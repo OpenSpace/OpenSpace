@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Seismic Waves: Northridge Earthquake - 1994"
@@ -22,24 +23,25 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
+
 local imagesDestination = syncedDirectory .. "2048"
 local pipsDestination = syncedDirectory .. "pips"
 
-local layer_base = {
+local LayerBase = {
   Identifier = Identifier,
   Name = Name,
   FilePath = syncedDirectory .. "background.jpg",
   Description = Description
 }
 
-local layer_stations = {
+local LayerStations = {
   Identifier = Identifier .. "-stations",
   Name = Name .. " (Stations)",
   FilePath = syncedDirectory .. "station_names.png",
   Description = Description
 }
 
-local layer_images = {
+local LayerImages = {
   Identifier = Identifier .. "-images",
   Name = Name .. " (Images)",
   Type = "ImageSequenceTileLayer",
@@ -47,7 +49,7 @@ local layer_images = {
   Description = Description
 }
 
-local pips = {
+local Pips = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -58,24 +60,26 @@ local pips = {
   CartesianPosition = { 0.75, 0.0, -2.0 }
 }
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_stations)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_images)
-  openspace.addScreenSpaceRenderable(pips)
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerStations)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerImages)
+  openspace.addScreenSpaceRenderable(Pips)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_stations)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_images)
-  openspace.removeScreenSpaceRenderable(pips)
+  openspace.removeScreenSpaceRenderable(Pips)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerImages)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerStations)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
 end)
 
-asset.export(layer_base)
-asset.export(layer_stations)
-asset.export(layer_images)
-asset.export(pips)
+asset.export(LayerBase)
+asset.export(LayerStations)
+asset.export(LayerImages)
+asset.export(Pips)
+
 
 
 asset.meta = {

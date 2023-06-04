@@ -1,12 +1,14 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local band = {
+
+
+local GalacticBand = {
     Identifier = "GalacticBand",
     Parent = transforms.SolarSystemBarycenter.Name,
     Transform = {
         Scale = {
           Type = "StaticScale",
-          Scale = 9.46377307652E18;
+          Scale = 9.46377307652E18
         }
     },
     Renderable = {
@@ -24,50 +26,52 @@ local band = {
     }
 }
 
-local uri = "Scene." .. band.Identifier .. ".Renderable"
 
-local showAction = {
-  Identifier = "os.nightsky.show_galactic_band",
-  Name = "Show galactic equator line",
-  Command = "openspace.fadeIn('" .. uri .. "')",
-  Documentation = "Shows the galactic equator line",
-  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
-  IsLocal = false
-}
-  
-local hideAction = {
-  Identifier = "os.nightsky.hide_galactic_band",
-  Name = "Hide galactic equator line",
-  Command = "openspace.fadeOut('" .. uri .. "')",
-  Documentation = "Hides the galactic equator line",
+local ShowGalacticBand = {
+  Identifier = "os.nightsky.ShowGalacticBand",
+  Name = "Show galactic band",
+  Command = [[
+    openspace.fadeIn("Scene.GalacticBand.Renderable")
+  ]],
+  Documentation = "Shows the galactic band",
   GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
-local toggleAction = {
-  Identifier = "os.nightsky.toggle_galactic_band",
+local HideGalacticBand = {
+  Identifier = "os.nightsky.HideGalacticBand",
+  Name = "Hide galactic band",
+  Command = [[
+    openspace.fadeOut("Scene.GalacticBand.Renderable")
+  ]],
+  Documentation = "Hides the galactic band",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local ToggleGalacticBand = {
+  Identifier = "os.nightsky.ToggleGalacticBand",
   Name = "Toggle galactic equator line",
-  Command = "openspace.toggleFade('" .. uri .. "')",
+  Command = [[
+    openspace.toggleFade("Scene.GalacticBand.Renderable")
+  ]],
   Documentation = "Toggles the galactic equator line visibilty",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(band)
-  openspace.action.registerAction(toggleAction)
-  openspace.action.registerAction(showAction)
-  openspace.action.registerAction(hideAction)
+  openspace.addSceneGraphNode(GalacticBand)
+  openspace.action.registerAction(ShowGalacticBand)
+  openspace.action.registerAction(HideGalacticBand)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.action.removeAction(hideAction)
-  openspace.action.removeAction(showAction)
-  openspace.action.registerAction(toggleAction)
-  openspace.removeSceneGraphNode(band)
+  openspace.action.removeAction(HideGalacticBand)
+  openspace.action.removeAction(ShowGalacticBand)
+  openspace.removeSceneGraphNode(GalacticBand)
 end)
-  
-asset.export(band)
-asset.export(toggleAction)
-asset.export(showAction)
-asset.export(hideAction)
+
+asset.export(GalacticBand)
+asset.export("ShowGalacticBand", ShowGalacticBand.Identifier)
+asset.export("HideGalacticBand", HideGalacticBand.Identifier)

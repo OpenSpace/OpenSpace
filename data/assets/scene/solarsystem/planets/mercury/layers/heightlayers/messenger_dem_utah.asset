@@ -1,6 +1,6 @@
-local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+local globe = asset.require("../../mercury")
 
-local layer = {
+local Layer = {
   Identifier = "Messenger_DEM_Utah",
   Name = "Messenger DEM [Utah]",
   Enabled = asset.enabled,
@@ -12,8 +12,13 @@ local layer = {
   TilePixelSize = 360
 }
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "HeightLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "HeightLayers", Layer)
+end)
+
+asset.export("layer", Layer)

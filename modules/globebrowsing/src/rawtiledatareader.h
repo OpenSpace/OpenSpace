@@ -68,7 +68,7 @@ public:
 
 private:
     std::optional<std::string> mrfCache();
-    
+
     void initialize();
 
     RawTile::ReadError rasterRead(int rasterBand, const IODescription& io,

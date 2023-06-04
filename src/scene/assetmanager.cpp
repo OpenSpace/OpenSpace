@@ -798,15 +798,33 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     if (it != _assets.end()) {
         Asset* a = it->get();
         // We should warn if an asset is requested twice with different enable settings or
-        // else the resulting status will depend on the order of asset loading
+        // else the resulting status will depend on the order of asset loading.
         if (a->explicitEnabled() != explicitEnable) {
-            ghoul_assert(a->firstParent(), "Asset must have a parent at this point");
-            LWARNING(fmt::format(
-                "Loading asset {0} from {1} with enable state {3} different from initial "
-                "loading from {2} with state {4}. Only {4} will have an effect",
-                path, retriever, a->firstParent()->path(), explicitEnable,
-                a->explicitEnabled()
-            ));
+            if (a->firstParent()) {
+                // The first request came from another asset, so we can mention it in the
+                // error message
+                LWARNING(fmt::format(
+                    "Loading asset {0} from {1} with enable state {3} different from "
+                    "initial loading from {2} with state {4}. Only {4} will have an "
+                    "effect",
+                    path, retriever, a->firstParent()->path(), explicitEnable,
+                    a->explicitEnabled()
+                ));
+            }
+            else {
+                // This can only happen if the asset was loaded from the profile directly,
+                // in which case we don't have to warn the user since it won't depend on
+                // the load order as it is always guaranteed that the profile assets are
+                // loaded first
+                ghoul_assert(
+                    std::find(
+                        _rootAssets.begin(),
+                        _rootAssets.end(),
+                        a
+                    ) != _rootAssets.end(),
+                    "Asset not loaded from profile"
+                );
+            }
         }
         return it->get();
     }

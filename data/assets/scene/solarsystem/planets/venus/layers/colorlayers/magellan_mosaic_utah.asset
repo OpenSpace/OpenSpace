@@ -1,9 +1,14 @@
-local globeIdentifier = asset.require("../../venus").Venus.Identifier
+local globe = asset.require("../../venus")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Magellan_Mosaic_Utah",
   Name = "Magellan Mosaic [Utah]",
   Enabled = asset.enabled,
+  FilePath = asset.localResource("magellan_mosaic_utah.vrt"),
+  BlendMode = "Color",
+  Settings = { Gamma = 2.0 },
   Description = [[Color layer for Venus. This mosaic was created from the Magellan
     F-BIDRs, (Full resolution Basic Image Data Records), the highest resolution
     radar images of the Venus surface (~75 m/pixel). Because Venus is shrouded by a
@@ -19,23 +24,19 @@ local layer = {
     angle to the side of the spacecraft. In the case of Left-Look Magellan SAR data,
     the radar system was sending signals to the left of the spacecraft. The SAR
     operated in this left-looking mode during cycles 1 and 3 of the mission.
-    (Description from USGS)]],
-  FilePath = asset.localResource("magellan_mosaic_utah.vrt"),
-  BlendMode = "Color",
-  Settings = {
-    Gamma = 2.0
-  }
+    (Description from USGS)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Venus.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Venus.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

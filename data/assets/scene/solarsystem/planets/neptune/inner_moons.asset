@@ -1,203 +1,679 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
-local kernel095 = asset.require("./kernels").nep095
-local kernel = asset.require("./kernels").nep097
+local kernel = asset.require("./kernels")
 
 
 
-local parentIdentifier = transforms.NeptuneBarycenter.Identifier
-local parentSpice = "NEPTUNE BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_inner", "moon_minor", "moon_minor_neptune" }
-local trailColor = { 0.2, 0.5, 0.75 }
-local trailTags = {
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_neptune",
-  "moonTrail_minor",
-  "moonTrail_minor_neptune"
-}
-
-local innerMoons = {
-  {
-    Identifier = "Naiad",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "NAIAD",
-    Radii = { 96000, 60000, 52000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.294,
-    Kernels = kernel095
-  },
-  {
-    Identifier = "Thalassa",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "THALASSA",
-    Radii = { 108000, 100000, 52000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.311,
-    Kernels = kernel095
-  },
-  {
-    Identifier = "Despina",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "DESPINA",
-    Radii = { 180000, 148000, 128000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.335,
-    Kernels = kernel095
-  },
-  {
-    Identifier = "Galatea",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "GALATEA",
-    Radii = { 204000, 184000, 144000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.429,
-    Kernels = kernel095
-  },
-  {
-    Identifier = "Larissa",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "LARISSA",
-    Radii = { 216000, 204000, 168000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.555,
-    Kernels = kernel095
-  },
-  {
-    Identifier = "Hippocamp",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "814",
-    Radii = { 16000, 16000, 16000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "Hippocamp",
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.936,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Proteus",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PROTEUS",
-    Radii = { 436000, 416000, 402000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1.122,
-    Kernels = kernel095
-  }
-}
-
-
--- Generate labels for each moon
-local moon_labels = {}
-
-for i, moon in ipairs(innerMoons) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 50.0,
-      Size = 5.2,
-      MinMaxSize = { 1, 20 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Mm",
-      FadeDistances = { 100, 800.0 },
-      FadeWidths = { 100, 1200.0 },
-    },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/" .. moon.Identifier,
-      Description = "Label for Neptune's moon " .. moonName .. " (inner group)"
+local Naiad = {
+  Identifier = "Naiad",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NAIAD",
+      Observer = "NEPTUNE BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 96000, 60000, 52000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Naiad",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad"
   }
-end
+}
 
+local NaiadTrail = {
+  Identifier = "NaiadTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NAIAD",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.294,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Naiad Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad"
+  }
+}
 
-local nodes = proceduralGlobes.createGlobes(innerMoons)
+local NaiadLabel = {
+  Identifier = "NaiadLabel",
+  Parent = Naiad.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Naiad",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Naiad Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad",
+    Description = "Label for Neptune's moon Naiad (Inner Moons)"
+  }
+}
+
+local Thalassa = {
+  Identifier = "Thalassa",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "THALASSA",
+      Observer = "NEPTUNE BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 108000, 100000, 52000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Thalassa",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa"
+  }
+}
+
+local ThalassaTrail = {
+  Identifier = "ThalassaTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "THALASSA",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.311,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Thalassa Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa"
+  }
+}
+
+local ThalassaLabel = {
+  Identifier = "ThalassaLabel",
+  Parent = Thalassa.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Thalassa",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Thalassa Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa",
+    Description = "Label for Neptune's moon Thalassa (Inner Moons)"
+  }
+}
+
+local Despina = {
+  Identifier = "Despina",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "DESPINA",
+      Observer = "NEPTUNE BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 180000, 148000, 128000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Despina",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina"
+  }
+}
+
+local DespinaTrail = {
+  Identifier = "DespinaTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "DESPINA",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.335,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Despina Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina"
+  }
+}
+
+local DespinaLabel = {
+  Identifier = "DespinaLabel",
+  Parent = Despina.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Despina",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Despina Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina",
+    Description = "Label for Neptune's moon Despina (Inner Moons)"
+  }
+}
+
+local Galatea = {
+  Identifier = "Galatea",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "GALATEA",
+      Observer = "NEPTUNE BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 204000, 184000, 144000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Galatea",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea"
+  }
+}
+
+local GalateaTrail = {
+  Identifier = "GalateaTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "GALATEA",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.429,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Galatea Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea"
+  }
+}
+
+local GalateaLabel = {
+  Identifier = "GalateaLabel",
+  Parent = Galatea.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Galatea",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Galatea Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea",
+    Description = "Label for Neptune's moon Galatea (Inner Moons)"
+  }
+}
+
+local Larissa = {
+  Identifier = "Larissa",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "LARISSA",
+      Observer = "NEPTUNE BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 216000, 204000, 168000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Larissa",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa"
+  }
+}
+
+local LarissaTrail = {
+  Identifier = "LarissaTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "LARISSA",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.555,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Larissa Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa"
+  }
+}
+
+local LarissaLabel = {
+  Identifier = "LarissaLabel",
+  Parent = Larissa.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Larissa",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Larissa Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa",
+    Description = "Label for Neptune's moon Larissa (Inner Moons)"
+  }
+}
+
+local Hippocamp = {
+  Identifier = "Hippocamp",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "814",
+      Observer = "NEPTUNE BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 16000, 16000, 16000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Hippocamp",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp"
+  }
+}
+
+local HippocampTrail = {
+  Identifier = "HippocampTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "814",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.936,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Hippocamp Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp"
+  }
+}
+
+local HippocampLabel = {
+  Identifier = "HippocampLabel",
+  Parent = Hippocamp.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Hippocamp",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Hippocamp Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp",
+    Description = "Label for Neptune's moon Hippocamp (Inner Moons)"
+  }
+}
+
+local Proteus = {
+  Identifier = "Proteus",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PROTEUS",
+      Observer = "NEPTUNE BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 436000, 416000, 402000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Proteus",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus"
+  }
+}
+
+local ProteusTrail = {
+  Identifier = "ProteusTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PROTEUS",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 1.122,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Proteus Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus"
+  }
+}
+
+local ProteusLabel = {
+  Identifier = "ProteusLabel",
+  Parent = Proteus.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Proteus",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Proteus Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus",
+    Description = "Label for Neptune's moon Proteus (Inner Moons)"
+  }
+}
+
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernel.nep095)
+  openspace.spice.loadKernel(kernel.nep097)
 
-  for _, moonlabel in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moonlabel)
-  end
+
+  openspace.addSceneGraphNode(Naiad)
+  openspace.addSceneGraphNode(NaiadTrail)
+  openspace.addSceneGraphNode(NaiadLabel)
+
+  openspace.addSceneGraphNode(Thalassa)
+  openspace.addSceneGraphNode(ThalassaTrail)
+  openspace.addSceneGraphNode(ThalassaLabel)
+
+  openspace.addSceneGraphNode(Despina)
+  openspace.addSceneGraphNode(DespinaTrail)
+  openspace.addSceneGraphNode(DespinaLabel)
+
+  openspace.addSceneGraphNode(Galatea)
+  openspace.addSceneGraphNode(GalateaTrail)
+  openspace.addSceneGraphNode(GalateaLabel)
+
+  openspace.addSceneGraphNode(Larissa)
+  openspace.addSceneGraphNode(LarissaTrail)
+  openspace.addSceneGraphNode(LarissaLabel)
+
+  openspace.addSceneGraphNode(Hippocamp)
+  openspace.addSceneGraphNode(HippocampTrail)
+  openspace.addSceneGraphNode(HippocampLabel)
+
+  openspace.addSceneGraphNode(Proteus)
+  openspace.addSceneGraphNode(ProteusTrail)
+  openspace.addSceneGraphNode(ProteusLabel)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(NaiadLabel)
+  openspace.removeSceneGraphNode(NaiadTrail)
+  openspace.removeSceneGraphNode(Naiad)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(ThalassaLabel)
+  openspace.removeSceneGraphNode(ThalassaTrail)
+  openspace.removeSceneGraphNode(Thalassa)
+
+  openspace.removeSceneGraphNode(DespinaLabel)
+  openspace.removeSceneGraphNode(DespinaTrail)
+  openspace.removeSceneGraphNode(Despina)
+
+  openspace.removeSceneGraphNode(GalateaLabel)
+  openspace.removeSceneGraphNode(GalateaTrail)
+  openspace.removeSceneGraphNode(Galatea)
+
+  openspace.removeSceneGraphNode(LarissaLabel)
+  openspace.removeSceneGraphNode(LarissaTrail)
+  openspace.removeSceneGraphNode(Larissa)
+
+  openspace.removeSceneGraphNode(HippocampLabel)
+  openspace.removeSceneGraphNode(HippocampTrail)
+  openspace.removeSceneGraphNode(Hippocamp)
+
+  openspace.removeSceneGraphNode(ProteusLabel)
+  openspace.removeSceneGraphNode(ProteusTrail)
+  openspace.removeSceneGraphNode(Proteus)
+
+
+  openspace.spice.unloadKernel(kernel.nep097)
+  openspace.spice.unloadKernel(kernel.nep095)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Naiad)
+asset.export(NaiadTrail)
+asset.export(NaiadLabel)
+
+asset.export(Thalassa)
+asset.export(ThalassaTrail)
+asset.export(ThalassaLabel)
+
+asset.export(Despina)
+asset.export(DespinaTrail)
+asset.export(DespinaLabel)
+
+asset.export(Galatea)
+asset.export(GalateaTrail)
+asset.export(GalateaLabel)
+
+asset.export(Larissa)
+asset.export(LarissaTrail)
+asset.export(LarissaLabel)
+
+asset.export(Hippocamp)
+asset.export(HippocampTrail)
+asset.export(HippocampLabel)
+
+asset.export(Proteus)
+asset.export(ProteusTrail)
+asset.export(ProteusLabel)
+
 
 
 asset.meta = {

@@ -102,6 +102,7 @@ private:
     void populateWindowConfigsList(std::string preset);
     void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
         std::filesystem::path savePath, const std::string& saveWindowCfgPath);
+    void onNewWindowConfigSelection(int newIndex);
     bool versionCheck(sgct::config::GeneratorVersion& v) const;
 
     const std::string _assetPath;
@@ -110,8 +111,6 @@ private:
     const std::string _userConfigPath;
     const std::string _profilePath;
     const std::string _userProfilePath;
-    const std::vector<std::string>& _readOnlyWindowConfigs;
-    const std::vector<std::string>& _readOnlyProfiles;
     bool _shouldLaunch = false;
     int _userAssetCount = 0;
     int _userConfigStartingIdx = 0;

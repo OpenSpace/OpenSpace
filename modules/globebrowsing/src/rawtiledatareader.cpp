@@ -60,62 +60,6 @@ namespace openspace::globebrowsing {
 
 namespace {
     constexpr std::string_view _loggerCat = "RawTileDataReader";
-// These are some locations in memory taken from ESRI's No Data Available tile so that we
-// can spotcheck these tiles and not present them
-// The pair is <byte index, expected value>
-struct MemoryLocation {
-    int offset;
-    std::byte value;
-};
-
-// The memory locations are grouped to be mostly cache-aligned
-constexpr std::array<MemoryLocation, 42> NoDataAvailableData = {
-    MemoryLocation { .offset = 296380, .value = std::byte(205) },
-    MemoryLocation { .offset = 296381, .value = std::byte(205) },
-    MemoryLocation { .offset = 296382, .value = std::byte(205) },
-    MemoryLocation { .offset = 296383, .value = std::byte(255) },
-    MemoryLocation { .offset = 296384, .value = std::byte(224) },
-    MemoryLocation { .offset = 296385, .value = std::byte(224) },
-    MemoryLocation { .offset = 296386, .value = std::byte(224) },
-    MemoryLocation { .offset = 296387, .value = std::byte(255) },
-    MemoryLocation { .offset = 296388, .value = std::byte(244) },
-    MemoryLocation { .offset = 296389, .value = std::byte(244) },
-    MemoryLocation { .offset = 296390, .value = std::byte(244) },
-    MemoryLocation { .offset = 296391, .value = std::byte(255) },
-
-    MemoryLocation { .offset = 269840, .value = std::byte(209) },
-    MemoryLocation { .offset = 269841, .value = std::byte(209) },
-    MemoryLocation { .offset = 269842, .value = std::byte(209) },
-    MemoryLocation { .offset = 269844, .value = std::byte(203) },
-    MemoryLocation { .offset = 269845, .value = std::byte(203) },
-    MemoryLocation { .offset = 269846, .value = std::byte(203) },
-    MemoryLocation { .offset = 269852, .value = std::byte(221) },
-    MemoryLocation { .offset = 269853, .value = std::byte(221) },
-    MemoryLocation { .offset = 269854, .value = std::byte(221) },
-    MemoryLocation { .offset = 269856, .value = std::byte(225) },
-    MemoryLocation { .offset = 269857, .value = std::byte(225) },
-    MemoryLocation { .offset = 269858, .value = std::byte(225) },
-    MemoryLocation { .offset = 269860, .value = std::byte(218) },
-    MemoryLocation { .offset = 269861, .value = std::byte(218) },
-
-    MemoryLocation { .offset = 240349, .value = std::byte(203) },
-    MemoryLocation { .offset = 240350, .value = std::byte(203) },
-    MemoryLocation { .offset = 240352, .value = std::byte(205) },
-    MemoryLocation { .offset = 240353, .value = std::byte(204) },
-    MemoryLocation { .offset = 240354, .value = std::byte(205) },
-
-    MemoryLocation { .offset = 0, .value = std::byte(204) },
-    MemoryLocation { .offset = 7, .value = std::byte(255) },
-    MemoryLocation { .offset = 520, .value = std::byte(204) },
-    MemoryLocation { .offset = 880, .value = std::byte(204) },
-    MemoryLocation { .offset = 883, .value = std::byte(255) },
-    MemoryLocation { .offset = 91686, .value = std::byte(204) },
-    MemoryLocation { .offset = 372486, .value = std::byte(204) },
-    MemoryLocation { .offset = 670483, .value = std::byte(255) },
-    MemoryLocation { .offset = 231684, .value = std::byte(202) },
-    MemoryLocation { .offset = 232092, .value = std::byte(202) },
-    MemoryLocation { .offset = 235921, .value = std::byte(203) },
-};
 
 enum class Side {
     Left = 0,
@@ -485,7 +429,8 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
             // Already existing directories causes a 'failure' but no error
             if (ec) {
                 LWARNING(fmt::format(
-                    "Failed to create directories for cache at: {}. Error Code: {}, message: {}",
+                    "Failed to create directories for cache at: {}. "
+                    "Error Code: {}, message: {}",
                     root, std::to_string(ec.value()), ec.message()
                 ));
                 return std::nullopt;
@@ -494,7 +439,9 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
 
         GDALDriver* driver = GetGDALDriverManager()->GetDriverByName("MRF");
         if (driver != nullptr) {
-            GDALDataset* src = static_cast<GDALDataset*>(GDALOpen(_datasetFilePath.c_str(), GA_ReadOnly));
+            GDALDataset* src = static_cast<GDALDataset*>(
+                GDALOpen(_datasetFilePath.c_str(), GA_ReadOnly)
+            );
             if (!src) {
                 LWARNING(fmt::format(
                     "Failed to load dataset: {}. GDAL Error: {}",
@@ -506,16 +453,34 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
             defer{ GDALClose(src); };
 
             char** createOpts = nullptr;
-            createOpts = CSLSetNameValue(createOpts, "CACHEDSOURCE", _datasetFilePath.c_str());
+            createOpts = CSLSetNameValue(
+                createOpts,
+                "CACHEDSOURCE",
+                _datasetFilePath.c_str()
+            );
             createOpts = CSLSetNameValue(createOpts, "NOCOPY", "true");
             createOpts = CSLSetNameValue(createOpts, "uniform_scale", "2");
-            createOpts = CSLSetNameValue(createOpts, "compress", _cacheProperties.compression.c_str());
-            createOpts = CSLSetNameValue(createOpts, "quality", std::to_string(_cacheProperties.quality).c_str());
-            createOpts = CSLSetNameValue(createOpts, "blocksize", std::to_string(_cacheProperties.blockSize).c_str());
+            createOpts = CSLSetNameValue(
+                createOpts,
+                "compress",
+                _cacheProperties.compression.c_str()
+            );
+            createOpts = CSLSetNameValue(
+                createOpts,
+                "quality",
+                std::to_string(_cacheProperties.quality).c_str()
+            );
+            createOpts = CSLSetNameValue(
+                createOpts,
+                "blocksize",
+                std::to_string(_cacheProperties.blockSize).c_str()
+            );
             createOpts = CSLSetNameValue(createOpts, "indexname", cache.c_str());
             createOpts = CSLSetNameValue(createOpts, "DATANAME", cache.c_str());
 
-            GDALDataset* dst = static_cast<GDALDataset*>(driver->CreateCopy(mrf.c_str(), src, false, createOpts, nullptr, nullptr));
+            GDALDataset* dst = static_cast<GDALDataset*>(
+                driver->CreateCopy(mrf.c_str(), src, false, createOpts, nullptr, nullptr)
+            );
             if (!dst) {
                 LWARNING(fmt::format(
                     "Failed to create MRF Caching dataset dataset: {}. GDAL Error: {}",
@@ -687,17 +652,6 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
     IODescription io = ioDescription(tileIndex);
     RawTile::ReadError worstError = RawTile::ReadError::None;
     readImageData(io, worstError, reinterpret_cast<char*>(rawTile.imageData.get()));
-
-    for (const MemoryLocation& ml : NoDataAvailableData) {
-        std::byte* ptr = rawTile.imageData.get();
-        if (ml.offset >= static_cast<int>(numBytes) || ptr[ml.offset] != ml.value) {
-            // Bail out as early as possible
-            break;
-        }
-
-        // If we got here, we have (most likely) a No data yet available tile
-        worstError = RawTile::ReadError::Failure;
-    }
 
     rawTile.error = worstError;
     rawTile.tileIndex = std::move(tileIndex);
@@ -1023,9 +977,7 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
         }
     }
 
-    if (allIsMissing) {
-        rawTile.error = RawTile::ReadError::Failure;
-    }
+    ppData.allMissingData = allIsMissing;
 
     return ppData;
 }

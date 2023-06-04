@@ -1,4 +1,6 @@
-local image = asset.require("./hd84406_image").image
+local hd84406 = asset.require("./hd84406_image")
+
+
 
 local HD84406Image = {
   Identifier = "HD84406Image",
@@ -9,21 +11,25 @@ local HD84406Image = {
   RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
   UsePerspectiveProjection = false,
   Opacity = 1.0,
-  TexturePath = image .. "HD84406.png",
+  TexturePath = hd84406.image .. "HD84406.png",
   Tag = { "mission_jwst_target" },
   Description = [[
     JWST alignment image of star HD 84406 by NASA/STScI.
-  ]],
+  ]]
 }
+
 
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(HD84406Image)
 end)
+
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(HD84406Image)
 end)
 
 asset.export(HD84406Image)
+
+
 
 asset.meta = {
   Name = "HD 84406 Star Image",

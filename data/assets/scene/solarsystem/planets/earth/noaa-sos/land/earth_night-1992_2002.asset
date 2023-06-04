@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Nighttime Lights Comparison - 1992 and 2002"
@@ -19,32 +20,35 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_1992 = {
+
+local Layer1992 = {
   Identifier = Identifier .. "-1992",
   Name = Name .. " (1992)",
   FilePath = syncedDirectory .. "Nightlights_1992.jpg",
   Description = Description
 }
 
-local layer_2002 = {
+local Layer2002 = {
   Identifier = Identifier .. "-2002",
   Name = Name .. " (2002)",
   FilePath = syncedDirectory .. "Nightlights_2002.jpg",
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_1992)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2002)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer1992)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer2002)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_1992)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_2002)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer1992)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer2002)
 end)
 
-asset.export(layer_1992)
-asset.export(layer_2002)
+asset.export(Layer1992)
+asset.export(Layer2002)
+
 
 
 asset.meta = {

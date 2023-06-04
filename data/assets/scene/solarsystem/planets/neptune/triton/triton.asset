@@ -1,6 +1,7 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").nep097
-asset.require("./trail")
+local kernel = asset.require("../kernels")
+
+
 
 local Triton = {
   Identifier = "Triton",
@@ -10,30 +11,49 @@ local Triton = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_TRITON",
       DestinationFrame = "GALACTIC",
-      Kernels = kernel
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "TRITON",
-      Observer = "NEPTUNE BARYCENTER",
-      Kernels = kernel
+      Observer = "NEPTUNE BARYCENTER"
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 2709000, 2706000, 2705000 },
     SegmentsPerPatch = 64,
-    Layers = {},
+    Layers = {}
   },
-  Tags = { "moon_solarSystem", "moon_giants", "moon_neptune" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_major_neptune" },
   GUI = {
     Name = "Triton",
     Path = "/Solar System/Planets/Neptune/Major Moons/Triton"
   }
 }
 
-TritonLabel = {
-  Identifier = Triton.Identifier .. "Label",
+local TritonTrail = {
+  Identifier = "TritonTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "TRITON",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 5.875,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune", "moonTrail_major_neptune" },
+  GUI = {
+    Name = "Triton Trail",
+    Path = "/Solar System/Planets/Neptune/Major Moons/Triton"
+  }
+}
+
+local TritonLabel = {
+  Identifier = "TritonLabel",
   Parent = Triton.Identifier,
   Renderable = {
     Enabled = false,
@@ -47,7 +67,7 @@ TritonLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 15.0 },
-    FadeWidths = { 1, 15.0 },
+    FadeWidths = { 1, 15.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
@@ -59,17 +79,27 @@ TritonLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.nep097)
+
+
   openspace.addSceneGraphNode(Triton)
+  openspace.addSceneGraphNode(TritonTrail)
   openspace.addSceneGraphNode(TritonLabel)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TritonLabel)
+  openspace.removeSceneGraphNode(TritonTrail)
   openspace.removeSceneGraphNode(Triton)
+
+
+  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(Triton)
+asset.export(TritonTrail)
 asset.export(TritonLabel)
+
 
 
 asset.meta = {

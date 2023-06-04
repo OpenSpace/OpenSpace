@@ -1,6 +1,8 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local kernels = asset.require("./kernels").kernels
+local kernels = asset.require("./kernels")
+
+
 
 local models = asset.syncedResource({
   Name = "Apollo Models",
@@ -9,7 +11,8 @@ local models = asset.syncedResource({
   Version = 4
 })
 
-local apolloSpiceId = -908
+
+local ApolloSpiceId = -908
 
 local Apollo8 = {
   Identifier = "Apollo8",
@@ -22,10 +25,9 @@ local Apollo8 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
+      Target = ApolloSpiceId,
       Observer = "EARTH BARYCENTER",
-      Frame = "GALACTIC",
-      Kernels = kernels
+      Frame = "GALACTIC"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -57,7 +59,7 @@ local Apollo8Model = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -math.pi / 2}
+      Rotation = { 0.0, 0.0, -math.pi / 2 }
     }
   },
   Renderable = {
@@ -92,7 +94,10 @@ local Apollo8Pivot = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.kernels)
+
   openspace.addSceneGraphNode(Apollo8)
   openspace.addSceneGraphNode(Apollo8Model)
   openspace.addSceneGraphNode(Apollo8Pivot)
@@ -102,6 +107,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo8Pivot)
   openspace.removeSceneGraphNode(Apollo8Model)
   openspace.removeSceneGraphNode(Apollo8)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo8)

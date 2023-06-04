@@ -56,8 +56,9 @@ struct GeoJsonProperties : public properties::PropertyOwner {
         Absolute = 0,
         // Compute position using altitude above the height map
         RelativeToGround
-        // Stick to planet surface (TODO: use GDAL to render layer instead and use as default)
-        //ClampToGround
+        // Stick to planet surface (TODO: use GDAL to render layer instead and use as
+        // default)
+        // ClampToGround
     };
 
     enum class PointTextureAnchor {

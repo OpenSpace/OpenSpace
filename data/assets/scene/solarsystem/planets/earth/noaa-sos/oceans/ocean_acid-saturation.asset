@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Ocean Acidification: Saturation State"
@@ -27,7 +28,8 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -42,15 +44,15 @@ local layer = {
   Description = Description
 }
 
-local reefs = {
+local Reefs = {
   Identifier = Identifier .. "-reefs",
   Name = Name .. " (Reefs)",
   Enabled = asset.enabled,
   FilePath = syncedDirectory .. "reefs.png",
-  Description = Description,
+  Description = Description
 }
 
-local colorbar = {
+local Colorbar = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -60,21 +62,23 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", reefs)
-  openspace.addScreenSpaceRenderable(colorbar)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Reefs)
+  openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", reefs)
-  openspace.removeScreenSpaceRenderable(colorbar)
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Reefs)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(reefs)
-asset.export(colorbar)
+asset.export(Layer)
+asset.export(Reefs)
+asset.export(Colorbar)
+
 
 
 asset.meta = {

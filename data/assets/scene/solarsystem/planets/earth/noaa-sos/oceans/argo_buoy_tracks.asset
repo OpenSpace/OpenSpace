@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Float Tracks: Argo (buoy surface animation)"
@@ -24,7 +25,8 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -33,7 +35,7 @@ local layer = {
   Description = Description
 }
 
-local buoy = {
+local Buoy = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -43,18 +45,20 @@ local buoy = {
   CartesianPosition = { 0.0, -0.25, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(buoy)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Buoy)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(buoy)
+  openspace.removeScreenSpaceRenderable(Buoy)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(buoy)
+asset.export(Layer)
+asset.export(Buoy)
+
 
 
 asset.meta = {

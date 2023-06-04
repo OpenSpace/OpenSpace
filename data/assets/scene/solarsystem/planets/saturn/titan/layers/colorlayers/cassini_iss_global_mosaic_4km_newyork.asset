@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../titan").Titan.Identifier
+local globe = asset.require("../../titan")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Cassini_ISS_Global_Mosaic_4km_NewYork",
   Name = "Cassini ISS Global Mosaic [New York]",
   Enabled = asset.enabled,
@@ -12,18 +14,19 @@ local layer = {
     1,600 miles (2,575 kilometers). Pixel resolution is 4005 meters per pixel (m).
     Titan is assumed to be spherical until a control network -- a model of the moon's
     shape based on multiple images tied together at defined points on the surface --
-    is created at some point in the future. (Description from URL)]],
+    is created at some point in the future. (Description from URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Titan.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Titan.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

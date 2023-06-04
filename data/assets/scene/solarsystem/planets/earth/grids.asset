@@ -1,20 +1,22 @@
 local transforms = asset.require("./transforms")
 
-local eclipticRotationMatrix = {
+
+
+local EclipticRotationMatrix = {
   -0.05487554,  0.4941095, -0.8676661,
   -0.9938214 , -0.1109906, -0.0003515167,
   -0.09647644,  0.8622859,  0.4971472
 }
 
-local lightSecond = 299792458
-local lightMinute = 1.798754748E10
+local LightSecond = 299792458
+local LightMinute = 17987547480
 
 local plane1lsec = {
   Identifier = "1lsecGrid",
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     },
     Translation = {
       Type = "SpiceTranslation",
@@ -29,7 +31,7 @@ local plane1lsec = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightSecond, 2*lightSecond }
+    Size = { 2 * LightSecond, 2 * LightSecond }
   },
   GUI = {
     Name = "1lsec Grid",
@@ -42,7 +44,7 @@ local plane1lmin = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     },
     Translation = {
       Type = "SpiceTranslation",
@@ -57,13 +59,14 @@ local plane1lmin = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightMinute, 2*lightMinute }
+    Size = { 2 * LightMinute, 2 * LightMinute }
   },
   GUI = {
     Name = "1lmin Grid",
     Path = "/Solar System/Planets/Earth"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(plane1lsec)
@@ -77,6 +80,7 @@ end)
 
 asset.export(plane1lsec)
 asset.export(plane1lmin)
+
 
 
 asset.meta = {

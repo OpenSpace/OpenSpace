@@ -70,14 +70,14 @@
 namespace {
     constexpr std::string_view _loggerCat = "AtmosphereDeferredcaster";
 
-    constexpr std::array<const char*, 27> UniformNames = {
-        "cullAtmosphere", "Rg", "Rt", "groundRadianceEmission", "HR", "betaRayleigh",
-        "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", "HO",
-        "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU",
-        "inverseModelTransformMatrix", "modelTransformMatrix",
-        "projectionToModelTransformMatrix", "viewToWorldMatrix", "camPosObj",
-        "sunDirectionObj", "hardShadows", "transmittanceTexture", "irradianceTexture",
-        "inscatterTexture"
+    constexpr std::array<const char*, 28> UniformNames = {
+        "cullAtmosphere", "opacity", "Rg", "Rt", "groundRadianceEmission", "HR",
+        "betaRayleigh", "HM", "betaMieExtinction", "mieG", "sunRadiance",
+        "ozoneLayerEnabled", "HO", "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU",
+        "SAMPLES_MU_S", "SAMPLES_NU", "inverseModelTransformMatrix",
+        "modelTransformMatrix", "projectionToModelTransformMatrix", "viewToWorldMatrix",
+        "camPosObj", "sunDirectionObj", "hardShadows", "transmittanceTexture",
+        "irradianceTexture", "inscatterTexture"
     };
 
     constexpr float ATM_EPS = 2000.f;
@@ -294,6 +294,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         isAtmosphereInFrustum(MV, tPlanetPos, scaledRadius + ATM_EPS))
     {
         prg.setUniform(_uniformCache.cullAtmosphere, 0);
+        prg.setUniform(_uniformCache.opacity, _opacity);
         prg.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
         prg.setUniform(_uniformCache.Rt, _atmosphereRadius);
         prg.setUniform(_uniformCache.groundRadianceEmission, _groundRadianceEmission);
@@ -501,6 +502,10 @@ void AtmosphereDeferredcaster::initializeCachedVariables(
 
 void AtmosphereDeferredcaster::setModelTransform(glm::dmat4 transform) {
     _modelTransform = std::move(transform);
+}
+
+void AtmosphereDeferredcaster::setOpacity(float opacity) {
+    _opacity = opacity;
 }
 
 void AtmosphereDeferredcaster::setParameters(float atmosphereRadius, float planetRadius,

@@ -1,5 +1,3 @@
--- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SPOUT enabled
-
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -17,7 +15,6 @@ local Spout = {
     Path = "/Examples"
   }
 }
-
 
 
 asset.onInitialize(function()

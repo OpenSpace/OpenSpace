@@ -1,11 +1,13 @@
 local helper = asset.require("util/vrt_flipbook_helper")
-local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
-local assetPrefix = "A11flip";
-local assetGlobe = moon_asset.Moon.Identifier;
-local flipbookCount = 19;
 
-local flipbook = nil;
+
+local assetPrefix = "A11flip"
+local assetGlobe = moonAsset.Moon.Identifier
+local flipbookCount = 19
+
+local flipbook = nil
 
 local vrts = asset.syncedResource({
   Name = "Apollo 11 Flipbook",
@@ -16,13 +18,13 @@ local vrts = asset.syncedResource({
 
 
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe);
-  flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19);
+asset.onInitialize(function()
+  openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe)
+  flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19)
 
   rawset(_G, "nextFlip", function() helper.nextFlipbookPage(flipbook) end)
   openspace.action.registerAction({
-    Identifier = "lem_flipbook.next_flip",
+    Identifier = "os.lemFlipbook.NextFlip",
     Name = "Next Apollo 11 flip",
     Command = "nextFlip()",
     Documentation = "Show the next Apollo 11 flipbook image",
@@ -32,24 +34,19 @@ asset.onInitialize(function ()
 
   rawset(_G, "previousFlip", function() helper.previousFlipbookPage(flipbook) end)
   openspace.action.registerAction({
-    Identifier = "lem_flipbook.prev_flip",
+    Identifier = "os.lemFlipbook.PrevFlip",
     Name = "Prev Apollo 11 flip",
     Command = "previousFlip()",
     Documentation = "Show the previous Apollo 11 flipbook image",
     GuiPath = "/Missions/Apollo/11",
     IsLocal = false
   })
-
-  openspace.bindKey("p", "lem_flipbook.next_flip")
-  openspace.bindKey("o", "lem_flipbook.prev_flip")
 end)
 
 
-asset.onDeinitialize(function ()
-  flipbook = nil;
+asset.onDeinitialize(function()
+  flipbook = nil
 
-  openspace.action.removeAction("lem_flipbook.next_flip")
-  openspace.action.removeAction("lem_flipbook.prev_flip")
-  openspace.clearKey("o")
-  openspace.clearKey("p")
+  openspace.action.removeAction("os.lemFlipbook.NextFlip")
+  openspace.action.removeAction("os.lemFlipbook.PrevFlip")
 end)

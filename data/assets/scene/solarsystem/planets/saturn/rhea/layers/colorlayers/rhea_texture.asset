@@ -1,4 +1,6 @@
-local globeIdentifier = asset.require("../../rhea").Rhea.Identifier
+local globe = asset.require("../../rhea")
+
+
 
 local texturesPath = asset.syncedResource({
   Name = "Rhea textures",
@@ -7,21 +9,23 @@ local texturesPath = asset.syncedResource({
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "rhea.jpg",
   Enabled = asset.enabled
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Rhea.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Rhea.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

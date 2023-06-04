@@ -1,4 +1,4 @@
-asset.onInitialize(function ()
+asset.onInitialize(function()
   -- Avoid errors for developers when building without the touch module
   if not openspace.modules.isLoaded("Touch") then
     return
@@ -13,6 +13,8 @@ asset.onInitialize(function ()
   local directTouchList = { "RenderableGlobe" }
   openspace.setPropertyValueSingle("Modules.Touch.DefaultDirectTouchRenderableTypes", directTouchList)
 end)
+
+
 
 asset.meta = {
   Name = "Touch Module Default Settings",

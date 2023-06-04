@@ -1,5 +1,6 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
+
+
 
 local syncedKernels = asset.syncedResource({
   Name = "Saturn Shepherd Moons Spice Kernels",
@@ -8,202 +9,683 @@ local syncedKernels = asset.syncedResource({
   Version = 1
 })
 
+
 local kernels = {
   syncedKernels .. "sat415.bsp",
   syncedKernels .. "sat393_daphnis.bsp"
 }
 
-local parentIdentifier = transforms.SaturnBarycenter.Identifier
-local parentSpice = "SATURN BARYCENTER"
-local guiPath = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_shepherd", "moon_minor", "moon_minor_saturn" }
-local trailColor = { 0.5, 0.3, 0.3 }
-local trailTags = {
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_saturn",
-  "moonTrail_minor",
-  "moonTrail_minor_saturn"
-}
 
-local shepherdGroup = {
-  {
-    Identifier = "Prometheus",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PROMETHEUS",
-    Radii = { 135600, 79400, 59400 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = guiPath .. "/Prometheus"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.612990038,
-    Kernels = kernels
-  },
-  {
-    Identifier = "Pandora",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PANDORA",
-    Radii = { 104000, 81000, 64000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = guiPath .. "/Pandora"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.628504213,
-    Kernels = kernels
-  },
-  {
-    Identifier = "Atlas",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "ATLAS",
-    Radii = { 40800, 35400, 18800 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = guiPath .. "/Atlas"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.6016947883,
-    Kernels = kernels
-  },
-  {
-    Identifier = "Janus",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "JANUS",
-    Radii = { 203000, 185000, 152600 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = guiPath .. "/Janus"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.694660342,
-    Kernels = kernels
-  },
-  {
-    Identifier = "Epimetheus",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "EPIMETHEUS",
-    Radii = { 129800, 114000, 106200 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = guiPath .. "/Epimetheus"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.694333517,
-    Kernels = kernels
-  },
-  {
-    Identifier = "Daphnis",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "DAPHNIS",
-    Radii = { 8600, 8200, 6400 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = guiPath .. "/Daphnis"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.5940798,
-    Kernels = kernels
-  },
-  {
-    Identifier = "Pan",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PAN",
-    Radii = { 34400, 31400, 20800 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = guiPath .. "/Pan"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.575050718,
-    Kernels = kernels
-  }
-}
-
--- Generate all moon labels
-local moon_labels = {}
-
-for i, moon in ipairs(shepherdGroup) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 5.5,
-      MinMaxSize = { 1, 20 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Normal",
-      EnableFading = true,
-      FadeUnit = "Mm",
-      FadeDistances = { 75.0, 1000.0 },
-      FadeWidths = { 25.0, 800.0 }
-    },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/" .. moon.Identifier,
-      Description = "Label for Saturn's moon " .. moonName .. " (Shepherd group)"
+local Prometheus = {
+  Identifier = "Prometheus",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PROMETHEUS",
+      Observer = "SATURN BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 135600, 79400, 59400 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Prometheus",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus"
   }
-end
+}
 
-local nodes = proceduralGlobes.createGlobes(shepherdGroup)
+local PrometheusTrail = {
+  Identifier = "PrometheusTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PROMETHEUS",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.612990038,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Prometheus Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus"
+  }
+}
+
+local PrometheusLabel = {
+  Identifier = "PrometheusLabel",
+  Parent = Prometheus.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Prometheus",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Prometheus Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus",
+    Description = "Label for Saturn's moon Prometheus (Shepherd Moons)"
+  }
+}
+
+local Pandora = {
+  Identifier = "Pandora",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PANDORA",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 104000, 81000, 64000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Pandora",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora"
+  }
+}
+
+local PandoraTrail = {
+  Identifier = "PandoraTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PANDORA",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.628504213,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Pandora Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora"
+  }
+}
+
+local PandoraLabel = {
+  Identifier = "PandoraLabel",
+  Parent = Pandora.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Pandora",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Pandora Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora",
+    Description = "Label for Saturn's moon Pandora (Shepherd Moons)"
+  }
+}
+
+local Atlas = {
+  Identifier = "Atlas",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ATLAS",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 40800, 35400, 18800 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Atlas",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas"
+  }
+}
+
+local AtlasTrail = {
+  Identifier = "AtlasTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ATLAS",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.6016947883,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Atlas Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas"
+  }
+}
+
+local AtlasLabel = {
+  Identifier = "AtlasLabel",
+  Parent = Atlas.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Atlas",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Atlas Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas",
+    Description = "Label for Saturn's moon Atlas (Shepherd Moons)"
+  }
+}
+
+local Janus = {
+  Identifier = "Janus",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JANUS",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 203000, 185000, 152600 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Janus",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus"
+  }
+}
+
+local JanusTrail = {
+  Identifier = "JanusTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JANUS",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.694660342,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Janus Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus"
+  }
+}
+
+local JanusLabel = {
+  Identifier = "JanusLabel",
+  Parent = Janus.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Janus",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Janus Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus",
+    Description = "Label for Saturn's moon Janus (Shepherd Moons)"
+  }
+}
+
+local Epimetheus = {
+  Identifier = "Epimetheus",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EPIMETHEUS",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 129800, 114000, 106200 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Epimetheus",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus"
+  }
+}
+
+local EpimetheusTrail = {
+  Identifier = "EpimetheusTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EPIMETHEUS",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.694333517,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Epimetheus Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus"
+  }
+}
+
+local EpimetheusLabel = {
+  Identifier = "EpimetheusLabel",
+  Parent = Epimetheus.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Epimetheus",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Epimetheus Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus",
+    Description = "Label for Saturn's moon Epimetheus (Shepherd Moons)"
+  }
+}
+
+local Daphnis = {
+  Identifier = "Daphnis",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "DAPHNIS",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 8600, 8200, 6400 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Daphnis",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis"
+  }
+}
+
+local DaphnisTrail = {
+  Identifier = "DaphnisTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "DAPHNIS",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.5940798,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Daphnis Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis"
+  }
+}
+
+local DaphnisLabel = {
+  Identifier = "DaphnisLabel",
+  Parent = Daphnis.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Daphnis",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Daphnis Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis",
+    Description = "Label for Saturn's moon Daphnis (Shepherd Moons)"
+  }
+}
+
+local Pan = {
+  Identifier = "Pan",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PAN",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 34400, 31400, 20800 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Pan",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan"
+  }
+}
+
+local PanTrail = {
+  Identifier = "PanTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PAN",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.575050718,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Pan Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan"
+  }
+}
+
+local PanLabel = {
+  Identifier = "PanLabel",
+  Parent = Pan.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Pan",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Pan Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan",
+    Description = "Label for Saturn's moon Pan (Shepherd Moons)"
+  }
+}
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(syncedKernels .. "sat393_daphnis.bsp")
+  openspace.spice.loadKernel(syncedKernels .. "sat415.bsp")
 
-  for _, moon in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moon)
-  end
+
+  openspace.addSceneGraphNode(Prometheus)
+  openspace.addSceneGraphNode(PrometheusTrail)
+  openspace.addSceneGraphNode(PrometheusLabel)
+
+  openspace.addSceneGraphNode(Pandora)
+  openspace.addSceneGraphNode(PandoraTrail)
+  openspace.addSceneGraphNode(PandoraLabel)
+
+  openspace.addSceneGraphNode(Atlas)
+  openspace.addSceneGraphNode(AtlasTrail)
+  openspace.addSceneGraphNode(AtlasLabel)
+
+  openspace.addSceneGraphNode(Janus)
+  openspace.addSceneGraphNode(JanusTrail)
+  openspace.addSceneGraphNode(JanusLabel)
+
+  openspace.addSceneGraphNode(Epimetheus)
+  openspace.addSceneGraphNode(EpimetheusTrail)
+  openspace.addSceneGraphNode(EpimetheusLabel)
+
+  openspace.addSceneGraphNode(Daphnis)
+  openspace.addSceneGraphNode(DaphnisTrail)
+  openspace.addSceneGraphNode(DaphnisLabel)
+
+  openspace.addSceneGraphNode(Pan)
+  openspace.addSceneGraphNode(PanTrail)
+  openspace.addSceneGraphNode(PanLabel)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(PrometheusLabel)
+  openspace.removeSceneGraphNode(PrometheusTrail)
+  openspace.removeSceneGraphNode(Prometheus)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(PandoraLabel)
+  openspace.removeSceneGraphNode(PandoraTrail)
+  openspace.removeSceneGraphNode(Pandora)
+
+  openspace.removeSceneGraphNode(AtlasLabel)
+  openspace.removeSceneGraphNode(AtlasTrail)
+  openspace.removeSceneGraphNode(Atlas)
+
+  openspace.removeSceneGraphNode(JanusLabel)
+  openspace.removeSceneGraphNode(JanusTrail)
+  openspace.removeSceneGraphNode(Janus)
+
+  openspace.removeSceneGraphNode(EpimetheusLabel)
+  openspace.removeSceneGraphNode(EpimetheusTrail)
+  openspace.removeSceneGraphNode(Epimetheus)
+
+  openspace.removeSceneGraphNode(DaphnisLabel)
+  openspace.removeSceneGraphNode(DaphnisTrail)
+  openspace.removeSceneGraphNode(Daphnis)
+
+  openspace.removeSceneGraphNode(PanLabel)
+  openspace.removeSceneGraphNode(PanTrail)
+  openspace.removeSceneGraphNode(Pan)
+
+
+  openspace.spice.unloadKernel(syncedKernels .. "sat415.bsp")
+  openspace.spice.unloadKernel(syncedKernels .. "sat393_daphnis.bsp")
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Prometheus)
+asset.export(PrometheusTrail)
+asset.export(PrometheusLabel)
+
+asset.export(Pandora)
+asset.export(PandoraTrail)
+asset.export(PandoraLabel)
+
+asset.export(Atlas)
+asset.export(AtlasTrail)
+asset.export(AtlasLabel)
+
+asset.export(Janus)
+asset.export(JanusTrail)
+asset.export(JanusLabel)
+
+asset.export(Epimetheus)
+asset.export(EpimetheusTrail)
+asset.export(EpimetheusLabel)
+
+asset.export(Daphnis)
+asset.export(DaphnisTrail)
+asset.export(DaphnisLabel)
+
+asset.export(Pan)
+asset.export(PanTrail)
+asset.export(PanLabel)
+
 
 
 asset.meta = {

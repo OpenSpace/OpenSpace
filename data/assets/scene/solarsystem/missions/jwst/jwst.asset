@@ -1,11 +1,11 @@
 asset.require("spice/base")
 asset.require("./actions")
-asset.require("scene/solarsystem/planets/earth/layers/colorlayers/terra_modis_temporal")
-asset.require("scene/solarsystem/planets/earth/layers/colorlayers/esri_viirs_combo")
-
+asset.require("./mission")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
+
+
 
 local models = asset.syncedResource({
   Name = "JWST Model",
@@ -21,22 +21,23 @@ local band = asset.syncedResource({
   Version = 1
 })
 
-local launchTime = "2021 DEC 25 12:20:00"
-local endTime = "2024 JAN 22 00:00:00"
+
+local LaunchTime = "2021 DEC 25 12:20:00"
+local EndTime = "2024 JAN 22 00:00:00"
 
 local JWSTBand = {
   Identifier = "JWSTBand",
   Parent = transforms.JWSTPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = launchTime,
-    End = endTime
+    Start = LaunchTime,
+    End = EndTime
   },
   Transform = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "JWSTBand",
-      XAxis = { 1, 0, 0 },
+      XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
       ZAxis = sunTransforms.SolarSystemBarycenter.Identifier
     }
@@ -56,7 +57,7 @@ local JWSTBand = {
     Path = "/Solar System/Missions/JWST",
     Description = [[
       The safe viewing band for the James Webb Space Telescope at its current position
-    ]],
+    ]]
   }
 }
 
@@ -65,8 +66,8 @@ local JWSTModel = {
   Parent = transforms.JWSTRotation.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = launchTime,
-    End = endTime
+    Start = LaunchTime,
+    End = EndTime
   },
   Renderable = {
     Type = "RenderableModel",
@@ -87,7 +88,7 @@ local JWSTModel = {
     Description = [[
       Animated model of the James Webb Space Telescope that shows its deployment in
       real time
-    ]],
+    ]]
   }
 }
 
@@ -96,8 +97,8 @@ local JWSTFov = {
   Parent = JWSTModel.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = launchTime,
-    End = endTime
+    Start = LaunchTime,
+    End = EndTime
   },
   Renderable = {
     Type = "RenderablePrism",
@@ -112,7 +113,7 @@ local JWSTFov = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = { 0, 0, math.rad(30) }
-    },
+    }
   },
   Tag = { "mission_jwst_fov" },
   GUI = {
@@ -120,7 +121,7 @@ local JWSTFov = {
     Path = "/Solar System/Missions/JWST",
     Description = [[
       The field of view for the James Webb Space Telescope at its current position
-    ]],
+    ]]
   }
 }
 
@@ -129,8 +130,8 @@ local JWSTLabel = {
   Parent = transforms.JWSTPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = launchTime,
-    End = endTime
+    Start = LaunchTime,
+    End = EndTime
   },
   Renderable = {
     Type = "RenderableLabel",
@@ -149,53 +150,8 @@ local JWSTLabel = {
   }
 }
 
+
 asset.onInitialize(function()
-  -- Start of data outage, use Terra instead as replacement
-  openspace.scriptScheduler.loadScheduledScript(
-    "2021 DEC 19 00:00:00",
-    [[openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
-      true
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
-      false
-    )]],
-    [[openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
-      false
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
-      true
-    )]],
-    "",
-    2 -- Not default group, never clear this script
-  )
-
-  -- End of data outage, Go back to VIIRS ESRI combo
-  openspace.scriptScheduler.loadScheduledScript(
-    "2021 DEC 30 00:00:00",
-    [[openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
-      false
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
-      true
-    )]],
-    [[openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
-      true
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
-      false
-    )]],
-    "",
-    2 -- Not default group, never clear this script
-  )
-
   openspace.addSceneGraphNode(JWSTBand)
   openspace.addSceneGraphNode(JWSTModel)
   openspace.addSceneGraphNode(JWSTFov)
@@ -215,6 +171,8 @@ asset.export(JWSTBand)
 asset.export(JWSTModel)
 asset.export(JWSTFov)
 asset.export(JWSTLabel)
+
+
 
 asset.meta = {
   Name = "James Webb Space Telescope",

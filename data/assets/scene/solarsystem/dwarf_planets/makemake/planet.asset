@@ -1,6 +1,8 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("./transforms")
 
+
+
 local modelFolder = asset.syncedResource({
   Name = "Makemake Model",
   Type = "HttpSynchronization",
@@ -8,32 +10,34 @@ local modelFolder = asset.syncedResource({
   Version = 1
 })
 
+
 local Planet = {
   Identifier = "MakemakeGlobe",
   Parent = transforms.Position.Identifier,
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
-      RotationAxis = {0.0, 0.0, 1.0},
-      RotationRate = 1.0/(10.273*60.0*60.0)
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 1.0 / (10.273 * 60.0 * 60.0)
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = modelFolder .. 'Makemake_1_1430.glb',
+    GeometryFile = modelFolder .. "Makemake_1_1430.glb",
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
     LightSources = {
       sun.LightSource
-    },
+    }
   },
   GUI = {
     Name = "Makemake",
     Path = "/Solar System/Dwarf Planets/Makemake",
-    Description = [[A 3D model of Makemake, Credit: NASA Visualization Technology 
-      Applications and Development (VTAD)."]]
-  } 
+    Description = [[A 3D model of Makemake. Credit: NASA Visualization Technology
+      Applications and Development (VTAD).]]
+  }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Planet)
@@ -44,6 +48,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("Planet", Planet)
+
+
 
 asset.meta = {
   Name = "Makemake Globe",

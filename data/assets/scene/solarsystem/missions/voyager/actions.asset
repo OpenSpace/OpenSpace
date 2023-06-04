@@ -1,56 +1,56 @@
-local jupiter_approach = {
-  Identifier = "os.missions.voyager.setup.jupiterapproach",
+local SetupJupiterApproach = {
+  Identifier = "os.voyager.SetupJupiterApproach",
   Name = "Set Jupiter approach",
   Command = [[
-    openspace.time.setTime('1979-01-20T01:32:07.914')
+    openspace.time.setTime("1979-01-20T01:32:07.914")
   ]],
   Documentation = "Sets the time for Voyager's approach to Jupiter",
   GuiPath = "/Missions/Voyager",
   isLocal = false
 }
 
-local saturn_approach = {
-  Identifier = "os.missions.voyager.setup.saturnapproach",
+local SetupSaturnApproach = {
+  Identifier = "os.voyager.SetupSaturnApproach",
   Name = "Set Saturn approach",
   Command = [[
-    openspace.time.setTime('1980-10-20T07:43:42.645');
+    openspace.time.setTime("1980-10-20T07:43:42.645")
   ]],
   Documentation = "Sets the time for Voyager's approach to Saturn",
   GuiPath = "/Missions/Voyager",
   isLocal = false
 }
 
-local focus_jupiter = {
-  Identifier = "os.missions.voyager.jupiter.focus",
+local JupiterFocus = {
+  Identifier = "os.voyager.JupiterFocus",
   Name = "Focus on Jupiter",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Jupiter');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Jupiter")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
   ]],
   Documentation = "Set the camera focus to Jupiter",
   GuiPath = "/Missions/Voyager",
   isLocal = false
 }
 
-local focus_saturn = {
-  Identifier = "os.missions.voyager.saturn.focus",
+local SaturnFocus = {
+  Identifier = "os.voyager.SaturnFocus",
   Name = "Focus on Saturn",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Saturn")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
   ]],
   Documentation = "Sets the camera focus on Saturn",
   GuiPath = "/Missions/Voyager",
   isLocal = false
 }
 
-local toggle_minormoon_trails = {
-  Identifier = "os.missions.voyager.toggleminormoontrails",
+local ToggleMinorMoonTrails = {
+  Identifier = "os.voyager.ToggleMinorMoonTrails",
   Name = "Toggle minor trails",
   Command = [[
-    local list = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled')
+    local list = openspace.getProperty("{moonTrail_minor}.Renderable.Enabled")
     for _,v in pairs(list) do
       openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
     end
@@ -60,21 +60,30 @@ local toggle_minormoon_trails = {
   isLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(jupiter_approach)
-  openspace.action.registerAction(saturn_approach)
-  openspace.action.registerAction(focus_jupiter)
-  openspace.action.registerAction(focus_saturn)
-  openspace.action.registerAction(toggle_minormoon_trails)
+  openspace.action.registerAction(SetupJupiterApproach)
+  openspace.action.registerAction(SetupSaturnApproach)
+  openspace.action.registerAction(JupiterFocus)
+  openspace.action.registerAction(SaturnFocus)
+  openspace.action.registerAction(ToggleMinorMoonTrails)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggle_minormoon_trails)
-  openspace.action.removeAction(focus_saturn)
-  openspace.action.removeAction(focus_jupiter)
-  openspace.action.removeAction(saturn_approach)
-  openspace.action.removeAction(jupiter_approach)
+  openspace.action.removeAction(ToggleMinorMoonTrails)
+  openspace.action.removeAction(SaturnFocus)
+  openspace.action.removeAction(JupiterFocus)
+  openspace.action.removeAction(SetupSaturnApproach)
+  openspace.action.removeAction(SetupJupiterApproach)
 end)
+
+asset.export("SetupJupiterApproach", SetupJupiterApproach.Identifier)
+asset.export("SetupSaturnApproach", SetupSaturnApproach.Identifier)
+asset.export("JupiterFocus", JupiterFocus.Identifier)
+asset.export("SaturnFocus", SaturnFocus.Identifier)
+asset.export("ToggleMinorMoonTrails", ToggleMinorMoonTrails.Identifier)
+
+
 
 asset.meta = {
   Name = "Voyager Actions",

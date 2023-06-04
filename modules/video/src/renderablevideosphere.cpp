@@ -41,9 +41,9 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 5> UniformNames = {
-        "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
-        "mirrorTexture"
+    constexpr std::array<const char*, 6> UniformNames = {
+        "opacity", "modelViewProjection", "modelViewTransform", "modelViewRotation",
+        "colorTexture", "mirrorTexture"
     };
 
     enum class Orientation : int {
@@ -258,6 +258,10 @@ void RenderableVideoSphere::render(const RenderData& data, RendererTasks&) {
         glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
     _shader->setUniform(_uniformCache.modelViewProjection, modelViewProjection);
 
+    const glm::dmat4 modelViewTransform =
+        data.camera.combinedViewMatrix() * modelTransform;
+    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
+
     glm::mat3 modelViewRotation = glm::mat3(
         glm::dmat3(data.camera.viewRotationMatrix()) * modelRotation
     );
@@ -325,7 +329,7 @@ void RenderableVideoSphere::render(const RenderData& data, RendererTasks&) {
     }
 
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
-    _shader->setUniform(_uniformCache._mirrorTexture, _mirrorTexture.value());
+    _shader->setUniform(_uniformCache.mirrorTexture, _mirrorTexture.value());
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();

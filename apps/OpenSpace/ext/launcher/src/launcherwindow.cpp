@@ -213,8 +213,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     , _userProfilePath(
         absPath(globalConfig.pathTokens.at("USER_PROFILES")).string() + '/'
     )
-    , _readOnlyWindowConfigs(globalConfig.readOnlyWindowConfigs)
-    , _readOnlyProfiles(globalConfig.readOnlyProfiles)
     , _sgctConfigName(sgctConfigName)
 {
     Q_INIT_RESOURCE(resources);
@@ -657,45 +655,49 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     connect(
         _windowConfigBox,
         QOverload<int>::of(&QComboBox::currentIndexChanged),
-        [this](int newIndex) {
-            std::filesystem::path pathSelected = absPath(selectedWindowConfig());
-            std::string fileSelected = pathSelected.generic_string();
-            if (newIndex == _windowConfigBoxIndexSgctCfgDefault) {
-                _editWindowButton->setEnabled(false);
-                _editWindowButton->setToolTip(
-                    "Cannot edit the 'Default' configuration since it is not a file"
-                );
-            }
-            else if (newIndex >= _preDefinedConfigStartingIdx) {
-                _editWindowButton->setEnabled(false);
-                _editWindowButton->setToolTip(
-                    QString::fromStdString(fmt::format(
-                        "Cannot edit '{}' since it is one of the configuration "
-                        "files provided in the OpenSpace installation", fileSelected))
-                );
-            }
-            else {
-                try {
-                    sgct::config::GeneratorVersion previewGenVersion =
-                        sgct::readConfigGenerator(fileSelected);
-                    if (!versionCheck(previewGenVersion)) {
-                        _editWindowButton->setEnabled(false);
-                        _editWindowButton->setToolTip(QString::fromStdString(fmt::format(
-                            "This file does not meet the minimum required version of {}.",
-                            versionMin.versionString()
-                        )));
-                        return;
-                    } 
-                }
-                catch (const std::runtime_error&) {
-                    // Ignore an exception here because clicking the edit button will
-                    // bring up an explanatory error message
-                }
-                _editWindowButton->setEnabled(true);
-                _editWindowButton->setToolTip("");
-            }
-        }
+        this,
+        &LauncherWindow::onNewWindowConfigSelection
     );
+    // Call combobox selected callback to refresh the file status of the current selection
+    onNewWindowConfigSelection(_windowConfigBox->currentIndex());
+}
+
+void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
+    std::filesystem::path pathSelected = absPath(selectedWindowConfig());
+    std::string fileSelected = pathSelected.string();
+    if (newIndex == _windowConfigBoxIndexSgctCfgDefault) {
+        _editWindowButton->setEnabled(false);
+        _editWindowButton->setToolTip(
+            "Cannot edit the 'Default' configuration since it is not a file"
+        );
+    }
+    else if (newIndex >= _preDefinedConfigStartingIdx) {
+        _editWindowButton->setEnabled(false);
+        _editWindowButton->setToolTip(
+            QString::fromStdString(fmt::format(
+                "Cannot edit '{}'\nsince it is one of the configuration "
+                "files provided in the OpenSpace installation", fileSelected))
+        );
+    }
+    else {
+        try {
+            sgct::config::GeneratorVersion previewGenVersion =
+                sgct::readConfigGenerator(fileSelected);
+            if (!versionCheck(previewGenVersion)) {
+                _editWindowButton->setEnabled(false);
+                _editWindowButton->setToolTip(QString::fromStdString(fmt::format(
+                    "This file does not meet the minimum required version of {}.",
+                    versionMin.versionString())));
+                return;
+            } 
+        }
+        catch (const std::runtime_error&) {
+            // Ignore an exception here because clicking the edit button will
+            // bring up an explanatory error message
+        }
+        _editWindowButton->setEnabled(true);
+        _editWindowButton->setToolTip("");
+    }
 }
 
 bool LauncherWindow::versionCheck(sgct::config::GeneratorVersion& v) const {
@@ -723,8 +725,8 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         profile,
         _assetPath,
         _userAssetPath,
+        _profilePath,
         saveProfilePath,
-        _readOnlyProfiles,
         this
     );
     editor.exec();
@@ -806,7 +808,6 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                     preview,
                     winCfg,
                     saveWindowCfgPath,
-                    _readOnlyWindowConfigs,
                     this
                 );
                 ret = editor.exec();

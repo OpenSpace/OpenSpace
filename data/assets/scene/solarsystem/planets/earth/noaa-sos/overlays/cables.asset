@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Undersea Communication Cables"
@@ -17,7 +18,8 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -25,15 +27,17 @@ local layer = {
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", Layer)
 end)
 
-asset.export(layer)
+asset.export(Layer)
+
 
 
 asset.meta = {

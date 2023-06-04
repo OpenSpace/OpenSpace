@@ -32,8 +32,6 @@
 #include <deque>
 
 namespace {
-    constexpr std::string_view _loggerCat = "WwtCommunicator";
-
     // WWT messages
     ghoul::Dictionary moveCameraMessage(const glm::dvec2& celestCoords, double fov,
                                         double roll)

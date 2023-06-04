@@ -1,127 +1,131 @@
-local function getScaleCommand(identifier, scale, speed)
-  local command = 'openspace.setPropertyValue("' .. identifier .. '.Scale.Scale", '
+local function scaleCommand(identifier, scale, speed)
+  local command = [[openspace.setPropertyValue("]] .. identifier .. [[.Scale.Scale", ]]
   command = command .. scale .. ", " .. speed
   if (scale == 1) then
     command = command .. ")"
   else
-    command = command .. ', "CubicEaseOut")'
+    command = command .. [[, "CubicEaseOut")]]
   end
   return command
 end
 
-local function getScaleAction(identifier, scale, name, speed)
+local function scaleAction(identifier, scale, name, speed)
   local actionString = "Grow"
   if (scale == 1) then
     actionString = "Shrink"
   end
-  local action = {
+  return {
     Identifier = "os." .. actionString .. "_" .. identifier,
     Name = actionString .. " " .. name,
-    Command = getScaleCommand(identifier, scale, speed),
+    Command = scaleCommand(identifier, scale, speed),
     Documentation = "Scales " .. name .. " to " .. scale .. "x",
     GuiPath = "/Solar System/Scale",
     IsLocal = true
   }
-  return action
 end
 
-local function getToggleScaleAction(identifier, scale, name, speedup, speedown)
-  local action = {
+local function toggleScaleAction(identifier, scale, name, speedup, speeddown)
+  return {
     Identifier = "os.toggle_" .. string.gsub(name, "%s+", "") .. "_scale",
     Name = "Toggle " .. name .. " scale",
     Command = [[
-local list = openspace.getProperty("]] .. identifier .. [[.Scale.Scale");
+local list = openspace.getProperty("]] .. identifier .. [[.Scale.Scale")
 if #list == 0 then
-  openspace.printWarning("No planets to resize");
+  openspace.printWarning("No planets to resize")
 else
-  local prop = list[1];
-  local currentScale = openspace.getPropertyValue(prop);
-  local newScale = 1;
+  local prop = list[1]
+  local currentScale = openspace.getPropertyValue(prop)
+  local newScale = 1
   if (currentScale == 1) then
-    ]] .. getScaleCommand(identifier, scale, speedup) .. [[
+    ]] .. scaleCommand(identifier, scale, speedup) .. [[
   else
-    ]] .. getScaleCommand(identifier, 1, speedown) .. [[
+    ]] .. scaleCommand(identifier, 1, speeddown) .. [[
   end
 end
 ]],
-  GuiPath = "/Solar System/Scale",
-  Documentation = "Toggle the scale of " .. name,
-  IsLocal = true
+    GuiPath = "/Solar System/Scale",
+    Documentation = "Toggle the scale of " .. name,
+    IsLocal = true
   }
-  return action
 end
 
-local grow_planets = getScaleAction("{planet_solarSystem}", 3400, "Planets", 3)
-asset.export("grow_planets", grow_planets.Identifier)
-local shrink_planets = getScaleAction("{planet_solarSystem}", 1, "Planets", 2)
-asset.export("shrink_planets", shrink_planets.Identifier)
-local toggle_planet_scale = getToggleScaleAction("{planet_solarSystem}", 3400, "Planets", 3, 2)
-asset.export("toggle_planet_scale", toggle_planet_scale.Identifier)
+local GrowPlanets = scaleAction("{planet_solarSystem}", 3400, "Planets", 3)
+local ShrinkPlanets = scaleAction("{planet_solarSystem}", 1, "Planets", 2)
+local TogglePlanetScale = toggleScaleAction("{planet_solarSystem}", 3400, "Planets", 3, 2)
 
-local grow_inner_planets = getScaleAction("{planet_terrestrial}", 3400, "Inner Planets", 3)
-asset.export("grow_inner_planets", grow_inner_planets.Identifier)
-local shrink_inner_planets = getScaleAction("{planet_terrestrial}", 1, "Inner Planets", 2)
-asset.export("shrink_inner_planets", shrink_inner_planets.Identifier)
-local toggle_inner_planet_scale = getToggleScaleAction("{planet_terrestrial}", 3400, "Inner Planets", 3, 2)
-asset.export("toggle_inner_planet_scale", toggle_inner_planet_scale.Identifier)
+local GrowInnerPlanets = scaleAction("{planet_terrestrial}", 3400, "Inner Planets", 3)
+local ShrinkInnerPlanets = scaleAction("{planet_terrestrial}", 1, "Inner Planets", 2)
+local ToggleInnerPlanetScale = toggleScaleAction("{planet_terrestrial}", 3400, "Inner Planets", 3, 2)
 
-local grow_outter_planets = getScaleAction("{planet_giants}", 3400, "Outter Planets", 3)
-asset.export("grow_outter_planets", grow_outter_planets.Identifier)
-local shrink_outter_planets = getScaleAction("{planet_giants}", 1, "Outter Planets", 2)
-asset.export("shrink_outter_planets", shrink_outter_planets.Identifier)
-local toggle_outter_planet_scale = getToggleScaleAction("{planet_giants}", 3400, "Outter Planets", 3, 2)
-asset.export("toggle_outter_planet_scale", toggle_outter_planet_scale.Identifier)
+local GrowOuterPlanets = scaleAction("{planet_giants}", 3400, "Outer Planets", 3)
+local ShrinkOuterPlanets = scaleAction("{planet_giants}", 1, "Outer Planets", 2)
+local ToggleOuterPlanetScale = toggleScaleAction("{planet_giants}", 3400, "Outer Planets", 3, 2)
 
-local grow_jupiter_moons = getScaleAction("{moon_jupiter}", 50, "Jupiter Moons", 3)
-asset.export("grow_jupiter_moons", grow_jupiter_moons.Identifier)
-local shrink_jupiter_moons = getScaleAction("{moon_jupiter}", 1, "Jupiter Moons", 2)
-asset.export("shrink_jupiter_moons", shrink_jupiter_moons.Identifier)
-local toggle_jupiter_moon_scales = getToggleScaleAction("{moon_jupiter}", 50, "Jupiter Moons", 3, 2)
-asset.export("toggle_jupiter_moon_scales", toggle_jupiter_moon_scales.Identifier)
+local GrowJupiterMoons = scaleAction("{moon_jupiter}", 50, "Jupiter Moons", 3)
+local ShrinkJupiterMoons = scaleAction("{moon_jupiter}", 1, "Jupiter Moons", 2)
+local ToggleJupiterMoonScales = toggleScaleAction("{moon_jupiter}", 50, "Jupiter Moons", 3, 2)
 
-local grow_moon = getScaleAction("Scene.Moon", 25, "Moon", 3)
-asset.export("grow_moon", grow_moon.Identifier)
-local shrink_moon = getScaleAction("Scene.Moon", 1, "Moon", 2)
-asset.export("shrink_moon", shrink_moon.Identifier)
-local toggle_moon_scale = getToggleScaleAction("Scene.Moon", 25, "Moon", 3, 2)
-asset.export("toggle_moon_scale", toggle_moon_scale.Identifier)
+local GrowMoon = scaleAction("Scene.Moon", 25, "Moon", 3)
+local ShrinkMoon = scaleAction("Scene.Moon", 1, "Moon", 2)
+local ToggleMoonScale = toggleScaleAction("Scene.Moon", 25, "Moon", 3, 2)
+
 
 asset.onInitialize(function()
-  openspace.action.registerAction(grow_planets)
-  openspace.action.registerAction(shrink_planets)
-  openspace.action.registerAction(toggle_planet_scale)
+  openspace.action.registerAction(GrowPlanets)
+  openspace.action.registerAction(ShrinkPlanets)
+  openspace.action.registerAction(TogglePlanetScale)
 
-  openspace.action.registerAction(grow_inner_planets)
-  openspace.action.registerAction(shrink_inner_planets)
-  openspace.action.registerAction(toggle_inner_planet_scale)
+  openspace.action.registerAction(GrowInnerPlanets)
+  openspace.action.registerAction(ShrinkInnerPlanets)
+  openspace.action.registerAction(ToggleInnerPlanetScale)
 
-  openspace.action.registerAction(grow_outter_planets)
-  openspace.action.registerAction(shrink_outter_planets)
-  openspace.action.registerAction(toggle_outter_planet_scale)
+  openspace.action.registerAction(GrowOuterPlanets)
+  openspace.action.registerAction(ShrinkOuterPlanets)
+  openspace.action.registerAction(ToggleOuterPlanetScale)
 
-  openspace.action.registerAction(grow_jupiter_moons)
-  openspace.action.registerAction(shrink_jupiter_moons)
-  openspace.action.registerAction(toggle_jupiter_moon_scales)
+  openspace.action.registerAction(GrowJupiterMoons)
+  openspace.action.registerAction(ShrinkJupiterMoons)
+  openspace.action.registerAction(ToggleJupiterMoonScales)
 
-  openspace.action.registerAction(grow_moon)
-  openspace.action.registerAction(shrink_moon)
-  openspace.action.registerAction(toggle_moon_scale)
+  openspace.action.registerAction(GrowMoon)
+  openspace.action.registerAction(ShrinkMoon)
+  openspace.action.registerAction(ToggleMoonScale)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggle_moon_scale)
-  openspace.action.removeAction(shrink_moon)
-  openspace.action.removeAction(grow_moon)
+  openspace.action.removeAction(ToggleMoonScale)
+  openspace.action.removeAction(ShrinkMoon)
+  openspace.action.removeAction(GrowMoon)
 
-  openspace.action.removeAction(toggle_outter_planet_scale)
-  openspace.action.removeAction(shrink_outter_planets)
-  openspace.action.removeAction(grow_outter_planets)
+  openspace.action.removeAction(ToggleJupiterMoonScales)
+  openspace.action.removeAction(ShrinkJupiterMoons)
+  openspace.action.removeAction(GrowJupiterMoons)
 
-  openspace.action.removeAction(toggle_inner_planet_scale)
-  openspace.action.removeAction(shrink_inner_planets)
-  openspace.action.removeAction(grow_inner_planets)
+  openspace.action.removeAction(ToggleOuterPlanetScale)
+  openspace.action.removeAction(ShrinkOuterPlanets)
+  openspace.action.removeAction(GrowOuterPlanets)
 
-  openspace.action.removeAction(toggle_planet_scale)
-  openspace.action.removeAction(shrink_planets)
-  openspace.action.removeAction(grow_planets)
+  openspace.action.removeAction(ToggleInnerPlanetScale)
+  openspace.action.removeAction(ShrinkInnerPlanets)
+  openspace.action.removeAction(GrowInnerPlanets)
+
+  openspace.action.removeAction(TogglePlanetScale)
+  openspace.action.removeAction(ShrinkPlanets)
+  openspace.action.removeAction(GrowPlanets)
 end)
+
+asset.export("GrowPlanets", GrowPlanets.Identifier)
+asset.export("ShrinkPlanets", ShrinkPlanets.Identifier)
+asset.export("TogglePlanetScale", TogglePlanetScale.Identifier)
+asset.export("GrowInnerPlanets", GrowInnerPlanets.Identifier)
+asset.export("ShrinkInnerPlanets", ShrinkInnerPlanets.Identifier)
+asset.export("ToggleInnerPlanetScale", ToggleInnerPlanetScale.Identifier)
+asset.export("GrowOuterPlanets", GrowOuterPlanets.Identifier)
+asset.export("ShrinkOuterPlanets", ShrinkOuterPlanets.Identifier)
+asset.export("ToggleOuterPlanetScale", ToggleOuterPlanetScale.Identifier)
+asset.export("GrowJupiterMoons", GrowJupiterMoons.Identifiers)
+asset.export("ShrinkJupiterMoons", ShrinkJupiterMoons.Identifier)
+asset.export("ToggleJupiterMoonScales", ToggleJupiterMoonScales.Identifier)
+asset.export("GrowMoon", GrowMoon.Identifier)
+asset.export("ShrinkMoon", ShrinkMoon.Identifier)
+asset.export("ToggleMoonScale", ToggleMoonScale.Identifier)

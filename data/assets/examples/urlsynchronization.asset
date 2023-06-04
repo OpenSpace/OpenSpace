@@ -1,5 +1,3 @@
--- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SYNC enabled
-
 asset.syncedResource({
   Name = "Example Single",
   Type = "UrlSynchronization",
@@ -13,7 +11,7 @@ asset.syncedResource({
   Identifier = "example_multiple",
   Url = {
     "http://celestrak.com/NORAD/elements/stations.txt",
-    "http://celestrak.com/NORAD/elements/gps-ops.txt",
+    "http://celestrak.com/NORAD/elements/gps-ops.txt"
   }
 })
 

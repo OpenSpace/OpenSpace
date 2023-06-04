@@ -24,7 +24,7 @@
 
 #include <openspace/util/factorymanager.h>
 
-#include <openspace/documentation/documentationengine.h> 
+#include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/json.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -80,9 +80,9 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
             }
         }
         else if (tv) {
-            nlohmann::json json = generateJsonDocumentation(tv->documentations);
+            nlohmann::json restrictions = generateJsonDocumentation(tv->documentations);
             // We have a TableVerifier, so we need to recurse
-            entry["restrictions"] = json;
+            entry["restrictions"] = restrictions;
         }
         else {
             entry["description"] = p.verifier->documentation();
@@ -142,7 +142,7 @@ FactoryManager& FactoryManager::ref() {
 
 nlohmann::json FactoryManager::generateJson() const {
     nlohmann::json json;
-    std::vector<Documentation> docs = DocEng.documentations(); 
+    std::vector<Documentation> docs = DocEng.documentations();
 
     for (const FactoryInfo& factoryInfo : _factories) {
         nlohmann::json factory;
@@ -161,7 +161,7 @@ nlohmann::json FactoryManager::generateJson() const {
             nlohmann::json documentation = generateJsonDocumentation(*factoryDoc);
             factory["classes"].push_back(documentation);
             // Remove documentation from list check at the end if all docs got put in
-            docs.erase(factoryDoc);          
+            docs.erase(factoryDoc);
         }
         else {
             nlohmann::json documentation;
@@ -210,7 +210,7 @@ nlohmann::json FactoryManager::generateJson() const {
     nlohmann::json result;
     result["name"] = "Asset Types";
     result["data"] = json;
-        
+
     return result;
 }
 

@@ -1,7 +1,9 @@
+asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunAsset = asset.require("scene/solarsystem/sun/sun")
 local earthAsset = asset.require("../earth")
-asset.require("spice/base")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Moon Labels",
@@ -9,6 +11,7 @@ local labelsPath = asset.syncedResource({
   Identifier = "moon_labels",
   Version = 1
 })
+
 
 local Moon = {
   Identifier = "Moon",
@@ -32,10 +35,10 @@ local Moon = {
     Layers = {},
     ShadowGroup = {
       Sources = {
-        { Name = sunAsset.Sun.Identifier, Radius = 696.3E6 },
+        { Name = sunAsset.Sun.Identifier, Radius = 696300000 },
       },
       Casters = {
-        { Name = earthAsset.Earth.Identifier, Radius = 6.371E6 },
+        { Name = earthAsset.Earth.Identifier, Radius = 6371000 },
       }
     },
     Labels = {
@@ -60,8 +63,8 @@ local MoonLabel = {
   Identifier = "MoonLabel",
   Parent = Moon.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Moon",
     FontSize = 70.0,
     Size = 6.0,
@@ -81,47 +84,54 @@ local MoonLabel = {
   }
 }
 
-local focus_moon = {
-  Identifier = "os.solarsystem.earth.moon.focus",
+local FocusMoon = {
+  Identifier = "os.earth.FocusMoon",
   Name = "Focus on Moon",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Moon")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Set camera focus on the Moon",
   GuiPath = "/Solar System/Earth/Moon",
   isLocal = false
 }
 
-local toggle_moon_shading = {
-  Identifier = "os.solarsystem.earth.moon.toggleshading",
+local ToggleMoonShading = {
+  Identifier = "os.earth.ToggleMoonShading",
   Name = "Toggle Moon shading",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.PerformShading', not openspace.getPropertyValue('Scene.Moon.Renderable.PerformShading'));
+    openspace.setPropertyValueSingle(
+      "Scene.Moon.Renderable.PerformShading",
+      not openspace.getPropertyValue("Scene.Moon.Renderable.PerformShading")
+    )
   ]],
   Documentation = "Toggles the shading of the Moon",
   GuiPath = "/Solar System/Earth/Moon",
   isLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Moon)
   openspace.addSceneGraphNode(MoonLabel)
 
-  openspace.action.registerAction(focus_moon)
-  openspace.action.registerAction(toggle_moon_shading)
+  openspace.action.registerAction(FocusMoon)
+  openspace.action.registerAction(ToggleMoonShading)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggle_moon_shading)
-  openspace.action.removeAction(focus_moon)
+  openspace.action.removeAction(ToggleMoonShading)
+  openspace.action.removeAction(FocusMoon)
 
   openspace.removeSceneGraphNode(MoonLabel)
   openspace.removeSceneGraphNode(Moon)
 end)
 
 asset.export(Moon)
+asset.export(MoonLabel)
+asset.export("FocusMoon", FocusMoon.Identifier)
+asset.export("ToggleMoonShading", ToggleMoonShading.Identifier)
 
 
 

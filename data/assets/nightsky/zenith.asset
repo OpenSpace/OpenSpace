@@ -1,4 +1,6 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+
+
 
 local textures = asset.syncedResource({
   Name = "Zenith Textures",
@@ -7,7 +9,8 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local position = {
+
+local ZenithPosition = {
   Identifier = "ZenithPosition",
   Parent = earthAsset.Earth.Identifier,
   Transform = {
@@ -35,14 +38,14 @@ local position = {
   }
 }
 
-local plane = {
+local ZenithDot = {
   Identifier = "ZenithDot",
-  Parent = position.Identifier,
+  Parent = ZenithPosition.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = { -math.pi, 0.0, 0.0 }
-    },
+    }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
@@ -59,41 +62,41 @@ local plane = {
   }
 }
 
-local uri = "Scene." .. plane.Identifier .. ".Renderable"
-
-local showAction = {
-  Identifier = "os.nightsky.show_zenith",
+local ShowZenith = {
+  Identifier = "os.nightsky.ShowZenith",
   Name = "Show local zenith",
   Command = [[
-    local camera = openspace.navigation.getNavigationState();
-    openspace.setParent('ZenithPosition', camera.Anchor)
-    openspace.setPropertyValueSingle('Scene.ZenithPosition.Translation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Globe', camera.Anchor);
-    openspace.fadeIn(']] .. uri .. [[')
-    ]],
+    local camera = openspace.navigation.getNavigationState()
+    openspace.setParent("ZenithPosition", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.ZenithPosition.Translation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.ZenithPosition.Rotation.Globe", camera.Anchor)
+    openspace.fadeIn("Scene.ZenithDot.Renderable")
+  ]],
   Documentation = "Shows a dot for the local zenith",
   GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
-local hideAction = {
-  Identifier = "os.nightsky.hide_zenith",
+local HideZenith = {
+  Identifier = "os.nightsky.HideZenith",
   Name = "Hide local zenith",
-  Command = "openspace.fadeOut('" .. uri .. "')",
+  Command = [[
+    openspace.fadeOut("Scene.ZenithDot.Renderable")
+  ]],
   Documentation = "Hides the dot for the local zenith",
   GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
-local toggleAction = {
-  Identifier = "os.nightsky.toggle_zenith",
+local ToggleZenith = {
+  Identifier = "os.nightsky.ToggleZenith",
   Name = "Toggle local zenith",
   Command = [[
     local camera = openspace.navigation.getNavigationState();
-    openspace.setParent('ZenithPosition', camera.Anchor)
-    openspace.setPropertyValueSingle('Scene.ZenithPosition.Translation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Globe', camera.Anchor);
-    openspace.toggleFade(']] .. uri .. [[')
+    openspace.setParent("ZenithPosition", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.ZenithPosition.Translation.Globe", camera.Anchor);
+    openspace.setPropertyValueSingle("Scene.ZenithPosition.Rotation.Globe", camera.Anchor);
+    openspace.toggleFade("Scene.ZenithDot.Renderable")
     ]],
   Documentation = "Toggles the dot for the local zenith",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -101,23 +104,23 @@ local toggleAction = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(position)
-  openspace.addSceneGraphNode(plane)
-  openspace.action.registerAction(hideAction)
-  openspace.action.registerAction(showAction)
-  openspace.action.registerAction(toggleAction)
+  openspace.addSceneGraphNode(ZenithPosition)
+  openspace.addSceneGraphNode(ZenithDot)
+  openspace.action.registerAction(ShowZenith)
+  openspace.action.registerAction(HideZenith)
+  openspace.action.registerAction(ToggleZenith)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.registerAction(toggleAction)
-  openspace.action.removeAction(showAction)
-  openspace.action.removeAction(hideAction)
-  openspace.removeSceneGraphNode(plane)
-  openspace.removeSceneGraphNode(position)
+  openspace.action.removeAction(ToggleZenith)
+  openspace.action.removeAction(HideZenith)
+  openspace.action.removeAction(ShowZenith)
+  openspace.removeSceneGraphNode(ZenithDot)
+  openspace.removeSceneGraphNode(ZenithPosition)
 end)
 
-asset.export(position)
-asset.export(plane)
-asset.export(hideAction)
-asset.export(showAction)
-asset.export(toggleAction)
+asset.export(ZenithPosition)
+asset.export(ZenithDot)
+asset.export("ShowZenith", ShowZenith.Identifier)
+asset.export("HideZenith", HideZenith.Identifier)
+asset.export("ToggleZenith", ToggleZenith.Identifier)

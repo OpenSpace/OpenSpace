@@ -1,6 +1,8 @@
-local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
+
+
 
 local model = asset.syncedResource({
   Name = "Deimos Model",
@@ -16,6 +18,7 @@ local kernels = asset.syncedResource({
   Version = 1
 })
 
+
 local Deimos = {
   Identifier = "Deimos",
   Parent = transforms.MarsBarycenter.Identifier,
@@ -24,20 +27,18 @@ local Deimos = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_DEIMOS",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels .. "mar097.bsp"
+      DestinationFrame = "GALACTIC"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "DEIMOS",
-      Observer = "MARS BARYCENTER",
-      Kernels = kernels .. "mar097.bsp"
+      Observer = "MARS BARYCENTER"
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/Deimos_1_1000.glb",
-    ModelScale = 'Kilometer',
+    GeometryFile = model .. "Deimos_1_1000.glb",
+    ModelScale = "Kilometer",
     RotationVector = { 180, 0, 180 },
     AmbientIntensity = 0.02,
     SpecularIntensity = 0.0,
@@ -76,7 +77,6 @@ local DeimosTrail = {
   }
 }
 
-
 local DeimosLabel = {
   Identifier = "DeimosLabel",
   Parent = Deimos.Identifier,
@@ -104,6 +104,8 @@ local DeimosLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "mar097.bsp")
+
   openspace.addSceneGraphNode(Deimos)
   openspace.addSceneGraphNode(DeimosTrail)
   openspace.addSceneGraphNode(DeimosLabel)
@@ -113,10 +115,13 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DeimosLabel)
   openspace.removeSceneGraphNode(DeimosTrail)
   openspace.removeSceneGraphNode(Deimos)
+
+  openspace.spice.unloadKernel(kernels .. "mar097.bsp")
 end)
 
 asset.export(Deimos)
 asset.export(DeimosTrail)
+
 
 
 asset.meta = {

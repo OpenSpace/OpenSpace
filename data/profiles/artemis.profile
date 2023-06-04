@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
@@ -88,7 +89,7 @@
       "value": "false"
     },
     {
-      "name": "Scene.ISSModel.Renderable.Enabled",
+      "name": "Scene.ISS.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
     },

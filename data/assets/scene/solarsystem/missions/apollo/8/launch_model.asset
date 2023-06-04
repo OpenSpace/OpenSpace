@@ -1,6 +1,8 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local kernels = asset.require("./kernels").kernels
+local kernels = asset.require("./kernels")
+
+
 
 local models = asset.syncedResource({
   Name = "Apollo Models",
@@ -9,7 +11,8 @@ local models = asset.syncedResource({
   Version = 4
 })
 
-local apolloSpiceId = -908
+
+local ApolloSpiceId = -908
 
 local Apollo8Launch = {
   Identifier = "Apollo8Launch",
@@ -22,10 +25,9 @@ local Apollo8Launch = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
+      Target = ApolloSpiceId,
       Observer = "EARTH",
-      Frame = "IAU_EARTH",
-      Kernels = kernels
+      Frame = "IAU_EARTH"
     }
   },
   GUI = {
@@ -45,7 +47,7 @@ local Apollo8LaunchModel = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -math.pi / 2}
+      Rotation = { 0.0, 0.0, -math.pi / 2 }
     }
   },
   Renderable = {
@@ -64,7 +66,10 @@ local Apollo8LaunchModel = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.kernels)
+
   openspace.addSceneGraphNode(Apollo8Launch)
   openspace.addSceneGraphNode(Apollo8LaunchModel)
 end)
@@ -72,6 +77,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo8LaunchModel)
   openspace.removeSceneGraphNode(Apollo8Launch)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo8Launch)

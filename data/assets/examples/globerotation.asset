@@ -1,6 +1,7 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local models = asset.syncedResource({
   Name = "New Horizons Model",
@@ -9,26 +10,24 @@ local models = asset.syncedResource({
   Version = 2
 })
 
-local lat = 40.7306
-local long = -73.9352
 
-local Example_GlobeRotation = {
-  Identifier = "Example_GlobeRotation",
+local ExampleGlobeRotation = {
+  Identifier = "ExampleGlobeRotation",
   Parent = earth.Earth.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earth.Earth.Identifier,
-      Latitude = lat,
-      Longitude = long,
+      Latitude = 40.7306,
+      Longitude = -73.9352,
       Altitude = 6,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earth.Earth.Identifier,
-      Latitude = lat,
-      Longitude = long
+      Latitude = 40.7306,
+      Longitude = -73.9352
       -- Can be used to to put flat on leaning surfaces, but also leads to updating
       -- the rotation every frame
       --UseHeightmap = true
@@ -46,12 +45,13 @@ local Example_GlobeRotation = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Example_GlobeRotation)
+  openspace.addSceneGraphNode(ExampleGlobeRotation)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Example_GlobeRotation)
+  openspace.removeSceneGraphNode(ExampleGlobeRotation)
 end)
 
-asset.export(Example_GlobeRotation)
+asset.export(ExampleGlobeRotation)

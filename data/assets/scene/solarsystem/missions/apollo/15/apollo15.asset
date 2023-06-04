@@ -1,7 +1,10 @@
-local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local sun = asset.require("scene/solarsystem/sun/sun")
 asset.require("spice/base")
 asset.require("../actions")
+local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sun = asset.require("scene/solarsystem/sun/sun")
+local kernels = asset.require("scene/solarsystem/missions/apollo/15/kernels")
+
+
 
 local models = asset.syncedResource({
   Name = "Apollo Models",
@@ -10,26 +13,16 @@ local models = asset.syncedResource({
   Version = 4
 })
 
-local kernels = asset.require("scene/solarsystem/missions/apollo/15/kernels").kernels
-
-
--- local models = asset.syncedResource({
---   Name = "Apollo 15 Models",
---   Type = "HttpSynchronization",
---   Identifier = "apollo_models",
---   Version = 1
--- })
 
 local Apollo15 = {
   Identifier = "Apollo15",
-  Parent = moon_transforms.Moon.Identifier,
+  Parent = moonTransforms.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "APOLLO 15",
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels
+      Frame = "IAU_MOON"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -59,15 +52,14 @@ local Apollo15 = {
 
 local Apollo15Trail = {
   Identifier = "Apollo15Trail",
-  Parent = moon_transforms.Moon.Identifier,
+  Parent = moonTransforms.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
       Target = "APOLLO 15",
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels
+      Frame = "IAU_MOON"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1971 JUL 26",
@@ -81,6 +73,8 @@ local Apollo15Trail = {
 }
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.kernels)
+
   openspace.addSceneGraphNode(Apollo15)
   openspace.addSceneGraphNode(Apollo15Trail)
 end)
@@ -88,6 +82,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo15Trail)
   openspace.removeSceneGraphNode(Apollo15)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo15)

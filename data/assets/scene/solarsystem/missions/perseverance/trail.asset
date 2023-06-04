@@ -2,9 +2,11 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local spice = asset.require("./spice")
 
-local startTime = "2020 JUL 17 13:56:42"
-local approachMars = "2021 FEB 11 20:32:16"
-local endTime = "2021 FEB 18 20:32:16"
+
+
+local StartTime = "2020 JUL 17 13:56:42"
+local ApproachMars = "2021 FEB 11 20:32:16"
+local EndTime = "2021 FEB 18 20:32:16"
 
 local PerseveranceTrailSun = {
   Identifier = "PerseveranceTrailSun",
@@ -14,12 +16,11 @@ local PerseveranceTrailSun = {
     Translation = {
       Type = "SpiceTranslation",
       Target = spice.ID,
-      Observer = "SSB",
-      Kernels = spice.Kernels
+      Observer = "SSB"
     },
     Color = { 0.2, 0.7, 0.1 },
-    StartTime = startTime,
-    EndTime = endTime,
+    StartTime = StartTime,
+    EndTime = EndTime,
     SampleInterval = 100,
     Enabled = false
   },
@@ -37,11 +38,10 @@ local PerseveranceTrailMars = {
     Translation = {
       Type = "SpiceTranslation",
       Target = spice.ID,
-      Observer = "MARS BARYCENTER",
-      Kernels = spice.Kernels
+      Observer = "MARS BARYCENTER"
     },
     Color = { 0.7, 0.9, 0.6 },
-    StartTime = approachMars,
+    StartTime = ApproachMars,
     EndTime = "2021 FEB 18 20:43:48",
     SampleInterval = 100,
     Enabled = false
@@ -52,7 +52,10 @@ local PerseveranceTrailMars = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(spice.Kernels)
+
   openspace.addSceneGraphNode(PerseveranceTrailSun)
   openspace.addSceneGraphNode(PerseveranceTrailMars)
 end)
@@ -60,6 +63,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PerseveranceTrailMars)
   openspace.removeSceneGraphNode(PerseveranceTrailSun)
+
+  openspace.spice.unloadKernel(spice.Kernels)
 end)
 
 asset.export(PerseveranceTrailSun)

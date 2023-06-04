@@ -1,5 +1,6 @@
-local mars = asset.require('scene/solarsystem/planets/mars/mars')
-local marsIdentifier = mars.Mars.Identifier
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
+
+
 
 local data = asset.syncedResource({
   Name = "GeoJSON Example Path Perseverance",
@@ -8,7 +9,8 @@ local data = asset.syncedResource({
   Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/path_perseverance.geojson"
 })
 
-local Example_RoverPath = {
+
+local ExampleRoverPath = {
   Identifier = "Mars-Perseverance-Path",
   File = data .. "path_perseverance.geojson",
   HeightOffset = 10.0,
@@ -19,15 +21,17 @@ local Example_RoverPath = {
   Name = "Perseverance Rover Path"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(marsIdentifier, Example_RoverPath)
+  openspace.globebrowsing.addGeoJson(mars.Mars.Identifier, ExampleRoverPath)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(marsIdentifier, Example_RoverPath)
+  openspace.globebrowsing.deleteGeoJson(mars.Mars.Identifier, ExampleRoverPath)
 end)
 
-asset.export(Example_RoverPath)
+asset.export(ExampleRoverPath)
+
 
 
 asset.meta = {

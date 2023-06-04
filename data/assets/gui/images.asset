@@ -1,5 +1,3 @@
--- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SYNC enabled
-
 asset.syncedResource({
   Type = "UrlSynchronization",
   Name = "Icons",
@@ -17,7 +15,7 @@ asset.syncedResource({
     "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/callisto.png",
     "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/europa.png",
     "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/ganymede.png",
-    "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/io.png",
+    "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/io.png"
   },
   UseHash = false
 })
@@ -32,7 +30,7 @@ asset.syncedResource({
     "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_earthweather.png",
     "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_mars.png",
     "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_galaxies.png",
-    "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_example.png",
+    "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_example.png"
   },
   UseHash = false
 })

@@ -348,10 +348,11 @@ void GuiSpaceTimeComponent::render() {
                 openspace::TimeUnits.end(),
                 std::string(""),
                 [](const std::string& a, const openspace::TimeUnit& unit) {
-                    return fmt::format("{}{} / second", a, nameForTimeUnit(unit, true)) + '\0';
+                    return fmt::format(
+                        "{}{} / second", a, nameForTimeUnit(unit, true)
+                    ) + '\0';
                 }
             );
-
             _firstFrame = false;
         }
 

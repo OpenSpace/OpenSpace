@@ -3,6 +3,7 @@ asset.require("./layers/colorlayers/global_mosaic_100m_hpf_sweden", false)
 asset.require("./layers/colorlayers/global_mosaic_100m_hpf_newyork", true)
 
 
+
 asset.meta = {
   Name = "Default Enceladus Layers",
   Version = "1.0",

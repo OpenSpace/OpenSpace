@@ -4,7 +4,10 @@ local bookmarkHelper = asset.require("util/generate_bookmarks")
 -- ensure that it is loaded first
 asset.require("scene/solarsystem/planets/earth/earth")
 
-local nodes = bookmarkHelper.getBookmarks("Local Bookmarks", "${ASSETS}/customization/localbookmarks.csv")
+local nodes = bookmarkHelper.loadBookmarks(
+  "Local Bookmarks",
+  "${ASSETS}/customization/localbookmarks.csv"
+)
 
 
 asset.onInitialize(function()

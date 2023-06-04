@@ -1,4 +1,6 @@
-local image = asset.require("./hh212_image").image
+local hh212 = asset.require("./hh212_image")
+
+
 
 local HH212Image = {
   Identifier = "HH212Image",
@@ -9,21 +11,25 @@ local HH212Image = {
   RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
   UsePerspectiveProjection = false,
   Opacity = 1.0,
-  TexturePath = image .. "hh212.png",
+  TexturePath = hh212.image .. "hh212.png",
   Tag = { "mission_jwst_target" },
   Description = [[
     Image of HH 212 by ESO/M. McCaughrean.
-  ]],
+  ]]
 }
+
 
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(HH212Image)
 end)
+
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(HH212Image)
 end)
 
 asset.export(HH212Image)
+
+
 
 asset.meta = {
   Name = "HH 212 Image",

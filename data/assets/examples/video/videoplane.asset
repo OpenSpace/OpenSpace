@@ -1,5 +1,7 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
+
+
 local data = asset.syncedResource({
   Name = "Example Globe Video",
   Type = "UrlSynchronization",
@@ -8,7 +10,7 @@ local data = asset.syncedResource({
 })
 
 
-local plane = {
+local Plane = {
   Identifier = "VideoPlaneExample",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
@@ -30,15 +32,18 @@ local plane = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(plane)
+  openspace.addSceneGraphNode(Plane)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(plane)
+  openspace.removeSceneGraphNode(Plane)
 end)
 
-asset.export(plane)
+asset.export(Plane)
+
+
 
 asset.meta = {
   Name = "Video Plane Test",

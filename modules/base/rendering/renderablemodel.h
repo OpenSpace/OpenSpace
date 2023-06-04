@@ -78,13 +78,16 @@ private:
         BounceInfinitely
     };
 
+    std::filesystem::path _file;
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
-    double _modelScale = 1.0;
+    properties::DoubleProperty _modelScale;
     bool _invertModelScale = false;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
+    bool _modelHasAnimation = false;
     std::string _animationStart;
     AnimationMode _animationMode = AnimationMode::Once;
+    double _animationTimeScale = 1.0;
     properties::BoolProperty _enableAnimation;
 
     properties::FloatProperty _ambientIntensity;
@@ -102,11 +105,14 @@ private:
     std::string _vertexShaderPath;
     std::string _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(nLightSources, lightDirectionsViewSpace, lightIntensities,
-        modelViewTransform, normalTransform, projectionTransform,
-        performShading, ambientIntensity, diffuseIntensity,
-        specularIntensity, performManualDepthTest, gBufferDepthTexture,
-        resolution, opacity) _uniformCache;
+    UniformCache(modelViewTransform, projectionTransform, normalTransform, meshTransform,
+        meshNormalTransform, ambientIntensity, diffuseIntensity,
+        specularIntensity, performShading, use_forced_color, has_texture_diffuse,
+        has_texture_normal, has_texture_specular, has_color_specular,
+        texture_diffuse, texture_normal, texture_specular, color_diffuse,
+        color_specular, opacity, nLightSources, lightDirectionsViewSpace,
+        lightIntensities, performManualDepthTest, gBufferDepthTexture, resolution
+    ) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
 

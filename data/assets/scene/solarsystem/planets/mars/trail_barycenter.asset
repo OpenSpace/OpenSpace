@@ -1,5 +1,5 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -23,9 +23,10 @@ local MarsBarycenterTrail = {
     Name = "Mars Barycenter Trail",
     Path = "/Solar System/Planets/Mars",
     Description = [[Trail of Mars' Barycenter as observed by the Sun. Data from NASA Spice
-      (see base spice asset)]],
+      (see base spice asset)]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MarsBarycenterTrail)

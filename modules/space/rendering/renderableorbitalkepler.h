@@ -58,7 +58,8 @@ private:
 
     bool _updateDataBuffersAtNextRender = false;
     std::streamoff _numObjects;
-    std::vector<size_t> _segmentSize;
+    std::vector<GLint> _segmentSize;
+    std::vector<GLint> _startIndex;
     properties::UIntProperty _segmentQuality;
     properties::UIntProperty _startRenderIdx;
     properties::UIntProperty _sizeRender;

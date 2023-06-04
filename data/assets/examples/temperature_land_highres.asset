@@ -1,4 +1,6 @@
-local globeIdentifier = asset.require("scene/solarsystem/planets/earth/earth.asset").Earth.Identifier
+local globe = asset.require("scene/solarsystem/planets/earth/earth")
+
+
 
 local path = asset.syncedResource({
   Name = "Earth Textures Climate",
@@ -7,7 +9,8 @@ local path = asset.syncedResource({
   Version = 1
 })
 
-local layer_prototype = {
+
+local LayerPrototype = {
   Identifier = "ERA5_Land_HighRes_Monthly_2M_Temperature_Temporal_prototype",
   Name = "ERA5 Land HighRes Monthly 2M Temperature (Temporal) [Prototype]",
   Type = "TemporalTileLayer",
@@ -26,7 +29,7 @@ local layer_prototype = {
   Description = "Temporal coverage: 01 Jan 1981 - 31 Dec 2020"
 }
 
-local layer_folder = {
+local LayerFolder = {
   Identifier = "ERA5_Land_HighRes_Monthly_2M_Temperature_Temporal_folder",
   Name = "ERA5 Land HighRes Monthly 2M Temperature (Temporal) [Folder]",
   Type = "TemporalTileLayer",
@@ -40,17 +43,21 @@ local layer_folder = {
   Description = "Temporal coverage: 01 Jan 1981 - 31 Dec 2020"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_prototype)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_folder)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerPrototype)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerFolder)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_folder)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_prototype)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerFolder)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerPrototype)
 end)
 
-asset.export("layer", layer_prototype)
+asset.export("Prototype", LayerPrototype)
+asset.export("Folder", LayerFolder)
+
+
 
 asset.meta = {
   Name = "Climate Earth Layers",

@@ -1,12 +1,15 @@
 local transforms = asset.require("./transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local models = asset.syncedResource({
   Name = "New Horizons Model",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_model",
   Version = 2
 })
+
 
 local NewHorizons = {
   Identifier = "NewHorizons",
@@ -27,6 +30,7 @@ local NewHorizons = {
     Path = "/Solar System/Missions/New Horizons"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NewHorizons)

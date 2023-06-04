@@ -1,6 +1,8 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
-local position = {
+
+
+local MeridianPosition = {
   Identifier = "MeridianPosition",
   Parent = earthAsset.Earth.Identifier,
   Transform = {
@@ -27,14 +29,14 @@ local position = {
   }
 }
 
-local grid = {
-  Identifier = "Meridian",
-  Parent = position.Identifier,
+local MeridianPlane = {
+  Identifier = "MeridianPlane",
+  Parent = MeridianPosition.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
       Scale = 1000000
-    },
+    }
   },
   Renderable = {
     Type = "RenderableRadialGrid",
@@ -52,35 +54,35 @@ local grid = {
   }
 }
 
-local uri = "Scene." .. grid.Identifier .. ".Renderable"
-
-local showAction = {
-  Identifier = "os.nightsky.show_meridian",
+local ShowMeridian = {
+  Identifier = "os.nightsky.ShowMeridian",
   Name = "Show local meridian",
   Command = [[
-    local camera = openspace.navigation.getNavigationState();
-    openspace.setParent('MeridianPosition', camera.Anchor)
-    openspace.setPropertyValueSingle('Scene.MeridianPosition.Translation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.MeridianPosition.Rotation.Globe', camera.Anchor);
-    openspace.fadeIn(']] .. uri .. [[');
+    local camera = openspace.navigation.getNavigationState()
+    openspace.setParent("MeridianPosition", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.MeridianPosition.Translation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.MeridianPosition.Rotation.Globe", camera.Anchor)
+    openspace.fadeIn("Scene.MeridianPlane.Renderable")
   ]],
   Documentation = "Shows a line for the local meridian",
   GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
-local hideAction = {
-  Identifier = "os.nightsky.hide_meridian",
+local HideMeridian = {
+  Identifier = "os.nightsky.HideMeridian",
   Name = "Hide local meridian",
-  Command = "openspace.fadeOut('" .. uri .. "')",
+  Command = [[
+    openspace.fadeOut("Scene.MeridianPlane.Renderable")
+  ]],
   Documentation = "Hides the line for the local meridian",
   GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
 
-local toggleAction = {
-  Identifier = "os.nightsky.toggle_meridian",
+local ToggleMeridian = {
+  Identifier = "os.nightsky.ToggleMeridian",
   Name = "Toggle local meridian",
   Command = [[
     local camera = openspace.navigation.getNavigationState();
@@ -94,24 +96,25 @@ local toggleAction = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(position)
-  openspace.addSceneGraphNode(grid)
-  openspace.action.registerAction(hideAction)
-  openspace.action.registerAction(showAction)
-  openspace.action.registerAction(toggleAction)
+  openspace.addSceneGraphNode(MeridianPosition)
+  openspace.addSceneGraphNode(MeridianPlane)
+  openspace.action.registerAction(ShowMeridian)
+  openspace.action.registerAction(HideMeridian)
+  openspace.action.registerAction(ToggleMeridian)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggleAction)
-  openspace.action.removeAction(showAction)
-  openspace.action.removeAction(hideAction)
-  openspace.removeSceneGraphNode(grid)
-  openspace.removeSceneGraphNode(position)
+  openspace.action.removeAction(ToggleMeridian)
+  openspace.action.removeAction(HideMeridian)
+  openspace.action.removeAction(ShowMeridian)
+  openspace.removeSceneGraphNode(MeridianPlane)
+  openspace.removeSceneGraphNode(MeridianPosition)
 end)
 
-asset.export(position)
-asset.export(grid)
-asset.export(hideAction)
-asset.export(showAction)
-asset.export(toggleAction)
+asset.export(MeridianPosition)
+asset.export(MeridianPlane)
+asset.export("ShowMeridian", ShowMeridian.Identifier)
+asset.export("HideMeridian", HideMeridian.Identifier)
+asset.export("ToggleMeridian", ToggleMeridian.Identifier)

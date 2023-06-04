@@ -19,23 +19,26 @@ local spk = asset.syncedResource({
   Version = 2
 })
 
+
 local kernels = {
   lsk .. "naif0012.tls",
   pck .. "pck00011.tpc",
   spk .. "de430.bsp"
 }
 
+
 asset.onInitialize(function()
-  for _, kernel in ipairs(kernels) do
-    openspace.spice.loadKernel(kernel)
-  end
+  openspace.spice.loadKernel(lsk .. "naif0012.tls")
+  openspace.spice.loadKernel(pck .. "pck00011.tpc")
+  openspace.spice.loadKernel(spk .. "de430.bsp")
 end)
 
 asset.onDeinitialize(function()
-  for i = #kernels, 1, -1 do
-    openspace.spice.unloadKernel(kernels[i])
-  end
+  openspace.spice.unloadKernel(spk .. "de430.bsp")
+  openspace.spice.unloadKernel(pck .. "pck00011.tpc")
+  openspace.spice.unloadKernel(lsk .. "naif0012.tls")
 end)
+
 
 
 asset.meta = {

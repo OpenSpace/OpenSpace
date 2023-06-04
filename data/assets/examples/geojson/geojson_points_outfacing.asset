@@ -1,5 +1,6 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local earthIdentifier = earth.Earth.Identifier
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
 
 local data = asset.syncedResource({
   Name = "GeoJSON Example Outfacing",
@@ -8,7 +9,8 @@ local data = asset.syncedResource({
   Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/points.geojson"
 })
 
-local Example_Points = {
+
+local ExamplePoints = {
   Identifier = "Points-Example-outfacing",
   File = data .. "points.geojson",
   HeightOffset = 20000.0,
@@ -19,15 +21,17 @@ local Example_Points = {
   Name = "Example Points (align to globe normal)"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Points)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePoints)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Points)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExamplePoints)
 end)
 
-asset.export(Example_Points)
+asset.export(ExamplePoints)
+
 
 
 asset.meta = {

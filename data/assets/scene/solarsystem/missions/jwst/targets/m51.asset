@@ -1,4 +1,6 @@
-local image = asset.require("./m51_image").image
+local m51 = asset.require("./m51_image")
+
+
 
 local M51Image = {
   Identifier = "M51Image",
@@ -9,22 +11,26 @@ local M51Image = {
   RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
   UsePerspectiveProjection = false,
   Opacity = 1.0,
-  TexturePath = image .. "m51-galaxy.png",
+  TexturePath = m51.image .. "m51-galaxy.png",
   Tag = { "mission_jwst_target" },
   Description = [[
     Image of the M51 Galaxy by NASA, ESA, S. Beckwith (STScI),
     and The Hubble Heritage Team (STScI/AURA).
-  ]],
+  ]]
 }
+
 
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(M51Image)
 end)
+
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(M51Image)
 end)
 
 asset.export(M51Image)
+
+
 
 asset.meta = {
   Name = "M51 Galaxy Image",

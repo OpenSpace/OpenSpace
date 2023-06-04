@@ -1,5 +1,7 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
+
+
 
 local modelFolder = asset.syncedResource({
   Name = "Scale Golden Gate Bridge",
@@ -10,25 +12,27 @@ local modelFolder = asset.syncedResource({
   Override = false
 })
 
-local scaleModel = {
+
+local Location = { 37.816116, -122.47789, 120.0 }
+
+local ScaleModel = {
   Identifier = "Scale_GoldenGateBridge",
   Parent = earthAsset.Earth.Identifier,
-  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  -- Note: Lat/Lon/Scale values come from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 37.816116,
-      Longitude = -122.477890,
-      Altitude = 120.0,
+      Latitude = Location[1],
+      Longitude = Location[2],
+      Altitude = Location[3],
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 37.816116,
-      Longitude = -122.477890,
-      UseHeightmap = false
+      Latitude = Location[1],
+      Longitude = Location[2]
     },
     Scale = {
       Type = "StaticScale",
@@ -48,40 +52,42 @@ local scaleModel = {
   }
 }
 
-local updatePositionAction = {
-  Identifier = "os.scale_models.drop_golden_gate_bridge",
+local UpdatePositionAction = {
+  Identifier = "os.scalemodels.DropGoldenGateBridge",
   Name = "Drop Golden Gate Bridge under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_GoldenGateBridge')
+    openspace.globebrowsing.setNodePositionFromCamera("Scale_GoldenGateBridge")
   ]],
   Documentation = "Updates the Golden Gate Bridge position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
-local resetPositionAction = {
-  Identifier = "os.os.scale_models.reset_golden_gate_bridge",
+local ResetPositionAction = {
+  Identifier = "os.scalemodels.ResetGoldenGateBridge",
   Name = "Reset Golden Gate Bridge position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_GoldenGateBridge', ']] .. earthAsset.Earth.Identifier .. [[', 37.816116, -122.477890)
-  ]],
-  Documentation = "Resets the Golden Gate Bridge back to it's actual location",
+    openspace.globebrowsing.setNodePosition("Scale_GoldenGateBridge", "]] .. earthAsset.Earth.Identifier .. [[", ]] .. Location[1] .. "," .. Location[2] .. ")",
+  Documentation = "Resets the Golden Gate Bridge back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(scaleModel)
-  openspace.action.registerAction(updatePositionAction)
-  openspace.action.registerAction(resetPositionAction)
+  openspace.addSceneGraphNode(ScaleModel)
+
+  openspace.action.registerAction(UpdatePositionAction)
+  openspace.action.registerAction(ResetPositionAction)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(resetPositionAction)
-  openspace.action.removeAction(updatePositionAction)
-  openspace.removeSceneGraphNode(scaleModel)
+  openspace.action.removeAction(ResetPositionAction)
+  openspace.action.removeAction(UpdatePositionAction)
+
+  openspace.removeSceneGraphNode(ScaleModel)
 end)
 
-asset.export(scaleModel)
-asset.export(updatePositionAction)
-asset.export(resetPositionAction)
+asset.export(ScaleModel)
+asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
+asset.export("ResetPositionAction", ResetPositionAction.Identifier)

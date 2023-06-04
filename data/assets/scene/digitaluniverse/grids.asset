@@ -1,31 +1,7 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local equatorialRotationMatrix = {
-  -0.05487554,  0.4941095, -0.8676661,
-  -0.8734371 , -0.4448296, -0.1980764,
-  -0.483835  ,  0.7469823,  0.4559838
-}
 
-local equatorialTransformationMatrix = {
-  -0.05487554,  0.4941095, -0.8676661, 0.0,
-  -0.8734371 , -0.4448296, -0.1980764, 0.0,
-  -0.483835  ,  0.7469823,  0.4559838, 0.0,
-   0.0       ,  0.0      ,  0.0      , 1.0
-}
-
-local eclipticRotationMatrix = {
-  -0.05487554,  0.4941095, -0.8676661,
-  -0.9938214 , -0.1109906, -0.0003515167,
-  -0.09647644,  0.8622859,  0.4971472
-}
-
-local eclipticTransformationMatrix = {
-  -0.05487554,  0.4941095, -0.8676661,    0.0,
-  -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-  -0.09647644,  0.8622859,  0.4971472,    0.0,
-   0.0       ,  0.0      ,  0.0      ,    1.0
-}
 
 local speck = asset.syncedResource({
   Name = "Grids Speck Files",
@@ -34,14 +10,41 @@ local speck = asset.syncedResource({
   Version = 3
 })
 
-local lightHour = 1.0792528488E12
-local lightDay = 2.59020684E13
-local lightMonth = 7.771E14
-local lightYear = 9.4605284E15
 
-local radio = {
+local EquatorialRotationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,
+  -0.8734371 , -0.4448296, -0.1980764,
+  -0.483835  ,  0.7469823,  0.4559838
+}
+
+local EquatorialTransformationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661, 0.0,
+  -0.8734371 , -0.4448296, -0.1980764, 0.0,
+  -0.483835  ,  0.7469823,  0.4559838, 0.0,
+   0.0       ,  0.0      ,  0.0      , 1.0
+}
+
+local EclipticRotationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,
+  -0.9938214 , -0.1109906, -0.0003515167,
+  -0.09647644,  0.8622859,  0.4971472
+}
+
+local EclipticTransformationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,    0.0,
+  -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+  -0.09647644,  0.8622859,  0.4971472,    0.0,
+   0.0       ,  0.0      ,  0.0      ,    1.0
+}
+
+local LightHour = 1.0792528488E12
+local LightDay = 2.59020684E13
+local LightMonth = 7.771E14
+local LightYear = 9.4605284E15
+
+local RadioSphere = {
   Identifier = "RadioSphere",
-  Parent = earth_transforms.EarthBarycenter.Identifier,
+  Parent = earthTransforms.EarthBarycenter.Identifier,
   Transform = {
     Scale = {
       Type = "TimeDependentScale",
@@ -51,7 +54,7 @@ local radio = {
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = equatorialRotationMatrix
+      Rotation = EquatorialRotationMatrix
     }
   },
   Renderable = {
@@ -67,7 +70,7 @@ local radio = {
   }
 }
 
-local oort = {
+local OortSphere = {
   Identifier = "OortSphere",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
@@ -77,7 +80,7 @@ local oort = {
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -93,7 +96,7 @@ local oort = {
   }
 }
 
-local ecliptic = {
+local EclipticSphere = {
   Identifier = "EclipticSphere",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
@@ -103,7 +106,7 @@ local ecliptic = {
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -119,7 +122,7 @@ local ecliptic = {
   }
 }
 
-local eclipticLabels = {
+local EclipticSphereLabels = {
   Identifier = "EclipticSphereLabels",
   Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -132,12 +135,12 @@ local eclipticLabels = {
       Size = 14.75,
       MinMaxSize = { 1, 50 },
       Unit = "pc",
-      TransformationMatrix = eclipticTransformationMatrix
+      TransformationMatrix = EclipticTransformationMatrix
     },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc",
-    TransformationMatrix = eclipticTransformationMatrix
+    TransformationMatrix = EclipticTransformationMatrix
   },
   GUI = {
     Name = "Ecliptic Sphere Labels",
@@ -145,17 +148,17 @@ local eclipticLabels = {
   }
 }
 
-local equatorial = {
+local EquatorialSphere = {
   Identifier = "EquatorialSphere",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 4.28601E17;
+      Scale = 4.28601E17
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = equatorialRotationMatrix
+      Rotation = EquatorialRotationMatrix
     }
   },
   Renderable = {
@@ -171,7 +174,7 @@ local equatorial = {
   }
 }
 
-local equatorialLabels = {
+local EquatorialSphereLabels = {
   Identifier = "EquatorialSphereLabels",
   Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -184,12 +187,12 @@ local equatorialLabels = {
       Size = 14.5,
       MinMaxSize = { 2, 70 },
       Unit = "pc",
-      TransformationMatrix = equatorialTransformationMatrix
+      TransformationMatrix = EquatorialTransformationMatrix
     },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc",
-    TransformationMatrix = equatorialTransformationMatrix
+    TransformationMatrix = EquatorialTransformationMatrix
   },
   GUI = {
     Name = "Equatorial Sphere Labels",
@@ -197,13 +200,13 @@ local equatorialLabels = {
   }
 }
 
-local galactic = {
+local GalacticSphere = {
   Identifier = "GalacticSphere",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 9.46377307652E18;
+      Scale = 9.46377307652E18
     }
   },
   Renderable = {
@@ -219,7 +222,7 @@ local galactic = {
   }
 }
 
-local galacticLabels = {
+local GalacticSphereLabels = {
   Identifier = "GalacticSphereLabels",
   Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -243,13 +246,13 @@ local galacticLabels = {
   }
 }
 
-local plane1lh = {
+local Plane1lh = {
   Identifier = "1lhGrid",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -266,7 +269,7 @@ local plane1lh = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightHour, 2*lightHour }
+    Size = { 2 * LightHour, 2 * LightHour }
   },
   GUI = {
     Name = "1lh Grid",
@@ -274,13 +277,13 @@ local plane1lh = {
   }
 }
 
-local plane1ld = {
+local Plane1ld = {
   Identifier = "1ldGrid",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -297,7 +300,7 @@ local plane1ld = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightDay, 2*lightDay }
+    Size = { 2 * LightDay, 2 * LightDay }
   },
   GUI = {
     Name = "1ld Grid",
@@ -305,13 +308,13 @@ local plane1ld = {
   }
 }
 
-local plane1lm = {
+local Plane1lm = {
   Identifier = "1lmGrid",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -328,7 +331,7 @@ local plane1lm = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightMonth, 2*lightMonth }
+    Size = { 2 * LightMonth, 2 * LightMonth }
   },
   GUI = {
     Name = "1lm Grid",
@@ -336,13 +339,13 @@ local plane1lm = {
   }
 }
 
-local plane1ly = {
+local Plane1ly = {
   Identifier = "1lyGrid",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -359,7 +362,7 @@ local plane1ly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightYear, 2*lightYear }
+    Size = { 2 * LightYear, 2 * LightYear }
   },
   GUI = {
     Name = "1ly Grid",
@@ -367,13 +370,13 @@ local plane1ly = {
   }
 }
 
-local plane10ly = {
+local Plane10ly = {
   Identifier = "10lyGrid",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -390,7 +393,7 @@ local plane10ly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 10*2*lightYear, 10*2*lightYear }
+    Size = { 10 * 2 * LightYear, 10 * 2 * LightYear }
   },
   GUI = {
     Name = "10ly Grid",
@@ -398,13 +401,13 @@ local plane10ly = {
   }
 }
 
-local plane100ly = {
+local Plane100ly = {
   Identifier = "100lyGrid",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -421,7 +424,7 @@ local plane100ly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 100*2*lightYear, 100*2*lightYear }
+    Size = { 100 * 2 * LightYear, 100 * 2 * LightYear }
   },
   GUI = {
     Name = "100ly Grid",
@@ -429,13 +432,13 @@ local plane100ly = {
   }
 }
 
-local plane1kly = {
+local Plane1kly = {
   Identifier = "1klyGrid",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -452,7 +455,7 @@ local plane1kly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 1E3*2*lightYear, 1E3*2*lightYear }
+    Size = { 1000 * 2 * LightYear, 1000 * 2 * LightYear }
   },
   GUI = {
     Name = "1kly Grid",
@@ -460,13 +463,13 @@ local plane1kly = {
   }
 }
 
-local plane10kly = {
+local Plane10kly = {
   Identifier = "10klyGrid",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -483,7 +486,7 @@ local plane10kly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 10E3*2*lightYear, 10E3*2*lightYear }
+    Size = { 10000 * 2 * LightYear, 10000 * 2 * LightYear }
   },
   GUI = {
     Name = "10kly Grid",
@@ -491,7 +494,7 @@ local plane10kly = {
   }
 }
 
-local plane100kly = {
+local Plane100kly = {
   Identifier = "100klyGrid",
   Renderable = {
     Type = "RenderableGrid",
@@ -509,7 +512,7 @@ local plane100kly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 100E3*2*lightYear, 100E3*2*lightYear }
+    Size = { 100000 * 2 * LightYear, 100000 * 2 * LightYear }
   },
   GUI = {
     Name = "100kly Grid",
@@ -517,7 +520,7 @@ local plane100kly = {
   }
 }
 
-local plane1Mly = {
+local Plane1Mly = {
   Identifier = "1MlyGrid",
   Renderable = {
     Type = "RenderableGrid",
@@ -535,7 +538,7 @@ local plane1Mly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 1E6*2*lightYear, 1E6*2*lightYear }
+    Size = { 1E6 * 2 * LightYear, 1E6 * 2 * LightYear }
   },
   GUI = {
     Name = "1Mly Grid",
@@ -543,7 +546,7 @@ local plane1Mly = {
   }
 }
 
-local plane10Mly = {
+local Plane10Mly = {
   Identifier = "10MlyGrid",
   Renderable = {
     Type = "RenderableGrid",
@@ -561,7 +564,7 @@ local plane10Mly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 10E6*2*lightYear, 10E6*2*lightYear }
+    Size = { 10E6 * 2 * LightYear, 10E6 * 2 * LightYear }
   },
   GUI = {
     Name = "10Mly Grid",
@@ -569,7 +572,7 @@ local plane10Mly = {
   }
 }
 
-local plane100Mly = {
+local Plane100Mly = {
   Identifier = "100MlyGrid",
   Renderable = {
     Type = "RenderableGrid",
@@ -587,7 +590,7 @@ local plane100Mly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 100E6*2*lightYear, 100E6*2*lightYear }
+    Size = { 100E6 * 2 * LightYear, 100E6 * 2 * LightYear }
   },
   GUI = {
     Name = "100Mly Grid",
@@ -595,7 +598,7 @@ local plane100Mly = {
   }
 }
 
-local plane20Gly = {
+local Plane20Gly = {
   Identifier = "20GlyGrid",
   Renderable = {
     Type = "RenderableGrid",
@@ -613,7 +616,7 @@ local plane20Gly = {
     LineWidth = 2.0,
     Segments = { 40, 40 },
     HighlightRate = { 5, 5 },
-    Size = { 20E9*2*lightYear, 20E9*2*lightYear }
+    Size = { 20E9 * 2 * LightYear, 20E9 * 2 * LightYear }
   },
   GUI = {
     Name = "20Gly Grid",
@@ -621,29 +624,75 @@ local plane20Gly = {
   }
 }
 
-local nodes = {
-  radio, oort, ecliptic, eclipticLabels, equatorial, equatorialLabels,
-  galactic, galacticLabels, plane1lh, plane1ld, plane1lm, plane1ly, plane10ly,
-  plane100ly, plane1kly, plane10kly, plane100kly, plane1Mly, plane10Mly, plane100Mly,
-  plane20Gly
-}
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.addSceneGraphNode(RadioSphere)
+  openspace.addSceneGraphNode(OortSphere)
+  openspace.addSceneGraphNode(EclipticSphere)
+  openspace.addSceneGraphNode(EclipticSphereLabels)
+  openspace.addSceneGraphNode(EquatorialSphere)
+  openspace.addSceneGraphNode(EquatorialSphereLabels)
+  openspace.addSceneGraphNode(GalacticSphere)
+  openspace.addSceneGraphNode(GalacticSphereLabels)
+  openspace.addSceneGraphNode(Plane1lh)
+  openspace.addSceneGraphNode(Plane1ld)
+  openspace.addSceneGraphNode(Plane1lm)
+  openspace.addSceneGraphNode(Plane1ly)
+  openspace.addSceneGraphNode(Plane10ly)
+  openspace.addSceneGraphNode(Plane100ly)
+  openspace.addSceneGraphNode(Plane1kly)
+  openspace.addSceneGraphNode(Plane10kly)
+  openspace.addSceneGraphNode(Plane100kly)
+  openspace.addSceneGraphNode(Plane1Mly)
+  openspace.addSceneGraphNode(Plane10Mly)
+  openspace.addSceneGraphNode(Plane100Mly)
+  openspace.addSceneGraphNode(Plane20Gly)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
-  end
+    openspace.removeSceneGraphNode(Plane20Gly)
+    openspace.removeSceneGraphNode(Plane100Mly)
+    openspace.removeSceneGraphNode(Plane10Mly)
+    openspace.removeSceneGraphNode(Plane1Mly)
+    openspace.removeSceneGraphNode(Plane100kly)
+    openspace.removeSceneGraphNode(Plane10kly)
+    openspace.removeSceneGraphNode(Plane1kly)
+    openspace.removeSceneGraphNode(Plane100ly)
+    openspace.removeSceneGraphNode(Plane10ly)
+    openspace.removeSceneGraphNode(Plane1ly)
+    openspace.removeSceneGraphNode(Plane1lm)
+    openspace.removeSceneGraphNode(Plane1ld)
+    openspace.removeSceneGraphNode(Plane1lh)
+    openspace.removeSceneGraphNode(GalacticSphereLabels)
+    openspace.removeSceneGraphNode(GalacticSphere)
+    openspace.removeSceneGraphNode(EquatorialSphereLabels)
+    openspace.removeSceneGraphNode(EquatorialSphere)
+    openspace.removeSceneGraphNode(EclipticSphereLabels)
+    openspace.removeSceneGraphNode(EclipticSphere)
+    openspace.removeSceneGraphNode(RadioSphere)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(RadioSphere)
+asset.export(OortSphere)
+asset.export(EclipticSphere)
+asset.export(EclipticSphereLabels)
+asset.export(EquatorialSphere)
+asset.export(EquatorialSphereLabels)
+asset.export(GalacticSphere)
+asset.export(GalacticSphereLabels)
+asset.export(Plane1lh)
+asset.export(Plane1ld)
+asset.export(Plane1lm)
+asset.export(Plane1ly)
+asset.export(Plane10ly)
+asset.export(Plane100ly)
+asset.export(Plane1kly)
+asset.export(Plane10kly)
+asset.export(Plane100kly)
+asset.export(Plane1Mly)
+asset.export(Plane10Mly)
+asset.export(Plane100Mly)
+asset.export(Plane20Gly)
 
 
 

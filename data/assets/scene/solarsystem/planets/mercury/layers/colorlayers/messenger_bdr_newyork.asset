@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+local globe = asset.require("../../mercury")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Messenger_BDR_NewYork",
   Name = "Messenger BDR [New York]",
   Enabled = asset.enabled,
@@ -11,20 +13,21 @@ local layer = {
   This edition, version 1, was released May 6, 2016 to the Planetary Data System (PDS)
   MESSENGER archive. It is compiled using NAC or WAC 750-nm images from any campaign that
   best fit the intended illumination geometry or low emission angle and incidence angle
-  near 74 degrees. It is controlled and projected onto a global digital elevation model. It uses
-  a Kasseleinin-Shkuratov photometric model, whose parameters are the same for any given
-  wavelength band across all MESSENGER end-of-mission map data products]]
+  near 74 degrees. It is controlled and projected onto a global digital elevation model.
+  It uses a Kasseleinin-Shkuratov photometric model, whose parameters are the same for any
+  given wavelength band across all MESSENGER end-of-mission map data products]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

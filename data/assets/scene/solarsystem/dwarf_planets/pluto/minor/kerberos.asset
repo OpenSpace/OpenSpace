@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
 
 
 
@@ -15,7 +14,7 @@ local Kerberos = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 0.1E5, 0.1E5, 0.1E5 },
+    Radii = { 10000, 10000, 10000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
@@ -76,6 +75,7 @@ local KerberosLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Kerberos)
   openspace.addSceneGraphNode(KerberosTrail)
@@ -90,6 +90,7 @@ end)
 
 asset.export(Kerberos)
 asset.export(KerberosTrail)
+asset.export(KerberosLabel)
 
 
 

@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Species Richness - Amphibians Threatened"
@@ -21,21 +22,22 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_4096 = {
+
+local Layer4096 = {
   Identifier = Identifier,
   Name = Name,
   FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
 
-local layer_with_background = {
+local LayerWithBackground = {
   Identifier = Identifier .. "-background",
   Name = Name,
   FilePath = syncedDirectory .. "4096-background.png",
   Description = Description
 }
 
-local labels = {
+local Labels = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -45,21 +47,22 @@ local labels = {
 }
 
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_4096)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_with_background)
-  openspace.addScreenSpaceRenderable(labels)
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer4096)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerWithBackground)
+  openspace.addScreenSpaceRenderable(Labels)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_4096)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_with_background)
-  openspace.removeScreenSpaceRenderable(labels);
+  openspace.removeScreenSpaceRenderable(Labels)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerWithBackground)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer4096)
 end)
 
-asset.export(layer_4096)
-asset.export(layer_with_background)
-asset.export(labels)
+asset.export(Layer4096)
+asset.export(LayerWithBackground)
+asset.export(Labels)
+
 
 
 asset.meta = {

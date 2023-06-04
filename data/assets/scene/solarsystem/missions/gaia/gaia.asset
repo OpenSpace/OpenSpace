@@ -1,6 +1,8 @@
 local transforms = asset.require("./transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local model = asset.syncedResource({
   Name = "Gaia Model",
   Type = "HttpSynchronization",
@@ -45,6 +47,7 @@ local Gaia = {
     Path = "/Solar System/Missions/Gaia"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Gaia)

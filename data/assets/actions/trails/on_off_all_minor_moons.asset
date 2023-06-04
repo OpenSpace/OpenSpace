@@ -1,21 +1,21 @@
-local minormoons_on = {
-  Identifier = "os_default.minormoons_on",
+local MinorMoonsOn = {
+  Identifier = "os.MinorMoonsOn",
   Name = "Turn on minor moons and trails",
   Command = [[
-    local trails = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled');
-    local trails_fade = openspace.getProperty('{moonTrail_minor}.Renderable.Fade');
+    local trails = openspace.getProperty("{moonTrail_minor}.Renderable.Enabled")
+    local trails_fade = openspace.getProperty("{moonTrail_minor}.Renderable.Fade")
 
-    local moons = openspace.getProperty('{moon_minor}.Renderable.Enabled');
-    local moons_fade = openspace.getProperty('{moon_minor}.Renderable.Fade');
+    local moons = openspace.getProperty("{moon_minor}.Renderable.Enabled")
+    local moons_fade = openspace.getProperty("{moon_minor}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(trails[i], true)
-      openspace.setPropertyValueSingle(v, 1, 2, 'Linear')
+      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
     end
 
     for i, v in pairs(moons_fade) do
       openspace.setPropertyValueSingle(moons[i], true)
-      openspace.setPropertyValueSingle(v, 1, 2, 'Linear')
+      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
     end
   ]],
   Documentation = "Turn ON minor moons and their trails for all planets in the solar system",
@@ -23,22 +23,34 @@ local minormoons_on = {
   IsLocal = true
 }
 
-local minormoons_off = {
-  Identifier = "os_default.minormoons_off",
+local MinorMoonsOff = {
+  Identifier = "os.MinorMoonsOff",
   Name = "Turn off minor moons and trails",
   Command = [[
-    local trails = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled');
-    local trails_fade = openspace.getProperty('{moonTrail_minor}.Renderable.Fade');
+    local trails = openspace.getProperty("{moonTrail_minor}.Renderable.Enabled")
+    local trails_fade = openspace.getProperty("{moonTrail_minor}.Renderable.Fade")
 
-    local moons = openspace.getProperty('{moon_minor}.Renderable.Enabled');
-    local moons_fade = openspace.getProperty('{moon_minor}.Renderable.Fade');
+    local moons = openspace.getProperty("{moon_minor}.Renderable.Enabled")
+    local moons_fade = openspace.getProperty("{moon_minor}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
-      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)" )
+      openspace.setPropertyValueSingle(
+        v,
+        0,
+        2,
+        "Linear",
+        "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)"
+      )
     end
 
     for i, v in pairs(moons_fade) do
-      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)" )
+      openspace.setPropertyValueSingle(
+        v,
+        0,
+        2,
+        "Linear",
+        "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)"
+      )
     end
   ]],
   Documentation = "Turn OFF minor moons and their trails for all planets in the solar system",
@@ -46,18 +58,20 @@ local minormoons_off = {
   IsLocal = true
 }
 
-asset.export("minormoons_on", minormoons_on.Identifier)
-asset.export("minormoons_off", minormoons_off.Identifier)
 
 asset.onInitialize(function()
-  openspace.action.registerAction(minormoons_on)
-  openspace.action.registerAction(minormoons_off)
+  openspace.action.registerAction(MinorMoonsOn)
+  openspace.action.registerAction(MinorMoonsOff)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(minormoons_off)
-  openspace.action.removeAction(minormoons_on)
+  openspace.action.removeAction(MinorMoonsOff)
+  openspace.action.removeAction(MinorMoonsOn)
 end)
+
+asset.export("MinorMoonsOn", MinorMoonsOn.Identifier)
+asset.export("MinorMoonsOff", MinorMoonsOff.Identifier)
+
 
 
 asset.meta = {

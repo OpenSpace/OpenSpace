@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Climate Model: Temperature Change (Hadley e1) - 1860 - 2099"
@@ -25,7 +26,8 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -40,7 +42,7 @@ local layer = {
   Description = Description
 }
 
-local colorbar = {
+local Colorbar = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -50,18 +52,20 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(colorbar)
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(colorbar)
+asset.export(Layer)
+asset.export(Colorbar)
+
 
 
 asset.meta = {

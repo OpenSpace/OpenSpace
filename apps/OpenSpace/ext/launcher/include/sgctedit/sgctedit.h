@@ -64,13 +64,10 @@ public:
      *                imported window cluster configuration.
      * \param configName The name of the window configuration filename
      * \param configBasePath The path to the folder where default config files reside
-     * \param configsReadOnly vector list of window config names that are read-only and
-     *                         must not be overwritten
      * \param parent Pointer to parent Qt widget
      */
     SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
-        std::string& configBasePath, const std::vector<std::string>& configsReadOnly,
-        QWidget* parent);
+        std::string& configBasePath, QWidget* parent);
 
     /**
      * Returns the saved filename
@@ -86,6 +83,27 @@ public:
      */
     sgct::config::Cluster cluster() const;
 
+    /**
+     * Called when the number of windows that should be displayed changes.
+     * 
+     * \param newCount The new number of windows included
+     */
+    void nWindowsDisplayedChanged(int newCount);
+
+    /**
+     * Called when the checkbox for GUI only on first window is clicked.
+     * 
+     * \param checked true if GUI is selected for first window only.
+     */
+    void firstWindowGuiOptionClicked(bool checked);
+
+    /**
+     * Called when the QComboBox is selected and has a new value
+     * 
+     * \param text the QString of the selected value
+     */
+    void firstWindowGraphicsSelectionChanged(const QString& text);
+
 private:
     std::vector<QRect> createMonitorInfoSet();
     void createWidgets(const std::vector<QRect>& monitorSizes, unsigned int nWindows,
@@ -97,6 +115,8 @@ private:
     void generateConfigResizeWindowsAccordingToSelected(sgct::config::Node& node);
     void generateConfigIndividualWindowSettings(sgct::config::Node& node);
     void setupProjectionTypeInGui(sgct::config::Viewport& vPort, WindowControl* wCtrl);
+    void setupStateOfUiOnFirstWindow(size_t nWindows);
+    void deleteFromTags(sgct::config::Window& window);
 
     void save();
     void apply();
@@ -112,7 +132,6 @@ private:
         QColor(0xF8, 0x33, 0x3C)
     };
     std::string _configurationFilename;
-    const std::vector<std::string> _readOnlyConfigs;
 
     QBoxLayout* _layoutButtonBox = nullptr;
     QPushButton* _saveButton = nullptr;

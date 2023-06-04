@@ -1,4 +1,6 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local orbit = asset.syncedResource({
   Name = "Tesla Roadster Orbit",
@@ -7,9 +9,10 @@ local orbit = asset.syncedResource({
   Version = 2
 })
 
+
 local TeslaRoadsterTrail = {
   Identifier = "TeslaRoadsterTrail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
@@ -33,7 +36,7 @@ local TeslaRoadsterTrail = {
 
 local TeslaPosition = {
   Identifier = "TeslaPosition",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
@@ -47,6 +50,7 @@ local TeslaPosition = {
       to 2089 DEC 31 03:00:00. Data from JPL Horizons]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TeslaPosition)

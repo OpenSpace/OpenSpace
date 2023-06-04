@@ -1,17 +1,17 @@
-local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local JuiceTrailJupiter = {
   Identifier = "JuiceTrailJupiter",
-  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Parent = transforms.JupiterBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
       Target = "JUICE",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernels.Kernels
+      Observer = "JUPITER BARYCENTER"
     },
     Color = { 0.70, 0.370, 0.45 },
     StartTime = "2031 JUL 02 00:00:00.000",
@@ -27,14 +27,19 @@ local JuiceTrailJupiter = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.Kernels)
+
   openspace.addSceneGraphNode(JuiceTrailJupiter)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JuiceTrailJupiter)
+
+  openspace.spice.unloadKernel(kernels.Kernels)
 end)
 
 asset.export(JuiceTrailJupiter)
+
 
 
 asset.meta = {

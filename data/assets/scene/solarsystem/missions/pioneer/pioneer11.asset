@@ -2,6 +2,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
 
 
+
 local kernelsFolder = asset.syncedResource({
   Name = "Pioneer Kernels",
   Type = "HttpSynchronization",
@@ -9,12 +10,13 @@ local kernelsFolder = asset.syncedResource({
   Version = 1
 })
 
-local kernelsList = {
+
+local kernel = {
   kernelsFolder .. "p11-a.bsp",
   kernelsFolder .. "p11_sat336.bsp"
 }
 
-local Pioneer11NAIF = -24
+local Pioneer11ID = -24
 
 local Pioneer11 = {
   Identifier = "Pioneer_11",
@@ -22,9 +24,8 @@ local Pioneer11 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = Pioneer11NAIF,
-      Observer = "SSB",
-      Kernels = kernelsList
+      Target = Pioneer11ID,
+      Observer = "SSB"
     }
   },
   Renderable = model.PioneerModel,
@@ -42,16 +43,15 @@ local Pioneer11Trail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = Pioneer11NAIF,
-      Observer = "SSB",
-      Kernels = kernelsList
+      Target = Pioneer11ID,
+      Observer = "SSB"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1973 APR 06 02:25:00.000",
     EndTime = "1990 JAN 02 00:00:00.000",
     EnableFade = false,
+    -- 6087 is the number of days between the Start and End time (so sample every 2d)
     SampleInterval = 6087 * 2
-    --6087 is the number of days between the Start and End time (so sample every 2d)
   },
   GUI = {
     Name = "Pioneer 11 Trail (SPICE)",
@@ -61,7 +61,10 @@ local Pioneer11Trail = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel)
+
   openspace.addSceneGraphNode(Pioneer11)
   openspace.addSceneGraphNode(Pioneer11Trail)
 end)
@@ -69,6 +72,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Pioneer11Trail)
   openspace.removeSceneGraphNode(Pioneer11)
+
+  openspace.spice.unloadKernel(kernel)
 end)
 
 asset.export(Pioneer11)

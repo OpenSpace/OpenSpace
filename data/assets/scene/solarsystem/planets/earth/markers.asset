@@ -1,12 +1,14 @@
 local transforms = asset.require("./transforms")
 
 
+
 local texturesPath = asset.syncedResource({
   Name = "Earth Textures",
   Type = "HttpSynchronization",
   Identifier = "earth_textures",
   Version = 2
 })
+
 
 local EarthMarker = {
   Identifier = "EarthMarker",
@@ -25,6 +27,7 @@ local EarthMarker = {
     Path = "/Solar System/Planets/Earth"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthMarker)

@@ -1,167 +1,489 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels").nep102
+local kernel = asset.require("./kernels")
 
 
 
-local parentIdentifier = transforms.NeptuneBarycenter.Identifier
-local parentSpice = "NEPTUNE BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_irregular_prograde", "moon_minor", "moon_minor_neptune" }
-local trailColor = { 0.2, 0.5, 0.75 }
-local trailTags = {
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_neptune",
-  "moonTrail_minor",
-  "moonTrail_minor_neptune"
-}
-
-local irregularProgradeMoons = {
-  {
-    Identifier = "Halimede",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "HALIMEDE",
-    Radii = { 62000, 62000, 62000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1879.08,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Psamathe",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PSAMATHE",
-    Radii = { 40000, 40000, 40000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 9074.3,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Sao",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "SAO",
-    Radii = { 44000, 44000, 44000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 2912.72,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Laomedeia",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "LAOMEDEIA",
-    Radii = { 42000, 42000, 42000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 3171.33,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Neso",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "NESO",
-    Radii = { 60000, 60000, 60000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 9740.73,
-    Kernels = kernel
-  }
-}
-
-
--- Generate labels for each moon
-local moon_labels = {}
-
-for i, moon in ipairs(irregularProgradeMoons) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 7.4,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Gm",
-      FadeDistances = { 1, 250.0 },
-      FadeWidths = { 1, 250.0 },
-    },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/" .. moon.Identifier,
-      Description = "Label for Neptune's moon " .. moonName .. " (Irregular prograde group)"
+local Halimede = {
+  Identifier = "Halimede",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HALIMEDE",
+      Observer = "NEPTUNE BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 62000, 62000, 62000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Halimede",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede"
   }
-end
+}
 
+local HalimedeTrail = {
+  Identifier = "HalimedeTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HALIMEDE",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 1879.08,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Halimede Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede"
+  }
+}
 
-local nodes = proceduralGlobes.createGlobes(irregularProgradeMoons)
+local HalimedeLabel = {
+  Identifier = "HalimedeLabel",
+  Parent = Halimede.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Halimede",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Halimede Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede",
+    Description = "Label for Neptune's moon Halimede (Irregular Prograde Moons)"
+  }
+}
+
+local Psamathe = {
+  Identifier = "Psamathe",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PSAMATHE",
+      Observer = "NEPTUNE BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 40000, 40000, 40000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Psamathe",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe"
+  }
+}
+
+local PsamatheTrail = {
+  Identifier = "PsamatheTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PSAMATHE",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 9074.3,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Psamathe Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe"
+  }
+}
+
+local PsamatheLabel = {
+  Identifier = "PsamatheLabel",
+  Parent = Psamathe.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Psamathe",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Psamathe Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe",
+    Description = "Label for Neptune's moon Psamathe (Irregular Prograde Moons)"
+  }
+}
+
+local Sao = {
+  Identifier = "Sao",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SAO",
+      Observer = "NEPTUNE BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 44000, 44000, 44000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Sao",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao"
+  }
+}
+
+local SaoTrail = {
+  Identifier = "SaoTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SAO",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 2912.72,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Sao Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao"
+  }
+}
+
+local SaoLabel = {
+  Identifier = "SaoLabel",
+  Parent = Sao.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Sao",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Sao Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao",
+    Description = "Label for Neptune's moon Sao (Irregular Prograde Moons)"
+  }
+}
+
+local Laomedeia = {
+  Identifier = "Laomedeia",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "LAOMEDEIA",
+      Observer = "NEPTUNE BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 42000, 42000, 42000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Laomedeia",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia"
+  }
+}
+
+local LaomedeiaTrail = {
+  Identifier = "LaomedeiaTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "LAOMEDEIA",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 3171.33,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Laomedeia Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia"
+  }
+}
+
+local LaomedeiaLabel = {
+  Identifier = "LaomedeiaLabel",
+  Parent = Laomedeia.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Laomedeia",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Laomedeia Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia",
+    Description = "Label for Neptune's moon Laomedeia (Irregular Prograde Moons)"
+  }
+}
+
+local Neso = {
+  Identifier = "Neso",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NESO",
+      Observer = "NEPTUNE BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 60000, 60000, 60000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Neso",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso"
+  }
+}
+
+local NesoTrail = {
+  Identifier = "NesoTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NESO",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 9740.73,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Neso Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso"
+  }
+}
+
+local NesoLabel = {
+  Identifier = "NesoLabel",
+  Parent = Neso.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Neso",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Neso Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso",
+    Description = "Label for Neptune's moon Neso (Irregular Prograde Moons)"
+  }
+}
+
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernel.nep102)
 
-  for _, moonlabel in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moonlabel)
-  end
+
+  openspace.addSceneGraphNode(Halimede)
+  openspace.addSceneGraphNode(HalimedeTrail)
+  openspace.addSceneGraphNode(HalimedeLabel)
+
+  openspace.addSceneGraphNode(Psamathe)
+  openspace.addSceneGraphNode(PsamatheTrail)
+  openspace.addSceneGraphNode(PsamatheLabel)
+
+  openspace.addSceneGraphNode(Sao)
+  openspace.addSceneGraphNode(SaoTrail)
+  openspace.addSceneGraphNode(SaoLabel)
+
+  openspace.addSceneGraphNode(Laomedeia)
+  openspace.addSceneGraphNode(LaomedeiaTrail)
+  openspace.addSceneGraphNode(LaomedeiaLabel)
+
+  openspace.addSceneGraphNode(Neso)
+  openspace.addSceneGraphNode(NesoTrail)
+  openspace.addSceneGraphNode(NesoLabel)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(HalimedeLabel)
+  openspace.removeSceneGraphNode(HalimedeTrail)
+  openspace.removeSceneGraphNode(Halimede)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(PsamatheLabel)
+  openspace.removeSceneGraphNode(PsamatheTrail)
+  openspace.removeSceneGraphNode(Psamathe)
+
+  openspace.removeSceneGraphNode(SaoLabel)
+  openspace.removeSceneGraphNode(SaoTrail)
+  openspace.removeSceneGraphNode(Sao)
+
+  openspace.removeSceneGraphNode(LaomedeiaLabel)
+  openspace.removeSceneGraphNode(LaomedeiaTrail)
+  openspace.removeSceneGraphNode(Laomedeia)
+
+  openspace.removeSceneGraphNode(NesoLabel)
+  openspace.removeSceneGraphNode(NesoTrail)
+  openspace.removeSceneGraphNode(Neso)
+
+
+  openspace.spice.unloadKernel(kernel.nep102)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Halimede)
+asset.export(HalimedeTrail)
+asset.export(HalimedeLabel)
+
+asset.export(Psamathe)
+asset.export(PsamatheTrail)
+asset.export(PsamatheLabel)
+
+asset.export(Sao)
+asset.export(SaoTrail)
+asset.export(SaoLabel)
+
+asset.export(Laomedeia)
+asset.export(LaomedeiaTrail)
+asset.export(LaomedeiaLabel)
+
+asset.export(Neso)
+asset.export(NesoTrail)
+asset.export(NesoLabel)
+
 
 
 asset.meta = {

@@ -1,6 +1,5 @@
-local colorLayersPath = "./layers/colorlayers"
+asset.require("./layers/colorlayers/io_texture", true)
 
-asset.require(colorLayersPath .. "/io_texture", true)
 
 
 asset.meta = {

@@ -615,7 +615,7 @@ glm::ivec2 RenderEngine::fontResolution() const {
         return global::windowDelegate->currentViewportSize();
     }
     else {
-        return global::windowDelegate->currentSubwindowSize();
+        return global::windowDelegate->currentViewportResolution();
     }
 }
 
@@ -686,7 +686,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     const bool renderingEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
-    if (renderingEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+    if (renderingEnabled && _globalBlackOutFactor > 0.f) {
         _renderer.render(_scene, _camera, _globalBlackOutFactor);
     }
 
@@ -835,7 +835,7 @@ void RenderEngine::renderEndscreen() {
 
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
+        glm::vec2(global::windowDelegate->firstWindowResolution()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
     constexpr std::string_view Text = "Shutting down";
@@ -1269,7 +1269,7 @@ void RenderEngine::renderVersionInformation() {
         );
     }
 
-    float debugOffset = 0.f;
+    [[maybe_unused]] float debugOffset = 0.f;
 #ifdef _DEBUG
     {
         const glm::vec2 debugBox = _fontVersionInfo->boundingBox("Debug build");

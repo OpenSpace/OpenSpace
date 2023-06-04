@@ -5,22 +5,26 @@ local data = asset.syncedResource({
   Url = "http://liu-se.cdn.openspaceproject.com/files/examples/video/chlorophyll_model_2048.mp4"
 })
 
-local spec = {
-  Type = "ScreenSpaceVideo",
+
+local ScreenSpace = {
   Identifier = "ScreenSpaceVideoExample",
+  Type = "ScreenSpaceVideo",
   Name = "Screen Space Video Example",
   Video = data .. "/chlorophyll_model_2048.mp4"
-};
+}
+
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(spec)
+  openspace.addScreenSpaceRenderable(ScreenSpace)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(spec)
+  openspace.removeScreenSpaceRenderable(ScreenSpace)
 end)
 
-asset.export(spec)
+asset.export(ScreenSpace)
+
+
 
 asset.meta = {
   Name = "Video ScreenSpace",

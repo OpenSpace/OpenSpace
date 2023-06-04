@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOSPHERE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOSPHERE___H__
+#ifndef __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOSPHERE___H__
+#define __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOSPHERE___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -83,12 +83,12 @@ private:
 
     std::unique_ptr<Sphere> _sphere;
 
-    UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,
-        _mirrorTexture) _uniformCache;
+    UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
+        colorTexture, mirrorTexture) _uniformCache;
 
     bool _sphereIsDirty = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOSPHERE___H__
+#endif // __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOSPHERE___H__

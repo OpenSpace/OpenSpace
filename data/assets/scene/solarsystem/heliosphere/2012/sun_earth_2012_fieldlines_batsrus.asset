@@ -1,5 +1,7 @@
-local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere.asset')
-asset.require('scene/solarsystem/heliosphere/2012/reset_loop_action.asset')
+asset.require("scene/solarsystem/heliosphere/2012/reset_loop_action")
+local transforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
+
+
 
 local transferFunctions = asset.syncedResource({
   Name = "Fieldlines Transfer Functions",
@@ -16,19 +18,26 @@ local fieldlineData = asset.syncedResource({
   UnzipFiles = true
 })
 
+
 local unzippedDataDestination = {
   openClosed = fieldlineData .. "magnetic_fieldlines-open_closed",
   velocityFlow = fieldlineData .. "velocity_flowlines-upstream",
   asherStatic = fieldlineData .. "ashers_static_seeds"
 }
 
-local loop = {
+local LoopBatsrus = {
+  Identifier = "os.2012july.LoopBatsrus",
+  Name = "Loop BATSRUS",
+  Command = [[
+    openspace.scriptScheduler.clear()
+    openspace.time.setDeltaTime(1400)
+    openspace.time.setTime("2012-JUL-14 06:00:00.000")
+    local StartTimeScriptBatsrusLoop = "openspace.time.setTime('2012 JUL 14 06:00:00')"
+    openspace.scriptScheduler.loadScheduledScript("2012 JUL 16 07:30:00", StartTimeScriptBatsrusLoop)
+  ]],
   Documentation = "Sets time to start of data, sets higher delta time and loops back from start, when at end of data",
   GuiPath = "/2012July",
-  Identifier = "2012july.loop_batsrus",
-  IsLocal = false,
-  Name = "Loop BATSRUS",
-  Command = "openspace.scriptScheduler.clear();\nopenspace.time.setDeltaTime(1400);\nopenspace.time.setTime('2012-JUL-14 06:00:00.00');\nlocal StarttimescriptBatsrusLoop = \"openspace.time.setTime('2012 JUL 14 06:00:00')\";\nopenspace.scriptScheduler.loadScheduledScript('2012 JUL 16 07:30:00', StarttimescriptBatsrusLoop);"
+  IsLocal = false
 }
 
 local batsrusTemperatureColorTable = transferFunctions .. "batsrus_temperature.txt"
@@ -42,16 +51,16 @@ local colorRanges = {
   { 0, 60 },
   { -0.015, 0.015 },
   { 150, 900 },
-  { 0, 3 },
+  { 0, 3 }
 }
 
-local interactionSphere = 6380000  -- A value slightly bigger than earth radius
+local InteractionSphere = 6380000  -- A value slightly bigger than earth radius
 
 ----------------------LUTZ's JULY TRACES-------------------------
 local BatsrusJ12OpenClosed = {
   Identifier = "FL_BATSRUS_J12_OpenClosed",
   Parent = transforms.GSMReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.openClosed,
@@ -64,7 +73,7 @@ local BatsrusJ12OpenClosed = {
       batsrusDensityColorTable,
       batsrusCurrentColorTable,
       batsrusVelocityColorTable,
-      batsrusTopologyColorTable,
+      batsrusTopologyColorTable
     },
     ColorTableRanges = colorRanges,
     MaskingEnabled = true,
@@ -81,7 +90,7 @@ local BatsrusJ12OpenClosed = {
 local BatsrusJ12FlowLines = {
   Identifier = "FL_BATSRUS_J12_FlowLines",
   Parent = transforms.GSMReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.velocityFlow,
@@ -94,7 +103,7 @@ local BatsrusJ12FlowLines = {
       batsrusDensityColorTable,
       batsrusCurrentColorTable,
       batsrusVelocityColorTable,
-      batsrusTopologyColorTable,
+      batsrusTopologyColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -108,7 +117,7 @@ local BatsrusJ12FlowLines = {
 local BatsrusAsherStaticSeedsFlowLines = {
   Identifier = "FL_BATSRUS_ASHER_STATIC_SSEDS_FlowLines",
   Parent = transforms.GSMReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.asherStatic,
@@ -119,7 +128,7 @@ local BatsrusAsherStaticSeedsFlowLines = {
       batsrusDensityColorTable,
       batsrusCurrentColorTable,
       batsrusVelocityColorTable,
-      batsrusTopologyColorTable,
+      batsrusTopologyColorTable
     },
    ColorTableRanges = colorRanges
   },
@@ -129,8 +138,9 @@ local BatsrusAsherStaticSeedsFlowLines = {
   }
 }
 
-asset.onInitialize(function ()
-  openspace.action.registerAction(loop)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(LoopBatsrus)
 
   openspace.addSceneGraphNode(BatsrusJ12OpenClosed)
   openspace.addSceneGraphNode(BatsrusJ12FlowLines)
@@ -138,13 +148,20 @@ asset.onInitialize(function ()
 
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(BatsrusAsherStaticSeedsFlowLines)
   openspace.removeSceneGraphNode(BatsrusJ12FlowLines)
   openspace.removeSceneGraphNode(BatsrusJ12OpenClosed)
 
-  openspace.action.removeAction(loop)
+  openspace.action.removeAction(LoopBatsrus)
 end)
+
+asset.export("LoopBatsrus", LoopBatsrus.Identifier)
+asset.export(BatsrusJ12OpenClosed)
+asset.export(BatsrusJ12FlowLines)
+asset.export(BatsrusAsherStaticSeedsFlowLines)
+
+
 
 asset.meta = {
   Name = "Fieldlines from Batsrus model of 2012 event",

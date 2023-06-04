@@ -9,10 +9,11 @@ local speck = asset.syncedResource({
   Name = "Exoplanets Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_speck",
-  Version = 2
+  Version = 3
 })
 
-local object = {
+
+local Object = {
   Identifier = "Exoplanets",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -33,30 +34,31 @@ local object = {
     CorrectionSizeEndDistance = 15.23,
     CorrectionSizeFactor = 13.3,
     BillboardMinMaxSize = { 0.0, 75.0 },
-    EnablePixelSizeControl = true,
+    EnablePixelSizeControl = true
   },
   GUI = {
     Name = "Exoplanets",
     Path = "/Milky Way/Exoplanets",
-    Description = [[Census: 4,055 planets in 3,023 systems. DU Version 20.11. <br>
+    Description = [[Census: 5,361 planets in 3,982 systems. DU Version 20.12. <br>
       Extrasolar planets, or exoplanets, are a relatively new phenomenon in
       astronomy. While many astronomers believed in their existence, no
       observational evidence was available until 1995. Since that time, scientists
       have discovered thousands of systems consisting of one or more planets around
       a host star.(Description from URL) <br><br> Data Reference: NASA Exoplanet
-      Archive (CalTech/NASA)]],
+      Archive (CalTech/NASA)]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

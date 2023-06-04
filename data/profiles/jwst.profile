@@ -6,6 +6,7 @@
     "base",
     "base_keybindings",
     "scene/solarsystem/planets/earth/earth",
+    "scene/solarsystem/planets/earth/layers/colorlayers/viirs_noaa20_temporal.asset",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/earth/satellites/misc/hubble_trail",
     "scene/solarsystem/planets/earth/lagrange_points/lagrange_points",
@@ -59,55 +60,55 @@
   ],
   "keybindings": [
     {
-      "action": "os.solarsystem.earth.togglesatellitetrails",
+      "action": "os.solarsystem.ToggleSatelliteTrails",
       "key": "S"
     },
     {
-      "action": "os.missions.jwst.togglelagrangianpoints",
+      "action": "os.jwst.ToggleLagrangianPoints",
       "key": "P"
     },
     {
-      "action": "os.missions.jwst.togglehudf",
+      "action": "os.jwst.ToggleHudf",
       "key": "U"
     },
     {
-      "action": "os.missions.jwst.togglel2",
+      "action": "os.jwst.ToggleL2",
       "key": "O"
     },
     {
-      "action": "os.missions.jwst.togglefov",
+      "action": "os.jwst.ToggleFov",
       "key": "V"
     },
     {
-      "action": "os.missoins.jwst.setup.launch",
+      "action": "os.jwst.SetupLaunch",
       "key": "J"
     },
     {
-      "action": "os.missions.jwst.togglesuntrail",
+      "action": "os.jwst.ToggleSunTrail",
       "key": "K"
     },
     {
-      "action": "os.missions.jwst.play.forwards",
+      "action": "os.jwst.PlayForwards",
       "key": "M"
     },
     {
-      "action": "os.missions.jwst.play.backwards",
+      "action": "os.jwst.PlayBackwards",
       "key": "N"
     },
     {
-      "action": "os.missions.jwst.play.clear",
+      "action": "os.jwst.ClearTimelapse",
       "key": "B"
     },
     {
-      "action": "os.missions.jwst.toggletrialsexceptmoon",
+      "action": "os.jwst.ToggleTrailsExceptMoon",
       "key": "G"
     },
     {
-      "action": "os.missions.jwst.toggledirection",
+      "action": "os.jwst.ToggleDirection",
       "key": "Y"
     },
     {
-      "action": "os.missions.jwst.togglejwsttrails",
+      "action": "os.jwst.ToggleJwstTrails",
       "key": "T"
     }
   ],
@@ -247,11 +248,6 @@
       "name": "Scene.ISS_trail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
-    },
-    {
-      "name": "",
-      "type": "setPropertyValueSingle",
-      "value": ""
     },
     {
       "name": "Scene.Earth.Renderable.Layers.ColorLayers.VIIRS_NOAA20_Temporal.Enabled",

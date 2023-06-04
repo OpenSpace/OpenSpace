@@ -1,5 +1,7 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local circle = asset.syncedResource({
   Name = "Circle",
@@ -15,15 +17,17 @@ local kernels = asset.syncedResource({
   Version = 1
 })
 
+
+local L5 = 395
+
 local L5Position = {
   Identifier = "L5Position",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = 395, -- L5
-      Observer = "SSB",
-      Kernels = kernels .. "L5_de431.bsp"
+      Target = L5,
+      Observer = "SSB"
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
@@ -40,14 +44,14 @@ local L5 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Billboard = true,
-    Size = 800E6,
+    Size = 800000000,
     Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
   GUI = {
     Name = "L5",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange points"
   }
 }
 
@@ -72,7 +76,10 @@ local L5Label = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "L5_de431.bsp")
+
   openspace.addSceneGraphNode(L5Position)
   openspace.addSceneGraphNode(L5)
   openspace.addSceneGraphNode(L5Label)
@@ -82,11 +89,14 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(L5Label)
   openspace.removeSceneGraphNode(L5)
   openspace.removeSceneGraphNode(L5Position)
+
+  openspace.spice.unloadKernel(kernels .. "L5_de431.bsp")
 end)
 
 asset.export(L5Position)
 asset.export(L5)
 asset.export(L5Label)
+
 
 
 asset.meta = {

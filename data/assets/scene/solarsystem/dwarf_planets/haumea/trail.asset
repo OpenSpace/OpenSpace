@@ -1,9 +1,11 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local translation = asset.require("./transforms").Translation
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
 
 local Trail = {
   Identifier = "HaumeaTrail",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = sunTransforms.SunECLIPJ2000.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Color = { 0.2, 0.8, 0.3 },
@@ -11,7 +13,7 @@ local Trail = {
     Resolution = 10000,
     Enabled = asset.enabled,
     Fade = 1.24,
-    Translation = translation
+    Translation = transforms.Translation
   },
   Tag = { "planetTrail_dwarf" },
   GUI = {
@@ -20,6 +22,7 @@ local Trail = {
     Description = "Trail of Haumea"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Trail)
@@ -30,6 +33,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("Trail", Trail)
+
+
 
 asset.meta = {
   Name = "Haumea Trail",

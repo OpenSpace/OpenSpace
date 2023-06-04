@@ -1,4 +1,6 @@
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
+
+
 
 local data = asset.syncedResource({
   Type = "HttpSynchronization",
@@ -8,7 +10,7 @@ local data = asset.syncedResource({
 })
 
 
-local magnetosphere = {
+local GanymedeMagnetosphere = {
   Identifier = "GanymedeMagnetosphere",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
@@ -35,12 +37,13 @@ local magnetosphere = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(magnetosphere)
+  openspace.addSceneGraphNode(GanymedeMagnetosphere)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(magnetosphere)
+  openspace.removeSceneGraphNode(GanymedeMagnetosphere)
 end)
+
 
 
 asset.meta = {

@@ -59,7 +59,7 @@ private:
     properties::FloatProperty _chromaKeyTolerance;
 
     properties::OptionProperty _typeOption;
-    layers::Adjustment::ID _type;
+    layers::Adjustment::ID _typeId;
 
     std::function<void(void)> _onChangeCallback;
 };

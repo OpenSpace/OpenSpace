@@ -19,7 +19,8 @@ local colorLUT = asset.syncedResource({
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "Stars-Denver",
   Renderable = {
     Type = "RenderableStars",
@@ -46,15 +47,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

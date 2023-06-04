@@ -1,4 +1,6 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local horizons = asset.syncedResource({
   Name = "5 Astraea Trajectory",
@@ -7,9 +9,10 @@ local horizons = asset.syncedResource({
   Version = 2
 })
 
+
 local AstraeaTrail = {
   Identifier = "AstraeaTrail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
@@ -33,7 +36,7 @@ local AstraeaTrail = {
 
 local AstraeaPosition = {
   Identifier = "AstraeaPosition",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
@@ -45,6 +48,7 @@ local AstraeaPosition = {
     Path = "/Solar System/Interstellar"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(AstraeaPosition)

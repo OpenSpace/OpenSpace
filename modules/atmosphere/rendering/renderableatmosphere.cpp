@@ -469,6 +469,7 @@ void RenderableAtmosphere::update(const UpdateData& data) {
 
     glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
     _deferredcaster->setModelTransform(modelTransform);
+    _deferredcaster->setOpacity(opacity());
     _deferredcaster->update(data);
 
     // Calculate atmosphere dimming coefficient

@@ -1,4 +1,6 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+
+
 
 local textures = asset.syncedResource({
   Name = "Light Pollution Textures",
@@ -7,7 +9,8 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local sphere = {
+
+local LightPollutionSphere = {
   Identifier = "LightPollutionSphere",
   Parent = earthAsset.Earth.Identifier,
   Transform = {
@@ -50,156 +53,156 @@ local sphere = {
   }
 }
 
-local pollution_1 = {
-  Identifier = "os.nightsky.set_light_pollution_level_1",
+local SetLightPollutionLevel1 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel1",
   Name = "Set light pollution level 1",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 1.0);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Fade", 1.0)
     openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Fade", 0.9, 0.3)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Opacity', 0.01, 0.5);
-    openspace.setPropertyValueSingle('Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent', 6.1, 0.3);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Opacity", 0.01, 0.5)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent", 6.1, 0.3)
   ]],
   Documentation = "Adds a light pollution sphere and lowers the level of the stars by 0.1",
   GuiPath = "/Night Sky/Light Pollution",
   IsLocal = false
 }
 
-local pollution_2 = {
-  Identifier = "os.nightsky.set_light_pollution_level_2",
+local SetLightPollutionLevel2 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel2",
   Name = "Set light pollution level 2",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 1.0);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Fade", 1.0)
     openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Fade", 0.8, 0.3)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Opacity', 0.02, 0.5);
-    openspace.setPropertyValueSingle('Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent', 6.0, 0.3);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Opacity", 0.02, 0.5)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent", 6.0, 0.3)
   ]],
   Documentation = "Adds a light pollution sphere and lowers the level of the stars by 0.2",
   GuiPath = "/Night Sky/Light Pollution",
   IsLocal = false
 }
 
-local pollution_3 = {
-  Identifier = "os.nightsky.set_light_pollution_level_3",
+local SetLightPollutionLevel3 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel3",
   Name = "Set light pollution level 3",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 1.0);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Fade", 1.0)
     openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Fade", 0.7, 0.3)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Opacity', 0.03, 0.5);
-    openspace.setPropertyValueSingle('Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent', 5.9, 0.3);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Opacity", 0.03, 0.5)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent", 5.9, 0.3)
   ]],
   Documentation = "Adds a light pollution sphere and lowers the level of the stars by 0.3",
   GuiPath = "/Night Sky/Light Pollution",
   IsLocal = false
 }
 
-local pollution_4 = {
-  Identifier = "os.nightsky.set_light_pollution_level_4",
+local SetLightPollutionLevel4 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel4",
   Name = "Set light pollution level 4",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 1.0);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Fade", 1.0)
     openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Fade", 0.6, 0.3)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Opacity', 0.04, 0.5);
-    openspace.setPropertyValueSingle('Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent', 5.8, 0.3);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Opacity", 0.04, 0.5)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent", 5.8, 0.3)
   ]],
   Documentation = "Adds a light pollution sphere and lowers the level of the stars by 0.4",
   GuiPath = "/Night Sky/Light Pollution",
   IsLocal = false
 }
 
-local pollution_5 = {
-  Identifier = "os.nightsky.set_light_pollution_level_5",
+local SetLightPollutionLevel5 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel5",
   Name = "Set light pollution level 5",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 1.0);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Fade", 1.0)
     openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Fade", 0.5, 0.3)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Opacity', 0.05, 0.5);
-    openspace.setPropertyValueSingle('Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent', 5.8, 0.4);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Opacity", 0.05, 0.5)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent", 5.8, 0.4)
   ]],
   Documentation = "Adds a light pollution sphere and lowers the level of the stars by 0.5",
   GuiPath = "/Night Sky/Light Pollution",
   IsLocal = false
 }
 
-local pollution_6 = {
-  Identifier = "os.nightsky.set_light_pollution_level_6",
+local SetLightPollutionLevel6 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel6",
   Name = "Set light pollution level 6",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 1.0);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Fade", 1.0)
     openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Fade", 0.4, 0.3)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Opacity', 0.06, 0.5);
-    openspace.setPropertyValueSingle('Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent', 5.7, 0.4);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Opacity", 0.06, 0.5)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent", 5.7, 0.4)
   ]],
   Documentation = "Adds a light pollution sphere and lowers the level of the stars by 0.6",
   GuiPath = "/Night Sky/Light Pollution",
   IsLocal = false
 }
 
-local pollution_7 = {
-  Identifier = "os.nightsky.set_light_pollution_level_7",
+local SetLightPollutionLevel7 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel7",
   Name = "Set light pollution level 7",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 1.0);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Fade", 1.0)
     openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Fade", 0.3, 0.3)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Opacity', 0.07, 0.5);
-    openspace.setPropertyValueSingle('Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent', 5.6, 0.4);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Opacity", 0.07, 0.5)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent", 5.6, 0.4)
   ]],
   Documentation = "Adds a light pollution sphere and lowers the level of the stars by 0.7",
   GuiPath = "/Night Sky/Light Pollution",
   IsLocal = false
 }
 
-local pollution_8 = {
-  Identifier = "os.nightsky.set_light_pollution_level_8",
+local SetLightPollutionLevel8 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel8",
   Name = "Set light pollution level 8",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 1.0);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Fade", 1.0)
     openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Fade", 0.2, 0.3)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Opacity', 0.08, 0.5);
-    openspace.setPropertyValueSingle('Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent', 5.5, 0.4);
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Opacity", 0.08, 0.5)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent", 5.5, 0.4)
   ]],
   Documentation = "Adds a light pollution sphere and lowers the level of the stars by 0.8",
   GuiPath = "/Night Sky/Light Pollution",
   IsLocal = false
 }
 
-local pollution_9 = {
-  Identifier = "os.nightsky.set_light_pollution_level_9",
+local SetLightPollutionLevel9 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel9",
   Name = "Set light pollution level 9",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Enabled', true)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 1.0)
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Opacity', 0.09, 0.5)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Fade", 1.0)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Opacity", 0.09, 0.5)
     openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Fade", 0.1, 0.3)
-    openspace.setPropertyValueSingle('Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent', 5.4, 0.4)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent", 5.4, 0.4)
   ]],
   Documentation = "Adds a light pollution sphere and lowers the level of the stars by 0.9",
   GuiPath = "/Night Sky/Light Pollution",
   IsLocal = false
 }
 
-local hideAction = {
-  Identifier = "os.nightsky.undo_light_pollution",
+local UndoLightPollution = {
+  Identifier = "os.nightsky.UndoLightPollution",
   Name = "Undo light pollution",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 0.0, 0.3)
-    openspace.setPropertyValueSingle('Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent', 6.2, 0.3)
+    openspace.setPropertyValueSingle("Scene.LightPollutionSphere.Renderable.Fade", 0.0, 0.3)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.ParametersOwner.MagnitudeExponent", 6.2, 0.3)
     openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Fade", 1.0, 0.3)
     ]],
   Documentation = "Hides the light pollution sphere and resets the stars",
@@ -207,42 +210,43 @@ local hideAction = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(sphere)
-  openspace.action.registerAction(hideAction)
-  openspace.action.registerAction(pollution_1)
-  openspace.action.registerAction(pollution_2)
-  openspace.action.registerAction(pollution_3)
-  openspace.action.registerAction(pollution_4)
-  openspace.action.registerAction(pollution_5)
-  openspace.action.registerAction(pollution_6)
-  openspace.action.registerAction(pollution_7)
-  openspace.action.registerAction(pollution_8)
-  openspace.action.registerAction(pollution_9)
+  openspace.addSceneGraphNode(LightPollutionSphere)
+  openspace.action.registerAction(SetLightPollutionLevel1)
+  openspace.action.registerAction(SetLightPollutionLevel2)
+  openspace.action.registerAction(SetLightPollutionLevel3)
+  openspace.action.registerAction(SetLightPollutionLevel4)
+  openspace.action.registerAction(SetLightPollutionLevel5)
+  openspace.action.registerAction(SetLightPollutionLevel6)
+  openspace.action.registerAction(SetLightPollutionLevel7)
+  openspace.action.registerAction(SetLightPollutionLevel8)
+  openspace.action.registerAction(SetLightPollutionLevel9)
+  openspace.action.registerAction(UndoLightPollution)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(pollution_9)
-  openspace.action.removeAction(pollution_8)
-  openspace.action.removeAction(pollution_7)
-  openspace.action.removeAction(pollution_6)
-  openspace.action.removeAction(pollution_5)
-  openspace.action.removeAction(pollution_4)
-  openspace.action.removeAction(pollution_3)
-  openspace.action.removeAction(pollution_2)
-  openspace.action.removeAction(pollution_1)
-  openspace.action.removeAction(hideAction)
-  openspace.removeSceneGraphNode(sphere)
+  openspace.action.removeAction(UndoLightPollution)
+  openspace.action.removeAction(SetLightPollutionLevel9)
+  openspace.action.removeAction(SetLightPollutionLevel8)
+  openspace.action.removeAction(SetLightPollutionLevel7)
+  openspace.action.removeAction(SetLightPollutionLevel6)
+  openspace.action.removeAction(SetLightPollutionLevel5)
+  openspace.action.removeAction(SetLightPollutionLevel4)
+  openspace.action.removeAction(SetLightPollutionLevel3)
+  openspace.action.removeAction(SetLightPollutionLevel2)
+  openspace.action.removeAction(SetLightPollutionLevel1)
+  openspace.removeSceneGraphNode(LightPollutionSphere)
 end)
 
-asset.export(sphere)
-asset.export(hideAction)
-asset.export(pollution_1)
-asset.export(pollution_2)
-asset.export(pollution_3)
-asset.export(pollution_4)
-asset.export(pollution_5)
-asset.export(pollution_6)
-asset.export(pollution_7)
-asset.export(pollution_8)
-asset.export(pollution_9)
+asset.export(LightPollutionSphere)
+asset.export("SetLightPollutionLevel1", SetLightPollutionLevel1.Identifier)
+asset.export("SetLightPollutionLevel2", SetLightPollutionLevel2.Identifier)
+asset.export("SetLightPollutionLevel3", SetLightPollutionLevel3.Identifier)
+asset.export("SetLightPollutionLevel4", SetLightPollutionLevel4.Identifier)
+asset.export("SetLightPollutionLevel5", SetLightPollutionLevel5.Identifier)
+asset.export("SetLightPollutionLevel6", SetLightPollutionLevel6.Identifier)
+asset.export("SetLightPollutionLevel7", SetLightPollutionLevel7.Identifier)
+asset.export("SetLightPollutionLevel8", SetLightPollutionLevel8.Identifier)
+asset.export("SetLightPollutionLevel9", SetLightPollutionLevel9.Identifier)
+asset.export("UndoLightPollution", UndoLightPollution.Identifier)

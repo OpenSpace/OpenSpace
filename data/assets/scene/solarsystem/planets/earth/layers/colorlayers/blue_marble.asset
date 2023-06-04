@@ -1,4 +1,6 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
+
 
 local texturesPath = asset.syncedResource({
   Name = "Earth Textures",
@@ -7,24 +9,26 @@ local texturesPath = asset.syncedResource({
   Version = 2
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Blue_Marble",
   Name = "Blue Marble",
   Enabled = asset.enabled,
   FilePath = texturesPath .. "earth_bluemarble.jpg",
-  Description = "Earth image from Blue Marble Next Generation",
+  Description = "Earth image from Blue Marble Next Generation"
 }
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
 
 
 asset.meta = {
