@@ -89,7 +89,7 @@ local ToggleMeridian = {
     openspace.setParent('MeridianPosition', camera.Anchor)
     openspace.setPropertyValueSingle('Scene.MeridianPosition.Translation.Globe', camera.Anchor);
     openspace.setPropertyValueSingle('Scene.MeridianPosition.Rotation.Globe', camera.Anchor);
-    openspace.toggleFade(']] .. uri .. [[')
+    openspace.toggleFade("Scene.MeridianPlane.Renderable")
     ]],
   Documentation = "Toggles the line for the local meridian",
   GuiPath = "/Night Sky/Lines and Grids",

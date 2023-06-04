@@ -87,8 +87,8 @@ local HideEclipticLine = {
   IsLocal = false
 }
 
-local toggleLineAction = {
-  Identifier = "os.nightsky.toggle_ecliptic_line",
+local ToggleEclipticLine = {
+  Identifier = "os.nightsky.ToggleEclipticLine",
   Name = "Toggle ecliptic line",
   Command = "openspace.toggleFade('Scene.EclipticLine.Renderable')",
   Documentation = "Toggles the ecliptic line visibilty",
