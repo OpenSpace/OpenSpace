@@ -1,0 +1,41 @@
+local globe = asset.require("../../moon")
+
+
+
+local texturesPath = asset.syncedResource({
+  Name = "Moon Textures",
+  Type = "HttpSynchronization",
+  Identifier = "moon_textures",
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = "Moon_Texture",
+  Name = "Moon Texture",
+  Enabled = asset.enabled,
+  FilePath = texturesPath .. "WAC_GLOBAL_E000N0000_032P.png",
+  Description = "Lower Resolution offline version of WAC layer"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Moon.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Moon.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("Layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Moon Texture",
+  Version = "1.0",
+  Description = "Offline lower resolution version of Moon WAC layer, available for offline use",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
