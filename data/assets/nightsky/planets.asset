@@ -123,8 +123,9 @@ local ShowNightSkyPlanets = {
     openspace.fadeIn("Scene.NightSkyMars.Renderable")
     openspace.fadeIn("Scene.NightSkyJupiter.Renderable")
     openspace.fadeIn("Scene.NightSkySaturn.Renderable")
+    openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 2)
   ]],
-  Documentation = "Show night sky versions of the planets",
+  Documentation = "Show night sky versions of the planets (note increases Scale of Moon)",
   GuiPath = "/Night Sky/Planets",
   IsLocal = false
 }
@@ -138,6 +139,7 @@ local HideNightSkyPlanets = {
     openspace.fadeOut("Scene.NightSkyMars.Renderable")
     openspace.fadeOut("Scene.NightSkyJupiter.Renderable")
     openspace.fadeOut("Scene.NightSkySaturn.Renderable")
+    openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 1)
   ]],
   Documentation = "Hides night sky versions of the planets",
   GuiPath = "/Night Sky/Planets",
@@ -154,8 +156,14 @@ local ToggleNightSkyPlanets = {
     openspace.toggleFade("Scene.NightSkyMars.Renderable")
     openspace.toggleFade("Scene.NightSkyJupiter.Renderable")
     openspace.toggleFade("Scene.NightSkySaturn.Renderable")
+    local scale = openspace.getPropertyValue("Scene.Moon.Scale.Scale")
+    if (scale > 1) then
+      openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 1.0)
+    else
+      openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 2.0)
+    end
   ]],
-  Documentation = "Toggles visibility of the night sky versions of the planets",
+  Documentation = "Toggles visibility of the night sky versions of the planets (note increases Scale of Moon)",
   GuiPath = "/Night Sky/Planets",
   IsLocal = false
 }
