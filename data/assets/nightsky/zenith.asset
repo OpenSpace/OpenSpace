@@ -92,12 +92,12 @@ local ToggleZenith = {
   Identifier = "os.nightsky.ToggleZenith",
   Name = "Toggle local zenith",
   Command = [[
-    local camera = openspace.navigation.getNavigationState();
+    local camera = openspace.navigation.getNavigationState()
     openspace.setParent("ZenithPosition", camera.Anchor)
-    openspace.setPropertyValueSingle("Scene.ZenithPosition.Translation.Globe", camera.Anchor);
-    openspace.setPropertyValueSingle("Scene.ZenithPosition.Rotation.Globe", camera.Anchor);
+    openspace.setPropertyValueSingle("Scene.ZenithPosition.Translation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.ZenithPosition.Rotation.Globe", camera.Anchor)
     openspace.toggleFade("Scene.ZenithDot.Renderable")
-    ]],
+  ]],
   Documentation = "Toggles the dot for the local zenith",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false

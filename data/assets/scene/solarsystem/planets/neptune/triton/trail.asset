@@ -1,6 +1,8 @@
 asset.require("spice/base")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").nep097
+local kernel = asset.require("../kernels")
+
+
 
 local Trail = {
   Identifier = "TritonTrail",
@@ -10,8 +12,7 @@ local Trail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "TRITON",
-      Observer = "NEPTUNE BARYCENTER",
-      Kernels = kernel
+      Observer = "NEPTUNE BARYCENTER"
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 5.877,
@@ -25,11 +26,17 @@ local Trail = {
 }
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.nep097)
+
+
   openspace.addSceneGraphNode(Trail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Trail)
+
+
+  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(Trail)

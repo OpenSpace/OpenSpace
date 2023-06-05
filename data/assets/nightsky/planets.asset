@@ -125,7 +125,7 @@ local ShowNightSkyPlanets = {
     openspace.fadeIn("Scene.NightSkySaturn.Renderable")
     openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 2)
   ]],
-  Documentation = "Show night sky versions of the planets (note increases Scale of Moon)",
+  Documentation = "Show night sky versions of the planets (Note: Increases the scale of the Moon)",
   GuiPath = "/Night Sky/Planets",
   IsLocal = false
 }
@@ -163,7 +163,7 @@ local ToggleNightSkyPlanets = {
       openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 2.0)
     end
   ]],
-  Documentation = "Toggles visibility of the night sky versions of the planets (note increases Scale of Moon)",
+  Documentation = "Toggles visibility of the night sky versions of the planets (Note: Increases the scale of the Moon)",
   GuiPath = "/Night Sky/Planets",
   IsLocal = false
 }
