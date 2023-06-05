@@ -6,7 +6,7 @@ local sssb = asset.syncedResource({
   Name = "Small SolarSystem Body Data (Jupiter Trojan Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_jupiter_trojan_asteroid",
-  Version = 2
+  Version = 3
 })
 
 
