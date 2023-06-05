@@ -87,6 +87,20 @@ openspace.documentation = {
         "'OpenSpaceEngine.FadeDuration' property will be used instead. If the third " ..
         "argument (endScript) is provided then that script will be run after the fade " ..
         "is finished."
+    },
+    {
+        Name = "toggleFade",
+        Arguments = {
+            identifier = "String",
+            fadeTime = "Number?",
+            endScript = "String?"
+        },
+        Documentation = [[Toggles the fade state of the node(s) with the given identifier over the given
+          time in seconds. The identifier can contain a tag and/or a wildcard to target
+          several nodes. If the fade time is not provided then the
+          "OpenSpaceEngine.FadeDuration" property will be used instead. If the third
+          argument (endScript) is provided then that script will be run after the fade
+          is finished.]]
     }
 }
 
@@ -301,4 +315,21 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
             endScript
         )
     end
+end
+
+openspace.toggleFade = function(renderable, fadeTime, endScript)
+  if (fadeTime == nil) then
+    fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
+  end
+  local enabled = openspace.getPropertyValue(renderable .. ".Enabled")
+  local fadeState = openspace.getPropertyValue(renderable .. ".Fade")
+  if (enabled) then
+    if (fadeState < 0.5) then
+      openspace.fadeIn(renderable, fadeTime-(fadeTime*fadeState), endScript)
+    else
+      openspace.fadeOut(renderable, fadeTime*fadeState, endScript)
+    end
+  else
+    openspace.fadeIn(renderable, fadeTime, endScript)
+  end
 end

@@ -29,8 +29,8 @@ local GroundPanoPosition = {
       Latitude = 34.201639,
       Longitude = -118.171319,
       Altitude = 10.0,
-      UseCamera = true,
-      UseCameraAltitude = true
+      UseCamera = false,
+      UseCameraAltitude = false
     },
     Rotation = {
       Type = "GlobeRotation",
@@ -151,10 +151,9 @@ local HideGroundPano = {
   Identifier = "os.nightsky.HideGroundPano",
   Name = "Hide ground panorama",
   Command = [[
-    -- same position as above
-    openspace.setPropertyValueSingle("Scene.GroundPanoSphere.Renderable.Fade", 0.0, 0.5)
+    openspace.fadeOut("Scene.GroundPanoSphere.Renderable")
   ]],
-  Documentation = "Hides the ground panorama",
+  Documentation = "Hides the panorama",
   GuiPath = "/Night Sky/Panoramas",
   IsLocal = false
 }

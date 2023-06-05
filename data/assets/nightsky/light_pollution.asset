@@ -34,7 +34,7 @@ local LightPollutionSphere = {
   },
   Renderable = {
     Type = "RenderableSphere",
-    Size = 8.5,
+    Size = earthAsset.Earth.Renderable.Radii[1] * 1.05,
     Segments = 40,
     Opacity = 0.0,
     Enabled = asset.enabled,

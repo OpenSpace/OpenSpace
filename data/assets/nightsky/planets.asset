@@ -41,9 +41,9 @@ local Venus = {
     Type = "RenderablePlaneImageLocal",
     Enabled = asset.enabled,
     Billboard = true,
-    Size = 6051900 * 500,
+    Size = 6051900 * 700,
     Texture = textures .. "glare.png",
-    MultiplyColor = { 0.608, 0.604, 0.455 },
+    MultiplyColor = { 1.0 , 0.992, 0.757 },
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
@@ -118,23 +118,14 @@ local ShowNightSkyPlanets = {
   Identifier = "os.nightsky.ShowNightSkyPlanets",
   Name = "Show night sky planets",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.NightSkyMercury.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.NightSkyVenus.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.NightSkyMars.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.NightSkyJupiter.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.NightSkySaturn.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.NightSkyMercury.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.NightSkyVenus.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.NightSkyMars.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.NightSkyJupiter.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.NightSkySaturn.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.NightSkyMercury.Renderable.Fade", 1.0, 0.25)
-    openspace.setPropertyValueSingle("Scene.NightSkyVenus.Renderable.Fade", 1.0, 0.25)
-    openspace.setPropertyValueSingle("Scene.NightSkyMars.Renderable.Fade", 1.0, 0.25)
-    openspace.setPropertyValueSingle("Scene.NightSkyJupiter.Renderable.Fade", 1.0, 0.25)
-    openspace.setPropertyValueSingle("Scene.NightSkySaturn.Renderable.Fade", 1.0, 0.25)
+    openspace.fadeIn("Scene.NightSkyMercury.Renderable")
+    openspace.fadeIn("Scene.NightSkyVenus.Renderable")
+    openspace.fadeIn("Scene.NightSkyMars.Renderable")
+    openspace.fadeIn("Scene.NightSkyJupiter.Renderable")
+    openspace.fadeIn("Scene.NightSkySaturn.Renderable")
+    openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 2)
   ]],
-  Documentation = "Show night sky versions of the planets",
+  Documentation = "Show night sky versions of the planets (Note: Increases the scale of the Moon)",
   GuiPath = "/Night Sky/Planets",
   IsLocal = false
 }
@@ -143,17 +134,39 @@ local HideNightSkyPlanets = {
   Identifier = "os.nightsky.HideNightSkyPlanets",
   Name = "Hide night sky planets",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.NightSkyMercury.Renderable.Fade", 0.0, 1.0)
-    openspace.setPropertyValueSingle("Scene.NightSkyVenus.Renderable.Fade", 0.0, 1.0)
-    openspace.setPropertyValueSingle("Scene.NightSkyMars.Renderable.Fade", 0.0, 1.0)
-    openspace.setPropertyValueSingle("Scene.NightSkyJupiter.Renderable.Fade", 0.0, 1.0)
-    openspace.setPropertyValueSingle("Scene.NightSkySaturn.Renderable.Fade", 0.0, 1.0)
+    openspace.fadeOut("Scene.NightSkyMercury.Renderable")
+    openspace.fadeOut("Scene.NightSkyVenus.Renderable")
+    openspace.fadeOut("Scene.NightSkyMars.Renderable")
+    openspace.fadeOut("Scene.NightSkyJupiter.Renderable")
+    openspace.fadeOut("Scene.NightSkySaturn.Renderable")
+    openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 1)
   ]],
   Documentation = "Hides night sky versions of the planets",
   GuiPath = "/Night Sky/Planets",
   IsLocal = false
 }
 
+
+local ToggleNightSkyPlanets = {
+  Identifier = "os.nightsky.ToggleNightSkyPlanets",
+  Name = "Toggle night sky planets",
+  Command = [[
+    openspace.toggleFade("Scene.NightSkyMercury.Renderable")
+    openspace.toggleFade("Scene.NightSkyVenus.Renderable")
+    openspace.toggleFade("Scene.NightSkyMars.Renderable")
+    openspace.toggleFade("Scene.NightSkyJupiter.Renderable")
+    openspace.toggleFade("Scene.NightSkySaturn.Renderable")
+    local scale = openspace.getPropertyValue("Scene.Moon.Scale.Scale")
+    if (scale > 1) then
+      openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 1.0)
+    else
+      openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 2.0)
+    end
+  ]],
+  Documentation = "Toggles visibility of the night sky versions of the planets (Note: Increases the scale of the Moon)",
+  GuiPath = "/Night Sky/Planets",
+  IsLocal = false
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mercury)
@@ -163,9 +176,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Saturn)
   openspace.action.registerAction(ShowNightSkyPlanets)
   openspace.action.registerAction(HideNightSkyPlanets)
+  openspace.action.registerAction(ToggleNightSkyPlanets)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleNightSkyPlanets)
   openspace.action.removeAction(HideNightSkyPlanets)
   openspace.action.removeAction(ShowNightSkyPlanets)
   openspace.removeSceneGraphNode(Saturn)
@@ -182,3 +197,4 @@ asset.export(Jupiter)
 asset.export(Saturn)
 asset.export("ShowNightSkyPlanets", ShowNightSkyPlanets.Identifier)
 asset.export("HideNightSkyPlanets", HideNightSkyPlanets.Identifier)
+asset.export("ToggleNightSkyPlanets", ToggleNightSkyPlanets.Identifier)
