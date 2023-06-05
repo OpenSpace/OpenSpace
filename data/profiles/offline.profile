@@ -62,7 +62,6 @@
     "Moon",
     "Sun",
     "Venus",
-    "ISS"
   ],
   "meta": {
     "author": "OpenSpace Team",
