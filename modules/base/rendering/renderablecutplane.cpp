@@ -27,6 +27,8 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -36,178 +38,141 @@
 #include <ghoul/opengl/texture.h>
 #include <fstream>
 #include <optional>
+#include <iostream>
+
+
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
-        "hej",
-        "Hejhejs",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square",
-        // @VISIBILITY(2.25)
-        openspace::properties::Property::Visibility::User
-    };
-
-    struct [[codegen::Dictionary(RenderableCutPlane)]] Parameters {
-//         [[codegen::verbatim(TextureInfo.description)]]
-        std::string texture;
-
-    };
+//  constexpr std::string_view _loggerCat = “RenderableCutPlane”;
+  constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
+    "FilePath",
+    "Hejhejs",
+    "text",
+    // @VISIBILITY(2.25)
+    openspace::properties::Property::Visibility::User
+  };
+  constexpr openspace::properties::Property::PropertyInfo PlaneEquationInfo = {
+    "PlaneEquation",
+      "Hejhejs",
+      "text",
+    // @VISIBILITY(2.25)
+    openspace::properties::Property::Visibility::User
+  };
+  constexpr openspace::properties::Property::PropertyInfo ScalingUnitInfo = {
+    "ScalingUnit",
+      "Hejhejs",
+      "text",
+    // @VISIBILITY(2.25)
+    openspace::properties::Property::Visibility::User
+  };
+  struct [[codegen::Dictionary(RenderableCutPlane)]] Parameters {
+    // [[codegen::verbatim(FilePathInfo.description)]]
+    std::string filePath;
+    // [[codegen::verbatim(PlaneEquationInfo.description)]]
+    std::optional<double> planeEquation[4];
+    // [[codegen::verbatim(ScalingUnitInfo.description)]]
+    std::optional<bool> lazyLoading;
+  };
 #include "renderablecutplane_codegen.cpp"
 } // namespace
-
 namespace openspace {
-
 documentation::Documentation RenderableCutPlane::Documentation() {
-    return codegen::doc<Parameters>(
-        "base_renderable_cut_plane",
-        RenderablePlane::Documentation()
-    );
+  return codegen::doc<Parameters>(
+    "base_renderablecutplane",
+    RenderablePlane::Documentation()
+  );
 }
 
 RenderableCutPlane::RenderableCutPlane(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
-    , _filePath(TextureInfo)
+  : RenderablePlane(dictionary),
+_filePath(_filePath)
 {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+  const Parameters p = codegen::bake<Parameters>(dictionary);
+  addProperty(_blendMode);
+  // FILE PATH
+  _filePath = absPath(p.filePath).string();
+    std::cout << "FILEPATH: " << &_filePath <<"\n";
+    
 
-    addProperty(_blendMode);
 
-    _filePath = absPath(p.texture).string();
-    _sourceFile = std::make_unique<ghoul::filesystem::File>(_filePath.value());
-
-    addProperty(_filePath);
-    _filePath.onChange([this]() { loadTexture(); });
-    _sourceFile->setCallback([this]() { _textureIsDirty = true; });
-
-    if (_isLoadingLazily) {
-        _enabled.onChange([this]() {
-            if (!_enabled) {
-                BaseModule::TextureManager.release(_texture);
-                _texture = nullptr;
-            }
-            if (_enabled) {
-                _textureIsDirty = true;
-            }
-        });
-    }
-
-    _autoScale.onChange([this]() {
-        if (!_autoScale) {
-            return;
-        }
-
-        // Shape the plane based on the aspect ration of the image
-        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
-        if (_textureDimensions != textureDim) {
-            float aspectRatio = textureDim.x / textureDim.y;
-            float planeAspectRatio = _size.value().x / _size.value().y;
-
-            if (std::abs(planeAspectRatio - aspectRatio) >
-                std::numeric_limits<float>::epsilon())
-            {
-                glm::vec2 newSize =
-                    aspectRatio > 0.f ?
-                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-                _size = newSize;
-            }
-
-            _textureDimensions = textureDim;
-        }
-    });
+  setRenderBin(Renderable::RenderBin::Opaque);
 }
 
 bool RenderableCutPlane::isReady() const {
     return RenderablePlane::isReady();
 }
 
+//void RenderableCutPlane::initialize() {
+//  RenderablePlane::initialize();
+//}
+
 void RenderableCutPlane::initializeGL() {
     RenderablePlane::initializeGL();
-
-    if (!_isLoadingLazily) {
-        loadTexture();
-    }
+    createPlane();
 }
 
 void RenderableCutPlane::deinitializeGL() {
-    _sourceFile = nullptr;
-
-    BaseModule::TextureManager.release(_texture);
     RenderablePlane::deinitializeGL();
 }
 
-void RenderableCutPlane::bindTexture() {
-    _texture->bind();
-}
-
 void RenderableCutPlane::update(const UpdateData& data) {
-    ZoneScoped;
-
     RenderablePlane::update(data);
-
-    if (_textureIsDirty) {
-        loadTexture();
-        _textureIsDirty = false;
-    }
+    createPlane();
 }
 
-void RenderableCutPlane::loadTexture() {
-    ZoneScoped;
+void RenderableCutPlane::createPlane()
+    {
+        const GLfloat sizeX = _size.value().x;
+        const GLfloat sizeZ = _size.value().y;
+//        data = readdata();
+//      Create a 5x5 vector using a vector of vectors
+//        const float sizeX = 10;
+//        const float sizeZ = 7;
+        std::vector<std::vector<float>> dataplane(10, std::vector<float>(7));
+           // Initialize the vector
+//          float count = 0;
+//          for (int i = 0; i < sizeX; ++i) {
+//              for (int j = 0; j < sizeZ; ++j) {
+//                  dataplane[i][j] = count;
+//                  count = count + 0.1;
+//              }
+//          }
+//          // Print the dataplane vector
+//          for (int i = 0; i < sizeX; ++i) {
+//              for (int j = 0; j < sizeZ; ++j) {
+//                  std::cout << dataplane[i][j] << " ";
+//              }
+//              std::cout << std::endl;
+//          }
+          const GLfloat vertexData[] = {
+              //   x       y    z    w    s    t
+              -sizeX, -sizeZ, 0.f, 0.f, 0.f, 0.f,
+               sizeX,  sizeZ, 0.f, 0.f, 1.f, 1.f,
+              -sizeX,  sizeZ, 0.f, 0.f, 0.f, 1.f,
+              -sizeX, -sizeZ, 0.f, 0.f, 0.f, 0.f,
+               sizeX, -sizeZ, 0.f, 0.f, 1.f, 0.f,
+               sizeX,  sizeZ, 0.f, 0.f, 1.f, 1.f,
+          };
 
-    if (!_filePath.value().empty()) {
-        ghoul::opengl::Texture* t = _texture;
-
-        unsigned int hash = ghoul::hashCRC32File(_filePath);
-
-        _texture = BaseModule::TextureManager.request(
-            std::to_string(hash),
-            [path = _filePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
-                std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(
-                        absPath(path).string(),
-                        2
-                    );
-
-                LDEBUGC(
-                    "RenderableCutPlane",
-                    fmt::format("Loaded texture from {}", absPath(path))
-                );
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
-
-                return texture;
-            }
-        );
-
-        BaseModule::TextureManager.release(t);
-
-        _sourceFile = std::make_unique<ghoul::filesystem::File>(_filePath.value());
-        _sourceFile->setCallback([this]() { _textureIsDirty = true; });
-
-        if (!_autoScale) {
-            return;
-        }
-
-        // Shape the plane based on the aspect ration of the image
-        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
-        if (_textureDimensions != textureDim) {
-            float aspectRatio = textureDim.x / textureDim.y;
-            float planeAspectRatio = _size.value().x / _size.value().y;
-
-            if (std::abs(planeAspectRatio - aspectRatio) >
-                std::numeric_limits<float>::epsilon())
-            {
-                glm::vec2 newSize =
-                    aspectRatio > 0.f ?
-                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-                _size = newSize;
-            }
-
-            _textureDimensions = textureDim;
-        }
+        glBindVertexArray(_quad);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
+        glEnableVertexAttribArray(1);
+               glVertexAttribPointer(
+                   1,
+                   2,
+                   GL_FLOAT,
+                   GL_FALSE,
+                   sizeof(GLfloat) * 6,
+                   reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+               );
+       glBindVertexArray(0);
+        // Remember to free the dynamically allocated memory
+        //delete[] dataArray;
     }
-}
 
 } // namespace openspace
+
+

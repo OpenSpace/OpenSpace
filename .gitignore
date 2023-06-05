@@ -44,3 +44,4 @@ doc
 config/schema/sgct.schema.json
 modules/fieldlinessequence/ext/hdf5/
 modules/fieldlinessequence/ext/HighFive/
+data/assets/scene/solarsystem/planets/earth/magnetosphere/GAMERA.asset

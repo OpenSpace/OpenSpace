@@ -23,7 +23,7 @@ namespace documentation { struct Documentation; }
 class RenderableCutPlane : public RenderablePlane {
 public:
     RenderableCutPlane(const ghoul::Dictionary& dictionary);
-
+//    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -34,13 +34,14 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture() override;
+//    virtual void bindTexture() override;
+    void createPlane();
 
 private:
-    void loadTexture();
+//    void loadTexture();
 
     properties::StringProperty _filePath;
-    ghoul::opengl::Texture* _texture = nullptr;
+//    ghoul::opengl::Texture* _texture = nullptr;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     std::unique_ptr<ghoul::filesystem::File> _sourceFile;
     // two more vec2

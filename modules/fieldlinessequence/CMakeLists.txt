@@ -57,7 +57,7 @@ create_new_module(
 #########################################################################################
 
 # Set FieldlineSequence paths
-set(FIELDLINESEQUENCE_BASE_DIR "C:/OpenSpace/OpenSpace/modules/fieldlinessequence")
+set(FIELDLINESEQUENCE_BASE_DIR "/Users/juliajohnstone/OpenSpace/OpenSpace/modules/fieldlinessequence")
 set(FIELDLINESEQUENCE_SRC_DIR "${FIELDLINESEQUENCE_BASE_DIR}/src")
 set(FIELDLINESEQUENCE_EXT_DIR "${FIELDLINESEQUENCE_BASE_DIR}/ext")
 
