@@ -65,9 +65,9 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles",
+    "description": "This profile adds low resolution textures to the planets that do not require internet to view.",
     "license": "MIT License",
-    "name": "Default",
+    "name": "Offline",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
@@ -85,6 +85,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 3
+    "minor": 4
   }
 }
