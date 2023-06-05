@@ -24,7 +24,9 @@ local gamera = {
     ColorTablePaths = {transferFunction},
     LoadAtRuntime = true,
     -- ScaleToMeters = 1.0,
-    Color = { 1.0, 0.725, 0.75, 0.8 }
+    Color = { 1.0, 0.725, 0.75, 0.8 },
+    Axis = "z",
+    Value = 0, 
   },
   GUI = {
     Path = "/Solar System/Planets/Earth",

@@ -32,6 +32,10 @@ public:
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
+    
+    void readHdfFile(std::string pathToHdf5File);
+    void slicer(char axis, float value);
+    void interpolator(float value);
 
 protected:
 //    virtual void bindTexture() override;
@@ -45,6 +49,20 @@ private:
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     std::unique_ptr<ghoul::filesystem::File> _sourceFile;
     // two more vec2
+    std::string _axis;
+    float _value;
+    
+    
+    std::vector<std::vector<std::vector<std::vector<float>>>> _volumeCoordinates;
+
+    std::vector<std::string> _extraQuantatiesNames;
+    std::vector<std::vector<std::vector<std::vector<float>>>> _extraQuantaties;
+
+    std::vector<std::vector<std::vector<float>>> _slicedDataBP; // Slice fo data BEFORE position of slice
+    std::vector<std::vector<std::vector<float>>> _slicedDataAP; // Slice fo data AFTER position of slice
+
+    std::vector<std::vector<std::vector<float>>> _interpolatedData;
+    
 
     bool _isLoadingLazily = false;
     bool _textureIsDirty = false;
