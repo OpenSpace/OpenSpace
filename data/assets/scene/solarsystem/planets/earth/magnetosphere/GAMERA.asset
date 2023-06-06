@@ -10,6 +10,7 @@ local gamera = {
     Type = "RenderableFieldlinesSequence",
     -- SourceFolder = "C:/Users/aemolin/Documents/GAMERAdata/dir",
     --SourceFolder = "C:/Users/kjjohnst/Documents/GAMERAdata/dir",
+  SourceFolder = "/Users/juliajohnstone/Desktop/Exjobb/viz4sasha/dir",
     -- Hierarchy = {"/", "/Step#0" }, -- Hierarchical navigation in H5 file
     LineWidth = 1.0,
     ScalingUnit = "RE",
@@ -25,8 +26,6 @@ local gamera = {
     LoadAtRuntime = true,
     -- ScaleToMeters = 1.0,
     Color = { 1.0, 0.725, 0.75, 0.8 },
-    Axis = "z",
-    Value = 0, 
   },
   GUI = {
     Path = "/Solar System/Planets/Earth",
