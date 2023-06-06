@@ -38,7 +38,8 @@ public:
 
 protected:
     Tile renderTile(const TileIndex& tileIndex, const std::string& text,
-        const glm::vec2& position, const glm::vec4& color);
+        const glm::vec2& position, const glm::vec4& color,
+        const glm::vec4& backgroundColor = glm::vec4(0.0));
 
     const TileTextureInitData initData;
 
