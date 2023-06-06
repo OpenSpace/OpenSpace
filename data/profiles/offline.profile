@@ -61,7 +61,7 @@
     "Mars",
     "Moon",
     "Sun",
-    "Venus",
+    "Venus"
   ],
   "meta": {
     "author": "OpenSpace Team",
