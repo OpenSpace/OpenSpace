@@ -97,6 +97,7 @@ const BaseViewport* currentViewport = nullptr;
 Frustum::Mode currentFrustumMode;
 glm::mat4 currentModelViewProjectionMatrix;
 glm::mat4 currentModelMatrix;
+glm::ivec2 currentDrawResolution;
 
 #ifdef OPENVR_SUPPORT
 Window* FirstOpenVRWindow = nullptr;
@@ -449,6 +450,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
     currentWindow = &data.window;
     currentViewport = &data.viewport;
     currentFrustumMode = data.frustumMode;
+    currentDrawResolution = glm::ivec2(data.bufferSize.x, data.bufferSize.y);
 
     glm::vec3 pos;
     std::memcpy(
@@ -533,6 +535,7 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
     currentWindow = &data.window;
     currentViewport = &data.viewport;
     currentFrustumMode = data.frustumMode;
+    currentDrawResolution = glm::ivec2(data.bufferSize.x, data.bufferSize.y);
 
     try {
         global::openSpaceEngine->drawOverlays();
@@ -766,7 +769,7 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         const Viewport* viewport = dynamic_cast<const Viewport*>(currentViewport);
-        if (viewport != nullptr) {
+        if (viewport) {
             if (viewport->hasSubViewports() && viewport->nonLinearProjection()) {
                 ivec2 dim = viewport->nonLinearProjection()->cubemapResolution();
                 return glm::ivec2(dim.x, dim.y);
@@ -776,7 +779,9 @@ void setSgctDelegateFunctions() {
                 return glm::ivec2(dim.x, dim.y);
             }
         }
-        return glm::ivec2(-1, -1);
+        else {
+            return currentDrawResolution;
+        }
     };
     sgctDelegate.currentViewportSize = []() {
         ZoneScoped;
