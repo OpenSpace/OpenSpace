@@ -1,16 +1,8 @@
-local data = asset.syncedResource({
-  Name = "Example Globe Video",
-  Type = "UrlSynchronization",
-  Identifier = "example_globe_video",
-  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/video/chlorophyll_model_2048.mp4"
-})
-
-
 local ScreenSpace = {
   Identifier = "ScreenSpaceVideoExample",
   Type = "ScreenSpaceVideo",
   Name = "Screen Space Video Example",
-  Video = data .. "/chlorophyll_model_2048.mp4"
+  Video = asset.localResource("examplevideo.mp4")
 }
 
 

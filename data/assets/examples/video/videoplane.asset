@@ -2,14 +2,6 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local data = asset.syncedResource({
-  Name = "Example Globe Video",
-  Type = "UrlSynchronization",
-  Identifier = "example_globe_video",
-  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/video/test-video.mp4"
-})
-
-
 local Plane = {
   Identifier = "VideoPlaneExample",
   Parent = transforms.EarthCenter.Identifier,
@@ -23,8 +15,7 @@ local Plane = {
     Type = "RenderableVideoPlane",
     MirrorBackside = true,
     Size = 3E7,
-    Video = data .. "/test-video.mp4",
-    PlaybackMode = "RealTimeLoop"
+    Video = asset.localResource("examplevideo.mp4"),
   },
   GUI = {
     Name = "Video Plane Example",

@@ -2,19 +2,12 @@ local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
-local data = asset.syncedResource({
-  Name = "Example Globe Video",
-  Type = "UrlSynchronization",
-  Identifier = "example_globe_video",
-  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/video/test-video.mp4"
-})
-
-
 local Layer = {
-  Identifier = "ExampleVideo",
+  Name = "Globe Video Loop Example",
+  Identifier = "GlobeVideoLoopExample",
+  Enabled = true,
   Type = "VideoTileLayer",
-  Video = data .. "/test-video.mp4",
-  Name = "Example Video"
+  Video = asset.localResource("examplevideo.mp4"),
 }
 
 
