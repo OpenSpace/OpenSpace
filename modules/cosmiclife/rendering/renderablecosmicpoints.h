@@ -81,7 +81,10 @@ namespace openspace {
         void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
             GLuint textureHeight);
         void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
-            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
+            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
+        void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
+        float computeFadeFactor(float distanceNodeToCamera) const;
         void updateRenderData(const RenderData& data);
         float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e);
 
@@ -96,6 +99,7 @@ namespace openspace {
         bool _hasColorMapFile = false;
         bool _isColorMapExact = false;
         bool _hasDatavarSize = false;
+        bool _hasLabel = false;
 
         std::vector<float> _result;
 
@@ -120,7 +124,16 @@ namespace openspace {
         properties::BoolProperty _useLinearFiltering;
         properties::TriggerProperty _setRangeFromData;
         properties::OptionProperty _renderOption;
-
+        properties::Vec3Property _textColor;
+        properties::FloatProperty _textOpacity;
+        properties::FloatProperty _textSize;
+        properties::IVec2Property _textMinMaxSize;
+        properties::BoolProperty _drawLabels;
+        properties::BoolProperty _enableLabelFadingEffect;
+        properties::Vec2Property _fadeLabelDistances;
+        properties::Vec2Property _fadeLabelWidths;
+        properties::Vec2Property _fadeInDistances;
+        properties::BoolProperty _disableFadeInDistance;
 
 
         ghoul::opengl::Texture* _spriteTexture = nullptr;
@@ -144,6 +157,7 @@ namespace openspace {
         // String variables
         std::string _speckFile;
         std::string _colorMapFile;
+        std::string _labelFile;
         std::string _colorOptionString;
         std::string _datavarSizeOptionString;
 
