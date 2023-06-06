@@ -7,6 +7,11 @@ local Triton = {
   Identifier = "Triton",
   Parent = transforms.NeptuneBarycenter.Identifier,
   Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_TRITON",
+      DestinationFrame = "GALACTIC",
+    },
     Translation = {
       Type = "SpiceTranslation",
       Target = "TRITON",
@@ -100,8 +105,7 @@ asset.export(TritonLabel)
 asset.meta = {
   Name = "Triton",
   Version = "1.1",
-  Description = [[Procedural Globe asset containing Neptune's moon: Triton. A blank globe
-    and SPICE trail are generated for the moon]],
+  Description = [[Globe asset containing Neptune's moon Triton]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

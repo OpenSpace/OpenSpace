@@ -307,7 +307,8 @@ local VoyagerTrailEncounterNeptune = {
     -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
     StartTime = "1989 AUG 23 22:30:00",
     EndTime = "1989 AUG 26",
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = asset.enabled
   },
   Tag = { "voyager2_trail" },
   GUI = {

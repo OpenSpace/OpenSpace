@@ -1,5 +1,4 @@
-asset.require("./layers/colorlayers/clr_mosaic_globalfill_600m_newyork", true)
-
+asset.require("./layers/colorlayers/triton_voyager2_clrmosaic_globalfill_600m", true)
 
 
 asset.meta = {
