@@ -1,3 +1,6 @@
+-- To learn how you can include your own video, see the wiki 
+-- http://wiki.openspaceproject.com/docs/builders/assets/resources.html
+
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 
