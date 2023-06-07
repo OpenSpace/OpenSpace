@@ -40,7 +40,6 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
- // from billboard cloud
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
@@ -54,7 +53,7 @@ namespace ghoul::fontrendering { class Font; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-} // namespace ghoul::opengl
+}
 
 namespace openspace {
 
@@ -85,6 +84,7 @@ namespace openspace {
         void updateRenderData(const RenderData& data);
         float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e);
 
+        // camera position variable
         glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
 
         // bool variables
@@ -97,12 +97,13 @@ namespace openspace {
         bool _isColorMapExact = false;
         bool _hasDatavarSize = false;
 
+        // variable for storing the data variables to send to shader 
         std::vector<float> _result;
 
+        // variable to store each unique species
+        std::optional<std::string> _uniqueSpecies;
 
-
-        GLuint _pTexture = 0;
-
+        // property declarations
         properties::FloatProperty _scaleFactor;
         properties::Vec3Property _pointColor;
         properties::Vec3Property _frameColor;
@@ -122,12 +123,12 @@ namespace openspace {
         properties::OptionProperty _renderOption;
 
 
-
+        // ghoul properties for texture and program 
         ghoul::opengl::Texture* _spriteTexture = nullptr;
         ghoul::opengl::ProgramObject* _program = nullptr;
 
 
-        // variables that are sent to the shaders
+        // uniform shader-variables
         UniformCache(
             cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
             minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
@@ -138,30 +139,30 @@ namespace openspace {
         // font variable from ghoul library
         std::shared_ptr<ghoul::fontrendering::Font> _font;
 
-        std::optional<std::string> _uniqueSpecies;
-        std::vector<float> _cachedDataSlice;
-
-        // String variables
+        // string variables
         std::string _speckFile;
         std::string _colorMapFile;
         std::string _colorOptionString;
         std::string _datavarSizeOptionString;
 
-        // distance default unit -- change?
+        // distance default unit
         DistanceUnit _unit = DistanceUnit::Parsec;
 
-        // speck files
+        // variables for speck files
         speck::Dataset _dataset;
         speck::Labelset _labelset;
         speck::ColorMap _colorMap;
 
-        // range data, do we need conversion map?
+        // variables for color data
         std::vector<glm::vec2> _colorRangeData;
         std::unordered_map<int, std::string> _optionConversionMap;
         std::unordered_map<int, std::string> _optionConversionSizeMap;
 
+        // transformation variable
         glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
+        // texture, vertex array object and vertex buffer object for OpenGL
+        GLuint _pTexture = 0;
         GLuint _vao = 0;
         GLuint _vbo = 0;
     };
