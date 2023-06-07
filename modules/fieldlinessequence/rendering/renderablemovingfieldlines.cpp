@@ -146,7 +146,9 @@ namespace openspace {
         std::filesystem::path filePath,
         std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
-        double startTime
+        double yOutherLimit,
+        int numberOfFieldlines,
+        double algorithmAccuracy
     );
 
     void addCoordinatesToSeedPoints(
@@ -164,9 +166,14 @@ namespace openspace {
         std::filesystem::path filePath
     );
 
+    std::vector<RenderableMovingFieldlines::SetOfSeedPoints> filterSetOfSeedPoints(
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPoints,
+        double yOutherLimit
+    );
+
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectSetOfSeedPoints(
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPoints,
-        float percentageOfSeedPoints
+        int numberOfFieldlines
     );
 
     std::ifstream readTxtOrCSVFile(std::filesystem::path filePath);
@@ -483,13 +490,15 @@ namespace openspace {
     bool RenderableMovingFieldlines::getStateFromCdfFiles(std::filesystem::path pathToDownloadTo) {
 
         std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
-
         std::vector<std::pair<glm::vec3, std::string>> seedPoints;
         std::vector<double> birthTimes;
-
         bool isSuccessful = false;
         bool shouldExtractSeedPoints = true;
+
         double startTime = 0.0;
+        double yOutherLimit = 6.0;
+        int numberOfFieldlines = 5;
+        double algorithmAccuracy = 0.3;
 
         for (const std::filesystem::path entry : _sourceFiles) {
             const std::string& cdfPath = entry.string();
@@ -526,10 +535,12 @@ namespace openspace {
                 // download and use .csv file with seedpoints
                 if (_useSeedPointProvider) {
                     selectAndModifySeedpoints(
-                        pathToDownloadTo,
+                        _providedSeedFilePath,
                         seedPoints,
                         birthTimes,
-                        startTime
+                        yOutherLimit,
+                        numberOfFieldlines,
+                        algorithmAccuracy
                     );
                 }
                 // Use provided .csv file with seedpoints
@@ -538,7 +549,9 @@ namespace openspace {
                         _providedSeedFilePath,
                         seedPoints,
                         birthTimes,
-                        startTime
+                        yOutherLimit,
+                        numberOfFieldlines,
+                        algorithmAccuracy
                     );
                 }
                 // Use provided .txt file with seedpoints
@@ -836,7 +849,7 @@ namespace openspace {
                 fmt::format("selectSeedpoints incorrect fourth parameter"));
         }
 
-        for (int i = 0; i < numberOfFieldlines - 1; i++)
+        for (int i = 0; i < numberOfFieldlines; i++)
         {
             double find = abs(stepLength * (i + 1));
             //std::cout << "Find: " << find << std::endl;
@@ -916,13 +929,31 @@ namespace openspace {
         return numberOfFieldlinesOnSide;
     }
 
+    std::vector<RenderableMovingFieldlines::SetOfSeedPoints> filterSetOfSeedPoints(
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPoints,
+        double yOutherLimit
+    )
+    {
+        double limitPositiveY = yOutherLimit;
+        double limitNegativeY = yOutherLimit * -1;
+
+        for (auto it = setOfSeedPoints.begin(); it != setOfSeedPoints.end();) {
+            if (it->IMF.y > limitPositiveY || it->IMF.y < limitNegativeY) {
+                it = setOfSeedPoints.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+        return setOfSeedPoints;
+    }
+
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectSetOfSeedPoints(
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPoints,
-        float percentageOfSeedPoints
+        int numberOfFieldlines
     )
     {
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSetOfSeedpoints;
-        int numberOfFieldlines = int(setOfSeedPoints.size() * percentageOfSeedPoints);
 
         if (numberOfFieldlines > 1)
         {
@@ -941,11 +972,16 @@ namespace openspace {
                 }
             }
 
+            int fieldlinesInTheMiddle = 1;
+            numberOfFieldlines = numberOfFieldlines - fieldlinesInTheMiddle;
+
             int numberOfFieldlinesOnSide = getNumberOfFieldLinesOnSide(
                 numberOfFieldlines,
                 rightSideSeedpoints.size(),
                 leftSideSeedpoints.size()
             );
+
+            std::cout << "number of fieldlines on side: " << numberOfFieldlinesOnSide << std::endl;
 
             int furthestRelativeAngleRight = 90 - (atan(abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.x) / abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.y)) * (180 / 3.14));
             int furthestRelativeAngleLeft = 90 - (atan(abs(leftSideSeedpoints[0].IMF.x) / abs(leftSideSeedpoints[0].IMF.y)) * (180 / 3.14));
@@ -991,13 +1027,45 @@ namespace openspace {
                 selectedSeedpointsRightSide.end()
             );
 
-            selectedSetOfSeedpoints = selectedSeedpointsLeftSide;
+            if (selectedSeedpointsLeftSide.size() != selectedSetOfSeedpoints.size())
+            {
+                // find closest to the middle
+                int bestIndex = 0;
+                double y_value;
+                double smallest_y_value = 1000;
+                bool thisSeedPointIsAlreadyAdded;
+
+                // select seedpoint set with smallest y value on imf
+                for (int i = 0; i < selectedSetOfSeedpoints.size(); i++)
+                {
+                    thisSeedPointIsAlreadyAdded = false;
+                    y_value = abs(selectedSetOfSeedpoints[i].IMF.y);
+                    if (y_value < smallest_y_value)
+                    {
+                        for (int j = 0; j < selectedSeedpointsLeftSide.size(); j++)
+                        {
+                            if (setOfSeedPoints[i].IMF.y == selectedSeedpointsLeftSide[j].IMF.y)
+                            {
+                                thisSeedPointIsAlreadyAdded = true;
+                            }
+                        }
+                        if (!thisSeedPointIsAlreadyAdded)
+                        {
+                            smallest_y_value = y_value;
+                            bestIndex = i;
+                        }
+
+                    }
+                }
+                selectedSeedpointsLeftSide.push_back(setOfSeedPoints[bestIndex]);
+                selectedSetOfSeedpoints = selectedSeedpointsLeftSide;
+            }
         }
         else if (numberOfFieldlines == 1)
         {
-            int bestIndex;
-            double smallest_y_value = 100;
+            int bestIndex = 0;
             double y_value;
+            double smallest_y_value = 1000;
 
             // select seedpoint set with smallest y value on imf
             for (int i = 0; i < setOfSeedPoints.size(); i++)
@@ -1007,10 +1075,8 @@ namespace openspace {
                 {
                     smallest_y_value = y_value;
                     bestIndex = i;
-                    std::cout << smallest_y_value << std::endl;
                 }
             }
-            std::cout << setOfSeedPoints[bestIndex].IMF.x << setOfSeedPoints[bestIndex].IMF.y << setOfSeedPoints[bestIndex].IMF.z << std::endl;
             selectedSetOfSeedpoints.push_back(setOfSeedPoints[bestIndex]);
         }
         else
@@ -1029,7 +1095,9 @@ namespace openspace {
         std::filesystem::path filePath,
         std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
-        double startTime
+        double yOutherLimit,
+        int numberOfFieldlines,
+        double algorithmAccuracy
     )
     {
         if (!std::filesystem::is_regular_file(filePath) ||
@@ -1039,26 +1107,16 @@ namespace openspace {
                 fmt::format("SeedPointFile needs to be a .csv file"));
         }
 
+        std::cout << filePath << std::endl;
+
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedpoints =
             extractSeedPointsFromCSVFile(filePath);
 
-        float percentageOfSetSeedPoints = 0.4;
-
-        //Filters data from unusable seedpoints
-        //TODO: Make function and make dynamic
-        //for (auto it = setOfSeedpoints.begin(); it != setOfSeedpoints.end();) {
-        //    if (it->IMF.y > 10 || it->IMF.y < -10 || (it->IMF.y > -1 && it->IMF.y < 1)) {
-        //        it = setOfSeedpoints.erase(it);
-        //    }
-        //    else {
-        //        ++it;
-        //    }
-        //}
-
-        float percentageOfSetSeedPoints = 0.5;
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> filteredSetOfSeedpoints =
+            filterSetOfSeedPoints(setOfSeedpoints, yOutherLimit);
 
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSetOfSeedpoints =
-            selectSetOfSeedPoints(setOfSeedpoints, percentageOfSetSeedPoints);
+            selectSetOfSeedPoints(filteredSetOfSeedpoints, numberOfFieldlines);
 
         addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSetOfSeedpoints);
 
@@ -1074,15 +1132,13 @@ namespace openspace {
         std::unique_ptr<ccmc::Interpolator> interpolator =
             std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
-        float accuracy = 0.3;
-
-       seedPoints =
+        seedPoints =
             fls::validateAndModifyAllSeedPoints(
                 seedPoints,
                 _tracingVariable,
                 kameleon.get(),
                 _nPointsOnPathLine,
-                accuracy
+                algorithmAccuracy
             );
 
         std::vector<std::pair<glm::vec3, std::string>> nightsideSeedPoints =
@@ -1094,39 +1150,14 @@ namespace openspace {
                 _nPointsOnPathLine
             );
 
-        //Hardcoded adding of nightside seedpoints
-        //TODO: Make dynamic
-        std::filesystem::path filePathNightside = "C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/nightside.txt";
+        // See the seed points
+        std::cout << "Seed points to enter the visualization" << std::endl;
 
-        /* NIGHTSIDE
-        std::filesystem::path filePathNightside = "C:/Dev/OpenSpaceLocalData/nightside.txt";
-        double startTimeNightside = 0.0;
-        std::tuple<std::vector<glm::vec3>, std::vector<double>> nightsideSeedpoints =
-            extractSeedPointsFromFile(filePathNightside, seedPoints, birthTimes, startTimeNightside);
-        */
-
-        /*std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/ON_MODIFIERAD.txt");
-
-        if (output_file.is_open()){
-            for (const auto& subvec : testFieldlinePositions) {
-                for (const auto& vec : subvec) {
-                    output_file << vec.x << " " << vec.y << " " << vec.z << " " << std::endl;
-                }
-            }
-            output_file.close();
-        }
-        else {
-            std::cerr << "Unable to open file" << std::endl;
-        }*/
-
-        // ALGORITHM
-        // TODO: remove just for testing
-
-        // See the selected and modified seed points
-        // TODO: REMOVE
-         for (int i = 0; i < seedPoints.size(); i++)
+        for (int i = 0; i < seedPoints.size(); i++)
         {
-            std::cout << "seedpoint " << i << ": " << seedPoints[i].first << std::endl;
+            std::cout << seedPoints[i].first.x <<
+                " " << seedPoints[i].first.y << " " <<
+                seedPoints[i].first.z << " " << std::endl;
 
         }
         for (int i = 0; i < birthTimes.size(); i++)
