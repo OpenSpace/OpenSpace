@@ -504,8 +504,9 @@ HorizonsResult readHorizonsFile(std::filesystem::path file) {
     // " Before data starts, Observer table doesn't
     std::string line;
     std::getline(fileStream, line);
+    const std::string vectorTabHeader = "JDTDB";
     while (line[0] != '$') {
-        if (line == "JDTDB") {
+        if (line.substr(0, vectorTabHeader.size()) == vectorTabHeader) {
             fileStream.close();
             return readHorizonsVectorFile(file);
         }
