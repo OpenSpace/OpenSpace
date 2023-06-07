@@ -6,7 +6,7 @@ local sssb = asset.syncedResource({
   Name = "Small SolarSystem Body Data (Chiron-type Comet)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_chiron-type_comet",
-  Version = 2
+  Version = 3
 })
 
 

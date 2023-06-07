@@ -239,8 +239,9 @@ namespace {
     }
 
     double epochFromYMDdSubstring(const std::string& epoch) {
-        // The epochString is in the form:
+        // The epochString can be in one of two forms:
         // YYYYMMDD.ddddddd
+        // YYYY-MM-DD.ddddddd
         // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
         // and dddd the fraction of that day.
 
@@ -258,8 +259,14 @@ namespace {
             e += ".0";
         }
         // 1, 2
+        size_t nDashes = std::count_if(
+            epoch.begin(),
+            epoch.end(),
+            [](char c) { return c == '-'; }
+        );
+        std::string formatString = (nDashes == 2) ? "{:4}-{:2}-{:2}{}" : "{:4}{:2}{:2}{}";
         auto [res, year, monthNum, dayOfMonthNum, fractionOfDay] =
-            scn::scan_tuple<int, int, int, double>(e, "{:4}{:2}{:2}{}");
+            scn::scan_tuple<int, int, int, double>(e, formatString);
         if (!res) {
             throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
         }
@@ -598,10 +605,12 @@ std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
 
     std::string line;
     std::getline(f, line);
+    // Newer versions downloaded from the JPL SBDB website have " around variables
+    line.erase(remove(line.begin(), line.end(), '\"'), line.end());
     if (line != ExpectedHeader) {
         throw ghoul::RuntimeError(fmt::format(
             "Expected JPL SBDB file to start with '{}' but found '{}' instead",
-            ExpectedHeader, line
+            ExpectedHeader, line.substr(0, 100)
         ));
     }
 
