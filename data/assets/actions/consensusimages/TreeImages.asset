@@ -10,7 +10,7 @@ local treeImages = {
     ]],
     Documentation = [[Turn on and off Primates Tree Images]],
     GuiPath = "/ConsensusImages",
-    IsLocal = true
+    IsLocal = false
   }
   asset.export("treeImages", treeImages.Identifier)
   

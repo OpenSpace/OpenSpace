@@ -10,7 +10,7 @@ local scaledImages = {
     ]],
     Documentation = [[Turn on and off Primates Scaled Images]],
     GuiPath = "/ConsensusImages",
-    IsLocal = true
+    IsLocal = false
   }
   asset.export("scaledImages", scaledImages.Identifier)
   

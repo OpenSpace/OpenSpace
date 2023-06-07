@@ -10,7 +10,7 @@ local consensusImages = {
     ]],
     Documentation = [[Turn on and off Primates Consensus images]],
     GuiPath = "/ConsensusImages",
-    IsLocal = true
+    IsLocal = false
   }
   asset.export("consensusImages", consensusImages.Identifier)
   
