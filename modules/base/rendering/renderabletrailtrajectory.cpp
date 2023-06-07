@@ -230,7 +230,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
             // Make space for the vertices
             _vertexArray.clear();
-            _vertexArray.resize(_numberOfVertices);
+            _vertexArray.resize(_numberOfVertices + 1);
         }
 
         // Calculate sweeping range for this iteration
@@ -252,6 +252,17 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _minVertex = glm::min(_minVertex, p);
         }
         ++_sweepIteration;
+
+        // Adds the last point in time to the _vertexArray so that we
+        // ensure that points for _start and _end always exists.
+        if (stopIndex == _numberOfVertices) {
+            const glm::vec3 p = _translation->position({
+                {},
+                Time(_end),
+                Time(0.0)
+            });
+            _vertexArray[stopIndex] = { p.x, p.y, p.z };
+        }
 
         if (stopIndex == _numberOfVertices) {
             _sweepIteration = 0;
@@ -299,10 +310,13 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             0.0,
             (data.time.j2000Seconds() - _start) / (_end - _start)
         );
-        _primaryRenderInformation.count = std::min(
-            static_cast<GLsizei>(ceil(_vertexArray.size() * t)),
-            static_cast<GLsizei>(_vertexArray.size() - 1)
-        );
+        if (data.time.j2000Seconds() < _end) {
+            _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size() * t);
+        }
+        else {
+            _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
+        }
+
     }
 
     // If we are inside the valid time, we additionally want to draw a line from the last
