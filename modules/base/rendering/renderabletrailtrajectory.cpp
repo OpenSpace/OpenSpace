@@ -218,15 +218,15 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             // Cap _numberOfVertices in order to prevent overflow and extreme performance
             // degredation/RAM usage
             _numberOfVertices = std::min(
-                static_cast<unsigned int>(timespan / _totalSampleInterval),
+                static_cast<unsigned int>(std::ceil(timespan / _totalSampleInterval)),
                 maxNumberOfVertices
             );
 
             // We need to recalcuate the _totalSampleInterval if _numberOfVertices eqals
             // maxNumberOfVertices. If we don't do this the position for each vertex
             // will not be correct for the number of vertices we are doing along the trail
-            _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ?
-                (timespan / _numberOfVertices) : _totalSampleInterval;
+            _totalSampleInterval = std::max(1.0, (_numberOfVertices == maxNumberOfVertices) ?
+                (timespan / _numberOfVertices) : _totalSampleInterval);
 
             // Make space for the vertices
             _vertexArray.clear();
@@ -311,7 +311,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             (data.time.j2000Seconds() - _start) / (_end - _start)
         );
         if (data.time.j2000Seconds() < _end) {
-            _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size() * t);
+            _primaryRenderInformation.count = static_cast<GLsizei>(std::max(1.0,_vertexArray.size() * t));
         }
         else {
             _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
