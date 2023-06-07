@@ -253,8 +253,9 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
         ++_sweepIteration;
 
+        // Full sweep is complete here.
         // Adds the last point in time to the _vertexArray so that we
-        // ensure that points for _start and _end always exists.
+        // ensure that points for _start and _end always exists
         if (stopIndex == _numberOfVertices) {
             const glm::vec3 p = _translation->position({
                 {},
@@ -262,9 +263,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 Time(0.0)
             });
             _vertexArray[stopIndex] = { p.x, p.y, p.z };
-        }
 
-        if (stopIndex == _numberOfVertices) {
             _sweepIteration = 0;
             setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
         }
