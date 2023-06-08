@@ -310,7 +310,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             (data.time.j2000Seconds() - _start) / (_end - _start)
         );
         if (data.time.j2000Seconds() < _end) {
-            _primaryRenderInformation.count = static_cast<GLsizei>(std::max(1.0,_vertexArray.size() * t));
+            _primaryRenderInformation.count = static_cast<GLsizei>(std::max(1.0, _vertexArray.size() * t));
         }
         else {
             _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
