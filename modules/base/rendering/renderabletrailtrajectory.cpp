@@ -218,7 +218,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             // Cap _numberOfVertices in order to prevent overflow and extreme performance
             // degredation/RAM usage
             _numberOfVertices = std::min(
-                static_cast<unsigned int>(timespan / _totalSampleInterval),
+                static_cast<unsigned int>(std::ceil(timespan / _totalSampleInterval)),
                 maxNumberOfVertices
             );
 
@@ -227,10 +227,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             // will not be correct for the number of vertices we are doing along the trail
             _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ?
                 (timespan / _numberOfVertices) : _totalSampleInterval;
+            _totalSampleInterval = std::max(1.0, _totalSampleInterval);
 
             // Make space for the vertices
             _vertexArray.clear();
-            _vertexArray.resize(_numberOfVertices);
+            _vertexArray.resize(_numberOfVertices + 1);
         }
 
         // Calculate sweeping range for this iteration
@@ -253,7 +254,17 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
         ++_sweepIteration;
 
+        // Full sweep is complete here.
+        // Adds the last point in time to the _vertexArray so that we
+        // ensure that points for _start and _end always exists
         if (stopIndex == _numberOfVertices) {
+            const glm::vec3 p = _translation->position({
+                {},
+                Time(_end),
+                Time(0.0)
+            });
+            _vertexArray[stopIndex] = { p.x, p.y, p.z };
+
             _sweepIteration = 0;
             setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
         }
@@ -299,10 +310,13 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             0.0,
             (data.time.j2000Seconds() - _start) / (_end - _start)
         );
-        _primaryRenderInformation.count = std::min(
-            static_cast<GLsizei>(ceil(_vertexArray.size() * t)),
-            static_cast<GLsizei>(_vertexArray.size() - 1)
-        );
+        if (data.time.j2000Seconds() < _end) {
+            _primaryRenderInformation.count = static_cast<GLsizei>(std::max(1.0, _vertexArray.size() * t));
+        }
+        else {
+            _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
+        }
+
     }
 
     // If we are inside the valid time, we additionally want to draw a line from the last
