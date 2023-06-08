@@ -1027,7 +1027,7 @@ namespace openspace {
                 selectedSeedpointsRightSide.end()
             );
 
-            if (selectedSeedpointsLeftSide.size() != selectedSetOfSeedpoints.size())
+            if (selectedSeedpointsLeftSide.size() != setOfSeedPoints.size())
             {
                 // find closest to the middle
                 int bestIndex = 0;
@@ -1036,10 +1036,10 @@ namespace openspace {
                 bool thisSeedPointIsAlreadyAdded;
 
                 // select seedpoint set with smallest y value on imf
-                for (int i = 0; i < selectedSetOfSeedpoints.size(); i++)
+                for (int i = 0; i < setOfSeedPoints.size(); i++)
                 {
                     thisSeedPointIsAlreadyAdded = false;
-                    y_value = abs(selectedSetOfSeedpoints[i].IMF.y);
+                    y_value = abs(setOfSeedPoints[i].IMF.y);
                     if (y_value < smallest_y_value)
                     {
                         for (int j = 0; j < selectedSeedpointsLeftSide.size(); j++)
@@ -1120,7 +1120,7 @@ namespace openspace {
 
         addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSetOfSeedpoints);
 
-        // TODO: Fix hard coded path
+        // TODO: Fix hard coded path // highres/3d__var_1_e20000101-020000-000.out.cdf // /3d__var_1_e20000101-020000-000.out.cdf
         std::string cdfPathTemp = "C:/Dev/OpenSpaceLocalData/simonmans/3d__var_1_e20000101-020000-000.out.cdf";
 
         size_t _nPointsOnPathLine = 50;
