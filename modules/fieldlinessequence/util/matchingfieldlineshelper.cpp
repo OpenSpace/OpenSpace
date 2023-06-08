@@ -408,16 +408,37 @@ namespace openspace::fls {
                 vectorIE.y = imfSeedPointNightside.y - earthPos.y;
                 vectorIE.z = imfSeedPointNightside.z - earthPos.z;
 
-                closedSeedPointNightside.x = imfSeedPointNightside.x - vectorIE.x * 0.06;
-                closedSeedPointNightside.y = imfSeedPointNightside.y - vectorIE.y * 0.06;
-                closedSeedPointNightside.z = imfSeedPointNightside.z - vectorIE.z * 0.06;
+                closedSeedPointNightside.x = imfSeedPointNightside.x - vectorIE.x * 0.04;
+                closedSeedPointNightside.y = imfSeedPointNightside.y - vectorIE.y * 0.04;
+                closedSeedPointNightside.z = imfSeedPointNightside.z - vectorIE.z * 0.04;
+
+                bool moveTheOtherSeedPoints = true;
 
                 while (closedSeedPointNightside.x < 0)
                 {
-                    // move seed point towards earh
+                    // move seed point towards earth
                     closedSeedPointNightside.x = closedSeedPointNightside.x - vectorIE.x * factor;
                     closedSeedPointNightside.y = closedSeedPointNightside.y - vectorIE.y * factor;
                     closedSeedPointNightside.z = closedSeedPointNightside.z - vectorIE.z * factor;
+
+                    if (moveTheOtherSeedPoints)
+                    {
+                        // move seed point towards earth
+                        imfSeedPointNightside.x = imfSeedPointNightside.x - vectorIE.x * factor;
+                        imfSeedPointNightside.y = imfSeedPointNightside.y - vectorIE.y * factor;
+                        imfSeedPointNightside.z = imfSeedPointNightside.z - vectorIE.z * factor;
+
+                        // move seed point towards earth
+                        osSeedPointNightside.x = osSeedPointNightside.x - vectorIE.x * factor;
+                        osSeedPointNightside.y = osSeedPointNightside.y - vectorIE.y * factor;
+                        osSeedPointNightside.z = osSeedPointNightside.z - vectorIE.z * factor;
+
+                        // move seed point towards earth
+                        onSeedPointNightside.x = onSeedPointNightside.x - vectorIE.x * factor;
+                        onSeedPointNightside.y = onSeedPointNightside.y - vectorIE.y * factor;
+                        onSeedPointNightside.z = onSeedPointNightside.z - vectorIE.z * factor;
+                    }
+
 
                     // trace fieldline from closedSeedPoint
                     std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
@@ -433,6 +454,8 @@ namespace openspace::fls {
                     // check if closed
                     if (checkIfFieldlineIsClosed(fieldlinePositions))
                     {
+
+                        moveTheOtherSeedPoints = false;
 
                         std::cout << "Closed seed point traced closed fieldline "
                             << std::endl;
@@ -454,7 +477,7 @@ namespace openspace::fls {
                         bool closedSeedPointIsClosedFieldline = true;
                         int indexFlowlinePos2 = 0;
 
-                        while (closedSeedPointIsClosedFieldline && indexFlowlinePos2 < 50) //99
+                        while (closedSeedPointIsClosedFieldline && indexFlowlinePos2 < 100)//indexFlowlinePos2 < 100) //99
                         {
                             // trace fieldline from closedSeedPoint
                             std::vector<glm::vec3> fieldlinePositions2 = fls::getFieldlinePositions(
@@ -468,12 +491,17 @@ namespace openspace::fls {
                             {
                                 closedSeedPointIsClosedFieldline = false;
                                 std::cout << indexFlowlinePos2 <<
-                                    "point out of " << "50" << " not approved" << std::endl;
+                                    "point out of " << "100" << " not approved" << std::endl;
+                                break;
+                            }
+
+                            if (flowlinePositions[indexFlowlinePos2].x > 0)
+                            {
                                 break;
                             }
 
                             std::cout << indexFlowlinePos2 <<
-                                "point out of " << "50" << " approved" << std::endl;
+                                "point out of " << "100" << " approved" << std::endl;
                             indexFlowlinePos2++;
                         }
 
@@ -481,6 +509,8 @@ namespace openspace::fls {
                         if (closedSeedPointIsClosedFieldline)
                         {
                             std::cout << "Finding Closed Nightside Seed Point - Complete" << std::endl;
+                            // mod
+
                             break;
                         }
                     }
@@ -1471,7 +1501,7 @@ namespace openspace::fls {
                 deathTime = birthTime + 700;
             }
             else {
-                deathTime = birthTime + 2000;
+                deathTime = birthTime + 4000; // increase time
             }
 
             // TODO: Make it work dynamically

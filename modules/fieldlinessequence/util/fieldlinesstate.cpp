@@ -406,7 +406,7 @@ void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
     _lineCount.push_back(static_cast<GLsizei>(nNewPoints));
     _vertexPositions.reserve(nOldPoints + nNewPoints);
 
-    std::copy(line.begin(), line.end(), std::back_inserter(_vertexPositions));    
+    std::copy(line.begin(), line.end(), std::back_inserter(_vertexPositions));
 }
 
 void FieldlinesState::addLinesToBeRendered() {
@@ -434,7 +434,7 @@ double FieldlinesState::daysideDeathTime(size_t index) {
         {
             break;
         }
-        
+
     }
 
     return time;
@@ -456,20 +456,20 @@ void FieldlinesState::initializeRenderedMatchingFieldlines() {
 
 // move all bad to the end and then we delete
 // hard coded, this circulates 21 vertices around the first reconnection
-void FieldlinesState::deleteBadMatchingFieldlines() { 
+void FieldlinesState::deleteBadMatchingFieldlines() {
 
     std::vector<size_t> indicesToRemove;
     size_t nMatchingFieldlines = _allMatchingFieldlines.size() - 1;
     for (size_t j = 0; j < nMatchingFieldlines; ++j) {
         int totalTopologyChanges = 0;
         for (size_t i = 190; i < 211; ++i) {
-            if (_allMatchingFieldlines[j].pathLines.first.keyFrames[i].topology != 
+            if (_allMatchingFieldlines[j].pathLines.first.keyFrames[i].topology !=
                 _allMatchingFieldlines[j].pathLines.first.keyFrames[i + 1].topology) {
                 ++totalTopologyChanges;
             }
         }
 
-        if (totalTopologyChanges > 2) { 
+        if (totalTopologyChanges > 2) {
             --j;
             --nMatchingFieldlines;
             std::swap(_allMatchingFieldlines[j], _allMatchingFieldlines[nMatchingFieldlines]);
@@ -495,7 +495,7 @@ void FieldlinesState::deleteBadMatchingFieldlines() {
 }
 
 glm::vec3 FieldlinesState::criticalPoint(size_t i) {
-    size_t afterReconnection = 
+    size_t afterReconnection =
         _allMatchingFieldlines[i].pathLines.first.line.size() / 2;
     size_t beforeReconnection = afterReconnection - 1;
 
@@ -545,7 +545,7 @@ void FieldlinesState::addMatchingKeyFrames(
     const std::vector<glm::vec3>&& keyFrame1, const std::vector<glm::vec3>&& keyFrame2,
     const double time1, const double time2, const std::vector<float>&& length1, const std::vector<float>&& length2,
     size_t matchingFieldlinesId) {
-    
+
     Fieldline f1, f2;
 
     // convert vertices from RE to meters and place in key frame objects
@@ -599,7 +599,7 @@ void FieldlinesState::addMatchingKeyFrames(
     _allMatchingFieldlines[matchingFieldlinesId].pathLines.second.keyFrames.push_back(f2);
 }
 
-void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline, 
+void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline,
                                    const double time, const int pathLineIndex)
 {
     Fieldline f;
