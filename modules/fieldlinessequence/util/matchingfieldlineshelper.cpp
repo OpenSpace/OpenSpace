@@ -68,7 +68,7 @@ namespace openspace::fls {
         const size_t nPointsOnPathLine,
         ccmc::Kameleon* kameleon,
         float innerBoundaryLimit,
-        float& accuracy,
+        double &accuracy,
         size_t _nPointsOnFieldLine
     );
 
@@ -114,7 +114,7 @@ namespace openspace::fls {
         float innerBoundaryLimit,
         size_t _nPointsOnFieldLine,
         float& stepLength,
-        float& accuracy,
+        double& accuracy,
         bool up);
 
     glm::vec3 modifySeedpointClosed(
@@ -126,7 +126,7 @@ namespace openspace::fls {
         float innerBoundaryLimit,
         size_t _nPointsOnFieldLine,
         float& stepLength,
-        float& accuracy,
+        double& accuracy,
         bool closerToEarth);
 
     glm::vec3 modifySeedpointIMF(
@@ -138,7 +138,7 @@ namespace openspace::fls {
         float innerBoundaryLimit,
         size_t _nPointsOnFieldLine,
         float& stepLength,
-        float& accuracy,
+        double& accuracy,
         bool closerToEarth);
 
     // DEFINITIONS
@@ -175,7 +175,46 @@ namespace openspace::fls {
         return isSuccessful;
     }
 
-    //
+    int findLastOpenNorthFieldlineIndex(
+        std::vector<glm::vec3> flowlinePositions,
+        int startIndex,
+        ccmc::Kameleon* kameleon
+    )
+    {
+        int indexOfLastOpenNorthFieldline = 0;
+        double innerBoundaryLimit = 0.5;
+        std::string previousTopology = "";
+
+        while (startIndex < flowlinePositions.size() - 1)
+        {
+            // Print progress
+            std::cout << "Checking fieldline topology of the " << startIndex + 1 << " point out of " << flowlinePositions.size() << " on the flowline" << std::endl;
+
+            // Get fieldline of current + 1 position on flowline
+            std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
+                flowlinePositions[startIndex + 1],
+                kameleon,
+                innerBoundaryLimit,
+                2
+            );
+
+            // check if traced fieldline is IMF
+            if (checkIfFieldlineIsIMF(fieldlinePositions)) //fieldlinePositions[0].z < 0 || fieldlinePositions[fieldlinePositions.size() - 1].z < 0)
+            {
+                if (previousTopology == "OPEN_NORTH")
+                {
+                    indexOfLastOpenNorthFieldline = startIndex;
+                    break;
+                }
+                else {
+                    previousTopology = "OPEN_NORTH";
+                }
+            }
+            startIndex++;
+        }
+
+        return indexOfLastOpenNorthFieldline;
+    }
 
     std::vector<std::pair<glm::vec3, std::string>> findAndAddNightsideSeedPoints (
         std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
@@ -228,11 +267,16 @@ namespace openspace::fls {
                     seedPoints[i].first,
                     kameleon,
                     innerBoundaryLimit,
-                    2
+                    100
                 );
 
                 // now, lets figure out the edge position of that fieldline
-                glm::vec3 firstPosOfFieldline = fieldlinePositions[0];
+                glm::vec3 firstPosOfFieldline = fieldlinePositions[20];
+
+                std::cout << "fieldlinePositions: " << fieldlinePositions[0].x << " "
+                    << fieldlinePositions[0].y << " "
+                    << fieldlinePositions[0].z << " "
+                    << std::endl;
 
                 // trace a flowline from the new point/edge position
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
@@ -249,68 +293,69 @@ namespace openspace::fls {
                 std::vector<std::vector<glm::vec3>> lastON;
                 std::vector<std::vector<glm::vec3>> firstIMF;
 
-                std::string previousTopology = "";
-                int indexFlowlinePos = 0;
+                double indexFlowlinePos2 = 0;
 
-                while (indexFlowlinePos < flowlinePositions.size() - 1)
-                {
-                    std::cout << "Checking fieldline topology of the " << indexFlowlinePos + 1 << " point out of " << flowlinePositions.size() << " on the flowline" << std::endl;
+                // optimiezstar
+                int n_points_on_flowline = 20;
+                // trace a flowline from the new point/edge position
+                ccmc::Fieldline flowline2 = traceAndCreateMappedPathLine(
+                    tracingVar,
+                    tracer,
+                    firstPosOfFieldline,
+                    n_points_on_flowline,
+                    ccmc::Tracer::Direction::FOWARD);
 
-                    std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
-                        flowlinePositions[indexFlowlinePos + 1],
-                        kameleon,
-                        innerBoundaryLimit,
-                        2
-                    );
+                std::vector<glm::vec3> flowlinePositions2
+                    = getPositionsFromLine(flowline2);
 
-                    std::cout << fieldlinePositions[0].z << std::endl;
+                indexFlowlinePos2 = findLastOpenNorthFieldlineIndex(flowlinePositions2, 0, kameleon);
 
-                    // check if traced fieldline is IMF
-                    if (fieldlinePositions[0].z < 0 || fieldlinePositions[fieldlinePositions.size() - 1].z < 0)
-                    {
-                        if (previousTopology == "OPEN_NORTH")
-                        {
-                            std::vector<glm::vec3> fieldlinePositionsIMF = fls::getFieldlinePositions(
-                                flowlinePositions[indexFlowlinePos + 1],
-                                kameleon,
-                                innerBoundaryLimit,
-                                testNPoints
-                            );
+                std::cout << indexFlowlinePos2 << " " << flowlinePositions2.size() << " " << indexFlowlinePos2 / flowlinePositions2.size() << std::endl;
+                double referencePercentage = indexFlowlinePos2 / flowlinePositions2.size();
+                int indexFlowlinePos = referencePercentage * flowlinePositions.size();
 
-                            std::vector<glm::vec3> fieldlinePositionsON = fls::getFieldlinePositions(
-                                flowlinePositions[indexFlowlinePos],
-                                kameleon,
-                                innerBoundaryLimit,
-                                testNPoints
-                            );
-                            lastON.push_back(fieldlinePositionsON);
-                            firstIMF.push_back(fieldlinePositionsIMF);
-                            break;
-                        }
-                    }
-                    else {
-                        previousTopology = "OPEN_NORTH";
-                    }
-                    indexFlowlinePos++;
-                }
+                std::cout << "Finding reference index - Completed" << std::endl;
+
+                indexFlowlinePos = findLastOpenNorthFieldlineIndex(flowlinePositions, indexFlowlinePos, kameleon);
+
+                std::vector<glm::vec3> fieldlinePositionsIMF = fls::getFieldlinePositions(
+                    flowlinePositions[indexFlowlinePos], // fix, should be + 1
+                    kameleon,
+                    innerBoundaryLimit,
+                    testNPoints
+                );
+
+                std::vector<glm::vec3> fieldlinePositionsON = fls::getFieldlinePositions(
+                    flowlinePositions[indexFlowlinePos -1], // fix, should be 0
+                    kameleon,
+                    innerBoundaryLimit,
+                    testNPoints
+                );
+
+                lastON.push_back(fieldlinePositionsON);
+                firstIMF.push_back(fieldlinePositionsIMF);
+
+                std::cout << fieldlinePositionsON[0].z << " " << fieldlinePositionsON[fieldlinePositionsON.size()-1].z << std::endl;
+                std::cout << fieldlinePositionsIMF[0].z << " " << fieldlinePositionsIMF[fieldlinePositionsIMF.size()-1].z << std::endl;
 
                 std::cout << "Finding last ON and first IMF - Complete" << std::endl;
                 std::cout << "Finding IMF Nightside Seed Point" << std::endl;
 
                 float leastXValue = -1000;
 
-                // find point on the imf with smallest x-value (closest to earth)
-                for (int i = 0; i < firstIMF.size(); i++)
-                {
-                    for (int j = 0; j < testNPoints; j++)
+                // find point on the imf with smallest x-value (closest to earth) O(n)
+                // TODO use min-heap here instead
+                    for (int i = 0; i < firstIMF.size(); i++)
                     {
-                        if (firstIMF[i][j].x > leastXValue)
+                        for (int j = 0; j < testNPoints; j++)
                         {
-                            leastXValue = firstIMF[i][j].x;
-                            imfSeedPointNightside = firstIMF[i][j];
+                            if (firstIMF[i][j].x > leastXValue)
+                            {
+                                leastXValue = firstIMF[i][j].x;
+                                imfSeedPointNightside = firstIMF[i][j];
+                            }
                         }
                     }
-                }
 
                 std::cout << "Finding IMF Nightside Seed Point - Complete" << std::endl;
                 std::cout << "Finding ON Nightside Seed Point" << std::endl;
@@ -318,6 +363,7 @@ namespace openspace::fls {
                 double shortestDistance = 1000;
 
                 // find point on the on fieldline closest to the imfNightsideSeedPoint
+                // TODO optimize from O(n)
                 for (int i = 0; i < lastON.size(); i++)
                 {
                     for (int j = 0; j < testNPoints; j++)
@@ -408,7 +454,7 @@ namespace openspace::fls {
                         bool closedSeedPointIsClosedFieldline = true;
                         int indexFlowlinePos2 = 0;
 
-                        while (closedSeedPointIsClosedFieldline && indexFlowlinePos2 < 99)
+                        while (closedSeedPointIsClosedFieldline && indexFlowlinePos2 < 50) //99
                         {
                             // trace fieldline from closedSeedPoint
                             std::vector<glm::vec3> fieldlinePositions2 = fls::getFieldlinePositions(
@@ -422,12 +468,12 @@ namespace openspace::fls {
                             {
                                 closedSeedPointIsClosedFieldline = false;
                                 std::cout << indexFlowlinePos2 <<
-                                    "point out of " << "99" << " not approved" << std::endl;
+                                    "point out of " << "50" << " not approved" << std::endl;
                                 break;
                             }
 
                             std::cout << indexFlowlinePos2 <<
-                                "point out of " << "99" << " approved" << std::endl;
+                                "point out of " << "50" << " approved" << std::endl;
                             indexFlowlinePos2++;
                         }
 
@@ -476,7 +522,7 @@ namespace openspace::fls {
         const std::string& tracingVar,
         ccmc::Kameleon* kameleon,
         const size_t nPointsOnPathLine,
-        float& accuracy)
+        double& accuracy)
     {
         if (tracingVar != "u_perp_b") {
             std::cout << "aint working " << std::endl;
@@ -523,7 +569,7 @@ namespace openspace::fls {
         const size_t nPointsOnPathLine,
         ccmc::Kameleon* kameleon,
         float innerBoundaryLimit,
-        float& accuracy,
+        double& accuracy,
         size_t _nPointsOnFieldLine
         )
     {
@@ -822,8 +868,9 @@ namespace openspace::fls {
         else if (fieldlinePositions[0].z < threshold_start_z.second &&
             fieldlinePositions[fieldlinePositions.size() - 1].z > threshold_start_z.first)
         {
-
+            return true;
         }
+
         return false;
     }
 
@@ -922,7 +969,7 @@ namespace openspace::fls {
     * Checks if the position of the flowLine has gone past set criteria
     */
     bool keepCheckingFlowlinesFieldline(std::vector<glm::vec3> flowlinePos, int flowlineIndex) {
-        if (flowlinePos[flowlineIndex].x > -0.5)
+        if (flowlinePos[flowlineIndex].x > -4)
         {
             return true;
         }
@@ -976,7 +1023,7 @@ namespace openspace::fls {
         float innerBoundaryLimit,
         size_t _nPointsOnFieldLine,
         float& stepLength,
-        float& accuracy,
+        double& accuracy,
         bool up)
     {
         std::vector<glm::vec3> fieldlinePositions;
@@ -1098,7 +1145,7 @@ namespace openspace::fls {
         float innerBoundaryLimit,
         size_t _nPointsOnFieldLine,
         float& stepLength,
-        float& accuracy,
+        double& accuracy,
         bool closerToEarth)
     {
         if (closerToEarth)
@@ -1176,7 +1223,7 @@ namespace openspace::fls {
         float innerBoundaryLimit,
         size_t _nPointsOnFieldLine,
         float& stepLength,
-        float& accuracy,
+        double& accuracy,
         bool closerToEarth)
     {
         if (closerToEarth)

@@ -56,8 +56,7 @@ namespace openspace {
             const std::string& tracingVar,
             ccmc::Kameleon* kameleon,
             const size_t nPointsOnPathLine,
-            float& accuracy/*,
-            std::vector<std::string>& seedPointsTopology*/
+            double& accuracy
         );
 
         std::vector<std::pair<glm::vec3, std::string>> findAndAddNightsideSeedPoints(
