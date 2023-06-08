@@ -1121,6 +1121,25 @@ namespace openspace::fls {
                     accuracy,
                     false
                 );
+                break;
+            } else if (!checkIfFieldlineIsOpen(fieldlinePositions))
+            {
+                stepLength = stepLength / 2;
+
+                std::cout << "NOT OPEN! - Move seed point" << std::endl;
+                glm::vec3 modifiedSeedpoint = modifySeedpoint(
+                    seedPoint,
+                    tracingVar,
+                    tracer,
+                    nPointsOnPathLine,
+                    kameleon,
+                    innerBoundaryLimit,
+                    _nPointsOnFieldLine,
+                    stepLength,
+                    accuracy,
+                    true
+                );
+                break;
             }
             flowlineIndex++;
         }
