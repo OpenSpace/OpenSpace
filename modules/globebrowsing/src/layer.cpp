@@ -438,6 +438,10 @@ bool Layer::enabled() const {
     return _enabled;
 }
 
+bool Layer::isInitialized() const {
+    return _isInitialized;
+}
+
 TileProvider* Layer::tileProvider() const {
     return _tileProvider.get();
 }
