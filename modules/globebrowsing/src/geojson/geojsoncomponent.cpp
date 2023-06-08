@@ -649,8 +649,16 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             _geometryFeatures.push_back(std::move(g));
 
             std::string name = _geometryFeatures.back().key();
+            std::string identifier = makeIdentifier(name);
+
+            // If there is already an owner with that name as an identifier, make a
+            // unique one
+            if (_featuresPropertyOwner.hasPropertySubOwner(identifier)) {
+                identifier = fmt::format("Feature{}-", index, identifier);
+            }
+
             properties::PropertyOwner::PropertyOwnerInfo info = {
-                makeIdentifier(name),
+                identifier,
                 name
                 // @TODO: Use description from file, if any
             };
