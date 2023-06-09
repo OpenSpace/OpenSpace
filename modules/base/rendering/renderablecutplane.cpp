@@ -81,6 +81,9 @@ namespace {
     float cutValue;
     // Quantity to color by 
     std::string colorQuantity;
+    // Number of meters per data distance unit
+    float scaleToMeter;
+      
   };
 #include "renderablecutplane_codegen.cpp"
 } // namespace
@@ -112,19 +115,30 @@ bool RenderableCutPlane::isReady() const {
 
 void RenderableCutPlane::initialize() {
     RenderablePlane::initialize();
-    loadTexture();
+//    loadTexture();
 }
 
 void RenderableCutPlane::initializeGL() {
+    ZoneScoped;
+
+    glGenVertexArrays(1, &_quad); // generate array
+    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    loadTexture();
+    std::cout << "hej efter load " <<_axis1 << " " << _axis2;
+    _axis1 *= _size.value().x;
+    _axis2 *= _size.value().y;
+    std::cout << "hej efter load " <<_axis1 << " " << _axis2;
+    _size = {_axis1,_axis2};
     RenderablePlane::initializeGL();
+    
     // TODO: Call shaders when implemented
     _shader = BaseModule::ProgramObjectManager.request(
-        "CutPlane",
+        "Plane",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                "CutPlane",
-                absPath("${MODULE_BASE}/shaders/cutplane_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/cutplane_fs.glsl")
+                "Plane",
+                absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
             );
         }
     );
@@ -133,7 +147,7 @@ void RenderableCutPlane::initializeGL() {
 
 void RenderableCutPlane::deinitializeGL() {
 
-    BaseModule::TextureManager.release(_texture);
+//    BaseModule::TextureManager.release(_texture);
     RenderablePlane::deinitializeGL();
 }
 
@@ -145,16 +159,13 @@ void RenderableCutPlane::bindTexture() {
 //    _texture->bind();
 }
 
-void RenderableCutPlane::render(const RenderData& data, RendererTasks& t) {
-    ZoneScoped;
-    RenderablePlane::render(data,t);
-}
+//void RenderableCutPlane::render(const RenderData& data, RendererTasks& t) {
+//    ZoneScoped;
+//    RenderablePlane::render(data,t);
+//}
 
 void RenderableCutPlane::loadTexture()
 {
-    const GLfloat sizeX = _size.value().x;
-    const GLfloat sizeZ = _size.value().y;
-    
     // Create a 2D vector with dimensions 50x40
     std::vector<std::vector<float>> vec1(50, std::vector<float>(40));
     // Create a 2D vector with dimensions 50x40
@@ -185,9 +196,25 @@ void RenderableCutPlane::loadTexture()
     slices.push_back(vec1);
     slices.push_back(vec2);
     
+    int axisIndex = 2;
+      std::transform(_axis.begin(), _axis.end(), _axis.begin(),
+                      [](unsigned char c) { return std::tolower(c); });
+    
+    // Set the scaling of the coordinates
+    if (_axis.compare("x") == 0) axisIndex = 0;
+    else if (_axis.compare("y") == 0) axisIndex = 1;
+
+    // Copy elements except the second element
+    std::copy_if(volumeMinMax.begin(), volumeMinMax.end(), std::back_inserter(_axisDim),
+           [&volumeMinMax, axisIndex](const std::vector<int>& vec) { return &vec != &volumeMinMax[axisIndex]; });
+    
+     _axis1 = abs(_axisDim[0][0]) + abs(_axisDim[0][1]);
+     _axis2 = abs(_axisDim[1][0]) + abs(_axisDim[1][1]);
+    
     unsigned int hash = ghoul::hashCRC32File(_filePath);
     
     void* memory = static_cast<void*>(&slices[0]);
+    
     
     _texture = BaseModule::TextureManager.request(
         std::to_string(hash),
@@ -200,12 +227,35 @@ void RenderableCutPlane::loadTexture()
                 );
             texture->uploadTexture();
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            texture->purgeFromRAM(); 
-
+            texture->purgeFromRAM();
             return texture;
         }
     );
+    
+    BaseModule::TextureManager.release(t);
+    
+    // Shape the plane based on the aspect ration of the image
+    glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+    if (_textureDimensions != textureDim) {
+        float aspectRatio = textureDim.x / textureDim.y;
+        float planeAspectRatio = _size.value().x / _size.value().y;
+
+        if (std::abs(planeAspectRatio - aspectRatio) >
+            std::numeric_limits<float>::epsilon())
+        {
+            glm::vec2 newSize =
+                aspectRatio > 0.f ?
+                glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+            _size = newSize;
+        }
+
+        _textureDimensions = textureDim;
+    }
+
 }
+
+
 
 }// namespace openspace
 

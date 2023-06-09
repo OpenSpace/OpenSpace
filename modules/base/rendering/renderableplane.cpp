@@ -106,6 +106,7 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::variant<float, glm::vec2> size;
+//        std::optional<std::variant<float, glm::vec2>> size;
 
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
@@ -139,12 +140,17 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 
     addProperty(Fadeable::_opacity);
 
-    if (std::holds_alternative<float>(p.size)) {
-        _size = glm::vec2(std::get<float>(p.size));
-    }
-    else {
-        _size = std::get<glm::vec2>(p.size);
-    }
+//    if(p.size.has_value()){
+        if (std::holds_alternative<float>(p.size)) {
+            _size = glm::vec2(std::get<float>(p.size));
+        }
+        else {
+            _size = std::get<glm::vec2>(p.size);
+        }
+//    }
+//    else{
+//        _size = {10,10};
+//    }
 
     _billboard = p.billboard.value_or(_billboard);
     _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
