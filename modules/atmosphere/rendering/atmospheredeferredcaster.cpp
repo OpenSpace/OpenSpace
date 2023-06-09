@@ -270,6 +270,45 @@ void AtmosphereDeferredcaster::deinitialize() {
 
 void AtmosphereDeferredcaster::update(const UpdateData&) {}
 
+float AtmosphereDeferredcaster::eclipseShadow(glm::dvec3 position, bool ground)
+{
+    // This code is copied from the atmosphere deferred fragment shader 
+    // It is used to calculate the eclipse shadow
+    const ShadowRenderingStruct& shadow = _shadowDataArrayCache.front();
+    if (!shadow.isShadowing) {
+        return 1.0f;
+    }
+
+    glm::dvec3 pc = shadow.casterPositionVec - position;
+    glm::dvec3 scNorm = shadow.sourceCasterVec;
+    glm::dvec3 pcProj = dot(pc, scNorm) * scNorm;
+    glm::dvec3 d = pc - pcProj;
+
+    float length_d = float(length(d));
+    double lengthPcProj = length(pcProj);
+
+    float r_p_pi = float(shadow.rc * (lengthPcProj + shadow.xp) / shadow.xp);
+    float r_u_pi = float(shadow.rc * (shadow.xu - lengthPcProj) / shadow.xu);
+
+    if (length_d < r_u_pi) {
+        // umbra
+        if (_hardShadowsEnabled) {
+            return ground ? 0.2 : 0.5;
+        }
+        else {
+            // butterworth function
+            return sqrt(r_u_pi / (r_u_pi + pow(length_d, 4.0)));
+        }
+    }
+    else if (length_d < r_p_pi) {
+        // penumbra
+        return _hardShadowsEnabled ? 0.5 : length_d / r_p_pi;
+    }
+    else {
+        return 1.0;
+    }
+}
+
 void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const DeferredcastData&,
                                           ghoul::opengl::ProgramObject& prg)
 {

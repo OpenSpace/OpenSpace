@@ -75,6 +75,7 @@ public:
     void initializeCachedVariables(ghoul::opengl::ProgramObject& program) override;
 
     void update(const UpdateData&) override;
+    float eclipseShadow(glm::dvec3 position, bool ground);
 
     void calculateAtmosphereParameters();
 
