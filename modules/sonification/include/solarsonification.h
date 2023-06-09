@@ -61,6 +61,11 @@ private:
     const int NeptuneIndex = 7;
 
     /**
+    * Set all settings for all planets to the given value
+    */
+    void setAll(bool value);
+
+    /**
      * Create a vector with current sonification settings.
      * Order of settings: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
      *

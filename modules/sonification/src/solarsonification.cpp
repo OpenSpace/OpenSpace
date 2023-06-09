@@ -138,6 +138,18 @@ SolarSonification::~SolarSonification() {
     stop();
 }
 
+void SolarSonification::setAll(bool value) {
+    _toggleAll.setValue(value);
+    _mercuryEnabled.setValue(value);
+    _venusEnabled.setValue(value);
+    _earthEnabled.setValue(value);
+    _marsEnabled.setValue(value);
+    _jupiterEnabled.setValue(value);
+    _saturnEnabled.setValue(value);
+    _uranusEnabled.setValue(value);
+    _neptuneEnabled.setValue(value);
+}
+
 std::vector<int> SolarSonification::createSettingsVector() const {
     std::vector<int> settings(NumPlanets, false);
 
@@ -211,21 +223,14 @@ void SolarSonification::onEnabledChanged() {
 }
 
 void SolarSonification::onToggleAllChanged() {
-    _mercuryEnabled.setValue(_toggleAll);
-    _venusEnabled.setValue(_toggleAll);
-    _earthEnabled.setValue(_toggleAll);
-    _marsEnabled.setValue(_toggleAll);
-    _jupiterEnabled.setValue(_toggleAll);
-    _saturnEnabled.setValue(_toggleAll);
-    _uranusEnabled.setValue(_toggleAll);
-    _neptuneEnabled.setValue(_toggleAll);
+    setAll(_toggleAll);
 }
 
 void SolarSonification::update(const Camera* camera) {}
 
 void SolarSonification::stop() {
     _isTurningOff = true;
-    _toggleAll = false;
+    setAll(false);
 }
 
 } // namespace openspace

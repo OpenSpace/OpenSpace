@@ -199,48 +199,48 @@ private:
     };
 
     /**
-    * Set all settings for all planets to the given value
-    */
+     * Set all settings for all planets to the given value
+     */
     void setAll(bool value);
 
     /**
-    * Set all settings for Mercury to the given value
-    */
+     * Set all settings for Mercury to the given value
+     */
     void setAllMercury(bool value);
 
     /**
-    * Set all settings for Mercury to the given value
-    */
+     * Set all settings for Mercury to the given value
+     */
     void setAllVenus(bool value);
 
     /**
-    * Set all settings for Mercury to the given value
-    */
+     * Set all settings for Mercury to the given value
+     */
     void setAllEarth(bool value);
 
     /**
-    * Set all settings for Mercury to the given value
-    */
+     * Set all settings for Mercury to the given value
+     */
     void setAllMars(bool value);
 
     /**
-    * Set all settings for Mercury to the given value
-    */
+     * Set all settings for Mercury to the given value
+     */
     void setAllJupiter(bool value);
 
     /**
-    * Set all settings for Mercury to the given value
-    */
+     * Set all settings for Mercury to the given value
+     */
     void setAllSaturn(bool value);
 
     /**
-    * Set all settings for Mercury to the given value
-    */
+     * Set all settings for Mercury to the given value
+     */
     void setAllUranus(bool value);
 
     /**
-    * Set all settings for Mercury to the given value
-    */
+     * Set all settings for Mercury to the given value
+     */
     void setAllNeptune(bool value);
 
     /**

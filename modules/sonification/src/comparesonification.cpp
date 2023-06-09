@@ -168,6 +168,16 @@ CompareSonification::~CompareSonification() {
     stop();
 }
 
+void CompareSonification::setAll(bool value) {
+    _toggleAll.setValue(value);
+    _sizeDayEnabled.setValue(value);
+    _gravityEnabled.setValue(value);
+    _temperatureEnabled.setValue(value);
+    _atmosphereEnabled.setValue(value);
+    _moonsEnabled.setValue(value);
+    _ringsEnabled.setValue(value);
+}
+
 std::vector<int> CompareSonification::createSettingsVector() const {
     std::vector<int> settings(NumSettings, false);
 
@@ -293,19 +303,14 @@ void CompareSonification::onSecondChanged() {
 }
 
 void CompareSonification::onToggleAllChanged() {
-    _sizeDayEnabled.setValue(_toggleAll);
-    _gravityEnabled.setValue(_toggleAll);
-    _temperatureEnabled.setValue(_toggleAll);
-    _atmosphereEnabled.setValue(_toggleAll);
-    _moonsEnabled.setValue(_toggleAll);
-    _ringsEnabled.setValue(_toggleAll);
+    setAll(_toggleAll);
 }
 
 void CompareSonification::update(const Camera* camera) {}
 
 void CompareSonification::stop() {
     _isTurningOff = true;
-    _toggleAll = false;
+    setAll(false);
 
     _firstPlanet = 0;
     _secondPlanet = 0;
