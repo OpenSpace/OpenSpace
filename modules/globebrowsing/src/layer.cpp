@@ -384,6 +384,7 @@ void Layer::initialize() {
     if (_tileProvider) {
         _tileProvider->initialize();
     }
+    _isInitialized = true;
 }
 
 void Layer::deinitialize() {
