@@ -429,22 +429,12 @@ void PlanetsSonification::onEnabledChanged() {
 }
 
 void PlanetsSonification::onToggleAllChanged() {
-    // Set all the settings
-    _mercuryProperty.toggleAll.setValue(_toggleAll);
-    _venusProperty.toggleAll.setValue(_toggleAll);
-    _earthProperty.toggleAll.setValue(_toggleAll);
-    _marsProperty.toggleAll.setValue(_toggleAll);
-    _jupiterProperty.toggleAll.setValue(_toggleAll);
-    _saturnProperty.toggleAll.setValue(_toggleAll);
-    _uranusProperty.toggleAll.setValue(_toggleAll);
-    _neptuneProperty.toggleAll.setValue(_toggleAll);
+    setAll(_toggleAll);
 }
 
 // Mercury
 void PlanetsSonification::onMercuryAllChanged() {
-    _mercuryProperty.sizeDayEnabled.setValue(_mercuryProperty.toggleAll);
-    _mercuryProperty.gravityEnabled.setValue(_mercuryProperty.toggleAll);
-    _mercuryProperty.temperatureEnabled.setValue(_mercuryProperty.toggleAll);
+    setAllMercury(_mercuryProperty.toggleAll);
 }
 void PlanetsSonification::onMercurySettingChanged() {
     sendSettings(MercuryIndex);
@@ -452,10 +442,7 @@ void PlanetsSonification::onMercurySettingChanged() {
 
 // Venus
 void PlanetsSonification::onVenusAllChanged() {
-    _venusProperty.sizeDayEnabled.setValue(_venusProperty.toggleAll);
-    _venusProperty.gravityEnabled.setValue(_venusProperty.toggleAll);
-    _venusProperty.temperatureEnabled.setValue(_venusProperty.toggleAll);
-    _venusProperty.atmosphereEnabled.setValue(_venusProperty.toggleAll);
+    setAllVenus(_venusProperty.toggleAll);
 }
 void PlanetsSonification::onVenusSettingChanged() {
     sendSettings(VenusIndex);
@@ -463,11 +450,7 @@ void PlanetsSonification::onVenusSettingChanged() {
 
 // Earth
 void PlanetsSonification::onEarthAllChanged() {
-    _earthProperty.sizeDayEnabled.setValue(_earthProperty.toggleAll);
-    _earthProperty.gravityEnabled.setValue(_earthProperty.toggleAll);
-    _earthProperty.temperatureEnabled.setValue(_earthProperty.toggleAll);
-    _earthProperty.atmosphereEnabled.setValue(_earthProperty.toggleAll);
-    _earthProperty.moonsEnabled.setValue(_earthProperty.toggleAll);
+    setAllEarth(_earthProperty.toggleAll);
 }
 void PlanetsSonification::onEarthSettingChanged() {
     sendSettings(EarthIndex);
@@ -475,11 +458,7 @@ void PlanetsSonification::onEarthSettingChanged() {
 
 // Mars
 void PlanetsSonification::onMarsAllChanged() {
-    _marsProperty.sizeDayEnabled.setValue(_marsProperty.toggleAll);
-    _marsProperty.gravityEnabled.setValue(_marsProperty.toggleAll);
-    _marsProperty.temperatureEnabled.setValue(_marsProperty.toggleAll);
-    _marsProperty.atmosphereEnabled.setValue(_marsProperty.toggleAll);
-    _marsProperty.moonsEnabled.setValue(_marsProperty.toggleAll);
+    setAllMars(_marsProperty.toggleAll);
 }
 void PlanetsSonification::onMarsSettingChanged() {
     sendSettings(MarsIndex);
@@ -487,11 +466,7 @@ void PlanetsSonification::onMarsSettingChanged() {
 
 // Jupiter
 void PlanetsSonification::onJupiterAllChanged() {
-    _jupiterProperty.sizeDayEnabled.setValue(_jupiterProperty.toggleAll);
-    _jupiterProperty.gravityEnabled.setValue(_jupiterProperty.toggleAll);
-    _jupiterProperty.temperatureEnabled.setValue(_jupiterProperty.toggleAll);
-    _jupiterProperty.atmosphereEnabled.setValue(_jupiterProperty.toggleAll);
-    _jupiterProperty.moonsEnabled.setValue(_jupiterProperty.toggleAll);
+    setAllJupiter(_jupiterProperty.toggleAll);
 }
 void PlanetsSonification::onJupiterSettingChanged() {
     sendSettings(JupiterIndex);
@@ -499,12 +474,7 @@ void PlanetsSonification::onJupiterSettingChanged() {
 
 // Saturn
 void PlanetsSonification::onSaturnAllChanged() {
-    _saturnProperty.sizeDayEnabled.setValue(_saturnProperty.toggleAll);
-    _saturnProperty.gravityEnabled.setValue(_saturnProperty.toggleAll);
-    _saturnProperty.temperatureEnabled.setValue(_saturnProperty.toggleAll);
-    _saturnProperty.atmosphereEnabled.setValue(_saturnProperty.toggleAll);
-    _saturnProperty.moonsEnabled.setValue(_saturnProperty.toggleAll);
-    _saturnProperty.ringsEnabled.setValue(_saturnProperty.toggleAll);
+    setAllSaturn(_saturnProperty.toggleAll);
 }
 void PlanetsSonification::onSaturnSettingChanged() {
     sendSettings(SaturnIndex);
@@ -512,11 +482,7 @@ void PlanetsSonification::onSaturnSettingChanged() {
 
 // Uranus
 void PlanetsSonification::onUranusAllChanged() {
-    _uranusProperty.sizeDayEnabled.setValue(_uranusProperty.toggleAll);
-    _uranusProperty.gravityEnabled.setValue(_uranusProperty.toggleAll);
-    _uranusProperty.temperatureEnabled.setValue(_uranusProperty.toggleAll);
-    _uranusProperty.atmosphereEnabled.setValue(_uranusProperty.toggleAll);
-    _uranusProperty.moonsEnabled.setValue(_uranusProperty.toggleAll);
+    setAllUranus(_uranusProperty.toggleAll);
 }
 void PlanetsSonification::onUranusSettingChanged() {
     sendSettings(UranusIndex);
@@ -524,14 +490,100 @@ void PlanetsSonification::onUranusSettingChanged() {
 
 // Neptune
 void PlanetsSonification::onNeptuneAllChanged() {
-    _neptuneProperty.sizeDayEnabled.setValue(_neptuneProperty.toggleAll);
-    _neptuneProperty.gravityEnabled.setValue(_neptuneProperty.toggleAll);
-    _neptuneProperty.temperatureEnabled.setValue(_neptuneProperty.toggleAll);
-    _neptuneProperty.atmosphereEnabled.setValue(_neptuneProperty.toggleAll);
-    _neptuneProperty.moonsEnabled.setValue(_neptuneProperty.toggleAll);
+    setAllNeptune(_neptuneProperty.toggleAll);
 }
 void PlanetsSonification::onNeptuneSettingChanged() {
     sendSettings(NeptuneIndex);
+}
+
+// Set functions for all planets
+void PlanetsSonification::setAll(bool value) {
+    // Set all the settings
+    _mercuryProperty.toggleAll.setValue(value);
+    setAllMercury(value);
+
+    _venusProperty.toggleAll.setValue(value);
+    setAllVenus(value);
+
+    _earthProperty.toggleAll.setValue(value);
+    setAllEarth(value);
+
+    _marsProperty.toggleAll.setValue(value);
+    setAllMars(value);
+
+    _jupiterProperty.toggleAll.setValue(value);
+    setAllJupiter(value);
+
+    _saturnProperty.toggleAll.setValue(value);
+    setAllSaturn(value);
+
+    _uranusProperty.toggleAll.setValue(value);
+    setAllUranus(value);
+
+    _neptuneProperty.toggleAll.setValue(value);
+    setAllNeptune(value);
+}
+
+void PlanetsSonification::setAllMercury(bool value) {
+    _mercuryProperty.sizeDayEnabled.setValue(value);
+    _mercuryProperty.gravityEnabled.setValue(value);
+    _mercuryProperty.temperatureEnabled.setValue(value);
+}
+
+void PlanetsSonification::setAllVenus(bool value) {
+    _venusProperty.sizeDayEnabled.setValue(value);
+    _venusProperty.gravityEnabled.setValue(value);
+    _venusProperty.temperatureEnabled.setValue(value);
+    _venusProperty.atmosphereEnabled.setValue(value);
+}
+
+void PlanetsSonification::setAllEarth(bool value) {
+    _earthProperty.sizeDayEnabled.setValue(value);
+    _earthProperty.gravityEnabled.setValue(value);
+    _earthProperty.temperatureEnabled.setValue(value);
+    _earthProperty.atmosphereEnabled.setValue(value);
+    _earthProperty.moonsEnabled.setValue(value);
+}
+
+void PlanetsSonification::setAllMars(bool value) {
+    _marsProperty.sizeDayEnabled.setValue(value);
+    _marsProperty.gravityEnabled.setValue(value);
+    _marsProperty.temperatureEnabled.setValue(value);
+    _marsProperty.atmosphereEnabled.setValue(value);
+    _marsProperty.moonsEnabled.setValue(value);
+}
+
+void PlanetsSonification::setAllJupiter(bool value) {
+    _jupiterProperty.sizeDayEnabled.setValue(value);
+    _jupiterProperty.gravityEnabled.setValue(value);
+    _jupiterProperty.temperatureEnabled.setValue(value);
+    _jupiterProperty.atmosphereEnabled.setValue(value);
+    _jupiterProperty.moonsEnabled.setValue(value);
+}
+
+void PlanetsSonification::setAllSaturn(bool value) {
+    _saturnProperty.sizeDayEnabled.setValue(value);
+    _saturnProperty.gravityEnabled.setValue(value);
+    _saturnProperty.temperatureEnabled.setValue(value);
+    _saturnProperty.atmosphereEnabled.setValue(value);
+    _saturnProperty.moonsEnabled.setValue(value);
+    _saturnProperty.ringsEnabled.setValue(value);
+}
+
+void PlanetsSonification::setAllUranus(bool value) {
+    _uranusProperty.sizeDayEnabled.setValue(value);
+    _uranusProperty.gravityEnabled.setValue(value);
+    _uranusProperty.temperatureEnabled.setValue(value);
+    _uranusProperty.atmosphereEnabled.setValue(value);
+    _uranusProperty.moonsEnabled.setValue(value);
+}
+
+void PlanetsSonification::setAllNeptune(bool value) {
+    _neptuneProperty.sizeDayEnabled.setValue(value);
+    _neptuneProperty.gravityEnabled.setValue(value);
+    _neptuneProperty.temperatureEnabled.setValue(value);
+    _neptuneProperty.atmosphereEnabled.setValue(value);
+    _neptuneProperty.moonsEnabled.setValue(value);
 }
 
 // Extract data from the given identifier
@@ -721,7 +773,7 @@ void PlanetsSonification::update(const Camera* camera) {
 
 void PlanetsSonification::stop() {
     _isTurningOff = true;
-    _toggleAll = false;
+    setAll(false);
 }
 
 void PlanetsSonification::addPlanet(ghoul::Dictionary dict) {
