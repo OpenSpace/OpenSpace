@@ -1123,7 +1123,7 @@ namespace openspace {
         // TODO: Fix hard coded path
         std::string cdfPathTemp = "C:/Dev/OpenSpaceLocalData/simonmans/3d__var_1_e20000101-020000-000.out.cdf";
 
-        size_t _nPointsOnPathLine = 50;
+        size_t _nPointsOnPathLine = 200;
         std::string _tracingVariable = "u_perp_b";
 
         std::unique_ptr<ccmc::Kameleon> kameleon =

@@ -611,6 +611,7 @@ namespace openspace::fls {
         {
             if (seedPoints[i].second == "OPEN_NORTH" || seedPoints[i].second == "OPEN_SOUTH")
             {
+                std::cout << std::endl << "Open seed point validation start." << std::endl;
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                     tracingVar,
                     tracer,
@@ -678,12 +679,34 @@ namespace openspace::fls {
 
                         break;
                     }
+                    else if (!checkIfFieldlineIsOpen(fieldlinePositions))
+                    {
+                        float stepLength = 5;
+
+                        std::cout << "NOT OPEN! - Move seed point" << std::endl;
+                        glm::vec3 modifiedSeedpoint = modifySeedpoint(
+                            seedPoints[i],
+                            tracingVar,
+                            tracer,
+                            nPointsOnPathLine,
+                            kameleon,
+                            innerBoundaryLimit,
+                            _nPointsOnFieldLine,
+                            stepLength,
+                            accuracy,
+                            true
+                        );
+
+                        seedPoints[i].first = modifiedSeedpoint;
+                        break;
+                    }
                     counter++;
                 }
+                std::cout << "OPEN seed point done." << std::endl << std::endl;
             }
             else if (seedPoints[i].second == "CLOSED")
             {
-
+                std::cout << std::endl << "CLOSED seed point validation start." << std::endl;
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                     tracingVar,
                     tracer,
@@ -693,56 +716,68 @@ namespace openspace::fls {
 
                 std::vector<glm::vec3> flowlinePositions = getPositionsFromLine(flowline);
 
-                std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
-                    flowlinePositions[flowlinePositions.size()-4],
-                    kameleon,
-                    innerBoundaryLimit,
-                    _nPointsOnFieldLine
-                );
-
-                if (!checkIfFieldlineIsClosed(fieldlinePositions))
+                int counter2 = 1;
+                while (counter2 < nPointsOnPathLine && flowlinePositions[flowlinePositions.size() - counter2].x > -0.5)
                 {
-                    float stepLength = 0.2;
 
-                    glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
-                        seedPoints[i],
-                        tracingVar,
-                        tracer,
-                        nPointsOnPathLine,
+
+                    std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
+                        flowlinePositions[flowlinePositions.size() - counter2],
                         kameleon,
                         innerBoundaryLimit,
-                        _nPointsOnFieldLine,
-                        stepLength,
-                        accuracy,
-                        true
+                        _nPointsOnFieldLine
                     );
 
-                    seedPoints[i].first = modifiedSeedpoint;
-                }
-                else //If it is a Closed fieldline
-                {
-                    float stepLength = 0.1;
-                    glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
-                        seedPoints[i],
-                        tracingVar,
-                        tracer,
-                        nPointsOnPathLine,
-                        kameleon,
-                        innerBoundaryLimit,
-                        _nPointsOnFieldLine,
-                        stepLength,
-                        accuracy,
-                        false
-                    );
-                }
+                    if (!checkIfFieldlineIsClosed(fieldlinePositions))
+                    {
+                        float stepLength = 0.5;
 
+                        glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
+                            seedPoints[i],
+                            tracingVar,
+                            tracer,
+                            nPointsOnPathLine,
+                            kameleon,
+                            innerBoundaryLimit,
+                            _nPointsOnFieldLine,
+                            stepLength,
+                            accuracy,
+                            true
+                        );
+
+                        seedPoints[i].first = modifiedSeedpoint;
+                        break;
+                    }
+                    //else //If it is a Closed fieldline
+                    //{
+                    //    float stepLength = 0.1;
+                    //    glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
+                    //        seedPoints[i],
+                    //        tracingVar,
+                    //        tracer,
+                    //        nPointsOnPathLine,
+                    //        kameleon,
+                    //        innerBoundaryLimit,
+                    //        _nPointsOnFieldLine,
+                    //        stepLength,
+                    //        accuracy,
+                    //        false
+                    //    );
+                    //    seedPoints[i].first = modifiedSeedpoint;
+                    //    break;
+                    //}
+                    counter2++;
+                }
                 float newOpenXvalue = (seedPoints[i].first.x + seedPoints[i - 1].first.x) / 2;
                 seedPoints[i + 1].first.x = newOpenXvalue;
                 seedPoints[i + 2].first.x = newOpenXvalue;
 
+                std::cout << "CLOSED seed point done." << std::endl << std::endl;
+
             }
             else if (seedPoints[i].second == "IMF")
             {
+                std::cout << std::endl << "IMF seed point validation start." << std::endl;
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                     tracingVar,
                     tracer,
@@ -797,6 +832,7 @@ namespace openspace::fls {
 
                     seedPoints[i].first = modifiedSeedpoint;
                 }
+                std::cout << "IMF seed point done." << std::endl << std::endl;
             }
 
             seedPoints = validateAndModifySeedPointsRecursive(
@@ -1196,49 +1232,57 @@ namespace openspace::fls {
 
         std::vector<glm::vec3> flowlinePositions = getPositionsFromLine(seedPointFlowline);
 
-        std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
-            flowlinePositions[flowlinePositions.size()-4],
-            kameleon,
-            innerBoundaryLimit,
-            _nPointsOnFieldLine
-        );
-
-        if (!checkIfFieldlineIsClosed(fieldlinePositions))
+        int counter2 = 1;
+        while (counter2 < nPointsOnPathLine && flowlinePositions[flowlinePositions.size() - counter2].x > -0.5)
         {
-            stepLength = stepLength / 2;
-
-            std::cout << "NOT CLOSED! - Move seed point" << std::endl;
-            glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
-                seedPoint,
-                tracingVar,
-                tracer,
-                nPointsOnPathLine,
+            std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
+                flowlinePositions[flowlinePositions.size()-counter2],
                 kameleon,
                 innerBoundaryLimit,
-                _nPointsOnFieldLine,
-                stepLength,
-                accuracy,
-                true
+                _nPointsOnFieldLine
             );
-        }
-        if (stepLength > accuracy)
-        {
-            stepLength = stepLength / 2;
 
-            std::cout << "Good fieldline - Not enough accuracy - Move seed point" << std::endl;
-            glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
-                seedPoint,
-                tracingVar,
-                tracer,
-                nPointsOnPathLine,
-                kameleon,
-                innerBoundaryLimit,
-                _nPointsOnFieldLine,
-                stepLength,
-                accuracy,
-                false
-            );
+            if (!checkIfFieldlineIsClosed(fieldlinePositions))
+            {
+                stepLength = stepLength / 2;
+
+                std::cout << "NOT CLOSED! - Move seed point" << std::endl;
+                glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
+                    seedPoint,
+                    tracingVar,
+                    tracer,
+                    nPointsOnPathLine,
+                    kameleon,
+                    innerBoundaryLimit,
+                    _nPointsOnFieldLine,
+                    stepLength,
+                    accuracy,
+                    true
+                );
+            }
+            if (stepLength > accuracy)
+            {
+                stepLength = stepLength / 2;
+
+                std::cout << "Good fieldline - Not enough accuracy - Move seed point" << std::endl;
+                glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
+                    seedPoint,
+                    tracingVar,
+                    tracer,
+                    nPointsOnPathLine,
+                    kameleon,
+                    innerBoundaryLimit,
+                    _nPointsOnFieldLine,
+                    stepLength,
+                    accuracy,
+                    false
+                );
+            }
+            counter2++;
         }
+
+
+
 
         return seedPoint.first;
     }
