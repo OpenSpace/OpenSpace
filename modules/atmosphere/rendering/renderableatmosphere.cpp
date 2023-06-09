@@ -34,6 +34,7 @@
 #include <openspace/properties/property.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <math.h>
+#include <algorithm>
 
 namespace {
     constexpr float KM_TO_M = 1000.f;
@@ -471,55 +472,7 @@ void RenderableAtmosphere::update(const UpdateData& data) {
     _deferredcaster->setModelTransform(modelTransform);
     _deferredcaster->setOpacity(opacity());
     _deferredcaster->update(data);
-
-    // Calculate atmosphere dimming coefficient
-    // Calculate if the camera is in the atmosphere and if it is in the fading region
-    float atmosphereDimming = 1.f;
-    glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
-    glm::dvec3 planetPos = glm::dvec3(modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
-    float cameraDistance = static_cast<float>(glm::distance(planetPos, cameraPos));
-    // Atmosphere height is in KM
-    float atmosphereEdge = KM_TO_M * (_planetRadius + _atmosphereHeight);
-    // Height of the atmosphere where the objects will be faded
-    float atmosphereFadingHeight = KM_TO_M * _atmosphereDimmingHeight * _atmosphereHeight;
-    float atmosphereInnerEdge = atmosphereEdge - atmosphereFadingHeight;
-    bool cameraIsInAtmosphere = cameraDistance < atmosphereEdge;
-    bool cameraIsInFadingRegion = cameraDistance > atmosphereInnerEdge;
-
-    // Check if camera is in sunset
-    glm::dvec3 normalUnderCamera = glm::normalize(cameraPos - planetPos);
-    glm::dvec3 vecToSun = glm::normalize(-planetPos);
-    float cameraSunAngle = glm::degrees(static_cast<float>(
-        glm::acos(glm::dot(vecToSun, normalUnderCamera))
-    ));
-    float sunsetStart = _atmosphereDimmingSunsetAngle.value().x;
-    float sunsetEnd = _atmosphereDimmingSunsetAngle.value().y;
-    // If cameraSunAngle is more than 90 degrees, we are in shaded part of globe
-    bool cameraIsInSun = cameraSunAngle <= sunsetEnd;
-    bool cameraIsInSunset = cameraSunAngle > sunsetStart && cameraIsInSun;
-
-    // Fade if camera is inside the atmosphere
-    if (cameraIsInAtmosphere && cameraIsInSun) {
-        // If camera is in fading part of the atmosphere
-        // Fade with regards to altitude
-        if (cameraIsInFadingRegion) {
-            // Fading - linear interpolation
-            atmosphereDimming = (cameraDistance - atmosphereInnerEdge) /
-                atmosphereFadingHeight;
-        }
-        else {
-            // Camera is below fading region - atmosphere dims objects completely
-            atmosphereDimming = 0.0;
-        }
-        if (cameraIsInSunset) {
-            // Fading - linear interpolation
-            atmosphereDimming = (cameraSunAngle - sunsetStart) /
-                (sunsetEnd - sunsetStart);
-        }
-        global::navigationHandler->camera()->setAtmosphereDimmingFactor(
-            atmosphereDimming
-        );
-    }
+    setDimmingCoefficient(computeModelTransformMatrix(data.modelTransform));
 }
 
 void RenderableAtmosphere::updateAtmosphereParameters() {
@@ -544,6 +497,80 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _sunFollowingCameraEnabled
     );
     _deferredcaster->setHardShadows(_hardShadowsEnabled);
+}
+
+// Calculate atmosphere dimming coefficient
+void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransform) {
+    // Calculate if the camera is in the atmosphere and if it is in the sunny region
+    glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+    glm::dvec3 planetPos = glm::dvec3(modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
+    float cameraDistance = static_cast<float>(glm::distance(planetPos, cameraPos));
+    glm::dvec3 normalUnderCamera = glm::normalize(cameraPos - planetPos);
+    glm::dvec3 vecToSun = glm::normalize(-planetPos);
+
+    float cameraSunAngle = glm::degrees(static_cast<float>(
+        glm::acos(glm::dot(vecToSun, normalUnderCamera))
+        ));
+    float sunsetEnd = _atmosphereDimmingSunsetAngle.value().y;
+
+    // If cameraSunAngle is more than 90 degrees, we are in shaded part of globe
+    bool cameraIsInSun = cameraSunAngle <= sunsetEnd;
+    // Atmosphere height is in KM
+    float atmosphereEdge = KM_TO_M * (_planetRadius + _atmosphereHeight);
+    bool cameraIsInAtmosphere = cameraDistance < atmosphereEdge;
+
+    // Don't fade if camera is not in the sunny part of an atmosphere 
+    if (!(cameraIsInAtmosphere && cameraIsInSun)) {
+        return;
+    }
+    // Else we need to fade the objects
+    // Height of the atmosphere where the objects will be faded
+    float atmosphereFadingHeight = KM_TO_M * _atmosphereDimmingHeight * _atmosphereHeight;
+    float atmosphereInnerEdge = atmosphereEdge - atmosphereFadingHeight;
+    bool cameraIsInFadingRegion = cameraDistance > atmosphereInnerEdge;
+
+    // Check if camera is in sunset
+    float sunsetStart = _atmosphereDimmingSunsetAngle.value().x;
+    bool cameraIsInSunset = cameraSunAngle > sunsetStart && cameraIsInSun;
+
+    // See if we are inside of an eclipse shadow
+    float eclipseShadow = _deferredcaster->eclipseShadow(cameraPos, false);
+    bool cameraIsInEclipse = std::abs(eclipseShadow - 1.0f) > glm::epsilon<float>();
+    // Invert shadow and multiply with itself to make it more narrow
+    eclipseShadow = std::pow(1.0f - eclipseShadow, 2.0f);
+    float atmosphereDimming = 0.f;
+
+    if (cameraIsInSunset) {
+        // Fading - linear interpolation
+        atmosphereDimming = (cameraSunAngle - sunsetStart) /
+            (sunsetEnd - sunsetStart);
+    }
+    else if (cameraIsInFadingRegion && cameraIsInEclipse) {
+        // Fade with regards to altitude & eclipse shadow
+        // Fading - linear interpolation
+        float fading = (cameraDistance - atmosphereInnerEdge) /
+            atmosphereFadingHeight;
+        atmosphereDimming = std::clamp(eclipseShadow + fading, 0.0f, 1.0f);
+    }
+    else if (cameraIsInFadingRegion) {
+        // Fade with regards to altitude
+        // Fading - linear interpolation
+        atmosphereDimming = (cameraDistance - atmosphereInnerEdge) /
+            atmosphereFadingHeight;
+    }
+    else if (cameraIsInEclipse) {
+        atmosphereDimming = eclipseShadow;
+    }
+    else {
+        // Camera is below fading region - atmosphere dims objects completely
+        atmosphereDimming = 0.0f;
+
+    }
+    // Calculate dimming coefficient for stars, labels etc that are dimmed in the
+    // atmosphere
+    global::navigationHandler->camera()->setAtmosphereDimmingFactor(
+        atmosphereDimming
+    );
 }
 
 }  // namespace openspace
