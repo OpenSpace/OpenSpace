@@ -505,7 +505,7 @@ HorizonsResult readHorizonsFile(std::filesystem::path file) {
     std::string line;
     std::getline(fileStream, line);
     while (line[0] != '$') {
-        if (line == "JDTDB") {
+        if (line.starts_with("JDTDB")) {
             fileStream.close();
             return readHorizonsVectorFile(file);
         }
