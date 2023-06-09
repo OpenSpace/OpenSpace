@@ -162,6 +162,12 @@ protected:
     /// part of the trail
     RenderInformation _floatingRenderInformation;
 
+    // Optional for accurate rendering of trail when using Render Full Trail Mode
+    bool _splitTrailRenderMode = false;
+    RenderInformation _firstSegRenderInformation;
+    RenderInformation _secondSegRenderInformation;
+    RenderInformation _midPointRenderInformation;
+
 private:
     void internalRender(bool renderLines, bool renderPoints,
         const RenderData& data,

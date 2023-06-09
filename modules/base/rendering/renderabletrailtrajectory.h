@@ -86,6 +86,7 @@ private:
     bool _subsamplingIsDirty = true;
 
     std::array<TrailVBOLayout, 2> _auxiliaryVboData = {};
+    std::array<TrailVBOLayout, 3> _midPointVboData = {};
 
     /// The conversion of the _startTime into the internal time format
     double _start = 0.0;

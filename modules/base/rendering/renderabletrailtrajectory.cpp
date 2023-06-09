@@ -182,6 +182,15 @@ void RenderableTrailTrajectory::initializeGL() {
     glGenVertexArrays(1, &_floatingRenderInformation._vaoID);
     glGenBuffers(1, &_floatingRenderInformation._vBufferID);
     _floatingRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
+
+    glGenVertexArrays(1, &_firstSegRenderInformation._vaoID);
+    glGenBuffers(1, &_firstSegRenderInformation._vBufferID);
+
+    glGenVertexArrays(1, &_secondSegRenderInformation._vaoID);
+    glGenBuffers(1, &_secondSegRenderInformation._vBufferID);
+
+    glGenVertexArrays(1, &_midPointRenderInformation._vaoID);
+    glGenBuffers(1, &_midPointRenderInformation._vBufferID);
 }
 
 void RenderableTrailTrajectory::deinitializeGL() {
@@ -297,12 +306,118 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
     // This has to be done every update step;
     if (_renderFullTrail) {
-        // If the full trail should be rendered at all times, we can directly render the
-        // entire set
-        _primaryRenderInformation.first = 0;
-        _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
+
+        // Find the closest sampling point and replace it with current position
+        const double j2k = data.time.j2000Seconds();
+
+        if (j2k > _start && j2k < _end) {
+            _splitTrailRenderMode = true;
+
+            const int vSize = _vertexArray.size();
+
+            // Get current time in percentage of _start to _end
+            const double t = std::max(0.0,(j2k - _start) / (_end - _start));
+
+            // First segment
+            _firstSegRenderInformation.first = 0;
+            _firstSegRenderInformation.count = static_cast<GLsizei> (
+                std::max(
+                    0.0, 
+                    floor((vSize - 1) * t))
+            );
+
+            glBindVertexArray(_firstSegRenderInformation._vaoID);
+            glBindBuffer(GL_ARRAY_BUFFER, _firstSegRenderInformation._vBufferID);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                vSize * sizeof(TrailVBOLayout),
+                _vertexArray.data(),
+                GL_DYNAMIC_DRAW
+            );
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+
+            // Lines from point-object-point
+
+            const int preCount = std::max(_firstSegRenderInformation.count - 1, 0);
+            const int postCount = std::min(
+                _firstSegRenderInformation.count + 1,
+                vSize - 1
+            );
+
+            glm::dvec3 preV0(
+                _vertexArray[preCount].x,
+                _vertexArray[preCount].y,
+                _vertexArray[preCount].z
+            );
+
+            glm::dvec3 postV0(
+                _vertexArray[postCount].x,
+                _vertexArray[postCount].y,
+                _vertexArray[postCount].z
+            );
+
+            const glm::dvec3 p = _translation->position(data);
+            const glm::dvec3 v1 = { p.x, p.y, p.z };
+            const glm::dvec3 preP0 = preV0 - v1;
+            const glm::dvec3 postP0 = postV0 - v1;
+
+            _midPointVboData[0] = {
+                static_cast<float>(preP0.x),
+                static_cast<float>(preP0.y),
+                static_cast<float>(preP0.z)
+            };
+            _midPointVboData[1] = { 
+                0.f, 
+                0.f, 
+                0.f 
+            };
+            _midPointVboData[2] = {
+                static_cast<float>(postP0.x),
+                static_cast<float>(postP0.y),
+                static_cast<float>(postP0.z)
+            };
+
+            _midPointRenderInformation.first = 0;
+            _midPointRenderInformation.count = 3;
+
+            _midPointRenderInformation._localTransform = glm::translate(
+                glm::dmat4(1.0),
+                v1
+            );
+
+            glBindVertexArray(_midPointRenderInformation._vaoID);
+            glBindBuffer(GL_ARRAY_BUFFER, _midPointRenderInformation._vBufferID);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                _midPointVboData.size() * sizeof(TrailVBOLayout),
+                _midPointVboData.data(),
+                GL_DYNAMIC_DRAW
+            );
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+
+            // Second segment
+            _secondSegRenderInformation.first = _firstSegRenderInformation.count + 1;
+
+            _secondSegRenderInformation.count = static_cast<GLsizei>(
+                _vertexArray.size() - _firstSegRenderInformation.count - 1
+            );
+
+            _secondSegRenderInformation._vaoID = _firstSegRenderInformation._vaoID;
+            _secondSegRenderInformation._vBufferID = _firstSegRenderInformation._vBufferID;
+        }
+        else {
+            _splitTrailRenderMode = false;
+            _primaryRenderInformation.first = 0;
+            _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
+        }
     }
     else {
+        _splitTrailRenderMode = false;
+
         // If only trail so far should be rendered, we need to find the corresponding time
         // in the array and only render it until then
         _primaryRenderInformation.first = 0;
@@ -310,8 +425,13 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             0.0,
             (data.time.j2000Seconds() - _start) / (_end - _start)
         );
+
         if (data.time.j2000Seconds() < _end) {
-            _primaryRenderInformation.count = static_cast<GLsizei>(std::max(1.0, _vertexArray.size() * t));
+            _primaryRenderInformation.count = static_cast<GLsizei>(
+                std::max(
+                    1.0, 
+                    _vertexArray.size() * t)
+            );
         }
         else {
             _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());

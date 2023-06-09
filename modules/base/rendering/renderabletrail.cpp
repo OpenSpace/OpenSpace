@@ -351,11 +351,16 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         // so we check if there is data available and if there isn't, we use the
         // glDrawArrays draw call; otherwise the glDrawElements
         if (info._iBufferID == 0) {
-            glDrawArrays(
-                GL_LINE_STRIP,
-                info.first,
-                info.count
-            );
+            if (false) {
+                // Something with glDrawMultiArrays
+            }
+            else {
+                glDrawArrays(
+                    GL_LINE_STRIP,
+                    info.first,
+                    info.count
+                );
+            }
         }
         else {
             glDrawElements(
@@ -451,30 +456,66 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     //    return;
     //}
 
-    // Render the primary batch of vertices
-    internalRender(
-        renderLines,
-        renderPoints,
-        data,
-        modelTransform,
-        _primaryRenderInformation,
-        totalNumber,
-        primaryOffset
-    );
-
-    // The secondary batch is optional, so we need to check whether we have any data here
-    if (_floatingRenderInformation._vaoID != 0 && _floatingRenderInformation.count != 0) {
+    if (_splitTrailRenderMode) {
+        // Splits the trail up into three parts for more accurate rendering
         internalRender(
             renderLines,
             renderPoints,
             data,
             modelTransform,
-            _floatingRenderInformation,
-            totalNumber,
-            // -1 because we duplicate the penultimate point between the vertices
-            -(primaryOffset + _primaryRenderInformation.count - 1)
+            _firstSegRenderInformation,
+            _firstSegRenderInformation.count,
+            _firstSegRenderInformation.first
+        );
+
+        internalRender(
+            renderLines,
+            renderPoints,
+            data,
+            modelTransform,
+            _midPointRenderInformation,
+            _midPointRenderInformation.count,
+            _midPointRenderInformation.first
+        );
+
+        internalRender(
+            renderLines,
+            renderPoints,
+            data,
+            modelTransform,
+            _secondSegRenderInformation,
+            _secondSegRenderInformation.count,
+            _secondSegRenderInformation.first
         );
     }
+    else {
+        // Render the primary batch of vertices
+        internalRender(
+            renderLines,
+            renderPoints,
+            data,
+            modelTransform,
+            _primaryRenderInformation,
+            totalNumber,
+            primaryOffset
+        );
+
+        // The secondary batch is optional, so we need to check whether we have any data here
+        if (_floatingRenderInformation._vaoID != 0 && _floatingRenderInformation.count != 0) {
+            internalRender(
+                renderLines,
+                renderPoints,
+                data,
+                modelTransform,
+                _floatingRenderInformation,
+                totalNumber,
+                // -1 because we duplicate the penultimate point between the vertices
+                -(primaryOffset + _primaryRenderInformation.count - 1)
+            );
+        }
+    }
+
+    
 
     if (renderPoints) {
         glDisable(GL_PROGRAM_POINT_SIZE);
