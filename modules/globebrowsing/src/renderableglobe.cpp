@@ -1441,7 +1441,6 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
     const glm::dmat4 modelViewTransform = viewTransform * _cachedModelTransform;
 
-
     std::array<glm::dvec3, 4> cornersCameraSpace;
     std::array<glm::dvec3, 4> cornersModelSpace;
     for (int i = 0; i < 4; ++i) {
@@ -1997,7 +1996,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 
         const glm::uvec3 dimensions = tileTexture->dimensions();
 
-        const glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
+        const glm::vec2 samplePos = transformedUv * glm::vec2(dimensions) - glm::vec2(0.5f);
         glm::uvec2 samplePos00 = samplePos;
         samplePos00 = glm::clamp(
             samplePos00,
