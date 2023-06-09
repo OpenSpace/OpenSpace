@@ -244,7 +244,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ConstantVelocityFlight = {
         "ConstantVelocityFlight",
-        "Constant Velocitry Flight",
+        "Constant Velocity Flight",
         "If this value is enabled, the camera motion will not be affected by the "
         "distance of the camera to the surface of a planet. When enabling this setting "
         "consider adjusting the mouse sensitivity to a lower value",
