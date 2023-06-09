@@ -41,6 +41,13 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+documentation::Documentation VideoTileProvider::Documentation() {
+    documentation::Documentation doc = VideoPlayer::Documentation();
+    doc.name = "VideoTileProvider";
+    doc.id = "video_videotileprovider";
+    return doc;
+}
+
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     : _videoPlayer(dictionary)
 {

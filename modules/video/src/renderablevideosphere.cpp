@@ -131,7 +131,13 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableVideoSphere::Documentation() {
-    return codegen::doc<Parameters>("renderable_video_sphere");
+    documentation::Documentation doc =
+        codegen::doc<Parameters>("renderable_video_sphere");
+
+    documentation::Documentation vp = VideoPlayer::Documentation();
+    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
+
+    return doc;
 }
 
 RenderableVideoSphere::RenderableVideoSphere(const ghoul::Dictionary& dictionary)

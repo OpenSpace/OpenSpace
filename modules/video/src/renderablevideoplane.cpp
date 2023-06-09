@@ -29,6 +29,17 @@
 
 namespace openspace {
 
+documentation::Documentation RenderableVideoPlane::Documentation() {
+    documentation::Documentation doc = RenderablePlane::Documentation();
+    doc.name = "RenderableVideoPlane";
+    doc.id = "video_renderablevideoplane";
+
+    documentation::Documentation vp = VideoPlayer::Documentation();
+    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
+
+    return doc;
+}
+
 RenderableVideoPlane::RenderableVideoPlane(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _videoPlayer(dictionary)

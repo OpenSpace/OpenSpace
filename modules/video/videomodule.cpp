@@ -81,7 +81,13 @@ void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
 }
 
 std::vector<documentation::Documentation> VideoModule::documentations() const {
-    return std::vector<documentation::Documentation>();
+    return {
+        RenderableVideoPlane::Documentation(),
+        RenderableVideoSphere::Documentation(),
+        ScreenSpaceVideo::Documentation(),
+        globebrowsing::VideoTileProvider::Documentation(),
+        VideoPlayer::Documentation()
+    };
 }
 
 } // namespace openspace
