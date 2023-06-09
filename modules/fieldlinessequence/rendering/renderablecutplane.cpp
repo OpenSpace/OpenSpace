@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablecutplane.h>
+#include <modules/fieldlinessequence/rendering/renderablecutplane.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
@@ -54,27 +54,16 @@ namespace {
     // @VISIBILITY(2.25)
     openspace::properties::Property::Visibility::User
   };
-  constexpr openspace::properties::Property::PropertyInfo PlaneEquationInfo = {
-    "PlaneEquation",
-      "Hejhejs",
-      "text",
-    // @VISIBILITY(2.25)
-    openspace::properties::Property::Visibility::User
-  };
-  constexpr openspace::properties::Property::PropertyInfo ScalingUnitInfo = {
-    "ScalingUnit",
-      "Hejhejs",
-      "text",
-    // @VISIBILITY(2.25)
-    openspace::properties::Property::Visibility::User
-  };
+  //constexpr openspace::properties::Property::PropertyInfo PlaneEquationInfo = {
+  //  "PlaneEquation",
+  //    "Hejhejs",
+  //    "text",
+  //  // @VISIBILITY(2.25)
+  //  openspace::properties::Property::Visibility::User
+  //};
   struct [[codegen::Dictionary(RenderableCutPlane)]] Parameters {
     // [[codegen::verbatim(FilePathInfo.description)]]
     std::string filePath;
-    // [[codegen::verbatim(PlaneEquationInfo.description)]]
-    std::optional<double> planeEquation[4];
-    // [[codegen::verbatim(ScalingUnitInfo.description)]]
-    std::optional<bool> lazyLoading;
     // Axis to slice on
     std::string axis;
     // Value to what axis
@@ -82,7 +71,7 @@ namespace {
     // Quantity to color by 
     std::string colorQuantity;
     // Number of meters per data distance unit
-    float scaleToMeter;
+   // float scaleToMeter;
       
   };
 #include "renderablecutplane_codegen.cpp"
@@ -142,7 +131,6 @@ void RenderableCutPlane::initializeGL() {
             );
         }
     );
-    
 }
 
 void RenderableCutPlane::deinitializeGL() {
@@ -213,49 +201,26 @@ void RenderableCutPlane::loadTexture()
     
     unsigned int hash = ghoul::hashCRC32File(_filePath);
     
+    ghoul::opengl::Texture* t = _texture;
     void* memory = static_cast<void*>(&slices[0]);
     
-    
-    _texture = BaseModule::TextureManager.request(
-        std::to_string(hash),
-        [slice = memory]() -> std::unique_ptr<ghoul::opengl::Texture> {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    slice,
-                    sizeof(slice),
-                    2
-                );
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            texture->purgeFromRAM();
-            return texture;
-        }
-    );
-    
-    BaseModule::TextureManager.release(t);
-    
-    // Shape the plane based on the aspect ration of the image
-    glm::vec2 textureDim = glm::vec2(_texture->dimensions());
-    if (_textureDimensions != textureDim) {
-        float aspectRatio = textureDim.x / textureDim.y;
-        float planeAspectRatio = _size.value().x / _size.value().y;
-
-        if (std::abs(planeAspectRatio - aspectRatio) >
-            std::numeric_limits<float>::epsilon())
-        {
-            glm::vec2 newSize =
-                aspectRatio > 0.f ?
-                glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-            _size = newSize;
-        }
-
-        _textureDimensions = textureDim;
-    }
+    //_texture = BaseModule::TextureManager.request(
+    //    std::to_string(hash),
+    //    [slice = memory]() -> std::unique_ptr<ghoul::opengl::Texture> {
+    //        std::unique_ptr<ghoul::opengl::Texture> texture =
+    //            ghoul::io::TextureReader::ref().loadTexture(
+    //                slice,
+    //                sizeof(slice),
+    //                2
+    //            );
+    //        texture->uploadTexture();
+    //        texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    //        texture->purgeFromRAM();
+    //        return texture;
+    //    }
+    //);
 
 }
-
-
 
 }// namespace openspace
 

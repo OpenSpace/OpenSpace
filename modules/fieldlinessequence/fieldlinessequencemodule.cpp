@@ -25,6 +25,7 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <modules/fieldlinessequence/rendering/renderablecutplane.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -65,12 +66,14 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(factory, "No renderable factory existed");
 
     factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
+    factory->registerClass<RenderableCutPlane>("RenderableCutPlane");
 }
 
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
-        RenderableFieldlinesSequence::Documentation()
+        RenderableFieldlinesSequence::Documentation(),
+        RenderableCutPlane::Documentation()
     };
 }
 

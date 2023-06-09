@@ -44,7 +44,6 @@
 #include <modules/base/rendering/grids/renderableradialgrid.h>
 #include <modules/base/rendering/grids/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
-#include <modules/base/rendering/renderablecutplane.h>
 #include <modules/base/rendering/renderabledisc.h>
 #include <modules/base/rendering/renderablelabel.h>
 #include <modules/base/rendering/renderablemodel.h>
@@ -132,7 +131,6 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
-    fRenderable->registerClass<RenderableCutPlane>("RenderableCutPlane");
     fRenderable->registerClass<RenderableDisc>("RenderableDisc");
     fRenderable->registerClass<RenderableGrid>("RenderableGrid");
     fRenderable->registerClass<RenderableLabel>("RenderableLabel");
@@ -216,7 +214,6 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
 
         RenderableBoxGrid::Documentation(),
         RenderableCartesianAxes::Documentation(),
-        RenderableCutPlane::Documentation(),
         RenderableDisc::Documentation(),
         RenderableGrid::Documentation(),
         RenderableLabel::Documentation(),

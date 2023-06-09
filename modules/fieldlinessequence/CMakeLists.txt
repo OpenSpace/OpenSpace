@@ -29,6 +29,7 @@ set(HEADER_FILES
   util/fieldlinesstate.h
   util/commons.h
   util/kameleonfieldlinehelper.h
+  rendering/renderablecutplane.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -37,6 +38,7 @@ set(SOURCE_FILES
   util/fieldlinesstate.cpp
   util/commons.cpp
   util/kameleonfieldlinehelper.cpp
+  rendering/renderablecutplane.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -57,7 +59,7 @@ create_new_module(
 #########################################################################################
 
 # Set FieldlineSequence paths
-set(FIELDLINESEQUENCE_BASE_DIR "/Users/juliajohnstone/OpenSpace/OpenSpace/modules/fieldlinessequence")
+set(FIELDLINESEQUENCE_BASE_DIR "${PROJECT_SOURCE_DIR}/modules/fieldlinessequence")
 set(FIELDLINESEQUENCE_SRC_DIR "${FIELDLINESEQUENCE_BASE_DIR}/src")
 set(FIELDLINESEQUENCE_EXT_DIR "${FIELDLINESEQUENCE_BASE_DIR}/ext")
 

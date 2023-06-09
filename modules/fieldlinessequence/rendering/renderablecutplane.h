@@ -73,6 +73,7 @@ private:
     std::vector<std::vector<int>> _axisDim;
     int _axis1;
     int _axis2;
+
 };
 
 } // namespace openspace

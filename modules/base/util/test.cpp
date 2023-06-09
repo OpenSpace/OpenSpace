@@ -44,7 +44,7 @@ void readHdfFile(std::string pathToHdf5File) {
 	int all_y = vCoordDataY[0].size(); // number of cols for each matrix
 	int all_x = vCoordDataX[0][0].size(); // number of rows for each 
 
-	TODO gör alla temp_coord to glm::vec3
+	//TODO gör alla temp_coord to glm::vec3
 	_volumeCoordinates.resize(all_z, std::vector<std::vector<std::vector<float>>>(all_y, std::vector<std::vector<float>>(all_x)));
 
 	for (int z = 0; z < all_z; z++) { //z ---- Every z value that exists
