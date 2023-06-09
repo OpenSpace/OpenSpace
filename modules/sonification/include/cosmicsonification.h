@@ -28,6 +28,7 @@
 #include <modules/sonification/include/sonificationbase.h>
 
 #include <modules/space/speckloader.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <map>
 
 namespace openspace {
@@ -76,8 +77,8 @@ public:
 
 private:
     // Precision of distances and angles
-    const double AnglePrecision = 0.05;
-    const double DistancePrecision = 0.1;
+    properties::DoubleProperty _anglePrecision;
+    properties::DoubleProperty _distancePrecision;
 
     // Number of samples to smooth out the data for the sonification
     static const int NumSamples = 60;

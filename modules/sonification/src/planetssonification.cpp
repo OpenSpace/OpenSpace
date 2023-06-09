@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#define _USE_MATH_DEFINES
+
 #include <modules/sonification/include/planetssonification.h>
 
 #include <modules/sonification/sonificationmodule.h>
@@ -32,6 +34,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
+#include <math.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsSonification";
@@ -48,6 +51,34 @@ namespace {
         "ToggleAll",
         "All",
         "Toggle all sonifications for all planets"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LowDistancePrecisionInfo = {
+        "LowDistancePrecision",
+        "Low Distance Precision",
+        "The lower precision used for distances of planets that are NOT in focus, "
+        "given in meters"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HighDistancePrecisionInfo = {
+        "HighDistancePrecision",
+        "High Distance Precision",
+        "The higher precision used for distances of planets that are in focus, "
+        "given in meters"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LowAnglePrecisionInfo = {
+        "LowAnglePrecision",
+        "Low Angle Precision",
+        "The lower precision used for angles of planets that are NOT in focus, "
+        "given in radians"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HighAnglePrecisionInfo = {
+        "HighAnglePrecision",
+        "High Angle Precision",
+        "The lower precision used for angles of planets that are in focus, "
+        "given in radians"
     };
 
     // Planets
@@ -158,6 +189,10 @@ namespace openspace {
 PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     : SonificationBase(PlanetsSonificationInfo, ip, port)
     , _toggleAll(ToggleAllInfo, false)
+    , _lowDistancePrecision(LowDistancePrecisionInfo, 1.0e4, 1.0e3, 1.0e9)
+    , _highDistancePrecision(HighDistancePrecisionInfo, 1.0e3, 1.0e2, 1.0e6)
+    , _lowAnglePrecision(LowAnglePrecisionInfo, 0.1, 0.1, M_PI/2.0)
+    , _highAnglePrecision(HighAnglePrecisionInfo, 0.05, 0.0, M_PI/4.0)
     , _mercuryProperty(PlanetsSonification::PlanetProperty(MercuryInfo))
     , _venusProperty(PlanetsSonification::PlanetProperty(VenusInfo))
     , _earthProperty(PlanetsSonification::PlanetProperty(EarthInfo))
@@ -167,8 +202,8 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     , _uranusProperty(PlanetsSonification::PlanetProperty(UranusInfo))
     , _neptuneProperty(PlanetsSonification::PlanetProperty(NeptuneInfo))
 {
-    _anglePrecision = LowAnglePrecision;
-    _distancePrecision = LowDistancePrecision;
+    _anglePrecision = _lowAnglePrecision;
+    _distancePrecision = _lowDistancePrecision;
 
     // Add onChange for the properties
     _enabled.onChange([this]() { onEnabledChanged(); });
@@ -237,6 +272,13 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _neptuneProperty.moonsEnabled.onChange([this]() { onNeptuneSettingChanged(); });
 
     // Add the properties
+    addProperty(_lowDistancePrecision);
+    _lowDistancePrecision.setExponent(3);
+    addProperty(_highDistancePrecision);
+    _highDistancePrecision.setExponent(3);
+    addProperty(_lowAnglePrecision);
+    addProperty(_highAnglePrecision);
+
     addProperty(_toggleAll);
     addPropertySubOwner(_mercuryProperty);
     addPropertySubOwner(_venusProperty);
@@ -750,12 +792,12 @@ void PlanetsSonification::update(const Camera* camera) {
     for (int i = 0; i < _planets.size(); ++i) {
         // Increase presision if the planet is in focus
         if (focusNode->identifier() == _planets[i].identifier) {
-            _anglePrecision = HighAnglePrecision;
-            _distancePrecision = HighDistancePrecision;
+            _anglePrecision = _highAnglePrecision;
+            _distancePrecision = _highDistancePrecision;
         }
         else {
-            _anglePrecision = LowAnglePrecision;
-            _distancePrecision = LowDistancePrecision;
+            _anglePrecision = _lowDistancePrecision;
+            _distancePrecision = _lowAnglePrecision;
         }
 
         bool hasNewData = getData(camera, i);

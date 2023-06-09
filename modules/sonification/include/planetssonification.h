@@ -28,6 +28,7 @@
 #include <modules/sonification/include/sonificationbase.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {
 
@@ -68,12 +69,6 @@ public:
 private:
     // Indices for data items
     static const int NumSettings = 6;
-
-    // Set the differnet levels of precision
-    const double LowDistancePrecision = 10000.0;
-    const double HighDistancePrecision = 1000.0;
-    const double LowAnglePrecision = 0.1;
-    const double HighAnglePrecision = 0.05;
 
     // Indices for the planets
     static const int MercuryIndex = 0;
@@ -338,6 +333,12 @@ private:
     PlanetProperty _saturnProperty;
     PlanetProperty _uranusProperty;
     PlanetProperty _neptuneProperty;
+
+    // Set the differnet levels of precision
+    properties::DoubleProperty _lowDistancePrecision;
+    properties::DoubleProperty _highDistancePrecision;
+    properties::DoubleProperty _lowAnglePrecision;
+    properties::DoubleProperty _highAnglePrecision;
 };
 
 } // namespace openspace

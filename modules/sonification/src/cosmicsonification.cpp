@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#define _USE_MATH_DEFINES
+
 #include <modules/sonification/include/cosmicsonification.h>
 
 #include <modules/cosmiclife/rendering/renderablecosmicpoints.h>
@@ -33,6 +35,7 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/query/query.h>
+#include <math.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "CosmicSonification";
@@ -44,6 +47,18 @@ namespace {
        "Cosmic Sonification",
        "Sonification of the cosmic view of life labelsData"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo DistancePrecisionInfo = {
+        "DistancePrecision",
+        "Distance Precision",
+        "The precision used for distances, given in meters"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AnglePrecisionInfo = {
+        "AnglePrecision",
+        "Angle Precision",
+        "The precision used for angles, given in radians"
+    };
 } // namespace
 #include "cosmicsonification_lua.inl"
 
@@ -51,7 +66,13 @@ namespace openspace {
 
 CosmicSonification::CosmicSonification(const std::string& ip, int port)
     : SonificationBase(CosmicSonificationInfo, ip, port)
-{}
+    , _distancePrecision(DistancePrecisionInfo, 0.1, 0.01, 1.0e3)
+    , _anglePrecision(AnglePrecisionInfo, 0.05, 0.0, M_PI/2.0)
+{
+    addProperty(_distancePrecision);
+    _distancePrecision.setExponent(2);
+    addProperty(_anglePrecision);
+}
 
 CosmicSonification::~CosmicSonification() {
 
@@ -91,9 +112,9 @@ void CosmicSonification::update(const Camera* camera) {
 
         // Check if this data is new, otherwise don't send it
         bool shouldSendData = false;
-        if (std::abs(nodeData.distance() - distance) > DistancePrecision ||
-            std::abs(nodeData.HAngle() - angleH) > AnglePrecision ||
-            std::abs(nodeData.VAngle() - angleV) > AnglePrecision)
+        if (std::abs(nodeData.distance() - distance) > _distancePrecision ||
+            std::abs(nodeData.HAngle() - angleH) > _anglePrecision ||
+            std::abs(nodeData.VAngle() - angleV) > _anglePrecision)
         {
             // Update the saved data for the planet
             nodeData.addDistance(distance);
@@ -186,9 +207,9 @@ void CosmicSonification::update(const Camera* camera) {
 
             // Check if this data is new, otherwise don't send it
             bool shouldSendData = false;
-            if (std::abs(label.data[i].distance() - distance) > DistancePrecision ||
-                std::abs(label.data[i].HAngle() - angleH) > AnglePrecision ||
-                std::abs(label.data[i].VAngle() - angleV) > AnglePrecision)
+            if (std::abs(label.data[i].distance() - distance) > _distancePrecision ||
+                std::abs(label.data[i].HAngle() - angleH) > _anglePrecision ||
+                std::abs(label.data[i].VAngle() - angleV) > _anglePrecision)
             {
                 // Update the saved data for the planet
                 label.data[i].addDistance(distance);
