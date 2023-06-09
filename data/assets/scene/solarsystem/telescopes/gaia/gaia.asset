@@ -44,7 +44,7 @@ local Gaia = {
   },
   GUI = {
     Name = "Gaia",
-    Path = "/Solar System/Missions/Gaia"
+    Path = "/Solar System/Telescopes/Gaia"
   }
 }
 

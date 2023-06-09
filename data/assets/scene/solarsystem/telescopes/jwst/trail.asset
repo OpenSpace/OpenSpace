@@ -43,7 +43,7 @@ local JWSTTrailLaunch = {
   },
   GUI = {
     Name = "JWST Launch Trail",
-    Path = "/Solar System/Missions/JWST/Trails",
+    Path = "/Solar System/Telescopes/JWST/Trails",
     Description = [[
       James Webb Space Telescope Launch Trail relative to Earth IAU.
     ]]
@@ -75,7 +75,7 @@ local JWSTTrailCruise = {
   },
   GUI = {
     Name = "JWST Cruise Trail",
-    Path = "/Solar System/Missions/JWST/Trails",
+    Path = "/Solar System/Telescopes/JWST/Trails",
     Description = [[
       James Webb Space Telescope Cruise Trail relative to Earth.
     ]]
@@ -107,7 +107,7 @@ local JWSTTrailOrbit = {
   },
   GUI = {
     Name = "JWST Orbit Trail",
-    Path = "/Solar System/Missions/JWST/Trails",
+    Path = "/Solar System/Telescopes/JWST/Trails",
     Description = [[
       James Webb Space Telescope Orbit Trail relative to L2.
     ]]
@@ -138,7 +138,7 @@ local JWSTTrailCoRevOrbit = {
   },
   GUI = {
     Name = "JWST L2 Co-revolving Orbit Trail",
-    Path = "/Solar System/Missions/JWST/Trails",
+    Path = "/Solar System/Telescopes/JWST/Trails",
     Description = [[
       James Webb Space Telescope Orbit Trail that Co-revolves with L2.
     ]]
@@ -167,7 +167,7 @@ local JWSTSunTrail = {
   },
   GUI = {
     Name = "JWST Sun Trail",
-    Path = "/Solar System/Missions/JWST/Trails",
+    Path = "/Solar System/Telescopes/JWST/Trails",
     Description = [[
       James Webb Space Telescope Trail relative to the Sun.
     ]]

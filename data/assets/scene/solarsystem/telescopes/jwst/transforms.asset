@@ -48,7 +48,7 @@ local JWSTPosition = {
   },
   GUI = {
     Name = "JWST Position",
-    Path = "/Solar System/Missions/JWST",
+    Path = "/Solar System/Telescopes/JWST",
     Hidden = true,
     Description = [[
       James Webb Space Telescope Position relative to Earth.
@@ -71,7 +71,7 @@ local JWSTRotation = {
   },
   GUI = {
     Name = "JWST Rotation",
-    Path = "/Solar System/Missions/JWST",
+    Path = "/Solar System/Telescopes/JWST",
     Hidden = true,
     Description = [[
       James Webb Space Telescope Rotation so the sunshield always faces the Sun.
