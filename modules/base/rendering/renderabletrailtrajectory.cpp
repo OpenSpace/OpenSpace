@@ -227,7 +227,6 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             // will not be correct for the number of vertices we are doing along the trail
             _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ?
                 (timespan / _numberOfVertices) : _totalSampleInterval;
-            _totalSampleInterval = std::max(1.0, _totalSampleInterval);
 
             // Make space for the vertices
             _vertexArray.clear();
@@ -311,7 +310,12 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             (data.time.j2000Seconds() - _start) / (_end - _start)
         );
         if (data.time.j2000Seconds() < _end) {
-            _primaryRenderInformation.count = static_cast<GLsizei>(std::max(1.0, _vertexArray.size() * t));
+            _primaryRenderInformation.count = static_cast<GLsizei>(
+                std::max(
+                    1.0,
+                    floor(_vertexArray.size() - 1) * t
+                )
+                );
         }
         else {
             _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
