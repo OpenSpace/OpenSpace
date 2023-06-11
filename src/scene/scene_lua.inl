@@ -225,8 +225,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 fmt::format(
                     "{}: Property '{}' does not accept input of type '{}'. Requested "
                     "type: '{}'",
-                    errorLocation(L),
-                    prop->fullyQualifiedIdentifier(),
+                    errorLocation(L), prop->fullyQualifiedIdentifier(),
                     luaTypeToString(type), luaTypeToString(prop->typeLua())
                 )
             );
@@ -300,33 +299,6 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
 
     const int type = lua_type(L, -1);
     if (type != prop.typeLua()) {
-        std::string propValue;
-        prop.getStringValue(propValue);
-        std::string propDescription = prop.description();
-        std::string propGuiName = prop.guiName();
-        std::string_view propTypeLua = luaTypeToString(prop.typeLua());
-        int propTypeLuaInt = prop.typeLua();
-        // lua_State l_state = *L;
-        // std::string propTypeLua = prop.getLuaValue
-
-        LERRORC(
-            "property_setValue(1))",
-            fmt::format(
-                "{}: Property '{}' does not accept input of type '{}'. Requested "
-                "type: '{}'"
-                "description: {}"
-                "propGuiName: {}"
-                "propTypeLua: {}"
-                "propTypeLuaInt: {}",
-                errorLocation(L),
-                propValue,
-                propDescription,
-                propGuiName,
-                propTypeLua,
-                propTypeLuaInt 
-            )
-        );
-
         LERRORC(
             "property_setValue",
             fmt::format(
