@@ -429,7 +429,7 @@ void SoftwareConnection::handleOutgoingMessages() {
                 size_t subjectBufferOffset = 0;
                 subjectBuffer.clear();
                 std::string subjectPrefixString = fmt::format(
-                    "{}{}{}{}", identifier, simp::DELIM, guiNameProp->getStringValue(), simp::DELIM
+                    "{}{}{}{}", identifier, simp::DELIM, guiNameProp->stringValue(), simp::DELIM
                 );
                 simp::toByteBuffer(subjectBuffer, subjectBufferOffset, subjectPrefixString);
 

@@ -418,7 +418,7 @@ bool handleDateValue(
             global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.{}', {});",
-                    identifier, propertyName, newDate
+                    identifier, propertyName, ghoul::to_string(newDate)
                 ),
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -547,7 +547,7 @@ bool handleStringValue(
         if (!property) return;
 
         // Update string property of renderable
-        auto currentStringValue = property->getStringValue();
+        auto currentStringValue = property->stringValue();
         if (newStringValue != currentStringValue) {
             global::scriptEngine->queueScript(
                 fmt::format(
@@ -574,10 +574,7 @@ bool handleStringValue(
     return true;
 }
 
-void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<SoftwareConnection> connection) {
-    // LDEBUG(fmt::format("Message recieved on connection {}... New Data", connectionPtr->id()));
-    // will_send_message = false
-    
+void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<SoftwareConnection> connection) {    
     size_t offset = 0;
     std::string identifier;
 
@@ -884,7 +881,7 @@ void handleMessage(IncomingMessage& incomingMessage) {
                 break;
             }
 
-            std::string sendBack = fmt::format("{}{}", software, simp::DELIM);
+            std::string sendBack = software + simp::DELIM;
 
             // Send back message to software to complete handshake            
             std::vector<std::byte> subject;

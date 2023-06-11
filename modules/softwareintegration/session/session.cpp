@@ -212,7 +212,7 @@ bool softwareintegration::Session::saveSession(const std::string& wantedFileName
 
             assetFile << INDENT << "{\n"
                       << INDENT << INDENT << "GUI = {\n"
-                      << INDENT << INDENT << INDENT << "Name = " << r->property("Name")->getStringValue() << ",\n"
+                      << INDENT << INDENT << INDENT << "Name = " << r->property("Name")->stringValue() << ",\n"
                       << INDENT << INDENT << INDENT << "Path = \"/Software Integration\"" << "\n"
                       << INDENT << INDENT << "},\n"
                       << INDENT << INDENT << "Identifier = \"" << identifier << "\",\n"
@@ -237,7 +237,7 @@ bool softwareintegration::Session::saveSession(const std::string& wantedFileName
                 assetFile << INDENT << INDENT << INDENT
                           << p->identifier() << " = ";
 
-                std::string valueAsString = p->getStringValue();
+                std::string valueAsString = p->stringValue();
                 
                 if (std::string{ p->type().name() }.find("string") == std::string::npos) {
                     for(
