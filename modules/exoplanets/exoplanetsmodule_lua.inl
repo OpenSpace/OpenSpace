@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,11 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/scene/scene.h>
+#include <algorithm>
+#include <string>
+#include <string_view>
+
 namespace {
 
-constexpr const char _loggerCat[] = "ExoplanetsModule";
+constexpr std::string_view _loggerCat = "ExoplanetsModule";
 
-constexpr const char ExoplanetsGuiPath[] = "/Milky Way/Exoplanets/Exoplanet Systems/";
+constexpr std::string_view ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
 // Lua cannot handle backslashes, so replace these with forward slashes
 std::string formatPathToLua(const std::string& path) {
@@ -119,12 +124,12 @@ void createExoplanetSystem(const std::string& starName) {
     using namespace openspace;
     using namespace exoplanets;
 
-    const std::string starIdentifier = createIdentifier(starName);
+    const std::string starIdentifier = makeIdentifier(starName);
 
     std::string sanitizedStarName = starName;
     sanitizeNameString(sanitizedStarName);
 
-    const std::string guiPath = ExoplanetsGuiPath + sanitizedStarName;
+    const std::string guiPath = fmt::format("{}{}", ExoplanetsGuiPath, sanitizedStarName);
 
     SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
     if (existingStarNode) {
@@ -282,7 +287,7 @@ void createExoplanetSystem(const std::string& starName) {
         double semiMajorAxisInMeter = planet.a * distanceconstants::AstronomicalUnit;
         double semiMajorAxisInKm = semiMajorAxisInMeter * 0.001;
 
-        const std::string planetIdentifier = createIdentifier(planetName);
+        const std::string planetIdentifier = makeIdentifier(planetName);
 
         const std::string planetKeplerTranslation = "{"
             "Type = 'KeplerTranslation',"
@@ -445,7 +450,7 @@ void createExoplanetSystem(const std::string& starName) {
     bool hasLuminosity = !std::isnan(system.starData.luminosity);
 
     if (hasTeff && hasLuminosity) {
-        constexpr const char* description =
+        constexpr std::string_view description =
             "The habitable zone is the region around a star in which an Earth-like "
             "planet can potentially have liquid water on its surface."
             "<br><br>"
@@ -453,7 +458,7 @@ void createExoplanetSystem(const std::string& starName) {
             "would trap any incoming infrared radiation, leading to the planet "
             "surface becoming so hot that water boils away. The outer boundary is where "
             "the greenhouse effect would not be able to maintain surface temperature "
-            "above freezing anywhere on the planet.";
+            "above freezing anywhere on the planet";
 
         const std::string hzTexture = module->habitableZoneTexturePath();
 
@@ -486,7 +491,7 @@ void createExoplanetSystem(const std::string& starName) {
             "GUI = {"
                 "Name = '" + starName + " Habitable Zone',"
                 "Path = '" + guiPath + "',"
-                "Description = '" + description + "'"
+                "Description = '" + std::string(description) + "'"
             "}"
         "}";
 
@@ -504,7 +509,7 @@ void createExoplanetSystem(const std::string& starName) {
             // magnitude or star luminosity, but for now this looks good enough.
             double size = 59.0 * radiusInMeter;
             if (hasTeff) {
-                constexpr const float sunTeff = 5780.f;
+                constexpr float sunTeff = 5780.f;
                 size *= std::pow(system.starData.teff / sunTeff, 2.0);
             }
 
@@ -627,7 +632,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 [[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
     using namespace openspace;
     using namespace exoplanets;
-    const std::string starIdentifier = createIdentifier(std::move(starName));
+    const std::string starIdentifier = makeIdentifier(std::move(starName));
     global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
         scripting::ScriptEngine::RemoteScripting::Yes

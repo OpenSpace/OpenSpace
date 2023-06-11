@@ -1,0 +1,42 @@
+local globe = asset.require("../../mercury")
+
+
+
+local texturesPath = asset.syncedResource({
+  Name = "Mercury Textures",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_textures",
+  Version = 2
+})
+
+
+local Layer = {
+  Identifier = "Texture",
+  FilePath = texturesPath .. "Mercury_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_32ppd.jpg",
+  Enabled = asset.enabled,
+  Description = [[The Map Projected Basemap RDR (BDR) data set consists of a global
+    monochrome map of reflectance at a resolution of 256 pixels per degree (~166 m/p).
+    This is an offline version with lower resoution than the Messenger BDR layer.]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("Layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Mercury Texture",
+  Version = "1.0",
+  Description = "Default texture for Mercury",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

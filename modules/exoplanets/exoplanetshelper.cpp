@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,8 +38,8 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* _loggerCat = "ExoplanetsModule";
-}
+    constexpr std::string_view _loggerCat = "ExoplanetsModule";
+} // namespace
 
 namespace openspace::exoplanets {
 
@@ -88,7 +88,7 @@ glm::vec3 computeStarColor(float bv) {
     const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * (nValues - 1)));
     std::string color;
     for (int i = 0; i < t + 1; i++) {
-        getline(colorMap, color);
+        std::getline(colorMap, color);
     }
     colorMap.close();
 
@@ -152,13 +152,6 @@ glm::dmat3 computeSystemRotation(glm::dvec3 starPosition) {
         starToSunVec.y,
         starToSunVec.z
     );
-}
-
-std::string createIdentifier(std::string name) {
-    std::replace(name.begin(), name.end(), ' ', '_');
-    std::replace(name.begin(), name.end(), '.', '-');
-    sanitizeNameString(name);
-    return name;
 }
 
 void sanitizeNameString(std::string& s) {

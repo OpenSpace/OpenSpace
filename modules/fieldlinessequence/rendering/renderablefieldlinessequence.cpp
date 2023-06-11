@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,94 +46,117 @@
 #include <thread>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableFieldlinesSequence";
+    constexpr std::string_view _loggerCat = "RenderableFieldlinesSequence";
 
     constexpr openspace::properties::Property::PropertyInfo ColorMethodInfo = {
         "ColorMethod",
         "Color Method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
-        "examples, temperature or particle density."
+        "examples, temperature or particle density",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
         "Quantity to Color By",
-        "Quantity used to color lines if the 'By Quantity' color method is selected."
+        "Quantity used to color lines if the 'By Quantity' color method is selected",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
         "ColorQuantityMinMax",
         "ColorTable Min Value",
-        "Value to map to the lowest and highest end of the color table."
+        "Value to map to the lowest and highest end of the color table",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to Color Table",
-        "Color Table/Transfer Function to use for 'By Quantity' coloring."
+        "Color Table/Transfer Function to use for 'By Quantity' coloring",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "Color",
         "Uniform Line Color",
-        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'."
+        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
         "Additive Blending",
-        "Activate/deactivate additive blending."
+        "Activate/deactivate additive blending",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
         "Domain Limits",
-        "Enable/Disable domain limits"
+        "Enable/Disable domain limits",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo DomainXInfo = {
         "LimitsX",
         "X-limits",
-        "Valid range along the X-axis. [Min, Max]"
+        "Valid range along the X-axis. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainYInfo = {
         "LimitsY",
         "Y-limits",
-        "Valid range along the Y-axis. [Min, Max]"
+        "Valid range along the Y-axis. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
         "LimitsZ",
         "Z-limits",
-        "Valid range along the Z-axis. [Min, Max]"
+        "Valid range along the Z-axis. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainRInfo = {
         "LimitsR",
         "Radial limits",
-        "Valid radial range. [Min, Max]"
+        "Valid radial range. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow Color",
-        "Color of particles flow direction indication."
+        "Color of particles flow direction indication",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
         "Flow Direction",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
-        "illustrate magnetic flow."
+        "illustrate magnetic flow",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
         "Reversed",
         "Reversed Flow",
-        "Toggle to make the flow move in the opposite direction."
+        "Toggle to make the flow move in the opposite direction",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
         "Particle Size",
-        "Size of the particles."
+        "Size of the particles",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
         "Particle Spacing",
-        "Spacing inbetween particles."
+        "Spacing inbetween particles",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "Speed",
         "Speed",
-        "Speed of the flow."
+        "Speed of the flow",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",
@@ -141,27 +164,33 @@ namespace {
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
-        "topologies like solar wind & closed lines."
+        "topologies like solar wind & closed lines",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
         "Lower Limit",
-        "Lower and upper limit of the valid masking range"
+        "Lower and upper limit of the valid masking range",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
         "Quantity used for Masking",
-        "Quantity used for masking."
+        "Quantity used for masking",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the fieldlines"
+        "This value specifies the line width of the fieldlines",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
         "Jump to Start Of Sequence",
-        "Performs a time jump to the start of the sequence."
+        "Performs a time jump to the start of the sequence",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
@@ -550,9 +579,6 @@ fls::Model stringToModel(std::string str) {
 
 bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM() {
     fls::Model model = stringToModel(_modelStr);
-    if (model == fls::Model::Invalid) {
-        return false;
-    }
     for (const std::string& filePath : _sourceFiles) {
         FieldlinesState newState;
         const bool loadedSuccessfully = newState.loadStateFromJson(
@@ -580,7 +606,7 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
     _states.push_back(newState);
     _nStates = _startTimes.size();
     if (_nStates == 1) {
-        // loading dynamicaly is not nessesary if only having one set in the sequence 
+        // loading dynamicaly is not nessesary if only having one set in the sequence
         _loadingStatesDynamically = false;
     }
     _activeStateIndex = 0;
@@ -767,9 +793,9 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
 // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
 void RenderableFieldlinesSequence::extractTriggerTimesFromFileNames() {
     // number of  characters in filename (excluding '.osfls')
-    constexpr const int FilenameSize = 23;
+    constexpr int FilenameSize = 23;
     // size(".osfls")
-    constexpr const int ExtSize = 6;
+    constexpr int ExtSize = 6;
 
     for (const std::string& filePath : _sourceFiles) {
         const size_t strLength = filePath.size();
@@ -1049,7 +1075,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
-    
+
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
@@ -1079,6 +1105,12 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         if (!_hasBeenUpdated) {
             updateVertexPositionBuffer();
         }
+
+        if (_states[_activeStateIndex].nExtraQuantities() > 0) {
+            _shouldUpdateColorBuffer = true;
+            _shouldUpdateMaskingBuffer = true;
+        }
+
         _hasBeenUpdated = true;
     }
     else {

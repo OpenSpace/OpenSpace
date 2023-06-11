@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value explicitly specifies the size of the screen space plane."
+        "This value explicitly specifies the size of the screen space plane",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -83,7 +85,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
     _size.set(glm::vec4(0.f, 0.f, resolution.x, resolution.y));
 }
 
-ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {} // NOLINT
+ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
 
 bool ScreenSpaceFramebuffer::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
@@ -108,7 +110,7 @@ void ScreenSpaceFramebuffer::render() {
     const glm::vec4& size = _size.value();
 
     const float xratio = resolution.x / (size.z - size.x);
-    const float yratio = resolution.y / (size.w - size.y);;
+    const float yratio = resolution.y / (size.w - size.y);
 
     if (!_renderFunctions.empty()) {
         GLint viewport[4];

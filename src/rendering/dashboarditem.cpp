@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,34 +32,24 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    constexpr std::string_view KeyType = "Type";
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
-        "If this value is set to 'true' this dashboard item is shown in the dashboard"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
-        "Identifier",
-        "Identifier",
-        ""
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
-        "GuiName",
-        "Gui Name",
-        ""
+        "Enabled",
+        "If this value is set to 'true' this dashboard item is shown in the dashboard",
+        // @VISIBILITY(1.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(DashboardItem)]] Parameters {
         std::string type;
 
-        // [[codegen::verbatim(IdentifierInfo.description)]]
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
-        // [[codegen::verbatim(GuiNameInfo.description)]]
         std::optional<std::string> guiName;
+
+        std::optional<bool> enabled;
     };
 #include "dashboarditem_codegen.cpp"
 } // namespace
@@ -80,12 +70,14 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);
 
     DashboardItem* item = factory->create(dashboardType, std::move(dictionary));
+    item->_type = dashboardType;
+
     return std::unique_ptr<DashboardItem>(item);
 }
 
 DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "", "" })
-    , _isEnabled(EnabledInfo, true)
+    , _enabled(EnabledInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -94,11 +86,12 @@ DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
         setGuiName(*p.guiName);
     }
 
-    addProperty(_isEnabled);
+    _enabled = p.enabled.value_or(_enabled);
+    addProperty(_enabled);
 }
 
 bool DashboardItem::isEnabled() const {
-    return _isEnabled;
+    return _enabled;
 }
 
 } // namespace openspace

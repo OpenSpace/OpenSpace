@@ -2,6 +2,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
 
 
+
 local kernelsFolder = asset.syncedResource({
   Name = "Pioneer Kernels",
   Type = "HttpSynchronization",
@@ -9,9 +10,8 @@ local kernelsFolder = asset.syncedResource({
   Version = 1
 })
 
-local kernelsList = { kernelsFolder .. "p10-a.bsp" }
 
-local Pioneer10NAIF = "-23"
+local Pioneer10ID = -23
 
 local Pioneer10 = {
   Identifier = "Pioneer_10",
@@ -19,16 +19,15 @@ local Pioneer10 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = Pioneer10NAIF,
-      Observer = "SSB",
-      Kernels = kernelsList
+      Target = Pioneer10ID,
+      Observer = "SSB"
     }
   },
   Renderable = model.PioneerModel,
   GUI = {
     Name = "Pioneer 10 Spacecraft",
     Path = "/Solar System/Missions/Pioneer",
-    Description = [[Pioneer 10 Spacecraft. Positioned by SPICE data.]]
+    Description = "Pioneer 10 Spacecraft. Positioned by SPICE data"
   }
 }
 
@@ -39,15 +38,14 @@ local Pioneer10Trail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = Pioneer10NAIF,
-      Observer = "SSB",
-      Kernels = kernelsList
+      Target = Pioneer10ID,
+      Observer = "SSB"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1972 MAR 03 02:04:00",
     EndTime = "1990 JAN 02 00:00:00",
     EnableFade = false,
-    SampleInterval = 6545 * 2  
+    SampleInterval = 6545 * 2
     -- 6545 is the number of days between the Start and End time (aka sample every 2d)
   },
   GUI = {
@@ -58,16 +56,21 @@ local Pioneer10Trail = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernelsFolder .. "p10-a.bsp")
+
   openspace.addSceneGraphNode(Pioneer10)
   openspace.addSceneGraphNode(Pioneer10Trail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Pioneer10Trail)
   openspace.removeSceneGraphNode(Pioneer10)
+
+  openspace.spice.unloadKernel(kernelsFolder .. "p10-a.bsp")
 end)
-    
+
 asset.export(Pioneer10)
 asset.export(Pioneer10Trail)
 
@@ -76,10 +79,9 @@ asset.export(Pioneer10Trail)
 asset.meta = {
   Name = "Pioneer 10",
   Version = "1.0",
-  Description = [[ Pioneer 10 Model and Trail. Driven by SPICE data for high accuracy
-  from March 3rd, 1972 to January 2nd, 1990.]],
+  Description = [[Pioneer 10 Model and Trail. Driven by SPICE data for high accuracy from
+    March 3rd, 1972 to January 2nd, 1990]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Pioneer_10", "Pioneer_10Trail"}
+  License = "MIT license"
 }

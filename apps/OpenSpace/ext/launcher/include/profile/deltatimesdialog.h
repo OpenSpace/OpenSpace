@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,7 +63,7 @@ public:
 
 private:
     void createWidgets();
-    
+
     void listItemSelected();
     void valueChanged(const QString& text);
     void saveDeltaTimeValue();
@@ -76,7 +76,7 @@ private:
      * Called to transition to editing a particular dt value (gui settings)
      *
      * \param index index in dt list
-     * \param state \c true if the edit mode should be turned on, \c false otherwise
+     * \param state `true` if the edit mode should be turned on, `false` otherwise
      */
     void transitionEditMode(int index, bool state);
 

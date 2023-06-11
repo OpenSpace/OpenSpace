@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,17 +70,6 @@ namespace {
 [[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState) {
     using namespace openspace;
 
-    documentation::TestResult r = documentation::testSpecification(
-        interaction::NavigationState::Documentation(),
-        navigationState
-    );
-
-    if (!r.success) {
-        throw ghoul::lua::LuaError(
-            fmt::format("Could not set camera state: {}", ghoul::to_string(r))
-        );
-    }
-
     global::navigationHandler->setNavigationStateNextFrame(
         interaction::NavigationState(navigationState)
     );
@@ -140,20 +129,65 @@ namespace {
     global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
 
+// Picks the previous node from the interesting nodes out of the profile and selects that.
+// If the current anchor is not an interesting node, the first will be selected
+[[codegen::luawrap]] void targetPreviousInterestingAnchor() {
+    using namespace openspace;
+    if (global::profile->markNodes.empty()) {
+        LWARNINGC(
+            "targetPreviousInterestingAnchor",
+            "Profile does not define any interesting nodes"
+        );
+        return;
+    }
+    const std::vector<std::string>& markNodes = global::profile->markNodes;
+
+    std::string currAnchor =
+        global::navigationHandler->orbitalNavigator().anchorNode()->identifier();
+
+    auto it = std::find(markNodes.begin(), markNodes.end(), currAnchor);
+    if (it == markNodes.end()) {
+        // We want to use the first node if the current node is not an interesting node
+        global::navigationHandler->orbitalNavigator().setFocusNode(markNodes.front());
+    }
+    else if (it == markNodes.begin()) {
+        // We want to use the last node if the current node is the first in the list
+        global::navigationHandler->orbitalNavigator().setFocusNode(markNodes.back());
+    }
+    else {
+        // Otherwise we can just select the previous one
+        global::navigationHandler->orbitalNavigator().setFocusNode(*(it - 1));
+    }
+    global::navigationHandler->orbitalNavigator().startRetargetAnchor();
+}
+
 /**
  * Finds the input joystick with the given 'name' and binds the axis identified by the
  * second argument to be used as the type identified by the third argument. If
  * 'isInverted' is 'true', the axis value is inverted. 'joystickType' is if the joystick
  * behaves more like a joystick or a trigger, where the first is the default. If
  * 'isSticky' is 'true', the value is calculated relative to the previous value. If
+ * 'shouldFlip' is true, then the camera movement for the axis is reversed. If
  * 'sensitivity' is given then that value will affect the sensitivity of the axis together
  * with the global sensitivity.
+ *
+ * \param joystickName the name for the joystick or game controller that should be bound
+ * \param axis the axis of the joystick that should be bound
+ * \param axisType the type of movement that the axis should be mapped to
+ * \param shouldInvert if the joystick movement should be inverted or not
+ * \param joystickType what type of joystick or axis this is. Either
+ *                     <code>"JoystickLike"</code> or <code>"TriggerLike"</code>.
+ * \param isSticky if true, the value is calculated relative to the previous value,
+ *                 if false the the value is used as is.
+ * \param shouldFlip reverses the movement of the camera that the joystick produces
+ * \param sensitivity sensitivity for this axis
  */
 [[codegen::luawrap]] void bindJoystickAxis(std::string joystickName, int axis,
                                            std::string axisType,
                                            bool shouldInvert = false,
                                            std::string joystickType = "JoystickLike",
                                            bool isSticky = false,
+                                           bool shouldFlip = false,
                                            double sensitivity = 0.0)
 {
     using namespace openspace;
@@ -165,6 +199,7 @@ namespace {
         JoystickCameraStates::AxisInvert(shouldInvert),
         ghoul::from_string<JoystickCameraStates::JoystickType>(joystickType),
         isSticky,
+        JoystickCameraStates::AxisFlip(shouldFlip),
         sensitivity
     );
 }
@@ -176,6 +211,15 @@ namespace {
  * value is rescaled from [-1, 1] to [min, max], default is [0, 1]. If 'isInverted' is
  * 'true', the axis value is inverted. The last argument determines whether the property
  * change is going to be executed locally or remotely, where the latter is the default.
+ *
+ * \param joystickName the name for the joystick or game controller that should be bound
+ * \param axis the axis of the joystick that should be bound
+ * \param propertyUri the property that this joystick axis should modify
+ * \param min the minimum value that this axis can set for the property
+ * \param max the maximum value that this axis can set for the property
+ * \param shouldInvert if the joystick movement should be inverted or not
+ * \param isRemote if true, the property change will also be executed on connected nodes
+ *                 if false, the property change will only affect the master node
  */
 [[codegen::luawrap]] void bindJoystickAxisProperty(std::string joystickName, int axis,
                                                    std::string propertyUri,
@@ -184,13 +228,14 @@ namespace {
                                                    bool isRemote = true)
 {
     using namespace openspace;
+    using JoystickCameraStates = interaction::JoystickCameraStates;
     global::navigationHandler->setJoystickAxisMappingProperty(
         std::move(joystickName),
         axis,
         std::move(propertyUri),
         min,
         max,
-        interaction::JoystickCameraStates::AxisInvert(shouldInvert),
+        JoystickCameraStates::AxisInvert(shouldInvert),
         isRemote
     );
 }
@@ -205,7 +250,7 @@ namespace {
  * bool.
  */
 [[codegen::luawrap]]
-std::tuple<std::string, bool, std::string, bool, double, std::string, float, float, bool>
+std::tuple<std::string, bool, std::string, bool, bool, double, std::string, float, float, bool>
 joystickAxis(std::string joystickName, int axis)
 {
     using namespace openspace;
@@ -218,6 +263,7 @@ joystickAxis(std::string joystickName, int axis)
         info.invert,
         ghoul::to_string(info.joystickType),
         info.isSticky,
+        info.flip,
         info.sensitivity,
         info.propertyUri,
         info.minValue,
@@ -372,6 +418,46 @@ joystickAxis(std::string joystickName, int axis)
 [[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
     using namespace openspace;
     return global::navigationHandler->listAllJoysticks();
+}
+
+/**
+ * Returns the distance in meters to the current focus node
+ */
+[[codegen::luawrap]] double distanceToFocus() {
+    using namespace openspace;
+
+    const SceneGraphNode * focus = global::navigationHandler->anchorNode();
+    Camera * camera = global::navigationHandler->camera();
+
+    return glm::distance(camera->positionVec3(), focus->worldPosition());
+}
+
+/**
+ * Returns the distance in meters to the current focus node's bounding sphere
+ */
+[[codegen::luawrap]] double distanceToFocusBoundingSphere() {
+    using namespace openspace;
+
+    const SceneGraphNode* focus = global::navigationHandler->anchorNode();
+    Camera* camera = global::navigationHandler->camera();
+
+    double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
+
+    return distance - focus->boundingSphere();
+}
+
+/**
+ * Returns the distance in meters to the current focus node's interaction sphere
+ */
+[[codegen::luawrap]] double distanceToFocusInteractionSphere() {
+    using namespace openspace;
+
+    const SceneGraphNode* focus = global::navigationHandler->anchorNode();
+    Camera* camera = global::navigationHandler->camera();
+
+    double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
+
+    return distance - focus->interactionSphere();
 }
 
 #include "navigationhandler_lua_codegen.cpp"

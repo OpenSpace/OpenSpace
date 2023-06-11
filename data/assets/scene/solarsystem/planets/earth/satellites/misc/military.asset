@@ -1,20 +1,53 @@
-local shared = asset.require("util/tle_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Military",
+
+
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Military)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_military",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=military&FORMAT=kvn",
   Filename = "military.txt",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=military&FORMAT=TLE",
-  TrailColor = { 0.75, 0.75, 0.35 }
+  Override = true
+})
+
+
+local MilitarySatellites = {
+  Identifier = "MilitarySatellites",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "military.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Military",
+    Path = "/Solar System/Planets/Earth/Satellites"
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MilitarySatellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MilitarySatellites)
+end)
+
+asset.export(MilitarySatellites)
+
 
 
 asset.meta = {
   Name = "Satellites Military",
   Version = "1.0",
-  Description = [[ Satellites asset for Military. Data from Celestrak]],
+  Description = "Satellites asset for Military. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

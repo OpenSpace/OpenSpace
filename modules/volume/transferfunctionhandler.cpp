@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,38 +32,44 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunction",
         "TransferFunction",
-        "All the envelopes used in the transfer function"
+        "All the envelopes used in the transfer function",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataUnitInfo = {
         "DataUnit",
         "DataUnit",
-        "Unit of the data"
+        "Unit of the data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinValueInfo = {
         "MinValue",
         "MinValue",
-        "Minimum value in the data"
+        "Minimum value in the data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxValueInfo = {
         "MaxValue",
         "MaxValue",
-        "Maximum value in the data"
+        "Maximum value in the data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveTransferFunctionInfo = {
         "SaveTransferFunction",
         "Save Transfer Function",
-        "Save your transfer function"
+        "Save your transfer function",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
-}
+} // namespace
 
 namespace openspace::volume {
 
 TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
-    : properties::PropertyOwner({ "TransferFunctionHandler" })
+    : properties::PropertyOwner({ "TransferFunctionHandler", "Tranfer Function Handler" })
     , _transferFunctionPath(prop)
     , _dataUnit(DataUnitInfo)
     , _minValue(MinValueInfo)

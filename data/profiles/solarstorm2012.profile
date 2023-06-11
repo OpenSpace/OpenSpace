@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "dashboard/default_dashboard",
     "scene/solarsystem/heliosphere/2012/sun_earth_2012_fieldlines",
     "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",
@@ -37,19 +38,19 @@
   ],
   "keybindings": [
     {
-      "action": "2012july.reset_loop",
+      "action": "os.2012july.ResetLoop",
       "key": "R"
     },
     {
-      "action": "2012july.dark_sun",
+      "action": "os.2012july.DarkSun",
       "key": "D"
     },
     {
-      "action": "2012july.loop_enlil",
+      "action": "os.2012july.LoopEnlil",
       "key": "E"
     },
     {
-      "action": "2012july.loop_batsrus",
+      "action": "os.2012july.LoopBatsrus",
       "key": "B"
     }
   ],
@@ -63,7 +64,7 @@
   ],
   "meta": {
     "author": "Community Coordinated Modeling Center, NASA Goddard",
-    "description": "This profile is showing several coronal mass ejection (CMEs) during July 2012, where the last one was incredible intense. Its strength was comparable to the most intense CME in recorded history, the Carrington Event of 1859, which caused damage to electric equipment world wide. Luckily this 2012 event missed earth. The event is modeled with ENLIL which spands across the solarsystem, from the Sun to Earth, Batsrus which is showing the interaction of the flow of the solar wind and Earths magnetosphere. There is also one time step of the PFSS model showing the Suns local magnetic structure.",
+    "description": "This profile is showing several coronal mass ejection (CMEs) during July 2012, where the last one was incredible intense. Its strength was comparable to the most intense CME in recorded history, the Carrington Event of 1859, which caused damage to electric equipment world wide. Luckily this 2012 event missed earth. The event is modeled with ENLIL which spands across the solarsystem, from the Sun to Earth, Batsrus which is showing the interaction of the flow of the solar wind and Earths magnetosphere. There is also one time step of the PFSS model showing the Suns local magnetic structure",
     "license": "MIT License",
     "name": "Solar storm 2012",
     "url": "https://www.openspaceproject.com",

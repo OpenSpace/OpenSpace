@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <modules/server/servermodule.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/server/include/serverinterface.h>
 #include <modules/server/include/connection.h>
 #include <modules/server/include/topics/topic.h>
@@ -40,7 +41,7 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyInterfaces = "Interfaces";
+    constexpr std::string_view KeyInterfaces = "Interfaces";
 } // namespace
 
 namespace openspace {
@@ -50,6 +51,15 @@ ServerModule::ServerModule()
     , _interfaceOwner({"Interfaces", "Interfaces", "Server Interfaces"})
 {
     addPropertySubOwner(_interfaceOwner);
+
+    global::callback::preSync->emplace_back([this]() {
+        // Trigger callbacks
+        using K = CallbackHandle;
+        using V = CallbackFunction;
+        for (const std::pair<K, V>& it : _preSyncCallbacks) {
+            it.second(); // call function
+        }
+    });
 }
 
 ServerModule::~ServerModule() {
@@ -78,7 +88,7 @@ int ServerModule::skyBrowserUpdateTime() const {
 
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     global::callback::preSync->emplace_back([this]() {
-        ZoneScopedN("ServerModule")
+        ZoneScopedN("ServerModule");
 
         preSync();
     });
@@ -103,10 +113,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
         std::unique_ptr<ServerInterface> serverInterface =
             ServerInterface::createFromDictionary(interfaceDictionary);
 
-
-        if (global::windowDelegate->isMaster()) {
-            serverInterface->initialize();
-        }
+        serverInterface->initialize();
 
         _interfaceOwner.addPropertySubOwner(serverInterface.get());
 
@@ -122,10 +129,6 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
 }
 
 void ServerModule::preSync() {
-    if (!global::windowDelegate->isMaster()) {
-        return;
-    }
-
     // Set up new connections.
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         if (!serverInterface->isEnabled()) {
@@ -170,7 +173,7 @@ void ServerModule::preSync() {
 }
 
 void ServerModule::cleanUpFinishedThreads() {
-    ZoneScoped
+    ZoneScoped;
 
     for (ConnectionData& connectionData : _connections) {
         Connection& connection = *connectionData.connection;
@@ -191,12 +194,10 @@ void ServerModule::cleanUpFinishedThreads() {
 }
 
 void ServerModule::disconnectAll() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
-        if (global::windowDelegate->isMaster()) {
-            serverInterface->deinitialize();
-        }
+        serverInterface->deinitialize();
     }
 
     for (ConnectionData& connectionData : _connections) {
@@ -210,7 +211,7 @@ void ServerModule::disconnectAll() {
 }
 
 void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
-    ZoneScoped
+    ZoneScoped;
 
     std::string messageString;
     messageString.reserve(256);
@@ -221,7 +222,7 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
 }
 
 void ServerModule::consumeMessages() {
-    ZoneScoped
+    ZoneScoped;
 
     std::lock_guard lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {
@@ -231,6 +232,30 @@ void ServerModule::consumeMessages() {
         }
         _messageQueue.pop_front();
     }
+}
+
+ServerModule::CallbackHandle ServerModule::addPreSyncCallback(CallbackFunction cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _preSyncCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void ServerModule::removePreSyncCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _preSyncCallbacks.begin(),
+        _preSyncCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, CallbackFunction>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _preSyncCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _preSyncCallbacks.erase(it);
 }
 
 } // namespace openspace

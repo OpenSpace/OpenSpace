@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@ in vec4 vs_positionViewSpace;
 uniform vec3 color;
 uniform float alphaValue;
 
+
 Fragment getFragment() {
   Fragment frag;
 
@@ -43,6 +44,6 @@ Fragment getFragment() {
   // JCC: Need to change the position to camera space
   frag.gPosition = vs_positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    
+
   return frag;
 }

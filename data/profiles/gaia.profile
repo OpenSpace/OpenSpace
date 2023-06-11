@@ -1,12 +1,13 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "scene/milkyway/gaia/apogee",
     "scene/milkyway/gaia/gaiastars",
     "scene/milkyway/gaia/galah",
-    "scene/solarsystem/missions/gaia/dashboard",
-    "scene/solarsystem/missions/gaia/gaia",
-    "scene/solarsystem/missions/gaia/trail"
+    "scene/solarsystem/telescopes/gaia/dashboard",
+    "scene/solarsystem/telescopes/gaia/gaia",
+    "scene/solarsystem/telescopes/gaia/trail"
   ],
   "camera": {
     "aim": "",
@@ -33,7 +34,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This scene contains a new rendering method to show the massive ESA Gaia stars dataset. By default, it loads the few million stars of the Gaia DR2 that contain radial velocities.",
+    "description": "This scene contains a new rendering method to show the massive ESA Gaia stars dataset. By default, it loads the few million stars of the Gaia DR2 that contain radial velocities",
     "license": "MIT License",
     "name": "Gaia",
     "url": "https://www.openspaceproject.com",

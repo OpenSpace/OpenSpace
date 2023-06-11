@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -107,9 +107,6 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom = 180.f,
 // Rotate the original coordinate system (where x is pointing to First Point of Aries)
 // so that x is pointing from star to the sun.
 glm::dmat3 computeSystemRotation(glm::dvec3 starPosition);
-
-// Create an identifier without whitespaces
-std::string createIdentifier(std::string name);
 
 void sanitizeNameString(std::string& s);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,91 +59,109 @@
 #include <iterator>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableMultiresVolume";
-    constexpr const char* KeyDataSource = "Source";
-    constexpr const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    constexpr const char* KeyTransferFunction = "TransferFunction";
+    constexpr std::string_view _loggerCat = "RenderableMultiresVolume";
+    constexpr std::string_view KeyDataSource = "Source";
+    constexpr std::string_view KeyErrorHistogramsSource = "ErrorHistogramsSource";
+    constexpr std::string_view KeyTransferFunction = "TransferFunction";
 
-    constexpr const char* KeyBrickSelector = "BrickSelector";
-    constexpr const char* KeyStartTime = "StartTime";
-    constexpr const char* KeyEndTime = "EndTime";
+    constexpr std::string_view KeyBrickSelector = "BrickSelector";
+    constexpr std::string_view KeyStartTime = "StartTime";
+    constexpr std::string_view KeyEndTime = "EndTime";
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
         "Stepsize Coefficient",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current Time",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory Budget",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming Budget",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global Time",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick Selector",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print Stats",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats Filename",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScalingInfo = {
         "Scaling",
         "Scaling",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 
@@ -271,7 +289,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     }
 
     addProperty(_selectorName);
-    _selectorName.onChange([&]() {
+    _selectorName.onChange([this]() {
         Selector s;
         std::string newSelectorName = _selectorName;
         if (newSelectorName == "simple") {
@@ -423,7 +441,7 @@ void RenderableMultiresVolume::initializeGL() {
 
     global::raycasterManager->attachRaycaster(*_raycaster);
 
-    auto onChange = [&](bool enabled) {
+    auto onChange = [this](bool enabled) {
         if (enabled) {
             global::raycasterManager->attachRaycaster(*_raycaster);
         }

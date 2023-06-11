@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,17 +25,24 @@
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <ghoul/misc/profiling.h>
+#include <openspace/properties/property.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <math.h>
 
 namespace {
+    constexpr float KM_TO_M = 1000.f;
+
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",
         "Atmosphere Height (KM)",
-        "The thickness of the atmosphere in km"
+        "The thickness of the atmosphere in km",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo =
@@ -43,59 +50,70 @@ namespace {
         "AverageGroundReflectance",
         "Average Ground Reflectance (%)",
         "Average percentage of light reflected by the ground during the pre-calculation "
-        "phase"
+        "phase",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmissionInfo = {
         "GroundRadianceEmission",
         "Percentage of initial radiance emitted from ground",
-        "Multiplier of the ground radiance color during the rendering phase"
+        "Multiplier of the ground radiance color during the rendering phase",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
         "RayleighHeightScale",
         "Rayleigh Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor"
+        "constant factor",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffInfo =
     {
         "RayleighScatteringCoeff",
         "Rayleigh Scattering Coeff",
-        "Rayleigh sea-level scattering coefficients in meters"
+        "Rayleigh sea-level scattering coefficients in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OzoneLayerInfo = {
         "Ozone",
         "Ozone Layer Enabled",
-        "Enables/Disable Ozone Layer during pre-calculation phase"
+        "Enables/Disable Ozone Layer during pre-calculation phase",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
         "OzoneLayerHeightScale",
         "Ozone Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor"
+        "constant factor",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffInfo = {
         "OzoneLayerCoeff",
         "Ozone Layer Extinction Coeff",
-        "Ozone scattering coefficients in meters"
+        "Ozone scattering coefficients in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MieHeightScaleInfo = {
         "MieHeightScale",
         "Mie Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor"
+        "constant factor",
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffInfo = {
         "MieScatteringCoeff",
         "Mie Scattering Coeff",
-        "Mie sea-level scattering coefficients in meters"
+        "Mie sea-level scattering coefficients in meters",
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -103,19 +121,25 @@ namespace {
     {
         "MieScatteringExtinctionPropCoefficient",
         "Mie Scattering/Extinction Proportion Coefficient (%)",
-        "Mie Scattering/Extinction Proportion Coefficient (%)"
+        "Mie Scattering/Extinction Proportion Coefficient (%)",
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MieAsymmetricFactorGInfo = {
         "MieAsymmetricFactorG",
         "Mie Asymmetric Factor G",
-        "Averaging of the scattering angle over a high number of scattering events"
+        "Averaging of the scattering angle over a high number of scattering events",
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SunIntensityInfo = {
         "SunIntensity",
         "Sun Intensity",
-        "Unitless for now"
+        "Unitless for now",
+        // @VISIBILITY(2.6)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -123,15 +147,32 @@ namespace {
     {
         "SunFollowingCamera",
         "Enable Sun On Camera Position",
-        "When selected the Sun is artificially positioned behind the observer all times"
+        "When selected the Sun is artificially positioned behind the observer all times",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadowsInfo",
         "Enable Hard Shadows for Eclipses",
-        "Enable/Disables hard shadows through the atmosphere"
+        "Enable/Disables hard shadows through the atmosphere",
+        // @VISIBILITY(2.8)
+        openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AtmosphereDimmingHeightInfo ={
+        "AtmosphereDimmingHeight",
+        "Atmosphere Dimming Height",
+        "Percentage of the atmosphere where other objects, such as the stars, are faded",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SunsetAngleInfo = {
+        "AtmosphereDimmingSunsetAngle",
+        "Atmosphere Dimming Sunset Angle",
+        "The angle (degrees) between the Camera and the Sun where the sunset starts, and "
+        "the atmosphere starts to fade in objects such as the stars",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 
     struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
         struct ShadowGroup {
@@ -212,6 +253,12 @@ namespace {
             std::optional<bool> saveCalculatedTextures;
         };
         std::optional<ATMDebug> debug;
+
+        // [[codegen::verbatim(AtmosphereDimmingHeightInfo.description)]]
+        std::optional<float> atmosphereDimmingHeight;
+
+        // [[codegen::verbatim(SunsetAngleInfo.description)]]
+        std::optional<glm::vec2> sunsetAngle;
     };
 #include "renderableatmosphere_codegen.cpp"
 
@@ -252,6 +299,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _sunIntensity(SunIntensityInfo, 5.f, 0.1f, 1000.f)
     , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabled(EclipseHardShadowsInfo, false)
+    , _atmosphereDimmingHeight(AtmosphereDimmingHeightInfo, 0.7f, 0.f, 1.f)
+    , _atmosphereDimmingSunsetAngle(
+        SunsetAngleInfo,
+        glm::vec2(95.f, 100.f), glm::vec2(0.f), glm::vec2(180.f)
+    )
  {
     auto updateWithCalculation = [this]() {
         _deferredCasterNeedsUpdate = true;
@@ -355,6 +407,18 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     }
 
     setBoundingSphere(_planetRadius * 1000.0);
+
+    _atmosphereDimmingHeight =
+        p.atmosphereDimmingHeight.value_or(_atmosphereDimmingHeight);
+    addProperty(_atmosphereDimmingHeight);
+
+    _atmosphereDimmingSunsetAngle = p.sunsetAngle.value_or(
+        _atmosphereDimmingSunsetAngle
+    );
+    _atmosphereDimmingSunsetAngle.setViewOption(
+        properties::Property::ViewOptions::MinMaxRange
+    );
+    addProperty(_atmosphereDimmingSunsetAngle);
 }
 
 void RenderableAtmosphere::deinitializeGL() {
@@ -387,7 +451,7 @@ glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const TransformData
 }
 
 void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderTask) {
-    ZoneScoped
+    ZoneScoped;
 
     DeferredcasterTask task{ _deferredcaster.get(), data };
     renderTask.deferredcasterTasks.push_back(task);
@@ -405,7 +469,57 @@ void RenderableAtmosphere::update(const UpdateData& data) {
 
     glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
     _deferredcaster->setModelTransform(modelTransform);
+    _deferredcaster->setOpacity(opacity());
     _deferredcaster->update(data);
+
+    // Calculate atmosphere dimming coefficient
+    // Calculate if the camera is in the atmosphere and if it is in the fading region
+    float atmosphereDimming = 1.f;
+    glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+    glm::dvec3 planetPos = glm::dvec3(modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
+    float cameraDistance = static_cast<float>(glm::distance(planetPos, cameraPos));
+    // Atmosphere height is in KM
+    float atmosphereEdge = KM_TO_M * (_planetRadius + _atmosphereHeight);
+    // Height of the atmosphere where the objects will be faded
+    float atmosphereFadingHeight = KM_TO_M * _atmosphereDimmingHeight * _atmosphereHeight;
+    float atmosphereInnerEdge = atmosphereEdge - atmosphereFadingHeight;
+    bool cameraIsInAtmosphere = cameraDistance < atmosphereEdge;
+    bool cameraIsInFadingRegion = cameraDistance > atmosphereInnerEdge;
+
+    // Check if camera is in sunset
+    glm::dvec3 normalUnderCamera = glm::normalize(cameraPos - planetPos);
+    glm::dvec3 vecToSun = glm::normalize(-planetPos);
+    float cameraSunAngle = glm::degrees(static_cast<float>(
+        glm::acos(glm::dot(vecToSun, normalUnderCamera))
+    ));
+    float sunsetStart = _atmosphereDimmingSunsetAngle.value().x;
+    float sunsetEnd = _atmosphereDimmingSunsetAngle.value().y;
+    // If cameraSunAngle is more than 90 degrees, we are in shaded part of globe
+    bool cameraIsInSun = cameraSunAngle <= sunsetEnd;
+    bool cameraIsInSunset = cameraSunAngle > sunsetStart && cameraIsInSun;
+
+    // Fade if camera is inside the atmosphere
+    if (cameraIsInAtmosphere && cameraIsInSun) {
+        // If camera is in fading part of the atmosphere
+        // Fade with regards to altitude
+        if (cameraIsInFadingRegion) {
+            // Fading - linear interpolation
+            atmosphereDimming = (cameraDistance - atmosphereInnerEdge) /
+                atmosphereFadingHeight;
+        }
+        else {
+            // Camera is below fading region - atmosphere dims objects completely
+            atmosphereDimming = 0.0;
+        }
+        if (cameraIsInSunset) {
+            // Fading - linear interpolation
+            atmosphereDimming = (cameraSunAngle - sunsetStart) /
+                (sunsetEnd - sunsetStart);
+        }
+        global::navigationHandler->camera()->setAtmosphereDimmingFactor(
+            atmosphereDimming
+        );
+    }
 }
 
 void RenderableAtmosphere::updateAtmosphereParameters() {

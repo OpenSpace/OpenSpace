@@ -1,5 +1,7 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local SaturnBarycenter = {
   Identifier = "SaturnBarycenter",
@@ -15,18 +17,19 @@ local SaturnBarycenter = {
     Name = "Saturn Barycenter",
     Path = "/Solar System/Planets/Saturn",
     Hidden = true,
-    Description = [[ Saturn Barycenter position]]
+    Description = "Saturn Barycenter position"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SaturnBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SaturnBarycenter)
 end)
-  
+
 asset.export(SaturnBarycenter)
 
 
@@ -34,7 +37,7 @@ asset.export(SaturnBarycenter)
 asset.meta = {
   Name = "Saturn Transforms",
   Version = "1.1",
-  Description = [[ Saturn Barycenter transform]],
+  Description = "Saturn Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

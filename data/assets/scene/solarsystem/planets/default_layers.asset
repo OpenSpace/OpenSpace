@@ -7,7 +7,7 @@ asset.require("./jupiter/europa/default_layers")
 asset.require("./jupiter/ganymede/default_layers")
 asset.require("./jupiter/io/default_layers")
 
-asset.require('./mars/default_layers')
+asset.require("./mars/default_layers")
 
 asset.require("./mercury/default_layers")
 
@@ -28,10 +28,11 @@ asset.require("./uranus/default_layers")
 asset.require("./venus/default_layers")
 
 
+
 asset.meta = {
   Name = "Default Solar System Layers",
   Version = "1.0",
-  Description = [[ Adds default layers for all planets. Remove this asset and include
+  Description = [[Adds default layers for all planets. Remove this asset and include
     individual layers for planets to customize planet layers]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,10 +33,10 @@ in vec4 vs_position;
 uniform sampler1D texture1;
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
-
 uniform bool hasSunPosition;
 uniform vec3 sunPosition;
 uniform float _nightFactor;
+
 
 Fragment getFragment() {
   // Moving the origin to the center
@@ -58,7 +58,7 @@ Fragment getFragment() {
   if (texCoord < 0.0 || texCoord > 1.0) {
     discard;
   }
-      
+
   vec4 diffuse = texture(texture1, texCoord);
   // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
   // to normalize the alpha value to [0,1]

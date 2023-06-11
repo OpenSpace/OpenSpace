@@ -1,5 +1,6 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernel = asset.require("./kernels")
 
 
 
@@ -14,7 +15,7 @@ local NeptuneBarycenterTrail = {
       Observer = "SSB"
     },
     Color = { 0.2, 0.5, 1.0 },
-    Period  = 60266,
+    Period = 60266,
     Resolution = 1000,
     Enabled = false
   },
@@ -22,18 +23,23 @@ local NeptuneBarycenterTrail = {
   GUI = {
     Name = "Neptune Barycenter Trail",
     Path = "/Solar System/Planets/Neptune",
-    Description = [[ BarycenterTrail of Neptune as observed by the Sun.]]
+    Description = "BarycenterTrail of Neptune as observed by the Sun"
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.nep097)
+
   openspace.addSceneGraphNode(NeptuneBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneBarycenterTrail)
+
+  openspace.spice.unloadKernel(kernel.nep097)
 end)
-  
+
 asset.export(NeptuneBarycenterTrail)
 
 
@@ -41,7 +47,8 @@ asset.export(NeptuneBarycenterTrail)
 asset.meta = {
   Name = "Neptune Trail",
   Version = "1.1",
-  Description = [[ Trail of Neptune's Barycenter. Data from NASA Spice (see base spice asset)]],
+  Description = [[Trail of Neptune's Barycenter. Data from NASA Spice (see base spice
+    asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

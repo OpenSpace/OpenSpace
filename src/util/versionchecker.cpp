@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,13 @@
 #include <openspace/openspace.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <sstream>
 
 namespace {
-    constexpr const char _loggerCat[] = "VersionChecker";
+    constexpr std::string_view _loggerCat = "VersionChecker";
 } // namespace
 
 namespace openspace {
@@ -44,14 +45,7 @@ VersionChecker::~VersionChecker() {
 void VersionChecker::requestLatestVersion(const std::string& url) {
     using GCC = ghoul::systemcapabilities::GeneralCapabilitiesComponent;
     std::string operatingSystem = SysCap.component<GCC>().operatingSystemString();
-
-    // Need to escape non-http characters when passing the operating system in the url
-    for (size_t i = 0; i < operatingSystem.size(); i++) {
-        if (operatingSystem[i] == ' ') {
-            operatingSystem.erase(i, 1);
-            operatingSystem.insert(i, "%20");
-        }
-    }
+    operatingSystem = ghoul::encodeUrl(operatingSystem);
 
     std::string fullUrl = fmt::format(
         "{}?client_version={}&commit_hash={}&operating_system={}",
@@ -119,7 +113,7 @@ void VersionChecker::cancel() {
             }
             else {
                 LINFO(fmt::format(
-                    "OpenSpace version {}.{}.{} is up to date.",
+                    "OpenSpace version {}.{}.{} is up to date",
                     currentVersion.major,
                     currentVersion.minor,
                     currentVersion.patch
@@ -133,7 +127,7 @@ void VersionChecker::cancel() {
             std::vector<char> data = _request->downloadedData();
             std::string response(data.begin(), data.end());
             LWARNING(fmt::format(
-                "Failed to get latest OpenSpace version information from {}.",
+                "Failed to get latest OpenSpace version information from {}",
                 _request->url()
             ));
             _request = nullptr;

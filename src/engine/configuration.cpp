@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,8 +35,8 @@
 
 namespace {
     // We can't use ${SCRIPTS} here as that hasn't been defined by this point
-    constexpr const char* InitialConfigHelper =
-                                               "${BASE}/scripts/configuration_helper.lua";
+    constexpr std::string_view InitialConfigHelper =
+        "${BASE}/scripts/configuration_helper.lua";
 
     struct [[codegen::Dictionary(Configuration)]] Parameters {
         // The SGCT configuration file that determines the window and view frustum
@@ -58,6 +58,18 @@ namespace {
         // any scene. These scripts can be used for user-specific customization, such as a
         // global rebinding of keys from the default
         std::optional<std::vector<std::string>> globalCustomizationScripts;
+
+        enum class [[codegen::map(openspace::properties::Property::Visibility)]]
+        Visibility
+        {
+            NoviceUser = 0,
+            User,
+            AdvancedUser,
+            Developer
+        };
+        // Determines the property visibility level that is selected when starting up
+        // OpenSpace. If it is not provided, it defaults to 'User'
+        std::optional<Visibility> propertyVisibility;
 
         // A list of paths that are automatically registered with the file system. If a
         // key X is used in the table, it is then useable by referencing ${X} in all other
@@ -254,6 +266,10 @@ namespace {
         // the OpenSpaceEngine with the same name
         std::optional<bool> printEvents;
 
+        /// Determines which key opens the in-game console. The value passed in must be a
+        /// valid key (see keys.h for a list)
+        std::optional<std::string> consoleKey;
+
         // This value determines whether the initialization of the scene graph should
         // occur multithreaded, that is, whether multiple scene graph nodes should
         // initialize in parallel. The only use for this value is to disable it for
@@ -287,9 +303,6 @@ namespace {
         // displayed while the scene graph is created and initialized
         std::optional<LoadingScreen> loadingScreen;
 
-        // List of profiles that cannot be overwritten by user
-        std::optional<std::vector<std::string>> readOnlyProfiles;
-
         // Configurations for each module
         std::optional<std::map<std::string, ghoul::Dictionary>> moduleConfigurations;
     };
@@ -309,6 +322,7 @@ void parseLuaState(Configuration& configuration) {
     lua_getglobal(s, "sgctconfiginitializeString");
     c.sgctConfigNameInitialized = ghoul::lua::value<std::string>(
         s,
+        1,
         ghoul::lua::PopValue::Yes
     );
 
@@ -337,6 +351,12 @@ void parseLuaState(Configuration& configuration) {
     c.profile = p.profile.value_or(c.profile);
     c.globalCustomizationScripts =
         p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
+
+    if (p.propertyVisibility.has_value()) {
+        c.propertyVisibility = codegen::map<properties::Property::Visibility>(
+            *p.propertyVisibility
+        );
+    }
     c.pathTokens = p.paths;
     c.fonts = p.fonts.value_or(c.fonts);
     c.fontSize.frameInfo = p.fontSize.frameInfo;
@@ -351,6 +371,19 @@ void parseLuaState(Configuration& configuration) {
     c.isCheckingOpenGLState = p.checkOpenGLState.value_or(c.isCheckingOpenGLState);
     c.isLoggingOpenGLCalls = p.logEachOpenGLCall.value_or(c.isLoggingOpenGLCalls);
     c.isPrintingEvents = p.printEvents.value_or(c.isPrintingEvents);
+
+    if (p.consoleKey.has_value()) {
+        KeyWithModifier km = stringToKey(*p.consoleKey);
+        if (km.modifier != KeyModifier::None) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Console key '{}' must be a 'bare' key and cannot contain any modifiers",
+                *p.consoleKey
+            ));
+        }
+
+        c.consoleKey = km.key;
+    }
+
     c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
     c.shouldUseScreenshotDate = p.screenshotUseDate.value_or(c.shouldUseScreenshotDate);
     c.onScreenTextScaling = p.onScreenTextScaling.value_or(c.onScreenTextScaling);
@@ -420,7 +453,6 @@ void parseLuaState(Configuration& configuration) {
         c.httpProxy.password = p.httpProxy->password.value_or(c.httpProxy.password);
     }
 
-    c.readOnlyProfiles = p.readOnlyProfiles.value_or(c.readOnlyProfiles);
     c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
 }
 
@@ -453,7 +485,7 @@ std::filesystem::path findConfiguration(const std::string& filename) {
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
                                         const glm::ivec2& primaryMonitorResolution,
-                                        const std::string& overrideScript)
+                                        std::string_view overrideScript)
 {
     ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
 

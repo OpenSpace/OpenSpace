@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,6 +57,7 @@ namespace openspace::globebrowsing {
 
 namespace openspace::globebrowsing {
 
+// If you add a new type, also add it to shaders/texturetilemapping.glsl
 enum class Type {
     DefaultTileProvider = 0,
     SingleImageTileProvider,
@@ -66,21 +67,21 @@ enum class Type {
     TileIndexTileProvider,
     ByIndexTileProvider,
     ByLevelTileProvider,
-    InterpolateTileProvider
+    InterpolateTileProvider,
+    FfmpegTileProvider
 };
-
 
 struct TileProvider : public properties::PropertyOwner {
     static unsigned int NumTileProviders;
 
     static std::unique_ptr<TileProvider> createFromDictionary(
-        layergroupid::TypeID layerTypeID, const ghoul::Dictionary& dictionary);
+        layers::Layer::ID layerTypeID, const ghoul::Dictionary& dictionary);
 
     static void initializeDefaultTile();
     static void deinitializeDefaultTile();
 
     TileProvider();
-    virtual ~TileProvider() = default;
+    ~TileProvider() override = default;
 
     void initialize();
     void deinitialize();
@@ -88,10 +89,9 @@ struct TileProvider : public properties::PropertyOwner {
     virtual Tile tile(const TileIndex& tileIndex) = 0;
 
     /**
-     * Returns the status of a <code>Tile</code>. The <code>Tile::Status</code>
-     * corresponds the <code>Tile</code> that would be returned if the function
-     * <code>tile</code> would be invoked with the same <code>TileIndex</code> argument at
-     * this point in time.
+     * Returns the status of a `Tile`. The `Tile::Status` corresponds the `Tile` that
+     * would be returned if the function `tile` would be invoked with the same `TileIndex`
+     * argument at this point in time.
      */
     virtual Tile::Status tileStatus(const TileIndex& index) = 0;
 
@@ -115,13 +115,13 @@ struct TileProvider : public properties::PropertyOwner {
     virtual void reset() = 0;
 
     /**
-     * \return The minimum level as defined by the <code>TileIndex</code> that this
+     * \return The minimum level as defined by the `TileIndex` that this
      *         TileProvider is capable of providing.
      */
     virtual int minLevel() = 0;
 
     /**
-     * \return The maximum level as defined by <code>TileIndex</code> that this
+     * \return The maximum level as defined by `TileIndex` that this
      *         TileProvider is able provide.
      */
     virtual int maxLevel() = 0;
@@ -132,7 +132,8 @@ struct TileProvider : public properties::PropertyOwner {
     virtual float noDataValueAsFloat() = 0;
 
 
-    ChunkTile chunkTile(TileIndex tileIndex, int parents = 0, int maxParents = 1337);
+    virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0,
+        int maxParents = 1337);
     ChunkTilePile chunkTilePile(TileIndex tileIndex, int pileSize);
 
 
@@ -140,6 +141,10 @@ struct TileProvider : public properties::PropertyOwner {
 
     uint16_t uniqueIdentifier = 0;
     bool isInitialized = false;
+protected:
+    ChunkTile traverseTree(TileIndex tileIndex, int parents, int maxParents,
+        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
+        TileUvTransform& uvTransform);
 
 private:
     virtual void internalInitialize();

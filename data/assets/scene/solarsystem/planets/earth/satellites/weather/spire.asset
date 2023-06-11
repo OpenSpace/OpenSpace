@@ -1,21 +1,53 @@
-local shared = asset.require("util/tle_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Spire",
+
+
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Spire)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_spire",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=spire&FORMAT=kvn",
   Filename = "spire.txt",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=spire&FORMAT=TLE",
-  TrailColor = { 0.75, 0.75, 0.35 }
+  Override = true
+})
+
+
+local SpireSatellites = {
+  Identifier = "SpireSatellites",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "spire.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Spire",
+    Path = "/Solar System/Planets/Earth/Satellites"
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SpireSatellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SpireSatellites)
+end)
+
+asset.export(SpireSatellites)
+
 
 
 asset.meta = {
   Name = "Satellites Weather - Spire",
   Version = "1.0",
-  Description = [[ Satellites asset for Weather - Search & Rescue (SARSAT). Data from 
-  Celestrak]],
+  Description = [[Satellites asset for the Spire constellation. Data from Celestrak]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

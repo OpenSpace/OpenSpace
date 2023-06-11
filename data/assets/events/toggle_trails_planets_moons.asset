@@ -1,14 +1,16 @@
 local action = asset.require("actions/trails/toggle_trails_planets_moons")
 
+
+
 asset.onInitialize(function()
   openspace.event.registerEventAction(
     "CameraFocusTransition",
-    action.fade_up_trails,
+    action.FadeUpTrails,
     { Transition = "Exiting" }
   )
   openspace.event.registerEventAction(
     "CameraFocusTransition",
-    action.fade_down_trails,
+    action.FadeDownTrails,
     { Transition = "Approaching" }
   )
 end)
@@ -16,12 +18,12 @@ end)
 asset.onDeinitialize(function()
   openspace.event.unregisterEventAction(
     "CameraFocusTransition",
-    action.fade_up_trails,
+    action.FadeUpTrails,
     { Transition = "Exiting" }
   )
   openspace.event.unregisterEventAction(
     "CameraFocusTransition",
-    action.fade_down_trails,
+    action.FadeDownTrails,
     { Transition = "Approaching" }
   )
 end)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@ uniform float opacity;
 uniform vec2 conservativeBounds;
 uniform bool showOptimistic;
 
+
 // Remap the radius to texture coordinates in the trasfer function texture. The texture
 // is treated as a linear scale where the color represent too cold to too hot. Account
 // for the conservative bounds my mapping one third of the texture ouside each boundary.
@@ -56,6 +57,7 @@ float computeTextureCoord(float radius, float innerRadius,
     return mix(t1, t2, t);
   }
 }
+
 
 Fragment getFragment() {
   // The length of the texture coordinates vector is our distance from the center

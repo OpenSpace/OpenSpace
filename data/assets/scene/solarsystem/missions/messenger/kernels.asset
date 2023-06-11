@@ -1,0 +1,41 @@
+local kernels = asset.syncedResource({
+  Name = "Messenger Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "messenger_spice",
+  Version = 2
+})
+
+
+local Kernels = {
+  kernels .. "messenger_2548.tsc",
+  kernels .. "msgr_v231.tf",
+
+  kernels .. "de405.bsp",
+  kernels .. "msgr_040803_150430_150430_od431sc_2.bsp",
+  kernels .. "msgr_antenna_v000.bsp",
+  kernels .. "msgr_de405_de423s.bsp",
+
+  kernels .. "msgr_epps_v100.ti",
+  kernels .. "msgr_grns_v110.ti",
+  kernels .. "msgr_mag_v021.ti",
+  kernels .. "msgr_mascs_v100.ti",
+  kernels .. "msgr_mdis_v160.ti",
+  kernels .. "msgr_mla_v010.ti",
+  kernels .. "msgr_rs_v111.ti",
+  kernels .. "msgr_xrs_v001.ti",
+
+
+  kernels .. "pck00008.tpc",
+  kernels .. "pck00008_msgr.tpc",
+  kernels .. "pck00009_msgr_v10.tpc",
+  kernels .. "pck00010_msgr_v10.tpc",
+  kernels .. "pck00010_msgr_v23.tpc",
+  kernels .. "pck00010.tpc",
+
+  kernels .. "msgr_1103_v02.bc",
+  kernels .. "msgr_1104_v02.bc",
+  kernels .. "msgr_1105_v02.bc",
+  kernels .. "msgr_1106_v02.bc"
+}
+
+asset.export("Kernels", Kernels)

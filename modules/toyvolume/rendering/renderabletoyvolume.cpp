@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,49 +32,58 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableToyVolume";
+    constexpr std::string_view _loggerCat = "RenderableToyVolume";
+
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value set the downscaling factor"
-        " when rendering the current volume."
+        "This value set the downscaling factor when rendering the current volume",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -84,7 +93,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _size(SizeInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
-    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f )
+    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
     , _rotation(
         RotationInfo,
@@ -132,8 +141,9 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         _rayCastSteps = static_cast<int>(dictionary.value<double>("Steps"));
     }
     else {
-        LINFO("Number of raycasting steps not specified for ToyVolume."
-            " Using default value.");
+        LINFO(
+            "Number of raycasting steps not specified for ToyVolume. Using default value"
+        );
     }
 }
 
@@ -146,7 +156,7 @@ void RenderableToyVolume::initializeGL() {
 
     global::raycasterManager->attachRaycaster(*_raycaster.get());
 
-    std::function<void(bool)> onChange = [&](bool enabled) {
+    std::function<void(bool)> onChange = [this](bool enabled) {
         if (enabled) {
             global::raycasterManager->attachRaycaster(*_raycaster.get());
         }
@@ -163,7 +173,7 @@ void RenderableToyVolume::initializeGL() {
     addProperty(_translation);
     addProperty(_rotation);
     addProperty(_color);
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
     addProperty(_downScaleVolumeRendering);
 }
 

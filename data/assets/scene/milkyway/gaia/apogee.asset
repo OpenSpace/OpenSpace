@@ -19,7 +19,8 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local gaia_abundance_apogee = {
+
+local GaiaAbundanceApogee = {
   Identifier = "GaiaAbundanceApogee",
   Renderable = {
     Type = "RenderableStars",
@@ -34,7 +35,7 @@ local gaia_abundance_apogee = {
     ColorRange = { { -0.8, 0.6 } },
     -- ShapeTexture = textures .. "disc.png",
     ColorMap = colormaps .. "colorbv.cmap",
-    OtherDataColorMap = colormaps .. "RainbowGradient.cmap",
+    OtherDataColorMap = colormaps .. "rainbowgradient.cmap",
     StaticFilter = -9999,
     StaticFilterReplacement = 0.0,
     DataMapping = {
@@ -51,26 +52,27 @@ local gaia_abundance_apogee = {
   GUI = {
     Path = "/Milky Way/Gaia",
     Name = "Gaia Abundance Apogee",
-    Description = "Data set of stars color coded by metallicity."
+    Description = "Data set of stars color coded by metallicity"
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(gaia_abundance_apogee)
+  openspace.addSceneGraphNode(GaiaAbundanceApogee)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(gaia_abundance_apogee)
+  openspace.removeSceneGraphNode(GaiaAbundanceApogee)
 end)
-  
-asset.export(gaia_abundance_apogee)
+
+asset.export(GaiaAbundanceApogee)
 
 
 
 asset.meta = {
   Name = "Gaia Abundance Apogee",
   Version = "1.0",
-  Description = [[This asset contains a RenderableStars dataset with metallicity data.]],
+  Description = "This asset contains a RenderableStars dataset with metallicity data",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT License"

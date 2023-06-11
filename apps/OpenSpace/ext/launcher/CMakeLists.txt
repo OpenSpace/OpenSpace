@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
 
 set(HEADER_FILES
   include/filesystemaccess.h
@@ -113,8 +113,6 @@ target_include_directories(
   openspace-ui-launcher
   PUBLIC
   include
-  ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/include
-  ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/sgct/ext/glm
 )
 target_link_libraries(
   openspace-ui-launcher
@@ -125,13 +123,28 @@ target_link_libraries(
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
+  PRIVATE
+    sgct
+)
+
+target_precompile_headers(openspace-ui-launcher PRIVATE
+  <openspace/scene/profile.h>
+  <ghoul/glm.h>
+  <QAbstractItemDelegate>
+  <QAbstractItemModel>
+  <QDialog>
+  <QLineEdit>
+  <QObject>
+  <QStyleOption>
+  <QTextCursor>
+  <QWidget>
+  <filesystem>
 )
 
 if (MSVC)
-set(MSVC_WARNINGS
-  "/wd4619"   # #pragma warning: there is no warning number (raised by Qt headers)
-  "/wd4946"   # reinterpret_cast used between related classes: 
-)
-target_compile_options(openspace-ui-launcher INTERFACE ${MSVC_WARNINGS})
-
+  set(MSVC_WARNINGS
+    "/wd4619"   # #pragma warning: there is no warning number (raised by Qt headers)
+    "/wd4946"   # reinterpret_cast used between related classes: 
+  )
+  target_compile_options(openspace-ui-launcher INTERFACE ${MSVC_WARNINGS})
 endif ()

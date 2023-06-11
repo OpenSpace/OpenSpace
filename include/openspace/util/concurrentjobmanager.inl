@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,7 @@ void ConcurrentJobManager<P>::clearEnqueuedJobs() {
 
 template<typename P>
 std::shared_ptr<Job<P>> ConcurrentJobManager<P>::popFinishedJob() {
-    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop!");
+    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop");
 
     std::lock_guard lock(_finishedJobsMutex);
     return _finishedJobs.pop();

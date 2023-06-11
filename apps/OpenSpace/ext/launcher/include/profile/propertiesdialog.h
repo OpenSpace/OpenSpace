@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,7 +83,7 @@ private:
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
 
-    QPushButton* _fillFromScriptLog = nullptr;
+    QPushButton* _addFromScriptLog = nullptr;
     QLabel* _commandLabel = nullptr;
     QComboBox* _commandCombo = nullptr;
     QLabel* _propertyLabel = nullptr;

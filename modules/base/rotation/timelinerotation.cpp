@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,13 +28,26 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
+#include <optional>
 
 namespace {
+    constexpr openspace::properties::Property::PropertyInfo ShouldInterpolateInfo = {
+        "ShouldInterpolate",
+        "Should Interpolate",
+        "If this value is set to 'true', an interpolation is applied between the given "
+        "keyframes. If this value is set to 'false', the interpolation is not applied",
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(TimelineRotation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Rotation objects
         std::map<std::string, ghoul::Dictionary> keyframes
             [[codegen::reference("core_transform_rotation")]];
+
+        // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
+        std::optional<bool> shouldInterpolate;
     };
 #include "timelinerotation_codegen.cpp"
 } // namespace
@@ -45,7 +58,9 @@ documentation::Documentation TimelineRotation::Documentation() {
     return codegen::doc<Parameters>("base_transform_rotation_keyframe");
 }
 
-TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary) {
+TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)
+    : _shouldInterpolate(ShouldInterpolateInfo, true)
+{
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     for (const std::pair<const std::string, ghoul::Dictionary>& kf : p.keyframes) {
@@ -58,6 +73,9 @@ TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary) {
             _timeline.addKeyframe(t, std::move(rotation));
         }
     }
+
+    _shouldInterpolate = p.shouldInterpolate.value_or(_shouldInterpolate);
+    addProperty(_shouldInterpolate);
 }
 
 glm::dmat3 TimelineRotation::matrix(const UpdateData& data) const {
@@ -78,16 +96,26 @@ glm::dmat3 TimelineRotation::matrix(const UpdateData& data) const {
     }
     const double prevTime = prev->timestamp;
     const double nextTime = next->timestamp;
+    if (_shouldInterpolate) {
+        double t = 0.0;
+        if (nextTime - prevTime > 0.0) {
+            t = (now - prevTime) / (nextTime - prevTime);
+        }
 
-    double t = 0.0;
-    if (nextTime - prevTime > 0.0) {
-        t = (now - prevTime) / (nextTime - prevTime);
+        const glm::dquat nextRot = glm::quat_cast(next->data->matrix(data));
+        const glm::dquat prevRot = glm::quat_cast(prev->data->matrix(data));
+
+        return glm::dmat3(glm::slerp(prevRot, nextRot, t));
     }
-
-    const glm::dquat nextRot = glm::quat_cast(next->data->matrix(data));
-    const glm::dquat prevRot = glm::quat_cast(prev->data->matrix(data));
-
-    return glm::dmat3(glm::slerp(prevRot, nextRot, t));
+    else {
+        if (prevTime <= now && now < nextTime) {
+            return prev->data->matrix(data);
+        }
+        else if (nextTime <= now) {
+            return next->data->matrix(data);
+        }
+    }
+    return glm::dmat3(0.0);
 }
 
 } // namespace openspace

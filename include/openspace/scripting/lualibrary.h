@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,8 +39,8 @@ namespace openspace::scripting {
 struct LuaLibrary {
     /**
     * This structure represents a Lua function with its #name, #function pointer
-    * #argumentText describing the arguments this function takes, and the the #helpText
-    * describing the function.
+    * #arguments describe the arguments this function takes, and the #helpText describing
+    * the function.
     */
     struct Function {
         /// The name of the function
@@ -61,6 +61,11 @@ struct LuaLibrary {
         std::string returnType;
         /// A help text describing what the function does/
         std::string helpText;
+        /// The source location where the implementation for this Lua file is located
+        struct {
+            std::string file = "<none>";
+            int line = 0;
+        } sourceLocation;
     };
     /// The name of the library
     std::string name;

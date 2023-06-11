@@ -1,8 +1,11 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "VIIRS_NOAA20_Temporal",
   Name = "VIIRS NOAA20 (Temporal)",
+  Enabled = asset.enabled,
   Type = "TemporalTileLayer",
   Mode = "Prototyped",
   Prototyped = {
@@ -18,29 +21,29 @@ local layer = {
       "jpg"
     )
   },
-  Description = [[ Temporal coverage: 11 November 2015 - Present. The imagery resolution
-    is 0.25 km, and the temporal resolution is daily.]]
+  Description = [[Temporal coverage: 11 November 2015 - Present. The imagery resolution
+    is 0.25 km, and the temporal resolution is daily]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "VIIRS NOAA20 (Temporal)",
   Version = "1.1",
-  Description = [[ This layer has the best daily Earth Image. GIBS hosted layer created
-    with openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Description = "This layer has the best daily Earth Image",
   Author = "NASA EOSDIS Global Imagery Browse Services",
-  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/" ..
-    "eosdis-components/gibs",
+  URL =
+    "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
   License = "NASA"
 }

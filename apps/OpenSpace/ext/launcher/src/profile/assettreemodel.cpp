@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,8 @@
 #include <QColor>
 
 namespace {
-    constexpr const char* Header1 = "Asset";
-    constexpr const char* Header2 = "Enabled";
+    constexpr std::string_view Header1 = "Asset";
+    constexpr std::string_view Header2 = "Enabled";
 
     struct ImportElement {
         std::string line;
@@ -140,8 +140,8 @@ AssetTreeModel::AssetTreeModel(QObject* parent)
 {
     _rootItem = std::make_unique<AssetTreeItem>(
         std::vector<QVariant> {
-            QString::fromStdString(Header1),
-            QString::fromStdString(Header2)
+            QString::fromStdString(std::string(Header1)),
+            QString::fromStdString(std::string(Header2))
         }
     );
 }
@@ -156,7 +156,10 @@ void AssetTreeModel::importModelData(const std::string& assetBasePath,
     std::string assetList = assets.useQtFileSystemModelToTraverseDir(assetBasePath);
     assetList += assets.useQtFileSystemModelToTraverseDir(userAssetBasePath, true);
     std::istringstream iss(assetList);
-    ImportElement rootElem = { "", 0, false };
+    ImportElement rootElem = {
+        .line = "",
+        .level = 0,
+    };
 
     if (importGetNextLine(rootElem, iss)) {
         importInsertItem(iss, _rootItem.get(), rootElem, 0);

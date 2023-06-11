@@ -1,12 +1,11 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local MarsTrailEarth = {
   Identifier = "MarsTrailEarth",
-  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Parent = transforms.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
@@ -23,19 +22,19 @@ local MarsTrailEarth = {
   GUI = {
     Name = "Mars trail from Earth",
     Path = "/Solar System/Planets/Mars",
-    Hidden = false,
-    Description = [[ Trail of Mars as observed by the Earth]],
+    Description = "Trail of Mars as observed by the Earth"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MarsTrailEarth)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MarsTrailEarth)
 end)
-  
+
 asset.export(MarsTrailEarth)
 
 
@@ -43,8 +42,8 @@ asset.export(MarsTrailEarth)
 asset.meta = {
   Name = "Mars Trail from Earth",
   Version = "1.1",
-  Description = [[ Trail of Mars, parented to Earth with Earth as the SPICE observer.
-    Data from NASA SPICE (see base spice asset)]],
+  Description = [[Trail of Mars, parented to Earth with Earth as the SPICE observer. Data
+    from NASA SPICE (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

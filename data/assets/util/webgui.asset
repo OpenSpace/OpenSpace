@@ -1,22 +1,23 @@
 asset.require("./static_server")
-
 local guiCustomization = asset.require("customization/gui")
 
+
+
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "fae0fddfcdbdd9bd78e7b1b3d2954823e2af26f5"
-local dataProvider = "data.openspaceproject.com/files/webgui"
+local frontendHash = "c6b16ef4ffdda6b20298d16a204c8977ad56ef09"
 
 local frontend = asset.syncedResource({
   Identifier = "WebGuiFrontend",
   Name = "Web Gui Frontend",
   Type = "UrlSynchronization",
-  -- Url = dataProvider .. "/frontend/" ..  frontendHash .. "/frontend.zip"
+  -- Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
   -- TODO: Remove. This was added in order to use the new GUI for saving sessions.
   -- in the Software Integration Module
   Url = "openspacegui.vlq.se/e2b459d60bc7d2fc0ad8e4a89789b26febe60e57/frontend.zip"
 })
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   -- Unzip the frontend bundle
   local dest = frontend .. "frontend"
   if not openspace.directoryExists(dest) then
@@ -52,10 +53,10 @@ asset.onInitialize(function ()
   end
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   -- Remove the frontend endpoint
   local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
-  local newDirectories = {};
+  local newDirectories = {}
 
   -- @TODO(maci, 2019-08-23) see message below
   --openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "")
@@ -75,7 +76,7 @@ asset.onDeinitialize(function ()
 end)
 
 function setCefRoute(route)
-  local port = 4680
+  local port = openspace.getPropertyValue("Modules.WebGui.Port")
   -- As a developer, you can manually serve the webgui from port 4690
   -- with the command `npm start` in the web gui repository
   if guiCustomization.webguiDevelopmentMode then
@@ -87,13 +88,13 @@ function setCefRoute(route)
   )
 end
 
-
 asset.export("setCefRoute", setCefRoute)
+
+
 
 asset.meta = {
   Name = "WebGUI",
-  Version = "0.1",
-  Description = [[ insert CEF rant ]],
+  Version = "1.0",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

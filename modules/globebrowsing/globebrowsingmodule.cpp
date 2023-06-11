@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,9 @@
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <modules/globebrowsing/src/gdalwrapper.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
+#include <modules/globebrowsing/src/geojson/geojsonmanager.h>
+#include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/globetranslation.h>
 #include <modules/globebrowsing/src/globerotation.h>
@@ -89,46 +92,36 @@
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
-    constexpr const char _loggerCat[] = "GlobeBrowsingModule";
-    constexpr const char _factoryName[] = "TileProvider";
+    constexpr std::string_view _loggerCat = "GlobeBrowsingModule";
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
-        "WMSCacheEnabled",
-        "WMS Cache Enabled",
-        "Determines whether automatic caching of WMS servers is enabled. Changing the "
-        "value of this property will not affect already created WMS datasets."
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo OfflineModeInfo = {
-        "OfflineMode",
-        "Offline Mode",
-        "Determines whether loaded WMS servers should be used in offline mode, that is "
-        "not even try to retrieve images through an internet connection. Please note "
-        "that this setting is only reasonable, if the caching is enabled and there is "
-        "available cached data. Changing the value of this property will not affect "
-        "already created WMS datasets."
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
-        "WMSCacheLocation",
-        "WMS Cache Location",
-        "The location of the cache folder for WMS servers. Changing the value of this "
-        "property will not affect already created WMS datasets."
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
-        "WMSCacheSize",
-        "WMS Cache Size",
-        "The maximum size of the cache for each WMS server. Changing the value of this "
-        "property will not affect already created WMS datasets."
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile Cache Size",
-        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU."
+        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo
+        DefaultGeoPointTextureInfo =
+    {
+        "DefaultGeoPointTexture",
+        "Default Geo Point Texture",
+        "A path to a texture to use as default for GeoJson points"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MRFCacheEnabledInfo = {
+        "MRFCacheEnabled",
+        "MRF Cache Enabled",
+        "Determines whether automatic caching of globe browsing data is enabled.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MRFCacheLocationInfo = {
+        "MRFCacheLocation",
+        "MRF Cache Location",
+        "The location of the root folder for the MRF cache of globe browsing data.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
@@ -148,7 +141,7 @@ namespace {
             std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
             int ret = sscanf(
                 subDatasets[i],
-                "SUBDATASET_%i_%256[^=]",
+                "SUBDATASET_%i_%255[^=]",
                 &iDataset,
                 IdentifierBuffer.data()
             );
@@ -187,25 +180,18 @@ namespace {
     }
 
     struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
-        // [[codegen::verbatim(WMSCacheEnabledInfo.description)]]
-        std::optional<bool> cacheEnabled [[codegen::key("WMSCacheEnabled")]];
-
-        // [[codegen::verbatim(OfflineModeInfo.description)]]
-        std::optional<bool> offlineMode;
-
-        // [[codegen::verbatim(WMSCacheLocationInfo.description)]]
-        std::optional<std::string> cacheLocation [[codegen::key("WMSCacheLocation")]];
-
-        // [[codegen::verbatim(WMSCacheSizeInfo.description)]]
-        std::optional<int> wmsCacheSize [[codegen::key("WMSCacheSize")]];
 
         // [[codegen::verbatim(TileCacheSizeInfo.description)]]
         std::optional<int> tileCacheSize;
 
-        // If you know what you are doing and you have WMS caching *disabled* but offline
-        // mode *enabled*, you can set this value to 'true' to silence a warning that you
-        // would otherwise get at startup
-        std::optional<bool> noWarning;
+        // [[codegen::verbatim(DefaultGeoPointTextureInfo.description)]]
+        std::optional<std::string> defaultGeoPointTexture;
+
+        // [[codegen::verbatim(MRFCacheEnabledInfo.description)]]
+        std::optional<bool> mrfCacheEnabled [[codegen::key("MRFCacheEnabled")]];
+
+        // [[codegen::verbatim(MRFCacheLocationInfo.description)]]
+        std::optional<std::string> mrfCacheLocation [[codegen::key("MRFCacheLocation")]];
     };
 #include "globebrowsingmodule_codegen.cpp"
 } // namespace
@@ -214,44 +200,52 @@ namespace openspace {
 
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
-    , _wmsCacheEnabled(WMSCacheEnabledInfo, false)
-    , _offlineMode(OfflineModeInfo, false)
-    , _wmsCacheLocation(WMSCacheLocationInfo, "${BASE}/cache_gdal")
-    , _wmsCacheSizeMB(WMSCacheSizeInfo, 1024)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
+    , _defaultGeoPointTexturePath(DefaultGeoPointTextureInfo)
+    , _mrfCacheEnabled(MRFCacheEnabledInfo, false)
+    , _mrfCacheLocation(MRFCacheLocationInfo, "${BASE}/cache_mrf")
 {
-    addProperty(_wmsCacheEnabled);
-    addProperty(_offlineMode);
-    addProperty(_wmsCacheLocation);
-    addProperty(_wmsCacheSizeMB);
     addProperty(_tileCacheSizeMB);
+
+    addProperty(_defaultGeoPointTexturePath);
+
+    addProperty(_mrfCacheEnabled);
+    addProperty(_mrfCacheLocation);
 }
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
     const Parameters p = codegen::bake<Parameters>(dict);
-    _wmsCacheEnabled = p.cacheEnabled.value_or(_wmsCacheEnabled);
-    _offlineMode = p.offlineMode.value_or(_offlineMode);
-    _wmsCacheLocation = p.cacheLocation.value_or(_wmsCacheLocation);
-    _wmsCacheSizeMB = p.wmsCacheSize.value_or(_wmsCacheSizeMB);
     _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
-    const bool noWarning = p.noWarning.value_or(false);
 
-    if (!_wmsCacheEnabled && _offlineMode && !noWarning) {
-        LWARNINGC(
-            "GlobeBrowsingModule",
-            "WMS caching is disabled, but offline mode is enabled. Unless you know "
-            "what you are doing, this will probably cause many servers to stop working. "
-            "If you want to silence this warning, set the 'NoWarning' parameter to "
-            "'true'."
-        );
+    _defaultGeoPointTexturePath.onChange([this]() {
+        if (_defaultGeoPointTexturePath.value().empty()) {
+            _hasDefaultGeoPointTexture = false;
+            return;
+        }
+        std::filesystem::path path = _defaultGeoPointTexturePath.value();
+        if (std::filesystem::exists(path)) {
+            _hasDefaultGeoPointTexture = true;
+        }
+        else {
+            LWARNINGC("GlobeBrowsingModule", fmt::format(
+                "The provided texture file {} for the default geo point texture "
+                "does not exist", path
+            ));
+        }
+    });
+
+    if (p.defaultGeoPointTexture.has_value()) {
+        _defaultGeoPointTexturePath = absPath(*p.defaultGeoPointTexture).string();
     }
 
+    _mrfCacheEnabled = p.mrfCacheEnabled.value_or(_mrfCacheEnabled);
+    _mrfCacheLocation = p.mrfCacheLocation.value_or(_mrfCacheLocation);
 
     // Initialize
-    global::callback::initializeGL->emplace_back([&]() {
-        ZoneScopedN("GlobeBrowsingModule")
+    global::callback::initializeGL->emplace_back([this]() {
+        ZoneScopedN("GlobeBrowsingModule");
 
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
         addPropertySubOwner(_tileCache.get());
@@ -267,21 +261,21 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     });
 
     global::callback::deinitializeGL->emplace_back([]() {
-        ZoneScopedN("GlobeBrowsingModule")
+        ZoneScopedN("GlobeBrowsingModule");
 
         TileProvider::deinitializeDefaultTile();
     });
 
     // Render
-    global::callback::render->emplace_back([&]() {
-        ZoneScopedN("GlobeBrowsingModule")
+    global::callback::render->emplace_back([this]() {
+        ZoneScopedN("GlobeBrowsingModule");
 
         _tileCache->update();
     });
 
     // Deinitialize
-    global::callback::deinitialize->emplace_back([&]() {
-        ZoneScopedN("GlobeBrowsingModule")
+    global::callback::deinitialize->emplace_back([]() {
+        ZoneScopedN("GlobeBrowsingModule");
 
         GdalWrapper::destroy();
     });
@@ -301,42 +295,22 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fRotation, "Rotation factory was not created");
     fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
 
-    FactoryManager::ref().addFactory<TileProvider>(_factoryName);
+    FactoryManager::ref().addFactory<TileProvider>("TileProvider");
 
     ghoul::TemplateFactory<TileProvider>* fTileProvider =
         FactoryManager::ref().factory<TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
 
-    {
-        using namespace layergroupid;
-        fTileProvider->registerClass<DefaultTileProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::DefaultTileLayer)]
-        );
-        fTileProvider->registerClass<SingleImageProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SingleImageTileLayer)]
-        );
-        fTileProvider->registerClass<ImageSequenceTileProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ImageSequenceTileLayer)]
-        );
-        fTileProvider->registerClass<SpoutImageProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SpoutImageTileLayer)]
-        );
-        fTileProvider->registerClass<TemporalTileProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::TemporalTileLayer)]
-        );
-        fTileProvider->registerClass<TileIndexTileProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::TileIndexTileLayer)]
-        );
-        fTileProvider->registerClass<SizeReferenceTileProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SizeReferenceTileLayer)]
-        );
-        fTileProvider->registerClass<TileProviderByLevel>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ByLevelTileLayer)]
-        );
-        fTileProvider->registerClass<TileProviderByIndex>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ByIndexTileLayer)]
-        );
-    }
+
+    fTileProvider->registerClass<DefaultTileProvider>("DefaultTileLayer");
+    fTileProvider->registerClass<SingleImageProvider>("SingleImageTileLayer");
+    fTileProvider->registerClass<ImageSequenceTileProvider>("ImageSequenceTileLayer");
+    fTileProvider->registerClass<SpoutImageProvider>("SpoutImageTileLayer");
+    fTileProvider->registerClass<TemporalTileProvider>("TemporalTileLayer");
+    fTileProvider->registerClass<TileIndexTileProvider>("TileIndexTileLayer");
+    fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileLayer");
+    fTileProvider->registerClass<TileProviderByLevel>("ByLevelTileLayer");
+    fTileProvider->registerClass<TileProviderByIndex>("ByIndexTileLayer");
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
@@ -362,8 +336,12 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::SingleImageProvider::Documentation(),
         globebrowsing::SizeReferenceTileProvider::Documentation(),
         globebrowsing::TemporalTileProvider::Documentation(),
+        globebrowsing::TileIndexTileProvider::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
+        globebrowsing::GeoJsonManager::Documentation(),
+        globebrowsing::GeoJsonComponent::Documentation(),
+        globebrowsing::GeoJsonProperties::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
         ShadowComponent::Documentation()
@@ -414,11 +392,51 @@ glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
     using namespace globebrowsing;
 
     const Geodetic3 pos = {
-        { glm::radians(latitude), glm::radians(longitude) },
+        { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
         altitude
     };
 
     return glm::vec3(globe.ellipsoid().cartesianPosition(pos));
+}
+
+glm::dvec3 GlobeBrowsingModule::geoPosition() const {
+    using namespace globebrowsing;
+
+    const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
+    if (!n) {
+        return glm::dvec3(0.0);
+    }
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        return glm::dvec3(0.0);
+    }
+
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
+    const glm::dvec3 cameraPositionModelSpace =
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+    const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
+        cameraPositionModelSpace
+    );
+
+    const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
+        posHandle.centerToReferenceSurface
+    );
+
+    double lat = glm::degrees(geo2.lat);
+    double lon = glm::degrees(geo2.lon);
+
+    double altitude = glm::length(
+        cameraPositionModelSpace - posHandle.centerToReferenceSurface
+    );
+
+    if (glm::length(cameraPositionModelSpace) <
+        glm::length(posHandle.centerToReferenceSurface))
+    {
+        altitude = -altitude;
+    }
+
+    return glm::dvec3(lat, lon, altitude);
 }
 
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
@@ -433,17 +451,15 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     positionOnPatch.lat *= uv.y;
     positionOnPatch.lon *= uv.x;
     const Geodetic2 pointPosition = {
-        corner.lat + positionOnPatch.lat,
-        corner.lon + positionOnPatch.lon
+        .lat = corner.lat + positionOnPatch.lat,
+        .lon = corner.lon + positionOnPatch.lon
     };
 
     // Compute altitude
     const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
-        LERROR(
-            "Cannot go to chunk. The renderable is not attached to a scene graph node."
-        );
+        LERROR("Cannot go to chunk. The renderable is not attached to scene graph node");
         return;
     }
     const glm::dmat4 inverseModelTransform = glm::inverse(
@@ -558,32 +574,6 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
     }
 }
 
-std::string GlobeBrowsingModule::layerGroupNamesList() {
-    std::string listLayerGroups;
-    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1; ++i) {
-        listLayerGroups += globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i] +
-                           std::string(", ");
-    }
-    listLayerGroups += std::string(" and ") +
-        globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[
-            globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1
-        ];
-    return listLayerGroups;
-}
-
-std::string GlobeBrowsingModule::layerTypeNamesList() {
-    std::string listLayerTypes;
-    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_TYPES - 1; ++i) {
-        listLayerTypes += std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]) +
-                          ", ";
-    }
-    listLayerTypes += std::string(" and ") +
-        globebrowsing::layergroupid::LAYER_TYPE_NAMES[
-            globebrowsing::layergroupid::NUM_LAYER_TYPES - 1
-        ];
-    return listLayerTypes;
-}
-
 void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string globe,
                                               std::string url)
 {
@@ -655,7 +645,7 @@ void GlobeBrowsingModule::removeWMSServer(const std::string& name) {
     }
 
     // Then remove the calues from the globe server list
-    for (auto it = _urlList.begin(); it != _urlList.end(); ) {
+    for (auto it = _urlList.begin(); it != _urlList.end();) {
         // We have to increment first because the erase will invalidate the iterator
         const auto eraseIt = it++;
 
@@ -680,49 +670,49 @@ bool GlobeBrowsingModule::hasUrlInfo(const std::string& globe) const {
     return _urlList.find(globe) != _urlList.end();
 }
 
-bool GlobeBrowsingModule::isWMSCachingEnabled() const {
-    return _wmsCacheEnabled;
+bool GlobeBrowsingModule::isMRFCachingEnabled() const {
+    return _mrfCacheEnabled;
 }
 
-bool GlobeBrowsingModule::isInOfflineMode() const {
-    return _offlineMode;
+const std::string GlobeBrowsingModule::mrfCacheLocation() const {
+    return _mrfCacheLocation;
 }
 
-std::string GlobeBrowsingModule::wmsCacheLocation() const {
-    return _wmsCacheLocation;
+bool GlobeBrowsingModule::hasDefaultGeoPointTexture() const {
+    return _hasDefaultGeoPointTexture;
 }
 
-uint64_t GlobeBrowsingModule::wmsCacheSize() const {
-    uint64_t size = _wmsCacheSizeMB;
-    return size * 1024 * 1024;
+std::string_view GlobeBrowsingModule::defaultGeoPointTexture() const {
+    return _defaultGeoPointTexturePath;
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
-    std::string listLayerGroups = layerGroupNamesList();
-
-    scripting::LuaLibrary res;
-    res.name = "globebrowsing";
-    res.functions = {
-        codegen::lua::AddLayer,
-        codegen::lua::DeleteLayer,
-        codegen::lua::GetLayers,
-        codegen::lua::MoveLayer,
-        codegen::lua::GoToChunk,
-        codegen::lua::GoToGeo,
-        // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
-        // paths work really well close to surfaces
-        codegen::lua::FlyToGeo,
-        codegen::lua::GetLocalPositionFromGeo,
-        codegen::lua::GetGeoPositionForCamera,
-        codegen::lua::LoadWMSCapabilities,
-        codegen::lua::RemoveWMSServer,
-        codegen::lua::CapabilitiesWMS
+    return {
+        .name = "globebrowsing",
+        .functions = {
+            codegen::lua::AddLayer,
+            codegen::lua::DeleteLayer,
+            codegen::lua::GetLayers,
+            codegen::lua::MoveLayer,
+            codegen::lua::GoToChunk,
+            codegen::lua::GoToGeo,
+            // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
+            // paths work really well close to surfaces
+            codegen::lua::FlyToGeo,
+            codegen::lua::GetLocalPositionFromGeo,
+            codegen::lua::GetGeoPositionForCamera,
+            codegen::lua::LoadWMSCapabilities,
+            codegen::lua::RemoveWMSServer,
+            codegen::lua::CapabilitiesWMS,
+            codegen::lua::AddGeoJson,
+            codegen::lua::DeleteGeoJson,
+            codegen::lua::AddGeoJsonFromFile,
+        },
+        .scripts = {
+            absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"),
+            absPath("${MODULE_GLOBEBROWSING}/scripts/node_support.lua")
+        }
     };
-    res.scripts = {
-        absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
-    };
-
-    return res;
 }
 
 } // namespace openspace

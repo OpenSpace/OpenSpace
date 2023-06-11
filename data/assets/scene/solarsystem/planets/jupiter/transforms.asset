@@ -1,11 +1,11 @@
-local sun_transforms_asset = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
 local JupiterBarycenter = {
   Identifier = "JupiterBarycenter",
-  Parent = sun_transforms_asset.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -20,14 +20,15 @@ local JupiterBarycenter = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JupiterBarycenter)
 end)
-  
+
 asset.export(JupiterBarycenter)
 
 
@@ -35,7 +36,7 @@ asset.export(JupiterBarycenter)
 asset.meta = {
   Name = "Jupiter Transforms",
   Version = "1.1",
-  Description = [[ Jupiter Barycenter transform ]],
+  Description = "Jupiter Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

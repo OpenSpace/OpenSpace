@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,9 +29,9 @@
 #include <openspace/query/query.h>
 
 namespace {
-    constexpr const char* _loggerCat = "NavigationState";
+    constexpr std::string_view _loggerCat = "NavigationState";
 
-    const double Epsilon = 1E-7;
+    constexpr double Epsilon = 1E-7;
 
     struct [[codegen::Dictionary(NavigationState)]] Parameters {
         // The identifier of the anchor node
@@ -98,16 +98,16 @@ CameraPose NavigationState::cameraPose() const {
 
     if (!anchorNode) {
         LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as anchor.", anchor
+            "Could not find scene graph node '{}' used as anchor", anchor
         ));
         return CameraPose();
     }
 
     if (!referenceFrameNode) {
         LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as reference frame.",
-            referenceFrame)
-        );
+            "Could not find scene graph node '{}' used as reference frame",
+            referenceFrame
+        ));
         return CameraPose();
     }
 
@@ -115,6 +115,9 @@ CameraPose NavigationState::cameraPose() const {
 
     const glm::dmat3 referenceFrameTransform = referenceFrameNode->modelTransform();
 
+    // @TODO (2023-05-16, emmbr) This computation is wrong and has to be fixed! Only
+    // works if the reference frame is also the anchor node. I remember that fixing it
+    // was not as easy as using referenceFrameNode instead of anchor node though..
     resultingPose.position = anchorNode->worldPosition() +
         referenceFrameTransform * glm::dvec3(position);
 

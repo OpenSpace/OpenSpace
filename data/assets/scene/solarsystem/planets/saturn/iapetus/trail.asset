@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat375
+local kernel = asset.require("../kernels")
 
 
 
@@ -11,29 +11,33 @@ local IapetusTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "IAPETUS",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Observer = "SATURN BARYCENTER"
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 79.0,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn", "moonTrail_major_saturn" },
   GUI = {
     Name = "Iapetus Trail",
-    Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[ Trail of Saturn's moon Iapetus as observed by Saturn.]],
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus",
+    Description = "Trail of Saturn's moon Iapetus as observed by Saturn"
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.sat441)
+
   openspace.addSceneGraphNode(IapetusTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(IapetusTrail)
+
+  openspace.spice.unloadKernel(kernel.sat441)
 end)
-  
+
 asset.export(IapetusTrail)
 
 
@@ -41,7 +45,7 @@ asset.export(IapetusTrail)
 asset.meta = {
   Name = "Iapetus Trail",
   Version = "1.1",
-  Description = [[Main trail for Iapetus. Data from NASA Spice (see base spice asset)]],
+  Description = "Main trail for Iapetus. Data from NASA Spice (see base spice asset)",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,22 +52,17 @@ public:
     void setPropertyOwnerFunction(
         std::function<std::vector<properties::PropertyOwner*>()> func);
 
-    void setVisibility(properties::Property::Visibility visibility);
-
     void render() override;
 
 protected:
     void renderPropertyOwner(properties::PropertyOwner* owner);
     void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
 
-    properties::Property::Visibility _visibility = properties::Property::Visibility::User;
-
     std::vector<properties::PropertyOwner*> _propertyOwners;
     std::function<std::vector<properties::PropertyOwner*>()> _propertyOwnerFunction;
 
     properties::BoolProperty _useTreeLayout;
     properties::StringListProperty _treeOrdering;
-    properties::BoolProperty _ignoreHiddenHint;
 };
 
 } // namespace openspace::gui

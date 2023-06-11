@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,27 +35,31 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableDistanceLabel";
+    constexpr std::string_view _loggerCat = "RenderableDistanceLabel";
 
     constexpr openspace::properties::Property::PropertyInfo NodeLineInfo = {
         "NodeLine",
         "Node Line",
         "Property to track a nodeline. When tracking the label text will be updating the "
-        "distance from the nodeline start and end."
+        "distance from the nodeline start and end",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
         "DistanceUnit",
         "Distance Unit",
-        "Property to define the unit in which the distance should be displayed."
-        "Defaults to 'km' if not specified."
+        "Property to define the unit in which the distance should be displayed. "
+        "Defaults to 'km' if not specified",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo CustomUnitDescriptorInfo = {
         "CustomUnitDescriptor",
         "Custom Unit Descriptor",
         "Property to define a custom unit descriptor to use to describe the distance "
-        "value. Defaults to the units SI descriptor if not specified."
+        "value. Defaults to the units SI descriptor if not specified",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDistanceLabel)]] Parameters {
@@ -78,7 +82,7 @@ documentation::Documentation RenderableDistanceLabel::Documentation() {
 }
 
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
-    : RenderableLabels(dictionary)
+    : RenderableLabel(dictionary)
     , _nodelineId(NodeLineInfo)
     , _distanceUnit(DistanceUnitInfo, 1, 0, 11)
     , _customUnitDescriptor(CustomUnitDescriptorInfo)
@@ -117,9 +121,9 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         const float scale = unit(_distanceUnit);
 
         // Get unit descriptor text
-        std::string unitDescriptor = toString(_distanceUnit);
+        std::string_view unitDescriptor = toString(_distanceUnit);
         if (!_customUnitDescriptor.value().empty()) {
-            unitDescriptor = _customUnitDescriptor.value();
+            unitDescriptor = _customUnitDescriptor;
         }
 
         // Get distance as string and remove fractional part
@@ -131,7 +135,7 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         distanceText.erase(pos, subStr.size());
 
         // Create final label text and set it
-        const std::string finalText = distanceText + " " + unitDescriptor;
+        const std::string finalText = fmt::format("{} {}", distanceText, unitDescriptor);
         setLabelText(finalText);
 
         // Update placement of label with transformation matrix

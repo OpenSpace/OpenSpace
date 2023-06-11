@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -91,6 +91,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(interaction::ActionManager::luaLibrary());
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());
     engine.addLibrary(interaction::NavigationHandler::luaLibrary());
+    engine.addLibrary(interaction::OrbitalNavigator::luaLibrary());
     engine.addLibrary(interaction::PathNavigator::luaLibrary());
     engine.addLibrary(interaction::SessionRecording::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());

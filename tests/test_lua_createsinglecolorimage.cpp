@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <openspace/engine/openspaceengine.h>
 #include <ghoul/filesystem/file.h>
@@ -42,7 +44,7 @@ TEST_CASE("CreateSingleColorImage: Create image and check return value",
 
     CHECK_THAT(
         path.string(),
-        Catch::Matchers::Contains("colorFile.ppm")
+        Catch::Matchers::ContainsSubstring("colorFile.ppm")
     );
 }
 
@@ -54,7 +56,7 @@ TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
             "notCreatedColorFile",
             glm::dvec3(255.0, 0.0, 0.0)
         ).string(),
-        Catch::Matchers::Contains(
+        Catch::Matchers::Equals(
             "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
         )
     );

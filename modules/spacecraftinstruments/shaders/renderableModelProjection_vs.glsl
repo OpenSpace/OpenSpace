@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,12 +38,13 @@ uniform mat4 ModelTransform;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 
+
 void main() {
   vec4 raw_pos = psc_to_meter(meshTransform * in_position, vec2(1.0, 0.0));
   vec4 position = ProjectorMatrix * ModelTransform * raw_pos;
   vs_normal = normalize(ModelTransform * meshNormalTransform * vec4(in_normal, 0.0));
   vs_ndc = position / position.w;
 
-  vec2 texco = (in_st * 2.0) - 1.0; 
+  vec2 texco = (in_st * 2.0) - 1.0;
   gl_Position = vec4(texco, 0.0, 1.0);
 }

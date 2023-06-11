@@ -20,18 +20,19 @@ local UranusTrail = {
   GUI = {
     Name = "Uranus Trail",
     Path = "/Solar System/Planets/Uranus",
-    Description = [[ Trail of Uranus as observed by the Sun.]],
+    Description = "Trail of Uranus as observed by the Sun"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(UranusTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(UranusTrail)
 end)
-  
+
 asset.export(UranusTrail)
 
 
@@ -39,7 +40,7 @@ asset.export(UranusTrail)
 asset.meta = {
   Name = "Uranus Trail",
   Version = "1.1",
-  Description = [[ Main trail of Uranus. Data from NASA Spice (see base spice asset)]],
+  Description = "Main trail of Uranus. Data from NASA Spice (see base spice asset)",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

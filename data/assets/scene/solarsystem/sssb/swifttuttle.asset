@@ -1,11 +1,14 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 local sync = asset.syncedResource({
   Name = "Swift Tuttle Orbit",
   Type = "HttpSynchronization",
   Identifier = "swift_tuttle_horizons",
-  Version = 2
+  Version = 3
 })
+
 
 local SwiftTuttleTrail = {
   Identifier = "SwiftTuttleTrail",
@@ -46,16 +49,17 @@ local SwiftTuttlePosition = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SwiftTuttlePosition)
   openspace.addSceneGraphNode(SwiftTuttleTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SwiftTuttleTrail)
   openspace.removeSceneGraphNode(SwiftTuttlePosition)
 end)
-    
+
 asset.export(SwiftTuttlePosition)
 asset.export(SwiftTuttleTrail)
 
@@ -64,11 +68,11 @@ asset.export(SwiftTuttleTrail)
 asset.meta = {
   Name = "Swift Tuttle",
   Version = "1.2",
-  Description = [[ Position and Trail of Swift Tuttle from 1879 JUN 27
-    to 2050 JAN 01. Data from JPL Horizons]],
+  Description = [[Position and Trail of Swift Tuttle from 1879 JUN 27 to 2050 JAN 01. Data
+    from JPL Horizons]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
-  License = [[ JPL-authored documents are sponsored by NASA under Contract
-    NAS7-030010. All documents available from this server may be protected
-    under the U.S. and Foreign Copyright Laws."]]
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws]]
 }

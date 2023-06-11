@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ public:
 
     void initialize(std::shared_ptr<Connection> connection, size_t topicId);
     nlohmann::json wrappedPayload(const nlohmann::json& payload) const;
-    nlohmann::json wrappedError(std::string message = "Could not complete request.",
+    nlohmann::json wrappedError(std::string message = "Could not complete request",
         int code = 500);
     virtual void handleJson(const nlohmann::json& json) = 0;
     virtual bool isDone() const = 0;

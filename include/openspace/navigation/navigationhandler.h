@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,6 +53,7 @@ namespace openspace::interaction {
 
 struct JoystickInputStates;
 struct NavigationState;
+struct NodeCameraStateSpec;
 struct WebsocketInputStates;
 class KeyframeNavigator;
 class OrbitalNavigator;
@@ -61,7 +62,7 @@ class PathNavigator;
 class NavigationHandler : public properties::PropertyOwner {
 public:
     NavigationHandler();
-    ~NavigationHandler();
+    virtual ~NavigationHandler() override;
 
     void initialize();
     void deinitialize();
@@ -90,6 +91,10 @@ public:
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
+    bool disabledKeybindings() const;
+    bool disabledMouse() const;
+    bool disabledJoystick() const;
+
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
@@ -101,15 +106,16 @@ public:
             JoystickCameraStates::AxisInvert::No,
         JoystickCameraStates::JoystickType joystickType =
             JoystickCameraStates::JoystickType::JoystickLike,
-        bool isSticky = false, double sensitivity = 0.0
-    );
+        bool isSticky = false,
+        JoystickCameraStates::AxisFlip shouldFlip = JoystickCameraStates::AxisFlip::No,
+        double sensitivity = 0.0);
 
     void setJoystickAxisMappingProperty(std::string joystickName,
         int axis, std::string propertyUri,
         float min = 0.f, float max = 1.f,
         JoystickCameraStates::AxisInvert shouldInvert =
-        JoystickCameraStates::AxisInvert::No, bool isRemote = true
-    );
+            JoystickCameraStates::AxisInvert::No,
+        bool isRemote = true);
 
     JoystickCameraStates::AxisInformation joystickAxisMapping(
         const std::string& joystickName, int axis) const;
@@ -136,12 +142,28 @@ public:
     NavigationState navigationState() const;
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
-    void saveNavigationState(const std::string& filepath,
+    void saveNavigationState(const std::filesystem::path& filepath,
         const std::string& referenceFrameIdentifier);
 
     void loadNavigationState(const std::string& filepath);
 
-    void setNavigationStateNextFrame(NavigationState state);
+    /**
+     * Set camera state from a provided navigation state next frame. The actual position
+     * will computed from the scene in the same frame as it is set.
+     *
+     * \param state the navigation state to compute a camera positon from
+     */
+    void setNavigationStateNextFrame(const NavigationState& state);
+
+    /**
+     * Set camera state from a provided node based camera specification structure, next
+     * frame. The camera position will be computed to look at the node provided in the
+     * node info. The actual position will computed from the scene in the same frame as
+     * it is set.
+     *
+     * \param spec the node specification from which to compute the resulting camera pose
+     */
+    void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
 
     /**
     * \return The Lua library that contains all Lua functions available to affect the
@@ -150,7 +172,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    void applyNavigationState(const NavigationState& ns);
+    void applyPendingState();
     void updateCameraTransitions();
     void clearGlobalJoystickStates();
 
@@ -159,7 +181,7 @@ private:
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
-    inline static const double InteractionHystersis = 0.0125;
+    static constexpr double InteractionHystersis = 0.0125;
     bool _inAnchorApproachSphere = false;
     bool _inAnchorReachSphere = false;
 
@@ -167,8 +189,9 @@ private:
     KeyframeNavigator _keyframeNavigator;
     PathNavigator _pathNavigator;
 
-    std::optional<NavigationState> _pendingNavigationState;
+    std::optional<std::variant<NodeCameraStateSpec, NavigationState>> _pendingState;
 
+    properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,20 +35,22 @@
 #include <gdal.h>
 
 namespace {
-    constexpr const char* _loggerCat = "GdalWrapper";
+    constexpr std::string_view _loggerCat = "GdalWrapper";
 
     constexpr openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
         "LogGdalErrors",
         "Log GDAL errors",
         "If this value is enabled, any error that is raised by GDAL will be logged using "
-        "the logmanager. If this value is disabled, any error will be ignored."
+        "the logmanager. If this value is disabled, any error will be ignored",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo GdalMaximumCacheInfo = {
         "GdalMaximumCacheSize",
         "GDAL maximum cache size",
         "This function sets the maximum amount of RAM memory in MB that GDAL is "
-        "permitted to use for caching."
+        "permitted to use for caching",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {
@@ -89,7 +91,7 @@ bool GdalWrapper::logGdalErrors() const {
 }
 
 GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize)
-    : PropertyOwner({ "GdalWrapper" })
+    : PropertyOwner({ "GdalWrapper", "Gdal Wrapper" })
     , _logGdalErrors(LogGdalErrorInfo, false)
     , _gdalMaximumCacheSize(
         GdalMaximumCacheInfo,
@@ -99,7 +101,7 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
         1                                           // Step: One MB
     )
 {
-    ZoneScoped
+    ZoneScoped;
 
     addProperty(_logGdalErrors);
     addProperty(_gdalMaximumCacheSize);

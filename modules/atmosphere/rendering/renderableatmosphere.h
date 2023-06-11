@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/textureunit.h>
@@ -94,6 +95,10 @@ private:
     properties::FloatProperty _sunIntensity;
     properties::BoolProperty _sunFollowingCameraEnabled;
     properties::BoolProperty _hardShadowsEnabled;
+
+    // Atmosphere dimming
+    properties::FloatProperty _atmosphereDimmingHeight;
+    properties::Vec2Property _atmosphereDimmingSunsetAngle;
 
     float _planetRadius = 0.f;
     float _mieScattExtPropCoefProp = 1.f;

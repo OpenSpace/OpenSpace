@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -49,16 +50,16 @@ namespace documentation { struct Documentation; }
  * the planes from Spherical to Cartesian coordinates and back. It also specifies the
  * interface that its children need to implement.
  */
-class ScreenSpaceRenderable : public properties::PropertyOwner {
+class ScreenSpaceRenderable : public properties::PropertyOwner, public Fadeable {
 public:
     static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    static constexpr const char* KeyName = "Name";
-    static constexpr const char* KeyIdentifier = "Identifier";
+    static constexpr std::string_view KeyName = "Name";
+    static constexpr std::string_view KeyIdentifier = "Identifier";
 
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderable();
+    virtual ~ScreenSpaceRenderable() override;
 
     virtual void render();
 
@@ -111,7 +112,6 @@ protected:
     glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
-    float opacity() const;
 
     properties::BoolProperty _enabled;
     properties::BoolProperty _usePerspectiveProjection;
@@ -130,14 +130,13 @@ protected:
     properties::Vec3Property _localRotation;
 
     properties::FloatProperty _scale;
+    properties::FloatProperty _gamma;
     properties::Vec3Property _multiplyColor;
     properties::Vec4Property _backgroundColor;
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
-    UniformCache(color, opacity, mvp, texture, backgroundColor) _uniformCache;
+    UniformCache(color, opacity, mvp, texture, backgroundColor, gamma) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 

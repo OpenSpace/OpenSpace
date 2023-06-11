@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,28 +52,36 @@ namespace {
         "SourceType",
         "Source Type",
         "The type of position that is used as the source to calculate the distance. The "
-        "default value is 'Camera'."
+        "default value is 'Camera'",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
         "SourceNodeName",
         "Source Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the source for computing the distance."
+        "node that is to be used as the source for computing the distance",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination Type",
         "The type of position that is used as the destination to calculate the distance. "
-        "The default value for this is 'Focus'."
+        "The default value for this is 'Focus'",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
         "DestinationNodeName",
         "Destination Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the destination for computing the distance."
+        "node that is to be used as the destination for computing the distance",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
@@ -81,14 +89,15 @@ namespace {
         "Simplification",
         "If this value is enabled, the distance is displayed in nuanced units, such as "
         "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
-        "explicitly requested."
+        "explicitly requested",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this distance unit is used as a destination "
-        "to convert the meters into."
+        "to convert the meters into"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
@@ -96,7 +105,8 @@ namespace {
         "Format String",
         "The format string that is used for formatting the distance string.  This format "
         "receives four parameters:  The name of the source, the name of the destination "
-        "the value of the distance and the unit of the distance"
+        "the value of the distance and the unit of the distance",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     std::vector<std::string> unitList() {
@@ -105,8 +115,8 @@ namespace {
             openspace::DistanceUnits.begin(),
             openspace::DistanceUnits.end(),
             res.begin(),
-            [](openspace::DistanceUnit unit) -> std::string {
-                return nameForDistanceUnit(unit);
+            [](openspace::DistanceUnit unit) {
+                return std::string(nameForDistanceUnit(unit));
             }
         );
         return res;
@@ -257,7 +267,10 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     addProperty(_doSimplification);
 
     for (DistanceUnit u : DistanceUnits) {
-        _requestedUnit.addOption(static_cast<int>(u), nameForDistanceUnit(u));
+        _requestedUnit.addOption(
+            static_cast<int>(u),
+            std::string(nameForDistanceUnit(u))
+        );
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
     if (p.requestedUnit.has_value()) {
@@ -332,7 +345,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 }
 
 void DashboardItemDistance::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(
         _source,
@@ -344,21 +357,21 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     );
 
     const double d = glm::length(sourceInfo.first - destinationInfo.first);
-    std::pair<double, std::string> dist;
+    std::pair<double, std::string_view> dist;
     if (_doSimplification) {
         dist = simplifyDistance(d);
     }
     else {
         const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
         const double convertedD = convertMeters(d, unit);
-        dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
+        dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
     try {
         char* end = fmt::format_to(
             _buffer.data(),
-            _formatString.value().c_str(),
+            fmt::runtime(_formatString.value()),
             sourceInfo.second, destinationInfo.second, dist.first, dist.second
         );
 
@@ -372,17 +385,17 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemDistance::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     const double d = glm::length(1e20);
-    std::pair<double, std::string> dist;
+    std::pair<double, std::string_view> dist;
     if (_doSimplification) {
         dist = simplifyDistance(d);
     }
     else {
         DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
         double convertedD = convertMeters(d, unit);
-        dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
+        dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     return _font->boundingBox(

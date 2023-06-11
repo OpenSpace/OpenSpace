@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/json_helper.h>
+
 namespace openspace {
 
 std::string escapedJson(const std::string& text) {
@@ -29,20 +31,26 @@ std::string escapedJson(const std::string& text) {
     jsonString.reserve(text.size());
     for (const char& c : text) {
         switch (c) {
+            case '\b':
+                jsonString += "\\b";
+                break;
             case '\t':
                 jsonString += "\\t"; // Replace tab with \t.
+                break;
+            case '\n':
+                jsonString += "\\\\n"; // Replace newline with \n.
+                break;
+            case '\f':
+                jsonString += "\\f";
+                break;
+            case '\r':
+                jsonString += "\\r"; // Replace carriage return with \r.
                 break;
             case '"':
                 jsonString += "\\\""; // Replace " with \".
                 break;
             case '\\':
                 jsonString += "\\\\"; // Replace \ with \\.
-                break;
-            case '\n':
-                jsonString += "\\\\n"; // Replace newline with \n.
-                break;
-            case '\r':
-                jsonString += "\\r"; // Replace carriage return with \r.
                 break;
             default:
                 jsonString += c;
@@ -74,6 +82,31 @@ std::string formatJsonNumber(double d) {
         return "null";
     }
     return std::to_string(d);
+}
+
+void sortJson(nlohmann::json& json, const std::string& key) {
+    std::sort(
+        json.begin(),
+        json.end(),
+        [&key](const nlohmann::json& lhs, const nlohmann::json& rhs) {
+            std::string lhsString = lhs[key];
+            std::string rhsString = rhs[key];
+            std::transform(
+                lhsString.begin(),
+                lhsString.end(),
+                lhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+            std::transform(
+                rhsString.begin(),
+                rhsString.end(),
+                rhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+
+            return rhsString > lhsString;
+        }
+    );
 }
 
 }  // namespace openspace

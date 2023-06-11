@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,10 +31,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -55,11 +52,9 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableBillboardsCloud";
-    constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
-    constexpr const char* RenderToPolygonProgram = "RenderableBillboardsCloud_Polygon";
+    constexpr std::string_view _loggerCat = "RenderableBillboardsCloud";
 
-    constexpr const std::array<const char*, 21> UniformNames = {
+    constexpr std::array<const char*, 21> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
@@ -75,14 +70,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite."
+        "The path to the texture that should be used as the point sprite",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point."
+        "size of each point",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
@@ -90,83 +88,69 @@ namespace {
         "Use Color Map",
         "If this value is set to 'true', the provided color map is used (if one was "
         "provided in the configuration). If no color map was provided, changing this "
-        "setting does not do anything."
+        "setting does not do anything",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value is used to define the color of the astronomical object."
+        "This value is used to define the color of the astronomical object",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical object."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
-        "TextColor",
-        "Text Color",
-        "The text color for the astronomical object."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
-        "TextOpacity",
-        "Text Opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
-        "TextSize",
-        "Text Size",
-        "The text size for the astronomical object labels."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
-        "TextMinMaxSize",
-        "Text Min/Max Size",
-        "The minimal and maximal size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered."
+        "The path to the color map file of the astronomical object",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects."
+        "Enables/Disables the drawing of the astronomical objects",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden."
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        "Labels",
+        "Labels",
+        "The labels for the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
         "This value determines which paramenter is used for default color of the "
-        "astronomical objects."
+        "astronomical objects",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OptionColorRangeInfo = {
         "OptionColorRange",
         "Option Color Range",
-        "This value changes the range of values to be mapped with the current color map."
+        "This value changes the range of values to be mapped with the current color map",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
-        "This value determines which paramenter (datavar) is used for scaling "
-        "of the astronomical objects."
+        "This value determines which paramenter (datavar) is used for scaling of the "
+        "astronomical objects",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts."
+        "Option wether the billboards should face the camera or not. Used for non-linear "
+        "display environments such as fisheye.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -174,27 +158,32 @@ namespace {
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
         "our galaxy from which the astronomical object will start and end "
-        "fading-in."
+        "fading-in",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in Effect",
-        "Enables/Disables the Fade-in effect."
+        "Enables/Disables the Fade-in effect",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable Pixel Size Control",
         "Enable pixel size control for rectangular projections. If set to true, the "
-        "billboard size is restricted by the min/max size in pixels property."
+        "billboard size is restricted by the min/max size in pixels property",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BillboardMinMaxSizeInfo = {
         "BillboardMinMaxSize",
         "Billboard Min/Max Size in Pixels",
         "The minimum and maximum size (in pixels) for the billboard representing the "
-        "astronomical object."
+        "astronomical object",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -202,26 +191,31 @@ namespace {
     {
         "CorrectionSizeEndDistance",
         "Distance in 10^X meters where correction size stops acting",
-        "Distance in 10^X meters where correction size stops acting."
+        "Distance in 10^X meters where correction size stops acting",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
         "CorrectionSizeFactor",
         "Control variable for distance size",
-        ""
+        "",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseLinearFiltering = {
         "UseLinearFiltering",
         "Use Linear Filtering",
         "Determines whether the provided color map should be sampled nearest neighbor "
-        "(=off) or linearly (=on)"
+        "(=off) or linearly (=on)",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SetRangeFromData = {
         "SetRangeFromData",
         "Set Data Range from Data",
-        "Set the data range based on the available data"
+        "Set the data range based on the available data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableBillboardsCloud)]] Parameters {
@@ -274,24 +268,9 @@ namespace {
         // The number of sides for the polygon used to represent the astronomical object
         std::optional<int> polygonSides;
 
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
-
-        // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor [[codegen::color()]];
-
-        // [[codegen::verbatim(TextOpacityInfo.description)]]
-        std::optional<float> textOpacity;
-
-        // [[codegen::verbatim(TextSizeInfo.description)]]
-        std::optional<float> textSize;
-
-        // The path to the label file that contains information about the astronomical
-        // objects being rendered
-        std::optional<std::string> labelFile;
-
-        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> textMinMaxSize;
+        // [[codegen::verbatim(LabelsInfo.description)]]
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("space_labelscomponent")]];
 
         // [[codegen::verbatim(ColorOptionInfo.description)]]
         std::optional<std::vector<std::string>> colorOption;
@@ -342,17 +321,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _useColorMap(UseColorMapInfo, true)
     , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
-    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
-    , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
-    , _textMinMaxSize(
-        LabelMinMaxSizeInfo,
-        glm::ivec2(8, 20),
-        glm::ivec2(0),
-        glm::ivec2(100)
-    )
     , _drawElements(DrawElementsInfo, true)
-    , _drawLabels(DrawLabelInfo, false)
     , _pixelSizeControl(PixelSizeControlInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _optionColorRangeData(OptionColorRangeInfo, glm::vec2(0.f))
@@ -389,7 +358,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _useColorMap = p.useColorMap.value_or(_useColorMap);
 
     _drawElements = p.drawElements.value_or(_drawElements);
-    _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+    _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
     _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
@@ -412,7 +381,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
     if (p.texture.has_value()) {
         _spriteTexturePath = absPath(*p.texture).string();
-        _spriteTexturePath.onChange([&]() { _spriteTextureIsDirty = true; });
+        _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
 
         // @TODO (abock, 2021-01-31) I don't know why we only add this property if the
         // texture is given, but I think it's a bug
@@ -433,7 +402,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
                 _colorOptionString = opts[i];
             }
         }
-        _colorOption.onChange([&]() {
+        _colorOption.onChange([this]() {
             _dataIsDirty = true;
             const glm::vec2 colorRange = _colorRangeData[_colorOption.value()];
             _optionColorRangeData = colorRange;
@@ -445,7 +414,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         if (!_colorRangeData.empty()) {
             _optionColorRangeData = _colorRangeData[_colorRangeData.size() - 1];
         }
-        _optionColorRangeData.onChange([&]() {
+        _optionColorRangeData.onChange([this]() {
             const glm::vec2 colorRange = _optionColorRangeData;
             _colorRangeData[_colorOption.value()] = colorRange;
             _dataIsDirty = true;
@@ -459,7 +428,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_pointColor);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
     addProperty(_scaleFactor);
@@ -472,7 +441,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _datavarSizeOptionString = opts[i];
         }
 
-        _datavarSizeOption.onChange([&]() {
+        _datavarSizeOption.onChange([this]() {
             _dataIsDirty = true;
             _datavarSizeOptionString = _optionConversionSizeMap[_datavarSizeOption];
         });
@@ -484,28 +453,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _polygonSides = p.polygonSides.value_or(_polygonSides);
     _hasPolygon = p.polygonSides.has_value();
 
-    if (p.labelFile.has_value()) {
-        _drawLabels = p.drawLabels.value_or(_drawLabels);
-        addProperty(_drawLabels);
-
-        _labelFile = absPath(*p.labelFile).string();
-        _hasLabel = true;
-
-        _textColor = p.textColor.value_or(_textColor);
-        _hasLabel = p.textColor.has_value();
-        _textColor.setViewOption(properties::Property::ViewOptions::Color);
-        addProperty(_textColor);
-        _textColor.onChange([&]() { _textColorIsDirty = true; });
-
-        _textOpacity = p.textOpacity.value_or(_textOpacity);
-        addProperty(_textOpacity);
-
-        _textSize = p.textSize.value_or(_textSize);
-        addProperty(_textSize);
-
-        _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
-        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-        addProperty(_textMinMaxSize);
+    if (p.labels.has_value()) {
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
     }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
@@ -555,16 +508,22 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     addProperty(_useColorMap);
 
     _useLinearFiltering = p.useLinearFiltering.value_or(_useLinearFiltering);
-    _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
+    _useLinearFiltering.onChange([this]() { _dataIsDirty = true; });
     addProperty(_useLinearFiltering);
 }
 
 bool RenderableBillboardsCloud::isReady() const {
-    return (_program && (!_dataset.entries.empty())) || (!_labelset.entries.empty());
+    bool isReady = _program && !_dataset.entries.empty();
+
+    // If we have labels, they also need to be loaded
+    if (_hasLabels) {
+        isReady = isReady || _labels->isReady();
+    }
+    return isReady;
 }
 
 void RenderableBillboardsCloud::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_hasSpeckFile) {
         _dataset = speck::data::loadFileWithCache(_speckFile);
@@ -574,11 +533,9 @@ void RenderableBillboardsCloud::initialize() {
         _colorMap = speck::color::loadFileWithCache(_colorMapFile);
     }
 
-    if (!_labelFile.empty()) {
-        _labelset = speck::label::loadFileWithCache(_labelFile);
-        for (speck::Labelset::Entry& e : _labelset.entries) {
-            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
-        }
+    if (_hasLabels) {
+        _labels->initialize();
+        _labels->loadLabels();
     }
 
     if (!_colorOptionString.empty() && (_colorRangeData.size() > 1)) {
@@ -591,13 +548,13 @@ void RenderableBillboardsCloud::initialize() {
 }
 
 void RenderableBillboardsCloud::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        ProgramObjectName,
+        "RenderableBillboardsCloud",
         []() {
             return global::renderEngine->buildRenderProgram(
-                ProgramObjectName,
+                "RenderableBillboardsCloud",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_gs.glsl")
@@ -606,10 +563,10 @@ void RenderableBillboardsCloud::initializeGL() {
     );
 
     _renderToPolygonProgram = DigitalUniverseModule::ProgramObjectManager.request(
-        RenderToPolygonProgram,
+        "RenderableBillboardsCloud_Polygon",
         []() {
             return ghoul::opengl::ProgramObject::Build(
-                RenderToPolygonProgram,
+                "RenderableBillboardsCloud_Polygon",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
@@ -622,18 +579,6 @@ void RenderableBillboardsCloud::initializeGL() {
     if (_hasPolygon) {
         createPolygonTexture();
     }
-
-    if (_hasLabel) {
-        if (!_font) {
-            size_t _fontSize = 50;
-            _font = global::fontManager->font(
-                "Mono",
-                static_cast<float>(_fontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes,
-                ghoul::fontrendering::FontManager::LoadGlyphs::No
-            );
-        }
-    }
 }
 
 void RenderableBillboardsCloud::deinitializeGL() {
@@ -643,14 +588,16 @@ void RenderableBillboardsCloud::deinitializeGL() {
     _vao = 0;
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        ProgramObjectName,
+        "RenderableBillboardsCloud",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
     _program = nullptr;
 
-    DigitalUniverseModule::ProgramObjectManager.release(RenderToPolygonProgram);
+    DigitalUniverseModule::ProgramObjectManager.release(
+        "RenderableBillboardsCloud_Polygon"
+    );
     _renderToPolygonProgram = nullptr;
 
     DigitalUniverseModule::TextureManager.release(_spriteTexture);
@@ -689,9 +636,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
     _program->setUniform(
         _uniformCache.cameraViewProjectionMatrix,
-        glm::mat4(
-            glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
-        )
+        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
     );
 
     const float minBillboardSize = _billboardMinMaxSize.value().x; // in pixels
@@ -740,40 +685,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     global::renderEngine->openglStateCache().resetDepthState();
 }
 
-void RenderableBillboardsCloud::renderLabels(const RenderData& data,
-                                             const glm::dmat4& modelViewProjectionMatrix,
-                                             const glm::dvec3& orthoRight,
-                                             const glm::dvec3& orthoUp,
-                                             float fadeInVariable)
-{
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity * fadeInVariable);
-
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-    labelInfo.orthoRight = orthoRight;
-    labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = _textMinMaxSize.value().x;
-    labelInfo.maxSize = _textMinMaxSize.value().y;
-    labelInfo.cameraPos = data.camera.positionVec3();
-    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = _renderOption;
-    labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, _textSize);
-    labelInfo.enableDepth = true;
-    labelInfo.enableFalseDepth = false;
-
-    for (const speck::Labelset::Entry& e : _labelset.entries) {
-        glm::vec3 scaledPos(e.position);
-        scaledPos *= toMeter(_unit);
-        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
-            *_font,
-            scaledPos,
-            e.text,
-            textColor,
-            labelInfo
-        );
-    }
-}
-
 void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     float fadeInVar = 1.f;
     if (!_disableFadeInDistance) {
@@ -797,9 +708,9 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
-    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+    glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -807,7 +718,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
     );
     if (orthoRight == glm::dvec3(0.0)) {
-        glm::dvec3 otherVector(
+        glm::dvec3 otherVector = glm::vec3(
             cameraUpDirectionWorld.y,
             cameraUpDirectionWorld.x,
             cameraUpDirectionWorld.z
@@ -820,17 +731,17 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         renderBillboards(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
     }
 
-    if (_drawLabels && _hasLabel) {
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
+    if (_hasLabels) {
+        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
     }
 }
 
 void RenderableBillboardsCloud::update(const UpdateData&) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_dataIsDirty && _hasSpeckFile) {
-        ZoneScopedN("Data dirty")
-        TracyGpuZone("Data dirty")
+        ZoneScopedN("Data dirty");
+        TracyGpuZone("Data dirty");
         LDEBUG("Regenerating data");
 
         std::vector<float> slice = createDataSlice();
@@ -947,8 +858,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 
     if (_hasSpriteTexture && _spriteTextureIsDirty && !_spriteTexturePath.value().empty())
     {
-        ZoneScopedN("Sprite texture")
-        TracyGpuZone("Sprite texture")
+        ZoneScopedN("Sprite texture");
+        TracyGpuZone("Sprite texture");
 
         ghoul::opengl::Texture* texture = _spriteTexture;
 
@@ -974,7 +885,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 }
 
 std::vector<float> RenderableBillboardsCloud::createDataSlice() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_dataset.entries.empty()) {
         return std::vector<float>();
@@ -1144,7 +1055,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
 }
 
 void RenderableBillboardsCloud::createPolygonTexture() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Creating Polygon Texture");
 
@@ -1200,7 +1111,7 @@ void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
     glBindVertexArray(_polygonVao);
     glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
 
-    constexpr const std::array<GLfloat, 4> VertexData = {
+    constexpr std::array<GLfloat, 4> VertexData = {
         //      x      y     z     w
         0.f, 0.f, 0.f, 1.f,
     };
@@ -1221,7 +1132,7 @@ void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
         );
 
     program->activate();
-    constexpr const glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
 
     program->setUniform("sides", _polygonSides);

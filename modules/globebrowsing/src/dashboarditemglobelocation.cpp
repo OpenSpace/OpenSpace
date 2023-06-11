@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,13 @@
 
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -40,41 +42,22 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DisplayFormatInfo = {
         "DisplayFormat",
         "Display Format",
-        "Choosing the format in which the camera location is displayed"
+        "Choosing the format in which the camera location is displayed",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
         "Significant Digits",
-        "Determines the number of significant digits that are shown in the location text."
+        "Determines the number of significant digits that are shown in the location text",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(DashboardItemGlobeLocation)]] Parameters {
-        // [[codegen::verbatim(FontNameInfo.description)]]
-        std::optional<std::string> fontName;
-
-        // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize;
-
         enum class DisplayFormat {
             DecimalDegrees,
             DegreeMinuteSeconds
@@ -92,31 +75,19 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemGlobeLocation::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_dashboarditem_globelocation");
+    return codegen::doc<Parameters>(
+        "globebrowsing_dashboarditem_globelocation",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemGlobeLocation::DashboardItemGlobeLocation(
                                                       const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 10.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _displayFormat(DisplayFormatInfo)
     , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
-    , _font(global::fontManager->font(KeyFontMono, 10))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    _fontName = p.fontName.value_or(_fontName);
-    _fontName.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    _fontSize = p.fontSize.value_or(_fontSize);
-    _fontSize.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
 
     auto updateFormatString = [this]() {
         switch (_displayFormat.value()) {
@@ -170,45 +141,16 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 }
 
 void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
-    using namespace globebrowsing;
+    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
 
-    const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
-    if (!n) {
-        return;
-    }
-    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
-    if (!globe) {
-        return;
-    }
+    glm::dvec3 position = module->geoPosition();
+    double lat = position.x;
+    double lon = position.y;
+    double altitude = position.z;
 
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
-    const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
-    const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
-        cameraPositionModelSpace
-    );
-
-    const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
-        posHandle.centerToReferenceSurface
-    );
-
-    double lat = glm::degrees(geo2.lat);
-    double lon = glm::degrees(geo2.lon);
-
-    double altitude = glm::length(
-        cameraPositionModelSpace - posHandle.centerToReferenceSurface
-    );
-
-    if (glm::length(cameraPositionModelSpace) <
-        glm::length(posHandle.centerToReferenceSurface))
-    {
-        altitude = -altitude;
-    }
-
-    std::pair<double, std::string> dist = simplifyDistance(altitude);
+    std::pair<double, std::string_view> dist = simplifyDistance(altitude);
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
     char* end = nullptr;
@@ -217,7 +159,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
         {
             end = fmt::format_to(
                 _buffer.data(),
-                _formatString, lat, lon, dist.first, dist.second
+                fmt::runtime(_formatString), lat, lon, dist.first, dist.second
             );
             break;
         }
@@ -244,7 +186,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
             end = fmt::format_to(
                 _buffer.data(),
-                _formatString,
+                fmt::runtime(_formatString),
                 latDeg, latMin, latSec, isNorth ? "N" : "S",
                 lonDeg, lonMin, lonSec, isEast ? "E" : "W",
                 dist.first, dist.second
@@ -261,7 +203,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemGlobeLocation::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     return _font->boundingBox(
         fmt::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)

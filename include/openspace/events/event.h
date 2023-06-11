@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -77,6 +77,9 @@ struct Event {
         PointSpacecraft,
         RenderableEnabled,
         RenderableDisabled,
+        CameraPathStarted,
+        CameraPathFinished,
+        CameraMovedPosition,
         Custom
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -113,12 +116,12 @@ void logAllEvents(const Event* e);
  * to the scene.
  */
 struct EventSceneGraphNodeAdded : public Event {
-    static const Type Type = Event::Type::SceneGraphNodeAdded;
+    static constexpr Type Type = Event::Type::SceneGraphNodeAdded;
 
     /**
      * Creates an instance of an EventSceneGraphNodeAdded event.
      *
-     * \param Node The identifier of the node that was added
+     * \param node_ The identifier of the node that was added
      *
      * \pre node_ must not be nullptr
      */
@@ -131,12 +134,12 @@ struct EventSceneGraphNodeAdded : public Event {
  * is signalled, the scene graph node has already been removed.
  */
 struct EventSceneGraphNodeRemoved : public Event {
-    static const Type Type = Event::Type::SceneGraphNodeRemoved;
+    static constexpr Type Type = Event::Type::SceneGraphNodeRemoved;
 
     /**
      * Creates an instance of an EventSceneGraphNodeRemoved event.
      *
-     * \param Node The identifier of the node that was removed
+     * \param node_ The identifier of the node that was removed
      *
      * \pre node_ must not be nullptr
      */
@@ -149,7 +152,7 @@ struct EventSceneGraphNodeRemoved : public Event {
  * The new state is sent as an argument with this event.
  */
 struct EventParallelConnection : public Event {
-    static const Type Type = Event::Type::ParallelConnection;
+    static constexpr Type Type = Event::Type::ParallelConnection;
 
     enum class State : uint8_t {
         Established,
@@ -161,7 +164,7 @@ struct EventParallelConnection : public Event {
     /**
      * Creates an instance of an EventParallelConnection event.
      *
-     * \param State The new state of the parallel connection system;  is one of
+     * \param state_ The new state of the parallel connection system;  is one of
      *        `Established`, `Lost`, `HostshipGained`, or `HostshipLost`
      */
     explicit EventParallelConnection(State state_);
@@ -173,7 +176,7 @@ struct EventParallelConnection : public Event {
  * regardless of whether it is the initial profile, or any subsequent profile is loaded.
  */
 struct EventProfileLoadingFinished : public Event {
-    static const Type Type = Event::Type::ProfileLoadingFinished;
+    static constexpr Type Type = Event::Type::ProfileLoadingFinished;
 
     /**
      * Creates an instance of an EventProfileLoadingFinished event.
@@ -187,7 +190,7 @@ struct EventProfileLoadingFinished : public Event {
  * which means that OpenSpace is just about the shutdown.
  */
 struct EventApplicationShutdown : public Event {
-    static const Type Type = Event::Type::ApplicationShutdown;
+    static constexpr Type Type = Event::Type::ApplicationShutdown;
 
     enum class State : uint8_t {
         Started,
@@ -197,8 +200,8 @@ struct EventApplicationShutdown : public Event {
 
     /**
      * Creates an instance of an EventApplicationShutdown event.
-     * 
-     * \param State The next state of the application shutdown sequence;  is one of
+     *
+     * \param state_ The next state of the application shutdown sequence;  is one of
      *        `Started`, `Aborted`,  or `Finished`
      */
     explicit EventApplicationShutdown(State state_);
@@ -210,13 +213,13 @@ struct EventApplicationShutdown : public Event {
  * this event is craeted, the screenspace renderable is already registered and available.
  */
 struct EventScreenSpaceRenderableAdded : public Event {
-    static const Type Type = Event::Type::ScreenSpaceRenderableAdded;
+    static constexpr Type Type = Event::Type::ScreenSpaceRenderableAdded;
 
     /**
      * Creates an instance of an EventScreenSpaceRenderableAdded event.
      *
      * \param renderable_ The the new screenspace renderable that was added to the system
-     * 
+     *
      * \pre renderable_ must not be nullptr
      */
     explicit EventScreenSpaceRenderableAdded(const ScreenSpaceRenderable* renderable_);
@@ -229,7 +232,7 @@ struct EventScreenSpaceRenderableAdded : public Event {
  * no longer available
  */
 struct EventScreenSpaceRenderableRemoved : public Event {
-    static const Type Type = Event::Type::ScreenSpaceRenderableRemoved;
+    static constexpr Type Type = Event::Type::ScreenSpaceRenderableRemoved;
 
     /**
      * Creates an instance of an EventScreenSpaceRenderableRemoved event.
@@ -259,7 +262,7 @@ Exiting                 Receding               Reaching                Approachi
 ```
  */
 struct EventCameraFocusTransition : public Event {
-    static const Type Type = Event::Type::CameraFocusTransition;
+    static constexpr Type Type = Event::Type::CameraFocusTransition;
 
     enum class Transition {
         Approaching,
@@ -270,7 +273,7 @@ struct EventCameraFocusTransition : public Event {
 
     /**
      * Creates an instance of an EventCameraFocusTransition event.
-     * 
+     *
      * \param camera_ The camera object that caused the transition
      * \param node_ The name of the node the camera is transitioning relative to.
      *        Currently is always the same as the camera's focus node
@@ -294,16 +297,16 @@ struct EventCameraFocusTransition : public Event {
  * currently unused.
  */
 struct EventTimeOfInterestReached : public Event {
-    static const Type Type = Event::Type::TimeOfInterestReached;
+    static constexpr Type Type = Event::Type::TimeOfInterestReached;
 
     /**
      * Creates an instance of an EventTimeOfInterestReached event.
-     * 
+     *
      * \param time_ The time of interest that has been reached
      * \param camera_ Information about the camera for the specific transition
      */
     EventTimeOfInterestReached(const Time* time_, const Camera* camera_);
-    
+
     const Time* time = nullptr;
     const Camera* camera = nullptr;
 };
@@ -314,7 +317,7 @@ struct EventTimeOfInterestReached : public Event {
  * currently unused.
  */
 struct EventMissionEventReached : public Event {
-    static const Type Type = Event::Type::MissionEventReached;
+    static constexpr Type Type = Event::Type::MissionEventReached;
 
     // Not sure which kind of parameters we want to pass here
     EventMissionEventReached();
@@ -325,19 +328,19 @@ struct EventMissionEventReached : public Event {
  * event is currently unused.
  */
 struct EventPlanetEclipsed : public Event {
-    static const Type Type = Event::Type::PlanetEclipsed;
+    static constexpr Type Type = Event::Type::PlanetEclipsed;
 
     /**
      * Creates an instance of an EventPlanetEclipsed event.
      *
      * \param eclipsee_ The scene graph node that is eclipsed by another object
      * \param eclipser_ The scene graph node that is eclipsing the other object
-     * 
+     *
      * \pre eclipsee_ must not be nullptr
      * \pre eclipser_ must not be nullptr
      */
     EventPlanetEclipsed(const SceneGraphNode* eclipsee_, const SceneGraphNode* eclipser_);
-    
+
     const tstring eclipsee;
     const tstring eclipser;
 };
@@ -347,12 +350,12 @@ struct EventPlanetEclipsed : public Event {
  * interpolation time of a property change is 0s, this event is not fired
  */
 struct EventInterpolationFinished : public Event {
-    static const Type Type = Event::Type::InterpolationFinished;
+    static constexpr Type Type = Event::Type::InterpolationFinished;
 
     /**
      * Creates an instance of an EventInterpolationFinished event.
-     * 
-     * \param Property The property whose interpolation has finished
+     *
+     * \param property_ The property whose interpolation has finished
      *
      * \pre property_ must not be nullptr
      */
@@ -366,11 +369,11 @@ struct EventInterpolationFinished : public Event {
  * same time.
  */
 struct EventFocusNodeChanged : public Event {
-    static const Type Type = Event::Type::FocusNodeChanged;
+    static constexpr Type Type = Event::Type::FocusNodeChanged;
 
     /**
      * Creates an instance of an EventFocusNodeChanged event.
-     * 
+     *
      * \param oldNode_ The scene graph node which was the old focus node
      * \param newNode_ The scene graph node that is the new focus node
      *
@@ -378,7 +381,7 @@ struct EventFocusNodeChanged : public Event {
      * \pre newNode_ must not be nullptr
      */
     EventFocusNodeChanged(const SceneGraphNode* oldNode_, const SceneGraphNode* newNode_);
-    
+
     const tstring oldNode;
     const tstring newNode;
 };
@@ -387,22 +390,22 @@ struct EventFocusNodeChanged : public Event {
  * This event is created when a layer is added to to a globe.
  */
 struct EventLayerAdded : public Event {
-    static const Type Type = Event::Type::LayerAdded;
+    static constexpr Type Type = Event::Type::LayerAdded;
 
     /**
      * Creates an instance of an EventLayerAdded event.
-     * 
+     *
      * \param node_ The identifier of the globe to which the layer is added
      * \param layerGroup_ The identifier of the layer group to which the layer is added
      * \param layer_ The identifier of the layer that was added
-     * 
+     *
      * \pre node_ must not be empty
      * \pre layerGroup_ must not be empty
      * \pre layer_ must not be empty
      */
     explicit EventLayerAdded(std::string_view node_, std::string_view layerGroup_,
         std::string_view layer_);
-    
+
     const tstring node;
     const tstring layerGroup;
     const tstring layer;
@@ -412,7 +415,7 @@ struct EventLayerAdded : public Event {
  * This event is created when a layer is removed from a globe.
  */
 struct EventLayerRemoved : public Event {
-    static const Type Type = Event::Type::LayerRemoved;
+    static constexpr Type Type = Event::Type::LayerRemoved;
 
     /**
      * Creates an instance of an EventLayerRemoved event.
@@ -427,7 +430,7 @@ struct EventLayerRemoved : public Event {
      */
     explicit EventLayerRemoved(std::string_view node_, std::string_view layerGroup_,
         std::string_view layer_);
-    
+
     const tstring node;
     const tstring layerGroup;
     const tstring layer;
@@ -438,7 +441,7 @@ struct EventLayerRemoved : public Event {
  * The event contains information about the new state of the session recording subsystem.
  */
 struct EventSessionRecordingPlayback : public Event {
-    static const Type Type = Event::Type::SessionRecordingPlayback;
+    static constexpr Type Type = Event::Type::SessionRecordingPlayback;
 
     enum class State {
         Started,
@@ -454,7 +457,7 @@ struct EventSessionRecordingPlayback : public Event {
      *        `Resumed`, `Finished`
      */
     EventSessionRecordingPlayback(State state_);
-    
+
     const State state;
 };
 
@@ -465,7 +468,7 @@ struct EventSessionRecordingPlayback : public Event {
  * it should do the pointing.
  */
 struct EventPointSpacecraft : public Event {
-    static const Type Type = Event::Type::PointSpacecraft;
+    static constexpr Type Type = Event::Type::PointSpacecraft;
 
     /**
      * Creates an instance of an EventSessionRecordingPlayback event.
@@ -476,7 +479,7 @@ struct EventPointSpacecraft : public Event {
      *        redirect itself to the coordinate. Default is 3 seconds
      */
     EventPointSpacecraft(double ra_, double dec_, double duration_ = 3.0);
-    
+
     const double ra;
     const double dec;
     const double duration;
@@ -487,17 +490,17 @@ struct EventPointSpacecraft : public Event {
  * signalled, the renderable has already been enabled.
  */
 struct EventRenderableEnabled : public Event {
-    static const Type Type = Event::Type::RenderableEnabled;
+    static constexpr Type Type = Event::Type::RenderableEnabled;
 
     /**
      * Creates an instance of an EventRenderableEnabled event.
      *
      * \param node_ The identifier of the node that contains the renderable
-     * 
+     *
      * \pre node_ must not be nullptr
      */
     explicit EventRenderableEnabled(const SceneGraphNode* node_);
-    
+
     const tstring node;
 };
 
@@ -506,7 +509,7 @@ struct EventRenderableEnabled : public Event {
  * signalled, the renderable has already been disabled.
  */
 struct EventRenderableDisabled : public Event {
-    static const Type Type = Event::Type::RenderableDisabled;
+    static constexpr Type Type = Event::Type::RenderableDisabled;
 
     /**
      * Creates an instance of an EventRenderableDisabled event.
@@ -516,8 +519,58 @@ struct EventRenderableDisabled : public Event {
      * \pre node_ must not be nullptr
      */
     explicit EventRenderableDisabled(const SceneGraphNode* node_);
-  
-  const tstring node;
+
+    const tstring node;
+};
+
+/**
+ * This event is created when the a camera path is started
+ */
+struct EventCameraPathStarted : public Event {
+    static constexpr Type Type = Event::Type::CameraPathStarted;
+
+    /**
+     * Creates an instance of an EventCameraPathStarted event.
+     *
+     * \param origin_ The scene graph node from which the path started
+     * \param destination_ The scene graph node at which the path ends
+     */
+    EventCameraPathStarted(const SceneGraphNode* origin_,
+        const SceneGraphNode* destination_);
+
+    const tstring origin;
+    const tstring destination;
+};
+
+/**
+ * This event is created when the a camera path is finished
+ */
+struct EventCameraPathFinished : public Event {
+    static constexpr Type Type = Event::Type::CameraPathFinished;
+
+    /**
+     * Creates an instance of an EventCameraPathStarted event.
+     *
+     * \param origin_ The scene graph node from which the path started
+     * \param destination_ The scene graph node where the path ended
+     */
+    EventCameraPathFinished(const SceneGraphNode* origin_,
+        const SceneGraphNode* destination_);
+
+    const tstring origin;
+    const tstring destination;
+};
+
+/**
+ * This event is created when the a camera moves location
+ */
+struct EventCameraMovedPosition : public Event {
+    static constexpr Type Type = Event::Type::CameraMovedPosition;
+
+    /**
+     * Creates an instance of an EventCameraMovedPosition event.
+     */
+    EventCameraMovedPosition();
 };
 
 /**
@@ -526,14 +579,14 @@ struct EventRenderableDisabled : public Event {
  * transitioned to a specific event type, if it is deemed to be useful.
  */
 struct CustomEvent : public Event {
-    static const Type Type = Event::Type::Custom;
+    static constexpr Type Type = Event::Type::Custom;
 
     /**
      * Creates an instance of a CustomEvent event.
-     * 
+     *
      * \param subtype_ A textual description of the custom subtype that is emitted
      * \param payload_ The payload in a string form
-     * 
+     *
      * \pre subtype_ must not be empty
      */
     CustomEvent(std::string_view subtype_, std::string_view payload_);

@@ -1,11 +1,14 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local modelFolder = asset.syncedResource({
   Name = "Pioneer 10/11 Models",
   Type = "HttpSynchronization",
   Identifier = "pioneer_10_11_model",
   Version = 3
 })
+
 
 local ModelRenderable = {
   Type = "RenderableModel",
@@ -22,11 +25,13 @@ local ModelRenderable = {
 
 asset.export("PioneerModel", ModelRenderable)
 
+
+
 asset.meta = {
   Name = "Pioneer Model",
   Version = "1.0",
-  Description = [[ Pioneer model asset. Used by both pioneer 10 and pioneer 11 asset.
-  Untextured version of model from NASA 3D resources.]],
+  Description = [[Pioneer model asset. Used by both pioneer 10 and pioneer 11 asset.
+    Untextured version of model from NASA 3D resources]],
   Author = "NASA",
   URL = "https://nasa3d.arc.nasa.gov/detail/eoss-pioneer",
   License = "NASA"

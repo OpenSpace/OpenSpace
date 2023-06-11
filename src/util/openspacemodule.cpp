@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,12 +34,9 @@
 #include <algorithm>
 #include <filesystem>
 
-#include <openspace/modulepath.h>
-
-
 namespace {
-    constexpr const char* _loggerCat = "OpenSpaceModule";
-    constexpr const char* ModuleBaseToken = "MODULE_";
+    constexpr std::string_view _loggerCat = "OpenSpaceModule";
+    constexpr std::string_view ModuleBaseToken = "MODULE_";
 } // namespace
 
 namespace openspace {
@@ -49,8 +46,8 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
 {}
 
 void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     std::string upperIdentifier = identifier();
     std::transform(
@@ -63,29 +60,31 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
     std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
 
     std::filesystem::path path = modulePath();
-    LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
-    FileSys.registerPathToken(moduleToken, std::move(path));
+    if (!path.empty()) {
+        LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
+        FileSys.registerPathToken(moduleToken, std::move(path));
+    }
 
     internalInitialize(configuration);
 }
 
 void OpenSpaceModule::initializeGL() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     internalInitializeGL();
 }
 
 void OpenSpaceModule::deinitialize() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     internalDeinitialize();
 }
 
 void OpenSpaceModule::deinitializeGL() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     internalDeinitializeGL();
 }
@@ -110,7 +109,7 @@ std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {
     return {};
 }
 
-std::string OpenSpaceModule::modulePath() const {
+std::filesystem::path OpenSpaceModule::modulePath() const {
     std::string moduleIdentifier = identifier();
     std::transform(
         moduleIdentifier.begin(),
@@ -121,23 +120,7 @@ std::string OpenSpaceModule::modulePath() const {
 
     // First try the internal module directory
     std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);
-    if (std::filesystem::is_directory(path)) {
-        return path.string();
-    }
-    else { // Otherwise, it might be one of the external directories
-        for (const char* dir : ModulePaths) {
-            const std::string& p = std::string(dir) + '/' + moduleIdentifier;
-            if (std::filesystem::is_directory(absPath(p))) {
-                return absPath(p).string();
-            }
-        }
-    }
-
-    // If we got this far, neither the internal module nor any of the external modules fit
-    throw ghoul::RuntimeError(
-        fmt::format("Could not resolve path for module {}", identifier()),
-        "OpenSpaceModule"
-    );
+    return std::filesystem::is_directory(path) ? path : "";
 }
 
 void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}

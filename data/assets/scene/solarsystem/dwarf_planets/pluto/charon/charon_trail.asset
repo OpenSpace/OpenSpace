@@ -2,7 +2,8 @@ local transforms = asset.require("../transforms")
 asset.require("spice/base")
 
 
-local CharonTrailBarycentric = {
+
+local CharonBarycentricTrail = {
   Identifier = "CharonBarycentricTrail",
   Parent = transforms.PlutoBarycenter.Identifier,
   Renderable = {
@@ -16,34 +17,35 @@ local CharonTrailBarycentric = {
     Period = 6.38723,
     Resolution = 1000
   },
-  Tag = { 
-    "moonTrail_solarSystem", 
-    "moonTrail_dwarf", 
-    "moonTrail_pluto", 
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
     "moonTrail_minor"
   },
   GUI = {
     Name = "Charon Barycentric Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Charon"
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(CharonTrailBarycentric)
+  openspace.addSceneGraphNode(CharonBarycentricTrail)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(CharonTrailBarycentric)
+  openspace.removeSceneGraphNode(CharonBarycentricTrail)
 end)
-  
-asset.export(CharonTrailBarycentric)
+
+asset.export(CharonBarycentricTrail)
 
 
 
 asset.meta = {
   Name = "Charon Barycentric Trail",
   Version = "1.0",
-  Description = [[ Trail of Charon as observed by Pluto Barycenter. Data from
+  Description = [[Trail of Charon as observed by Pluto Barycenter. Data from
     NASA Spice (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

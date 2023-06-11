@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,18 +33,19 @@ uniform vec3 color;
 uniform float opacity = 1.0;
 uniform float lineFade;
 
+
 Fragment getFragment() {
   // float offsetPeriods = offset / period;
   // This is now done in the fragment shader instead to make smooth movement between
   // vertices. We want vertexDistance to be double up to this point, I think, (hence the
   // unnessesary float to float conversion)
   float vertexDistance = periodFraction - offsetPeriods;
-  
-  // This is the alternative way of calculating 
+
+  // This is the alternative way of calculating
   // the offsetPeriods: (vertexID_perOrbit/nrOfSegments_f)
   // float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
   // float nrOfSegments_f = float(numberOfSegments);
-  // float vertexDistance = periodFraction - (vertexID_perOrbit/nrOfSegments_f); 
+  // float vertexDistance = periodFraction - (vertexID_perOrbit/nrOfSegments_f);
 
   if (vertexDistance < 0.0) {
     vertexDistance += 1.0;

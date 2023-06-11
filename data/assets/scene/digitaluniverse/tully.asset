@@ -12,11 +12,27 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
-local tullyPoints = {
+
+local TransformMatrix = {
+  -0.7357425748,    0.67726129641,  0.0,           0.0,
+  -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+  0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+  0.0,              0.0,            0.0,           1.0
+}
+
+local TullyGalaxies = {
   Identifier = "TullyGalaxies",
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = true,
+    Labels = {
+      File = speck .. "tully.label",
+      Color = { 0.7, 0.7, 0.7 },
+      Size = 19.36,
+      MinMaxSize = { 8, 20 },
+      Unit = "Mpc",
+      TransformationMatrix = TransformMatrix
+    },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
     ScaleFactor = 504.0,
@@ -27,18 +43,8 @@ local tullyPoints = {
     --ColorOption = { "proximity" },
     ColorOption = { "prox5Mpc" },
     ColorRange = { { 1.0, 30.0 } },
-    LabelFile = speck .. "tully.label",
-    DrawLabels = false,
     Unit = "Mpc",
-    TextColor = { 0.7, 0.7, 0.7 },
-    TextSize = 19.36,
-    TextMinMaxSize = { 8, 20 },
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
-    },
+    TransformationMatrix = TransformMatrix,
     FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"
     BillboardMinMaxSize = { 0.0, 7.0 }, -- in pixels
     --CorrectionSizeEndDistance = 22.0,
@@ -67,7 +73,7 @@ local tullyPoints = {
   }
 }
 
-local tullyImages = {
+local TullyGalaxiesImages = {
   Identifier = "TullyGalaxiesImages",
   Renderable = {
     Type = "RenderablePlanesCloud",
@@ -79,12 +85,7 @@ local tullyImages = {
     TexturePath = textures,
     Luminosity = "diamkpc",
     ScaleLuminosity = 0.001,
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
-    },
+    TransformationMatrix = TransformMatrix,
     Unit = "Mpc",
     -- Fade in value in the same unit as "Unit"
     FadeInDistances = {0.0005, 0.003},
@@ -98,7 +99,7 @@ local tullyImages = {
       come from The Galaxy Catalog. A handful of nearby galaxies are represented by
       their actual images, which come mostly from the National Optical Astronomy
       Observatory (NOAO). Each of these images has been altered from its original state.
-      These images were taken from Earth on some of the world’s largest telescopes, so
+      These images were taken from Earth on some of the world's largest telescopes, so
       foreground stars from our own Galaxy appear in each image. We are representing
       galaxies in extragalactic space, so we have removed the stars from each image.
       (Description from URL) <br><br> Data Reference: Tully Galaxy Catalog: Brent Tully
@@ -106,18 +107,19 @@ local tullyImages = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(tullyPoints)
-  openspace.addSceneGraphNode(tullyImages)
+  openspace.addSceneGraphNode(TullyGalaxies)
+  openspace.addSceneGraphNode(TullyGalaxiesImages)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(tullyImages)
-  openspace.removeSceneGraphNode(tullyPoints)
+  openspace.removeSceneGraphNode(TullyGalaxiesImages)
+  openspace.removeSceneGraphNode(TullyGalaxies)
 end)
-  
-asset.export(tullyPoints)
-asset.export(tullyImages)
+
+asset.export(TullyGalaxies)
+asset.export(TullyGalaxiesImages)
 
 
 
@@ -125,7 +127,7 @@ asset.meta = {
   Name = "Tully Galaxies",
   Version = "3.1",
   Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
-    images.]],
+    images]],
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

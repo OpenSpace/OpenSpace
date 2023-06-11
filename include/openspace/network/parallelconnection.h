@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,7 +85,8 @@ public:
 
     ParallelConnection::Message receiveMessage();
 
-    static const uint8_t ProtocolVersion;
+    // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
+    static constexpr uint8_t ProtocolVersion = 6;
 
 private:
     std::unique_ptr<ghoul::io::TcpSocket> _socket;

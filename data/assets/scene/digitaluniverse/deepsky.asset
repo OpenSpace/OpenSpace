@@ -2,7 +2,7 @@ local textures = asset.syncedResource({
   Name = "Deep Sky Objects Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_deepsky_textures",
-  Version = 1
+  Version = 2
 })
 
 local speck = asset.syncedResource({
@@ -12,11 +12,19 @@ local speck = asset.syncedResource({
   Version = 1
 })
 
-local deepSkyPoints = {
+
+local DeepSkyObjects = {
   Identifier = "DeepSkyObjects",
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "dso.label",
+      Color = { 0.1, 0.4, 0.6 },
+      Size = 20.50,
+      MinMaxSize = { 16, 20 },
+      Unit = "pc"
+    },
     Color = { 1.0, 1.0, 0.0 },
     Opacity = 0.99,
     ScaleFactor = 500.0,
@@ -27,11 +35,7 @@ local deepSkyPoints = {
     --ColorOption = { "proximity" },
     --ColorOption = { "prox5Mpc" },
     --ColorRange = { { 1.0, 30.0 } },
-    LabelFile = speck .. "dso.label",
     Unit = "pc",
-    TextColor = { 0.1, 0.4, 0.6 },
-    TextSize = 20.50,
-    TextMinMaxSize = { 16, 20 },
     --FadeInDistances = { 0.05, 1.0 }, -- Fade in value in the same unit as "Unit"
     BillboardMinMaxSize = { 0.0, 8.22 }, -- in pixels
     --CorrectionSizeEndDistance = 22.0,
@@ -47,11 +51,11 @@ local deepSkyPoints = {
   GUI = {
     Name = "Deep Sky Objects Points",
     Path = "/Universe/Galaxies",
-    Description = [[Point cloud and labels for Deep Sky Objects]]
+    Description = "Point cloud and labels for Deep Sky Objects"
   }
 }
 
-local deepSkyImages = {
+local DeepSkyObjectsImages = {
   Identifier = "DeepSkyObjectsImages",
   Renderable = {
     Type = "RenderablePlanesCloud",
@@ -78,7 +82,7 @@ local deepSkyImages = {
     Name = "Deep Sky Objects Images",
     Path = "/Universe/Galaxies",
     Description = [[Census: 63 images and labels. DU Version 1.3. <br> These data are
-      2-D images of Messier objects placed in 3-D space. Not only do we place these 
+      2-D images of Messier objects placed in 3-D space. Not only do we place these
       images at the proper location and give them the correct orientation, we also
       size them accurately so that you can fly to the globular cluster M13, for
       example, and see just how small the cluster of hundreds of thousands of stars
@@ -86,29 +90,30 @@ local deepSkyImages = {
       6, 7, 11, 16, 18, 21, 23-26, 29, 34-39, 41, 46-48, 50, 52, 67, 93, 103, 2-5,
       9, 10, 12-15, 19, 22, 28, 30, 53-56, 68-72, 75, 79, 80, 92, 107, 27, 57, 76,
       97, 8, 17, 20, 78, 1 (Description from URL) <br><br> Data Reference: Largely
-      NOAO and various other sources (each image has a ref)]],
+      NOAO and various other sources (each image has a ref)]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(deepSkyPoints)
-  openspace.addSceneGraphNode(deepSkyImages)
+  openspace.addSceneGraphNode(DeepSkyObjects)
+  openspace.addSceneGraphNode(DeepSkyObjectsImages)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(deepSkyImages)
-  openspace.removeSceneGraphNode(deepSkyPoints)
+  openspace.removeSceneGraphNode(DeepSkyObjectsImages)
+  openspace.removeSceneGraphNode(DeepSkyObjects)
 end)
-  
-asset.export(deepSkyPoints)
-asset.export(deepSkyImages)
+
+asset.export(DeepSkyObjects)
+asset.export(DeepSkyObjectsImages)
 
 
 
 asset.meta = {
   Name = "Deep Sky Objects Images",
   Version = "1.1",
-  Description = [[Digital Universe asset for Deep Sky Objects and their Images]],
+  Description = "Digital Universe asset for Deep Sky Objects and their Images",
   Author = "Nate Greenstein, Matt Everhart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,9 +59,10 @@ namespace {
         }
     }
 
-    constexpr const char* AnchorProperty = "NavigationHandler.OrbitalNavigator.Anchor";
+    constexpr std::string_view AnchorProperty =
+        "NavigationHandler.OrbitalNavigator.Anchor";
 
-    constexpr const char* RetargetAnchorProperty =
+    constexpr std::string_view RetargetAnchorProperty =
         "NavigationHandler.OrbitalNavigator.RetargetAnchor";
 
 } // namespace
@@ -232,7 +233,7 @@ void GuiSpaceTimeComponent::render() {
         "Entering a date here and confirming with ENTER sets the current simulation time "
         "to the entered date. The format of the date has to be either ISO 8601 "
         "YYYY-MM-DDThh:mm:ss (2017-08-27T04:00:00) or YYYY MMM DD hh:mm:ss "
-        "(2017 MAY 01 12:00:00). The hours are in 24h and specified as UTC.",
+        "(2017 MAY 01 12:00:00). The hours are in 24h and specified as UTC",
         _tooltipDelay
     );
 
@@ -270,7 +271,7 @@ void GuiSpaceTimeComponent::render() {
     };
 
     const bool minusMonth = ImGui::Button("-Month");
-    showTooltip("OBS: A month here equals 30 days.", _tooltipDelay);
+    showTooltip("OBS: A month here equals 30 days", _tooltipDelay);
     if (minusMonth) {
         incrementTime(-30);
     }
@@ -331,26 +332,27 @@ void GuiSpaceTimeComponent::render() {
     if (plusMonth) {
         incrementTime(30);
     }
-    showTooltip("OBS: A month here equals 30 days.", _tooltipDelay);
+    showTooltip("OBS: A month here equals 30 days", _tooltipDelay);
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 //
     {
         const float dt = static_cast<float>(global::timeManager->targetDeltaTime());
         if (_firstFrame) {
-            const std::pair<double, std::string>& dtInfo = simplifyTime(dt);
+            const std::pair<double, std::string_view>& dtInfo = simplifyTime(dt);
             _deltaTime = static_cast<float>(dtInfo.first);
-            _deltaTimeUnit = timeUnitFromString(dtInfo.second.c_str());
+            _deltaTimeUnit = timeUnitFromString(dtInfo.second);
 
             _timeUnits = std::accumulate(
                 openspace::TimeUnits.begin(),
                 openspace::TimeUnits.end(),
                 std::string(""),
                 [](const std::string& a, const openspace::TimeUnit& unit) {
-                    return a + nameForTimeUnit(unit, true) + " / second" + '\0';
+                    return fmt::format(
+                        "{}{} / second", a, nameForTimeUnit(unit, true)
+                    ) + '\0';
                 }
             );
-
             _firstFrame = false;
         }
 

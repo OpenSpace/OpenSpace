@@ -1,6 +1,8 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+
+
 
 local Uranus = {
   Identifier = "Uranus",
@@ -27,7 +29,7 @@ local Uranus = {
   GUI = {
     Name = "Uranus",
     Path = "/Solar System/Planets/Uranus",
-    Description = [[Globe for Uranus.]]
+    Description = "Globe for Uranus"
   }
 }
 
@@ -36,32 +38,37 @@ local UranusLabel = {
   Parent = Uranus.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Uranus",
     FontSize = 70.0,
-    Size = 8.86,
-    MinMaxSize = { 1, 100 },
+    Size = 9.0,
+    MinMaxSize = { 1, 80 },
     OrientationOption = "Camera View Direction",
-    BlendMode = "Additive"
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.5, 100.0 },
+    FadeWidths = { 1.0, 120.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Uranus Label",
     Path = "/Solar System/Planets/Uranus",
-    Description = [[ Main planet label for Uranus.]],
+    Description = "Main planet label for Uranus"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Uranus)
   openspace.addSceneGraphNode(UranusLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(UranusLabel)
   openspace.removeSceneGraphNode(Uranus)
 end)
-    
+
 asset.export(Uranus)
 asset.export(UranusLabel)
 
@@ -70,7 +77,7 @@ asset.export(UranusLabel)
 asset.meta = {
   Name = "Uranus",
   Version = "1.1",
-  Description = [[ Uranus globe, and main planet label.]],
+  Description = "Uranus globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

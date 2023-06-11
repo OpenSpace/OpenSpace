@@ -32,10 +32,9 @@ end
 local ReloadUIScript = [[ if openspace.hasProperty('Modules.CefWebGui.Reload') then openspace.setPropertyValue('Modules.CefWebGui.Reload', nil) end ]]
 
 if is_image_file(extension) then
-  identifier = basename_without_extension:gsub(" ", "_")
-  identifier = identifier:gsub("%p", "_") -- replace all punctuation characters with '_'
-  return [[openspace.addScreenSpaceRenderable({
-    Identifier = "]] .. identifier .. [[",
+  return [[
+  openspace.addScreenSpaceRenderable({
+    Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
     Type = "ScreenSpaceImageLocal",
     TexturePath = "]] .. filename .. [["
   });]] .. ReloadUIScript
@@ -44,7 +43,9 @@ elseif extension == ".asset" then
     if openspace.asset.isLoaded("]] .. filename .. [[") ~= true then
       openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
     end
-    openspace.asset.add("]] .. filename .. [[");]] .. ReloadUIScript
+    openspace.asset.add("]] .. filename .. '");' .. ReloadUIScript
 elseif extension == ".osrec" or extension == ".osrectxt" then
-  return [[openspace.sessionRecording.startPlayback("]] .. filename .. [[")]]
+  return 'openspace.sessionRecording.startPlayback("' .. filename .. '")'
+elseif extension == ".geojson" then
+  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. filename .. '")'  .. ReloadUIScript
 end

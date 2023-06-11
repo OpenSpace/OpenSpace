@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,7 +64,7 @@ void GuiActionComponent::render() {
 
         const interaction::Action& a = global::actionManager->action(p.second);
         ImGui::Text("%s", a.documentation.c_str());
-        if (!a.synchronization) {
+        if (a.isLocal) {
             ImGui::SameLine();
             ImGui::Text("(%s)", "local");
         }
@@ -86,7 +86,7 @@ void GuiActionComponent::render() {
         ImGui::SetCursorPosX(350.f);
 
         ImGui::Text("%s", action.documentation.c_str());
-        if (!action.synchronization) {
+        if (action.isLocal) {
             ImGui::SameLine();
             ImGui::Text("(%s)", "local");
         }

@@ -1,19 +1,21 @@
-local Kernels = asset.syncedResource({
+local kernels = asset.syncedResource({
   Name = "Uranus Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "uranus_kernels",
-  Version = 1
+  Version = 2
 })
 
-asset.export("ura091", Kernels .. "ura091-rocks-merge.bsp")
-asset.export("ura111", Kernels .. "ura111.bsp")
-asset.export("ura112", Kernels .. "ura112.bsp")
+
+asset.export("ura111", kernels .. "ura111.bsp")
+asset.export("ura115", kernels .. "ura115.bsp")
+asset.export("ura116", kernels .. "ura116.bsp")
+
 
 
 asset.meta = {
   Name = "Uranus Spice Kernels",
   Version = "1.0",
-  Description = [[ Generic SPICE kernels for Uranus.]],
+  Description = "Generic SPICE kernels for Uranus",
   Author = "OpenSpace Team",
   URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
   License = "NASA"

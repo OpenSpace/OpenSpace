@@ -2,6 +2,7 @@ local transforms = asset.require("./transforms")
 asset.require("spice/base")
 
 
+
 local PlutoTrailBarycentric = {
   Identifier = "PlutoBarycentricTrail",
   Parent = transforms.PlutoBarycenter.Identifier,
@@ -20,18 +21,19 @@ local PlutoTrailBarycentric = {
   GUI = {
     Name = "Pluto Barycentric Trail",
     Path = "/Solar System/Dwarf Planets/Pluto",
-    Description = [[Orbit of Pluto around it's Barycenter.]]
+    Description = "Orbit of Pluto around its Barycenter"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoTrailBarycentric)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoTrailBarycentric)
 end)
-  
+
 asset.export(PlutoTrailBarycentric)
 
 
@@ -39,8 +41,8 @@ asset.export(PlutoTrailBarycentric)
 asset.meta = {
   Name = "Pluto Barycentric Trail",
   Version = "1.0",
-  Description = [[ Trail of Pluto as observed by it's Barrycenter. Data from
-    NASA Spice (see base spice asset)]],
+  Description = [[Trail of Pluto as observed by it's Barrycenter. Data from NASA Spice
+    (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

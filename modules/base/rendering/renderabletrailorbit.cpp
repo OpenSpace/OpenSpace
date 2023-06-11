@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -93,7 +93,8 @@ namespace {
         "The objects period, i.e. the length of its orbit around the parent object given "
         "in (Earth) days. In the case of Earth, this would be a sidereal year "
         "(=365.242 days). If this values is specified as multiples of the period, it is "
-        "possible to show the effects of precession."
+        "possible to show the effects of precession",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
@@ -102,14 +103,17 @@ namespace {
         "The number of samples along the orbit. This determines the resolution of the "
         "trail; the tradeoff being that a higher resolution is able to resolve more "
         "detail, but will take more resources while rendering, too. The higher, the "
-        "smoother the trail, but also more memory will be used."
+        "smoother the trail, but also more memory will be used",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
        "RenderableType",
        "RenderableType",
        "This value specifies if the orbit should be rendered in the Background,"
-       "Opaque, Transparent, or Overlay rendering step. Default is Transparent."
+       "Opaque, Transparent, or Overlay rendering step. Default is Transparent",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
@@ -332,24 +336,6 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
-
-    // Updating bounding sphere
-    glm::vec3 maxVertex(-std::numeric_limits<float>::max());
-    glm::vec3 minVertex(std::numeric_limits<float>::max());
-
-    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout& vertexData) {
-        maxVertex.x = std::max(maxVertex.x, vertexData.x);
-        maxVertex.y = std::max(maxVertex.y, vertexData.y);
-        maxVertex.z = std::max(maxVertex.z, vertexData.z);
-
-        minVertex.x = std::min(minVertex.x, vertexData.x);
-        minVertex.y = std::min(minVertex.y, vertexData.y);
-        minVertex.z = std::min(minVertex.z, vertexData.z);
-    };
-
-    std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
-
-    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
@@ -361,7 +347,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     }
 
 
-    constexpr const double Epsilon = 1e-7;
+    constexpr double Epsilon = 1e-7;
     // When time stands still (at the iron hill), we don't need to perform any work
     if (std::abs(data.time.j2000Seconds() - _previousTime) < Epsilon) {
         return { false, false, 0 };
@@ -502,6 +488,25 @@ void RenderableTrailOrbit::fullSweep(double time) {
     _primaryRenderInformation.count = _resolution;
 
     _firstPointTime = time + secondsPerPoint;
+
+    // Updating bounding sphere
+    glm::vec3 maxVertex(-std::numeric_limits<float>::max());
+    glm::vec3 minVertex(std::numeric_limits<float>::max());
+
+    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout& vertexData) {
+        maxVertex.x = std::max(maxVertex.x, vertexData.x);
+        maxVertex.y = std::max(maxVertex.y, vertexData.y);
+        maxVertex.z = std::max(maxVertex.z, vertexData.z);
+
+        minVertex.x = std::min(minVertex.x, vertexData.x);
+        minVertex.y = std::min(minVertex.y, vertexData.y);
+        minVertex.z = std::min(minVertex.z, vertexData.z);
+    };
+
+    std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
+
+    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
+
     _needsFullSweep = false;
 }
 

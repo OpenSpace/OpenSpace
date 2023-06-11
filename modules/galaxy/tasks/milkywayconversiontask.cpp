@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,12 +35,12 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr const char* KeyInFilenamePrefix = "InFilenamePrefix";
-    constexpr const char* KeyInFilenameSuffix = "InFilenameSuffix";
-    constexpr const char* KeyInFirstIndex = "InFirstIndex";
-    constexpr const char* KeyInNSlices = "InNSlices";
-    constexpr const char* KeyOutFilename = "OutFilename";
-    constexpr const char* KeyOutDimensions = "OutDimensions";
+    constexpr std::string_view KeyInFilenamePrefix = "InFilenamePrefix";
+    constexpr std::string_view KeyInFilenameSuffix = "InFilenameSuffix";
+    constexpr std::string_view KeyInFirstIndex = "InFirstIndex";
+    constexpr std::string_view KeyInNSlices = "InNSlices";
+    constexpr std::string_view KeyOutFilename = "OutFilename";
+    constexpr std::string_view KeyOutDimensions = "OutDimensions";
 } // namespace
 
 namespace openspace {
@@ -97,7 +97,7 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
         resolutionRatio
     );
     std::function<glm::tvec4<GLfloat>(glm::ivec3)> sampleFunction =
-        [&](glm::ivec3 outCoord) {
+        [resolutionRatio, sampler](glm::ivec3 outCoord) {
             const glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5f)) *
                                       resolutionRatio) - glm::vec3(0.5f);
             const glm::tvec4<GLfloat> value = sampler.sample(inCoord);

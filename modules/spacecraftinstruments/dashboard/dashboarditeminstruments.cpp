@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,14 +44,18 @@ namespace {
         "Active Color",
         "This value determines the color that the active instrument is rendered in. "
         "Shortly after activation, the used color is mixture of this and the flash "
-        "color. The default value is (0.6, 1.0, 0.0)."
+        "color. The default value is (0.6, 1.0, 0.0)",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlashColorInfo = {
         "FlashColor",
         "Flash Color",
         "This value determines the color that is used shortly after an instrument "
-        "activation. The default value is (0.9, 1.0, 0.75)"
+        "activation. The default value is (0.9, 1.0, 0.75)",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     std::string progressToStr(int size, double t) {
@@ -116,7 +120,7 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
 }
 
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     double currentTime = global::timeManager->time().j2000Seconds();
 
@@ -127,7 +131,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
     penPosition.y -= 25.f;
 
-    constexpr const glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
+    constexpr glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
 
     double previous = sequencer.prevCaptureTime(currentTime);
     double next = sequencer.nextCaptureTime(currentTime);
@@ -144,11 +148,11 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             ghoul::fontrendering::CrDirection::Down
         );
 
-        std::pair<double, std::string> remainingConv = simplifyTime(remaining);
+        std::pair<double, std::string_view> remainingConv = simplifyTime(remaining);
 
         // If the remaining time is below 5 minutes, we switch over to seconds display
         if (remaining < 5 * 60) {
-            remainingConv = { remaining, "seconds" };
+            remainingConv = std::pair(remaining, "seconds");
         }
 
         const int Size = 25;

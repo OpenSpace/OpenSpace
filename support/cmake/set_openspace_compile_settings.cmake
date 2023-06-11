@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -23,7 +23,7 @@
 ##########################################################################################
 
 function (set_openspace_compile_settings target)
-  target_compile_features(${target} PRIVATE cxx_std_17)
+  target_compile_features(${target} PUBLIC cxx_std_20)
 
   set(MSVC_WARNINGS
     "/MP"       # Multi-threading support
@@ -31,13 +31,9 @@ function (set_openspace_compile_settings target)
     "/wd4127"   # conditional expression is constant [raised by: websocketpp]
     "/wd4201"   # nonstandard extension used : nameless struct/union  [raised by: GLM]
     "/wd5030"   # attribute 'attribute' is not recognized  [raised by: codegen]
-    "/std:c++latest"
     "/permissive-"
     "/Zc:__cplusplus" # Correctly set the __cplusplus macro
   )
-  if (OPENSPACE_WARNINGS_AS_ERRORS)
-    set(MSVC_WARNINGS ${MSVC_WARNINGS} "/WX")
-  endif ()
   if (OPENSPACE_OPTIMIZATION_ENABLE_AVX)
     set(MSVC_WARNINGS ${MSVC_WARNINGS} "/arch:AVX")
   endif ()
@@ -61,12 +57,11 @@ function (set_openspace_compile_settings target)
   endif ()
 
   set(CLANG_WARNINGS
-    "-stdlib=libc++"
     "-Wall"
     "-Wextra"
     "-Wmost"
     "-Wpedantic"
-    
+
     "-Wabstract-vbase-init"
     "-Walloca"
     "-Wanon-enum-enum-conversion"
@@ -78,7 +73,6 @@ function (set_openspace_compile_settings target)
     "-Wbitfield-constant-conversion"
     "-Wbool-conversions"
     "-Wcast-align"
-    "-Wcast-function-type"
     "-Wcast-qual"
     "-Wcomma"
     "-Wconditional-uninitialized"
@@ -142,14 +136,12 @@ function (set_openspace_compile_settings target)
     "-Wvariadic-macros"
     "-Wvla"
     "-Wzero-as-null-pointer-constant"
-    
-    "-Wno-attributes=codegen::"
+
+    "-Wno-attributes"
+    "-Wno-deprecated-enum-enum-conversion"
     "-Wno-missing-braces"
     "-Wno-unknown-attributes"
   )
-  if (OPENSPACE_WARNINGS_AS_ERRORS)
-    set(CLANG_WARNINGS ${CLANG_WARNINGS} "-Werror")
-  endif ()
 
 
   set(GCC_WARNINGS
@@ -178,17 +170,16 @@ function (set_openspace_compile_settings target)
     "-Wuninitialized"
     "-Wvla"
     "-Wzero-as-null-pointer-constant"
-    
+
     "-Wno-attributes"
     "-Wno-deprecated-copy"
+    "-Wno-deprecated-enum-enum-conversion"
     "-Wno-float-equal"
     "-Wno-long-long"
+    "-Wno-missing-field-initializers"
     "-Wno-unknown-attributes"
     "-Wno-write-strings"
   )
-  if (OPENSPACE_WARNINGS_AS_ERRORS)
-    set(GCC_WARNINGS ${CLANG_WARNINGS} "-Werror")
-  endif ()
 
   if (MSVC)
     target_compile_options(${target} PRIVATE ${MSVC_WARNINGS})
@@ -196,17 +187,15 @@ function (set_openspace_compile_settings target)
     # Boost as of 1.64 still uses unary_function unless we define this
     target_compile_definitions(${target} PRIVATE "_HAS_AUTO_PTR_ETC")
     target_compile_definitions(${target} PRIVATE "NOMINMAX")
+    target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
+    target_compile_definitions(${target} PRIVATE "VC_EXTRALEAN")
   elseif (NOT LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if (OPENSPACE_WARNINGS_AS_ERRORS)
-      target_compile_options(${target} PRIVATE "-Werror")
-    endif ()
-    # Apple has "deprecated" OpenGL and offers nothing by warnings instead
+    # Apple has "deprecated" OpenGL and offers nothing but warnings instead
     target_compile_definitions(${target} PRIVATE "GL_SILENCE_DEPRECATION")
 
     target_compile_options(${target} PRIVATE ${CLANG_WARNINGS})
   elseif (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(${target} PRIVATE ${CLANG_WARNINGS} "-std=c++17")
-    target_link_libraries(${target} PRIVATE "c++" "c++abi")
+    target_compile_options(${target} PRIVATE ${CLANG_WARNINGS})
   elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     target_compile_options(${target} PRIVATE ${GCC_WARNINGS})
   else ()

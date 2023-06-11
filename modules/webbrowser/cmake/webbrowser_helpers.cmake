@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -131,7 +131,7 @@ function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
   if (USE_SANDBOX)
     # Logical target used to link the cef_sandbox library.
     message(STATUS "Using CEF in Sandboxed mode.")
-    ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+    add_logical_target("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
     target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
   endif ()
 
@@ -151,7 +151,7 @@ function(run_cef_linux_config CEF_TARGET CEF_ROOT)
   if (USE_SANDBOX)
     # Logical target used to link the cef_sandbox library.
     message(STATUS "Using CEF in Sandboxed mode.")
-    ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+    add_logical_target("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
     target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
   endif ()
 
@@ -160,7 +160,9 @@ function(run_cef_linux_config CEF_TARGET CEF_ROOT)
 endfunction ()
 
 function(set_modules_dependency_on_cef_libraries LIB_DEPENDENT)
-  target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_lib) 
+  if (WIN32 OR OS_LINUX)
+    target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_lib)
+  endif ()
   target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_dll_wrapper)
 endfunction ()
 

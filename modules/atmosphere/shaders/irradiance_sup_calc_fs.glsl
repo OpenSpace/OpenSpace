@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #version __CONTEXT__
 
 #include "atmosphere_common.glsl"
@@ -42,9 +42,10 @@ uniform sampler3D deltaSMTexture;
 
 const int IRRADIANCE_INTEGRAL_SAMPLES = 32;
 
-// Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI/2]
+// Spherical Coordinates Steps. phi in [0,2PI] and theta in [0, PI/2]
 const float stepPhi = (2.0 * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / (2.0 * float(IRRADIANCE_INTEGRAL_SAMPLES));
+
 
 void main() {
   // See Bruneton and Collienne to understand the mapping.
@@ -97,5 +98,5 @@ void main() {
   }
 
   // Write the higher order irradiance to texture deltaE
-  renderTableColor = vec4(irradianceE, 0.0);    
+  renderTableColor = vec4(irradianceE, 0.0);
 }

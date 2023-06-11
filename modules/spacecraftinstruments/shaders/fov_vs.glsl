@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,6 +51,7 @@ const int VertexColorTypeIntersectionStart = 4;
 const int VertexColorTypeIntersectionEnd = 5;
 const int VertexColorTypeSquare = 6;
 
+
 void main() {
   vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_point_position, 1.0);
 
@@ -59,7 +60,7 @@ void main() {
   gl_Position = pos;
 
   vec3 color;
-  switch (colorInformation) { 
+  switch (colorInformation) {
     case VertexColorTypeDefaultStart:
       vs_color = vec4(colorStart, 1.0);
       break;

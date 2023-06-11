@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,14 @@
 #define __OPENSPACE_CORE___JSON_HELPER___H__
 
 #include <string>
+#include <openspace/json.h>
 
 namespace openspace {
 
 /**
  * This function takes a \p text and escapes all necessary characters () that JSON
  * does not want in its strings.
+ *
  * \param text The text that is to be escaped
  * \return The same text with all required characteres escaped
  */
@@ -40,26 +42,39 @@ std::string escapedJson(const std::string& text);
 /**
  * This function takes a \p list of text and escapes all necessary characters () that
  * JSON does not want in its strings.
- * \param text The list of text that is to be escaped
+ *
+ * \param list The list of text that is to be escaped
  * \return The same text with all required characteres escaped
  */
 std::string escapedJson(const std::vector<std::string>& list);
 
 /**
  * Convert the input value to a valid JSON formatted string. Nan and Inf values
- * are not vald JSON and will be represented by 'null'
+ * are not vald JSON and will be represented by 'null'.
+ *
  * \param d The value to format
  * \return The resulting JSON formatted string
  */
 std::string formatJsonNumber(double d);
 
 /**
- * Convert the input value to a valid JSON formatted string
+ * Convert the input value to a valid JSON formatted string.
+ *
  * \param value The value to be converted
  * \return The resulting JSON formatted string
  */
 template <typename T>
 std::string formatJson(T value);
+
+/**
+ * Sort a json object that is an array of objects with the structure
+ * [ key = {}, key = {} ...]. Sorts it by the provided key
+ *
+ * \param json The json to sort
+ * \param key The key the json should be sorted by
+ * \return The sorted JSON
+ */
+void sortJson(nlohmann::json& json, const std::string& key);
 
 } // namespace openspace
 

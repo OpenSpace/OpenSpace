@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -98,15 +98,15 @@ namespace {
 ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
                          std::string assetBasePath,
                          std::string userAssetBasePath,
+                         std::string builtInProfileBasePath,
                          std::string profileBasePath,
-                         const std::vector<std::string>& readOnlyProfiles,
                          QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
     , _assetBasePath(std::move(assetBasePath))
     , _userAssetBasePath(std::move(userAssetBasePath))
     , _profileBasePath(std::move(profileBasePath))
-    , _readOnlyProfiles(readOnlyProfiles)
+    , _builtInProfilesPath(std::move(builtInProfileBasePath))
 {
     setWindowTitle("Profile Editor");
     createWidgets(profileName);
@@ -184,9 +184,8 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
 
-        _keybindingsLabel = new QLabel("Keybindings");
+        _keybindingsLabel = new QLabel("Actions & Keybindings");
         _keybindingsLabel->setObjectName("heading");
-        _keybindingsLabel->setWordWrap(true);
         container->addWidget(_keybindingsLabel, 0, 0);
 
         QPushButton* keybindingsProperties = new QPushButton("Edit");
@@ -345,7 +344,9 @@ void ProfileEdit::initSummaryTextForEachCategory() {
         QString::fromStdString(summarizeProperties(_profile.properties))
     );
 
-    _keybindingsLabel->setText(labelText(_profile.keybindings.size(), "Keybindings"));
+    _keybindingsLabel->setText(
+        labelText(_profile.keybindings.size(), "Actions & Keybindings")
+    );
     _keybindingsEdit->setText(QString::fromStdString(
         summarizeKeybindings(_profile.keybindings, _profile.actions)
     ));
@@ -365,7 +366,7 @@ void ProfileEdit::duplicateProfile() {
         return;
     }
 
-    constexpr const char Separator = '_';
+    constexpr char Separator = '_';
     int version = 0;
     if (size_t it = profile.rfind(Separator); it != std::string::npos) {
         // If the value exists, we have a profile that potentially already has a version
@@ -488,16 +489,20 @@ void ProfileEdit::approved() {
         return;
     }
 
-    auto it = std::find(_readOnlyProfiles.begin(), _readOnlyProfiles.end(), profileName);
-    if (it == _readOnlyProfiles.end()) {
-        _saveSelected = true;
-        _errorMsg->setText("");
-        accept();
-    }
-    else {
+    std::filesystem::path p = fmt::format(
+        "{}/{}.profile", _builtInProfilesPath, profileName
+    );
+    if (std::filesystem::exists(p)) {
+        // The filename exists in the OpenSpace-provided folder, so we don't want to allow
+        // a user to overwrite it
         _errorMsg->setText(
             "This is a read-only profile. Click 'Duplicate' or rename & save"
         );
+    }
+    else {
+        _saveSelected = true;
+        _errorMsg->setText("");
+        accept();
     }
 }
 

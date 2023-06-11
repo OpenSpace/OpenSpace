@@ -1,21 +1,54 @@
-local shared = asset.require("util/tle_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Last 30 Days",
+
+
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Last 30 Days)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_tle-new",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=last-30-days&FORMAT=kvn",
   Filename = "tle-new.txt",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=last-30-days&FORMAT=TLE",
-  TrailColor = { 0.65, 0.25, 0.45 },
-  Description = [[All the satellites that have been launched in the last 30 days.]]
+  Override = true
+})
+
+
+local Last30DaysSatellites = {
+  Identifier = "Last30DaysSatellites",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "tle-new.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.65, 0.25, 0.45 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Last 30 Days",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Description = [[All the satellites that have been launched in the last 30 days.]]
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Last30DaysSatellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Last30DaysSatellites)
+end)
+
+asset.export(Last30DaysSatellites)
+
 
 
 asset.meta = {
   Name = "Satellites Last 30 Days",
   Version = "1.0",
-  Description = [[ Satellites asset for Last 30 Days. Data from Celestrak]],
+  Description = "Satellites asset for Last 30 Days. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,6 +63,8 @@ public:
     glm::vec3 cartesianCoordinatesFromGeo(const globebrowsing::RenderableGlobe& globe,
         double latitude, double longitude, double altitude);
 
+    glm::dvec3 geoPosition() const;
+
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
@@ -90,10 +92,11 @@ public:
 
     void removeWMSServer(const std::string& name);
 
-    bool isWMSCachingEnabled() const;
-    bool isInOfflineMode() const;
-    std::string wmsCacheLocation() const;
-    uint64_t wmsCacheSize() const; // bytes
+    bool isMRFCachingEnabled() const;
+    const std::string mrfCacheLocation() const;
+
+    bool hasDefaultGeoPointTexture() const;
+    std::string_view defaultGeoPointTexture() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -111,22 +114,11 @@ private:
     glm::dquat lookDownCameraRotation(const globebrowsing::RenderableGlobe& globe,
         glm::dvec3 cameraPositionModelSpace, globebrowsing::Geodetic2 geo2);
 
-    /**
-     \return a comma separated list of layer group names.
-     */
-    static std::string layerGroupNamesList();
-
-    /**
-     \return a comma separated list of layer type names.
-     */
-    static std::string layerTypeNamesList();
-
-
-    properties::BoolProperty _wmsCacheEnabled;
-    properties::BoolProperty _offlineMode;
-    properties::StringProperty _wmsCacheLocation;
-    properties::UIntProperty _wmsCacheSizeMB;
     properties::UIntProperty _tileCacheSizeMB;
+
+    properties::StringProperty _defaultGeoPointTexturePath;
+    properties::BoolProperty _mrfCacheEnabled;
+    properties::StringProperty _mrfCacheLocation;
 
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 
@@ -136,6 +128,8 @@ private:
     std::map<std::string, Capabilities> _capabilitiesMap;
 
     std::multimap<std::string, UrlInfo> _urlList;
+
+    bool _hasDefaultGeoPointTexture = false;
 };
 
 } // namespace openspace

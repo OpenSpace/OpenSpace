@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,17 +39,14 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "EphemerisProgram";
-    constexpr const char* KeyTranslation = "Translation";
-
 #ifdef __APPLE__
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 12> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase"
     };
 #else
-    constexpr const std::array<const char*, 14> UniformNames = {
+    constexpr std::array<const char*, 14> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase", "viewport", "lineWidth"
@@ -71,17 +68,12 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        AppearanceInfo = {
-            "Appearance",
-            "Appearance",
-            "The appearance of the trail."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
+        "This value determines the RGB main color for the lines and points of the trail",
+        // @VISIBILITY(1.2)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadeInfo = {
@@ -89,7 +81,9 @@ namespace {
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is "
         "'true', the 'Fade' parameter determines the speed of fading. If this value is "
-        "'false', the entire trail is rendered at full opacity and color."
+        "'false', the entire trail is rendered at full opacity and color",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
@@ -97,7 +91,9 @@ namespace {
         "Line fade",
         "The fading factor that is applied to the trail if the 'EnableFade' value is "
         "'true'. If it is 'false', this setting has no effect. The higher the number, "
-        "the less fading is applied."
+        "the less fading is applied",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -105,7 +101,9 @@ namespace {
         "Line Width",
         "This value specifies the line width of the trail if the selected rendering "
         "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
+        "ignored",
+        // @VISIBILITY(2.4)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
@@ -114,15 +112,18 @@ namespace {
         "This value specifies the base size of the points along the line if the selected "
         "rendering method includes points. If the rendering mode is set the Lines, this "
         "value is ignored. If a subsampling of the values is performed, the subsampled "
-        "values are half this size."
+        "values are half this size",
+        // @VISIBILITY(2.4)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering Mode",
-        "Determines how the trail should be rendered to the screen.If 'Lines' is "
+        "Determines how the trail should be rendered to the screen. If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
-        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts."
+        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
@@ -165,7 +166,11 @@ documentation::Documentation RenderableTrail::Documentation() {
 }
 
 RenderableTrail::Appearance::Appearance()
-    : properties::PropertyOwner(AppearanceInfo)
+    : properties::PropertyOwner({
+        "Appearance",
+        "Appearance",
+        "The appearance of the trail"
+    })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
     , lineFade(FadeInfo, 1.f, 0.f, 30.f)
@@ -197,10 +202,10 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     setRenderBin(RenderBin::Overlay);
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _translation = Translation::createFromDictionary(
-        dictionary.value<ghoul::Dictionary>(KeyTranslation)
+        dictionary.value<ghoul::Dictionary>("Translation")
     );
     addPropertySubOwner(_translation.get());
 
@@ -233,14 +238,14 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
 #ifdef __APPLE__
     _programObject = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "EphemerisProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "EphemerisProgram",
                 absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
             );
@@ -248,10 +253,10 @@ void RenderableTrail::initializeGL() {
     );
 #else
     _programObject = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "EphemerisProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "EphemerisProgram",
                 absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
             );
@@ -264,7 +269,7 @@ void RenderableTrail::initializeGL() {
 
 void RenderableTrail::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "EphemerisProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -281,7 +286,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
                                      const glm::dmat4& modelTransform,
                                      RenderInformation& info, int nVertices, int offset)
 {
-    ZoneScoped
+    ZoneScoped;
 
     // We pass in the model view transformation matrix as double in order to maintain
     // high precision for vertices; especially for the trails, a high vertex precision
@@ -381,7 +386,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
 }
 
 void RenderableTrail::render(const RenderData& data, RendererTasks&) {
-    ZoneScoped
+    ZoneScoped;
 
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, opacity());
@@ -433,15 +438,18 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         _primaryRenderInformation.first;
 
     // Culling
-    const glm::dvec3 trailPosWorld = glm::dvec3(
-        modelTransform * _primaryRenderInformation._localTransform *
-        glm::dvec4(0.0, 0.0, 0.0, 1.0)
-    );
-    const double distance = glm::distance(trailPosWorld, data.camera.eyePositionVec3());
+    //const glm::dvec3 trailPosWorld = glm::dvec3(
+    //    modelTransform * _primaryRenderInformation._localTransform *
+    //    glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    //);
+    //const double distance = glm::distance(trailPosWorld, data.camera.eyePositionVec3());
 
-    if (distance > _boundingSphere * DISTANCE_CULLING_RADII) {
-        return;
-    }
+    //if (distance > boundingSphere() * DISTANCE_CULLING_RADII) {
+    //    // Reset
+    //    global::renderEngine->openglStateCache().resetBlendState();
+    //    global::renderEngine->openglStateCache().resetDepthState();
+    //    return;
+    //}
 
     // Render the primary batch of vertices
     internalRender(
@@ -474,8 +482,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(0);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(true);
+    // Reset
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 
     _programObject->deactivate();
 }

@@ -21,18 +21,19 @@ local SaturnBarycenterTrail = {
   GUI = {
     Name = "Saturn Barycenter Trail",
     Path = "/Solar System/Planets/Saturn",
-    Description = [[ Trail of Saturn's Barycenter as observed by the Sun.]]
+    Description = "Trail of Saturn's Barycenter as observed by the Sun"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SaturnBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SaturnBarycenterTrail)
 end)
-  
+
 asset.export(SaturnBarycenterTrail)
 
 
@@ -40,7 +41,8 @@ asset.export(SaturnBarycenterTrail)
 asset.meta = {
   Name = "Saturn Trail",
   Version = "1.1",
-  Description = [[ Trail of Saturn's Barycenter. Data from NASA Spice (see base spice asset)]],
+  Description = [[Trail of Saturn's Barycenter. Data from NASA Spice (see base spice
+    asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

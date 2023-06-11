@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,6 +39,7 @@ uniform float r;
 uniform vec4 dhdH;
 uniform sampler3D deltaJTexture;
 
+
 // The integrand here is the f(y) of the trapezoidal rule:
 vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // We can calculate r_i by the cosine law: r_i^2=dist^2 + r^2 - 2*r*dist*cos(PI-theta)
@@ -63,7 +64,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   vec3 inScatteringRadiance = vec3(0.0);
   float dy = rayDistance(r, mu, Rt, Rg) / float(INSCATTER_INTEGRAL_SAMPLES);
   vec3 inScatteringRadiance_i = integrand(r, mu, muSun, nu, 0.0);
-  
+
   // In order to solve the integral from equation (11) we use the trapezoidal rule:
   // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
   // where y_i+1 = y_j
@@ -76,13 +77,14 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   return inScatteringRadiance;
 }
 
+
 void main() {
   float mu = 0.0;
   float muSun = 0.0;
   float nu = 0.0;
   // Unmapping the variables from texture texels coordinates to mapped coordinates
   unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
-  
-  // Write to texture deltaSR 
+
+  // Write to texture deltaSR
   renderTarget = vec4(inscatter(r, mu, muSun, nu), 1.0);
 }

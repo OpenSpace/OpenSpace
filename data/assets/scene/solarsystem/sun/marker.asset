@@ -1,5 +1,6 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
+local transforms = asset.require("./transforms")
+
 
 
 local textures = asset.syncedResource({
@@ -8,6 +9,7 @@ local textures = asset.syncedResource({
   Identifier = "sun_textures",
   Version = 4
 })
+
 
 local SunMarker = {
   Identifier = "SunMarker",
@@ -24,18 +26,19 @@ local SunMarker = {
   GUI = {
     Name = "Sun Marker",
     Path = "/Solar System/Sun",
-    Description = [[ Sun marker with name, sized for Solar System view]]
+    Description = "Sun marker with name, sized for Solar System view"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SunMarker)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SunMarker)
 end)
-  
+
 asset.export(SunMarker)
 
 
@@ -43,7 +46,7 @@ asset.export(SunMarker)
 asset.meta = {
   Name = "Sun marker",
   Version = "1.1",
-  Description = [[ Marker for the Sun, with a stick and label.]],
+  Description = "Marker for the Sun, with a stick and label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
