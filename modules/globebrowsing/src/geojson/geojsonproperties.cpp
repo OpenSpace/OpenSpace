@@ -64,6 +64,8 @@ namespace geojson::propertykeys {
     constexpr std::string_view AltitudeModeClamp = "clampToGround";
     constexpr std::string_view AltitudeModeAbsolute = "absolute";
     constexpr std::string_view AltitudeModeRelative = "relativeToGround";
+
+    constexpr std::string_view PerformShading = "performShading";
 } // namespace geojson::propertykeys
 
 namespace {
@@ -210,7 +212,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ExtrudeInfo = {
         "Extrude",
         "Extrude",
-        "If true, extrude the mesh or line to intersect the globe",
+        "If true, extrude the geometry to intersect the globe.Lines/polygons will be"
+        "extruded with polygons,and points with lines ",
         openspace::properties::Property::Visibility::User
     };
 
@@ -404,16 +407,16 @@ GeoJsonProperties::GeoJsonProperties()
     addProperty(performShading);
 
     altitudeModeOption.addOptions({
-        { static_cast<int>(AltitudeMode::Absolute), "Absolute"},
+        { static_cast<int>(AltitudeMode::Absolute), "Absolute" },
         { static_cast<int>(AltitudeMode::RelativeToGround), "Relative to Ground" }
         //{ static_cast<int>(AltitudeMode::ClampToGround), "Clamp to Ground" } / TODO: add ClampToGround
-        });
+    });
     addProperty(altitudeModeOption);
 
     pointAnchorOption.addOptions({
-        { static_cast<int>(PointTextureAnchor::Bottom), "Bottom"},
+        { static_cast<int>(PointTextureAnchor::Bottom), "Bottom" },
         { static_cast<int>(PointTextureAnchor::Center), "Center" }
-        });
+    });
     addProperty(pointAnchorOption);
 
     addPropertySubOwner(tessellation);
@@ -555,6 +558,9 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
                 ));
             }
         }
+        else if (keyMatches(key, propertykeys::PerformShading, PerformShadingInfo)) {
+            result.performShading = value.getBoolean();
+        }
         else if (keyMatches(key, propertykeys::Tessellate, TessellationEnabledInfo)) {
             result.tessellationEnabled = value.getBoolean();
         }
@@ -563,7 +569,13 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             result.useTessellationLevel = true;
             result.tessellationLevel = static_cast<int>(value.getNumber());
         }
-        else if (keyMatches(key, propertykeys::TessellationMaxDistance, TessellationDistanceInfo)) {
+        else if (
+            keyMatches(
+                key,
+                propertykeys::TessellationMaxDistance,
+                TessellationDistanceInfo
+            ))
+        {
             result.tessellationDistance = static_cast<float>(value.getNumber());
         }
     };
