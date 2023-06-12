@@ -258,9 +258,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseTessellationLevelInfo = {
         "UseTessellationLevel",
         "Use Tessellation Level",
-        "If true, use the 'Tesselation Level' to control the level of detail for the "
-        "tessellation. The distance used will be the 'Tesselation Distance' divided by "
-        "the 'Tesselation Level', so the higher the level value, the smaller each "
+        "If true, use the 'Tessellation Level' to control the level of detail for the "
+        "tessellation. The distance used will be the 'Tessellation Distance' divided by "
+        "the 'Tessellation Level', so the higher the level value, the smaller each "
         "segment in the geomoetry will be",
         openspace::properties::Property::Visibility::AdvancedUser
     };
