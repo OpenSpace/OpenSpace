@@ -79,7 +79,7 @@ public:
 private:
     glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& data);
     void updateAtmosphereParameters();
-    void dimmingCoefficient(const glm::dmat4& modelTransform);
+    void setDimmingCoefficient(const glm::dmat4& modelTransform);
 
     properties::FloatProperty _atmosphereHeight;
     properties::FloatProperty _groundAverageReflectance;
