@@ -534,8 +534,8 @@ IncomingMessage receiveMessageFromSoftware(std::shared_ptr<SoftwareConnection> c
     std::string type{ headerBuffer.begin() + 5, headerBuffer.begin() + 9 };
     auto typeEnum = softwareintegration::simp::getMessageType(type);
 
-    // Read and convert message size: Byte 9-24
-    const size_t subjectSize = std::stoll(std::string{ headerBuffer.begin() + 9, headerBuffer.begin() + 25 });
+    // Read and convert message size: Byte 9-23
+    const size_t subjectSize = std::stoll(std::string{ headerBuffer.begin() + 9, headerBuffer.begin() + 24 });
 
     // Receive the message subject
     if (typeEnum != softwareintegration::simp::MessageType::Unknown) {

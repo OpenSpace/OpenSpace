@@ -134,4 +134,57 @@ scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
     };
 }
 
+namespace softwareintegration {
+
+void setDefaultDeltaTimeSteps() {
+    // TODO: This can be set in profile for now
+    // // Set large time steps for the GUI (so you for example 
+    // // can see the movement of stars at 5000 years/second)
+    // // Values set in seconds: Real time, 5k years, 
+    // // 10k year, 50k year, 100k year, 500k year, 1M year
+    // std::vector<double> wantedTimeSteps{
+    //     1.0, 157680000000.0, 315360000000.0,
+    //     1576800000000.0, 3153600000000.0,
+    //     15768000000000.0, 3153600000000.0
+    // };
+    // auto timeSteps = global::timeManager->deltaTimeSteps();
+    // std::sort(timeSteps.begin(), timeSteps.end());
+
+    // auto it = wantedTimeSteps.begin();
+    // while (it != wantedTimeSteps.end()) {
+    //     if (
+    //         std::find_if(
+    //             timeSteps.begin(),
+    //             timeSteps.end(),
+    //             [it](double ts) { return std::abs(*it - ts) < std::numeric_limits<double>::epsilon(); }
+    //         ) != timeSteps.end()
+    //     ) {
+    //         it = wantedTimeSteps.erase(it);
+    //     }
+    //     else {
+    //         ++it;
+    //     }
+    // }
+
+    // if (wantedTimeSteps.size() > 0) {
+    //     std::string largeTimeSteps = "{ ";
+    //     for (size_t i = 0; i < wantedTimeSteps.size(); ++i) {
+    //         if (i != 0) {
+    //             largeTimeSteps += ", ";
+    //         }
+    //         largeTimeSteps += ghoul::to_string(wantedTimeSteps[i]);
+    //     }
+    //     largeTimeSteps += " }";
+    //     global::scriptEngine->queueScript(
+    //         fmt::format(
+    //             "openspace.time.setDeltaTimeSteps({});",
+    //             largeTimeSteps
+    //         ),
+    //         scripting::ScriptEngine::RemoteScripting::Yes
+    //     );
+    // }
+}
+
+} // namespace softwareintegration
+
 }  // namespace openspace

@@ -141,20 +141,7 @@ bool softwareintegration::Session::loadSessionData(SoftwareIntegrationModule* mo
         return false;
     }
 
-    // Set large time steps for the GUI (so you for example 
-    // can see the movement of stars at 5000 years/second)
-    // Values set in seconds: Real time, 5k years, 
-    // 10k year, 50k year, 100k year, 500k year, 1M year
-    std::string largeTimeSteps = "{ 1.0, 157680000000.0, 315360000000.0,"
-                                    " 1576800000000.0, 3153600000000.0,"
-                                    " 15768000000000.0, 3153600000000.0 }";
-    global::scriptEngine->queueScript(
-        fmt::format(
-            "openspace.time.setDeltaTimeSteps({});",
-            largeTimeSteps
-        ),
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    softwareintegration::setDefaultDeltaTimeSteps();
 
     return true;
 }

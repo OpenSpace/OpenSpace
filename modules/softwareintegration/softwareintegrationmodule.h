@@ -87,6 +87,12 @@ private:
     std::shared_ptr<softwareintegration::network::NetworkState> _networkState;
 };
 
+namespace softwareintegration {
+
+void setDefaultDeltaTimeSteps();
+
+} // namespace softwareintegration
+
 } // namespace openspace
 
 #include "softwareintegrationmodule.inl"
