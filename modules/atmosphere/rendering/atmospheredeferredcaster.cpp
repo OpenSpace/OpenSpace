@@ -275,7 +275,7 @@ float AtmosphereDeferredcaster::eclipseShadow(glm::dvec3 position, bool ground)
     // This code is copied from the atmosphere deferred fragment shader 
     // It is used to calculate the eclipse shadow
     const ShadowRenderingStruct& shadow = _shadowDataArrayCache.front();
-    if (!shadow.isShadowing) {
+    if (_shadowDataArrayCache.empty() || !shadow.isShadowing) {
         return 1.0f;
     }
 
