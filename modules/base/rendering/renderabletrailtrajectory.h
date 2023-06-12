@@ -105,6 +105,9 @@ private:
     /// Max and min vertex used to calculate the bounding sphere
     glm::vec3 _maxVertex;
     glm::vec3 _minVertex;
+
+    // Contains all timestamps corresponding to the positions in _vertexArray
+    std::vector<double> _timeVector;
 };
 
 } // namespace openspace

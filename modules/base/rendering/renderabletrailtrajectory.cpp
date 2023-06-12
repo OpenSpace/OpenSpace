@@ -236,11 +236,12 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             // will not be correct for the number of vertices we are doing along the trail
             _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ?
                 (timespan / _numberOfVertices) : _totalSampleInterval;
-            _totalSampleInterval = std::max(1.0, _totalSampleInterval);
 
             // Make space for the vertices
             _vertexArray.clear();
             _vertexArray.resize(_numberOfVertices + 1);
+            _timeVector.clear();
+            _timeVector.resize(_numberOfVertices + 1);
         }
 
         // Calculate sweeping range for this iteration
@@ -256,6 +257,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 Time(0.0)
             });
             _vertexArray[i] = { p.x, p.y, p.z };
+            _timeVector[i] = Time(_start + i * _totalSampleInterval).j2000Seconds();
 
             // Set max and min vertex for bounding sphere calculations
             _maxVertex = glm::max(_maxVertex, p);
@@ -273,6 +275,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 Time(0.0)
             });
             _vertexArray[stopIndex] = { p.x, p.y, p.z };
+            _timeVector[stopIndex] = Time(_end).j2000Seconds();            
 
             _sweepIteration = 0;
             setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
@@ -307,7 +310,6 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
     // This has to be done every update step;
     if (_renderFullTrail) {
 
-        // Find the closest sampling point and replace it with current position
         const double j2k = data.time.j2000Seconds();
 
         if (j2k > _start && j2k < _end) {
@@ -315,15 +317,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
             const int vSize = _vertexArray.size();
 
-            // Get current time in percentage of _start to _end
-            const double t = std::max(0.0,(j2k - _start) / (_end - _start));
-
             // First segment
             _firstSegRenderInformation.first = 0;
-            _firstSegRenderInformation.count = static_cast<GLsizei> (
-                std::max(
-                    0.0, 
-                    floor((vSize - 1) * t))
+            _firstSegRenderInformation.count = std::distance(
+                _timeVector.begin(),
+                std::lower_bound(_timeVector.begin(), _timeVector.end(), j2k)
             );
 
             glBindVertexArray(_firstSegRenderInformation._vaoID);
@@ -339,23 +337,19 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
 
             // Lines from point-object-point
-
-            const int preCount = std::max(_firstSegRenderInformation.count - 1, 0);
-            const int postCount = std::min(
-                _firstSegRenderInformation.count + 1,
-                vSize - 1
-            );
+            const int preIndex = std::max(_firstSegRenderInformation.count - 1, 0);
+            const int postIndex = _firstSegRenderInformation.count;
 
             glm::dvec3 preV0(
-                _vertexArray[preCount].x,
-                _vertexArray[preCount].y,
-                _vertexArray[preCount].z
+                _vertexArray[preIndex].x,
+                _vertexArray[preIndex].y,
+                _vertexArray[preIndex].z
             );
 
             glm::dvec3 postV0(
-                _vertexArray[postCount].x,
-                _vertexArray[postCount].y,
-                _vertexArray[postCount].z
+                _vertexArray[postIndex].x,
+                _vertexArray[postIndex].y,
+                _vertexArray[postIndex].z
             );
 
             const glm::dvec3 p = _translation->position(data);
@@ -400,10 +394,10 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
 
             // Second segment
-            _secondSegRenderInformation.first = _firstSegRenderInformation.count + 1;
+            _secondSegRenderInformation.first = _firstSegRenderInformation.count;
 
             _secondSegRenderInformation.count = static_cast<GLsizei>(
-                _vertexArray.size() - _firstSegRenderInformation.count - 1
+                _vertexArray.size() - _firstSegRenderInformation.count
             );
 
             _secondSegRenderInformation._vaoID = _firstSegRenderInformation._vaoID;
