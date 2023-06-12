@@ -50,20 +50,21 @@ public:
 
     bool isReady() const override;
     
-//    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
     
 protected:
-    virtual void bindTexture() override;
-//    void createPlane();
+//    virtual void bindTexture() override;
 
+    
 private:
     void loadTexture();
+    std::unique_ptr<ghoul::opengl::Texture> createFloatTexture(const std::vector<std::vector<float>>& data);
 
     properties::StringProperty _filePath;
-    ghoul::opengl::Texture* _texture = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     std::unique_ptr<ghoul::filesystem::File> _sourceFile;
     std::string _axis;

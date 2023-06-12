@@ -39,7 +39,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
+ 
 #include <fstream>
 #include <optional>
 #include <iostream>
@@ -61,6 +61,14 @@ namespace {
   //  // @VISIBILITY(2.25)
   //  openspace::properties::Property::Visibility::User
   //};
+
+constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
+    "ColorQuantity",
+    "Quantity to Color By",
+    "Quantity used to color lines if the 'By Quantity' color method is selected",
+    // @VISIBILITY(2.67)
+    openspace::properties::Property::Visibility::User
+};
   struct [[codegen::Dictionary(RenderableCutPlane)]] Parameters {
     // [[codegen::verbatim(FilePathInfo.description)]]
     std::string filePath;
@@ -103,8 +111,9 @@ bool RenderableCutPlane::isReady() const {
 }
 
 void RenderableCutPlane::initialize() {
-    RenderablePlane::initialize();
-//    loadTexture();
+//    _transferFunction = std::make_unique<TransferFunction>(
+//        absPath(_colorTablePaths[0]).string()
+//    );
 }
 
 void RenderableCutPlane::initializeGL() {
@@ -113,7 +122,6 @@ void RenderableCutPlane::initializeGL() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     loadTexture();
-    std::cout << "hej efter load " <<_axis1 << " " << _axis2;
     _axis1 *= _size.value().x;
     _axis2 *= _size.value().y;
     std::cout << "hej efter load " <<_axis1 << " " << _axis2;
@@ -122,35 +130,115 @@ void RenderableCutPlane::initializeGL() {
     
     // TODO: Call shaders when implemented
     _shader = BaseModule::ProgramObjectManager.request(
-        "Plane",
+        "CutPlane",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                "Plane",
-                absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
+                "CutPlane",
+                absPath("${MODULE_BASE}/shaders/cutplane_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/cutplane_fs.glsl")
             );
         }
     );
 }
 
 void RenderableCutPlane::deinitializeGL() {
+ ZoneScoped;
+    
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
 
-//    BaseModule::TextureManager.release(_texture);
-    RenderablePlane::deinitializeGL();
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+
+    BaseModule::ProgramObjectManager.release(
+        "CutPlane",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+    _shader = nullptr;
+}
+
+void RenderableCutPlane::render(const RenderData& data, RendererTasks&) {
+    ZoneScoped;
+
+    _shader->activate();
+    _shader->setUniform("opacity", opacity());
+
+    _shader->setUniform("mirrorBackside", _mirrorBackside);
+
+    glm::dvec3 objectPositionWorld = glm::dvec3(
+        glm::translate(
+            glm::dmat4(1.0),
+            data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+
+    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
+    glm::dvec3 newRight = glm::normalize(
+        glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
+    );
+    glm::dvec3 newUp = glm::cross(normal, newRight);
+
+    // CAMERA
+    glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
+    cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
+    cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
+    cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
+
+    const glm::dmat4 rotationTransform =
+        glm::dmat4(data.modelTransform.rotation);
+
+    const glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        rotationTransform *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::dmat4 modelViewTransform =
+        data.camera.combinedViewMatrix() * modelTransform;
+
+    _shader->setUniform("modelViewProjectionTransform",
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+
+    _shader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    bindTexture();
+    defer { unbindTexture(); };
+
+    _shader->setUniform("texture1", unit);
+
+//    _shader->setUniform("multiplyColor", _multiplyColor);
+
+//    bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
+//    if (additiveBlending) {
+//        glDepthMask(false);
+//        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+//    }
+    glDisable(GL_CULL_FACE);
+
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+//    if (additiveBlending) {
+//        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//        glDepthMask(true);
+//    }
+
+    _shader->deactivate();
+   
 }
 
 void RenderableCutPlane::update(const UpdateData& data) {
     RenderablePlane::update(data);
 }
 
-void RenderableCutPlane::bindTexture() {
-//    _texture->bind();
-}
-
-//void RenderableCutPlane::render(const RenderData& data, RendererTasks& t) {
-//    ZoneScoped;
-//    RenderablePlane::render(data,t);
+//void RenderableCutPlane::bindTexture() {
+//    ghoul::opengl::Texture* rawTexture = _texture.get();
+//    ghoul_assert(_texture, "Texture must be loaded before binding");
+//    rawTexture->bind();
 //}
+
 
 void RenderableCutPlane::loadTexture()
 {
@@ -199,28 +287,57 @@ void RenderableCutPlane::loadTexture()
      _axis1 = abs(_axisDim[0][0]) + abs(_axisDim[0][1]);
      _axis2 = abs(_axisDim[1][0]) + abs(_axisDim[1][1]);
     
-    unsigned int hash = ghoul::hashCRC32File(_filePath);
+    _texture = createFloatTexture(slices[0]);
     
-    ghoul::opengl::Texture* t = _texture;
-    void* memory = static_cast<void*>(&slices[0]);
-    
-    //_texture = BaseModule::TextureManager.request(
-    //    std::to_string(hash),
-    //    [slice = memory]() -> std::unique_ptr<ghoul::opengl::Texture> {
-    //        std::unique_ptr<ghoul::opengl::Texture> texture =
-    //            ghoul::io::TextureReader::ref().loadTexture(
-    //                slice,
-    //                sizeof(slice),
-    //                2
-    //            );
-    //        texture->uploadTexture();
-    //        texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-    //        texture->purgeFromRAM();
-    //        return texture;
-    //    }
-    //);
+//    CREATE TEXTURE OBJECT
+//    unsigned int hash = ghoul::hashCRC32File(_filePath);
+//    void* memory = static_cast<void*>(&slices[0]);
+//
+//    _texture = BaseModule::TextureManager.request(ss
+//        std::to_string(hash),
+//        [slice = memory]() -> std::unique_ptr<ghoul::opengl::Texture> {
+//            std::unique_ptr<ghoul::opengl::Texture> texture =
+//                ghoul::io::TextureReader::ref().loadTexture(
+//                    slice,
+//                    sizeof(slice),
+//                    2
+//                );
+//            texture->uploadTexture();
+//            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+//            texture->purgeFromRAM();
+//            return texture;
+//        }
+//    );
 
 }
+// Function to create a floating-point texture from a double vector
+std::unique_ptr<ghoul::opengl::Texture> RenderableCutPlane::createFloatTexture(const std::vector<std::vector<float>>& data)
+{
+    // Convert the 2D vector to a flat float array
+    std::vector<float> flatData; //en slice men platt
+    for (const auto& row : data) {
+        flatData.insert(flatData.end(), row.begin(), row.end());
+    }
+    // Create a floating-point texture
+    GLenum type = GL_TEXTURE_2D;
+    ghoul::opengl::Texture::Format format = ghoul::opengl::Texture::Format::Red;
+    GLenum internalFormat = GL_R32F; //32 bit float
+    glm::uvec3 size(data[0].size(), data.size(), 1);
+    std::unique_ptr<ghoul::opengl::Texture> texture =
+        std::make_unique<ghoul::opengl::Texture>(
+            flatData.data(),
+            size,
+            type,
+            format,
+            internalFormat,
+            GL_FLOAT
+        );
+    // Set texture parameters
+    texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    return texture;
+}
+
 
 }// namespace openspace
 
