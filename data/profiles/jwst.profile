@@ -10,12 +10,12 @@
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/earth/satellites/misc/hubble_trail",
     "scene/solarsystem/planets/earth/lagrange_points/lagrange_points",
-    "scene/solarsystem/missions/jwst/jwst",
-    "scene/solarsystem/missions/jwst/trail",
-    "scene/solarsystem/missions/jwst/targets/targets",
-    "scene/solarsystem/missions/jwst/timelapse",
-    "scene/solarsystem/missions/jwst/toggle_trail",
-    "scene/solarsystem/missions/jwst/point_jwst",
+    "scene/solarsystem/telescopes/jwst/jwst",
+    "scene/solarsystem/telescopes/jwst/trail",
+    "scene/solarsystem/telescopes/jwst/targets/targets",
+    "scene/solarsystem/telescopes/jwst/timelapse",
+    "scene/solarsystem/telescopes/jwst/toggle_trail",
+    "scene/solarsystem/telescopes/jwst/point_jwst",
     "scene/digitaluniverse/hdf"
   ],
   "camera": {

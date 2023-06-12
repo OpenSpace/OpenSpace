@@ -21,7 +21,7 @@ local GalacticBand = {
         Enabled = asset.enabled
     },
     GUI = {
-        Name = "Galactic Band",
+        Name = "Galactic Equator Line",
         Path = "/Other/Lines"
     }
 }
@@ -31,12 +31,10 @@ local ShowGalacticBand = {
   Identifier = "os.nightsky.ShowGalacticBand",
   Name = "Show galactic band",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Fade", 1.0, 1.0)
+    openspace.fadeIn("Scene.GalacticBand.Renderable")
   ]],
   Documentation = "Shows the galactic band",
-  GuiPath = "/Night Sky/Lines and Grids",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
@@ -44,13 +42,21 @@ local HideGalacticBand = {
   Identifier = "os.nightsky.HideGalacticBand",
   Name = "Hide galactic band",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Fade", 0.0, 1.0)
+    openspace.fadeOut("Scene.GalacticBand.Renderable")
   ]],
   Documentation = "Hides the galactic band",
-  GuiPath = "/Night Sky/Lines and Grids",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
+local ToggleGalacticBand = {
+  Identifier = "os.nightsky.ToggleGalacticBand",
+  Name = "Toggle galactic equator line",
+  Command = "openspace.toggleFade('Scene.GalacticBand.Renderable')",
+  Documentation = "Toggles the galactic equator line visibilty",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GalacticBand)

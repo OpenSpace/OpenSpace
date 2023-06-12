@@ -56,6 +56,8 @@ public:
     Tile::Status tileStatus(const TileIndex& tileIndex) override final;
     TileDepthTransform depthTransform() override final;
 
+    static documentation::Documentation Documentation();
+
 private:
     void internalInitialize() override final;
     void internalDeinitialize() override final;

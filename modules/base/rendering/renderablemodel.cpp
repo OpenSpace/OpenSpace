@@ -547,6 +547,13 @@ void RenderableModel::initializeGL() {
     );
     _modelHasAnimation = _geometry->hasAnimation();
 
+    // @TODO (abock, 2023-06-03) Leaving this here to address issue #2731. The
+    // _modelHasAnimation has not been set to true in the constructor causing the
+    // `enableAnimation` function not to be called
+    if (_enableAnimation) {
+        _geometry->enableAnimation(true);
+    }
+
     if (!_modelHasAnimation) {
         if (!_animationStart.empty()) {
             LWARNING(fmt::format(

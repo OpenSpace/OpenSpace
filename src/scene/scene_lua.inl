@@ -282,7 +282,8 @@ bool doesUriContainGroupTag(const std::string& command, std::string& groupName) 
 }
 
 std::string removeGroupNameFromUri(const std::string& uri) {
-    return uri.substr(uri.find_first_of("."));
+    size_t pos = uri.find_first_of(".");
+    return pos == std::string::npos ? uri : uri.substr(pos);
 }
 
 } // namespace

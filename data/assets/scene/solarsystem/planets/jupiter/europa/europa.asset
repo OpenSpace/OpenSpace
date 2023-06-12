@@ -46,7 +46,7 @@ local Europa = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_major_jupiter" },
   GUI = {
     Path = "/Solar System/Planets/Jupiter/Major Moons/Europa"
   }

@@ -3,17 +3,10 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 local textures = asset.syncedResource({
-  Name = "Cardinal Direction Textures",
-  Type = "UrlSynchronization",
-  Identifier = "cardinal_direction_textures",
-  Url = {
-    "https://wms.openspace.amnh.org/static/sync/url/directions/sphere.png",
-    "https://wms.openspace.amnh.org/static/sync/url/directions/sphere2.png",
-    "https://wms.openspace.amnh.org/static/sync/url/directions/sphere3.png",
-    "https://wms.openspace.amnh.org/static/sync/url/directions/sphere4.png",
-    "https://wms.openspace.amnh.org/static/sync/url/directions/sphere5.png"
-  },
-  Override = false
+  Name = "Cardinal Directions Textures",
+  Type = "HttpSynchronization",
+  Identifier = "cardinal_directions_textures",
+  Version = 1
 })
 
 
@@ -60,7 +53,7 @@ local CardinalDirectionSphere = {
     Size = 50000,
     Segments = 80,
     Opacity = 0.9,
-    Texture = textures .. "sphere.png",
+    Texture = textures .. "nesw_red.png",
     Orientation = "Inside",
     MirrorTexture = true,
     RenderBinMode = "PostDeferredTransparent"
@@ -76,34 +69,50 @@ local showCommand = [[
   local camera = openspace.navigation.getNavigationState()
   openspace.setParent("CardinalDirectionsPosition", camera.Anchor)
   openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Translation.Globe", camera.Anchor)
-  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Translation.Latitude", lat)
-  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Translation.Longitude", lon)
   openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Rotation.Globe", camera.Anchor)
-  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Rotation.Latitude", lat)
-  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Rotation.Longitude", lon)
-  openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Enabled", true)
-  openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Fade", 0.0)
-  openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Fade", 1.0, 1.0)
+  openspace.fadeIn("Scene.CardinalDirectionSphere.Renderable")
 ]]
 
 local ShowNeswBand = {
 Identifier = "os.nightsky.ShowNeswBand",
-  Name = "Show cardinal directions (with ticks)",
+  Name = "Show cardinal directions (with lines)",
   Command = [[
     openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture", "]] ..
-    textures:gsub("\\","/") .. [[sphere5.png")]] .. showCommand,
-  Documentation = "Shows the cardinal direction sphere with letters and circle with tick marks",
+    textures:gsub("\\","/") .. [[nesw_lines_red.png")]] .. showCommand,
+  Documentation = "Shows the cardinal direction sphere with letters and a circle with tick marks",
   GuiPath = "/Night Sky/Directions",
   IsLocal = false
 }
+
+local ShowNeswBandSmall = {
+  Identifier = "os.nightsky.ShowNeswBandSmall",
+    Name = "Show cardinal directions (small with lines)",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture", "]] ..
+      textures:gsub("\\","/") .. [[nesw_lines_red_small.png")]] .. showCommand,
+    Documentation = "Shows the cardinal direction sphere with small letters and a circle with tick marks",
+    GuiPath = "/Night Sky/Directions",
+    IsLocal = false
+  }
 
 local ShowNeswLetters = {
   Identifier = "os.nightsky.ShowNeswLetters",
   Name = "Show cardinal directions (letters only)",
   Command = [[
     openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture","]] ..
-    textures:gsub("\\","/") .. [[sphere.png")]] .. showCommand,
+    textures:gsub("\\","/") .. [[nesw_red.png")]] .. showCommand,
   Documentation = "Shows the cardinal direction sphere with letters only",
+  GuiPath = "/Night Sky/Directions",
+  IsLocal = false
+}
+
+local ShowNeswLettersSmall = {
+  Identifier = "os.nightsky.ShowNeswLettersSmall",
+  Name = "Show cardinal directions (small letters only)",
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture","]] ..
+    textures:gsub("\\","/") .. [[nesw_red_small.png")]] .. showCommand,
+  Documentation = "Shows the cardinal direction sphere with small letters only",
   GuiPath = "/Night Sky/Directions",
   IsLocal = false
 }
@@ -111,9 +120,7 @@ local ShowNeswLetters = {
 local HideNesw = {
   Identifier = "os.nightsky.HideNesw",
   Name = "Hide cardinal directions",
-  Command = [[
-    openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Fade", 0.0, 1.0)
-  ]],
+  Command = "openspace.fadeOut('Scene.CardinalDirectionSphere.Renderable')",
   Documentation = "Hides the cardinal directions",
   GuiPath = "/Night Sky/Directions",
   IsLocal = false
@@ -123,13 +130,17 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(CardinalDirectionsPosition)
   openspace.addSceneGraphNode(CardinalDirectionSphere)
   openspace.action.registerAction(ShowNeswBand)
+  openspace.action.registerAction(ShowNeswBandSmall)
   openspace.action.registerAction(ShowNeswLetters)
+  openspace.action.registerAction(ShowNeswLettersSmall)
   openspace.action.registerAction(HideNesw)
 end)
 
 asset.onDeinitialize(function()
   openspace.action.removeAction(HideNesw)
+  openspace.action.removeAction(ShowNeswLettersSmall)
   openspace.action.removeAction(ShowNeswLetters)
+  openspace.action.removeAction(ShowNeswBandSmall)
   openspace.action.removeAction(ShowNeswBand)
   openspace.removeSceneGraphNode(CardinalDirectionSphere)
   openspace.removeSceneGraphNode(CardinalDirectionsPosition)
@@ -138,5 +149,7 @@ end)
 asset.export(CardinalDirectionsPosition)
 asset.export(CardinalDirectionSphere)
 asset.export("ShowNeswBand", ShowNeswBand.Identifier)
+asset.export("ShowNeswBandSmall", ShowNeswBand.Identifier)
 asset.export("ShowNeswLetters", ShowNeswLetters.Identifier)
+asset.export("ShowNeswLettersSmall", ShowNeswLettersSmall.Identifier)
 asset.export("HideNesw", HideNesw.Identifier)

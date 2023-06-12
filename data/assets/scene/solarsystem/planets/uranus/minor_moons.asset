@@ -6,7 +6,7 @@ asset.require("./irregular_retrograde_moons")
 
 local UranusMinorMoonsOn = {
   Identifier = "os.solarsystem.UranusMinorMoonsOn",
-  Name = "Turn on minor moons and trails",
+  Name = "Turn ON minor moons and trails",
   Command = [[
     local trails = openspace.getProperty("{moonTrail_minor_uranus}.Renderable.Enabled")
     local trails_fade = openspace.getProperty("{moonTrail_minor_uranus}.Renderable.Fade")
@@ -31,7 +31,7 @@ local UranusMinorMoonsOn = {
 
 local UranusMinorMoonsOff = {
   Identifier = "os.solarsystem.UranusMinorMoonsOff",
-  Name = "Turn off minors moon and trails",
+  Name = "Turn OFF minors moon and trails",
   Command = [[
     local trails = openspace.getProperty("{moonTrail_minor_uranus}.Renderable.Enabled")
     local trails_fade = openspace.getProperty("{moonTrail_minor_uranus}.Renderable.Fade")

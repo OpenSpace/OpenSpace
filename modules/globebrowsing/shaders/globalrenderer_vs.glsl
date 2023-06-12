@@ -109,7 +109,7 @@ void main() {
   levelWeights = getLevelWeights(distToVertexOnEllipsoid);
 
   // Get the height value and apply skirts
-  float height = getTileHeight(in_uv, levelWeights)  - getTileVertexSkirtLength();
+  float height = getTileHeight(in_uv, levelWeights) - getTileVertexSkirtLength();
 
 #if USE_ACCURATE_NORMALS
   // Calculate tangents

@@ -336,6 +336,7 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::SingleImageProvider::Documentation(),
         globebrowsing::SizeReferenceTileProvider::Documentation(),
         globebrowsing::TemporalTileProvider::Documentation(),
+        globebrowsing::TileIndexTileProvider::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
         globebrowsing::GeoJsonManager::Documentation(),

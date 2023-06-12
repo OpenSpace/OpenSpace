@@ -1,10 +1,5 @@
-local data = asset.syncedResource({
-  Name = "Example Globe Video",
-  Type = "UrlSynchronization",
-  Identifier = "example_globe_video",
-  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/video/test-video.mp4"
-})
-
+-- To learn how you can include your own video, see the wiki 
+-- http://wiki.openspaceproject.com/docs/builders/assets/resources.html
 
 local Sphere = {
   Identifier = "ExampleVideoOnSphere",
@@ -12,11 +7,11 @@ local Sphere = {
     Type = "RenderableVideoSphere",
     Size = 100.0,
     Segments = 80,
-    Video = data .. "test-video.mp4",
+    Video = asset.localResource("examplevideo.mp4"),
     Orientation = "Both"
   },
   GUI = {
-    Name = "Video Sphere",
+    Name = "Video Sphere Example",
     Path = "/Other/Spheres"
   }
 }

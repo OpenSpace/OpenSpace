@@ -6,7 +6,7 @@ local textures = asset.syncedResource({
   Name = "Ecliptic Band Textures",
   Type = "HttpSynchronization",
   Identifier = "ecliptic_band_textures",
-  Version = 1
+  Version = 2
 })
 
 
@@ -55,7 +55,7 @@ local EclipticBand = {
   },
   Renderable = {
     Type = "RenderableSphere",
-    Texture = textures .. "band.png",
+    Texture = textures .. "band2x.png",
     Size = 4.28601E17,
     Segments = 50,
     DisableFadeInOut = true,
@@ -72,23 +72,26 @@ local EclipticBand = {
 local ShowEclipticLine = {
   Identifier = "os.nightsky.ShowEclipticLine",
   Name = "Show ecliptic line",
-  Command = [[
-    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Fade", 1.0, 1.0)
-  ]],
+  Command = "openspace.fadeIn('Scene.EclipticLine.Renderable')",
   Documentation = "Shows the ecliptic line",
-  GuiPath = "/Night Sky/Lines and Grids",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
 local HideEclipticLine = {
   Identifier = "os.nightsky.HideEclipticLine",
   Name = "Hide ecliptic line",
-  Command = [[
-    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Fade", 0.0, 1.0)
-  ]],
+  Command = "openspace.fadeOut('Scene.EclipticLine.Renderable')",
   Documentation = "Hides the ecliptic line",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local ToggleEclipticLine = {
+  Identifier = "os.nightsky.ToggleEclipticLine",
+  Name = "Toggle ecliptic line",
+  Command = "openspace.toggleFade('Scene.EclipticLine.Renderable')",
+  Documentation = "Toggles the ecliptic line visibilty",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
@@ -97,12 +100,10 @@ local ShowEclipticBand = {
   Identifier = "os.nightsky.ShowEclipticBand",
   Name = "Show ecliptic band",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Fade", 1.0, 1.0)
+    openspace.fadeIn("Scene.EclipticBand.Renderable")
   ]],
   Documentation = "Shows the ecliptic band",
-  GuiPath = "/Night Sky/Lines and Grids",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
@@ -110,9 +111,18 @@ local HideEclipticBand = {
   Identifier = "os.nightsky.HideEclipticBand",
   Name = "Hide ecliptic band",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Fade", 0.0, 1.0)
+    openspace.fadeOut("Scene.EclipticBand.Renderable")
   ]],
   Documentation = "Hides the ecliptic band",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local ToggleEclipticBand = {
+  Identifier = "os.nightsky.ToggleEclipticBand",
+  Name = "Toggle ecliptic band",
+  Command = "openspace.toggleFade('Scene.EclipticBand.Renderable')",
+  Documentation = "Toggles the ecliptic band visibilty",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
@@ -123,13 +133,17 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(EclipticBand)
   openspace.action.registerAction(ShowEclipticLine)
   openspace.action.registerAction(HideEclipticLine)
+  openspace.action.registerAction(ToggleEclipticLine)
   openspace.action.registerAction(ShowEclipticBand)
   openspace.action.registerAction(HideEclipticBand)
+  openspace.action.registerAction(ToggleEclipticBand)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleEclipticBand)
   openspace.action.removeAction(HideEclipticBand)
   openspace.action.removeAction(ShowEclipticBand)
+  openspace.action.removeAction(ToggleEclipticLine)
   openspace.action.removeAction(HideEclipticLine)
   openspace.action.removeAction(ShowEclipticLine)
   openspace.removeSceneGraphNode(EclipticBand)
@@ -140,5 +154,7 @@ asset.export(EclipticLine)
 asset.export(EclipticBand)
 asset.export("ShowEclipticLine", ShowEclipticLine.Identifier)
 asset.export("HideEclipticLine", HideEclipticLine.Identifier)
+asset.export("ToggleEclipticLine", ToggleEclipticLine.Identifier)
 asset.export("ShowEclipticBand", ShowEclipticBand.Identifier)
 asset.export("HideEclipticBand", HideEclipticBand.Identifier)
+asset.export("ToggleEclipticBand", ToggleEclipticBand.Identifier)

@@ -19,7 +19,7 @@ local Miranda = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
   GUI = {
     Name = "Miranda",
     Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
@@ -40,7 +40,7 @@ local MirandaTrail = {
     Period = 1.413479,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
   GUI = {
     Name = "Miranda Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
@@ -64,7 +64,7 @@ local MirandaLabel = {
     FadeDistances = { 1, 250.0 },
     FadeWidths = { 1, 250.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Miranda Label",
     Path = "/Solar System/Planets/Uranus/Major Moons/Miranda",
@@ -88,7 +88,7 @@ local Ariel = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
   GUI = {
     Name = "Ariel",
     Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
@@ -109,7 +109,7 @@ local ArielTrail = {
     Period = 2.520379,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
   GUI = {
     Name = "Ariel Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
@@ -133,7 +133,7 @@ local ArielLabel = {
     FadeDistances = { 1, 250.0 },
     FadeWidths = { 1, 250.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Ariel Label",
     Path = "/Solar System/Planets/Uranus/Major Moons/Ariel",
@@ -157,7 +157,7 @@ local Umbriel = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
   GUI = {
     Name = "Umbriel",
     Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
@@ -178,7 +178,7 @@ local UmbrielTrail = {
     Period = 4.144177,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
   GUI = {
     Name = "Umbriel Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
@@ -202,7 +202,7 @@ local UmbrielLabel = {
     FadeDistances = { 1, 250.0 },
     FadeWidths = { 1, 250.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Umbriel Label",
     Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel",
@@ -226,7 +226,7 @@ local Titania = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
   GUI = {
     Name = "Titania",
     Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
@@ -247,7 +247,7 @@ local TitaniaTrail = {
     Period = 8.705872,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
   GUI = {
     Name = "Titania Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
@@ -271,7 +271,7 @@ local TitaniaLabel = {
     FadeDistances = { 1, 250.0 },
     FadeWidths = { 1, 250.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Titania Label",
     Path = "/Solar System/Planets/Uranus/Major Moons/Titania",
@@ -295,7 +295,7 @@ local Oberon = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
   GUI = {
     Name = "Oberon",
     Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
@@ -316,7 +316,7 @@ local OberonTrail = {
     Period = 13.463239,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
   GUI = {
     Name = "Oberon Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
@@ -340,12 +340,73 @@ local OberonLabel = {
     FadeDistances = { 1, 250.0 },
     FadeWidths = { 1, 250.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Oberon Label",
     Path = "/Solar System/Planets/Uranus/Major Moons/Oberon",
     Description = "Label for Uranus' moon Oberon"
   }
+}
+
+
+local UranusMajorMoonsOn = {
+  Identifier = "os.solarsystem.UranusMajorMoonsOn",
+  Name = "Turn ON major moons and trails",
+  Command = [[
+    local trails = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Enabled")
+    local trails_fade = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Fade")
+
+    local moons = openspace.getProperty("{moon_major_uranus}.Renderable.Enabled")
+    local moons_fade = openspace.getProperty("{moon_major_uranus}.Renderable.Fade")
+
+    for i, v in pairs(trails_fade) do
+      openspace.setPropertyValueSingle(trails[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
+    end
+
+    for i, v in pairs(moons_fade) do
+      openspace.setPropertyValueSingle(moons[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
+    end
+  ]],
+  Documentation = "Turn ON Uranus's major moons and their trails",
+  GuiPath = "/Solar System/Uranus",
+  IsLocal = true
+}
+
+local UranusMajorMoonsOff = {
+  Identifier = "os.solarsystem.UranusMajorMoonsOff",
+  Name = "Turn OFF majors moon and trails",
+  Command = [[
+    local trails = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Enabled")
+    local trails_fade = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Fade")
+
+    local moons = openspace.getProperty("{moon_major_uranus}.Renderable.Enabled")
+    local moons_fade = openspace.getProperty("{moon_major_uranus}.Renderable.Fade")
+
+    for i, v in pairs(trails_fade) do
+      openspace.setPropertyValueSingle(
+        v,
+        0,
+        2,
+        "Linear",
+        "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)"
+      )
+    end
+
+    for i, v in pairs(moons_fade) do
+      openspace.setPropertyValueSingle(
+        v,
+        0,
+        2,
+        "Linear",
+        "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)"
+      )
+    end
+  ]],
+  Documentation = "Turn OFF Uranus's major moons and their trails",
+  GuiPath = "/Solar System/Uranus",
+  IsLocal = true
 }
 
 
@@ -372,9 +433,15 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Oberon)
   openspace.addSceneGraphNode(OberonTrail)
   openspace.addSceneGraphNode(OberonLabel)
+
+  openspace.action.registerAction(UranusMajorMoonsOn)
+  openspace.action.registerAction(UranusMajorMoonsOff)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(UranusMajorMoonsOff)
+  openspace.action.removeAction(UranusMajorMoonsOn)
+
   openspace.removeSceneGraphNode(MirandaLabel)
   openspace.removeSceneGraphNode(MirandaTrail)
   openspace.removeSceneGraphNode(Miranda)
@@ -414,7 +481,8 @@ asset.export(TitaniaLabel)
 asset.export(Oberon)
 asset.export(OberonTrail)
 asset.export(OberonLabel)
-
+asset.export("UranusMajorMoonsOn", UranusMajorMoonsOn.Identifier)
+asset.export("UranusMajorMoonsOff", UranusMajorMoonsOff.Identifier)
 
 
 asset.meta = {

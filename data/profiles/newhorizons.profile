@@ -148,6 +148,36 @@
       "value": "false"
     },
     {
+      "name": "Scene.NixText.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.PlutoText.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.CharonText.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.HydraText.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.KerberosText.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.StyxText.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
       "name": "Scene.PlutoProjection.Renderable.ColorTexturePaths",
       "type": "setPropertyValue",
       "value": "1.000000"

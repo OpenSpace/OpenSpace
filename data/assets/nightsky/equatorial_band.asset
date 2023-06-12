@@ -41,12 +41,10 @@ local ShowEquatorialLine = {
   Identifier = "os.nightsky.ShowEquatorialLine",
   Name = "Show equatorial line",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Fade", 1.0, 1.0)
+    openspace.fadeIn("Scene.EquatorialLine.Renderable")
   ]],
   Documentation = "Shows the equatorial line",
-  GuiPath = "/Night Sky/Lines and Grids",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
@@ -54,9 +52,18 @@ local HideEquatorialLine = {
   Identifier = "os.nightsky.HideEquatorialLine",
   Name = "Hide equatorial line",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Fade", 0.0, 1.0)
+    openspace.fadeOut("Scene.EquatorialLine.Renderable")
   ]],
   Documentation = "Hides the equatorial line",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local ToggleEquatorialLine = {
+  Identifier = "os.nightsky.ToggleEquatorialLine",
+  Name = "Toggle equatorial line",
+  Command = "openspace.toggleFade('Scene.EquatorialLine.Renderable')",
+  Documentation = "Toggles the equatorial line visibilty",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
@@ -66,9 +73,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(EquatorialLine)
   openspace.action.registerAction(ShowEquatorialLine)
   openspace.action.registerAction(HideEquatorialLine)
+  openspace.action.registerAction(ToggleEquatorialLine)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleEquatorialLine)
   openspace.action.removeAction(HideEquatorialLine)
   openspace.action.removeAction(ShowEquatorialLine)
   openspace.removeSceneGraphNode(EquatorialLine)
@@ -77,3 +86,4 @@ end)
 asset.export(EquatorialLine)
 asset.export("ShowEquatorialLine", ShowEquatorialLine.Identifier)
 asset.export("HideEquatorialLine", HideEquatorialLine.Identifier)
+asset.export("ToggleEquatorialLine", ToggleEquatorialLine.Identifier)

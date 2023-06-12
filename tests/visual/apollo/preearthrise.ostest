@@ -2,7 +2,7 @@
     { "type": "pause", 
       "value": "true"},
     { "type": "action", 
-      "value": "os.missions.apollo8.setup.earthrise"},
+      "value": "os.apollo8.SetupEarthrise"},
     { "type": "wait", 
       "value": "60"}, 
     { "type": "screenshot", 

@@ -88,7 +88,7 @@ glm::vec3 computeStarColor(float bv) {
     const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * (nValues - 1)));
     std::string color;
     for (int i = 0; i < t + 1; i++) {
-        getline(colorMap, color);
+        std::getline(colorMap, color);
     }
     colorMap.close();
 

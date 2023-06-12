@@ -76,7 +76,8 @@ public:
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    documentation::Documentation Documentation();
+    static documentation::Documentation Documentation();
+
 private:
     // Libmpv keys
     enum class MpvKey : uint64_t {

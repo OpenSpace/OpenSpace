@@ -1,0 +1,124 @@
+{
+  "masteraddress": "localhost",
+  "externalcontrolport": 20500,
+  "settings": {
+    "display": {
+      "swapinterval": 0
+    }
+  },
+  "nodes": [
+    {
+      "address": "localhost",
+      "port": 20401,
+      "windows": [
+        {
+          "border": true,
+          "draw2d": true,
+          "draw3d": false,
+          "id": 0,
+          "monitor": 0,
+          "name": "GUI",
+          "pos": {
+            "x": 50,
+            "y": 50
+          },
+          "size": {
+            "x": 1280,
+            "y": 960
+          },
+          "res": {
+            "x": 2560,
+            "y": 1920
+          },
+          "tags": [
+            "GUI",
+            "GUI_No_Render"
+          ],
+          "viewports": [
+            {
+              "pos": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "projection": {
+                "fov": {
+                  "down": 25.264999389648438,
+                  "left": 40.0,
+                  "right": 40.0,
+                  "up": 25.264999389648438
+                },
+                "type": "PlanarProjection"
+              },
+              "size": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "tracked": false
+            }
+          ]
+        },
+        {
+          "border": true,
+          "draw2d": false,
+          "draw3d": true,
+          "id": 1,
+          "monitor": 0,
+          "name": "Portrait View",
+          "pos": {
+            "x": 1350,
+            "y": 50
+          },
+          "size": {
+            "x": 540,
+            "y": 960
+          },
+          "res": {
+            "x": 1080,
+            "y": 1920
+          },
+          "viewports": [
+            {
+              "pos": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "projection": {
+                "fov": {
+                  "down": 40.0,
+                  "left": 25.264999389648438,
+                  "right": 25.264999389648438,
+                  "up": 40.0
+                },
+                "type": "PlanarProjection"
+              },
+              "size": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "tracked": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scene": {
+    "orientation": {
+      "w": 0.0,
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    }
+  },
+  "users": [
+    {
+      "eyeseparation": 0.06499999761581421,
+      "pos": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 4.0
+      }
+    }
+  ],
+  "version": 1
+}

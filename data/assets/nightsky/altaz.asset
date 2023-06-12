@@ -58,35 +58,42 @@ local AltAzGrid = {
   }
 }
 
+
 local ShowAltaz = {
   Identifier = "os.nightsky.ShowAltaz",
   Name = "Show Alt/Az grid",
   Command = [[
-    local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera()
     local camera = openspace.navigation.getNavigationState()
     openspace.setParent("AltAzGridPosition", camera.Anchor)
     openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Translation.Globe", camera.Anchor)
-    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Translation.Latitude", lat)
-    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Translation.Longitude", lon)
     openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Rotation.Globe", camera.Anchor)
-    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Rotation.Latitude", lat)
-    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Rotation.Longitude", lon)
-    openspace.setPropertyValueSingle("Scene.AltAzGrid.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.AltAzGrid.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.AltAzGrid.Renderable.Fade", 1.0, 1.0)
+    openspace.fadeIn("Scene.AltAzGrid.Renderable")
   ]],
   Documentation = "Shows a local Altitude/Azimuth grid centered around your position",
-  GuiPath = "/Night Sky/Lines and Grids",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
 local HideAltaz = {
   Identifier = "os.nightsky.HideAltaz",
   Name = "Hide Alt/Az grid",
+  Command = "openspace.fadeOut('Scene.AltAzGrid.Renderable')",
+  Documentation = "Hides the local Altitude/Azimuth grid centered around your position",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local ToggleAltaz = {
+  Identifier = "os.nightsky.ToggleAltaz",
+  Name = "Toggle Alt/Az grid",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.AltAzGrid.Renderable.Fade", 0, 1)
+    local camera = openspace.navigation.getNavigationState()
+    openspace.setParent("AltAzGridPosition", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Translation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Rotation.Globe", camera.Anchor)
+    openspace.toggleFade("Scene.AltAzGrid.Renderable")
   ]],
-  Documentation = "Hides the Alt/Az grid",
+  Documentation = "Toggles the local Altitude/Azimuth grid centered around your position",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
@@ -96,10 +103,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(AltAzGrid)
   openspace.action.registerAction(ShowAltaz)
   openspace.action.registerAction(HideAltaz)
+  openspace.action.registerAction(ToggleAltaz)
 
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleAltaz)
   openspace.action.removeAction(HideAltaz)
   openspace.action.removeAction(ShowAltaz)
   openspace.removeSceneGraphNode(AltAzGrid)
@@ -110,3 +119,4 @@ asset.export(AltAzGridPosition)
 asset.export(AltAzGrid)
 asset.export("ShowAltaz", ShowAltaz.Identifier)
 asset.export("HideAltaz", HideAltaz.Identifier)
+asset.export("ToggleAltaz", ToggleAltaz.Identifier)

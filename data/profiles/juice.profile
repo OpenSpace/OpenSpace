@@ -110,6 +110,16 @@
       "name": "Scene.GanymedeMagnetosphere.Renderable.FlowEnabled",
       "type": "setPropertyValueSingle",
       "value": "true"
+    },
+    {
+      "name": "Scene.JuiceNavCam.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceJanus.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {

@@ -231,6 +231,15 @@ void ShadowComponent::deinitializeGL() {
 }
 
 RenderData ShadowComponent::begin(const RenderData& data) {
+    glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
+    if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
+        (_shadowDepthTextureHeight != renderingResolution.y)))
+    {
+        _shadowDepthTextureWidth = renderingResolution.x * 2;
+        _shadowDepthTextureHeight = renderingResolution.y * 2;
+        updateDepthTexture();
+    }
+
     // ===========================================
     // Builds light's ModelViewProjectionMatrix:
     // ===========================================
@@ -374,15 +383,6 @@ void ShadowComponent::update(const UpdateData&) {
     }
     else {
         _sunPosition = glm::dvec3(0.0);
-    }
-
-    glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
-    if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
-        (_shadowDepthTextureHeight != renderingResolution.y)))
-    {
-        _shadowDepthTextureWidth = renderingResolution.x * 2;
-        _shadowDepthTextureHeight = renderingResolution.y * 2;
-        updateDepthTexture();
     }
 }
 

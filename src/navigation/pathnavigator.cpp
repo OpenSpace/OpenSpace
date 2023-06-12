@@ -404,35 +404,17 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
         // than the interaction sphere of the node
         double bs = n->boundingSphere();
         double is = n->interactionSphere();
-        return is > bs ? is : bs;
+        return std::max(is, bs);
     };
 
     double result = sphere(node);
 
     if (result < _minValidBoundingSphere) {
-        // If the bs of the target is too small, try to find a good value in a child node.
-        // Only check the closest children, to avoid deep traversal in the scene graph.
-        // Alsp. the chance to find a bounding sphere that represents the visual size of
-        // the target well is higher for these nodes
-        for (SceneGraphNode* child : node->children()) {
-            result = sphere(child);
-            if (result > _minValidBoundingSphere) {
-                LDEBUG(fmt::format(
-                    "The scene graph node '{}' has no, or a very small, bounding sphere. "
-                    "Using bounding sphere of child node '{}' in computations",
-                    node->identifier(),
-                    child->identifier()
-                ));
-                return result;
-            }
-        }
-
         LDEBUG(fmt::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
-            "minimal value. This might lead to unexpected results",
-            node->identifier())
-        );
-
+            "minimal value of {}. This might lead to unexpected results",
+            node->identifier(), _minValidBoundingSphere
+        ));
         result = _minValidBoundingSphere;
     }
 

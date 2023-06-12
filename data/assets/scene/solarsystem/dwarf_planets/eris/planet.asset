@@ -26,6 +26,7 @@ local Planet = {
     GeometryFile = modelFolder .. "Eris_1_2326.glb",
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
+    ModelScale = "Kilometer",
     LightSources = {
       sun.LightSource
     }

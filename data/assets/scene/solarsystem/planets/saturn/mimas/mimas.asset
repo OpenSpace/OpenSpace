@@ -70,7 +70,7 @@ local MimasLabel = {
     FadeDistances = { 0.3, 10.0 },
     FadeWidths = { 0.15, 10.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels", "moon_major_saturn" },
   GUI = {
     Name = "Mimas Label",
     Path = "/Solar System/Planets/Saturn/Major Moons/Mimas",
