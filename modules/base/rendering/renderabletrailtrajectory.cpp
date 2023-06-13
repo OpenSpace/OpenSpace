@@ -507,7 +507,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _primaryRenderInformation.count = static_cast<GLsizei>(
                 std::distance(
                     _timeVector.begin(),
-                    std::lower_bound(_timeVector.begin(), _timeVector.end(), data.time.j2000Seconds())
+                    std::lower_bound(
+                        _timeVector.begin(), 
+                        _timeVector.end(), 
+                        data.time.j2000Seconds()
+                    )
                 )
             );
         }
