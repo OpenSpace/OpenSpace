@@ -15,7 +15,8 @@ asset.onInitialize(function ()
   }
 
   local labels = {
-    "birds_lineage_29"
+    "birds_lineage_29",
+    "lineage_19"
   }
 
   openspace.cosmicSonification.addNodes(nodes)
