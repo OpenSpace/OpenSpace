@@ -30,6 +30,11 @@ LauncherWindow  QLabel#clear {
   background-color: rgba(0, 0, 0, 0%);
 }
 
+LauncherWindow  QLabel#version-info {
+  font-size: 10pt;
+  color: #dfdfdf;
+}
+
 LauncherWindow  QComboBox#config {
   background: rgb(96, 96, 96);
   border: 1px solid rgb(128, 128, 128);

@@ -82,6 +82,9 @@ namespace {
         constexpr QRect StartButton(
             LeftRuler, TopRuler + 400, ItemWidth, ItemHeight
         );
+        constexpr QRect VersionString(
+            5, ScreenHeight - SmallItemHeight, ItemWidth, SmallItemHeight
+        );
     } // geometry
 
     std::optional<Profile> loadProfileFromFile(QWidget* parent, std::string filename) {
@@ -363,6 +366,15 @@ QWidget* LauncherWindow::createCentralWidget() {
     _editWindowButton->setObjectName("small");
     _editWindowButton->setGeometry(geometry::EditWindowButton);
     _editWindowButton->setCursor(Qt::PointingHandCursor);
+
+
+    QLabel* versionLabel = new QLabel(centralWidget);
+    versionLabel->setVisible(true);
+    versionLabel->setText(
+        QString::fromStdString(std::string(openspace::OPENSPACE_VERSION_STRING_FULL))
+    );
+    versionLabel->setObjectName("version-info");
+    versionLabel->setGeometry(geometry::VersionString);
 
     return centralWidget;
 }
