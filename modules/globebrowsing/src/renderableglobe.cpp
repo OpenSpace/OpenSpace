@@ -987,7 +987,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 {
     ZoneScoped;
 
-
     if (_layerManagerDirty) {
         _layerManager.update();
         _layerManagerDirty = false;
@@ -1001,8 +1000,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             lgs.end(),
             0,
             [](int lhs, LayerGroup* lg) {
-            return lhs + static_cast<int>(lg->activeLayers().size());
-        }
+                return lhs + static_cast<int>(lg->activeLayers().size());
+            }
         );
         _nLayersIsDirty = false;
     }
@@ -1112,8 +1111,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     _iterationsOfUnavailableData =
         (_allChunksAvailable ? 0 : _iterationsOfUnavailableData + 1);
 
-
-
     //
     // Setting uniforms that don't change between chunks but are view dependent
     //
@@ -1180,8 +1177,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         );
         _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
-
-
 
     // Local shader
     _localRenderer.program->setUniform(
