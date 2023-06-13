@@ -473,9 +473,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             renderPoints,
             data,
             modelTransform,
-            _midPointRenderInformation,
-            _midPointRenderInformation.count,
-            _midPointRenderInformation.first
+            _replacementPointsRenderInformation,
+            _replacementPointsRenderInformation.count,
+            _replacementPointsRenderInformation.first
         );
 
         internalRender(

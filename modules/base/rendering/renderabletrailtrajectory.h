@@ -103,11 +103,16 @@ private:
     double _totalSampleInterval = 0.0;
 
     /// Max and min vertex used to calculate the bounding sphere
-    glm::vec3 _maxVertex;
-    glm::vec3 _minVertex;
+    glm::dvec3 _maxVertex;
+    glm::dvec3 _minVertex;
 
     // Contains all timestamps corresponding to the positions in _vertexArray
     std::vector<double> _timeVector;
+
+    // TEMP
+    std::vector<DoubleTrailVBOLayout> _dVertexArray; //Replace VertexArray with double?
+    int _padding = 1;
+    std::vector<TrailVBOLayout> _replacementPoints;
 };
 
 } // namespace openspace

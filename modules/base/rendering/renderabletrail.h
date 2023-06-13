@@ -117,6 +117,11 @@ protected:
         float x, y, z;
     };
 
+    /// TEMP
+    struct DoubleTrailVBOLayout {
+        double x, y, z;
+    };
+
     /// The backend storage for the vertex buffer object containing all points for this
     /// trail.
     std::vector<TrailVBOLayout> _vertexArray;
@@ -167,6 +172,7 @@ protected:
     RenderInformation _firstSegRenderInformation;
     RenderInformation _secondSegRenderInformation;
     RenderInformation _midPointRenderInformation;
+    RenderInformation _replacementPointsRenderInformation;
 
 private:
     void internalRender(bool renderLines, bool renderPoints,

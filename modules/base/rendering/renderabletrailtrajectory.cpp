@@ -191,6 +191,9 @@ void RenderableTrailTrajectory::initializeGL() {
 
     glGenVertexArrays(1, &_midPointRenderInformation._vaoID);
     glGenBuffers(1, &_midPointRenderInformation._vBufferID);
+
+    glGenVertexArrays(1, &_replacementPointsRenderInformation._vaoID);
+    glGenBuffers(1, &_replacementPointsRenderInformation._vBufferID);
 }
 
 void RenderableTrailTrajectory::deinitializeGL() {
@@ -242,6 +245,10 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _vertexArray.resize(_numberOfVertices + 1);
             _timeVector.clear();
             _timeVector.resize(_numberOfVertices + 1);
+
+            // TEMP
+            _dVertexArray.clear();
+            _dVertexArray.resize(_numberOfVertices + 1);
         }
 
         // Calculate sweeping range for this iteration
@@ -251,17 +258,19 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
         // Calculate all vertex positions
         for (unsigned int i = startIndex; i < stopIndex; ++i) {
-            const glm::vec3 p = _translation->position({
+            const glm::dvec3 dp = _translation->position({
                 {},
                 Time(_start + i * _totalSampleInterval),
                 Time(0.0)
-            });
+                });
+            const glm::vec3 p(dp.x, dp.y, dp.z);
             _vertexArray[i] = { p.x, p.y, p.z };
             _timeVector[i] = Time(_start + i * _totalSampleInterval).j2000Seconds();
+            _dVertexArray[i] = {dp.x, dp.y, dp.z};
 
             // Set max and min vertex for bounding sphere calculations
-            _maxVertex = glm::max(_maxVertex, p);
-            _minVertex = glm::min(_minVertex, p);
+            _maxVertex = glm::max(_maxVertex, dp);
+            _minVertex = glm::min(_minVertex, dp);
         }
         ++_sweepIteration;
 
@@ -269,16 +278,18 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // Adds the last point in time to the _vertexArray so that we
         // ensure that points for _start and _end always exists
         if (stopIndex == _numberOfVertices) {
-            const glm::vec3 p = _translation->position({
+            const glm::dvec3 dp = _translation->position({
                 {},
                 Time(_end),
                 Time(0.0)
-            });
+                });
+            const glm::vec3 p(dp.x, dp.y, dp.z);
             _vertexArray[stopIndex] = { p.x, p.y, p.z };
-            _timeVector[stopIndex] = Time(_end).j2000Seconds();            
+            _timeVector[stopIndex] = Time(_end).j2000Seconds();
+            _dVertexArray[stopIndex] = { dp.x, dp.y, dp.z };
 
             _sweepIteration = 0;
-            setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
+            setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.0);
         }
         else {
             // Early return as we don't need to render if we are still
@@ -315,6 +326,9 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         if (j2k > _start && j2k < _end) {
             _splitTrailRenderMode = true;
 
+            //temp
+            _padding = 200;
+
             const int vSize = _vertexArray.size();
 
             // First segment
@@ -323,7 +337,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 _timeVector.begin(),
                 std::lower_bound(_timeVector.begin(), _timeVector.end(), j2k)
             );
-
+            // ONLY DO THIS ONCE --
             glBindVertexArray(_firstSegRenderInformation._vaoID);
             glBindBuffer(GL_ARRAY_BUFFER, _firstSegRenderInformation._vBufferID);
             glBufferData(
@@ -334,8 +348,127 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             );
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+            // -------------------
+
+            // Second segment
+            _secondSegRenderInformation.first = _firstSegRenderInformation.count;
+
+            _secondSegRenderInformation.count = static_cast<GLsizei>(
+                _vertexArray.size() - _firstSegRenderInformation.count
+            );
+
+            _secondSegRenderInformation._vaoID = _firstSegRenderInformation._vaoID;
+            _secondSegRenderInformation._vBufferID = _firstSegRenderInformation._vBufferID;
+
+            
+            // TESTING ---------------------------------------------------------------------------------
+            /// NOTE: Percentage based move of new replacement points - 0.0 -> 1.0 -> SPACECRAFT <- 1.0 <- 0.0
+            /// NOTE: Restructure to remove redefinition of ...count and other variables in ...RenderInformation
+            int prePaddingDelta = (_firstSegRenderInformation.count - 1) >= _padding ? _padding : _firstSegRenderInformation.count - 1;
+            int postPaddingDelta =(_secondSegRenderInformation.count - 1) >= _padding ? _padding: _secondSegRenderInformation.count - 1;
+            int numOfPoints = prePaddingDelta + postPaddingDelta + 1;
+
+            _replacementPoints.clear();
+            //_replacementPoints.resize(numOfPoints);
+
+            _replacementPointsRenderInformation.first = 0;
+            _replacementPointsRenderInformation.count = numOfPoints;
+
+            // current position
+            const glm::dvec3 p = _translation->position(data);
+
+            // do pre
+            glm::dvec3 v(p.x, p.y, p.z);
+            for (int i = 0; i < prePaddingDelta; ++i) {
+                const int floatPointIndex = (_firstSegRenderInformation.count - prePaddingDelta) + i;
+                
+                glm::dvec3 fp(
+                    _vertexArray[floatPointIndex].x,
+                    _vertexArray[floatPointIndex].y,
+                    _vertexArray[floatPointIndex].z
+                );
+
+                glm::dvec3 dp(
+                    _dVertexArray[floatPointIndex].x,
+                    _dVertexArray[floatPointIndex].y,
+                    _dVertexArray[floatPointIndex].z
+                );
+
+                glm::dvec3 dv = fp - dp;
+
+                glm::dvec3 newPoint = dp - v;
+                newPoint = newPoint + dv * ((i == prePaddingDelta - 1) ? 0.0 : ((prePaddingDelta - i) / static_cast<double>(prePaddingDelta)));
+                _replacementPoints.push_back({
+                    static_cast<float>(newPoint.x),
+                    static_cast<float>(newPoint.y),
+                    static_cast<float>(newPoint.z)
+                });
+            }
+
+            //insert mid
+            _replacementPoints.push_back({
+                0.f,
+                0.f,
+                0.f
+            });
+
+            // do post
+            v = glm::dvec3(p.x, p.y, p.z);
+            for (int i = 0; i < postPaddingDelta; ++i) {
+                const int floatPointIndex = _secondSegRenderInformation.first + i;
+
+                glm::dvec3 fp(
+                    _vertexArray[floatPointIndex].x,
+                    _vertexArray[floatPointIndex].y,
+                    _vertexArray[floatPointIndex].z
+                );
+
+                glm::dvec3 dp(
+                    _dVertexArray[floatPointIndex].x,
+                    _dVertexArray[floatPointIndex].y,
+                    _dVertexArray[floatPointIndex].z
+                );
+
+                glm::dvec3 dv = fp - dp;
+
+                glm::dvec3 newPoint = dp - v;
+                newPoint = newPoint + dv * ((i == postPaddingDelta - 1) ? 1.0 : (1.0 - (postPaddingDelta - i) / static_cast<double>(postPaddingDelta)));
+                _replacementPoints.push_back({
+                    static_cast<float>(newPoint.x),
+                    static_cast<float>(newPoint.y),
+                    static_cast<float>(newPoint.z)
+                    });
+            }
 
 
+            // Set some variables
+            _replacementPointsRenderInformation.first = 0;
+            _replacementPointsRenderInformation.count = _replacementPoints.size();
+
+            _replacementPointsRenderInformation._localTransform = glm::translate(
+                glm::dmat4(1.0),
+                p
+            );
+
+            glBindVertexArray(_replacementPointsRenderInformation._vaoID);
+            glBindBuffer(GL_ARRAY_BUFFER, _replacementPointsRenderInformation._vBufferID);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                _replacementPoints.size() * sizeof(TrailVBOLayout),
+                _replacementPoints.data(),
+                GL_DYNAMIC_DRAW
+            );
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+            // This is stupid, detta borde göras om först, och sen ändra i koden så att allt före tar hänsyn till detta
+            _firstSegRenderInformation.count -= prePaddingDelta - 1;
+            _secondSegRenderInformation.first += std::max(0, postPaddingDelta - 1);
+            _secondSegRenderInformation.count -= postPaddingDelta - 1;
+
+            // -----------------------------------------------------------------------------------------
+
+            /*
             // Lines from point-object-point
             const int preIndex = std::max(_firstSegRenderInformation.count - 1, 0);
             const int postIndex = _firstSegRenderInformation.count;
@@ -362,10 +495,10 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 static_cast<float>(preP0.y),
                 static_cast<float>(preP0.z)
             };
-            _midPointVboData[1] = { 
-                0.f, 
-                0.f, 
-                0.f 
+            _midPointVboData[1] = {
+                0.f,
+                0.f,
+                0.f
             };
             _midPointVboData[2] = {
                 static_cast<float>(postP0.x),
@@ -374,7 +507,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             };
 
             _midPointRenderInformation.first = 0;
-            _midPointRenderInformation.count = 3;
+            _midPointRenderInformation.count = 0;
 
             _midPointRenderInformation._localTransform = glm::translate(
                 glm::dmat4(1.0),
@@ -391,17 +524,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             );
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-
-            // Second segment
-            _secondSegRenderInformation.first = _firstSegRenderInformation.count;
-
-            _secondSegRenderInformation.count = static_cast<GLsizei>(
-                _vertexArray.size() - _firstSegRenderInformation.count
-            );
-
-            _secondSegRenderInformation._vaoID = _firstSegRenderInformation._vaoID;
-            _secondSegRenderInformation._vBufferID = _firstSegRenderInformation._vBufferID;
+            */
         }
         else {
             _splitTrailRenderMode = false;
