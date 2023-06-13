@@ -130,7 +130,7 @@ bool SoftwareConnection::hasPropertySubscription(
     // Get renderable
     auto r = renderable(identifier);
     if (!r) {
-        LWARNING(fmt::format(
+        LDEBUG(fmt::format(
             "Couldn't check for property subscriptions, renderable {} doesn't exist",
             identifier
         ));
@@ -259,7 +259,7 @@ void SoftwareConnection::setShouldNotSendData(const std::string& identifier, con
 
 void SoftwareConnection::disconnect() {
     _socket->disconnect();
-    LINFO(fmt::format("OpenSpace has disconnected with external software through socket"));
+    LINFO(fmt::format("OpenSpace has disconnected with external software"));
 }
 
 bool SoftwareConnection::isConnected() const {

@@ -37,7 +37,7 @@
 
 namespace {
 
-constexpr const char* _loggerCat = "MessageHandler";
+constexpr const char* _loggerCat = "SoftwareIntegration MessageHandler: ";
 
 } // namespace
 
@@ -585,7 +585,7 @@ void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<So
             LERROR(fmt::format("Error when reading data message: {}", err.message));
             return;
         }
-        LINFO(fmt::format(
+        LDEBUG(fmt::format(
             "Handling '{}':",
             simp::getStringFromDataKey(dataKey)
         ));
@@ -880,12 +880,12 @@ void handleMessage(IncomingMessage& incomingMessage) {
             break;
 		}
 		case simp::MessageType::Data: {
-			LDEBUG(fmt::format("Message recieved on connection {}... New Data", connectionPtr->id()));
+			LINFO(fmt::format("Data message recieved on connection {}.", connectionPtr->id()));
 			handleDataMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::RemoveSceneGraphNode: {
-			LDEBUG(fmt::format("Message recieved on connection {}... Remove SGN", connectionPtr->id()));
+			LINFO(fmt::format("Remove Scene Graph Node message recieved on connection {}.", connectionPtr->id()));
 			handleRemoveSGNMessage(message, connectionPtr);
 			break;
 		}
@@ -907,7 +907,7 @@ void postSyncCallbacks() {
         auto& [identifier, callbackList] = *callbackMapIt;
         
         try {
-            LINFO(fmt::format("Callbacks for {}:", identifier));
+            LDEBUG(fmt::format("Callbacks for {}:", identifier));
             const SceneGraphNode* sgn = global::renderEngine->scene()->sceneGraphNode(identifier);
             if (!sgn) throw std::exception{};
 
@@ -933,7 +933,7 @@ void postSyncCallbacks() {
 
                     callback();
                     callbacksIt = callbackList.erase(callbacksIt);
-                    LINFO(fmt::format("Callback '{}' executed", description));
+                    LDEBUG(fmt::format("Callback '{}' executed", description));
                 }
                 catch (std::exception&) {
                     ++callbacksIt;

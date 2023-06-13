@@ -697,7 +697,7 @@ void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareInt
     softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::DataPoints);
     LINFO(fmt::format(
         "New point data ({} points) has loaded. {} values are NaN values. "
-        "Point's with at least one NaN value are hidden.", 
+        "Points with at least one NaN value are hidden.", 
         (pointData.size() / 3), nNans
     ));
 }
@@ -847,7 +847,7 @@ void RenderablePointsCloud::loadColormapAttributeData(SoftwareIntegrationModule*
 void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
     // Fetch linear size attribute data from module's centralized storage
     std::vector<float> linearSizeAttributeData;
-    if (softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::LinearSizeAttrData, linearSizeAttributeData)) {
+    if (!softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::LinearSizeAttrData, linearSizeAttributeData)) {
         LWARNING("There was an issue trying to fetch the linear size attribute data from the centralized storage.");
         return;
     }
