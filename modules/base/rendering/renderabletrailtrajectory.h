@@ -78,6 +78,9 @@ private:
     properties::IntProperty _timeStampSubsamplingFactor;
     /// Determines whether the full trail should be rendered or the future trail removed
     properties::BoolProperty _renderFullTrail;
+    /// Determines how many vertices around the object that will be 
+    /// replaced during full trail rendering
+    properties::IntProperty _numberOfReplacementPoints;
 
     /// Dirty flag that determines whether the full vertex buffer needs to be resampled
     bool _needsFullSweep = true;
@@ -86,7 +89,6 @@ private:
     bool _subsamplingIsDirty = true;
 
     std::array<TrailVBOLayout, 2> _auxiliaryVboData = {};
-    std::array<TrailVBOLayout, 3> _midPointVboData = {};
 
     /// The conversion of the _startTime into the internal time format
     double _start = 0.0;
@@ -106,12 +108,14 @@ private:
     glm::dvec3 _maxVertex;
     glm::dvec3 _minVertex;
 
+
+
     // Contains all timestamps corresponding to the positions in _vertexArray
     std::vector<double> _timeVector;
 
-    // TEMP
-    std::vector<DoubleTrailVBOLayout> _dVertexArray; //Replace VertexArray with double?
-    int _padding = 1;
+    std::vector<TrailDVBOLayout> _dVertexArray;
+
+    // Contains all the points that we will render in model-space
     std::vector<TrailVBOLayout> _replacementPoints;
 };
 

@@ -117,8 +117,8 @@ protected:
         float x, y, z;
     };
 
-    /// TEMP
-    struct DoubleTrailVBOLayout {
+    /// The layout of the VBOs (double precision)
+    struct TrailDVBOLayout {
         double x, y, z;
     };
 
@@ -171,7 +171,6 @@ protected:
     bool _splitTrailRenderMode = false;
     RenderInformation _firstSegRenderInformation;
     RenderInformation _secondSegRenderInformation;
-    RenderInformation _midPointRenderInformation;
     RenderInformation _replacementPointsRenderInformation;
 
 private:

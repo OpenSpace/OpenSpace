@@ -455,9 +455,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     //    global::renderEngine->openglStateCache().resetDepthState();
     //    return;
     //}
-
+    
+    // Splits the trail up into three parts for more accurate rendering
     if (_splitTrailRenderMode) {
-        // Splits the trail up into three parts for more accurate rendering
         internalRender(
             renderLines,
             renderPoints,
