@@ -46,10 +46,10 @@ struct DeferredcastData;
 struct ShadowConfiguration;
 
 struct ShadowRenderingStruct {
-    double xu = 0.0;
-    double xp = 0.0;
-    double rs = 0.0;
-    double rc = 0.0;
+    double umbra = 0.0;
+    double penumbra = 0.0;
+    double radiusSource = 0.0;
+    double radiusCaster = 0.0;
     glm::dvec3 sourceCasterVec = glm::dvec3(0.0);
     glm::dvec3 casterPositionVec = glm::dvec3(0.0);
     bool isShadowing = false;
@@ -75,6 +75,7 @@ public:
     void initializeCachedVariables(ghoul::opengl::ProgramObject& program) override;
 
     void update(const UpdateData&) override;
+    float eclipseShadow(glm::dvec3 position);
 
     void calculateAtmosphereParameters();
 

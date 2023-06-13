@@ -270,6 +270,47 @@ void AtmosphereDeferredcaster::deinitialize() {
 
 void AtmosphereDeferredcaster::update(const UpdateData&) {}
 
+float AtmosphereDeferredcaster::eclipseShadow(glm::dvec3 position) {
+    // This code is copied from the atmosphere deferred fragment shader 
+    // It is used to calculate the eclipse shadow
+    const ShadowRenderingStruct& shadow = _shadowDataArrayCache.front();
+    if (_shadowDataArrayCache.empty() || !shadow.isShadowing) {
+        return 1.f;
+    }
+
+    const glm::dvec3 positionToCaster = shadow.casterPositionVec - position;
+    const glm::dvec3 sourceToCaster = shadow.sourceCasterVec; // Normalized
+    const glm::dvec3 casterShadow = dot(positionToCaster, sourceToCaster) * sourceToCaster;
+    const glm::dvec3 positionToShadow = positionToCaster - casterShadow;
+
+    float distanceToShadow = static_cast<float>(length(positionToShadow));
+    double shadowLength = length(casterShadow);
+
+    float radiusPenumbra = static_cast<float>(
+        shadow.radiusCaster * (shadowLength + shadow.penumbra) / shadow.penumbra
+    );
+    float radiusUmbra = static_cast<float>(
+        shadow.radiusCaster * (shadow.umbra - shadowLength) / shadow.umbra
+    );
+
+    // Is the position in the umbra - the fully shaded part
+    if (distanceToShadow < radiusUmbra) {
+        if (_hardShadowsEnabled) {
+            return 0.5f;
+        }
+        else {
+            // Smooth the shadow with the butterworth function
+            return sqrt(radiusUmbra / (radiusUmbra + pow(distanceToShadow, 4.f)));
+        }
+    }
+    else if (distanceToShadow < radiusPenumbra) { // In penumbra - partially shaded part
+        return _hardShadowsEnabled ? 0.5f : distanceToShadow / radiusPenumbra;
+    }
+    else {
+        return 1.f;
+    }
+}
+
 void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const DeferredcastData&,
                                           ghoul::opengl::ProgramObject& prg)
 {
@@ -391,9 +432,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
                 return;
             }
 
-            const double sourceScale = std::max(glm::compMax(sourceNode->scale()), 1.0);
-            const double casterScale = std::max(glm::compMax(casterNode->scale()), 1.0);
-
+            double sourceScale = std::max(glm::compMax(sourceNode->scale()), 1.0);
+            double casterScale = std::max(glm::compMax(casterNode->scale()), 1.0);
+            double actualSourceRadius = shadowConf.source.second * sourceScale;
+            double actualCasterRadius = shadowConf.caster.second * casterScale;
             // First we determine if the caster is shadowing the current planet
             // (all calculations in World Coordinates):
             glm::dvec3 planetCasterVec = casterPos - data.modelTransform.translation;
@@ -403,11 +445,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
                 (glm::dot(planetCasterVec, sourceCasterVec) / (scLength * scLength)) *
                 sourceCasterVec;
             double dTest = glm::length(planetCasterVec - planetCasterProj);
-            double xpTest = shadowConf.caster.second * casterScale *
-                scLength /
-                (shadowConf.source.second * sourceScale +
-                    shadowConf.caster.second * casterScale);
-            double rpTest = shadowConf.caster.second * casterScale *
+            double xpTest = actualCasterRadius * scLength /
+                (actualSourceRadius + actualCasterRadius);
+            double rpTest = actualCasterRadius *
                 (glm::length(planetCasterProj) + xpTest) / xpTest;
 
             double casterDistSun = glm::length(casterPos - sunPosWorld);
@@ -423,11 +463,11 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
             {
                 // The current caster is shadowing the current planet
                 shadow.isShadowing = true;
-                shadow.rs = shadowConf.source.second * sourceScale;
-                shadow.rc = shadowConf.caster.second * casterScale;
+                shadow.radiusSource = actualSourceRadius;
+                shadow.radiusCaster = actualCasterRadius;
                 shadow.sourceCasterVec = glm::normalize(sourceCasterVec);
-                shadow.xp = xpTest;
-                shadow.xu = shadow.rc * scLength / (shadow.rs - shadow.rc);
+                shadow.penumbra = xpTest;
+                shadow.umbra = shadow.radiusCaster * scLength / (shadow.radiusSource - shadow.radiusCaster);
                 shadow.casterPositionVec = casterPos;
             }
             _shadowDataArrayCache.push_back(shadow);
@@ -444,11 +484,11 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
 
             if (sd.isShadowing) {
                 std::strcpy(bf, "].xp\0");
-                prg.setUniform(_uniformNameBuffer, sd.xp);
+                prg.setUniform(_uniformNameBuffer, sd.penumbra);
                 std::strcpy(bf, "].xu\0");
-                prg.setUniform(_uniformNameBuffer, sd.xu);
+                prg.setUniform(_uniformNameBuffer, sd.umbra);
                 std::strcpy(bf, "].rc\0");
-                prg.setUniform(_uniformNameBuffer, sd.rc);
+                prg.setUniform(_uniformNameBuffer, sd.radiusCaster);
                 std::strcpy(bf, "].sourceCasterVec\0");
                 prg.setUniform(_uniformNameBuffer, sd.sourceCasterVec);
                 std::strcpy(bf, "].casterPositionVec\0");
