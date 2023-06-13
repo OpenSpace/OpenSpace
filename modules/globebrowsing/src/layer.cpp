@@ -384,6 +384,7 @@ void Layer::initialize() {
     if (_tileProvider) {
         _tileProvider->initialize();
     }
+    _isInitialized = true;
 }
 
 void Layer::deinitialize() {
@@ -436,6 +437,10 @@ void Layer::setEnabled(bool enabled) {
 
 bool Layer::enabled() const {
     return _enabled;
+}
+
+bool Layer::isInitialized() const {
+    return _isInitialized;
 }
 
 TileProvider* Layer::tileProvider() const {
