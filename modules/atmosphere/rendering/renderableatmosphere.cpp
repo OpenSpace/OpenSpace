@@ -33,8 +33,8 @@
 #include <ghoul/misc/profiling.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/deferredcastermanager.h>
-#include <math.h>
 #include <algorithm>
+#include <math.h>
 
 namespace {
     constexpr float KM_TO_M = 1000.f;
@@ -273,7 +273,7 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
 
 RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.0f)
+    , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.f)
     , _groundAverageReflectance(AverageGroundReflectanceInfo, 0.f, 0.f, 1.f)
     , _groundRadianceEmission(GroundRadianceEmissionInfo, 0.f, 0.f, 1.f)
     , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 50.f)
@@ -502,15 +502,16 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
 // Calculate atmosphere dimming coefficient
 void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransform) {
     // Calculate if the camera is in the atmosphere and if it is in the sunny region
-    glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
-    glm::dvec3 planetPos = glm::dvec3(modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
+    const glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+    // TODO: change the assumption that the Sun is placed in the origin 
+    const glm::dvec3 planetPos = glm::dvec3(modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
+    const glm::dvec3 normalUnderCamera = glm::normalize(cameraPos - planetPos);
+    const glm::dvec3 vecToSun = glm::normalize(-planetPos);
+    
     float cameraDistance = static_cast<float>(glm::distance(planetPos, cameraPos));
-    glm::dvec3 normalUnderCamera = glm::normalize(cameraPos - planetPos);
-    glm::dvec3 vecToSun = glm::normalize(-planetPos);
-
-    float cameraSunAngle = glm::degrees(static_cast<float>(
-        glm::acos(glm::dot(vecToSun, normalUnderCamera))
-        ));
+    float cameraSunAngle = static_cast<float>(
+        glm::degrees(glm::acos(glm::dot(vecToSun, normalUnderCamera))
+    ));
     float sunsetEnd = _atmosphereDimmingSunsetAngle.value().y;
 
     // If cameraSunAngle is more than 90 degrees, we are in shaded part of globe
@@ -520,7 +521,7 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     bool cameraIsInAtmosphere = cameraDistance < atmosphereEdge;
 
     // Don't fade if camera is not in the sunny part of an atmosphere 
-    if (!(cameraIsInAtmosphere && cameraIsInSun)) {
+    if (!cameraIsInAtmosphere || !cameraIsInSun) {
         return;
     }
     // Else we need to fade the objects
@@ -534,10 +535,10 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     bool cameraIsInSunset = cameraSunAngle > sunsetStart && cameraIsInSun;
 
     // See if we are inside of an eclipse shadow
-    float eclipseShadow = _deferredcaster->eclipseShadow(cameraPos, false);
-    bool cameraIsInEclipse = std::abs(eclipseShadow - 1.0f) > glm::epsilon<float>();
+    float eclipseShadow = _deferredcaster->eclipseShadow(cameraPos);
+    bool cameraIsInEclipse = std::abs(eclipseShadow - 1.f) > glm::epsilon<float>();
     // Invert shadow and multiply with itself to make it more narrow
-    eclipseShadow = std::pow(1.0f - eclipseShadow, 2.0f);
+    eclipseShadow = std::pow(1.f - eclipseShadow, 2.f);
     float atmosphereDimming = 0.f;
 
     if (cameraIsInSunset) {
@@ -550,7 +551,7 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
         // Fading - linear interpolation
         float fading = (cameraDistance - atmosphereInnerEdge) /
             atmosphereFadingHeight;
-        atmosphereDimming = std::clamp(eclipseShadow + fading, 0.0f, 1.0f);
+        atmosphereDimming = std::clamp(eclipseShadow + fading, 0.f, 1.f);
     }
     else if (cameraIsInFadingRegion) {
         // Fade with regards to altitude
@@ -563,8 +564,7 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     }
     else {
         // Camera is below fading region - atmosphere dims objects completely
-        atmosphereDimming = 0.0f;
-
+        atmosphereDimming = 0.f;
     }
     // Calculate dimming coefficient for stars, labels etc that are dimmed in the
     // atmosphere
