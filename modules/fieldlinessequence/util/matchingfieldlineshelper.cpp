@@ -730,7 +730,7 @@ namespace openspace::fls {
 
                     if (!checkIfFieldlineIsClosed(fieldlinePositions))
                     {
-                        float stepLength = 0.5;
+                        float stepLength = 0.7;
 
                         glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
                             seedPoints[i],
@@ -786,51 +786,58 @@ namespace openspace::fls {
                     ccmc::Tracer::Direction::REVERSE);
 
                 std::vector<glm::vec3> flowlinePositions = getPositionsFromLine(flowline);
-
-                std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
-                    flowlinePositions[flowlinePositions.size() - 1],
-                    kameleon,
-                    innerBoundaryLimit,
-                    _nPointsOnFieldLine
-                );
-
-                if (!checkIfFieldlineIsIMF(fieldlinePositions))
+                int counter2 = 1;
+                while (counter2 < (nPointsOnPathLine))
                 {
-                    float stepLength = 0.5;
 
-                    glm::vec3 modifiedSeedpoint = modifySeedpointIMF(
-                        seedPoints[i],
-                        tracingVar,
-                        tracer,
-                        nPointsOnPathLine,
+                    std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
+                        flowlinePositions[flowlinePositions.size() - counter2],
                         kameleon,
                         innerBoundaryLimit,
-                        _nPointsOnFieldLine,
-                        stepLength,
-                        accuracy,
-                        false
+                        _nPointsOnFieldLine
                     );
 
-                    seedPoints[i].first = modifiedSeedpoint;
-                }
-                else //If it is a IMF
-                {
-                    float stepLength = 0.5;
+                    if (!checkIfFieldlineIsIMF(fieldlinePositions))
+                    {
+                        float stepLength = 0.5;
 
-                    glm::vec3 modifiedSeedpoint = modifySeedpointIMF(
-                        seedPoints[i],
-                        tracingVar,
-                        tracer,
-                        nPointsOnPathLine,
-                        kameleon,
-                        innerBoundaryLimit,
-                        _nPointsOnFieldLine,
-                        stepLength,
-                        accuracy,
-                        true
-                    );
+                        glm::vec3 modifiedSeedpoint = modifySeedpointIMF(
+                            seedPoints[i],
+                            tracingVar,
+                            tracer,
+                            nPointsOnPathLine,
+                            kameleon,
+                            innerBoundaryLimit,
+                            _nPointsOnFieldLine,
+                            stepLength,
+                            accuracy,
+                            false
+                        );
 
-                    seedPoints[i].first = modifiedSeedpoint;
+                        seedPoints[i].first = modifiedSeedpoint;
+                        break;
+                    }
+                    else //If it is a IMF
+                    {
+                        float stepLength = 0.5;
+
+                        glm::vec3 modifiedSeedpoint = modifySeedpointIMF(
+                            seedPoints[i],
+                            tracingVar,
+                            tracer,
+                            nPointsOnPathLine,
+                            kameleon,
+                            innerBoundaryLimit,
+                            _nPointsOnFieldLine,
+                            stepLength,
+                            accuracy,
+                            true
+                        );
+
+                        seedPoints[i].first = modifiedSeedpoint;
+                        break;
+                    }
+                    counter2++;
                 }
                 std::cout << "IMF seed point done." << std::endl << std::endl;
             }
@@ -869,7 +876,7 @@ namespace openspace::fls {
             testFieldlinePositions.push_back(fieldlinePositions2);
         }
 
-        std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/NotWorking.txt");
+        std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/CLOSEDNOTWORKING.txt");
 
         if (output_file.is_open()) {
             for (const auto& subvec : testFieldlinePositions) {
@@ -887,7 +894,7 @@ namespace openspace::fls {
 
     bool checkIfFieldlineIsOpen(std::vector<glm::vec3> fieldlinePositions)
     {
-        std::pair<double, double> threshold_start_z = { std::make_pair(25.0, -25.0) };
+        std::pair<double, double> threshold_start_z = { std::make_pair(10.0, -10.0) };
         std::pair<double, double> threshold_end_z = { std::make_pair(-0.6, 0.6) };
 
         if (fieldlinePositions[0].z > threshold_start_z.first ||
@@ -924,7 +931,7 @@ namespace openspace::fls {
 
     bool checkIfFieldlineIsIMF(std::vector<glm::vec3> fieldlinePositions)
     {
-        std::pair<double, double> threshold_start_z = { std::make_pair(25.0, -25.0) };
+        std::pair<double, double> threshold_start_z = { std::make_pair(10.0, -10.0) };
 
         if (fieldlinePositions[0].z > threshold_start_z.first &&
             fieldlinePositions[fieldlinePositions.size() - 1].z < threshold_start_z.second) {
@@ -1157,7 +1164,7 @@ namespace openspace::fls {
                     accuracy,
                     false
                 );
-                break;
+
             } else if (!checkIfFieldlineIsOpen(fieldlinePositions))
             {
                 stepLength = stepLength / 2;
@@ -1175,7 +1182,7 @@ namespace openspace::fls {
                     accuracy,
                     true
                 );
-                break;
+
             }
             flowlineIndex++;
         }
@@ -1281,9 +1288,6 @@ namespace openspace::fls {
             counter2++;
         }
 
-
-
-
         return seedPoint.first;
     }
 
@@ -1318,48 +1322,54 @@ namespace openspace::fls {
 
         std::vector<glm::vec3> flowlinePositions = getPositionsFromLine(seedPointFlowline);
 
-        std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
-            flowlinePositions[flowlinePositions.size() - 1],
-            kameleon,
-            innerBoundaryLimit,
-            _nPointsOnFieldLine
-        );
-
-        if (!checkIfFieldlineIsIMF(fieldlinePositions))
+        int counter2 = 1;
+        while (counter2 < (nPointsOnPathLine))
         {
-            stepLength = stepLength / 2;
-
-            std::cout << "NOT IMF! - Move seed point" << std::endl;
-            glm::vec3 modifiedSeedpoint = modifySeedpointIMF(
-                seedPoint,
-                tracingVar,
-                tracer,
-                nPointsOnPathLine,
+            //std::cout << "STEPS IN SECOND WHILE LOOP: " << counter2 << std::endl;
+            std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
+                flowlinePositions[flowlinePositions.size() - counter2],
                 kameleon,
                 innerBoundaryLimit,
-                _nPointsOnFieldLine,
-                stepLength,
-                accuracy,
-                false
+                _nPointsOnFieldLine
             );
-        }
-        if (stepLength > accuracy)
-        {
-            stepLength = stepLength / 2;
 
-            std::cout << "Good fieldline - Not enough accuracy - Move seed point" << std::endl;
-            glm::vec3 modifiedSeedpoint = modifySeedpointIMF(
-                seedPoint,
-                tracingVar,
-                tracer,
-                nPointsOnPathLine,
-                kameleon,
-                innerBoundaryLimit,
-                _nPointsOnFieldLine,
-                stepLength,
-                accuracy,
-                true
-            );
+            if (!checkIfFieldlineIsIMF(fieldlinePositions))
+            {
+                stepLength = stepLength / 2;
+
+                std::cout << "NOT IMF! - Move seed point" << std::endl;
+                glm::vec3 modifiedSeedpoint = modifySeedpointIMF(
+                    seedPoint,
+                    tracingVar,
+                    tracer,
+                    nPointsOnPathLine,
+                    kameleon,
+                    innerBoundaryLimit,
+                    _nPointsOnFieldLine,
+                    stepLength,
+                    accuracy,
+                    false
+                );
+            }
+            if (stepLength > accuracy)
+            {
+                stepLength = stepLength / 2;
+
+                std::cout << "Good fieldline - Not enough accuracy - Move seed point" << std::endl;
+                glm::vec3 modifiedSeedpoint = modifySeedpointIMF(
+                    seedPoint,
+                    tracingVar,
+                    tracer,
+                    nPointsOnPathLine,
+                    kameleon,
+                    innerBoundaryLimit,
+                    _nPointsOnFieldLine,
+                    stepLength,
+                    accuracy,
+                    true
+                );
+            }
+            counter2++;
         }
         return seedPoint.first;
     }
