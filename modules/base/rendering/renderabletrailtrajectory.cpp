@@ -498,11 +498,6 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // If only trail so far should be rendered, we need to find the corresponding time
         // in the array and only render it until then
         _primaryRenderInformation.first = 0;
-        const double t = std::max(
-            0.0,
-            (data.time.j2000Seconds() - _start) / (_end - _start)
-        );
-
         if (data.time.j2000Seconds() < _end) {
             _primaryRenderInformation.count = static_cast<GLsizei>(
                 std::distance(
