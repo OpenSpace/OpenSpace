@@ -15,7 +15,12 @@ local Layer = {
   Identifier = "Earth_Bluemarble_Height",
   Enabled = asset.enabled,
   FilePath = texturesPath .. "earth_bluemarble_height.jpg",
-  Description = "Topographic layer from Blue Marble Next Generation"
+  Description = "Topographic layer from Blue Marble Next Generation",
+  --note these values were just chosen to try to closly match the look of the ESRI Terrain layer
+  Settings = {
+    Multiplier = 40,
+    Offset = -600
+  }
 }
 
 
