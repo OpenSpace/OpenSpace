@@ -219,14 +219,14 @@ void MemoryAwareTileCache::TextureContainer::reset() {
             _initData.ghoulTextureFormat,
             toGlTextureFormat(_initData.glType, _initData.ghoulTextureFormat),
             _initData.glType,
-            Texture::FilterMode::Linear,
+            Texture::FilterMode::AnisotropicMipMap,
             Texture::WrappingMode::ClampToEdge,
             Texture::AllocateData(_initData.shouldAllocateDataOnCPU)
         );
 
         tex->setDataOwnership(Texture::TakeOwnership::Yes);
         tex->uploadTexture();
-        tex->setFilter(Texture::FilterMode::Linear);
+        tex->setFilter(Texture::FilterMode::AnisotropicMipMap);
 
         _textures.push_back(std::move(tex));
     }
@@ -472,7 +472,10 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile rawTile
             _numTextureBytesAllocatedOnCPU += numBytes - previousExpectedDataSize;
             tex->reUploadTexture();
         }
-        tex->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        // Hi there, I know someone will be tempted to change this to a Linear filtering
+        // mode at some point. This will introduce rendering artifacts when looking at the
+        // globe at oblique angles (see #2752)
+        tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         Tile tile{ tex, std::move(rawTile.tileMetaData), Tile::Status::OK };
         TileTextureInitData::HashKey initDataKey = initData.hashKey;
         _textureContainerMap[initDataKey].second->put(std::move(key), std::move(tile));
