@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/fieldlinessequence/rendering/renderablecutplane.h>
+#include <modules/fieldlinessequence/util/gameravolumeslicer.cpp>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>

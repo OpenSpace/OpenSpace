@@ -35,10 +35,12 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   rendering/renderablefieldlinessequence.cpp
+  rendering/renderablecutplane.cpp
   util/fieldlinesstate.cpp
   util/commons.cpp
   util/kameleonfieldlinehelper.cpp
-  rendering/renderablecutplane.cpp
+  util/gameravolumeslicer.cpp
+
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
