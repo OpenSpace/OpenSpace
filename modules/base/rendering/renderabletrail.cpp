@@ -351,16 +351,11 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         // so we check if there is data available and if there isn't, we use the
         // glDrawArrays draw call; otherwise the glDrawElements
         if (info._iBufferID == 0) {
-            if (false) {
-                // Something with glDrawMultiArrays
-            }
-            else {
-                glDrawArrays(
-                    GL_LINE_STRIP,
-                    info.first,
-                    info.count
-                );
-            }
+            glDrawArrays(
+                GL_LINE_STRIP,
+                info.first,
+                info.count
+            );
         }
         else {
             glDrawElements(
