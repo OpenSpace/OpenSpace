@@ -25,8 +25,8 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
+  rendering/renderablefieldlinessequenceold.h
   rendering/renderablefieldlinessequence.h
-  rendering/renderablefieldlinessequencenew.h
   util/fieldlinesstate.h
   util/commons.h
   util/webfieldlinesmanager.h
@@ -38,8 +38,8 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+  rendering/renderablefieldlinessequenceold.cpp
   rendering/renderablefieldlinessequence.cpp
-  rendering/renderablefieldlinessequencenew.cpp
   util/fieldlinesstate.cpp
   util/webfieldlinesmanager.cpp
   util/webfieldlineswindow.cpp

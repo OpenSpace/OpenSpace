@@ -65,7 +65,7 @@ WebFieldlinesWorker::~WebFieldlinesWorker() {
         }
     }
 }
-    
+
 // PUBLIC FUNCTIONS
 void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime,
                                                           double endTime,
@@ -141,18 +141,18 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime,
         }
 
         // We have got 2 strikes, no more requests for you, Mr.Sir.
-        if (_strikes % 2 == 0) { 
+        if (_strikes % 2 == 0) {
             _bigWindowHasData = (_triggerTimesWeb.size() > 0);
             _noMoreRequests = true;
             acceptableToStartRequestingAgain =
                 std::make_pair(minTime.j2000Seconds(), maxTime.j2000Seconds());
-        }     
+        }
     }
 }
 
 // Download all files in the current window
 // This function starts usually in the middle of the window and proceeds to download all
-// future timesteps, then steps backwards from the startingpoint 
+// future timesteps, then steps backwards from the startingpoint
 // TODO(Axel): Different behaviour depending on direction the user is moving in,
 // might be wanted?
 void WebFieldlinesWorker::downloadWindow(
@@ -191,7 +191,7 @@ void WebFieldlinesWorker::downloadWindow(
                 downloadOsfls(it);
                 downloaded = true;
                 _doneUpdating = false;
-            }   
+            }
         });
 
         // Backwards
@@ -273,7 +273,7 @@ void WebFieldlinesWorker::updateRFSSourceFiles(std::vector<std::string>& _source
         _readyToUpdateSourceFiles = false;
         _doneUpdating = true;
     }
- 
+
 }
 
 bool WebFieldlinesWorker::windowIsComplete() {
@@ -300,7 +300,7 @@ bool WebFieldlinesWorker::edgeMode() {
     }
     return _noMoreRequests && _bigWindowHasData;
 }
-    
+
 void WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> downloadKey)
 {
     _downloadedSomething = true;
@@ -325,7 +325,7 @@ void WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> downloadKe
     _readyToDownload = false;
 }
 
-// This function searches for triggerTime in _downloadedTriggerTimes, 
+// This function searches for triggerTime in _downloadedTriggerTimes,
 // to see weather a file has already been downloaded or not
 bool WebFieldlinesWorker::fileIsOnDisk(double triggerTime) {
     return std::find_if(
@@ -335,7 +335,7 @@ bool WebFieldlinesWorker::fileIsOnDisk(double triggerTime) {
             return element.first == triggerTime;
         }) != _downloadedTriggerTimes.end();
 }
-    
+
 void WebFieldlinesWorker::checkForExistingData(
     std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb,
     std::vector<std::pair<double, std::string>>& _triggerTimesOnDisk)
@@ -355,7 +355,7 @@ void WebFieldlinesWorker::checkForExistingData(
         }
     }
 }
-    
+
 void WebFieldlinesWorker::parseTriggerTimesList(std::string s,
                       std::vector<std::tuple<double, std::string, int>> &_triggerTimesWeb)
 {
@@ -381,7 +381,7 @@ void WebFieldlinesWorker::parseTriggerTimesList(std::string s,
 
     _triggerTimesWeb.push_back(std::make_tuple(triggerTimeString2Double(sub), sub, -1));
 }
-    
+
 double WebFieldlinesWorker::triggerTimeString2Double(std::string s){
     s.replace(13, 1, ":");
     s.replace(16, 1, ":");
@@ -391,7 +391,7 @@ double WebFieldlinesWorker::triggerTimeString2Double(std::string s){
     // openspace timeconverter gives an error.
     // but we're gonna be consistent with the error
 }
-    
+
 void WebFieldlinesWorker::triggerTimeDouble2String(double i, std::string& s) {
     double temp = i /*+ 69.185013294*/;
     Time time = Time();
@@ -400,7 +400,7 @@ void WebFieldlinesWorker::triggerTimeDouble2String(double i, std::string& s) {
     s.replace(13, 1, "-");
     s.replace(16, 1, "-");
 }
-    
+
 // Inserts the pair in sorted order
 void WebFieldlinesWorker::addToDownloadedList(std::pair<double, std::string> pair) {
     const std::string fileName = pair.second.substr(pair.second.size() - 29);
@@ -415,5 +415,5 @@ bool WebFieldlinesWorker::compareTimetriggersEqual(double first, double second) 
     const double eps = 100.0;
     return first > second - eps && first < second + eps;
 }
-    
+
 } // namespace openspace

@@ -24,8 +24,8 @@
 
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
-//#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequencenew.h>
+//#include <modules/fieldlinessequence/rendering/renderablefieldlinessequenceold.h>
+#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -65,15 +65,15 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "No renderable factory existed");
 
-    //factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
-    factory->registerClass<RenderableFieldlinesSequenceNew>("RenderableFieldlinesSequenceNew");
+    //factory->registerClass<RenderableFiOld>("RenderableFieldlinesSequenceold");
+    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
 }
 
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
-        //RenderableFieldlinesSequence::Documentation(),
-        RenderableFieldlinesSequenceNew::Documentation()
+        //RenderableFieldlinesSequenceOld::Documentation(),
+        RenderableFieldlinesSequence::Documentation()
 
     };
 }

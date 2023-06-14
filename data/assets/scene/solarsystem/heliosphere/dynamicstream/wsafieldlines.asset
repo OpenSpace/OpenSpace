@@ -4,7 +4,7 @@ local fieldlines = {
   Identifier = "WSA_Fieldlines_PFSS_IO",
   Parent = transforms.TransformGONG.Identifier,
   Renderable = {
-    Type = "RenderableFieldlinesSequenceNew",
+    Type = "RenderableFieldlinesSequence",
     InputFileType = "Osfls",
     LoadingType = "DynamicDownloading",
     InfoURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id=",

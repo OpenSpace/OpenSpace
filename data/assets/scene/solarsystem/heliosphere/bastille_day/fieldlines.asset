@@ -26,7 +26,7 @@ local fieldlines = {
     Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
   },
   Renderable = {
-    Type = "RenderableFieldlinesSequenceNew",
+    Type = "RenderableFieldlinesSequence",
     SourceFolder = fieldlinesDirectory,
     LoadingType = "DynamicLoading",
     InputFileType = "Osfls",
