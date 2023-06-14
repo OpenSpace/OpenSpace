@@ -7,7 +7,7 @@ local Layer = {
   Name = "HRSC MOLA Blended DEM Global 200m v2",
   Enabled = asset.enabled,
   FilePath = asset.localResource("mdem200m.wms"),
-  TilePixelSize = 513,
+  TilePixelSize = 129,
   Description = [[Blend of data derived from the Mars Orbiter Laser Altimeter
     (MOLA, an instrument aboard NASA's Mars Global Surveyor spacecraft), and data derived
     from the High-Resolution Stereo Camera (HRSC, an instrument aboard the European Space
