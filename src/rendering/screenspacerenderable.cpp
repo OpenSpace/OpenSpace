@@ -464,7 +464,7 @@ void ScreenSpaceRenderable::createShaders() {
         "hdrExposure",
         static_cast<double>(global::renderEngine->hdrExposure())
     );
-    rendererData.setValue("disableHDR", global::renderEngine->isHdrDisabled());
+    rendererData.setValue("disableHDR", true);
 
     dict.setValue("rendererData", rendererData);
     dict.setValue(
