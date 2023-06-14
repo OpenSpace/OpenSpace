@@ -1998,7 +1998,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 
         glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         // @TODO (emmbr, 2023-06-14) This 0.5f offset was added as a bandaid for issue
-        // #2696. It seems to imrpve the behavior, but I am not certain of why. And the
+        // #2696. It seems to improve the behavior, but I am not certain of why. And the
         // underlying problem is still there and should at some point be looked at again
         samplePos -= glm::vec2(0.5f);
 
