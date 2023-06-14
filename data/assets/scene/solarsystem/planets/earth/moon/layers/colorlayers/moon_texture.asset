@@ -6,7 +6,7 @@ local texturesPath = asset.syncedResource({
   Name = "Moon Textures",
   Type = "HttpSynchronization",
   Identifier = "moon_textures",
-  Version = 1
+  Version = 2
 })
 
 
@@ -15,7 +15,8 @@ local Layer = {
   Name = "Moon Texture",
   Enabled = asset.enabled,
   FilePath = texturesPath .. "WAC_GLOBAL_E000N0000_032P.png",
-  Description = "Lower Resolution offline version of WAC layer"
+  Description = "Lower Resolution offline version of WAC layer",
+  CacheSettings = { Enabled = false }
 }
 
 

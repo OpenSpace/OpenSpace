@@ -13,7 +13,8 @@ local texturesPath = asset.syncedResource({
 local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "rhea.jpg",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  CacheSettings = { Enabled = false }
 }
 
 

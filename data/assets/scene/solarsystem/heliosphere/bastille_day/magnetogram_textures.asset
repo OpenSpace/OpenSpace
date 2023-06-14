@@ -42,7 +42,8 @@ asset.onInitialize(function()
         Name = imagename,   --"Magnetogram-" .. i,
         Description = "",
         FilePath = imagename,
-        Enabled = false
+        Enabled = false,
+        CacheSettings = { Enabled = false }
       }
     )
   end

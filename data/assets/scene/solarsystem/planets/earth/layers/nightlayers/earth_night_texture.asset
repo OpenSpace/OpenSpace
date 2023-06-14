@@ -15,7 +15,8 @@ local Layer = {
   Name = "Earth Night Texture",
   Enabled = asset.enabled,
   FilePath = texturesPath .. "earth_night.png",
-  Description = "Earth's city lights are clearly visible from space"
+  Description = "Earth's city lights are clearly visible from space",
+  CacheSettings = { Enabled = false }
 }
 
 

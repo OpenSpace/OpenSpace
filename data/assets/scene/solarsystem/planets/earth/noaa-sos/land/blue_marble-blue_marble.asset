@@ -30,7 +30,8 @@ local Layer = {
   Name = Name,
   Enabled = asset.enabled,
   FilePath = syncedDirectory .. "4096.jpg",
-  Description = Description
+  Description = Description,
+  CacheSettings = { Enabled = false }
 }
 
 

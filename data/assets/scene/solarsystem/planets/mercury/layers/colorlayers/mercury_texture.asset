@@ -16,7 +16,8 @@ local Layer = {
   Enabled = asset.enabled,
   Description = [[The Map Projected Basemap RDR (BDR) data set consists of a global
     monochrome map of reflectance at a resolution of 256 pixels per degree (~166 m/p).
-    This is an offline version with lower resoution than the Messenger BDR layer.]]
+    This is an offline version with lower resoution than the Messenger BDR layer.]],
+    CacheSettings = { Enabled = false }
 }
 
 
