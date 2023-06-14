@@ -50,6 +50,7 @@ public:
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
     bool isPointingSpacecraft() const;
+    bool shouldUpdateWhileTargetAnimates() const;
 
     double setVerticalFovWithScroll(float scroll);
     void setIdInBrowser() const;
@@ -71,6 +72,7 @@ private:
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
     properties::BoolProperty _isPointingSpacecraft;
+    properties::BoolProperty _updateDuringTargetAnimation;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 

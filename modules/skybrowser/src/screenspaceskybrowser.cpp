@@ -82,6 +82,14 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UpdateDuringAnimationInfo = {
+        "UpdateDuringTargetAnimation",
+        "Update During Target Animation",
+        "If checked, the sky browser display copy will update its coordinates while "
+        "the target is animating.",
+        openspace::properties::Property::Visibility::User
+    };
+
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;
@@ -91,6 +99,9 @@ namespace {
 
         // [[codegen::verbatim(PointSpacecraftInfo.description)]]
         std::optional<bool> pointSpacecraft;
+
+        // [[codegen::verbatim(UpdateDuringAnimationInfo.description)]]
+        std::optional<bool> updateDuringTargetAnimation;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -123,6 +134,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
     , _isHidden(IsHiddenInfo, true)
     , _isPointingSpacecraft(PointSpacecraftInfo, false)
+    , _updateDuringTargetAnimation(UpdateDuringAnimationInfo, false)
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
@@ -131,6 +143,9 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     _textureQuality = p.textureQuality.value_or(_textureQuality);
     _isHidden = p.isHidden.value_or(_isHidden);
     _isPointingSpacecraft = p.pointSpacecraft.value_or(_isPointingSpacecraft);
+    _updateDuringTargetAnimation = p.updateDuringTargetAnimation.value_or(
+        _updateDuringTargetAnimation
+    );
 
     addProperty(_isHidden);
     addProperty(_url);
@@ -139,6 +154,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     addProperty(_textureQuality);
     addProperty(_verticalFov);
     addProperty(_isPointingSpacecraft);
+    addProperty(_updateDuringTargetAnimation);
 
     _textureQuality.onChange([this]() { _isDimensionsDirty = true; });
 
@@ -197,6 +213,10 @@ bool ScreenSpaceSkyBrowser::isInitialized() const {
 
 bool ScreenSpaceSkyBrowser::isPointingSpacecraft() const {
     return _isPointingSpacecraft;
+}
+
+bool ScreenSpaceSkyBrowser::shouldUpdateWhileTargetAnimates() const {
+    return _updateDuringTargetAnimation;
 }
 
 void ScreenSpaceSkyBrowser::setIdInBrowser() const {
