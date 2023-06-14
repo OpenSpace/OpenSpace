@@ -67,7 +67,7 @@ public:
     const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
     bool isInitialized() const;
 
-    void reset();
+    void reload();
     void destroy();
     void update();
 
@@ -123,7 +123,7 @@ private:
     properties::TriggerProperty _play;
     properties::TriggerProperty _pause;
     properties::TriggerProperty _goToStart;
-    properties::TriggerProperty _reset;
+    properties::TriggerProperty _reload;
     properties::BoolProperty _playAudio;
     properties::BoolProperty _loopVideo;
 
