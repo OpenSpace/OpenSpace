@@ -91,8 +91,9 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
 }
 
 void TargetBrowserPair::synchronizeAim() {
-    bool shouldUpdate = _browser->shouldUpdateWhileTargetAnimates() ? 
-         true : !_targetAnimation.isAnimating();
+    bool shouldUpdate =
+        _browser->shouldUpdateWhileTargetAnimates() ||
+        !_targetAnimation.isAnimating();
     if (shouldUpdate && _browser->isInitialized()) {
         _browser->setEquatorialAim(targetDirectionEquatorial());
         _browser->setTargetRoll(targetRoll());
