@@ -59,13 +59,13 @@ local function illuminationAction(node, nodeLower, global)
     Command = actionCommand,
     Documentation = "Enables " .. string.lower(actionName) .. " for" .. node,
     GuiPath = "/Solar System/" .. node,
-    IsLocal = true
+    IsLocal = false
   }
   return action
 end
 
-local CurrentFocusGlobal = illuminationAction("Current Focus", "current_focus", true)
-local CurrentFocusStandard = illuminationAction("Current Focus", "current_focus", false)
+--local CurrentFocusGlobal = illuminationAction("Current Focus", "current_focus", true)
+--local CurrentFocusStandard = illuminationAction("Current Focus", "current_focus", false)
 
 local EarthGlobal = illuminationAction("Earth", "earth", true)
 local EarthStandard = illuminationAction("Earth", "earth", false)
@@ -98,7 +98,7 @@ local AllGlobesGlobalIllumination = {
   ]],
   Documentation = "Enables global illumination for all globes",
   GuiPath = "/Solar System",
-  IsLocal = true
+  IsLocal = false
 }
 
 local AllGlobesStandardIllumination = {
@@ -114,13 +114,13 @@ local AllGlobesStandardIllumination = {
   ]],
   Documentation = "Disables global illumination for all globes",
   GuiPath = "/Solar System",
-  IsLocal = true
+  IsLocal = false
 }
 
 
 asset.onInitialize(function()
-  openspace.action.registerAction(CurrentFocusGlobal)
-  openspace.action.registerAction(CurrentFocusStandard)
+  -- openspace.action.registerAction(CurrentFocusGlobal)
+  -- openspace.action.registerAction(CurrentFocusStandard)
   openspace.action.registerAction(EarthGlobal)
   openspace.action.registerAction(EarthStandard)
   openspace.action.registerAction(MarsGlobal)
@@ -148,12 +148,12 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(MarsGlobal)
   openspace.action.removeAction(EarthStandard)
   openspace.action.removeAction(EarthGlobal)
-  openspace.action.removeAction(CurrentFocusStandard)
-  openspace.action.removeAction(CurrentFocusGlobal)
+  -- openspace.action.removeAction(CurrentFocusStandard)
+  -- openspace.action.removeAction(CurrentFocusGlobal)
 end)
 
-asset.export("CurrentFocusGlobal", CurrentFocusGlobal.Identifier)
-asset.export("CurrentFocusStandard", CurrentFocusStandard.Identifier)
+-- asset.export("CurrentFocusGlobal", CurrentFocusGlobal.Identifier)
+-- asset.export("CurrentFocusStandard", CurrentFocusStandard.Identifier)
 asset.export("EarthGlobal", EarthGlobal.Identifier)
 asset.export("EarthStandard", EarthStandard.Identifier)
 asset.export("MarsGlobal", MarsGlobal.Identifier)
