@@ -57,7 +57,7 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
         _stopCommand = *p.stopCommand;
     }
     else {
-        LWARNING("Scanner must provide stop command, please check asset file");
+        LDEBUG("Scanner must provide stop command, please check asset file");
     }
 
     _spiceIDs = p.spice;
