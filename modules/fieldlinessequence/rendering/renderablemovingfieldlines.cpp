@@ -137,23 +137,25 @@ namespace {
 namespace openspace {
     std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFile(
         std::filesystem::path filePath,
-        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
+        std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
         double startTime
     );
 
     void selectAndModifySeedpoints(
         std::filesystem::path filePath,
-        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
+        std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
         double yOutherLimit,
         int numberOfFieldlines,
         double algorithmAccuracy
     );
 
+    std::string removeNonNumeric(const std::string& str);
+
     void addCoordinatesToSeedPoints(
         RenderableMovingFieldlines::SeedPointInformation temp,
-        std::vector<std::pair<glm::vec3, std::string>>& seedPoints
+        std::vector<Seedpoint>& seedPoints
     );
 
     void addCoordinatesOfTopologies(
@@ -488,17 +490,16 @@ namespace openspace {
     }
 
     bool RenderableMovingFieldlines::getStateFromCdfFiles(std::filesystem::path pathToDownloadTo) {
-
         std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
-        std::vector<std::pair<glm::vec3, std::string>> seedPoints;
+        std::vector<Seedpoint> seedPoints;
         std::vector<double> birthTimes;
         bool isSuccessful = false;
         bool shouldExtractSeedPoints = true;
 
         double startTime = 0.0;
         double yOutherLimit = 6.0;
-        int numberOfFieldlines = 5;
-        double algorithmAccuracy = 0.3;
+        int numberOfFieldlines = 10;
+        double algorithmAccuracy = 0.01;
 
         for (const std::filesystem::path entry : _sourceFiles) {
             const std::string& cdfPath = entry.string();
@@ -678,16 +679,11 @@ namespace openspace {
     )
     {
         std::ifstream file = readTxtOrCSVFile(filePath);
-
         RenderableMovingFieldlines::SetOfSeedPoints setOfSeedPoints;
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data;
-
-
         std::string lineTemp;
         int lineCounter = 0;
-
         int topologyCounter = 0;
-
         bool topologyReset = false;
 
         // Read each line of the CSV file
@@ -700,7 +696,7 @@ namespace openspace {
             RenderableMovingFieldlines::SeedPointInformation seedPoint;
 
             // Get seedPoint
-            while (std::getline(lineStream, field, ',') && elementCounter < 5)
+            while (std::getline(lineStream, field, ',') && elementCounter < 8)
             {
                 switch (elementCounter)
                 {
@@ -718,6 +714,19 @@ namespace openspace {
                     break;
                 case 4:
                     seedPoint.earthSide = field;
+                    break;
+                case 5:
+                    // Remove the square brackets
+                    field = removeNonNumeric(field);
+                    seedPoint.criticalPoint.x = std::stof(field);
+                    break;
+                case 6:
+                    seedPoint.criticalPoint.y = std::stof(field);
+                    break;
+                case 7:
+                    // Remove the square brackets
+                    field = removeNonNumeric(field);
+                    seedPoint.criticalPoint.z = std::stof(field);
                     break;
                 }
 
@@ -769,19 +778,33 @@ namespace openspace {
         return data;
     }
 
+    std::string removeNonNumeric(const std::string& str) {
+        const std::string validNumericChars = "-.0123456789";
+        std::string result;
+
+        for (char c : str) {
+            if (validNumericChars.find(c) != std::string::npos) {
+                result += c; // Append the character to the result string
+            }
+        }
+
+        return result;
+    }
+
     /**
     * Add coordinates of seedpoints by topology (vector data)
     * to seedpoint vector for rendering
     */
     void addCoordinatesToSeedPoints(
         RenderableMovingFieldlines::SeedPointInformation temp,
-        std::vector<std::pair<glm::vec3, std::string>>& seedPoints
+        std::vector<Seedpoint>& seedPoints
         //, std::vector<std::string>& seedPointsTopology
     )
     {
             glm::vec3 seedPointVector(temp.x, temp.y, temp.z);
             std::string topology = temp.fieldLineStatus;
-            seedPoints.push_back({ seedPointVector, topology });
+            glm::vec3 criticalPointVector(temp.criticalPoint.x, temp.criticalPoint.y, temp.criticalPoint.z);
+            seedPoints.push_back({ seedPointVector, topology, criticalPointVector });
             // seedPointsTopology.push_back(topology);
     }
 
@@ -791,7 +814,7 @@ namespace openspace {
     * (push back seedpoints we want to render)
     */
     void addCoordinatesOfTopologies(
-        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
+        std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data/*,
         std::vector<std::string>& seedPointsTopology*/
@@ -826,7 +849,7 @@ namespace openspace {
             // buuble sort: sort decending order based on y-value
             for (int i = 0; i < setOfSeedpoints.size() - 1; ++i) {
                 for (int j = 0; j < setOfSeedpoints.size() - i - 1; ++j) {
-                    if (setOfSeedpoints[j].IMF.y > setOfSeedpoints[j + 1].IMF.y) {
+                    if (setOfSeedpoints[j].IMF.criticalPoint.y > setOfSeedpoints[j + 1].IMF.criticalPoint.y) {
                         std::swap(setOfSeedpoints[j], setOfSeedpoints[j + 1]);
                     }
                 }
@@ -837,7 +860,7 @@ namespace openspace {
             // bubble sort: sort incremental order based on y-value
             for (int i = 0; i < setOfSeedpoints.size() - 1; ++i) {
                 for (int j = 0; j < setOfSeedpoints.size() - i - 1; ++j) {
-                    if (setOfSeedpoints[j].IMF.y < setOfSeedpoints[j + 1].IMF.y) {
+                    if (setOfSeedpoints[j].IMF.criticalPoint.y < setOfSeedpoints[j + 1].IMF.criticalPoint.y) {
                         std::swap(setOfSeedpoints[j], setOfSeedpoints[j + 1]);
                     }
                 }
@@ -860,7 +883,8 @@ namespace openspace {
             while (left <= right) {
                 int mid = (left + right) / 2;
 
-                float relativeAngle = 90 - (atan(abs(setOfSeedpoints[mid].IMF.x) / abs(setOfSeedpoints[mid].IMF.y)) * (180 / 3.14));
+                float relativeAngle = 90 - (atan(abs(setOfSeedpoints[mid].IMF.criticalPoint.x)
+                / abs(setOfSeedpoints[mid].IMF.criticalPoint.y)) * (180 / 3.14));
                 //std::cout << "Relative angle: " << relativeAngle << std::endl;
 
                 if (abs(relativeAngle) == find) {
@@ -891,8 +915,10 @@ namespace openspace {
                 setOfSeedpoints.erase(setOfSeedpoints.begin() + closestIndex);
             }
             else {
-                float relativeAngle = 90 - (atan(abs(setOfSeedpoints[closestIndex].IMF.x) / abs(setOfSeedpoints[closestIndex].IMF.y)) * (180 / 3.14));
-                float relativeAngle2 = 90 - (atan(abs(setOfSeedpoints[closestIndex + 1].IMF.x) / abs(setOfSeedpoints[closestIndex + 1].IMF.y)) * (180 / 3.14));
+                float relativeAngle = 90 - (atan(abs(setOfSeedpoints[closestIndex].IMF.criticalPoint.x)
+                / abs(setOfSeedpoints[closestIndex].IMF.criticalPoint.y)) * (180 / 3.14));
+                float relativeAngle2 = 90 - (atan(abs(setOfSeedpoints[closestIndex + 1].IMF.criticalPoint.x)
+                / abs(setOfSeedpoints[closestIndex + 1].IMF.criticalPoint.y)) * (180 / 3.14));
                 double dist1 = std::abs(relativeAngle - find);
                 double dist2 = std::abs(relativeAngle2 - find);
                 if (dist1 <= dist2) {
@@ -938,7 +964,7 @@ namespace openspace {
         double limitNegativeY = yOutherLimit * -1;
 
         for (auto it = setOfSeedPoints.begin(); it != setOfSeedPoints.end();) {
-            if (it->IMF.y > limitPositiveY || it->IMF.y < limitNegativeY) {
+            if (it->IMF.criticalPoint.y > limitPositiveY || it->IMF.criticalPoint.y < limitNegativeY) {
                 it = setOfSeedPoints.erase(it);
             }
             else {
@@ -962,7 +988,7 @@ namespace openspace {
 
             for (int i = 0; i < setOfSeedPoints.size(); i++)
             {
-                if (setOfSeedPoints[i].IMF.y < 0)
+                if (setOfSeedPoints[i].IMF.criticalPoint.y < 0)
                 {
                     leftSideSeedpoints.push_back(setOfSeedPoints[i]);
                 }
@@ -983,8 +1009,8 @@ namespace openspace {
 
             std::cout << "number of fieldlines on side: " << numberOfFieldlinesOnSide << std::endl;
 
-            int furthestRelativeAngleRight = 90 - (atan(abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.x) / abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.y)) * (180 / 3.14));
-            int furthestRelativeAngleLeft = 90 - (atan(abs(leftSideSeedpoints[0].IMF.x) / abs(leftSideSeedpoints[0].IMF.y)) * (180 / 3.14));
+            int furthestRelativeAngleRight = 90 - (atan(abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.criticalPoint.x) / abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.criticalPoint.y)) * (180 / 3.14));
+            int furthestRelativeAngleLeft = 90 - (atan(abs(leftSideSeedpoints[0].IMF.criticalPoint.x) / abs(leftSideSeedpoints[0].IMF.criticalPoint.y)) * (180 / 3.14));
 
             int stepAngleRight = furthestRelativeAngleRight / numberOfFieldlinesOnSide;
             int stepAngleLeft = furthestRelativeAngleLeft / numberOfFieldlinesOnSide;
@@ -1039,12 +1065,12 @@ namespace openspace {
                 for (int i = 0; i < setOfSeedPoints.size(); i++)
                 {
                     thisSeedPointIsAlreadyAdded = false;
-                    y_value = abs(setOfSeedPoints[i].IMF.y);
+                    y_value = abs(setOfSeedPoints[i].IMF.criticalPoint.y);
                     if (y_value < smallest_y_value)
                     {
                         for (int j = 0; j < selectedSeedpointsLeftSide.size(); j++)
                         {
-                            if (setOfSeedPoints[i].IMF.y == selectedSeedpointsLeftSide[j].IMF.y)
+                            if (setOfSeedPoints[i].IMF.criticalPoint.y == selectedSeedpointsLeftSide[j].IMF.criticalPoint.y)
                             {
                                 thisSeedPointIsAlreadyAdded = true;
                             }
@@ -1070,7 +1096,7 @@ namespace openspace {
             // select seedpoint set with smallest y value on imf
             for (int i = 0; i < setOfSeedPoints.size(); i++)
             {
-                y_value = abs(setOfSeedPoints[i].IMF.y);
+                y_value = abs(setOfSeedPoints[i].IMF.criticalPoint.y);
                 if (y_value < smallest_y_value)
                 {
                     smallest_y_value = y_value;
@@ -1093,7 +1119,7 @@ namespace openspace {
     */
     void selectAndModifySeedpoints(
         std::filesystem::path filePath,
-        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
+        std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
         double yOutherLimit,
         int numberOfFieldlines,
@@ -1141,7 +1167,7 @@ namespace openspace {
                 algorithmAccuracy
             );
 
-        std::vector<std::pair<glm::vec3, std::string>> nightsideSeedPoints =
+        std::vector<Seedpoint> nightsideSeedPoints =
             fls::findAndAddNightsideSeedPoints(
                 seedPoints,
                 birthTimes,
@@ -1155,9 +1181,9 @@ namespace openspace {
 
         for (int i = 0; i < seedPoints.size(); i++)
         {
-            std::cout << seedPoints[i].first.x <<
-                " " << seedPoints[i].first.y << " " <<
-                seedPoints[i].first.z << " " << std::endl;
+            std::cout << seedPoints[i].seedPoint.x <<
+                " " << seedPoints[i].seedPoint.y << " " <<
+                seedPoints[i].seedPoint.z << " " << std::endl;
 
         }
         for (int i = 0; i < birthTimes.size(); i++)
@@ -1174,7 +1200,7 @@ namespace openspace {
     */
     std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFile(
         std::filesystem::path filePath,
-        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
+        std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
         double startTime
     ) {
@@ -1207,7 +1233,7 @@ namespace openspace {
                     ss >> point.x;
                     ss >> point.y;
                     ss >> point.z;
-                    seedPoints.push_back({ point, "null" });
+                    seedPoints.push_back({ point, "null" , glm::vec3() });
 
                     bool isEmpty = ss.eof();
                     if (!isEmpty) {
@@ -1270,12 +1296,6 @@ namespace openspace {
             ));
         }
         std::vector<glm::vec3> seedPointsVec3;
-        /*for (int i = 0; i < seedPoints.size(); i++)
-        {
-            std::cout << "seedpoint " << i << ": " << seedPoints[i].first << std::endl;
-            seedPointsVec3[i] = seedPoints[i].first;
-
-        }*/
 
         return std::make_tuple(seedPointsVec3, birthTimes);
     }

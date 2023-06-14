@@ -38,11 +38,17 @@ namespace openspace {
 
     class FieldlinesState;
 
+    struct Seedpoint {
+        glm::vec3 seedPoint;
+        std::string topology;
+        glm::vec3 criticalPoint;
+    };
+
     namespace fls {
         bool convertCdfToMatchingFieldlinesState(
             FieldlinesState& state,
             ccmc::Kameleon* kameleon,
-            std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
+            std::vector<Seedpoint>& seedPoints,
             const std::vector<double>& birthTimes,
             double manualTimeOffset,
             const std::string& tracingVar,
@@ -51,16 +57,16 @@ namespace openspace {
             const size_t nPointsOnPathLine,
             const size_t nPointsOnFieldLines);
 
-        std::vector<std::pair<glm::vec3, std::string>> validateAndModifyAllSeedPoints(
-            std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
+        std::vector <Seedpoint> validateAndModifyAllSeedPoints(
+            std::vector<Seedpoint>& seedPoints,
             const std::string& tracingVar,
             ccmc::Kameleon* kameleon,
             const size_t nPointsOnPathLine,
             double& accuracy
         );
 
-        std::vector<std::pair<glm::vec3, std::string>> findAndAddNightsideSeedPoints(
-            std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
+        std::vector <Seedpoint> findAndAddNightsideSeedPoints(
+            std::vector<Seedpoint>& seedPoints,
             std::vector<double>& birthTimes,
             ccmc::Kameleon* kameleon,
             const std::string& tracingVar,

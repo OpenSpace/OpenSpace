@@ -85,6 +85,7 @@ public:
         float z = 0.0;
         std::string earthSide = "";
         std::string fieldLineStatus = "";
+        glm::vec3 criticalPoint;
     };
 
     // Struct containing FOUR seedpoints, a set of seedpoints
