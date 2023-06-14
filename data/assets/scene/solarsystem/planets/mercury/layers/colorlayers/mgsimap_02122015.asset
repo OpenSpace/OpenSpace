@@ -20,7 +20,7 @@ local Layer = {
     Multiplier = 1.15
   },
   BlendMode = "Multiply",
-  CacheSettings = { Enabled = false}
+  CacheSettings = { Enabled = false }
 }
 
 

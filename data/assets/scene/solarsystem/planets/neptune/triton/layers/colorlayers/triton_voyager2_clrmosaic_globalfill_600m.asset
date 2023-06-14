@@ -20,7 +20,7 @@ local Layer = {
     combining high-resolution images taken through orange, violet, and ultraviolet filters; these
     images were displayed as red, green, and blue images and combined to create this
     color version (Smith et al., 1989).]],
-    CacheSettings = { Enabled = false}
+    CacheSettings = { Enabled = false }
 }
 
 

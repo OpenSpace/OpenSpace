@@ -22,7 +22,7 @@ local Layer = {
         Identifier = "Clouds",
         Name = "Clouds",
         FilePath = texturesPath .. "venus_clouds.jpg",
-        CacheSettings = { Enabled = false}
+        CacheSettings = { Enabled = false }
       }
     },
     {

@@ -43,7 +43,7 @@ asset.onInitialize(function()
         Description = "",
         FilePath = imagename,
         Enabled = false,
-        CacheSettings = { Enabled = false}
+        CacheSettings = { Enabled = false }
       }
     )
   end

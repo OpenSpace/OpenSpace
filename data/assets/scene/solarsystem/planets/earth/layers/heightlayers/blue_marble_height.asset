@@ -21,7 +21,7 @@ local Layer = {
     Multiplier = 40,
     Offset = -600
   },
-  CacheSettings = { Enabled = false}
+  CacheSettings = { Enabled = false }
 }
 
 

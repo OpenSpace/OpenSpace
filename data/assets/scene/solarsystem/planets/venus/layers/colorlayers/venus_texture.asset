@@ -14,7 +14,7 @@ local Clouds = {
   Identifier = "Clouds",
   FilePath = texturesPath .. "venus_clouds.jpg",
   Enabled = asset.enabled,
-  CacheSettings = { Enabled = false}
+  CacheSettings = { Enabled = false }
 }
 
 local Layer = {
@@ -25,7 +25,7 @@ local Layer = {
     Opacity = 0.48,
     Gamma = 0.48
   },
-  CacheSettings = { Enabled = false}
+  CacheSettings = { Enabled = false }
 }
 
 
