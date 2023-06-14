@@ -27,14 +27,13 @@
 in vec4 vs_gPosition;
 in vec3 vs_gNormal;
 in float vs_screenSpaceDepth;
-in vec2 vs_st;
+in vec2 vs_st; //texture coordinates
 
 uniform sampler2D texture1;
 uniform bool additiveBlending;
 uniform float opacity = 1.0;
 uniform bool mirrorBackside = true;
 uniform vec3 multiplyColor;
-
 
 Fragment getFragment() {
   Fragment frag;
@@ -50,18 +49,19 @@ Fragment getFragment() {
     }
   }
 
-  frag.color.rgb *= multiplyColor;
+  //frag.color.rgb *= multiplyColor;
+  frag.color.rgb *= vec3(0.0, 1.0, 0.0);
 
   frag.color.a *= opacity;
   if (frag.color.a == 0.0) {
     discard;
   }
 
-  frag.depth = vs_screenSpaceDepth;
+frag.depth = vs_screenSpaceDepth;
 
-  if (additiveBlending) {
+/*if (additiveBlending) {
     frag.blend = BLEND_MODE_ADDITIVE;
-  }
+  }*/
 
   // G-Buffer
   frag.gPosition = vs_gPosition;

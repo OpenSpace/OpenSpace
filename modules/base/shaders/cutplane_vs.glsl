@@ -32,10 +32,23 @@ layout(location = 1) in vec2 in_st;
 out vec4 vs_gPosition;
 out vec3 vs_gNormal;
 out float vs_screenSpaceDepth;
-out vec2 vs_st;
+out vec2 vs_st; 
 
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewTransform;
+
+// Uniforms needed to color by quantity
+uniform int colorMethod;
+uniform sampler1D colorTable;
+uniform vec2 colorTableRange;
+out vec4 vs_color;
+
+/*vec4 getTransferFunctionColor() {
+  // Remap the color scalar to a [0,1] range
+  float lookUpVal =
+    (in_color_scalar - colorTableRange.x) / (colorTableRange.y - colorTableRange.x);
+  return texture(colorTable, lookUpVal);
+}*/
 
 
 void main() {
