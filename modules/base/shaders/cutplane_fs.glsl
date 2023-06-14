@@ -35,6 +35,8 @@ uniform float opacity = 1.0;
 uniform bool mirrorBackside = true;
 uniform vec3 multiplyColor;
 
+in vec4 vs_color;
+
 Fragment getFragment() {
   Fragment frag;
   if (gl_FrontFacing) {
@@ -50,18 +52,21 @@ Fragment getFragment() {
   }
 
   //frag.color.rgb *= multiplyColor;
-  frag.color.rgb *= vec3(0.0, 1.0, 0.0);
+  //frag.color.rgb *= vec3(0.0, 1.0, 0.0);
 
   frag.color.a *= opacity;
   if (frag.color.a == 0.0) {
     discard;
   }
 
-frag.depth = vs_screenSpaceDepth;
+  vec4 fragColor = vs_color;
+  frag.color = fragColor;
 
-/*if (additiveBlending) {
+  frag.depth = vs_screenSpaceDepth;
+
+  if (additiveBlending) {
     frag.blend = BLEND_MODE_ADDITIVE;
-  }*/
+  }
 
   // G-Buffer
   frag.gPosition = vs_gPosition;

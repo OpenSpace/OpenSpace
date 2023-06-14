@@ -11,15 +11,16 @@ local cutplane = {
     --ScaleToMeter = 2 * 6371000,
     FilePath = "/Users/juliajohnstone/Desktop/Exjobb/viz4sasha/dir-cut/erc.eb.h5",
     Origin = "Center",
-    Billboard = false,
-    --ScalingUnit = RE",
-    --MultiplyColor = { 1, 1, 0 },
+  --  MultiplyColor = { 1, 1, 0 },
     -- ColorTablePaths = {transferFunction},
     Axis = "x",
     CutValue = 5.0,
-    ColorQuantity = "singlecolor",
-    ColorTableRanges = {{50, 300}},
-    ColorTablePaths = {transferFunction}, 
+    DataProperty = "singlecolor", -- !!!!!!!!!!!!!!!!!!!!!!
+   -- BlendMode = "Normal",
+   -- MirrorBackside = true,
+    ColorTableRanges = {{50, 200}},
+    ColorTablePaths=  {transferFunction},
+    
   },
   GUI = {
     Path = "/Solar System/Planets/Earth",

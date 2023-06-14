@@ -46,7 +46,14 @@
 #include <iostream>
 #include <ostream>
 
+#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
+
+
 namespace {
+    enum BlendMode {
+        Normal = 0,
+        Additive
+    };
 //  constexpr std::string_view _loggerCat = “RenderableCutPlane”;
   constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
     "FilePath",
@@ -55,20 +62,33 @@ namespace {
     // @VISIBILITY(2.25)
     openspace::properties::Property::Visibility::User
   };
-  //constexpr openspace::properties::Property::PropertyInfo PlaneEquationInfo = {
-  //  "PlaneEquation",
-  //    "Hejhejs",
-  //    "text",
-  //  // @VISIBILITY(2.25)
-  //  openspace::properties::Property::Visibility::User
-  //};
-
-constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
-    "ColorQuantity",
-    "Quantity to Color By",
-    "Quantity used to color lines if the 'By Quantity' color method is selected",
+  constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
+     "BlendMode",
+     "Blending Mode",
+     "This determines the blending mode that is applied to this plane",
+     openspace::properties::Property::Visibility::AdvancedUser
+  };
+  constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
+    "MirrorBackside",
+    "Mirror backside of image plane",
+    "If this value is set to false, the image plane will not be mirrored when "
+    "looking from the backside. This is usually desirable when the image shows "
+    "data at a specific location, but not if it is displaying text for example",
+      // @VISIBILITY(2.67)
+      openspace::properties::Property::Visibility::User
+  };
+constexpr openspace::properties::Property::PropertyInfo DataPropertyInfo = {
+    "DataProperty",
+    "Dataproperty to create a plane of from slice",
+    " ",
     // @VISIBILITY(2.67)
     openspace::properties::Property::Visibility::User
+};
+constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
+       "ColorTablePath",
+       "Path to Color Table",
+       "Color Table/Transfer Function to use for 'By Quantity' coloring",
+       openspace::properties::Property::Visibility::AdvancedUser
 };
   struct [[codegen::Dictionary(RenderableCutPlane)]] Parameters {
     // [[codegen::verbatim(FilePathInfo.description)]]
@@ -77,10 +97,23 @@ constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
     std::string axis;
     // Value to what axis
     float cutValue;
-    // Quantity to color by 
-    std::string colorQuantity;
-    // Number of meters per data distance unit
-   // float scaleToMeter;
+    // [[codegen::verbatim(DataPropertyInfo.description)]]
+    std::string dataProperty;
+    // List of ranges for which their corresponding parameters values will be
+    // colorized by. Should be entered as {min value, max value} per range
+    std::optional<std::vector<glm::vec2>> colorTableRanges;
+
+    enum class [[codegen::map(BlendMode)]] BlendMode {
+        Normal,
+        Additive
+    };
+    // [[codegen::verbatim(BlendModeInfo.description)]]
+    std::optional<BlendMode> blendMode;
+    // [[codegen::verbatim(MirrorBacksideInfo.description)]]
+    std::optional<bool> mirrorBackside;
+    // A list of paths to transferfunction .txt files containing color tables
+    // used for colorizing the fieldlines according to different parameters
+    std::optional<std::vector<std::string>> colorTablePaths;
       
   };
 #include "renderablecutplane_codegen.cpp"
@@ -95,14 +128,53 @@ documentation::Documentation RenderableCutPlane::Documentation() {
 
 RenderableCutPlane::RenderableCutPlane(const ghoul::Dictionary& dictionary)
 : RenderablePlane(dictionary),
-_filePath(FilePathInfo)
+_filePath(FilePathInfo),
+_blendMode(BlendModeInfo),
+_mirrorBackside(MirrorBacksideInfo),
+_colorTablePath(ColorTablePathInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     addProperty(_blendMode);
     
     _axis = p.axis;
     _cutValue = p.cutValue;
-    _colorQuantity = p.colorQuantity;
+    _dataproperty = p.dataProperty;
+    _colorTableRanges = *p.colorTableRanges;
+    
+
+    if (p.colorTablePaths.has_value()) {
+        _colorTablePaths = p.colorTablePaths.value();
+    }
+    else {
+        // Set a default color table, just in case the (optional) user defined paths are
+        // corrupt or not provided
+        _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
+    }
+
+    _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
+
+    _blendMode.addOptions({
+        { static_cast<int>(BlendMode::Normal), "Normal" },
+        { static_cast<int>(BlendMode::Additive), "Additive"}
+        });
+    _blendMode.onChange([this]() {
+        switch (_blendMode) {
+        case static_cast<int>(BlendMode::Normal):
+            setRenderBinFromOpacity();
+            break;
+        case static_cast<int>(BlendMode::Additive):
+            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+            break;
+        default:
+            throw ghoul::MissingCaseException();
+        }
+        });
+
+    _opacity.onChange([this]() {
+        if (_blendMode == static_cast<int>(BlendMode::Normal)) {
+            setRenderBinFromOpacity();
+        }
+        });
     
     setRenderBin(Renderable::RenderBin::Opaque);
 }
@@ -112,9 +184,9 @@ bool RenderableCutPlane::isReady() const {
 }
 
 void RenderableCutPlane::initialize() {
-//    _transferFunction = std::make_unique<TransferFunction>(
-//        absPath(_colorTablePaths[0]).string()
-//    );
+    _transferFunction = std::make_unique<TransferFunction>(
+        absPath(_colorTablePaths[0]).string()
+    );
 }
 
 void RenderableCutPlane::initializeGL() {
@@ -122,12 +194,14 @@ void RenderableCutPlane::initializeGL() {
 
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glGenBuffers(1, &_vertexColorBuffer);
     loadTexture();
     _axis1 *= _size.value().x;
     _axis2 *= _size.value().y;
-    std::cout << "hej efter load " <<_axis1 << " " << _axis2;
     _size = {_axis1,_axis2};
     RenderablePlane::initializeGL();
+    glGenBuffers(1, &_vertexColorBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
     
     // TODO: Call shaders when implemented
     _shader = BaseModule::ProgramObjectManager.request(
@@ -140,6 +214,7 @@ void RenderableCutPlane::initializeGL() {
             );
         }
     );
+   
 }
 
 void RenderableCutPlane::deinitializeGL() {
@@ -149,6 +224,9 @@ void RenderableCutPlane::deinitializeGL() {
     _quad = 0;
 
     glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+
+    glDeleteBuffers(1, &_vertexColorBuffer);
     _vertexPositionBuffer = 0;
 
     BaseModule::ProgramObjectManager.release(
@@ -201,20 +279,23 @@ void RenderableCutPlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 
-    ghoul::opengl::TextureUnit unit;
-    unit.activate();
+    ghoul::opengl::TextureUnit textureUnit;
+    textureUnit.activate();
+    _transferFunction->bind(); // Calls update internally
+    _shader->setUniform("colorTable", textureUnit);
+   _shader->setUniform("colorTableRange", _colorTableRanges[0]);
     bindTexture();
     defer { unbindTexture(); };
 
-    _shader->setUniform("texture1", unit);
+    _shader->setUniform("texture1", textureUnit);
 
 //    _shader->setUniform("multiplyColor", _multiplyColor);
 
-//    bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
-//    if (additiveBlending) {
-//        glDepthMask(false);
-//        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-//    }
+    bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
+    if (additiveBlending) {
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
     glDisable(GL_CULL_FACE);
 
     glBindVertexArray(_quad);
@@ -232,13 +313,14 @@ void RenderableCutPlane::render(const RenderData& data, RendererTasks&) {
 
 void RenderableCutPlane::update(const UpdateData& data) {
     RenderablePlane::update(data);
+   // updateVertexColorBuffer();
 }
 
-//void RenderableCutPlane::bindTexture() {
-//    ghoul::opengl::Texture* rawTexture = _texture.get();
-//    ghoul_assert(_texture, "Texture must be loaded before binding");
-//    rawTexture->bind();
-//}
+void RenderableCutPlane::bindTexture() {
+    ghoul::opengl::Texture* rawTexture = _texture.get();
+    ghoul_assert(_texture, "Texture must be loaded before binding");
+    rawTexture->bind();
+}
 
 
 void RenderableCutPlane::loadTexture()
@@ -256,9 +338,7 @@ void RenderableCutPlane::loadTexture()
     };
     // Create a vector with the names of the data
     std::vector<std::string> dataNames = { "multicolor", "singlecolor" };
-    //Create vector that contains both data slices
-    std::vector<std::vector<std::vector<float>>> slices;
-    
+  
     // Auto-fill the vector with numbers from 1 to 50 in a cyclic manner
     int count = 1;
     for (int i = 0; i < 50; i++) {
@@ -272,7 +352,10 @@ void RenderableCutPlane::loadTexture()
     
     slices.push_back(vec1);
     slices.push_back(vec2);
-    
+
+    //Create vector that contains both data slices
+    // _slice = _interpolatedData;
+
     int axisIndex = 2;
       std::transform(_axis.begin(), _axis.end(), _axis.begin(),
                       [](unsigned char c) { return std::tolower(c); });
@@ -289,6 +372,7 @@ void RenderableCutPlane::loadTexture()
      _axis2 = abs(_axisDim[1][0]) + abs(_axisDim[1][1]);
     
     _texture = createFloatTexture(slices[0]);
+    
     
 //    CREATE TEXTURE OBJECT
 //    unsigned int hash = ghoul::hashCRC32File(_filePath);
@@ -334,11 +418,39 @@ std::unique_ptr<ghoul::opengl::Texture> RenderableCutPlane::createFloatTexture(c
             GL_FLOAT
         );
     // Set texture parameters
-    texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    //texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
     return texture;
 }
 
+void RenderableCutPlane::updateVertexColorBuffer() {
+    //if (_activeStateIndex == -1) { return; }
+    glBindVertexArray(_quad);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+    
+    std::vector<float> flatVector;
+    for (const auto& innerVector : slices[0]){
+        flatVector.insert(flatVector.end(), innerVector.begin(), innerVector.end());
+    }
+    bool isSuccessful = true;
+    // use colorquan as argument to get the wanted dataprop in the selected slice 
+    const std::vector<float>& quantities = flatVector;
+
+    if (isSuccessful) {
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            quantities.size() * sizeof(float),
+            quantities.data(),
+            GL_STATIC_DRAW
+        );
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+}
 
 }// namespace openspace
 
