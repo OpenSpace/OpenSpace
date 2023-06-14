@@ -977,7 +977,9 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
         }
     }
 
-    ppData.allMissingData = allIsMissing;
+    if (allIsMissing) {
+        rawTile.error = RawTile::ReadError::Failure;
+    }
 
     return ppData;
 }
