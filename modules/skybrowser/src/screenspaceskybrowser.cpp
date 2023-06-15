@@ -159,7 +159,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     _textureQuality.onChange([this]() { _isDimensionsDirty = true; });
 
     if (global::windowDelegate->isMaster()) {
-        _borderColor = randomBorderColor();
+        _wwtBorderColor = randomBorderColor();
     }
 
     _useRadiusAzimuthElevation.onChange(

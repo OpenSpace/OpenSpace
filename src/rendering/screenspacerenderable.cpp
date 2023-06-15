@@ -43,8 +43,9 @@
 #include <variant>
 
 namespace {
-    constexpr std::array<const char*, 6> UniformNames = {
-        "color", "opacity", "mvpMatrix", "tex", "backgroundColor", "gamma"
+    constexpr std::array<const char*, 8> UniformNames = {
+        "color", "opacity", "mvpMatrix", "tex", "backgroundColor", "gamma", "borderColor",
+        "borderWidth"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -153,6 +154,20 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BorderWidthInfo = {
+        "BorderWidth",
+        "Border Width",
+        "The width of the border",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BorderColorInfo = {
+        "BorderColor",
+        "Border Color",
+        "Sets the color of the border",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
     float wrap(float value, float min, float max) {
         return glm::mod(value - min, max - min) + min;
     }
@@ -187,6 +202,12 @@ namespace {
 
         // [[codegen::verbatim(GammaInfo.description)]]
         std::optional<glm::vec3> radiusAzimuthElevation;
+
+        // [[codegen::verbatim(BorderWidthInfo.description)]]
+        std::optional<float> borderWidth;
+
+        // [[codegen::verbatim(BorderColorInfo.description)]]
+        std::optional<glm::vec3> borderColor [[codegen::color()]];
 
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
@@ -292,6 +313,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec4(1.f)
     )
     , _delete(DeleteInfo)
+    , _borderWidth(BorderWidthInfo, 0.f, 0.f, 1000.f)
+    , _borderColor(BorderColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -328,6 +351,13 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(Fadeable::_fade);
     addProperty(_localRotation);
 
+    addProperty(_borderColor);
+    addProperty(_borderWidth);
+
+    _borderWidth = p.borderWidth.value_or(_borderWidth);
+
+    _borderColor = p.borderColor.value_or(_borderColor);
+    _borderColor.setViewOption(properties::Property::ViewOptions::Color);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -498,7 +528,7 @@ glm::vec2 ScreenSpaceRenderable::screenSpacePosition() {
     return glm::vec2(_cartesianPosition.value());
 }
 
-glm::vec2  ScreenSpaceRenderable::screenSpaceDimensions() {
+glm::vec2 ScreenSpaceRenderable::screenSpaceDimensions() {
     float ratio = static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y);
     return glm::vec2(2.f * _scale * ratio, 2.f * _scale);
 }
@@ -596,11 +626,18 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     glDisable(GL_CULL_FACE);
 
     _shader->activate();
+    // Calculate the border from pixels to UV coordinates
+    glm::vec2 borderUV = glm::vec2(
+        _borderWidth / static_cast<float>(_objectSize.x),
+        _borderWidth / static_cast<float>(_objectSize.y)
+    );
 
     _shader->setUniform(_uniformCache.color, _multiplyColor);
     _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
     _shader->setUniform(_uniformCache.gamma, _gamma);
+    _shader->setUniform(_uniformCache.borderWidth, borderUV);
+    _shader->setUniform(_uniformCache.borderColor, _borderColor);
     _shader->setUniform(
         _uniformCache.mvp,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
