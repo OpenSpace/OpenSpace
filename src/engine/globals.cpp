@@ -38,6 +38,7 @@
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/keyframerecording.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
@@ -96,6 +97,7 @@ namespace {
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::NavigationHandler) +
         sizeof(interaction::SessionRecording) +
+        sizeof(interaction::KeyframeRecording) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
@@ -330,6 +332,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    keyframeRecording = new (currentPos) interaction::KeyframeRecording;
+    ghoul_assert(keyframeRecording, "No keyframeRecording");
+    currentPos += sizeof(interaction::KeyframeRecording);
+#else // ^^^ WIN32 / !WIN32 vvv
+    keyframeRecording = new interaction::KeyframeRecording(true);
+#endif // WIN32
+
+#ifdef WIN32
     rootPropertyOwner = new (currentPos) properties::PropertyOwner({ "" });
     ghoul_assert(rootPropertyOwner, "No rootPropertyOwner");
     currentPos += sizeof(properties::PropertyOwner);
@@ -388,6 +398,7 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
     rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
+    rootPropertyOwner->addPropertySubOwner(global::keyframeRecording);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
     rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
 
@@ -449,6 +460,13 @@ void destroy() {
     sessionRecording->~SessionRecording();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete sessionRecording;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'KeyframeRecording'");
+#ifdef WIN32
+    keyframeRecording->~KeyframeRecording();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete keyframeRecording;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'NavigationHandler'");
