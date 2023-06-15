@@ -31,6 +31,8 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <openspace/rendering/transferfunction.h>
+
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class Texture; }
 
@@ -56,24 +58,44 @@ public:
     static documentation::Documentation Documentation();
     
 protected:
-//    virtual void bindTexture() override;
+    virtual void bindTexture() override;
 
     
 private:
     void loadTexture();
+    void updateVertexColorBuffer();
     std::unique_ptr<ghoul::opengl::Texture> createFloatTexture(const std::vector<std::vector<float>>& data);
 
     properties::StringProperty _filePath;
     std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    std::unique_ptr<TransferFunction> _transferFunction;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     std::unique_ptr<ghoul::filesystem::File> _sourceFile;
     std::string _axis;
     float _cutValue;
-    std::string _colorQuantity;
+    std::string _dataproperty;
+    // Used to save property for later initialization
+    int _colorQuantityTemp = 0;
+    // Color table/transfer function for "By Quantity" coloring
+    properties::StringProperty _colorTablePath;
+    // Paths to color tables. One for each 'extraQuantity'
+    std::vector<std::string> _colorTablePaths;
+    // Values represents min & max values represented in the color table
+    std::vector<glm::vec2> _colorTableRanges;
 
     std::vector<std::vector<int>> _axisDim;
     int _axis1;
     int _axis2;
+
+    properties::OptionProperty _blendMode;
+    properties::BoolProperty _mirrorBackside;
+
+    // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
+    // the lines
+    GLuint _vertexColorBuffer = 0;
+
+    std::vector<std::vector<std::vector<float>>> slices;
+
 
 };
 

@@ -28,6 +28,7 @@
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
+layout(location = 2) in float in_color_scalar;
 
 out vec4 vs_gPosition;
 out vec3 vs_gNormal;
@@ -43,15 +44,22 @@ uniform sampler1D colorTable;
 uniform vec2 colorTableRange;
 out vec4 vs_color;
 
-/*vec4 getTransferFunctionColor() {
+vec4 getTransferFunctionColor() {
   // Remap the color scalar to a [0,1] range
   float lookUpVal =
     (in_color_scalar - colorTableRange.x) / (colorTableRange.y - colorTableRange.x);
   return texture(colorTable, lookUpVal);
-}*/
+}
 
 
 void main() {
+
+ bool hasColor = true;
+
+  if (hasColor) {
+      vec4 quantityColor = getTransferFunctionColor();
+      vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
+  }
   vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
   vec4 positionClipSpace = modelViewProjectionTransform * position;
   vec4 positionScreenSpace = z_normalization(positionClipSpace);
