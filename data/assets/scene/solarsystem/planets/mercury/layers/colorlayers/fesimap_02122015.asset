@@ -15,7 +15,8 @@ local Layer = {
   Identifier = "fesimap_02122015",
   Enabled = asset.enabled,
   FilePath = texturesPath .. "fesimap_02122015.png",
-  BlendMode = "Multiply"
+  BlendMode = "Multiply",
+  CacheSettings = { Enabled = false }
 }
 
 

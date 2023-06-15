@@ -104,7 +104,6 @@ struct TileMetaData {
     std::array<float, 4> maxValues;
     std::array<float, 4> minValues;
     std::array<bool, 4> hasMissingData;
-    bool allMissingData = false;
     uint8_t nValues = 0;
 };
 

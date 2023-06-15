@@ -13,7 +13,8 @@ local texturesPath = asset.syncedResource({
 local Clouds = {
   Identifier = "Clouds",
   FilePath = texturesPath .. "venus_clouds.jpg",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  CacheSettings = { Enabled = false }
 }
 
 local Layer = {
@@ -23,7 +24,8 @@ local Layer = {
   Settings = {
     Opacity = 0.48,
     Gamma = 0.48
-  }
+  },
+  CacheSettings = { Enabled = false }
 }
 
 

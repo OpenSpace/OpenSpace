@@ -165,6 +165,14 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
+        "Delete",
+        "Delete",
+        "Triggering this will remove this GeoJson component from its globe. Note that the "
+        "GUI may have to be reloaded for the change to be reflect in the user interface.",
+        openspace::properties::Property::Visibility::User
+    };
+
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
         // The unique identifier for this layer. May not contain '.' or spaces
         std::string identifier;
@@ -305,6 +313,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         glm::vec2(90.f, 180.f)
     )
     , _flyToFeature(FlyToFeatureInfo)
+    , _deleteThisComponent(DeleteInfo)
+    , _deletePropertyOwner({ "Deletion", "Deletion" })
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _featuresPropertyOwner({ "Features", "Features" })
 {
@@ -403,6 +413,12 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _flyToFeature.onChange([this]() { flyToFeature(); });
     addProperty(_flyToFeature);
+
+    // Add delete trigger under its own property owner, to make it more difficult to
+    // access by mistake
+    _deleteThisComponent.onChange([this]() { triggerDeletion(); });
+    _deletePropertyOwner.addProperty(_deleteThisComponent);
+    addPropertySubOwner(_deletePropertyOwner);
 
     readFile();
 
@@ -807,6 +823,16 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
         fmt::format(
             "openspace.globebrowsing.flyToGeo(\"{}\", {}, {}, {})",
             _globeNode.owner()->identifier(), lat, lon, d
+        ),
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
+
+void GeoJsonComponent::triggerDeletion() const {
+    global::scriptEngine->queueScript(
+        fmt::format(
+            "openspace.globebrowsing.deleteGeoJson(\"{}\", \"{}\")",
+            _globeNode.owner()->identifier(), _identifier
         ),
         scripting::ScriptEngine::RemoteScripting::Yes
     );

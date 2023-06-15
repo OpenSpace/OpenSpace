@@ -15,7 +15,8 @@ local Layer = {
   Identifier = "ssimap_02122015",
   Enabled = asset.enabled,
   FilePath = texturesPath .. "ssimap_02122015.png",
-  BlendMode = "Multiply"
+  BlendMode = "Multiply",
+  CacheSettings = { Enabled = false }
 }
 
 

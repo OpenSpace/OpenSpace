@@ -115,6 +115,8 @@ private:
      */
     void flyToFeature(std::optional<int> index = std::nullopt) const;
 
+    void triggerDeletion() const;
+
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
     properties::BoolProperty _enabled;
@@ -145,6 +147,9 @@ private:
     properties::Vec2Property _centerLatLong;
     float _bboxDiagonalSize = 0.f;
     properties::TriggerProperty _flyToFeature;
+
+    properties::PropertyOwner _deletePropertyOwner;
+    properties::TriggerProperty _deleteThisComponent;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
     std::unique_ptr<LightSource> _defaultLightSource;

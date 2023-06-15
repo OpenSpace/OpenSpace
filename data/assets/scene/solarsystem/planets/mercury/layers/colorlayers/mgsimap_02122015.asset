@@ -19,7 +19,8 @@ local Layer = {
     Gamma = 1.33,
     Multiplier = 1.15
   },
-  BlendMode = "Multiply"
+  BlendMode = "Multiply",
+  CacheSettings = { Enabled = false }
 }
 
 
