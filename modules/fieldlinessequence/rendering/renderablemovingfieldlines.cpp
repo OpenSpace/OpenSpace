@@ -246,7 +246,6 @@ namespace openspace {
         std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
         _providedSeedFilePath = p.providedSeedPointFilePath;
-        //_providedSeedCSVFilePath = p.providedSeedPointCSVFilePath;
         _useSeedPointProvider = p.useSeedPointProvider.value_or(_useSeedPointProvider);
         _seedPointsFromProvider = p.seedPointsFromProvider.value_or(_seedPointsFromProvider);
         _extraVars = p.extraVariables.value_or(_extraVars);
@@ -829,8 +828,6 @@ namespace openspace {
             addCoordinatesToSeedPoints(data[i].OpenNorth, seedPoints);
             addCoordinatesToSeedPoints(data[i].OpenSouth, seedPoints);
 
-            // TODO make understandable - make function - temp code until better solution
-            // t = the time format as a number, looks really confusing...
             //add birthtime for each set of seedpoints
             birthTimes.push_back(startTime);
         }
