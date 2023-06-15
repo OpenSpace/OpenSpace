@@ -49,8 +49,8 @@ const std::string STRING_NOT_SET = "<string not set>";
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
-    constexpr const std::array<const char*, 20> UniformNames = {
-        "color", "size", "modelMatrix", "cameraUp", "screenSize",
+    constexpr const std::array<const char*, 21> UniformNames = {
+        "color", "fade", "size", "modelMatrix", "cameraUp", "screenSize",
         "cameraViewProjectionMatrix", "eyePosition", "sizeOption",
         "colormapTexture", "colormapMin", "colormapMax", "colormapNanMode",
         "colormapNanColor", "colormapEnabled", "linearSizeMin", "linearSizeMax",
@@ -74,7 +74,7 @@ namespace {
         "Identifier",
         "Identifier used as part of key to access data in centralized central storage."
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo PointUnitInfo = {
         "PointUnit",
         "Point Unit",
@@ -146,13 +146,13 @@ namespace {
         "Velocity Time Unit",
         "The time unit of the velocity data."
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo VelocityDateRecordedInfo = {
         "VelocityDateRecorded",
         "Velocity Date Recorded",
         "The date the velocity data was recorded."
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo VelocityNanModeInfo = {
         "VelocityNanMode",
         "Velocity NaN Mode",
@@ -222,7 +222,7 @@ namespace {
 
         // [[codegen::verbatim(MotionEnabledInfo.description)]]
         std::optional<bool> motionEnabled;
-        
+
         // [[codegen::verbatim(NameInfo.description)]]
         std::optional<std::string> name;
 
@@ -269,7 +269,7 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _identifier = p.identifier.value();
-    
+
     _name = p.name.value_or(_name);
     _name.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_name);
@@ -277,6 +277,8 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
+
+    addProperty(_fade);
 
     _size = p.size.value_or(_size);
     addProperty(_size);
@@ -465,6 +467,7 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
     );
 
     _shaderProgram->setUniform(_uniformCache.color, _color);
+    _shaderProgram->setUniform(_uniformCache.fade, _fade);
 
     _shaderProgram->setUniform(_uniformCache.size, _size);
     _shaderProgram->setUniform(_uniformCache.sizeOption, _sizeOption);
@@ -571,7 +574,7 @@ void RenderablePointsCloud::update(const UpdateData&) {
             nullptr
         );
 
-        if (_hasLoadedColormapAttributeData) { 
+        if (_hasLoadedColormapAttributeData) {
             GLint colormapScalarsAttribute = _shaderProgram->attributeLocation("in_colormapAttributeScalar");
             glEnableVertexAttribArray(colormapScalarsAttribute);
             glVertexAttribPointer(
@@ -584,7 +587,7 @@ void RenderablePointsCloud::update(const UpdateData&) {
             );
         }
 
-        if (_hasLoadedLinearSizeAttributeData) { 
+        if (_hasLoadedLinearSizeAttributeData) {
             GLint linearSizeAttributeScalar = _shaderProgram->attributeLocation("in_linearSizeAttributeScalar");
             glEnableVertexAttribArray(linearSizeAttributeScalar);
             glVertexAttribPointer(
@@ -597,7 +600,7 @@ void RenderablePointsCloud::update(const UpdateData&) {
             );
         }
 
-        if (_hasLoadedVelocityData) { 
+        if (_hasLoadedVelocityData) {
             GLint velocityAttribute = _shaderProgram->attributeLocation("in_velocity");
             glEnableVertexAttribArray(velocityAttribute);
             glVertexAttribPointer(
@@ -656,7 +659,7 @@ bool RenderablePointsCloud::checkDataStorage() {
 
 void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareIntegrationModule) {
     // Fetch point data from module's centralized storage
-    std::vector<float> pointData; 
+    std::vector<float> pointData;
     if (!softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::DataPoints, pointData)) {
         LERROR("There was an issue trying to fetch the point data from the centralized storage.");
         return;
@@ -688,7 +691,7 @@ void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareInt
             value *= toMeters;
         }
     }
-    
+
     // Assign point data to point data slice
     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
     pointDataSlice->clear();
@@ -697,7 +700,7 @@ void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareInt
     softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::DataPoints);
     LINFO(fmt::format(
         "New point data ({} points) has loaded. {} values are NaN values. "
-        "Points with at least one NaN value are hidden.", 
+        "Points with at least one NaN value are hidden.",
         (pointData.size() / 3), nNans
     ));
 }
@@ -771,7 +774,7 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
     auto velocityDataSlice = getDataSlice(DataSliceKey::Velocity);
     velocityDataSlice->clear();
     velocityDataSlice->assign(velocityData.begin(), velocityData.end());
-    
+
     LINFO(
         fmt::format(
             "Viewing {} points with velocity ({} points in total). "
@@ -964,7 +967,7 @@ bool RenderablePointsCloud::shouldLoadVelocityData(SoftwareIntegrationModule* so
         (
             _velocityUnitsAreDirty
             || softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::VelocityData)
-        ) 
+        )
         && _velocityDistanceUnit.value() != STRING_NOT_SET
         && _velocityTimeUnit.value() != STRING_NOT_SET
     );

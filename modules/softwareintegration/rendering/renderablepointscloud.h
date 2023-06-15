@@ -86,7 +86,7 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
     UniformCache(
-        color, size, modelMatrix, cameraUp, screenSize,
+        color, fade, size, modelMatrix, cameraUp, screenSize,
         cameraViewProjectionMatrix, eyePosition, sizeOption,
         colormapTexture, colormapMin, colormapMax, colormapNanMode,
         colormapNanColor, colormapEnabled, linearSizeMin, linearSizeMax,
@@ -115,8 +115,8 @@ private:
     properties::StringProperty _velocityTimeUnit;
     properties::IVec3Property _velocityDateRecorded;
     properties::IntProperty _velocityNanMode;
-    
-    
+
+
     std::optional<std::string> _identifier = std::nullopt;
 
     bool _pointUnitIsDirty = false;
@@ -125,7 +125,7 @@ private:
     bool _hasLoadedColormap = false;
 
     bool _hasLoadedLinearSizeAttributeData = false;
-    
+
     double _t0 = 0.0;
     bool _velocityDateIsDirty = false;
     bool _velocityUnitsAreDirty = false;

@@ -40,6 +40,7 @@ in float ta;
 in vec3 ge_velocity;
 
 uniform vec4 color;
+uniform float fade;
 
 uniform float colormapMin;
 uniform float colormapMax;
@@ -67,25 +68,25 @@ Fragment getFragment() {
         discard;
     }
 
-    // Don't show points with no value for that 
+    // Don't show points with no value for that
     // attribute, if ColormapNanRenderMode is Hidden
     if (
-        colormapEnabled 
-        && isnan(ge_colormapAttributeScalar) 
+        colormapEnabled
+        && isnan(ge_colormapAttributeScalar)
         && colormapNanMode == COLORMAPNANMODE_HIDDEN
     ) {
         discard;
     }
-    
+
     // ========== Velocity NaN mode ==========
-    // Don't show points with no value for 
+    // Don't show points with no value for
     // velocity, if VelocityNanRenderMode is Hidden
     bool velocityIsNan = (isnan(ge_velocity[0]) ||
                           isnan(ge_velocity[1]) ||
                           isnan(ge_velocity[2]));
-    if (motionEnabled && 
-        velocityIsNan && 
-        velocityNanMode == VELOCITYNANMODE_HIDDEN) 
+    if (motionEnabled &&
+        velocityIsNan &&
+        velocityNanMode == VELOCITYNANMODE_HIDDEN)
     {
         discard;
     } // else the point is left static
@@ -99,7 +100,7 @@ Fragment getFragment() {
 
     vec4 outputColor = color;
     if (colormapEnabled) {
-        // Set colormapNanColor if point doesn't have a value for the attribute 
+        // Set colormapNanColor if point doesn't have a value for the attribute
         if (isnan(ge_colormapAttributeScalar) && colormapNanMode == COLORMAPNANMODE_COLOR) {
             outputColor = vec4(colormapNanColor.rgb, colormapNanColor.a);
         }
@@ -108,6 +109,8 @@ Fragment getFragment() {
             outputColor = vec4(colorFromColormap.rgb, colorFromColormap.a * color.a);
         }
     }
+
+    outputColor.a *= fade;
 
     Fragment frag;
     frag.color = outputColor * vec4(circle);
