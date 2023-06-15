@@ -60,6 +60,7 @@ namespace interaction {
     class KeyframeRecording;
     class NavigationHandler;
     class SessionRecording;
+    class KeyframeRecording;
 } // namespace interaction
 namespace properties { class PropertyOwner; }
 namespace scripting {
@@ -97,6 +98,7 @@ inline interaction::KeybindingManager* keybindingManager;
 inline interaction::KeyframeRecording* keyframeRecording;
 inline interaction::NavigationHandler* navigationHandler;
 inline interaction::SessionRecording* sessionRecording;
+inline interaction::KeyframeRecording* keyframeRecording;
 inline properties::PropertyOwner* rootPropertyOwner;
 inline properties::PropertyOwner* screenSpaceRootPropertyOwner;
 inline properties::PropertyOwner* userPropertyOwner;

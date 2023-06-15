@@ -65,6 +65,8 @@ set(OPENSPACE_SOURCE
   interaction/scriptcamerastates.cpp
   interaction/sessionrecording.cpp
   interaction/sessionrecording_lua.inl
+  interaction/keyframerecording.cpp
+  interaction/keyframerecording_lua.inl
   interaction/websocketinputstate.cpp
   interaction/websocketcamerastates.cpp
   interaction/tasks/convertrecfileversiontask.cpp
@@ -256,6 +258,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mousecamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyframerecording.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketcamerastates.h
