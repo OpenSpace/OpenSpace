@@ -104,8 +104,8 @@ namespace {
         "Number of Accurate Trail Points",
         "The number of vertices, each side of the object, that will be recalculated "
         "for greater accuracy. This also ensures that the object connects with the trail.",
-            // @VISIBILITY(?)
-            openspace::properties::Property::Visibility::AdvancedUser
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {
@@ -313,7 +313,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
         glBufferData(
             GL_ARRAY_BUFFER,
-            _vertexArray.size() * sizeof(TrailVBOLayout),
+            _vertexArray.size() * sizeof(TrailVBOLayout<float>),
             _vertexArray.data(),
             GL_STATIC_DRAW
         );
@@ -349,7 +349,6 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
             // Second segment
             _secondSegRenderInformation.first = _firstSegRenderInformation.count;
-
             _secondSegRenderInformation.count = static_cast<GLsizei>(
                 _vertexArray.size() - _firstSegRenderInformation.count
             );
@@ -374,7 +373,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 ;
 
             // All points before the object
-            glm::dvec3 v(p.x, p.y, p.z);
+            glm::dvec3 v = glm::dvec3(p.x, p.y, p.z);
             for (int i = 0; i < prePaddingDelta; ++i) {
                 const int floatPointIndex = (_firstSegRenderInformation.count - prePaddingDelta) + i;
                 
@@ -395,12 +394,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
                 double mult = 0.0;
                 if (i == prePaddingDelta - 1) {
-                    if (i == 0) {
-                        mult = 1.0;
-                    }
-                    else {
-                        mult = 0.0;
-                    }
+                    mult = (i == 0) ? 1.0 : 0.0;
                 }
                 else {
                     mult = (prePaddingDelta - i) / static_cast<double>(prePaddingDelta);
@@ -441,21 +435,16 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 glm::dvec3 dv = fp - dp;
                 glm::dvec3 newPoint = dp - v;
 
-                double mult = 0.0;
-                if (i == postPaddingDelta - 1) {
-                    mult = 1.0;
-                }
-                else {
-                    mult = 1.0 - 
-                        (postPaddingDelta - i) / static_cast<double>(postPaddingDelta);
-                }
+                double mult = (i == postPaddingDelta - 1) ? 
+                    1.0 :
+                    1.0 - (postPaddingDelta - i) / static_cast<double>(postPaddingDelta);
 
                 newPoint = newPoint + dv * mult;
                 _replacementPoints.push_back({
                     static_cast<float>(newPoint.x),
                     static_cast<float>(newPoint.y),
                     static_cast<float>(newPoint.z)
-                    });
+                });
             }
 
 
@@ -473,7 +462,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             glBindBuffer(GL_ARRAY_BUFFER, _replacementPointsRenderInformation._vBufferID);
             glBufferData(
                 GL_ARRAY_BUFFER,
-                _replacementPoints.size() * sizeof(TrailVBOLayout),
+                _replacementPoints.size() * sizeof(TrailVBOLayout<float>),
                 _replacementPoints.data(),
                 GL_DYNAMIC_DRAW
             );
@@ -553,7 +542,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         glBindBuffer(GL_ARRAY_BUFFER, _floatingRenderInformation._vBufferID);
         glBufferData(
             GL_ARRAY_BUFFER,
-            _auxiliaryVboData.size() * sizeof(TrailVBOLayout),
+            _auxiliaryVboData.size() * sizeof(TrailVBOLayout<float>),
             _auxiliaryVboData.data(),
             GL_DYNAMIC_DRAW
         );

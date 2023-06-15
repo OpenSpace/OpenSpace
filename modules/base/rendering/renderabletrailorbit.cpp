@@ -229,8 +229,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // floating value
             glBufferSubData(
                 GL_ARRAY_BUFFER,
-                _primaryRenderInformation.first * sizeof(TrailVBOLayout),
-                sizeof(TrailVBOLayout),
+                _primaryRenderInformation.first * sizeof(TrailVBOLayout<float>),
+                sizeof(TrailVBOLayout<float>),
                 _vertexArray.data() + _primaryRenderInformation.first
             );
         }
@@ -242,7 +242,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // array
             glBufferData(
                 GL_ARRAY_BUFFER,
-                _vertexArray.size() * sizeof(TrailVBOLayout),
+                _vertexArray.size() * sizeof(TrailVBOLayout<float>),
                 _vertexArray.data(),
                 GL_STREAM_DRAW
             );
@@ -269,8 +269,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             auto upload = [this](int begin, int length) {
                 glBufferSubData(
                     GL_ARRAY_BUFFER,
-                    begin * sizeof(TrailVBOLayout),
-                    sizeof(TrailVBOLayout) * length,
+                    begin * sizeof(TrailVBOLayout<float>),
+                    sizeof(TrailVBOLayout<float>) * length,
                     _vertexArray.data() + begin
                 );
             };
@@ -493,7 +493,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     glm::vec3 maxVertex(-std::numeric_limits<float>::max());
     glm::vec3 minVertex(std::numeric_limits<float>::max());
 
-    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout& vertexData) {
+    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout<float>& vertexData) {
         maxVertex.x = std::max(maxVertex.x, vertexData.x);
         maxVertex.y = std::max(maxVertex.y, vertexData.y);
         maxVertex.z = std::max(maxVertex.z, vertexData.z);

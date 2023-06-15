@@ -88,7 +88,7 @@ private:
     /// Dirty flag to determine whether the stride information needs to be changed
     bool _subsamplingIsDirty = true;
 
-    std::array<TrailVBOLayout, 2> _auxiliaryVboData = {};
+    std::array<TrailVBOLayout<float>, 2> _auxiliaryVboData = {};
 
     /// The conversion of the _startTime into the internal time format
     double _start = 0.0;
@@ -113,10 +113,10 @@ private:
     // Contains all timestamps corresponding to the positions in _vertexArray
     std::vector<double> _timeVector;
 
-    std::vector<TrailDVBOLayout> _dVertexArray;
+    std::vector<TrailVBOLayout<double>> _dVertexArray;
 
     // Contains all the points that we will render in model-space
-    std::vector<TrailVBOLayout> _replacementPoints;
+    std::vector<TrailVBOLayout<float>> _replacementPoints;
 };
 
 } // namespace openspace

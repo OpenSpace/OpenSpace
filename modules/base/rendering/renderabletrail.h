@@ -112,19 +112,15 @@ protected:
     /// Returns the documentation entries that the con
     static documentation::Documentation Documentation();
 
-    /// The layout of the VBOs
+    /// The layout of the VBOs (use float if sending as positions to shader)
+    template <typename T>
     struct TrailVBOLayout {
-        float x, y, z;
-    };
-
-    /// The layout of the VBOs (double precision)
-    struct TrailDVBOLayout {
-        double x, y, z;
+        T x, y, z;
     };
 
     /// The backend storage for the vertex buffer object containing all points for this
     /// trail.
-    std::vector<TrailVBOLayout> _vertexArray;
+    std::vector<TrailVBOLayout<float>> _vertexArray;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
