@@ -198,6 +198,7 @@ private:
     std::vector<std::string> _extraVars;
     size_t _nPointsOnPathLine = 200;
     size_t _nPointsOnFieldlines = 100;
+    std::string _startTimeStr = "";
     // which tracing vaiable to trace. 'b' for fieldline is default
     std::string _tracingVariable = "u_perp_b";
 

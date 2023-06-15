@@ -68,6 +68,7 @@ namespace openspace {
         std::vector <Seedpoint> findAndAddNightsideSeedPoints(
             std::vector<Seedpoint>& seedPoints,
             std::vector<double>& birthTimes,
+            double startTime,
             ccmc::Kameleon* kameleon,
             const std::string& tracingVar,
             const size_t nPointsOnPathLine

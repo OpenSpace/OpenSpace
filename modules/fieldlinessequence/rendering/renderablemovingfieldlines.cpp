@@ -148,7 +148,8 @@ namespace openspace {
         std::vector<double>& birthTimes,
         double yOutherLimit,
         int numberOfFieldlines,
-        double algorithmAccuracy
+        double algorithmAccuracy,
+        double startTime
     );
 
     std::string removeNonNumeric(const std::string& str);
@@ -161,7 +162,8 @@ namespace openspace {
     void addCoordinatesOfTopologies(
         std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data,
+        double startTime
     );
 
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(
@@ -498,7 +500,7 @@ namespace openspace {
 
         double startTime = 0.0;
         double yOutherLimit = 6.0;
-        int numberOfFieldlines = 10;
+        int numberOfFieldlines = 1;
         double algorithmAccuracy = 0.01;
 
         for (const std::filesystem::path entry : _sourceFiles) {
@@ -519,10 +521,10 @@ namespace openspace {
                 // give in date-format their proper birthTime.
                 bool hasStartTime = kameleon->doesAttributeExist("start_time");
                 if (hasStartTime) {
-                    std::string startTimeStr =
+                    _startTimeStr =
                         kameleon->getGlobalAttribute("start_time").getAttributeString();
                     startTime = Time::convertTime(
-                        startTimeStr.substr(0, startTimeStr.length() - 2)
+                        _startTimeStr.substr(0, _startTimeStr.length() - 2)
                     );
                 }
                 else {
@@ -541,7 +543,8 @@ namespace openspace {
                         birthTimes,
                         yOutherLimit,
                         numberOfFieldlines,
-                        algorithmAccuracy
+                        algorithmAccuracy,
+                        startTime
                     );
                 }
                 // Use provided .csv file with seedpoints
@@ -552,7 +555,8 @@ namespace openspace {
                         birthTimes,
                         yOutherLimit,
                         numberOfFieldlines,
-                        algorithmAccuracy
+                        algorithmAccuracy,
+                        startTime
                     );
                 }
                 // Use provided .txt file with seedpoints
@@ -656,9 +660,6 @@ namespace openspace {
         CURL* curl = curl_easy_init();
         if (curl)
         {
-            /*std::filesystem::path pathToDownloadTo = initializeSyncDirectory(
-                folderNameInSyncFolder,
-                nameOfGeneratedFile);*/
             FILE* fp = fopen(pathToDownloadTo.string().c_str(), "w");
             curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
@@ -816,22 +817,22 @@ namespace openspace {
     void addCoordinatesOfTopologies(
         std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data/*,
-        std::vector<std::string>& seedPointsTopology*/
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data,
+        double startTime
     )
     {
         // Iterate through data vector
         for (size_t i = 0; i < data.size(); i++)
         {
-            addCoordinatesToSeedPoints(data[i].IMF, seedPoints); //, seedPointsTopology);
-            addCoordinatesToSeedPoints(data[i].Closed, seedPoints); //, seedPointsTopology);
-            addCoordinatesToSeedPoints(data[i].OpenNorth, seedPoints); //, seedPointsTopology);
-            addCoordinatesToSeedPoints(data[i].OpenSouth, seedPoints); //, seedPointsTopology);
+            addCoordinatesToSeedPoints(data[i].IMF, seedPoints);
+            addCoordinatesToSeedPoints(data[i].Closed, seedPoints);
+            addCoordinatesToSeedPoints(data[i].OpenNorth, seedPoints);
+            addCoordinatesToSeedPoints(data[i].OpenSouth, seedPoints);
 
             // TODO make understandable - make function - temp code until better solution
             // t = the time format as a number, looks really confusing...
-            double t = -28695.816082351092;
-            birthTimes.push_back(t);
+            //add birthtime for each set of seedpoints
+            birthTimes.push_back(startTime);
         }
     }
 
@@ -1123,7 +1124,8 @@ namespace openspace {
         std::vector<double>& birthTimes,
         double yOutherLimit,
         int numberOfFieldlines,
-        double algorithmAccuracy
+        double algorithmAccuracy,
+        double startTime
     )
     {
         if (!std::filesystem::is_regular_file(filePath) ||
@@ -1144,7 +1146,7 @@ namespace openspace {
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSetOfSeedpoints =
             selectSetOfSeedPoints(filteredSetOfSeedpoints, numberOfFieldlines);
 
-        addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSetOfSeedpoints);
+        addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSetOfSeedpoints, startTime);
 
         // TODO: Fix hard coded path // highres/3d__var_1_e20000101-020000-000.out.cdf // /3d__var_1_e20000101-020000-000.out.cdf
         std::string cdfPathTemp = "C:/Dev/OpenSpaceLocalData/simonmans/3d__var_1_e20000101-020000-000.out.cdf";
@@ -1171,6 +1173,7 @@ namespace openspace {
             fls::findAndAddNightsideSeedPoints(
                 seedPoints,
                 birthTimes,
+                startTime,
                 kameleon.get(),
                 _tracingVariable,
                 _nPointsOnPathLine
@@ -1310,8 +1313,7 @@ namespace openspace {
             i->resetTraverser();
         }
 
-        std::string targetTime = "2000-01-01T04:00:00";
-        global::timeManager->setTimeNextFrame(Time(Time::convertTime(targetTime)));
+        global::timeManager->setTimeNextFrame(Time(Time::convertTime(_startTimeStr)));
 
         for (size_t travindex = 0; travindex < _traversers.size(); travindex += 2) {
 

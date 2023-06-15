@@ -231,6 +231,7 @@ namespace openspace::fls {
     std::vector<Seedpoint> findAndAddNightsideSeedPoints (
         std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
+        double startTime,
         ccmc::Kameleon* kameleon,
         const std::string& tracingVar,
         const size_t nPointsOnPathLine
@@ -542,7 +543,7 @@ namespace openspace::fls {
             seedPoints.push_back(nightsideSeedPoints[i]);
             if ((i+1) % 4 == 0)
             {
-                birthTimes.push_back(-28000);
+                birthTimes.push_back(startTime+1000);
             }
         }
         return nightsideSeedPoints;
@@ -634,7 +635,7 @@ namespace openspace::fls {
 
             if (seedPoints[i].topology == "OPEN_NORTH" || seedPoints[i].topology == "OPEN_SOUTH")
             {
-                std::cout << std::endl << "Open seed point validation start." << std::endl;
+                std::cout << std::endl << seedPoints[i].topology << " seed point validation start." << std::endl;
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                     tracingVar,
                     tracer,
@@ -646,7 +647,7 @@ namespace openspace::fls {
 
                 //createTextFileWithFieldlineCoordinates(flowlinePositions, kameleon, innerBoundaryLimit, _nPointsOnFieldLine);
 
-                int counter = 0;
+                int counter = 1;
 
                 while(keepCheckingFlowlinesFieldline(flowlinePositions, counter))
                 {
@@ -660,7 +661,7 @@ namespace openspace::fls {
 
                     if (checkIfFieldlineIsClosed(fieldlinePositions))
                     {
-                        float stepLength = 1.5;
+                        float stepLength = 2;
                         Seedpoint lastWorkingSeedpoint;
 
                         std::cout << "CLOSED! - Move seed point" << std::endl;
@@ -685,7 +686,7 @@ namespace openspace::fls {
                     }
                     else if(checkIfFieldlineIsIMF(fieldlinePositions))
                     {
-                        float stepLength = 1.5;
+                        float stepLength = 2;
                         Seedpoint lastWorkingSeedpoint;
 
                         std::cout << "IMF! - Move seed point closer to critical point" << std::endl;
@@ -710,7 +711,7 @@ namespace openspace::fls {
                     }
                     else if (!checkIfFieldlineIsOpen(fieldlinePositions))
                     {
-                        float stepLength = 1.5;
+                        float stepLength = 2;
                         Seedpoint lastWorkingSeedpoint;
 
                         std::cout << "NOT OPEN! - Move seed point" << std::endl;
@@ -734,7 +735,7 @@ namespace openspace::fls {
                     }
                     counter++;
                 }
-                std::cout << "OPEN seed point done." << std::endl << std::endl;
+                std::cout << seedPoints[i].topology << " seed point done." << std::endl << std::endl;
             }
             else if (seedPoints[i].topology == "CLOSED")
             {
@@ -806,7 +807,7 @@ namespace openspace::fls {
                 seedPoints[i + 1].seedPoint.x = newOpenXvalue;
                 seedPoints[i + 2].seedPoint.x = newOpenXvalue;*/
 
-                std::cout << "CLOSED seed point done." << std::endl << std::endl;
+                std::cout << seedPoints[i].topology << " seed point done." << std::endl << std::endl;
 
             }
             else if (seedPoints[i].topology == "IMF")
@@ -880,7 +881,7 @@ namespace openspace::fls {
                     }
                     counter2++;
                 }
-                std::cout << "IMF seed point done." << std::endl << std::endl;
+                std::cout << seedPoints[i].topology << " seed point done." << std::endl << std::endl;
             }
 
             seedPoints = validateAndModifySeedPointsRecursive(
@@ -1090,7 +1091,7 @@ namespace openspace::fls {
 
             //std::cout << "Modifying.... Closer to Critical point by: " << stepLength << std::endl;
             std::cout << seedPoint.criticalPoint.x << " " << seedPoint.criticalPoint.y << " " << seedPoint.criticalPoint.z << " ";
-            std::cout << seedPoint.seedPoint.x << " " << seedPoint.seedPoint.y << " " << seedPoint.seedPoint.z << " ";
+            std::cout << "| " << seedPoint.seedPoint.x << " " << seedPoint.seedPoint.y << " " << seedPoint.seedPoint.z << " ";
         }
         catch (const ghoul::RuntimeError& e) {
             std::cerr << "Error: " << e.message << std::endl;
@@ -1109,7 +1110,7 @@ namespace openspace::fls {
 
             //std::cout << "Modifying.... Away from Critical point by: " << stepLength << std::endl;
             std::cout << seedPoint.criticalPoint.x << " " << seedPoint.criticalPoint.y << " " << seedPoint.criticalPoint.z << " " ;
-            std::cout << seedPoint.seedPoint.x << " " << seedPoint.seedPoint.y << " " << seedPoint.seedPoint.z << " ";
+            std::cout << "| " << seedPoint.seedPoint.x << " " << seedPoint.seedPoint.y << " " << seedPoint.seedPoint.z << " ";
         }
         catch (const ghoul::RuntimeError& e) {
             std::cerr << "Error: " << e.message << std::endl;
@@ -1121,7 +1122,7 @@ namespace openspace::fls {
     * Checks if the position of the flowLine has gone past set criteria
     */
     bool keepCheckingFlowlinesFieldline(std::vector<glm::vec3> flowlinePos, int flowlineIndex) {
-        if (flowlinePos[flowlineIndex].x > -4)
+        if (flowlinePos[flowlineIndex].x > -0.5)
         {
             return true;
         }
@@ -1200,7 +1201,7 @@ namespace openspace::fls {
 
         std::vector<glm::vec3> flowlinePositions = getPositionsFromLine(seedPointFlowline);
 
-        int flowlineIndex = 0;
+        int flowlineIndex = 1;
 
         while (keepCheckingFlowlinesFieldline(flowlinePositions, flowlineIndex))
         {
@@ -1704,10 +1705,10 @@ namespace openspace::fls {
             // for the sake of the smurfsaft
             // match the death of dayside to the birth of nigthside
             if (i < matchingSeedPoints.size() / 4) {
-                deathTime = birthTime + 700;
+                deathTime = birthTime + 1000;
             }
             else {
-                deathTime = birthTime + 4000; // increase time
+                deathTime = birthTime + 3000; // increase time
             }
 
             // TODO: Make it work dynamically
