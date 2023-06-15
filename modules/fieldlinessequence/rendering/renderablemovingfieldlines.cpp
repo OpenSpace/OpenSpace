@@ -149,7 +149,8 @@ namespace openspace {
         double yOutherLimit,
         int numberOfFieldlines,
         double algorithmAccuracy,
-        double startTime
+        double startTime,
+        const std::string cdfPath
     );
 
     std::string removeNonNumeric(const std::string& str);
@@ -543,7 +544,8 @@ namespace openspace {
                         yOutherLimit,
                         numberOfFieldlines,
                         algorithmAccuracy,
-                        startTime
+                        startTime,
+                        cdfPath
                     );
                 }
                 // Use provided .csv file with seedpoints
@@ -555,7 +557,8 @@ namespace openspace {
                         yOutherLimit,
                         numberOfFieldlines,
                         algorithmAccuracy,
-                        startTime
+                        startTime,
+                        cdfPath
                     );
                 }
                 // Use provided .txt file with seedpoints
@@ -1122,7 +1125,8 @@ namespace openspace {
         double yOutherLimit,
         int numberOfFieldlines,
         double algorithmAccuracy,
-        double startTime
+        double startTime,
+        const std::string cdfPath
     )
     {
         if (!std::filesystem::is_regular_file(filePath) ||
@@ -1145,14 +1149,11 @@ namespace openspace {
 
         addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSetOfSeedpoints, startTime);
 
-        // TODO: Fix hard coded path // highres/3d__var_1_e20000101-020000-000.out.cdf // /3d__var_1_e20000101-020000-000.out.cdf
-        std::string cdfPathTemp = "C:/Dev/OpenSpaceLocalData/simonmans/3d__var_1_e20000101-020000-000.out.cdf";
-
         size_t _nPointsOnPathLine = 200;
         std::string _tracingVariable = "u_perp_b";
 
         std::unique_ptr<ccmc::Kameleon> kameleon =
-            kameleonHelper::createKameleonObject(cdfPathTemp);
+            kameleonHelper::createKameleonObject(cdfPath);
 
         std::unique_ptr<ccmc::Interpolator> interpolator =
             std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
