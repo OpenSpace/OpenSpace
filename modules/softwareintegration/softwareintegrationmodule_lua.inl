@@ -26,6 +26,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
 
@@ -38,12 +39,14 @@ namespace {
     using namespace openspace;
 
     if (!global::windowDelegate->isMaster()) {
-        throw ghoul::lua::LuaError("Not on master...");
+        LERRORC("SoftwareIntegration::loadSessionData", "Not on main node...");
+        return "Not on main node...";
     }
 
     auto softwareIntegrationModule = global::moduleEngine->module<SoftwareIntegrationModule>();
     if (!softwareIntegrationModule) {
-        throw ghoul::lua::LuaError("Module not found...");
+        LERRORC("SoftwareIntegration::loadSessionData", "Module not found...");
+        return "Module not found...";
     }
 
     std::string errorMessage;
@@ -63,7 +66,7 @@ namespace {
     using namespace openspace;
 
     if (!global::windowDelegate->isMaster()) {
-        throw ghoul::lua::LuaError("Not on master...");
+        return "Not on main node...";
     }
 
     std::string errorMessage;

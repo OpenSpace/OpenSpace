@@ -278,8 +278,6 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    addProperty(_fade);
-
     _size = p.size.value_or(_size);
     addProperty(_size);
 
