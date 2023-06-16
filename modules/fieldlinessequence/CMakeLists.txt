@@ -25,7 +25,6 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-  rendering/renderablefieldlinessequenceold.h
   rendering/renderablefieldlinessequence.h
   util/fieldlinesstate.h
   util/commons.h
@@ -33,18 +32,17 @@ set(HEADER_FILES
   util/webfieldlineswindow.h
   util/webfieldlinesworker.h
   util/kameleonfieldlinehelper.h
-  util/dynamicdownloadermanager.h
+  util/dynamicfilesequencedownloader.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  rendering/renderablefieldlinessequenceold.cpp
   rendering/renderablefieldlinessequence.cpp
   util/fieldlinesstate.cpp
   util/webfieldlinesmanager.cpp
   util/webfieldlineswindow.cpp
   util/webfieldlinesworker.cpp
-  util/dynamicdownloadermanager.cpp
+  util/dynamicfilesequencedownloader.cpp
   util/commons.cpp
   util/kameleonfieldlinehelper.cpp
 )

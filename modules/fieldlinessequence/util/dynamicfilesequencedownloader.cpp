@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fieldlinessequence/util/dynamicdownloadermanager.h>
+#include <modules/fieldlinessequence/util/dynamicfilesequencedownloader.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/json.h>
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    constexpr const char* _loggerCat = "DynamicDownloaderManager";
+    constexpr const char* _loggerCat = "DynamicFileSequenceDownloader";
 } // namepace
 
 namespace openspace {
@@ -69,7 +69,8 @@ std::string formulateDataHttpRequest(double minTime, double maxTime,
 //    return a windows .back().first;
 //}
 
-DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string infoURL,
+DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
+    const std::string infoURL,
     const std::string dataURL,
     int nOfFilesToQ)
     : _infoURL(infoURL)
@@ -92,7 +93,7 @@ DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string
     requestAvailableFiles(httpDataRequest, _syncDir);
 }
 
-void DynamicDownloaderManager::requestDataInfo(std::string httpInfoRequest) {
+void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest) {
     HttpMemoryDownload respons(httpInfoRequest);
     respons.start();
     respons.wait();
@@ -119,7 +120,7 @@ void DynamicDownloaderManager::requestDataInfo(std::string httpInfoRequest) {
 
 }
 
-void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest,
+void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRequest,
                                                             std::filesystem::path syncDir)
 {
     // Declaring big window. pair.first is timestep, pair.second is url to be downloaded
@@ -208,7 +209,7 @@ void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest
     }
 }
 
-double DynamicDownloaderManager::calculateCadence() {
+double DynamicFileSequenceDownloader::calculateCadence() {
     double averageTime = 0.0;
     if (_availableData.size() < 2) {
         //if 0 or 1 files there is no cadence
@@ -222,7 +223,7 @@ double DynamicDownloaderManager::calculateCadence() {
     return averageTime;
 }
 
-void DynamicDownloaderManager::downloadFile() {
+void DynamicFileSequenceDownloader::downloadFile() {
     ZoneScoped;
 
     if (_filesCurrentlyDownloading.size() < 4 && _queuedFilesToDownload.size() > 0) {
@@ -240,7 +241,7 @@ void DynamicDownloaderManager::downloadFile() {
     }
 }
 
-void DynamicDownloaderManager::checkForFinishedDownloads() {
+void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
     ZoneScoped;
 
     std::vector<File*>::iterator currentIt = _filesCurrentlyDownloading.begin();
@@ -279,7 +280,9 @@ void DynamicDownloaderManager::checkForFinishedDownloads() {
 
 // negative part of this is it has to go through the whole list.
 // Maybe a std::map is better to fetch to most relavent file to download.
-std::vector<File>::iterator DynamicDownloaderManager::closestFileToNow(const double time) {
+std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(
+                                                                        const double time)
+{
     ZoneScoped;
 
     File* closest;
@@ -298,7 +301,7 @@ std::vector<File>::iterator DynamicDownloaderManager::closestFileToNow(const dou
     //return *closest;
 }
 
-void DynamicDownloaderManager::putOnQueue() {
+void DynamicFileSequenceDownloader::putOnQueue() {
     ZoneScoped;
 
     std::vector<File>::iterator end;
@@ -328,7 +331,7 @@ void DynamicDownloaderManager::putOnQueue() {
     }
 }
 
-void DynamicDownloaderManager::update(const double time, const double deltaTime) {
+void DynamicFileSequenceDownloader::update(const double time, const double deltaTime) {
     ZoneScoped;
     // First frame cannot guarantee time and deltatime has been set yet.
     if (_firstFrame) {
@@ -414,16 +417,16 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
 
 // The todo list: //
 //
-//     done
-// 1. When initializing add the already cached files to the _availableData list as downloaded
-//
-//     to be desided if we should implement this or not. TBD
+//     TBD if we should implement this or not.
 // 2. OnChange functions for if a different dataID is selected - reinitialize things
-//     note: can there be different id for other models other than wsa. If that is the
-//     case, it wouldnt make sense to change id, and therefor dataset, for the same
-//     renderable. If they are all the same model, it could work.
+//     note: can there be the same id for for different models other than wsa.
+//     If that is the case, it wouldnt make sense to change id, and therefor dataset,
+//     for the same renderable. If they are all the same model, it could work.
 //
 // 3. Rename folder for where files are being downloaded to
+//     note: same as above:
+//     if same id for diffrent models: then include modelname in path
+//     else: Only rename after what new name for dynamic downloader is
 //
 // 4. Move class into a different module + rename class
 //
@@ -431,25 +434,30 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
 //
 // 6. ultimet test: test with different data
 //
-//     done
-// 7. optamize the closestFileToNow function
-//
-//     done
-// 8. tracy
-//
 // 9. maybe make a copy of the once that gets returned with downloadedFiles() so that
 //     the originals can be removed with clearDownloaded() before returning out of
 //     downloadedFiles()
 //
+// Done items:
+//
+// 7. optamize the closestFileToNow function
+//
+// 8. tracy
+//
+// 1. When initializing add the already cached files to the _availableData
+// list as downloaded
+//
+//
+
 
 }
-void DynamicDownloaderManager::clearDownloaded() {
+void DynamicFileSequenceDownloader::clearDownloaded() {
     _downloadedFiles.clear();
 }
 
 //reference or no reference? return path to where they are instead?
 const std::vector<std::filesystem::path>&
-DynamicDownloaderManager::downloadedFiles()
+DynamicFileSequenceDownloader::downloadedFiles()
 {
     return _downloadedFiles;
     // Maybe do...

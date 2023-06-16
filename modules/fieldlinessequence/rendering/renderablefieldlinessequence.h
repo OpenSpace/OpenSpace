@@ -28,7 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
-#include <modules/fieldlinessequence/util/dynamicdownloadermanager.h>
+#include <modules/fieldlinessequence/util/dynamicfilesequencedownloader.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -150,7 +150,7 @@ private:
     std::string _dataURL = "";
     //  DynamicDownloaderManager downloads and updates renderable field lines with
     //  field lines downloaded from the web.
-    std::unique_ptr<DynamicDownloaderManager> _dynamicdownloaderManager;
+    std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
 
     // In setup it is used to scale JSON coordinates. During runtime it is used to scale
     // domain limits.
