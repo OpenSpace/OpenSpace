@@ -200,9 +200,6 @@ namespace openspace::fls {
 
         while (startIndex < flowlinePositions.size() - 1)
         {
-            // Print progress
-            std::cout << "Checking fieldline topology of the " << startIndex + 1 << " point out of " << flowlinePositions.size() << " on the flowline" << std::endl;
-
             // Get fieldline of current + 1 position on flowline
             std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
                 flowlinePositions[startIndex + 1],
@@ -293,8 +290,6 @@ namespace openspace::fls {
         }
         else if (topology == "OPEN_NORTH" || topology == "OPEN_SOUTH")
         {
-            std::cout << "entered on os ter " << std::endl;
-
             ccmc::Fieldline tempFlowline = traceAndCreateMappedPathLine(
                 tracingVar,
                 tracer,
@@ -308,7 +303,6 @@ namespace openspace::fls {
             counter = tempflowlinePositions.size() -1;
             while (counter > 0)
             {
-                std::cout << "checking " << counter << " " << topology << std::endl;
                 std::vector<glm::vec3> imfFieldlinePos = fls::getFieldlinePositions(
                     tempflowlinePositions[counter],
                     kameleon,
@@ -320,7 +314,6 @@ namespace openspace::fls {
                 {
                     if (!checkIfFieldlineIsOpen(imfFieldlinePos))
                     {
-                        std::cout << "Ooopsie " << std::endl;
                         return false;
                     }
                 }
@@ -328,7 +321,6 @@ namespace openspace::fls {
                 {
                     if (!checkIfFieldlineIsOpen(imfFieldlinePos))
                     {
-                        std::cout << "Ooopsie " << std::endl;
                         return false;
                     }
                 }
@@ -395,11 +387,6 @@ namespace openspace::fls {
         seedPoint.x = seedPoint.x - directionVector.x * factor;
         seedPoint.y = seedPoint.y - directionVector.y * factor;
         seedPoint.z = seedPoint.z - directionVector.z * factor;
-
-        std::cout << "Moved seedpoint: " << topology << std::endl;
-        std::cout << "Seedpoint pos: " << seedPoint.x <<
-            " " << seedPoint.y << " " << seedPoint.z << std::endl;
-
         return true;
     }
 
