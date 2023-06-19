@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <../modules/fieldlinessequence/ext/HighFive/include/highfive/H5File.hpp>
 
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
@@ -665,15 +666,25 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM() {
 bool RenderableFieldlinesSequence::loadHdf5StatesIntoRAM() {
     for (const std::string& filePath : _sourceFiles) {
 
-        FieldlinesState newState;
-        bool success = newState.loadStateFromHdf5(filePath, 
-            _hierarchy,
-            _scalingFactor); //asset file
-        if (success) {
-            addStateToSequence(newState);
-        }
-        else {
-            LWARNING(fmt::format("Failed to load state from: {}", filePath));
+        HighFive::File file(filePath, HighFive::File::ReadOnly);
+        const size_t nSteps = file.getNumberObjects();
+
+        float t = 0.0;
+
+        for (size_t step = 0; step < nSteps; step++) {
+            FieldlinesState newState;
+            bool success = newState.loadStateFromHdf5(filePath, 
+                _hierarchy,
+                _scalingFactor,
+                step,
+                t); //asset file
+            if (success) {
+                addStateToSequence(newState);
+            }
+            else {
+                LWARNING(fmt::format("Failed to load state from: {}", filePath));
+            }
+            t += 0.3;
         }
     }
     return true;

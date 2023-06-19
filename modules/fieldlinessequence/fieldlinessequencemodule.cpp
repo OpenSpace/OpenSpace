@@ -26,6 +26,7 @@
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 #include <modules/fieldlinessequence/rendering/renderablecutplane.h>
+#include <modules/fieldlinessequence/util/gameravolumeslicer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>

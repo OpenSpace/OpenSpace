@@ -30,6 +30,7 @@ set(HEADER_FILES
   util/commons.h
   util/kameleonfieldlinehelper.h
   rendering/renderablecutplane.h
+  util/gameravolumeslicer.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 

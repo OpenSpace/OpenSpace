@@ -224,80 +224,99 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 }
 
 #ifdef FLS_HAVE_HDF5
-bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File, std::vector<std::string> hierarchy, float scalingFactor)
+bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File, std::vector<std::string> hierarchy, float scalingFactor, size_t step, float t)
 {
-    HighFive::File file(pathToHdf5File, HighFive::File::ReadOnly);
-
+        HighFive::File file(pathToHdf5File, HighFive::File::ReadOnly);
+    //const size_t nSteps = file.getNumberObjects();
     // ----- EXTRACT THE EXTRA QUANTITY NAMES & TRIGGER TIME (same for all lines) ----- //
+        std::string StepName = file.getObjectName(step);
+        HighFive::Group g = file.getGroup(StepName); //Get the group that holds all groups for the lines
 
-    HighFive::Group g = file.getGroup("Step#0"); //Get the group that holds all groups for the lines
-    double sTime = 0.0;
-    _triggerTime = sTime;
 
-    std::string firstLineName = g.getObjectName(1);
-    HighFive::Group firstLine = g.getGroup(firstLineName);
-    const size_t nVariables = firstLine.getNumberObjects(); //Number of datasets
-    const std::vector<std::string> variableNameVec = firstLine.listObjectNames(); //All names of dataset
+        //#### SWITCH THIS OUT FOR THE MJD ATTRIBUTE ####//
+        //HighFive::Group g0 = file.getGroup("Step#0");
+        //HighFive::Attribute an = g.getAttribute("time");
+        //HighFive::Attribute a0 = g0.getAttribute("time");
 
-    for (size_t i = 0; i < nVariables; ++i) { //Store all variables data except LCon
-        if (variableNameVec[i] != "LCon" && variableNameVec[i] != "xyz") {
-            _extraQuantityNames.push_back(variableNameVec[i]);
-        }
-    }
+        //float tn;
+        //float t0;
+        //an.read(tn);
+        //a0.read(t0);
 
-    const size_t nExtras = _extraQuantityNames.size();
-    _extraQuantities.resize(nExtras);
+        //float t = (tn - t0);
 
-    size_t lineStartIdx = 0;
+        /*double sTime = 0.0;*/
 
-    const size_t nLines = g.getNumberObjects() - 1; //Fulkod... Get number of groups(lines) minus one to subtract the attribute object
+        _triggerTime = t;
 
-    // Loop through all fieldlines
-    for (size_t i = 0; i < nLines; i++) {
+        //std::cout << "################### " << " STEP: " << StepName << " t0: " << t0 << " tn: " << tn << " trigger time: " << _triggerTime << "\n";
 
-        std::vector<std::vector<float>> coordData;
-        const std::string lineName = g.getObjectName(i);
-        const HighFive::Group line = g.getGroup(lineName);
-        const HighFive::DataSet ds = line.getDataSet("xyz");
-        ds.read(coordData);
-        const size_t nPoints = coordData.size();
+        //#### SWITCH THIS OUT FOR THE MJD ATTRIBUTE ####//
 
-        for (size_t j = 0; j < nPoints; ++j) {
-            const std::vector<float>& points = coordData[j]; //glm::vec3<float>
+        std::string firstLineName = g.getObjectName(1);
+        HighFive::Group firstLine = g.getGroup(firstLineName);
+        const size_t nVariables = firstLine.getNumberObjects(); //Number of datasets
+        const std::vector<std::string> variableNameVec = firstLine.listObjectNames(); //All names of dataset
 
-            const size_t xIdx = 0;
-            const size_t yIdx = 1;
-            const size_t zIdx = 2;
-            // Expects the x, y and z variables to be stored first!
-            _vertexPositions.push_back(
-                scalingFactor *
-                glm::vec3(
-                    points[xIdx],
-                    points[yIdx],
-                    points[zIdx]
-                )
-            );
-        }
-
-        for (size_t n = 0; n < nExtras; n++) // Collect all extra values except Lcon
-        {
-            std::vector<float> extraData;
-            const std::string extraName = _extraQuantityNames[n];
-
-            const HighFive::DataSet extraDs = line.getDataSet(extraName);
-            extraDs.read(extraData);
-
-            for (size_t m = 0; m < nPoints; m++) {
-                _extraQuantities[n].push_back(
-                    extraData[m]
-                );
+        for (size_t i = 0; i < nVariables; ++i) { //Store all variables data except LCon
+            if (variableNameVec[i] != "LCon" && variableNameVec[i] != "xyz") {
+                _extraQuantityNames.push_back(variableNameVec[i]);
             }
         }
-        _lineCount.push_back(static_cast<GLsizei>(nPoints));
-        _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
-        lineStartIdx += nPoints;
-    }
-    return true;
+
+        const size_t nExtras = _extraQuantityNames.size();
+        _extraQuantities.resize(nExtras);
+
+        size_t lineStartIdx = 0;
+
+        const size_t nLines = g.getNumberObjects() - 1; //Fulkod... Get number of groups(lines) minus one to subtract the attribute object
+
+        // Loop through all fieldlines
+        for (size_t i = 0; i < nLines; i++) {
+
+            std::vector<std::vector<float>> coordData;
+            const std::string lineName = g.getObjectName(i);
+            const HighFive::Group line = g.getGroup(lineName);
+            const HighFive::DataSet ds = line.getDataSet("xyz");
+            ds.read(coordData);
+            const size_t nPoints = coordData.size();
+
+            for (size_t j = 0; j < nPoints; ++j) {
+                const std::vector<float>& points = coordData[j]; //glm::vec3<float>
+
+                const size_t xIdx = 0;
+                const size_t yIdx = 1;
+                const size_t zIdx = 2;
+                // Expects the x, y and z variables to be stored first!
+                _vertexPositions.push_back(
+                    scalingFactor *
+                    glm::vec3(
+                        points[xIdx],
+                        points[yIdx],
+                        points[zIdx]
+                    )
+                );
+            }
+
+            for (size_t n = 0; n < nExtras; n++) // Collect all extra values except Lcon
+            {
+                std::vector<float> extraData;
+                const std::string extraName = _extraQuantityNames[n];
+
+                const HighFive::DataSet extraDs = line.getDataSet(extraName);
+                extraDs.read(extraData);
+
+                for (size_t m = 0; m < nPoints; m++) {
+                    _extraQuantities[n].push_back(
+                        extraData[m]
+                    );
+                }
+            }
+            _lineCount.push_back(static_cast<GLsizei>(nPoints));
+            _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
+            lineStartIdx += nPoints;
+        }
+        return true;
 }
 #endif
 

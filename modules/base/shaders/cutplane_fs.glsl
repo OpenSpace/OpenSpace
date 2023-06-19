@@ -52,15 +52,15 @@ Fragment getFragment() {
   }
 
   //frag.color.rgb *= multiplyColor;
-  //frag.color.rgb *= vec3(0.0, 1.0, 0.0);
+  frag.color.rgb *= vec3(0.0, 0.0, 1.0);
 
   frag.color.a *= opacity;
   if (frag.color.a == 0.0) {
     discard;
   }
 
-  vec4 fragColor = vs_color;
-  frag.color = fragColor;
+  //vec4 fragColor = vs_color;
+  //frag.color = fragColor;
 
   frag.depth = vs_screenSpaceDepth;
 

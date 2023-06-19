@@ -9,6 +9,7 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLECUTPLANE___H__
 
 #include <modules/base/rendering/renderableplane.h>
+#include <modules/fieldlinessequence/util/gameravolumeslicer.h>
 
 #include <string>
 #include <iostream>
@@ -60,22 +61,29 @@ public:
 protected:
     virtual void bindTexture() override;
 
+    void createPlane();
+
+    ghoul::opengl::ProgramObject* _shader = nullptr;
+    GLuint _vertexColorBuffer = 0;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
     
 private:
     void loadTexture();
     void updateVertexColorBuffer();
     std::unique_ptr<ghoul::opengl::Texture> createFloatTexture(const std::vector<std::vector<float>>& data);
-
+    GameraVolumeSlicer _slice;
     properties::StringProperty _filePath;
     std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
     std::unique_ptr<TransferFunction> _transferFunction;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     std::unique_ptr<ghoul::filesystem::File> _sourceFile;
     std::string _axis;
+
     float _cutValue;
-    std::string _dataproperty;
+    std::string _dataProperty;
     // Used to save property for later initialization
-    int _colorQuantityTemp = 0;
+    int _dataPropertyIndex;
     // Color table/transfer function for "By Quantity" coloring
     properties::StringProperty _colorTablePath;
     // Paths to color tables. One for each 'extraQuantity'
@@ -83,20 +91,13 @@ private:
     // Values represents min & max values represented in the color table
     std::vector<glm::vec2> _colorTableRanges;
 
-    std::vector<std::vector<int>> _axisDim;
+    //The axis dimensions of the axis we're not slicing on
+    std::vector<std::vector<float>> _axisDim;
     int _axis1;
     int _axis2;
-
-    properties::OptionProperty _blendMode;
-    properties::BoolProperty _mirrorBackside;
-
     // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
     // the lines
-    GLuint _vertexColorBuffer = 0;
-
-    std::vector<std::vector<std::vector<float>>> slices;
-
-
+    bool _planeIsDirty = false;
 };
 
 } // namespace openspace

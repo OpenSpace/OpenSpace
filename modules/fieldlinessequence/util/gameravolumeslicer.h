@@ -22,14 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___GAMERAVOLUMESLICER___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___GAMERAVOLUMESLICER___H__
 
 #include <modules/fieldlinessequence/util/commons.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 #include <vector>
+#include <HighFive/H5File.hpp>
 //#include "modules/kameleon/ext/kameleon/ext/hdf5/hdf5-1.8.12/c++/src/H5Cpp.h"
 //#ifdef HAVE_HDF5 
 //#include "modules/kameleon/ext/kameleon/ext/hdf5/hdf5-1.8.12/c++/src/H5Cpp.h"
@@ -38,54 +39,35 @@
 
 namespace openspace {
 
-class FieldlinesState {
+    //struct Slice {
+    //    std::vector<std::string> quantitiesNames;
+
+    //    std::vector<std::vector<std::vector<float>>> data;
+
+    //    std::vector<std::vector<float>> volumeDimensions; // Inner vec should be vec2
+
+    //};
+
+class GameraVolumeSlicer {
 public:
-    void convertLatLonToCartesian(float scale = 1.f);
-    void scalePositions(float scale);
-
-    bool loadStateFromOsfls(const std::string& pathToOsflsFile);
-    void saveStateToOsfls(const std::string& pathToOsflsFile);
-
-    bool loadStateFromJson(const std::string& pathToJsonFile, fls::Model model,
-        float coordToMeters);
-    void saveStateToJson(const std::string& pathToJsonFile);
-
-    bool loadStateFromHdf5(const std::string& pathToHdf5File, std::vector<std::string> hierarchy, float scalingFactor, size_t step, float t);
-
-    const std::vector<std::vector<float>>& extraQuantities() const;
-    const std::vector<std::string>& extraQuantityNames() const;
-    const std::vector<GLsizei>& lineCount() const;
-    const std::vector<GLint>& lineStart() const;
-
-    fls::Model model() const;
-    size_t nExtraQuantities() const;
-    double triggerTime() const;
-    const std::vector<glm::vec3>& vertexPositions() const;
-
-    // Special getter. Returns extraQuantities[index].
-    std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
-
-    void setModel(fls::Model m);
-    void setTriggerTime(double t);
-    void setExtraQuantityNames(std::vector<std::string> names);
-
-    void addLine(std::vector<glm::vec3>& line);
-    void appendToExtra(size_t idx, float val);
+   GameraVolumeSlicer() = default;
+   void getSlice(std::string pathToHdf5File, std::string axis, int value);
+   //Slice _slice;
+   std::vector<std::string> quantitiesNames();
+   std::vector<std::vector<float>> volumeDimensions();
+   std::vector<std::vector<std::vector<float>>> data();
 
 private:
-    bool _isMorphable = false;
-    double _triggerTime = -1.0;
-    fls::Model _model;
 
-    //H5::H5File* current_file;
-    //H5::Group* rootGroup;
-    //H5::Group* variableGroup;
+    std::vector<std::vector<float>> getVolumeDimensions(HighFive::File file);
+    std::vector<std::vector<std::vector<float>>> slicer(std::string axis, float value, HighFive::Group timeStep);
+    void interpolator(float value, std::vector<std::vector<std::vector<float>>> slicedDataBDP,
+                        std::vector<std::vector<std::vector<float>>> slicedDataADP,
+                        std::vector<std::vector<std::vector<float>>>& data);
 
-    std::vector<std::vector<float>> _extraQuantities;
-    std::vector<std::string> _extraQuantityNames;
-    std::vector<GLsizei> _lineCount;
-    std::vector<GLint> _lineStart;
-    std::vector<glm::vec3> _vertexPositions;
+     std::vector<std::string> _quantitiesNames;
+     std::vector<std::vector<float>> _volumeDimensions; // Inner vec should be vec2
+     std::vector<std::vector<std::vector<float>>> _data;
 
     //H5 variables 
     //TODO: inizialize variables
@@ -93,5 +75,5 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___GAMERAVOLUMESLICER___H__
 

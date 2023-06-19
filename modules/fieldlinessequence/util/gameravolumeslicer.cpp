@@ -22,6 +22,7 @@
 // * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 // ****************************************************************************************/
 
+#include <modules/fieldlinessequence/util/gameravolumeslicer.h>
 #include <HighFive/H5File.hpp>
 #include <HighFive/bits/H5Slice_traits.hpp>
 #include <highfive/H5Easy.hpp>
@@ -34,25 +35,15 @@
 
 #include <ghoul/logging/logmanager.h>
 
-typedef struct {
-    std::vector<std::string> quantitiesNames;
-
-    std::vector<std::vector<std::vector<float>>> data;
-
-    std::vector<std::vector<float>> volumeDimensions; // Inner vec should be vec2
-
-} slice;
-
-namespace {
+namespace  openspace{
     constexpr std::string_view _loggerCat = "GameraVolumeSlicer";
-} // namespace
-
-
 //************************ INTERPOLATOR ***********************//
 // Interpolation algorithm : v = (t-1)*d1 + t*d2
 //************************************************************//
-void interpolator(float value, std::vector<std::vector<std::vector<float>>> slicedDataBDP, std::vector<std::vector<std::vector<float>>> slicedDataADP,
-    std::vector<std::vector<std::vector<float>>>& data) {
+void GameraVolumeSlicer::interpolator(float value, std::vector<std::vector<std::vector<float>>> slicedDataBDP, 
+                                      std::vector<std::vector<std::vector<float>>> slicedDataADP,
+                                      std::vector<std::vector<std::vector<float>>>& data) 
+{
 
     int size_1 = slicedDataADP[0].size();
     int size_2 = slicedDataADP[0][0].size();
@@ -91,15 +82,17 @@ void interpolator(float value, std::vector<std::vector<std::vector<float>>> slic
 // "count" decides how many values from the offset value
 // that should be included
 //******************************************************//
-std::vector<std::vector<std::vector<float>>> slicer(char axis, float value, HighFive::Group timeStep, slice& _slice) {
+std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::slicer(std::string axis, float value, HighFive::Group timeStep) {
 
-    char axisInput = char(tolower(axis));
+    std::transform(axis.begin(), axis.end(), axis.begin(),
+                      [](unsigned char a) { return std::tolower(a); });
+
     std::vector<std::vector<std::vector<float>>> slicedDataBDP; // Slice fo data BEFORE position of slice, these can be function variables
     std::vector<std::vector<std::vector<float>>> slicedDataADP; // Slice fo data AFTER position of slice, these can be function variables
     std::vector<std::vector<std::vector<float>>> data; // To store the final slices
 
-    for (int q = 0; q < _slice.quantitiesNames.size(); q++) {
-        std::string quantityName = _slice.quantitiesNames[q];
+    for (int q = 0; q < _quantitiesNames.size(); q++) {
+        std::string quantityName = _quantitiesNames[q];
         const HighFive::DataSet dsQuantity = timeStep.getDataSet(quantityName);
 
         // Get the dataset dimensions
@@ -110,31 +103,31 @@ std::vector<std::vector<std::vector<float>>> slicer(char axis, float value, High
         std::vector<size_t> offsetADP(dataset_dimensions.size(), 0);
         std::vector<size_t> count(dataset_dimensions.size(), 1);
 
-        if (axisInput == 'x') {
-            if (value >= _slice.volumeDimensions[0][0] || value <= _slice.volumeDimensions[0][1]) {
+        if (axis == "x") {
+            if (value <= _volumeDimensions[0][0] || value >= _volumeDimensions[0][1]) {
                 LERROR("Invalid value, unable to slice");
             }
-            int index = abs(_slice.volumeDimensions[0][0]) + std::round(value);
+            int index = abs(_volumeDimensions[0][0]) + std::round(value);
             offsetBDP[2] = index - 1;
             offsetADP[2] = index;
             count[0] = dataset_dimensions[0];
             count[1] = dataset_dimensions[1];
         }
-        else if (axisInput == 'y') {
-            if (value >= _slice.volumeDimensions[2][0] || value <= _slice.volumeDimensions[2][1]) {
+        else if (axis == "y") {
+            if (value <= _volumeDimensions[2][0] || value >= _volumeDimensions[2][1]) {
                 LERROR("Invalid value, unable to slice");
             }
-            int index = abs(_slice.volumeDimensions[1][0]) + std::round(value);
+            int index = abs(_volumeDimensions[1][0]) + std::round(value);
             offsetBDP[1] = index - 1;
             offsetADP[1] = index;
             count[0] = dataset_dimensions[0];
             count[2] = dataset_dimensions[2];
         }
-        else if (axisInput == 'z') {
-            if (value >= _slice.volumeDimensions[2][0] || value <= _slice.volumeDimensions[2][1]) {
+        else if (axis == "z") {
+            if (value <= _volumeDimensions[2][0] || value >= _volumeDimensions[2][1]) {
                 LERROR("Invalid value, unable to slice");
             }
-            int index = abs(_slice.volumeDimensions[2][0]) + std::round(value);
+            int index = abs(_volumeDimensions[2][0]) + std::round(value);
             offsetBDP[0] = index - 1;
             offsetADP[0] = index;
             count[1] = dataset_dimensions[1];
@@ -159,13 +152,11 @@ std::vector<std::vector<std::vector<float>>> slicer(char axis, float value, High
         std::vector<std::vector<float>> tempBDP;
         std::vector<std::vector<float>> tempADP;
 
-        if (axis == 'x') { // Find another solution for formating the different dimensions in the same way.
+        if (axis == "x") { // Find another solution for formating the different dimensions in the same way.
             // Flatten the 3D vector into a 2D vector
             for (const auto& innerVec : dataBDP) {
                 std::vector<float> temp;
-                std::cout << innerVec.size() << "";
                 for (const auto& vec : innerVec) {
-                    std::cout << vec.size() << "";
                     for (const auto& num : vec) {
                         temp.push_back(num);
                     }
@@ -176,9 +167,7 @@ std::vector<std::vector<std::vector<float>>> slicer(char axis, float value, High
             // Flatten the 3D vector into a 2D vector
             for (const auto& innerVec : dataADP) {
                 std::vector<float> temp;
-                std::cout << innerVec.size() << "";
                 for (const auto& vec : innerVec) {
-                    std::cout << vec.size() << "";
                     for (const auto& num : vec) {
                         temp.push_back(num);
                     }
@@ -213,7 +202,7 @@ std::vector<std::vector<std::vector<float>>> slicer(char axis, float value, High
 
 //****************** EXTRACT VOLUME DIMENSIONS *****************//
 //*************************************************************//
-std::vector<std::vector<float>> getVolumeDimensions(HighFive::File file, slice& _slice) {
+std::vector<std::vector<float>> GameraVolumeSlicer::getVolumeDimensions(HighFive::File file) {
     // Open the datasets
     const HighFive::DataSet dsX = file.getDataSet("/X");
     const HighFive::DataSet dsY = file.getDataSet("/Y");
@@ -281,10 +270,28 @@ std::vector<std::vector<float>> getVolumeDimensions(HighFive::File file, slice& 
     return volumeDimensions;
 }
 
+//************************ RETURN _QUANTITIESNAMES ***********************//
+//*************************************************************//
+std::vector<std::string> GameraVolumeSlicer::quantitiesNames() {
+    return _quantitiesNames;
+}
+
+//************************ RETURN _VOLUMEDIMENSIONS ***********************//
+//*************************************************************//
+std::vector<std::vector<float>> GameraVolumeSlicer::volumeDimensions() {
+    return _volumeDimensions;
+}
+
+//************************ RETURN _DATA ***********************//
+//*************************************************************//
+std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::data() {
+    return _data;
+}
+
 
 //************************ MAIN FUNCTION ***********************//
 //*************************************************************//
-slice getSlice(std::string pathToHdf5File, char axis, int value) {
+void GameraVolumeSlicer::getSlice(std::string pathToHdf5File, std::string axis, int value) {
 
     // Open the HDF5 file
     HighFive::File file(pathToHdf5File, HighFive::File::ReadOnly);
@@ -292,15 +299,11 @@ slice getSlice(std::string pathToHdf5File, char axis, int value) {
     // Open the group for desired timestep
     const HighFive::Group timeStep = file.getGroup("/Step#1");
 
-    slice _slice;
-
     // Get all the names of datasets stored in group 'timeStep'
-    _slice.quantitiesNames = timeStep.listObjectNames();
-    _slice.volumeDimensions = getVolumeDimensions(file, _slice);
-    _slice.data = slicer(axis, value, timeStep, _slice);
-
-
-    return _slice;
+    _quantitiesNames = timeStep.listObjectNames();
+    _volumeDimensions = getVolumeDimensions(file);
+    _data = slicer(axis, value, timeStep);
+ 
 }
-
+} // namespace openspace
 
