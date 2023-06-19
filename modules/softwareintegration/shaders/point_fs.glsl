@@ -25,10 +25,10 @@
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
-const int COLORMAPNANMODE_HIDDEN = 0;
+const int COLORMAPNANMODE_HIDE = 0;
 const int COLORMAPNANMODE_COLOR = 1;
 
-const int VELOCITYNANMODE_HIDDEN = 0;
+const int VELOCITYNANMODE_HIDE = 0;
 const int VELOCITYNANMODE_STATIC = 2;
 
 flat in float ge_colormapAttributeScalar;
@@ -73,7 +73,7 @@ Fragment getFragment() {
     if (
         colormapEnabled
         && isnan(ge_colormapAttributeScalar)
-        && colormapNanMode == COLORMAPNANMODE_HIDDEN
+        && colormapNanMode == COLORMAPNANMODE_HIDE
     ) {
         discard;
     }
@@ -86,7 +86,7 @@ Fragment getFragment() {
                           isnan(ge_velocity[2]));
     if (motionEnabled &&
         velocityIsNan &&
-        velocityNanMode == VELOCITYNANMODE_HIDDEN)
+        velocityNanMode == VELOCITYNANMODE_HIDE)
     {
         discard;
     } // else the point is left static
