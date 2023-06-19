@@ -24,7 +24,6 @@
 
 #include <algorithm>
 #include <iostream>
-#include <ranges>
 
 #include <glm/glm.hpp>
 
@@ -131,10 +130,12 @@ void KeyframeRecording::setSequenceTime(double sequenceTime) {
 
 void KeyframeRecording::preSynchronization(double dt) {
     if (_stateChanged) {
-        auto it = std::ranges::find_if(_keyframes | std::views::reverse,
-            [timestamp = _sequenceTime](const nlohmann::json &entry) {
+        auto it = std::find_if(
+            _keyframes.rbegin(), _keyframes.rend(),
+            [timestamp = _sequenceTime](const nlohmann::json& entry) {
                 return timestamp >= static_cast<double>(entry["timestamp"]["sequence"]);
-            });
+            }
+        );
 
         nlohmann::json currKeyframe = nullptr;
         nlohmann::json nextKeyframe = nullptr;
