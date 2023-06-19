@@ -347,7 +347,7 @@ void create() {
     ghoul_assert(keyframeRecording, "No keyframeRecording");
     currentPos += sizeof(interaction::KeyframeRecording);
 #else // ^^^ WIN32 / !WIN32 vvv
-    keyframeRecording = new interaction::KeyframeRecording(true);
+    keyframeRecording = new interaction::KeyframeRecording;
 #endif // WIN32
 
 #ifdef WIN32
