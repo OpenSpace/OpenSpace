@@ -2454,18 +2454,21 @@ int RenderableGaiaStars::internalReadCSVFile(std::vector<std::string>const& head
     for (const auto& s : _requiredValues) {
         tmp[s] = newidx++;
     }
+    _otherDataRenderOption.addOptions(_requiredValues);
+
     //Update optional parameter indices
     for (const auto& [header, index] : _fileHeaders) {
         //if header name is not among required we update the index.
         if (std::find(_requiredValues.begin(), _requiredValues.end(), header) == _requiredValues.end()) {
-            tmp[header] = newidx++;
+            tmp[header] = newidx;
+            
+            _otherDataRenderOption.addOption(newidx, header);
+            ++newidx;
         }
     }
 
     //Add column names as selectable column to render by. //TODO create a list of headers that are required - followed by optional to remove 
     //warnings when loading.
-    _otherDataRenderOption.addOptions(_requiredValues);
-    _otherDataRenderOption.addOptions(headers);
 
     _fileHeaders = std::move(tmp);
     _octreeManager._fileHeaders = _fileHeaders;
