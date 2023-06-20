@@ -139,9 +139,10 @@ std::unique_ptr<RawVolume<gaiavolume::GaiaVolumeDataLayout>>> RawVolumeReader<Vo
     //Loop each voxel and read its data. Data is stored as: nStars -> datacolumns
     for (size_t i{ 0 }; i < volume->nCells(); i++) {
         gaiavolume::GaiaVolumeDataLayout voxel{};
-        file.read(reinterpret_cast<char*>(&voxel.nStars), sizeof(voxel.nStars));
+        file.read(reinterpret_cast<char*>(&voxel.has_data), sizeof(voxel.has_data));
         //Only read voxel data if there exists stars for that voxel.
-        if (voxel.nStars > 0) {
+        if (voxel.containData()) {
+            //file.read(reinterpret_cast<char*>(&voxel.nStars), sizeof(voxel.nStars));
             voxel.data.assign(nHeaders, gaiavolume::VoxelDataLayout{});
             size_t length = voxel.data.size() * sizeof(gaiavolume::VoxelDataLayout);
             file.read(reinterpret_cast<char*>(voxel.data.data()), length);

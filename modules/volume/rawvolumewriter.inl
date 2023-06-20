@@ -125,8 +125,9 @@ RawVolumeWriter<VoxelType>::write(const RawVolume<gaiavolume::GaiaVolumeDataLayo
     //because data are stored in variable vector containers)
     gaiavolume::GaiaVolumeDataLayout const* data = volume.data();
     for (size_t i{ 0 }; i < volume.nCells(); i++) {
-        file.write(reinterpret_cast<const char*>(&data[i].nStars), sizeof(data[i].nStars));
-        if (data[i].nStars > 0) {
+        file.write(reinterpret_cast<const char*>(&data[i].has_data), sizeof(data[i].has_data));
+        if (data[i].containData()) {
+            //file.write(reinterpret_cast<const char*>(&data[i].nStars), sizeof(data[i].nStars));
             std::vector<gaiavolume::VoxelDataLayout> const& voxelData = data[i].data;
             const char* const buffer = reinterpret_cast<const char*>(voxelData.data());
             size_t length = voxelData.size() * sizeof(gaiavolume::VoxelDataLayout);

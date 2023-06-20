@@ -35,11 +35,20 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/transferfunction.h>
 #include <modules/gaia/tasks/generateGaiaVolumeTask.h>
+#include <algorithm>
 
 namespace openspace {
     class Histogram;
     struct RenderData;
 } // namespace openspace
+
+namespace openspace::gaiavolume {
+    enum VolumeRenderMode {
+        Average = 0,
+        Minimum = 1,
+        Maximum = 2,
+    };
+}
 
 namespace openspace::volume {
 
@@ -78,6 +87,15 @@ private:
     void jumpToTimestep(int i);
 
     void loadTimestepMetadata(const std::string& path);
+    void updateRenderVoxelData(Timestep* t = nullptr);
+    float getVoxelData(gaiavolume::VoxelDataLayout const& data) const;
+
+    properties::OptionProperty _xAxis;
+    properties::OptionProperty _yAxis;
+    properties::OptionProperty _renderValueBy;
+
+    std::optional<std::string> _xAxisStartValue;
+    std::optional<std::string> _yAxisStartValue;
 
     properties::OptionProperty _gridType;
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;

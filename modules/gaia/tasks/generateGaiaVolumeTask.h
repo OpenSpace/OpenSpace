@@ -8,6 +8,7 @@
 #include <ghoul/glm.h>
 #include <map>
 #include <vector>
+#include <openspace/properties/optionproperty.h>
 
 namespace openspace::gaiavolume {
 
@@ -20,16 +21,33 @@ struct Limits {
 };
 
 struct VoxelDataLayout {
+    bool isNaNData = true;
     double avgData = 0.0; //Average is double if we have very large values summed before computing the average.
     float minData{ std::numeric_limits<float>::max() };
     float maxData{ std::numeric_limits<float>::lowest() };
+    int nStars{ 0 };
 };
 
 struct GaiaVolumeDataLayout {
+    enum HAS_DATA {
+        yes = 0,
+        no = 1
+    };
+    bool containData() const { return has_data == HAS_DATA::yes; };
     //Each voxel contain data about the stars that reside in that perticular voxel
     //It stores the combined voxeldata for all the stars and not 1 perticular star's values.
+    //Has data indicate whether there is any meaningful data or trash data, because of how the 
+    //VoxelDataLayout is initiated, empty voxels will have the wrong data while voxels near 'star voxels'
+    //will contain meaningfull data that have been blurred.
+    HAS_DATA has_data{ HAS_DATA::no };
     std::vector<VoxelDataLayout> data{};
-    int nStars = 0;
+    //int nStars = 0;
+};
+
+enum FilterOption {
+    None = 0,
+    Gaussian = 1,
+    RadiusFallOff = 2
 };
     
 class GenerateGaiaVolumeTask : public Task {
@@ -52,6 +70,9 @@ private:
     glm::vec3 _upperDomainBound = glm::vec3(0.f);
 
     std::map<std::string, int> _fileHeaders;
+
+    bool _applyFilter;
+    FilterOption _filterOption; //TODO: Create a enum for this with option Gaussian
 };
 
 } // namespace openspace::gaiavolume

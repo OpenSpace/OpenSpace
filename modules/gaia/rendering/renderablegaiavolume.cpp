@@ -47,11 +47,31 @@
 #include <filesystem>
 #include <optional>
 #include <modules/gaia/tasks/generateGaiaVolumeTask.h>
+#include <ghoul/fmt.h>
+
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableGaiaVolume";
 
     const float SecondsInOneDay = 60 * 60 * 24;
+
+    constexpr openspace::properties::Property::PropertyInfo XAxisInfo = {
+        "XAxis",
+        "X-axis",
+        "Specify column data to use for the transfer function x-axis."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo YAxisInfo = {
+        "YAxis",
+        "Y-axis",
+        "Specify column data to use for the transfer function y-axis."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderValueByInfo = {
+        "RenderValueBy",
+        "Render value by",
+        "Specifiy which value to render by, e.g., average, minimum, maximum."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
@@ -164,6 +184,10 @@ namespace {
 
         // @TODO Missing documentation
         std::optional<ghoul::Dictionary> clipPlanes;
+
+        std::optional<std::string> xAxis;
+
+        std::optional<std::string> yAxis;
     };
 #include "renderablegaiavolume_codegen.cpp"
 
@@ -176,7 +200,7 @@ documentation::Documentation RenderableGaiaVolume::Documentation() {
 }
 
 RenderableGaiaVolume::RenderableGaiaVolume(
-                                                      const ghoul::Dictionary& dictionary)
+    const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
@@ -190,9 +214,12 @@ RenderableGaiaVolume::RenderableGaiaVolume(
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _invertDataAtZ(false)
+    , _xAxis(XAxisInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _yAxis(YAxisInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _renderValueBy(RenderValueByInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
+    
     _sourceDirectory = absPath(p.sourceDirectory).string();
     _transferFunctionPath = absPath(p.transferFunction).string();
     unsigned int const textureDimension{ 2 };
@@ -207,7 +234,7 @@ RenderableGaiaVolume::RenderableGaiaVolume(
     _gridType.addOptions({
         { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid" },
         { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid" }
-    });
+        });
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
     _stepSize = p.stepSize.value_or(_stepSize);
@@ -226,8 +253,21 @@ RenderableGaiaVolume::RenderableGaiaVolume(
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
 
+    _renderValueBy.addOptions({
+        {static_cast<int>(gaiavolume::VolumeRenderMode::Average), "Average"},
+        {static_cast<int>(gaiavolume::VolumeRenderMode::Minimum), "Minimum"},
+        {static_cast<int>(gaiavolume::VolumeRenderMode::Maximum), "Maximum"}
+        });
+    _renderValueBy = static_cast<int>(gaiavolume::VolumeRenderMode::Average);
+    _renderValueBy.onChange([this]() { updateRenderVoxelData(); });
+
+
+    _xAxisStartValue = p.xAxis;
+    _yAxisStartValue = p.yAxis;
+
     addProperty(_brightness);
     addProperty(Fadeable::_opacity);
+    addProperty(_renderValueBy);
 }
 
 RenderableGaiaVolume::~RenderableGaiaVolume() {}
@@ -259,39 +299,36 @@ void RenderableGaiaVolume::initializeGL() {
 
         gaiavolume::GaiaVolumeDataLayout* data = t.rawVolume->data();
 
-        std::map<std::string, int> const &column = t.metadata.fileheaders;
-        //Create a vector contining the data for the transfer function
-        std::vector<float> newdata;
-        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            if (data[i].nStars > 0) {
-                int feh = column.at("fe_h");
-                int zradius = column.at("pz");
-                newdata.push_back(data[i].data[feh].avgData);
-                newdata.push_back(data[i].data[zradius].avgData);
-            }
-            //Voxel does not contain any data, for now use 0,0 as coordinates. TODO: See if there is another
-            //That does not involve putting 'fake' data, (0,0) has a meaning in the transfer function.. 
-            else {
-                newdata.push_back(0.0f);
-                newdata.push_back(0.0f);
-            }
+        std::map<std::string, int> const &columns = t.metadata.fileheaders;
+
+        //Add all the options in the same order as they appear in the file. Kind of fugly but
+        //it makes it more understandable in the gui if they follow the same order(?)..
+        for (size_t index{ 0 }; index < t.metadata.fileheaders.size(); index++) {
+            //Return the item with matching index.
+            auto header = std::find_if(t.metadata.fileheaders.begin(), t.metadata.fileheaders.end(),
+                [&index](std::pair<std::string, int> const& p) {
+                    return index == p.second;
+                });
+            _xAxis.addOption(index, header->first);
+            _yAxis.addOption(index, header->first);
         }
 
-        t.texture = std::make_shared<ghoul::opengl::Texture>(
-            t.metadata.dimensions,
-            GL_TEXTURE_3D,
-            ghoul::opengl::Texture::Format::RG,
-            GL_RG,
-            GL_FLOAT,
-            ghoul::opengl::Texture::FilterMode::Linear,
-            ghoul::opengl::Texture::WrappingMode::Clamp
-        );
-
-        t.texture->setPixelData(
-            reinterpret_cast<void*>(newdata.data()),
-            ghoul::opengl::Texture::TakeOwnership::No
-        );
-        t.texture->uploadTexture();
+        //TODO: this is kind of fugly that we set the x and y axis in each iteration
+        //but it works for now because gaia volume will probably only use 1 timestep.
+        if (_xAxisStartValue.has_value()) {
+            _xAxis.set(columns.at(_xAxisStartValue.value()));
+        }
+        else {
+            _xAxis.set(0);
+        }
+        if (_yAxisStartValue.has_value()) {
+            _yAxis.set(columns.at(_yAxisStartValue.value()));
+        }
+        else {
+            _yAxis.set(0);
+        }
+        
+        updateRenderVoxelData(&t);
     }
 
     _clipPlanes->initialize();
@@ -323,6 +360,13 @@ void RenderableGaiaVolume::initializeGL() {
         0;
     _jumpToTimestep.setMaxValue(lastTimestep);
 
+
+    _xAxis.onChange([this]() { updateRenderVoxelData(); });
+    _yAxis.onChange([this]() { updateRenderVoxelData(); });
+
+    addProperty(_xAxis);
+    addProperty(_yAxis);
+
     addProperty(_stepSize);
     addProperty(_transferFunctionPath);
     addProperty(_sourceDirectory);
@@ -345,6 +389,83 @@ void RenderableGaiaVolume::initializeGL() {
         );
         _raycaster->setTransferFunction(_transferFunction);
     });
+}
+
+void RenderableGaiaVolume::updateRenderVoxelData(Timestep* t) {
+    //LDEBUG("X axis value changed to: " + std::to_string(_xAxis.value()));
+    //LDEBUG("Y axis value changed to: " + std::to_string(_yAxis.value()));
+    if (!t) {
+        t = currentTimestep();
+    }
+
+    gaiavolume::GaiaVolumeDataLayout* data = t->rawVolume->data();
+    int nanvoxels{ 0 };
+    int filledvoxels{ 0 };
+
+    //Create a vector contining the data for the transfer function
+    std::vector<float> newdata;
+    newdata.reserve(t->rawVolume->nCells());
+    for (size_t i = 0; i < t->rawVolume->nCells(); i++) {
+        if (data[i].containData()) {
+            gaiavolume::VoxelDataLayout const& xVoxelData = data[i].data[_xAxis.value()];
+            gaiavolume::VoxelDataLayout const& yVoxelData = data[i].data[_yAxis.value()];
+
+            //If either of the values are nan we 'ignore' it in the same way as if it was empty.
+            if (xVoxelData.isNaNData || yVoxelData.isNaNData) {
+                newdata.push_back(0.0f);
+                newdata.push_back(0.0f);
+                ++nanvoxels;
+            }
+            else {
+                //Get the data depending on what render mode used.
+                float xValue = getVoxelData(xVoxelData);
+                float yValue = getVoxelData(yVoxelData);
+
+                newdata.push_back(xValue);
+                newdata.push_back(yValue);
+            }
+            ++filledvoxels;
+        }
+        //Voxel does not contain any data, for now use 0,0 as coordinates. TODO: See if there is another
+        //That does not involve putting 'fake' data, (0,0) has a meaning in the transfer function.. 
+        else {
+            newdata.push_back(0.0f);
+            newdata.push_back(0.0f);
+        }
+    }
+    LDEBUG(fmt::format(
+        "Number of nan values {} out of {}: {}%", nanvoxels, filledvoxels, static_cast<double>(nanvoxels) / filledvoxels * 100.0
+    ));
+    //Create texture if it does not exist
+    if (!t->texture) {
+        t->texture = std::make_shared<ghoul::opengl::Texture>(
+            t->metadata.dimensions,
+            GL_TEXTURE_3D,
+            ghoul::opengl::Texture::Format::RG,
+            GL_RG,
+            GL_FLOAT,
+            ghoul::opengl::Texture::FilterMode::Linear,
+            ghoul::opengl::Texture::WrappingMode::Clamp
+        );
+    }
+
+    t->texture->setPixelData(
+        reinterpret_cast<void*>(newdata.data()),
+        ghoul::opengl::Texture::TakeOwnership::No
+    );
+    t->texture->uploadTexture();
+}
+
+float RenderableGaiaVolume::getVoxelData(gaiavolume::VoxelDataLayout const& data) const {
+    switch (_renderValueBy)
+    {
+    case gaiavolume::VolumeRenderMode::Average:
+        return data.avgData;
+    case gaiavolume::VolumeRenderMode::Minimum:
+        return data.minData;
+    case gaiavolume::VolumeRenderMode::Maximum:
+        return data.maxData;
+    }
 }
 
 void RenderableGaiaVolume::loadTimestepMetadata(const std::string& path) {
