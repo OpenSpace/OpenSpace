@@ -53,11 +53,8 @@ const float LUM_LOWER_CAP = 0.01;
 
 vec3 color2rgb(float color) {
   //Normalize st coordinate between min and max range to [0,1]
+  color = clamp(color, colorRange.x, colorRange.y);
   float st = (color - colorRange.x) / (colorRange.y - colorRange.x);
-
-  if(gl_FragCoord.x < 850) {
-    st = clamp(st, 0.0, 1.0);
-  }
   return texture(colorTexture, st).rgb;
 }
 
@@ -69,6 +66,9 @@ void main() {
   float ratioMultiplier = 1.0;
 
   // color = color2rgb(ge_brightness.y); 
+  if(ge_otherData >colorRange.y || ge_otherData < colorRange.x) {
+    discard;
+  }
   color = color2rgb(ge_otherData);
   ratioMultiplier = 0.01;
 

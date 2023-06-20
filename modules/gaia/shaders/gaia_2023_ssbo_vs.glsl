@@ -132,7 +132,7 @@ void main() {
   int otherDataIdx = 0;
   if(columnIndex < 3) //Index 0,1,2 are for the positional data, x,y,z.
   {
-    //Move to first star, move to this star's positional data, columnIndex gets the corret x,y, or z component. 
+    //Move to first star, move to this star's positional data, columnIndex gets the corret x, y, or z component. 
     otherDataIdx = firstStarInChunk + placeInChunk * 3 + columnIndex;
   }
   else if(columnIndex < 5) //Index 3,4 are the color data: absolut magnitude, color

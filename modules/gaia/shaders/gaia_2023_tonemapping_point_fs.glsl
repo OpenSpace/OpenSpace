@@ -151,6 +151,12 @@ Fragment getFragment() {
           pixelWeight > pixelWeightThreshold)
       {
         vec4 sIntensity = texture(renderedTexture, sPoint);
+        //For some reason stars may contain NaN color values from the first pass. 
+        //This results in maximum intensity (completely white) when applying the filter.
+        //Therefore we skip these pixels. 
+        if((isnan(sIntensity.r) || isnan(sIntensity.g) || isnan(sIntensity.b))) {
+          continue;
+        }
 
         // Use normal distribution function for halo/bloom effect. 
         if (useCircleDist) {
