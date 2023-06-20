@@ -838,6 +838,19 @@ namespace openspace::fls {
             if (seedPoints[i].topology == "OPEN_NORTH" || seedPoints[i].topology == "OPEN_SOUTH")
             {
                 std::cout << std::endl << seedPoints[i].topology << " seed point validation start." << std::endl;
+
+                ccmc::Fieldline flowline2 = traceAndCreateMappedPathLine(
+                    tracingVar,
+                    tracer,
+                    seedPoints[i].seedPoint,
+                    100,
+                    ccmc::Tracer::Direction::FOWARD);
+
+                std::vector<glm::vec3> flowlinePositions2 = getPositionsFromLine(flowline2);
+
+                createTextFileWithFieldlineCoordinates(flowlinePositions2, kameleon, innerBoundaryLimit, 100);
+
+
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                     tracingVar,
                     tracer,
@@ -846,8 +859,6 @@ namespace openspace::fls {
                     ccmc::Tracer::Direction::FOWARD);
 
                 std::vector<glm::vec3> flowlinePositions = getPositionsFromLine(flowline);
-
-                //createTextFileWithFieldlineCoordinates(flowlinePositions, kameleon, innerBoundaryLimit, _nPointsOnFieldLine);
 
                 int counter = 1;
 
@@ -937,6 +948,7 @@ namespace openspace::fls {
                     }
                     counter++;
                 }
+
                 std::cout << seedPoints[i].topology << " seed point done." << std::endl << std::endl;
             }
             else if (seedPoints[i].topology == "CLOSED")
@@ -1108,16 +1120,37 @@ namespace openspace::fls {
         size_t _nPointsOnFieldLine) {
 
         std::vector<std::vector<glm::vec3>> testFieldlinePositions;
+        int flowlineIndex = 0;
 
-        for (int i = 0; i < flowlinePositions.size(); i++)
+        bool onlyDaysideLimit = true;
+
+        if (onlyDaysideLimit)
         {
-            std::vector<glm::vec3> fieldlinePositions2 = fls::getFieldlinePositions(
-                flowlinePositions[i],
-                kameleon,
-                innerBoundaryLimit,
-                _nPointsOnFieldLine
-            );
-            testFieldlinePositions.push_back(fieldlinePositions2);
+            while (keepCheckingFlowlinesFieldline(flowlinePositions, flowlineIndex))
+            {
+                std::vector<glm::vec3> fieldlinePositions2 = fls::getFieldlinePositions(
+                    flowlinePositions[flowlineIndex],
+                    kameleon,
+                    innerBoundaryLimit,
+                    _nPointsOnFieldLine
+                );
+                testFieldlinePositions.push_back(fieldlinePositions2);
+
+                flowlineIndex++;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < flowlinePositions.size(); i++)
+            {
+                std::vector<glm::vec3> fieldlinePositions2 = fls::getFieldlinePositions(
+                    flowlinePositions[i],
+                    kameleon,
+                    innerBoundaryLimit,
+                    _nPointsOnFieldLine
+                );
+                testFieldlinePositions.push_back(fieldlinePositions2);
+            }
         }
 
         std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/CLOSEDNOTWORKING.txt");
@@ -1127,7 +1160,7 @@ namespace openspace::fls {
                 for (const auto& vec : subvec) {
                     output_file << vec.x << " " << vec.y << " " << vec.z << " " << std::endl;
                 }
-                output_file << std::endl << std::endl << "NEW FIELD LINE " << std::endl;
+                //output_file << std::endl << std::endl << "NEW FIELD LINE " << std::endl;
             }
             output_file.close();
         }
