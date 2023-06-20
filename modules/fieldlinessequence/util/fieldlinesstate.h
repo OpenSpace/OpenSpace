@@ -50,7 +50,7 @@ public:
         float coordToMeters);
     void saveStateToJson(const std::string& pathToJsonFile);
 
-    bool loadStateFromHdf5(const std::string& pathToHdf5File, std::vector<std::string> hierarchy, float scalingFactor, size_t step, float t);
+    bool loadStateFromHdf5(const std::string& pathToHdf5File, std::vector<std::string> hierarchy, float scalingFactor, size_t step);
 
     const std::vector<std::vector<float>>& extraQuantities() const;
     const std::vector<std::string>& extraQuantityNames() const;

@@ -669,23 +669,34 @@ bool RenderableFieldlinesSequence::loadHdf5StatesIntoRAM() {
         HighFive::File file(filePath, HighFive::File::ReadOnly);
         const size_t nSteps = file.getNumberObjects();
 
-        float t = 0.0;
+   /*     float t = 0.0;*/
 
         for (size_t step = 0; step < nSteps; step++) {
             FieldlinesState newState;
-            bool success = newState.loadStateFromHdf5(filePath, 
+            bool success = newState.loadStateFromHdf5(
+                filePath, 
                 _hierarchy,
                 _scalingFactor,
-                step,
-                t); //asset file
+                step
+            ); //asset file
             if (success) {
                 addStateToSequence(newState);
             }
             else {
                 LWARNING(fmt::format("Failed to load state from: {}", filePath));
             }
-            t += 0.3;
+            //t += 0.3;
         }
+        std::sort(_states.begin(), _states.end(), [](FieldlinesState a, FieldlinesState b)
+            {
+                return a.triggerTime() < b.triggerTime();
+            }
+        );
+        std::sort(_startTimes.begin(), _startTimes.end(), [](double a, double b)
+            {
+                return a < b;
+            }
+        );
     }
     return true;
 }

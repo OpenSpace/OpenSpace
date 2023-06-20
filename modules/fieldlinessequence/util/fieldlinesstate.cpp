@@ -224,7 +224,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 }
 
 #ifdef FLS_HAVE_HDF5
-bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File, std::vector<std::string> hierarchy, float scalingFactor, size_t step, float t)
+bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File, std::vector<std::string> hierarchy, float scalingFactor, size_t step)
 {
         HighFive::File file(pathToHdf5File, HighFive::File::ReadOnly);
     //const size_t nSteps = file.getNumberObjects();
@@ -234,16 +234,16 @@ bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File, std::
 
 
         //#### SWITCH THIS OUT FOR THE MJD ATTRIBUTE ####//
-        //HighFive::Group g0 = file.getGroup("Step#0");
-        //HighFive::Attribute an = g.getAttribute("time");
-        //HighFive::Attribute a0 = g0.getAttribute("time");
+        HighFive::Group g0 = file.getGroup("Step#0");
+        HighFive::Attribute an = g.getAttribute("time");
+        HighFive::Attribute a0 = g0.getAttribute("time");
 
-        //float tn;
-        //float t0;
-        //an.read(tn);
-        //a0.read(t0);
+        float tn;
+        float t0;
+        an.read(tn);
+        a0.read(t0);
 
-        //float t = (tn - t0);
+        float t = (tn - t0)/10;
 
         /*double sTime = 0.0;*/
 
