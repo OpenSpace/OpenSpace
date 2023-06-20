@@ -782,7 +782,7 @@ namespace openspace {
     }
 
     std::string removeNonNumeric(const std::string& str) {
-        const std::string validNumericChars = "-.0123456789";
+        const std::string validNumericChars = "-.0123456789e";
         std::string result;
 
         for (char c : str) {
