@@ -126,7 +126,6 @@ struct File {
 
 class DynamicFileSequenceDownloader {
 public:
-    //DynamicDownloaderManager() = default;
     DynamicFileSequenceDownloader(
         int dataID, const std::string infoURL, const std::string dataURL, int nOfFilesToQ
     );
@@ -155,7 +154,7 @@ private:
     double _dataMinTime;
     double _dataMaxTime;
     //std::string _dataIdDescription;
-    //temporary having a global cadence. To be replaced with a cadence for each file.
+    //Currently have both a global cadence and it's assigned to every element too.
     double _tempCadence = 0;
     const int _nOfFilesToQueue = 0;
 

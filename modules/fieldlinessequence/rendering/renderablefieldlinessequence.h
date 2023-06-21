@@ -148,7 +148,7 @@ private:
     int _nOfFilesToQueue = 10;
     std::string _infoURL = "";
     std::string _dataURL = "";
-    //  DynamicDownloaderManager downloads and updates renderable field lines with
+    //  DynamicFileSequenceDownloader downloads and updates renderable field lines with
     //  field lines downloaded from the web.
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
 
@@ -249,7 +249,6 @@ private:
 
     // At least one file in data set needs to be loaded to read extra variable
     bool _firstLoad = true;
-
 };
 
 } // namespace openspace

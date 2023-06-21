@@ -59,16 +59,6 @@ std::string formulateDataHttpRequest(double minTime, double maxTime,
     return baseURL + std::to_string(dataID.first) + minText + maxText;
 }
 
-//// Returns first trigger of window
-//double DynamicDownloaderManager::windowStart() {
-//    return a windows .front().first;
-//}
-
-//// Returns last trigger of window
-//double DynamicDownloaderManager::windowEnd() {
-//    return a windows .back().first;
-//}
-
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     const std::string infoURL,
     const std::string dataURL,
@@ -117,7 +107,6 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
     _dataMinTime = Time::convertTime(jsonResult["availability"]["startDate"]);
     _dataMaxTime = Time::convertTime(jsonResult["availability"]["stopDate"]);
     //_dataIdDescription = jsonResult["description"];
-
 }
 
 void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRequest,
@@ -349,6 +338,7 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
     int speedThreshhold = 7200;
     if (abs(deltaTime) > speedThreshhold) {
         // to fast, do nothing
+        LWARNING("Dynamic file sequence downloader: Paused. Time moves to fast.");
         return;
     }
 
@@ -437,6 +427,7 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
 // 9. maybe make a copy of the once that gets returned with downloadedFiles() so that
 //     the originals can be removed with clearDownloaded() before returning out of
 //     downloadedFiles()
+// 10. deal with jsonResult["description"]
 //
 // Done items:
 //
