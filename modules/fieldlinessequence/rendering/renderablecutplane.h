@@ -60,13 +60,14 @@ public:
     
 protected:
     virtual void bindTexture() override;
+  //  virtual void unbindTexture() override;
 
     void createPlane();
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
     GLuint _vertexColorBuffer = 0;
-    GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;
+    GLuint vaoHandle;
     
 private:
     void loadTexture();

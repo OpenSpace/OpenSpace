@@ -140,8 +140,6 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   shaders/axes_fs.glsl
   shaders/axes_vs.glsl
-  shaders/cutplane_fs.glsl
-  shaders/cutplane_vs.glsl
   shaders/disc_fs.glsl
   shaders/disc_vs.glsl
   shaders/grid_vs.glsl

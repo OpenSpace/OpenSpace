@@ -352,6 +352,7 @@ void RenderablePlane::createPlane() {
         sizeof(GLfloat) * 6,
         reinterpret_cast<void*>(sizeof(GLfloat) * 4)
     );
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 

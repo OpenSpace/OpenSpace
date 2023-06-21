@@ -47,3 +47,5 @@ data/assets/scene/solarsystem/planets/earth/magnetosphere/GAMERA.assets
 modules/base/rendering/renderableplane.cpp
 modules/fieldlinessequence/ext/hdf5/
 modules/fieldlinessequence/ext/HighFive/
+data/assets/scene/solarsystem/planets/earth/magnetosphere/GAMERA.asset
+data/assets/scene/solarsystem/planets/earth/magnetosphere/test-cutplane.asset
