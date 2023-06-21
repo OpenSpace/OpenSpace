@@ -22,54 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+in vec4 vs_gPosition;
+in vec3 vs_gNormal;
+in float vs_screenSpaceDepth;
+//in vec2 vs_st; //texture coordinates
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in float in_color_scalar;
+uniform sampler2D texture1;
+uniform bool additiveBlending;
+uniform float opacity = 1.0;
+uniform bool mirrorBackside = true;
+uniform vec3 multiplyColor;
 
-out vec4 vs_gPosition;
-out vec3 vs_gNormal;
-out float vs_screenSpaceDepth;
-out vec2 vs_st; 
+in vec4 vs_color;
+in float vs_depth;
 
-uniform mat4 modelViewProjectionTransform;
-uniform mat4 modelViewTransform;
+Fragment getFragment() {
 
-// Uniforms needed to color by quantity
-uniform int colorMethod;
-uniform sampler1D colorTable;
-uniform vec2 colorTableRange;
-out vec4 vs_color;
-
-vec4 getTransferFunctionColor() {
-  // Remap the color scalar to a [0,1] range
-  float lookUpVal =
-    (in_color_scalar - colorTableRange.x) / (colorTableRange.y - colorTableRange.x);
-  return texture(colorTable, lookUpVal);
-}
-
-
-void main() {
-
- bool hasColor = true;
-
-  if (hasColor) {
-      vec4 quantityColor = getTransferFunctionColor();
-      vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
+  //frag.color.a *= opacity;
+  if (vs_color.a == 0.0) {
+    discard;
   }
-  vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-  vec4 positionClipSpace = modelViewProjectionTransform * position;
-  vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
-  gl_Position = positionScreenSpace;
+  vec4 fragColor = vs_color;  
+  
+  Fragment frag;
+  frag.depth = vs_screenSpaceDepth;
+  frag.color = fragColor;
+
+  //frag.color.rgb *= vec3(1.0, 0.0, 0.0);
 
   // G-Buffer
-  vs_gNormal = vec3(0.0);
-  vs_gPosition = modelViewTransform * position; // Must be in SGCT eye space;
+  frag.gPosition = vec4(0.0);//vs_gPosition;
 
-  vs_st = in_st;
-  vs_screenSpaceDepth = positionScreenSpace.w;
+  if (additiveBlending) {
+    frag.blend = BLEND_MODE_ADDITIVE;
+  }
+
+  // G-Buffer
+  frag.gPosition = vs_gPosition;
+  frag.gNormal = vec4(vs_gNormal, 1.0);
+  //frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+
+  return frag;
 }

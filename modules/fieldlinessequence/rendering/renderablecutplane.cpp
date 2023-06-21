@@ -50,11 +50,6 @@
 
 
 namespace {
-    enum BlendMode {
-        Normal = 0,
-        Additive
-    };
-//  constexpr std::string_view _loggerCat = “RenderableCutPlane”;
   constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
     "FilePath",
     "Hejhejs",
@@ -87,11 +82,6 @@ constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
     // List of ranges for which their corresponding parameters values will be
     // colorized by. Should be entered as {min value, max value} per range
     std::optional<std::vector<glm::vec2>> colorTableRanges;
-
-    enum class [[codegen::map(BlendMode)]] BlendMode {
-        Normal,
-        Additive
-    };
     // A list of paths to transferfunction .txt files containing color tables
     // used for colorizing the fieldlines according to different parameters
     std::optional<std::vector<std::string>> colorTablePaths;
@@ -128,8 +118,13 @@ _colorTablePath(ColorTablePathInfo)
         // corrupt or not provided
         _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
     }
+    if (p.colorTableRanges.has_value()) {
+        _colorTableRanges = *p.colorTableRanges;
+    }
+    else {
+        _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
+    }
  
-   // setRenderBin(Renderable::RenderBin::Opaque);
 }
 
 bool RenderableCutPlane::isReady() const {
@@ -144,29 +139,30 @@ void RenderableCutPlane::initialize() {
 
 void RenderableCutPlane::initializeGL() {
     ZoneScoped;
-
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    glGenBuffers(1, &_vertexColorBuffer); // generate buffer
+   // RenderablePlane::initializeGL();
+   // glGenVertexArrays(1, &_quad); // generate array
+   // glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+  
+    loadTexture();
 
     _axis1 *= _size.value().x;
     _axis2 *= _size.value().y;
-    _size = {_axis1,_axis2};
+    _size = { _axis1,_axis2 };
+    std::cout << _axis1 << ", " << _axis2 << "\n";
 
- 
+    _colorTablePaths.resize(4, _colorTablePaths.back());
+    _colorTablePath = _colorTablePaths[0];
+    _colorTableRanges.resize(4, _colorTableRanges.back());
 
-    loadTexture();
     createPlane();
-   
-   // updateVertexColorBuffer();
-    // TODO: Call shaders when implemented
+ 
    _shader = BaseModule::ProgramObjectManager.request(
         "CutPlane",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "CutPlane",
-                absPath("${MODULE_BASE}/shaders/cutplane_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/cutplane_fs.glsl")
+                absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/cutplane_vs.glsl"),
+                absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/cutplane_fs.glsl")
             );
         }
     );
@@ -176,20 +172,21 @@ void RenderableCutPlane::initializeGL() {
         });
 
     // Needed for additive blending
-    //setRenderBin(Renderable::RenderBin::Overlay); 
+   // setRenderBin(Renderable::RenderBin::Overlay); 
 }
 
 void RenderableCutPlane::deinitializeGL() {
  ZoneScoped;
 
-     glDeleteVertexArrays(1, &_quad);
-     _quad = 0;
+    glDeleteBuffers(1, &vaoHandle);
+    vaoHandle = 0;
 
-     glDeleteBuffers(1, &_vertexPositionBuffer);
-     _vertexPositionBuffer = 0;
+   glDeleteBuffers(1, &_vertexPositionBuffer);
+   _vertexPositionBuffer = 0;
 
-    glDeleteBuffers(1, &_vertexColorBuffer);
+   glDeleteBuffers(1, &_vertexColorBuffer);
    _vertexColorBuffer = 0;
+
 
     BaseModule::ProgramObjectManager.release(
         "CutPlane",
@@ -200,13 +197,11 @@ void RenderableCutPlane::deinitializeGL() {
     _shader = nullptr;
 }
 
-void RenderableCutPlane::render(const RenderData& data, RendererTasks&) {
+void RenderableCutPlane::render(const RenderData& data, RendererTasks& t) {
     ZoneScoped;
 
     _shader->activate();
     _shader->setUniform("opacity", opacity());
-
-    _shader->setUniform("mirrorBackside", _mirrorBackside);
 
     glm::dvec3 objectPositionWorld = glm::dvec3(
         glm::translate(
@@ -246,48 +241,40 @@ void RenderableCutPlane::render(const RenderData& data, RendererTasks&) {
     textureUnit.activate();
     _transferFunction->bind(); // Calls update internally
     _shader->setUniform("colorTable", textureUnit);
-    _shader->setUniform("colorTableRange", _colorTableRanges[0]);
-    bindTexture();
-    defer { unbindTexture(); };
+    _shader->setUniform("colorTableRange", _colorTableRanges[_dataPropertyIndex]);
+   // _texture->bind();
+   // defer{ unbindTexture(); };
+  // _shader->setUniform("texture1", textureUnit);
 
-    _shader->setUniform("texture1", textureUnit);
+  //  glDisable(GL_CULL_FACE);
+   
+   glBindVertexArray(vaoHandle);
+   glDrawArrays(GL_TRIANGLES, 0, 6);
+   glBindVertexArray(0);
 
-//    _shader->setUniform("multiplyColor", _multiplyColor);
-
-    bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
-    if (additiveBlending) {
-        glDepthMask(false);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    }
-    glDisable(GL_CULL_FACE);
-
-    glBindVertexArray(_quad);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-  //  glBindVertexArray(2);
-
-    if (additiveBlending) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
-    }
+   /* glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);  
+     glBindVertexArray(0);*/
 
     _shader->deactivate();
 }
 
 void RenderableCutPlane::update(const UpdateData& data) {
     ZoneScoped;
-    if (_planeIsDirty) {
+   // if (_planeIsDirty) {
         createPlane();
-    }
+   // }
    // RenderablePlane::update(data);
-   // updateVertexColorBuffer();
+    //updateVertexColorBuffer();
 }
 
 void RenderableCutPlane::bindTexture() {
     //ghoul::opengl::Texture* rawTexture = _texture.get();
     //ghoul_assert(_texture, "Texture must be loaded before binding");
     //rawTexture->bind();
-    _texture->bind();
+    if (_texture) {
+        _texture->bind();
+    }
 }
 
 void RenderableCutPlane::createPlane()
@@ -304,45 +291,50 @@ void RenderableCutPlane::createPlane()
          sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f
     };
 
-    glBindVertexArray(_quad);
+    std::vector<float> flatData = {};
+    for (size_t i = 0; i < _slice.data()[_dataPropertyIndex].size(); i++)
+    {
+        for (size_t j = 0; j < _slice.data()[_dataPropertyIndex][i].size(); j++) {
+
+            flatData.push_back(_slice.data()[_dataPropertyIndex][i][j]);
+        }
+    }
+  
+    const std::vector<float>& colorData = flatData;
+
+    GLuint vboHandles[2];
+    glGenBuffers(2, vboHandles);
+
+     _vertexPositionBuffer = vboHandles[0];
+     _vertexColorBuffer = vboHandles[1];
+
+    // Populate the position buffer
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, nullptr);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 7,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-    );
-
+    // Populate the color buffer
     glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, colorData.size() * sizeof(float), colorData.data(), GL_STATIC_DRAW);
 
-    std::vector<float> flatVector;
-    for (const auto& innerVector : _slice.data()[_dataPropertyIndex]) {
-        flatVector.insert(flatVector.end(), innerVector.begin(), innerVector.end());
-    }
-    // use colorquan as argument to get the wanted dataprop in the selected slice 
-    const std::vector<float>& quantities = flatVector;
+    glGenVertexArrays(1, &vaoHandle);
+    glBindVertexArray(vaoHandle);
 
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        quantities.size() * sizeof(float),
-        quantities.data(),
-        GL_STATIC_DRAW
-    );
+    // Enable the vertex attribute arrays
+    glEnableVertexAttribArray(0);  // Vertex position
+    glEnableVertexAttribArray(1);  // Vertex color
 
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, reinterpret_cast<void*>(sizeof(GLfloat) * 6));
+    // Map index 0 to the position buffer
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
+    // Map index 1 to the color buffer
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+   // delete[] colorData;
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-   // glBindVertexArray(2);
+ 
 }
-
 
 void RenderableCutPlane::loadTexture()
 {
@@ -386,10 +378,15 @@ void RenderableCutPlane::loadTexture()
 std::unique_ptr<ghoul::opengl::Texture> RenderableCutPlane::createFloatTexture(const std::vector<std::vector<float>>& data)
 {
     // Convert the 2D vector to a flat float array
-    std::vector<float> flatData; //en slice men platt
+    std::vector<float> flatData1; //en slice men platt
     for (const auto& row : data) {
-        flatData.insert(flatData.end(), row.begin(), row.end());
+        flatData1.insert(flatData1.end(), row.begin(), row.end());
     }
+
+    for (const auto& element : flatData1) {
+        std::cout << element << " ";
+    }
+
     // Create a floating-point texture
     GLenum type = GL_TEXTURE_2D;
     ghoul::opengl::Texture::Format format = ghoul::opengl::Texture::Format::Red;
@@ -397,7 +394,7 @@ std::unique_ptr<ghoul::opengl::Texture> RenderableCutPlane::createFloatTexture(c
     glm::uvec3 size(data[0].size(), data.size(), 1);
     std::unique_ptr<ghoul::opengl::Texture> texture =
         std::make_unique<ghoul::opengl::Texture>(
-            flatData.data(),
+            flatData1.data(),
             size,
             type,
             format,
@@ -412,8 +409,30 @@ std::unique_ptr<ghoul::opengl::Texture> RenderableCutPlane::createFloatTexture(c
 
 void RenderableCutPlane::updateVertexColorBuffer() {
     //if (_activeStateIndex == -1) { return; }
-  //  glBindVertexArray(_quad);
-   
+    //glBindVertexArray(_quad);
+    //glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+
+    //std::vector<float> flatVector;
+    //for (const auto& innerVector : _slice.data()[_dataPropertyIndex]) {
+    //    flatVector.insert(flatVector.end(), innerVector.begin(), innerVector.end());
+    //}
+    //// use colorquan as argument to get the wanted dataprop in the selected slice 
+    //const std::vector<float>& quantities = flatVector;
+
+    //// use colorquan as argument to get the wanted dataprop in the selected slice 
+    //glBufferData(
+    //    GL_ARRAY_BUFFER,
+    //    quantities.size() * sizeof(float),
+    //    quantities.data(),
+    //    GL_STATIC_DRAW
+    //);
+
+    //glEnableVertexAttribArray(2);
+    //glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindVertexArray(0);
+
 
 }
 
