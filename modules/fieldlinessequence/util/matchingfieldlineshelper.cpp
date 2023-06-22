@@ -1048,25 +1048,29 @@ namespace openspace::fls {
                         seedPoints[i].seedPoint = modifiedSeedpoint;
                         break;
                     }
-                    //else //If it is a Closed fieldline
-                    //{
-                    //    float stepLength = 0.1;
-                    //    glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
-                    //        seedPoints[i],
-                    //        tracingVar,
-                    //        tracer,
-                    //        nPointsOnPathLine,
-                    //        kameleon,
-                    //        innerBoundaryLimit,
-                    //        _nPointsOnFieldLine,
-                    //        directionToCriticalPoint,
-                    //        stepLength,
-                    //        accuracy,
-                    //        false
-                    //    );
-                    //    seedPoints[i].seedPoint = modifiedSeedpoint;
-                    //    break;
-                    //}
+                    else //If it is a Closed fieldline
+                    {
+                        float stepLength = 0.9;
+                        Seedpoint lastWorkingSeedpoint;
+
+                        glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
+                            seedPoints[i],
+                            tracingVar,
+                            tracer,
+                            nPointsOnPathLine,
+                            kameleon,
+                            innerBoundaryLimit,
+                            _nPointsOnFieldLine,
+                            directionToCriticalPoint,
+                            stepLength,
+                            accuracy,
+                            false,
+                            lastWorkingSeedpoint
+                        );
+
+                        seedPoints[i].seedPoint = modifiedSeedpoint;
+                        break;
+                    }
                     counter2++;
                 }
                 /*float newOpenXvalue = (seedPoints[i].seedPoint.x + seedPoints[i - 1].seedPoint.x) / 2;
