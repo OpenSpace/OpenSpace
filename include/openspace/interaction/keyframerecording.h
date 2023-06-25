@@ -74,10 +74,9 @@ private:
 
     std::vector<nlohmann::json> _keyframes;
     std::string _filename;
-    bool _playing;
-    bool _timeChanged;
-    bool _stateChanged;
-    double _sequenceTime;
+    bool _isPlaying = false;
+    bool _hasStateChanged = false;
+    double _sequenceTime = 0.0;
 };
 
 } // namespace openspace

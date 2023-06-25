@@ -101,20 +101,20 @@ void KeyframeRecording::loadSequence(std::string filename) {
 }
 
 void KeyframeRecording::play() {
-    _playing = true;
+    _isPlaying = true;
 }
 
 void KeyframeRecording::pause() {
-    _playing = false;
+    _isPlaying = false;
 }
 
 void KeyframeRecording::setSequenceTime(double sequenceTime) {
     _sequenceTime = sequenceTime;
-    _stateChanged = true;
+    _hasStateChanged = true;
 }
 
 void KeyframeRecording::preSynchronization(double dt) {
-    if (_stateChanged) {
+    if (_hasStateChanged) {
         auto it = std::find_if(
             _keyframes.rbegin(),
             _keyframes.rend(),
@@ -134,7 +134,7 @@ void KeyframeRecording::preSynchronization(double dt) {
         // At or after last keyframe
         else if (it == _keyframes.rbegin()) {
             currKeyframe = nextKeyframe = _keyframes.back();
-            _playing = false;
+            _isPlaying = false;
         }
         else {
             currKeyframe = *it;
@@ -160,12 +160,12 @@ void KeyframeRecording::preSynchronization(double dt) {
             false
         );
 
-        _stateChanged = false;
+        _hasStateChanged = false;
     }
 
-    if (_playing) {
+    if (_isPlaying) {
         _sequenceTime += dt;
-        _stateChanged = true;
+        _hasStateChanged = true;
     }
 }
 
