@@ -35,10 +35,10 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/keyframerecording.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/interaction/keyframerecording.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
@@ -95,9 +95,9 @@ namespace {
         sizeof(interaction::InteractionMonitor) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
+        sizeof(interaction::KeyframeRecording) +
         sizeof(interaction::NavigationHandler) +
         sizeof(interaction::SessionRecording) +
-        sizeof(interaction::KeyframeRecording) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
@@ -316,6 +316,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    keyframeRecording = new (currentPos) interaction::KeyframeRecording;
+    ghoul_assert(keyframeRecording, "No keyframeRecording");
+    currentPos += sizeof(interaction::KeyframeRecording);
+#else // ^^^ WIN32 / !WIN32 vvv
+    keyframeRecording = new interaction::KeyframeRecording;
+#endif // WIN32
+
+#ifdef WIN32
     navigationHandler = new (currentPos) interaction::NavigationHandler;
     ghoul_assert(navigationHandler, "No navigationHandler");
     currentPos += sizeof(interaction::NavigationHandler);
@@ -329,14 +337,6 @@ void create() {
     currentPos += sizeof(interaction::SessionRecording);
 #else // ^^^ WIN32 / !WIN32 vvv
     sessionRecording = new interaction::SessionRecording(true);
-#endif // WIN32
-
-#ifdef WIN32
-    keyframeRecording = new (currentPos) interaction::KeyframeRecording;
-    ghoul_assert(keyframeRecording, "No keyframeRecording");
-    currentPos += sizeof(interaction::KeyframeRecording);
-#else // ^^^ WIN32 / !WIN32 vvv
-    keyframeRecording = new interaction::KeyframeRecording;
 #endif // WIN32
 
 #ifdef WIN32
@@ -396,9 +396,9 @@ void initialize() {
 
     // New property subowners also have to be added to the ImGuiModule callback!
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
+    rootPropertyOwner->addPropertySubOwner(global::keyframeRecording);
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
     rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
-    rootPropertyOwner->addPropertySubOwner(global::keyframeRecording);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
     rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
 
@@ -462,18 +462,18 @@ void destroy() {
     delete sessionRecording;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'KeyframeRecording'");
-#ifdef WIN32
-    keyframeRecording->~KeyframeRecording();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete keyframeRecording;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'NavigationHandler'");
 #ifdef WIN32
     navigationHandler->~NavigationHandler();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete navigationHandler;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'KeyframeRecording'");
+#ifdef WIN32
+    keyframeRecording->~KeyframeRecording();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete keyframeRecording;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'KeybindingManager'");

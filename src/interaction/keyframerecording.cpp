@@ -22,22 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <algorithm>
-#include <iostream>
-
-#include <glm/glm.hpp>
-
-#include <ghoul/filesystem/filesystem.h>
-
 #include <openspace/interaction/keyframerecording.h>
+
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/camera/camera.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/glm.h>
+#include <algorithm>
+#include <iostream>
 
 #include "keyframerecording_lua.inl"
 
@@ -48,53 +46,43 @@ namespace {
 namespace openspace::interaction {
 
 KeyframeRecording::KeyframeRecording()
-    : properties::PropertyOwner({ "KeyframeRecording", "Keyframe Recording" }) {
+    : properties::PropertyOwner({ "KeyframeRecording", "Keyframe Recording" })
+{}
 
-}
-
-KeyframeRecording::~KeyframeRecording() {
-}
-
-bool KeyframeRecording::newSequence(std::string filename) {
+void KeyframeRecording::newSequence(std::string filename) {
     saveSequence();
 
     _keyframes.clear();
-    _filename = filename;
-    return true;
+    _filename = std::move(filename);
 }
 
-bool KeyframeRecording::addKeyframe(double sequenceTime) {
-
+void KeyframeRecording::addKeyframe(double sequenceTime) {
     nlohmann::json keyframe = newKeyframe(sequenceTime);
 
-    auto it = std::find_if(_keyframes.begin(), _keyframes.end(),
+    auto it = std::find_if(
+        _keyframes.begin(),
+        _keyframes.end(),
         [sequenceTime](const nlohmann::json& entry) {
             return sequenceTime < static_cast<double>(entry["timestamp"]["sequence"]);
         }
     );
     _keyframes.insert(it, keyframe);
-
-    return true;
 }
 
-bool KeyframeRecording::updateKeyframe(int index)
-{
+void KeyframeRecording::updateKeyframe(int index) {
     nlohmann::json old = _keyframes.at(index);
     _keyframes[index] = newKeyframe(static_cast<double>(old["timestamp"]["sequence"]));
-    return false;
 }
 
-bool KeyframeRecording::moveKeyframe(int index, double sequenceTime)
-{
+void KeyframeRecording::moveKeyframe(int index, double sequenceTime) {
     _keyframes[index]["timestamp"]["sequence"] = sequenceTime;
     sortKeyframes();
-    return false;
 }
 
-bool KeyframeRecording::saveSequence()
-{
-    if (_filename.length() < 1) {
-        // @TODO(jockekilby) Throw some error about having to create sequence with a valid filename first
+bool KeyframeRecording::saveSequence() {
+    if (_filename.empty()) {
+        // @TODO(jockekilby) Throw some error about having to create sequence with a valid
+        // filename first
         return false;
     }
 
@@ -102,17 +90,14 @@ bool KeyframeRecording::saveSequence()
     std::filesystem::path path = absPath("${RECORDINGS}/" + _filename + ".json");
     std::ofstream ofs(path);
     ofs << sequence.dump(2);
-    ofs.close();
     return true;
 }
 
-bool KeyframeRecording::loadSequence(std::string filename)
-{
+void KeyframeRecording::loadSequence(std::string filename) {
     std::filesystem::path path = absPath("${RECORDINGS}/" + filename + ".json");
     std::ifstream file(path);
     _keyframes = nlohmann::json::parse(file).get<std::vector<nlohmann::json>>();
     _filename = filename;
-    return true;
 }
 
 void KeyframeRecording::play() {
@@ -131,14 +116,15 @@ void KeyframeRecording::setSequenceTime(double sequenceTime) {
 void KeyframeRecording::preSynchronization(double dt) {
     if (_stateChanged) {
         auto it = std::find_if(
-            _keyframes.rbegin(), _keyframes.rend(),
+            _keyframes.rbegin(),
+            _keyframes.rend(),
             [timestamp = _sequenceTime](const nlohmann::json& entry) {
                 return timestamp >= static_cast<double>(entry["timestamp"]["sequence"]);
             }
         );
 
-        nlohmann::json currKeyframe = nullptr;
-        nlohmann::json nextKeyframe = nullptr;
+        nlohmann::json currKeyframe;
+        nlohmann::json nextKeyframe;
         double factor = 0.0;
 
         // Before first keyframe
@@ -146,7 +132,7 @@ void KeyframeRecording::preSynchronization(double dt) {
             currKeyframe = nextKeyframe = _keyframes.front();
         }
         // At or after last keyframe
-        else if(it == _keyframes.rbegin()) {
+        else if (it == _keyframes.rbegin()) {
             currKeyframe = nextKeyframe = _keyframes.back();
             _playing = false;
         }
@@ -201,15 +187,17 @@ scripting::LuaLibrary KeyframeRecording::luaLibrary() {
 }
 
 void KeyframeRecording::sortKeyframes() {
-    std::sort(_keyframes.begin(), _keyframes.end(),
+    std::sort(
+        _keyframes.begin(),
+        _keyframes.end(),
         [](nlohmann::json lhs, nlohmann::json rhs) {
             return static_cast<double>(lhs["timestamp"]["sequence"]) <
                 static_cast<double>(rhs["timestamp"]["sequence"]);
-        });
+        }
+    );
 }
 
-nlohmann::json KeyframeRecording::newKeyframe(double sequenceTime)
-{
+nlohmann::json KeyframeRecording::newKeyframe(double sequenceTime) {
     interaction::NavigationHandler& handler = *global::navigationHandler;
     interaction::OrbitalNavigator& navigator = handler.orbitalNavigator();
     const SceneGraphNode* node = navigator.anchorNode();
@@ -259,8 +247,8 @@ nlohmann::json KeyframeRecording::newKeyframe(double sequenceTime)
     return keyframe;
 }
 
-KeyframeNavigator::CameraPose KeyframeRecording::keyframeToPose(const nlohmann::json& keyframe) const
-{
+KeyframeNavigator::CameraPose KeyframeRecording::keyframeToPose(
+                                                   const nlohmann::json& keyframe) const {
     KeyframeNavigator::CameraPose pose;
 
     pose.position.x = keyframe["camera"]["position"]["x"];

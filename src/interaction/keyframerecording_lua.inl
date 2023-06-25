@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <optional>
-
 #include <openspace/engine/globals.h>
+
+#include <optional>
 
 namespace {
 
@@ -33,7 +33,7 @@ namespace {
     if (filename.empty()) {
         throw ghoul::lua::LuaError("Filename string is empty");
     }
-    openspace::global::keyframeRecording->newSequence(filename);
+    openspace::global::keyframeRecording->newSequence(std::move(filename));
 }
 
 // Adds a keyframe at the specified sequence-time.
@@ -51,20 +51,21 @@ namespace {
     openspace::global::keyframeRecording->moveKeyframe(index, sequenceTime);
 }
 
-// Saves the current sequence of keyframes to disk under the last filename supplied to 'newSequence'.
+// Saves the current sequence of keyframes to disk under the last filename supplied to
+// 'newSequence'.
 [[codegen::luawrap]] void saveSequence() {
     openspace::global::keyframeRecording->saveSequence();
 }
 
 // Loads a sequence from the supplied file.
 [[codegen::luawrap]] void loadSequence(std::string filename) {
-    openspace::global::keyframeRecording->loadSequence(filename);
+    openspace::global::keyframeRecording->loadSequence(std::move(filename));
 }
 
 //
 [[codegen::luawrap]] void play(std::optional<double> sequenceTime) {
     if (sequenceTime.has_value()) {
-        openspace::global::keyframeRecording->setSequenceTime(sequenceTime.value());
+        openspace::global::keyframeRecording->setSequenceTime(*sequenceTime);
     }
 
     openspace::global::keyframeRecording->play();

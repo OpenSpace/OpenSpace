@@ -25,14 +25,13 @@
 #ifndef __OPENSPACE_CORE___KEYFRAMERECORDING___H__
 #define __OPENSPACE_CORE___KEYFRAMERECORDING___H__
 
-#include <vector>
-#include <string>
-
-#include <json/json.hpp>
-
 #include <openspace/properties/propertyowner.h>
-#include <openspace/scripting/lualibrary.h>
+
 #include <openspace/navigation/keyframenavigator.h>
+#include <openspace/scripting/lualibrary.h>
+#include <json/json.hpp>
+#include <string>
+#include <vector>
 
 namespace openspace::interaction {
 
@@ -40,19 +39,17 @@ class KeyframeRecording : public properties::PropertyOwner {
 public:
     KeyframeRecording();
 
-    ~KeyframeRecording() override;
+    void newSequence(std::string filename);
 
-    bool newSequence(std::string filename);
+    void addKeyframe(double sequenceTime);
 
-    bool addKeyframe(double sequenceTime);
+    void updateKeyframe(int index);
 
-    bool updateKeyframe(int index);
-
-    bool moveKeyframe(int index, double sequenceTime);
+    void moveKeyframe(int index, double sequenceTime);
 
     bool saveSequence();
 
-    bool loadSequence(std::string filename);
+    void loadSequence(std::string filename);
 
     void preSynchronization(double dt);
 
@@ -67,7 +64,6 @@ public:
      * interaction
      */
     static openspace::scripting::LuaLibrary luaLibrary();
-protected:
 
 private:
     void sortKeyframes();
