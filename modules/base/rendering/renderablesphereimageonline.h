@@ -50,7 +50,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture();
+    void bindTexture() override;
 
 private:
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(
