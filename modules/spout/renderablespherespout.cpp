@@ -101,9 +101,6 @@ void RenderableSphereSpout::bindTexture() {
         _spoutReceiver.saveGLTextureState();
         glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
     }
-    else {
-        RenderableSphere::bindTexture();
-    }
 }
 
 void RenderableSphereSpout::unbindTexture() {

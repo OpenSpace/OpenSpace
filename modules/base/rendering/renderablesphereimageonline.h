@@ -22,69 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGEONLINE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGEONLINE___H__
 
-#include <openspace/rendering/renderable.h>
+#include <modules/base/rendering/renderablesphere.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/engine/downloadmanager.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-class Sphere;
 struct RenderData;
 struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
-class RenderableSphere : public Renderable {
+class RenderableSphereImageOnline : public RenderableSphere {
 public:
-    RenderableSphere(const ghoul::Dictionary& dictionary);
+    RenderableSphereImageOnline(const ghoul::Dictionary& dictionary);
 
-    void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture() = 0;
-    virtual void unbindTexture();
-
-    properties::FloatProperty _size;
-    properties::IntProperty _segments;
-
-    properties::OptionProperty _orientation;
-    properties::BoolProperty _mirrorTexture;
-
-    properties::BoolProperty _disableFadeInDistance;
-    properties::FloatProperty _fadeInThreshold;
-    properties::FloatProperty _fadeOutThreshold;
+    virtual void bindTexture();
 
 private:
-    ghoul::opengl::ProgramObject* _shader = nullptr;
+    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
+        const std::string& url);
 
-    std::unique_ptr<Sphere> _sphere;
-    bool _sphereIsDirty = false;
+    properties::StringProperty _texturePath;
 
-    UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
-        colorTexture, mirrorTexture) _uniformCache;
-
+    std::future<DownloadManager::MemoryFile> _imageFuture;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    bool _textureIsDirty = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGEONLINE___H__

@@ -13,7 +13,7 @@ for z = 1,3 do
           }
         },
         Renderable = {
-          Type = "RenderableSphere",
+          Type = "RenderableSphereImageLocal",
           Size = 0.20 + i * 0.01,
           Segments = 80,
           Opacity = 1,

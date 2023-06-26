@@ -48,7 +48,7 @@ local CardinalDirectionSphere = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Enabled = asset.enabled,
     Size = 50000,
     Segments = 80,

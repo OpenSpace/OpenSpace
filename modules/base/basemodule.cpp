@@ -48,7 +48,8 @@
 #include <modules/base/rendering/renderablelabel.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablenodeline.h>
-#include <modules/base/rendering/renderablesphere.h>
+#include <modules/base/rendering/renderablesphereimagelocal.h>
+#include <modules/base/rendering/renderablesphereimageonline.h>
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
@@ -146,7 +147,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
         "RenderableTimeVaryingSphere"
     );
     fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
-    fRenderable->registerClass<RenderableSphere>("RenderableSphere");
+    fRenderable->registerClass<RenderableSphereImageLocal>("RenderableSphereImageLocal");
+    fRenderable->registerClass<RenderableSphereImageOnline>("RenderableSphereImageOnline");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
@@ -226,6 +228,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderablePrism::Documentation(),
         RenderableRadialGrid::Documentation(),
         RenderableSphere::Documentation(),
+        RenderableSphereImageLocal::Documentation(),
+        RenderableSphereImageOnline::Documentation(),
         RenderableSphericalGrid::Documentation(),
         RenderableTimeVaryingSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
