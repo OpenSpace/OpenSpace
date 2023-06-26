@@ -1,0 +1,7 @@
+contact_links:
+  - name: Slack Community Support
+    url: https://github.com/orgs/community/discussions
+    about: Please ask and answer questions here. Slack is the easiest and most reliable way of getting in touch with the project members.
+  - name: Support Email
+    url: support@openspaceproject.com
+    about: To get in contact with the project members for people that don't want to use Slack
