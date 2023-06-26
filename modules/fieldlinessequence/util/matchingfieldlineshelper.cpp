@@ -248,6 +248,10 @@ namespace openspace::fls {
         tempSeedPoint.y = seedPoint.y - directionVector.y * factor;
         tempSeedPoint.z = seedPoint.z - directionVector.z * factor;
 
+        std::cout << "DirectionVector: " << directionVector.x << " " << directionVector.y << " " << directionVector.z << std::endl;
+
+        std::cout << seedPoint.x << " " << seedPoint.y << " " << seedPoint.z << std::endl;
+
         int counter;
 
         if (topology == "IMF")
@@ -272,20 +276,11 @@ namespace openspace::fls {
                     2
                 );
 
-                if (topology == "IMF")
+                if (!checkIfFieldlineIsIMF(imfFieldlinePos))
                 {
-                    if (!checkIfFieldlineIsIMF(imfFieldlinePos))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-                else if (topology == "CLOSED")
-                {
-                    if (!checkIfFieldlineIsClosed(imfFieldlinePos))
-                    {
-                        return false;
-                    }
-                }
+
                 counter++;
             }
         }
@@ -361,9 +356,9 @@ namespace openspace::fls {
 
                     if (tempflowlinePositions[counter].x > 0)
                     {
-                        seedPoint.x = seedPoint.x - directionVector.x * factor;
-                        seedPoint.y = seedPoint.y - directionVector.y * factor;
-                        seedPoint.z = seedPoint.z - directionVector.z * factor;
+                        seedPoint.x = tempSeedPoint.x;
+                        seedPoint.y = tempSeedPoint.y;
+                        seedPoint.z = tempSeedPoint.z;
                         return false;
                     }
 
@@ -377,18 +372,18 @@ namespace openspace::fls {
                 }
                 if (counter == tempflowlinePositions.size())
                 {
-                    seedPoint.x = seedPoint.x - directionVector.x * factor;
-                    seedPoint.y = seedPoint.y - directionVector.y * factor;
-                    seedPoint.z = seedPoint.z - directionVector.z * factor;
+                    seedPoint.x = tempSeedPoint.x;
+                    seedPoint.y = tempSeedPoint.y;
+                    seedPoint.z = tempSeedPoint.z;
                     return false;
                 }
             }
         }
 
         // move seed point
-        seedPoint.x = seedPoint.x - directionVector.x * factor;
-        seedPoint.y = seedPoint.y - directionVector.y * factor;
-        seedPoint.z = seedPoint.z - directionVector.z * factor;
+        seedPoint.x = tempSeedPoint.x;
+        seedPoint.y = tempSeedPoint.y;
+        seedPoint.z = tempSeedPoint.z;
         return true;
     }
 
@@ -449,7 +444,7 @@ namespace openspace::fls {
                 );
 
                 // now, lets take a point close to the edge of that fieldline
-                glm::vec3 firstPosOfFieldline = fieldlinePositions[2];
+                glm::vec3 firstPosOfFieldline = fieldlinePositions[1];
 
                 // trace a flowline from the new point/edge position
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
@@ -570,7 +565,7 @@ namespace openspace::fls {
                 std::cout << "Finding OS Nightside Seed Point - Complete" << std::endl;
                 std::cout << "Finding Closed Nightside Seed Point" << std::endl;
 
-                double factor = 0.03;
+                double factor = 0.05;
 
                 glm::vec3 earthPos;
                 earthPos.x = 0;
@@ -591,6 +586,7 @@ namespace openspace::fls {
                 bool moveOS = true;
                 bool moveON = true;
 
+                /*
                 moveClosed = validateAndMoveSeedPoint(
                     closedSeedPointNightside,
                     vectorIE,
@@ -602,6 +598,7 @@ namespace openspace::fls {
                     tracer,
                     "CLOSED"
                 );
+                */
 
                 while (closedSeedPointNightside.x < 0 && moveClosed)
                 {
@@ -659,83 +656,11 @@ namespace openspace::fls {
                         tracer,
                         "CLOSED"
                     );
-
-                    /*
-                    // trace fieldline from closedSeedPoint
-                    std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
-                        closedSeedPointNightside,
-                        kameleon,
-                        innerBoundaryLimit,
-                        2
-                    );
-
-                    // check if closed
-                    if (checkIfFieldlineIsClosed(fieldlinePositions))
-                    {
-                        std::cout << "Closed seed point traced closed fieldline "
-                            << std::endl;
-
-                        std::cout << "Checking so all points on flowline traces closed fiedlines" << std::endl;
-
-                        // trace flowline
-                        ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
-                            tracingVar,
-                            tracer,
-                            closedSeedPointNightside,
-                            100,
-                            ccmc::Tracer::Direction::FOWARD);
-
-                        // get postions from flowline
-                        std::vector<glm::vec3> flowlinePositions
-                            = getPositionsFromLine(flowline);
-
-                        bool closedSeedPointIsClosedFieldline = true;
-                        int indexFlowlinePos2 = 0;
-
-                        while (closedSeedPointIsClosedFieldline && indexFlowlinePos2 < 100)//indexFlowlinePos2 < 100) //99
-                        {
-                            // trace fieldline from closedSeedPoint
-                            std::vector<glm::vec3> fieldlinePositions2 = fls::getFieldlinePositions(
-                                flowlinePositions[indexFlowlinePos2],
-                                kameleon,
-                                innerBoundaryLimit,
-                                2
-                            );
-
-                            if (!checkIfFieldlineIsClosed(fieldlinePositions2))
-                            {
-                                closedSeedPointIsClosedFieldline = false;
-                                std::cout << indexFlowlinePos2 <<
-                                    "point out of " << "100" << " not approved" << std::endl;
-                                break;
-                            }
-
-                            if (flowlinePositions[indexFlowlinePos2].x > 0)
-                            {
-                                break;
-                            }
-
-                            std::cout << indexFlowlinePos2 <<
-                                "point out of " << "100" << " approved" << std::endl;
-                            indexFlowlinePos2++;
-                        }
-
-                        // we've found only closed fieldlines
-                        if (closedSeedPointIsClosedFieldline)
-                        {
-                            std::cout << "Finding Closed Nightside Seed Point - Complete" << std::endl;
-                            // mod
-
-                            break;
-                        }
-                    }
-                    */
-
                 }
 
                 glm::vec3 weDontKnowThePositionOfTheCP;
-                nightsideSeedPoints.push_back({ onSeedPointNightside, "OPEN_NORTH", weDontKnowThePositionOfTheCP });
                 nightsideSeedPoints.push_back({ osSeedPointNightside, "OPEN_NORTH", weDontKnowThePositionOfTheCP });
+                nightsideSeedPoints.push_back({ onSeedPointNightside, "OPEN_SOUTH", weDontKnowThePositionOfTheCP });
                 nightsideSeedPoints.push_back({ imfSeedPointNightside, "IMF", weDontKnowThePositionOfTheCP });
                 nightsideSeedPoints.push_back({ closedSeedPointNightside, "CLOSED", weDontKnowThePositionOfTheCP });
             }
