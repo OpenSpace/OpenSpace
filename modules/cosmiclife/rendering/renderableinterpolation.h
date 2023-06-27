@@ -73,16 +73,19 @@ namespace openspace {
         static documentation::Documentation Documentation();
 
     private:
+        // Struct to store a point
         struct Point {
             float x;
             float y;
             float z;
         };
 
+        // Struct to store a vertex 
         struct Vertex {
             float location[3];
         };
 
+        // For drawing distance lines: Struct for storing distances and their corresponding points for vertex tables 
         struct DistancePoints {
             float distance;
             speck::Dataset::Entry p1;
@@ -133,6 +136,7 @@ namespace openspace {
 
         GLuint _pTexture = 0;
 
+        // Properties
         properties::FloatProperty _scaleFactor;
         properties::Vec3Property _pointColor;
         properties::Vec3Property _frameColor;
@@ -149,7 +153,6 @@ namespace openspace {
         properties::BoolProperty _useLinearFiltering;
         properties::TriggerProperty _setRangeFromData;
         properties::OptionProperty _renderOption;
-
         properties::FloatProperty _interpolationValue;
         properties::OptionProperty _dataSetOneOption;
         properties::OptionProperty _dataSetTwoOption;
@@ -157,13 +160,17 @@ namespace openspace {
         properties::BoolProperty _computeDistances;
         properties::FloatProperty _percentageOfLines;
 
-
+        // Map for file paths (for the interpolation dropdowns)
         std::map<std::string, std::string> _filePaths; 
+
+        //  string for storing the name of every species (used for having unique images)
         std::optional<std::string> _uniqueSpecies;
 
+        // Vector of points for MDS and UMAP
         std::vector<Point> _MDS_points;
         std::vector<Point> _Umap_points;
 
+        // Vertex tables for the distance lines for UMAP and MDS
         std::vector<Vertex> _vertices1;
         std::vector<Vertex> _vertices2;
 
@@ -191,8 +198,7 @@ namespace openspace {
         // distance default unit -- change?
         DistanceUnit _unit = DistanceUnit::Parsec;
 
-        // speck files
-        //speck::Dataset _dataset;
+        // Storing data for interpolation 
         std::map<std::string, speck::Dataset> _datasets;
         speck::Dataset _interpolationDataset;
         speck::Dataset _dataSetOne;
@@ -207,9 +213,11 @@ namespace openspace {
 
         glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
+        // VAO and VBO for points
         GLuint _vao = 0;
         GLuint _vbo = 0;
 
+        // VAO and VBO for lines
         GLuint _vaoLines = 0;
         GLuint _vboLines = 0;
     };

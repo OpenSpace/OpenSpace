@@ -33,6 +33,7 @@ out vec3 linecolor;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
+// Size of vertex table for coloring the lines 
 uniform int vertexSize;
 
 const double PARSEC = 0.308567756e17LF;
@@ -42,6 +43,7 @@ void main() {
   int currentIdx = gl_VertexID / 2;
   int lineSize = vertexSize / 2;
   
+  // Statements to set different colors on the lines, can be tweaked
   if(currentIdx < 1) {
     linecolor = vec3(1, 0, 0);
   }
@@ -51,7 +53,7 @@ void main() {
   else {
     linecolor = vec3(0, 1, 1);
   }
-
+  
   vec4 positionViewSpace = modelViewTransform * vec4(in_position * 1E3, 1.0);
   vec4 positionClipSpace = projectionTransform * positionViewSpace;
   vec4 positionScreenSpace = positionClipSpace;

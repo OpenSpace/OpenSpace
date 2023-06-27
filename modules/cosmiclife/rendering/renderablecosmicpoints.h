@@ -80,9 +80,9 @@ namespace openspace {
         void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
             GLuint textureHeight);
         void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
-            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
+            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
+            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
         float computeFadeFactor(float distanceNodeToCamera) const;
         void updateRenderData(const RenderData& data);
         float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e);

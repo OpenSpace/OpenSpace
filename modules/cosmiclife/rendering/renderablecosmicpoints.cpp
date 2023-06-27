@@ -86,34 +86,31 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-In Start and End Distances",
-        "These values determine the initial and final distances from the center of "
-        "which the object will start and end fading-in."
+        "These values determine the initial and final distances from the center of which the object will start and end fading-in."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in Effect",
-        "Enables/Disables the Fade-in effect."
+        "Enables/Disables the label fade-in effect."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrameColorInfo = {
         "FrameColor",
         "Frame Color",
-        "This value gives the color of the frame around each point."
+        "This value gives the color of the frame below each point."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxThresholdInfo = {
         "MaxThresholdInfo",
         "Max Threshold Info",
-        "This value is used to tell the max distance when the object should be shown or not." 
-        "When shown it is faded according to distance to camera."
+        "This value is used to tell the max distance when the object should be shown or not. When shown it is faded according to distance to camera."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
-        "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point."
+        "This value is used as a multiplicative factor that is applied to the apparent size of each point."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -143,8 +140,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
         "Text Opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent."
+        "Determines the transparency of the text label, where 1 is completely opaque and 0 fully transparent."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
@@ -156,8 +152,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
         "Text Min/Max Size",
-        "The minimal and maximal size (in pixels) of the text for the labels for the "
-        "objects being rendered."
+        "The minimal and maximal size (in pixels) of the text for the labels for the objects being rendered."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
@@ -169,15 +164,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BillboardMinMaxSizeInfo = {
         "BillboardMinMaxSize",
         "Billboard Min/Max Size in Pixels",
-        "The minimum and maximum size (in pixels) for the billboard representing the "
-        "object."
+        "The minimum and maximum size (in pixels) for the billboard representing the object."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
-        "This value determines which paramenter is used for default color of the "
-        "objects."
+        "This value determines which paramenter is used for default color of the objects."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OptionColorRangeInfo = {
@@ -189,72 +182,65 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
-        "This value determines which paramenter (datavar) is used for scaling "
-        "of the objects."
+        "This value determines which paramenter (datavar) is used for scaling of the objects."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts."
-        "Debug option for rendering of billboards and texts."
+        "Debug option for rendering of billboards and texts. Debug option for rendering of billboards and texts."
     };
 
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable Pixel Size Control",
-        "Enable pixel size control for rectangular projections. If set to true, the "
-        "billboard size is restricted by the min/max size in pixels property."
+        "Enable pixel size control for rectangular projections. If set to true, the billboard size is restricted by the min/max size in pixels property."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        CorrectionSizeEndDistanceInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo CorrectionSizeEndDistanceInfo = {
         "CorrectionSizeEndDistance",
-        "Distance in 10^X meters where correction size stops acting",
-        "Distance in 10^X meters where correction size stops acting."
+        "Correction Size End Distance",
+        "Distance in 10^X meters where correction size stops acting, distance in 10^X meters where correction size stops acting."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
         "CorrectionSizeFactor",
-        "Control variable for distance size",
-        ""
+        "Correction Size Factor",
+        "Control variable for distance size."
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseLinearFiltering = {
         "UseLinearFiltering",
         "Use Linear Filtering",
-        "Determines whether the provided color map should be sampled nearest neighbor "
-        "(=off) or linearly (=on)"
+        "Determines whether the provided color map should be sampled nearest neighbor (=off) or linearly (=on)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SetRangeFromData = {
         "SetRangeFromData",
         "Set Data Range from Data",
-        "Set the data range based on the available data"
+        "Set the data range based on the available data."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableLabelFadingEffectInfo = {
-    "EnableLabelFading",
-    "Enable/Disable Fade-in Effect for Labels",
-    "Enable/Disable the Fade-in effect for Labels."
+        "EnableLabelFading",
+        "Enable/Disable Fading",
+        "Enable/Disable the Fade-in effect for labels."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeLabelDistancesInfo = {
-    "FadeLabelDistances",
-    "Fade Label Distances",
-    "The distance range in which the labels should be fully opaque. "
-    "The distance from the position of the label to the camera in meter."
+        "FadeLabelDistances",
+        "Fade Label Distances",
+        "The distance range in which the labels should be fully opaque. The distance from the position of the label to the camera in meter."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeLabelWidthsInfo = {
-    "FadelabelWidths",
-    "Fade Label Widths",
-    "The distances over which the fading of the labels takes place, given in the meter unit. "
-    "The first value is the distance before the closest distance and the second "
-    "the one after the furthest distance. For example, with the unit Km, "
-    "a value of {1, 2} will make the label being fully faded out 1 km before "
-    "the closest distance and 2 km away from the furthest distance."
+        "FadelabelWidths",
+        "Fade Label Widths",
+        "The distances over which the fading of the labels takes place, given in the meter unit. "
+        "The first value is the distance before the closest distance and the second "
+        "the one after the furthest distance. For example, with the unit Km, "
+        "a value of {1, 2} will make the label being fully faded out 1 km before "
+        "the closest distance and 2 km away from the furthest distance."
     };
 
     struct [[codegen::Dictionary(RenderableCosmicPoints)]] Parameters {
@@ -284,6 +270,7 @@ namespace {
             ViewDirection [[codegen::key("Camera View Direction")]],
             PositionNormal [[codegen::key("Camera Position Normal")]]
         };
+
         // [[codegen::verbatim(RenderOptionInfo.description)]]
         std::optional<RenderOption> renderOption;
 
@@ -296,6 +283,7 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
+        
         // The unit used for all distances. Must match the unit of any
         // distances/positions in the data files
         std::optional<Unit> unit;
@@ -370,6 +358,7 @@ namespace {
         // [[codegen::verbatim(FadeLabelWidthsInfo.description)]]
         std::optional<glm::vec2> fadeLabelWidths;
 
+        // The string that contains the name of every unique species for the images 
         std::optional<std::string> uniqueSpecies;
     };
 #include "renderablecosmicpoints_codegen.cpp"
@@ -430,27 +419,27 @@ namespace openspace {
         )
         , _disableFadeInDistance(DisableFadeInInfo, true)
 
-
-
-
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
         if (p.file.has_value()) {
+            // Speck file 
             _speckFile = absPath(*p.file).string();
-
             _hasSpeckFile = p.file.has_value();
 
+            // Property for drawing the points 
             _drawElements = p.drawElements.value_or(_drawElements);
             _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
             addProperty(_drawElements);
 
+            // Properties for images and border 
             _uniqueSpecies = p.uniqueSpecies;
             _useFade = p.useFade.value_or(_useFade);
             _maxThreshold = p.maxThreshold.value_or(_maxThreshold);
             _frameColor = p.frameColor.value_or(_frameColor);
         }
 
+        // Render options
         _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
         _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
 
@@ -469,6 +458,7 @@ namespace openspace {
             _unit = DistanceUnit::Meter;
         }
 
+        // Texture property 
         if (p.texture.has_value()) {
             _spriteTexturePath = absPath(*p.texture).string();
             _spriteTexturePath.onChange([&]() { _spriteTextureIsDirty = true; });
@@ -476,6 +466,7 @@ namespace openspace {
         }
         _hasSpriteTexture = p.texture.has_value();
 
+        // If label file exists add all properties for labels
         if (p.labelFile.has_value()) {
             _drawLabels = p.drawLabels.value_or(_drawLabels);
             addProperty(_drawLabels);
@@ -508,12 +499,11 @@ namespace openspace {
 
             _fadeLabelWidths = p.fadeLabelWidths.value_or(_fadeLabelWidths);
             addProperty(_fadeLabelWidths);
-
-
         }
 
         _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
+        // Fading for labels
         if (p.fadeInDistances.has_value()) {
             _fadeInDistances = *p.fadeInDistances;
             _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
@@ -522,6 +512,7 @@ namespace openspace {
             addProperty(_disableFadeInDistance);
         }
 
+        // Color properties
         if (p.colorMap.has_value()) {
             _colorMapFile = absPath(*p.colorMap).string();
             _hasColorMapFile = true;
@@ -561,11 +552,14 @@ namespace openspace {
             addProperty(_pointColor);
         }
 
+        // Opacity property
         addProperty(_opacity);
 
+        // Scale property
         _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
         addProperty(_scaleFactor);
 
+        // Size Option
         if (p.sizeOption.has_value()) {
             std::vector<std::string> opts = *p.sizeOption;
             for (size_t i = 0; i < opts.size(); ++i) {
@@ -588,19 +582,23 @@ namespace openspace {
         _pixelSizeControl = p.enablePixelSizeControl.value_or(_pixelSizeControl);
         addProperty(_pixelSizeControl);
 
+        // Billboard size
         _billboardMinMaxSize = p.billboardMinMaxSize.value_or(_billboardMinMaxSize);
         _billboardMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
         addProperty(_billboardMinMaxSize);
 
+        // Correction size
         _correctionSizeEndDistance =
             p.correctionSizeEndDistance.value_or(_correctionSizeEndDistance);
         addProperty(_correctionSizeEndDistance);
 
         _correctionSizeFactor = p.correctionSizeFactor.value_or(_correctionSizeFactor);
+        
         if (p.correctionSizeFactor.has_value()) {
             addProperty(_correctionSizeFactor);
         }
 
+        // Properties for data range
         _setRangeFromData.onChange([this]() {
             const int colorMapInUse =
                 _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
@@ -617,6 +615,7 @@ namespace openspace {
             });
         addProperty(_setRangeFromData);
 
+        // Linear filtering 
         _useLinearFiltering = p.useLinearFiltering.value_or(_useLinearFiltering);
         _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
         addProperty(_useLinearFiltering);
@@ -631,11 +630,10 @@ namespace openspace {
         if (_hasSpeckFile) {
             _dataset = speck::data::loadFileWithCache(_speckFile);
 
+            // Unique Species stores all the names for every species. Used to render a seperate image for every species. 
             if (_uniqueSpecies.has_value()) {
-                //Find all occurences in _dataset that correspond to specie store those instead
                 std::vector<openspace::speck::Dataset::Entry> newdataset;
                 std::copy_if(_dataset.entries.begin(), _dataset.entries.end(), std::back_inserter(newdataset), [this](const openspace::speck::Dataset::Entry& entry) {
-                    //function to find species
                     return entry.comment == _uniqueSpecies.value();
                     });
 
@@ -647,7 +645,6 @@ namespace openspace {
             _colorMap = speck::color::loadFileWithCache(_colorMapFile);
         }
 
-
         if (!_labelFile.empty()) {
             _labelset = speck::label::loadFileWithCache(_labelFile);
             for (speck::Labelset::Entry& e : _labelset.entries) {
@@ -656,8 +653,6 @@ namespace openspace {
         }
 
         if (!_colorOptionString.empty() && (_colorRangeData.size() > 1)) {
-            // Following DU behavior here. The last colormap variable
-            // entry is the one selected by default.
             _colorOption.setValue(static_cast<int>(_colorRangeData.size() - 1));
         }
 
@@ -666,6 +661,7 @@ namespace openspace {
 
     void RenderableCosmicPoints::initializeGL() {
 
+        // Program for rendering the points 
         _program = CosmicLifeModule::ProgramObjectManager.request(
             ProgramObjectName,
             []() {
@@ -680,6 +676,7 @@ namespace openspace {
 
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
+        // Font manager for the labels
         if (_hasLabel) {
             if (!_font) {
                 size_t _fontSize = 8;
@@ -693,8 +690,6 @@ namespace openspace {
         }
     }
 
-    // vao = vertex array object
-    // vbo = vertex buffer object
     void RenderableCosmicPoints::deinitializeGL() {
         glDeleteBuffers(1, &_vbo);
         _vbo = 0;
@@ -716,15 +711,15 @@ namespace openspace {
     void RenderableCosmicPoints::renderPoints(const RenderData& data,
         const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight,
-        const glm::dvec3& orthoUp,
-        float fadeInVariable)
-    {
+        const glm::dvec3& orthoUp) {
+        
         glDepthMask(true);
         glEnablei(GL_BLEND, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         _program->activate();
 
+        // Set uniforms for the shader
         _program->setUniform(
             "screenSize",
             glm::vec2(global::renderEngine->renderingResolution())
@@ -780,21 +775,25 @@ namespace openspace {
         _program->setUniform(_uniformCache.spriteTexture, textureUnit);
         _program->setUniform(_uniformCache.hasColormap, _hasColorMapFile);
 
+        // Bind data and draw the points 
         glBindVertexArray(_vao);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
         glBindVertexArray(0);
         _program->deactivate();
 
+        // Reset OpenGL state 
         global::renderEngine->openglStateCache().resetBlendState();
         global::renderEngine->openglStateCache().resetDepthState();
     }
 
+    // Fading function for fading the images depending on camera distance 
     float RenderableCosmicPoints::fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e) {
         // Calculate distance between object and camera
         float distance = sqrt(pow((e.position.x * toMeter(_unit)) - data.camera.positionVec3().x, 2) + pow((e.position.y * toMeter(_unit)) - data.camera.positionVec3().y, 2) + pow((e.position.z * toMeter(_unit)) - data.camera.positionVec3().z, 2));
 
         // Set alpha value based on distance
         float alpha = 1.0f;
+        
         if (distance > _maxThreshold) {
             alpha = 0.0f;  // Object is completely transparent when beyond the maximum distance
         }
@@ -802,18 +801,17 @@ namespace openspace {
             alpha = 1.0f - (distance / _maxThreshold);
         }
 
-        // Set object alpha value
         return alpha;
     }
+
     void RenderableCosmicPoints::renderLabels(const RenderData& data,
         const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight,
-        const glm::dvec3& orthoUp,
-        float fadeInVariable)
+        const glm::dvec3& orthoUp)
     {
         glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), 1.f);
 
-        textColor.a *= fadeInVariable;
+        textColor.a *= 1;
         textColor.a *= _textOpacity;
 
         ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
@@ -841,8 +839,10 @@ namespace openspace {
             );
         }
     }
+
     void RenderableCosmicPoints::render(const RenderData& data, RendererTasks&) {
 
+        // Function that updates the data slice (moved outside update sinced it needed RenderData)
         updateRenderData(data);
 
         glm::dmat4 modelMatrix =
@@ -860,6 +860,7 @@ namespace openspace {
         glm::dvec3 orthoRight = glm::normalize(
             glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
         );
+        
         if (orthoRight == glm::dvec3(0.0)) {
             glm::dvec3 otherVector(
                 cameraUpDirectionWorld.y,
@@ -870,11 +871,12 @@ namespace openspace {
         }
         glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
+        // Render points and labels if drawElements and drawLabels is true 
         if (_hasSpeckFile && _drawElements) {
-            renderPoints(data, modelMatrix, orthoRight, orthoUp, 1);
+            renderPoints(data, modelMatrix, orthoRight, orthoUp);
         }
         if (_drawLabels && _hasLabel) {
-            renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, 1);
+            renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
         }
     }
 
@@ -933,6 +935,7 @@ namespace openspace {
                     reinterpret_cast<void*>(8 * sizeof(float))
                 );
 
+                // Used for the alpha value in the shader (fades the images) 
                 GLint opacityAttrib = _program->attributeLocation("in_opacity");
                 glEnableVertexAttribArray(opacityAttrib);
                 glVertexAttribPointer(
@@ -978,7 +981,7 @@ namespace openspace {
                     reinterpret_cast<void*>(8 * sizeof(float))
                 );
             }
-            //Doees not have colormap 
+            //Does not have colormap 
             else if (_hasDatavarSize) {
                 glEnableVertexAttribArray(positionAttrib);
                 glVertexAttribPointer(
@@ -1013,6 +1016,7 @@ namespace openspace {
                     reinterpret_cast<void*>(5 * sizeof(float))
                 );
             }
+            // Only has position 
             else {
                 glEnableVertexAttribArray(positionAttrib);
                 glVertexAttribPointer(
@@ -1072,29 +1076,6 @@ namespace openspace {
         }
     }
 
-    float RenderableCosmicPoints::computeFadeFactor(float distanceNodeToCamera) const {
-        float distanceUnit = toMeter(_unit);
-
-        float x = distanceNodeToCamera;
-        float startX = _fadeLabelDistances.value().x * distanceUnit;
-        float endX = _fadeLabelDistances.value().y * distanceUnit;
-
-        // The distances over which the fading should happen
-        float fadingStartDistance = _fadeLabelWidths.value().x * distanceUnit;
-        float fadingEndDistance = _fadeLabelWidths.value().y * distanceUnit;
-
-        if (x <= endX) {
-            float f1 = 1.f - (startX - x) / fadingStartDistance;
-            return std::clamp(f1, 0.f, 1.f);
-        }
-        else if (x > startX && x < endX) {
-            return 1.f;
-        }
-        else { // x >= endX
-            float f2 = 1.f - (x - endX) / fadingEndDistance;
-            return std::clamp(f2, 0.f, 1.f);
-        }
-    }
     std::vector<float> RenderableCosmicPoints::createDataSlice(const RenderData& data) {
 
         if (_dataset.entries.empty()) {
@@ -1139,8 +1120,7 @@ namespace openspace {
             ));
 
             float unitValue = 0.f;
-            // (abock, 2022-01-02)  This is vestigial from a previous rewrite. I just want to
-            // make it work for now and we can rewrite it properly later
+
             switch (_unit) {
             case DistanceUnit::Meter:
                 unitValue = 0.f;
@@ -1174,6 +1154,7 @@ namespace openspace {
             const double r = glm::length(p);
             maxRadius = std::max(maxRadius, r);
 
+            // Only do this once and every time the program runs we only update the fade value for opacity of the images 
             if (_dataIsDirty) {
                 if (_hasColorMapFile) {
                     for (int j = 0; j < 4; ++j) {
@@ -1260,14 +1241,17 @@ namespace openspace {
                     }
                 }
 
+                // Opacity attribute that is used in the shader for fading 
                 if (_useFade) {
                     float fade = fadeObjectDependingOnDistance(data, e);
                     _result.push_back(fade);
                 }
+                // Object should not be faded 
                 else {
                     _result.push_back(1);
                 }
             }
+            // This is only called after the first time createDataSlice is set, to make sure only the fade variable is updated every time and not all the data. 
             else {
                 float fade = fadeObjectDependingOnDistance(data, e);
 

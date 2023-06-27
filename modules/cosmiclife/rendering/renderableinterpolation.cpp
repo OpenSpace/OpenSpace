@@ -60,7 +60,6 @@ namespace {
     constexpr const char* _loggerCat = "RenderableInterpolation";
     constexpr const char* ProgramObjectName = "RenderableInterpolation";
 
-
     constexpr const std::array<const char*, 21> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
@@ -100,15 +99,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MaxThresholdInfo = {
         "MaxThresholdInfo",
         "Max Threshold Info",
-        "This value is used to tell the max distance when the object should be shown or not."
-        "When shown it is faded according to distance to camera."
+        "This value is used to tell the max distance when the object should be shown or not. When shown it is faded according to distance to camera."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
-        "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point."
+        "This value is used as a multiplicative factor that is applied to the apparent size of each point."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -126,8 +123,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
-        "This value determines which paramenter is used for default color of the "
-        "objects."
+        "This value determines which paramenter is used for default color of the objects."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OptionColorRangeInfo = {
@@ -139,8 +135,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
-        "This value determines which paramenter (datavar) is used for scaling "
-        "of the objects."
+        "This value determines which paramenter (datavar) is used for scaling of the objects."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
@@ -152,20 +147,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable Pixel Size Control",
-        "Enable pixel size control for rectangular projections. If set to true, the "
-        "billboard size is restricted by the min/max size in pixels property."
+        "Enable pixel size control for rectangular projections. If set to true, the billboard size is restricted by the min/max size in pixels property."
     };
 
     constexpr openspace::properties::Property::PropertyInfo BillboardMinMaxSizeInfo = {
         "BillboardMinMaxSize",
         "Billboard Min/Max Size in Pixels",
-        "The minimum and maximum size (in pixels) for the billboard representing the "
-        "object."
+        "The minimum and maximum size (in pixels) for the billboard representing the object."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        CorrectionSizeEndDistanceInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo CorrectionSizeEndDistanceInfo = {
         "CorrectionSizeEndDistance",
         "Distance in 10^X meters where correction size stops acting",
         "Distance in 10^X meters where correction size stops acting."
@@ -173,21 +164,20 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
         "CorrectionSizeFactor",
-        "Control variable for distance size",
-        ""
+        "Correction Size Factor",
+        "Control variable for distance size."
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseLinearFiltering = {
         "UseLinearFiltering",
         "Use Linear Filtering",
-        "Determines whether the provided color map should be sampled nearest neighbor"
-        "(=off) or linearly (=on)"
+        "Determines whether the provided color map should be sampled nearest neighbor (=off) or linearly (=on)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SetRangeFromData = {
         "SetRangeFromData",
         "Set Data Range from Data",
-        "Set the data range based on the available data"
+        "Set the data range based on the available data."
     };
 
     constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
@@ -209,32 +199,24 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo DirectoryPathInfo = {
-    "DirectoryPathInfo",
-    "Directory Path Info",
-    "Paths to all directories for the dropdowns."
+        "DirectoryPathInfo",
+        "Directory Path Info",
+        "Paths to all directories for the dropdowns."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ComputeDistancesInfo = {
-    "ComputeDistancesInfo",
-    "Compute Distances Info",
-    "Variable that determines if distances should be calculated between the dataset or not"
+        "ComputeDistancesInfo",
+        "Compute Distances Info",
+        "Variable that determines if distances should be calculated between the dataset or not."
     };
 
     constexpr openspace::properties::Property::PropertyInfo PercentageOfLinesInfo = {
-    "PercentageOfLinesInfo",
-    "Percentage Of Lines Info",
-    "Float variable of how many distance lines to render"
+        "PercentageOfLinesInfo",
+        "Percentage Of Lines Info",
+        "Float variable of how many distance lines to render."
     };
 
     struct [[codegen::Dictionary(RenderableInterpolation)]] Parameters {
-        // The path to the SPECK file that contains information about the astronomical
-        // object being rendered
-        std::optional<std::string> file;
-
-        //comment
-        std::optional<std::string> file2;
-
-       // std::vector<std::string> files;
 
         // [[codegen::verbatim(ColorInfo.description)]]
         glm::vec3 color [[codegen::color()]];
@@ -251,11 +233,13 @@ namespace {
         // [[codegen::verbatim(MaxThresholdInfo.description)]]
         std::optional<float> maxThreshold;
 
+        // Options for rendering 
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
             PositionNormal [[codegen::key("Camera Position Normal")]]
         };
 
+        // File-options 
         enum class [[codegen::map(FileOption)]] FileOption {
             MDS [[codegen::key("MDS")]],
             UMAP [[codegen::key("UMAP")]]
@@ -266,7 +250,6 @@ namespace {
         // [[codegen::verbatim(DataSetOneOptionInfo.description)]]
         std::optional<FileOption> fileOption;
 
-
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
             Kilometer [[codegen::key("Km")]],
@@ -276,6 +259,7 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
+
         // The unit used for all distances. Must match the unit of any
         // distances/positions in the data files
         std::optional<Unit> unit;
@@ -324,12 +308,14 @@ namespace {
         // [[codegen::verbatim(DirectoryPathInfo.description)]]
         std::optional<std::string> directoryPath;
 
+        // [[codegen::verbatim(DirectoryPathInfo.description)]]
         std::optional<bool> computeDistances;
 
+        // String for all the unique species in the dataset 
         std::optional<std::string> uniqueSpecies;
 
+        // [[codegen::verbatim(DirectoryPathInfo.description)]]
         std::optional<float> percentageOfLines;
-
 
     };
 #include "renderableinterpolation_codegen.cpp"
@@ -379,9 +365,10 @@ namespace openspace {
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
-
+        // The paths to the data files 
         _directoryPath = p.directoryPath.value_or(_directoryPath);
 
+        // Reads in all the file paths
         std::filesystem::path directoryPath = std::filesystem::path(_directoryPath.value());
         for (const auto& file : std::filesystem::recursive_directory_iterator(directoryPath)) {
             if (file.path().extension() == ".speck") {
@@ -391,44 +378,55 @@ namespace openspace {
             }
         }
 
+        // Store the file option names 
         std::vector<std::string> fileOptionNames;
-
 
         for (const auto& [name, path] : _filePaths) {
             fileOptionNames.push_back(name);
         }
 
+        // First dropdown 
         _dataSetOneOption.addOption(FileOption::MDS, fileOptionNames[0]);
         _dataSetOneOption.addOption(FileOption::UMAP, fileOptionNames[1]);
 
         _dataSetOneOption = FileOption::MDS;
        
+        // Second dropdown
         _dataSetTwoOption.addOption(FileOption::MDS, fileOptionNames[0]);
         _dataSetTwoOption.addOption(FileOption::UMAP, fileOptionNames[1]);
 
         _dataSetTwoOption = FileOption::UMAP;
        
+        // Properties for the images and borders 
         _uniqueSpecies = p.uniqueSpecies;
         _useFade = p.useFade.value_or(_useFade);
         _maxThreshold = p.maxThreshold.value_or(_maxThreshold);
         _frameColor = p.frameColor.value_or(_frameColor);
+
+        // Properties for the distance lines 
         _computeDistances = p.computeDistances.value_or(_computeDistances);
         _percentageOfLines = p.percentageOfLines.value_or(_percentageOfLines);
 
+        // Function that is called when the datasets in the dropdowns are changed 
         auto func = [this]() {
 
+            // Dataset names
             std::string dataSetOneName = _dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value());
             std::string dataSetTwoName = _dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value());
 
+            // Dataset values
             _dataSetOne =_datasets[_dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value())];
             _dataSetTwo =_datasets[_dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value())];
 
+            // Sort function (To make them in the same order)
              sort(_dataSetOne, _dataSetTwo);
 
+             // If we want distance lines we choose which lines to draw 
              if (_computeDistances) {
                  _vertices1.clear();
                  _vertices2.clear();
-                 // Find correct outliers
+
+                 // Find correct outliers from the stored ones 
                  for (int i = 0; i < _distanceHolders.size(); i++) {
 
                      if (_distanceHolders[i].dataset1 == dataSetOneName && _distanceHolders[i].dataset2 == dataSetTwoName) {
@@ -457,9 +455,11 @@ namespace openspace {
         addProperty(_dataSetOneOption);
         addProperty(_dataSetTwoOption);
 
+        // When the option in dropdowns are changed
         _dataSetOneOption.onChange(func);
         _dataSetTwoOption.onChange(func);
 
+        // Property and on change function for the morphing 
         _interpolationValue = p.interpolationValue.value_or(_interpolationValue);
         _interpolationValue.onChange([this]() {
             _interpolationValue = _interpolationValue.value();
@@ -468,9 +468,9 @@ namespace openspace {
             _lineDataIsDirty1 = true;
             _lineDataIsDirty2 = true;
             });
-        addProperty(_interpolationValue); //puts it on the GUI 
+        addProperty(_interpolationValue);
 
-
+        // Render options 
         _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
         _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
 
@@ -482,6 +482,7 @@ namespace openspace {
         }
         addProperty(_renderOption);
 
+        // Unit in meter
         if (p.unit.has_value()) {
             _unit = codegen::map<DistanceUnit>(*p.unit);
         }
@@ -489,18 +490,15 @@ namespace openspace {
             _unit = DistanceUnit::Meter;
         }
 
-
+        // Texture property 
         if (p.texture.has_value()) {
             _spriteTexturePath = absPath(*p.texture).string();
             _spriteTexturePath.onChange([&]() { _spriteTextureIsDirty = true; });
-
-            // @TODO (abock, 2021-01-31) I don't know why we only add this property if the
-            // texture is given, but I think it's a bug
-            // @TODO (emmbr, 2021-05-24) This goes for several properties in this renderable
             addProperty(_spriteTexturePath);
         }
         _hasSpriteTexture = p.texture.has_value();
 
+        // Color properties 
         if (p.colorMap.has_value()) {
             _colorMapFile = absPath(*p.colorMap).string();
             _hasColorMapFile = true;
@@ -540,11 +538,14 @@ namespace openspace {
             addProperty(_pointColor);
         }
 
+        // Opacity property 
         addProperty(_opacity);
 
+        // Property for scale
         _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
         addProperty(_scaleFactor);
 
+        // Size options 
         if (p.sizeOption.has_value()) {
             std::vector<std::string> opts = *p.sizeOption;
             for (size_t i = 0; i < opts.size(); ++i) {
@@ -565,10 +566,12 @@ namespace openspace {
         _pixelSizeControl = p.enablePixelSizeControl.value_or(_pixelSizeControl);
         addProperty(_pixelSizeControl);
 
+        // Billboard min/max
         _billboardMinMaxSize = p.billboardMinMaxSize.value_or(_billboardMinMaxSize);
         _billboardMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
         addProperty(_billboardMinMaxSize);
 
+        // Correction size 
         _correctionSizeEndDistance =
             p.correctionSizeEndDistance.value_or(_correctionSizeEndDistance);
         addProperty(_correctionSizeEndDistance);
@@ -578,6 +581,7 @@ namespace openspace {
             addProperty(_correctionSizeFactor);
         }
 
+        // Data range property 
         _setRangeFromData.onChange([this]() {
             const int colorMapInUse =
                 _hasColorMapFile ? _interpolationDataset.index(_colorOptionString) : 0;
@@ -594,6 +598,7 @@ namespace openspace {
             });
         addProperty(_setRangeFromData);
 
+        // Linear filtering 
         _useLinearFiltering = p.useLinearFiltering.value_or(_useLinearFiltering);
         _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
         addProperty(_useLinearFiltering);
@@ -607,6 +612,7 @@ namespace openspace {
         return (_program && _programL && hasAllDataSetData);
     }
 
+    // Function that find the points of intrest when drawing the distance line (right now the points of intrest is the one with same taxon code)
     std::vector<speck::Dataset::Entry> RenderableInterpolation::findPointsOfInterest(const speck::Dataset::Entry& e, const speck::Dataset& d) {
         
         std::vector<speck::Dataset::Entry> pointsOfInterest;
@@ -620,24 +626,24 @@ namespace openspace {
         return pointsOfInterest;
     }
 
+    // Function that computes the distances to each point of interestt 
     std::vector<float> RenderableInterpolation::computeDistances(const speck::Dataset::Entry& e1, const std::vector<speck::Dataset::Entry>& d1) {
-        //Store distances
+        // Store distances
         std::vector<float> distances;
 
-        //Loop all the entries in the dataset
+        // Loop all the entries in the dataset
         for (int i = 0; i < d1.size(); i++) {
-                //compute distance
+                // Compute distance
                 float distance = glm::distance(e1.position, d1[i].position);
-                //push back the distances
                 distances.push_back(distance);
             }
 
         return distances;
     }
 
+    // Function that puts the point with the largets distance difference between MDS and UMAP in two vertex tables
     std::pair<std::vector<RenderableInterpolation::Vertex>, std::vector<RenderableInterpolation::Vertex>> 
-        RenderableInterpolation::ComputeOutliers(const speck::Dataset& d1, const speck::Dataset& d2) 
-    {
+        RenderableInterpolation::ComputeOutliers(const speck::Dataset& d1, const speck::Dataset& d2) {
         
         std::vector<Vertex> v1;
         std::vector<Vertex> v2;
@@ -667,18 +673,20 @@ namespace openspace {
         // Find the top % and take their indices to get the correct point in the datasets
         int numElementsToPop = maxHeap1.size() * _percentageOfLines;
 
-        // Pop the top 10% elements from the max heap and store their indices
+        // Pop the top % elements from the max heap and store their indices
         for (int k = 0; k < numElementsToPop; k++) {
             
             DistancePoints maxValue1 = maxHeap1.top();
             maxHeap1.pop();
 
+            // Push-back vertex table for the two points to draw a line between in the chosen data set in dropdown 1
             v1.push_back(Vertex{ maxValue1.p1.position.x, maxValue1.p1.position.y, maxValue1.p1.position.z });
             v1.push_back(Vertex{ maxValue1.p2.position.x, maxValue1.p2.position.y, maxValue1.p2.position.z });
 
             DistancePoints maxValue2 = maxHeap2.top();
             maxHeap2.pop();
 
+            // Push-back vertex table for the two points to draw a line between in the chosen data set in dropdown 1
             v2.push_back(Vertex{ maxValue2.p1.position.x, maxValue2.p1.position.y, maxValue2.p1.position.z });
             v2.push_back(Vertex{ maxValue2.p2.position.x, maxValue2.p2.position.y, maxValue2.p2.position.z });
         }
@@ -687,6 +695,7 @@ namespace openspace {
 
     }
 
+    // Function that does the initialization of the distance lines 
     void RenderableInterpolation::initializeLines() {
 
         if (_vaoLines == 0) {
@@ -697,12 +706,14 @@ namespace openspace {
             glGenBuffers(1, &_vboLines);  // Generate VBO
         }
 
+        // Only render the lines when we are at the end points of the interpolation slider
         if (_interpolationValue < 0.01) {
             glBindVertexArray(_vaoLines);  // Bind VAO
-            glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
+            glBindBuffer(GL_ARRAY_BUFFER, _vboLines); // Bind VBO
 
             // Set VBO data
             glBufferData(GL_ARRAY_BUFFER, _vertices1.size() * sizeof(Vertex), _vertices1.data(), GL_DYNAMIC_DRAW);
+            
             // Enable vertex attribute array and specify layout
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
@@ -711,10 +722,11 @@ namespace openspace {
         }
         else if (_interpolationValue > 0.99) {
             glBindVertexArray(_vaoLines);  // Bind VAO
-            glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
+            glBindBuffer(GL_ARRAY_BUFFER, _vboLines); // Bind VBO
 
             // Set VBO data
             glBufferData(GL_ARRAY_BUFFER, _vertices1.size() * sizeof(Vertex), _vertices2.data(), GL_DYNAMIC_DRAW);
+            
             // Enable vertex attribute array and specify layout
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
@@ -724,6 +736,7 @@ namespace openspace {
 
     }
 
+    // Function that sorts the datasets so the points appear in the same order (If some points are missing we add the same point to the other dataset so it wont morph)
     void RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
         speck::Dataset d1_copy;
         speck::Dataset d2_copy;
@@ -761,14 +774,12 @@ namespace openspace {
             }
         }
 
-
-        // Sort the merged dataset if needed
-
         // Assign the sorted datasets to _dataSetOne and _dataSetTwo
         _dataSetOne = d1_copy;
         _dataSetTwo = d2_copy;
     }
 
+    // Function that stores all distances in advance (to render the lines)
     void RenderableInterpolation::storeDistanceHolders(std::map<std::string, speck::Dataset> const & d) {
 
         auto vertexPair = ComputeOutliers(d.begin()->second, d.rbegin()->second);
@@ -781,23 +792,24 @@ namespace openspace {
         for (const auto& [name, path] : _filePaths) {
             _datasets[name] = speck::data::loadFileWithCache(path);
 
+            // Find all unique species to get one image for every species 
             if (_uniqueSpecies.has_value()) {
-                //Find all occurences in _dataset that correspond to specie store those instead
                 std::vector<openspace::speck::Dataset::Entry> newdataset;
                 std::copy_if(_datasets[name].entries.begin(), _datasets[name].entries.end(), std::back_inserter(newdataset), [this](const openspace::speck::Dataset::Entry& entry) {
-                    //function to find species
                     return entry.comment == _uniqueSpecies.value();
                     });
 
                 _datasets[name].entries = std::move(newdataset);
             }
 
+            // Store distance holders if _computeDistances is true in ASSET (and also only if we have read in both MDS and UMAP, therefore size == 2)
             if (_datasets.size() == 2 && _computeDistances) {
                 storeDistanceHolders(_datasets);
             }
 
         }
 
+        // Initialize the dropdowns at start-up
         std::string dataSetOneName = _dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value());
         std::string dataSetTwoName = _dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value());
 
@@ -806,8 +818,8 @@ namespace openspace {
         
         sort(_dataSetOne, _dataSetTwo);
 
+        // Compute distances at start-up if _computeDistances is true in ASSET
         if (_computeDistances) {
-            // Find correct outliers
             for (int i = 0; i < _distanceHolders.size(); i++) {
 
                 if (_distanceHolders[i].dataset1 == dataSetOneName && _distanceHolders[i].dataset2 == dataSetTwoName) {
@@ -823,8 +835,6 @@ namespace openspace {
                     _vertices2 = _distanceHolders[i].v1;
                     break;
                 }
-
-
             }
 
             _lineDataIsDirty1 = true;
@@ -846,6 +856,7 @@ namespace openspace {
 
     void RenderableInterpolation::initializeGL() {
 
+        // Program for rendering the points with their corresponding shaders
         _program = CosmicLifeModule::ProgramObjectManager.request(
             ProgramObjectName,
             []() {
@@ -858,6 +869,7 @@ namespace openspace {
             }
         );
        
+        // Program for rendering the lines with their corresponding shaders
         _programL = BaseModule::ProgramObjectManager.request(
             "CartesianAxesProgram",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -982,6 +994,7 @@ namespace openspace {
         global::renderEngine->openglStateCache().resetDepthState();
     }
 
+    // Function used for fading the images 
     float RenderableInterpolation::fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e) {
         // Calculate distance between object and camera
         float distance = sqrt(pow((e.position.x * toMeter(_unit)) - data.camera.positionVec3().x, 2) + pow((e.position.y * toMeter(_unit)) - data.camera.positionVec3().y, 2) + pow((e.position.z * toMeter(_unit)) - data.camera.positionVec3().z, 2));
@@ -999,9 +1012,10 @@ namespace openspace {
         return alpha;
     }
 
+    // Function used to render the lines 
     void RenderableInterpolation::renderLines(const RenderData& data) {
 
-        // Render lines
+        // Only render lines when interpolation value is smaller then 0.01 or bigger than 0.99 meaning we have the vertexes for the chosen representations
         if (_interpolationValue < 0.01) {
             _programL->activate();
 
@@ -1015,6 +1029,7 @@ namespace openspace {
 
             _programL->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
             _programL->setUniform("projectionTransform", data.camera.projectionMatrix());
+            // Send in a uniform of the size to be able to color the lines 
             _programL->setUniform("vertexSize", static_cast<GLsizei>(_vertices1.size()));
 
             // Changes GL state:
@@ -1050,13 +1065,14 @@ namespace openspace {
 
             _programL->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
             _programL->setUniform("projectionTransform", data.camera.projectionMatrix());
+            // Send in a uniform of the size to be able to color the lines 
             _programL->setUniform("vertexSize", static_cast<GLsizei>(_vertices2.size()));
 
             // Changes GL state:
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnablei(GL_BLEND, 0);
             glEnable(GL_LINE_SMOOTH);
-            glLineWidth(5.0);
+            glLineWidth(2.0);
 
             glBindVertexArray(_vaoLines);
             glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_vertices2.size()));
@@ -1109,6 +1125,7 @@ namespace openspace {
   
     }
 
+    // Function that calculates the linear interpolation for each entry 
     speck::Dataset::Entry RenderableInterpolation::interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv) {
         speck::Dataset::Entry result {e1};
         result.position = glm::vec3{e1.position.x - iv * (e1.position.x - e2.position.x),
@@ -1119,6 +1136,7 @@ namespace openspace {
         return result;
     }
 
+    // Function that creates the interpolation result by using the interpol() function 
     speck::Dataset RenderableInterpolation::interpolationFunc(const speck::Dataset& d1, const speck::Dataset& d2, float iv) {
         speck::Dataset result{ d1 };
 
@@ -1128,6 +1146,7 @@ namespace openspace {
         return result;
     }
 
+    // Update render data is put outside update to be able to send in data
     void RenderableInterpolation::updateRenderData(const RenderData& data) {
 
         if (_dataIsDirty) {
@@ -1300,6 +1319,7 @@ namespace openspace {
 
     void RenderableInterpolation::update(const UpdateData&) {
 
+        // Only initialize lines if we want to compute them for that dataset 
         if (_computeDistances) {
             initializeLines();
         }

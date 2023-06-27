@@ -28,6 +28,7 @@ flat in vec4 gs_colorMap;
 flat in float vs_screenSpaceDepth;
 in vec2 texCoord;
 in float ta;
+// The opacity variable that is updated to fade the images 
 in float gs_opacity;
 
 uniform float alphaValue;
@@ -35,6 +36,8 @@ uniform vec3 color;
 uniform vec3 frameColor;
 uniform sampler2D spriteTexture;
 uniform bool hasColorMap;
+
+// A bool that checks if its an image or a point (if it is an image we use gamma correction on the rgb)
 uniform bool useGamma;
 
 Fragment getFragment() {
@@ -72,6 +75,7 @@ Fragment getFragment() {
       }
       else {
         frag.color = fullColor;
+        // gamma correction 
         frag.color.rgb = pow(frag.color.rgb, vec3(1.0/(gamma)));
       }
   }

@@ -99,6 +99,7 @@ void main() {
         scaleMultiply *= dvarScaling[0];
     }
 
+    // Set opacity for the fragment shader (used for fading the images) 
     gs_opacity = opacity[0];
     
     vec3 scaledRight = vec3(0.0);

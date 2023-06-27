@@ -38,6 +38,7 @@ flat out float opacity;
 void main() {
   colorMap = in_colormap;
   dvarScaling = in_dvarScaling;
+  // Fading the images 
   opacity = in_opacity;
   gl_Position = in_position;
 }
