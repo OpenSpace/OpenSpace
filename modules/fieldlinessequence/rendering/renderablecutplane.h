@@ -60,18 +60,11 @@ public:
     
 protected:
     virtual void bindTexture() override;
-  //  virtual void unbindTexture() override;
-
     void createPlane();
 
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-    GLuint _vertexColorBuffer = 0;
-    GLuint _vertexPositionBuffer = 0;
-    GLuint vaoHandle;
     
 private:
     void loadTexture();
-    void updateVertexColorBuffer();
     std::unique_ptr<ghoul::opengl::Texture> createFloatTexture(const std::vector<std::vector<float>>& data);
     GameraVolumeSlicer _slice;
     properties::StringProperty _filePath;
@@ -80,6 +73,7 @@ private:
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     std::unique_ptr<ghoul::filesystem::File> _sourceFile;
     std::string _axis;
+    properties::Vec3Property _size;
 
     float _cutValue;
     std::string _dataProperty;
@@ -94,11 +88,13 @@ private:
 
     //The axis dimensions of the axis we're not slicing on
     std::vector<std::vector<float>> _axisDim;
-    int _axis1;
-    int _axis2;
-    // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
-    // the lines
-    bool _planeIsDirty = false;
+    int _xAxis;
+    int _yAxis;
+    int _zAxis;
+    // Align 
+    double alignOnX;
+    double alignOnY;
+    double alignOnZ;
 };
 
 } // namespace openspace

@@ -7,20 +7,14 @@ local cutplane = {
   InteractionSphere = 6380000,  -- A value slightly bigger than earth radius
   Renderable = {
     Type = "RenderableCutPlane",
-    Size = 2* 6371000,
+    Size = 6371000,
     Origin = "Center",
-    --Billboard = true,
-    --ScaleToMeter = 2 * 6371000,
-    FilePath = "C:/Users/kjjohnst/Documents/GAMERAdata/openSpace.eb3.h5",
-    --FilePath = "C:/Users/aemolin/Documents/GAMERAdata/dirCP/openSpace.eb3.h5",
-  --  MultiplyColor = { 1, 1, 0 },
-    -- ColorTablePaths = {transferFunction},
-    Axis = 'x',
-    CutValue = 5.0,
+    --FilePath = "C:/Users/kjjohnst/Documents/GAMERAdata/openSpace.eb3.h5",
+    FilePath = "C:/Users/aemolin/Documents/GAMERAdata/dirCP/openSpace.eb3.h5",
+    Axis = "z",
+    CutValue = 0.0,
     DataProperty = "Bx", -- !!!!!!!!!!!!!!!!!!!!!!
-   -- BlendMode = "Normal",
-   -- MirrorBackside = true,
-   MultiplyColor = { 1, 1, 0 },
+    ColorTableRanges = {{-20, 20}},
     ColorTablePaths=  {transferFunction},
     
   },
