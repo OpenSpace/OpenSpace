@@ -235,26 +235,20 @@ void RenderableSphere::deinitializeGL() {
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     Orientation orientation = static_cast<Orientation>(_orientation.value());
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    glm::dmat3 modelRotation =
-        glm::dmat3(data.modelTransform.rotation);
+    glm::dmat4 modelTransform = calcModelTransform(data);
+    glm::dmat3 modelRotation = glm::dmat3(data.modelTransform.rotation);
 
     // Activate shader
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _shader->activate();
     _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    glm::mat4 modelViewProjection = data.camera.projectionMatrix() *
-                             glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
-    _shader->setUniform(_uniformCache.modelViewProjection, modelViewProjection);
-
-    const glm::dmat4 modelViewTransform =
-        data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
     _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
+
+    glm::dmat4 modelViewProjection = calcModelViewProjectionTransform(data, modelTransform);
+    _shader->setUniform(_uniformCache.modelViewProjection, glm::mat4(modelViewProjection));
+
 
     glm::mat3 modelViewRotation = glm::mat3(
         glm::dmat3(data.camera.viewRotationMatrix()) * modelRotation

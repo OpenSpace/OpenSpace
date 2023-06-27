@@ -141,8 +141,29 @@ protected:
     // An optional renderbin that renderables can use for certain components, in cases
     // where all parts of the renderable should not be rendered in the same bin
     std::optional<RenderBin> _secondaryRenderBin;
-private:
 
+    struct AltTransform {
+        AltTransform() {
+            translation = std::nullopt;
+            rotation = std::nullopt;
+            scale = std::nullopt;
+        };
+
+        std::optional<glm::dvec3> translation = std::nullopt;
+        std::optional<glm::dmat3> rotation = std::nullopt;
+        std::optional<glm::dvec3> scale = std::nullopt;
+    };
+
+    glm::dmat4 calcModelTransform(const RenderData& data,
+        const AltTransform altTransform = AltTransform()) const;
+
+    glm::dmat4 calcModelViewTransform(const RenderData& data,
+        std::optional<const glm::dmat4> modelTransform = std::nullopt) const;
+
+    glm::dmat4 calcModelViewProjectionTransform(const RenderData& data,
+        std::optional<const glm::dmat4> modelTransform = std::nullopt) const;
+
+private:
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;
     SceneGraphNode* _parent = nullptr;

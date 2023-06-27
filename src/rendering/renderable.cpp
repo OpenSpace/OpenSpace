@@ -337,4 +337,32 @@ bool Renderable::hasOverrideRenderBin() const noexcept {
     return _hasOverrideRenderBin;
 }
 
+glm::dmat4 Renderable::calcModelTransform(const RenderData& data,
+                                          const AltTransform altTransform) const
+{
+    glm::dvec3 translation =
+        altTransform.translation.value_or(data.modelTransform.translation);
+    glm::dmat3 rotation = altTransform.rotation.value_or(data.modelTransform.rotation);
+    glm::dvec3 scale = altTransform.scale.value_or(data.modelTransform.scale);
+
+    return glm::translate(glm::dmat4(1.0), translation) *
+        glm::dmat4(rotation) *
+        glm::scale(glm::dmat4(1.0), scale);
+}
+
+glm::dmat4 Renderable::calcModelViewTransform(const RenderData& data,
+                                    std::optional<const glm::dmat4> modelTransform) const
+{
+    glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    return data.camera.combinedViewMatrix() * modelMatrix;
+}
+
+glm::dmat4 Renderable::calcModelViewProjectionTransform(const RenderData& data,
+                                    std::optional<const glm::dmat4> modelTransform) const
+{
+    glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    return glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix() *
+        modelMatrix;
+}
+
 }  // namespace openspace
