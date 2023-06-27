@@ -30,7 +30,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <optional>
 
 namespace {
@@ -49,8 +48,8 @@ namespace {
         std::string texture;
 
         // If this value is set to 'true', the image for this sphere will not be loaded at
-        // startup but rather when image is shown for the first time. Additionally, if the
-        // sphere is hidden, the image will automatically be unloaded
+        // startup but rather when the image is shown for the first time. Additionally, if
+        // the sphere is disabled, the image will automatically be unloaded
         std::optional<bool> lazyLoading;
     };
 #include "renderablesphereimagelocal_codegen.cpp"
@@ -69,11 +68,10 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(const ghoul::Dictionary& 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath = p.texture;
-
-    addProperty(_texturePath);
     _texturePath.onChange([this]() {
         loadTexture();
     });
+    addProperty(_texturePath);
 }
 
 bool RenderableSphereImageLocal::isReady() const {
@@ -89,6 +87,7 @@ void RenderableSphereImageLocal::initializeGL() {
 }
 
 void RenderableSphereImageLocal::deinitializeGL() {
+    _texture.release();
     _texture = nullptr;
 
     RenderableSphere::deinitializeGL();

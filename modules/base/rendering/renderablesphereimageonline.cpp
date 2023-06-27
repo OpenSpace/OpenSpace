@@ -31,8 +31,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -60,15 +58,15 @@ documentation::Documentation RenderableSphereImageOnline::Documentation() {
 
 RenderableSphereImageOnline::RenderableSphereImageOnline(const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
-    , _texturePath(TextureInfo)
+    , _textureUrl(TextureInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _texturePath = p.url;
-    _texturePath.onChange([this]() {
+    _textureUrl = p.url;
+    _textureUrl.onChange([this]() {
         _textureIsDirty = true;
     });
-    addProperty(_texturePath);
+    addProperty(_textureUrl);
 }
 
 void RenderableSphereImageOnline::deinitializeGL() {
@@ -87,7 +85,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
 
     if (!_imageFuture.valid()) {
         std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
-            _texturePath
+            _textureUrl
         );
         if (future.valid()) {
             _imageFuture = std::move(future);
@@ -100,7 +98,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
         if (imageFile.corrupted) {
             LERRORC(
                 "RenderableSphereImageOnline",
-                fmt::format("Error loading image from URL '{}'", _texturePath)
+                fmt::format("Error loading image from URL '{}'", _textureUrl)
             );
             return;
         }

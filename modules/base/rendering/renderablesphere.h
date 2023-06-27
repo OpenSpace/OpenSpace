@@ -27,16 +27,10 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -82,7 +76,6 @@ private:
 
     UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
         colorTexture, mirrorTexture) _uniformCache;
-
 };
 
 } // namespace openspace

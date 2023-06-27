@@ -33,10 +33,9 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <optional>
 
@@ -164,11 +163,13 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     _size.onChange([this]() {
         setBoundingSphere(_size);
         _sphereIsDirty = true;
-        });
+    });
     addProperty(_size);
 
     _segments = p.segments;
-    _segments.onChange([this]() { _sphereIsDirty = true; });
+    _segments.onChange([this]() {
+        _sphereIsDirty = true;
+    });
     addProperty(_segments);
 
     _orientation.addOptions({
@@ -342,20 +343,20 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
+    if (renderBin() == Renderable::RenderBin::PreDeferredTransparent) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
-    }
-
     _shader->setIgnoreUniformLocationError(IgnoreError::No);
     _shader->deactivate();
+
+    // Reset
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    unbindTexture();
 
     if (orientation == Orientation::Inside) {
         glCullFace(GL_BACK);

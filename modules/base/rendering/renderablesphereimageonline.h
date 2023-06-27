@@ -29,7 +29,6 @@
 
 #include <openspace/engine/downloadmanager.h>
 
-namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
@@ -56,7 +55,7 @@ private:
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(
         const std::string& url);
 
-    properties::StringProperty _texturePath;
+    properties::StringProperty _textureUrl;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::unique_ptr<ghoul::opengl::Texture> _texture;

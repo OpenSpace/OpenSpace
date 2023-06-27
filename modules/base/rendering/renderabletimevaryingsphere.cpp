@@ -24,25 +24,32 @@
 
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 
-#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/util/sphere.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/programobject.h>
-#include <filesystem>
-#include <optional>
 
 namespace {
+    // Extract J2000 time from file names
+    // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
+    double extractTriggerTimeFromFileName(const std::string& filePath) {
+        // Extract the filename from the path (without extension)
+        std::string timeString = std::filesystem::path(filePath).stem().string();
+
+        // Ensure the separators are correct
+        timeString.replace(4, 1, "-");
+        timeString.replace(7, 1, "-");
+        timeString.replace(13, 1, ":");
+        timeString.replace(16, 1, ":");
+        timeString.replace(19, 1, ".");
+
+        return openspace::Time::convertTime(timeString);
+    }
+
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
         "Texture Source",
@@ -60,8 +67,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-double extractTriggerTimeFromFileName(const std::string& filePath);
 
 documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
     return codegen::doc<Parameters>("base_renderable_time_varying_sphere");
@@ -103,7 +108,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     fs::path sourceFolder = absPath(_textureSourcePath);
     if (!std::filesystem::is_directory(sourceFolder)) {
         throw ghoul::RuntimeError(
-            "Source folder for timevaryingsphere is not a valid directory"
+            "Source folder for RenderableTimeVaryingSphere is not a valid directory"
         );
     }
     // Extract all file paths from the provided folder
@@ -127,7 +132,8 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     }
 
     std::sort(
-        _files.begin(), _files.end(),
+        _files.begin(),
+        _files.end(),
         [](const FileData& a, const FileData& b) {
             return a.time < b.time;
         }
@@ -135,7 +141,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     // Ensure that there are available and valid source files left
     if (_files.empty()) {
         throw ghoul::RuntimeError(
-            "Source folder for timevaryingsphere contains no files"
+            "Source folder for RenderableTimeVaryingSphere contains no files"
         );
     }
 }
@@ -177,25 +183,11 @@ void RenderableTimeVaryingSphere::bindTexture() {
     }
 }
 
-// Extract J2000 time from file names
-// Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
-double extractTriggerTimeFromFileName(const std::string& filePath) {
-    // Extract the filename from the path (without extension)
-    std::string timeString = std::filesystem::path(filePath).stem().string();
-
-    // Ensure the separators are correct
-    timeString.replace(4, 1, "-");
-    timeString.replace(7, 1, "-");
-    timeString.replace(13, 1, ":");
-    timeString.replace(16, 1, ":");
-    timeString.replace(19, 1, ".");
-
-    return Time::convertTime(timeString);
-}
-
 void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTime) {
     auto iter = std::upper_bound(
-        _files.begin(), _files.end(), currentTime,
+        _files.begin(),
+        _files.end(),
+        currentTime,
         [](double value, const FileData& f) {
             return value < f.time;
         }
@@ -218,8 +210,8 @@ void RenderableTimeVaryingSphere::computeSequenceEndTime() {
     if (_files.size() > 1) {
         const double lastTriggerTime = _files[_files.size() - 1].time;
         const double sequenceDuration = lastTriggerTime - _files[0].time;
-        const double averageStateDuration = sequenceDuration /
-            (static_cast<double>(_files.size()) - 1.0);
+        const double averageStateDuration =
+            sequenceDuration / (static_cast<double>(_files.size()) - 1.0);
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
 }

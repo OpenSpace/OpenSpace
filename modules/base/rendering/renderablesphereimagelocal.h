@@ -27,7 +27,6 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
-namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
@@ -51,7 +50,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture();
+    void bindTexture() override;
 
 private:
     void loadTexture();
