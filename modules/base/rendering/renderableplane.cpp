@@ -41,9 +41,9 @@
 #include <variant>
 
 namespace {
-    constexpr std::array<const char*, 7> UniformNames = {
-        "opacity", "modelViewProjection", "modelViewTransform", "modelViewRotation",
-        "colorTexture", "mirrorBackside", "multiplyColor"
+    constexpr std::array<const char*, 6> UniformNames = {
+        "modelViewProjection", "modelViewTransform", "colorTexture", "opacity",
+        "mirrorBackside", "multiplyColor"
     };
 
     enum BlendMode {
@@ -215,6 +215,8 @@ void RenderablePlane::initializeGL() {
             );
         }
     );
+
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 void RenderablePlane::deinitializeGL() {
@@ -317,6 +319,7 @@ void RenderablePlane::update(const UpdateData&) {
 
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
 
     if (_planeIsDirty) {

@@ -83,8 +83,8 @@ protected:
 private:
     bool _planeIsDirty = false;
 
-    UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
-        colorTexture, mirrorBackside, multiplyColor) _uniformCache;
+    UniformCache(modelViewProjection, modelViewTransform, colorTexture, opacity,
+        mirrorBackside, multiplyColor) _uniformCache;
 };
 
 } // namespace openspace
