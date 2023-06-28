@@ -235,19 +235,22 @@ void RenderableSphere::deinitializeGL() {
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     Orientation orientation = static_cast<Orientation>(_orientation.value());
 
-    glm::dmat4 modelTransform = calcModelTransform(data);
-    glm::dmat3 modelRotation = glm::dmat3(data.modelTransform.rotation);
-
     // Activate shader
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _shader->activate();
     _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
-    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
+    glm::dmat4 modelTransform, modelViewTransform, modelViewProjectionTransform;
+    calcAllTransforms(
+        data,
+        modelTransform,
+        modelViewTransform,
+        modelViewProjectionTransform
+    );
+    glm::dmat3 modelRotation = glm::dmat3(data.modelTransform.rotation);
 
-    glm::dmat4 modelViewProjection = calcModelViewProjectionTransform(data, modelTransform);
-    _shader->setUniform(_uniformCache.modelViewProjection, glm::mat4(modelViewProjection));
+    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
+    _shader->setUniform(_uniformCache.modelViewProjection, glm::mat4(modelViewProjectionTransform));
 
 
     glm::mat3 modelViewRotation = glm::mat3(

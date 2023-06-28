@@ -269,17 +269,19 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     AltTransform altTransf;
     altTransf.rotation = rotationTransform;
 
-    const glm::dmat4 modelTransform = calcModelTransform(data, altTransf);
-    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
-
-    const glm::dmat4 modelViewProjectionTransform =
-        calcModelViewProjectionTransform(data, modelTransform);
+    glm::dmat4 modelTransform, modelViewTransform, modelViewProjectionTransform;
+    calcAllTransforms(
+        data,
+        modelTransform,
+        modelViewTransform,
+        modelViewProjectionTransform,
+        altTransf
+    );
 
     _shader->setUniform(
         _uniformCache.modelViewProjection,
         glm::mat4(modelViewProjectionTransform)
     );
-
     _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
 
     ghoul::opengl::TextureUnit unit;
