@@ -204,7 +204,7 @@ namespace {
         std::optional<glm::vec3> radiusAzimuthElevation;
 
         // [[codegen::verbatim(BorderWidthInfo.description)]]
-        std::optional<float> borderWidth;
+        std::optional<float> borderWidth [[codegen::greater(0.0)]];
 
         // [[codegen::verbatim(BorderColorInfo.description)]]
         std::optional<glm::vec3> borderColor [[codegen::color()]];
