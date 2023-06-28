@@ -159,17 +159,13 @@ void RenderableCutPlane::initialize() {
 
 void RenderableCutPlane::initializeGL() {
     ZoneScoped;
-   // RenderablePlane::initializeGL();
-   // glGenVertexArrays(1, &_quad); // generate array
-   // glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    loadTexture();
-    std::cout << "HEJ" <<_size.value().x;
 
-    _xAxis = _xAxis * _size.value().x;
-    _yAxis = _yAxis * _size.value().y;
-    _zAxis = _zAxis * _size.value().z;
-    _size = { _xAxis,_yAxis, _zAxis };
-    std::cout << _xAxis << ", " << _yAxis << ", " << _zAxis << "\n";
+    loadTexture();
+
+    _xAxisSize *= _size.value().x;
+    _yAxisSize *= _size.value().y;
+    _zAxisSize *= _size.value().z;
+    _size = { _xAxisSize, _yAxisSize, _zAxisSize };
 
     RenderablePlane::initializeGL();
     createPlane();
@@ -184,15 +180,20 @@ void RenderableCutPlane::initializeGL() {
             );
         }
     );
-    _colorTablePaths.resize(12, _colorTablePaths.back());
-    _colorTablePath = _colorTablePaths[0];
-    _colorTableRanges.resize(12, _colorTableRanges.back());
 }
 
 void RenderableCutPlane::deinitializeGL() {
  ZoneScoped;
 
  RenderablePlane::deinitializeGL();
+
+ BaseModule::ProgramObjectManager.release(
+     "CutPlane",
+     [](ghoul::opengl::ProgramObject* p) {
+         global::renderEngine->removeRenderProgram(p);
+     }
+ );
+ _shader = nullptr;
 
 }
 
@@ -203,22 +204,13 @@ void RenderableCutPlane::render(const RenderData& data, RendererTasks& t) {
     _shader->setUniform("opacity", opacity());
 
     _shader->setUniform("mirrorBackside", _mirrorBackside);
-    std::cout << "HEJ2" << _size.value().x;
-
-    RenderData modifiedData = data;
-    modifiedData.modelTransform.translation.x += (alignOnX * 6371000);
-    modifiedData.modelTransform.translation.y += (alignOnY * 6371000);
-    modifiedData.modelTransform.translation.z += (alignOnZ * 6371000);
-
-    std::cout << "Zata" << modifiedData.modelTransform.translation.z;
 
     glm::dvec3 objectPositionWorld = glm::dvec3(
         glm::translate(
             glm::dmat4(1.0),
-            modifiedData.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+            data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
    
-
     glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
     glm::dvec3 newRight = glm::normalize(
         glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
@@ -234,9 +226,22 @@ void RenderableCutPlane::render(const RenderData& data, RendererTasks& t) {
         cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), modifiedData.modelTransform.translation) *
+    std::cout << axisCutValueX << "X \n";
+    std::cout << axisCutValueX << "Y \n";
+    std::cout << axisCutValueX << "Z \n";
+
+   
+    const glm::dmat4 translationMatrixX = glm::translate(glm::dmat4(1.0),
+        glm::dvec3((alignOnX + axisCutValueX) * 2 * fls::ReToMeter, 0.0, 0.0));
+    const glm::dmat4 translationMatrixY = glm::translate(glm::dmat4(1.0),
+        glm::dvec3(0.0, (alignOnY + axisCutValueY) * 2 * fls::ReToMeter, 0.0));
+    const glm::dmat4 translationMatrixZ = glm::translate(glm::dmat4(1.0),
+        glm::dvec3(0.0, 0.0 , 2 * (alignOnZ + axisCutValueZ) * fls::ReToMeter));
+
+    const glm::dmat4 modelTransform = 
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         rotationTransform *
+        translationMatrixX * translationMatrixY * translationMatrixZ *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     const glm::dmat4 modelViewTransform =
         data.camera.combinedViewMatrix() * modelTransform;
@@ -283,7 +288,6 @@ void RenderableCutPlane::update(const UpdateData& data) {
 }
 
 void RenderableCutPlane::bindTexture() {
-
     _texture->bind();
 }
 
@@ -292,11 +296,12 @@ void RenderableCutPlane::loadTexture()
     _slice.getSlice(_filePath, _axis, _cutValue);
 
     // z as default 
-    int axisIndex = 2;
+     dataProperyIndex = 2;
+     
     // Set the index of the axis to scale on
-    if (_axis.compare("x") == 0) axisIndex = 0; 
-    else if (_axis.compare("y") == 0) axisIndex = 1; 
-    else axisIndex = 2;
+    if (_axis.compare("x") == 0) dataProperyIndex = 0; 
+    else if (_axis.compare("y") == 0) dataProperyIndex = 1; 
+    else dataProperyIndex = 2;
  
     std::vector<std::vector<float>> volumeDimensions = _slice.volumeDimensions();
 
@@ -306,7 +311,7 @@ void RenderableCutPlane::loadTexture()
     for (const auto& row : volumeDimensions) {
         std::vector<float> modifiedRow = row;
 
-        if (&row == &(volumeDimensions[axisIndex])) {
+        if (&row == &(volumeDimensions[dataProperyIndex])) {
             // Modify the specific row in the new vector
             std::fill(modifiedRow.begin(), modifiedRow.end(), 0.0f);
         }
@@ -315,24 +320,22 @@ void RenderableCutPlane::loadTexture()
         axisDim.push_back(modifiedRow);
     }
 
-    for (const auto& vec : axisDim) {
-        for (const auto& element : vec) {
-            std::cout << element << " ";
-        }
-        std::cout << std::endl;
+    _xAxisSize = abs(axisDim[0][0]) + abs(axisDim[0][1]);
+    _yAxisSize = abs(axisDim[1][0]) + abs(axisDim[1][1]);
+    _zAxisSize = abs(axisDim[2][0]) + abs(axisDim[2][1]);
+
+    alignOnX = ((abs(axisDim[0][0]) + abs(axisDim[0][1])) / 2) + axisDim[0][0]; 
+    alignOnY = ((abs(axisDim[1][0]) + abs(axisDim[1][1])) / 2) + axisDim[1][0];
+    alignOnZ = ((abs(axisDim[2][0]) + abs(axisDim[2][1])) / 2) + axisDim[2][0];
+
+    switch (dataProperyIndex) {
+    case 0: { axisCutValueX += _cutValue; }
+    case 1: { axisCutValueY += _cutValue; }
+    case 2: { axisCutValueZ += _cutValue; }
+
     }
-
-    _xAxis = abs(axisDim[0][0]) + abs(axisDim[0][1]);
-    _yAxis = abs(axisDim[1][0]) + abs(axisDim[1][1]);
-    _zAxis = abs(axisDim[2][0]) + abs(axisDim[2][1]);
-
-    alignOnX = floor(((abs(axisDim[0][0]) + abs(axisDim[0][1])) / 2) + axisDim[0][0]); 
-    alignOnY = floor(((abs(axisDim[1][0]) + abs(axisDim[1][1])) / 2) + axisDim[1][0]);
-    alignOnZ = floor(((abs(axisDim[2][0]) + abs(axisDim[2][1])) / 2) + axisDim[2][0]); 
-
-    std::cout << alignOnX << " ";
-    std::cout << alignOnY << " ";
-    std::cout << alignOnZ << " ";
+    std::cout << abs(axisDim[0][0]) << ", " << abs(axisDim[0][1]) << ", " << (abs(axisDim[0][0]) + abs(axisDim[0][1])) / 2 << "hej1";
+    std::cout << alignOnX << ", " << alignOnY << ", " << alignOnZ << "hej2 ";
 
     std::vector<std::string> s = _slice.quantitiesNames();
  
@@ -361,7 +364,6 @@ std::unique_ptr<ghoul::opengl::Texture> RenderableCutPlane::createFloatTexture(c
             flatData.push_back(_slice.data()[_dataPropertyIndex][i][j]);
         }
     }
-    const std::vector<float>& colorData = flatData;
 
     // Create a floating-point texture
     GLenum type = GL_TEXTURE_2D;
@@ -384,19 +386,55 @@ std::unique_ptr<ghoul::opengl::Texture> RenderableCutPlane::createFloatTexture(c
     return texture;
 }
 void RenderableCutPlane::createPlane() {
-    std::cout << "HEJ3" << _size.value().x;
+
     const GLfloat sizeX = _size.value().x;
     const GLfloat sizeY = _size.value().y;
     const GLfloat sizeZ = _size.value().z;
-    const GLfloat vertexData[] = {
-        //   x       y    z    w    s    t
-        -sizeX,  -sizeY, -sizeZ, 0.f, 0.f, 0.f,
-         sizeX,  sizeY, sizeZ, 0.f, 1.f, 1.f,
-        -sizeX,  sizeY, sizeZ, 0.f, 0.f, 1.f,
-        -sizeX, -sizeY, -sizeZ, 0.f, 0.f, 0.f,
-         sizeX, -sizeY, -sizeZ, 0.f, 1.f, 0.f,
-         sizeX,  sizeY, sizeZ, 0.f, 1.f, 1.f
-    };
+    GLfloat vertexData[36];  // 6 vertices with 6 components each
+
+    switch (dataProperyIndex) {
+    case 0: {
+        // Vertex data with X-axis set to zero
+        const GLfloat verticesXZero[] = {
+            0.f, -sizeY, -sizeZ, 0.f, 0.f, 0.f,
+            0.f,  sizeY,  sizeZ, 0.f, 1.f, 1.f,
+            0.f,  sizeY, -sizeZ, 0.f, 0.f, 1.f,
+            0.f, -sizeY, -sizeZ, 0.f, 0.f, 0.f,
+            0.f, -sizeY,  sizeZ, 0.f, 1.f, 0.f,
+            0.f,  sizeY,  sizeZ, 0.f, 1.f, 1.f
+        };
+;        memcpy(vertexData, verticesXZero, sizeof(vertexData));
+        break;
+    }
+    case 1: {
+        // Vertex data with Y-axis set to zero
+        const GLfloat verticesYZero[] = {
+            -sizeX, 0.f, -sizeZ, 0.f, 0.f, 0.f,
+             sizeX, 0.f,  sizeZ, 0.f, 1.f, 1.f,
+            -sizeX, 0.f,  sizeZ, 0.f, 0.f, 1.f,
+            -sizeX, 0.f, -sizeZ, 0.f, 0.f, 0.f,
+             sizeX, 0.f, -sizeZ, 0.f, 1.f, 0.f,
+             sizeX, 0.f,  sizeZ, 0.f, 1.f, 1.f
+        };
+        memcpy(vertexData, verticesYZero, sizeof(vertexData));
+        break;
+    }
+    case 2: {
+        // Vertex data with Z-axis set to zero
+        const GLfloat verticesZZero[] = {
+            -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
+             sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
+            -sizeX,  sizeY, 0.f, 0.f, 0.f, 1.f,
+            -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
+             sizeX, -sizeY, 0.f, 0.f, 1.f, 0.f,
+             sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f
+        };
+        memcpy(vertexData, verticesZZero, sizeof(vertexData));
+        break;
+    }
+    default:
+        return;  // Invalid axis, exit without modifying the vertex data
+    }
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);

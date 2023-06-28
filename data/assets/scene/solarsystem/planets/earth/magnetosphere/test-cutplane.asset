@@ -9,12 +9,12 @@ local cutplane = {
     Type = "RenderableCutPlane",
     Size = 6371000,
     Origin = "Center",
-    --FilePath = "C:/Users/kjjohnst/Documents/GAMERAdata/openSpace.eb3.h5",
-    FilePath = "C:/Users/aemolin/Documents/GAMERAdata/dirCP/openSpace.eb3.h5",
-    Axis = "z",
-    CutValue = 0.0,
-    DataProperty = "Bx", -- !!!!!!!!!!!!!!!!!!!!!!
-    ColorTableRanges = {{-20, 20}},
+    FilePath = "C:/Users/kjjohnst/Documents/GAMERAdata/openSpace_Aug2016_lowres.eb3.h5",
+    --FilePath = "C:/Users/aemolin/Documents/GAMERAdata/dirCP/openSpace.eb3.h5",
+    Axis = "y",
+    CutValue = 5.0,
+    DataProperty = "By", -- !!!!!!!!!!!!!!!!!!!!!!
+    ColorTableRanges = {{-10, 20}},
     ColorTablePaths=  {transferFunction},
     
   },

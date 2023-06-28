@@ -88,13 +88,20 @@ private:
 
     //The axis dimensions of the axis we're not slicing on
     std::vector<std::vector<float>> _axisDim;
-    int _xAxis;
-    int _yAxis;
-    int _zAxis;
+    int _xAxisSize;
+    int _yAxisSize;
+    int _zAxisSize;
     // Align 
     double alignOnX;
     double alignOnY;
     double alignOnZ;
+
+    float axisCutValueX = 0;
+    float axisCutValueY = 0;
+    float axisCutValueZ = 0;
+
+
+    int dataProperyIndex;
 };
 
 } // namespace openspace
