@@ -129,6 +129,10 @@ protected:
     // Local rotation (roll, pitch, yaw)
     properties::Vec3Property _localRotation;
 
+    // Border
+    properties::FloatProperty _borderWidth;
+    properties::Vec3Property _borderColor;
+
     properties::FloatProperty _scale;
     properties::FloatProperty _gamma;
     properties::Vec3Property _multiplyColor;
@@ -136,7 +140,8 @@ protected:
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
-    UniformCache(color, opacity, mvp, texture, backgroundColor, gamma) _uniformCache;
+    UniformCache(color, opacity, mvp, texture, backgroundColor, gamma, 
+        borderColor, borderWidth) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 

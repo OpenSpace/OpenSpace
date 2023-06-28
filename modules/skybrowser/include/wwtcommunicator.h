@@ -76,7 +76,7 @@ protected:
     properties::DoubleProperty _verticalFov;
 
     double _borderRadius = 0.0;
-    glm::ivec3 _borderColor = glm::ivec3(70);
+    glm::ivec3 _wwtBorderColor = glm::ivec3(70);
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     double _targetRoll = 0.0;
     bool _isImageCollectionLoaded = false;
