@@ -886,7 +886,6 @@ namespace openspace {
 
                 float relativeAngle = 90 - (atan(abs(setOfSeedpoints[mid].IMF.criticalPoint.x)
                 / abs(setOfSeedpoints[mid].IMF.criticalPoint.y)) * (180 / 3.14));
-                //std::cout << "Relative angle: " << relativeAngle << std::endl;
 
                 if (abs(relativeAngle) == find) {
                     closestIndex = mid;
@@ -901,7 +900,6 @@ namespace openspace {
                 }
             }
 
-            // save setOfSeedpoints.y closest to find
             if (closestIndex == -1) {
                 throw ghoul::RuntimeError(
                     "Out of range when trying to select points"
