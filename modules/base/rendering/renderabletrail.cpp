@@ -293,7 +293,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     // is necessary as they are usually far away from their reference
     _programObject->setUniform(
         _uniformCache.modelView,
-        data.camera.combinedViewMatrix() * modelTransform * info._localTransform
+        calcModelViewTransform(data, modelTransform) * info._localTransform
     );
 
     const int sorting = [](RenderInformation::VertexSorting s) {
@@ -391,10 +391,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, opacity());
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    glm::dmat4 modelTransform = calcModelTransform(data);
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 

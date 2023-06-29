@@ -80,8 +80,8 @@ private:
 
     void deleteDataGPUAndCPU();
     void createPlanes();
-    void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
-        const glm::dmat4& projectionMatrix, float fadeInVariable);
+    void renderPlanes(const RenderData& data, const glm::dmat4& modelViewTransform,
+        const glm::dmat4& projectionTransform, float fadeInVariable);
 
     void loadTextures();
 

@@ -386,13 +386,9 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
         );
     }
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-        modelTransform * anchorTranslation;
+    const glm::dmat4 modelTransform = calcModelTransform(data);
+    const glm::dmat4 modelViewTransform =
+        calcModelViewTransform(data, modelTransform) * anchorTranslation;
 
     _program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());

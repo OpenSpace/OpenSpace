@@ -962,15 +962,13 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
-    glm::dmat4 model = glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    glm::dmat4 model = calcModelTransform(data);
 
     float viewScaling = data.camera.scaling();
     glm::dmat4 view = data.camera.combinedViewMatrix();
     glm::dmat4 projection = data.camera.projectionMatrix();
 
-    glm::dmat4 modelViewProjMat = projection * view * model;
+    glm::dmat4 modelViewProjMat = calcModelViewProjectionTransform(data, model);
     glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
 
     // Wait until camera has stabilized before we traverse the Octree/stream from files.
