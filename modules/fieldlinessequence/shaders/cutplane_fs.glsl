@@ -45,7 +45,6 @@ Fragment getFragment() {
 
   float value = texture(texture1, vs_st).r;
   float lookUpVal = (value - colorTableRange.x) / (colorTableRange.y - colorTableRange.x);
-  //return texture(colorTable, lookUpVal);
 
   vec4 color = texture(colorTable, lookUpVal);
 
@@ -66,8 +65,6 @@ Fragment getFragment() {
     }
   }
 
-
- // frag.color.rgb *= multiplyColor;
 
   frag.color.a *= opacity;
   if (frag.color.a == 0.0) {

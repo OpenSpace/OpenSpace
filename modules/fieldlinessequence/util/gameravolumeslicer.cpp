@@ -91,12 +91,12 @@ std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::slicer(std::str
     std::vector<std::vector<std::vector<float>>> slicedDataADP; // Slice fo data AFTER position of slice, these can be function variables
     std::vector<std::vector<std::vector<float>>> data; // To store the final slices
 
-    for (int q = 0; q < _quantitiesNames.size(); q++) {
-        std::string quantityName = _quantitiesNames[q];
-        const HighFive::DataSet dsQuantity = timeStep.getDataSet(quantityName);
+    for (int q = 0; q < _dataPropertyNames.size(); q++) {
+        std::string dataPropertyName = _dataPropertyNames[q];
+        const HighFive::DataSet dsProperty = timeStep.getDataSet(dataPropertyName);
 
         // Get the dataset dimensions
-        auto dataset_dimensions = dsQuantity.getSpace().getDimensions();
+        auto dataset_dimensions = dsProperty.getSpace().getDimensions();
 
         // Define the selection parameters
         std::vector<size_t> offsetBDP(dataset_dimensions.size(), 0);
@@ -138,8 +138,8 @@ std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::slicer(std::str
             return data;
         }
 
-        HighFive::Selection sliceBDP = dsQuantity.select(offsetBDP, count);
-        HighFive::Selection sliceADP = dsQuantity.select(offsetADP, count);
+        HighFive::Selection sliceBDP = dsProperty.select(offsetBDP, count);
+        HighFive::Selection sliceADP = dsProperty.select(offsetADP, count);
 
         // Create a 3D vector to store the slice
         std::vector<std::vector<std::vector<float>>> dataBDP(count[0], std::vector<std::vector<float>>(count[1], std::vector<float>(count[2])));
@@ -272,8 +272,8 @@ std::vector<std::vector<float>> GameraVolumeSlicer::getVolumeDimensions(HighFive
 
 //************************ RETURN _QUANTITIESNAMES ***********************//
 //*************************************************************//
-std::vector<std::string> GameraVolumeSlicer::quantitiesNames() {
-    return _quantitiesNames;
+std::vector<std::string> GameraVolumeSlicer::dataPropertyNames() {
+    return _dataPropertyNames;
 }
 
 //************************ RETURN _VOLUMEDIMENSIONS ***********************//
@@ -300,7 +300,7 @@ void GameraVolumeSlicer::getSlice(std::string pathToHdf5File, std::string axis, 
     const HighFive::Group timeStep = file.getGroup("/Step#1");
 
     // Get all the names of datasets stored in group 'timeStep'
-    _quantitiesNames = timeStep.listObjectNames();
+    _dataPropertyNames = timeStep.listObjectNames();
     _volumeDimensions = getVolumeDimensions(file);
     _data = slicer(axis, value, timeStep);
  

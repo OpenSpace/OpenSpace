@@ -47,11 +47,10 @@ namespace documentation { struct Documentation; }
 class RenderableCutPlane : public RenderablePlane {
 public:
     RenderableCutPlane(const ghoul::Dictionary& dictionary);
+
     void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
-
-    bool isReady() const override;
     
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
@@ -61,47 +60,49 @@ public:
 protected:
     virtual void bindTexture() override;
     void createPlane();
-
     
 private:
-    void loadTexture();
-    std::unique_ptr<ghoul::opengl::Texture> createFloatTexture(const std::vector<std::vector<float>>& data);
-    GameraVolumeSlicer _slice;
-    properties::StringProperty _filePath;
-    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
-    std::unique_ptr<TransferFunction> _transferFunction;
-    glm::vec2 _textureDimensions = glm::vec2(0.f);
-    std::unique_ptr<ghoul::filesystem::File> _sourceFile;
-    std::string _axis;
-    properties::Vec3Property _size;
+    void loadDataFromSlice();
+    std::unique_ptr<ghoul::opengl::Texture> createTexture(const std::vector<std::vector<float>>& data);
 
+    // Axis to cut the volume on 
+    std::string _axis;
+    // Value to slice on
     float _cutValue;
+    // What data property to render
     std::string _dataProperty;
-    // Used to save property for later initialization
+    // Index of the data property 
     int _dataPropertyIndex;
-    // Color table/transfer function for "By Quantity" coloring
-    properties::StringProperty _colorTablePath;
-    // Paths to color tables. One for each 'extraQuantity'
+    // Path to volume data file
+    properties::StringProperty _filePath;
+    // Size unit (in meters) of the axes dimensions
+    properties::Vec3Property _size;
+    // Paths to color tables 
     std::vector<std::string> _colorTablePaths;
     // Values represents min & max values represented in the color table
     std::vector<glm::vec2> _colorTableRanges;
 
+    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    std::unique_ptr<TransferFunction> _transferFunction;
+
+    GameraVolumeSlicer _slice;
     //The axis dimensions of the axis we're not slicing on
     std::vector<std::vector<float>> _axisDim;
-    int _xAxisSize;
-    int _yAxisSize;
-    int _zAxisSize;
+
+
+    int _xAxisLength;
+    int _yAxisLength;
+    int _zAxisLength;
     // Align 
-    double alignOnX;
-    double alignOnY;
-    double alignOnZ;
+    double _alignOnX;
+    double _alignOnY;
+    double _alignOnZ;
 
-    float axisCutValueX = 0;
-    float axisCutValueY = 0;
-    float axisCutValueZ = 0;
+    float _axisCutValueX = 0;
+    float _axisCutValueY = 0;
+    float _axisCutValueZ = 0;
 
-
-    int dataProperyIndex;
+    int axisIndex;
 };
 
 } // namespace openspace

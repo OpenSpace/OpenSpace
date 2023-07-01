@@ -36,24 +36,14 @@
 //#include "modules/kameleon/ext/kameleon/ext/hdf5/hdf5-1.8.12/c++/src/H5Cpp.h"
 
 
-
 namespace openspace {
-
-    //struct Slice {
-    //    std::vector<std::string> quantitiesNames;
-
-    //    std::vector<std::vector<std::vector<float>>> data;
-
-    //    std::vector<std::vector<float>> volumeDimensions; // Inner vec should be vec2
-
-    //};
 
 class GameraVolumeSlicer {
 public:
    GameraVolumeSlicer() = default;
    void getSlice(std::string pathToHdf5File, std::string axis, int value);
-   //Slice _slice;
-   std::vector<std::string> quantitiesNames();
+
+   std::vector<std::string> dataPropertyNames();
    std::vector<std::vector<float>> volumeDimensions();
    std::vector<std::vector<std::vector<float>>> data();
 
@@ -65,12 +55,10 @@ private:
                         std::vector<std::vector<std::vector<float>>> slicedDataADP,
                         std::vector<std::vector<std::vector<float>>>& data);
 
-     std::vector<std::string> _quantitiesNames;
+     std::vector<std::string> _dataPropertyNames;
      std::vector<std::vector<float>> _volumeDimensions; // Inner vec should be vec2
      std::vector<std::vector<std::vector<float>>> _data;
 
-    //H5 variables 
-    //TODO: inizialize variables
 };
 
 } // namespace openspace

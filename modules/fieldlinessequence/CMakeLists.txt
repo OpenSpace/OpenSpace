@@ -75,18 +75,19 @@ set(FIELDLINESEQUENCE_EXT_DIR "${FIELDLINESEQUENCE_BASE_DIR}/ext")
 #boost settings
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME ON) 
+set(Boost_USE_STATIC_RUNTIME ON)
+set(HIGHFIVE_USE_BOOST OFF)
 
 # If libraries needs to be built, make them shared
 option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 
 # HDF5 options
 option(HDF5_USE_STATIC_LIBRARIES "Use HDF5 static libraries" OFF)
-option(FIELDLINESEQUENCE_USE_HDF5 "Build FieldlineSequence with HDF5 library" OFF)
+option(FIELDLINESEQUENCE_USE_HDF5 "Build FieldlineSequence with HDF5 library" ON)
 
 # Highfive options
 option(HIGHFIVE_USE_STATIC_LIBS "Use HighFive static libraries" OFF)
-option(FIELDLINESEQUENCE_USE_HIGHFIVE "Build HighFive with zlib" OFF)
+option(FIELDLINESEQUENCE_USE_HIGHFIVE "Build HighFive with zlib" ON)
 
 #########################################################################################
 # External Third-party software
