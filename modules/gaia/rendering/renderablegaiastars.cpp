@@ -48,6 +48,9 @@
 #include <fstream>
 #include <cstdint>
 
+
+using namespace std::chrono;
+
 namespace {
     constexpr std::string_view _loggerCat = "RenderableGaiaStars";
 
@@ -581,9 +584,27 @@ namespace {
 
 namespace openspace {
 
+
 documentation::Documentation RenderableGaiaStars::Documentation() {
     return codegen::doc<Parameters>("gaiamission_renderablegaiastars");
 }
+
+long long deltaTime = 0;
+long long updateDeltaTime = 0;
+long frame = 0;
+long maxFrames = 2000;
+double averageFrameRateMilliseconds = 0;
+double averageUpdateMilliseconds = 0;
+bool reportedfps = false;
+
+double maxDeltaTime = 0;
+double maxUpdateDeltaTime = 0;
+
+long long timingReadFile = 0;
+long long timingOctreeCreation = 0;
+long long timingFetchDataOnCPU = 0;
+long long timingUploadDataToGPU = 0;
+bool timedFunctions = true;
 
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -674,7 +695,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         });
     addProperty(_filePath);
 
-
+    
     _dataMapping.px = p.dataMapping.px.value_or("px");
     _dataMapping.py = p.dataMapping.py.value_or("py");
     _dataMapping.pz = p.dataMapping.pz.value_or("pz");
@@ -1060,6 +1081,8 @@ void RenderableGaiaStars::deinitializeGL() {
 }
 
 void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
+    auto frameStart = high_resolution_clock::now();
+
     checkGlErrors("Before render");
 
     // Save current FBO.
@@ -1102,6 +1125,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // Traverse Octree and build a map with new nodes to render, uses mvp matrix to decide
     const int renderOption = _renderMode;
     int deltaStars = 0;
+    auto start = high_resolution_clock::now();
     std::map<int, std::vector<float>> updateData = _octreeManager.traverseData(
         modelViewProjMat,
         screenSize,
@@ -1109,6 +1133,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         gaia::RenderMode(renderOption),
         _lodPixelThreshold
     );
+    auto end = high_resolution_clock::now();
+    timingFetchDataOnCPU = duration_cast<nanoseconds>(end - start).count();
 
     // Update number of rendered stars.
     _nStarsToRender += deltaStars;
@@ -1127,7 +1153,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         shaderOption == gaia::ShaderOption::PointSSBO ||
         shaderOption == gaia::ShaderOption::BillboardSSBONoFBO)
     {
+        auto start = high_resolution_clock::now();
         renderWithSSBO(updateData, nChunksToRender);
+        auto end = high_resolution_clock::now();
+        timingUploadDataToGPU = duration_cast<nanoseconds>(end - start).count();
     }
     else {
         renderWithVBO(updateData, maxStarsPerNode);
@@ -1321,6 +1350,35 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     checkGlErrors("After render");
+
+
+    if (timedFunctions) {
+        LDEBUG(fmt::format("\nRead file in {}ms \nCreated Octree in {}ms \nFetch data in {}ns, {}ms"
+            "\nUpload data in {}ns, {}ms", timingReadFile, timingOctreeCreation, timingFetchDataOnCPU, timingFetchDataOnCPU/1000000.0, timingUploadDataToGPU, timingUploadDataToGPU/1000000.0));
+        timedFunctions = false;
+    }
+    
+    auto frameEnd = high_resolution_clock::now();
+    double dt = duration_cast<milliseconds>(frameEnd - frameStart).count();
+    deltaTime += dt;
+    maxDeltaTime = std::max(maxDeltaTime, dt);
+
+    if (!reportedfps && frame > maxFrames) {
+        averageFrameRateMilliseconds = static_cast<double>(maxFrames) / (deltaTime / 1000.0);
+        averageUpdateMilliseconds = static_cast<double>(maxFrames) / (updateDeltaTime / 1000.0);
+        double totalAverage = static_cast<double>(maxFrames) / ((deltaTime + updateDeltaTime) / 1000.0);
+        LDEBUG(fmt::format("Average fps {} in {} frames, total deltatime is {}", averageFrameRateMilliseconds, maxFrames, deltaTime));
+        LDEBUG(fmt::format("Average fps {} in {} frames, total updateDeltaTime is {}", averageUpdateMilliseconds, maxFrames, updateDeltaTime));
+        LDEBUG(fmt::format("Average fps {} in {} frames, render + update ", totalAverage, maxFrames));
+
+        LDEBUG(fmt::format("Average render time {}ms, max render time {}ms in {} frames", deltaTime / static_cast<double>(maxFrames),maxDeltaTime, maxFrames));
+        LDEBUG(fmt::format("Average update time {}ms, max update time {}ms in {} frames", updateDeltaTime / static_cast<double>(maxFrames), maxUpdateDeltaTime, maxFrames));
+        LDEBUG(fmt::format("Average render + update {}ms in {} frames", updateDeltaTime / static_cast<double>(maxFrames) + deltaTime / static_cast<double>(maxFrames), maxFrames));
+        long long memoryUsage = _octreeManager.ramUsage();
+        LDEBUG(fmt::format("Memory usage: {}MB used by the octree", memoryUsage));
+        reportedfps = true;
+    }
+    frame++;
 }
 
 void RenderableGaiaStars::renderWithSSBO(const std::map<int, std::vector<float>>& updateData, int nChunksToRender) {
@@ -1584,13 +1642,14 @@ void RenderableGaiaStars::update(const UpdateData&) {
     if (_programTM->isDirty() || _shadersAreDirty) {
         initializeTmShaders(shaderOption);
     }
+    auto updateStart = high_resolution_clock::now();
 
     if (_buffersAreDirty) {
         LDEBUG("Regenerating buffers");
 
         // Set values per star slice depending on render option
         _nRenderValuesPerStar = PositionSize + ColorSize + VelocitySize + _OptionalDataSize; //TODO check if this step is necessary now
-
+        
         // Calculate memory budgets.
         _chunkSize = _octreeManager.maxStarsPerNode() * _nRenderValuesPerStar;
         long long totalChunkSizeInBytes = _octreeManager.totalNodes() *
@@ -1968,6 +2027,11 @@ void RenderableGaiaStars::update(const UpdateData&) {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
     }
+
+    auto updateEnd = high_resolution_clock::now();
+    double dt = duration_cast<milliseconds>(updateEnd - updateStart).count();
+    updateDeltaTime += dt;
+    maxUpdateDeltaTime = std::max(maxUpdateDeltaTime, dt);
 }
 
 void RenderableGaiaStars::updateGUIProperties(int shaderoption) {
@@ -2402,6 +2466,7 @@ int RenderableGaiaStars::readMultipleCSVFiles(const std::filesystem::path& folde
 
 int RenderableGaiaStars::internalReadCSVFile(std::vector<std::string>const& headers, std::vector<std::vector<std::string>> const &dataTable) {
     LDEBUG("Adding data to octree.");
+    auto start = high_resolution_clock::now();
     int idx{ 0 };
     for (const auto& s : headers) {
         _fileHeaders[s] = idx++;
@@ -2474,13 +2539,19 @@ int RenderableGaiaStars::internalReadCSVFile(std::vector<std::string>const& head
     _octreeManager._fileHeaders = _fileHeaders;
     _octreeManager.sliceLodData();
 
+    auto end = high_resolution_clock::now();
+    timingOctreeCreation = duration_cast<milliseconds>(end - start).count();
+
     return static_cast<int>(dataTable.size());
 }
 
 int RenderableGaiaStars::readCSVFile(const std::filesystem::path& filePath)
 {
+    auto start = high_resolution_clock::now();
     //Read data from csv file and convert it to float values
     std::vector<std::vector<std::string>> dataTable = ghoul::loadCSVFile(filePath.string(), true);
+    auto end = high_resolution_clock::now();
+    timingReadFile = duration_cast<milliseconds>(end - start).count();
 
     if (dataTable.empty())
     {
@@ -2524,8 +2595,12 @@ int RenderableGaiaStars::readSpeckFile(const std::filesystem::path& filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fileReader(false);
+    auto start = high_resolution_clock::now();
     std::vector<float> fullData = fileReader.readSpeckFile(filePath, nReadValuesPerStar);
+    auto end = high_resolution_clock::now();
+    timingReadFile = duration_cast<milliseconds>(end - start).count();
 
+    start = high_resolution_clock::now();
     // Insert stars into octree.
     for (size_t i = 0; i < fullData.size(); i += nReadValuesPerStar) {
         auto first = fullData.begin() + i;
@@ -2535,6 +2610,10 @@ int RenderableGaiaStars::readSpeckFile(const std::filesystem::path& filePath) {
         _octreeManager.insert(starValues);
     }
     _octreeManager.sliceLodData();
+    
+    end = high_resolution_clock::now();
+    timingOctreeCreation = duration_cast<milliseconds>(end - start).count();
+    
     return static_cast<int>(fullData.size() / nReadValuesPerStar);
 }
 

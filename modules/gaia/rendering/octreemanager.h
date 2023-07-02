@@ -64,6 +64,10 @@ public:
     OctreeManager() = default;
     ~OctreeManager() = default;
 
+    double ramUsage();
+    long long ramUsage(const openspace::OctreeManager::OctreeNode& node);
+
+
     /**
      * Initializes a one layer Octree with root and 8 children that covers all stars.
      *
@@ -100,6 +104,7 @@ public:
      * Calls `printStarsPerNode(node, prefix)` internally.
      */
     void printStarsPerNode() const;
+
 
     /**
      * Used while streaming nodes from files. Checks if any nodes need to be loaded or

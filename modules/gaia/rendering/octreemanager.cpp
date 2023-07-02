@@ -37,7 +37,47 @@ namespace {
 } // namespace
 
 namespace openspace {
+double OctreeManager::ramUsage() {
+    long long totalBytes = 0;
+    for (int i = 0; i < 8; ++i) {
+        totalBytes += ramUsage(*_root->Children[i]);
+    }
 
+    double octreesize = (_freeSpotsInBuffer.size() + _removedKeysInPrevCall.size()) * sizeof(int) +
+        _leastRecentlyFetchedNodes.size() * sizeof(unsigned long long) + sizeof(OctreeManager);
+
+    totalBytes += octreesize;
+
+    //Convert to MB
+    double MB = static_cast<double>(totalBytes)/ (1024ll * 1024ll);
+    return MB;
+}
+
+long long OctreeManager::ramUsage(const openspace::OctreeManager::OctreeNode& node) {
+    if (node.isLeaf) {
+        long long nodeSize = sizeof(OctreeManager::OctreeNode); // static size of node
+        //variable data sizes
+        long long posSize = node.posData.size() * sizeof(float);
+        long long colSize = node.colData.size() * sizeof(float);
+        long long velSize = node.velData.size() * sizeof(float);
+        long long magOrderSize = node.magOrder.size() * sizeof(std::pair<float, size_t>);
+
+        long long optionalSize = 0;
+        for (auto const& [index, parameter] : node.optionalBinData) {
+            optionalSize += parameter.size() * sizeof(float);
+        }
+
+        //return posSize + colSize + optionalSize + velSize; //This would be the data itself but we are interested in the whole data.
+        return nodeSize + posSize + colSize + velSize + magOrderSize + optionalSize;
+    }
+    else {
+        long long totalBytes = 0;
+        for (int i = 0; i < 8; ++i) {
+            totalBytes += ramUsage(*node.Children[i]);
+        }
+        return totalBytes;
+    }
+}
 void OctreeManager::initOctree(long long cpuRamBudget, int maxDist, int maxStarsPerNode) {
     if (_root) {
         LDEBUG("Clear existing Octree");
