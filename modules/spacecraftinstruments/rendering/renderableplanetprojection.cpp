@@ -522,17 +522,12 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     _programObject->setUniform(_mainUniformCache.sunPos, static_cast<glm::vec3>(sunPos));
 
     // Model transform and view transform needs to be in double precision
-    glm::dmat4 trans =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::dmat4 modelTransform = calcModelTransform(data);
 
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * trans;
-
-    _programObject->setUniform(_mainUniformCache.modelTransform, glm::mat4(trans));
+    _programObject->setUniform(_mainUniformCache.modelTransform, glm::mat4(modelTransform));
     _programObject->setUniform(
         _mainUniformCache.modelViewProjectionTransform,
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+        glm::mat4(calcModelViewProjectionTransform(data, modelTransform))
     );
 
     _programObject->setUniform(_mainUniformCache.hasBaseMap, _baseTexture != nullptr);
