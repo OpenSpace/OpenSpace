@@ -498,7 +498,7 @@ namespace openspace {
 
         double startTime = 0.0;
         double yOutherLimit = 6;
-        int numberOfFieldlines = 3;
+        int numberOfFieldlines = 1;
         double algorithmAccuracy = 0.01;
 
         for (const std::filesystem::path entry : _sourceFiles) {
@@ -1196,8 +1196,7 @@ namespace openspace {
                 _nPointsOnPathLine
             );
 
-        // See the seed points
-        std::cout << "Seed points to enter the visualization" << std::endl;
+        std::cout << std::endl << "Seed points to enter the visualization" << std::endl;
 
         for (int i = 0; i < seedPoints.size(); i++)
         {
@@ -1205,10 +1204,6 @@ namespace openspace {
                 " " << seedPoints[i].seedPoint.y << " " <<
                 seedPoints[i].seedPoint.z << " " << std::endl;
 
-        }
-        for (int i = 0; i < birthTimes.size(); i++)
-        {
-            std::cout << "birthtime " << i << ": " << birthTimes[i] << std::endl;
         }
     }
 

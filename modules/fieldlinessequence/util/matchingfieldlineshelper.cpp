@@ -1228,7 +1228,8 @@ namespace openspace::fls {
         tempSeedPoint.y = seedPoint.y - directionVector.y * factor;
         tempSeedPoint.z = seedPoint.z - directionVector.z * factor;
 
-        std::cout << seedPoint.x << " " << seedPoint.y << " " << seedPoint.z << std::endl;
+        std::cout << "Intended seed point topology: " << topology;
+        std::cout << " | Seed point position : " << seedPoint.x << " " << seedPoint.y << " " << seedPoint.z << std::endl;
 
         int counter;
 
@@ -1342,7 +1343,6 @@ namespace openspace::fls {
 
                     if (!checkIfFieldlineIsClosed(fieldlinePosFL))
                     {
-                        std::cout << counter << std::endl;
                         break;
                     }
 
@@ -1357,7 +1357,6 @@ namespace openspace::fls {
                 }
             }
         }
-
         seedPoint.x = tempSeedPoint.x;
         seedPoint.y = tempSeedPoint.y;
         seedPoint.z = tempSeedPoint.z;
@@ -1467,7 +1466,8 @@ namespace openspace::fls {
                     = getPositionsFromLine(flowline2);
 
                 double indexFlowlinePos2 = findFirstIMFIndex(flowlinePositions2, 0, kameleon, innerBoundaryLimit);
-                double referencePercentage = indexFlowlinePos2 / (flowlinePositions2.size() + 3);
+                double referencePercentage = indexFlowlinePos2 / (flowlinePositions2.size() + 1.5);
+                // If you get points way of, make sure that 1.5 is enough, otherwise increase it
                 int indexFlowlinePos = referencePercentage * flowlinePositions.size();
 
                 std::cout << "Finding reference index - Completed" << std::endl;
@@ -1545,6 +1545,7 @@ namespace openspace::fls {
 
                 std::cout << "Finding OS Nightside Seed Point - Complete" << std::endl;
                 std::cout << "Finding Closed Nightside Seed Point" << std::endl;
+                std::cout << "Sliding IMF, ON and OS closer to nightside region" << std::endl;
 
                 double factor = 0.02;
 
