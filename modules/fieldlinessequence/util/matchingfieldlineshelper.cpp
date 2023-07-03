@@ -1380,6 +1380,7 @@ namespace openspace::fls {
 
     /*
     * Nightside seed point finder
+    * Beware long function, bad variable names, not modularized etc. due to time
     */
     std::vector<Seedpoint> findAndAddNightsideSeedPoints(
         std::vector<Seedpoint>& seedPoints,
@@ -1432,7 +1433,7 @@ namespace openspace::fls {
                     100
                 );
 
-                // now, lets take a point close to the edge of that fieldline WEAK SPOT
+                // now, lets take a point close to the edge of that fieldline
                 glm::vec3 firstPosOfFieldline = fieldlinePositions[1];
 
                 // trace a flowline from the new point/edge position
@@ -1451,8 +1452,9 @@ namespace openspace::fls {
                 std::vector<std::vector<glm::vec3>> lastON;
                 std::vector<std::vector<glm::vec3>> firstIMF;
 
-                // optimiezstar
+                // find reference index of imf first
                 int n_points_on_flowline = 20;
+
                 // trace a flowline from the new point/edge position
                 ccmc::Fieldline flowline2 = traceAndCreateMappedPathLine(
                     tracingVar,
