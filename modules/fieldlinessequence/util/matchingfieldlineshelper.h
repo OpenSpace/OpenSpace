@@ -61,7 +61,7 @@ namespace openspace {
             std::vector<Seedpoint>& seedPoints,
             const std::string& tracingVar,
             ccmc::Kameleon* kameleon,
-            const size_t nPointsOnPathLine,
+            const size_t& nPointsOnPathLine,
             double& accuracy
         );
 

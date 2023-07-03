@@ -1,26 +1,23 @@
--- Deprecated: local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere') -- skapar en variabel som ar en asset
+local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere')
 
 -- Change to location on your machine
 local fieldlinesDirectory = 'C:/Dev/OpenSpaceLocalData/simonmans' --old: 'C:/Users/HEM/Documents/Liu/Data_Fieldlines'
-local providedSeedPointFilePath = 'C:/Dev/OpenSpaceLocalData/simonmans/seedpoint_dayside_test.txt' --old: 'C:/Dev/OpenSpaceLocalData/simonmans/seedpoint_dayside_test.txt'
---local providedSeedPointCSVFilePath = 'C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans' -- '${SYNC}/http/seed_points/dayside_seedpoints.csv'
+local seedPointProviderURL = 'http://localhost:5000/get_dayside_csv_file'
 
 local movingLines = {
-  Identifier = "MovingFieldlines", -- important: needs to be unique
-  Parent = transforms.GSMReferenceFrame.Identifier, -- hiearchi parent/child where do i want to locate this scence graph node
+  Identifier = "MovingFieldlines",
+  Parent = transforms.GSMReferenceFrame.Identifier,
   Renderable = {
     Type = "RenderableMovingFieldlines",
     SourceFolder = fieldlinesDirectory,
     UseSeedPointProvider = false,
-    SeedPointsFromProvider = "",
+    SeedPointProviderURL = seedPointProviderURL,
     ProvidedSeedPointFilePath = providedSeedPointFilePath,
-    --ProvidedSeedPointCSVFilePath = providedSeedPointCSVFilePath,
-    TracingVariable = "u_perp_b", -- u = velocity or similar, perp = perpendicular, b = magnetic field, ultimately our flowline = where our line is moving through time
-    NumberOfPointsOnPathLine = 200, -- flow line, our number of keyframes 
-    NumberOfPointsOnFieldlines = 500, -- on each keyframe, there's 500 points on our flowline
+    TracingVariable = "u_perp_b",
+    NumberOfPointsOnPathLine = 200, 
+    NumberOfPointsOnFieldlines = 500,
     LineWidth = 4,
-    RenderFlowLine = true -- if we want to render the flowline - edit to true 
+    RenderFlowLine = true
   },
   GUI = {
     Path = "/Solar System/Planets/Earth",
@@ -38,8 +35,6 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(movingLines)
-
--- Deprecated: assetHelper.registerSceneGraphNodesAndExport(asset, { movingLines })
 
 asset.meta = {
   Name = "M",

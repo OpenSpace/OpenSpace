@@ -62,11 +62,11 @@ namespace openspace::fls {
         const std::string& tracingVar,
         ccmc::Tracer& tracer,
         std::vector<Seedpoint>& seedPoint,
-        const size_t nPointsOnPathLine,
+        const size_t& nPointsOnPathLine,
         ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit,
+        float& innerBoundaryLimit,
         double &accuracy,
-        size_t _nPointsOnFieldLine
+        size_t& _nPointsOnFieldLine
     );
 
     void createTextFileWithFieldlineCoordinates(
@@ -78,54 +78,46 @@ namespace openspace::fls {
     );
 
     bool checkIfFieldlineIsOpen(
-        std::vector<glm::vec3> fieldlinePositions
+        std::vector<glm::vec3>& fieldlinePositions
     );
 
     bool checkIfFieldlineIsClosed(
-        std::vector<glm::vec3> fieldlinePositions
+        std::vector<glm::vec3>& fieldlinePositions
     );
 
     bool checkIfFieldlineIsIMF(
-        std::vector<glm::vec3> fieldlinePositions
+        std::vector<glm::vec3>& fieldlinePositions
     );
 
     bool keepCheckingFlowlinesFieldline(
-        std::vector<glm::vec3> flowlinePos,
-       int flowlineIndex
+        std::vector<glm::vec3>& flowlinePos,
+       int& flowlineIndex
     );
 
     Seedpoint moveSeedpointTowardsCriticalPoint(
         Seedpoint& seedPoint,
-        glm::vec3 directionToCriticalPoint,
+        glm::vec3& directionToCriticalPoint,
         float& stepLength
     );
 
     Seedpoint moveSeedpointAwayFromCriticalPoint(
         Seedpoint& seedPoint,
-        glm::vec3 directionToCriticalPoint,
+        glm::vec3& directionToCriticalPoint,
         float& stepLength
     );
 
     std::vector<glm::vec3> getPositionsFromLine(
-        ccmc::Fieldline seedPointFlowline
-    );
-
-    std::vector <std::vector<glm::vec3>> addFieldLinePositionsToVector(
-        std::vector <std::vector<glm::vec3>>& seedPointFieldlinePositions,
-        std::vector<glm::vec3> seedPointFlowlinePositionsVec3,
-        ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit,
-        size_t _nPointsOnFieldLine
+        ccmc::Fieldline& seedPointFlowline
     );
 
     glm::vec3 modifySeedpointOpen(
         Seedpoint& seedPoint,
         const std::string& tracingVar,
         ccmc::Tracer& tracer,
-        const size_t nPointsOnPathLine,
+        const size_t& nPointsOnPathLine,
         ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit,
-        size_t _nPointsOnFieldLine,
+        float& innerBoundaryLimit,
+        size_t& _nPointsOnFieldLine,
         glm::vec3& directionToCriticalPoint,
         float& stepLength,
         double& accuracy,
@@ -137,10 +129,10 @@ namespace openspace::fls {
         Seedpoint& seedPoint,
         const std::string& tracingVar,
         ccmc::Tracer& tracer,
-        const size_t nPointsOnPathLine,
+        const size_t& nPointsOnPathLine,
         ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit,
-        size_t _nPointsOnFieldLine,
+        float& innerBoundaryLimit,
+        size_t& _nPointsOnFieldLine,
         glm::vec3& directionToCriticalPoint,
         float& stepLength,
         double& accuracy,
@@ -152,10 +144,10 @@ namespace openspace::fls {
         Seedpoint& seedPoint,
         const std::string& tracingVar,
         ccmc::Tracer& tracer,
-        const size_t nPointsOnPathLine,
+        const size_t& nPointsOnPathLine,
         ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit,
-        size_t _nPointsOnFieldLine,
+        float& innerBoundaryLimit,
+        size_t& _nPointsOnFieldLine,
         glm::vec3& directionToCriticalPoint,
         float& stepLength,
         double& accuracy,
@@ -198,14 +190,13 @@ namespace openspace::fls {
     }
 
     /*
-    * Traces the field line of a given seedpoint and returns the
-    * points postions of that fieldline
+    * Dayside algorithm
     */
     std::vector<Seedpoint> validateAndModifyAllSeedPoints(
         std::vector<Seedpoint>& seedPoints,
         const std::string& tracingVar,
         ccmc::Kameleon* kameleon,
-        const size_t nPointsOnPathLine,
+        const size_t& nPointsOnPathLine,
         double& accuracy
     )
     {
@@ -243,17 +234,19 @@ namespace openspace::fls {
         return seedPoints;
     }
 
-
+    /*
+    * Reccursive method to validate and move seed points
+    */
     std::vector<Seedpoint> validateAndModifySeedPointsRecursive(
         int i,
         const std::string& tracingVar,
         ccmc::Tracer& tracer,
         std::vector<Seedpoint>& seedPoints,
-        const size_t nPointsOnPathLine,
+        const size_t& nPointsOnPathLine,
         ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit,
+        float& innerBoundaryLimit,
         double& accuracy,
-        size_t _nPointsOnFieldLine
+        size_t& _nPointsOnFieldLine
         )
     {
         if (i >= seedPoints.size())
@@ -262,7 +255,6 @@ namespace openspace::fls {
         }
         else
         {
-
             std::cout
                 << "****************************************"
                 << std::endl;
@@ -277,11 +269,16 @@ namespace openspace::fls {
                 << std::endl;
 
             glm::vec3 directionToCriticalPoint;
-            directionToCriticalPoint.x = seedPoints[i].criticalPoint.x - seedPoints[i].seedPoint.x;
-            directionToCriticalPoint.y = seedPoints[i].criticalPoint.y - seedPoints[i].seedPoint.y;
-            directionToCriticalPoint.z = seedPoints[i].criticalPoint.z - seedPoints[i].seedPoint.z;
+            directionToCriticalPoint.x =
+                seedPoints[i].criticalPoint.x - seedPoints[i].seedPoint.x;
+            directionToCriticalPoint.y =
+                seedPoints[i].criticalPoint.y - seedPoints[i].seedPoint.y;
+            directionToCriticalPoint.z =
+                seedPoints[i].criticalPoint.z - seedPoints[i].seedPoint.z;
 
-            if (seedPoints[i].topology == "OPEN_NORTH" || seedPoints[i].topology == "OPEN_SOUTH")
+            if (seedPoints[i].topology == "OPEN_NORTH" ||
+                seedPoints[i].topology == "OPEN_SOUTH"
+            )
             {
                 std::cout
                     << std::endl
@@ -393,17 +390,6 @@ namespace openspace::fls {
             {
                 std::cout << std::endl << "CLOSED seed point validation start." << std::endl;
 
-                ccmc::Fieldline flowline6 = traceAndCreateMappedPathLine(
-                    tracingVar,
-                    tracer,
-                    seedPoints[i].seedPoint,
-                    200,
-                    ccmc::Tracer::Direction::REVERSE);
-
-                std::vector<glm::vec3> flowlinePositions6 = getPositionsFromLine(flowline6);
-
-                createTextFileWithFieldlineCoordinates(flowlinePositions6, kameleon, innerBoundaryLimit, 200, "CLOSED_BEFORE.txt");
-
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                     tracingVar,
                     tracer,
@@ -414,7 +400,8 @@ namespace openspace::fls {
                 std::vector<glm::vec3> flowlinePositions = getPositionsFromLine(flowline);
 
                 int counter2 = 1;
-                while (counter2 < nPointsOnPathLine && flowlinePositions[flowlinePositions.size() - counter2].x > -0.5)
+                while (counter2 < nPointsOnPathLine &&
+                    flowlinePositions[flowlinePositions.size() - counter2].x > -0.5)
                 {
                     std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
                         flowlinePositions[flowlinePositions.size() - counter2],
@@ -485,17 +472,6 @@ namespace openspace::fls {
             else if (seedPoints[i].topology == "IMF")
             {
                 std::cout << std::endl << "IMF seed point validation start." << std::endl;
-
-                ccmc::Fieldline flowline8 = traceAndCreateMappedPathLine(
-                    tracingVar,
-                    tracer,
-                    seedPoints[i].seedPoint,
-                    200,
-                    ccmc::Tracer::Direction::REVERSE);
-
-                std::vector<glm::vec3> flowlinePositions8 = getPositionsFromLine(flowline8);
-
-                createTextFileWithFieldlineCoordinates(flowlinePositions8, kameleon, innerBoundaryLimit, 200, "IMF_BEFORE.txt");
 
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                     tracingVar,
@@ -587,6 +563,10 @@ namespace openspace::fls {
     return seedPoints;
     }
 
+    /*
+    * Experimental method used for extracting positions of fieldlines to a .txt file
+    * from a flowline
+    */
     void createTextFileWithFieldlineCoordinates(
         std::vector<glm::vec3> flowlinePositions,
         ccmc::Kameleon* kameleon,
@@ -596,7 +576,6 @@ namespace openspace::fls {
 
         std::vector<std::vector<glm::vec3>> testFieldlinePositions;
         int flowlineIndex = 0;
-
         bool onlyDaysideLimit = false;
 
         if (onlyDaysideLimit)
@@ -682,7 +661,10 @@ namespace openspace::fls {
         }
     }
 
-    bool checkIfFieldlineIsOpen(std::vector<glm::vec3> fieldlinePositions)
+    /*
+    * Check if fieldline has Open topology
+    */
+    bool checkIfFieldlineIsOpen(std::vector<glm::vec3>& fieldlinePositions)
     {
         std::pair<double, double> threshold_start_z = { std::make_pair(10.0, -10.0) };
         std::pair<double, double> threshold_end_z = { std::make_pair(-0.6, 0.6) };
@@ -705,7 +687,10 @@ namespace openspace::fls {
         return false;
 }
 
-    bool checkIfFieldlineIsClosed(std::vector<glm::vec3> fieldlinePositions)
+    /*
+    * Check if fieldline has Closed topology
+    */
+    bool checkIfFieldlineIsClosed(std::vector<glm::vec3>& fieldlinePositions)
     {
         std::pair<double, double> threshold_end_z = { std::make_pair(-0.6, 0.6) };
 
@@ -719,7 +704,10 @@ namespace openspace::fls {
         return false;
     }
 
-    bool checkIfFieldlineIsIMF(std::vector<glm::vec3> fieldlinePositions)
+    /*
+    * Check if fieldline has IMF topology
+    */
+    bool checkIfFieldlineIsIMF(std::vector<glm::vec3>& fieldlinePositions)
     {
         std::pair<double, double> threshold_start_z = { std::make_pair(25.0, -25.0) };
 
@@ -738,106 +726,16 @@ namespace openspace::fls {
     }
 
     /*
-    * Move seed z-coordinate down by stepLength
+    * Move seed point along the direction of a vector, towards the critical point
     */
-    Seedpoint moveSeedpointDown(
-        Seedpoint& seedPoint, float& stepLength)
-    {
-        try {
-            if (seedPoint.topology == "OPEN_NORTH")
-            {
-                seedPoint.seedPoint.z = seedPoint.seedPoint.z - stepLength;
-
-                std::cout << "Modifying.... Down by:" << stepLength << std::endl;
-                std::cout << "Top " << seedPoint.topology << ", z value: " << seedPoint.seedPoint.z << std::endl;
-            }
-            else if (seedPoint.topology == "OPEN_SOUTH")
-            {
-                seedPoint.seedPoint.z = seedPoint.seedPoint.z + stepLength;
-                std::cout << "Modifying.... Down by: " << stepLength << std::endl;
-                std::cout << "Top " << seedPoint.topology << ", z value: " << seedPoint.seedPoint.z << std::endl;
-            }
-        }
-        catch (const ghoul::RuntimeError& e) {
-            std::cerr << "Error: " << e.message << std::endl;
-        }
-        return seedPoint;
-    }
-
-    /*
-    * Move seed z-coordinate up by stepLength
-    */
-    Seedpoint moveSeedpointUp(
-        Seedpoint& seedPoint, float& stepLength)
-    {
-        try {
-            if (seedPoint.topology == "OPEN_NORTH")
-            {
-                seedPoint.seedPoint.z = seedPoint.seedPoint.z + stepLength;
-
-                std::cout << "Modifying.... Up by: " << stepLength << std::endl;
-                std::cout << "Top " << seedPoint.topology << ", z value: " << seedPoint.seedPoint.z << std::endl;
-            }
-            else if (seedPoint.topology == "OPEN_SOUTH")
-            {
-                seedPoint.seedPoint.z = seedPoint.seedPoint.z - stepLength;
-
-                std::cout << "Modifying.... Up by: " << stepLength << std::endl;
-                std::cout << "Top " << seedPoint.topology << ", z value: " << seedPoint.seedPoint.z << std::endl;
-            }
-        }
-        catch (const ghoul::RuntimeError& e) {
-            std::cerr << "Error: " << e.message << std::endl;
-        }
-        return seedPoint;
-    }
-
-    /*
-    * Move seed by negative x-coordinate (closer to earth)
-    */
-    Seedpoint moveSeedNegativeX(
-        Seedpoint& seedPoint, float& stepLength)
-    {
-        try {
-            seedPoint.seedPoint.x = seedPoint.seedPoint.x - stepLength;
-
-            std::cout << "Modifying.... Closer to Earth by: " << stepLength << std::endl;
-            std::cout << "Top " << seedPoint.topology << ", x value: " << seedPoint.seedPoint.x << std::endl;
-        }
-        catch (const ghoul::RuntimeError& e) {
-            std::cerr << "Error: " << e.message << std::endl;
-        }
-        return seedPoint;
-    }
-
-    /*
-    * Move seed by positive x-coordinate (closer to earth)
-    */
-    Seedpoint moveSeedPositiveX(
-        Seedpoint& seedPoint, float& stepLength)
-    {
-        try {
-            seedPoint.seedPoint.x = seedPoint.seedPoint.x + stepLength;
-
-            std::cout << "Modifying.... Closer to Critical point by: " << stepLength << std::endl;
-            std::cout << "Top " << seedPoint.topology << ", x value: " << seedPoint.seedPoint.x << std::endl;
-        }
-        catch (const ghoul::RuntimeError& e) {
-            std::cerr << "Error: " << e.message << std::endl;
-        }
-        return seedPoint;
-    }
-
     Seedpoint moveSeedpointTowardsCriticalPoint(
-        Seedpoint& seedPoint, glm::vec3 directionToCriticalPoint, float& stepLength)
+        Seedpoint& seedPoint, glm::vec3& directionToCriticalPoint, float& stepLength)
     {
         try {
-            // move seed point towards critical point
             seedPoint.seedPoint.x = seedPoint.seedPoint.x + directionToCriticalPoint.x * stepLength;
             seedPoint.seedPoint.y = seedPoint.seedPoint.y + directionToCriticalPoint.y * stepLength;
             seedPoint.seedPoint.z = seedPoint.seedPoint.z + directionToCriticalPoint.z * stepLength;
 
-            //std::cout << "Modifying.... Closer to Critical point by: " << stepLength << std::endl;
             std::cout << seedPoint.criticalPoint.x << " " << seedPoint.criticalPoint.y << " " << seedPoint.criticalPoint.z << " ";
             std::cout << "| " << seedPoint.seedPoint.x << " " << seedPoint.seedPoint.y << " " << seedPoint.seedPoint.z << " ";
         }
@@ -847,16 +745,17 @@ namespace openspace::fls {
         return seedPoint;
     }
 
+    /*
+    * Move seed point along the direction of a vector, away from the critical point
+    */
     Seedpoint moveSeedpointAwayFromCriticalPoint(
-        Seedpoint& seedPoint, glm::vec3 directionToCriticalPoint, float& stepLength)
+        Seedpoint& seedPoint, glm::vec3& directionToCriticalPoint, float& stepLength)
     {
         try {
-            // move seed point towards earth
             seedPoint.seedPoint.x = seedPoint.seedPoint.x - directionToCriticalPoint.x * stepLength;
             seedPoint.seedPoint.y = seedPoint.seedPoint.y - directionToCriticalPoint.y * stepLength;
             seedPoint.seedPoint.z = seedPoint.seedPoint.z - directionToCriticalPoint.z * stepLength;
 
-            //std::cout << "Modifying.... Away from Critical point by: " << stepLength << std::endl;
             std::cout << seedPoint.criticalPoint.x << " " << seedPoint.criticalPoint.y << " " << seedPoint.criticalPoint.z << " " ;
             std::cout << "| " << seedPoint.seedPoint.x << " " << seedPoint.seedPoint.y << " " << seedPoint.seedPoint.z << " ";
         }
@@ -868,10 +767,12 @@ namespace openspace::fls {
 
     /*
     * Checks if the position of the flowLine has gone past set criteria
+    * If it has we do not have to check the rest of the fieldlines since these will not
+    * be in the visualization due to the fade/transition to nightside seed points.
     */
     bool keepCheckingFlowlinesFieldline(
-        std::vector<glm::vec3> flowlinePos,
-        int flowlineIndex)
+        std::vector<glm::vec3>& flowlinePos,
+        int& flowlineIndex)
     {
         if (flowlinePos[flowlineIndex].x > - 2)
         {
@@ -881,33 +782,9 @@ namespace openspace::fls {
     }
 
     /*
-    * Adds all coordinates for fieldline positions to a vector from a given flowline
+    * Extract vector containing positions for a ccmc fieldline
     */
-    std::vector <std::vector<glm::vec3>> addFieldLinePositionsToVector(
-        std::vector <std::vector<glm::vec3>>& seedPointFieldlinePositions,
-        std::vector<glm::vec3> seedPointFlowlinePositionsVec3,
-        ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit,
-        size_t _nPointsOnFieldLine)
-    {
-        seedPointFieldlinePositions.clear();
-        std::vector<glm::vec3> fieldlinePositions;
-
-        for (int i = 0; i < seedPointFlowlinePositionsVec3.size(); i++)
-        {
-            fieldlinePositions = fls::getFieldlinePositions(
-                seedPointFlowlinePositionsVec3[i],
-                kameleon,
-                innerBoundaryLimit,
-                _nPointsOnFieldLine
-            );
-            seedPointFieldlinePositions.push_back(fieldlinePositions);
-        }
-
-        return seedPointFieldlinePositions;
-    }
-
-    std::vector<glm::vec3> getPositionsFromLine(ccmc::Fieldline seedPointFlowline)
+    std::vector<glm::vec3> getPositionsFromLine(ccmc::Fieldline& seedPointFlowline)
     {
         std::vector<ccmc::Point3f> seedPointFlowlinePositions
             = seedPointFlowline.getPositions();
@@ -916,14 +793,17 @@ namespace openspace::fls {
         return seedPointFlowlinePositionsVec3;
     }
 
+    /*
+    * Validate and move the on and os seed points
+    */
     glm::vec3 modifySeedpointOpen(
         Seedpoint& seedPoint,
         const std::string& tracingVar,
         ccmc::Tracer& tracer,
-        const size_t nPointsOnPathLine,
+        const size_t& nPointsOnPathLine,
         ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit,
-        size_t _nPointsOnFieldLine,
+        float& innerBoundaryLimit,
+        size_t& _nPointsOnFieldLine,
         glm::vec3& directionToCriticalPoint,
         float& stepLength,
         double& accuracy,
@@ -1051,7 +931,6 @@ namespace openspace::fls {
         if (stepLength > accuracy)
         {
             stepLength = stepLength / 2;
-
             lastWorkingSeedpoint = seedPoint;
 
             std::cout << "All fieldlines along flowline were approved on topology " <<
@@ -1071,18 +950,20 @@ namespace openspace::fls {
                 lastWorkingSeedpoint
             );
         }
-
         return seedPoint.seedPoint;
     }
 
+    /*
+    * Validate and move the closed seed point
+    */
     glm::vec3 modifySeedpointClosed(
         Seedpoint& seedPoint,
         const std::string& tracingVar,
         ccmc::Tracer& tracer,
-        const size_t nPointsOnPathLine,
+        const size_t& nPointsOnPathLine,
         ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit,
-        size_t _nPointsOnFieldLine,
+        float& innerBoundaryLimit,
+        size_t& _nPointsOnFieldLine,
         glm::vec3& directionToCriticalPoint,
         float& stepLength,
         double& accuracy,
@@ -1180,15 +1061,17 @@ namespace openspace::fls {
         return seedPoint.seedPoint;
     }
 
-
+    /*
+    *  Validate and move IMF seed point
+    */
     glm::vec3 modifySeedpointIMF(
         Seedpoint& seedPoint,
         const std::string& tracingVar,
         ccmc::Tracer& tracer,
-        const size_t nPointsOnPathLine,
+        const size_t& nPointsOnPathLine,
         ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit,
-        size_t _nPointsOnFieldLine,
+        float& innerBoundaryLimit,
+        size_t& _nPointsOnFieldLine,
         glm::vec3& directionToCriticalPoint,
         float& stepLength,
         double& accuracy,
@@ -1283,11 +1166,15 @@ namespace openspace::fls {
         return seedPoint.seedPoint;
     }
 
+    /*
+    * Identify the flowline[index] where the safe tracing switches from ON to IMF and
+    * return that index
+    */
     int findFirstIMFIndex(
-        std::vector<glm::vec3> flowlinePositions,
+        std::vector<glm::vec3>& flowlinePositions,
         int startIndex,
         ccmc::Kameleon* kameleon,
-        float innerBoundaryLimit
+        float& innerBoundaryLimit
     )
     {
         std::string previousTopology = "";
@@ -1315,20 +1202,22 @@ namespace openspace::fls {
             }
             startIndex++;
         }
-
         return indexOfFirstIMF;
     }
 
+    /*
+    * Validate and move seed points on the nightside
+    */
     bool validateAndMoveSeedPoint
     (
         glm::vec3& seedPoint,
-        glm::vec3 directionVector,
-        double factor,
+        glm::vec3& directionVector,
+        double& factor,
         ccmc::Kameleon* kameleon,
         const std::string& tracingVar,
-        const size_t nPointsOnPathLine,
-        float innerBoundaryLimit,
-        ccmc::Tracer tracer,
+        const size_t& nPointsOnPathLine,
+        float& innerBoundaryLimit,
+        ccmc::Tracer& tracer,
         std::string topology
     )
     {
@@ -1338,8 +1227,6 @@ namespace openspace::fls {
         tempSeedPoint.x = seedPoint.x - directionVector.x * factor;
         tempSeedPoint.y = seedPoint.y - directionVector.y * factor;
         tempSeedPoint.z = seedPoint.z - directionVector.z * factor;
-
-        std::cout << "DirectionVector: " << directionVector.x << " " << directionVector.y << " " << directionVector.z << std::endl;
 
         std::cout << seedPoint.x << " " << seedPoint.y << " " << seedPoint.z << std::endl;
 
@@ -1471,13 +1358,15 @@ namespace openspace::fls {
             }
         }
 
-        // move seed point
         seedPoint.x = tempSeedPoint.x;
         seedPoint.y = tempSeedPoint.y;
         seedPoint.z = tempSeedPoint.z;
         return true;
     }
 
+    /*
+    * Calculate the distance between two points in 3d space
+    */
     double calculateDistance(
         double x1, double y1, double z1,
         double x2, double y2, double z2
@@ -1489,6 +1378,9 @@ namespace openspace::fls {
         return std::sqrt(dx * dx + dy * dy + dz * dz);
     }
 
+    /*
+    * Nightside seed point finder
+    */
     std::vector<Seedpoint> findAndAddNightsideSeedPoints(
         std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
@@ -1497,7 +1389,6 @@ namespace openspace::fls {
         const std::string& tracingVar,
         const size_t nPointsOnPathLine)
     {
-        // initialize
         std::vector<Seedpoint> nightsideSeedPoints;
         glm::vec3 imfSeedPointNightside;
         glm::vec3 closedSeedPointNightside;
@@ -1518,13 +1409,10 @@ namespace openspace::fls {
         }
 
         float innerBoundaryLimit = 0.5f;
-
         std::unique_ptr<ccmc::Interpolator> interpolator =
             std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
-
         ccmc::Tracer tracer(kameleon, interpolator.get());
-
-        int testNPoints = 20000;
+        int nPointsOnFlowline = 20000;
 
         std::cout << "Finding last ON and first IMF" << std::endl;
 
@@ -1548,25 +1436,11 @@ namespace openspace::fls {
                 glm::vec3 firstPosOfFieldline = fieldlinePositions[1];
 
                 // trace a flowline from the new point/edge position
-                ccmc::Fieldline flowline9 = traceAndCreateMappedPathLine(
-                    tracingVar,
-                    tracer,
-                    firstPosOfFieldline,
-                    100,
-                    ccmc::Tracer::Direction::FOWARD);
-
-                // get all the positions of the traced flowline
-                std::vector<glm::vec3> flowlinePositions9
-                    = getPositionsFromLine(flowline9);
-
-                createTextFileWithFieldlineCoordinates(flowlinePositions9, kameleon, innerBoundaryLimit, 200, "whatisgoingwrong.txt");
-
-                // trace a flowline from the new point/edge position
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                     tracingVar,
                     tracer,
                     firstPosOfFieldline,
-                    100,
+                    nPointsOnFlowline,
                     ccmc::Tracer::Direction::FOWARD);
 
                 // get all the positions of the traced flowline
@@ -1591,7 +1465,7 @@ namespace openspace::fls {
                     = getPositionsFromLine(flowline2);
 
                 double indexFlowlinePos2 = findFirstIMFIndex(flowlinePositions2, 0, kameleon, innerBoundaryLimit);
-                double referencePercentage = indexFlowlinePos2 / (flowlinePositions2.size() + 4);
+                double referencePercentage = indexFlowlinePos2 / (flowlinePositions2.size() + 3);
                 int indexFlowlinePos = referencePercentage * flowlinePositions.size();
 
                 std::cout << "Finding reference index - Completed" << std::endl;
@@ -1599,17 +1473,17 @@ namespace openspace::fls {
                 indexFlowlinePos = findFirstIMFIndex(flowlinePositions, indexFlowlinePos, kameleon, innerBoundaryLimit);
 
                 std::vector<glm::vec3> fieldlinePositionsIMF = fls::getFieldlinePositions(
-                    flowlinePositions[indexFlowlinePos], // fix, should be + 1
+                    flowlinePositions[indexFlowlinePos],
                     kameleon,
                     innerBoundaryLimit,
-                    testNPoints
+                    nPointsOnFlowline
                 );
 
                 std::vector<glm::vec3> fieldlinePositionsON = fls::getFieldlinePositions(
-                    flowlinePositions[indexFlowlinePos - 1], // fix, should be 0
+                    flowlinePositions[indexFlowlinePos - 1],
                     kameleon,
                     innerBoundaryLimit,
-                    testNPoints
+                    nPointsOnFlowline
                 );
 
                 lastON.push_back(fieldlinePositionsON);
@@ -1623,11 +1497,9 @@ namespace openspace::fls {
 
                 float leastXValue = -1000;
 
-                // find point on the imf with smallest x-value (closest to earth) O(n)
-                // TODO use min-heap here instead
                 for (int i = 0; i < firstIMF.size(); i++)
                 {
-                    for (int j = 0; j < testNPoints; j++)
+                    for (int j = 0; j < nPointsOnFlowline; j++)
                     {
                         if (firstIMF[i][j].x > leastXValue)
                         {
@@ -1642,14 +1514,10 @@ namespace openspace::fls {
 
                 double shortestDistance = 1000;
 
-                // find point on the on fieldline closest to the imfNightsideSeedPoint
-                // TODO optimize from O(n)
                 for (int i = 0; i < lastON.size(); i++)
                 {
-                    for (int j = 0; j < testNPoints; j++)
+                    for (int j = 0; j < nPointsOnFlowline; j++)
                     {
-                        // calculate distance
-
                         double distance = calculateDistance(
                             lastON[i][j].x,
                             lastON[i][j].y,
@@ -1782,8 +1650,6 @@ namespace openspace::fls {
                 );
             }
         }
-
-        // add nightside seedpoints to seedPoints that will enter the rendering phace
         for (int i = 0; i < nightsideSeedPoints.size(); i++)
         {
             seedPoints.push_back(nightsideSeedPoints[i]);

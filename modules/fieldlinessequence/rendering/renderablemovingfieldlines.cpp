@@ -92,14 +92,12 @@ namespace {
     struct [[codegen::Dictionary(RenderableMovingFieldlines)]] Parameters {
         // Path to folder containing the input .cdf files
         std::filesystem::path sourceFolder [[codegen::directory()]];
+        // API URL to seed point provider
+        std::string seedPointProviderURL;
         // Bool if seedPointProvider is used or not
         std::optional<bool> useSeedPointProvider;
-        // Variable storing seedpoints
-        std::optional<std::string> seedPointsFromProvider;
         // Path to file with seed points
         std::filesystem::path providedSeedPointFilePath;
-        // Path to csv file with seed points
-        //std::filesystem::path providedSeedPointCSVFilePath;
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
         // Which variable in CDF file to trace. 'u_perp_b' is default.
@@ -136,53 +134,56 @@ namespace {
 
 namespace openspace {
     std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFile(
-        std::filesystem::path filePath,
+        std::filesystem::path& filePath,
         std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
-        double startTime
+        double& startTime
     );
 
     void selectAndModifySeedpoints(
-        std::filesystem::path filePath,
+        std::filesystem::path& filePath,
         std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
-        double yOutherLimit,
-        int numberOfFieldlines,
-        double algorithmAccuracy,
-        double startTime,
-        const std::string cdfPath
+        double& yOutherLimit,
+        int& numberOfFieldlines,
+        double& algorithmAccuracy,
+        double& startTime,
+        const std::string& cdfPath
     );
 
     std::string removeNonNumeric(const std::string& str);
 
-    void addCoordinatesToSeedPoints(
-        RenderableMovingFieldlines::SeedPointInformation temp,
+    void pushSeedPointToRendering(
+        RenderableMovingFieldlines::SeedPointInformation& seedPoint,
         std::vector<Seedpoint>& seedPoints
     );
 
-    void addCoordinatesOfTopologies(
+    void pushSelectedSeedPointsToRendering(
         std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data,
-        double startTime
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints>& data,
+        double& startTime
     );
 
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(
-        std::filesystem::path filePath
+        std::filesystem::path& filePath
     );
 
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> filterSetOfSeedPoints(
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPoints,
-        double yOutherLimit
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints>& setOfSeedPoints,
+        double& yOutherLimit
     );
 
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectSetOfSeedPoints(
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPoints,
-        int numberOfFieldlines
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints>& setOfSeedPoints,
+        int& numberOfFieldlines
     );
 
-    std::ifstream readTxtOrCSVFile(std::filesystem::path filePath);
-    std::vector<std::string> extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
+    std::ifstream readFile(std::filesystem::path& filePath);
+
+    std::vector<std::string> extractMagnitudeVarsFromStrings(
+        std::vector<std::string> extrVars
+    );
 
     documentation::Documentation RenderableMovingFieldlines::Documentation() {
         return codegen::doc<Parameters>("fieldlinessequence_renderablemovingfieldlines");
@@ -248,7 +249,7 @@ namespace openspace {
 
         _providedSeedFilePath = p.providedSeedPointFilePath;
         _useSeedPointProvider = p.useSeedPointProvider.value_or(_useSeedPointProvider);
-        _seedPointsFromProvider = p.seedPointsFromProvider.value_or(_seedPointsFromProvider);
+        _seedPointProviderURL = p.seedPointProviderURL;
         _extraVars = p.extraVariables.value_or(_extraVars);
         _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
         _tracingVariable = p.tracingVariable.value_or(_tracingVariable);
@@ -325,23 +326,21 @@ namespace openspace {
             absPath(_colorTablePaths[0]).string()
             );
 
-        // Create filePath where seedPoint file should be saved if API is used
         std::filesystem::path pathToDownloadTo = initializeSyncDirectory
         (
             "seed_points",
             "dayside_seedpoints.csv"
         );
 
-        // Get CSV file from API
         if (_useSeedPointProvider) {
-            getSeedPointsFromAPI("http://localhost:5000/get_csv_file", pathToDownloadTo);
+            getSeedPointsFromAPI(
+                _seedPointProviderURL,
+                pathToDownloadTo
+            );
         }
-
-        // Use provided file with seedpoints
         else if (
             !_useSeedPointProvider &&
-            _providedSeedFilePath.empty() //&&
-            //_providedSeedCSVFilePath.empty()
+            _providedSeedFilePath.empty()
         )
         {
             throw ghoul::RuntimeError(
@@ -351,7 +350,7 @@ namespace openspace {
 
         bool stateSuccuess = getStateFromCdfFiles(pathToDownloadTo);
         if (!stateSuccuess) {
-            throw ghoul::RuntimeError("Trying to read cdf file failed");
+            throw ghoul::RuntimeError("Trying to read CDF file failed");
         }
 
         size_t traverserIndex = 0;
@@ -365,7 +364,6 @@ namespace openspace {
             _traversers.push_back(PathLineTraverser{ const_cast<std::vector<openspace::FieldlinesState::Fieldline>&>(mf.pathLines.second.keyFrames) });
             double timeToReconTrav2 = _traversers[traverserIndex + 1].
                 getTimeToReconnectionPoint(mf.pathLines.second.daysideReconnectionStart);
-
 
             // nighside only
             //_traversers[traverserIndex ].setStartPoint(
@@ -499,8 +497,8 @@ namespace openspace {
         bool shouldExtractSeedPoints = true;
 
         double startTime = 0.0;
-        double yOutherLimit = 6.0;
-        int numberOfFieldlines = 1;
+        double yOutherLimit = 6;
+        int numberOfFieldlines = 3;
         double algorithmAccuracy = 0.01;
 
         for (const std::filesystem::path entry : _sourceFiles) {
@@ -534,8 +532,7 @@ namespace openspace {
                     ));
                 }
 
-                // Run seedpoint-provider (API-call),
-                // download and use .csv file with seedpoints
+                // Run seed point provider
                 if (_useSeedPointProvider) {
                     selectAndModifySeedpoints(
                         _providedSeedFilePath,
@@ -549,7 +546,11 @@ namespace openspace {
                     );
                 }
                 // Use provided .csv file with seedpoints
-                else if (!_useSeedPointProvider && _providedSeedFilePath.extension().string() == ".csv") {
+                else if (
+                    !_useSeedPointProvider &&
+                    _providedSeedFilePath.extension().string() == ".csv"
+                )
+                {
                     selectAndModifySeedpoints(
                         _providedSeedFilePath,
                         seedPoints,
@@ -561,8 +562,13 @@ namespace openspace {
                         cdfPath
                     );
                 }
-                // Use provided .txt file with seedpoints
-                else {
+
+                // Use provided .txt file with seedpoint
+                else if (
+                    !_useSeedPointProvider &&
+                    _providedSeedFilePath.extension().string() == ".txt"
+                )
+                {
                     extractSeedPointsFromFile(
                         _providedSeedFilePath,
                         seedPoints,
@@ -577,7 +583,6 @@ namespace openspace {
             /************ SWITCH MOVING/MATCHING HERE ****************/
             //isSuccessful = fls::convertCdfToMovingFieldlinesState(
             isSuccessful = fls::convertCdfToMatchingFieldlinesState(
-                /*********************************************************/
                 _fieldlineState,
                 kameleon.get(),
                 seedPoints,
@@ -602,7 +607,6 @@ namespace openspace {
                 throw ghoul::MissingCaseException();
             }
         }
-
         return isSuccessful;
     }
 
@@ -629,15 +633,7 @@ namespace openspace {
         }
     }
 
-    // Write function used by CURLOPT_WRITEFUNCTION
-    size_t RenderableMovingFieldlines::write_data(
-        void* ptr, size_t size, size_t nmemb, FILE* stream) {
-        size_t written;
-        written = fwrite(ptr, size, nmemb, stream);
-        return written;
-    }
-
-    // Function that creates a new path depending on user inputs
+    // Creates new filepath
     std::filesystem::path RenderableMovingFieldlines::initializeSyncDirectory(
         std::string folderName,
         std::string nameOfTextFile
@@ -645,16 +641,27 @@ namespace openspace {
     {
         std::filesystem::path pathToDownloadTo =
             absPath("${SYNC}/http/" + folderName + "/" + nameOfTextFile);
-
         return pathToDownloadTo;
     }
 
+    // Used by CURLOPT_WRITEFUNCTION
+    size_t RenderableMovingFieldlines::write_data(
+        void* ptr,
+        size_t size,
+        size_t nmemb,
+        FILE* stream
+    )
+    {
+        size_t written;
+        written = fwrite(ptr, size, nmemb, stream);
+        return written;
+    }
+
     /**
-    * Initializes curl, creates a text file in sync folder,
-    * writes response (api request to URL), to textfile
+    * Initializes curl, creates a file in sync folder,
+    * writes response (writes API response), to file
     */
-    void RenderableMovingFieldlines::getSeedPointsFromAPI
-    (
+    void RenderableMovingFieldlines::getSeedPointsFromAPI(
         std::string URL,
         std::filesystem::path pathToDownloadTo
     )
@@ -668,37 +675,34 @@ namespace openspace {
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
             curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
             CURLcode res = curl_easy_perform(curl);
-
             curl_easy_cleanup(curl);
             fclose(fp);
         }
     }
 
     /**
-    * Read CSV file and add seedpoints information to a vector and return it
+    * Read CSV file and return set of seed points vector
     */
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(
-        std::filesystem::path filePath
+        std::filesystem::path& filePath
     )
     {
-        std::ifstream file = readTxtOrCSVFile(filePath);
+        std::ifstream file = readFile(filePath);
         RenderableMovingFieldlines::SetOfSeedPoints setOfSeedPoints;
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data;
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPointsVector;
         std::string lineTemp;
         int lineCounter = 0;
         int topologyCounter = 0;
         bool topologyReset = false;
 
-        // Read each line of the CSV file
+        // Read CSV line
         while (std::getline(file, lineTemp)) {
             std::stringstream lineStream(lineTemp);
             std::string field;
             int elementCounter = 0;
-            std::cout << "" << std::endl;
-
             RenderableMovingFieldlines::SeedPointInformation seedPoint;
 
-            // Get seedPoint
+            // Read each "word" in line and add to seedPoint
             while (std::getline(lineStream, field, ',') && elementCounter < 8)
             {
                 switch (elementCounter)
@@ -719,7 +723,6 @@ namespace openspace {
                     seedPoint.earthSide = field;
                     break;
                 case 5:
-                    // Remove the square brackets
                     field = removeNonNumeric(field);
                     seedPoint.criticalPoint.x = std::stof(field);
                     break;
@@ -727,18 +730,15 @@ namespace openspace {
                     seedPoint.criticalPoint.y = std::stof(field);
                     break;
                 case 7:
-                    // Remove the square brackets
                     field = removeNonNumeric(field);
                     seedPoint.criticalPoint.z = std::stof(field);
                     break;
                 }
-
-                // Add to element
                 elementCounter++;
             }
 
-            // Check if we added a new seedPointSet last iteration
-            // If we did reset the topology counter
+            // Check if we added a new setOfSeedPoints last iteration
+            // If we did reset the topology counter, so that we start creating a new set
             if (topologyReset) {
                 topologyCounter = 0;
                 topologyReset = false;
@@ -759,29 +759,28 @@ namespace openspace {
                 setOfSeedPoints.OpenSouth = seedPoint;
                 break;
             }
-
-            // Add to line
             lineCounter++;
 
+            // Add setOfSeedPoints to vector
             if (lineCounter % 4 == 0 && lineCounter != 0) {
-
+                setOfSeedPointsVector.push_back(setOfSeedPoints);
                 std::cout << "Push back set of seedpoints to vector " << std::endl;
-                data.push_back(setOfSeedPoints);
                 RenderableMovingFieldlines::SetOfSeedPoints setOfSeedPoints;
                 topologyReset = true;
             }
-
-            // Keep track of which topology we are at
             topologyCounter++;
         }
-
-        // Close the file
         file.close();
-
-        return data;
+        return setOfSeedPointsVector;
     }
 
-    std::string removeNonNumeric(const std::string& str) {
+    /**
+    * Remove unwanted characters from string
+    */
+    std::string removeNonNumeric(
+        const std::string& str
+    )
+    {
         const std::string validNumericChars = "-.0123456789e";
         std::string result;
 
@@ -790,52 +789,56 @@ namespace openspace {
                 result += c; // Append the character to the result string
             }
         }
-
         return result;
     }
 
     /**
-    * Add coordinates of seedpoints by topology (vector data)
-    * to seedpoint vector for rendering
+    * Add information of selected seed points to seedPoint vector used in rendering
     */
-    void addCoordinatesToSeedPoints(
-        RenderableMovingFieldlines::SeedPointInformation temp,
+    void pushSeedPointToRendering(
+        RenderableMovingFieldlines::SeedPointInformation& seedPoint,
         std::vector<Seedpoint>& seedPoints
-        //, std::vector<std::string>& seedPointsTopology
     )
     {
-            glm::vec3 seedPointVector(temp.x, temp.y, temp.z);
-            std::string topology = temp.fieldLineStatus;
-            glm::vec3 criticalPointVector(temp.criticalPoint.x, temp.criticalPoint.y, temp.criticalPoint.z);
-            seedPoints.push_back({ seedPointVector, topology, criticalPointVector });
-            // seedPointsTopology.push_back(topology);
+        glm::vec3 seedPointPosition(
+            seedPoint.x,
+            seedPoint.y,
+            seedPoint.z
+        );
+        std::string topology = seedPoint.fieldLineStatus;
+        glm::vec3 criticalPointPosition(
+            seedPoint.criticalPoint.x,
+            seedPoint.criticalPoint.y,
+            seedPoint.criticalPoint.z
+        );
+
+        seedPoints.push_back({ seedPointPosition, topology, criticalPointPosition });
     }
 
     /**
-    * Iterate through vector with seedpoint information and pushback seedpoints to
-    * seedPoints and create birthTimes for rendering
-    * (push back seedpoints we want to render)
+    * Push selected seed points in correct order to the seedPoints vector used in rendering
     */
-    void addCoordinatesOfTopologies(
+    void pushSelectedSeedPointsToRendering(
         std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data,
-        double startTime
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints>& setOfSeedPointsVector,
+        double& startTime
     )
     {
-        // Iterate through data vector
-        for (size_t i = 0; i < data.size(); i++)
+        for (int i = 0; i < setOfSeedPointsVector.size(); i++)
         {
-            addCoordinatesToSeedPoints(data[i].IMF, seedPoints);
-            addCoordinatesToSeedPoints(data[i].Closed, seedPoints);
-            addCoordinatesToSeedPoints(data[i].OpenNorth, seedPoints);
-            addCoordinatesToSeedPoints(data[i].OpenSouth, seedPoints);
-
-            //add birthtime for each set of seedpoints
+            pushSeedPointToRendering(setOfSeedPointsVector[i].IMF, seedPoints);
+            pushSeedPointToRendering(setOfSeedPointsVector[i].Closed, seedPoints);
+            pushSeedPointToRendering(setOfSeedPointsVector[i].OpenNorth, seedPoints);
+            pushSeedPointToRendering(setOfSeedPointsVector[i].OpenSouth, seedPoints);
             birthTimes.push_back(startTime);
         }
     }
 
+    /**
+    * Select seed points to use in rendering out from
+    * vector of setOfSeedPoint (that contains all seedPoints from CSV file)
+    */
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectSeedpoints(
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedpoints,
         int stepLength,
@@ -850,7 +853,8 @@ namespace openspace {
             // buuble sort: sort decending order based on y-value
             for (int i = 0; i < setOfSeedpoints.size() - 1; ++i) {
                 for (int j = 0; j < setOfSeedpoints.size() - i - 1; ++j) {
-                    if (setOfSeedpoints[j].IMF.criticalPoint.y > setOfSeedpoints[j + 1].IMF.criticalPoint.y) {
+                    if (setOfSeedpoints[j].IMF.criticalPoint.y >
+                        setOfSeedpoints[j + 1].IMF.criticalPoint.y) {
                         std::swap(setOfSeedpoints[j], setOfSeedpoints[j + 1]);
                     }
                 }
@@ -861,23 +865,17 @@ namespace openspace {
             // bubble sort: sort incremental order based on y-value
             for (int i = 0; i < setOfSeedpoints.size() - 1; ++i) {
                 for (int j = 0; j < setOfSeedpoints.size() - i - 1; ++j) {
-                    if (setOfSeedpoints[j].IMF.criticalPoint.y < setOfSeedpoints[j + 1].IMF.criticalPoint.y) {
+                    if (setOfSeedpoints[j].IMF.criticalPoint.y <
+                        setOfSeedpoints[j + 1].IMF.criticalPoint.y) {
                         std::swap(setOfSeedpoints[j], setOfSeedpoints[j + 1]);
                     }
                 }
             }
         }
-        else
-        {
-            throw ghoul::RuntimeError(
-                fmt::format("selectSeedpoints incorrect fourth parameter"));
-        }
 
         for (int i = 0; i < numberOfFieldlines; i++)
         {
             double find = abs(stepLength * (i + 1));
-            //std::cout << "Find: " << find << std::endl;
-
             int left = 0, right = setOfSeedpoints.size() - 1;
             int closestIndex = -1;
 
@@ -914,9 +912,11 @@ namespace openspace {
                 setOfSeedpoints.erase(setOfSeedpoints.begin() + closestIndex);
             }
             else {
-                float relativeAngle = 90 - (atan(abs(setOfSeedpoints[closestIndex].IMF.criticalPoint.x)
+                float relativeAngle =
+                    90 - (atan(abs(setOfSeedpoints[closestIndex].IMF.criticalPoint.x)
                 / abs(setOfSeedpoints[closestIndex].IMF.criticalPoint.y)) * (180 / 3.14));
-                float relativeAngle2 = 90 - (atan(abs(setOfSeedpoints[closestIndex + 1].IMF.criticalPoint.x)
+                float relativeAngle2 =
+                    90 - (atan(abs(setOfSeedpoints[closestIndex + 1].IMF.criticalPoint.x)
                 / abs(setOfSeedpoints[closestIndex + 1].IMF.criticalPoint.y)) * (180 / 3.14));
                 double dist1 = std::abs(relativeAngle - find);
                 double dist2 = std::abs(relativeAngle2 - find);
@@ -930,10 +930,14 @@ namespace openspace {
                 }
             }
         }
-
         return selectedSeedpoints;
     }
 
+    /*
+    * Check and only accept a number of fieldlines if possible
+    * If number of fieldlines on side is bigger than that sides number of critical points
+    * Accept that number as the highest number of fieldlines on both sides
+    */
     int getNumberOfFieldLinesOnSide(int numberOfFieldlines, int rightSideSize, int leftSideSize)
     {
         int numberOfFieldlinesOnSide = numberOfFieldlines / 2;
@@ -954,16 +958,21 @@ namespace openspace {
         return numberOfFieldlinesOnSide;
     }
 
+    /*
+    * Filter/Remove seed points that lies beyond the user defined limit, yOutherLimit
+    */
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> filterSetOfSeedPoints(
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPoints,
-        double yOutherLimit
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints>& setOfSeedPoints,
+        double& yOutherLimit
     )
     {
         double limitPositiveY = yOutherLimit;
         double limitNegativeY = yOutherLimit * -1;
 
         for (auto it = setOfSeedPoints.begin(); it != setOfSeedPoints.end();) {
-            if (it->IMF.criticalPoint.y > limitPositiveY || it->IMF.criticalPoint.y < limitNegativeY) {
+            if (it->IMF.criticalPoint.y > limitPositiveY ||
+                it->IMF.criticalPoint.y < limitNegativeY)
+            {
                 it = setOfSeedPoints.erase(it);
             }
             else {
@@ -973,9 +982,12 @@ namespace openspace {
         return setOfSeedPoints;
     }
 
+    /*
+    * Selection of seed points
+    */
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectSetOfSeedPoints(
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPoints,
-        int numberOfFieldlines
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints>& setOfSeedPoints,
+        int& numberOfFieldlines
     )
     {
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSetOfSeedpoints;
@@ -1006,10 +1018,12 @@ namespace openspace {
                 leftSideSeedpoints.size()
             );
 
-            std::cout << "number of fieldlines on side: " << numberOfFieldlinesOnSide << std::endl;
-
-            int furthestRelativeAngleRight = 90 - (atan(abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.criticalPoint.x) / abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.criticalPoint.y)) * (180 / 3.14));
-            int furthestRelativeAngleLeft = 90 - (atan(abs(leftSideSeedpoints[0].IMF.criticalPoint.x) / abs(leftSideSeedpoints[0].IMF.criticalPoint.y)) * (180 / 3.14));
+            int furthestRelativeAngleRight =
+                90 - (atan(abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.criticalPoint.x)
+                    / abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.criticalPoint.y)) * (180 / 3.14));
+            int furthestRelativeAngleLeft =
+                90 - (atan(abs(leftSideSeedpoints[0].IMF.criticalPoint.x)
+                    / abs(leftSideSeedpoints[0].IMF.criticalPoint.y)) * (180 / 3.14));
 
             int stepAngleRight = furthestRelativeAngleRight / numberOfFieldlinesOnSide;
             int stepAngleLeft = furthestRelativeAngleLeft / numberOfFieldlinesOnSide;
@@ -1092,7 +1106,6 @@ namespace openspace {
             double y_value;
             double smallest_y_value = 1000;
 
-            // select seedpoint set with smallest y value on imf
             for (int i = 0; i < setOfSeedPoints.size(); i++)
             {
                 y_value = abs(setOfSeedPoints[i].IMF.criticalPoint.y);
@@ -1114,17 +1127,22 @@ namespace openspace {
     }
 
     /**
-    * Extracts seed points from csv file and return tuple
+    * Extracts dayside seed points from .csv file.
+    * Filter and selects seed points
+    * Selected seed points are then validated and potentially moved to the optimal
+    * location for ensuring a desired visualization on the dayside
+    * Lastly, by utilizing the dayside ON seed points and a "safe tracing"-method,
+    * nightside seed points are found and validated
     */
     void selectAndModifySeedpoints(
-        std::filesystem::path filePath,
+        std::filesystem::path& filePath,
         std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
-        double yOutherLimit,
-        int numberOfFieldlines,
-        double algorithmAccuracy,
-        double startTime,
-        const std::string cdfPath
+        double& yOutherLimit,
+        int& numberOfFieldlines,
+        double& algorithmAccuracy,
+        double& startTime,
+        const std::string& cdfPath
     )
     {
         if (!std::filesystem::is_regular_file(filePath) ||
@@ -1133,8 +1151,6 @@ namespace openspace {
             throw ghoul::RuntimeError(
                 fmt::format("SeedPointFile needs to be a .csv file"));
         }
-
-        std::cout << filePath << std::endl;
 
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedpoints =
             extractSeedPointsFromCSVFile(filePath);
@@ -1145,7 +1161,12 @@ namespace openspace {
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSetOfSeedpoints =
             selectSetOfSeedPoints(filteredSetOfSeedpoints, numberOfFieldlines);
 
-        addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSetOfSeedpoints, startTime);
+        pushSelectedSeedPointsToRendering(
+            seedPoints,
+            birthTimes,
+            selectedSetOfSeedpoints,
+            startTime
+        );
 
         size_t _nPointsOnPathLine = 200;
         std::string _tracingVariable = "u_perp_b";
@@ -1198,10 +1219,10 @@ namespace openspace {
     * IMF and closed fieldline and the last two gives their respective open fieldlines.
     */
     std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFile(
-        std::filesystem::path filePath,
+        std::filesystem::path& filePath,
         std::vector<Seedpoint>& seedPoints,
         std::vector<double>& birthTimes,
-        double startTime
+        double& startTime
     ) {
 
         if (!std::filesystem::is_regular_file(filePath) ||
@@ -2226,13 +2247,13 @@ namespace openspace {
     /**
     * File for reading txt or csv file
     */
-    std::ifstream readTxtOrCSVFile(std::filesystem::path filePath) {
-        std::ifstream file(filePath);\
-
+    std::ifstream readFile(std::filesystem::path& filePath) {
+        std::ifstream file(filePath);
         if (!file.is_open()) {
-            LERROR("Couldnt read file");
+            throw ghoul::RuntimeError(
+                "Could not read file."
+            );
         }
-
         return file;
     }
 
