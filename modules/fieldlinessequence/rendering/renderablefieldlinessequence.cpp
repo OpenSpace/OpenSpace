@@ -669,8 +669,6 @@ bool RenderableFieldlinesSequence::loadHdf5StatesIntoRAM() {
         HighFive::File file(filePath, HighFive::File::ReadOnly);
         const size_t nSteps = file.getNumberObjects();
 
-   /*     float t = 0.0;*/
-
         for (size_t step = 0; step < nSteps; step++) {
             FieldlinesState newState;
             bool success = newState.loadStateFromHdf5(
@@ -685,7 +683,6 @@ bool RenderableFieldlinesSequence::loadHdf5StatesIntoRAM() {
             else {
                 LWARNING(fmt::format("Failed to load state from: {}", filePath));
             }
-            //t += 0.3;
         }
         std::sort(_states.begin(), _states.end(), [](FieldlinesState a, FieldlinesState b)
             {

@@ -227,7 +227,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File, std::vector<std::string> hierarchy, float scalingFactor, size_t step)
 {
         HighFive::File file(pathToHdf5File, HighFive::File::ReadOnly);
-    //const size_t nSteps = file.getNumberObjects();
+
     // ----- EXTRACT THE EXTRA QUANTITY NAMES & TRIGGER TIME (same for all lines) ----- //
         std::string StepName = file.getObjectName(step);
         HighFive::Group g = file.getGroup(StepName); //Get the group that holds all groups for the lines
@@ -245,11 +245,7 @@ bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File, std::
 
         float t = (tn - t0)/10;
 
-        /*double sTime = 0.0;*/
-
         _triggerTime = t;
-
-        //std::cout << "################### " << " STEP: " << StepName << " t0: " << t0 << " tn: " << tn << " trigger time: " << _triggerTime << "\n";
 
         //#### SWITCH THIS OUT FOR THE MJD ATTRIBUTE ####//
 
@@ -269,7 +265,7 @@ bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File, std::
 
         size_t lineStartIdx = 0;
 
-        const size_t nLines = g.getNumberObjects() - 1; //Fulkod... Get number of groups(lines) minus one to subtract the attribute object
+        const size_t nLines = g.getNumberObjects() - 1;
 
         // Loop through all fieldlines
         for (size_t i = 0; i < nLines; i++) {

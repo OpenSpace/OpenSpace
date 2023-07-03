@@ -31,7 +31,6 @@ in vec2 vs_st;
 
 
 uniform sampler2D texture1;
-uniform bool additiveBlending;
 uniform float opacity = 1.0;
 uniform bool mirrorBackside = true;
 
@@ -73,9 +72,7 @@ Fragment getFragment() {
 
   frag.depth = vs_screenSpaceDepth;
 
-  if (additiveBlending) {
-    frag.blend = BLEND_MODE_ADDITIVE;
-  }
+ frag.blend = BLEND_MODE_ADDITIVE;
 
   // G-Buffer
   frag.gPosition = vs_gPosition;
