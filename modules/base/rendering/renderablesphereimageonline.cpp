@@ -70,7 +70,6 @@ RenderableSphereImageOnline::RenderableSphereImageOnline(const ghoul::Dictionary
 }
 
 void RenderableSphereImageOnline::deinitializeGL() {
-    _texture.release();
     _texture = nullptr;
 
     RenderableSphere::deinitializeGL();
