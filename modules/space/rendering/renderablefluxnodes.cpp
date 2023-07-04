@@ -677,11 +677,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
 
     // Calculate Model View MatrixProjection
     const glm::dmat4 rotationTransform = glm::dmat4(data.modelTransform.rotation);
-
-    AltTransform altTransf;
-    altTransf.rotation = rotationTransform;
-
-    const glm::dmat4 modelTransform = calcModelTransform(data, altTransf);
+    const glm::dmat4 modelTransform = calcModelTransform(data, { .rotation = rotationTransform });
 
     _shaderProgram->setUniform(
         "modelViewProjection",

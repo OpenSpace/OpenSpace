@@ -142,20 +142,14 @@ protected:
     // where all parts of the renderable should not be rendered in the same bin
     std::optional<RenderBin> _secondaryRenderBin;
 
-    struct AltTransform {
-        AltTransform() {
-            translation = std::nullopt;
-            rotation = std::nullopt;
-            scale = std::nullopt;
-        };
-
+    struct AlternativeTransform {
         std::optional<glm::dvec3> translation = std::nullopt;
         std::optional<glm::dmat3> rotation = std::nullopt;
         std::optional<glm::dvec3> scale = std::nullopt;
     };
 
     glm::dmat4 calcModelTransform(const RenderData& data,
-        const AltTransform altTransform = AltTransform()) const;
+        const AlternativeTransform altTransform = {}) const;
 
     glm::dmat4 calcModelViewTransform(const RenderData& data,
         std::optional<const glm::dmat4> modelTransform = std::nullopt) const;
@@ -166,7 +160,7 @@ protected:
     void calcAllTransforms(const RenderData& data, glm::dmat4& ModelTransformResult,
         glm::dmat4& ModelViewTransformResult,
         glm::dmat4& ModelViewProjectionTransformResult,
-        const AltTransform altModelTransform = AltTransform()) const;
+        const AlternativeTransform altModelTransform = {}) const;
 
 private:
     double _boundingSphere = 0.0;

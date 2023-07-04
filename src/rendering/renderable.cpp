@@ -338,7 +338,7 @@ bool Renderable::hasOverrideRenderBin() const noexcept {
 }
 
 glm::dmat4 Renderable::calcModelTransform(const RenderData& data,
-                                          const AltTransform altTransform) const
+                                          const AlternativeTransform altTransform) const
 {
     glm::dvec3 translation =
         altTransform.translation.value_or(data.modelTransform.translation);
@@ -369,7 +369,7 @@ void Renderable::calcAllTransforms(const RenderData& data,
                                    glm::dmat4& ModelTransformResult,
                                    glm::dmat4& ModelViewTransformResult,
                                    glm::dmat4& ModelViewProjectionTransformResult,
-                                   const AltTransform altModelTransform) const
+                                   const AlternativeTransform altModelTransform) const
 {
     ModelTransformResult = calcModelTransform(data, altModelTransform);
     ModelViewTransformResult = calcModelViewTransform(data, ModelTransformResult);
