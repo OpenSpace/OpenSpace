@@ -35,7 +35,7 @@ flat in float vs_component[];
 flat in int vs_nColors[];
 flat in vec4 vs_colors[][MaxColors];
 flat in int vs_glyphIndex[];
-in dvec4 vs_dposWorld[];
+flat in dvec4 vs_dposWorld[];
 
 flat out float gs_component;
 out float gs_depthClipSpace;
@@ -72,34 +72,34 @@ void main() {
     gs_glyphIndex = vs_glyphIndex[0];
 
     dvec4 dpos = vs_dposWorld[0]; //modelMatrix * dvec4(pos);
-    vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
+    dvec4 dposClip = cameraViewProjectionMatrix * dpos;
 
-    float scale = size;
-    float screenRatio = screenSize.x / screenSize.y;
+    double scale = double(size);
+    double screenRatio = double(screenSize.x) / double(screenSize.y);
 
     // TODO: make billboarding optional
-    vec4 scaledRightClip = scale * vec4(1.0, 0.0, 0.0, 0.0);
-    vec4 scaledUpClip = scale * screenRatio * vec4(0.0, 1.0, 0.0, 0.0);
+    dvec4 scaledRightClip = scale * dvec4(1.0, 0.0, 0.0, 0.0);
+    dvec4 scaledUpClip = scale * screenRatio * dvec4(0.0, 1.0, 0.0, 0.0);
 
     // TODO: make it work in dome
 
     // Limit size of billboards based on pixel size
-    vec2 halfViewSize = screenSize * 0.5;
-    vec4 lowerLeft =  z_normalization(dposClip - scaledRightClip - scaledUpClip);
-    vec4 upperRight = z_normalization(dposClip + scaledUpClip + scaledRightClip);
+    dvec2 halfViewSize = dvec2(screenSize) * 0.5;
+    vec4 lowerLeft =  z_normalization(vec4(dposClip - scaledRightClip - scaledUpClip));
+    vec4 upperRight = z_normalization(vec4(dposClip + scaledUpClip + scaledRightClip));
 
-    vec2 topRight = upperRight.xy / upperRight.w;
-    vec2 bottomLeft = lowerLeft.xy / lowerLeft.w;
+    dvec2 topRight = dvec2(upperRight.xy / upperRight.w);
+    dvec2 bottomLeft = dvec2(lowerLeft.xy / lowerLeft.w);
 
-    vec2 sizes = abs(halfViewSize * (topRight.xy - bottomLeft.xy));
-    float diagonalSize = length(sizes);
+    dvec2 sizes = abs(halfViewSize * (topRight.xy - bottomLeft.xy));
+    double diagonalSize = length(sizes);
 
-    float correctionScale = 1.0;
+    double correctionScale = 1.0;
     if (diagonalSize > maxBillboardSize) {
-        correctionScale = maxBillboardSize / diagonalSize;
+        correctionScale = double(maxBillboardSize) / diagonalSize;
     }
     else if (diagonalSize < minBillboardSize) {
-        correctionScale = minBillboardSize / diagonalSize;
+        correctionScale = double(minBillboardSize) / diagonalSize;
     }
     scaledRightClip *= correctionScale;
     scaledUpClip *= correctionScale;
@@ -107,31 +107,30 @@ void main() {
     // Apply component scaling lastly, to get comparable sizes
     float comp = vs_component[0];
 
-    float sizeFactor = comp;
+    double sizeFactor = double(comp);
     if (!useFixedRingWidth) {
         // Same area:
 //        sizeFactor = sqrt(2.0 * comp);
 
         // Ish 90% width of previous ring
         sizeFactor = 1.0;
-        for (int i = 1; i < comp; i++) {
-            // TODO: create a constant for the
-            sizeFactor += sqrt(pow(0.87, comp)); // This computation is not completely logical.
-                                                // But it makes the result look ok. based on
-                                                // trying to make each ring about 90% as wide
-                                                // as the previous. The sqrt spaces them out quite nicely
+        for (int i = 1; i < int(comp); i++) {
+            // This computation is not completely logical.
+            // But it makes the result look ok. based on
+            // trying to make each ring about 90% as wide
+            // as the previous. The sqrt spaces them out quite nicely
+            sizeFactor += double(sqrt(pow(0.87, comp)));
         }
-        gs_sizeFactor = sizeFactor;
+        gs_sizeFactor = float(sizeFactor);
     }
 
     scaledRightClip *= sizeFactor;
     scaledUpClip *= sizeFactor;
 
-
-    lowerLeft = dposClip - scaledRightClip - scaledUpClip;
-    vec4 lowerRight = dposClip + scaledRightClip - scaledUpClip;
-    vec4 upperLeft = dposClip + scaledUpClip - scaledRightClip;
-    upperRight = dposClip + scaledUpClip + scaledRightClip;
+    lowerLeft = vec4(dposClip - scaledRightClip - scaledUpClip);
+    vec4 lowerRight = vec4(dposClip + scaledRightClip - scaledUpClip);
+    vec4 upperLeft = vec4(dposClip + scaledUpClip - scaledRightClip);
+    upperRight = vec4(dposClip + scaledUpClip + scaledRightClip);
     gs_depthClipSpace = lowerLeft.w * (1 - int(onTop));
 
     // Lower left
