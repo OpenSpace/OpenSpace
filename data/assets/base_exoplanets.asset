@@ -21,7 +21,6 @@ asset.require("scene/digitaluniverse/exoplanets")
 asset.require("scene/digitaluniverse/globularclusters")
 asset.require("scene/digitaluniverse/grids")
 asset.require("scene/digitaluniverse/h2regions")
-asset.require("scene/digitaluniverse/kepler")
 asset.require("scene/digitaluniverse/milkyway")
 asset.require("scene/digitaluniverse/milkyway_sphere")
 asset.require("scene/digitaluniverse/obassociations")
@@ -32,35 +31,12 @@ asset.require("scene/digitaluniverse/starlabels")
 asset.require("scene/digitaluniverse/stars")
 asset.require("scene/digitaluniverse/supernovaremnants")
 
-asset.require("util/default_actions")
-
-local toggle_trails = {
-  Identifier = "os_default.toggle_trails",
-  Name = "Toggle Trails",
-  Command = [[
-    local list = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Enabled");
-    for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
-    
-    local moonlist = openspace.getProperty("{moonTrail_solarSystem}.Renderable.Enabled");
-    for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
-  ]],
-  Documentation = "Toggles the visibility of planet and moon trails",
-  GuiPath = "/Rendering",
-  IsLocal = false,
-
-  Key = "h"
-}
-
-
-local trailAction = asset.require("actions/trails/toggle_trails_planets_moons").toggle_trails
+asset.require("actions/default_actions")
 
 asset.onInitialize(function ()
-  openspace.bindKey("h", trailAction.Identifier)
-
   -- Reset dpi scaling from base_blank asset
   openspace.setPropertyValueSingle("Modules.CefWebGui.GuiScale", 1.0)
 end)
 
 asset.onDeinitialize(function ()
-  openspace.clearKey(toggle_trails.Key)
 end)
