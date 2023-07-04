@@ -1,6 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
 
+
+
 local GSMKernel = asset.localResource("../kernels/GSM.ti")
 
 local GSMReferenceFrame = {
@@ -9,9 +11,8 @@ local GSMReferenceFrame = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "GSM", --Geocentric Solar Magnetospheric
-      DestinationFrame = "GALACTIC",
-      Kernels = GSMKernel
+      SourceFrame = "GSM", -- Geocentric Solar Magnetospheric
+      DestinationFrame = "GALACTIC"
     }
   },
   GUI = {
@@ -21,15 +22,21 @@ local GSMReferenceFrame = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(GSMKernel)
+
   openspace.addSceneGraphNode(GSMReferenceFrame)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GSMReferenceFrame)
+
+  openspace.spice.unloadKernel(GSMKernel)
 end)
 
 asset.export(GSMReferenceFrame)
+
 
 
 asset.meta = {

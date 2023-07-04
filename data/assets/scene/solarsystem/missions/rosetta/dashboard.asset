@@ -1,11 +1,15 @@
-local spacing = {
+asset.require("./rosetta")
+
+
+
+local Spacing = {
   Type = "DashboardItemSpacing",
   Identifier = "RosettaSpacing",
   GuiName = "Rosetta Spacing",
   Spacing = 25
 }
 
-local distance = {
+local Distance = {
   Type = "DashboardItemDistance",
   Identifier = "Rosetta67PDistance",
   GuiName = "Rosetta 67P Distance",
@@ -15,20 +19,21 @@ local distance = {
   DestinationNodeName = "67P"
 }
 
-local instruments = {
+local Instruments = {
   Type = "DashboardItemInstruments",
   Identifier = "RosettaInstruments",
-  GuiName = "Rosetta Instruments",
+  GuiName = "Rosetta Instruments"
 }
 
+
 asset.onInitialize(function()
-  openspace.dashboard.addDashboardItem(spacing)
-  openspace.dashboard.addDashboardItem(distance)
-  openspace.dashboard.addDashboardItem(instruments)
+  openspace.dashboard.addDashboardItem(Spacing)
+  openspace.dashboard.addDashboardItem(Distance)
+  openspace.dashboard.addDashboardItem(Instruments)
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(instruments)
-  openspace.dashboard.removeDashboardItem(distance)
-  openspace.dashboard.removeDashboardItem(spacing)
+  openspace.dashboard.removeDashboardItem(Instruments)
+  openspace.dashboard.removeDashboardItem(Distance)
+  openspace.dashboard.removeDashboardItem(Spacing)
 end)

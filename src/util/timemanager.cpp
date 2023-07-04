@@ -74,8 +74,10 @@ namespace {
         "when interpolating"
     };
 
-    constexpr std::string_view DeltaTimeStepsKeybindsGuiPath = "/Time/Delta Time Steps";
-}
+    constexpr std::string_view DeltaTimeStepsGuiPath = "/Time/Simulation Speed/Steps";
+
+    constexpr std::string_view DeltaTimeActionPrefix = "core.time.delta_time";
+} // namespace
 
 namespace openspace {
 
@@ -466,6 +468,7 @@ void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
     _deltaTimeSteps = std::move(deltaTimes);
     _deltaTimeStepsChanged = true;
 
+    clearDeltaTimesKeybindings();
     addDeltaTimesKeybindings();
 }
 
@@ -500,16 +503,16 @@ void TimeManager::addDeltaTimesKeybindings() {
     auto addDeltaTimeKeybind = [this](Key key, KeyModifier mod, double step) {
         const std::string s = fmt::format("{:.0f}", step);
 
-        std::string identifier = fmt::format("core.time.delta_time.{}", s);
+        std::string identifier = fmt::format("{}.{}", DeltaTimeActionPrefix, s);
         interaction::Action action;
         action.identifier = identifier;
         action.command = fmt::format("openspace.time.interpolateDeltaTime({})", s);
         action.documentation = fmt::format(
             "Setting the simulation speed to {} seconds per realtime second", s
         );
-        action.name = fmt::format("Set Simulation Speed: {}", s);
-        action.guiPath = DeltaTimeStepsKeybindsGuiPath;
-        action.synchronization = interaction::Action::IsSynchronized::No;
+        action.name = fmt::format("Set: {}", s);
+        action.guiPath = DeltaTimeStepsGuiPath;
+        action.isLocal = interaction::Action::IsLocal::Yes;
         global::actionManager->registerAction(std::move(action));
         global::keybindingManager->bindKey(key, mod, std::move(identifier));
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });
@@ -551,6 +554,15 @@ void TimeManager::addDeltaTimesKeybindings() {
 }
 
 void TimeManager::clearDeltaTimesKeybindings() {
+    // Iterate over all of the registered actions with the common prefix that we created
+    // in the addDeltaTimesKeybindings function
+    std::vector<interaction::Action> actions = global::actionManager->actions();
+    for (const interaction::Action& action : actions) {
+        if (action.identifier.starts_with(DeltaTimeActionPrefix)) {
+            global::actionManager->removeAction(action.identifier);
+        }
+    }
+
     for (const KeyWithModifier& kb : _deltaTimeStepKeybindings) {
         // Check if there are multiple keys bound to the same key
         auto bindings = global::keybindingManager->keyBinding(kb);

@@ -48,14 +48,16 @@ namespace {
         "StartTime",
         "Start Time",
         "The start time for the range of this trajectory. The date must be in ISO 8601 "
-        "format: YYYY MM DD HH:mm:ss.xxx"
+        "format: YYYY MM DD HH:mm:ss.xxx",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
         "EndTime",
         "End Time",
         "The end time for the range of this trajectory. The date must be in ISO 8601 "
-        "format: YYYY MM DD HH:mm:ss.xxx"
+        "format: YYYY MM DD HH:mm:ss.xxx",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SampleIntervalInfo = {
@@ -64,7 +66,8 @@ namespace {
         "The interval between samples of the trajectory. This value (together with "
         "'TimeStampSubsampleFactor') determines how far apart (in time) the samples are "
         "spaced along the trajectory. The time interval between 'StartTime' and "
-        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments"
+        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeSubSampleInfo = {
@@ -73,14 +76,17 @@ namespace {
         "The factor that is used to create subsamples along the trajectory. This value "
         "(together with 'SampleInterval') determines how far apart (in time) the samples "
         "are spaced along the trajectory. The time interval between 'StartTime' and "
-        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments"
+        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderFullPathInfo = {
         "ShowFullTrail",
         "Render Full Trail",
         "If this value is set to 'true', the entire trail will be rendered; if it is "
-        "'false', only the trail until the current time in the application will be shown"
+        "'false', only the trail until the current time in the application will be shown",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SweepChunkSizeInfo = {
@@ -88,7 +94,9 @@ namespace {
         "Sweep Chunk Size",
         "The number of vertices that will be calculated each frame whenever the trail "
         "needs to be recalculated. "
-        "A greater value will result in more calculations per frame."
+        "A greater value will result in more calculations per frame.",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {
@@ -208,30 +216,30 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
 
             // Cap _numberOfVertices in order to prevent overflow and extreme performance
-            // degredation/RAM usage 
+            // degredation/RAM usage
             _numberOfVertices = std::min(
-                static_cast<unsigned int>(timespan / _totalSampleInterval),
+                static_cast<unsigned int>(std::ceil(timespan / _totalSampleInterval)),
                 maxNumberOfVertices
             );
 
             // We need to recalcuate the _totalSampleInterval if _numberOfVertices eqals
-            // maxNumberOfVertices. If we don't do this the position for each vertex 
-            // will not be correct for the number of vertices we are doing along the trail.
-            _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ? 
+            // maxNumberOfVertices. If we don't do this the position for each vertex
+            // will not be correct for the number of vertices we are doing along the trail
+            _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ?
                 (timespan / _numberOfVertices) : _totalSampleInterval;
 
             // Make space for the vertices
             _vertexArray.clear();
-            _vertexArray.resize(_numberOfVertices);
+            _vertexArray.resize(_numberOfVertices + 1);
         }
-        
+
         // Calculate sweeping range for this iteration
         unsigned int startIndex = _sweepIteration * _sweepChunkSize;
         unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
         unsigned int stopIndex = std::min(nextIndex, _numberOfVertices);
 
         // Calculate all vertex positions
-        for (int i = startIndex; i < stopIndex; ++i) {
+        for (unsigned int i = startIndex; i < stopIndex; ++i) {
             const glm::vec3 p = _translation->position({
                 {},
                 Time(_start + i * _totalSampleInterval),
@@ -245,16 +253,26 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
         ++_sweepIteration;
 
+        // Full sweep is complete here.
+        // Adds the last point in time to the _vertexArray so that we
+        // ensure that points for _start and _end always exists
         if (stopIndex == _numberOfVertices) {
+            const glm::vec3 p = _translation->position({
+                {},
+                Time(_end),
+                Time(0.0)
+            });
+            _vertexArray[stopIndex] = { p.x, p.y, p.z };
+
             _sweepIteration = 0;
             setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
         }
-        else { 
-            // Early return as we don't need to render if we are still 
+        else {
+            // Early return as we don't need to render if we are still
             // doing full sweep calculations
             return;
         }
-        
+
         // Upload vertices to the GPU
         glBindVertexArray(_primaryRenderInformation._vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
@@ -291,10 +309,18 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             0.0,
             (data.time.j2000Seconds() - _start) / (_end - _start)
         );
-        _primaryRenderInformation.count = std::min(
-            static_cast<GLsizei>(ceil(_vertexArray.size() * t)),
-            static_cast<GLsizei>(_vertexArray.size() - 1)
-        );
+        if (data.time.j2000Seconds() < _end) {
+            _primaryRenderInformation.count = static_cast<GLsizei>(
+                std::max(
+                    1.0,
+                    floor(_vertexArray.size() - 1) * t
+                )
+                );
+        }
+        else {
+            _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
+        }
+
     }
 
     // If we are inside the valid time, we additionally want to draw a line from the last

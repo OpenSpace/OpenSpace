@@ -1,6 +1,8 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 
+
+
 local PlutoBarycenterAccurate = {
   Identifier = "PlutoBarycenterAccurate",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
@@ -13,8 +15,7 @@ local PlutoBarycenterAccurate = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PLUTO BARYCENTER",
-      Observer = "SSB",
-      Kernels = kernels.PlutoKernels
+      Observer = "SSB"
     }
   },
   GUI = {
@@ -30,8 +31,7 @@ local NewHorizonsPosition = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "NEW HORIZONS",
-      Observer = "PLUTO BARYCENTER",
-      Kernels = kernels.NewHorizonsKernels
+      Observer = "PLUTO BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -45,7 +45,11 @@ local NewHorizonsPosition = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.PlutoKernels)
+  openspace.spice.loadKernel(kernels.NewHorizonsKernels)
+
   openspace.addSceneGraphNode(PlutoBarycenterAccurate)
   openspace.addSceneGraphNode(NewHorizonsPosition)
 end)
@@ -53,6 +57,9 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NewHorizonsPosition)
   openspace.removeSceneGraphNode(PlutoBarycenterAccurate)
+
+  openspace.spice.unloadKernel(kernels.NewHorizonsKernels)
+  openspace.spice.unloadKernel(kernels.PlutoKernels)
 end)
 
 asset.export(PlutoBarycenterAccurate)

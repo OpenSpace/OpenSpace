@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+local globe = asset.require("../../mercury")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Messenger_BDR_Utah",
   Name = "Messenger BDR [Utah]",
   Enabled = asset.enabled,
@@ -16,22 +18,23 @@ local layer = {
   wavelength band across all MESSENGER end-of-mission map data products]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "Messenger BDR [Utah]",
   Version = "1.0",
-  Description = [[Mercury MESSENGER MDIS Global Basemap BDR 166m layer for Mercury globe. 
+  Description = [[Mercury MESSENGER MDIS Global Basemap BDR 166m layer for Mercury globe.
     This map is hosted on the OpenSpace server in Utah]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mercury/Messenger/Global/Mercury_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_166m",

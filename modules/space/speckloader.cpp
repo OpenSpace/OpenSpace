@@ -152,15 +152,15 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
     while (std::getline(file, line)) {
         currentLineNumber++;
 
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r
+        if (!line.empty() && line.back() == '\r') {
+            line = line.substr(0, line.length() - 1);
+        }
+
         // Ignore empty line or commented-out lines
         if (line.empty() || line[0] == '#') {
             continue;
-        }
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
         }
 
         strip(line);
@@ -263,6 +263,21 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
             res.textures.push_back(texture);
             continue;
         }
+
+        if (startsWith(line, "maxcomment")) {
+            // ignoring this comment as we don't need it
+            continue;
+        }
+
+        // If we get this far, we had an illegal header as it wasn't an empty line and
+        // didn't start with either '#' denoting a comment line, and didn't start with
+        // either the 'datavar', 'texturevar', 'polyorivar', or 'texture' keywords
+        throw ghoul::RuntimeError(fmt::format(
+            "Error in line {} while reading the header information of file {}. Line is "
+            "neither a comment line, nor starts with one of the supported keywords for "
+            "SPECK files",
+            currentLineNumber, path
+        ));
     }
 
     std::sort(

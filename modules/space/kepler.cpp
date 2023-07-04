@@ -205,7 +205,11 @@ namespace {
         // 00-56 correspond to 2000-2056. We'll see each other again in 2057!
 
         // 1,2. Get the full year and days
-        auto [res, year, daysInYear] = scn::scan_tuple<int, double>(epoch, "{:2}{}");
+        std::string e = epoch;
+        if (e.find('.') == std::string::npos) {
+            e += ".0";
+        }
+        auto [res, year, daysInYear] = scn::scan_tuple<int, double>(e, "{:2}{}");
         if (!res) {
             throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
         }
@@ -235,8 +239,9 @@ namespace {
     }
 
     double epochFromYMDdSubstring(const std::string& epoch) {
-        // The epochString is in the form:
+        // The epochString can be in one of two forms:
         // YYYYMMDD.ddddddd
+        // YYYY-MM-DD.ddddddd
         // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
         // and dddd the fraction of that day.
 
@@ -248,9 +253,20 @@ namespace {
         // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
         // midnight
 
+        std::string e = epoch;
+        if (e.find('.') == std::string::npos) {
+            // No . was found so the epoch was provided as an integer number (see #2551)
+            e += ".0";
+        }
         // 1, 2
+        size_t nDashes = std::count_if(
+            epoch.begin(),
+            epoch.end(),
+            [](char c) { return c == '-'; }
+        );
+        std::string formatString = (nDashes == 2) ? "{:4}-{:2}-{:2}{}" : "{:4}{:2}{:2}{}";
         auto [res, year, monthNum, dayOfMonthNum, fractionOfDay] =
-            scn::scan_tuple<int, int, int, double>(epoch, "{:4}{:2}{:2}{}");
+            scn::scan_tuple<int, int, int, double>(e, formatString);
         if (!res) {
             throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
         }
@@ -589,10 +605,12 @@ std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
 
     std::string line;
     std::getline(f, line);
+    // Newer versions downloaded from the JPL SBDB website have " around variables
+    line.erase(remove(line.begin(), line.end(), '\"'), line.end());
     if (line != ExpectedHeader) {
         throw ghoul::RuntimeError(fmt::format(
             "Expected JPL SBDB file to start with '{}' but found '{}' instead",
-            ExpectedHeader, line
+            ExpectedHeader, line.substr(0, 100)
         ));
     }
 

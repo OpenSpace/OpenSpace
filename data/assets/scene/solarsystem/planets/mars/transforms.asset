@@ -1,5 +1,7 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local MarsBarycenter = {
   Identifier = "MarsBarycenter",
@@ -15,9 +17,10 @@ local MarsBarycenter = {
     Name = "Mars Barycenter",
     Path = "/Solar System/Planets/Mars",
     Hidden = true,
-    Description = "SPICE Translation for targeting Mars Barycenter",
+    Description = "SPICE Translation for targeting Mars Barycenter"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MarsBarycenter)

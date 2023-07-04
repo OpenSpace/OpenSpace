@@ -41,9 +41,9 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 5> UniformNames = {
-        "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
-        "mirrorTexture"
+    constexpr std::array<const char*, 6> UniformNames = {
+        "opacity", "modelViewProjection", "modelViewTransform", "modelViewRotation",
+        "colorTexture", "mirrorTexture"
     };
 
     enum class Orientation : int {
@@ -57,32 +57,39 @@ namespace {
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
         "that is applied to this sphere. This image is expected to be an equirectangular "
-        "projection"
+        "projection",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
         "Mirror Texture",
-        "Mirror the texture along the x-axis"
+        "Mirror the texture along the x-axis",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
-        "outside of the sphere, or both"
+        "outside of the sphere, or both",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value specifies the number of segments that the sphere is separated in"
+        "This value specifies the number of segments that the sphere is separated in",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the radius of the sphere in meters"
+        "This value specifies the radius of the sphere in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
@@ -90,7 +97,8 @@ namespace {
         "Fade-Out Threshold",
         "This value determines percentage of the sphere that is visible before starting "
         "to fade it out. A negative or zero value means no fading out will happen. This "
-        "is also the default"
+        "is also the default",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
@@ -99,13 +107,15 @@ namespace {
         "This value determines the distance from center of MilkyWay from where the "
         "astronomical object starts to fade in, given as a percentage of the size of "
         "the object. A negative or zero value means no fading in will happen. This is "
-        "also the default"
+        "also the default",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable Fade-In/Fade-Out effects",
-        "Enables/Disables the fade in and out effects"
+        "Enables/Disables the fade in and out effects",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
@@ -161,8 +171,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _size = p.size;
     _segments = p.segments;
@@ -208,7 +217,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_disableFadeInDistance);
 
     setBoundingSphere(_size);
-    setRenderBinFromOpacity();
 }
 
 bool RenderableSphere::isReady() const {
@@ -266,6 +274,10 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glm::mat4 modelViewProjection = data.camera.projectionMatrix() *
                              glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
     _shader->setUniform(_uniformCache.modelViewProjection, modelViewProjection);
+
+    const glm::dmat4 modelViewTransform =
+        data.camera.combinedViewMatrix() * modelTransform;
+    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
 
     glm::mat3 modelViewRotation = glm::mat3(
         glm::dmat3(data.camera.viewRotationMatrix()) * modelRotation
@@ -334,7 +346,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     }
 
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
-    _shader->setUniform(_uniformCache._mirrorTexture, _mirrorTexture.value());
+    _shader->setUniform(_uniformCache.mirrorTexture, _mirrorTexture.value());
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();

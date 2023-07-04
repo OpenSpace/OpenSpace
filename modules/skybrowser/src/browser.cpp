@@ -39,19 +39,24 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "Set the dimensions of the web browser window"
+        "Set the dimensions of the web browser window",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
-        "The URL to load"
+        "The URL to load",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Reload the web browser"
+        "Reload the web browser",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(Browser)]] Parameters {
@@ -124,7 +129,7 @@ void Browser::initializeGL() {
 
     _browserInstance->initialize();
     _browserInstance->loadUrl(_url);
-    // Update the dimensions upon initialization. Do this with flag as it affects 
+    // Update the dimensions upon initialization. Do this with flag as it affects
     // derived classes as well
     _isDimensionsDirty = true;
 }

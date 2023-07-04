@@ -10,7 +10,8 @@ local textures = asset.syncedResource({
   Version = 3
 })
 
-local charonRadius = 6.035E5
+
+local CharonRadius = 603500
 
 local CharonProjection = {
   Identifier = "CharonProjection",
@@ -29,7 +30,7 @@ local CharonProjection = {
   },
   Renderable = {
     Type = "RenderablePlanetProjection",
-    Radius = charonRadius,
+    Radius = CharonRadius,
     Segments = 350,
     ColorTexturePaths = {
       textures .. "NH_Charon_mosaic.png",
@@ -41,18 +42,18 @@ local CharonProjection = {
     },
     MeridianShift = true,
     Projection = {
-      Observer   = "NEW HORIZONS",
-      Target     = "CHARON",
+      Observer = "NEW HORIZONS",
+      Target = "CHARON",
       Aberration = "NONE",
       AspectRatio = 2,
       Instrument = {
-        Name       = "NH_LORRI",
-        Method     = "ELLIPSOID",
+        Name = "NH_LORRI",
+        Method = "ELLIPSOID",
         Aberration = "NONE",
-        Fovy       = 0.2907,
-        Aspect     = 1,
-        Near       = 0.2,
-        Far        = 10000
+        Fovy = 0.2907,
+        Aspect = 1,
+        Near = 0.2,
+        Far = 10000
       },
       PotentialTargets = {
         "PLUTO",
@@ -77,7 +78,7 @@ local CharonText = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10^6.3,
+    Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
     Texture = textures .. "Charon-Text.png",
@@ -107,6 +108,7 @@ local CharonShadow = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CharonProjection)

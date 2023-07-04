@@ -1,7 +1,9 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
 asset.require("./trail")
-local kernel = asset.require("../kernels").jup310
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Jupiter Labels",
@@ -10,6 +12,7 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Europa = {
   Identifier = "Europa",
   Parent = transforms.JupiterBarycenter.Identifier,
@@ -17,14 +20,12 @@ local Europa = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_EUROPA",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernel
+      DestinationFrame = "GALACTIC"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "EUROPA",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Observer = "JUPITER BARYCENTER"
     }
   },
   Renderable = {
@@ -45,9 +46,9 @@ local Europa = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_major_jupiter" },
   GUI = {
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Europa"
   }
 }
 
@@ -71,12 +72,15 @@ local EuropaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Europa Label",
-    Path = "/Solar System/Planets/Jupiter/Moons",
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Europa",
     Description = "Label for Jupiter's moon Europa"
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.jup365)
+
   openspace.addSceneGraphNode(Europa)
   openspace.addSceneGraphNode(EuropaLabel)
 end)
@@ -84,15 +88,17 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EuropaLabel)
   openspace.removeSceneGraphNode(Europa)
+
+  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Europa)
-
+asset.export(EuropaLabel)
 
 
 
 asset.meta = {
-  Name = "Mimas",
+  Name = "Europa",
   Version = "1.1",
   Description = "Europa globe with labels",
   Author = "OpenSpace Team",

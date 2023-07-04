@@ -46,10 +46,10 @@ struct DeferredcastData;
 struct ShadowConfiguration;
 
 struct ShadowRenderingStruct {
-    double xu = 0.0;
-    double xp = 0.0;
-    double rs = 0.0;
-    double rc = 0.0;
+    double umbra = 0.0;
+    double penumbra = 0.0;
+    double radiusSource = 0.0;
+    double radiusCaster = 0.0;
     glm::dvec3 sourceCasterVec = glm::dvec3(0.0);
     glm::dvec3 casterPositionVec = glm::dvec3(0.0);
     bool isShadowing = false;
@@ -75,10 +75,12 @@ public:
     void initializeCachedVariables(ghoul::opengl::ProgramObject& program) override;
 
     void update(const UpdateData&) override;
+    float eclipseShadow(glm::dvec3 position);
 
     void calculateAtmosphereParameters();
 
     void setModelTransform(glm::dmat4 transform);
+    void setOpacity(float opacity);
 
     void setParameters(float atmosphereRadius, float planetRadius,
         float averageGroundReflectance, float groundRadianceEmission,
@@ -112,12 +114,12 @@ private:
         ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
 
 
-    UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
-        betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
-        SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix,
-        modelTransformMatrix, projectionToModelTransform, viewToWorldMatrix,
-        camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture,
-        inscatterTexture) _uniformCache;
+    UniformCache(cullAtmosphere, opacity, Rg, Rt, groundRadianceEmission, HR,
+        betaRayleigh, HM, betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO,
+        betaOzoneExtinction, SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU,
+        inverseModelTransformMatrix, modelTransformMatrix, projectionToModelTransform,
+        viewToWorldMatrix, camPosObj, sunDirectionObj, hardShadows, transmittanceTexture,
+        irradianceTexture, inscatterTexture) _uniformCache;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
@@ -156,6 +158,7 @@ private:
     const glm::ivec3 _textureSize;
 
     glm::dmat4 _modelTransform;
+    float _opacity = 1.f;
 
     // Eclipse Shadows
     std::vector<ShadowConfiguration> _shadowConfArray;

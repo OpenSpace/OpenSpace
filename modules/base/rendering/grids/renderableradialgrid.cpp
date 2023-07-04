@@ -40,27 +40,34 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered"
+        "This value determines the color of the grid lines that are rendered",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridSegmentsInfo = {
         "GridSegments",
         "Number of Grid Segments",
         "Specifies the number of segments for the grid, in the radial and angular "
-        "direction respectively"
+        "direction respectively",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
         "Number of Circle Segments",
         "This value specifies the number of segments that is used to render each circle "
-        "in the grid"
+        "in the grid",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid"
+        "This value specifies the line width of the spherical grid",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiiInfo = {
@@ -68,17 +75,12 @@ namespace {
         "Inner and Outer Radius",
         "The radii values that determine the size of the circular grid. The first value "
         "is the radius of the inmost ring and the second is the radius of the outmost "
-        "ring"
+        "ring",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden"
-    };
-
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
-    {
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid"
@@ -100,9 +102,6 @@ namespace {
         // [[codegen::verbatim(RadiiInfo.description)]]
         std::optional<glm::vec2> radii;
 
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
-
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("space_labelscomponent")]];
@@ -123,23 +122,21 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _radii(RadiiInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(20.f))
-    , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
     _gridSegments = p.gridSegments.value_or(_gridSegments);
-    _gridSegments.onChange([&]() { _gridIsDirty = true; });
+    _gridSegments.onChange([this]() { _gridIsDirty = true; });
     addProperty(_gridSegments);
 
     _circleSegments = p.circleSegments.value_or(_circleSegments);
-    _circleSegments.onChange([&]() {
+    _circleSegments.onChange([this]() {
         if (_circleSegments.value() % 2 == 1) {
             _circleSegments = _circleSegments - 1;
         }
@@ -152,17 +149,16 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
 
     _radii = p.radii.value_or(_radii);
     _radii.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-    _radii.onChange([&]() { _gridIsDirty = true; });
+    _radii.onChange([this]() { _gridIsDirty = true; });
 
     addProperty(_radii);
 
     if (p.labels.has_value()) {
-        _drawLabels = p.drawLabels.value_or(_drawLabels);
-        addProperty(_drawLabels);
-
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
     }
 }
 
@@ -244,7 +240,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     global::renderEngine->openglStateCache().resetDepthState();
 
     // Draw labels
-    if (_drawLabels && _hasLabels) {
+    if (_hasLabels && _labels->enabled()) {
         const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
         const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
         glm::vec3 right = glm::cross(viewDirection, lookup);

@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Coral Reef Risk Outlook"
@@ -30,28 +31,29 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_2012 = {
+
+local Layer2012 = {
   Identifier = Identifier .. "-2012",
   Name = Name .. " (2012)",
   FilePath = syncedDirectory .. "2012_2048.jpg",
   Description = Description
 }
 
-local layer_2030 = {
+local Layer2030 = {
   Identifier = Identifier .. "-2030",
   Name = Name .. " (2030)",
   FilePath = syncedDirectory .. "2030_2048.jpg",
   Description = Description
 }
 
-local layer_2050 = {
+local Layer2050 = {
   Identifier = Identifier .. "-2050",
   Name = Name .. " (2050)",
   FilePath = syncedDirectory .. "2050_2048.jpg",
   Description = Description
 }
 
-local legend = {
+local Legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -61,24 +63,26 @@ local legend = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2012)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2030)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2050)
-  openspace.addScreenSpaceRenderable(legend)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer2012)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer2030)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer2050)
+  openspace.addScreenSpaceRenderable(Legend)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_2012)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_2030)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_2050)
-  openspace.removeScreenSpaceRenderable(legend)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer2050)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer2030)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer2012)
 end)
 
-asset.export(layer_2012)
-asset.export(layer_2030)
-asset.export(layer_2050)
-asset.export(legend)
+asset.export(Layer2012)
+asset.export(Layer2030)
+asset.export(Layer2050)
+asset.export(Legend)
+
 
 
 asset.meta = {

@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Sea Level Rise: Impact of 6 meter (black)"
@@ -27,82 +28,85 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_0m = {
+
+local Layer0m = {
   Identifier = Identifier .. "-0m",
   Name = Name .. " (0m)",
   FilePath = syncedDirectory .. "0m-new.png",
   Description = Description
 }
 
-local layer_1m = {
+local Layer1m = {
   Identifier = Identifier .. "-1m",
   Name = Name .. " (1m)",
   FilePath = syncedDirectory .. "1m-new.png",
   Description = Description
 }
 
-local layer_2m = {
+local Layer2m = {
   Identifier = Identifier .. "-2m",
   Name = Name .. " (2m)",
   FilePath = syncedDirectory .. "2m-new.png",
   Description = Description
 }
 
-local layer_3m = {
+local Layer3m = {
   Identifier = Identifier .. "-3m",
   Name = Name .. " (3m)",
   FilePath = syncedDirectory .. "3m-new.png",
   Description = Description
 }
 
-local layer_4m = {
+local Layer4m = {
   Identifier = Identifier .. "-4m",
   Name = Name .. " (4m)",
   FilePath = syncedDirectory .. "4m-new.png",
   Description = Description
 }
 
-local layer_5m = {
+local Layer5m = {
   Identifier = Identifier .. "-5m",
   Name = Name .. " (5m)",
   FilePath = syncedDirectory .. "5m-new.png",
   Description = Description
 }
 
-local layer_6m = {
+local Layer6m = {
   Identifier = Identifier .. "-6m",
   Name = Name .. " (6m)",
   FilePath = syncedDirectory .. "6m-new.png",
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_0m)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_1m)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2m)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_3m)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_4m)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_5m)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_6m)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer0m)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer1m)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer2m)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer3m)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer4m)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer5m)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer6m)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_0m)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_1m)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_2m)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_3m)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_4m)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_5m)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_6m)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer6m)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer5m)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer4m)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer3m)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer2m)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer1m)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer0m)
 end)
 
-asset.export(layer_0m)
-asset.export(layer_1m)
-asset.export(layer_2m)
-asset.export(layer_3m)
-asset.export(layer_4m)
-asset.export(layer_5m)
-asset.export(layer_6m)
+asset.export(Layer0m)
+asset.export(Layer1m)
+asset.export(Layer2m)
+asset.export(Layer3m)
+asset.export(Layer4m)
+asset.export(Layer5m)
+asset.export(Layer6m)
+
 
 
 asset.meta = {

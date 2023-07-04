@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../moon").Moon.Identifier
+local globe = asset.require("../../moon")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Kaguya_Sweden",
   Name = "Kaguya [Sweden]",
   Enabled = asset.enabled,
@@ -15,15 +17,16 @@ local layer = {
     resolution]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Moon.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Moon.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

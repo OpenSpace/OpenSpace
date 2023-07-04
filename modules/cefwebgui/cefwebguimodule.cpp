@@ -40,32 +40,40 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
-        "This setting determines whether the browser should be enabled or not"
+        "Enabled",
+        "This setting determines whether the browser should be enabled or not",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Trigger this property to reload the browser"
+        "Trigger this property to reload the browser",
+        // @VISIBILITY(2.2)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "Visible",
         "Is Visible",
-        "This setting determines whether the browser should be visible or not"
+        "This setting determines whether the browser should be visible or not",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "GUI URL",
-        "The URL of the webpage that is used to load the WebGUI from"
+        "The URL of the webpage that is used to load the WebGUI from",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
         "GuiScale",
         "Gui Scale",
-        "GUI scale multiplier"
+        "GUI scale multiplier",
+        openspace::properties::Property::Visibility::Always
     };
 } // namespace
 
@@ -103,7 +111,7 @@ void CefWebGuiModule::startOrStopGui() {
             );
             _instance->initialize();
             _instance->reshape(static_cast<glm::ivec2>(
-                static_cast<glm::vec2>(global::windowDelegate->currentSubwindowSize()) *
+                static_cast<glm::vec2>(global::windowDelegate->guiWindowResolution()) *
                 global::windowDelegate->dpiScaling()
             ));
             if (!_url.value().empty()) {
@@ -218,12 +226,13 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         const bool isGuiWindow =
             global::windowDelegate->hasGuiWindow() ?
             global::windowDelegate->isGuiWindow() :
-            true;
+            global::windowDelegate->currentWindowId()
+                == global::windowDelegate->firstWindowId();
         const bool isMaster = global::windowDelegate->isMaster();
 
         if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate->windowHasResized() || _instance->_shouldReshape) {
-                glm::ivec2 csws = global::windowDelegate->currentSubwindowSize();
+                glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
                 _instance->reshape(static_cast<glm::ivec2>(
                     static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
                 ));

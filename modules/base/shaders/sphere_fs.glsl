@@ -27,6 +27,7 @@
 in vec4 vs_position;
 in vec2 vs_textureCoords;
 in vec3 vs_normal;
+in float vs_screenSpaceDepth;
 
 uniform sampler2D colorTexture;
 uniform float opacity;
@@ -43,7 +44,7 @@ Fragment getFragment() {
 
   frag.color = texture(colorTexture, texCoord);
   frag.color.a *= opacity;
-  frag.depth = vs_position.w;
+  frag.depth = vs_screenSpaceDepth;
 
   // G-Buffer
   frag.gPosition = vs_position;

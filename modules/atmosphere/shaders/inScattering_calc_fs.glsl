@@ -45,7 +45,7 @@ uniform float r;
 uniform vec4 dhdH;
 
 
-void integrand(float r, float mu, float muSun, float nu, float y, out vec3 S_R, 
+void integrand(float r, float mu, float muSun, float nu, float y, out vec3 S_R,
                out vec3 S_M)
 {
   // The integral's integrand is the single inscattering radiance:
@@ -59,10 +59,10 @@ void integrand(float r, float mu, float muSun, float nu, float y, out vec3 S_R,
   // angular precision
   S_R = vec3(0.0);
   S_M = vec3(0.0);
-  
+
   // cosine law
   float ri = max(sqrt(r * r + y * y + 2.0 * r * mu * y), Rg);
-  
+
   // Considering the Sun as a parallel light source, thew vector s_i = s.
   // So muSun_i = (vec(y_i) dot vec(s))/r_i = ((vec(x) + vec(yi-x)) dot vec(s))/r_i
   // muSun_i = (vec(x) dot vec(s) + vec(yi-x) dot vec(s))/r_i = (r*muSun + yi*nu)/r_i
@@ -123,7 +123,7 @@ void main() {
   // parameters (uv), we unmapping mu, muSun and nu.
   float mu, muSun, nu;
   unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
-  
+
   // Here we calculate the single inScattered light. Because this is a single
   // inscattering, the light that arrives at a point y in the path from the eye to the
   // infinity (top of atmosphere or planet's ground), comes only from the light source,
@@ -135,7 +135,7 @@ void main() {
   // S[L0] = P_R*S_R[L0] + P_M*S_M[L0]
   // In order to save memory, we just store the red component of S_M[L0], and later we use
   // the proportionality rule to calcule the other components.
-  vec3 S_R; // First Order Rayleigh InScattering 
+  vec3 S_R; // First Order Rayleigh InScattering
   vec3 S_M; // First Order Mie InScattering
   inscatter(r, mu, muSun, nu, S_R, S_M);
   renderTarget1 = vec4(S_R, 1.0);

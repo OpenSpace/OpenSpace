@@ -1,11 +1,11 @@
-local scale = 149597870700 -- 1 AU
+local AU = 149597870700 -- 1 AU
 
-local circle = {
+local Circle = {
   Identifier = "ExampleCircle",
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = scale
+      Scale = AU
     }
   },
   Renderable = {
@@ -22,7 +22,7 @@ local circle = {
   }
 }
 
-local ellipse = {
+local Ellipse = {
   Identifier = "ExampleEllipse",
   Transform = {
     Scale = {
@@ -36,7 +36,7 @@ local ellipse = {
     LineWidth = 3.0,
     GridSegments = { 1, 1 },
     CircleSegments = 64,
-    Radii = { 0.0, scale }
+    Radii = { 0.0, AU }
   },
   GUI = {
     Name = "Example Ellipse",
@@ -44,15 +44,16 @@ local ellipse = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(circle)
-  openspace.addSceneGraphNode(ellipse)
+  openspace.addSceneGraphNode(Circle)
+  openspace.addSceneGraphNode(Ellipse)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(ellipse)
-  openspace.removeSceneGraphNode(circle)
+  openspace.removeSceneGraphNode(Ellipse)
+  openspace.removeSceneGraphNode(Circle)
 end)
 
-asset.export(circle)
-asset.export(ellipse)
+asset.export(Circle)
+asset.export(Ellipse)

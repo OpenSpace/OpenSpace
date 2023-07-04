@@ -1,0 +1,130 @@
+-- Source:  http://pluto.jhuapl.edu/Mission/index.php
+-- Many of the values (especially days of the month if 01 or 30 or 31  and  hh::mm::ss if all 0)
+-- are approximate and need fixing
+
+local Mission = {
+  Name = "New Horizons",
+  Phases = {
+    {
+      Name = "Cruise Phase",
+      TimeRange = { Start = "2006 JAN 19 00:00:00", End = "2015 JAN 15 00:00:00" },
+      Phases = {
+        {
+          Name = "Jupiter fly-by",
+          TimeRange = { Start = "2007 FEB 28 00:00:00", End = "2007 FEB 28 23:59:59" }
+        },
+        {
+          Name = "Annual checkout 1",
+          TimeRange = { Start = "2007 SEP 01 00:00:00", End = "2007 NOV 30 00:00:00" }
+        },
+        {
+          Name = "Annual checkout 2",
+          TimeRange = { Start = "2008 JUL 01 00:00:00", End = "2008 AUG 31 00:00:00" }
+        },
+        {
+          Name = "Annual checkout 3",
+          TimeRange = { Start = "2009 JUL 01 00:00:00", End = "2009 AUG 31 00:00:00" }
+        },
+        {
+          Name = "Annual checkout 4",
+          TimeRange = { Start = "2010 MAY 01 00:00:00", End = "2010 JUL 31 00:00:00" }
+        },
+        {
+          Name = "Annual checkout 5",
+          TimeRange = { Start = "2011 MAY 01 00:00:00", End = "2011 JUL 31 00:00:00" }
+        },
+        {
+          Name = "Annual checkout 6",
+          TimeRange = { Start = "2012 MAY 01 00:00:00", End = "2012 JUL 31 00:00:00" }
+        },
+        {
+          Name = "Annual checkout 7",
+          TimeRange = { Start = "2013 MAY 01 00:00:00", End = "2013 AUG 31 00:00:00" }
+        },
+        {
+          Name = "Annual checkout 8 and Optical Navigation campaign 1",
+          TimeRange = { Start = "2014 JUN 01 00:00:00", End = "2014 AUG 31 00:00:00" }
+        },
+        {
+          Name = "Final Wakeup from Hibernation",
+          TimeRange = { Start = "2014 DEC 06 00:00:00", End = "2014 DEC 06 23:59:59" }
+        }
+      }
+    },
+    {
+      Name = "Pluto Encounter/Approach Phase 1",
+      TimeRange = { Start = "2015 JAN 15 00:00:00", End = "2015 APR 01 00:00:00" },
+      Phases = {
+        {
+          Name = "Optical nagivation campaign 2",
+          TimeRange = { Start = "2015 JAN 25 00:00:00", End = "2015 APR 01 00:00:00" }
+        }
+      }
+    },
+    {
+      Name = "Pluto Encounter/Approach Phase 2",
+      TimeRange = { Start = "2015 APR 01 00:00:00", End = "2015 JUN 01 00:00:00" },
+      Phases = {
+        {
+          Name = "Best-ever images of Pluto",
+          TimeRange = { Start = "2015 MAY 01 00:00:00", End = "2015 JUN 01 00:00:00" }
+        }
+      }
+    },
+    {
+      Name = "Pluto Encounter/Approach Phase 3",
+      TimeRange = { Start = "2015 JUN 01 00:00:00", End = "2015 JUL 15 00:00:00" },
+      Phases = {
+        {
+          Name = "Closest approach to Pluto",
+          TimeRange = { Start = "2015 JUL 14 11:49:57", End = "2015 JUL 14 11:49:58" }
+        },
+        {
+          Name = "Closest approach to Charon",
+          TimeRange = { Start = "2015 JUL 14 12:03:50", End = "2015 JUL 14 12:03:51" }
+        },
+        {
+          Name = "Pluto-Sun Occultation",
+          TimeRange = { Start = "2015 JUL 14 12:51:25", End = "2015 JUL 14 12:52:00" }
+        },
+        {
+          Name = "Pluto-Earth Occultation",
+          TimeRange = { Start = "2015 JUL 14 12:52:27", End = "2015 JUL 14 12:53:00" }
+        },
+        {
+          Name = "Charon-Sun Occultation",
+          TimeRange = { Start = "2015 JUL 14 14:17:40", End = "2015 JUL 14 14:18:00" }
+        },
+        {
+          Name = "Charon-Earth Occultation",
+          TimeRange = { Start = "2015 JUL 14 14:20:00", End = "2015 JUL 14 14:21:00" }
+        }
+      }
+    },
+    {
+      Name = "Departure Phase 1",
+      TimeRange = { Start = "2015 JUL 15 00:00:00", End = "2015 AUG 01 00:00:00" }
+    },
+    {
+      Name = "Departure Phase 2",
+      TimeRange = { Start = "2015 AUG 01 00:00:00", End = "2015 OCT 01 00:00:00" }
+    },
+    {
+      Name = "Departure Phase 3",
+      TimeRange = { Start = "2015 OCT 01 00:00:00", End = "2016 JAN 01 00:00:00" }
+    },
+    {
+      Name = "Data Playback Ends",
+      TimeRange = { Start = "2016 OCT 01 00:00:00", End = "2016 DEC 01 00:00:00" }
+    }
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.loadMission(Mission)
+end)
+
+asset.onDeinitialize(function()
+  openspace.unloadMission(Mission.Name)
+end)

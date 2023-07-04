@@ -35,13 +35,14 @@ out vec2 vs_st;
 out vec3 vs_normalViewSpace;
 out float vs_screenSpaceDepth;
 out vec4 vs_positionCameraSpace;
-out mat3 TBN;
+out mat3 vs_TBN;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform mat4 normalTransform;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
+
 
 void main() {
   vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
@@ -52,17 +53,18 @@ void main() {
   vs_st = in_st;
   vs_screenSpaceDepth = positionScreenSpace.w;
 
-  vs_normalViewSpace = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+  vs_normalViewSpace =
+    normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
-	// TBN matrix for normal mapping
-	vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));
-	vec3 N = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+  // TBN matrix for normal mapping
+  vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));
+  vec3 N = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
-	// Re-orthogonalize T with respect to N
-	T = normalize(T - dot(T, N) * N);
+  // Re-orthogonalize T with respect to N
+  T = normalize(T - dot(T, N) * N);
 
-	// Retrieve perpendicular vector B with cross product of T and N
-	vec3 B = normalize(cross(N, T));
+  // Retrieve perpendicular vector B with cross product of T and N
+  vec3 B = normalize(cross(N, T));
 
-	TBN = mat3(T, B, N);
+  vs_TBN = mat3(T, B, N);
 }

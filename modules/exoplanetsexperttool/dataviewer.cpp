@@ -162,7 +162,7 @@ namespace {
     // This should match the implementation in the exoplanet module
     std::string planetIdentifier(const openspace::exoplanets::ExoplanetItem& p) {
         using namespace openspace::exoplanets;
-        return createIdentifier(p.hostName) + "_" + p.component;
+        return fmt::format("{}_{}", openspace::makeIdentifier(p.hostName), p.component);
     }
 
     constexpr const glm::vec3 DefaultSelectedColor = { 0.2f, 0.8f, 1.f };
@@ -255,7 +255,7 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     _filteredData.reserve(_data.size());
     for (size_t i = 0; i < _data.size(); i++) {
         _filteredData.push_back(i);
-        _hostIdToPlanetsMap[createIdentifier(_data[i].hostName)].push_back(i);
+        _hostIdToPlanetsMap[makeIdentifier(_data[i].hostName)].push_back(i);
     }
     _filteredDataWithoutExternalSelection = _filteredData;
 
@@ -836,7 +836,7 @@ bool DataViewer::renderColormapEdit(ColorMappedVariable& variable,
 
         if (!relevantSystem.empty() && ImGui::SmallButton("Set from planets in system")) {
             relevantIndices =
-                _hostIdToPlanetsMap[createIdentifier(std::string(relevantSystem))];
+                _hostIdToPlanetsMap[makeIdentifier(std::string(relevantSystem))];
             updateMinMax = true;
         }
         else if (ImGui::SmallButton("Set from current table data")) {
@@ -1374,7 +1374,7 @@ void DataViewer::renderTable(const std::string& tableId,
                             bool systemIsAdded = !systemCanBeAdded(item.hostName);
                             if (systemIsAdded) {
                                 if (ImGui::Button("Zoom to star")) {
-                                    flyToStar(createIdentifier(item.hostName));
+                                    flyToStar(makeIdentifier(item.hostName));
                                 }
                             }
                             else {
@@ -2377,10 +2377,10 @@ void DataViewer::setUpSelectedColumns(int nSelected) {
 }
 
 void DataViewer::renderSystemViewContent(const std::string& host) {
-    const std::string hostIdentifier = createIdentifier(host);
+    const std::string hostIdentifier = makeIdentifier(host);
     bool systemIsAdded = !systemCanBeAdded(host);
 
-    std::vector<size_t>& planetIndices = _hostIdToPlanetsMap[createIdentifier(host)];
+    std::vector<size_t>& planetIndices = _hostIdToPlanetsMap[makeIdentifier(host)];
 
     static bool changeDefaultValueOrbitAppearance = false;
 
@@ -2917,7 +2917,7 @@ void DataViewer::updateSelectionInRenderable() {
 }
 
 void DataViewer::addOrTargetPlanet(const ExoplanetItem& item) {
-    const std::string identifier = createIdentifier(item.hostName);
+    const std::string identifier = makeIdentifier(item.hostName);
 
     if (systemCanBeAdded(item.hostName)) {
         LINFO("Adding system. Click again to target");
@@ -2944,7 +2944,7 @@ void DataViewer::addOrTargetPlanet(const ExoplanetItem& item) {
 }
 
 bool DataViewer::systemCanBeAdded(const std::string& host) const {
-    const std::string identifier = createIdentifier(host);
+    const std::string identifier = makeIdentifier(host);
 
     // Check if it does not already exist
     return sceneGraphNode(identifier) == nullptr;

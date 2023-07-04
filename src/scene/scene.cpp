@@ -75,10 +75,13 @@ namespace {
             return "PreDeferredTransparent";
         }
         else if (renderBin == 8) {
-            return "PostDeferredTransparent";
+            return "Overlay";
         }
         else if (renderBin == 16) {
-            return "Overlay";
+            return "PostDeferredTransparent";
+        }
+        else if (renderBin == 32) {
+            return "Sticker";
         }
         else {
             throw ghoul::MissingCaseException();
@@ -571,6 +574,10 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
     ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
 
     for (const Profile::Property& prop : p.properties) {
+        if (prop.name.empty()) {
+            LWARNING("Property name in profile was empty");
+            continue;
+        }
         std::string uriOrRegex = prop.name;
         std::string groupName;
         if (doesUriContainGroupTag(uriOrRegex, groupName)) {
@@ -796,7 +803,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "The URI is interpreted using a wildcard in which '*' is expanded to "
                 "'(.*)' and bracketed components '{ }' are interpreted as group tag "
                 "names. Then, the passed value will be set on all properties that fit "
-                "the regex + group name combination."
+                "the regex + group name combination.",
+                {}
             },
             {
                 "setPropertyValueSingle",
@@ -810,26 +818,28 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the value is interpolated at each step in between. The fourth "
                 "parameter is an optional easing function if a 'duration' has been "
                 "specified. If 'duration' is 0, this parameter value is ignored. "
-                "Otherwise, it has to be one of the easing functions defined in the list below. "
-                "This is the same as calling the setValue method and passing 'single' as "
-                "the fourth argument to setPropertyValue. The fifth argument is another "
-                "Lua script that will be executed when the interpolation provided in "
-                "parameter 3 finishes. "
-                "\n Avaiable easing functions: "
+                "Otherwise, it has to be one of the easing functions defined in the list "
+                "below. This is the same as calling the setValue method and passing "
+                "'single' as the fourth argument to setPropertyValue. The fifth argument "
+                "is another Lua script that will be executed when the interpolation "
+                "provided in parameter 3 finishes.\n Avaiable easing functions: "
                 "Linear, QuadraticEaseIn, QuadraticEaseOut, QuadraticEaseInOut, "
                 "CubicEaseIn, CubicEaseOut, CubicEaseInOut, QuarticEaseIn, "
                 "QuarticEaseOut, QuarticEaseInOut, QuinticEaseIn, QuinticEaseOut, "
-                "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, CircularEaseIn, "
-                "CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, ExponentialEaseOut, "
-                "ExponentialEaseInOut, ElasticEaseIn, ElasticEaseOut, ElasticEaseInOut, "
-                "BounceEaseIn, BounceEaseOut, BounceEaseInOut"
+                "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, "
+                "CircularEaseIn, CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, "
+                "ExponentialEaseOut, ExponentialEaseInOut, ElasticEaseIn, "
+                "ElasticEaseOut, ElasticEaseInOut, BounceEaseIn, BounceEaseOut, "
+                "BounceEaseInOut",
+                {}
             },
             {
                 "getPropertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
-                "Returns the value the property, identified by the provided URI"
+                "Returns the value the property, identified by the provided URI",
+                {}
             },
             codegen::lua::HasProperty,
             codegen::lua::GetProperty,
@@ -844,9 +854,25 @@ scripting::LuaLibrary Scene::luaLibrary() {
             codegen::lua::WorldRotation,
             codegen::lua::SetParent,
             codegen::lua::BoundingSphere,
-            codegen::lua::InteractionSphere
+            codegen::lua::InteractionSphere,
+            codegen::lua::MakeIdentifier
         }
     };
+}
+
+std::string makeIdentifier(std::string s) {
+    // Note that we want to preserve '-' and '_', but replace any other punctuation
+    // marks. Hence, we first convert '_' to whitespaces to avoid them being replaced
+    // in the puncutation check
+    std::replace(s.begin(), s.end(), '_', ' ');
+    std::replace_if(
+        s.begin(),
+        s.end(),
+        [](char c) { return std::ispunct(c) != 0; },
+        '-'
+    );
+    std::replace(s.begin(), s.end(), ' ', '_');
+    return s;
 }
 
 }  // namespace openspace

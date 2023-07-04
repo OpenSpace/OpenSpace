@@ -24,6 +24,7 @@ local SaturnTrail = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SaturnTrail)
 end)

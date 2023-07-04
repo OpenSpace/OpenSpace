@@ -38,15 +38,7 @@
 
 namespace openspace::interaction {
 
-KeybindingManager::KeybindingManager()
-    : DocumentationGenerator(
-        "Keybindings",
-        "keybinding",
-        {
-            { "keybindingTemplate", "${WEB}/documentation/keybinding.hbs" }
-        }
-    )
-{}
+KeybindingManager::KeybindingManager() {}
 
 void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
@@ -119,25 +111,23 @@ const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBinding
     return _keyLua;
 }
 
-std::string KeybindingManager::generateJson() const {
+nlohmann::json KeybindingManager::generateJson() const {
     ZoneScoped;
 
-    std::stringstream json;
-    json << "[";
-    bool first = true;
-    for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
-        if (!first) {
-            json << ",";
-        }
-        first = false;
-        json << "{";
-        json << R"("key": ")" << ghoul::to_string(p.first) << "\",";
-        json << R"("action": ")" << p.second << "\"";
-        json << "}";
-    }
-    json << "]";
+    nlohmann::json json;
 
-    return json.str();
+    for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
+        nlohmann::json keybind;
+        keybind["name"] = ghoul::to_string(p.first);
+        keybind["action"] = p.second;
+        json.push_back(std::move(keybind));
+    }
+    sortJson(json, "name");
+
+    nlohmann::json result;
+    result["name"] = "Keybindings";
+    result["keybindings"] = json;
+    return result;
 }
 
 scripting::LuaLibrary KeybindingManager::luaLibrary() {

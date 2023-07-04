@@ -454,7 +454,7 @@ std::string prunedIdentifier(std::string identifier) {
  * Takes an identifier to a sky browser or sky target, an index to an image and a value
  * for the opacity.
  */
-[[codegen::luawrap]] void setOpacityOfImageLayer(std::string identifier, 
+[[codegen::luawrap]] void setOpacityOfImageLayer(std::string identifier,
                                                  std::string imageUrl, float opacity)
 {
     using namespace openspace;
@@ -525,7 +525,6 @@ std::string prunedIdentifier(std::string identifier) {
         "Name = '" + nameBrowser + "',"
         "Url = '" + url + "',"
         "FaceCamera = false,"
-        "Gamma = 2.2,"
         "CartesianPosition = " + ghoul::to_string(positionBrowser) +
      "}";
 
@@ -824,10 +823,11 @@ std::string prunedIdentifier(std::string identifier) {
         const std::vector<std::string>& images = pair->selectedImages();
         std::for_each(
             images.rbegin(), images.rend(),
-            [&](std::string imageUrl) {
-                const ImageData& image = module->wwtDataHandler().image(imageUrl).value();
+            [module, pair](std::string imageUrl) {
+                std::optional<ImageData> img = module->wwtDataHandler().image(imageUrl);
+                ghoul_assert(img.has_value(), "No image found");
                 // Index of image is used as layer ID as it's unique in the image data set
-                pair->browser()->addImageLayerToWwt(image.imageUrl);
+                pair->browser()->addImageLayerToWwt(img->imageUrl);
             }
         );
     }

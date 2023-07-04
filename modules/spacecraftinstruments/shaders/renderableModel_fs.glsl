@@ -32,7 +32,7 @@ in vec4 vs_positionCameraSpace;
 
 uniform bool has_texture_diffuse;
 uniform sampler2D baseTexture;
-uniform vec3 baseColor;
+uniform vec4 baseColor;
 uniform sampler2D projectionTexture;
 uniform bool performShading;
 uniform float projectionFading;
@@ -47,13 +47,23 @@ const float specularPower = 100.0;
 
 
 Fragment getFragment() {
+  Fragment frag;
+  frag.depth = vs_depth;
+  frag.gPosition = vs_positionCameraSpace;
+  frag.gNormal = vec4(vs_normalViewSpace, 0.0);
+  frag.disableLDR2HDR = true;
+  frag.color.a = 1.0;
+
+  // Base color
   vec4 textureColor;
   if (has_texture_diffuse) {
-      textureColor = texture(baseTexture, vs_st);
+    textureColor = texture(baseTexture, vs_st);
   }
   else {
-      textureColor = vec4(baseColor, 1.0);
+    textureColor = vec4(baseColor.rgb, 1.0);
   }
+
+  // Mix base color with the projection images
   vec4 projectionColor = texture(projectionTexture, vs_st);
   if (projectionColor.a > 0.0) {
     textureColor.rgb = mix(
@@ -62,37 +72,38 @@ Fragment getFragment() {
       projectionFading * projectionColor.a
     );
   }
-  
+
   vec3 diffuseAlbedo = textureColor.rgb;
 
-  Fragment frag;
   if (performShading) {
-    // Some of these values could be passed in as uniforms
-    const vec3 lightColorAmbient = vec3(1.0);
+    // Could be seperated into ambinet, diffuse and specular and passed in as uniforms
     const vec3 lightColor = vec3(1.0);
-    
-    vec3 n = normalize(vs_normalViewSpace);
-    vec3 l = directionToSunViewSpace;
-    vec3 c = normalize(vs_positionCameraSpace.xyz);
-    vec3 r = reflect(l, n);
+    const float specularPower = 100.0;
 
-    float diffuseCosineFactor = dot(n,l);
-    float specularCosineFactor = dot(c,r);
+    // Ambient light
+    vec3 ambientColor = ambientIntensity * lightColor * diffuseAlbedo;
 
-    vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
-    vec3 diffuseColor = 
-        diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0.0);
-    vec3 specularColor = specularIntensity * lightColor * specularAlbedo *
-        pow(max(specularCosineFactor, 0.0), specularPower);
+    // Diffuse light
+    vec3 normal = normalize(vs_normalViewSpace);
+    vec3 lightDirection = directionToSunViewSpace;
+    float diffuseFactor =  max(dot(normal, lightDirection), 0.0);
+    vec3 diffuseColor =
+      diffuseIntensity * lightColor * diffuseFactor * diffuseAlbedo;
 
+    // Specular light
+    vec3 viewDirection = normalize(vs_positionCameraSpace.xyz);
+    vec3 reflectDirection = reflect(lightDirection, normal);
+    float specularFactor =
+      pow(max(dot(viewDirection, reflectDirection), 0.0), specularPower);
+    vec3 specularColor =
+      specularIntensity * lightColor * specularFactor * specularAlbedo;
+
+    // Total light
     frag.color.rgb = ambientColor + diffuseColor + specularColor;
   }
   else {
     frag.color.rgb = diffuseAlbedo;
   }
 
-  frag.color.a = 1.0;
-  frag.depth = vs_depth;
-  // frag.depth = 0.0;
   return frag;
 }

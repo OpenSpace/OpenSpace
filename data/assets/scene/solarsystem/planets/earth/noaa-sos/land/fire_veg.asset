@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Fire Observations and Vegetation - 2002 - 2011"
@@ -23,7 +24,8 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -32,7 +34,7 @@ local layer = {
   Description = Description
 }
 
-local colorbar_fire = {
+local ColorbarFire = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -42,7 +44,7 @@ local colorbar_fire = {
   CartesianPosition = { -0.5, -0.5, -2.0 }
 }
 
-local colorbar_veg = {
+local ColorbarVeg = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -52,21 +54,23 @@ local colorbar_veg = {
   CartesianPosition = { 0.5, -0.5, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar_fire)
-  openspace.addScreenSpaceRenderable(colorbar_veg)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(ColorbarFire)
+  openspace.addScreenSpaceRenderable(ColorbarVeg)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(colorbar_fire)
-  openspace.removeScreenSpaceRenderable(colorbar_veg)
+  openspace.removeScreenSpaceRenderable(ColorbarVeg)
+  openspace.removeScreenSpaceRenderable(ColorbarFire)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(colorbar_fire)
-asset.export(colorbar_veg)
+asset.export(Layer)
+asset.export(ColorbarFire)
+asset.export(ColorbarVeg)
+
 
 
 asset.meta = {

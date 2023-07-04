@@ -5,12 +5,14 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "StarsLabels",
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
     Labels = {
+      Enabled = true,
       File = speck .. "stars.label",
       Color = { 0.4, 0.4, 0.4 },
       Size = 14.7,
@@ -19,8 +21,7 @@ local object = {
     },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    Unit = "pc",
-    DrawLabels = true
+    Unit = "pc"
   },
   GUI = {
     Name = "Stars Labels",
@@ -29,15 +30,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

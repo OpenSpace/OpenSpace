@@ -54,6 +54,7 @@ private:
     properties::DoubleProperty _longitude;
     properties::DoubleProperty _angle;
     properties::BoolProperty _useHeightmap;
+    properties::BoolProperty _useCamera;
 
     RenderableGlobe* _globeNode = nullptr;
 

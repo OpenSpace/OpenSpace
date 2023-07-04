@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
 
 
 
@@ -15,13 +14,13 @@ local Nix = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 0.45E5, 0.45E5, 0.45E5 },
+    Radii = { 45000, 45000, 45000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
   Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
   GUI = {
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix"
   }
 }
 
@@ -47,7 +46,7 @@ local NixTrail = {
   },
   GUI = {
     Name = "Nix Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix"
   }
 }
 
@@ -70,11 +69,12 @@ local NixLabel = {
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
-    Name = "Cheron Label",
-    Path = "/Solar System/Dwarf Planets/Pluto/Moons",
+    Name = "Nix Label",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix",
     Description = "Label for Pluto's moon Nix"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Nix)
@@ -90,6 +90,7 @@ end)
 
 asset.export(Nix)
 asset.export(NixTrail)
+asset.export(NixLabel)
 
 
 

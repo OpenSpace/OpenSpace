@@ -1,6 +1,8 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Mercury Labels",
@@ -8,6 +10,7 @@ local labelsPath = asset.syncedResource({
   Identifier = "mercury_labels",
   Version = 1
 })
+
 
 local Mercury = {
   Identifier = "Mercury",
@@ -71,9 +74,10 @@ local MercuryLabel = {
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Mercury Label",
-    Path = "/Solar System/Planets/Mercury",
+    Path = "/Solar System/Planets/Mercury"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mercury)

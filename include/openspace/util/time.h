@@ -74,6 +74,8 @@ public:
     explicit Time(const std::string& time);
     Time(const Time& other) = default;
 
+    Time& operator=(const Time& other) = default;
+
     /**
      * Initializes the Time singleton.
      *

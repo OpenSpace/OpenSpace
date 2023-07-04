@@ -41,8 +41,10 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/helper.h>
@@ -118,27 +120,42 @@ namespace {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
-        "printed to the log"
+        "printed to the log",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "PropertyVisibility",
         "Property Visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
-        "are"
+        "are",
+        openspace::properties::Property::Visibility::Always
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
         "ShowHiddenSceneGraphNodes",
         "Show Hidden Scene Graph Nodes",
-        "If checked, hidden scene graph nodes are visible in the UI"
+        "If checked, hidden scene graph nodes are visible in the UI",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeDurationInfo = {
+        "FadeDuration",
+        "Fade Duration (seconds)",
+        "Controls how long time the fading in/out takes when enabling/disabling an "
+        "object through a checkbox in the UI. Holding SHIFT while clicking the "
+        "checkbox will enable/disable the renderable without fading, as will setting "
+        "this value to zero.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable All Mouse Inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
-        "double inputs on touch (from both touch input and inserted mouse inputs)"
+        "double inputs on touch (from both touch input and inserted mouse inputs)",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 
@@ -151,6 +168,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
     , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
+    , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
     , _disableAllMouseInputs(DisableMouseInputInfo, false)
 {
     FactoryManager::initialize();
@@ -158,9 +176,6 @@ OpenSpaceEngine::OpenSpaceEngine()
     TransformationManager::initialize();
 
     addProperty(_printEvents);
-    addProperty(_visibility);
-    addProperty(_showHiddenSceneGraphNodes);
-    addProperty(_disableAllMouseInputs);
 
     using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
@@ -170,6 +185,11 @@ OpenSpaceEngine::OpenSpaceEngine()
         { static_cast<int>(Visibility::Developer), "Developer" },
         { static_cast<int>(Visibility::Hidden), "Everything" },
     });
+    addProperty(_visibility);
+
+    addProperty(_showHiddenSceneGraphNodes);
+    addProperty(_fadeOnEnableDuration);
+    addProperty(_disableAllMouseInputs);
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {}
@@ -213,6 +233,7 @@ void OpenSpaceEngine::initialize() {
     );
 
     _printEvents = global::configuration->isPrintingEvents;
+    _visibility = static_cast<int>(global::configuration->propertyVisibility);
 
     std::string cacheFolder = absPath("${CACHE}").string();
     if (global::configuration->usePerProfileCache) {
@@ -470,6 +491,7 @@ void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
     try {
         global::luaConsole->initialize();
+        global::luaConsole->setCommandInputButton(global::configuration->consoleKey);
     }
     catch (ghoul::RuntimeError& e) {
         LERROR("Error initializing Console with error:");
@@ -917,6 +939,8 @@ void OpenSpaceEngine::deinitializeGL() {
 
     LTRACE("OpenSpaceEngine::deinitializeGL(begin)");
 
+    viewportChanged();
+
     // We want to render an image informing the user that we are shutting down
     global::renderEngine->renderEndscreen();
     global::windowDelegate->swapBuffer();
@@ -1017,71 +1041,43 @@ void OpenSpaceEngine::writeDocumentation() {
     path = absPath(path).string() + '/';
 
     // Start the async requests as soon as possible so they are finished when we need them
-    std::future<std::string> root = std::async(
+    std::future<nlohmann::json> settings = std::async(
         &properties::PropertyOwner::generateJson,
         global::rootPropertyOwner
     );
 
-    std::future<std::string> scene = std::async(
+    std::future<nlohmann::json> scene = std::async(
         &properties::PropertyOwner::generateJson,
         _scene.get()
     );
-
-
-    DocEng.addHandlebarTemplates(global::scriptEngine->templatesToRegister());
-    DocEng.addHandlebarTemplates(FactoryManager::ref().templatesToRegister());
-    DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
-
-    std::string json = "{\"documentation\":[";
-
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scripting",
-        global::scriptEngine->jsonName(),
-        global::scriptEngine->generateJson()
-    );
-
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Top Level", DocEng.jsonName(), DocEng.generateJson()
-    );
-
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Factory", FactoryManager::ref().jsonName(), FactoryManager::ref().generateJson()
-    );
-
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Keybindings",
-        global::keybindingManager->jsonName(),
-        global::keybindingManager->generateJson()
-    );
-
     SceneLicenseWriter writer;
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scene License Information", writer.jsonName(), writer.generateJson()
-    );
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scene Properties", "propertylist", root.get()
-    );
+    nlohmann::json scripting = global::scriptEngine->generateJson();
+    nlohmann::json factory = FactoryManager::ref().generateJson();
+    nlohmann::json keybindings = global::keybindingManager->generateJson();
+    nlohmann::json license = writer.generateJsonGroupedByLicense();
+    nlohmann::json sceneProperties = settings.get();
+    nlohmann::json sceneGraph = scene.get();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}})",
-        "Scene Graph Information", "propertylist", scene.get()
-    );
+    sceneProperties["name"] = "Settings";
+    sceneGraph["name"] = "Scene";
 
-    json += "]}";
+    // Add this here so that the generateJson function is the same as before to ensure
+    // backwards compatibility
+    nlohmann::json scriptingResult;
+    scriptingResult["name"] = "Scripting API";
+    scriptingResult["data"] = scripting;
 
-    // Add templates for the JSONs we just registered
-    DocEng.addHandlebarTemplates(global::keybindingManager->templatesToRegister());
-    DocEng.addHandlebarTemplates(writer.templatesToRegister());
-    DocEng.addHandlebarTemplates(global::rootPropertyOwner->templatesToRegister());
+    nlohmann::json documentation = {
+        sceneGraph, sceneProperties, keybindings, license, scriptingResult, factory
+    };
 
-    DocEng.writeDocumentationHtml(path, json);
+    nlohmann::json result;
+    result["documentation"] = documentation;
+
+    std::ofstream out(absPath("${DOCUMENTATION}/documentationData.js"));
+    out << "var data = " << result.dump();
+    out.close();
 }
 
 void OpenSpaceEngine::preSynchronization() {
@@ -1155,8 +1151,6 @@ void OpenSpaceEngine::preSynchronization() {
     if (_isRenderingFirstFrame) {
         setCameraFromProfile(*global::profile);
         setAdditionalScriptsFromProfile(*global::profile);
-
-        global::scriptEngine->runScriptFile(absPath("${SCRIPTS}/developer_settings.lua"));
     }
 
     // Handle callback(s) for change in engine mode
@@ -1179,15 +1173,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     bool master = global::windowDelegate->isMaster();
     global::syncEngine->postSynchronization(SyncEngine::IsMaster(master));
-
-    // This probably doesn't have to be done here every frame, but doing it earlier gives
-    // weird results when using side_by_side stereo --- abock
-    using FR = ghoul::fontrendering::FontRenderer;
-    FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
-
-    FR::defaultProjectionRenderer().setFramebufferSize(
-        global::renderEngine->renderingResolution()
-    );
 
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
@@ -1240,12 +1225,25 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(end)");
 }
 
+void OpenSpaceEngine::viewportChanged() {
+    // Needs to be updated since each render call potentially targets a different
+    // window and/or viewport
+    using FR = ghoul::fontrendering::FontRenderer;
+    FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
+
+    FR::defaultProjectionRenderer().setFramebufferSize(
+        global::renderEngine->renderingResolution()
+    );
+}
+
 void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
     ZoneScoped;
     TracyGpuZone("Render");
     LTRACE("OpenSpaceEngine::render(begin)");
+
+    viewportChanged();
 
     global::renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
 
@@ -1262,6 +1260,8 @@ void OpenSpaceEngine::drawOverlays() {
     ZoneScoped;
     TracyGpuZone("Draw2D");
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
+
+    viewportChanged();
 
     const bool isGuiWindow =
         global::windowDelegate->hasGuiWindow() ?
@@ -1460,7 +1460,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         _shutdown.inShutdown = false;
         global::eventEngine->publishEvent<events::EventApplicationShutdown>(
             events::EventApplicationShutdown::State::Aborted
-            );
+        );
     }
 }
 
@@ -1758,6 +1758,15 @@ void setCameraFromProfile(const Profile& p) {
                     geoScript,
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
+            },
+            [](const Profile::CameraGoToNode& node) {
+                using namespace interaction;
+                NodeCameraStateSpec spec;
+                spec.identifier = node.anchor;
+                spec.height = node.height;
+                spec.useTargetUpDirection = true;
+
+                global::navigationHandler->setCameraFromNodeSpecNextFrame(spec);
             }
         },
         p.camera.value()
@@ -1811,7 +1820,7 @@ void setActionsFromProfile(const Profile& p) {
         action.name = a.name;
         action.documentation = a.documentation;
         action.guiPath = a.guiPath;
-        action.synchronization = interaction::Action::IsSynchronized(a.isLocal);
+        action.isLocal = interaction::Action::IsLocal(a.isLocal);
         global::actionManager->registerAction(std::move(action));
     }
 }

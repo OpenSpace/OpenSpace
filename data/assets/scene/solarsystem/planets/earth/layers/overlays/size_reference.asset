@@ -1,23 +1,25 @@
-local earthAsset = asset.require("../../earth").Earth
-local globeIdentifier = earthAsset.Identifier
+local globe = asset.require("../../earth")
 
-local layer ={
+
+
+local Layer ={
   Identifier = "Size_Reference",
   Name = "Size Reference",
   Enabled = asset.enabled,
   Type = "SizeReferenceTileLayer",
-  Radii = earthAsset.Renderable.Radii
+  Radii = globe.Earth.Renderable.Radii
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

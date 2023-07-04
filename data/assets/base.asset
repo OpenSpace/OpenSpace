@@ -30,11 +30,11 @@ asset.require("scene/digitaluniverse/constellations")
 asset.require("scene/digitaluniverse/deepsky")
 asset.require("scene/digitaluniverse/dwarfs")
 asset.require("scene/digitaluniverse/exoplanets")
+asset.require("scene/digitaluniverse/exoplanets_candidates")
 asset.require("scene/digitaluniverse/globularclusters")
 asset.require("scene/digitaluniverse/grids")
 asset.require("scene/digitaluniverse/groups")
 asset.require("scene/digitaluniverse/h2regions")
-asset.require("scene/digitaluniverse/kepler")
 asset.require("scene/digitaluniverse/localdwarfs")
 asset.require("scene/digitaluniverse/milkyway")
 asset.require("scene/digitaluniverse/milkyway_arm_labels")
@@ -53,57 +53,16 @@ asset.require("scene/digitaluniverse/superclusters")
 asset.require("scene/digitaluniverse/supernovaremnants")
 asset.require("scene/digitaluniverse/tully")
 asset.require("scene/digitaluniverse/voids")
+asset.require("nightsky/nightsky")
 
 asset.require("customization/globebrowsing")
-asset.require("util/default_actions")
+asset.require("actions/default_actions")
 
-local toggle_trails = {
-  Identifier = "os_default.toggle_trails",
-  Name = "Toggle Trails",
-  Command = [[
-    local list = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Enabled");
-    for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
+asset.require("modules/exoplanets/exoplanets")
+asset.require("modules/skybrowser/skybrowser")
 
-    local moonlist = openspace.getProperty("{moonTrail_solarSystem}.Renderable.Enabled");
-    for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
-  ]],
-  Documentation = "Toggles the visibility of planet and moon trails",
-  GuiPath = "/Rendering",
-  IsLocal = false,
-
-  Key = "h"
-}
-
-local toggle_planet_labels = {
-  Identifier = "os_default.toggle_planet_labels",
-  Name = "Toggle planet labels",
-  Command = [[
-    local list = openspace.getProperty("{solarsystem_labels}.Renderable.Enabled");
-    for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
-  ]],
-  Documentation = "Turns on visibility for all solar system labels",
-  GuiPath = "/Rendering",
-  IsLocal = false,
-
-  Key = "l"
-}
-
-local trailAction = asset.require("actions/trails/toggle_trails_planets_moons").toggle_trails
-
-asset.onInitialize(function ()
-  openspace.bindKey("h", trailAction.Identifier)
-
-  openspace.action.registerAction(toggle_planet_labels)
-  openspace.bindKey(toggle_planet_labels.Key, toggle_planet_labels.Identifier)
-
+asset.onInitialize(function()
   openspace.globebrowsing.loadWMSServersFromFile(
     openspace.absPath("${DATA}/globebrowsing_servers.lua")
   )
-end)
-
-asset.onDeinitialize(function ()
-  openspace.clearKey(toggle_trails.Key)
-
-  openspace.action.removeAction(toggle_planet_labels)
-  openspace.clearKey(toggle_planet_labels.Key)
 end)

@@ -1,9 +1,9 @@
-asset.onInitialize(function ()
+asset.onInitialize(function()
   -- Disable the server, add production gui endpoint, and restart server.
   -- The temporary disabling avoids restarting the server on each property change.
-  -- TODO: Add a trigger property to the module to restart the server "manually"
-  -- and remove automatic restart on each property change,
-  -- since frequent restarting seems to be unstable on mac.
+  -- TODO: Add a trigger property to the module to restart the server "manually" and
+  -- remove automatic restart on each property change, since frequent restarting seems to
+  -- be unstable on MacOS.
 
   local enabled = openspace.getPropertyValue("Modules.WebGui.ServerProcessEnabled")
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
@@ -15,7 +15,7 @@ asset.onInitialize(function ()
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", enabled)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   -- TODO: Remove endpoints. As of 2019-10-29, OpenSpace sometimes
   -- crashes when endpoints are removed while the application is closing.
 end)

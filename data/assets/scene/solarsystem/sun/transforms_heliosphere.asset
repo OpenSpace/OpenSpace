@@ -1,6 +1,7 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
-local HEEQ180Kernel = asset.localResource("./kernels/HEEQ180.tf")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local HEEQ180ReferenceFrame = {
   Identifier = "HEEQ180ReferenceFrame",
@@ -15,8 +16,8 @@ local HEEQ180ReferenceFrame = {
       Type = "SpiceRotation",
       SourceFrame = "HEEQ180",
       DestinationFrame = "GALACTIC",
-      Kernels = HEEQ180Kernel
-    },
+      Kernels = asset.localResource("kernels/HEEQ180.tf")
+    }
   },
   GUI = {
     Name = "HEEQ180 Reference Frame",
@@ -24,6 +25,7 @@ local HEEQ180ReferenceFrame = {
     Hidden = true
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HEEQ180ReferenceFrame)
@@ -34,6 +36,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(HEEQ180ReferenceFrame)
+
 
 
 asset.meta = {

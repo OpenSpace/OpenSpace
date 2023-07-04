@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #version __CONTEXT__
 
 layout(location = 0) in vec4 vertPosition;
@@ -36,7 +36,7 @@ uniform mat4 modelViewTransform;
 void main() {
     modelPosition = vertPosition.xyz;
     viewPosition = modelViewTransform*vertPosition;
-    
+
     // project the position to view space
     gl_Position = projectionTransform * viewPosition;
     gl_Position.z = 1.0;

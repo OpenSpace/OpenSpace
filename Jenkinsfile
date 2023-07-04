@@ -16,7 +16,7 @@ if (env.CHANGE_BRANCH) {
 def readDir() {
   def dirsl = [];
   new File("${workspace}").eachDir() {
-    dirs -> println dirs.getName() 
+    dirs -> println dirs.getName()
     if (!dirs.getName().startsWith('.')) {
       dirsl.add(dirs.getName());
     }
@@ -27,7 +27,7 @@ def readDir() {
 def moduleCMakeFlags() {
   def modules = [];
   // using new File doesn't work as it is not allowed in the sandbox
-  
+
   if (isUnix()) {
      modules = sh(returnStdout: true, script: 'ls -d modules/*').trim().split('\n');
   };
@@ -61,8 +61,8 @@ parallel tools: {
       recordIssues(
         id: 'tools-cppcheck',
         tool: cppCheck(pattern: 'build/cppcheck.xml')
-      ) 
-    }  
+      )
+    }
     cleanWs()
   } // node('tools')
 },
@@ -101,7 +101,7 @@ linux_gcc_make: {
             testHelper.runUnitTests('bin/GhoulTest');
           }
         }
-      
+
         stage('linux-gcc-make/test-openspace') {
           timeout(time: 2, unit: 'MINUTES') {
             testHelper.runUnitTests('bin/OpenSpaceTest');
@@ -264,7 +264,7 @@ windows_msvc: {
             testHelper.runUnitTests('bin\\Debug\\codegentest');
           }
         }
-      
+
         stage('windows-msvc/test-sgct') {
           timeout(time: 2, unit: 'MINUTES') {
             testHelper.runUnitTests('bin\\Debug\\SGCTTest');
@@ -282,7 +282,7 @@ windows_msvc: {
             testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest');
           }
         }
-      }      
+      }
       cleanWs()
     } // node('windows')
   }
@@ -343,7 +343,7 @@ macos_make: {
             testHelper.runUnitTests('bin/Debug/OpenSpaceTest');
           }
         }
-      }        
+      }
       cleanWs()
     } // node('macos')
   }
@@ -384,7 +384,7 @@ macos_xcode: {
             testHelper.runUnitTests('bin/Debug/OpenSpaceTest');
           }
         }
-      } 
+      }
        cleanWs()
     } // node('macos')
   }

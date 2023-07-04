@@ -37,30 +37,31 @@
 #include <optional>
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableConstellationsBase";
+
     constexpr openspace::properties::Property::PropertyInfo NamesFileInfo = {
         "NamesFile",
         "Constellation Names File Path",
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full names of the constellations. If this value is empty, the "
-        "abbreviations are used as the full names"
+        "abbreviations are used as the full names",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The line width of the constellation"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden"
+        "The line width of the constellation",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation Selection",
-        "The constellations that are selected are displayed on the celestial sphere"
+        "The constellations that are selected are displayed on the celestial sphere",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     const static openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
@@ -70,9 +71,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableConstellationsBase)]] Parameters {
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
-
         // [[codegen::verbatim(NamesFileInfo.description)]]
         std::optional<std::filesystem::path> namesFile;
 
@@ -100,31 +98,28 @@ RenderableConstellationsBase::RenderableConstellationsBase(
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
     , _selection(SelectionInfo)
-    , _drawLabels(DrawLabelInfo, false)
     , _namesFilename(NamesFileInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     if (p.namesFile.has_value()) {
         _namesFilename = absPath(p.namesFile.value().string()).string();
     }
-    _namesFilename.onChange([&]() { loadConstellationFile(); });
+    _namesFilename.onChange([this]() { loadConstellationFile(); });
     addProperty(_namesFilename);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
     if (p.labels.has_value()) {
-        _drawLabels = p.drawLabels.value_or(_drawLabels);
-        addProperty(_drawLabels);
-
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
     }
 
     _selection.onChange([this]() { selectionPropertyHasChanged(); });
@@ -137,8 +132,7 @@ std::string RenderableConstellationsBase::constellationFullName(
                                                       const std::string& identifier) const
 {
     if (_namesTranslation.empty() || identifier.empty()) {
-        std::string message = "List of constellations or the given identifier was empty";
-        LWARNINGC("RenderableConstellationsBase", message);
+        LWARNING("List of constellations or the given identifier was empty");
         return "";
     }
 
@@ -146,11 +140,9 @@ std::string RenderableConstellationsBase::constellationFullName(
         return _namesTranslation.at(identifier);
     }
 
-    std::string message = fmt::format(
+    throw ghoul::RuntimeError(fmt::format(
         "Identifier '{}' could not be found in list of constellations", identifier
-    );
-    LERRORC("RenderableConstellationsBase", message);
-    return "";
+    ));
 }
 
 void RenderableConstellationsBase::loadConstellationFile() {
@@ -218,7 +210,7 @@ bool RenderableConstellationsBase::isReady() const {
 }
 
 void RenderableConstellationsBase::render(const RenderData& data, RendererTasks&) {
-    if (!_hasLabels || !_drawLabels) {
+    if (!_hasLabels || !_labels->enabled()) {
         return;
     }
 

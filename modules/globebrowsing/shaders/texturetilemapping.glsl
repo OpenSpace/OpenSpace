@@ -166,6 +166,8 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
   c.rgb = #{layerGroup}[#{i}].color;
 #elif (#{#{layerGroup}#{i}LayerType} == 9) // SpoutImageTileLayer
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
+#elif (#{#{layerGroup}#{i}LayerType} == 10) // VideoTileProvider
+  c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #endif
 
   return c;
@@ -185,7 +187,7 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
 
 vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor, float blendFactor) {
 #if (#{#{layerGroup}#{i}BlendMode} == BlendModeDefault)
-  return blendNormal(currentColor, vec4(newColor.rgb, newColor.a * blendFactor)); 
+  return blendNormal(currentColor, vec4(newColor.rgb, newColor.a * blendFactor));
 #elif (#{#{layerGroup}#{i}BlendMode} == BlendModeMultiply)
   return blendMultiply(currentColor, newColor * blendFactor);
 #elif (#{#{layerGroup}#{i}BlendMode} == BlendModeAdd)

@@ -1,0 +1,89 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local EquatorialRotationMatrix = {
+    -0.05487554,  0.4941095, -0.8676661,
+    -0.8734371,  -0.4448296, -0.1980764,
+    -0.483835,    0.7469823,  0.4559838
+}
+
+
+local EquatorialLine = {
+  Identifier = "EquatorialLine",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EquatorialRotationMatrix
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 4.28601E17
+    }
+  },
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    Opacity = 0.8,
+    Color = { 1.0, 1.0, 1.0 },
+    LineWidth = 3.0,
+    GridSegments = { 1, 1 },
+    Radii = { 0.5, 0.5 },
+    Enabled = asset.enabled
+  },
+  GUI = {
+    Name = "Equatorial Line",
+    Path = "/Other/Lines"
+  }
+}
+
+local ShowEquatorialLine = {
+  Identifier = "os.nightsky.ShowEquatorialLine",
+  Name = "Show equatorial line",
+  Command = [[
+    openspace.fadeIn("Scene.EquatorialLine.Renderable")
+  ]],
+  Documentation = "Shows the equatorial line",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local HideEquatorialLine = {
+  Identifier = "os.nightsky.HideEquatorialLine",
+  Name = "Hide equatorial line",
+  Command = [[
+    openspace.fadeOut("Scene.EquatorialLine.Renderable")
+  ]],
+  Documentation = "Hides the equatorial line",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local ToggleEquatorialLine = {
+  Identifier = "os.nightsky.ToggleEquatorialLine",
+  Name = "Toggle equatorial line",
+  Command = "openspace.toggleFade('Scene.EquatorialLine.Renderable')",
+  Documentation = "Toggles the equatorial line visibilty",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EquatorialLine)
+  openspace.action.registerAction(ShowEquatorialLine)
+  openspace.action.registerAction(HideEquatorialLine)
+  openspace.action.registerAction(ToggleEquatorialLine)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleEquatorialLine)
+  openspace.action.removeAction(HideEquatorialLine)
+  openspace.action.removeAction(ShowEquatorialLine)
+  openspace.removeSceneGraphNode(EquatorialLine)
+end)
+
+asset.export(EquatorialLine)
+asset.export("ShowEquatorialLine", ShowEquatorialLine.Identifier)
+asset.export("HideEquatorialLine", HideEquatorialLine.Identifier)
+asset.export("ToggleEquatorialLine", ToggleEquatorialLine.Identifier)

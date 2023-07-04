@@ -1,0 +1,6 @@
+asset.require("actions/trails/toggle_all_trails")
+asset.require("actions/trails/toggle_trails_planets_moons")
+asset.require("actions/planets/planet_lighting")
+asset.require("actions/system/undo_event_fades")
+asset.require("actions/trails/toggle_all_minor_moon_trails")
+asset.require("actions/trails/on_off_all_minor_moons")

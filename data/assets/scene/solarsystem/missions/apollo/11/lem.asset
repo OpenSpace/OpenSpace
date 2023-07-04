@@ -2,12 +2,14 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
+
 local lem_model = asset.syncedResource({
   Name = "Apollo Lem Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_lem_model",
   Version = 4
 })
+
 
 local Apollo11Lem = {
   Identifier = "Apollo11Lem",
@@ -24,8 +26,8 @@ local Apollo11Lem = {
   },
   GUI = {
     Name = "Apollo 11 Lem Position",
-      Path = "/Solar System/Missions/Apollo/11"
-}
+    Path = "/Solar System/Missions/Apollo/11"
+  }
 }
 
 local Apollo11LemModel = {
@@ -55,6 +57,7 @@ local Apollo11LemModel = {
     Path = "/Solar System/Missions/Apollo/11"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo11Lem)

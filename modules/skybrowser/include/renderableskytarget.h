@@ -61,7 +61,6 @@ public:
     glm::dvec3 rightVector() const;
     glm::dvec3 upVector() const;
 private:
-    // Properties
     properties::FloatProperty _crossHairSize;
     properties::FloatProperty _showRectangleThreshold;
     properties::FloatProperty _lineWidth;

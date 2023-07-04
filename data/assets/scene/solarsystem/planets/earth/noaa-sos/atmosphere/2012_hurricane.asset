@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Hurricane Season - 2012"
@@ -24,11 +25,12 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
+
 local namesDestination = syncedDirectory .. "names"
 local satDestination = syncedDirectory .. "sat"
 
 
-local layer_names = {
+local LayerNames = {
   Identifier = Identifier .. "-names",
   Name = Name .. " (Names)",
   Type = "ImageSequenceTileLayer",
@@ -36,7 +38,7 @@ local layer_names = {
   Description = Description
 }
 
-local layer_sat = {
+local LayerSat = {
   Identifier = Identifier .. "-sat",
   Name = Name .. " (Satellites)",
   Type = "TemporalTileLayer",
@@ -49,6 +51,7 @@ local layer_sat = {
   },
   Description = Description
 }
+
 
 asset.onInitialize(function()
   if not openspace.directoryExists(namesDestination) then
@@ -64,17 +67,18 @@ asset.onInitialize(function()
     openspace.unzipFile(syncedDirectory .. "sat-4.zip", satDestination, true)
   end
 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_names)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_sat)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNames)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerSat)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_names)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_sat)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerSat)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNames)
 end)
 
-asset.export(layer_names)
-asset.export(layer_sat)
+asset.export(LayerNames)
+asset.export(LayerSat)
+
 
 
 asset.meta = {

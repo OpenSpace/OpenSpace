@@ -1,11 +1,13 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local orbit = asset.syncedResource({
   Name = "Itokawa Orbit",
   Type = "HttpSynchronization",
   Identifier = "itokawa_horizons",
-  Version = 1
+  Version = 2
 })
 
 local model = asset.syncedResource({
@@ -14,6 +16,7 @@ local model = asset.syncedResource({
   Identifier = "itokawa_model",
   Version = 1
 })
+
 
 local ItokawaTrail = {
   Identifier = "ItokawaTrail",
@@ -68,7 +71,6 @@ local ItokawaModel = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true,
     SpecularIntensity = 0.0
   },
   GUI = {
@@ -78,6 +80,7 @@ local ItokawaModel = {
       https://solarsystem.nasa.gov/resources/2377/asteroid-itokawa-3d-model]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ItokawaPosition)
@@ -94,6 +97,7 @@ end)
 asset.export(ItokawaPosition)
 asset.export(ItokawaTrail)
 asset.export(ItokawaModel)
+
 
 
 asset.meta = {

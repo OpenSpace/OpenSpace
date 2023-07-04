@@ -201,7 +201,7 @@ void EventHandler::initialize() {
 
     global::callback::touchDetected->emplace(
         global::callback::touchDetected->begin(),
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             if (!_browserInstance) {
                 return false;
             }
@@ -241,7 +241,7 @@ void EventHandler::initialize() {
 
     global::callback::touchUpdated->emplace(
         global::callback::touchUpdated->begin(),
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             if (!_browserInstance || _validTouchStates.empty()) {
                 return false;
             }
@@ -249,7 +249,7 @@ void EventHandler::initialize() {
             auto it = std::find_if(
                 _validTouchStates.cbegin(),
                 _validTouchStates.cend(),
-                [&](const TouchInput& state){
+                [&input](const TouchInput& state) {
                     return state.fingerId == input.fingerId &&
                            state.touchDeviceId == input.touchDeviceId;
                 }
@@ -281,7 +281,7 @@ void EventHandler::initialize() {
 
     global::callback::touchExit->emplace(
         global::callback::touchExit->begin(),
-        [&](TouchInput input) {
+        [this](TouchInput input) {
             if (!_browserInstance) {
                 return;
             }
@@ -292,7 +292,7 @@ void EventHandler::initialize() {
             const auto found = std::find_if(
                 _validTouchStates.cbegin(),
                 _validTouchStates.cend(),
-                [&](const TouchInput& state){
+                [&input](const TouchInput& state) {
                     return state.fingerId == input.fingerId &&
                     state.touchDeviceId == input.touchDeviceId;
                 }
@@ -383,6 +383,8 @@ bool EventHandler::mousePositionCallback(double x, double y) {
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     _mousePosition.x = floor(static_cast<float>(x) * dpiScaling.x);
     _mousePosition.y = floor(static_cast<float>(y) * dpiScaling.y);
+    _mousePosition =
+        global::windowDelegate->mousePositionViewportRelative(_mousePosition);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
     global::interactionMonitor->markInteraction();
 
@@ -427,17 +429,36 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     return _browserInstance->sendKeyEvent(keyEvent);
 }
 
-bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction) {
+bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
     switch (key) {
-        case Key::F5:
-            _browserInstance->reloadBrowser();
-            return true;
         case Key::A:
             if (hasKeyModifier(mod, KeyModifier::Super)) {
                 _browserInstance->selectAll();
                 return true;
             }
             return false;
+        case Key::Minus:
+            if (hasKeyModifier(mod, KeyModifier::Shift)) {
+                CefKeyEvent keyEvent;
+                keyEvent.windows_key_code = mapFromGlfwToWindows(Key(45));
+                keyEvent.character = mapFromGlfwToCharacter(Key(45));
+                keyEvent.native_key_code = mapFromGlfwToNative(Key(45));
+                keyEvent.modifiers = static_cast<uint32>(mod);
+                keyEvent.type = keyEventType(action);
+                _browserInstance->sendKeyEvent(keyEvent);
+                return true;
+            }
+            return false;
+        case Key::Period: {
+            CefKeyEvent keyEvent;
+            keyEvent.windows_key_code = mapFromGlfwToWindows(Key::KeypadDecimal);
+            keyEvent.character = mapFromGlfwToCharacter(Key::KeypadDecimal);
+            keyEvent.native_key_code = mapFromGlfwToNative(Key::KeypadDecimal);
+            keyEvent.modifiers = static_cast<uint32>(mod);
+            keyEvent.type = keyEventType(action);
+            _browserInstance->sendKeyEvent(keyEvent);
+            return true;
+        }
         default:
             return false;
     }

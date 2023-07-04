@@ -1,14 +1,14 @@
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 local models = asset.syncedResource({
   Name = "Bennu Models",
   Type = "HttpSynchronization",
   Identifier = "bennu_models",
   Version = 2
 })
-
-local BENNU_BODY = "2101955"
 
 local images = asset.syncedResource({
   Name = "Bennu Images Approach",
@@ -24,6 +24,9 @@ local imagesA = asset.syncedResource({
   Version = 1
 })
 
+
+local BennuBodyId = "2101955"
+
 local BennuProjection = {
   Identifier = "BennuProjection",
   Parent = transforms.BennuBarycenter.Identifier,
@@ -32,18 +35,18 @@ local BennuProjection = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_BENNU",
       DestinationFrame = "GALACTIC"
-    },
+    }
   },
   Renderable = {
     Enabled = true,
     Type = "RenderableModelProjection",
-    Body = BENNU_BODY,
+    Body = BennuBodyId,
     GeometryFile = models .. "Bennu_v20_200k_an.obj",
     Projection = {
-      Sequence   = { images, imagesA },
+      Sequence = { images, imagesA },
       SequenceType = "image-sequence",
-      Observer   = "OSIRIS-REX",
-      Target     = BENNU_BODY,
+      Observer = "OSIRIS-REX",
+      Target = BennuBodyId,
       Aberration = "NONE",
       TextureMap = true,
       DataInputTranslation = {
@@ -54,7 +57,7 @@ local BennuProjection = {
           },
         },
         Target = {
-          Read  = {
+          Read = {
             "TARGET_NAME",
             "INSTRUMENT_HOST_NAME",
             "INSTRUMENT_ID",
@@ -80,6 +83,7 @@ local BennuProjection = {
     }
   },
   GUI = {
+    Name = "Bennu Projection",
     Path = "/Solar System/Asteroid"
   }
 }
@@ -91,7 +95,7 @@ local BennuTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = BENNU_BODY,
+      Target = BennuBodyId,
       Observer = "SSB"
     },
     Color = { 0.4, 0.0, 0.7 },
@@ -104,6 +108,7 @@ local BennuTrail = {
     Path = "/Solar System/Asteroid"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(BennuProjection)

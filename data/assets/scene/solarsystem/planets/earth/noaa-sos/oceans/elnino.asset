@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "El Nino and La Nina Seasonal Impacts"
@@ -22,52 +23,55 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_elnino_summer = {
+
+local LayerElninoSummer = {
   Identifier = Identifier .. "-elnino_summer",
   Name = Name .. " (El Nino, summer)",
   FilePath = syncedDirectory .. "elnino-summer-no-map-transparent-shapes.png",
   Description = Description
 }
 
-local layer_elnino_winter = {
+local LayerElninoWinter = {
   Identifier = Identifier .. "-elnino_winter",
   Name = Name .. " (El Nino, winter)",
   FilePath = syncedDirectory .. "elnino-winter-no-map-transparent-shapes.png",
   Description = Description
 }
 
-local layer_lanina_summer = {
+local LayerLaninaSummer = {
   Identifier = Identifier .. "-lanina_summer",
   Name = Name .. " (La Nina, summer)",
   FilePath = syncedDirectory .. "lanina-summer-no-map-transparent-shapes.png",
   Description = Description
 }
 
-local layer_lanina_winter = {
+local LayerLaninaWinter = {
   Identifier = Identifier .. "-lanina_winter",
   Name = Name .. " (La Nina, winter)",
   FilePath = syncedDirectory .. "lanina-winter-no-map-transparent-shapes.png",
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_elnino_summer)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_elnino_winter)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_lanina_summer)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_lanina_winter)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerElninoSummer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerElninoWinter)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerLaninaSummer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerLaninaWinter)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_elnino_summer)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_elnino_winter)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_lanina_summer)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_lanina_winter)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerLaninaWinter)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerLaninaSummer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerElninoWinter)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerElninoSummer)
 end)
 
-asset.export(layer_elnino_summer)
-asset.export(layer_elnino_winter)
-asset.export(layer_lanina_summer)
-asset.export(layer_lanina_winter)
+asset.export(LayerElninoSummer)
+asset.export(LayerElninoWinter)
+asset.export(LayerLaninaSummer)
+asset.export(LayerLaninaWinter)
+
 
 
 asset.meta = {

@@ -29,14 +29,16 @@
 #include <QDoubleValidator>
 #include <QFrame>
 #include <QGridLayout>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
-#include <QKeyEvent>
-#include <QTabWidget> 
+#include <QTabWidget>
+#include <QPlainTextEdit>
 
 namespace {
-    constexpr int CameraTypeNav = 0;
-    constexpr int CameraTypeGeo = 1;
+    constexpr int CameraTypeNode = 0;
+    constexpr int CameraTypeNav = 1;
+    constexpr int CameraTypeGeo = 2;
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
@@ -53,6 +55,19 @@ namespace {
         }
         return true;
     }
+
+    bool isNumericalLargerThan(QLineEdit* le, float limit) {
+        QString s = le->text();
+        bool validConversion = false;
+        float value = s.toFloat(&validConversion);
+        if (!validConversion) {
+            return false;
+        }
+        if (value > limit) {
+            return true;
+        }
+        return false;
+    }
 } // namespace
 
 CameraDialog::CameraDialog(QWidget* parent,
@@ -66,6 +81,14 @@ CameraDialog::CameraDialog(QWidget* parent,
     if (_camera->has_value()) {
         const openspace::Profile::CameraType& type = **_camera;
         std::visit(overloaded {
+            [this](const openspace::Profile::CameraGoToNode& node) {
+                _tabWidget->setCurrentIndex(CameraTypeNode);
+                _nodeState.anchor->setText(QString::fromStdString(node.anchor));
+                if (node.height.has_value()) {
+                    _nodeState.height->setText(QString::number(*node.height, 'g', 17));
+                }
+                tabSelect(CameraTypeNode);
+            },
             [this](const openspace::Profile::CameraNavState& nav) {
                 _tabWidget->setCurrentIndex(CameraTypeNav);
                 _navState.anchor->setText(QString::fromStdString(nav.anchor));
@@ -114,7 +137,11 @@ CameraDialog::CameraDialog(QWidget* parent,
         }, type);
     }
     else {
-        _tabWidget->setCurrentIndex(CameraTypeNav);
+        _tabWidget->setCurrentIndex(CameraTypeNode);
+
+        _nodeState.anchor->clear();
+        _nodeState.height->clear();
+
         _navState.anchor->clear();
         _navState.aim->clear();
         _navState.refFrame->clear();
@@ -138,6 +165,7 @@ void CameraDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     _tabWidget = new QTabWidget;
     connect(_tabWidget, &QTabWidget::tabBarClicked, this, &CameraDialog::tabSelect);
+    _tabWidget->addTab(createNodeWidget(), "Scene Graph Node");
     _tabWidget->addTab(createNavStateWidget(), "Navigation State");
     _tabWidget->addTab(createGeoWidget(), "Geo State");
     layout->addWidget(_tabWidget);
@@ -162,134 +190,234 @@ void CameraDialog::createWidgets() {
     }
 }
 
-QWidget* CameraDialog::createNavStateWidget() {
-    QWidget* box = new QWidget;
-    QGridLayout* layout = new QGridLayout(box);
+QWidget* CameraDialog::createNodeWidget() {
+    QWidget* tab = new QWidget;
+    QVBoxLayout* mainLayout = new QVBoxLayout(tab);
 
-    layout->addWidget(new QLabel("Anchor:"), 0, 0);
-    _navState.anchor = new QLineEdit;
-    _navState.anchor->setToolTip("Anchor camera to this node");
-    layout->addWidget(_navState.anchor, 0, 1);
-
-    layout->addWidget(new QLabel("Aim:"), 1, 0);
-    _navState.aim = new QLineEdit;
-    _navState.aim->setToolTip(
-        "If specified, camera will be aimed at this node while keeping the anchor node "
-        "in the same view location"
+    QLabel* description = new QLabel;
+    description->setWordWrap(true);
+    description->setAlignment(Qt::AlignCenter);
+    description->setObjectName("camera-description");
+    description->setText(
+        "Set the camera position based on a given scene graph node. \n \n "
+        "Automatically computes a position that frames the object, and if possible, "
+        "shows it from Sun-lit side. The exact position might change between start-ups."
     );
-    _navState.aim->setPlaceholderText("optional");
-    layout->addWidget(_navState.aim, 1, 1);
 
-    layout->addWidget(new QLabel("Reference Frame:"), 2, 0);
-    _navState.refFrame = new QLineEdit;
-    _navState.refFrame->setToolTip("Camera location in reference to this frame");
-    _navState.refFrame->setPlaceholderText("optional");
-    layout->addWidget(_navState.refFrame, 2, 1);
+    mainLayout->addWidget(description);
 
-    layout->addWidget(new QLabel("Position:"), 3, 0);
     {
-        QWidget* posBox = new QWidget;
-        QBoxLayout* posLayout = new QHBoxLayout(posBox);
-        posLayout->setContentsMargins(0, 0, 0, 0);
-        posLayout->addWidget(new QLabel("X [m]"));
-        _navState.positionX = new QLineEdit;
-        _navState.positionX->setValidator(new QDoubleValidator);
-        _navState.positionX->setToolTip("Camera position vector (x) [m]");
-        posLayout->addWidget(_navState.positionX);
+        QWidget* box = new QWidget;
+        QGridLayout* layout = new QGridLayout(box);
 
-        posLayout->addWidget(new QLabel("Y [m]"));
-        _navState.positionY = new QLineEdit;
-        _navState.positionY->setValidator(new QDoubleValidator);
-        _navState.positionY->setToolTip("Camera position vector (y) [m]");
-        posLayout->addWidget(_navState.positionY);
+        layout->addWidget(new QLabel("Anchor Node:"), 0, 0);
+        _nodeState.anchor = new QLineEdit;
+        _nodeState.anchor->setToolTip("Anchor camera to this scene graph node");
+        layout->addWidget(_nodeState.anchor, 0, 1);
 
-        posLayout->addWidget(new QLabel("Z [m]"));
-        _navState.positionZ = new QLineEdit;
-        _navState.positionZ->setValidator(new QDoubleValidator);
-        _navState.positionZ->setToolTip("Camera position vector (z) [m]");
-        posLayout->addWidget(_navState.positionZ);
-        layout->addWidget(posBox, 3, 1);
+        layout->addWidget(new QLabel("Height [m]:"), 1, 0);
+        _nodeState.height = new QLineEdit;
+        _nodeState.height->setValidator(new QDoubleValidator);
+        _nodeState.height->setToolTip(
+            "If specified, the camera will placed at the given height away from object. "
+            "The height is computed from the bounding sphere of the anchor node"
+        );
+        _nodeState.height->setPlaceholderText("optional");
+        layout->addWidget(_nodeState.height, 1, 1);
+
+        mainLayout->addWidget(box);
     }
 
-    layout->addWidget(new QLabel("Up:"), 4, 0);
+    // Add spacer at the end to prevent previous components from growing as much
+    mainLayout->addSpacerItem(
+        new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding)
+    );
+
+    return tab;
+}
+
+QWidget* CameraDialog::createNavStateWidget() {
+    QWidget* tab = new QWidget;
+    QVBoxLayout* mainLayout = new QVBoxLayout(tab);
+
+    QLabel* description = new QLabel;
+    description->setWordWrap(true);
+    description->setAlignment(Qt::AlignCenter);
+    description->setObjectName("camera-description");
+    description->setText(
+        "Set the camera position from a navigation state. \n"
+        "Allows for setting an exact view or camera position at start-up."
+    );
+
+    mainLayout->addWidget(description);
+
     {
-        QWidget* upBox = new QWidget;
-        QBoxLayout* upLayout = new QHBoxLayout(upBox);
-        upLayout->setContentsMargins(0, 0, 0, 0);
-        upLayout->addWidget(new QLabel("X"));
-        _navState.upX = new QLineEdit;
-        _navState.upX->setValidator(new QDoubleValidator);
-        _navState.upX->setToolTip("Camera up vector (x)");
-        _navState.upX->setPlaceholderText("semioptional");
-        upLayout->addWidget(_navState.upX);
+        QWidget* box = new QWidget;
+        QGridLayout* layout = new QGridLayout(box);
 
-        upLayout->addWidget(new QLabel("Y"));
-        _navState.upY = new QLineEdit;
-        _navState.upY->setValidator(new QDoubleValidator);
-        _navState.upY->setToolTip("Camera up vector (y)");
-        _navState.upY->setPlaceholderText("semioptional");
-        upLayout->addWidget(_navState.upY);
+        layout->addWidget(new QLabel("Anchor:"), 0, 0);
+        _navState.anchor = new QLineEdit;
+        _navState.anchor->setToolTip("Anchor camera to this node");
+        layout->addWidget(_navState.anchor, 0, 1);
 
-        upLayout->addWidget(new QLabel("Z"));
-        _navState.upZ = new QLineEdit;
-        _navState.upZ->setValidator(new QDoubleValidator);
-        _navState.upZ->setToolTip("Camera up vector (z)");
-        _navState.upZ->setPlaceholderText("semioptional");
-        upLayout->addWidget(_navState.upZ);
-        layout->addWidget(upBox, 4, 1);
+        layout->addWidget(new QLabel("Aim:"), 1, 0);
+        _navState.aim = new QLineEdit;
+        _navState.aim->setToolTip(
+            "If specified, camera will be aimed at this node while keeping the anchor node "
+            "in the same view location"
+        );
+        _navState.aim->setPlaceholderText("optional");
+        layout->addWidget(_navState.aim, 1, 1);
+
+        layout->addWidget(new QLabel("Reference Frame:"), 2, 0);
+        _navState.refFrame = new QLineEdit;
+        _navState.refFrame->setToolTip("Camera location in reference to this frame");
+        _navState.refFrame->setPlaceholderText("optional");
+        layout->addWidget(_navState.refFrame, 2, 1);
+
+        layout->addWidget(new QLabel("Position:"), 3, 0);
+        {
+            QWidget* posBox = new QWidget;
+            QBoxLayout* posLayout = new QHBoxLayout(posBox);
+            posLayout->setContentsMargins(0, 0, 0, 0);
+            posLayout->addWidget(new QLabel("X [m]"));
+            _navState.positionX = new QLineEdit;
+            _navState.positionX->setValidator(new QDoubleValidator);
+            _navState.positionX->setToolTip("Camera position vector (x) [m]");
+            posLayout->addWidget(_navState.positionX);
+
+            posLayout->addWidget(new QLabel("Y [m]"));
+            _navState.positionY = new QLineEdit;
+            _navState.positionY->setValidator(new QDoubleValidator);
+            _navState.positionY->setToolTip("Camera position vector (y) [m]");
+            posLayout->addWidget(_navState.positionY);
+
+            posLayout->addWidget(new QLabel("Z [m]"));
+            _navState.positionZ = new QLineEdit;
+            _navState.positionZ->setValidator(new QDoubleValidator);
+            _navState.positionZ->setToolTip("Camera position vector (z) [m]");
+            posLayout->addWidget(_navState.positionZ);
+            layout->addWidget(posBox, 3, 1);
+        }
+
+        layout->addWidget(new QLabel("Up:"), 4, 0);
+        {
+            QWidget* upBox = new QWidget;
+            QBoxLayout* upLayout = new QHBoxLayout(upBox);
+            upLayout->setContentsMargins(0, 0, 0, 0);
+            upLayout->addWidget(new QLabel("X"));
+            _navState.upX = new QLineEdit;
+            _navState.upX->setValidator(new QDoubleValidator);
+            _navState.upX->setToolTip("Camera up vector (x)");
+            _navState.upX->setPlaceholderText("semioptional");
+            upLayout->addWidget(_navState.upX);
+
+            upLayout->addWidget(new QLabel("Y"));
+            _navState.upY = new QLineEdit;
+            _navState.upY->setValidator(new QDoubleValidator);
+            _navState.upY->setToolTip("Camera up vector (y)");
+            _navState.upY->setPlaceholderText("semioptional");
+            upLayout->addWidget(_navState.upY);
+
+            upLayout->addWidget(new QLabel("Z"));
+            _navState.upZ = new QLineEdit;
+            _navState.upZ->setValidator(new QDoubleValidator);
+            _navState.upZ->setToolTip("Camera up vector (z)");
+            _navState.upZ->setPlaceholderText("semioptional");
+            upLayout->addWidget(_navState.upZ);
+            layout->addWidget(upBox, 4, 1);
+        }
+
+        layout->addWidget(new QLabel("Yaw angle:"), 5, 0);
+        _navState.yaw = new QLineEdit;
+        _navState.yaw->setValidator(new QDoubleValidator);
+        _navState.yaw->setToolTip("Yaw angle +/- 360 degrees");
+        _navState.yaw->setPlaceholderText("optional");
+        layout->addWidget(_navState.yaw, 5, 1);
+
+        layout->addWidget(new QLabel("Pitch angle:"), 6, 0);
+        _navState.pitch = new QLineEdit;
+        _navState.pitch->setValidator(new QDoubleValidator);
+        _navState.pitch->setToolTip("Pitch angle +/- 360 degrees");
+        _navState.pitch->setPlaceholderText("optional");
+        layout->addWidget(_navState.pitch, 6, 1);
+
+        mainLayout->addWidget(box);
     }
 
-    layout->addWidget(new QLabel("Yaw angle:"), 5, 0);
-    _navState.yaw = new QLineEdit;
-    _navState.yaw->setValidator(new QDoubleValidator);
-    _navState.yaw->setToolTip("Yaw angle +/- 360 degrees");
-    _navState.yaw->setPlaceholderText("optional");
-    layout->addWidget(_navState.yaw, 5, 1);
-
-    layout->addWidget(new QLabel("Pitch angle:"), 6, 0);
-    _navState.pitch = new QLineEdit;
-    _navState.pitch->setValidator(new QDoubleValidator);
-    _navState.pitch->setToolTip("Pitch angle +/- 360 degrees");
-    _navState.pitch->setPlaceholderText("optional");
-    layout->addWidget(_navState.pitch, 6, 1);
-
-    return box;
+    return tab;
 }
 
 QWidget* CameraDialog::createGeoWidget() {
-    QWidget* box = new QWidget;
-    QGridLayout* layout = new QGridLayout(box);
+    QWidget* tab = new QWidget;
+    QVBoxLayout* mainLayout = new QVBoxLayout(tab);
 
-    layout->addWidget(new QLabel("Anchor:"), 0, 0);
-    _geoState.anchor = new QLineEdit;
-    _geoState.anchor->setToolTip("Anchor camera to this globe (planet/moon)");
-    layout->addWidget(_geoState.anchor, 0, 1);
+    QLabel* description = new QLabel;
+    description->setWordWrap(true);
+    description->setAlignment(Qt::AlignCenter);
+    description->setObjectName("camera-description");
+    description->setText(
+        "Sets the camera position from a geodetic position of a globe (e.g a planet/moon)."
+    );
 
-    layout->addWidget(new QLabel("Latitude"), 1, 0);
-    _geoState.latitude = new QLineEdit;
-    _geoState.latitude->setValidator(new QDoubleValidator);
-    _geoState.latitude->setToolTip("Latitude of camera focus point (+/- 90 degrees)");
-    layout->addWidget(_geoState.latitude, 1, 1);
+    mainLayout->addWidget(description);
 
-    layout->addWidget(new QLabel("Longitude"), 2, 0);
-    _geoState.longitude = new QLineEdit;
-    _geoState.longitude->setValidator(new QDoubleValidator);
-    _geoState.longitude->setToolTip("Longitude of camera focus point (+/- 180 degrees)");
-    layout->addWidget(_geoState.longitude, 2, 1);
+    {
 
-    layout->addWidget(new QLabel("Altitude [m]"), 3, 0);
-    _geoState.altitude = new QLineEdit;
-    _geoState.altitude->setValidator(new QDoubleValidator);
-    _geoState.altitude->setToolTip("Altitude of camera (meters)");
-    _geoState.altitude->setPlaceholderText("optional");
-    layout->addWidget(_geoState.altitude, 3, 1);
+        QWidget* box = new QWidget;
+        QGridLayout* layout = new QGridLayout(box);
 
-    return box;
+        layout->addWidget(new QLabel("Anchor:"), 0, 0);
+        _geoState.anchor = new QLineEdit;
+        _geoState.anchor->setToolTip("Anchor camera to this globe (planet/moon)");
+        layout->addWidget(_geoState.anchor, 0, 1);
+
+        layout->addWidget(new QLabel("Latitude"), 1, 0);
+        _geoState.latitude = new QLineEdit;
+        _geoState.latitude->setValidator(new QDoubleValidator);
+        _geoState.latitude->setToolTip("Latitude of camera focus point (+/- 90 degrees)");
+        layout->addWidget(_geoState.latitude, 1, 1);
+
+        layout->addWidget(new QLabel("Longitude"), 2, 0);
+        _geoState.longitude = new QLineEdit;
+        _geoState.longitude->setValidator(new QDoubleValidator);
+        _geoState.longitude->setToolTip("Longitude of camera focus point (+/- 180 degrees)");
+        layout->addWidget(_geoState.longitude, 2, 1);
+
+        layout->addWidget(new QLabel("Altitude [m]"), 3, 0);
+        _geoState.altitude = new QLineEdit;
+        _geoState.altitude->setValidator(new QDoubleValidator);
+        _geoState.altitude->setToolTip("Altitude of camera (meters)");
+        _geoState.altitude->setPlaceholderText("optional");
+        layout->addWidget(_geoState.altitude, 3, 1);
+
+        mainLayout->addWidget(box);
+    }
+
+    // Add spacer at the end to prevent previous components from growing as much
+    mainLayout->addSpacerItem(
+        new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding)
+    );
+
+    return tab;
 }
 
 bool CameraDialog::areRequiredFormsFilledAndValid() {
     bool allFormsOk = true;
     _errorMsg->clear();
+
+    if (_tabWidget->currentIndex() == CameraTypeNode) {
+        if (_nodeState.anchor->text().isEmpty()) {
+            allFormsOk = false;
+            addErrorMsg("Anchor is empty");
+        }
+        if (!_nodeState.height->text().isEmpty()) {
+            if (!isNumericalLargerThan(_nodeState.height, 0.f)) {
+                allFormsOk = false;
+                addErrorMsg("Height must be larger than zero");
+            }
+        }
+    }
 
     if (_tabWidget->currentIndex() == CameraTypeNav) {
         if (_navState.anchor->text().isEmpty()) {
@@ -355,6 +483,7 @@ bool CameraDialog::areRequiredFormsFilledAndValid() {
             addErrorMsg("Longitude value is not in +/- 180.0 range");
         }
     }
+
     return allFormsOk;
 }
 
@@ -372,7 +501,15 @@ void CameraDialog::approved() {
         return;
     }
 
-    if (_tabWidget->currentIndex() == CameraTypeNav) {
+    if (_tabWidget->currentIndex() == CameraTypeNode) {
+        openspace::Profile::CameraGoToNode node;
+        node.anchor = _nodeState.anchor->text().toStdString();
+        if (!_nodeState.height->text().isEmpty()) {
+            node.height = _nodeState.height->text().toDouble();
+        }
+        *_camera = std::move(node);
+    }
+    else if (_tabWidget->currentIndex() == CameraTypeNav) {
         openspace::Profile::CameraNavState nav;
         nav.anchor = _navState.anchor->text().toStdString();
         nav.aim = _navState.aim->text().toStdString();
@@ -425,10 +562,13 @@ void CameraDialog::approved() {
 void CameraDialog::tabSelect(int tabIndex) {
     _errorMsg->clear();
 
-    if (tabIndex == 0) {
+    if (tabIndex == CameraTypeNode) {
+        _nodeState.anchor->setFocus(Qt::OtherFocusReason);
+    }
+    else if (tabIndex == CameraTypeNav) {
         _navState.anchor->setFocus(Qt::OtherFocusReason);
     }
-    else if (tabIndex == 1) {
+    else if (tabIndex == CameraTypeGeo) {
         _geoState.anchor->setFocus(Qt::OtherFocusReason);
     }
     else {

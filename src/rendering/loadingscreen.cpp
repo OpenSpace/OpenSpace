@@ -165,7 +165,7 @@ void LoadingScreen::render() {
 
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate->currentSubwindowSize()) * dpiScaling;
+        glm::vec2(global::windowDelegate->firstWindowResolution()) * dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 

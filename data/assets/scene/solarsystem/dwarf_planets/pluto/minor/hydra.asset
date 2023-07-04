@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
+local kernels = asset.require("../kernels")
 
 
 
@@ -10,19 +10,18 @@ local Hydra = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "HYDRA",
-      Observer = "PLUTO BARYCENTER",
-      Kernels = kernels
+      Observer = "PLUTO BARYCENTER"
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 0.53E5, 0.53E5, 0.53E5 },
+    Radii = { 53000, 53000, 53000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
   Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
   GUI = {
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Hydra"
   }
 }
 
@@ -48,7 +47,7 @@ local HydraTrail = {
   },
   GUI = {
     Name = "Hydra Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Hydra"
   }
 }
 
@@ -71,13 +70,16 @@ local HydraLabel = {
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
-    Name = "Cheron Label",
-    Path = "/Solar System/Dwarf Planets/Pluto/Moons",
+    Name = "Hydra Label",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Hydra",
     Description = "Label for Pluto's moon Hydra"
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.PlutoKernels)
+
   openspace.addSceneGraphNode(Hydra)
   openspace.addSceneGraphNode(HydraTrail)
   openspace.addSceneGraphNode(HydraLabel)
@@ -87,6 +89,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HydraLabel)
   openspace.removeSceneGraphNode(HydraTrail)
   openspace.removeSceneGraphNode(Hydra)
+
+  openspace.spice.unloadKernel(kernels.PlutoKernels)
 end)
 
 asset.export(Hydra)
