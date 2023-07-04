@@ -94,13 +94,19 @@ void main() {
     dvec2 sizes = abs(halfViewSize * (topRight.xy - bottomLeft.xy));
     double diagonalSize = length(sizes);
 
+    // @TODO: OBS! This leads to the rings disappearing when flying close to a
+    // star or planet. Why? Precision error?
     double correctionScale = 1.0;
-    if (diagonalSize > maxBillboardSize) {
+    if (diagonalSize > maxBillboardSize && diagonalSize > 0) {
         correctionScale = double(maxBillboardSize) / diagonalSize;
     }
-    else if (diagonalSize < minBillboardSize) {
+    else if (diagonalSize < minBillboardSize && diagonalSize > 0) {
         correctionScale = double(minBillboardSize) / diagonalSize;
     }
+
+    // Clamp to a valid range
+    correctionScale = clamp(correctionScale, 0.0, 1.0);
+
     scaledRightClip *= correctionScale;
     scaledUpClip *= correctionScale;
 
