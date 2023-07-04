@@ -196,40 +196,6 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
             return _gui.mouseWheelCallback(posY);
         }
     );
-
-    // Update renderbin based on distance, to avoid funky rendering with milky way volume
-    // and still get correct depth informaiton when close to planet systems
-    // OBS! This is kind of ugly, imo. Would have been nice to do it with events instead
-    global::callback::preSync->emplace_back([this]() {
-        if (!_enabled) {
-            return;
-        }
-
-        constexpr const double ThreshHoldDistance = 1.0e19;
-
-        // TODO: this should be done for any current focus?
-        SceneGraphNode* rootNode = sceneGraphNode("Root");
-        if (!rootNode) {
-            return;
-        }
-        const glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
-        const glm::dvec3 sunPos = rootNode->worldPosition();
-
-        const double distance = glm::distance(cameraPos, sunPos);
-
-        bool cameraIsInGalaxy = distance < ThreshHoldDistance;
-        if (cameraIsInGalaxy != _cameraWasWithinGalaxy) {
-            openspace::global::scriptEngine->queueScript(
-                fmt::format(
-                    "openspace.setPropertyValueSingle('{}', {})",
-                    fmt::format("Scene.{}.Renderable.RenderBinMode", GlyphCloudIdentifier),
-                    cameraIsInGalaxy ? 2 : 3 //"PreDeferredTransparent" : "PostDeferredTransparent"
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
-        }
-        _cameraWasWithinGalaxy = cameraIsInGalaxy;
-    });
 }
 
 bool ExoplanetsExpertToolModule::enabled() const {
