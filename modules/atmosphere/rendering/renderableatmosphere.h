@@ -96,6 +96,7 @@ private:
     properties::FloatProperty _sunIntensity;
     properties::BoolProperty _sunFollowingCameraEnabled;
     properties::BoolProperty _hardShadowsEnabled;
+    properties::FloatProperty _sunAngularSize;
 
     // Atmosphere dimming
     properties::FloatProperty _atmosphereDimmingHeight;

@@ -77,6 +77,7 @@ uniform vec3 betaMieExtinction;
 uniform float mieG;
 uniform float sunRadiance;
 uniform bool ozoneLayerEnabled;
+uniform float sunAngularSize;
 uniform int SAMPLES_R;
 uniform int SAMPLES_MU;
 uniform int SAMPLES_MU_S;
@@ -503,11 +504,11 @@ vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
 
   // @TODO (abock, 2021-07-01) This value is hard-coded to our sun+earth right now
   // Convert 0.3 degrees -> radians
-  const float SunAngularSize = (0.3 * M_PI / 180.0);
+  // const float SunAngularSize = (0.3 * M_PI / 180.0);
   const float FuzzyFactor = 0.5; // How fuzzy should the edges be
 
-  const float p1 = cos(SunAngularSize);
-  const float p2 = cos(SunAngularSize * FuzzyFactor);
+  const float p1 = cos(sunAngularSize);
+  const float p2 = cos(sunAngularSize * FuzzyFactor);
 
   float t = (angle - p1) / (p2 - p1);
   float scale = clamp(t, 0.0, 1.0);
