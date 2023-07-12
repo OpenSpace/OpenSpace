@@ -120,11 +120,13 @@ uniform ShadowRenderingStruct shadowDataArray[numberOfShadows];
 uniform int shadows;
 uniform bool hardShadows;
 
-float calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 position,
+// Returns whether there is an eclipse in the x component and the strength of the
+// shadowing in the y component
+vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 position,
                  bool ground)
 {
   if (!shadowInfoArray[0].isShadowing) {
-    return 1.0;
+    return vec2(0.0, 1.0);
   }
 
   dvec3 pc = shadowInfoArray[0].casterPositionVec - position;
@@ -141,19 +143,19 @@ float calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 p
   if (length_d < r_u_pi) {
     // umbra
     if (hardShadows) {
-      return ground  ?  0.2  :  0.5;
+      return ground  ?  vec2(1.0, 0.2)  :  vec2(1.0, 0.5);
     }
     else {
       // butterworth function
-      return sqrt(r_u_pi / (r_u_pi + pow(length_d, 4.0)));
+      return vec2(1.0, sqrt(r_u_pi / (r_u_pi + pow(length_d, 4.0))));
     }
   }
   else if (length_d < r_p_pi) {
     // penumbra
-    return hardShadows  ?  0.5  :  length_d / r_p_pi;
+    return hardShadows  ?  vec2(1.0, 0.5)  :  vec2(1.0, length_d / r_p_pi);
   }
   else {
-    return 1.0;
+    return vec2(1.0, 1.0);
   }
 }
 
@@ -619,8 +621,8 @@ void main() {
   pixelDepth -= offset;
 
   dvec3 onATMPos = (modelTransformMatrix * dvec4(x * 1000.0, 1.0)).xyz;
-  float eclipseShadowATM = calcShadow(shadowDataArray, onATMPos, false);
-  float sunIntensityInscatter = sunRadiance * eclipseShadowATM;
+  vec2 eclipseShadowATM = calcShadow(shadowDataArray, onATMPos, false);
+  float sunIntensityInscatter = sunRadiance * eclipseShadowATM.y;
 
   float irradianceFactor = 0.0;
 
@@ -632,15 +634,15 @@ void main() {
     attenuation, groundHit);
   vec3 atmColor = vec3(0.0);
   if (groundHit) {
-    float eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
-    float sunIntensityGround = sunRadiance * eclipseShadowPlanet;
+    vec2 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
+    float sunIntensityGround = sunRadiance * eclipseShadowPlanet.y;
     atmColor = groundColor(x, tF, v, s, attenuation, color, normal.xyz, irradianceFactor,
       normal.w, sunIntensityGround);
   }
   else {
     // In order to get better performance, we are not tracing multiple rays per pixel
     // when the ray doesn't intersect the ground
-    atmColor = sunColor(v, s, r, mu, irradianceFactor);
+    atmColor = sunColor(v, s, r, mu, irradianceFactor) * (1.0 - eclipseShadowATM.x);
   }
 
   // Final Color of ATM plus terrain. We want to support opacity so we blend between the
