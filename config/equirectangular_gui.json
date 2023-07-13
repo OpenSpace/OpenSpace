@@ -54,5 +54,12 @@
       "eyeseparation": 0.065,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
-  ]
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "Two windows: Primary 1280x720 window with equirectangular projection rendering without menu or text overlays, and a secondary with menu and text overlays minus rendering.",
+    "license": "MIT License",
+    "name": "Single",
+    "version": "1.0"
+  }
 }

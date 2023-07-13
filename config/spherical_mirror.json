@@ -36,5 +36,12 @@
       "eyeseparation": 0.06,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
-  ]
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "A single 1280x720 window with spherical projection rendering at 2048x2048 resolution.",
+    "license": "MIT License",
+    "name": "Single",
+    "version": "1.0"
+  }
 }
