@@ -36,12 +36,21 @@ uniform vec3 shadowColor;
 
 
 void main() {
-  if (mod(gl_VertexID, 2) == 0.0) {
+  // if (gl_VertexID <= 9 ) {
     vs_color = shadowColor;
-  }
-  else {
-    vs_color = shadowColor;
-  }
+  // }
+  // else {
+    // vs_color = vec3(0.0);
+  // }
+
+  // if (mod(gl_VertexID, 2) == 0.0) {
+  //   vs_color = vec3((gl_VertexID + 1) / 20.0 , 0.0, 0.0);
+  //   // vs_color = shadowColor;
+  // }
+  // else {
+  //   vs_color = vec3(0.0, gl_VertexID / 200, 0.0);
+  //   // vs_color = shadowColor;
+  // }
 
   // Transform the damn psc to homogenous coordinate
   vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_point_position, 1.0);

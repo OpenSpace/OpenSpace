@@ -60,15 +60,12 @@ public:
 private:
     void createCone(double et);
 
-    struct VBOLayout {
-        float x = 0.f;
-        float y = 0.f;
-        float z = 0.f;
-    };
-
     properties::IntProperty _numberOfPoints;
     properties::FloatProperty _shadowLength;
     properties::Vec3Property _shadowColor;
+    properties::BoolProperty _showUmbralShadow;
+    properties::BoolProperty _showPenumbralShadow;
+
     properties::StringProperty _lightSource;
     properties::StringProperty _lightSourceFrame;
     properties::StringProperty _shadower;
