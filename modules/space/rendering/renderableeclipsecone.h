@@ -62,9 +62,10 @@ private:
 
     properties::IntProperty _numberOfPoints;
     properties::FloatProperty _shadowLength;
-    properties::Vec3Property _shadowColor;
     properties::BoolProperty _showUmbralShadow;
+    properties::Vec3Property _umbralShadowColor;
     properties::BoolProperty _showPenumbralShadow;
+    properties::Vec3Property _penumbralShadowColor;
 
     properties::StringProperty _lightSource;
     properties::StringProperty _lightSourceFrame;
@@ -72,10 +73,10 @@ private:
     properties::StringProperty _shadowerFrame;
     properties::StringProperty _shadowee;
 
+    properties::IntProperty _test;
+
     ghoul::opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor, opacity) _uniformCache;
-
-    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

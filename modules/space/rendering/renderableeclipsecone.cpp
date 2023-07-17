@@ -62,14 +62,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
-        "ShadowColor",
-        "Shadow Color",
-        "This value determines the color that is used for the shadow cylinder",
-        // @VISIBILITY(2.5)
-        openspace::properties::Property::Visibility::User
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ShowUmbralShadowInfo = {
         "ShowUmbralShadow",
         "Show Umbral Shadow",
@@ -77,10 +69,28 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UmbralShadowColorInfo = {
+        "UmbralShadowColor",
+        "Umbral Shadow Color",
+        "This value determines the color that is used for the shadow cylinder of the "
+        "umbral shadow",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowPenumbralShadowInfo = {
         "ShowPenumbralShadow",
         "Show Penumbral Shadow",
         "If this is enabled, the penumbral portioon of the shadow is shown",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PenumbralShadowColorInfo = {
+        "PenumbralShadowColor",
+        "Penumbral Shadow Color",
+        "This value determines the color that is used for the shadow cylinder of the "
+        "penumbral shadow",
+        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -130,8 +140,17 @@ namespace {
         // [[codegen::verbatim(ShadowLengthInfo.description)]]
         std::optional<float> shadowLength;
 
-        // [[codegen::verbatim(ShadowColorInfo.description)]]
-        std::optional<glm::vec3> shadowColor [[codegen::color()]];
+        // [[codegen::verbatim(ShowUmbralShadowInfo.description)]]
+        std::optional<bool> showUmbralShadow;
+
+        // [[codegen::verbatim(UmbralShadowColorInfo.description)]]
+        std::optional<glm::vec3> umbralShadowColor [[codegen::color()]];
+
+        // [[codegen::verbatim(ShowPenumbralShadowInfo.description)]]
+        std::optional<bool> showPenumbralShadow;
+
+        // [[codegen::verbatim(PenumbralShadowColorInfo.description)]]
+        std::optional<glm::vec3> penumbralShadowColor [[codegen::color()]];
 
         // [[codegen::verbatim(LightSourceInfo.description)]]
         std::string lightSource;
@@ -161,17 +180,29 @@ RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary
     : Renderable(dictionary)
     , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
     , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 2.f)
-    , _shadowColor(ShadowColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _showUmbralShadow(ShowUmbralShadowInfo, true)
+    , _umbralShadowColor(
+        UmbralShadowColorInfo,
+        glm::vec3(1.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
+    )
     , _showPenumbralShadow(ShowPenumbralShadowInfo, true)
+    , _penumbralShadowColor(
+        PenumbralShadowColorInfo,
+        glm::vec3(1.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
+    )
     , _lightSource(LightSourceInfo)
     , _lightSourceFrame(LightSourceFrameInfo)
     , _shadower(ShadowerInfo)
     , _shadowerFrame(ShadowerFrameInfo)
     , _shadowee(ShadoweeInfo)
+    //, _test({"ABC", "ABC", ""}, 1, 0, 380)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
+    //addProperty(_test);
     addProperty(Fadeable::_opacity);
 
     _numberOfPoints = p.numberOfPoints.value_or(_numberOfPoints);
@@ -180,13 +211,17 @@ RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary
     _shadowLength = p.shadowLength.value_or(_shadowLength);
     addProperty(_shadowLength);
 
-    _shadowColor = p.shadowColor.value_or(_shadowColor);
-    _shadowColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_shadowColor);
-
+    _showUmbralShadow = p.showUmbralShadow.value_or(_showUmbralShadow);
     addProperty(_showUmbralShadow);
-    addProperty(_showPenumbralShadow);
+    _umbralShadowColor = p.umbralShadowColor.value_or(_umbralShadowColor);
+    _umbralShadowColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_umbralShadowColor);
 
+    _showPenumbralShadow = p.showPenumbralShadow.value_or(_showPenumbralShadow);
+    addProperty(_showPenumbralShadow);
+    _penumbralShadowColor = p.penumbralShadowColor.value_or(_penumbralShadowColor);
+    _penumbralShadowColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_penumbralShadowColor);
 
     _lightSource = p.lightSource;
     _lightSourceFrame = p.lightSourceFrame;
@@ -250,12 +285,19 @@ void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
 
-    _shader->setUniform(_uniformCache.shadowColor, _shadowColor);
     _shader->setUniform(_uniformCache.opacity, opacity());
 
     glBindVertexArray(_vao);
-    //glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
-    glDrawArrays(GL_LINES, 0, _numberOfPoints * 2);
+    if (_showUmbralShadow) {
+        _shader->setUniform(_uniformCache.shadowColor, _umbralShadowColor);
+        glDrawArrays(GL_LINES, 0, _numberOfPoints * 2);
+    }
+    if (_showPenumbralShadow) {
+        // The shadow vertices live in the same VBO so the start index might be offset
+        const int startIndex = _showUmbralShadow ? _numberOfPoints * 2 : 0;
+        _shader->setUniform(_uniformCache.shadowColor, _penumbralShadowColor);
+        glDrawArrays(GL_LINES, startIndex, _numberOfPoints * 2);
+    }
     glBindVertexArray(0);
 
     _shader->deactivate();
@@ -265,12 +307,6 @@ void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableEclipseCone::update(const UpdateData& data) {
-    //_stateMatrix = SpiceManager::ref().positionTransformMatrix(
-    //    _shadowerFrame,
-    //    "GALACTIC",
-    //    data.time.j2000Seconds()
-    //);
-
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
@@ -284,7 +320,10 @@ std::vector<VBOLayout> calculateShadowPoints(const std::vector<glm::dvec3>& srcT
                                              const glm::dmat3& lightSourceToShadower,
                                              double lengthScale)
 {
+    ghoul_assert(srcTerminator.size() == dstTerminator.size(), "Unmatched termiator pts");
+
     std::vector<VBOLayout> vertices;
+    vertices.reserve(dstTerminator.size() * 2);
     for (size_t i = 0; i < dstTerminator.size(); i++) {
         // Convert the terminator points from the reference frame of the Sun to the
         // reference frame of the Moon
@@ -293,7 +332,7 @@ std::vector<VBOLayout> calculateShadowPoints(const std::vector<glm::dvec3>& srcT
         const glm::dvec3 dst = dstTerminator[i];
         const glm::dvec3 dir = glm::normalize(dst - src);
 
-        // The start point are the terminator points on the Moon
+        // The start point is the terminator point on the Moon
         glm::vec3 p1 = dst * 1000.0;
         vertices.push_back({ p1.x, p1.y, p1.z });
 
@@ -329,6 +368,11 @@ void RenderableEclipseCone::createCone(double et) {
         et,
         _numberOfPoints
     );
+    // convert to meter
+    //for (glm::dvec3& p : resSrc.terminatorPoints) {
+    //    p *= 1000.0;
+    //}
+    //std::rotate(resSrc.terminatorPoints.begin(), resSrc.terminatorPoints.begin() + _test, resSrc.terminatorPoints.end());
 
 
     // 2. Get the penumbral terminator of the shadower from the lightsource
@@ -345,6 +389,10 @@ void RenderableEclipseCone::createCone(double et) {
         et,
         _numberOfPoints
     );
+    // convert to meter
+    //for (glm::dvec3& p : resDst.terminatorPoints) {
+    //    p *= 1000.0;
+    //}
 
     ghoul_assert(
         resSrc.terminatorPoints.size() == resDst.terminatorPoints.size(),
@@ -363,7 +411,7 @@ void RenderableEclipseCone::createCone(double et) {
         },
         et
     );
-    const double distance = glm::length(diff) * 1000.0; // to KM
+    const double distance = glm::length(diff) * 1000.0; // to meter
 
 
     const glm::dvec3 shadowerToLightSource = SpiceManager::ref().targetPosition(
@@ -375,19 +423,48 @@ void RenderableEclipseCone::createCone(double et) {
             SpiceManager::AberrationCorrection::Direction::Reception
         },
         et
-    ) * 1000.0; // to KM
+    ) /** 1000.0*/; // to meter
     glm::dmat3 lightSourceToShadower = SpiceManager::ref().frameTransformationMatrix(
         _lightSourceFrame, _shadowerFrame, et
     );
 
+
     // 4. Construct the umbral shadow
-    std::vector<VBOLayout> umbralVertices = calculateShadowPoints(
-        resSrc.terminatorPoints,
-        resDst.terminatorPoints,
-        shadowerToLightSource,
-        lightSourceToShadower,
-        distance * static_cast<double>(_shadowLength)
-    );
+    std::vector<VBOLayout> umbralVertices;
+    if (_showUmbralShadow) {
+        umbralVertices = calculateShadowPoints(
+            resSrc.terminatorPoints,
+            resDst.terminatorPoints,
+            shadowerToLightSource,
+            lightSourceToShadower,
+            distance * static_cast<double>(_shadowLength)
+        );
+    }
+
+
+    // 5. Construct the penumbral shadow
+    std::vector<VBOLayout> penumbralVertices;
+    if (_showPenumbralShadow) {
+        std::rotate(resSrc.terminatorPoints.begin(), resSrc.terminatorPoints.begin() + resSrc.terminatorPoints.size() / 2, resSrc.terminatorPoints.end());
+        penumbralVertices = calculateShadowPoints(
+            resSrc.terminatorPoints,
+            resDst.terminatorPoints,
+            shadowerToLightSource,
+            lightSourceToShadower,
+            distance * static_cast<double>(_shadowLength)
+        );
+    }
+
+
+    // 6. Combine vertices
+    std::vector<VBOLayout> vertices;
+    vertices.reserve(umbralVertices.size() + penumbralVertices.size());
+    vertices.insert(vertices.end(), umbralVertices.begin(), umbralVertices.end());
+    vertices.insert(vertices.end(), penumbralVertices.begin(), penumbralVertices.end());
+
+
+
+
     //for (size_t i = 0; i < resDst.terminatorPoints.size(); i++) {
     //    // Convert the terminator points from the reference frame of the Sun to the
     //    // reference frame of the Moon
@@ -433,15 +510,15 @@ void RenderableEclipseCone::createCone(double et) {
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(
         GL_ARRAY_BUFFER,
-        umbralVertices.size() * sizeof(VBOLayout),
+        vertices.size() * sizeof(VBOLayout),
         nullptr,
         GL_DYNAMIC_DRAW
     );
     glBufferSubData(
         GL_ARRAY_BUFFER,
         0,
-        umbralVertices.size() * sizeof(VBOLayout),
-        umbralVertices.data()
+        vertices.size() * sizeof(VBOLayout),
+        vertices.data()
     );
 
     glEnableVertexAttribArray(0);
