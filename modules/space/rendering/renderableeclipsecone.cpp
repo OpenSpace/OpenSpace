@@ -333,11 +333,11 @@ std::vector<VBOLayout> calculateShadowPoints(const std::vector<glm::dvec3>& srcT
         const glm::dvec3 dir = glm::normalize(dst - src);
 
         // The start point is the terminator point on the Moon
-        glm::vec3 p1 = dst * 1000.0;
+        glm::vec3 p1 = dst;
         vertices.push_back({ p1.x, p1.y, p1.z });
 
         // The end point is calculated by forward propagating the incoming direction
-        glm::vec3 p2 = dst * 1000.0 + dir * lengthScale;
+        glm::vec3 p2 = dst + dir * lengthScale;
         vertices.push_back({ p2.x, p2.y, p2.z });
     }
     return vertices;
@@ -369,10 +369,9 @@ void RenderableEclipseCone::createCone(double et) {
         _numberOfPoints
     );
     // convert to meter
-    //for (glm::dvec3& p : resSrc.terminatorPoints) {
-    //    p *= 1000.0;
-    //}
-    //std::rotate(resSrc.terminatorPoints.begin(), resSrc.terminatorPoints.begin() + _test, resSrc.terminatorPoints.end());
+    for (glm::dvec3& p : resSrc.terminatorPoints) {
+        p *= 1000.0;
+    }
 
 
     // 2. Get the penumbral terminator of the shadower from the lightsource
@@ -390,9 +389,9 @@ void RenderableEclipseCone::createCone(double et) {
         _numberOfPoints
     );
     // convert to meter
-    //for (glm::dvec3& p : resDst.terminatorPoints) {
-    //    p *= 1000.0;
-    //}
+    for (glm::dvec3& p : resDst.terminatorPoints) {
+        p *= 1000.0;
+    }
 
     ghoul_assert(
         resSrc.terminatorPoints.size() == resDst.terminatorPoints.size(),
@@ -423,7 +422,7 @@ void RenderableEclipseCone::createCone(double et) {
             SpiceManager::AberrationCorrection::Direction::Reception
         },
         et
-    ) /** 1000.0*/; // to meter
+    ) * 1000.0; // to meter
     glm::dmat3 lightSourceToShadower = SpiceManager::ref().frameTransformationMatrix(
         _lightSourceFrame, _shadowerFrame, et
     );

@@ -73,7 +73,7 @@ private:
     properties::StringProperty _shadowerFrame;
     properties::StringProperty _shadowee;
 
-    properties::IntProperty _test;
+    //properties::IntProperty _test;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor, opacity) _uniformCache;
