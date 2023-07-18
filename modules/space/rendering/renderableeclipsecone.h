@@ -31,7 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
@@ -63,9 +63,9 @@ private:
     properties::IntProperty _numberOfPoints;
     properties::FloatProperty _shadowLength;
     properties::BoolProperty _showUmbralShadow;
-    properties::Vec3Property _umbralShadowColor;
+    properties::Vec4Property _umbralShadowColor;
     properties::BoolProperty _showPenumbralShadow;
-    properties::Vec3Property _penumbralShadowColor;
+    properties::Vec4Property _penumbralShadowColor;
 
     properties::StringProperty _lightSource;
     properties::StringProperty _lightSourceFrame;

@@ -144,13 +144,13 @@ namespace {
         std::optional<bool> showUmbralShadow;
 
         // [[codegen::verbatim(UmbralShadowColorInfo.description)]]
-        std::optional<glm::vec3> umbralShadowColor [[codegen::color()]];
+        std::optional<glm::vec4> umbralShadowColor [[codegen::color()]];
 
         // [[codegen::verbatim(ShowPenumbralShadowInfo.description)]]
         std::optional<bool> showPenumbralShadow;
 
         // [[codegen::verbatim(PenumbralShadowColorInfo.description)]]
-        std::optional<glm::vec3> penumbralShadowColor [[codegen::color()]];
+        std::optional<glm::vec4> penumbralShadowColor [[codegen::color()]];
 
         // [[codegen::verbatim(LightSourceInfo.description)]]
         std::string lightSource;
@@ -183,16 +183,16 @@ RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary
     , _showUmbralShadow(ShowUmbralShadowInfo, true)
     , _umbralShadowColor(
         UmbralShadowColorInfo,
-        glm::vec3(1.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
+        glm::vec4(1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
     )
     , _showPenumbralShadow(ShowPenumbralShadowInfo, true)
     , _penumbralShadowColor(
         PenumbralShadowColorInfo,
-        glm::vec3(1.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
+        glm::vec4(1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
     )
     , _lightSource(LightSourceInfo)
     , _lightSourceFrame(LightSourceFrameInfo)

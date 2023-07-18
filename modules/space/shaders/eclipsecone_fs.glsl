@@ -24,15 +24,15 @@
 
 #include "fragment.glsl"
 
-in vec3 vs_color;
 in float vs_depth;
 
 uniform float opacity;
+uniform vec4 shadowColor;
 
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vec4(vs_color, opacity);
+  frag.color = vec4(shadowColor.rgb, shadowColor.a * opacity);
   frag.depth = vs_depth;
   return frag;
 }
