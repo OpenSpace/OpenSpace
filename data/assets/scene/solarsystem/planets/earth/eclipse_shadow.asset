@@ -1,17 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
--- local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local EarthMoonShadow = {
   Identifier = "EarthMoonShadow",
   Parent = transforms.Moon.Identifier,
-  -- Parent = transforms.EarthBarycenter.Identifier,
-  -- Transform = {
-  --   Translation = {
-  --     Type = "SpiceTranslation",
-  --     Target = "MOON",
-  --     Observer = "EARTH BARYCENTER"
-  --   },
-  -- },
   Renderable = {
     Type = "RenderableEclipseCone",
     Opacity = 1.0,
@@ -39,3 +30,14 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(EarthMoonShadow)
+
+
+
+asset.meta = {
+  Name = "Eclipse Shadow",
+  Version = "1.0",
+  Description = "The penumbral and umbral shadow eclipses for the Earth-Moon system",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
