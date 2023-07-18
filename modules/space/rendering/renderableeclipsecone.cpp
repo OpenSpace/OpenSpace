@@ -228,6 +228,8 @@ RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary
     _shadower = p.shadower;
     _shadowee = p.shadowee;
     _shadowerFrame = p.shadowerFrame;
+
+    setRenderBin(RenderBin::PostDeferredTransparent);
 }
 
 void RenderableEclipseCone::initializeGL() {
@@ -392,6 +394,12 @@ void RenderableEclipseCone::createCone(double et) {
     for (glm::dvec3& p : resDst.terminatorPoints) {
         p *= 1000.0;
     }
+    // Spice calculates the terminator points in a fixed clockwise/counterclockwise
+    // direction from the point of the view of the observer. Since we are switching target
+    // and observer, this means that one of the sets of points is clockwise, while the
+    // other is counterclockwise. In order for the right points to match up, we need to
+    // reverse the order of one of them. It doesn't matter which one, so we pick this one
+    std::reverse(resDst.terminatorPoints.begin(), resDst.terminatorPoints.end());
 
     ghoul_assert(
         resSrc.terminatorPoints.size() == resDst.terminatorPoints.size(),
