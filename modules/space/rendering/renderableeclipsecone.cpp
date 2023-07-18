@@ -292,13 +292,13 @@ void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(_vao);
     if (_showUmbralShadow) {
         _shader->setUniform(_uniformCache.shadowColor, _umbralShadowColor);
-        glDrawArrays(GL_LINES, 0, _numberOfPoints * 2);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, _numberOfPoints * 2);
     }
     if (_showPenumbralShadow) {
         // The shadow vertices live in the same VBO so the start index might be offset
         const int startIndex = _showUmbralShadow ? _numberOfPoints * 2 : 0;
         _shader->setUniform(_uniformCache.shadowColor, _penumbralShadowColor);
-        glDrawArrays(GL_LINES, startIndex, _numberOfPoints * 2);
+        glDrawArrays(GL_TRIANGLE_STRIP, startIndex, _numberOfPoints * 2);
     }
     glBindVertexArray(0);
 
@@ -349,8 +349,8 @@ void RenderableEclipseCone::createCone(double et) {
     // Big picture for the calculation for this example (lightSource = Sun,
     // shadower = Moon, shadowee = Earth). We get the limb (= penumbral terminator) of the
     // Sun as viewed from the Moon, then the limb of the Moon as viewed from the Sun.
-    // The umbral shadow cone is constructed by connecting the points of the limbs in
-    // order. The penumbral shadow cone is constructed by connecting them 180 deg out of
+    // The penumbral shadow cone is constructed by connecting the points of the limbs in
+    // order. The umbral shadow cone is constructed by connecting them 180 deg out of
     // phase (meaning top to bottom). We want the cone to eminate from the shadower, so
     // we take the distance from the shadower to the shadowee and use that as a scale for
     // the resulting vectors we get (also including the _shadowLength) as an additional
@@ -436,10 +436,10 @@ void RenderableEclipseCone::createCone(double et) {
     );
 
 
-    // 4. Construct the umbral shadow
-    std::vector<VBOLayout> umbralVertices;
-    if (_showUmbralShadow) {
-        umbralVertices = calculateShadowPoints(
+    // 4. Construct the penumbral shadow
+    std::vector<VBOLayout> penumbralVertices;
+    if (_showPenumbralShadow) {
+        penumbralVertices = calculateShadowPoints(
             resSrc.terminatorPoints,
             resDst.terminatorPoints,
             shadowerToLightSource,
@@ -449,11 +449,18 @@ void RenderableEclipseCone::createCone(double et) {
     }
 
 
-    // 5. Construct the penumbral shadow
-    std::vector<VBOLayout> penumbralVertices;
-    if (_showPenumbralShadow) {
-        std::rotate(resSrc.terminatorPoints.begin(), resSrc.terminatorPoints.begin() + resSrc.terminatorPoints.size() / 2, resSrc.terminatorPoints.end());
-        penumbralVertices = calculateShadowPoints(
+    // 5. Construct the umbral shadow
+    std::vector<VBOLayout> umbralVertices;
+    if (_showUmbralShadow) {
+        // For the umbral shadow, we need to mix the terminator points with a 180
+        // degree phase shift, so that the top terminator point of the sun gets matched
+        // with the bottom terminator point of the Moon, etc
+        std::rotate(
+            resSrc.terminatorPoints.begin(),
+            resSrc.terminatorPoints.begin() + resSrc.terminatorPoints.size() / 2,
+            resSrc.terminatorPoints.end()
+        );
+        umbralVertices = calculateShadowPoints(
             resSrc.terminatorPoints,
             resDst.terminatorPoints,
             shadowerToLightSource,
@@ -469,63 +476,13 @@ void RenderableEclipseCone::createCone(double et) {
     vertices.insert(vertices.end(), umbralVertices.begin(), umbralVertices.end());
     vertices.insert(vertices.end(), penumbralVertices.begin(), penumbralVertices.end());
 
-
-
-
-    //for (size_t i = 0; i < resDst.terminatorPoints.size(); i++) {
-    //    // Convert the terminator points from the reference frame of the Sun to the
-    //    // reference frame of the Moon
-    //    const glm::dvec3 src =
-    //        lightSourceToShadower * resSrc.terminatorPoints[i] + shadowerToLightSource;
-    //    const glm::dvec3 dst = resDst.terminatorPoints[i];
-    //    const glm::dvec3 dir = glm::normalize(dst - src);
-
-    //    // The start point are the terminator points on the Moon
-    //    glm::vec3 p1 = dst * 1000.0;
-    //    vertices.push_back({ p1.x, p1.y, p1.z });
-
-    //    // The end point is calculated by forward propagating the incoming direction
-    //    glm::vec3 p2 = dst * 1000.0 + dir * distance * static_cast<double>(_shadowLength);
-    //    vertices.push_back({ p2.x, p2.y, p2.z });
-    //}
-
-    //// 5. Construct the penumbral shadow
-    //for (size_t i = 0; i < resDst.terminatorPoints.size(); i++) {
-    //    // This is the same calculation as above but with the `dst` points rotated by
-    //    // 180 degrees. So instead of `src[i] -> dst[i]` we do
-    //    // `src[i] -> dst[i + #total / 2 % total]`
-
-    //    // Convert the terminator points from the reference frame of the Sun to the
-    //    // reference frame of the Moon
-    //    const glm::dvec3 src =
-    //        lightSourceToShadower * resSrc.terminatorPoints[i] + shadowerToLightSource;
-    //    const size_t nPoints = resDst.terminatorPoints.size();
-    //    const size_t dstIdx = (i + nPoints / 2) % nPoints;
-    //    const glm::dvec3 dst = resDst.terminatorPoints[dstIdx];
-    //    const glm::dvec3 dir = glm::normalize(dst - src);
-
-    //    // The start point are the terminator points on the Moon
-    //    glm::vec3 p1 = dst * 1000.0;
-    //    vertices.push_back({ p1.x, p1.y, p1.z });
-
-    //    // The end point is calculated by forward propagating the incoming direction
-    //    glm::vec3 p2 = dst * 1000.0 + dir * distance * static_cast<double>(_shadowLength);
-    //    vertices.push_back({ p2.x, p2.y, p2.z });
-    //}
-
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(
         GL_ARRAY_BUFFER,
         vertices.size() * sizeof(VBOLayout),
-        nullptr,
+        vertices.data(),
         GL_DYNAMIC_DRAW
-    );
-    glBufferSubData(
-        GL_ARRAY_BUFFER,
-        0,
-        vertices.size() * sizeof(VBOLayout),
-        vertices.data()
     );
 
     glEnableVertexAttribArray(0);
