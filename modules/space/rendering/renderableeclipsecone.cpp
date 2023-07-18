@@ -292,13 +292,13 @@ void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(_vao);
     if (_showUmbralShadow) {
         _shader->setUniform(_uniformCache.shadowColor, _umbralShadowColor);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, _numberOfPoints * 2);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, _nVertices);
     }
     if (_showPenumbralShadow) {
         // The shadow vertices live in the same VBO so the start index might be offset
-        const int startIndex = _showUmbralShadow ? _numberOfPoints * 2 : 0;
+        const int startIndex = _showUmbralShadow ? _nVertices : 0;
         _shader->setUniform(_uniformCache.shadowColor, _penumbralShadowColor);
-        glDrawArrays(GL_TRIANGLE_STRIP, startIndex, _numberOfPoints * 2);
+        glDrawArrays(GL_TRIANGLE_STRIP, startIndex, _nVertices);
     }
     glBindVertexArray(0);
 
@@ -446,6 +446,10 @@ void RenderableEclipseCone::createCone(double et) {
             lightSourceToShadower,
             distance * static_cast<double>(_shadowLength)
         );
+        
+        // We need to duplicate the first two vertices to close the cylinder at the seam
+        penumbralVertices.push_back(penumbralVertices[0]);
+        penumbralVertices.push_back(penumbralVertices[1]);
     }
 
 
@@ -467,14 +471,26 @@ void RenderableEclipseCone::createCone(double et) {
             lightSourceToShadower,
             distance * static_cast<double>(_shadowLength)
         );
+
+        // We need to duplicate the first two vertices to close the cylinder at the seam
+        umbralVertices.push_back(umbralVertices[0]);
+        umbralVertices.push_back(umbralVertices[1]);
     }
 
-
+    
     // 6. Combine vertices
     std::vector<VBOLayout> vertices;
     vertices.reserve(umbralVertices.size() + penumbralVertices.size());
     vertices.insert(vertices.end(), umbralVertices.begin(), umbralVertices.end());
     vertices.insert(vertices.end(), penumbralVertices.begin(), penumbralVertices.end());
+
+    _nVertices = 0;
+    if (_showPenumbralShadow) {
+        _nVertices = static_cast<int>(penumbralVertices.size());
+    }
+    if (_showUmbralShadow) {
+        _nVertices = static_cast<int>(penumbralVertices.size());
+    }
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);

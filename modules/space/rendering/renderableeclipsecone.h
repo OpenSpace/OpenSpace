@@ -73,13 +73,13 @@ private:
     properties::StringProperty _shadowerFrame;
     properties::StringProperty _shadowee;
 
-    //properties::IntProperty _test;
-
     ghoul::opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor, opacity) _uniformCache;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
+
+    int _nVertices = 0;
 };
 
 } // namespace openspace
