@@ -424,10 +424,16 @@ void AsdfTileProvider::update() {
         static_cast<GLsizei>(_rendertargetDimensions.y)
     );
 
-    glClearColor(.2f, .2f, .2f, 0.f);
+    //glClearColor(.2f, .2f, .2f, 0.f);
+    glClearColor(.0f, .0f, .0f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     _program->activate();
+    _program->setUniform("viewport",
+        glm::vec2(_rendertargetDimensions.x, _rendertargetDimensions.y));
+    _program->setUniform("lineWidth", _lineWidth);
+    const float blend = 2.0;
+    //_program->setUniform("blendFactor", blend);
     _program->setUniform("color", _color);
     _program->setUniform("projectionMatrix", projection);
 
@@ -443,9 +449,10 @@ void AsdfTileProvider::update() {
 
     if (_renderingMode == static_cast<int>(RenderingMode::Lines)) {
         glEnable(GL_LINE_SMOOTH);
+        glEnable(GL_BLEND);
+        //glDepthMask(GL_FALSE);
         glLineWidth(_lineWidth);
         glDrawArrays(GL_LINE_STRIP, 0, points.size());
-        glDisable(GL_LINE_SMOOTH);
     }
     else {
         glPointSize(_lineWidth);
