@@ -69,6 +69,7 @@ namespace {
 
     // Global flags to modify the RenderableGlobe
     constexpr bool LimitLevelByAvailableData = true;
+    constexpr bool PerformFrustumCulling = false;
     constexpr bool PreformHorizonCulling = true;
 
     // Shadow structure
