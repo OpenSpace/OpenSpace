@@ -22,12 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#version __CONTEXT__
 
-uniform vec3 color;
+layout (lines) in;
+layout (triangle_strip, max_vertices = 4) out;
 
-Fragment getFragment() {
-  Fragment frag;
-  frag.color = vec4(color, 1);
-  return frag;
+uniform vec2  viewport;
+uniform float lineWidth;
+
+void main()
+{
+    vec4 p1 = gl_in[0].gl_Position;
+    vec4 p2 = gl_in[1].gl_Position;
+
+    vec2 dir = normalize((p2.xy/p2.w - p1.xy/p1.w) * viewport); //v_line
+    vec2 offset = vec2(-dir.y, dir.x) * lineWidth / viewport;   // nv_line
+
+    gl_Position = p1 + vec4(offset.xy * p1.w, 0.0, 0.0);
+    EmitVertex();
+    gl_Position = p1 - vec4(offset.xy * p1.w, 0.0, 0.0);
+    EmitVertex();
+    gl_Position = p2 + vec4(offset.xy * p2.w, 0.0, 0.0);
+    EmitVertex();
+    gl_Position = p2 - vec4(offset.xy * p2.w, 0.0, 0.0);
+    EmitVertex();
+
+    EndPrimitive();
 }
