@@ -27,7 +27,12 @@
 layout (location = 0) in vec2 in_position;
 
 uniform dmat4 projectionMatrix;
+uniform vec2 viewport;
+
+out vec2 lineCenter;
 
 void main() {
-  gl_Position = vec4(projectionMatrix * vec4(in_position, 0, 1));
+  vec4 pos = vec4(projectionMatrix * vec4(in_position, 0, 1));
+  gl_Position = pos;
+  lineCenter = 0.5 * (pos.xy + vec2(1)) * viewport;
 }
