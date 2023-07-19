@@ -552,6 +552,17 @@ bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_en
     }
     box.addItem(QString::fromStdString(p.path().filename().string()));
 
+    //Add tooltip
+    if (isJson) {
+        sgct::config::Meta meta = sgct::readMeta(p.path().string(), true);
+        if (!meta.description.empty()) {
+            QString toolTip = QString::fromStdString(
+                fmt::format("<p>{}</p>", meta.description)
+            );
+            box.setItemData(box.count() - 1, toolTip, Qt::ToolTipRole);
+        }
+    }
+
     // For now, mark the XML configuration files to show that they are deprecated
     if (isXml) {
         box.setItemData(box.count() - 1, QBrush(Qt::darkYellow), Qt::ForegroundRole);
@@ -643,6 +654,13 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     _windowConfigBox->insertItem(
         _windowConfigBoxIndexSgctCfgDefault,
         QString::fromStdString(_sgctConfigName)
+    );
+    QString defaultTip = 
+        "<p>The basic default configuration specified in the .cfg file</p>";
+    _windowConfigBox->setItemData(
+        _windowConfigBoxIndexSgctCfgDefault,
+        defaultTip,
+        Qt::ToolTipRole
     );
     // Try to find the requested configuration file and set it as the current one. As we
     // have support for function-generated configuration files that will not be in the
