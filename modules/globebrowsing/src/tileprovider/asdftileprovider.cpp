@@ -246,7 +246,8 @@ void AsdfTileProvider::internalInitialize() {
     _program = global::renderEngine->buildRenderProgram(
         "AsdfProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_vs.glsl"),
-        absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_fs.glsl")
+        absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_fs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_gs.glsl")
     );
 
     const double aspect = halfSizeLon / halfSizeLat;
@@ -448,11 +449,13 @@ void AsdfTileProvider::update() {
     );
 
     if (_renderingMode == static_cast<int>(RenderingMode::Lines)) {
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_BLEND);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glEnable(GL_LINE_SMOOTH);
+        //glEnable(GL_BLEND);
         //glDepthMask(GL_FALSE);
-        glLineWidth(_lineWidth);
+        //glLineWidth(_lineWidth);
         glDrawArrays(GL_LINE_STRIP, 0, points.size());
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     else {
         glPointSize(_lineWidth);
