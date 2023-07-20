@@ -356,7 +356,8 @@ void AsdfTileProvider::update() {
     }
 
     std::vector<std::array<double, 2>> points;
-    points.reserve(_features.size());
+    // add two for adjacency information in rendering
+    points.reserve(_features.size() + 2);
 
     if (_renderFullAsdf) {
         std::transform(
@@ -396,6 +397,13 @@ void AsdfTileProvider::update() {
                 );
             }
         }
+    }
+
+    if(points.size() > 0) {
+        // duplicate first & last points so we don't loose them
+        // to adjacency information during rendering
+        points.insert(points.begin(), points.front());
+        points.push_back(points.back());
     }
 
     const glm::dmat4 projection = glm::ortho(
@@ -454,7 +462,7 @@ void AsdfTileProvider::update() {
         //glEnable(GL_BLEND);
         //glDepthMask(GL_FALSE);
         //glLineWidth(_lineWidth);
-        glDrawArrays(GL_LINE_STRIP, 0, points.size());
+        glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, points.size());
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     else {
