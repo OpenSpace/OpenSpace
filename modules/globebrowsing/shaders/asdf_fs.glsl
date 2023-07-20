@@ -25,9 +25,15 @@
 #include "fragment.glsl"
 
 uniform vec3 color;
+uniform vec2 viewport;
+uniform float lineWidth;
+
+in vec2 center;
 
 Fragment getFragment() {
+  float dist = 1.0 - length(gl_FragCoord.xy - center) / lineWidth;
+  float alpha = pow(dist, 2.5);
   Fragment frag;
-  frag.color = vec4(color, 1);
+  frag.color = vec4(color, alpha);
   return frag;
 }
