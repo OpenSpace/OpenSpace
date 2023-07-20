@@ -30,12 +30,21 @@ layout (triangle_strip, max_vertices = 6) out;
 uniform vec2  viewport;
 uniform float lineWidth;
 
+out vec2 center;
+
 void main()
 {
   vec4 p0 = gl_in[0].gl_Position;
-  vec4 p1 = gl_in[1].gl_Position;
-  vec4 p2 = gl_in[2].gl_Position;
-  vec4 p3 = gl_in[3].gl_Position;
+  p0.xyz /= p0.w;
+
+  vec4 p1 = gl_in[1].gl_Position/gl_in[1].gl_Position.w;
+  p1.xyz /= p1.w;
+
+  vec4 p2 = gl_in[2].gl_Position/gl_in[2].gl_Position.w;
+  p2.xyz /= p2.w;
+
+  vec4 p3 = gl_in[3].gl_Position/gl_in[3].gl_Position.w;
+  p3.xyz /= p3.w;
 
   vec2 p = normalize((p1.xy - p0.xy) * viewport);
   vec2 pn = vec2(-p.y, p.x);
@@ -48,26 +57,32 @@ void main()
 
   // P2
   gl_Position = p1 + vec4(pn * lineWidth / viewport, 0, 0);
+  center = 0.5 * (1.0 + p1.xy) * viewport;
   EmitVertex();
 
   // V0
   gl_Position = p1 + vec4(ln * lineWidth / viewport, 0, 0);
+  center = 0.5 * (1.0 + p1.xy) * viewport;
   EmitVertex();
 
   // V1
   gl_Position = p1 - vec4(ln * lineWidth / viewport, 0, 0);
+  center = 0.5 * (1.0 + p1.xy) * viewport;
   EmitVertex();
 
   // V2
   gl_Position = p2 + vec4(ln * lineWidth / viewport, 0, 0);
+  center = 0.5 * (1.0 + p2.xy) * viewport;
   EmitVertex();
 
   // V3
   gl_Position = p2 - vec4(ln * lineWidth / viewport, 0, 0);
+  center = 0.5 * (1.0 + p2.xy) * viewport;
   EmitVertex();
 
   // N1
   gl_Position = p2 - vec4(nn * lineWidth / viewport, 0 , 0);
+  center = 0.5 * (1.0 + p2.xy) * viewport;
   EmitVertex();
 
   EndPrimitive();
