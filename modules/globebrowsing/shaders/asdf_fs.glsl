@@ -31,9 +31,9 @@ uniform float lineWidth;
 in vec2 center;
 
 Fragment getFragment() {
-  float dist = 1.0 - length(gl_FragCoord.xy - center) / lineWidth;
-  float alpha = pow(dist, 2.5);
+  float dist = 1.0 - 2 * length(gl_FragCoord.xy - center) / lineWidth;
+  float alpha = smoothstep(0, 1, dist);
   Fragment frag;
-  frag.color = vec4(color, alpha);
+  frag.color = vec4(vec3(color), alpha);
   return frag;
 }

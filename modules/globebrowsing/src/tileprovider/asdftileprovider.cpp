@@ -138,7 +138,7 @@ AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
     _startTime(StartTimeInfo),
     _resolution(ResolutionInfo, 4096, 256, OpenGLCap.max2DTextureSize()),
     _color(ColorInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(1.f)),
-    _lineWidth(LineWidthInfo, 10.f, 1.f, 25.f),
+    _lineWidth(LineWidthInfo, 10.f, 1.f, 250.f),
     _renderFullAsdf(RenderFullAsdfInfo, false),
     _renderingMode(RenderingModeInfo,
         openspace::properties::OptionProperty::DisplayType::Dropdown),
@@ -457,13 +457,7 @@ void AsdfTileProvider::update() {
     );
 
     if (_renderingMode == static_cast<int>(RenderingMode::Lines)) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        //glEnable(GL_LINE_SMOOTH);
-        //glEnable(GL_BLEND);
-        //glDepthMask(GL_FALSE);
-        //glLineWidth(_lineWidth);
         glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, points.size());
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     else {
         glPointSize(_lineWidth);
