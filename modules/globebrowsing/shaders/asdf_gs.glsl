@@ -30,8 +30,6 @@ layout (triangle_strip, max_vertices = 6) out;
 uniform vec2  viewport;
 uniform float lineWidth;
 
-out vec2 center;
-
 void main()
 {
   vec4 p0 = gl_in[0].gl_Position;
@@ -66,32 +64,42 @@ void main()
   vec4 pos;
 
   pos = p1;
-  pos.xy += m1 * lineWidth * 0.5;
-  center = p1.xy;
+  pos.xy += np * lineWidth * 0.5;
   pos.xy = 2 * pos.xy / viewport - 1;
   pos.xyz *= pos.w;
   gl_Position = pos;
   EmitVertex();
 
   pos = p1;
-  pos.xy -= m1 * lineWidth * 0.5;
-  center = p1.xy;
+  pos.xy += nl * lineWidth * 0.5;
+  pos.xy = 2 * pos.xy / viewport - 1;
+  pos.xyz *= pos.w;
+  gl_Position = pos;
+  EmitVertex();
+
+  pos = p1;
+  pos.xy -= nl * lineWidth * 0.5;
   pos.xy = 2 * pos.xy / viewport - 1;
   pos.xyz *= pos.w;
   gl_Position = pos;
   EmitVertex();
 
   pos = p2;
-  pos.xy += m2 * lineWidth * 0.5;
-  center = p2.xy;
+  pos.xy += nl * lineWidth * 0.5;
   pos.xy = 2 * pos.xy / viewport - 1;
   pos.xyz *= pos.w;
   gl_Position = pos;
   EmitVertex();
 
   pos = p2;
-  pos.xy -= m2 * lineWidth * 0.5;
-  center = p2.xy;
+  pos.xy -= nl * lineWidth * 0.5;
+  pos.xy = 2 * pos.xy / viewport - 1;
+  pos.xyz *= pos.w;
+  gl_Position = pos;
+  EmitVertex();
+
+  pos = p2;
+  pos.xy -= nn * lineWidth * 0.5;
   pos.xy = 2 * pos.xy / viewport - 1;
   pos.xyz *= pos.w;
   gl_Position = pos;
