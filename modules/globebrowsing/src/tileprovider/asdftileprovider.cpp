@@ -48,6 +48,13 @@ namespace {
         Points,
     };
 
+    enum class KernelSize {
+        Disabled = 0,
+        Five = 5,
+        Nine = 9,
+        Thirteen = 13
+    };
+
     constexpr openspace::properties::Property::PropertyInfo JSONPathInfo = {
         "JSON",
         "JSON",
@@ -80,6 +87,14 @@ namespace {
         "LineWidth",
         "Line Width",
         "This value specifies the line width or Point size of the ASDF",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo KernelSizeInfo = {
+        "KernelSize",
+        "Kernel size",
+        "Specifies the kernel size of the gaussian blur filter used to smooth out"
+        "the edges of rendered path.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -126,6 +141,15 @@ namespace {
 
         // [[codegen::verbatim(RenderingModeInfo.description)]]
         std::optional<RenderingMode> renderingMode;
+
+        enum class [[codegen::map(KernelSize)]] KernelSize {
+            Disabled = 0,
+            Five = 5,
+            Nine = 9,
+            Thirteen = 13
+        };
+        // [[codegen::verbatim(KernelSizeInfo.description)]]
+        std::optional<KernelSize> kernelSize;
     };
 
 #include "asdftileprovider_codegen.cpp"
@@ -141,6 +165,8 @@ AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
     _lineWidth(LineWidthInfo, 10.f, 1.f, 1000.f),
     _renderFullAsdf(RenderFullAsdfInfo, false),
     _renderingMode(RenderingModeInfo,
+        openspace::properties::OptionProperty::DisplayType::Dropdown),
+    _kernelSize(KernelSizeInfo,
         openspace::properties::OptionProperty::DisplayType::Dropdown),
     _start(0.0),
     _fbo(0),
@@ -173,6 +199,14 @@ AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
     });
     addProperty(_renderingMode);
 
+    _kernelSize.addOptions({
+        { static_cast<int>(KernelSize::Disabled), "Disabled" },
+        { static_cast<int>(KernelSize::Five), "5" },
+        { static_cast<int>(KernelSize::Nine), "9" },
+        { static_cast<int>(KernelSize::Thirteen), "13" },
+        });
+    addProperty(_kernelSize);
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _JSONPath = p.JSON;
     _startTime = p.startTime;
@@ -182,6 +216,9 @@ AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
     _renderFullAsdf = p.renderFullAsdf.value_or(_renderFullAsdf);
     if (p.renderingMode.has_value()) {
         _renderingMode = static_cast<int>(codegen::map<RenderingMode>(*p.renderingMode));
+    }
+    if (p.kernelSize.has_value()) {
+        _kernelSize = static_cast<int>(codegen::map<KernelSize>(*p.kernelSize));
     }
 }
 
@@ -276,6 +313,17 @@ void AsdfTileProvider::internalInitialize() {
         GL_TEXTURE_WRAP_T,
         GL_CLAMP_TO_BORDER
     );
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
+    );
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
+    );
+
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -288,6 +336,70 @@ void AsdfTileProvider::internalInitialize() {
         nullptr
     );
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    static constexpr GLfloat vertices[] = {
+        -1.f, -1.f,
+        1.f, -1.f,
+        -1.f,  1.f,
+        -1.f,  1.f,
+        1.f, -1.f,
+        1.f,  1.f,
+    };
+
+    glGenVertexArrays(1, &_quadVao);
+    glBindVertexArray(_quadVao);
+    glGenBuffers(1, &_quadVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+        0,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        2 * sizeof(GL_FLOAT),
+        reinterpret_cast<void*>(0)
+    );
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    _texture2 = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(_rendertargetDimensions.x, _rendertargetDimensions.y, 1),
+        GL_TEXTURE_2D
+    );
+
+    glBindTexture(GL_TEXTURE_2D, *_texture2);
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
+    );
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
+    );
+
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA,
+        static_cast<GLsizei>(_rendertargetDimensions.x),
+        static_cast<GLsizei>(_rendertargetDimensions.y),
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glGenFramebuffers(1, &_fbo2);
+
+    _program2 = global::renderEngine->buildRenderProgram(
+        "AsdfProgram2",
+        absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_blur_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_blur_fs.glsl")
+    );
 
     update();
 }
@@ -433,7 +545,6 @@ void AsdfTileProvider::update() {
         static_cast<GLsizei>(_rendertargetDimensions.y)
     );
 
-    //glClearColor(.2f, .2f, .2f, 0.f);
     glClearColor(.0f, .0f, .0f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -441,8 +552,7 @@ void AsdfTileProvider::update() {
     _program->setUniform("viewport",
         glm::vec2(_rendertargetDimensions.x, _rendertargetDimensions.y));
     _program->setUniform("lineWidth", _lineWidth);
-    const float blend = 2.0;
-    //_program->setUniform("blendFactor", blend);
+    _program->setUniform("nPoints", static_cast<GLint>(points.size()-1));
     _program->setUniform("color", _color);
     _program->setUniform("projectionMatrix", projection);
 
@@ -462,6 +572,68 @@ void AsdfTileProvider::update() {
     else {
         glPointSize(_lineWidth);
         glDrawArrays(GL_POINTS, 0, points.size());
+    }
+
+    if (_kernelSize.value() != static_cast<int>(KernelSize::Disabled)) {
+        // Two-pass blur
+
+        // First pass - horizontally
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D,
+            *_texture2.get(),
+            0
+        );
+
+        glViewport(
+            0,
+            0,
+            static_cast<GLsizei>(_rendertargetDimensions.x),
+            static_cast<GLsizei>(_rendertargetDimensions.y)
+        );
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        _program2->activate();
+        _program2->setUniform("resolution",
+            glm::vec2(_rendertargetDimensions.x, _rendertargetDimensions.y));
+        _program2->setUniform("direction", glm::vec2(1, 0));
+        _program2->setUniform("kernelSize", _kernelSize.value());
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, *_texture.get());
+        glBindVertexArray(_quadVao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        // First pass - vertically
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D,
+            *_texture.get(),
+            0
+        );
+
+        glViewport(
+            0,
+            0,
+            static_cast<GLsizei>(_rendertargetDimensions.x),
+            static_cast<GLsizei>(_rendertargetDimensions.y)
+        );
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        _program2->activate();
+        _program2->setUniform("resolution",
+            glm::vec2(_rendertargetDimensions.x, _rendertargetDimensions.y));
+        _program2->setUniform("direction", glm::vec2(0, 1));
+        _program2->setUniform("kernelSize", _kernelSize.value());
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, *_texture2.get());
+        glBindVertexArray(_quadVao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 
     // Reset FBO, shader program and viewport

@@ -62,6 +62,7 @@ private:
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _renderFullAsdf;
     properties::OptionProperty _renderingMode;
+    properties::OptionProperty _kernelSize;
 
     struct Feature {
         double _lat, _lon;
@@ -70,12 +71,17 @@ private:
 
     double _start = 0.0;
     GLuint _fbo = 0;
+    GLuint _fbo2 = 0;
     GLuint _vao = 0;
     GLuint _vbo = 0;
+    GLuint _quadVao = 0;
+    GLuint _quadVbo = 0;
     GeodeticPatch _bounds;
     glm::ivec2 _rendertargetDimensions;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program2;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _texture2;
     std::vector<Feature> _features;
 };
 

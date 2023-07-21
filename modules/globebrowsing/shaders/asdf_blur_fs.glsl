@@ -22,91 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
 
-layout (lines_adjacency) in;
-layout (triangle_strip, max_vertices = 6) out;
+uniform sampler2D tex0;
+uniform vec2 resolution;
+uniform vec2 direction;
+uniform int kernelSize;
 
-uniform vec2  viewport;
-uniform float lineWidth;
-uniform int nPoints;
+in vec2 uv;
 
-void main()
-{
-  vec4 p0 = gl_in[0].gl_Position;
-  p0.xyz /= p0.w;
+vec4 blur5(sampler2D tex, vec2 uv, vec2 res, vec2 dir) {
+  vec4 color = vec4(0.0);
+  vec2 off1 = vec2(1.3333333333333333) * dir;
+  color += texture2D(tex, uv) * 0.29411764705882354;
+  color += texture2D(tex, uv + (off1 / res)) * 0.35294117647058826;
+  color += texture2D(tex, uv - (off1 / res)) * 0.35294117647058826;
+  return color; 
+}
 
-  vec4 p1 = gl_in[1].gl_Position/gl_in[1].gl_Position.w;
-  p1.xyz /= p1.w;
+vec4 blur9(sampler2D tex, vec2 uv, vec2 res, vec2 dir) {
+  vec4 color = vec4(0.0);
+  vec2 off1 = vec2(1.3846153846) * dir;
+  vec2 off2 = vec2(3.2307692308) * dir;
+  color += texture2D(tex, uv) * 0.2270270270;
+  color += texture2D(tex, uv + (off1 / res)) * 0.3162162162;
+  color += texture2D(tex, uv - (off1 / res)) * 0.3162162162;
+  color += texture2D(tex, uv + (off2 / res)) * 0.0702702703;
+  color += texture2D(tex, uv - (off2 / res)) * 0.0702702703;
+  return color;
+}
 
-  vec4 p2 = gl_in[2].gl_Position/gl_in[2].gl_Position.w;
-  p2.xyz /= p2.w;
+vec4 blur13(sampler2D tex, vec2 uv, vec2 res, vec2 dir) {
+  vec4 color;
+  vec2 off1 = vec2(1.3846153846) * dir;
+  vec2 off2 = vec2(3.2307692308) * dir;
+  vec2 off3 = vec2(5.176470588235294) * dir;
+  color += texture2D(tex, uv) * 0.1964825501511404;
+  color += texture2D(tex, uv + (off1 / res)) * 0.2969069646728344;
+  color += texture2D(tex, uv - (off1 / res)) * 0.2969069646728344;
+  color += texture2D(tex, uv + (off2 / res)) * 0.09447039785044732;
+  color += texture2D(tex, uv - (off2 / res)) * 0.09447039785044732;
+  color += texture2D(tex, uv + (off3 / res)) * 0.010381362401148057;
+  color += texture2D(tex, uv - (off3 / res)) * 0.010381362401148057;
 
-  vec4 p3 = gl_in[3].gl_Position/gl_in[3].gl_Position.w;
-  p3.xyz /= p3.w;
+  return color;
+}
 
-  p0.xy = (p0.xy + 1) * 0.5 * viewport;
-  p1.xy = (p1.xy + 1) * 0.5 * viewport;
-  p2.xy = (p2.xy + 1) * 0.5 * viewport;
-  p3.xy = (p3.xy + 1) * 0.5 * viewport;
-
-  vec2 p = normalize(p1.xy - p0.xy);
-  vec2 np = vec2(-p.y, p.x);
-
-  vec2 l = normalize(p2.xy - p1.xy);
-  vec2 nl = vec2(-l.y, l.x);
-
-  vec2 n = normalize(p3.xy - p2.xy);
-  vec2 nn = vec2(-n.y, n.x);
-
-  vec2 m1 = normalize(nl + np);
-  vec2 m2 = normalize(nl + nn);
-
-  vec4 pos;
-
-  pos = p1;
-  pos.xy += np * lineWidth * 0.5;
-  pos.xy = 2 * pos.xy / viewport - 1;
-  pos.xyz *= pos.w;
-  gl_Position = pos;
-  EmitVertex();
-
-  pos = p1;
-  pos.xy += nl * lineWidth * 0.5;
-  pos.xy = 2 * pos.xy / viewport - 1;
-  pos.xyz *= pos.w;
-  gl_Position = pos;
-  EmitVertex();
-
-  pos = p1;
-  pos.xy -= nl * lineWidth * 0.5;
-  pos.xy = 2 * pos.xy / viewport - 1;
-  pos.xyz *= pos.w;
-  gl_Position = pos;
-  EmitVertex();
-
-  pos = p2;
-  pos.xy += nl * lineWidth * 0.5;
-  pos.xy = 2 * pos.xy / viewport - 1;
-  pos.xyz *= pos.w;
-  gl_Position = pos;
-  EmitVertex();
-
-  pos = p2;
-  pos.xy -= nl * lineWidth * 0.5;
-  pos.xy = 2 * pos.xy / viewport - 1;
-  pos.xyz *= pos.w;
-  gl_Position = pos;
-  EmitVertex();
-
-  if (gl_PrimitiveIDIn < nPoints - 3) {
-    pos = p2;
-    pos.xy -= nn * lineWidth * 0.5;
-    pos.xy = 2 * pos.xy / viewport - 1;
-    pos.xyz *= pos.w;
-    gl_Position = pos;
-    EmitVertex();
+Fragment getFragment() {
+  Fragment frag;
+  frag.disableLDR2HDR = true;
+  if (kernelSize == 0) {
+    frag.color = texture(tex0, uv);
   }
-
-  EndPrimitive();
+  if (kernelSize == 5) {
+    frag.color = blur5(tex0, uv, resolution, direction);
+  }
+  if (kernelSize == 9) {
+    frag.color = blur9(tex0, uv, resolution, direction);
+  }
+  if (kernelSize == 13) {
+    frag.color = blur13(tex0, uv, resolution, direction);
+  }
+  return frag;
 }

@@ -24,89 +24,12 @@
 
 #version __CONTEXT__
 
-layout (lines_adjacency) in;
-layout (triangle_strip, max_vertices = 6) out;
+layout(location=0) in vec2 vertex_position;
 
-uniform vec2  viewport;
-uniform float lineWidth;
-uniform int nPoints;
+out vec2 uv;
 
 void main()
 {
-  vec4 p0 = gl_in[0].gl_Position;
-  p0.xyz /= p0.w;
-
-  vec4 p1 = gl_in[1].gl_Position/gl_in[1].gl_Position.w;
-  p1.xyz /= p1.w;
-
-  vec4 p2 = gl_in[2].gl_Position/gl_in[2].gl_Position.w;
-  p2.xyz /= p2.w;
-
-  vec4 p3 = gl_in[3].gl_Position/gl_in[3].gl_Position.w;
-  p3.xyz /= p3.w;
-
-  p0.xy = (p0.xy + 1) * 0.5 * viewport;
-  p1.xy = (p1.xy + 1) * 0.5 * viewport;
-  p2.xy = (p2.xy + 1) * 0.5 * viewport;
-  p3.xy = (p3.xy + 1) * 0.5 * viewport;
-
-  vec2 p = normalize(p1.xy - p0.xy);
-  vec2 np = vec2(-p.y, p.x);
-
-  vec2 l = normalize(p2.xy - p1.xy);
-  vec2 nl = vec2(-l.y, l.x);
-
-  vec2 n = normalize(p3.xy - p2.xy);
-  vec2 nn = vec2(-n.y, n.x);
-
-  vec2 m1 = normalize(nl + np);
-  vec2 m2 = normalize(nl + nn);
-
-  vec4 pos;
-
-  pos = p1;
-  pos.xy += np * lineWidth * 0.5;
-  pos.xy = 2 * pos.xy / viewport - 1;
-  pos.xyz *= pos.w;
-  gl_Position = pos;
-  EmitVertex();
-
-  pos = p1;
-  pos.xy += nl * lineWidth * 0.5;
-  pos.xy = 2 * pos.xy / viewport - 1;
-  pos.xyz *= pos.w;
-  gl_Position = pos;
-  EmitVertex();
-
-  pos = p1;
-  pos.xy -= nl * lineWidth * 0.5;
-  pos.xy = 2 * pos.xy / viewport - 1;
-  pos.xyz *= pos.w;
-  gl_Position = pos;
-  EmitVertex();
-
-  pos = p2;
-  pos.xy += nl * lineWidth * 0.5;
-  pos.xy = 2 * pos.xy / viewport - 1;
-  pos.xyz *= pos.w;
-  gl_Position = pos;
-  EmitVertex();
-
-  pos = p2;
-  pos.xy -= nl * lineWidth * 0.5;
-  pos.xy = 2 * pos.xy / viewport - 1;
-  pos.xyz *= pos.w;
-  gl_Position = pos;
-  EmitVertex();
-
-  if (gl_PrimitiveIDIn < nPoints - 3) {
-    pos = p2;
-    pos.xy -= nn * lineWidth * 0.5;
-    pos.xy = 2 * pos.xy / viewport - 1;
-    pos.xyz *= pos.w;
-    gl_Position = pos;
-    EmitVertex();
-  }
-
-  EndPrimitive();
+    uv = (vertex_position + 1) * 0.5;
+    gl_Position = vec4(vertex_position, 0.0, 1.0);
 }
