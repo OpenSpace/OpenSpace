@@ -138,7 +138,7 @@ AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
     _startTime(StartTimeInfo),
     _resolution(ResolutionInfo, 4096, 256, OpenGLCap.max2DTextureSize()),
     _color(ColorInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(1.f)),
-    _lineWidth(LineWidthInfo, 10.f, 1.f, 250.f),
+    _lineWidth(LineWidthInfo, 10.f, 1.f, 1000.f),
     _renderFullAsdf(RenderFullAsdfInfo, false),
     _renderingMode(RenderingModeInfo,
         openspace::properties::OptionProperty::DisplayType::Dropdown),
