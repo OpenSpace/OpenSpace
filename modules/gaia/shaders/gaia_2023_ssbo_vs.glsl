@@ -133,20 +133,25 @@ void main() {
   if(columnIndex < 3) //Index 0,1,2 are for the positional data, x,y,z.
   {
     //Move to first star, move to this star's positional data, columnIndex gets the corret x, y, or z component. 
-    otherDataIdx = firstStarInChunk + placeInChunk * 3 + columnIndex;
+    int stride = 3;
+    otherDataIdx = firstStarInChunk + placeInChunk * stride + columnIndex;
   }
   else if(columnIndex < 5) //Index 3,4 are the color data: absolut magnitude, color
   {
     //Move to first star, move past the positional data, move to this star's color data, (columnIndex - startindex) finds the correct component
     int startIndex = 3;
-    otherDataIdx = firstStarInChunk + nStarsInChunk * 3 + placeInChunk * 2 + (columnIndex - startIndex);
+    int stride = 2;
+    int movePastNColumnOfData = 3;
+    otherDataIdx = firstStarInChunk + nStarsInChunk * movePastNColumnOfData + placeInChunk * stride + (columnIndex - startIndex);
   }
   else if(columnIndex < 8) //Index 5,6,7 are the velocity data, vx,vy,vz
   {
     //Move to first star, move past positional and color data, move to this star's velocity data,
     //(columnindex - start index) finds the correct vx, vy, or vz component.
     int startIndex = 5;
-    otherDataIdx = firstStarInChunk + nStarsInChunk * 5 + placeInChunk * 3 + (columnIndex - startIndex);
+    int stride = 3;
+    int movePastNColumnOfData = 5;
+    otherDataIdx = firstStarInChunk + nStarsInChunk * movePastNColumnOfData + placeInChunk * stride + (columnIndex - startIndex);
   }
   else { //Column index is an optional data parameter.
     //Column index starts at 8 and there are only 1 value per star for every column.
