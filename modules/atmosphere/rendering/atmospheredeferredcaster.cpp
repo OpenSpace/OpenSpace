@@ -273,11 +273,11 @@ void AtmosphereDeferredcaster::update(const UpdateData&) {}
 float AtmosphereDeferredcaster::eclipseShadow(glm::dvec3 position) {
     // This code is copied from the atmosphere deferred fragment shader 
     // It is used to calculate the eclipse shadow
-    const ShadowRenderingStruct& shadow = _shadowDataArrayCache.front();
-    if (_shadowDataArrayCache.empty() || !shadow.isShadowing) {
+    if (_shadowDataArrayCache.empty() || !_shadowDataArrayCache.front().isShadowing) {
         return 1.f;
     }
 
+    const ShadowRenderingStruct& shadow = _shadowDataArrayCache.front();
     const glm::dvec3 positionToCaster = shadow.casterPositionVec - position;
     const glm::dvec3 sourceToCaster = shadow.sourceCasterVec; // Normalized
     const glm::dvec3 casterShadow = dot(positionToCaster, sourceToCaster) * sourceToCaster;
