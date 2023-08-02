@@ -12,7 +12,7 @@
     { "type": "script", 
       "value": "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Enabled', true)"},
     { "type": "script", 
-      "value": "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Enabled', true)"},
+      "value": "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended.Enabled', true)"},
     { "type": "wait", 
       "value": "100"},
     { "type": "navigationstate", 
