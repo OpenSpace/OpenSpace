@@ -78,11 +78,11 @@ local ToggleEquatorial = {
   Identifier = "os.bastilleday.fluxnodescutplane.ToggleEquatorial",
   Name = "Toggle equatorial cutplane",
   Command = [[
-    if openspace.getPropertyValue("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled") then
+    if openspace.propertyValue("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled") then
       openspace.setPropertyValueSingle(
         "Scene.EquatorialCutplane-bastille-day-2000.Renderable.Fade",
         0.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear",
         'openspace.setPropertyValueSingle("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled", false)'
       )
@@ -91,7 +91,7 @@ local ToggleEquatorial = {
       openspace.setPropertyValueSingle(
         "Scene.EquatorialCutplane-bastille-day-2000.Renderable.Fade",
         1.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear"
       )
     end
@@ -104,11 +104,11 @@ local ToggleMeridial = {
   Identifier = "os.bastilleday.fluxnodescutplane.ToggleMeridial",
   Name = "Toggle meridial cutplane",
   Command = [[
-    if openspace.getPropertyValue("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled") then
+    if openspace.propertyValue("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled") then
       openspace.setPropertyValueSingle(
         "Scene.MeridialCutplane-bastille-day-2000.Renderable.Fade",
         0.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear",
         'openspace.setPropertyValueSingle("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled", false)'
       )
@@ -117,7 +117,7 @@ local ToggleMeridial = {
       openspace.setPropertyValueSingle(
         "Scene.MeridialCutplane-bastille-day-2000.Renderable.Fade",
         1.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear"
       )
     end

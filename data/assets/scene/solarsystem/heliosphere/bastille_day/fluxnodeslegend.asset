@@ -23,11 +23,11 @@ local ToggleLegend = {
   Identifier = "os.bastilleday.fluxnodelegend.ToggleLegend",
   Name = "Toggle the legend image",
   Command = [[
-    if openspace.getPropertyValue("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled") then
+    if openspace.propertyValue("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled") then
       openspace.setPropertyValueSingle(
         "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
         0.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear",
         'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)'
       )
@@ -36,7 +36,7 @@ local ToggleLegend = {
       openspace.setPropertyValueSingle(
         "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
         1.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear"
       )
     end
@@ -53,7 +53,7 @@ local HideLegend = {
     openspace.setPropertyValueSingle(
       "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
       0.0,
-      openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+      openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
       "Linear",
       'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)'
     )

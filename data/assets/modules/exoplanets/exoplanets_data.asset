@@ -17,12 +17,12 @@ asset.onInitialize(function()
   -- Set the default data files used for the exoplanet system creation
   -- (Check if already set, to not override value set in another file)
   local p1 = "Modules.Exoplanets.DataFolder"
-  if (openspace.getPropertyValue(p1) == "") then
+  if (openspace.propertyValue(p1) == "") then
     openspace.setPropertyValueSingle(p1, dataPath)
   end
 
   local p2 = "Modules.Exoplanets.BvColormap"
-  if (openspace.getPropertyValue(p2) == "") then
+  if (openspace.propertyValue(p2) == "") then
     openspace.setPropertyValueSingle(p2, colormaps .. "colorbv.cmap")
   end
 end)

@@ -40,7 +40,7 @@ local ToggleKaguyaLayer = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled",
-      not openspace.getPropertyValue("Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled")
+      not openspace.propertyValue("Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled")
     )
   ]],
   Documentation = "Toggles Moon Kaguya color layer",

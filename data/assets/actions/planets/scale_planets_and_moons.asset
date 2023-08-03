@@ -29,12 +29,12 @@ local function toggleScaleAction(identifier, scale, name, speedup, speeddown)
     Identifier = "os.toggle_" .. string.gsub(name, "%s+", "") .. "_scale",
     Name = "Toggle " .. name .. " scale",
     Command = [[
-local list = openspace.getProperty("]] .. identifier .. [[.Scale.Scale")
+local list = openspace.property("]] .. identifier .. [[.Scale.Scale")
 if #list == 0 then
   openspace.printWarning("No planets to resize")
 else
   local prop = list[1]
-  local currentScale = openspace.getPropertyValue(prop)
+  local currentScale = openspace.propertyValue(prop)
   local newScale = 1
   if (currentScale == 1) then
     ]] .. scaleCommand(identifier, scale, speedup) .. [[

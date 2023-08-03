@@ -161,7 +161,7 @@ local Toggle67pProjection = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.67P.Renderable.ProjectionComponent.PerformProjection",
-      not openspace.getPropertyValue("Scene.67P.Renderable.ProjectionComponent.PerformProjection")
+      not openspace.propertyValue("Scene.67P.Renderable.ProjectionComponent.PerformProjection")
     )
   ]],
   Documentation = "Enables or disables the image projection on 67P",

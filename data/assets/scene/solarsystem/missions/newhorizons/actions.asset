@@ -54,7 +54,7 @@ local ToggleImageProjection = {
   Identifier = "os.newhorizons.ToggleImageProjection",
   Name = "Toggle NH image projection",
   Command = [[
-    local enabled = openspace.getPropertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection")
+    local enabled = openspace.propertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection")
     openspace.setPropertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection", not enabled)
     openspace.setPropertyValue("Scene.CharonProjection.Renderable.ProjectionComponent.PerformProjection", not enabled)
   ]],
@@ -94,7 +94,7 @@ local IncreaseHeightmapPluto = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PlutoProjection.Renderable.HeightExaggeration",
-      openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") + 5000
+      openspace.propertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") + 5000
     )
   ]],
   Documentation = "Increases the height map exaggeration on Pluto",
@@ -108,7 +108,7 @@ local DecreaseHeightmapPluto = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PlutoProjection.Renderable.HeightExaggeration",
-      openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") - 5000
+      openspace.propertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") - 5000
     )
   ]],
   Documentation = "Decreases the height map exaggeration on Pluto",
@@ -122,7 +122,7 @@ local IncreaseHeightmapCharon = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.CharonProjection.Renderable.HeightExaggeration",
-      openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") + 5000
+      openspace.propertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") + 5000
     )
   ]],
   Documentation = "Increases the height map exaggeration on Charon",
@@ -136,7 +136,7 @@ local DecreaseHeightmapCharon = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.CharonProjection.Renderable.HeightExaggeration",
-      openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") - 5000
+      openspace.propertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") - 5000
     )
   ]],
   Documentation = "Decreases the height map exaggeration on Charon",
@@ -150,7 +150,7 @@ local TogglePlutoTrail = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PlutoBarycentricTrail.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.PlutoBarycentricTrail.Renderable.Enabled")
+      not openspace.propertyValue("Scene.PlutoBarycentricTrail.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of the trail behind Pluto",
@@ -164,27 +164,27 @@ local TogglePlutoLabels = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PlutoText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.PlutoText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.PlutoText.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.CharonText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.CharonText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.CharonText.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.HydraText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.HydraText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.HydraText.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.NixText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.NixText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.NixText.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.KerberosText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.KerberosText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.KerberosText.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.StyxText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.StyxText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.StyxText.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx",
@@ -196,7 +196,7 @@ local ToggleNewHorizonsLabels = {
   Identifier = "os.newhorizons.ToggleNewHorizonsLabels",
   Name = "Toggle New Horizons labels",
   Command = [[
-    local v = openspace.getPropertyValue("Scene.Labels.Renderable.Opacity")
+    local v = openspace.propertyValue("Scene.Labels.Renderable.Opacity")
     if v <= 0.5 then
       openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity", 1.0, 2.0)
     else
@@ -214,11 +214,11 @@ local ToggleShadows = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PlutoShadow.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.PlutoShadow.Renderable.Enabled")
+      not openspace.propertyValue("Scene.PlutoShadow.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.CharonShadow.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.CharonShadow.Renderable.Enabled")
+      not openspace.propertyValue("Scene.CharonShadow.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of the shadow visualization of Pluto and Charon",
@@ -232,7 +232,7 @@ local ToggleNewHorizonsTrail = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.NewHorizonsTrailPluto.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.NewHorizonsTrailPluto.Renderable.Enabled")
+      not openspace.propertyValue("Scene.NewHorizonsTrailPluto.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the trail of New Horizons",
