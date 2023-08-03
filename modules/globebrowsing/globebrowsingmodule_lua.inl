@@ -612,9 +612,13 @@ getGeoPositionForCamera(bool useEyePosition = false)
         ));
     }
 
-    if (path.extension() != ".geojson") {
+    std::string extension = path.extension().string();
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+        [](unsigned char c) { return std::tolower(c); });
+
+    if (extension != ".geojson" && extension != ".json") {
         throw ghoul::lua::LuaError(fmt::format(
-            "Unexpected file type: '{}'. Expected '.geojson' file", filename
+            "Unexpected file type: '{}'. Expected '.geojson' or '.json' file", filename
         ));
     }
 
