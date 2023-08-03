@@ -611,8 +611,10 @@ void GeoJsonComponent::readFile() {
     try {
         GeoJSONFeatureCollection fc = reader.readFeatures(content);
 
+        int count = 1;
         for (const GeoJSONFeature& feature : fc.getFeatures()) {
-            parseSingleFeature(feature);
+            parseSingleFeature(feature, count);
+            count++;
         }
 
         if (_geometryFeatures.empty()) {
@@ -633,16 +635,25 @@ void GeoJsonComponent::readFile() {
     computeMainFeatureMetaPropeties();
 }
 
-void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& feature) {
+void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& feature,
+                                          int indexInFile
+) {
     // Read the geometry
     const geos::geom::Geometry* geom = feature.getGeometry();
-    ghoul_assert(geom, "No geometry found");
 
     // Read the properties
     GeoJsonOverrideProperties propsFromFile = propsFromGeoJson(feature);
 
     std::vector<const geos::geom::Geometry*> geomsToAdd;
-    if (geom->isPuntal()) {
+    if (!geom) {
+        // Null geometry => no geometries to add
+        LWARNING(fmt::format(
+            "Feature {} in GeoJson file '{}' is a null geometry and will not be loaded",
+            indexInFile, _geoJsonFile
+        ));
+        // @TODO (emmbr26) We should eventually support features with null geometry
+    }
+    else if (geom->isPuntal()) {
         // If points, handle all point features as one feature, even multi-points
         geomsToAdd = { geom };
     }
@@ -650,7 +661,10 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         size_t nGeom = geom->getNumGeometries();
         geomsToAdd.reserve(nGeom);
         for (size_t i = 0; i < nGeom; ++i) {
-            geomsToAdd.push_back(geom->getGeometryN(i));
+            const geos::geom::Geometry* subGeometry = geom->getGeometryN(i);
+            if (subGeometry) {
+                geomsToAdd.push_back(subGeometry);
+            }
         }
     }
 
@@ -687,7 +701,8 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         catch (const ghoul::MissingCaseException&) {
             LERROR(fmt::format(
                 "Error creating GeoJson layer with identifier '{}'. Problem reading "
-                "feature {} in GeoJson file '{}'.", identifier(), index, _geoJsonFile
+                "feature {} in GeoJson file '{}'.",
+                identifier(), indexInFile, _geoJsonFile
             ));
             // Do nothing
         }
