@@ -2357,7 +2357,7 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
         const std::vector<Layer*>& lyrs = _layerManager.layerGroup(gi.id).activeLayers();
         for (Layer* layer : lyrs) {
             Tile::Status status = layer->tileStatus(chunk.tileIndex);
-            if (status == Tile::Status::OK) {
+            if (status == Tile::Status::OK && layer->tileProvider()->maxLevel() > currLevel + 1) {
                 return UnknownDesiredLevel;
             }
         }
