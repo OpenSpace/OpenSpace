@@ -69,7 +69,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    layers::Layer::ID typeID = layers::Layer::ID::DefaultTileLayer;
+    layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
     if (p.defaultProvider.hasValue<std::string>("Type")) {
         std::string type = p.defaultProvider.value<std::string>("Type");
         typeID = ghoul::from_string<layers::Layer::ID>(type);
@@ -88,7 +88,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             static_cast<uint8_t>(ip.tileIndex.level)
         );
 
-        layers::Layer::ID providerID = layers::Layer::ID::DefaultTileLayer;
+        layers::Layer::ID providerID = layers::Layer::ID::DefaultTileProvider;
         if (ip.tileProvider.hasValue<std::string>("Type")) {
             std::string type = ip.tileProvider.value<std::string>("Type");
             providerID = ghoul::from_string<layers::Layer::ID>(type);

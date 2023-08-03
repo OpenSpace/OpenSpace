@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "Size_Reference",
   Name = "Size Reference",
   Enabled = asset.enabled,
-  Type = "SizeReferenceTileLayer",
+  Type = "SizeReferenceTileProvider",
   Radii = globe.Mars.Renderable.Radii
 }
 

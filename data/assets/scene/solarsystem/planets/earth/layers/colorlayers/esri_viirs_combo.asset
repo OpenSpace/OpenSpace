@@ -6,14 +6,14 @@ local Layer = {
   Identifier = "ESRI_VIIRS_Combo",
   Name = "ESRI VIIRS Combo",
   Enabled = asset.enabled,
-  Type = "ByLevelTileLayer",
+  Type = "TileProviderByLevel",
   LevelTileProviders = {
     {
       MaxLevel = 4,
       TileProvider = {
         Identifier = "Temporal_VIIRS_SNPP",
         Name = "Temporal VIIRS SNPP",
-        Type = "TemporalTileLayer",
+        Type = "TemporalTileProvider",
         Mode = "Prototyped",
         Prototyped = {
           Time = {
