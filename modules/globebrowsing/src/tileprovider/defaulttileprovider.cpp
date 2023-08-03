@@ -82,10 +82,6 @@ namespace {
         // [[codegen::verbatim(TilePixelSizeInfo.description)]]
         std::optional<int> tilePixelSize;
 
-        // Determines whether the tiles should have a padding zone around it, making the
-        // interpolation between tiles more pleasant
-        std::optional<bool> padTiles;
-
         // Determines if the tiles should be preprocessed before uploading to the GPU
         std::optional<bool> performPreProcessing;
 
@@ -144,7 +140,6 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
     int pixelSize = p.tilePixelSize.value_or(0);
-    _padTiles = p.padTiles.value_or(_padTiles);
 
     // Only preprocess height layers by default
     _performPreProcessing = _layerGroupID == layers::Group::ID::HeightLayers;
@@ -193,7 +188,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     _cacheProperties.compression = codegen::toString(compression);
 
     TileTextureInitData initData(
-        tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
+        tileTextureInitData(_layerGroupID, pixelSize)
     );
     _tilePixelSize = initData.dimensions.x;
     initAsyncTileDataReader(initData, _cacheProperties);
@@ -279,7 +274,7 @@ void DefaultTileProvider::update() {
 
     if (_asyncTextureDataProvider->shouldBeDeleted()) {
         initAsyncTileDataReader(
-            tileTextureInitData(_layerGroupID, _padTiles, _tilePixelSize),
+            tileTextureInitData(_layerGroupID, _tilePixelSize),
             _cacheProperties
         );
     }

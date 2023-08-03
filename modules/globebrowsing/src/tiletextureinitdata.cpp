@@ -26,9 +26,6 @@
 
 namespace {
 
-const glm::ivec2 TilePixelStartOffset = glm::ivec2(-2);
-const glm::ivec2 TilePixelSizeDifference = glm::ivec2(4);
-
 size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
     switch (format) {
         case ghoul::opengl::Texture::Format::Red:
@@ -104,7 +101,7 @@ openspace::globebrowsing::TileTextureInitData::HashKey calculateHashKey(
 
 namespace openspace::globebrowsing {
 
-TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTiles,
+TileTextureInitData tileTextureInitData(layers::Group::ID id,
                                         size_t preferredTileSize)
 {
     switch (id) {
@@ -115,7 +112,6 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTile
                 tileSize,
                 GL_FLOAT,
                 ghoul::opengl::Texture::Format::Red,
-                TileTextureInitData::PadTiles(shouldPadTiles),
                 TileTextureInitData::ShouldAllocateDataOnCPU::Yes
             );
         }
@@ -125,8 +121,7 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTile
                 tileSize,
                 tileSize,
                 GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(shouldPadTiles)
+                ghoul::opengl::Texture::Format::BGRA
             );
         }
         case layers::Group::ID::Overlays: {
@@ -135,8 +130,7 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTile
                 tileSize,
                 tileSize,
                 GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(shouldPadTiles)
+                ghoul::opengl::Texture::Format::BGRA
             );
         }
         case layers::Group::ID::NightLayers: {
@@ -145,8 +139,7 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTile
                 tileSize,
                 tileSize,
                 GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(shouldPadTiles)
+                ghoul::opengl::Texture::Format::BGRA
             );
         }
         case layers::Group::ID::WaterMasks: {
@@ -155,8 +148,7 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTile
                 tileSize,
                 tileSize,
                 GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(shouldPadTiles)
+                ghoul::opengl::Texture::Format::BGRA
             );
         }
         default: {
@@ -167,10 +159,8 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTile
 
 TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum type,
                                          ghoul::opengl::Texture::Format textureFormat,
-                                         PadTiles pad, ShouldAllocateDataOnCPU allocCpu)
+                                         ShouldAllocateDataOnCPU allocCpu)
     : dimensions(width, height, 1)
-    , tilePixelStartOffset(pad ? TilePixelStartOffset : glm::ivec2(0))
-    , tilePixelSizeDifference(pad ? TilePixelSizeDifference : glm::ivec2(0))
     , glType(type)
     , ghoulTextureFormat(textureFormat)
     , nRasters(numberOfRasters(ghoulTextureFormat))
@@ -179,7 +169,6 @@ TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum typ
     , bytesPerLine(bytesPerPixel * width)
     , totalNumBytes(bytesPerLine * height)
     , shouldAllocateDataOnCPU(allocCpu)
-    , padTiles(pad)
     , hashKey(calculateHashKey(dimensions, ghoulTextureFormat, glType))
 {}
 

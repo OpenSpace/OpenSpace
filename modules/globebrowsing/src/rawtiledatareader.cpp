@@ -776,20 +776,6 @@ IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const
     io.read.overview = 0;
     io.read.fullRegion.start = glm::ivec2(0, 0);
     io.read.fullRegion.numPixels = glm::ivec2(_rasterXSize, _rasterYSize);
-    // For correct sampling in dataset, we need to pad the texture tile
-
-    PixelRegion scaledPadding = {
-        .start = _initData.tilePixelStartOffset,
-        .numPixels = _initData.tilePixelSizeDifference
-    };
-
-    const double scale = static_cast<double>(io.read.region.numPixels.x) /
-                         static_cast<double>(io.write.region.numPixels.x);
-    scaledPadding.numPixels *= scale;
-    scaledPadding.start *= scale;
-
-    io.read.region.start += scaledPadding.start;
-    io.read.region.numPixels += scaledPadding.numPixels;
 
     io.write.bytesPerLine = _initData.bytesPerLine;
     io.write.totalNumBytes = _initData.totalNumBytes;

@@ -321,7 +321,7 @@ void MemoryAwareTileCache::createDefaultTextureContainers() {
     ZoneScoped;
 
     for (const layers::Group& gi : layers::Groups) {
-        TileTextureInitData initData = tileTextureInitData(gi.id, true);
+        TileTextureInitData initData = tileTextureInitData(gi.id);
         assureTextureContainerExists(initData);
     }
 }

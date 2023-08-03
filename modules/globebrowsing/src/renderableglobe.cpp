@@ -1606,7 +1606,7 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
         // If it does not it will still produce "correct" normals. If the resolution is
         // higher the shadows will be softer, if it is lower, pixels will be visible.
         // Since default is 64 this will most likely work fine.
-        constexpr float TileDelta = 1.f / DefaultSkirtedGridSegments;
+        constexpr float TileDelta = 1.f / 512;
         const glm::vec3 deltaTheta0 = modelViewTransformMat3 *
             (glm::vec3(corner10 - corner00) * TileDelta);
         const glm::vec3 deltaTheta1 = modelViewTransformMat3 *

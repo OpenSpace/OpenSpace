@@ -94,12 +94,6 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                     program.setUniform(t.uniformCache.uvOffset, ct.uvTransform.uvOffset);
                     program.setUniform(t.uniformCache.uvScale, ct.uvTransform.uvScale);
                 }
-
-                program.setUniform(galuc.paddingStartOffset, al.tilePixelStartOffset());
-                program.setUniform(
-                    galuc.paddingSizeDifference,
-                    al.tilePixelSizeDifference()
-                );
                 break;
             }
             case layers::Layer::ID::SolidColor:
@@ -166,14 +160,6 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
                     tuc.uvOffset = p.uniformLocation(n + "uvTransform.uvOffset");
                     tuc.uvScale = p.uniformLocation(n + "uvTransform.uvScale");
                 }
-
-                galuc.paddingStartOffset = p.uniformLocation(
-                    name + "padding.startOffset"
-                );
-                galuc.paddingSizeDifference = p.uniformLocation(
-                    name + "padding.sizeDifference"
-                );
-
                 break;
             }
             case layers::Layer::ID::SolidColor:
