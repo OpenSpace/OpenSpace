@@ -74,7 +74,7 @@ void RenderableVideoPlane::update(const UpdateData& data) {
         return;
     }
 
-    // Shape the vidoe based on the aspect ration of the film
+    // Shape the plane based on the aspect ration of the video
     glm::vec2 textureDim = glm::vec2(_videoPlayer.frameTexture()->dimensions());
     if (_textureDimensions != textureDim) {
         float aspectRatio = textureDim.x / textureDim.y;
@@ -83,10 +83,11 @@ void RenderableVideoPlane::update(const UpdateData& data) {
         if (std::abs(planeAspectRatio - aspectRatio) >
             std::numeric_limits<float>::epsilon())
         {
+            double scale = _size.value().y;
             glm::vec2 newSize =
                 aspectRatio > 0.f ?
-                glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+                glm::vec2(scale * aspectRatio, scale) :
+                glm::vec2(scale, scale * aspectRatio);
             _size = newSize;
         }
 
