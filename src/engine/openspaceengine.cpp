@@ -1690,7 +1690,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::CreateSingleColorImage,
             codegen::lua::IsMaster,
             codegen::lua::Version,
-            codegen::lua::ReadCSVFile
+            codegen::lua::ReadCSVFile,
+            codegen::lua::ResetCamera
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
@@ -1717,19 +1718,28 @@ void setCameraFromProfile(const Profile& p) {
         return;
     }
 
+    auto checkNodeExists = [](const std::string& node) {
+        if (global::renderEngine->scene()->sceneGraphNode(node) == nullptr) {
+            throw ghoul::RuntimeError(fmt::format("Could not find node '{}'", node));
+        }
+    };
+
     std::visit(
-        overloaded{
-            [](const Profile::CameraNavState& navStateProfile) {
+        overloaded {
+            [&checkNodeExists](const Profile::CameraNavState& navStateProfile) {
                 interaction::NavigationState nav;
                 nav.anchor = navStateProfile.anchor;
+                checkNodeExists(nav.anchor);
                 if (navStateProfile.aim.has_value()) {
                     nav.aim = navStateProfile.aim.value();
+                    checkNodeExists(nav.aim);
                 }
                 if (navStateProfile.referenceFrame.empty()) {
                     nav.referenceFrame = nav.anchor;
                 }
                 else {
                     nav.referenceFrame = navStateProfile.referenceFrame;
+                    checkNodeExists(navStateProfile.referenceFrame);
                 }
                 nav.position = navStateProfile.position;
                 if (navStateProfile.up.has_value()) {
@@ -1743,11 +1753,12 @@ void setCameraFromProfile(const Profile& p) {
                 }
                 global::navigationHandler->setNavigationStateNextFrame(nav);
             },
-            [](const Profile::CameraGoToGeo& geo) {
-                // Instead of direct calls to navigation state code, lua commands with
+            [&checkNodeExists](const Profile::CameraGoToGeo& geo) {
+                // Instead of direct calls to navigation state code, Lua commands with
                 // globebrowsing goToGeo are used because this prevents a module
                 // dependency in this core code. Eventually, goToGeo will be incorporated
                 // in the OpenSpace core and this code will change.
+                checkNodeExists(geo.anchor);
                 std::string geoScript = fmt::format("openspace.globebrowsing.goToGeo"
                     "([[{}]], {}, {}", geo.anchor, geo.latitude, geo.longitude);
                 if (geo.altitude.has_value()) {
@@ -1759,13 +1770,16 @@ void setCameraFromProfile(const Profile& p) {
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
             },
-            [](const Profile::CameraGoToNode& node) {
+            [&checkNodeExists](const Profile::CameraGoToNode& node) {
                 using namespace interaction;
-                NodeCameraStateSpec spec;
-                spec.identifier = node.anchor;
-                spec.height = node.height;
-                spec.useTargetUpDirection = true;
 
+                checkNodeExists(node.anchor);
+
+                NodeCameraStateSpec spec = {
+                    .identifier = node.anchor,
+                    .height = node.height,
+                    .useTargetUpDirection = true
+                };
                 global::navigationHandler->setCameraFromNodeSpecNextFrame(spec);
             }
         },
