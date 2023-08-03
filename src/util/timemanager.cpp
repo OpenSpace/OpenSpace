@@ -867,7 +867,7 @@ void TimeManager::interpolatePreviousDeltaTimeStep(double durationSeconds) {
 }
 
 void TimeManager::setPause(bool pause) {
-    interpolatePause(pause, 0);
+    _timePaused = pause;
 }
 
 void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
