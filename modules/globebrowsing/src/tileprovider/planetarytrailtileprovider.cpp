@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/tileprovider/asdftileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/planetarytrailtileprovider.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
@@ -43,11 +43,6 @@
 #include <filesystem>
 
 namespace {
-    enum class RenderingMode {
-        Lines = 0,
-        Points,
-    };
-
     enum class KernelSize {
         Disabled = 0,
         Five = 5,
@@ -65,7 +60,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start Time",
-        "The start time for the range of this SOMETHING",
+        "The start time for the range of this planetary trail. Its internal"
+        "start time will be adjusted with this value.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -79,7 +75,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the ASDF",
+        "This value determines the RGB color for the planetary trail",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -94,7 +90,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width or Point size of the ASDF",
+        "This value specifies the line width planetary trail.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -106,24 +102,16 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderFullAsdfInfo = {
-        "RenderFullAsdf",
-        "Render Full Asdf",
-        "If this value is set to 'true', the entire Asdf will be rendered; if it is "
-        "'false', only the Asdf until the current time in the application will be shown",
+    constexpr openspace::properties::Property::PropertyInfo RenderFullTrailInfo = {
+        "RenderFullTrail",
+        "Render Full Trail",
+        "If this value is set to 'true', the entire planetary trail will be rendered;"
+        "if it is 'false', only the portion of the trail up until the current time"
+        "in the application will be shown",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
-        "Rendering",
-        "Rendering Mode",
-        "Determines how the asdf should be rendered to the screen. If 'Lines' is "
-        "selected, only the line part is visible, if 'Points' is selected, only the "
-        "corresponding points (and subpoints) are shown",
-        openspace::properties::Property::Visibility::User
-    };
-
-    struct [[codegen::Dictionary(AsdfTileProvider)]] Parameters {
+    struct [[codegen::Dictionary(PlanetaryTrailTileProvider)]] Parameters {
         // [[codegen::verbatim(JSONPathInfo.description)]]
         std::string JSON;
 
@@ -142,16 +130,8 @@ namespace {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
-        // [[codegen::verbatim(RenderFullAsdfInfo.description)]]
-        std::optional<bool> renderFullAsdf;
-
-        enum class [[codegen::map(RenderingMode)]] RenderingMode {
-            Lines = 0,
-            Points
-        };
-
-        // [[codegen::verbatim(RenderingModeInfo.description)]]
-        std::optional<RenderingMode> renderingMode;
+        // [[codegen::verbatim(RenderFullTrailInfo.description)]]
+        std::optional<bool> renderFullTrail;
 
         enum class [[codegen::map(KernelSize)]] KernelSize {
             Disabled = 0,
@@ -163,21 +143,19 @@ namespace {
         std::optional<KernelSize> kernelSize;
     };
 
-#include "asdftileprovider_codegen.cpp"
+#include "planetarytrailtileprovider_codegen.cpp"
 }
 
 namespace openspace::globebrowsing {
 
-AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
+PlanetaryTrailTileProvider::PlanetaryTrailTileProvider(const ghoul::Dictionary& dictionary) :
     _JSONPath(JSONPathInfo),
     _startTime(StartTimeInfo),
     _resolution(ResolutionInfo, 4096, 256, OpenGLCap.max2DTextureSize()),
     _color(ColorInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(1.f)),
     _lineWidth(LineWidthInfo, 10.f, 1.f, 1000.f),
     _cutoff(CutoffInfo, 30.f, 0.f, 3600.f, 1.f),
-    _renderFullAsdf(RenderFullAsdfInfo, false),
-    _renderingMode(RenderingModeInfo,
-        openspace::properties::OptionProperty::DisplayType::Dropdown),
+    _renderFullTrail(RenderFullTrailInfo, false),
     _kernelSize(KernelSizeInfo,
         openspace::properties::OptionProperty::DisplayType::Dropdown),
     _start(0.0),
@@ -205,13 +183,7 @@ AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
 
     addProperty(_cutoff);
 
-    addProperty(_renderFullAsdf);
-
-    _renderingMode.addOptions({
-        { static_cast<int>(RenderingMode::Lines), "Lines" },
-        { static_cast<int>(RenderingMode::Points), "Points" },
-    });
-    addProperty(_renderingMode);
+    addProperty(_renderFullTrail);
 
     _kernelSize.addOptions({
         { static_cast<int>(KernelSize::Disabled), "Disabled" },
@@ -228,21 +200,18 @@ AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
     _color = p.color.value_or(_color);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _cutoff = p.cutoff.value_or(_cutoff);
-    _renderFullAsdf = p.renderFullAsdf.value_or(_renderFullAsdf);
-    if (p.renderingMode.has_value()) {
-        _renderingMode = static_cast<int>(codegen::map<RenderingMode>(*p.renderingMode));
-    }
+    _renderFullTrail = p.renderFullTrail.value_or(_renderFullTrail);
     if (p.kernelSize.has_value()) {
         _kernelSize = static_cast<int>(codegen::map<KernelSize>(*p.kernelSize));
     }
 }
 
-AsdfTileProvider::~AsdfTileProvider() {}
+PlanetaryTrailTileProvider::~PlanetaryTrailTileProvider() {}
 
-void AsdfTileProvider::internalInitialize() {
+void PlanetaryTrailTileProvider::internalInitialize() {
     ZoneScoped;
 
-    const auto _loggerCat = "AsdfTileProvider";
+    const auto _loggerCat = "PlanetaryTrailTileProvider";
     std::ifstream file(absPath(_JSONPath));
     nlohmann::json content = nlohmann::json::parse(file);
     double minLon = std::numeric_limits<double>::max();
@@ -296,10 +265,10 @@ void AsdfTileProvider::internalInitialize() {
     glBindVertexArray(0);
 
     _program = global::renderEngine->buildRenderProgram(
-        "AsdfProgram",
-        absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_vs.glsl"),
-        absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_fs.glsl"),
-        absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_gs.glsl")
+        "PlanetaryTrailProgram",
+        absPath("${MODULE_GLOBEBROWSING}/shaders/planetarytrail_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/planetarytrail_fs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/planetarytrail_gs.glsl")
     );
 
     const double aspect = halfSizeLon / halfSizeLat;
@@ -411,26 +380,26 @@ void AsdfTileProvider::internalInitialize() {
     glGenFramebuffers(1, &_fbo2);
 
     _program2 = global::renderEngine->buildRenderProgram(
-        "AsdfProgram2",
-        absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_blur_vs.glsl"),
-        absPath("${MODULE_GLOBEBROWSING}/shaders/asdf_blur_fs.glsl")
+        "PlanetaryTrailBlurProgram",
+        absPath("${MODULE_GLOBEBROWSING}/shaders/planetarytrail_blur_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/planetarytrail_blur_fs.glsl")
     );
 
     update();
 }
 
-void AsdfTileProvider::internalDeinitialize() {
+void PlanetaryTrailTileProvider::internalDeinitialize() {
     glDeleteFramebuffers(1, &_fbo);
     glDeleteBuffers(1, &_vbo);
     glDeleteVertexArrays(1, &_vao);
     _texture.reset();
 }
 
-Tile AsdfTileProvider::tile(const globebrowsing::TileIndex& tileIndex) {
+Tile PlanetaryTrailTileProvider::tile(const globebrowsing::TileIndex& tileIndex) {
     return Tile{ _texture.get(), std::nullopt, Tile::Status::OK };
 }
 
-Tile::Status AsdfTileProvider::tileStatus(const globebrowsing::TileIndex& tileIndex) {
+Tile::Status PlanetaryTrailTileProvider::tileStatus(const globebrowsing::TileIndex& tileIndex) {
     GeodeticPatch patch(tileIndex);
     if (_bounds.overlaps(patch)) {
         return Tile::Status::OK;
@@ -438,11 +407,11 @@ Tile::Status AsdfTileProvider::tileStatus(const globebrowsing::TileIndex& tileIn
     return globebrowsing::Tile::Status::OutOfRange;
 }
 
-TileDepthTransform AsdfTileProvider::depthTransform() {
+TileDepthTransform PlanetaryTrailTileProvider::depthTransform() {
     return { 0.f, 1.f };
 }
 
-globebrowsing::ChunkTile AsdfTileProvider::chunkTile(
+globebrowsing::ChunkTile PlanetaryTrailTileProvider::chunkTile(
     globebrowsing::TileIndex tileIndex,
     int parents,
     int maxParents)
@@ -473,7 +442,7 @@ globebrowsing::ChunkTile AsdfTileProvider::chunkTile(
     return traverseTree(tileIndex, parents, maxParents, ascendToParent, uvTransform);
 }
 
-void AsdfTileProvider::update() {
+void PlanetaryTrailTileProvider::update() {
     ZoneScoped;
 
     // Necessary since update is called before internalInitialize
@@ -486,7 +455,7 @@ void AsdfTileProvider::update() {
     // add two for adjacency information in rendering
     points.reserve(_features.size() + 2);
 
-    if (_renderFullAsdf) {
+    if (_renderFullTrail) {
         std::transform(
             _features.begin(),
             _features.end(),
@@ -585,14 +554,7 @@ void AsdfTileProvider::update() {
         points.data(),
         GL_DYNAMIC_DRAW
     );
-
-    if (_renderingMode == static_cast<int>(RenderingMode::Lines)) {
-        glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, points.size());
-    }
-    else {
-        glPointSize(_lineWidth);
-        glDrawArrays(GL_POINTS, 0, points.size());
-    }
+    glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, points.size());
 
     if (_kernelSize.value() != static_cast<int>(KernelSize::Disabled)) {
         // Two-pass blur
@@ -662,18 +624,18 @@ void AsdfTileProvider::update() {
     global::renderEngine->openglStateCache().resetViewportState();
 }
 
-void AsdfTileProvider::reset() {
+void PlanetaryTrailTileProvider::reset() {
 }
 
-int AsdfTileProvider::minLevel() {
+int PlanetaryTrailTileProvider::minLevel() {
     return 1;
 }
 
-int AsdfTileProvider::maxLevel() {
+int PlanetaryTrailTileProvider::maxLevel() {
     return 1337;
 }
 
-float AsdfTileProvider::noDataValueAsFloat() {
+float PlanetaryTrailTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 

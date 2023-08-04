@@ -163,7 +163,7 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
 #elif (#{#{layerGroup}#{i}LayerType} == 11) // VideoTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
-#elif (#{#{layerGroup}#{i}LayerType} == 11) // AsdfTileProvider
+#elif (#{#{layerGroup}#{i}LayerType} == 11) // PlanetaryTrailTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
 #endif
 
