@@ -31,6 +31,14 @@ uniform vec2  viewport;
 uniform float lineWidth;
 uniform int nPoints;
 
+in VertexData {
+  float opacity;
+} gs_in[];
+
+out VertexData {
+  float opacity;
+} gs_out;
+
 void main()
 {
   vec4 p0 = gl_in[0].gl_Position;
@@ -68,6 +76,8 @@ void main()
   pos.xy += np * lineWidth * 0.5;
   pos.xy = 2 * pos.xy / viewport - 1;
   pos.xyz *= pos.w;
+
+  gs_out.opacity = gs_in[1].opacity;
   gl_Position = pos;
   EmitVertex();
 
@@ -75,6 +85,8 @@ void main()
   pos.xy += nl * lineWidth * 0.5;
   pos.xy = 2 * pos.xy / viewport - 1;
   pos.xyz *= pos.w;
+
+  gs_out.opacity = gs_in[1].opacity;
   gl_Position = pos;
   EmitVertex();
 
@@ -82,6 +94,8 @@ void main()
   pos.xy -= nl * lineWidth * 0.5;
   pos.xy = 2 * pos.xy / viewport - 1;
   pos.xyz *= pos.w;
+
+  gs_out.opacity = gs_in[1].opacity;
   gl_Position = pos;
   EmitVertex();
 
@@ -89,6 +103,8 @@ void main()
   pos.xy += nl * lineWidth * 0.5;
   pos.xy = 2 * pos.xy / viewport - 1;
   pos.xyz *= pos.w;
+
+  gs_out.opacity = gs_in[2].opacity;
   gl_Position = pos;
   EmitVertex();
 
@@ -96,6 +112,8 @@ void main()
   pos.xy -= nl * lineWidth * 0.5;
   pos.xy = 2 * pos.xy / viewport - 1;
   pos.xyz *= pos.w;
+
+  gs_out.opacity = gs_in[2].opacity;
   gl_Position = pos;
   EmitVertex();
 
@@ -104,6 +122,8 @@ void main()
     pos.xy -= nn * lineWidth * 0.5;
     pos.xy = 2 * pos.xy / viewport - 1;
     pos.xyz *= pos.w;
+
+    gs_out.opacity = gs_in[2].opacity;
     gl_Position = pos;
     EmitVertex();
   }

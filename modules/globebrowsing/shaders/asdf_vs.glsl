@@ -24,11 +24,16 @@
 
 #version __CONTEXT__
 
-layout (location = 0) in vec2 in_position;
+layout (location = 0) in vec3 in_position_opacity;
 
 uniform dmat4 projectionMatrix;
 
+out VertexData {
+  float opacity;
+} vs_out;
+
 void main() {
-  vec4 pos = vec4(projectionMatrix * vec4(in_position, 0, 1));
+  vs_out.opacity = in_position_opacity.z;
+  vec4 pos = vec4(projectionMatrix * vec4(in_position_opacity.xy, 0, 1));
   gl_Position = pos;
 }
