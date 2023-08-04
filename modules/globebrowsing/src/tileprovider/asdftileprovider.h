@@ -60,6 +60,7 @@ private:
     properties::IntProperty _resolution;
     properties::Vec3Property _color;
     properties::FloatProperty _lineWidth;
+    properties::FloatProperty _cutoff;
     properties::BoolProperty _renderFullAsdf;
     properties::OptionProperty _renderingMode;
     properties::OptionProperty _kernelSize;

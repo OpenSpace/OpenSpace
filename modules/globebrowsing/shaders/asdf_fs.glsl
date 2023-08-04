@@ -26,8 +26,13 @@
 
 uniform vec3 color;
 
+in VertexData {
+  float opacity;
+} fs_in;
+
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vec4(vec3(color), 1);
+  frag.color = vec4(vec3(color), fs_in.opacity);
+  frag.disableLDR2HDR = true;
   return frag;
 }

@@ -83,6 +83,14 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo CutoffInfo = {
+        "CutOff",
+        "Cutoff",
+        "This value specifies the trail cutoff (in seconds). The higher the value the "
+        "longer the tail of the trail will be.",
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
@@ -128,6 +136,9 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
+        // [[codegen::verbatim(CutoffInfo.description)]]
+        std::optional<float> cutoff;
+
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
@@ -163,6 +174,7 @@ AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
     _resolution(ResolutionInfo, 4096, 256, OpenGLCap.max2DTextureSize()),
     _color(ColorInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(1.f)),
     _lineWidth(LineWidthInfo, 10.f, 1.f, 1000.f),
+    _cutoff(CutoffInfo, 30.f, 0.f, 3600.f, 1.f),
     _renderFullAsdf(RenderFullAsdfInfo, false),
     _renderingMode(RenderingModeInfo,
         openspace::properties::OptionProperty::DisplayType::Dropdown),
@@ -191,6 +203,8 @@ AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
 
     addProperty(_lineWidth);
 
+    addProperty(_cutoff);
+
     addProperty(_renderFullAsdf);
 
     _renderingMode.addOptions({
@@ -213,6 +227,7 @@ AsdfTileProvider::AsdfTileProvider(const ghoul::Dictionary& dictionary) :
     _resolution = p.resolution.value_or(_resolution);
     _color = p.color.value_or(_color);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
+    _cutoff = p.cutoff.value_or(_cutoff);
     _renderFullAsdf = p.renderFullAsdf.value_or(_renderFullAsdf);
     if (p.renderingMode.has_value()) {
         _renderingMode = static_cast<int>(codegen::map<RenderingMode>(*p.renderingMode));
@@ -275,7 +290,7 @@ void AsdfTileProvider::internalInitialize() {
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), nullptr);
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -467,7 +482,7 @@ void AsdfTileProvider::update() {
         return;
     }
 
-    std::vector<std::array<double, 2>> points;
+    std::vector<std::array<double, 3>> points;
     // add two for adjacency information in rendering
     points.reserve(_features.size() + 2);
 
@@ -477,7 +492,7 @@ void AsdfTileProvider::update() {
             _features.end(),
             std::back_inserter(points),
             [](const Feature& feature) {
-                return std::array<double, 2>{ feature._lat, feature._lon };
+                return std::array<double, 3>{ feature._lat, feature._lon, 1.0 };
        });
     }
     else {
@@ -491,7 +506,11 @@ void AsdfTileProvider::update() {
                 if (_start + feature._time > now) {
                     break;
                 }
-                points.push_back({ feature._lat, feature._lon });
+                double opacity = 1.0 - glm::smoothstep(
+                    static_cast<double>(_start + feature._time),
+                    static_cast<double>(_start + feature._time + _cutoff),
+                    now);
+                points.push_back({ feature._lat, feature._lon, opacity });
                 last = feature;
                 index++;
             }
@@ -504,7 +523,8 @@ void AsdfTileProvider::update() {
                 points.push_back(
                     {
                         last._lat + fact * (next._lat - last._lat),
-                        last._lon + fact * (next._lon - last._lon)
+                        last._lon + fact * (next._lon - last._lon),
+                        1.0
                     }
                 );
             }
@@ -561,7 +581,7 @@ void AsdfTileProvider::update() {
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(
         GL_ARRAY_BUFFER,
-        points.size() * sizeof(std::array<double, 2>),
+        points.size() * sizeof(std::array<double, 3>),
         points.data(),
         GL_DYNAMIC_DRAW
     );
