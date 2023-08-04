@@ -89,7 +89,7 @@ struct Layer {
         SolidColor,
         SpoutImageProvider,
         VideoTileProvider,
-        AsdfTileLayer,
+        PlanetaryTrailTileProvider,
         Unknown
     };
 
@@ -143,8 +143,8 @@ constexpr std::array<Layer, 12> Layers = {
         .identifier = "VideoTileProvider"
     },
     Layer {
-        .id = Layer::ID::AsdfTileLayer,
-        .identifier = "AsdfTileLayer"
+        .id = Layer::ID::PlanetaryTrailTileProvider,
+        .identifier = "PlanetaryTrailTileProvider"
     }
 };
 

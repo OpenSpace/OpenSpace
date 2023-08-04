@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__ASDFTILEPROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__ASDFTILEPROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__PLANETARYTRAILTILEPROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__PLANETARYTRAILTILEPROVIDER___H__
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
@@ -35,10 +35,10 @@
 
 namespace openspace::globebrowsing {
 
-class AsdfTileProvider : public TileProvider {
+class PlanetaryTrailTileProvider : public TileProvider {
 public:
-    AsdfTileProvider(const ghoul::Dictionary& dictionary);
-    ~AsdfTileProvider() override;
+    PlanetaryTrailTileProvider(const ghoul::Dictionary& dictionary);
+    ~PlanetaryTrailTileProvider() override;
 
     void update() override final;
     void reset() override final;
@@ -61,8 +61,7 @@ private:
     properties::Vec3Property _color;
     properties::FloatProperty _lineWidth;
     properties::FloatProperty _cutoff;
-    properties::BoolProperty _renderFullAsdf;
-    properties::OptionProperty _renderingMode;
+    properties::BoolProperty _renderFullTrail;
     properties::OptionProperty _kernelSize;
 
     struct Feature {
@@ -88,4 +87,4 @@ private:
 
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__ASDFTILEPROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__PLANETARYTRAILTILEPROVIDER___H__

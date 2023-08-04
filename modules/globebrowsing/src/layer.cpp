@@ -122,7 +122,7 @@ namespace {
             "SingleImageProvider", "ImageSequenceTileProvider",
             "SizeReferenceTileProvider", "TemporalTileProvider", "TileIndexTileProvider",
             "TileProviderByIndex", "TileProviderByLevel", "SolidColor",
-            "SpoutImageProvider", "VideoTileProvider", "AsdfTileLayer")]];
+            "SpoutImageProvider", "VideoTileProvider", "PlanetaryTrailTileProvider")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -307,7 +307,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             case layers::Layer::ID::TileProviderByIndex:
             case layers::Layer::ID::TileProviderByLevel:
             case layers::Layer::ID::VideoTileProvider:
-            case layers::Layer::ID::AsdfTileLayer:
+            case layers::Layer::ID::PlanetaryTrailTileProvider:
                 if (_tileProvider) {
                     removePropertySubOwner(*_tileProvider);
                 }
@@ -467,7 +467,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
         case layers::Layer::ID::TileProviderByIndex:
         case layers::Layer::ID::TileProviderByLevel:
         case layers::Layer::ID::VideoTileProvider:
-        case layers::Layer::ID::AsdfTileLayer:
+        case layers::Layer::ID::PlanetaryTrailTileProvider:
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
             initDict.setValue(
@@ -501,7 +501,7 @@ void Layer::addVisibleProperties() {
         case layers::Layer::ID::TileProviderByIndex:
         case layers::Layer::ID::TileProviderByLevel:
         case layers::Layer::ID::VideoTileProvider:
-        case layers::Layer::ID::AsdfTileLayer:
+        case layers::Layer::ID::PlanetaryTrailTileProvider:
             if (_tileProvider) {
                 addPropertySubOwner(*_tileProvider);
             }
