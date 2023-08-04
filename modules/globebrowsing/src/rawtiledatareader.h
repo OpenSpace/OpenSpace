@@ -79,13 +79,6 @@ private:
 
     IODescription ioDescription(const TileIndex& tileIndex) const;
 
-    /**
-     * A recursive function that is able to perform wrapping in case the read region of
-     * the given IODescription is outside of the given write region.
-     */
-    RawTile::ReadError repeatedRasterRead(int rasterBand, const IODescription& fullIO,
-        char* dataDestination, int depth = 0) const;
-
     TileMetaData tileMetaData(RawTile& rawTile, const PixelRegion& region) const;
 
     const std::string _datasetFilePath;
