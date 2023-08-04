@@ -106,7 +106,7 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id,
 {
     switch (id) {
         case layers::Group::ID::HeightLayers: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 64;
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(
                 tileSize,
                 tileSize,
