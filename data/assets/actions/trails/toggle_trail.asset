@@ -29,7 +29,7 @@ local ToggleTrail = {
         return
       end
     else
-      visibility = not openspace.getPropertyValue("Scene." .. trail .. ".Renderable.Enabled")
+      visibility = not openspace.propertyValue("Scene." .. trail .. ".Renderable.Enabled")
     end
 
     if visibility then

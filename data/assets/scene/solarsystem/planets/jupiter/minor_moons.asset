@@ -13,11 +13,11 @@ local JupiterMinorMoonsOn = {
   Identifier = "os.solarsystem.JupiterMinorMoonsOn",
   Name = "Turn ON minor moons and trails",
   Command = [[
-    local trails = openspace.getProperty("{moonTrail_minor_jupiter}.Renderable.Enabled")
-    local trails_fade = openspace.getProperty("{moonTrail_minor_jupiter}.Renderable.Fade")
+    local trails = openspace.property("{moonTrail_minor_jupiter}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_minor_jupiter}.Renderable.Fade")
 
-    local moons = openspace.getProperty("{moon_minor_jupiter}.Renderable.Enabled")
-    local moons_fade = openspace.getProperty("{moon_minor_jupiter}.Renderable.Fade")
+    local moons = openspace.property("{moon_minor_jupiter}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_minor_jupiter}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(trails[i], true)
@@ -38,11 +38,11 @@ local JupiterMinorMoonsOff = {
   Identifier = "os.solarsystem.JupiterMinorMoonsOff",
   Name = "Turn OFF minors moon and trails",
   Command = [[
-    local trails = openspace.getProperty("{moonTrail_minor_jupiter}.Renderable.Enabled")
-    local trails_fade = openspace.getProperty("{moonTrail_minor_jupiter}.Renderable.Fade")
+    local trails = openspace.property("{moonTrail_minor_jupiter}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_minor_jupiter}.Renderable.Fade")
 
-    local moons = openspace.getProperty("{moon_minor_jupiter}.Renderable.Enabled")
-    local moons_fade = openspace.getProperty("{moon_minor_jupiter}.Renderable.Fade")
+    local moons = openspace.property("{moon_minor_jupiter}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_minor_jupiter}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(

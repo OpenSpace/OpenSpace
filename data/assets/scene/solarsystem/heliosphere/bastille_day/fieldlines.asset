@@ -55,11 +55,11 @@ local ToggleFieldlines = {
   Identifier = "os.bastilleday.fieldlines.ToggleFieldlines",
   Name = "Toggle fieldlines",
   Command = [[
-    if openspace.getPropertyValue("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled") then
+    if openspace.propertyValue("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled") then
       openspace.setPropertyValueSingle(
         "Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Fade",
         0.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear",
         'openspace.setPropertyValueSingle("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled", false)'
       )
@@ -68,7 +68,7 @@ local ToggleFieldlines = {
       openspace.setPropertyValueSingle(
         "Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Fade",
         1.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear"
       )
     end

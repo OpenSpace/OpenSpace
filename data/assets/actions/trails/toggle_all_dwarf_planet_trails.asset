@@ -2,9 +2,9 @@ local ToggleDwarfPlanetTrails = {
   Identifier = "os.ToggleDwarfPlanetTrails",
   Name = "Toggle dwarf planet trails",
   Command = [[
-    local list = openspace.getProperty("{planetTrail_dwarf}.Renderable.Enabled")
+    local list = openspace.property("{planetTrail_dwarf}.Renderable.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggle on/off trails for all dwarf planets in the solar system",

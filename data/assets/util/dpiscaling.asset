@@ -6,19 +6,19 @@ asset.onInitialize(function()
   if openspace.modules.isLoaded("CefWebGui") then
     openspace.setPropertyValueSingle(
       "Modules.CefWebGui.GuiScale",
-      openspace.getPropertyValue("Modules.CefWebGui.GuiScale") * scale
+      openspace.propertyValue("Modules.CefWebGui.GuiScale") * scale
     )
   end
 
-  local dashboards = openspace.getProperty("Dashboard.*.FontSize")
+  local dashboards = openspace.property("Dashboard.*.FontSize")
   for _, v in ipairs(dashboards) do
     openspace.setPropertyValueSingle(
       v,
-      openspace.getPropertyValue(v) * scale
+      openspace.propertyValue(v) * scale
     )
   end
 
-  local offset = openspace.getPropertyValue("Dashboard.StartPositionOffset")
+  local offset = openspace.propertyValue("Dashboard.StartPositionOffset")
   openspace.setPropertyValueSingle(
     "Dashboard.StartPositionOffset",
     { offset[1] * scale, offset[2] * scale }
