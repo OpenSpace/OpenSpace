@@ -62,7 +62,6 @@ namespace {
     void traverseToFindFilesystemMatch(AssetTreeModel& model, QModelIndex parent,
                                        int nRows, const std::string& path)
     {
-
         int startIndex = 0;
         std::string token = "${USER_ASSETS}/";
         if (path.find(token) == 0) {
@@ -152,6 +151,15 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
         newAssetButton->setDefault(false);
         container->addWidget(newAssetButton, 0, 2);
         layout->addLayout(container);
+
+        QLabel* searchLabel = new QLabel("Search: ");
+        searchLabel->setObjectName("heading");
+        _searchTextBox = new QLineEdit;
+        _searchTextBox->setClearButtonEnabled(true);
+        QBoxLayout* layoutSearchBox = new QHBoxLayout;
+        layoutSearchBox->addWidget(searchLabel);
+        layoutSearchBox->addWidget(_searchTextBox);
+        layout->addLayout(layoutSearchBox);
     }
     {
         _assetTree = new QTreeView;
@@ -160,17 +168,7 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
             "Enable checkbox to include an asset. Those assets highlighted in red are "
             "present in the profile but do not exist in this OpenSpace installation"
         );
-        _assetTree->setAlternatingRowColors(true);
-        _assetTree->setModel(&_assetTreeModel);
-        _assetTree->setRootIndex(_assetTreeModel.index(-1, 0));
-        _assetTree->setColumnWidth(1, 60);
-        _assetTree->setColumnWidth(0, _assetTree->width() - 60);
-        _assetTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-        _assetTree->header()->setSectionResizeMode(1, QHeaderView::Fixed);
-        _assetTree->header()->setStretchLastSection(false);
-        _assetTree->setAnimated(true);
-        _assetTree->setSortingEnabled(false);
-        _assetTree->setSelectionMode(QAbstractItemView::SingleSelection);
+        setViewToBaseModel();
         connect(_assetTree, &QTreeView::clicked, this, &AssetsDialog::selected);
 
 
@@ -215,8 +213,31 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
             buttons, &QDialogButtonBox::rejected,
             this, &AssetsDialog::reject
         );
+        connect(
+            _searchTextBox, &QLineEdit::textChanged,
+            this, &AssetsDialog::searchTextChanged
+        );
         layout->addWidget(buttons);
     }
+    {
+        _searchProxyModel = new SearchProxyModel(this);
+        _searchProxyModel->setSourceModel(&_assetTreeModel);
+        _assetProxyModel = qobject_cast<QSortFilterProxyModel*>(_searchProxyModel);
+    }
+}
+
+void AssetsDialog::setViewToBaseModel() {
+    _assetTree->setAlternatingRowColors(true);
+    _assetTree->setModel(&_assetTreeModel);
+    _assetTree->setRootIndex(_assetTreeModel.index(-1, 0));
+    _assetTree->setColumnWidth(1, 60);
+    _assetTree->setColumnWidth(0, _assetTree->width() - 60);
+    _assetTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    _assetTree->header()->setSectionResizeMode(1, QHeaderView::Fixed);
+    _assetTree->header()->setStretchLastSection(false);
+    _assetTree->setAnimated(true);
+    _assetTree->setSortingEnabled(false);
+    _assetTree->setSelectionMode(QAbstractItemView::SingleSelection);
 }
 
 QString AssetsDialog::createTextSummary() {
@@ -258,4 +279,51 @@ void AssetsDialog::parseSelections() {
 
 void AssetsDialog::selected(const QModelIndex&) {
     _summary->setText(createTextSummary());
+}
+
+void AssetsDialog::searchTextChanged(const QString& text) {
+    if (!_assetProxyModel) {
+        return;
+    }
+    if (text.isEmpty()) {
+        setViewToBaseModel();
+        traverseToExpandSelectedItems(
+            *_assetTree,
+            _assetTreeModel,
+            _assetTreeModel.rowCount(_assetTreeModel.index(-1, 0)),
+            _assetTreeModel.index(-1, 0)
+        );
+    }
+    else {
+        _assetTree->setModel(_searchProxyModel);
+        _assetProxyModel->setFilterRegExp(text);
+        _assetTree->expandAll();
+    }
+}
+    
+void SearchProxyModel::setFilterRegExp(const QString& pattern) {
+    QRegExp regex(pattern, Qt::CaseInsensitive, QRegExp::FixedString);
+    QSortFilterProxyModel::setFilterRegExp(regex);
+}
+
+bool SearchProxyModel::filterAcceptsRow(int sourceRow,
+                                        const QModelIndex& sourceParent) const
+{
+    QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
+    return acceptIndex(idx);
+}
+
+bool SearchProxyModel::acceptIndex(const QModelIndex& idx) const {
+    if (idx.isValid()) {
+        QString text = idx.data(Qt::DisplayRole).toString();
+        if (filterRegExp().indexIn(text) >= 0) {
+            return true;
+        }
+        for (int row = 0; row < idx.model()->rowCount(idx); ++row) {
+            if (acceptIndex(idx.model()->index(row, 0, idx))) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

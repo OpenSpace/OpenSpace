@@ -26,11 +26,35 @@
 #define __OPENSPACE_UI_LAUNCHER___ASSETSDIALOG___H__
 
 #include <QDialog>
-
+#include <QSortFilterProxyModel>
+#include <QRegExp>
 #include "assettreemodel.h"
 
 class QTextEdit;
 class QTreeView;
+
+class SearchProxyModel : public QSortFilterProxyModel {
+public:
+    /**
+     * Constructor for SearchProxyModel class
+     *
+     * \param parent The QObject* object that is the Qt parent of this object
+     */
+    SearchProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
+
+    /**
+     * Sets the regular expression pattern to apply to the filter
+     *
+     * \param pattern The QString reference containing the regex pattern
+     */
+    void setFilterRegExp(const QString& pattern);
+
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+
+private:
+    bool acceptIndex(const QModelIndex& idx) const;
+};
 
 class AssetsDialog final : public QDialog {
 Q_OBJECT
@@ -48,12 +72,14 @@ public:
     AssetsDialog(QWidget* parent, openspace::Profile* profile,
         const std::string& assetBasePath, const std::string& userAssetBasePath);
 
+private slots:
+    void searchTextChanged(const QString& text);
+
 private:
     void createWidgets();
-
+    void setViewToBaseModel();
     void parseSelections();
     void selected(const QModelIndex&);
-
     /// Creates a text summary of all assets and their paths
     QString createTextSummary();
     void openAssetEditor();
@@ -61,7 +87,10 @@ private:
     openspace::Profile* _profile = nullptr;
     AssetTreeModel _assetTreeModel;
     QTreeView* _assetTree = nullptr;
+    QLineEdit* _searchTextBox = nullptr;
     QTextEdit* _summary = nullptr;
+    QSortFilterProxyModel* _assetProxyModel = nullptr;
+    SearchProxyModel* _searchProxyModel = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ASSETSDIALOG___H__
