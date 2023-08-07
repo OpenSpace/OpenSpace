@@ -8,7 +8,7 @@ local SwitchColorLayer = {
   Identifier = "os.bastilleday.magnetogramtexture.SwitchColorLayer",
   Name = "Next sun texture",
   Command = [[
-    local textureList = openspace.globebrowsing.getLayers("Sun", "ColorLayers")
+    local textureList = openspace.globebrowsing.layers("Sun", "ColorLayers")
     if (magnetogramsTextureIndex == -1) then
       magnetogramsTextureIndex = 2
     end
