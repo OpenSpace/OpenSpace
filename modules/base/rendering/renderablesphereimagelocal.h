@@ -22,27 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOSPHERE___H__
-#define __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOSPHERE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGELOCAL___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGELOCAL___H__
 
 #include <modules/base/rendering/renderablesphere.h>
 
-#include <modules/video/include/videoplayer.h>
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
+struct RenderData;
+struct UpdateData;
+
 namespace documentation { struct Documentation; }
 
-class RenderableVideoSphere : public RenderableSphere {
+class RenderableSphereImageLocal : public RenderableSphere {
 public:
-    RenderableVideoSphere(const ghoul::Dictionary& dictionary);
+    RenderableSphereImageLocal(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
 
     bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
@@ -51,9 +53,15 @@ protected:
     void bindTexture() override;
 
 private:
-    VideoPlayer _videoPlayer;
+    void loadTexture();
+
+    properties::StringProperty _texturePath;
+
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    bool _isLoadingLazily = false;
+    bool _textureIsDirty = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOSPHERE___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGELOCAL___H__

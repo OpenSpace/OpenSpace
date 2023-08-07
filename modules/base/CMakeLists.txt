@@ -55,6 +55,8 @@ set(HEADER_FILES
   rendering/renderableplanetimevaryingimage.h
   rendering/renderableprism.h
   rendering/renderablesphere.h
+  rendering/renderablesphereimagelocal.h
+  rendering/renderablesphereimageonline.h
   rendering/renderabletimevaryingsphere.h
   rendering/renderabletrail.h
   rendering/renderabletrailorbit.h
@@ -111,6 +113,8 @@ set(SOURCE_FILES
   rendering/renderableplanetimevaryingimage.cpp
   rendering/renderableprism.cpp
   rendering/renderablesphere.cpp
+  rendering/renderablesphereimagelocal.cpp
+  rendering/renderablesphereimageonline.cpp
   rendering/renderabletimevaryingsphere.cpp
   rendering/renderabletrail.cpp
   rendering/renderabletrailorbit.cpp

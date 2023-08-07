@@ -15,7 +15,7 @@ local Object = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Size = 9.2E20,
     Segments = 40,
     Opacity = 0.4,

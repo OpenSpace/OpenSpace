@@ -22,7 +22,7 @@ local WMAP = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Enabled = false,
     Size = 3975.41417036064E23,
     Segments = 80,
@@ -47,7 +47,7 @@ local CBE = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Enabled = false,
     Size = 3975.41417036064E23,
     Segments = 80,
@@ -72,7 +72,7 @@ local Planck = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Enabled = true,
     Size = 3975.41417036064E23,
     Segments = 80,
@@ -98,7 +98,7 @@ local HAlpha = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Enabled = false,
     Size = 9.2E21,
     Segments = 40,
@@ -141,10 +141,10 @@ asset.meta = {
   Name = "Background Radiation",
   Version = "2.1",
   Description = [[Various AllSky images for the Milky Way and observable Universe.
-      Included: Wilkinson Microwave Anisotropy Probe (WMAP), Cosmic Background Explorer,
-      Planck, and H Alpha <br><br> Data Reference: Planck/ESA and the Planck
-      Collaboration, Wilkinson Microwave Anisotropy Probe/NASA, Doug
-      Finkbeiner (Princeton)]],
+    Included: Wilkinson Microwave Anisotropy Probe (WMAP), Cosmic Background Explorer,
+    Planck, and H Alpha <br><br> Data Reference: Planck/ESA and the Planck
+    Collaboration, Wilkinson Microwave Anisotropy Probe/NASA, Doug
+    Finkbeiner (Princeton)]],
   Author = "Brian Abbott (AMNH), OpenSpace Team",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

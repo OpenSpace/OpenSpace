@@ -43,7 +43,7 @@ local JWSTBand = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Texture = band .. "JWST-band.png",
     Size = 9.2E15,
     Segments = 50,
