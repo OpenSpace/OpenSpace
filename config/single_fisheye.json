@@ -38,7 +38,7 @@
     "author": "OpenSpace Team",
     "description": "A single 1024x1024 window with fisheye projection rendering.",
     "license": "MIT License",
-    "name": "Single",
+    "name": "Fisheye",
     "version": "1.0"
   }
 }

@@ -66,7 +66,7 @@
     "author": "OpenSpace Team",
     "description": "Two windows: Primary 1280x720 window with menu and text overlays minus rendering, and a secondary 1280x720 window at 2048x2048 resolution with spherical mirror projection rendering without the menu or text overlays.",
     "license": "MIT License",
-    "name": "Single",
+    "name": "Spherical Mirror + GUI",
     "version": "1.0"
   }
 }

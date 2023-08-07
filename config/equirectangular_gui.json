@@ -59,7 +59,7 @@
     "author": "OpenSpace Team",
     "description": "Two windows: Primary 1280x720 window with equirectangular projection rendering without menu or text overlays, and a secondary with menu and text overlays minus rendering.",
     "license": "MIT License",
-    "name": "Single",
+    "name": "Equirectangular + GUI",
     "version": "1.0"
   }
 }

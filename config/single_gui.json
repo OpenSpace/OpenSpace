@@ -71,7 +71,7 @@
     "author": "OpenSpace Team",
     "description": "Two windows: Primary 1280x720 window with planar projection rendering without menu or text overlays, and a secondary with menu and text overlays minus rendering.",
     "license": "MIT License",
-    "name": "Single",
+    "name": "Single + GUI",
     "version": "1.0"
   }
 }

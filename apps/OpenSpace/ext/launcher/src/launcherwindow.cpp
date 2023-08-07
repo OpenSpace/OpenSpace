@@ -552,7 +552,7 @@ bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_en
     }
     box.addItem(QString::fromStdString(p.path().filename().string()));
 
-    //Add tooltip
+    // Add tooltip
     if (isJson) {
         sgct::config::Meta meta = sgct::readMeta(p.path().string(), true);
         if (!meta.description.empty()) {

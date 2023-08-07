@@ -59,9 +59,9 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "A single 1024x1024 window with spout output fisheye projection rendering.",
+    "description": "A single 1024x1024 window with Spout output fisheye projection rendering.",
     "license": "MIT License",
-    "name": "Single",
+    "name": "Fisheye Spout",
     "version": "1.0"
   }
 }

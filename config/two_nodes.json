@@ -65,7 +65,7 @@
     "author": "OpenSpace Team",
     "description": "Two individual nodes, each with a 1280x720 window with planar projection rendering.",
     "license": "MIT License",
-    "name": "Single",
+    "name": "Two Nodes",
     "version": "1.0"
   }
 }

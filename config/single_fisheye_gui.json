@@ -62,7 +62,7 @@
     "author": "OpenSpace Team",
     "description": "Two windows: Primary 1024x1024 window with menu and text overlays minus rendering, and a secondary 1024x1024 window with fisheye projection rendering without menu and text overlays.",
     "license": "MIT License",
-    "name": "Single",
+    "name": "Fisheye + GUI",
     "version": "1.0"
   }
 

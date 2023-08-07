@@ -58,9 +58,9 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "A single 1024x1024 window with spout output planar/flat projection rendering at 1920x1080 resolution.",
+    "description": "A single 1024x1024 window with Spout output planar/flat projection rendering at 1920x1080 resolution.",
     "license": "MIT License",
-    "name": "Single",
+    "name": "Planar Spout",
     "version": "1.0"
   }
 }
