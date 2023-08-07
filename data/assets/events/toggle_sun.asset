@@ -7,7 +7,7 @@ local ToggleSun = {
       return
     end
 
-    if not openspace.getPropertyValue("Scene.Sun.Renderable.Enabled") then
+    if not openspace.propertyValue("Scene.Sun.Renderable.Enabled") then
       openspace.setPropertyValueSingle("Scene.Sun.Renderable.Enabled", true)
     end
 

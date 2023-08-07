@@ -227,9 +227,9 @@ local VoyagerTrailCruiseSaturnInf = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1980 NOV 16",
-    EndTime = "2300 JAN 01",
-    -- 116558 is the number of days between the Start and End time
-    SampleInterval = 116558 * 2
+    EndTime = "2021 JAN 01",
+    -- 14656 is the number of days between the Start and End time
+    SampleInterval = 14656 * 2
   },
   Tag = { "voyager1_trail" },
   GUI = {

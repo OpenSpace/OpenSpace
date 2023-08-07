@@ -60,7 +60,7 @@ local LayerNuclear = {
 local LayerImages = {
   Identifier = Identifier .. "-images",
   Name = Name .. " (Images)",
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = imagesDestination,
   Description = Description
 }

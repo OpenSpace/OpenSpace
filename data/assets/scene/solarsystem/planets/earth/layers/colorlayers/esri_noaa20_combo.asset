@@ -6,14 +6,14 @@ local Layer = {
   Identifier = "ESRI_NOAA20_Combo",
   Name = "ESRI NOAA20 Combo",
   Enabled = asset.enabled,
-  Type = "ByLevelTileLayer",
+  Type = "TileProviderByLevel",
   LevelTileProviders = {
     {
       MaxLevel = 4,
       TileProvider = {
         Identifier = "Temporal_VIIRS_NOAA20",
         Name = "Temporal VIIRS NOAA20",
-        Type = "TemporalTileLayer",
+        Type = "TemporalTileProvider",
         Mode = "Prototyped",
         Prototyped = {
           Time = {

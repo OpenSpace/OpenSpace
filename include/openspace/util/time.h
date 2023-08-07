@@ -70,6 +70,12 @@ public:
     /// \overload static double convertTime(const std::string& time)
     static double convertTime(const char* time);
 
+    /**
+     * Returns the current wall time as an ISO 8601 date string (YYYY-MM-DDTHH-MN-SS) in
+     * the UTC timezone.
+     */
+    static std::string currentWallTime();
+
     explicit Time(double secondsJ2000 = -1);
     explicit Time(const std::string& time);
     Time(const Time& other) = default;
@@ -157,16 +163,13 @@ public:
     double advanceTime(double tickTime);
 
     /**
-     * Sets a relative time from profile.
+     * Modifies the passed time (first argument) by the delta time (second argument). The
+     * first argument must be an ISO 8601 date string. The second argument should be a
+     * string of the form [-]XX(s,m,h,d,M,y] with (s)econds, (m)inutes, (h)ours, (d)ays,
+     * (M)onths, and (y)ears as units and an optional - sign to move backwards in time.
+     * The return value is in the form of an ISO 8601 date string.
      */
-    static void setTimeRelativeFromProfile(const std::string& setTime);
-
-    /**
-     * Sets an absolute time from profile.
-     * \param setTime a string containing time to set, which must be a valid
-     * ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS
-     */
-    static void setTimeAbsoluteFromProfile(const std::string& setTime);
+    static std::string advancedTime(std::string base, std::string change);
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the

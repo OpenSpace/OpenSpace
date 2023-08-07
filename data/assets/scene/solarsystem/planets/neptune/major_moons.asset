@@ -8,11 +8,11 @@ local NeptuneMajorMoonsOn = {
   Identifier = "os.solarsystem.NeptuneMajorMoonsOn",
   Name = "Turn on major moons and trails",
   Command = [[
-    local trails = openspace.getProperty("{moonTrail_major_neptune}.Renderable.Enabled")
-    local trails_fade = openspace.getProperty("{moonTrail_major_neptune}.Renderable.Fade")
+    local trails = openspace.property("{moonTrail_major_neptune}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_major_neptune}.Renderable.Fade")
 
-    local moons = openspace.getProperty("{moon_major_neptune}.Renderable.Enabled")
-    local moons_fade = openspace.getProperty("{moon_major_neptune}.Renderable.Fade")
+    local moons = openspace.property("{moon_major_neptune}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_major_neptune}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(trails[i], true)
@@ -33,11 +33,11 @@ local NeptuneMajorMoonsOff = {
   Identifier = "os.solarsystem.NeptuneMajorMoonsOff",
   Name = "Turn off majors moon and trails",
   Command = [[
-    local trails = openspace.getProperty("{moonTrail_major_neptune}.Renderable.Enabled")
-    local trails_fade = openspace.getProperty("{moonTrail_major_neptune}.Renderable.Fade")
+    local trails = openspace.property("{moonTrail_major_neptune}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_major_neptune}.Renderable.Fade")
 
-    local moons = openspace.getProperty("{moon_major_neptune}.Renderable.Enabled")
-    local moons_fade = openspace.getProperty("{moon_major_neptune}.Renderable.Fade")
+    local moons = openspace.property("{moon_major_neptune}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_major_neptune}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(

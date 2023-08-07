@@ -65,7 +65,7 @@ void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul::TemplateFactory<globebrowsing::TileProvider>* fTileProvider =
         FactoryManager::ref().factory<globebrowsing::TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
-    fTileProvider->registerClass<globebrowsing::VideoTileProvider>("VideoTileLayer");
+    fTileProvider->registerClass<globebrowsing::VideoTileProvider>("VideoTileProvider");
 
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();

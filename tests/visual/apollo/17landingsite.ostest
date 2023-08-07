@@ -10,7 +10,7 @@
     { "type": "navigationstate", 
       "value": "{Anchor='Moon',Pitch=0.953555E0,Position={1.399797E6,8.334161E5,5.988283E5},Up={-0.381687E0,-0.228442E-1,0.924009E0},Yaw=-0.789410E-1}"},
     { "type": "wait", 
-      "value": "20"}, 
+      "value": "45"}, 
     { "type": "screenshot", 
       "value": "17landingsite"}
 ] 

@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "TextureSpout",
   Enabled = asset.enabled,
   SpoutName = "SPOUT_TERRA_RECEIVER",
-  Type = "SpoutImageTileLayer"
+  Type = "SpoutImageProvider"
 }
 
 

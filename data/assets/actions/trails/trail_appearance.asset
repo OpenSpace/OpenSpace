@@ -29,12 +29,12 @@ local function toggleHighlightAction(identifierString, value, nameString)
     Identifier = "os.toggle_" .. identifierString .. "_trail_highlight",
     Name = "Toggle " .. nameString .. " trail highlight",
     Command = [[
-local list = openspace.getProperty("]] .. identifierString .. [[.Renderable.Appearance.Fade")
+local list = openspace.property("]] .. identifierString .. [[.Renderable.Appearance.Fade")
 if #list == 0 then
   openspace.printWarning("No planets to resize")
 else
   local prop = list[1]
-  local fadeValue = openspace.getPropertyValue(prop)
+  local fadeValue = openspace.propertyValue(prop)
   if fadeValue > 1 then
     ]] .. highlightCommand(identifierString, 1, nameString) .. "\n" .. [[
   else
@@ -76,8 +76,8 @@ local ToggleTrailFading = {
   Identifier = "os.ToggleTrailFading",
   Name = "Toggle trail fading",
   Command = [[
-    local capList = openspace.getProperty("*Trail.Renderable.Appearance.EnableFade")
-    local list = openspace.getProperty("*trail.Renderable.Appearance.EnableFade")
+    local capList = openspace.property("*Trail.Renderable.Appearance.EnableFade")
+    local list = openspace.property("*trail.Renderable.Appearance.EnableFade")
     if (#capList == 0) and (#list == 0) then
       openspace.printWarning("No trails to toggle")
     else
@@ -87,7 +87,7 @@ local ToggleTrailFading = {
       else
         prop = list[1]
       end
-      local currentFade = openspace.getPropertyValue(prop)
+      local currentFade = openspace.propertyValue(prop)
       local newFade = not currentFade
       openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", newFade)
       openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", newFade)

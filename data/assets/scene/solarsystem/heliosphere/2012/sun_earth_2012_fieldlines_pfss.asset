@@ -23,7 +23,7 @@ local DarkSun = {
   Name = "Dark sun",
   Command = [[
     local property = "Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier"
-    local textureMultiplier = openspace.getPropertyValue(property)
+    local textureMultiplier = openspace.propertyValue(property)
     if (textureMultiplier < 0.01) then
       openspace.setPropertyValueSingle(property, 1.0, 1)
     else

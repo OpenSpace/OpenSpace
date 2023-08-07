@@ -40,11 +40,11 @@ local ToggleFluxnodes = {
   Identifier = "os.bastilleday.fluxnodes.ToggleFluxnodes",
   Name = "Toggle flux nodes",
   Command = [[
-    if openspace.getPropertyValue("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled") then
+    if openspace.propertyValue("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled") then
       openspace.setPropertyValueSingle(
         "Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Fade",
         0.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear",
         'openspace.setPropertyValueSingle("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled", false)'
       )
@@ -53,7 +53,7 @@ local ToggleFluxnodes = {
       openspace.setPropertyValueSingle(
         "Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Fade",
         1.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear"
       )
     end

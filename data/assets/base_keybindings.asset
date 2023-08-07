@@ -7,9 +7,9 @@ local TogglePlanetLabels = {
   Identifier = "os_default.TogglePlanetLabels",
   Name = "Toggle planet labels",
   Command = [[
-    local list = openspace.getProperty("{solarsystem_labels}.Renderable.Enabled")
+    local list = openspace.property("{solarsystem_labels}.Renderable.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Turns on visibility for all solar system labels",

@@ -146,25 +146,25 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
   vec4 c = vec4(0.0, 0.0, 0.0, 1.0);
 
     // All tile layers are the same. Sample from texture
-#if (#{#{layerGroup}#{i}LayerType} == 0) // DefaultTileLayer
+#if (#{#{layerGroup}#{i}LayerType} == 0) // DefaultTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 1) // SingleImageTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 1) // SingleImageProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 2) // ImageSequenceTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 2) // ImageSequenceTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 3) // SizeReferenceTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 3) // SizeReferenceTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 4) // TemporalTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 4) // TemporalTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 5) // TileIndexTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 5) // TileIndexTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 6) // ByIndexTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 6) // TileProviderByIndex
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 7) // ByLevelTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 7) // TileProviderByLevel
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 8) // SolidColor
   c.rgb = #{layerGroup}[#{i}].color;
-#elif (#{#{layerGroup}#{i}LayerType} == 9) // SpoutImageTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 9) // SpoutImageProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 10) // VideoTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);

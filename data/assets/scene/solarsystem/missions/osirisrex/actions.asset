@@ -78,7 +78,7 @@ local ToggleSunMarker = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.SunMarker.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.SunMarker.Renderable.Enabled")
+      not openspace.propertyValue("Scene.SunMarker.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of the text marking the location of the Sun",

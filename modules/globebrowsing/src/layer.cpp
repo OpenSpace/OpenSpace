@@ -121,11 +121,12 @@ namespace {
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // Specifies the type of layer that is to be added. If this value is not
-        // specified, the layer is a DefaultTileLayer
-        std::optional<std::string> type [[codegen::inlist("DefaultTileLayer",
-            "SingleImageTileLayer", "ImageSequenceTileLayer", "SizeReferenceTileLayer",
-            "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
-            "ByLevelTileLayer", "SolidColor", "SpoutImageTileLayer", "VideoTileLayer")]];
+        // specified, the layer is a DefaultTileProvider
+        std::optional<std::string> type [[codegen::inlist("DefaultTileProvider",
+            "SingleImageProvider", "ImageSequenceTileProvider",
+            "SizeReferenceTileProvider", "TemporalTileProvider", "TileIndexTileProvider",
+            "TileProviderByIndex", "TileProviderByLevel", "SolidColor",
+            "SpoutImageProvider", "VideoTileProvider")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -220,7 +221,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         }
     }
     else {
-        typeID = layers::Layer::ID::DefaultTileLayer;
+        typeID = layers::Layer::ID::DefaultTileProvider;
     }
 
     initializeBasedOnType(typeID, layerDict);
@@ -320,16 +321,16 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     _typeOption.onChange([this]() {
         switch (type()) {
             // Intentional fall through. Same for all tile layers
-            case layers::Layer::ID::DefaultTileLayer:
-            case layers::Layer::ID::SingleImageTileLayer:
-            case layers::Layer::ID::SpoutImageTileLayer:
-            case layers::Layer::ID::ImageSequenceTileLayer:
-            case layers::Layer::ID::SizeReferenceTileLayer:
-            case layers::Layer::ID::TemporalTileLayer:
-            case layers::Layer::ID::TileIndexTileLayer:
-            case layers::Layer::ID::ByIndexTileLayer:
-            case layers::Layer::ID::ByLevelTileLayer:
-            case layers::Layer::ID::VideoTileLayer:
+            case layers::Layer::ID::DefaultTileProvider:
+            case layers::Layer::ID::SingleImageProvider:
+            case layers::Layer::ID::SpoutImageProvider:
+            case layers::Layer::ID::ImageSequenceTileProvider:
+            case layers::Layer::ID::SizeReferenceTileProvider:
+            case layers::Layer::ID::TemporalTileProvider:
+            case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByIndex:
+            case layers::Layer::ID::TileProviderByLevel:
+            case layers::Layer::ID::VideoTileProvider:
                 if (_tileProvider) {
                     removePropertySubOwner(*_tileProvider);
                 }
@@ -495,16 +496,16 @@ glm::vec2 Layer::tileUvToTextureSamplePosition(const TileUvTransform& uvTransfor
 void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDict) {
     switch (id) {
         // Intentional fall through. Same for all tile layers
-        case layers::Layer::ID::DefaultTileLayer:
-        case layers::Layer::ID::SingleImageTileLayer:
-        case layers::Layer::ID::SpoutImageTileLayer:
-        case layers::Layer::ID::ImageSequenceTileLayer:
-        case layers::Layer::ID::SizeReferenceTileLayer:
-        case layers::Layer::ID::TemporalTileLayer:
-        case layers::Layer::ID::TileIndexTileLayer:
-        case layers::Layer::ID::ByIndexTileLayer:
-        case layers::Layer::ID::ByLevelTileLayer:
-        case layers::Layer::ID::VideoTileLayer:
+        case layers::Layer::ID::DefaultTileProvider:
+        case layers::Layer::ID::SingleImageProvider:
+        case layers::Layer::ID::SpoutImageProvider:
+        case layers::Layer::ID::ImageSequenceTileProvider:
+        case layers::Layer::ID::SizeReferenceTileProvider:
+        case layers::Layer::ID::TemporalTileProvider:
+        case layers::Layer::ID::TileIndexTileProvider:
+        case layers::Layer::ID::TileProviderByIndex:
+        case layers::Layer::ID::TileProviderByLevel:
+        case layers::Layer::ID::VideoTileProvider:
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
             initDict.setValue(
@@ -530,16 +531,16 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
 void Layer::addVisibleProperties() {
     switch (type()) {
         // Intentional fall through. Same for all tile layers
-        case layers::Layer::ID::DefaultTileLayer:
-        case layers::Layer::ID::SingleImageTileLayer:
-        case layers::Layer::ID::SpoutImageTileLayer:
-        case layers::Layer::ID::ImageSequenceTileLayer:
-        case layers::Layer::ID::SizeReferenceTileLayer:
-        case layers::Layer::ID::TemporalTileLayer:
-        case layers::Layer::ID::TileIndexTileLayer:
-        case layers::Layer::ID::ByIndexTileLayer:
-        case layers::Layer::ID::ByLevelTileLayer:
-        case layers::Layer::ID::VideoTileLayer:
+        case layers::Layer::ID::DefaultTileProvider:
+        case layers::Layer::ID::SingleImageProvider:
+        case layers::Layer::ID::SpoutImageProvider:
+        case layers::Layer::ID::ImageSequenceTileProvider:
+        case layers::Layer::ID::SizeReferenceTileProvider:
+        case layers::Layer::ID::TemporalTileProvider:
+        case layers::Layer::ID::TileIndexTileProvider:
+        case layers::Layer::ID::TileProviderByIndex:
+        case layers::Layer::ID::TileProviderByLevel:
+        case layers::Layer::ID::VideoTileProvider:
             if (_tileProvider) {
                 addPropertySubOwner(*_tileProvider);
             }
