@@ -2,9 +2,9 @@ local ToggleLagrangianPoints = {
   Identifier = "os.jwst.ToggleLagrangianPoints",
   Name = "Toggle Lagrangian points",
   Command = [[
-    local list = openspace.getProperty("{lagrange_points_earth}.Renderable.Enabled")
+    local list = openspace.property("{lagrange_points_earth}.Renderable.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggle points and labels for the Lagrangian points for Earth Sun system",
@@ -16,9 +16,9 @@ local ToggleHudf = {
   Identifier = "os.jwst.ToggleHudf",
   Name = "Toggle Hubble Ultra Deep Field",
   Command = [[
-    local list = openspace.getProperty("{mission_jwst_hudf}.*.Enabled")
+    local list = openspace.property("{mission_jwst_hudf}.*.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
@@ -30,9 +30,9 @@ local ToggleL2 = {
   Identifier = "os.jwst.ToggleL2",
   Name = "Toggle L2 line and small L2 label",
   Command = [[
-    local list = openspace.getProperty("{lagrange_points_earth_l2_small}.*.Enabled")
+    local list = openspace.property("{lagrange_points_earth_l2_small}.*.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggle L2 label, point and line",
@@ -44,9 +44,9 @@ local ToggleFov = {
   Identifier = "os.jwst.ToggleFov",
   Name = "Toggle JWST field of view and view band",
   Command = [[
-    local list = openspace.getProperty("{mission_jwst_fov}.*.Enabled")
+    local list = openspace.property("{mission_jwst_fov}.*.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggle James Webb Space Telecope field of view and view band",
@@ -82,7 +82,7 @@ local ToggleSunTrail = {
   Identifier = "os.jwst.ToggleSunTrail",
   Name = "Toggle JWST Sun trail",
   Command = [[
-    local value = openspace.getPropertyValue("Scene.JWSTSunTrail.Renderable.Enabled")
+    local value = openspace.propertyValue("Scene.JWSTSunTrail.Renderable.Enabled")
     openspace.setPropertyValueSingle("Scene.JWSTSunTrail.Renderable.Enabled", not value)
   ]],
   Documentation = "Toggle JWST trail relative to the Sun",
@@ -94,13 +94,13 @@ local ToggleTrailsExceptMoon = {
   Identifier = "os.jwst.ToggleTrailsExceptMoon",
   Name = "Toggle trails (except Moon)",
   Command = [[
-    local list = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Enabled")
+    local list = openspace.property("{planetTrail_solarSystem}.Renderable.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
-    local moonlist = openspace.getProperty("{moonTrail_solarSystem}.Renderable.Enabled")
+    local moonlist = openspace.property("{moonTrail_solarSystem}.Renderable.Enabled")
     for _,v in pairs(moonlist) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
     openspace.setPropertyValueSingle("Scene.MoonTrail.Renderable.Enabled", true)
   ]],
@@ -119,7 +119,7 @@ local ToggleJwstTrails = {
       "Scene.JWSTTrailCoRevOrbit.Renderable.Enabled"
     }
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggle JWST launch, cruise and L2 co-revolving orbit trails, not the Sun trail",

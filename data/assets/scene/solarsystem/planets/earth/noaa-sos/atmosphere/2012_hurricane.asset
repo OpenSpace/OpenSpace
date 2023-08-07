@@ -33,7 +33,7 @@ local satDestination = syncedDirectory .. "sat"
 local LayerNames = {
   Identifier = Identifier .. "-names",
   Name = Name .. " (Names)",
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = namesDestination,
   Description = Description
 }
@@ -41,7 +41,7 @@ local LayerNames = {
 local LayerSat = {
   Identifier = Identifier .. "-sat",
   Name = Name .. " (Satellites)",
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = satDestination,

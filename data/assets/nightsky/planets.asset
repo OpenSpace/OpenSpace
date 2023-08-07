@@ -156,7 +156,7 @@ local ToggleNightSkyPlanets = {
     openspace.toggleFade("Scene.NightSkyMars.Renderable")
     openspace.toggleFade("Scene.NightSkyJupiter.Renderable")
     openspace.toggleFade("Scene.NightSkySaturn.Renderable")
-    local scale = openspace.getPropertyValue("Scene.Moon.Scale.Scale")
+    local scale = openspace.propertyValue("Scene.Moon.Scale.Scale")
     if (scale > 1) then
       openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 1.0)
     else

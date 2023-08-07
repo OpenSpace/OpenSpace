@@ -24,7 +24,7 @@ local syncedDirectory = asset.syncedResource({
 local Layer = {
   Identifier = Identifier,
   Name = Name,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "4096",
   Description = Description
 }

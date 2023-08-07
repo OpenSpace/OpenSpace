@@ -14,7 +14,7 @@ local Layer = {
   Identifier = "Clouds_Magellan_Combo_NewYork",
   Name = "Clouds Magellan Combo [New York]",
   Enabled = asset.enabled,
-  Type = "ByLevelTileLayer",
+  Type = "TileProviderByLevel",
   LevelTileProviders = {
     {
       MaxLevel = 4,

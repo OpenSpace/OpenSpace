@@ -835,14 +835,25 @@ scripting::LuaLibrary Scene::luaLibrary() {
             },
             {
                 "getPropertyValue",
+                &luascriptfunctions::propertyGetValueDeprecated,
+                {},
+                "",
+                "Returns the value the property, identified by the provided URI. "
+                "Deprecated in favor of the 'propertyValue' function",
+                {}
+            },
+            {
+                "propertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
-                "Returns the value the property, identified by the provided URI",
+                "Returns the value the property, identified by the provided URI. "
+                "Deprecated in favor of the 'propertyValue' function",
                 {}
             },
             codegen::lua::HasProperty,
-            codegen::lua::GetProperty,
+            codegen::lua::PropertyDeprecated,
+            codegen::lua::Property,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,

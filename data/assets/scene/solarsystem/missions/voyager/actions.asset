@@ -50,9 +50,9 @@ local ToggleMinorMoonTrails = {
   Identifier = "os.voyager.ToggleMinorMoonTrails",
   Name = "Toggle minor trails",
   Command = [[
-    local list = openspace.getProperty("{moonTrail_minor}.Renderable.Enabled")
+    local list = openspace.property("{moonTrail_minor}.Renderable.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggles the trails of the minor moons",

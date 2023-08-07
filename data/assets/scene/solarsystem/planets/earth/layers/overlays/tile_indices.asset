@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "Tile_Indices",
   Name = "Tile Indices",
   Enabled = asset.enabled,
-  Type = "TileIndexTileLayer"
+  Type = "TileIndexTileProvider"
 }
 
 

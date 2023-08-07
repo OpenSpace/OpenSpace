@@ -78,7 +78,7 @@ local FadeToBlack = {
   Identifier = "os.FadeToBlack",
   Name = "Fade to/from black",
   Command = [[
-    if openspace.getPropertyValue("RenderEngine.BlackoutFactor") > 0.5 then
+    if openspace.propertyValue("RenderEngine.BlackoutFactor") > 0.5 then
       openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 0.0, 3)
     else
       openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1.0, 3)
@@ -102,7 +102,7 @@ local ToggleOverlays = {
   Identifier = "os.ToggleOverlays",
   Name = "Toggle dashboard and overlays",
   Command = [[
-    local isEnabled = openspace.getPropertyValue("Dashboard.IsEnabled")
+    local isEnabled = openspace.propertyValue("Dashboard.IsEnabled")
     openspace.setPropertyValueSingle("Dashboard.IsEnabled", not isEnabled)
     openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled)
     openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled)

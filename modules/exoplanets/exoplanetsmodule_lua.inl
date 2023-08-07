@@ -639,9 +639,23 @@ std::vector<std::string> hostStarsWithSufficientData() {
     );
 }
 
-[[codegen::luawrap]] std::vector<std::string> getListOfExoplanets() {
+[[codegen::luawrap]] std::vector<std::string> listOfExoplanets() {
     std::vector<std::string> names = hostStarsWithSufficientData();
     return names;
+}
+
+/**
+ * Deprecated in favor of 'listOfExoplanets'
+ */
+[[codegen::luawrap("getListOfExoplanets")]] std::vector<std::string>
+listOfExoplanetsDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getListOfExoplanets' function is deprecated and should be replaced with "
+        "'listOfExoplanets'"
+    );
+    return listOfExoplanets();
 }
 
 [[codegen::luawrap]] void listAvailableExoplanetSystems() {

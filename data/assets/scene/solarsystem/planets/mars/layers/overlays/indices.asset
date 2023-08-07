@@ -4,7 +4,7 @@ local globe = asset.require("../../mars")
 
 local Layer = {
   Identifier = "Indices",
-  Type = "TileIndexTileLayer",
+  Type = "TileIndexTileProvider",
   Enabled = asset.enabled
 }
 

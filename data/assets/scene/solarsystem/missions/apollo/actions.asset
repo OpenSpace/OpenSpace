@@ -4,7 +4,7 @@ local ToggleMoonShading = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.Moon.Renderable.PerformShading",
-      not openspace.getPropertyValue("Scene.Moon.Renderable.PerformShading")
+      not openspace.propertyValue("Scene.Moon.Renderable.PerformShading")
     )
   ]],
   Documentation = "Toggles the shading of the Moon",

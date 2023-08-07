@@ -29,9 +29,9 @@ local ToggleTrail = {
       end
     else
       visibility = not (
-        openspace.getPropertyValue("Scene." .. launchTrail .. ".Renderable.Enabled") or
-        openspace.getPropertyValue("Scene." .. cruiseTrail .. ".Renderable.Enabled") or
-        openspace.getPropertyValue("Scene." .. coRevOrbitTrail .. ".Renderable.Enabled")
+        openspace.propertyValue("Scene." .. launchTrail .. ".Renderable.Enabled") or
+        openspace.propertyValue("Scene." .. cruiseTrail .. ".Renderable.Enabled") or
+        openspace.propertyValue("Scene." .. coRevOrbitTrail .. ".Renderable.Enabled")
       )
     end
 

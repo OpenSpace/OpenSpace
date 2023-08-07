@@ -409,6 +409,9 @@ void VideoPlayer::initializeMpv() {
     // Starting MPV in a paused state seems to reduce problems with initialization
     setPropertyStringMpv("pause", "");
 
+    // Allow alpha channels
+    setPropertyStringMpv("alpha", "yes");
+
     // Verbose mode for debug purposes
     // setPropertyStringMpv("msg-level", "all=v");
     //mpv_request_log_messages(_mpvHandle, "debug");

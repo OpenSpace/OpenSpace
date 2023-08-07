@@ -941,13 +941,17 @@ void TimeManager::setTimeFromProfile(const Profile& p) {
     if (p.time.has_value()) {
         switch (p.time->type) {
             case Profile::Time::Type::Relative:
-                Time::setTimeRelativeFromProfile(p.time->value);
+            {
+                std::string t = Time::currentWallTime();
+                std::variant<std::string, double> t2 =
+                    Time::advancedTime(t, p.time->value);
+                ghoul_assert(std::holds_alternative<std::string>(t2), "Wrong type");
+                _currentTime.data() = Time(std::get<std::string>(t2));
                 break;
-
+            }
             case Profile::Time::Type::Absolute:
-                Time::setTimeAbsoluteFromProfile(p.time->value);
+                _currentTime.data() = Time(p.time->value);
                 break;
-
             default:
                 throw ghoul::MissingCaseException();
         }
@@ -956,8 +960,7 @@ void TimeManager::setTimeFromProfile(const Profile& p) {
     }
     else {
         // No value was specified so we are using 'now' instead
-        std::string now = std::string(Time::now().UTC());
-        Time::setTimeAbsoluteFromProfile(now);
+        _currentTime.data() = Time::now();
     }
 }
 

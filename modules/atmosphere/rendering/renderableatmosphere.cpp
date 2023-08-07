@@ -175,6 +175,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SunAngularSize = {
+        "SunAngularSize",
+        "Angular Size of the Sun",
+        "Specifies the angular size of the Sun in degrees",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
         struct ShadowGroup {
             // Individual light sources
@@ -260,6 +267,9 @@ namespace {
 
         // [[codegen::verbatim(SunsetAngleInfo.description)]]
         std::optional<glm::vec2> sunsetAngle;
+
+        // [[codegen::verbatim(SunAngularSize.description)]]
+        std::optional<float> sunAngularSize [[codegen::inrange(0.0, 180.0)]];
     };
 #include "renderableatmosphere_codegen.cpp"
 
@@ -305,6 +315,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         SunsetAngleInfo,
         glm::vec2(95.f, 100.f), glm::vec2(0.f), glm::vec2(180.f)
     )
+    , _sunAngularSize(SunAngularSize, 0.3f, 0.f, 180.f)
  {
     auto updateWithCalculation = [this]() {
         _deferredCasterNeedsUpdate = true;
@@ -420,6 +431,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         properties::Property::ViewOptions::MinMaxRange
     );
     addProperty(_atmosphereDimmingSunsetAngle);
+
+    _sunAngularSize = p.sunAngularSize.value_or(_sunAngularSize);
+    _sunAngularSize.onChange(updateWithoutCalculation);
+    addProperty(_sunAngularSize);
 }
 
 void RenderableAtmosphere::deinitializeGL() {
@@ -494,7 +509,8 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _ozoneCoeff,
         _mieScatteringCoeff,
         _mieExtinctionCoeff,
-        _sunFollowingCameraEnabled
+        _sunFollowingCameraEnabled,
+        _sunAngularSize
     );
     _deferredcaster->setHardShadows(_hardShadowsEnabled);
 }

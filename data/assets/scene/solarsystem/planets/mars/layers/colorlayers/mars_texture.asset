@@ -6,7 +6,7 @@ local texturesPath = asset.syncedResource({
   Name = "Mars Textures",
   Type = "HttpSynchronization",
   Identifier = "mars_textures",
-  Version = 1
+  Version = 3
 })
 
 
@@ -14,7 +14,7 @@ local Layer = {
   Identifier = "Mars_Texture",
   Name = "Mars Texture",
   Enabled = asset.enabled,
-  FilePath = texturesPath .. "mars.jpg",
+  FilePath = texturesPath .. "mars.png",
   Description = "Default jpg texture for Mars",
   CacheSettings = { Enabled = false }
 }

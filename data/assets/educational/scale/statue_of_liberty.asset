@@ -11,7 +11,7 @@ local modelFolder = asset.syncedResource({
 })
 
 
-local Location = { 48.87389, 2.29492, -3.0 }
+local Location = { 40.689206, -74.044487, -3.0 }
 
 local ScaleModel = {
   Identifier = "Scale_StatueOfLiberty",

@@ -320,6 +320,15 @@ std::vector<const Asset*> AssetManager::allAssets() const {
     return res;
 }
 
+std::vector<const Asset*> AssetManager::rootAssets() const {
+    std::vector<const Asset*> res;
+    res.reserve(_rootAssets.size());
+    for (Asset* asset : _rootAssets) {
+        res.push_back(asset);
+    }
+    return res;
+}
+
 std::vector<const ResourceSynchronization*> AssetManager::allSynchronizations() const {
     std::vector<const ResourceSynchronization*> res;
     res.reserve(_synchronizations.size());
@@ -329,6 +338,11 @@ std::vector<const ResourceSynchronization*> AssetManager::allSynchronizations() 
         res.push_back(p.second->synchronization.get());
     }
     return res;
+}
+
+bool AssetManager::isRootAsset(const Asset* asset) const {
+    auto it = std::find(_rootAssets.begin(), _rootAssets.end(), asset);
+    return it != _rootAssets.end();
 }
 
 bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
@@ -941,8 +955,10 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
         {
             codegen::lua::Add,
             codegen::lua::Remove,
+            codegen::lua::RemoveAll,
             codegen::lua::IsLoaded,
-            codegen::lua::AllAssets
+            codegen::lua::AllAssets,
+            codegen::lua::RootAssets
         }
     };
 }

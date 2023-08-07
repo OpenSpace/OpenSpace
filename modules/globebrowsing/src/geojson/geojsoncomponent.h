@@ -98,7 +98,7 @@ private:
     };
 
     void readFile();
-    void parseSingleFeature(const geos::io::GeoJSONFeature& feature);
+    void parseSingleFeature(const geos::io::GeoJSONFeature& feature, int indexInFile);
 
     /**
      * Add meta properties to the feature, to allow things like flying to it,
