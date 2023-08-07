@@ -27,10 +27,10 @@ asset.onInitialize(function()
   -- and remove automatic restart on each property change,
   -- since frequent restarting seems to be unstable on mac.
 
-  local enabled = openspace.getPropertyValue("Modules.WebGui.ServerProcessEnabled")
+  local enabled = openspace.propertyValue("Modules.WebGui.ServerProcessEnabled")
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
 
-  local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
+  local directories = openspace.propertyValue("Modules.WebGui.Directories")
   directories[#directories + 1] = "frontend"
   directories[#directories + 1] = frontend .. "frontend"
 
@@ -40,7 +40,7 @@ asset.onInitialize(function()
 
   -- The GUI contains date and simulation increment,
   -- so let's remove these from the dashboard.
-  if openspace.getPropertyValue("Modules.CefWebGui.Visible") then
+  if openspace.propertyValue("Modules.CefWebGui.Visible") then
     if openspace.hasProperty("Dashboard.Date.Enabled") then
       openspace.setPropertyValueSingle("Dashboard.Date.Enabled", false)
     end
@@ -52,7 +52,7 @@ end)
 
 asset.onDeinitialize(function()
   -- Remove the frontend endpoint
-  local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
+  local directories = openspace.propertyValue("Modules.WebGui.Directories")
   local newDirectories = {}
 
   -- @TODO(maci, 2019-08-23) see message below
@@ -73,7 +73,7 @@ asset.onDeinitialize(function()
 end)
 
 function setCefRoute(route)
-  local port = openspace.getPropertyValue("Modules.WebGui.Port")
+  local port = openspace.propertyValue("Modules.WebGui.Port")
   -- As a developer, you can manually serve the webgui from port 4690
   -- with the command `npm start` in the web gui repository
   if guiCustomization.webguiDevelopmentMode then
