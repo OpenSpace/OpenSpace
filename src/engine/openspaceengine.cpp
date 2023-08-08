@@ -1720,7 +1720,9 @@ void setCameraFromProfile(const Profile& p) {
 
     auto checkNodeExists = [](const std::string& node) {
         if (global::renderEngine->scene()->sceneGraphNode(node) == nullptr) {
-            throw ghoul::RuntimeError(fmt::format("Could not find node '{}'", node));
+            throw ghoul::RuntimeError(fmt::format(
+                "Error when setting camera from profile. Could not find node '{}'", node
+            ));
         }
     };
 
@@ -1730,7 +1732,7 @@ void setCameraFromProfile(const Profile& p) {
                 interaction::NavigationState nav;
                 nav.anchor = navStateProfile.anchor;
                 checkNodeExists(nav.anchor);
-                if (navStateProfile.aim.has_value()) {
+                if (navStateProfile.aim.has_value() && !(*navStateProfile.aim).empty()) {
                     nav.aim = navStateProfile.aim.value();
                     checkNodeExists(nav.aim);
                 }
