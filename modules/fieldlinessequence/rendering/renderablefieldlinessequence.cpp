@@ -354,6 +354,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    addProperty(Fadeable::_opacity);
+
     // Extracts the general information (from the asset file) that
     // is mandatory for the class to function;
     std::string fileTypeString;
@@ -1030,6 +1032,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         "time",
         global::windowDelegate->applicationTime() * (_flowReversed ? -1 : 1)
     );
+
+    _shaderProgram->setUniform("opacity", opacity());
 
     bool additiveBlending = false;
     if (_colorABlendEnabled) {

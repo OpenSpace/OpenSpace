@@ -206,7 +206,7 @@ NSArray* focusIdentifiers;
         (void)sender;
 
         global::scriptEngine->queueScript(
-            "local isEnabled = openspace.getPropertyValue('Dashboard.IsEnabled');\
+            "local isEnabled = openspace.propertyValue('Dashboard.IsEnabled');\
              openspace.setPropertyValueSingle('Dashboard.IsEnabled', not isEnabled);\
              openspace.setPropertyValueSingle('RenderEngine.ShowLog', not isEnabled);\
              openspace.setPropertyValueSingle('RenderEngine.ShowVersion', not isEnabled);\
@@ -219,7 +219,7 @@ NSArray* focusIdentifiers;
         // Remove unused variable warning
         (void)sender;
         global::scriptEngine->queueScript(
-            "local isEnabled = openspace.getPropertyValue('Modules.CefWebGui.Visible');\
+            "local isEnabled = openspace.propertyValue('Modules.CefWebGui.Visible');\
             openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', not isEnabled);",
             scripting::ScriptEngine::RemoteScripting::No
         );

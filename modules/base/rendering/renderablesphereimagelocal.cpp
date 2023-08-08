@@ -87,7 +87,6 @@ void RenderableSphereImageLocal::initializeGL() {
 }
 
 void RenderableSphereImageLocal::deinitializeGL() {
-    _texture.release();
     _texture = nullptr;
 
     RenderableSphere::deinitializeGL();

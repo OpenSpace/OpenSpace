@@ -57,7 +57,7 @@ namespace {
         "Number of Segments",
         "This value specifies the number of segments that the sphere is separated in",
         // @VISIBILITY(2.67)
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     enum class Orientation : int {
@@ -78,7 +78,7 @@ namespace {
         "MirrorTexture",
         "Mirror Texture",
         "Mirror the texture along the x-axis",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
@@ -220,7 +220,7 @@ void RenderableSphere::initializeGL() {
 }
 
 void RenderableSphere::deinitializeGL() {
-    _sphere.release();
+    _sphere = nullptr;
 
     BaseModule::ProgramObjectManager.release(
         "Sphere",
