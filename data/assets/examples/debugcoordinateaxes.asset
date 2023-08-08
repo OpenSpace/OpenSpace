@@ -19,6 +19,7 @@ local EarthBarycenterAxes = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
+    Name = "Earth Barycenter Axes",
     Path = "/Other/Coordinate Systems"
   }
 }
@@ -36,6 +37,7 @@ local EarthInertialAxes = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
+    Name = "Earth Inertial Axes",
     Path = "/Other/Coordinate Systems"
   }
 }
@@ -53,6 +55,7 @@ local EarthIAUAxes = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
+    Name = "Earth IAU Axes",
     Path = "/Other/Coordinate Systems"
   }
 }
@@ -70,6 +73,7 @@ local SunIAUAxes = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
+    Name = "Sun IAU Axes",
     Path = "/Other/Coordinate Systems"
   }
 }
@@ -87,6 +91,7 @@ local SolarSystemBarycenterAxes = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
+    Name = "Solar System Barycenter Axes",
     Path = "/Other/Coordinate Systems"
   }
 }
@@ -114,3 +119,15 @@ asset.export(EarthInertialAxes)
 asset.export(EarthIAUAxes)
 asset.export(SunIAUAxes)
 asset.export(SolarSystemBarycenterAxes)
+
+
+asset.meta = {
+  Name = "Debug Coordinates",
+  Version = "1.0",
+  Description = [[A set of coordinate axes demonstrating different XYZ coordinate
+    reference frames that are useful for debugging, such as the Earth or Solar
+    System Barycenter.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
