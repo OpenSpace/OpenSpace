@@ -1,6 +1,8 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Mars Labels",
@@ -9,8 +11,9 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
--- local marsRadii = { 3396190.0, 3396190.0, 3376200.0 }
-local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
+
+-- local MarsRadii = { 3396190.0, 3396190.0, 3376200.0 }
+local MarsRadii = { 3396190.0, 3396190.0, 3396190.0 }
 
 local Mars = {
   Identifier = "Mars",
@@ -29,7 +32,7 @@ local Mars = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = marsRadii,
+    Radii = MarsRadii,
     SegmentsPerPatch = 90,
     Layers = {},
     Labels = {
@@ -83,6 +86,7 @@ local MarsLabel = {
     Description = "Main label for Mars"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mars)

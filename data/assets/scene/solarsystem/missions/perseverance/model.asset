@@ -3,6 +3,8 @@ local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms"
 local sun = asset.require("scene/solarsystem/sun/sun")
 local spice = asset.require("./spice")
 
+
+
 local models = asset.syncedResource({
   Name = "Perseverance Model",
   Type = "HttpSynchronization",
@@ -10,12 +12,12 @@ local models = asset.syncedResource({
   Version = 2
 })
 
+
 local TranslationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
-    Kernels = spice.Kernels,
     Frame = "IAU_MARS",
     FixedDate = "2020 JUL 17 13:56:43"
   },
@@ -23,7 +25,6 @@ local TranslationKeyframes = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
-    Kernels = spice.Kernels,
     Frame = "IAU_MARS",
     FixedDate = "2020 JUL 17 13:56:43"
   },
@@ -31,31 +32,27 @@ local TranslationKeyframes = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
-    Frame = "IAU_MARS",
-    Kernels = spice.Kernels
+    Frame = "IAU_MARS"
   },
   ["2020 JUL 17 13:56:44"] = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
-    Frame = "IAU_MARS",
-    Kernels = spice.Kernels
+    Frame = "IAU_MARS"
   },
   ["2021 FEB 18 20:43:48"] = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
-    Frame = "IAU_MARS",
-    Kernels = spice.Kernels,
+    Frame = "IAU_MARS"
   },
   ["2021 FEB 18 20:43:49"] = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
     Frame = "IAU_MARS",
-    Kernels = spice.Kernels,
     FixedDate = "2021 FEB 18 20:43:48"
-  },
+  }
 }
 
 local PerseveranceNode = {
@@ -123,17 +120,18 @@ local Body = {
         Intensity = 0.5
       }
     },
-    RotationVector = {19.19,0.0,348.08}
+    RotationVector = { 19.19, 0.0, 348.08 }
   },
   GUI = {
     Name = "Perseverance Model Body",
-    Path = "/Solar System/Missions/Perseverance/Model",
-    -- Hidden = true
+    Path = "/Solar System/Missions/Perseverance/Model"
   }
 }
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(spice.Kernels)
+
   openspace.addSceneGraphNode(PerseveranceNode)
   openspace.addSceneGraphNode(Perseverance)
   openspace.addSceneGraphNode(PerseveranceModel)
@@ -145,8 +143,11 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PerseveranceModel)
   openspace.removeSceneGraphNode(Perseverance)
   openspace.removeSceneGraphNode(PerseveranceNode)
+
+  openspace.spice.unloadKernel(spice.Kernels)
 end)
 
+asset.export(PerseveranceNode)
 asset.export(Perseverance)
 asset.export(PerseveranceModel)
 asset.export(Body)

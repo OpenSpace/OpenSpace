@@ -12,7 +12,15 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
-local object = {
+
+local TransformMatrix = {
+  -0.7357425748,    0.67726129641,  0.0,           0.0,
+  -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+  0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+  0.0,              0.0,            0.0,           1.0
+}
+
+local Object = {
   Identifier = "Abell",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -23,7 +31,8 @@ local object = {
       Color = { 0.0, 0.8, 0.0 },
       Size = 22,
       MinMaxSize = { 10, 12 },
-      Unit = "Mpc"
+      Unit = "Mpc",
+      TransformationMatrix = TransformMatrix
     },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 1.0,
@@ -31,12 +40,7 @@ local object = {
     File = speck .. "abell.speck",
     Texture = textures .. "point3A.png",
     Unit = "Mpc",
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
-    },
+    TransformationMatrix = TransformMatrix,
     ScaleFactor = 520.0,
     BillboardMinMaxSize = { 0.0, 7.0 },
     EnablePixelSizeControl = true
@@ -55,20 +59,20 @@ local object = {
         are assigned colors while most are gray. The data set also has an arbitrary
         cut-off for completeness, resulting in the rectangular shape of the data set.
         (Description from URL) <br><br> Data Reference: Abell Clusters of Rich
-        Galaxies, Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]],
+        Galaxies, Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

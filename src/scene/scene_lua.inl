@@ -282,7 +282,8 @@ bool doesUriContainGroupTag(const std::string& command, std::string& groupName) 
 }
 
 std::string removeGroupNameFromUri(const std::string& uri) {
-    return uri.substr(uri.find_first_of("."));
+    size_t pos = uri.find_first_of(".");
+    return pos == std::string::npos ? uri : uri.substr(pos);
 }
 
 } // namespace
@@ -469,6 +470,16 @@ int propertyGetValue(lua_State* L) {
     return 1;
 }
 
+int propertyGetValueDeprecated(lua_State* L) {
+    LWARNINGC(
+        "Deprecation",
+        "'getPropertyValue' function is deprecated and should be replaced with "
+        "'propertyValue'"
+    );
+
+    return propertyGetValue(L);
+}
+
 }  // namespace openspace::luascriptfunctions
 
 namespace {
@@ -484,7 +495,7 @@ namespace {
 /**
  * Returns a list of property identifiers that match the passed regular expression
  */
-[[codegen::luawrap]] std::vector<std::string> getProperty(std::string regex) {
+[[codegen::luawrap]] std::vector<std::string> property(std::string regex) {
     using namespace openspace;
 
     std::string groupName;
@@ -588,6 +599,19 @@ namespace {
     }
 
     return res;
+}
+
+/**
+ * Returns a list of property identifiers that match the passed regular expression
+ */
+[[codegen::luawrap("getProperty")]] std::vector<std::string> propertyDeprecated(
+                                                                        std::string regex)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getProperty' function is deprecated and should be replaced with 'property'"
+    );
+    return property(std::move(regex));
 }
 
 /**

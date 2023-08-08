@@ -118,8 +118,8 @@ void TileProvider::deinitializeDefaultTile() {
     DefaultTileTexture = nullptr;
 }
 
-TileProvider::TileProvider() 
-    : properties::PropertyOwner({ "TileProvider", "Tile Provider" }) 
+TileProvider::TileProvider()
+    : properties::PropertyOwner({ "TileProvider", "Tile Provider" })
 {}
 
 void TileProvider::initialize() {
@@ -152,9 +152,9 @@ void TileProvider::deinitialize() {
     internalDeinitialize();
 }
 
-ChunkTile TileProvider::traverseTree(TileIndex tileIndex, int parents, int maxParents, 
-                        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent, 
-                                                             TileUvTransform& uvTransform) 
+ChunkTile TileProvider::traverseTree(TileIndex tileIndex, int parents, int maxParents,
+                        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
+                                                             TileUvTransform& uvTransform)
 {
     // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
     for (int i = 0; i < parents && tileIndex.level > 1; i++) {

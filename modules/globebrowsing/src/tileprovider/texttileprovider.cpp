@@ -60,7 +60,8 @@ void TextTileProvider::internalDeinitialize() {
 }
 
 Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string& text,
-                                  const glm::vec2& position, const glm::vec4& color)
+                                  const glm::vec2& position, const glm::vec4& color,
+                                  const glm::vec4& backgroundColor)
 {
     ZoneScoped;
     TracyGpuZone("tile");
@@ -70,8 +71,9 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
     if (!tile.texture) {
         ghoul::opengl::Texture* texture = tileCache->texture(initData);
 
-        // Keep track of defaultFBO and viewport to be able to reset state when done
-        GLint defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
+        GLint prevProgram, prevFBO;
+        glGetIntegerv(GL_CURRENT_PROGRAM, &prevProgram);
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFBO);
 
         // Render to texture
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -85,17 +87,25 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
 
         GLsizei w = static_cast<GLsizei>(texture->width());
         GLsizei h = static_cast<GLsizei>(texture->height());
+        global::renderEngine->openglStateCache().loadCurrentGLState();
         glViewport(0, 0, w, h);
-        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glClearColor(
+            backgroundColor.r,
+            backgroundColor.g,
+            backgroundColor.b,
+            backgroundColor.a
+        );
         glClear(GL_COLOR_BUFFER_BIT);
 
         fontRenderer->render(*font, position, text, color);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        global::renderEngine->openglStateCache().resetViewportState();
-
         tile = Tile{ texture, std::nullopt, Tile::Status::OK };
         tileCache->put(key, initData.hashKey, tile);
+
+        // Reset FBO, shader program and viewport
+        glUseProgram(prevProgram);
+        glBindFramebuffer(GL_FRAMEBUFFER, prevFBO);
+        global::renderEngine->openglStateCache().resetCachedStates();
     }
     return tile;
 }

@@ -1,23 +1,24 @@
-local setup_launch = {
-  Identifier = "os.missions.artemis.setup.launch",
+local SetupLaunch = {
+  Identifier = "os.artemis.SetupLaunch",
   Name = "Set to Artemis-1 launch time",
-  Command = [[
-    openspace.time.setTime('2022-11-16T08:19:00.000');
-  ]],
+  Command = [[openspace.time.setTime("2022-11-16T08:19:00.000")]],
   Documentation = "Set the time to the launch time of Artemis-1",
   GuiPath = "/Artemis",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(setup_launch)
+  openspace.action.registerAction(SetupLaunch)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(setup_launch)
+  openspace.action.removeAction(SetupLaunch)
 end)
 
-asset.export("SetupLaunch", setup_launch)
+asset.export("SetupLaunch", SetupLaunch.Identifier)
+
+
 
 asset.meta = {
   Name = "Actions - Artemis",

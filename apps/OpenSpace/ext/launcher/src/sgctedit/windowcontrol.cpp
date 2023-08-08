@@ -299,6 +299,15 @@ void WindowControl::createWidgets(const QColor& windowColor) {
         QBoxLayout* projectionLayout = new QVBoxLayout(projectionGroup);
         projectionLayout->setContentsMargins(0, 0, 0, 0);
         projectionLayout->setSpacing(0);
+        _projectionLabel = new QLabel(
+            "Projection information not shown while user interface is set to display "
+            "on the first window only"
+        );
+        _projectionLabel->setWordWrap(true);
+        _projectionLabel->setObjectName("notice");
+        _projectionLabel->setVisible(false);
+        _projectionLabel->setEnabled(false);
+        projectionLayout->addWidget(_projectionLabel);
 
         _projectionType = new QComboBox;
         _projectionType->addItems({
@@ -350,20 +359,20 @@ QWidget* WindowControl::createPlanarWidget() {
     QGridLayout* layout = new QGridLayout(widget);
     layout->setColumnStretch(1, 1);
 
-    QLabel* info = new QLabel(
+    _planar.labelInfo = new QLabel(
         "This projection type is the 'regular' projection with a horizontal and a "
         "vertical field of view, given in degrees. The wider the field of view, the "
         "more content is shown at the same time, but everything becomes smaller. Very "
         "large values will introduce distorions on the corners"
     );
-    info->setObjectName("info");
-    info->setWordWrap(true);
-    layout->addWidget(info, 0, 0, 1, 3);
+    _planar.labelInfo->setObjectName("info");
+    _planar.labelInfo->setWordWrap(true);
+    layout->addWidget(_planar.labelInfo, 0, 0, 1, 3);
 
-    QLabel* fovH = new QLabel("Horizontal FOV");
+    _planar.labelFovH = new QLabel("Horizontal FOV");
     QString hfovTip = "The total horizontal field of view of the viewport (degrees)";
-    fovH->setToolTip(hfovTip);
-    layout->addWidget(fovH, 1, 0);
+    _planar.labelFovH->setToolTip(hfovTip);
+    layout->addWidget(_planar.labelFovH, 1, 0);
 
     _planar.fovH = new QDoubleSpinBox;
     _planar.fovH->setMinimum(FovEpsilon);
@@ -377,11 +386,11 @@ QWidget* WindowControl::createPlanarWidget() {
     );
     layout->addWidget(_planar.fovH, 1, 1);
 
-    QLabel* fovV = new QLabel("Vertical FOV");
+    _planar.labelFovV = new QLabel("Vertical FOV");
     QString vfovTip = "The total vertical field of view of the viewport (degrees). "
         "Internally,\nthe values for 'up' & 'down' will each be half this value";
-    fovV->setToolTip(vfovTip);
-    layout->addWidget(fovV, 2, 0);
+    _planar.labelFovV->setToolTip(vfovTip);
+    layout->addWidget(_planar.labelFovV, 2, 0);
 
     _planar.fovV = new QDoubleSpinBox;
     _planar.fovV->setMinimum(FovEpsilon);
@@ -395,21 +404,20 @@ QWidget* WindowControl::createPlanarWidget() {
     );
     layout->addWidget(_planar.fovV, 2, 1);
 
-    QPushButton* lockFov = new QPushButton;
-    lockFov->setIcon(_lockIcon);
-    lockFov->setToolTip(
+    _planar.buttonLockFov = new QPushButton;
+    _planar.buttonLockFov->setIcon(_lockIcon);
+    _planar.buttonLockFov->setToolTip(
         "Locks and scales the Horizontal & Vertical field-of-view to the ideal settings "
         "based on the provided aspect ratio"
     );
-    lockFov->setFocusPolicy(Qt::NoFocus);
-    layout->addWidget(lockFov, 1, 2, 2, 1);
+    _planar.buttonLockFov->setFocusPolicy(Qt::NoFocus);
+    layout->addWidget(_planar.buttonLockFov, 1, 2, 2, 1);
     connect(
-        lockFov, &QPushButton::released,
-        [this, lockFov]() {
-            lockFov->setIcon(_fovLocked ? _lockIcon : _unlockIcon);
-        }
+        _planar.buttonLockFov,
+        &QPushButton::released,
+        this,
+        &WindowControl::onFovLockClicked
     );
-    connect(lockFov, &QPushButton::released, this, &WindowControl::onFovLockClicked);
 
     return widget;
 }
@@ -426,22 +434,22 @@ QWidget* WindowControl::createFisheyeWidget() {
     QGridLayout* layout = new QGridLayout(widget);
     layout->setColumnStretch(1, 1);
 
-    QLabel* info = new QLabel(
+    _fisheye.labelInfo = new QLabel(
         "This projection provides a rendering in a format that is suitable for "
         "planetariums and other immersive environments. A field-of-view of 180 degrees "
         "is presented as a circular image in the center of the screen. For this "
         "projection a square window is suggested, but not necessary"
     );
-    info->setObjectName("info");
-    info->setWordWrap(true);
-    layout->addWidget(info, 0, 0, 1, 2);
+    _fisheye.labelInfo->setObjectName("info");
+    _fisheye.labelInfo->setWordWrap(true);
+    layout->addWidget(_fisheye.labelInfo, 0, 0, 1, 2);
 
-    QLabel* qualityFisheye = new QLabel("Quality");
+    _fisheye.labelQuality = new QLabel("Quality");
     QString qualityTip = "Determines the pixel resolution of the projection rendering. "
         "The higher resolution,\nthe better the rendering quality, but at the expense of "
         "increased rendering times";
-    qualityFisheye->setToolTip(qualityTip);
-    layout->addWidget(qualityFisheye, 1, 0);
+    _fisheye.labelQuality->setToolTip(qualityTip);
+    layout->addWidget(_fisheye.labelQuality, 1, 0);
 
     _fisheye.quality = new QComboBox;
     _fisheye.quality->addItems(QualityTypes);
@@ -471,29 +479,28 @@ QWidget* WindowControl::createSphericalMirrorWidget() {
     QGridLayout* layout = new QGridLayout(widget);
     layout->setColumnStretch(1, 1);
 
-    QLabel* info = new QLabel(
+    _sphericalMirror.labelInfo = new QLabel(
         "This projection is rendering a image suite for use with a spherical mirror "
         "projection as described by Paul Bourke (http://paulbourke.net/dome/mirrordome/) "
         "and which is a low-cost yet effective way to provide content for a sphericalal "
         "display surface using a regular projector"
     );
-    info->setObjectName("info");
-    info->setWordWrap(true);
-    layout->addWidget(info, 0, 0, 1, 2);
+    _sphericalMirror.labelInfo->setObjectName("info");
+    _sphericalMirror.labelInfo->setWordWrap(true);
+    layout->addWidget(_sphericalMirror.labelInfo, 0, 0, 1, 2);
 
-    QLabel* qualitySphericalMirror = new QLabel("Quality");
+    _sphericalMirror.labelQuality = new QLabel("Quality");
     QString qualityTip = "Determines the pixel resolution of the projection rendering. "
         "The higher resolution,\nthe better the rendering quality, but at the expense of "
         "increased rendering times";
-    qualitySphericalMirror->setToolTip(qualityTip);
-    layout->addWidget(qualitySphericalMirror, 1, 0);
+    _sphericalMirror.labelQuality->setToolTip(qualityTip);
+    layout->addWidget(_sphericalMirror.labelQuality, 1, 0);
 
     _sphericalMirror.quality = new QComboBox;
     _sphericalMirror.quality->addItems(QualityTypes);
     _sphericalMirror.quality->setToolTip(qualityTip);
     _sphericalMirror.quality->setCurrentIndex(2);
     layout->addWidget(_sphericalMirror.quality, 1, 1);
-
 
     return widget;
 }
@@ -509,22 +516,22 @@ QWidget* WindowControl::createCylindricalWidget() {
     QGridLayout* layout = new QGridLayout(widget);
     layout->setColumnStretch(1, 1);
 
-    QLabel* info = new QLabel(
+    _cylindrical.labelInfo = new QLabel(
         "This projection type provides a cylindrical rendering that covers 360 degrees "
         "around the camera, which can be useful in immersive environments that are not "
         "spherical, but where, for example, all walls of a room are covered with "
         "projectors"
     );
-    info->setObjectName("info");
-    info->setWordWrap(true);
-    layout->addWidget(info, 0, 0, 1, 2);
+    _cylindrical.labelInfo->setObjectName("info");
+    _cylindrical.labelInfo->setWordWrap(true);
+    layout->addWidget(_cylindrical.labelInfo, 0, 0, 1, 2);
 
-    QLabel* qualityCylindrical = new QLabel("Quality");
+    _cylindrical.labelQuality = new QLabel("Quality");
     QString qualityTip = "Determines the pixel resolution of the projection rendering. "
         "The higher resolution,\nthe better the rendering quality, but at the expense of "
         "increased rendering times";
-    qualityCylindrical->setToolTip(qualityTip);
-    layout->addWidget(qualityCylindrical, 1, 0);
+    _cylindrical.labelQuality->setToolTip(qualityTip);
+    layout->addWidget(_cylindrical.labelQuality, 1, 0);
 
     _cylindrical.quality = new QComboBox;
     _cylindrical.quality->addItems(QualityTypes);
@@ -532,13 +539,13 @@ QWidget* WindowControl::createCylindricalWidget() {
     _cylindrical.quality->setCurrentIndex(2);
     layout->addWidget(_cylindrical.quality, 1, 1);
 
-    QLabel* heightOffset = new QLabel("Height Offset");
+    _cylindrical.labelHeightOffset = new QLabel("Height Offset");
     QString heightTip = "Offsets the height from which the cylindrical projection is "
         "generated.\nThis is, in general, only necessary if the user position is offset "
         "and\ncountering that offset is desired in order to continue producing\na "
         "'standard' cylindrical projection";
-    heightOffset->setToolTip(heightTip);
-    layout->addWidget(heightOffset, 2, 0);
+    _cylindrical.labelHeightOffset->setToolTip(heightTip);
+    layout->addWidget(_cylindrical.labelHeightOffset, 2, 0);
 
     _cylindrical.heightOffset = new QDoubleSpinBox;
     _cylindrical.heightOffset->setMinimum(-1000000.0);
@@ -562,22 +569,22 @@ QWidget* WindowControl::createEquirectangularWidget() {
     QGridLayout* layout = new QGridLayout(widget);
     layout->setColumnStretch(1, 1);
 
-    QLabel* info = new QLabel(
+    _equirectangular.labelInfo = new QLabel(
         "This projection provides the rendering as an image in equirectangular "
         "projection, which is a common display type for 360 surround video. When "
         "uploading a video in equirectangular projection to YouTube, for example, it "
         "will use it as a 360 video"
     );
-    info->setObjectName("info");
-    info->setWordWrap(true);
-    layout->addWidget(info, 0, 0, 1, 2);
+    _equirectangular.labelInfo->setObjectName("info");
+    _equirectangular.labelInfo->setWordWrap(true);
+    layout->addWidget(_equirectangular.labelInfo, 0, 0, 1, 2);
 
-    QLabel* qualityEquirectangular = new QLabel("Quality");
+    _equirectangular.labelQuality = new QLabel("Quality");
     QString qualityTip = "Determines the pixel resolution of the projection rendering. "
         "The higher resolution,\nthe better the rendering quality, but at the expense of "
         "increased rendering times";
-    qualityEquirectangular->setToolTip(qualityTip);
-    layout->addWidget(qualityEquirectangular, 1, 0);
+    _equirectangular.labelQuality->setToolTip(qualityTip);
+    layout->addWidget(_equirectangular.labelQuality, 1, 0);
 
     _equirectangular.quality = new QComboBox;
     _equirectangular.quality->addItems(QualityTypes);
@@ -791,6 +798,34 @@ void WindowControl::setProjectionEquirectangular(int quality, bool spoutOutput) 
     );
 }
 
+void WindowControl::setVisibilityOfProjectionGui(bool enable) {
+    _projectionType->setVisible(enable);
+    _planar.labelInfo->setVisible(enable);
+    _planar.fovH->setVisible(enable);
+    _planar.labelFovH->setVisible(enable);
+    _planar.fovV->setVisible(enable);
+    _planar.labelFovV->setVisible(enable);
+    _planar.buttonLockFov->setVisible(enable);
+    _fisheye.labelInfo->setVisible(enable);
+    _fisheye.quality->setVisible(enable);
+    _fisheye.labelQuality->setVisible(enable);
+    _fisheye.spoutOutput->setVisible(enable);
+    _sphericalMirror.labelInfo->setVisible(enable);
+    _sphericalMirror.quality->setVisible(enable);
+    _sphericalMirror.labelQuality->setVisible(enable);
+    _cylindrical.labelInfo->setVisible(enable);
+    _cylindrical.heightOffset->setVisible(enable);
+    _cylindrical.labelHeightOffset->setVisible(enable);
+    _cylindrical.quality->setVisible(enable);
+    _cylindrical.labelQuality->setVisible(enable);
+    _equirectangular.labelInfo->setVisible(enable);
+    _equirectangular.quality->setVisible(enable);
+    _equirectangular.labelQuality->setVisible(enable);
+    _equirectangular.spoutOutput->setVisible(enable);
+
+    _projectionLabel->setVisible(!enable);
+}
+
 void WindowControl::setQualityComboBoxFromLinesResolution(int lines, QComboBox* combo) {
     ghoul_assert(combo, "Invalid pointer");
     for (unsigned int v = 0; v < nQualityTypes; ++v) {
@@ -882,6 +917,7 @@ void WindowControl::onFovLockClicked() {
         _planar.fovH->setEnabled(true);
         _planar.fovV->setEnabled(true);
     }
+    _planar.buttonLockFov->setIcon(_fovLocked ? _lockIcon : _unlockIcon);
 }
 
 void WindowControl::updatePlanarLockedFov() {

@@ -83,7 +83,7 @@ private:
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
 
-    QPushButton* _fillFromScriptLog = nullptr;
+    QPushButton* _addFromScriptLog = nullptr;
     QLabel* _commandLabel = nullptr;
     QComboBox* _commandCombo = nullptr;
     QLabel* _propertyLabel = nullptr;

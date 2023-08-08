@@ -63,6 +63,7 @@ namespace {
     struct [[codegen::Dictionary(ScreenSpaceBrowser)]] Parameters {
         std::optional<std::string> identifier;
         std::optional<std::string> url;
+        std::optional<glm::vec2> dimensions;
     };
 #include "screenspacebrowser_codegen.cpp"
 
@@ -93,7 +94,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     _url = p.url.value_or(_url);
 
     glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
-    _dimensions = windowDimensions;
+    _dimensions = p.dimensions.value_or(windowDimensions);
 
     _renderHandler = new ScreenSpaceRenderHandler;
     _keyboardHandler = new WebKeyboardHandler();

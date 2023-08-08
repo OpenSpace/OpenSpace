@@ -250,7 +250,7 @@ void RenderableShadowCylinder::deinitializeGL() {
 }
 
 bool RenderableShadowCylinder::isReady() const {
-    return true;
+    return _shader;
 }
 
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {

@@ -320,6 +320,15 @@ std::vector<const Asset*> AssetManager::allAssets() const {
     return res;
 }
 
+std::vector<const Asset*> AssetManager::rootAssets() const {
+    std::vector<const Asset*> res;
+    res.reserve(_rootAssets.size());
+    for (Asset* asset : _rootAssets) {
+        res.push_back(asset);
+    }
+    return res;
+}
+
 std::vector<const ResourceSynchronization*> AssetManager::allSynchronizations() const {
     std::vector<const ResourceSynchronization*> res;
     res.reserve(_synchronizations.size());
@@ -329,6 +338,11 @@ std::vector<const ResourceSynchronization*> AssetManager::allSynchronizations() 
         res.push_back(p.second->synchronization.get());
     }
     return res;
+}
+
+bool AssetManager::isRootAsset(const Asset* asset) const {
+    auto it = std::find(_rootAssets.begin(), _rootAssets.end(), asset);
+    return it != _rootAssets.end();
 }
 
 bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
@@ -798,15 +812,33 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     if (it != _assets.end()) {
         Asset* a = it->get();
         // We should warn if an asset is requested twice with different enable settings or
-        // else the resulting status will depend on the order of asset loading
+        // else the resulting status will depend on the order of asset loading.
         if (a->explicitEnabled() != explicitEnable) {
-            ghoul_assert(a->firstParent(), "Asset must have a parent at this point");
-            LWARNING(fmt::format(
-                "Loading asset {0} from {1} with enable state {3} different from initial "
-                "loading from {2} with state {4}. Only {4} will have an effect",
-                path, retriever, a->firstParent()->path(), explicitEnable,
-                a->explicitEnabled()
-            ));
+            if (a->firstParent()) {
+                // The first request came from another asset, so we can mention it in the
+                // error message
+                LWARNING(fmt::format(
+                    "Loading asset {0} from {1} with enable state {3} different from "
+                    "initial loading from {2} with state {4}. Only {4} will have an "
+                    "effect",
+                    path, retriever, a->firstParent()->path(), explicitEnable,
+                    a->explicitEnabled()
+                ));
+            }
+            else {
+                // This can only happen if the asset was loaded from the profile directly,
+                // in which case we don't have to warn the user since it won't depend on
+                // the load order as it is always guaranteed that the profile assets are
+                // loaded first
+                ghoul_assert(
+                    std::find(
+                        _rootAssets.begin(),
+                        _rootAssets.end(),
+                        a
+                    ) != _rootAssets.end(),
+                    "Asset not loaded from profile"
+                );
+            }
         }
         return it->get();
     }
@@ -923,8 +955,10 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
         {
             codegen::lua::Add,
             codegen::lua::Remove,
+            codegen::lua::RemoveAll,
             codegen::lua::IsLoaded,
-            codegen::lua::AllAssets
+            codegen::lua::AllAssets,
+            codegen::lua::RootAssets
         }
     };
 }

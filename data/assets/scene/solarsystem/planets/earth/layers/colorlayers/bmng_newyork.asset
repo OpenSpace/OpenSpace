@@ -1,23 +1,27 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "BMNG_NewYork",
   Name = "BMNG [New York]",
   Enabled = asset.enabled,
   FilePath = asset.localResource("bmng_newyork.wms"),
   Description = [[Web loaded full resolution map of Blue Marble Next Generation. This map
-    is hosted on the OpenSpace servers in New York]],
+    is hosted on the OpenSpace servers in New York]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
 
 
 asset.meta = {

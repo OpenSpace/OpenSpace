@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local MajisVisnir = {
@@ -99,8 +100,8 @@ local MajisIr = {
     End = "2035 OCT 05 00:00:00.000"
   },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_MAJIS_IR",
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
@@ -239,6 +240,7 @@ end)
 -- asset.export(MajisIrB2)
 -- asset.export(MajisIrB4)
 asset.export(Majis)
+
 
 
 asset.meta = {

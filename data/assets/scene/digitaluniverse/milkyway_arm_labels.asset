@@ -12,7 +12,8 @@ local planeSpeck = asset.syncedResource({
   Version = 1
 })
 
-local plane = {
+
+local Object = {
   Identifier = "MilkyWayGalaxyArmLabelsImage",
   Parent = "Root",
   Renderable = {
@@ -36,19 +37,20 @@ local plane = {
       the Milky Way's spiral arms. We label them in this manner ("hard coding" the
       labels into an image rather than having native labels) so that they can retain
       their size, shape, and location as they overlay the galaxy. (Description from
-      Digital Universe Data Profiles)]],
+      Digital Universe Data Profiles)]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(plane)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(plane)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(plane)
+asset.export(Object)
 
 
 

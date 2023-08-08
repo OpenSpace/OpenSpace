@@ -1,6 +1,6 @@
+asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-asset.require("spice/base")
 
 
 
@@ -22,10 +22,10 @@ local JupiterTrailEarth = {
   Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
   GUI = {
     Name = "Jupiter trail from Earth",
-    Path = "/Solar System/Planets/Jupiter",
-    Hidden = false
+    Path = "/Solar System/Planets/Jupiter"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterTrailEarth)

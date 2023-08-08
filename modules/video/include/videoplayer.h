@@ -52,7 +52,7 @@ BooleanType(PauseAfterSeek);
 
 public:
     VideoPlayer(const ghoul::Dictionary& dictionary);
-    ~VideoPlayer();
+    ~VideoPlayer() override;
 
     void initialize();
 
@@ -67,7 +67,7 @@ public:
     const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
     bool isInitialized() const;
 
-    void reset();
+    void reload();
     void destroy();
     void update();
 
@@ -76,7 +76,8 @@ public:
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    documentation::Documentation Documentation();
+    static documentation::Documentation Documentation();
+
 private:
     // Libmpv keys
     enum class MpvKey : uint64_t {
@@ -84,23 +85,24 @@ private:
         Height,
         Width,
         Meta,
-        Params,
         Time,
         Fps,
         Pause,
         IsSeeking,
         Mute,
         Command,
-        Seek
+        Seek,
+        Loop
     };
     // Framebuffer
-    void createFBO(int width, int height);
-    void resizeFBO(int width, int height);
+    void createTexture(glm::ivec2 size);
+    void resizeTexture(glm::ivec2 size);
 
     // Libmpv
     static void onMpvRenderUpdate(void*); // Has to be static because of C api
     void initializeMpv(); // Called first time in update
     void renderMpv(); // Called in update
+    void renderFrame(); // Renders a frame; called in renderMpv
     void commandAsyncMpv(const char* cmd[], MpvKey key = MpvKey::Command);
     void handleMpvEvents();
     // Libmpv properties
@@ -116,15 +118,14 @@ private:
     double correctVideoPlaybackTime() const;
     bool isWithingStartEndTime() const;
     void updateFrameDuration();
-    void stepFrameForward();
-    void stepFrameBackward();
 
     // Properties for user interaction
     properties::TriggerProperty _play;
     properties::TriggerProperty _pause;
     properties::TriggerProperty _goToStart;
-    properties::TriggerProperty _reset;
+    properties::TriggerProperty _reload;
     properties::BoolProperty _playAudio;
+    properties::BoolProperty _loopVideo;
 
     // Video properties. Try to read all these values from the video
     std::string _videoFile;
@@ -141,12 +142,10 @@ private:
 
     // Syncing with multiple nodes
     double _correctPlaybackTime = 0.0;
-    double _deltaTime = 0.0;
 
     // Video stretching: map to simulation time animation mode
     double _startJ200Time = 0.0;
     double _endJ200Time = 0.0;
-    double _timeAtLastRender = 0.0;
     double _frameDuration = 0.0;
 
     // Libmpv

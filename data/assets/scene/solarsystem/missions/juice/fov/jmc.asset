@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local JMC1 = {
@@ -61,6 +62,7 @@ local JMC2 = {
 }
 
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JMC1)
   openspace.addSceneGraphNode(JMC2)
@@ -73,6 +75,7 @@ end)
 
 asset.export(JMC1)
 asset.export(JMC2)
+
 
 
 asset.meta = {

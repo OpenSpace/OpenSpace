@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
@@ -88,22 +89,12 @@
       "value": "false"
     },
     {
-      "name": "Scene.ISSModel.Renderable.Enabled",
+      "name": "Scene.ISS.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
     },
     {
       "name": "Scene.ISS_trail.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.ArtemisEarthTrail.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.ArtemisMoonTrail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
     }

@@ -67,18 +67,22 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
+    constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
+
     const GLenum ColorAttachmentArray[3] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,
        GL_COLOR_ATTACHMENT2,
     };
 
-    constexpr std::array<const char*, 14> UniformNames = {
-        "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "modelViewTransform", "normalTransform", "projectionTransform",
-        "performShading", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity", "performManualDepthTest", "gBufferDepthTexture",
-        "resolution", "opacity"
+    constexpr std::array<const char*, 26> UniformNames = {
+        "modelViewTransform", "projectionTransform", "normalTransform", "meshTransform",
+        "meshNormalTransform", "ambientIntensity", "diffuseIntensity",
+        "specularIntensity", "performShading", "use_forced_color", "has_texture_diffuse",
+        "has_texture_normal", "has_texture_specular", "has_color_specular",
+        "texture_diffuse", "texture_normal", "texture_specular", "color_diffuse",
+        "color_specular", "opacity", "nLightSources", "lightDirectionsViewSpace",
+        "lightIntensities", "performManualDepthTest", "gBufferDepthTexture", "resolution"
     };
 
     constexpr std::array<const char*, 5> UniformOpacityNames = {
@@ -139,6 +143,17 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ModelScaleInfo = {
+        "ModelScale",
+        "Model Scale",
+        "This value specifies the scale for the model. If a value for the ModelScale was "
+        "provided in the asset file, you can see and change it here. If instead a unit "
+        "name was provided in the asset, this is the value that that name represents. "
+        "For example 'Centimeter' becomes 0.01. For more information see "
+        "http://wiki.openspaceproject.com/docs/builders/models/model-scale.html",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
         "RotationVector",
         "Rotation Vector",
@@ -192,8 +207,14 @@ namespace {
             Mile
         };
 
-        // The scale of the model. For example if the model is in centimeters
-        // then ModelScale = Centimeter or ModelScale = 0.01
+        // The scale of the model. For example, if the model is in centimeters
+        // then <code>ModelScale = 'Centimeter'</code> or <code>ModelScale = 0.01</code>.
+        // The value that this needs to be in order for the model to be in the correct
+        // scale relative to the rest of OpenSpace can be tricky to find.
+        // Essentially it depends on the model software that the model was created
+        // with and the original intention of the modeler. For more information see
+        // our wiki page for this parameter:
+        // http://wiki.openspaceproject.com/docs/builders/models/model-scale.html
         std::optional<std::variant<ScaleUnit, double>> modelScale;
 
         // By default the given ModelScale is used to scale the model down,
@@ -255,7 +276,7 @@ namespace {
         std::optional<bool> enableFaceCulling;
 
         // [[codegen::verbatim(ModelTransformInfo.description)]]
-        std::optional<glm::dmat3x3> modelTransform;
+        std::optional<glm::dmat4x4> modelTransform;
 
         // [[codegen::verbatim(RotationVecInfo.description)]]
         std::optional<glm::dvec3> rotationVector;
@@ -297,10 +318,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _modelTransform(
         ModelTransformInfo,
-        glm::dmat3(1.0),
-        glm::dmat3(-1.0),
-        glm::dmat3(1.0)
+        glm::dmat4(1.0),
+        glm::dmat4(-1.0),
+        glm::dmat4(1.0)
     )
+    , _modelScale(ModelScaleInfo, 1.0, std::numeric_limits<double>::epsilon(), 4e+27)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(
@@ -323,12 +345,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    std::string file = absPath(p.geometryFile.string()).string();
-    _geometry = ghoul::io::ModelReader::ref().loadModel(
-        file,
-        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
-    );
+    _file = absPath(p.geometryFile.string());
+    if (!std::filesystem::exists(_file)) {
+        throw ghoul::RuntimeError(fmt::format("Cannot find model file {}", _file));
+    }
 
     _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
 
@@ -351,43 +371,32 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (p.modelTransform.has_value()) {
+        _modelTransform = *p.modelTransform;
+    }
+
     if (p.animationStartTime.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Animation start time given to model without animation");
-        }
         _animationStart = *p.animationStartTime;
     }
 
     if (p.enableAnimation.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Attempting to enable animation for a model that does not have any");
-        }
-        else if (*p.enableAnimation && _animationStart.empty()) {
-            LWARNING("Cannot enable animation without a given start time");
-        }
-        else {
-            _enableAnimation = *p.enableAnimation;
-            _geometry->enableAnimation(_enableAnimation);
-        }
+        _enableAnimation = *p.enableAnimation;
     }
 
     if (p.animationTimeScale.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Animation time scale given to model without animation");
-        }
-        else if (std::holds_alternative<float>(*p.animationTimeScale)) {
-            _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
+        if (std::holds_alternative<float>(*p.animationTimeScale)) {
+            _animationTimeScale = std::get<float>(*p.animationTimeScale);
         }
         else if (std::holds_alternative<Parameters::AnimationTimeUnit>(
-                    *p.animationTimeScale)
-                )
+                *p.animationTimeScale
+            ))
         {
             Parameters::AnimationTimeUnit animationTimeUnit =
                 std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
             TimeUnit timeUnit = codegen::map<TimeUnit>(animationTimeUnit);
 
-            _geometry->setTimeScale(static_cast<float>(
-                convertTime(1.0, timeUnit, TimeUnit::Second))
+            _animationTimeScale = static_cast<double>(
+                convertTime(1.0, timeUnit, TimeUnit::Second)
             );
         }
         else {
@@ -396,10 +405,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     }
 
     if (p.animationMode.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Animation mode given to model without animation");
-        }
-
         switch (*p.animationMode) {
             case Parameters::AnimationMode::LoopFromStart:
                 _animationMode = AnimationMode::LoopFromStart;
@@ -419,10 +424,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             default:
                 throw ghoul::MissingCaseException();
         }
-    }
-
-    if (p.modelTransform.has_value()) {
-        _modelTransform = *p.modelTransform;
     }
 
     _ambientIntensity = p.ambientIntensity.value_or(_ambientIntensity);
@@ -450,10 +451,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (_geometry->hasAnimation()) {
-        addProperty(_enableAnimation);
-    }
-
+    addProperty(_enableAnimation);
     addPropertySubOwner(_lightSourcePropertyOwner);
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
@@ -464,19 +462,45 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_modelTransform);
     addProperty(_rotationVec);
 
+    addProperty(_modelScale);
+    _modelScale.setExponent(20.f);
+
+    _modelScale.onChange([this]() {
+        if (!_geometry) {
+            LWARNING(fmt::format("Cannot set scale for model {}; not loaded yet", _file));
+            return;
+        }
+
+        setBoundingSphere(_geometry->boundingRadius() * _modelScale);
+
+        // Set Interaction sphere size to be 10% of the bounding sphere
+        setInteractionSphere(boundingSphere() * 0.1);
+    });
+
     _rotationVec.onChange([this]() {
         _modelTransform = glm::mat4_cast(glm::quat(glm::radians(_rotationVec.value())));
     });
 
     _enableAnimation.onChange([this]() {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Attempting to enable animation for a model that does not have any");
+        if (!_modelHasAnimation) {
+            LWARNING(fmt::format(
+                "Cannot enable animation for model {}; it does not have any", _file
+            ));
         }
         else if (_enableAnimation && _animationStart.empty()) {
-            LWARNING("Cannot enable animation without a given start time");
+            LWARNING(fmt::format(
+                "Cannot enable animation for model {}; it does not have a start time",
+                _file
+            ));
             _enableAnimation = false;
         }
         else {
+            if (!_geometry) {
+                LWARNING(fmt::format(
+                    "Cannot enable animation for model {}; not loaded yet", _file
+                ));
+                return;
+            }
             _geometry->enableAnimation(_enableAnimation);
         }
     });
@@ -507,15 +531,6 @@ bool RenderableModel::isReady() const {
 void RenderableModel::initialize() {
     ZoneScoped;
 
-    if (_geometry->hasAnimation() && _enableAnimation && _animationStart.empty()) {
-        LWARNING("Model with animation not given any start time");
-    }
-    else if (_geometry->hasAnimation() && !_enableAnimation) {
-        LINFO("Model with deactivated animation was found. "
-            "The animation can be activated by entering a start time in the asset file"
-        );
-    }
-
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
     }
@@ -524,6 +539,56 @@ void RenderableModel::initialize() {
 void RenderableModel::initializeGL() {
     ZoneScoped;
 
+    // Load model
+    _geometry = ghoul::io::ModelReader::ref().loadModel(
+        _file,
+        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+    );
+    _modelHasAnimation = _geometry->hasAnimation();
+
+    // @TODO (abock, 2023-06-03) Leaving this here to address issue #2731. The
+    // _modelHasAnimation has not been set to true in the constructor causing the
+    // `enableAnimation` function not to be called
+    if (_enableAnimation) {
+        _geometry->enableAnimation(true);
+    }
+
+    if (!_modelHasAnimation) {
+        if (!_animationStart.empty()) {
+            LWARNING(fmt::format(
+                "Animation start time given to model {} without animation", _file
+            ));
+        }
+
+        if (_enableAnimation) {
+            LWARNING(fmt::format(
+                "Cannot enable animation for model {}; it does not have any", _file
+            ));
+            _enableAnimation = false;
+        }
+
+        _enableAnimation.setReadOnly(true);
+    }
+    else {
+        if (_enableAnimation && _animationStart.empty()) {
+            LWARNING(fmt::format(
+                "Cannot enable animation for model {}; it does not have a start time",
+                _file
+            ));
+        }
+        else if (!_enableAnimation) {
+            LINFO(fmt::format(
+                "Model {} with deactivated animation was found. The animation can be "
+                "activated by entering a start time in the asset file", _file
+            ));
+        }
+
+        // Set animation settings
+        _geometry->setTimeScale(_animationTimeScale);
+    }
+
+    // Initialize shaders
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
         program += "|vs=" + _vertexShaderPath;
@@ -562,7 +627,11 @@ void RenderableModel::initializeGL() {
             std::filesystem::path fs =
                 absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
 
-            return global::renderEngine->buildRenderProgram("ModelOpacityProgram", vs, fs);
+            return global::renderEngine->buildRenderProgram(
+                "ModelOpacityProgram",
+                vs,
+                fs
+            );
         }
     );
     ghoul::opengl::updateUniformLocations(
@@ -733,18 +802,29 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         ++nLightSources;
     }
 
-    _program->setUniform(
-        _uniformCache.nLightSources,
-        nLightSources
-    );
-    _program->setUniform(
-        _uniformCache.lightIntensities,
-        _lightIntensitiesBuffer
-    );
-    _program->setUniform(
-        _uniformCache.lightDirectionsViewSpace,
-        _lightDirectionsViewSpaceBuffer
-    );
+    if (_uniformCache.performShading != -1) {
+        _program->setUniform(_uniformCache.performShading, _performShading);
+    }
+
+    if (_performShading) {
+        _program->setUniform(
+            _uniformCache.nLightSources,
+            nLightSources
+        );
+        _program->setUniform(
+            _uniformCache.lightIntensities,
+            _lightIntensitiesBuffer
+        );
+        _program->setUniform(
+            _uniformCache.lightDirectionsViewSpace,
+            _lightDirectionsViewSpaceBuffer
+        );
+
+        _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
+        _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
+        _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
+    }
+
     _program->setUniform(
         _uniformCache.modelViewTransform,
         glm::mat4(modelViewTransform)
@@ -761,10 +841,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _uniformCache.projectionTransform,
         data.camera.projectionMatrix()
     );
-    _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
-    _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
-    _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
-    _program->setUniform(_uniformCache.performShading, _performShading);
 
     if (!_enableFaceCulling) {
         glDisable(GL_CULL_FACE);
@@ -830,8 +906,9 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         }
 
         glDrawBuffers(3, ColorAttachmentArray);
-        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.f, 0.f, 0.f, 0.f)));
+        glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
 
         // Use a manuel depth test to make the models aware of the rest of the scene
         _program->setUniform(
@@ -938,6 +1015,15 @@ void RenderableModel::update(const UpdateData& data) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    }
+
+    if (_quadProgram->isDirty()) {
+        _quadProgram->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(
+            *_quadProgram,
+            _uniformOpacityCache,
+            UniformOpacityNames
+        );
     }
 
     if (!hasOverrideRenderBin()) {

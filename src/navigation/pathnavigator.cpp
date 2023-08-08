@@ -101,7 +101,7 @@ namespace {
         "Rotation Speed Factor (Linear Path)",
         "Affects how fast the camera rotates to the target rotation during a linear "
         "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
-        "seconds. A value of 2 means twice that fast, and so on",
+        "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
@@ -137,7 +137,7 @@ PathNavigator::PathNavigator()
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
     , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
-    , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 1.f, 0.1f, 2.f)
+    , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 1.5f, 0.1f, 3.f)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
@@ -404,35 +404,17 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
         // than the interaction sphere of the node
         double bs = n->boundingSphere();
         double is = n->interactionSphere();
-        return is > bs ? is : bs;
+        return std::max(is, bs);
     };
 
     double result = sphere(node);
 
     if (result < _minValidBoundingSphere) {
-        // If the bs of the target is too small, try to find a good value in a child node.
-        // Only check the closest children, to avoid deep traversal in the scene graph.
-        // Alsp. the chance to find a bounding sphere that represents the visual size of
-        // the target well is higher for these nodes
-        for (SceneGraphNode* child : node->children()) {
-            result = sphere(child);
-            if (result > _minValidBoundingSphere) {
-                LDEBUG(fmt::format(
-                    "The scene graph node '{}' has no, or a very small, bounding sphere. "
-                    "Using bounding sphere of child node '{}' in computations",
-                    node->identifier(),
-                    child->identifier()
-                ));
-                return result;
-            }
-        }
-
         LDEBUG(fmt::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
-            "minimal value. This might lead to unexpected results",
-            node->identifier())
-        );
-
+            "minimal value of {}. This might lead to unexpected results",
+            node->identifier(), _minValidBoundingSphere
+        ));
         result = _minValidBoundingSphere;
     }
 

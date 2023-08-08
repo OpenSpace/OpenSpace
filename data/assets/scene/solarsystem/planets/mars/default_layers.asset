@@ -1,4 +1,3 @@
--- Color layer
 asset.require("./layers/colorlayers/mars_texture", false)
 asset.require("./layers/colorlayers/moc_wa_color_utah", true)
 asset.require("./layers/colorlayers/moc_wa_color_sweden", false)
@@ -25,15 +24,14 @@ asset.require("./layers/colorlayers/ctx_blended", false)
 asset.require("./layers/colorlayers/hirise", false)
 asset.require("./layers/colorlayers/hirisels", false)
 
--- Height layers
 asset.require("./layers/heightlayers/mola_utah", false)
 asset.require("./layers/heightlayers/mola_sweden", false)
-asset.require("./layers/heightlayers/MDEM200M", true)
+asset.require("./layers/heightlayers/mdem200m", true)
 asset.require("./layers/heightlayers/hirisels", false)
 
--- Overlays
 asset.require("./layers/overlays/indices", false)
 asset.require("./layers/overlays/size_reference", false)
+
 
 
 asset.meta = {

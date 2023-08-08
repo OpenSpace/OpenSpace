@@ -1,19 +1,21 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("./transforms")
 
+
+
 local Planet = {
   Identifier = "OrcusGlobe",
   Parent = transforms.Position.Identifier,
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
-      RotationAxis = {0.0, 0.0, 1.0},
-      RotationRate = 1.0/(13.188*60.0*60.0)
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 1.0 / (13.188 * 60.0 * 60.0)
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 910.0E3, 910.0E3, 917.0E3 },
+    Radii = { 910000, 910000, 917000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
@@ -21,8 +23,9 @@ local Planet = {
     Name = "Orcus",
     Path = "/Solar System/Dwarf Planets/Orcus",
     Description = "Globe of Orcus"
-  } 
+  }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Planet)
@@ -33,6 +36,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("Planet", Planet)
+
+
 
 asset.meta = {
   Name = "Orcus Globe",

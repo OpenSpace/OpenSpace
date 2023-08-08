@@ -161,12 +161,7 @@ protected:
      * Returns the path for this module, possibly containing ghoul::filesystem::FileSystem
      * path tokens.
      */
-    std::string modulePath() const;
-
-    /**
-     * Returns a const pointer to the module engine
-     */
-    const ModuleEngine* moduleEngine() const;
+    std::filesystem::path modulePath() const;
 };
 
 } // namespace openspace

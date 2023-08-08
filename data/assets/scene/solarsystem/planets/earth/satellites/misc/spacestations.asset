@@ -1,5 +1,7 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
+
+
 local omm = asset.syncedResource({
   Name = "Satellite OMM Data (SpaceStations)",
   Type = "UrlSynchronization",
@@ -9,8 +11,9 @@ local omm = asset.syncedResource({
   Override = true
 })
 
-local satellites = {
-  Identifier = "stations",
+
+local SpaceStations = {
+  Identifier = "SpaceStations",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -23,7 +26,7 @@ local satellites = {
   },
   Tag = { "earth_satellites" },
   GUI = {
-    Name = "SpaceStations",
+    Name = "Space Stations",
     Path = "/Solar System/Planets/Earth/Satellites",
     Description = [[A collection of space stations (including the ISS and China's
       Tiangong), along with certain cubesats and satellite constellations from space
@@ -31,15 +34,16 @@ local satellites = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(SpaceStations)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(SpaceStations)
 end)
 
-asset.export(satellites)
+asset.export(SpaceStations)
 
 
 

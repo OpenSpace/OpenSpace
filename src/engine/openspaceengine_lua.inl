@@ -228,4 +228,11 @@ namespace {
     return res;
 }
 
+/**
+ * Resets the camera position to the same position where the profile originally started
+ */
+[[codegen::luawrap]] void resetCamera() {
+    openspace::setCameraFromProfile(*openspace::global::profile);
+}
+
 #include "openspaceengine_lua_codegen.cpp"

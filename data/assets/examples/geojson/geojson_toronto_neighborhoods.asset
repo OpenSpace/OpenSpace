@@ -1,5 +1,6 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local earthIdentifier = earth.Earth.Identifier
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
 
 local data = asset.syncedResource({
   Name = "GeoJSON Example Toronto Neighborhoods",
@@ -8,27 +9,30 @@ local data = asset.syncedResource({
   Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/toronto_neighborhoods.geojson"
 })
 
-local Example_Toronto = {
+
+local ExampleToronto = {
   Identifier = "Toronto-Neighborhoods",
   File = data .. "toronto_neighborhoods.geojson",
   HeightOffset = 1000.0,
   DefaultProperties = {
     Color = { 0.0, 1.0, 0.0 },
     FillColor = { 0.2, 0.33, 0.2 },
-    LineWidth = 2.0,
+    LineWidth = 2.0
   },
   Name = "Toronto Neighbourhoods"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Toronto)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExampleToronto)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Toronto)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExampleToronto)
 end)
 
-asset.export(Example_Toronto)
+asset.export(ExampleToronto)
+
 
 
 asset.meta = {

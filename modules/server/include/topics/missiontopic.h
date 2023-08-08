@@ -36,7 +36,7 @@ namespace openspace {
 class MissionTopic : public Topic {
 public:
     MissionTopic() = default;
-    virtual ~MissionTopic() = default;
+    ~MissionTopic() override = default;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

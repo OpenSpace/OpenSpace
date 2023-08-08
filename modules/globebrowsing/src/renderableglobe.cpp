@@ -987,7 +987,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 {
     ZoneScoped;
 
-
     if (_layerManagerDirty) {
         _layerManager.update();
         _layerManagerDirty = false;
@@ -1001,8 +1000,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             lgs.end(),
             0,
             [](int lhs, LayerGroup* lg) {
-            return lhs + static_cast<int>(lg->activeLayers().size());
-        }
+                return lhs + static_cast<int>(lg->activeLayers().size());
+            }
         );
         _nLayersIsDirty = false;
     }
@@ -1112,8 +1111,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     _iterationsOfUnavailableData =
         (_allChunksAvailable ? 0 : _iterationsOfUnavailableData + 1);
 
-
-
     //
     // Setting uniforms that don't change between chunks but are view dependent
     //
@@ -1180,8 +1177,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         );
         _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
-
-
 
     // Local shader
     _localRenderer.program->setUniform(
@@ -1282,7 +1277,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     }
     _localRenderer.program->deactivate();
 
-    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+    if (global::sessionRecording->isSavingFramesDuringPlayback() &&
+        global::sessionRecording->shouldWaitForTileLoading())
+    {
         // If our tile cache is very full, we assume we need to adjust the level of detail
         // dynamically to not keep rendering frames with unavailable data
         // After certain number of iterations(_debugProperties.dynamicLodIterationCount)
@@ -1438,7 +1435,6 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     // Send the matrix inverse to the fragment for the global and local shader (JCC)
     const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
     const glm::dmat4 modelViewTransform = viewTransform * _cachedModelTransform;
-
 
     std::array<glm::dvec3, 4> cornersCameraSpace;
     std::array<glm::dvec3, 4> cornersModelSpace;
@@ -1995,7 +1991,12 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 
         const glm::uvec3 dimensions = tileTexture->dimensions();
 
-        const glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
+        glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
+        // @TODO (emmbr, 2023-06-14) This 0.5f offset was added as a bandaid for issue
+        // #2696. It seems to improve the behavior, but I am not certain of why. And the
+        // underlying problem is still there and should at some point be looked at again
+        samplePos -= glm::vec2(0.5f);
+
         glm::uvec2 samplePos00 = samplePos;
         samplePos00 = glm::clamp(
             samplePos00,

@@ -1,5 +1,7 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
+
+
 local omm = asset.syncedResource({
   Name = "Satellite OMM Data (Aqua)",
   Type = "UrlSynchronization",
@@ -8,6 +10,7 @@ local omm = asset.syncedResource({
   Filename = "Aqua.txt",
   Override = true
 })
+
 
 local Aqua = {
   Identifier = "Aqua",
@@ -82,7 +85,8 @@ local AquaLabel = {
   }
 }
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   local a = openspace.space.readKeplerFile(omm .. "Aqua.txt", "OMM")
   AquaTrail.Renderable.Period = a[1].Period / (60 * 60 * 24)
 
@@ -91,7 +95,7 @@ asset.onInitialize(function ()
   openspace.addSceneGraphNode(AquaLabel)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(AquaLabel)
   openspace.removeSceneGraphNode(AquaTrail)
   openspace.removeSceneGraphNode(Aqua)
@@ -100,6 +104,8 @@ end)
 asset.export(Aqua)
 asset.export(AquaTrail)
 asset.export(AquaLabel)
+
+
 
 asset.meta = {
   Name = "Aqua",

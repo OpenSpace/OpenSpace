@@ -1,89 +1,92 @@
-local ctx_enable_action = {
-  Identifier = "os.mars.ctx.fadein",
+local CTXFadeIn = {
+  Identifier = "os.mars.CTXFadeIn",
   Name = "Fade in CTX",
   Command = [[
 openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Enabled", true)
-openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Settings.Opacity", 0)
-openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Settings.Opacity", 1, 2.0)]],
+openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Settings.Opacity", 0.0)
+openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Settings.Opacity", 1.0, 2.0)]],
   Documentation = "Enables and fades in CTX layer for Mars",
   GuiPath = "/Solar System/Mars",
   IsLocal = true
 }
-asset.export("ctx_enable_action", ctx_enable_action.Identifier)
 
-local ctx_disable_action = {
-  Identifier = "os.mars.ctx.fadedout",
+local CTXFadeOut = {
+  Identifier = "os.mars.CTXFadeOut",
   Name = "Fade out CTX layer",
-  Command = [[openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Settings.Opacity", 0, 2.0)]],
+  Command = [[openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Settings.Opacity", 0.0, 2.0)]],
   Documentation = "Fade out CTX",
   GuiPath = "/Solar System/Mars",
   IsLocal = true
 }
-asset.export("ctx_disable_action", ctx_disable_action.Identifier)
 
-local hirise_enable_action = {
-  Identifier = "os.mars.hirise.fadein",
+local HiriseFadeIn = {
+  Identifier = "os.mars.HiriseFadeIn",
   Name = "Fade in HiRISE",
   Command = [[
 openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Enabled", true)
-openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0)
-openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1, 2.0)]],
+openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0)
+openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0)]],
   Documentation = "Enables and fades in HiRise layer for Mars",
   GuiPath = "/Solar System/Mars",
   IsLocal = true
 }
-asset.export("hirise_enable_action", hirise_enable_action.Identifier)
 
-local hirise_disable_action = {
-  Identifier = "os.mars.hirise.fadedout",
+local HiriseFadeOut = {
+  Identifier = "os.mars.HiriseFadeOut",
   Name = "Fade out HiRISE",
-  Command = [[openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0, 2.0)]],
+  Command = [[openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0, 2.0)]],
   Documentation = "Fade out HiRISE layer for Mars",
   GuiPath = "/Solar System/Mars",
   IsLocal = true
 }
-asset.export("hirise_disable_action", hirise_disable_action.Identifier)
 
-local lshirise_enable_action = {
-  Identifier = "os.mars.lshirise.fadein",
+local LocalSetHiriseFadeIn = {
+  Identifier = "os.mars.LocalSetHiriseFadeIn",
   Name = "Fade in HiRISE local set",
   Command = [[
 openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Enabled", true)
 openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", true)
-openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Settings.Opacity", 0)
-openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Settings.Opacity", 1, 2.0)]],
+openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Settings.Opacity", 0.0)
+openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Settings.Opacity", 1.0, 2.0)]],
   Documentation = "Enables and fades in HiRise local set layers for Mars (including height)",
   GuiPath = "/Solar System/Mars",
   IsLocal = true
 }
-asset.export("lshirise_enable_action", lshirise_enable_action.Identifier)
 
-local lshirise_disable_action = {
-  Identifier = "os.mars.lshirise.fadedout",
+local LocalSetHiriseFadeOut = {
+  Identifier = "os.mars.LocalSetHiriseFadeOut",
   Name = "Fade out HiRISE local set",
-  Command = [[openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Settings.Opacity", 0, 2.0)
-openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", false)]],
+  Command = [[
+openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Settings.Opacity", 0.0, 2.0)
+openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", false)
+]],
   Documentation = "Fade out HiRISE local set layer for Mars",
   GuiPath = "/Solar System/Mars",
   IsLocal = true
 }
-asset.export("lshirise_disable_action", lshirise_disable_action.Identifier)
 
 
 asset.onInitialize(function()
-  openspace.action.registerAction(ctx_enable_action)
-  openspace.action.registerAction(ctx_disable_action)
-  openspace.action.registerAction(hirise_enable_action)
-  openspace.action.registerAction(hirise_disable_action)
-  openspace.action.registerAction(lshirise_enable_action)
-  openspace.action.registerAction(lshirise_disable_action)
+  openspace.action.registerAction(CTXFadeIn)
+  openspace.action.registerAction(CTXFadeOut)
+  openspace.action.registerAction(HiriseFadeIn)
+  openspace.action.registerAction(HiriseFadeOut)
+  openspace.action.registerAction(LocalSetHiriseFadeIn)
+  openspace.action.registerAction(LocalSetHiriseFadeOut)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(lshirise_disable_action)
-  openspace.action.removeAction(lshirise_enable_action)
-  openspace.action.removeAction(hirise_disable_action)
-  openspace.action.removeAction(hirise_enable_action)
-  openspace.action.removeAction(ctx_disable_action)
-  openspace.action.removeAction(ctx_enable_action)
+  openspace.action.removeAction(LocalSetHiriseFadeOut)
+  openspace.action.removeAction(LocalSetHiriseFadeIn)
+  openspace.action.removeAction(HiriseFadeOut)
+  openspace.action.removeAction(HiriseFadeIn)
+  openspace.action.removeAction(CTXFadeOut)
+  openspace.action.removeAction(CTXFadeIn)
 end)
+
+asset.export("CTXFadeIn", CTXFadeIn.Identifier)
+asset.export("CTXFadeOut", CTXFadeOut.Identifier)
+asset.export("HiriseFadeIn", HiriseFadeIn.Identifier)
+asset.export("HiriseFadeOut", HiriseFadeOut.Identifier)
+asset.export("LocalSetHiriseFadeIn", LocalSetHiriseFadeIn.Identifier)
+asset.export("LocalSetHiriseFadeOut", LocalSetHiriseFadeOut.Identifier)

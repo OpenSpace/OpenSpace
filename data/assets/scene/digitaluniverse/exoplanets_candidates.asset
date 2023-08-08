@@ -1,0 +1,68 @@
+local textures = asset.syncedResource({
+    Name = "Exoplanets Candidates Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_exoplanets_candidates_textures",
+    Version = 1
+})
+
+local speck = asset.syncedResource({
+  Name = "Exoplanets Candidates Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_exoplanets_candidates_speck",
+  Version = 1
+})
+
+
+local Object = {
+  Identifier = "PlanetaryCandidates",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 1.0, 1.0, 0.0 },
+    Opacity = 0.99,
+    ScaleFactor = 410.0,
+    File = speck .. "exoplanet_candidates.speck",
+    Unit = "pc",
+    Texture = textures .. "halo.png",
+    CorrectionSizeEndDistance = 15.86,
+    CorrectionSizeFactor = 8.59,
+    BillboardMinMaxSize = { 0.0, 30.0 },
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "Planetary Candidates",
+    Path = "/Milky Way/Exoplanets",
+    Description = [[Census: 6,082 stars with candidate planetary systems. DU Version 11.8.
+      <br> The exoplanet candidate stars are likely hosts for exoplanets. These are stars
+      plucked from NASA's Kepler and TESS space telescopes. The Kepler mission was
+      designed to stare at one spot, roughly twelve degrees across, in the constellation
+      Cygnus. By staring at one spot, the spacecraft could monitor over 500,000 stars in
+      that field for subtle variations in brightness. The data included here are the stars
+      that are considered good candidates to host planets. Rather than represent them
+      photo-realistically, with accurate colors, we choose to visualize them as generic,
+      pure yellow stars. (Description from URL) <br><br> Data Reference: NASA Exoplanet
+      Archive (CalTech/NASA)]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Planetary Candidates",
+  Version = "2.1",
+  Description = "Digital Universe asset for Planetary Candidates",
+  Author = "Brian Abbott, Emily Rice, and Jason No (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

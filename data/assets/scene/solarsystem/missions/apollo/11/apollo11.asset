@@ -1,14 +1,13 @@
 asset.require("spice/base")
 asset.require("../actions")
 asset.require("./actions")
-
 local sun = asset.require("scene/solarsystem/sun/sun")
-local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local descentKeyframes = asset.require("./lem_descent")
+local descentRotationKeyframes = asset.require("./lem_descent_rotation")
+local kernels = asset.require("./kernels")
 
-local descentKeyframes = asset.require("./lem_descent.asset")
-local descentRotationKeyframes = asset.require("./lem_descent_rotation.asset")
 
-local kernels = asset.require("./kernels").kernels
 
 local models = asset.syncedResource({
   Name = "Apollo Models",
@@ -17,7 +16,7 @@ local models = asset.syncedResource({
   Version = 1
 })
 
-local lem_model = asset.syncedResource({
+local lemModel = asset.syncedResource({
   Name = "Apollo Lem Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_lem_model",
@@ -26,12 +25,12 @@ local lem_model = asset.syncedResource({
 
 
 --landing - 1969-07-20T20:17:40
-local apolloSpiceId = -911
-local apolloLemSpiceId = -911500
+local ApolloSpiceId = -911
+local ApolloLemSpiceId = -911500
 
 local Apollo11Position = {
   Identifier = "Apollo11Position",
-  Parent = moon_transforms.Moon.Identifier,
+  Parent = moonTransforms.Moon.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1969 JUL 19 19:38:29.183",
@@ -40,10 +39,9 @@ local Apollo11Position = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
+      Target = ApolloSpiceId,
       Observer = "MOON",
-      Frame = "MOON_ME",
-      Kernels = kernels
+      Frame = "MOON_ME"
     }
   },
   GUI = {
@@ -87,15 +85,14 @@ local Apollo11Model = {
 
 local Apollo11MoonTrail = {
   Identifier = "Apollo11MoonTrail",
-  Parent = moon_transforms.Moon.Identifier,
+  Parent = moonTransforms.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
+      Target = ApolloSpiceId,
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels
+      Frame = "IAU_MOON"
     },
     Color = { 0.180000,0.510000,0.750000 },
     StartTime = "1969 JUL 19 19:38:29.183",
@@ -115,14 +112,13 @@ local lemTranslation = {
   Type = "TimelineTranslation",
   Keyframes = {
     -- 20:14:30 is an arbitrary cutoff, but last 4 minutes data in descentKeyframes
-    -- begins at 20.14.40. Due to linear interpolation, we will get
+    -- begins at 20:14:40. Due to linear interpolation, we will get
     -- a 10s linear transition to the location where the descentKeyframes start.
     ["1969 JUL 20 20:14:30"] = {
       Type = "SpiceTranslation",
-      Target = apolloLemSpiceId,
+      Target = ApolloLemSpiceId,
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels
+      Frame = "IAU_MOON"
     },
     ["1969 JUL 20 20:14:40"] = {
       Type = "TimelineTranslation",
@@ -140,7 +136,7 @@ local lemRotation = {
 
 local Apollo11LemTrail = {
   Identifier = "Apollo11LemTrail",
-  Parent = moon_transforms.Moon.Identifier,
+  Parent = moonTransforms.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = lemTranslation,
@@ -149,7 +145,7 @@ local Apollo11LemTrail = {
     EndTime = "1969 JUL 20 20:17:46.183",
     SampleInterval = 2,
     EnableFade = false,
-    Enabled = false,
+    Enabled = false
   },
   GUI = {
     Name = "Apollo 11 Lunar Lander Trail",
@@ -159,7 +155,7 @@ local Apollo11LemTrail = {
 
 local Apollo11LemPosition = {
   Identifier = "Apollo11LemPosition",
-  Parent = moon_transforms.Moon.Identifier,
+  Parent = moonTransforms.Moon.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1969 JUL 20 19:10:25.183"
@@ -191,9 +187,9 @@ local Apollo11LemDescentModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model .. "lmremoved.obj",
+    GeometryFile = lemModel .. "lmremoved.obj",
     SpecularIntensity = 0.0,
-    RotationVector = { 273.750,28.0,309.85 },
+    RotationVector = { 273.750, 28.0, 309.85 },
     LightSources = {
       sun.LightSource,
       {
@@ -224,9 +220,9 @@ local Apollo11LemLandedModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model .. "LM-2_ver2clean.obj",
+    GeometryFile = lemModel .. "LM-2_ver2clean.obj",
     SpecularIntensity = 0.0,
-    RotationVector = { 273.750,28.0,309.85 },
+    RotationVector = { 273.750, 28.0, 309.85 },
     LightSources = {
       sun.LightSource,
       {
@@ -242,29 +238,35 @@ local Apollo11LemLandedModel = {
   }
 }
 
-local nodes = {
-  Apollo11Position,
-  Apollo11LemPosition,
-  Apollo11Model,
-  Apollo11LemDescentModel,
-  Apollo11LemLandedModel,
-  Apollo11MoonTrail,
-  Apollo11LemTrail,
-}
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernels.kernels)
+
+  openspace.addSceneGraphNode(Apollo11Position)
+  openspace.addSceneGraphNode(Apollo11LemPosition)
+  openspace.addSceneGraphNode(Apollo11Model)
+  openspace.addSceneGraphNode(Apollo11LemDescentModel)
+  openspace.addSceneGraphNode(Apollo11LemLandedModel)
+  openspace.addSceneGraphNode(Apollo11MoonTrail)
+  openspace.addSceneGraphNode(Apollo11LemTrail)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
-  end
+  openspace.removeSceneGraphNode(Apollo11LemTrail)
+  openspace.removeSceneGraphNode(Apollo11MoonTrail)
+  openspace.removeSceneGraphNode(Apollo11LemLandedModel)
+  openspace.removeSceneGraphNode(Apollo11LemDescentModel)
+  openspace.removeSceneGraphNode(Apollo11Model)
+  openspace.removeSceneGraphNode(Apollo11LemPosition)
+  openspace.removeSceneGraphNode(Apollo11Position)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Apollo11Position)
+asset.export(Apollo11LemPosition)
+asset.export(Apollo11Model)
+asset.export(Apollo11LemDescentModel)
+asset.export(Apollo11LemLandedModel)
+asset.export(Apollo11MoonTrail)
+asset.export(Apollo11LemTrail)

@@ -44,6 +44,7 @@
 #include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/helper.h>
@@ -938,6 +939,8 @@ void OpenSpaceEngine::deinitializeGL() {
 
     LTRACE("OpenSpaceEngine::deinitializeGL(begin)");
 
+    viewportChanged();
+
     // We want to render an image informing the user that we are shutting down
     global::renderEngine->renderEndscreen();
     global::windowDelegate->swapBuffer();
@@ -1039,47 +1042,34 @@ void OpenSpaceEngine::writeDocumentation() {
 
     // Start the async requests as soon as possible so they are finished when we need them
     std::future<nlohmann::json> settings = std::async(
-        &properties::PropertyOwner::generateJsonJson,
+        &properties::PropertyOwner::generateJson,
         global::rootPropertyOwner
     );
 
     std::future<nlohmann::json> scene = std::async(
-        &properties::PropertyOwner::generateJsonJson,
+        &properties::PropertyOwner::generateJson,
         _scene.get()
     );
-
-
-    DocEng.addHandlebarTemplates(global::scriptEngine->templatesToRegister());
-    DocEng.addHandlebarTemplates(FactoryManager::ref().templatesToRegister());
-    DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
-
-    nlohmann::json scripting;
-    scripting["Name"] = "Scripting API";
-    scripting["Data"] = global::scriptEngine->generateJsonJson();
-
-    nlohmann::json factory;
-    factory["Name"] = "Asset Types";
-    factory["Data"] = FactoryManager::ref().generateJsonJson();
-
-    nlohmann::json keybindings;
-    keybindings["Name"] = "Keybindings";
-    keybindings["Keybindings"] = global::keybindingManager->generateJsonJson();
-
     SceneLicenseWriter writer;
-    nlohmann::json license;
-    license["Name"] = "Licenses";
-    license["Data"] = writer.generateJsonJson();
 
-    nlohmann::json sceneProperties;
-    sceneProperties["Name"] = "Settings";
-    sceneProperties["Data"] = settings.get();
+    nlohmann::json scripting = global::scriptEngine->generateJson();
+    nlohmann::json factory = FactoryManager::ref().generateJson();
+    nlohmann::json keybindings = global::keybindingManager->generateJson();
+    nlohmann::json license = writer.generateJsonGroupedByLicense();
+    nlohmann::json sceneProperties = settings.get();
+    nlohmann::json sceneGraph = scene.get();
 
-    nlohmann::json sceneGraph;
-    sceneGraph["Name"] = "Scene";
-    sceneGraph["Data"] = scene.get();
+    sceneProperties["name"] = "Settings";
+    sceneGraph["name"] = "Scene";
 
-    nlohmann::json documentation = { 
-        sceneGraph, sceneProperties, keybindings, license, scripting, factory 
+    // Add this here so that the generateJson function is the same as before to ensure
+    // backwards compatibility
+    nlohmann::json scriptingResult;
+    scriptingResult["name"] = "Scripting API";
+    scriptingResult["data"] = scripting;
+
+    nlohmann::json documentation = {
+        sceneGraph, sceneProperties, keybindings, license, scriptingResult, factory
     };
 
     nlohmann::json result;
@@ -1184,15 +1174,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     bool master = global::windowDelegate->isMaster();
     global::syncEngine->postSynchronization(SyncEngine::IsMaster(master));
 
-    // This probably doesn't have to be done here every frame, but doing it earlier gives
-    // weird results when using side_by_side stereo --- abock
-    using FR = ghoul::fontrendering::FontRenderer;
-    FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
-
-    FR::defaultProjectionRenderer().setFramebufferSize(
-        global::renderEngine->renderingResolution()
-    );
-
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
             global::eventEngine->publishEvent<events::EventApplicationShutdown>(
@@ -1244,12 +1225,25 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(end)");
 }
 
+void OpenSpaceEngine::viewportChanged() {
+    // Needs to be updated since each render call potentially targets a different
+    // window and/or viewport
+    using FR = ghoul::fontrendering::FontRenderer;
+    FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
+
+    FR::defaultProjectionRenderer().setFramebufferSize(
+        global::renderEngine->renderingResolution()
+    );
+}
+
 void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
     ZoneScoped;
     TracyGpuZone("Render");
     LTRACE("OpenSpaceEngine::render(begin)");
+
+    viewportChanged();
 
     global::renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
 
@@ -1266,6 +1260,8 @@ void OpenSpaceEngine::drawOverlays() {
     ZoneScoped;
     TracyGpuZone("Draw2D");
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
+
+    viewportChanged();
 
     const bool isGuiWindow =
         global::windowDelegate->hasGuiWindow() ?
@@ -1464,7 +1460,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         _shutdown.inShutdown = false;
         global::eventEngine->publishEvent<events::EventApplicationShutdown>(
             events::EventApplicationShutdown::State::Aborted
-            );
+        );
     }
 }
 
@@ -1694,7 +1690,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::CreateSingleColorImage,
             codegen::lua::IsMaster,
             codegen::lua::Version,
-            codegen::lua::ReadCSVFile
+            codegen::lua::ReadCSVFile,
+            codegen::lua::ResetCamera
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
@@ -1721,19 +1718,30 @@ void setCameraFromProfile(const Profile& p) {
         return;
     }
 
+    auto checkNodeExists = [](const std::string& node) {
+        if (global::renderEngine->scene()->sceneGraphNode(node) == nullptr) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error when setting camera from profile. Could not find node '{}'", node
+            ));
+        }
+    };
+
     std::visit(
-        overloaded{
-            [](const Profile::CameraNavState& navStateProfile) {
+        overloaded {
+            [&checkNodeExists](const Profile::CameraNavState& navStateProfile) {
                 interaction::NavigationState nav;
                 nav.anchor = navStateProfile.anchor;
-                if (navStateProfile.aim.has_value()) {
+                checkNodeExists(nav.anchor);
+                if (navStateProfile.aim.has_value() && !(*navStateProfile.aim).empty()) {
                     nav.aim = navStateProfile.aim.value();
+                    checkNodeExists(nav.aim);
                 }
                 if (navStateProfile.referenceFrame.empty()) {
                     nav.referenceFrame = nav.anchor;
                 }
                 else {
                     nav.referenceFrame = navStateProfile.referenceFrame;
+                    checkNodeExists(navStateProfile.referenceFrame);
                 }
                 nav.position = navStateProfile.position;
                 if (navStateProfile.up.has_value()) {
@@ -1747,11 +1755,12 @@ void setCameraFromProfile(const Profile& p) {
                 }
                 global::navigationHandler->setNavigationStateNextFrame(nav);
             },
-            [](const Profile::CameraGoToGeo& geo) {
-                // Instead of direct calls to navigation state code, lua commands with
+            [&checkNodeExists](const Profile::CameraGoToGeo& geo) {
+                // Instead of direct calls to navigation state code, Lua commands with
                 // globebrowsing goToGeo are used because this prevents a module
                 // dependency in this core code. Eventually, goToGeo will be incorporated
                 // in the OpenSpace core and this code will change.
+                checkNodeExists(geo.anchor);
                 std::string geoScript = fmt::format("openspace.globebrowsing.goToGeo"
                     "([[{}]], {}, {}", geo.anchor, geo.latitude, geo.longitude);
                 if (geo.altitude.has_value()) {
@@ -1762,6 +1771,18 @@ void setCameraFromProfile(const Profile& p) {
                     geoScript,
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
+            },
+            [&checkNodeExists](const Profile::CameraGoToNode& node) {
+                using namespace interaction;
+
+                checkNodeExists(node.anchor);
+
+                NodeCameraStateSpec spec = {
+                    .identifier = node.anchor,
+                    .height = node.height,
+                    .useTargetUpDirection = true
+                };
+                global::navigationHandler->setCameraFromNodeSpecNextFrame(spec);
             }
         },
         p.camera.value()

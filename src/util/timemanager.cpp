@@ -74,8 +74,10 @@ namespace {
         "when interpolating"
     };
 
-    constexpr std::string_view DeltaTimeStepsKeybindsGuiPath = "/Time/Simulation Speed/Steps";
-}
+    constexpr std::string_view DeltaTimeStepsGuiPath = "/Time/Simulation Speed/Steps";
+
+    constexpr std::string_view DeltaTimeActionPrefix = "core.time.delta_time";
+} // namespace
 
 namespace openspace {
 
@@ -466,6 +468,7 @@ void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
     _deltaTimeSteps = std::move(deltaTimes);
     _deltaTimeStepsChanged = true;
 
+    clearDeltaTimesKeybindings();
     addDeltaTimesKeybindings();
 }
 
@@ -500,7 +503,7 @@ void TimeManager::addDeltaTimesKeybindings() {
     auto addDeltaTimeKeybind = [this](Key key, KeyModifier mod, double step) {
         const std::string s = fmt::format("{:.0f}", step);
 
-        std::string identifier = fmt::format("core.time.delta_time.{}", s);
+        std::string identifier = fmt::format("{}.{}", DeltaTimeActionPrefix, s);
         interaction::Action action;
         action.identifier = identifier;
         action.command = fmt::format("openspace.time.interpolateDeltaTime({})", s);
@@ -508,7 +511,7 @@ void TimeManager::addDeltaTimesKeybindings() {
             "Setting the simulation speed to {} seconds per realtime second", s
         );
         action.name = fmt::format("Set: {}", s);
-        action.guiPath = DeltaTimeStepsKeybindsGuiPath;
+        action.guiPath = DeltaTimeStepsGuiPath;
         action.isLocal = interaction::Action::IsLocal::Yes;
         global::actionManager->registerAction(std::move(action));
         global::keybindingManager->bindKey(key, mod, std::move(identifier));
@@ -551,6 +554,15 @@ void TimeManager::addDeltaTimesKeybindings() {
 }
 
 void TimeManager::clearDeltaTimesKeybindings() {
+    // Iterate over all of the registered actions with the common prefix that we created
+    // in the addDeltaTimesKeybindings function
+    std::vector<interaction::Action> actions = global::actionManager->actions();
+    for (const interaction::Action& action : actions) {
+        if (action.identifier.starts_with(DeltaTimeActionPrefix)) {
+            global::actionManager->removeAction(action.identifier);
+        }
+    }
+
     for (const KeyWithModifier& kb : _deltaTimeStepKeybindings) {
         // Check if there are multiple keys bound to the same key
         auto bindings = global::keybindingManager->keyBinding(kb);
@@ -929,13 +941,17 @@ void TimeManager::setTimeFromProfile(const Profile& p) {
     if (p.time.has_value()) {
         switch (p.time->type) {
             case Profile::Time::Type::Relative:
-                Time::setTimeRelativeFromProfile(p.time->value);
+            {
+                std::string t = Time::currentWallTime();
+                std::variant<std::string, double> t2 =
+                    Time::advancedTime(t, p.time->value);
+                ghoul_assert(std::holds_alternative<std::string>(t2), "Wrong type");
+                _currentTime.data() = Time(std::get<std::string>(t2));
                 break;
-
+            }
             case Profile::Time::Type::Absolute:
-                Time::setTimeAbsoluteFromProfile(p.time->value);
+                _currentTime.data() = Time(p.time->value);
                 break;
-
             default:
                 throw ghoul::MissingCaseException();
         }
@@ -944,8 +960,7 @@ void TimeManager::setTimeFromProfile(const Profile& p) {
     }
     else {
         // No value was specified so we are using 'now' instead
-        std::string now = std::string(Time::now().UTC());
-        Time::setTimeAbsoluteFromProfile(now);
+        _currentTime.data() = Time::now();
     }
 }
 

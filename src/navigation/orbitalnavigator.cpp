@@ -244,7 +244,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ConstantVelocityFlight = {
         "ConstantVelocityFlight",
-        "Constant Velocitry Flight",
+        "Constant Velocity Flight",
         "If this value is enabled, the camera motion will not be affected by the "
         "distance of the camera to the surface of a planet. When enabling this setting "
         "consider adjusting the mouse sensitivity to a lower value",
@@ -435,9 +435,9 @@ OrbitalNavigator::LimitZoom::LimitZoom()
     , enableZoomOutLimit(EnabledMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
-        4e+27,
+        4e+27f,
         50.f,
-        4e+27
+        4e+27f
     )
 {
     // Min
@@ -724,7 +724,7 @@ void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputSt
         _movementTimer = _idleBehavior.idleWaitTime;
     }
     else if (!cameraLocationChanged) {
-        tickMovementTimer(deltaTime);
+        tickMovementTimer(static_cast<float>(deltaTime));
     }
 }
 
@@ -1711,7 +1711,8 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
 
     // Adjustment for if the camera is outside the max distance
     // Only apply if the min adjustment not already applied
-    if (maxHeight > 0.0 && std::abs(adjustment) < std::numeric_limits<double>::epsilon()) {
+    if (maxHeight > 0.0 && std::abs(adjustment) < std::numeric_limits<double>::epsilon())
+    {
         adjustment = glm::min(maxHeight - surfaceToCameraSigned, 0.0);
     }
 
@@ -1924,12 +1925,12 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime,
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
 
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-    const glm::dvec3 axisInWorldCoords =
-        glm::dmat3(modelTransform) * glm::normalize(axis);
+    const glm::dvec3 axisInWorldSpace =
+        glm::normalize(glm::dmat3(modelTransform) * glm::normalize(axis));
 
     // Compute rotation to be applied around the axis
     double angle = deltaTime * speedScale;
-    const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldCoords);
+    const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldSpace);
 
     // Rotate the position vector from the center to camera and update position
     const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();

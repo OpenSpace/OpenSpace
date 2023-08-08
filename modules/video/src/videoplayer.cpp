@@ -60,13 +60,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
         "GoToStart",
         "Go To Start",
-        "Go to start in video"
+        "Sets the time to the beginning of the video and pauses it."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
-        "Reset",
-        "Reset",
-        "Reset video"
+    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+        "Reload",
+        "Reload",
+        "Reloads the video and creates a new texture. This might be useful in case there "
+        "was an error loading the video."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
@@ -89,11 +90,11 @@ namespace {
         "'YYYY MM DD hh:mm:ss'."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PlaybackModeInfo = {
-        "PlaybackMode",
-        "Playback Mode",
-        "Determines the way the video should be played. The start and end time of the "
-        "video can be set, or the video can be played as a loop in real time."
+    constexpr openspace::properties::Property::PropertyInfo LoopVideoInfo = {
+        "LoopVideo",
+        "Loop Video",
+        "If checked, the video is continues playing from the start when it reaches the "
+        "end of the video."
     };
 
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
@@ -102,6 +103,9 @@ namespace {
 
         // [[codegen::verbatim(AudioInfo.description)]]
         std::optional<bool> playAudio;
+
+        // [[codegen::verbatim(LoopVideoInfo.description)]]
+        std::optional<bool> loopVideo;
 
         // [[codegen::verbatim(StartTimeInfo.description)]]
         std::optional<std::string> startTime [[codegen::datetime()]];
@@ -246,19 +250,33 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     , _play(PlayInfo)
     , _pause(PauseInfo)
     , _goToStart(GoToStartInfo)
-    , _reset(ResetInfo)
+    , _reload(ReloadInfo)
     , _playAudio(AudioInfo, false)
+    , _loopVideo(LoopVideoInfo, true)
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _videoFile = p.video;
+    _loopVideo = p.loopVideo.value_or(_loopVideo);
 
-    _reset.onChange([this]() { reset(); });
-    addProperty(_reset);
-    _playAudio.onChange([this]() { toggleMute(); });
-    addProperty(_playAudio);
+    _reload.onChange([this]() { reload(); });
+    addProperty(_reload);
+
+    if (p.playbackMode.has_value()) {
+        switch (*p.playbackMode) {
+        case Parameters::PlaybackMode::RealTimeLoop:
+            _playbackMode = PlaybackMode::RealTimeLoop;
+            break;
+        case Parameters::PlaybackMode::MapToSimulationTime:
+            _playbackMode = PlaybackMode::MapToSimulationTime;
+            break;
+        default:
+            LERROR("Missing playback mode in VideoTileProvider");
+            throw ghoul::MissingCaseException();
+        }
+    }
 
     if (_playbackMode == PlaybackMode::RealTimeLoop) {
         // Video interaction. Only valid for real time looping
@@ -268,20 +286,14 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         addProperty(_pause);
         _goToStart.onChange([this]() { goToStart(); });
         addProperty(_goToStart);
-    }
-
-    if (p.playbackMode.has_value()) {
-        switch (*p.playbackMode) {
-            case Parameters::PlaybackMode::RealTimeLoop:
-                _playbackMode = PlaybackMode::RealTimeLoop;
-                break;
-            case Parameters::PlaybackMode::MapToSimulationTime:
-                _playbackMode = PlaybackMode::MapToSimulationTime;
-                break;
-            default:
-                LERROR("Missing playback mode in VideoTileProvider");
-                throw ghoul::MissingCaseException();
-        }
+        _loopVideo.onChange([this]() {
+            std::string newValue = _loopVideo ? "inf" : "no";
+            setPropertyAsyncMpv(newValue.c_str(), MpvKey::Loop);
+        });
+        addProperty(_loopVideo);
+        // Audio only makes sense when the video is playing in real time
+        _playAudio.onChange([this]() { toggleMute(); });
+        addProperty(_playAudio);
     }
 
     if (_playbackMode == PlaybackMode::MapToSimulationTime) {
@@ -300,7 +312,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     keys = {
         { MpvKey::Pause, "pause" },
-        { MpvKey::Params, "video-params" },
         { MpvKey::Time, "time-pos" },
         { MpvKey::Duration, "duration" },
         { MpvKey::Height, "height" },
@@ -309,12 +320,12 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::Fps, "container-fps" },
         { MpvKey::IsSeeking, "seeking" },
         { MpvKey::Mute, "mute" },
-        { MpvKey::Seek, "seek" }
+        { MpvKey::Seek, "seek" },
+        { MpvKey::Loop, "loop-file" }
     };
 
     formats = {
         { MpvKey::Pause, MPV_FORMAT_FLAG },
-        { MpvKey::Params, MPV_FORMAT_NODE },
         { MpvKey::Time, MPV_FORMAT_DOUBLE },
         { MpvKey::Duration, MPV_FORMAT_DOUBLE },
         { MpvKey::Height, MPV_FORMAT_INT64 },
@@ -322,11 +333,15 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::Meta, MPV_FORMAT_NODE },
         { MpvKey::Fps, MPV_FORMAT_DOUBLE },
         { MpvKey::IsSeeking, MPV_FORMAT_FLAG },
-        { MpvKey::Mute, MPV_FORMAT_STRING }
+        { MpvKey::Mute, MPV_FORMAT_STRING },
+        { MpvKey::Loop, MPV_FORMAT_STRING }
     };
 }
 
-VideoPlayer::~VideoPlayer() {}
+VideoPlayer::~VideoPlayer() {
+    global::syncEngine->removeSyncable(this);
+    destroy();
+}
 
 void VideoPlayer::pause() {
     int isPaused = 1;
@@ -340,22 +355,6 @@ void VideoPlayer::play() {
 
 void VideoPlayer::goToStart() {
     seekToTime(0.0);
-}
-
-void VideoPlayer::stepFrameForward() {
-    if (!_isInitialized) {
-        return;
-    }
-    const char* cmd[] = { "frame-step", nullptr };
-    commandAsyncMpv(cmd);
-}
-
-void VideoPlayer::stepFrameBackward() {
-    if (!_isInitialized) {
-        return;
-    }
-    const char* cmd[] = { "frame-back-step", nullptr };
-    commandAsyncMpv(cmd);
 }
 
 void VideoPlayer::initialize() {
@@ -373,12 +372,19 @@ void VideoPlayer::initializeMpv() {
     // Avoiding async calls in uninitialized state
 
     // Loop video
-    // https://mpv.io/manual/master/#options-loop
-    setPropertyStringMpv("loop", "");
+    if (_loopVideo && _playbackMode == PlaybackMode::RealTimeLoop) {
+        // https://mpv.io/manual/master/#options-loop
+        setPropertyStringMpv("loop-file", "inf");
+    }
 
     // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
     // https://mpv.io/manual/master/#options-gpu-api
     setPropertyStringMpv("gpu-api", "opengl");
+
+    // Keep open the file. Even when we reach EOF we want to keep the video player
+    // running, in case the user starts the video from the beginning again
+    // https://mpv.io/manual/stable/#options-keep-open
+    setPropertyStringMpv("keep-open", "yes");
 
     // Enable hardware decoding
     // https://mpv.io/manual/master/#options-hwdec
@@ -403,9 +409,12 @@ void VideoPlayer::initializeMpv() {
     // Starting MPV in a paused state seems to reduce problems with initialization
     setPropertyStringMpv("pause", "");
 
+    // Allow alpha channels
+    setPropertyStringMpv("alpha", "yes");
+
     // Verbose mode for debug purposes
     // setPropertyStringMpv("msg-level", "all=v");
-    // mpv_request_log_messages(_mpvHandle, "debug");
+    //mpv_request_log_messages(_mpvHandle, "debug");
 
     if (mpv_initialize(_mpvHandle) < 0) {
         LINFO("mpv init failed");
@@ -451,11 +460,11 @@ void VideoPlayer::initializeMpv() {
         return;
     }
 
+    glGenFramebuffers(1, &_fbo);
     //Create FBO to render video into
-    createFBO(_videoResolution.x, _videoResolution.y);
+    createTexture(_videoResolution);
 
     //Observe video parameters
-    observePropertyMpv(MpvKey::Params);
     observePropertyMpv(MpvKey::Duration);
     observePropertyMpv(MpvKey::Meta);
     observePropertyMpv(MpvKey::Height);
@@ -465,11 +474,14 @@ void VideoPlayer::initializeMpv() {
     observePropertyMpv(MpvKey::Time);
     observePropertyMpv(MpvKey::IsSeeking);
 
+    // Render the first frame so we can see the video
+    renderFrame();
+
     _isInitialized = true;
 }
 
 void VideoPlayer::seekToTime(double time, PauseAfterSeek pauseAfter) {
-    if (_isSeeking || abs(_currentVideoTime - time) < glm::epsilon<double>()) {
+    if (_isSeeking || std::abs(_currentVideoTime - time) < glm::epsilon<double>()) {
         return;
     }
     pause();
@@ -499,44 +511,47 @@ void VideoPlayer::update() {
 void VideoPlayer::renderMpv() {
     handleMpvEvents();
 
+    // Renders a frame libmpv has been updated
     if (_wakeup) {
         uint64_t result = mpv_render_context_update(_mpvRenderContext);
         if ((result & MPV_RENDER_UPDATE_FRAME)) {
-            // Save the currently bound fbo
-            GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
-
-            // See render_gl.h on what OpenGL environment mpv expects, and other API
-            // details. This function fills the fbo and texture with data, after it
-            // we can get the data on the GPU, not the CPU
-            int fboInt = static_cast<int>(_fbo);
-            mpv_opengl_fbo mpfbo{
-                fboInt,
-                _videoResolution.x,
-                _videoResolution.y,
-                0
-            };
-            int flipY{ 1 };
-
-            mpv_render_param params[] = {
-                { MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo },
-                { MPV_RENDER_PARAM_FLIP_Y, &flipY },
-                { MPV_RENDER_PARAM_INVALID, nullptr }
-            };
-            // This "renders" to the video_framebuffer "linked by ID" in the
-            // params_fbo
-            mpv_render_context_render(_mpvRenderContext, params);
-
-            /* TODO: remove this comment in case we never encounter this issue again */
-            // We have to set the Viewport on every cycle because
-            // mpv_render_context_render internally rescales the fb of the context(?!)...
-            global::renderEngine->openglStateCache().resetViewportState();
-
-            // We also need to reset the render target
-            glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-
+            renderFrame();
             _wakeup = 0;
         }
     }
+}
+
+void VideoPlayer::renderFrame() {
+    // Save the currently bound fbo
+    GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+
+    // See render_gl.h on what OpenGL environment mpv expects, and other API
+    // details. This function fills the fbo and texture with data, after it
+    // we can get the data on the GPU, not the CPU
+    int fboInt = static_cast<int>(_fbo);
+    mpv_opengl_fbo mpfbo{
+        fboInt,
+        _videoResolution.x,
+        _videoResolution.y,
+        0
+    };
+    int flipY{ 1 };
+
+    mpv_render_param params[] = {
+        { MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo },
+        { MPV_RENDER_PARAM_FLIP_Y, &flipY },
+        { MPV_RENDER_PARAM_INVALID, nullptr }
+    };
+    // This "renders" to the video_framebuffer "linked by ID" in the
+    // params_fbo
+    mpv_render_context_render(_mpvRenderContext, params);
+
+    // We have to set the Viewport on every cycle because
+    // mpv_render_context_render internally rescales the fb of the context(?!)...
+    global::renderEngine->openglStateCache().resetViewportState();
+
+    // We also need to reset the render target
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 }
 
 void VideoPlayer::handleMpvEvents() {
@@ -605,7 +620,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
     }
     // Cast event to node or property depending on its format
     mpv_event_property* prop = nullptr;
-    mpv_node node;
+    mpv_node node = {};
     if (formats[key] == MPV_FORMAT_NODE) {
         int result = mpv_event_to_node(&node, event);
         if (!checkMpvError(result)) {
@@ -644,15 +659,12 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
                 break;
             }
 
-            if (*height == _videoResolution.y) {
-                break;
-            }
-
+            resizeTexture(glm::ivec2(_videoResolution.x, *height));
             LINFO(fmt::format("New height: {}", *height));
 
-            if (*height > 0 && _videoResolution.x > 0 && _fbo > 0) {
-                resizeFBO(_videoResolution.x, *height);
-            }
+            // Each time a size property is updated, it means libmpv is updating the video
+            // so we have to re-render the first frame to show it
+            renderFrame();
 
             break;
         }
@@ -664,15 +676,12 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
                 break;
             }
 
-            if (*width == _videoResolution.y) {
-                break;
-            }
-
+            resizeTexture(glm::ivec2(* width, _videoResolution.y));
             LINFO(fmt::format("New width: {}", *width));
 
-            if (*width > 0 && _videoResolution.y > 0 && _fbo > 0) {
-                resizeFBO(*width, _videoResolution.y);
-            }
+            // Each time a size property is updated, it means libmpv is updating the video
+            // so we have to re-render the first frame to show it
+            renderFrame();
 
             break;
         }
@@ -728,53 +737,6 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             else {
                 LWARNING("No meta data could be read");
             }
-
-            break;
-        }
-        case MpvKey::Params: {
-            if (node.format == MPV_FORMAT_NODE_ARRAY ||
-                node.format == MPV_FORMAT_NODE_MAP)
-            {
-                mpv_node_list* list = node.u.list;
-
-                mpv_node width, height;
-                bool foundWidth = false;
-                bool foundHeight = false;
-                for (int i = 0; i < list->num; ++i) {
-                    if (foundWidth && foundHeight) {
-                        break;
-                    }
-
-                    if (list->keys[i] == "w") {
-                        width = list->values[i];
-                        foundWidth = true;
-                    }
-                    else if (list->keys[i] == "h") {
-                        height = list->values[i];
-                        foundHeight = true;
-                    }
-                }
-
-                if (!foundWidth || !foundHeight) {
-                    LINFO("Could not find width or height params from parameters");
-                    return;
-                }
-
-                int w = -1;
-                int h = -1;
-                if (width.format == MPV_FORMAT_INT64) {
-                    w = width.u.int64;
-                }
-                if (height.format == MPV_FORMAT_INT64) {
-                    h = height.u.int64;
-                }
-
-                if (w == -1 || h == -1) {
-                    LERROR("Invalid width or height params");
-                    return;
-                }
-                resizeFBO(w, h);
-            }
             break;
         }
         default: {
@@ -823,7 +785,7 @@ const std::unique_ptr<ghoul::opengl::Texture>& VideoPlayer::frameTexture() const
     return _frameTexture;
 }
 
-void VideoPlayer::reset() {
+void VideoPlayer::reload() {
     if (_videoFile.empty()) {
         return;
     }
@@ -861,30 +823,24 @@ double VideoPlayer::correctVideoPlaybackTime() const {
     return percentage * _videoDuration;
 }
 
-void VideoPlayer::createFBO(int width, int height) {
-    LINFO(fmt::format("Creating new FBO with width: {} and height: {}", width, height));
+void VideoPlayer::createTexture(glm::ivec2 size) {
+    LINFO(fmt::format("Creating new FBO with width: {} and height: {}", size.x, size.y));
 
-    if (width <= 0 || height <= 0) {
+    if (size.x <= 0 || size.y <= 0) {
         LERROR("Cannot create empty fbo");
         return;
     }
 
     // Update resolution of video
-    _videoResolution = glm::ivec2(width, height);
+    _videoResolution = size;
 
-    glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
     _frameTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(width, height, 1),
+        glm::uvec3(size, 1),
         GL_TEXTURE_2D
     );
     _frameTexture->uploadTexture();
-
-    // Configure
-    _frameTexture->bind();
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     // Disable mipmaps
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -903,20 +859,18 @@ void VideoPlayer::createFBO(int width, int height) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void VideoPlayer::resizeFBO(int width, int height) {
-    if (width == _videoResolution.x && height == _videoResolution.y) {
-        return;
+void VideoPlayer::resizeTexture(glm::ivec2 size) {
+    bool isValid = size.x > 0 && size.y > 0 && _fbo > 0;
+    bool isNew = size != _videoResolution;
+    if (isValid && isNew) {
+        _videoResolution = size;
+        LINFO(fmt::format("Resizing texture: width: {} height: {}", size.x, size.y));
+
+        // Delete texture
+        _frameTexture = nullptr;
+
+        createTexture(size);
     }
-    LINFO(fmt::format("Resizing FBO with width: {} and height: {}", width, height));
-
-    // Update resolution of video
-    _videoResolution = glm::ivec2(width, height);
-
-    // Delete old FBO and texture
-    glDeleteFramebuffers(1, &_fbo);
-    _frameTexture.reset(nullptr);
-
-    createFBO(width, height);
 }
 
 } // namespace openspace::video

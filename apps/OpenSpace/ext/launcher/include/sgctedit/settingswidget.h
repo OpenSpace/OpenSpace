@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
 #define __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
 
+#include <QComboBox>
+#include <QVBoxLayout>
 #include <QWidget>
 
 #include <sgct/math.h>
@@ -73,16 +75,75 @@ public:
     void setShowUiOnFirstWindow(bool setUiOnFirstWindow);
 
     /**
+     * Sets value for whether or not the checkbox for having the UI only on the first
+     * window is enabled. This checkbox should only be clickable if the number of
+     * windows is 2 or more. 
+     */
+    void setEnableShowUiOnFirstWindowCheckbox(bool enable);
+
+    /**
+     * Gets the value of the selection for which display first window should mirror if
+     * the option to show the Ui in the first window is enabled. Note that this will
+     * return a value even if the checkbox is not enabled.
+     * 
+     * \return -1 if in a disabled state (e.g. when showUiOnFirstWindow() returns false)
+     *          0 if no window graphics are selected (only the UI will appear)
+     *          (1-4) for which window's setting will be used for window 1 graphics
+     */
+    int graphicsSelectionForShowUiOnFirstWindow() const;
+
+    /**
+     * Sets value of the graphics selection combo box for which other window that the
+     * first window will mirror.
+     * 
+     * \param selection int value for the combo box selection.
+     *                  0 if no window graphics are selected (only the UI will appear)
+     *                  (1-4) for which window's setting to use for window 1 graphics
+     */
+    void setGraphicsSelectionForShowUiOnFirstWindow(int selection);
+
+    /**
      * Sets the value of the checkbox for enabling VSync.
      * 
      * \param enableVsync boolean value, if set true then VSync is enabled
      */
     void setVsync(bool enableVsync);
 
+    /**
+     * Called when the number of windows that should be displayed changes.
+     * 
+     * \param newCount The new number of windows included
+     */
+    void nWindowsDisplayedChanged(int newCount);
+
+    /**
+     * Gets the pointer to the QComboBox that selects the graphics for first window
+     * 
+     * \return pointer to the QComboBox object
+     */
+    QComboBox* firstWindowGraphicsSelection();
+
+    /**
+     * Gets the pointer to the QCheckBox that selects if UI is in first window only
+     * 
+     * \return pointer to the QCheckBox object
+     */
+    QCheckBox* showUiOnFirstWindowCheckbox();
+
+signals:
+    void firstWindowGraphicsSelected(int selection);
+
 private:
+    void showUiOnFirstWindowClicked(bool checked);
+    void firstWindowGraphicsSelectionChanged(const QString &text);
+
     sgct::quat _orientationValue = sgct::quat(0.f, 0.f, 0.f, 0.f);
     QCheckBox* _checkBoxVsync = nullptr;
     QCheckBox* _showUiOnFirstWindow = nullptr;
+    QComboBox* _firstWindowGraphicsSelection = nullptr;
+    QBoxLayout* _firstWindowSelectionLayout = nullptr;
+    int _stateOfUiOnFirstWindowPreviousCount = 1;
+    bool _stateOfUiOnFirstWindowWhenDisabled = false;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__

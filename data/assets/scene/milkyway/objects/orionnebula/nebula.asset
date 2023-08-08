@@ -1,6 +1,8 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("./transforms")
 
+
+
 local sync = asset.syncedResource({
   Name = "Orion Nebula Model",
   Type = "HttpSynchronization",
@@ -8,18 +10,19 @@ local sync = asset.syncedResource({
   Version = 2
 })
 
+
 local NebulaHolder = {
   Identifier = "OrionNebulaHolder",
   Parent = transforms.NebulaPosition.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 35999998699110400.000000
+      Scale = 35999998699110400.0
     },
     Rotation = {
       Type = "FixedRotation",
       Attached = "OrionNebulaHolder",
-      XAxis = {1.000000,1.000000,0.510000},
+      XAxis = { 1.0, 1.0, 0.51 },
       XAxisOrthogonal = true,
       YAxis = "Sun",
       YAxisInverted = false
@@ -29,18 +32,19 @@ local NebulaHolder = {
     Name = "Orion Nebula",
     Path = "/Milky Way/Orion",
     Description = [[In the Digital Universe model of the Orion Nebula, we depict the
-      ionization front effectively as a terrain, with a flat Hubble image of the nebula mapped
-      on the undulating surface. In reality, the ionization front has a slight thickness to
-      it - about a third of a light year - but is quite thin compared to the overall size of
-      the nebula, which stretches about ten light years from side to side.<br><br>Close into
-      the center, we see small teardrop-shaped structures with their narrow ends pointing away
-      from the bright star: these are protoplanetary disks, or proplyds, of dense gas and dust
-      surrounding young stars. The larger formations that one sees farther away from the center
-      of the nebula take on a cup-like shape, with the narrow end pointing away from the
-      nebulas center. These enormous structures are bow shocks that delineate the region where
-      highspeed winds from the central star slow from supersonic to subsonic speeds. You can
-      think of an HII region as a sort of tremendous explosion, taking place over millennia,
-      and the bow shocks are part of the outward rush of material]]
+      ionization front effectively as a terrain, with a flat Hubble image of the nebula
+      mapped on the undulating surface. In reality, the ionization front has a slight
+      thickness to it - about a third of a light year - but is quite thin compared to the
+      overall size of the nebula, which stretches about ten light years from side to side.
+      <br><br>Close into the center, we see small teardrop-shaped structures with their
+      narrow ends pointing away from the bright star: these are protoplanetary disks, or
+      proplyds, of dense gas and dust surrounding young stars. The larger formations that
+      one sees farther away from the center of the nebula take on a cup-like shape, with
+      the narrow end pointing away from the nebulas center. These enormous structures are
+      bow shocks that delineate the region where highspeed winds from the central star
+      slow from supersonic to subsonic speeds. You can think of an HII region as a sort of
+      tremendous explosion, taking place over millennia, and the bow shocks are part of
+      the outward rush of material]]
   }
 }
 
@@ -50,7 +54,7 @@ local OrionNebulaModel = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 0.67500000
+      Scale = 0.675
     }
   },
   InteractionSphere = 0.8,
@@ -63,7 +67,7 @@ local OrionNebulaModel = {
     AmbientIntensity = 0.0,
     DiffuseIntensity = 1.0,
     --PerformShading = false,
-    RotationVector = { 0.000000, 22.300000, 0.000000 },
+    RotationVector = { 0.0, 22.3, 0.0 },
     LightSources = {
       sun.LightSource,
       {
@@ -86,7 +90,7 @@ local OrionNebulaShocksModel = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 0.67500000
+      Scale = 0.675
     }
   },
   Renderable = {
@@ -97,7 +101,7 @@ local OrionNebulaShocksModel = {
     AmbientIntensity = 0.0,
     DiffuseIntensity = 1.0,
     --PerformShading = false,
-    RotationVector = { 0.000000, 22.300000, 0.000000 },
+    RotationVector = { 0.0, 22.3, 0.0 },
     LightSources = {
       sun.LightSource,
       {
@@ -110,7 +114,6 @@ local OrionNebulaShocksModel = {
   GUI = {
     Name = "Orion Nebula Shocks",
     Path = "/Milky Way/Orion",
-    Hidden = false,
     Description = "Orion Nebula Shocks 3D model. See Orion Nebula for description"
   }
 }
@@ -121,18 +124,18 @@ local OrionNebulaProplydsModel = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 0.67500000
+      Scale = 0.675
     }
   },
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = sync .. "proplyds.obj",
-    Opacity = 1.0, 
+    Opacity = 1.0,
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
     DiffuseIntensity = 1.0,
     --PerformShading = false,
-    RotationVector = { 0.000000, 22.300000, 0.000000 },
+    RotationVector = { 0.0, 22.3, 0.0 },
     LightSources = {
       sun.LightSource,
       {
@@ -145,10 +148,10 @@ local OrionNebulaProplydsModel = {
   GUI = {
     Name = "Orion Nebula Proplyds",
     Path = "/Milky Way/Orion",
-    Hidden = false,
     Description = "Orion Nebula Proplyds 3D model. See Orion Nebula for description"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NebulaHolder)

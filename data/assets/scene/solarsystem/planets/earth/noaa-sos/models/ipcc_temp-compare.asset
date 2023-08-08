@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Climate Model: Temperature Change Comparison (GFDL a1b and b1)"
@@ -23,7 +24,8 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layers_names = {
+
+local layersNames = {
   "2025_gfdl_a1b",
   "2025_gfdl_b1",
   "2050_gfdl_a1b",
@@ -35,7 +37,7 @@ local layers_names = {
 }
 
 local layers = {}
-for i,v in ipairs(layers_names) do
+for i,v in ipairs(layersNames) do
   local layer = {
     Identifier = Identifier .. v,
     Name = Name,
@@ -47,7 +49,7 @@ for i,v in ipairs(layers_names) do
   table.insert(layers, layer)
 end
 
-local colorbar = {
+local Colorbar = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -60,23 +62,25 @@ local colorbar = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   for i,v in ipairs(layers) do
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", v)
+    openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", v)
   end
-  openspace.addScreenSpaceRenderable(colorbar)
+  openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
   for i,v in ipairs(layers) do
-    openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", v)
+    openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", v)
   end
-  openspace.removeScreenSpaceRenderable(colorbar)
 end)
 
 for _,v in ipairs(layers) do
   asset.export(v)
 end
+asset.export(Colorbar)
+
 
 
 asset.meta = {

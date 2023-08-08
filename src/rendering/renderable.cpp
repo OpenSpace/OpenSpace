@@ -44,10 +44,10 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
+        "Enabled",
         "This setting determines whether this object will be visible or not",
         // @VISIBILITY(0.33)
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
@@ -206,6 +206,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
 
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
+    _renderableType.setReadOnly(true);
     addProperty(_renderableType);
 
     _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);

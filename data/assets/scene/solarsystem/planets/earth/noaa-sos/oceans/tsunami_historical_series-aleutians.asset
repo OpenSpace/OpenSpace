@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Tsunami Historical Series: Aleutian Islands - 1946"
@@ -29,28 +30,29 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_coastal = {
+
+local LayerCoastal = {
   Identifier = Identifier .. "-coastal",
   Name = Name .. " (Coastal)",
   FilePath = syncedDirectory .. "Tsunami_Coastal_Map_Aleutians_1946_2k.jpg",
   Description = Description
 }
 
-local layer_energy_coastal = {
+local LayerEnergyCoastal = {
   Identifier = Identifier .. "-energy_coastal",
   Name = Name .. " (Energy Coastal)",
   FilePath = syncedDirectory .. "Tsunami_Energy+Coastal_Map_Aleutians_1946_4k.jpg",
   Description = Description
 }
 
-local layer_energy = {
+local LayerEnergy = {
   Identifier = Identifier .. "-energy",
   Name = Name .. " (Energy)",
   FilePath = syncedDirectory .. "Tsunami_Energy_Map_Aleutians_1946_4k.jpg",
   Description = Description
 }
 
-local layer_null = {
+local LayerNull = {
   Identifier = Identifier .. "-null",
   Name = Name .. " (Null)",
   FilePath = syncedDirectory .. "Tsunami_Null_Coastal_Map_Aleutians_1946_4k.jpg",
@@ -59,24 +61,25 @@ local layer_null = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_coastal)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_null)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCoastal)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergyCoastal)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergy)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNull)
 end)
 
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_coastal)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_energy)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_null)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNull)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergy)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergyCoastal)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCoastal)
 end)
 
-asset.export(layer_coastal)
-asset.export(layer_energy_coastal)
-asset.export(layer_energy)
-asset.export(layer_null)
+asset.export(LayerCoastal)
+asset.export(LayerEnergyCoastal)
+asset.export(LayerEnergy)
+asset.export(LayerNull)
+
 
 
 asset.meta = {

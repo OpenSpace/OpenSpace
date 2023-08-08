@@ -78,17 +78,17 @@ constexpr std::array<Group, 5> Groups = {
 
 struct Layer {
     enum class ID {
-        DefaultTileLayer = 0,
-        SingleImageTileLayer,
-        ImageSequenceTileLayer,
-        SizeReferenceTileLayer,
-        TemporalTileLayer,
-        TileIndexTileLayer,
-        ByIndexTileLayer,
-        ByLevelTileLayer,
+        DefaultTileProvider = 0,
+        SingleImageProvider,
+        ImageSequenceTileProvider,
+        SizeReferenceTileProvider,
+        TemporalTileProvider,
+        TileIndexTileProvider,
+        TileProviderByIndex,
+        TileProviderByLevel,
         SolidColor,
-        SpoutImageTileLayer,
-        VideoTileLayer,
+        SpoutImageProvider,
+        VideoTileProvider,
         Unknown
     };
 
@@ -98,48 +98,48 @@ struct Layer {
 
 constexpr std::array<Layer, 11> Layers = {
     Layer {
-        .id = Layer::ID::DefaultTileLayer,
-        .identifier = "DefaultTileLayer"
+        .id = Layer::ID::DefaultTileProvider,
+        .identifier = "DefaultTileProvider"
     },
     Layer {
-        .id = Layer::ID::SingleImageTileLayer,
-        .identifier = "SingleImageTileLayer"
+        .id = Layer::ID::SingleImageProvider,
+        .identifier = "SingleImageProvider"
     },
     Layer {
-        .id = Layer::ID::ImageSequenceTileLayer,
-        .identifier = "ImageSequenceTileLayer"
+        .id = Layer::ID::ImageSequenceTileProvider,
+        .identifier = "ImageSequenceTileProvider"
     },
     Layer {
-        .id = Layer::ID::SizeReferenceTileLayer,
-        .identifier = "SizeReferenceTileLayer"
+        .id = Layer::ID::SizeReferenceTileProvider,
+        .identifier = "SizeReferenceTileProvider"
     },
     Layer {
-        .id = Layer::ID::TemporalTileLayer,
-        .identifier = "TemporalTileLayer"
+        .id = Layer::ID::TemporalTileProvider,
+        .identifier = "TemporalTileProvider"
     },
     Layer {
-        .id = Layer::ID::TileIndexTileLayer,
-        .identifier = "TileIndexTileLayer"
+        .id = Layer::ID::TileIndexTileProvider,
+        .identifier = "TileIndexTileProvider"
     },
     Layer {
-        .id = Layer::ID::ByIndexTileLayer,
-        .identifier = "ByIndexTileLayer"
+        .id = Layer::ID::TileProviderByIndex,
+        .identifier = "TileProviderByIndex"
     },
     Layer {
-        .id = Layer::ID::ByLevelTileLayer,
-        .identifier = "ByLevelTileLayer"
+        .id = Layer::ID::TileProviderByLevel,
+        .identifier = "TileProviderByLevel"
     },
     Layer {
         .id = Layer::ID::SolidColor,
         .identifier = "SolidColor"
     },
     Layer {
-        .id = Layer::ID::SpoutImageTileLayer,
-        .identifier = "SpoutImageTileLayer"
+        .id = Layer::ID::SpoutImageProvider,
+        .identifier = "SpoutImageProvider"
     },
     Layer {
-        .id = Layer::ID::VideoTileLayer,
-        .identifier = "VideoTileLayer"
+        .id = Layer::ID::VideoTileProvider,
+        .identifier = "VideoTileProvider"
     }
 };
 

@@ -1,10 +1,12 @@
-local TexturesPath = asset.syncedResource({
+local texturesPath = asset.syncedResource({
   Name = "Habitable Zone Textures",
   Type = "HttpSynchronization",
   Identifier = "habitable_zone_textures",
   Version = 1
 })
-asset.export("TexturesPath", TexturesPath)
+asset.export("TexturesPath", texturesPath)
+
+
 
 asset.meta = {
   Name = "Habitable Zone Textures",
@@ -12,5 +14,5 @@ asset.meta = {
   Description = "Default textures that can be used for the habitable zone rendering",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
+  License = "MIT license"
 }

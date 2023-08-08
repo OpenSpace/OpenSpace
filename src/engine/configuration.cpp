@@ -303,12 +303,6 @@ namespace {
         // displayed while the scene graph is created and initialized
         std::optional<LoadingScreen> loadingScreen;
 
-        // List of window configurations that cannot be overwritten by user
-        std::optional<std::vector<std::string>> readOnlyWindowConfigs;
-
-        // List of profiles that cannot be overwritten by user
-        std::optional<std::vector<std::string>> readOnlyProfiles;
-
         // Configurations for each module
         std::optional<std::map<std::string, ghoul::Dictionary>> moduleConfigurations;
     };
@@ -459,8 +453,6 @@ void parseLuaState(Configuration& configuration) {
         c.httpProxy.password = p.httpProxy->password.value_or(c.httpProxy.password);
     }
 
-    c.readOnlyWindowConfigs = p.readOnlyWindowConfigs.value_or(c.readOnlyWindowConfigs);
-    c.readOnlyProfiles = p.readOnlyProfiles.value_or(c.readOnlyProfiles);
     c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
 }
 

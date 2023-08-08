@@ -58,6 +58,7 @@ public:
     TileDepthTransform depthTransform() const;
     void setEnabled(bool enabled);
     bool enabled() const;
+    bool isInitialized() const;
     TileProvider* tileProvider() const;
     glm::vec3 solidColor() const;
     const LayerRenderSettings& renderSettings() const;
@@ -87,7 +88,7 @@ private:
     properties::TriggerProperty _remove;
     properties::StringProperty _guiDescription;
 
-    layers::Layer::ID _type;
+    layers::Layer::ID _typeId;
     std::unique_ptr<TileProvider> _tileProvider;
     properties::Vec3Property _solidColor;
     LayerRenderSettings _renderSettings;
@@ -99,6 +100,7 @@ private:
     const layers::Group::ID _layerGroupId;
 
     std::function<void(Layer*)> _onChangeCallback;
+    bool _isInitialized = false;
   };
 
 } // namespace openspace::globebrowsing

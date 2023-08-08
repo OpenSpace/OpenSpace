@@ -24,8 +24,10 @@
 
 #include <ghoul/misc/dictionary.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/misc/assert.h>
 #include <iterator>
+#include <numeric>
 #include <sstream>
 
 template <>
@@ -750,6 +752,19 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             TestResult::Offense o;
             o.offender = key;
             o.reason = TestResult::Offense::Reason::Verification;
+
+            std::string list = std::accumulate(
+                values.begin() + 1,
+                values.end(),
+                fmt::format("{}", values.front()),
+                [](std::string lhs, typename T::Type rhs) {
+                    return fmt::format("{}, {}", lhs, rhs);
+                }
+            );
+            o.explanation = fmt::format(
+                "{} not in list of accepted values '{}'",
+                key, list
+            );
             r.offenses.push_back(o);
             return r;
         }

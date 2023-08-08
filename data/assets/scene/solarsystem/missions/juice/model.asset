@@ -1,5 +1,6 @@
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
 
 
 local model = asset.syncedResource({
@@ -8,6 +9,7 @@ local model = asset.syncedResource({
   Identifier = "juice_models",
   Version = 1
 })
+
 
 local JuiceModel = {
   Identifier = "JuiceModel",
@@ -60,6 +62,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(JuiceModel)
+
 
 
 asset.meta = {

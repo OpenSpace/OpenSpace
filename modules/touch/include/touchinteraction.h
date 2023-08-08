@@ -86,14 +86,14 @@ public:
      * Main function call
      * 1 Checks if doubleTap occured
      * 2 If the node in focus is large enough and all contact points have selected it,
-     * calls directControl() function for direct-manipulation
-     * 3 Updates std::vector<SelectedBody> _selectedContactPoints (only if LMA successfully
-     * converged, avoids interaction to snap on LMA fails)
+     *   calls directControl() function for direct-manipulation
+     * 3 Updates std::vector<SelectedBody> _selectedContactPoints (only if LMA
+     *   successfully converged, avoids interaction to snap on LMA fails)
      * 4 If directControl() wasn't called this frame, interpret the incoming
-     * list and decide what type of interaction this frame should do
+     *   list and decide what type of interaction this frame should do
      * 5 Compute the new total velocities after interaction
      * 6 Evaluate if directControl should be called next frame- true if all contact points
-     * select the same node and said node is larger than _nodeRadiusThreshold
+     *   select the same node and said node is larger than _nodeRadiusThreshold
      */
 
     void updateStateFromInput(const std::vector<TouchInputHolder>& list,

@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Koppen-Geiger Climate Classification - 2007"
@@ -20,7 +21,8 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -28,7 +30,7 @@ local layer = {
   Description = Description
 }
 
-local legend = {
+local Legend = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -39,7 +41,7 @@ local legend = {
   CartesianPosition = { -0.75, -0.5, -2.0 }
 }
 
-local legend1 = {
+local Legend1 = {
   Identifier = Identifier .. "-alt",
   Name = Name .. " (alt)",
   Enabled = asset.enabled,
@@ -49,21 +51,23 @@ local legend1 = {
   CartesianPosition = { 0.75, -0.5, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(legend)
-  openspace.addScreenSpaceRenderable(legend1)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
+  openspace.addScreenSpaceRenderable(Legend1)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(legend)
-  openspace.removeScreenSpaceRenderable(legend1)
+  openspace.removeScreenSpaceRenderable(Legend1)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(legend)
-asset.export(legend1)
+asset.export(Layer)
+asset.export(Legend)
+asset.export(Legend1)
+
 
 
 asset.meta = {

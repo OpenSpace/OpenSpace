@@ -346,7 +346,8 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
         {
             codegen::lua::AddExoplanetSystem,
             codegen::lua::RemoveExoplanetSystem,
-            codegen::lua::GetListOfExoplanets,
+            codegen::lua::ListOfExoplanets,
+            codegen::lua::ListOfExoplanetsDeprecated,
             codegen::lua::ListAvailableExoplanetSystems
         }
     };

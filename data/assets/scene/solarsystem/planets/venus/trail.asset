@@ -1,5 +1,5 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -21,10 +21,10 @@ local VenusTrail = {
   GUI = {
     Name = "Venus Trail",
     Path = "/Solar System/Planets/Venus",
-    Description = "Main trail for Venus",
-    Hidden = false
+    Description = "Main trail for Venus"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(VenusTrail)

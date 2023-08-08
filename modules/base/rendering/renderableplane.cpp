@@ -265,16 +265,14 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         rotationTransform *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-        glm::dmat4(1.0);
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     const glm::dmat4 modelViewTransform =
         data.camera.combinedViewMatrix() * modelTransform;
 
     _shader->setUniform("modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 
-    _shader->setUniform("modelViewTransform",
-        glm::mat4(data.camera.combinedViewMatrix() * glm::dmat4(modelViewTransform)));
+    _shader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -330,7 +328,7 @@ void RenderablePlane::createPlane() {
         -sizeX,  sizeY, 0.f, 0.f, 0.f, 1.f,
         -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
          sizeX, -sizeY, 0.f, 0.f, 1.f, 0.f,
-         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
+         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f
     };
 
     glBindVertexArray(_quad);

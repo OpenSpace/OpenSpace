@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
 
 
 local Styx = {
@@ -14,7 +13,7 @@ local Styx = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 0.45E5, 0.45E5, 0.45E5 },
+    Radii = { 45000, 45000, 45000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
@@ -75,6 +74,7 @@ local StyxLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Styx)
   openspace.addSceneGraphNode(StyxTrail)
@@ -89,6 +89,7 @@ end)
 
 asset.export(Styx)
 asset.export(StyxTrail)
+asset.export(StyxLabel)
 
 
 

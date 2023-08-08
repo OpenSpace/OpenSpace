@@ -19,7 +19,8 @@ local colormaps = asset.syncedResource({
   Version = 1
 })
 
-local object = {
+
+local Object = {
   Identifier = "Quasars",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -52,15 +53,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

@@ -52,8 +52,6 @@ struct Configuration {
     properties::Property::Visibility propertyVisibility =
         properties::Property::Visibility::User;
 
-    std::vector<std::string> readOnlyWindowConfigs;
-    std::vector<std::string> readOnlyProfiles;
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }

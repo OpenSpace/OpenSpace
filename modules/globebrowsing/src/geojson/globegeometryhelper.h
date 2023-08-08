@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYHELPER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYHELPER___H__
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace::globebrowsing {

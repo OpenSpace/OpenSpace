@@ -12,7 +12,8 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "LocalDwarfGalaxies",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -32,36 +33,37 @@ local object = {
     Texture = textures .. "point4.png",
     PolygonSides = 12,
     Unit = "Mpc",
-    ScaleFactor = 465,
+    ScaleFactor = 465.0,
     BillboardMinMaxSize = { 0.0, 20.0 },
     EnablePixelSizeControl = true
   },
   GUI = {
-      Name = "Local Group",
-      Path = "/Universe/Galaxies",
-      Description = [[Census: 102 galaxies. DU Version 6.4. <br> A group of galaxies is
-        a small number of large galaxies that are typically surrounded by a large
-        number of small galaxies. The Milky Way belongs to the Local Group, and is one
-        of roughly 100 galaxies in that group. The Milky Way, the Andromeda Galaxy
-        (also known as Messier 31, or M31), and the Triangulum Galaxy (M33) are three
-        of the largest galaxies in the Local Group. Each is a spiral galaxy containing
-        hundreds of billions of stars. Surrounding the Milky Way and Andromeda are a
-        bevy of dwarf galaxies-smaller, often irregular galaxies, that contain
-        hundreds of millions to a few billion stars. (Description from URL) <br><br>
-        Data Reference: Properties of dwarf galaxies in the Local Group
-        (McConnachie+, 2012)]]
+    Name = "Local Group",
+    Path = "/Universe/Galaxies",
+    Description = [[Census: 102 galaxies. DU Version 6.4. <br> A group of galaxies is
+      a small number of large galaxies that are typically surrounded by a large
+      number of small galaxies. The Milky Way belongs to the Local Group, and is one
+      of roughly 100 galaxies in that group. The Milky Way, the Andromeda Galaxy
+      (also known as Messier 31, or M31), and the Triangulum Galaxy (M33) are three
+      of the largest galaxies in the Local Group. Each is a spiral galaxy containing
+      hundreds of billions of stars. Surrounding the Milky Way and Andromeda are a
+      bevy of dwarf galaxies-smaller, often irregular galaxies, that contain
+      hundreds of millions to a few billion stars. (Description from URL) <br><br>
+      Data Reference: Properties of dwarf galaxies in the Local Group
+      (McConnachie+, 2012)]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

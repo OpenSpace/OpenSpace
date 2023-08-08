@@ -1,5 +1,7 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local VenusBarycenter = {
   Identifier = "VenusBarycenter",
@@ -18,6 +20,7 @@ local VenusBarycenter = {
     Description = "Position for Venus Barycenter"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(VenusBarycenter)

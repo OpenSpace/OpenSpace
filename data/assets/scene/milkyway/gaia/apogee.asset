@@ -19,7 +19,8 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local gaia_abundance_apogee = {
+
+local GaiaAbundanceApogee = {
   Identifier = "GaiaAbundanceApogee",
   Renderable = {
     Type = "RenderableStars",
@@ -55,15 +56,16 @@ local gaia_abundance_apogee = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(gaia_abundance_apogee)
+  openspace.addSceneGraphNode(GaiaAbundanceApogee)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(gaia_abundance_apogee)
+  openspace.removeSceneGraphNode(GaiaAbundanceApogee)
 end)
 
-asset.export(gaia_abundance_apogee)
+asset.export(GaiaAbundanceApogee)
 
 
 

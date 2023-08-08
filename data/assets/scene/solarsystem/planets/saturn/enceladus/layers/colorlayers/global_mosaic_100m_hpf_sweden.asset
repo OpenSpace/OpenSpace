@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../enceladus").Enceladus.Identifier
+local globe = asset.require("../../enceladus")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Global_Mosaic_100m_HPF_Sweden",
   Name = "Cassini Global Mosaic 100m HPF [Sweden]",
   Enabled = asset.enabled,
@@ -13,15 +15,16 @@ local layer = {
     than 120 degrees. (Description from URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Enceladus.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Enceladus.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

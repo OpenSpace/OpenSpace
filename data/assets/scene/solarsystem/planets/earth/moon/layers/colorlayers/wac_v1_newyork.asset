@@ -1,9 +1,13 @@
-local globeIdentifier = asset.require("../../moon").Moon.Identifier
+local globe = asset.require("../../moon")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "WAC_V1_NewYork",
   Name = "WAC V1 [New York]",
   Enabled = asset.enabled,
+  FilePath = asset.localResource("wac_v1_newyork.wms"),
+  Settings = { Gamma = 0.84 },
   Description = [[Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera (WAC)
     aboard the Lunar Reconnaissance Orbiter (LRO) has allowed the instrument team to
     create a global mosaic comprised of over 15,000 images acquired between November 2009
@@ -12,20 +16,19 @@ local layer = {
     month. To even out the incidence angle variations (generally angles between 55-75
     degrees), this morphology mosaic (at 643 nm), is comprised of data collected over
     three periods (1/20/2010 to 1/28/2010, 5/30/2010 to 6/6/2010, 7/24/2010 to 7/31/2010).
-    (Description from URL)]],
-  FilePath = asset.localResource("wac_v1_newyork.wms"),
-  Settings = { Gamma = 0.84 }
+    (Description from URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Moon.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Moon.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
