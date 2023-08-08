@@ -116,7 +116,7 @@ void CosmicSonification::update(const Camera* camera) {
             std::abs(nodeData.HAngle() - angleH) > _anglePrecision ||
             std::abs(nodeData.VAngle() - angleV) > _anglePrecision)
         {
-            // Update the saved data for the planet
+            // Update the saved data for the node
             nodeData.addDistance(distance);
             nodeData.addHAngle(angleH);
             nodeData.addVAngle(angleV);
