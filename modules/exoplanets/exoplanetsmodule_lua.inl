@@ -104,12 +104,6 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
     return system;
 }
 
-openspace::exoplanets::ExoplanetSystem
-getExoplanetSystemFromMainDataFile(const std::string& starName)
-{
-    using namespace openspace::exoplanets;
-    return findExoplanetSystemInData(starName);
-}
 
 void createExoplanetSystem(const std::string& starName,
                            const openspace::exoplanets::ExoplanetSystem& system)
@@ -616,7 +610,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     for (const std::string& starName : starsToAdd) {
         openspace::exoplanets::ExoplanetSystem systemData =
-            getExoplanetSystemFromMainDataFile(starName);
+            findExoplanetSystemInData(starName);
 
         if (systemData.planetsData.empty()) {
             LERROR(fmt::format("Exoplanet system '{}' could not be found", starName));
