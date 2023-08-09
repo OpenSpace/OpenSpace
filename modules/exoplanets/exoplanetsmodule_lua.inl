@@ -638,6 +638,11 @@ std::vector<std::string> hostStarsWithSufficientData() {
     );
 }
 
+/**
+ * Resturn a list with names of the host star of all the exoplanet systems
+ * that have sufficient data for generating a visualization, base don the
+ * module's loaded data file.
+ */
 [[codegen::luawrap]] std::vector<std::string> listOfExoplanets() {
     std::vector<std::string> names = hostStarsWithSufficientData();
     return names;
@@ -673,6 +678,24 @@ listOfExoplanetsDeprecated()
     ));
 }
 
+/**
+ * Load a set of exoplanets based on custom data, in the form of a CSV file, and add
+ * them to the rendering. Can be used to load custom datasets, or more recent planets
+ * than what are included in the internal data file that is released with OpenSpace.
+ *
+ * The format and column names in the CSV sould be the same as the ones provided by the
+ * NASA Exoplanet Archive. https://exoplanetarchive.ipac.caltech.edu/
+ *
+ * We recommend downloading the file from the Exoplanet Archive's Composite data table,
+ * where multiple sources are combined into one row per planet.
+ * https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
+ *
+ * Please remember to include all columns in the file download, as missing data columns
+ * may lead to an incomplete visualization.
+ *
+ * Also, void loading to large files of planets, as each added system will affec the
+ * rendering performance.
+ */
 [[codegen::luawrap]] void loadExoplanetsFromCsv(std::string csvFile) {
     using namespace openspace;
     using namespace exoplanets;
