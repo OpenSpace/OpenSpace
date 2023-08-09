@@ -160,14 +160,14 @@ void CosmicSonification::update(const Camera* camera) {
 
         // Check if this data is new, otherwise don't send it
         bool shouldSendData = false;
-        if (std::abs(nodeData.distance() - distance) > _distancePrecision ||
-            std::abs(nodeData.HAngle() - angleH) > _anglePrecision ||
-            std::abs(nodeData.VAngle() - angleV) > _anglePrecision)
+        if (std::abs(nodeData.distance - distance) > _distancePrecision ||
+            std::abs(nodeData.horizontalAngle - angleH) > _anglePrecision ||
+            std::abs(nodeData.verticalAngle - angleV) > _anglePrecision)
         {
             // Update the saved data for the node
-            nodeData.addDistance(distance);
-            nodeData.addHAngle(angleH);
-            nodeData.addVAngle(angleV);
+            nodeData.distance = distance;
+            nodeData.horizontalAngle = angleH;
+            nodeData.verticalAngle = angleV;
             shouldSendData = true;
         }
 
@@ -181,13 +181,13 @@ void CosmicSonification::update(const Camera* camera) {
             }
 
             // Distance
-            oscData.push_back(nodeData.distance());
+            oscData.push_back(nodeData.distance);
 
             // Horizontal angle
-            oscData.push_back(nodeData.HAngle());
+            oscData.push_back(nodeData.horizontalAngle);
 
             // Vertical angle
-            oscData.push_back(nodeData.VAngle());
+            oscData.push_back(nodeData.verticalAngle);
 
             oscData.shrink_to_fit();
             _connection->send(label, oscData);
@@ -255,14 +255,14 @@ void CosmicSonification::update(const Camera* camera) {
 
             // Check if this data is new, otherwise don't send it
             bool shouldSendData = false;
-            if (std::abs(label.data[i].distance() - distance) > _distancePrecision ||
-                std::abs(label.data[i].HAngle() - angleH) > _anglePrecision ||
-                std::abs(label.data[i].VAngle() - angleV) > _anglePrecision)
+            if (std::abs(label.data[i].distance - distance) > _distancePrecision ||
+                std::abs(label.data[i].horizontalAngle - angleH) > _anglePrecision ||
+                std::abs(label.data[i].verticalAngle - angleV) > _anglePrecision)
             {
                 // Update the saved data for the planet
-                label.data[i].addDistance(distance);
-                label.data[i].addHAngle(angleH);
-                label.data[i].addVAngle(angleV);
+                label.data[i].distance = distance;
+                label.data[i].horizontalAngle = angleH;
+                label.data[i].verticalAngle = angleV;
                 shouldSendData = true;
             }
 
@@ -274,13 +274,13 @@ void CosmicSonification::update(const Camera* camera) {
                 oscData.push_back(label.labels->entries[i].text);
 
                 // Distance
-                oscData.push_back(label.data[i].distance());
+                oscData.push_back(label.data[i].distance);
 
                 // Horizontal angle
-                oscData.push_back(label.data[i].HAngle());
+                oscData.push_back(label.data[i].horizontalAngle);
 
                 // Vertical angle
-                oscData.push_back(label.data[i].VAngle());
+                oscData.push_back(label.data[i].verticalAngle);
 
                 oscData.shrink_to_fit();
                 _connection->send(osclabel, oscData);

@@ -96,54 +96,10 @@ private:
     static const int NumSamples = 60;
 
     struct LabelsData {
-    public:
-        // Get a smoothed out value from the data
-        double distance() const {
-            return SonificationBase::calcMedian(distances);
-        }
-        double HAngle() const {
-            return SonificationBase::calcMedian(horizontalAngles);
-        }
-        double VAngle() const {
-            return SonificationBase::calcMedian(verticalAngles);
-        }
-
-        // Add values to ring buffers
-        void addDistance(const double distance) {
-            SonificationBase::addValueToRingBuffer(
-                distances,
-                indexDistances,
-                NumSamples,
-                distance
-            );
-        }
-        void addHAngle(const double angle) {
-            SonificationBase::addValueToRingBuffer(
-                horizontalAngles,
-                indexHAngles,
-                NumSamples,
-                angle
-            );
-        }
-        void addVAngle(const double angle) {
-            SonificationBase::addValueToRingBuffer(
-                verticalAngles,
-                indexVAngles,
-                NumSamples,
-                angle
-            );
-        }
-
-    private:
         // Distance, horizontal angle, vertical angle
-        std::vector<double> distances = std::vector<double>(NumSamples, 0.0);
-        std::vector<double> horizontalAngles = std::vector<double>(NumSamples, 0.0);
-        std::vector<double> verticalAngles = std::vector<double>(NumSamples, 0.0);
-
-        // The first "empty" slot in the ring buffer order. The "oldest" value
-        int indexDistances = 0;
-        int indexHAngles = 0;
-        int indexVAngles = 0;
+        double distance = 0.0;
+        double horizontalAngle = 0.0;
+        double verticalAngle = 0.0;
     };
 
     struct Labels {
@@ -163,7 +119,6 @@ private:
     };
 
     struct NodeData {
-    public:
         NodeData(std::string id = "") {
             identifier = id;
         }
@@ -174,53 +129,10 @@ private:
 
         std::string identifier;
 
-        // Get a smoothed out value from the data
-        double distance() const {
-            return SonificationBase::calcMedian(distances);
-        }
-        double HAngle() const {
-            return SonificationBase::calcMedian(horizontalAngles);
-        }
-        double VAngle() const {
-            return SonificationBase::calcMedian(verticalAngles);
-        }
-
-        // Add values to ring buffers
-        void addDistance(const double distance) {
-            SonificationBase::addValueToRingBuffer(
-                distances,
-                ringBufferIndexDist,
-                NumSamples,
-                distance
-            );
-        }
-        void addHAngle(const double angle) {
-            SonificationBase::addValueToRingBuffer(
-                horizontalAngles,
-                ringBufferIndexHAngle,
-                NumSamples,
-                angle
-            );
-        }
-        void addVAngle(const double angle) {
-            SonificationBase::addValueToRingBuffer(
-                verticalAngles,
-                ringBufferIndexVAngle,
-                NumSamples,
-                angle
-            );
-        }
-
-    private:
         // Distance, horizontal angle, vertical angle
-        std::vector<double> distances = std::vector<double>(NumSamples, 0.0);
-        std::vector<double> horizontalAngles = std::vector<double>(NumSamples, 0.0);
-        std::vector<double> verticalAngles = std::vector<double>(NumSamples, 0.0);
-
-        // The first "empty" slot in the ring buffer order. The "oldest" value
-        int ringBufferIndexDist = 0;
-        int ringBufferIndexHAngle = 0;
-        int ringBufferIndexVAngle = 0;
+        double distance = 0.0;
+        double horizontalAngle = 0.0;
+        double verticalAngle = 0.0;
     };
 
     std::vector<NodeData> _nodes;
