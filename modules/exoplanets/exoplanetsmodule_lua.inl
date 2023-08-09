@@ -757,7 +757,8 @@ listOfExoplanetsDeprecated()
     }
 
     LINFO(fmt::format(
-        "Added {} exoplanet systems from CSV file: '{}'",
+        "Read data for {} exoplanet systems from CSV file: '{}'. Please wait until "
+        "they are all finished initializing. You may have to reload the user interface.",
         hostNameToSystemDataMap.size(), csvFile
     ));
 }
