@@ -143,6 +143,13 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PivotInfo = {
+        "Pivot",
+        "Pivot",
+        "A vector that moves the place of origin for the model",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ModelScaleInfo = {
         "ModelScale",
         "Model Scale",
@@ -278,6 +285,9 @@ namespace {
         // [[codegen::verbatim(ModelTransformInfo.description)]]
         std::optional<glm::dmat4x4> modelTransform;
 
+        // [[codegen::verbatim(PivotInfo.description)]]
+        std::optional<glm::vec3> pivot;
+
         // [[codegen::verbatim(RotationVecInfo.description)]]
         std::optional<glm::dvec3> rotationVector;
 
@@ -321,6 +331,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         glm::dmat4(1.0),
         glm::dmat4(-1.0),
         glm::dmat4(1.0)
+    )
+    , _pivot(
+        PivotInfo,
+        glm::vec3(0.f),
+        glm::vec3(-std::numeric_limits<float>::max()),
+        glm::vec3(std::numeric_limits<float>::max())
     )
     , _modelScale(ModelScaleInfo, 1.0, std::numeric_limits<double>::epsilon(), 4e+27)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
@@ -371,17 +387,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (p.modelTransform.has_value()) {
-        _modelTransform = *p.modelTransform;
-    }
-
-    if (p.animationStartTime.has_value()) {
-        _animationStart = *p.animationStartTime;
-    }
-
-    if (p.enableAnimation.has_value()) {
-        _enableAnimation = *p.enableAnimation;
-    }
+    _modelTransform = p.modelTransform.value_or(_modelTransform);
+    _pivot = p.pivot.value_or(_pivot);
+    _animationStart = p.animationStartTime.value_or(_animationStart);
+    _enableAnimation = p.enableAnimation.value_or(_enableAnimation);
 
     if (p.animationTimeScale.has_value()) {
         if (std::holds_alternative<float>(*p.animationTimeScale)) {
@@ -460,6 +469,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_enableFaceCulling);
     addProperty(_enableDepthTest);
     addProperty(_modelTransform);
+    addProperty(_pivot);
     addProperty(_rotationVec);
 
     addProperty(_modelScale);
@@ -781,6 +791,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), glm::dvec3(_pivot.value())) *
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
