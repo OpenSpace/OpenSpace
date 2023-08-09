@@ -725,6 +725,7 @@ listOfExoplanetsDeprecated()
             sanitizeNameString(planetData.name);
             system.planetNames.push_back(planetData.name);
             system.planetsData.push_back(planetData.dataEntry);
+            updateStarDataFromNewPlanet(system.starData, planetData.dataEntry);
 
             hostNameToSystemDataMap[planetData.host] = system;
         }
