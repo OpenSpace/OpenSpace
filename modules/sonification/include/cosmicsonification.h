@@ -28,6 +28,7 @@
 #include <modules/sonification/include/sonificationbase.h>
 
 #include <modules/space/speckloader.h>
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <map>
 
@@ -76,6 +77,16 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
+    // Ability to filter what type of relationship between the birds are sonified
+    enum class BirdFilter {
+        None = 0,
+        Taxonomy,
+        Habitat,
+        Domesticated,
+    };
+
+    void guiChangeFilter();
+
     // Precision of distances and angles
     properties::DoubleProperty _anglePrecision;
     properties::DoubleProperty _distancePrecision;
@@ -213,6 +224,8 @@ private:
 
     std::vector<NodeData> _nodes;
     std::vector<Labels> _labels;
+    properties::OptionProperty _filter;
+    BirdFilter _birdFilter = BirdFilter::None;
 };
 
 } // openspace namespace

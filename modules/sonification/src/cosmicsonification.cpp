@@ -59,6 +59,12 @@ namespace {
         "Angle Precision",
         "The precision used for angles, given in radians"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo BirdFilterInfo = {
+        "BirdFilter",
+        "Bird Filter",
+        "The type of relationship that the sonification focuses on for the birds"
+    };
 } // namespace
 #include "cosmicsonification_lua.inl"
 
@@ -68,10 +74,34 @@ CosmicSonification::CosmicSonification(const std::string& ip, int port)
     : SonificationBase(CosmicSonificationInfo, ip, port)
     , _distancePrecision(DistancePrecisionInfo, 0.1, 0.01, 1.0e3)
     , _anglePrecision(AnglePrecisionInfo, 0.05, 0.0, M_PI/2.0)
+    , _filter(
+        BirdFilterInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
 {
     addProperty(_distancePrecision);
     _distancePrecision.setExponent(2);
     addProperty(_anglePrecision);
+
+    // Add options to the bird filter drop down menu
+    _filter.addOptions({
+        { 0, "None" },
+        { 1, "Taxonomy" },
+        { 2, "Habitat" },
+        { 3, "Domesticated" }
+    });
+    _filter.onChange([this]() { guiChangeFilter(); });
+    addProperty(_filter);
+}
+
+void CosmicSonification::guiChangeFilter() {
+    _birdFilter = static_cast<BirdFilter>(_filter.value());
+
+    std::string label = "/BirdFilter";
+    std::vector<OscDataType> data(1);
+    data[0] = static_cast<int>(_filter);
+
+    _connection->send(label, data);
 }
 
 CosmicSonification::~CosmicSonification() {
