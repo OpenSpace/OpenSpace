@@ -86,6 +86,7 @@ private:
     };
 
     void guiChangeFilter();
+    void guiChangeLock();
 
     // Precision of distances and angles
     properties::DoubleProperty _anglePrecision;
@@ -226,6 +227,7 @@ private:
     std::vector<Labels> _labels;
     properties::OptionProperty _filter;
     BirdFilter _birdFilter = BirdFilter::None;
+    properties::BoolProperty _lockClosestBird;
 };
 
 } // openspace namespace

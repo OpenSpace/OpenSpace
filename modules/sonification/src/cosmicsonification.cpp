@@ -65,6 +65,12 @@ namespace {
         "Bird Filter",
         "The type of relationship that the sonification focuses on for the birds"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo LockClosestBirdInfo = {
+        "LockClosestBird",
+        "Lock Closest Bird",
+        "Locks the sonification to the current closest bird in the scene"
+    };
 } // namespace
 #include "cosmicsonification_lua.inl"
 
@@ -78,6 +84,7 @@ CosmicSonification::CosmicSonification(const std::string& ip, int port)
         BirdFilterInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _lockClosestBird(LockClosestBirdInfo, false)
 {
     addProperty(_distancePrecision);
     _distancePrecision.setExponent(2);
@@ -92,6 +99,9 @@ CosmicSonification::CosmicSonification(const std::string& ip, int port)
     });
     _filter.onChange([this]() { guiChangeFilter(); });
     addProperty(_filter);
+
+    addProperty(_lockClosestBird);
+    _lockClosestBird.onChange([this]() { guiChangeLock(); });
 }
 
 void CosmicSonification::guiChangeFilter() {
@@ -100,6 +110,14 @@ void CosmicSonification::guiChangeFilter() {
     std::string label = "/BirdFilter";
     std::vector<OscDataType> data(1);
     data[0] = static_cast<int>(_filter);
+
+    _connection->send(label, data);
+}
+
+void CosmicSonification::guiChangeLock() {
+    std::string label = "/BirdLock";
+    std::vector<OscDataType> data(1);
+    data[0] = static_cast<int>(_lockClosestBird);
 
     _connection->send(label, data);
 }
