@@ -104,9 +104,8 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
     return system;
 }
 
-
 void createExoplanetSystem(const std::string& starName,
-                           const openspace::exoplanets::ExoplanetSystem& system)
+                           openspace::exoplanets::ExoplanetSystem system)
 {
     using namespace openspace;
     using namespace exoplanets;
@@ -219,7 +218,9 @@ void createExoplanetSystem(const std::string& starName,
 
     // Planets
     for (size_t i = 0; i < system.planetNames.size(); i++) {
-        ExoplanetDataEntry planet = system.planetsData[i];
+        // Note that we are here overriding some invalid parameters in the planet data.
+        // Use a reference, so that it is changed down the line
+        ExoplanetDataEntry& planet = system.planetsData[i];
         const std::string planetName = system.planetNames[i];
 
         if (std::isnan(planet.ecc)) {
