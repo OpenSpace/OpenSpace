@@ -110,6 +110,12 @@ glm::dmat3 computeSystemRotation(glm::dvec3 starPosition);
 
 void sanitizeNameString(std::string& s);
 
+// Star data should not vary between planets, but one data entry might lack data
+// for the host star while another does not. So for every planet, update star data
+// if needed
+void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p);
+
+
 } // namespace openspace::exoplanets
 
 #endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__
