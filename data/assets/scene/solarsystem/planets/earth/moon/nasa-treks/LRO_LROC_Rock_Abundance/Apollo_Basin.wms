@@ -1,0 +1,24 @@
+<GDAL_WMS>
+    <Service name="TMS">
+      <ServerUrl>https://trek.nasa.gov/tiles/Moon/EQ/LRO_NAC_RockAbnd_37S206E_150cmp/1.0.0//default/default028mm/${z}/${y}/${x}.png</ServerUrl>
+    </Service>
+    <DataWindow>
+      <UpperLeftX>-180</UpperLeftX>
+      <UpperLeftY>90</UpperLeftY>
+      <LowerRightX>180</LowerRightX>
+      <LowerRightY>-90</LowerRightY>
+      <TileCountX>2</TileCountX>
+      <TileCountY>1</TileCountY>
+      <TileLevel>8</TileLevel>
+      <YOrigin>top</YOrigin>
+    </DataWindow>
+    <Projection>
+      GEOGCS["GCS_Moon_2000",DATUM["D_Moon_2000",SPHEROID["Moon_2000_IAU_IAG",1737400,0]],PRIMEM["Reference_Meridian",0],UNIT["degree",0.0174532925199433]]
+    </Projection>
+    <BlockSizeX>256</BlockSizeX>
+    <BlockSizeY>256</BlockSizeY>
+    <BandsCount>3</BandsCount>
+    <MaxConnections>10</MaxConnections>
+    <DataValues NoData="0" Min="1" Max="255"/>
+    <ZeroBlockHttpCodes>404,400</ZeroBlockHttpCodes>
+  </GDAL_WMS>

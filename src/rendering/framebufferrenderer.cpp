@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "FramebufferRenderer";
 
-    constexpr glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
+    constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
     constexpr std::array<const char*, 9> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma",
@@ -87,8 +87,55 @@ namespace {
 
 namespace openspace {
 
+//============================//
+//=====  Reuse textures  =====//
+//============================//
+GLuint FramebufferRenderer::additionalColorTexture1() const {
+    // Gives access to the currently NOT used pingPongTexture
+    int unusedPingPongIndex = _pingPongIndex == 0 ? 1 : 0;
+    return _pingPongBuffers.colorTexture[unusedPingPongIndex];
+}
+
+GLuint FramebufferRenderer::additionalColorTexture2() const {
+    // Gives access to the exitColorTexture
+    return _exitColorTexture;
+}
+
+GLuint FramebufferRenderer::additionalColorTexture3() const {
+    // Gives access to the fxaaTexture
+    return _fxaaBuffers.fxaaTexture;
+}
+
+GLuint FramebufferRenderer::additionalDepthTexture() const {
+    // Gives access to the exitDepthTexture
+    return _exitDepthTexture;
+}
+
+//=============================//
+//=====  Access G-buffer  =====//
+//=============================//
+GLuint FramebufferRenderer::gBufferColorTexture() const {
+    // Gives access to the color texture of the G-buffer
+    return _gBuffers.colorTexture;
+}
+
+GLuint FramebufferRenderer::gBufferPositionTexture() const {
+    // Gives access to the position texture of the G-buffer
+    return _gBuffers.positionTexture;
+}
+
+GLuint FramebufferRenderer::gBufferNormalTexture() const {
+    // Gives access to the normal texture of the G-buffer
+    return _gBuffers.normalTexture;
+}
+
+GLuint FramebufferRenderer::gBufferDepthTexture() const {
+    // Gives access to the depth texture of the G-buffer
+    return _gBuffers.depthTexture;
+}
+
 void FramebufferRenderer::initialize() {
-    ZoneScoped
+    ZoneScoped;
     TracyGpuZone("Rendering initialize");
 
     LDEBUG("Initializing FramebufferRenderer");
@@ -133,10 +180,6 @@ void FramebufferRenderer::initialize() {
     glGenTextures(1, &_exitColorTexture);
     glGenTextures(1, &_exitDepthTexture);
     glGenFramebuffers(1, &_exitFramebuffer);
-
-    // HDR / Filtering Buffers
-    glGenFramebuffers(1, &_hdrBuffers.hdrFilteringFramebuffer);
-    glGenTextures(1, &_hdrBuffers.hdrFilteringTexture);
 
     // FXAA Buffers
     glGenFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
@@ -253,30 +296,6 @@ void FramebufferRenderer::initialize() {
     }
 
     //===================================//
-    //=====  HDR/Filtering Buffers  =====//
-    //===================================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _hdrBuffers.hdrFilteringFramebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        _hdrBuffers.hdrFilteringTexture,
-        0
-    );
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_FRAMEBUFFER,
-            _hdrBuffers.hdrFilteringFramebuffer,
-            -1,
-            "HDR filtering"
-        );
-    }
-
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("HDR/Filtering framebuffer is not complete");
-    }
-
-    //===================================//
     //==========  FXAA Buffers  =========//
     //===================================//
     glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
@@ -377,14 +396,13 @@ void FramebufferRenderer::initialize() {
 }
 
 void FramebufferRenderer::deinitialize() {
-    ZoneScoped
-    TracyGpuZone("Renderer deinitialize")
+    ZoneScoped;
+    TracyGpuZone("Renderer deinitialize");
 
     LINFO("Deinitializing FramebufferRenderer");
 
     glDeleteFramebuffers(1, &_gBuffers.framebuffer);
     glDeleteFramebuffers(1, &_exitFramebuffer);
-    glDeleteFramebuffers(1, &_hdrBuffers.hdrFilteringFramebuffer);
     glDeleteFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
     glDeleteFramebuffers(1, &_pingPongBuffers.framebuffer);
     glDeleteFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
@@ -392,7 +410,6 @@ void FramebufferRenderer::deinitialize() {
     glDeleteTextures(1, &_gBuffers.colorTexture);
     glDeleteTextures(1, &_gBuffers.depthTexture);
 
-    glDeleteTextures(1, &_hdrBuffers.hdrFilteringTexture);
     glDeleteTextures(1, &_fxaaBuffers.fxaaTexture);
     glDeleteTextures(1, &_gBuffers.positionTexture);
     glDeleteTextures(1, &_gBuffers.normalTexture);
@@ -424,8 +441,8 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
 }
 
 void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewport) {
-    ZoneScoped
-    TracyGpuZone("applyTMO")
+    ZoneScoped;
+    TracyGpuZone("applyTMO");
 
     _hdrFilteringProgram->activate();
 
@@ -693,8 +710,8 @@ void FramebufferRenderer::update() {
 }
 
 void FramebufferRenderer::updateResolution() {
-    ZoneScoped
-    TracyGpuZone("Renderer updateResolution")
+    ZoneScoped;
+    TracyGpuZone("Renderer updateResolution");
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.colorTexture);
     glTexImage2D(
@@ -799,27 +816,6 @@ void FramebufferRenderer::updateResolution() {
             -1,
             "G-Buffer Color Ping-Pong"
         );
-    }
-
-    // HDR / Filtering
-    glBindTexture(GL_TEXTURE_2D, _hdrBuffers.hdrFilteringTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _hdrBuffers.hdrFilteringTexture, -1, "HDR filtering");
     }
 
     // FXAA
@@ -943,14 +939,14 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _exitColorTexture, -1, "Exit depth");
+        glObjectLabel(GL_TEXTURE, _exitDepthTexture, -1, "Exit depth");
     }
 
     _dirtyResolution = false;
 }
 
 void FramebufferRenderer::updateRaycastData() {
-    ZoneScoped
+    ZoneScoped;
 
     _raycastData.clear();
     _exitPrograms.clear();
@@ -962,9 +958,9 @@ void FramebufferRenderer::updateRaycastData() {
 
     int nextId = 0;
     for (VolumeRaycaster* raycaster : raycasters) {
-        ZoneScopedN("raycaster")
+        ZoneScopedN("raycaster");
 
-        RaycastData data = { nextId++, "Helper" };
+        RaycastData data = { .id = nextId++, .namespaceName = "Helper" };
 
         const std::string& vsPath = raycaster->boundsVertexShaderPath();
         std::string fsPath = raycaster->boundsFragmentShaderPath();
@@ -1033,7 +1029,7 @@ void FramebufferRenderer::updateDeferredcastData() {
         global::deferredcasterManager->deferredcasters();
     int nextId = 0;
     for (Deferredcaster* caster : deferredcasters) {
-        DeferredcastData data = { nextId++, "HELPER" };
+        DeferredcastData data = { .id = nextId++, .namespaceName = "HELPER" };
 
         std::filesystem::path vsPath = caster->deferredcastVSPath();
         std::filesystem::path fsPath = caster->deferredcastFSPath();
@@ -1070,7 +1066,7 @@ void FramebufferRenderer::updateDeferredcastData() {
 
 
 void FramebufferRenderer::updateHDRAndFiltering() {
-    ZoneScoped
+    ZoneScoped;
 
     _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
         "HDR and Filtering Program",
@@ -1080,7 +1076,7 @@ void FramebufferRenderer::updateHDRAndFiltering() {
 }
 
 void FramebufferRenderer::updateFXAA() {
-    ZoneScoped
+    ZoneScoped;
 
     _fxaaProgram = ghoul::opengl::ProgramObject::Build(
         "FXAA Program",
@@ -1090,7 +1086,7 @@ void FramebufferRenderer::updateFXAA() {
 }
 
 void FramebufferRenderer::updateDownscaledVolume() {
-    ZoneScoped
+    ZoneScoped;
 
     _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
         "Write Downscaled Volume Program",
@@ -1100,8 +1096,8 @@ void FramebufferRenderer::updateDownscaledVolume() {
 }
 
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
-    ZoneScoped
-    TracyGpuZone("FramebufferRenderer")
+    ZoneScoped;
+    TracyGpuZone("FramebufferRenderer");
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     global::renderEngine->openglStateCache().setDefaultFramebuffer(_defaultFBO);
@@ -1122,8 +1118,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         // deferred g-buffer
-        ZoneScopedN("Deferred G-Buffer")
-        TracyGpuZone("Deferred G-Buffer")
+        ZoneScopedN("Deferred G-Buffer");
+        TracyGpuZone("Deferred G-Buffer");
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         glDrawBuffers(3, ColorAttachmentArray);
@@ -1133,10 +1129,9 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     Time time = global::timeManager->time();
 
     RenderData data = {
-        *camera,
-        std::move(time),
-        0,
-        {}
+        .camera = *camera,
+        .time = std::move(time),
+        .renderBinMask = 0
     };
     RendererTasks tasks;
 
@@ -1187,6 +1182,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glEnablei(GL_BLEND, 0);
 
     {
+        TracyGpuZone("Overlay")
+        ghoul::GLDebugGroup group("Overlay");
+        data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
+        scene->render(data, tasks);
+    }
+
+    {
         TracyGpuZone("PostDeferredTransparent")
         ghoul::GLDebugGroup group("PostDeferredTransparent");
         data.renderBinMask = static_cast<int>(
@@ -1196,9 +1198,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 
     {
-        TracyGpuZone("Overlay")
-        ghoul::GLDebugGroup group("Overlay");
-        data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
+        TracyGpuZone("Sticker")
+        ghoul::GLDebugGroup group("Sticker");
+        data.renderBinMask = static_cast<int>(
+            Renderable::RenderBin::Sticker
+        );
         scene->render(data, tasks);
     }
 
@@ -1221,7 +1225,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         // Apply the selected TMO on the results and resolve the result to the default FBO
-        TracyGpuZone("Apply TMO")
+        TracyGpuZone("Apply TMO");
         ghoul::GLDebugGroup group("Apply TMO");
 
         applyTMO(blackoutFactor, viewport);
@@ -1238,10 +1242,10 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
                                                 const glm::ivec4& viewport)
 {
-    ZoneScoped
+    ZoneScoped;
 
     for (const RaycasterTask& raycasterTask : tasks) {
-        TracyGpuZone("Raycaster")
+        TracyGpuZone("Raycaster");
 
         VolumeRaycaster* raycaster = raycasterTask.raycaster;
 
@@ -1375,10 +1379,10 @@ void FramebufferRenderer::performDeferredTasks(
                                              const std::vector<DeferredcasterTask>& tasks,
                                                                const glm::ivec4& viewport)
 {
-    ZoneScoped
+    ZoneScoped;
 
     for (const DeferredcasterTask& deferredcasterTask : tasks) {
-        TracyGpuZone("Deferredcaster")
+        TracyGpuZone("Deferredcaster");
 
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
@@ -1501,7 +1505,7 @@ void FramebufferRenderer::enableFXAA(bool enable) {
 }
 
 void FramebufferRenderer::updateRendererData() {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));

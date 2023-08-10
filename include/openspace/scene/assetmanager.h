@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <filesystem>
 #include <optional>
 #include <unordered_map>
-#include <unordered_set>
+#include <list>
 
 namespace openspace {
 
@@ -92,16 +92,33 @@ public:
      */
     std::vector<const Asset*> allAssets() const;
 
+    /**
+     * Returns all root assets, which are assets that have been loaded directly from the
+     * profile or by calling the #add method.
+     *
+     * \return A list of all root assets
+     */
+    std::vector<const Asset*> rootAssets() const;
+
     std::vector<const ResourceSynchronization*> allSynchronizations() const;
+
+    /**
+     * Returns whether the provided \p asset has been loaded directly by the user or
+     * loaded through a profile file.
+     *
+     * \param asset The asset that should be tested
+     * \return Whether the \p asset has been loaded directly or included in a profile
+     */
+    bool isRootAsset(const Asset* asset) const;
 
     /**
      * Loads the provided \p asset as a child of the provided \p parent. Loading an asset
      * means that asset file gets executed and the meta information is extracted from it.
      * The \p parent is the asset file that caused this loading to happen and can be a
-     * \c nullptr if the asset is to be loaded as a root asset.
+     * `nullptr` if the asset is to be loaded as a root asset.
      *
      * \param asset The asset that should be loaded
-     * \param parent The parent of the loaded asset file or \c nullptr if the asset is a
+     * \param parent The parent of the loaded asset file or `nullptr` if the asset is a
      *        root asset
      * \pre \p asset must not be a nullptr
      */
@@ -164,10 +181,10 @@ private:
 
     /// This list contains all of the assets that are queued to be loading in the next
     /// update call
-    std::unordered_set<std::string> _assetAddQueue;
+    std::list<std::string> _assetAddQueue;
 
     /// The list contains all of the assets that should be removed in the next update call
-    std::unordered_set<std::string> _assetRemoveQueue;
+    std::list<std::string> _assetRemoveQueue;
 
     /// This list contains all assets that need to be initialized in the next update call
     std::vector<Asset*> _toBeInitialized;

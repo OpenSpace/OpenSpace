@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,9 @@ namespace {
         "Spacing",
         "Spacing",
         "This value determines the spacing (in pixels) that this item represents. The "
-        "default value is 15"
+        "default value is 15",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemSpacing)]] Parameters {

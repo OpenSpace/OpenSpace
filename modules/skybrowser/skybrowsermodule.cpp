@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,68 +42,92 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if the GUI for this module should be enabled"
+        "Decides if the GUI for this module should be enabled",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowTitleInGuiBrowserInfo = {
         "ShowTitleInGuiBrowser",
         "Show Title in Gui Browser",
         "If true, the name of the currently selected sky browser is shown in the WebGUI "
-        "browser"
+        "browser",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow Camera Rotation",
         "Toggles if the camera should rotate to look at the sky target if it is going "
-        "outside of the current field of view"
+        "outside of the current field of view",
+        // @VISIBILITY(1.75)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraRotSpeedInfo = {
         "CameraRotationSpeed",
         "Camera Rotation Speed",
         "The speed of the rotation of the camera when the camera rotates to look at a "
-        "coordinate which is outside of the field of view"
+        "coordinate which is outside of the field of view",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetSpeedInfo = {
         "TargetAnimationSpeed",
         "Target Animation Speed",
-        "This determines the speed of the animation of the sky target"
+        "This determines the speed of the animation of the sky target",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserSpeedInfo = {
         "BrowserAnimationSpeed",
         "Field of View Animation Speed",
-        "This determines the speed of the animation of the field of view in the browser"
+        "This determines the speed of the animation of the field of view in the browser",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HideWithGuiInfo = {
         "HideTargetsBrowsersWithGui",
         "Hide Targets and Browsers with GUI",
         "If checked, the targets and browsers will be disabled when the sky browser "
-        "panel is minimized"
+        "panel is minimized",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo InverseZoomInfo = {
         "InverseZoomDirection",
         "Inverse Zoom Direction",
         "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
-        "inversed"
+        "inversed",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SynchronizeAimInfo = {
+        "SynchronizeAim",
+        "Synchronize Aim",
+        "If checked, the target and the browser will have synchronized aim.",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpaceCraftTimeInfo = {
         "SpaceCraftAnimationTime",
         "Space Craft Animation Time",
         "Sets the duration (in seconds) of the animation of the space craft when it is "
-        "pointed to where the target is aiming"
+        "pointed to where the target is aiming",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ImageCollectionInfo = {
        "WwtImageCollectionUrl",
        "AAS WorldWide Telescope Image Collection Url",
-       "The url of the image collection which is loaded into AAS WorldWide Telescope"
+       "The url of the image collection which is loaded into AAS WorldWide Telescope",
+       // @VISIBILITY(3.75)
+       openspace::properties::Property::Visibility::AdvancedUser
     };
+
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
@@ -127,6 +151,9 @@ namespace {
         // [[codegen::verbatim(InverseZoomInfo.description)]]
         std::optional<bool> inverseZoomDirection;
 
+        // [[codegen::verbatim(SynchronizeAimInfo.description)]]
+        std::optional<bool> synchronizeAim;
+
         // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
         std::optional<double> spaceCraftAnimationTime;
 
@@ -149,6 +176,7 @@ SkyBrowserModule::SkyBrowserModule()
     , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
     , _hideTargetsBrowsersWithGui(HideWithGuiInfo, false)
     , _inverseZoomDirection(InverseZoomInfo, false)
+    , _synchronizeAim(SynchronizeAimInfo, true)
     , _spaceCraftAnimationTime(SpaceCraftTimeInfo, 2.0, 0.0, 10.0)
     , _wwtImageCollectionUrl(
         ImageCollectionInfo,
@@ -165,12 +193,13 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_inverseZoomDirection);
     addProperty(_spaceCraftAnimationTime);
     addProperty(_wwtImageCollectionUrl);
+    addProperty(_synchronizeAim);
     _wwtImageCollectionUrl.setReadOnly(true);
 
     // Set callback functions
     global::callback::mouseButton->emplace(
         global::callback::mouseButton->begin(),
-        [&](MouseButton button, MouseAction action, KeyModifier, IsGuiWindow) -> bool {
+        [this](MouseButton, MouseAction action, KeyModifier, IsGuiWindow) -> bool {
             if (action == MouseAction::Press) {
                 _cameraRotation.stop();
             }
@@ -209,8 +238,10 @@ SkyBrowserModule::SkyBrowserModule()
         }
 
         if (_isCameraInSolarSystem) {
-            for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
-                pair->synchronizeAim();
+            if (_synchronizeAim) {
+                for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
+                    pair->synchronizeAim();
+                }
             }
             incrementallyAnimateTargets();
         }
@@ -223,13 +254,14 @@ SkyBrowserModule::SkyBrowserModule()
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    _enabled = p.enabled.value_or(true);
+    _enabled = p.enabled.value_or(_enabled);
     _allowCameraRotation = p.allowCameraRotation.value_or(_allowCameraRotation);
     _cameraRotationSpeed = p.cameraRotSpeed.value_or(_cameraRotationSpeed);
     _targetAnimationSpeed = p.targetSpeed.value_or(_targetAnimationSpeed);
     _browserAnimationSpeed = p.browserSpeed.value_or(_browserAnimationSpeed);
     _inverseZoomDirection = p.inverseZoomDirection.value_or(_inverseZoomDirection);
     _wwtImageCollectionUrl = p.wwtImageCollectionUrl.value_or(_wwtImageCollectionUrl);
+    _synchronizeAim = p.synchronizeAim.value_or(_synchronizeAim);
     _hideTargetsBrowsersWithGui = p.hideTargetsBrowsersGui.value_or(
         _hideTargetsBrowsersWithGui
     );
@@ -280,7 +312,7 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
     auto it = std::remove_if(
         _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
-        [&](const std::unique_ptr<TargetBrowserPair>& pair) {
+        [&found](const std::unique_ptr<TargetBrowserPair>& pair) {
             return found == pair.get();
         }
     );
@@ -303,9 +335,12 @@ void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
     disableHoverCircle();
 }
 
-void SkyBrowserModule::moveHoverCircle(int i, bool useScript) {
-    const ImageData& image = _dataHandler.image(i);
-
+void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScript) {
+    std::optional<const ImageData> found = _dataHandler.image(imageUrl);
+    if (!found.has_value()) {
+        return;
+    }
+    const ImageData image = *found;
     // Only move and show circle if the image has coordinates
     if (!(_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem)) {
         return;
@@ -392,7 +427,7 @@ TargetBrowserPair* SkyBrowserModule::pair(std::string_view id) const {
     auto it = std::find_if(
         _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
-        [&](const std::unique_ptr<TargetBrowserPair>& pair) {
+        [&id](const std::unique_ptr<TargetBrowserPair>& pair) {
             const bool foundBrowser = pair->browserId() == id;
             const bool foundTarget = pair->targetRenderableId() == id;
             const bool foundTargetNode = pair->targetNodeId() == id;
@@ -522,9 +557,10 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::ScrollOverBrowser,
             codegen::lua::LoadingImageCollectionComplete,
             codegen::lua::ShowAllTargetsAndBrowsers,
-            codegen::lua::PointSpaceCraft,
             codegen::lua::GetWwtImageCollectionUrl,
-            codegen::lua::StopAnimations
+            codegen::lua::StopAnimations,
+            codegen::lua::SetBorderRadius,
+            codegen::lua::ReloadDisplayCopyOnNode
         }
     };
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,9 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -64,7 +65,7 @@ struct ShutdownInformation {
 
 struct CommandlineArguments {
     std::string configurationName;
-    std::string configurationOverride;
+    std::vector<std::string> configurationOverride;
 };
 
 class OpenSpaceEngine : public properties::PropertyOwner {
@@ -88,6 +89,7 @@ public:
     void deinitializeGL();
     void preSynchronization();
     void postSynchronizationPreDraw();
+    void viewportChanged();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
     void drawOverlays();
@@ -104,7 +106,7 @@ public:
     void touchDetectionCallback(TouchInput input);
     void touchUpdateCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
-    void handleDragDrop(const std::string& file);
+    void handleDragDrop(std::filesystem::path file);
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
@@ -126,8 +128,7 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
-    void writeSceneDocumentation();
-    void writeStaticDocumentation();
+    void writeDocumentation();
     void createUserDirectoriesIfNecessary();
 
     /**
@@ -141,12 +142,13 @@ private:
     void loadFonts();
 
     void runGlobalCustomizationScripts();
-    std::string generateFilePath(std::string openspaceRelativePath);
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     properties::BoolProperty _printEvents;
     properties::OptionProperty _visibility;
     properties::BoolProperty _showHiddenSceneGraphNodes;
+    properties::FloatProperty _fadeOnEnableDuration;
+    properties::BoolProperty _disableAllMouseInputs;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
@@ -155,9 +157,6 @@ private:
     std::unique_ptr<VersionChecker> _versionChecker;
 
     glm::vec2 _mousePosition = glm::vec2(0.f);
-
-    //grabs json from each module to pass to the documentation engine.
-    std::string _documentationJson;
 
     std::future<void> _writeDocumentationTask;
 

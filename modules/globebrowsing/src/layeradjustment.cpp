@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,20 +32,23 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
         "ChromaKeyColor",
         "Chroma Key Color",
-        "This color is used as the chroma key for the layer that is adjusted"
+        "This color is used as the chroma key for the layer that is adjusted",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyToleranceInfo = {
         "ChromaKeyTolerance",
         "Chroma Key Tolerance",
         "This value determines the tolerance that is used to determine whether a color "
-        "is matching the selected Chroma key"
+        "is matching the selected Chroma key",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
-        "The type of layer adjustment that is applied to the underlying layer"
+        "The type of layer adjustment that is applied to the underlying layer",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(LayerAdjustment)]] Parameters {
@@ -84,9 +87,9 @@ LayerAdjustment::LayerAdjustment()
         _typeOption.addOption(static_cast<int>(ai.id), std::string(ai.identifier));
     }
     _typeOption.setValue(static_cast<int>(layers::Adjustment::ID::None));
-    _type = static_cast<layers::Adjustment::ID>(_typeOption.value());
+    _typeId = static_cast<layers::Adjustment::ID>(_typeOption.value());
 
-    _typeOption.onChange([&]() {
+    _typeOption.onChange([this]() {
         switch (type()) {
             case layers::Adjustment::ID::None:
                 break;
@@ -97,7 +100,7 @@ LayerAdjustment::LayerAdjustment()
             case layers::Adjustment::ID::TransferFunction:
                 break;
         }
-        _type = static_cast<layers::Adjustment::ID>(_typeOption.value());
+        _typeId = static_cast<layers::Adjustment::ID>(_typeOption.value());
         addVisibleProperties();
         if (_onChangeCallback) {
             _onChangeCallback();
@@ -133,7 +136,7 @@ void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmen
 }
 
 layers::Adjustment::ID LayerAdjustment::type() const {
-    return _type;
+    return _typeId;
 }
 
 void LayerAdjustment::addVisibleProperties() {

@@ -6049,7 +6049,7 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
                 ImGui::EndTooltip();
             }
             ImGui::SameLine();
-            HelpMarker("When drawing circle primitives with \"num_segments == 0\" tesselation will be calculated automatically.");
+            HelpMarker("When drawing circle primitives with \"num_segments == 0\" tessellation will be calculated automatically.");
 
             ImGui::DragFloat("Global Alpha", &style.Alpha, 0.005f, 0.20f, 1.0f, "%.2f"); // Not exposing zero here so user doesn't "lose" the UI (zero alpha clips all widgets). But application code could have a toggle to switch between zero and non-zero.
             ImGui::PopItemWidth();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -93,38 +93,38 @@ namespace {
             }
         };
 
-        constexpr const LeapSecond LeapEpoch = { 2000, 1 };
+        constexpr const LeapSecond LeapEpoch = { .year = 2000, .dayOfYear = 1 };
 
         // List taken from: https://www.ietf.org/timezones/data/leap-seconds.list
         constexpr const std::array<LeapSecond, 28> LeapSeconds = {
-            LeapSecond{ 1972,   1 },
-            LeapSecond{ 1972, 183 },
-            LeapSecond{ 1973,   1 },
-            LeapSecond{ 1974,   1 },
-            LeapSecond{ 1975,   1 },
-            LeapSecond{ 1976,   1 },
-            LeapSecond{ 1977,   1 },
-            LeapSecond{ 1978,   1 },
-            LeapSecond{ 1979,   1 },
-            LeapSecond{ 1980,   1 },
-            LeapSecond{ 1981, 182 },
-            LeapSecond{ 1982, 182 },
-            LeapSecond{ 1983, 182 },
-            LeapSecond{ 1985, 182 },
-            LeapSecond{ 1988,   1 },
-            LeapSecond{ 1990,   1 },
-            LeapSecond{ 1991,   1 },
-            LeapSecond{ 1992, 183 },
-            LeapSecond{ 1993, 182 },
-            LeapSecond{ 1994, 182 },
-            LeapSecond{ 1996,   1 },
-            LeapSecond{ 1997, 182 },
-            LeapSecond{ 1999,   1 },
-            LeapSecond{ 2006,   1 },
-            LeapSecond{ 2009,   1 },
-            LeapSecond{ 2012, 183 },
-            LeapSecond{ 2015, 182 },
-            LeapSecond{ 2017,   1 }
+            LeapSecond { .year = 1972, .dayOfYear =   1 },
+            LeapSecond { .year = 1972, .dayOfYear = 183 },
+            LeapSecond { .year = 1973, .dayOfYear =   1 },
+            LeapSecond { .year = 1974, .dayOfYear =   1 },
+            LeapSecond { .year = 1975, .dayOfYear =   1 },
+            LeapSecond { .year = 1976, .dayOfYear =   1 },
+            LeapSecond { .year = 1977, .dayOfYear =   1 },
+            LeapSecond { .year = 1978, .dayOfYear =   1 },
+            LeapSecond { .year = 1979, .dayOfYear =   1 },
+            LeapSecond { .year = 1980, .dayOfYear =   1 },
+            LeapSecond { .year = 1981, .dayOfYear = 182 },
+            LeapSecond { .year = 1982, .dayOfYear = 182 },
+            LeapSecond { .year = 1983, .dayOfYear = 182 },
+            LeapSecond { .year = 1985, .dayOfYear = 182 },
+            LeapSecond { .year = 1988, .dayOfYear =   1 },
+            LeapSecond { .year = 1990, .dayOfYear =   1 },
+            LeapSecond { .year = 1991, .dayOfYear =   1 },
+            LeapSecond { .year = 1992, .dayOfYear = 183 },
+            LeapSecond { .year = 1993, .dayOfYear = 182 },
+            LeapSecond { .year = 1994, .dayOfYear = 182 },
+            LeapSecond { .year = 1996, .dayOfYear =   1 },
+            LeapSecond { .year = 1997, .dayOfYear = 182 },
+            LeapSecond { .year = 1999, .dayOfYear =   1 },
+            LeapSecond { .year = 2006, .dayOfYear =   1 },
+            LeapSecond { .year = 2009, .dayOfYear =   1 },
+            LeapSecond { .year = 2012, .dayOfYear = 183 },
+            LeapSecond { .year = 2015, .dayOfYear = 182 },
+            LeapSecond { .year = 2017, .dayOfYear =   1 }
         };
         // Get the position of the last leap second before the desired date
         LeapSecond date{ year, dayOfYear };
@@ -205,7 +205,11 @@ namespace {
         // 00-56 correspond to 2000-2056. We'll see each other again in 2057!
 
         // 1,2. Get the full year and days
-        auto [res, year, daysInYear] = scn::scan_tuple<int, double>(epoch, "{:2}{}");
+        std::string e = epoch;
+        if (e.find('.') == std::string::npos) {
+            e += ".0";
+        }
+        auto [res, year, daysInYear] = scn::scan_tuple<int, double>(e, "{:2}{}");
         if (!res) {
             throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
         }
@@ -235,8 +239,9 @@ namespace {
     }
 
     double epochFromYMDdSubstring(const std::string& epoch) {
-        // The epochString is in the form:
+        // The epochString can be in one of two forms:
         // YYYYMMDD.ddddddd
+        // YYYY-MM-DD.ddddddd
         // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
         // and dddd the fraction of that day.
 
@@ -248,9 +253,20 @@ namespace {
         // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
         // midnight
 
+        std::string e = epoch;
+        if (e.find('.') == std::string::npos) {
+            // No . was found so the epoch was provided as an integer number (see #2551)
+            e += ".0";
+        }
         // 1, 2
+        size_t nDashes = std::count_if(
+            epoch.begin(),
+            epoch.end(),
+            [](char c) { return c == '-'; }
+        );
+        std::string formatString = (nDashes == 2) ? "{:4}-{:2}-{:2}{}" : "{:4}{:2}{:2}{}";
         auto [res, year, monthNum, dayOfMonthNum, fractionOfDay] =
-            scn::scan_tuple<int, int, int, double>(epoch, "{:4}{:2}{:2}{}");
+            scn::scan_tuple<int, int, int, double>(e, formatString);
         if (!res) {
             throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
         }
@@ -312,7 +328,6 @@ namespace {
         const size_t pos = epoch.find('T');
         if (pos == 10) {
             // We have the first form
-            
             int month;
             int days;
             auto res = scn::scan(
@@ -499,7 +514,7 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file) {
     std::optional<Parameters> current = std::nullopt;
     std::string line;
     while (std::getline(f, line)) {
-        if (line.empty()) {
+        if (line.empty() || line == "\r") {
             continue;
         }
 
@@ -590,10 +605,12 @@ std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
 
     std::string line;
     std::getline(f, line);
+    // Newer versions downloaded from the JPL SBDB website have " around variables
+    line.erase(remove(line.begin(), line.end(), '\"'), line.end());
     if (line != ExpectedHeader) {
         throw ghoul::RuntimeError(fmt::format(
             "Expected JPL SBDB file to start with '{}' but found '{}' instead",
-            ExpectedHeader, line
+            ExpectedHeader, line.substr(0, 100)
         ));
     }
 
@@ -687,7 +704,7 @@ std::optional<std::vector<Parameters>> loadCache(std::filesystem::path file) {
     res.reserve(size);
     for (uint32_t i = 0; i < size; i++) {
         Parameters param;
-        
+
         uint32_t nameLength = 0;
         stream.read(reinterpret_cast<char*>(&nameLength), sizeof(uint32_t));
         param.name.resize(nameLength);

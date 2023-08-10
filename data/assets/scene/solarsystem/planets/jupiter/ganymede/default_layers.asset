@@ -1,6 +1,5 @@
-local colorLayersPath = "./layers/colorlayers"
+asset.require("./layers/colorlayers/ganymede_texture", true)
 
-asset.require(colorLayersPath .. "/ganymede_texture", true)
 
 
 asset.meta = {

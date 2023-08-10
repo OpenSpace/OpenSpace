@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   globebrowsingmodule.h
@@ -58,7 +58,13 @@ set(HEADER_FILES
   src/tileindex.h
   src/tileloadjob.h
   src/tiletextureinitdata.h
+  src/tilecacheproperties.h
   src/timequantizer.h
+  src/geojson/geojsoncomponent.h
+  src/geojson/geojsonmanager.h
+  src/geojson/geojsonproperties.h
+  src/geojson/globegeometryfeature.h
+  src/geojson/globegeometryhelper.h
   src/tileprovider/defaulttileprovider.h
   src/tileprovider/imagesequencetileprovider.h
   src/tileprovider/singleimagetileprovider.h
@@ -100,6 +106,11 @@ set(SOURCE_FILES
   src/tileloadjob.cpp
   src/tiletextureinitdata.cpp
   src/timequantizer.cpp
+  src/geojson/geojsoncomponent.cpp
+  src/geojson/geojsonmanager.cpp
+  src/geojson/geojsonproperties.cpp
+  src/geojson/globegeometryfeature.cpp
+  src/geojson/globegeometryhelper.cpp
   src/tileprovider/defaulttileprovider.cpp
   src/tileprovider/imagesequencetileprovider.cpp
   src/tileprovider/singleimagetileprovider.cpp
@@ -118,6 +129,11 @@ set(SHADER_FILES
   shaders/advanced_rings_vs.glsl
   shaders/advanced_rings_fs.glsl
   shaders/blending.glsl
+  shaders/geojson_fs.glsl
+  shaders/geojson_points_fs.glsl
+  shaders/geojson_points_gs.glsl
+  shaders/geojson_points_vs.glsl
+  shaders/geojson_vs.glsl
   shaders/globalrenderer_vs.glsl
   shaders/localrenderer_vs.glsl
   shaders/renderer_fs.glsl
@@ -146,12 +162,15 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
   <map>
 )
 
+# Gdal
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
 if (WIN32)
-  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib)
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal241.dll")
+  add_library(gdal SHARED IMPORTED)
+  target_include_directories(gdal SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include)
+  set_target_properties(gdal PROPERTIES IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib)
+  set_target_properties(gdal PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal241.dll)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE gdal)
 else (WIN32)
   find_package(GDAL REQUIRED)
 
@@ -159,3 +178,12 @@ else (WIN32)
   target_link_libraries(openspace-module-globebrowsing PRIVATE ${GDAL_LIBRARY})
   mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
 endif () # WIN32
+
+begin_dependency("GEOS")
+add_subdirectory(ext/geos SYSTEM)
+target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
+
+set_property(TARGET geos PROPERTY FOLDER "External")
+set_property(TARGET geos_c PROPERTY FOLDER "External")
+set_property(TARGET ryu PROPERTY FOLDER "External")
+end_dependency("GEOS")

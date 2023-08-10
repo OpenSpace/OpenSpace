@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 -- Circle shapes are not support
@@ -83,7 +84,7 @@ local SwiFullGCO500 = {
       -- These translations are eyeballed based on the existing model
       Position = { 0.465, -0.1, 0.95 }
     }
-  },  
+  },
   Renderable = {
     Type = "RenderableFov",
     Body = "JUICE",
@@ -125,6 +126,7 @@ end)
 -- asset.export(SwiCh2)
 asset.export(SwiFull)
 -- asset.export(SwiFullGCO500)
+
 
 
 asset.meta = {

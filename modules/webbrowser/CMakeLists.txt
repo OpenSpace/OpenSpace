@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,10 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 include(cmake/webbrowser_helpers.cmake)
 
 set(WEBBROWSER_MODULE_NAME WebBrowser)
@@ -57,7 +54,6 @@ set(CEF_VERSION "102.0.10+gf249b2e+chromium-102.0.5005.115")
 if (WIN32 OR UNIX)
   option(USE_SANDBOX OFF)
 endif ()
-
 # Add this project's cmake/ directory to the module path.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(cef_support)
@@ -90,12 +86,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
 find_package(CEF REQUIRED)
 
 # Include the libcef_dll_wrapper target (executes libcef_dll/CMakeLists.txt).
-add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
+add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper SYSTEM)
 
 mark_as_advanced(CEF_DEBUG_INFO_FLAG USE_ATL USE_OFFICIAL_BUILD_SANDBOX USE_SANDBOX)
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-  # The CEF DLL wrapper is raising a lot of warnings on GCC
+if (UNIX)
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
 endif ()
 
@@ -169,7 +164,11 @@ set(WEBBROWSER_RESOURCES_SRCS
 
 # Place Helper in separate executable
 # The naming style "<ApplicationName> Helper" is required by Chromium.
-set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+if (OS_MACOSX)
+  set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+else ()
+  set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+endif ()
 set(CEF_HELPER_TARGET_GPU "OpenSpace Helper (GPU)" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
 set(CEF_HELPER_TARGET_RENDERER "OpenSpace Helper (Renderer)" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
 
@@ -202,8 +201,8 @@ if (OS_MACOSX)
     endif ()
   endforeach()
 
-  set_property(TARGET ${CEF_HELPER_TARGET_GPU} PROPERTY FOLDER "Helper")
-  set_property(TARGET ${CEF_HELPER_TARGET_RENDERER} PROPERTY FOLDER "Helper")
+  set_target_properties(${CEF_HELPER_TARGET_GPU} PROPERTIES FOLDER "Helper")
+  set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "Helper")
 else()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
@@ -219,7 +218,7 @@ else()
   endif (OS_WINDOWS)
 endif ()
 
-set_property(TARGET ${CEF_HELPER_TARGET} PROPERTY FOLDER "Helper")
+set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "Helper")
 
 ##########################################################################################
 # Create OpenSpace module.
@@ -266,8 +265,7 @@ target_precompile_headers(${webbrowser_module} PRIVATE
   <include/wrapper/cef_helpers.h>
 )
 
-set_folder_location(libcef_dll_wrapper "Helper")
-set_folder_location(openspace_web_helper "Helper")
+set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "Helper")
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()
@@ -292,13 +290,4 @@ if (UNIX AND NOT (${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
     DESTINATION ${CEF_ROOT}/${CMAKE_BUILD_TYPE}/
     FILES_MATCHING PATTERN *
   )
-  endif ()
-
-# Rename to "OpenSpace Helper" after build & link as spaces in targets are not allowed
-# add_custom_command(
-#   TARGET ${CEF_HELPER_TARGET} POST_BUILD
-#   COMMAND ${CMAKE_COMMAND} -E rename
-#     "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/${CEF_HELPER_TARGET}"
-#     "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/OpenSpace Helper"
-#   COMMENT "Renaming ${CEF_HELPER_TARGET} to 'OpenSpace Helper'"
-# )
+endif ()

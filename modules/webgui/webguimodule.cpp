@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,32 +44,39 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",
         "Enable Server Process",
-        "Enable the node js based process used to serve the Web GUI"
+        "Enable the node js based process used to serve the Web GUI",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
-        "The network address to use when connecting to OpenSpace from the Web GUI"
+        "The network address to use when connecting to OpenSpace from the Web GUI",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The network port to use when serving the Web GUI over HTTP"
+        "The network port to use when serving the Web GUI over HTTP",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo WebSocketInterfaceInfo = {
         "WebSocketInterface",
         "WebSocket Interface",
-        "The identifier of the websocket interface to use when communicating"
+        "The identifier of the websocket interface to use when communicating",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEntryPointInfo =
     {
         "ServerProcessEntryPoint",
         "Server Process Entry Point",
-        "The node js command to invoke"
+        "The node js command to invoke",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DirectoriesInfo = {
@@ -78,13 +85,17 @@ namespace {
         "Directories from which to to serve static content, as a string list "
         "with entries expressed as pairs, where every odd is the endpoint name and every "
         "even is the directory",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultEndpointInfo = {
         "DefaultEndpoint",
         "Default Endpoint",
         "The 'default' endpoint. The server will redirect http requests from / to "
-        "/<DefaultEndpoint>"
+        "/<DefaultEndpoint>",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ServedDirectoriesInfo = {
@@ -93,15 +104,16 @@ namespace {
         "Directories that are currently served. This value is set by the server process, "
         "as a verification of the actually served directories. For example, an onChange "
         "callback can be registered to this, to reload browsers when the server is "
-        "ready. Manual changes to this property have no effect"
+        "ready. Manual changes to this property have no effect",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(WebGuiModule)]] Parameters {
         // [[codegen::verbatim(PortInfo.description)]]
-        std::optional<int> port;
+        std::optional<int> port [[codegen::key("HttpPort")]];
 
         // [[codegen::verbatim(AddressInfo.description)]]
-        std::optional<std::string> address;
+        std::string address;
 
         // [[codegen::verbatim(WebSocketInterfaceInfo.description)]]
         std::optional<std::string> webSocketInterface;
@@ -163,12 +175,7 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     const Parameters p = codegen::bake<Parameters>(configuration);
 
     _port = p.port.value_or(_port);
-    if (p.address.has_value()) {
-        _address = p.address.value();
-    }
-    else {
-        _address = "192.168.1.8"; //global::windowDelegate
-    }
+    _address = p.address;
     _webSocketInterface = p.webSocketInterface.value_or(_webSocketInterface);
 
     auto startOrStop = [this]() {
@@ -229,7 +236,7 @@ void WebGuiModule::notifyEndpointListeners(const std::string& endpoint, bool exi
 }
 
 void WebGuiModule::startProcess() {
-    ZoneScoped
+    ZoneScoped;
 
     _endpoints.clear();
 

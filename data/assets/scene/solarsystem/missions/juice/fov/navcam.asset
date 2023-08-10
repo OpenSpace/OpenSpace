@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local NavCam = {
@@ -41,6 +42,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(NavCam)
+
 
 
 asset.meta = {

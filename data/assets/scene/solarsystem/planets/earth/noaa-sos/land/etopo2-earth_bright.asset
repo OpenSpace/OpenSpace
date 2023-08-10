@@ -1,14 +1,15 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "ETOPO2: Topography and Bathymetry (bright colors)"
 local Identifier = "noaa-sos-land-etopo2-earth_bright"
-local Description = [[Many datasets have been created by utilizing the ETOPO2 dataset, 
-which was generated from digital databases of seafloor and land elevations on a 2-minute 
-latitude/longitude grid (1 minute of latitude = 1 nautical mile, or 1.15 statute miles). 
-The ETOPO2 is a combination of satellite altimetry observations, shipboard echo-sounding 
-measurements, data from the Digital Bathymetric Data Base Variable Resolution and data 
-from the GLOBE project which has a global digital elevation model. Earth Color Enhanced 
+local Description = [[Many datasets have been created by utilizing the ETOPO2 dataset,
+which was generated from digital databases of seafloor and land elevations on a 2-minute
+latitude/longitude grid (1 minute of latitude = 1 nautical mile, or 1.15 statute miles).
+The ETOPO2 is a combination of satellite altimetry observations, shipboard echo-sounding
+measurements, data from the Digital Bathymetric Data Base Variable Resolution and data
+from the GLOBE project which has a global digital elevation model. Earth Color Enhanced
 uses green, yellow, orange, red and white to denote increasing elevation of the land]]
 local URL = "https://sos.noaa.gov/catalog/datasets/etopo2-topography-and-bathymetry-bright-colors/"
 
@@ -20,7 +21,8 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -28,15 +30,17 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
+asset.export(Layer)
+
 
 
 asset.meta = {

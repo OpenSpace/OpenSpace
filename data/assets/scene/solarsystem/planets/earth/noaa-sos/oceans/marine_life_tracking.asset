@@ -1,14 +1,15 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Marine Life Tracks: Pacific Ocean"
 local Identifier = "noaa-sos-oceans-marine_life_tracking"
-local Description = [[This dataset contains the locations of a leatherback turtle, a 
-northern elephant seal, and two white sharks for each day over the course of several 
-months. The data used was taken from topp.org (TOPP stands for Tagging of Pelagic 
-Predators), a site that tracks marine animals in an attempt to learn more about them. 
-TOPP's goal is to protect marine wildlife from overfishing, climate change, and various 
-other threats. The purpose of this dataset is to serve as an example of a hand-made 
+local Description = [[This dataset contains the locations of a leatherback turtle, a
+northern elephant seal, and two white sharks for each day over the course of several
+months. The data used was taken from topp.org (TOPP stands for Tagging of Pelagic
+Predators), a site that tracks marine animals in an attempt to learn more about them.
+TOPP's goal is to protect marine wildlife from overfishing, climate change, and various
+other threats. The purpose of this dataset is to serve as an example of a hand-made
 animal tracking dataset. For a more extensive dataset using data from TOPP, go here]]
 local URL = "https://sos.noaa.gov/catalog/datasets/marine-life-tracks-pacific-ocean/"
 
@@ -20,7 +21,8 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -28,7 +30,7 @@ local layer = {
   Description = Description
 }
 
-local legend = {
+local Legend = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -38,18 +40,20 @@ local legend = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(legend);  
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(legend)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(legend)
+asset.export(Layer)
+asset.export(Legend)
+
 
 
 asset.meta = {

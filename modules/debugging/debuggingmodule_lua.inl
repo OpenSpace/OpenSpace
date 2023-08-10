@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,25 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/scene/scene.h>
+
 namespace {
 
 constexpr const char RenderedPathIdentifier[] = "CurrentCameraPath";
 constexpr const char RenderedPointsIdentifier[] = "CurrentPathControlPoints";
 constexpr const char DebuggingGuiPath[] = "/Debugging";
 
-constexpr glm::vec3 PathColor = { 1.0, 1.0, 0.0 };
-constexpr glm::vec3 OrientationLineColor = { 0.0, 1.0, 1.0 };
-
-// Conver the input string to a format that is valid as an identifier
-std::string makeIdentifier(std::string s) {
-    std::replace(s.begin(), s.end(), ' ', '_');
-    std::replace(s.begin(), s.end(), '.', '-');
-    // Remove quotes and apostrophe, since they cause problems
-    // when a string is translated to a script call
-    s.erase(remove(s.begin(), s.end(), '\"'), s.end());
-    s.erase(remove(s.begin(), s.end(), '\''), s.end());
-    return s;
-}
+constexpr glm::vec3 PathColor = glm::vec3(1.0, 1.0, 0.0);
+constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
 /**
  * Render the current camera path from the path navigation system. The first optional
@@ -190,7 +181,7 @@ std::string makeIdentifier(std::string s) {
     // previously rendered ones
     std::string addParentScript = fmt::format(
         "if openspace.hasSceneGraphNode('{0}') then "
-        "openspace.removeSceneGraphNode('{0}') "
+            "openspace.removeSceneGraphNode('{0}') "
         "end "
         "openspace.addSceneGraphNode({{ Identifier = '{0}' }})",
         RenderedPointsIdentifier
@@ -215,23 +206,23 @@ std::string makeIdentifier(std::string s) {
             "Identifier = 'ControlPoint_" + std::to_string(i) + "',"
             "Parent = '" + RenderedPointsIdentifier + "',"
             "Transform = { "
-            "Translation = {"
-            "Type = 'StaticTranslation',"
-            "Position = " + ghoul::to_string(points[i]) + ""
-            "},"
+                "Translation = {"
+                    "Type = 'StaticTranslation',"
+                    "Position = " + ghoul::to_string(points[i]) + ""
+                "},"
             "},"
             "Renderable = {"
-            "Type = 'RenderableSphere',"
-            "Enabled = true,"
-            "Segments = 30,"
-            "Size = " + std::to_string(radius) + ","
-            "Texture = " + colorTexturePath + ""
+                "Type = 'RenderableSphere',"
+                "Enabled = true,"
+                "Segments = 30,"
+                "Size = " + std::to_string(radius) + ","
+                "Texture = " + colorTexturePath + ""
             "},"
             "GUI = {"
-            "Name = 'Control Point " + std::to_string(i) + "',"
-            "Path = '" + guiPath + "'"
+                "Name = 'Control Point " + std::to_string(i) + "',"
+                "Path = '" + guiPath + "'"
             "}"
-            "}";
+        "}";
 
         global::scriptEngine->queueScript(
             fmt::format("openspace.addSceneGraphNode({})", node),
@@ -280,21 +271,21 @@ std::string makeIdentifier(std::string s) {
         "Identifier = '" + identifier + "',"
         "Parent = '" + nodeIdentifier + "',"
         "Transform = { "
-        "Scale = {"
-        "Type = 'StaticScale',"
-        "Scale = " + std::to_string(*scale) + ""
-        "}"
+            "Scale = {"
+                "Type = 'StaticScale',"
+                "Scale = " + std::to_string(*scale) + ""
+            "}"
         "},"
         "Renderable = {"
-        "Type = 'RenderableCartesianAxes',"
-        "Enabled = true,"
-        "XColor = { 1.0, 0.0, 0.0 },"
-        "YColor = { 0.0, 1.0, 0.0 },"
-        "ZColor = { 0.0, 0.0, 1.0 }"
+            "Type = 'RenderableCartesianAxes',"
+            "Enabled = true,"
+            "XColor = { 1.0, 0.0, 0.0 },"
+            "YColor = { 0.0, 1.0, 0.0 },"
+            "ZColor = { 0.0, 0.0, 1.0 }"
         "},"
         "GUI = {"
-        "Name = '" + identifier + "',"
-        "Path = '" + DebuggingGuiPath + "/Coordiante Systems'"
+            "Name = '" + identifier + "',"
+            "Path = '" + DebuggingGuiPath + "/Coordiante Systems'"
         "}"
     "}";
 

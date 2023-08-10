@@ -1,6 +1,5 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local transforms = asset.require("./transforms")
 local NewHorizonsModel = asset.require("./model")
+
 
 
 local models = asset.syncedResource({
@@ -24,12 +23,13 @@ local Labels = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Labels)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Labels)
 end)
-  
+
 asset.export(Labels)

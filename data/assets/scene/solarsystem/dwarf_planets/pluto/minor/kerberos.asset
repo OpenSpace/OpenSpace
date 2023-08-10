@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
 
 
 
@@ -15,13 +14,13 @@ local Kerberos = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 0.1E5, 0.1E5, 0.1E5 },
+    Radii = { 10000, 10000, 10000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
   Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
   GUI = {
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Kerberos"
   }
 }
 
@@ -39,30 +38,59 @@ local KerberosTrail = {
     Period = 32.16756,
     Resolution = 1000
   },
-  Tag = { 
-    "moonTrail_solarSystem", 
-    "moonTrail_dwarf", 
-    "moonTrail_pluto", 
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
     "moonTrail_minor"
   },
   GUI = {
     Name = "Kerberos Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Kerberos"
   }
 }
+
+local KerberosLabel = {
+  Identifier = "KerberosLabel",
+  Parent = Kerberos.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Kerberos",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1000.0 },
+    FadeWidths = { 150.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Kerberos Label",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Kerberos",
+    Description = "Label for Pluto's moon Kerberos"
+  }
+}
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Kerberos)
   openspace.addSceneGraphNode(KerberosTrail)
+  openspace.addSceneGraphNode(KerberosLabel)
 end)
-  
+
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(KerberosLabel)
   openspace.removeSceneGraphNode(KerberosTrail)
   openspace.removeSceneGraphNode(Kerberos)
 end)
-  
+
 asset.export(Kerberos)
 asset.export(KerberosTrail)
+asset.export(KerberosLabel)
 
 
 

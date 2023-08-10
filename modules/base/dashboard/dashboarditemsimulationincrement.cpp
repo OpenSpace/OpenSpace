@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,14 +41,18 @@ namespace {
         "Time Simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
-        "displayed in seconds"
+        "displayed in seconds",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this time unit is used as a destination to "
-        "convert the seconds into"
+        "convert the seconds into",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransitionFormatInfo = {
@@ -59,7 +63,8 @@ namespace {
         "delta time. This format gets five parameters in this order:  The target delta "
         "time value, the target delta time unit, the string 'Paused' if the delta time "
         "is paused or the empty string otherwise, the current delta time value, and the "
-        "current delta time unit"
+        "current delta time unit",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RegularFormatInfo = {
@@ -68,7 +73,8 @@ namespace {
         "The format string used to format the text if the target delta time is the same "
         "as the current delta time. This format gets three parameters in this order:  "
         "The target delta value, the target delta unit, and the string 'Paused' if the "
-        "delta time is paused or the empty string otherwise"
+        "delta time is paused or the empty string otherwise",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     std::vector<std::string> unitList() {
@@ -151,7 +157,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     const double targetDt = global::timeManager->targetDeltaTime();
     const double currentDt = global::timeManager->deltaTime();
@@ -167,17 +173,17 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
         const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
 
         const double convTarget = convertTime(targetDt, TimeUnit::Second, unit);
-        targetDeltaTime = {
+        targetDeltaTime = std::pair(
             convTarget,
             std::string(nameForTimeUnit(unit, convTarget != 1.0))
-        };
+        );
 
         if (targetDt != currentDt) {
             const double convCurrent = convertTime(currentDt, TimeUnit::Second, unit);
-            currentDeltaTime = {
+            currentDeltaTime = std::pair(
                 convCurrent,
                 std::string(nameForTimeUnit(unit, convCurrent != 1.0))
-            };
+            );
         }
     }
 
@@ -215,7 +221,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     double t = global::timeManager->targetDeltaTime();
     std::pair<double, std::string> deltaTime;
@@ -225,10 +231,10 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
     else {
         TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
         double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = {
+        deltaTime = std::pair(
             convertedT,
             std::string(nameForTimeUnit(unit, convertedT != 1.0))
-        };
+        );
     }
 
     return _font->boundingBox(

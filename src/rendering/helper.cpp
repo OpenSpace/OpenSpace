@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/scene/lightsource.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
@@ -144,8 +145,8 @@ VertexObjects& gVertexObjectsConstructor() {
 } // namespace detail
 
 void initialize() {
-    ZoneScoped
-    TracyGpuZone("helper::initialize")
+    ZoneScoped;
+    TracyGpuZone("helper::initialize");
 
     ghoul_assert(!isInitialized, "Rendering Helper initialized twice");
 
@@ -502,6 +503,28 @@ std::pair<std::vector<Vertex>, std::vector<GLushort>> createSphere(int nSegments
     }
 
     return { vertices, indices };
+}
+
+void LightSourceRenderData::updateBasedOnLightSources(const RenderData& renderData,
+                                const std::vector<std::unique_ptr<LightSource>>& sources)
+{
+    unsigned int nEnabledLightSources = 0;
+    intensitiesBuffer.resize(sources.size());
+    directionsViewSpaceBuffer.resize(sources.size());
+
+    // Get intensities and view space direction for the given light sources,
+    // given the provided render data information
+    for (const std::unique_ptr<LightSource>& lightSource : sources) {
+        if (!lightSource->isEnabled()) {
+            continue;
+        }
+        intensitiesBuffer[nEnabledLightSources] = lightSource->intensity();
+        directionsViewSpaceBuffer[nEnabledLightSources] =
+            lightSource->directionViewSpace(renderData);
+
+        ++nEnabledLightSources;
+    }
+    nLightSources = nEnabledLightSources;
 }
 
 } // namespace openspace::rendering::helper

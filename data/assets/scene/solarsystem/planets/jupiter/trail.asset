@@ -1,5 +1,5 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -24,14 +24,15 @@ local JupiterTrail = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JupiterTrail)
 end)
-  
+
 asset.export(JupiterTrail)
 
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -145,7 +145,7 @@ public:
     // [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
     const glm::mat4& viewProjectionMatrix() const;
 
-    std::vector<Syncable*> getSyncables();
+    std::vector<Syncable*> syncables();
 
     // Static constants
     // (2021-07-16, emmbr) Note that this hard coded vector for the view direction is also

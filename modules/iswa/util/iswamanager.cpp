@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -97,7 +97,7 @@ namespace openspace {
 IswaManager* IswaManager::_instance = nullptr;
 
 IswaManager::IswaManager()
-    : properties::PropertyOwner({ "IswaManager" })
+    : properties::PropertyOwner({ "IswaManager", "Iswa Manager" })
     , _baseUrl("https://iswa-demo-server.herokuapp.com/")
 {
     _type[CygnetType::Texture] = "Texture";

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,20 +39,32 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered"
+        "This value determines the color of the grid lines that are rendered",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that are used to render the "
-        "surrounding sphere"
+        "surrounding sphere",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid"
+        "This value specifies the line width of the spherical grid",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        "Labels",
+        "Labels",
+        "The labels for the grid"
     };
 
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
@@ -64,6 +76,10 @@ namespace {
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(LabelsInfo.description)]]
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("space_labelscomponent")]];
     };
 #include "renderablesphericalgrid_codegen.cpp"
 } // namespace
@@ -83,15 +99,14 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
     _segments = p.segments.value_or(_segments);
-    _segments.onChange([&]() {
+    _segments.onChange([this]() {
         if (_segments.value() % 2 == 1) {
             _segments = _segments - 1;
         }
@@ -104,12 +119,25 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 
     // Radius is always 1
     setBoundingSphere(1.0);
+
+    if (p.labels.has_value()) {
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
+    }
 }
 
 bool RenderableSphericalGrid::isReady() const {
-    bool ready = true;
-    ready &= (_gridProgram != nullptr);
-    return ready;
+    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+}
+
+void RenderableSphericalGrid::initialize() {
+    if (_hasLabels) {
+        _labels->initialize();
+        _labels->loadLabels();
+    }
 }
 
 void RenderableSphericalGrid::initializeGL() {
@@ -162,14 +190,14 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-                                          modelTransform;
+    const glm::dmat4 modelViewTransform =
+        data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+
+    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform(
-        "MVPTransform",
-        glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
-    );
+    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
@@ -195,6 +223,31 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
+
+    // Draw labels
+    if (_hasLabels && _labels->enabled()) {
+        const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+        const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+        glm::vec3 right = glm::cross(viewDirection, lookup);
+        const glm::vec3 up = glm::cross(right, viewDirection);
+
+        const glm::dmat4 worldToModelTransform = glm::inverse(modelTransform);
+        glm::vec3 orthoRight = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+        );
+
+        if (orthoRight == glm::vec3(0.0)) {
+            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+            right = glm::cross(viewDirection, otherVector);
+            orthoRight = glm::normalize(
+                glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+            );
+        }
+        const glm::vec3 orthoUp = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
+        );
+        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+    }
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {

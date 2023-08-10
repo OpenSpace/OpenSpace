@@ -5,12 +5,14 @@ local icons = asset.syncedResource({
   Version = 1
 })
 
+
 local marker = {
   Identifier = "target-marker",
   Name = "Target Marker",
   Type = "ScreenSpaceImageLocal",
   TexturePath = icons .. "target.png"
 }
+
 
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(marker)

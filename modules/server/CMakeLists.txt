@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(HEADER_FILES
@@ -39,6 +39,7 @@ set(HEADER_FILES
   include/topics/flightcontrollertopic.h
   include/topics/getpropertytopic.h
   include/topics/luascripttopic.h
+  include/topics/missiontopic.h
   include/topics/sessionrecordingtopic.h
   include/topics/setpropertytopic.h
   include/topics/shortcuttopic.h
@@ -65,6 +66,7 @@ set(SOURCE_FILES
   src/topics/flightcontrollertopic.cpp
   src/topics/getpropertytopic.cpp
   src/topics/luascripttopic.cpp
+  src/topics/missiontopic.cpp
   src/topics/sessionrecordingtopic.cpp
   src/topics/setpropertytopic.cpp
   src/topics/shortcuttopic.cpp

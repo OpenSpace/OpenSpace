@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@ namespace openspace::globebrowsing {
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(
         layerGroup.activeLayers().size() == _gpuActiveLayers.size(),
@@ -48,7 +48,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
         auto& galuc = gal.uniformCache;
         const Layer& al = *activeLayers[i];
 
-        program.setUniform(galuc.opacity, al.renderSettings().opacity);
+        program.setUniform(galuc.opacity, al.opacity());
         program.setUniform(galuc.gamma, al.renderSettings().gamma);
         program.setUniform(galuc.multiplier, al.renderSettings().multiplier);
         program.setUniform(galuc.offset, al.renderSettings().offset);
@@ -66,15 +66,16 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
 
         switch (al.type()) {
             // Intentional fall through. Same for all tile layers
-            case layers::Layer::ID::DefaultTileLayer:
-            case layers::Layer::ID::SingleImageTileLayer:
-            case layers::Layer::ID::SpoutImageTileLayer:
-            case layers::Layer::ID::ImageSequenceTileLayer:
-            case layers::Layer::ID::SizeReferenceTileLayer:
-            case layers::Layer::ID::TemporalTileLayer:
-            case layers::Layer::ID::TileIndexTileLayer:
-            case layers::Layer::ID::ByIndexTileLayer:
-            case layers::Layer::ID::ByLevelTileLayer: {
+            case layers::Layer::ID::DefaultTileProvider:
+            case layers::Layer::ID::SingleImageProvider:
+            case layers::Layer::ID::SpoutImageProvider:
+            case layers::Layer::ID::VideoTileProvider:
+            case layers::Layer::ID::ImageSequenceTileProvider:
+            case layers::Layer::ID::SizeReferenceTileProvider:
+            case layers::Layer::ID::TemporalTileProvider:
+            case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByIndex:
+            case layers::Layer::ID::TileProviderByLevel: {
                 const ChunkTilePile& ctp = al.chunkTilePile(
                     tileIndex,
                     layerGroup.pileSize()
@@ -145,15 +146,16 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
 
         switch (al.type()) {
             // Intentional fall through. Same for all tile layers
-            case layers::Layer::ID::DefaultTileLayer:
-            case layers::Layer::ID::SingleImageTileLayer:
-            case layers::Layer::ID::SpoutImageTileLayer:
-            case layers::Layer::ID::ImageSequenceTileLayer:
-            case layers::Layer::ID::SizeReferenceTileLayer:
-            case layers::Layer::ID::TemporalTileLayer:
-            case layers::Layer::ID::TileIndexTileLayer:
-            case layers::Layer::ID::ByIndexTileLayer:
-            case layers::Layer::ID::ByLevelTileLayer: {
+            case layers::Layer::ID::DefaultTileProvider:
+            case layers::Layer::ID::SingleImageProvider:
+            case layers::Layer::ID::SpoutImageProvider:
+            case layers::Layer::ID::VideoTileProvider:
+            case layers::Layer::ID::ImageSequenceTileProvider:
+            case layers::Layer::ID::SizeReferenceTileProvider:
+            case layers::Layer::ID::TemporalTileProvider:
+            case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByIndex:
+            case layers::Layer::ID::TileProviderByLevel: {
                 gal.gpuChunkTiles.resize(pileSize);
                 for (size_t j = 0; j < gal.gpuChunkTiles.size(); ++j) {
                     GPULayer::GPUChunkTile& t = gal.gpuChunkTiles[j];

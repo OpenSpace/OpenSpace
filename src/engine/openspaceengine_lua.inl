@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/openspace.h>
+#include <ghoul/misc/csvreader.h>
 
 namespace {
 
@@ -38,8 +39,7 @@ namespace {
  * Writes out documentation files
  */
 [[codegen::luawrap]] void writeDocumentation() {
-    openspace::global::openSpaceEngine->writeStaticDocumentation();
-    openspace::global::openSpaceEngine->writeSceneDocumentation();
+    openspace::global::openSpaceEngine->writeDocumentation();
 }
 
 // Sets the folder used for storing screenshots or session recording frames
@@ -184,6 +184,7 @@ namespace {
 /**
  * This function returns information about the current OpenSpace version. The resulting
  * table has the structure:
+ * \code
  * Version = {
  *   Major = <number>
  *   Minor = <number>
@@ -191,6 +192,7 @@ namespace {
  * },
  * Commit = <string>
  * Branch = <string>
+ * \endcode
  */
 [[codegen::luawrap]] ghoul::Dictionary version() {
     ghoul::Dictionary res;
@@ -205,6 +207,32 @@ namespace {
     res.setValue("Branch", std::string(openspace::OPENSPACE_GIT_BRANCH));
 
     return res;
+}
+
+/**
+ * Loads the CSV file provided as a parameter and returns it as a vector containing the
+ * values of the each row. The inner vector has the same number of values as the CSV has
+ * columns. The second parameter controls whether the first entry in the returned outer
+ * vector is containing the names of the columns
+ */
+[[codegen::luawrap]] std::vector<std::vector<std::string>> readCSVFile(
+                                                               std::filesystem::path file,
+                                                            bool includeFirstLine = false)
+{
+    if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
+        throw ghoul::lua::LuaError(fmt::format("Could not find file {}", file));
+    }
+
+    std::vector<std::vector<std::string>> res =
+        ghoul::loadCSVFile(file.string(), includeFirstLine);
+    return res;
+}
+
+/**
+ * Resets the camera position to the same position where the profile originally started
+ */
+[[codegen::luawrap]] void resetCamera() {
+    openspace::setCameraFromProfile(*openspace::global::profile);
 }
 
 #include "openspaceengine_lua_codegen.cpp"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ documentation::Documentation TileProviderByLevel::Documentation() {
 }
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -56,7 +56,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         ghoul::Dictionary& tileProviderDict = provider.tileProvider;
         tileProviderDict.setValue("LayerGroupID", static_cast<int>(group));
 
-        layers::Layer::ID typeID = layers::Layer::ID::DefaultTileLayer;
+        layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
         if (tileProviderDict.hasValue<std::string>("Type")) {
             std::string type = tileProviderDict.value<std::string>("Type");
             typeID = ghoul::from_string<layers::Layer::ID>(type);
@@ -107,7 +107,7 @@ void TileProviderByLevel::internalDeinitialize() {
 }
 
 Tile TileProviderByLevel::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     TileProvider* provider = levelProvider(tileIndex.level);
     if (provider) {
@@ -124,7 +124,7 @@ Tile::Status TileProviderByLevel::tileStatus(const TileIndex& index) {
 }
 
 TileProvider* TileProviderByLevel::levelProvider(int level) const {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_levelTileProviders.empty()) {
         int clampedLevel = glm::clamp(

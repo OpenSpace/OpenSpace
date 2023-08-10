@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,8 +39,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format String",
-        "The format text describing how this dashboard item renders it's text. This text "
-        "must contain exactly one {} which is a placeholder that will contain the date"
+        "The format text describing how this dashboard item renders its text. This text "
+        "must contain exactly one {} which is a placeholder that will contain the date",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeFormatInfo = {
@@ -49,7 +50,9 @@ namespace {
         "The format string used for formatting the date/time before being passed to the "
         "string in FormatString. See "
         "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html for full "
-        "information about how to structure this format"
+        "information about how to structure this format",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemDate)]] Parameters {
@@ -83,7 +86,7 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
 }
 
 void DashboardItemDate::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     std::string time = SpiceManager::ref().dateFromEphemerisTime(
         global::timeManager->time().j2000Seconds(),
@@ -104,7 +107,7 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemDate::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::string_view time = global::timeManager->time().UTC();
     return _font->boundingBox(fmt::format(fmt::runtime(_formatString.value()), time));

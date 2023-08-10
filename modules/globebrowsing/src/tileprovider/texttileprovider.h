@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,8 @@ public:
 
 protected:
     Tile renderTile(const TileIndex& tileIndex, const std::string& text,
-        const glm::vec2& position, const glm::vec4& color);
+        const glm::vec2& position, const glm::vec4& color,
+        const glm::vec4& backgroundColor = glm::vec4(0.0));
 
     const TileTextureInitData initData;
 

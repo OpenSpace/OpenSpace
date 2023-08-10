@@ -1,11 +1,12 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Country Names"
 local Identifier = "noaa-sos-overlays-country_pop_names"
-local Description = [[Overlays are datasets with transparent backgrounds that contain 
-foreground data used to augment other SOS datasets.This particular dataset overlays 
-country names with font size according to population onto any dataset that you are 
+local Description = [[Overlays are datasets with transparent backgrounds that contain
+foreground data used to augment other SOS datasets.This particular dataset overlays
+country names with font size according to population onto any dataset that you are
 viewing]]
 local URL = "https://sos.noaa.gov/catalog/datasets/country-names/"
 
@@ -17,7 +18,8 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -25,15 +27,17 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
-  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", Layer)
 end)
 
-asset.export(layer)
+asset.export(Layer)
+
 
 
 asset.meta = {

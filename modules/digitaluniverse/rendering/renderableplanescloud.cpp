@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -64,108 +62,88 @@ namespace {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point"
+        "size of each point",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
-        "TextColor",
-        "Text Color",
-        "The text color for the astronomical object"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
-        "TextOpacity",
-        "Text Opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
-        "TextSize",
-        "Text Size",
-        "The text size for the astronomical object labels"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
-        "LabelFile",
-        "Label File",
-        "The path to the label file that contains information about the astronomical "
-        "objects being rendered"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
-        "TextMinSize",
-        "Text Min Size",
-        "The minimal size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
-        "TextMaxSize",
-        "Text Max Size",
-        "The maximum size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered"
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        "Labels",
+        "Labels",
+        "The labels for the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects"
+        "Enables/Disables the drawing of the astronomical objects",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
-        "Transformation matrix to be applied to each astronomical object"
+        "Transformation matrix to be applied to each astronomical object",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane"
+        "This determines the blending mode that is applied to this plane",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
         "Texture Path",
-        "This value specifies the path for the textures in disk"
+        "This value specifies the path for the textures in disk",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LuminosityInfo = {
         "Luminosity",
         "Luminosity variable",
-        "Datavar variable to control the luminosity/size of the astronomical objects"
+        "Datavar variable to control the luminosity/size of the astronomical objects",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleLuminosityInfo = {
         "ScaleLuminosity",
         "ScaleLuminosity variable",
-        "Scaling control for the luminosity/size of the astronomical objects"
+        "Scaling control for the luminosity/size of the astronomical objects",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts"
+        "Debug option for rendering of billboards and texts",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
-        "our galaxy from which the astronomical object will start and end fading-in"
+        "our galaxy from which the astronomical object will start and end fading-in",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in effect",
-        "Enables/Disables the Fade-in effect"
+        "Enables/Disables the Fade-in effect",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PlaneMinSizeInfo = {
         "PlaneMinSize",
         "Plane Min Size in Pixels",
-        "The min size (in pixels) for the plane representing the astronomical object"
+        "The min size (in pixels) for the plane representing the astronomical object",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlanesCloud)]] Parameters {
@@ -176,23 +154,9 @@ namespace {
         // [[codegen::verbatim(ScaleFactorInfo.description)]]
         std::optional<float> scaleFactor;
 
-        // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor [[codegen::color()]];
-
-        // [[codegen::verbatim(TextOpacityInfo.description)]]
-        std::optional<float> textOpacity;
-
-        // [[codegen::verbatim(TextSizeInfo.description)]]
-        std::optional<float> textSize;
-
-        // [[codegen::verbatim(LabelFileInfo.description)]]
-        std::optional<std::string> labelFile;
-
-        // [[codegen::verbatim(LabelMinSizeInfo.description)]]
-        std::optional<int> textMinSize;
-
-        // [[codegen::verbatim(LabelMaxSizeInfo.description)]]
-        std::optional<int> textMaxSize;
+        // [[codegen::verbatim(LabelsInfo.description)]]
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("space_labelscomponent")]];
 
         // [[codegen::verbatim(TransformationMatrixInfo.description)]]
         std::optional<glm::dmat4x4> transformationMatrix;
@@ -245,10 +209,7 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
 
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 300000.f)
-    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
-    , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
+    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
     , _drawElements(DrawElementsInfo, true)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _fadeInDistances(
@@ -263,12 +224,12 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     if (p.file.has_value()) {
         _speckFile = absPath(*p.file);
         _hasSpeckFile = true;
-        _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+        _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
         addProperty(_drawElements);
     }
 
@@ -288,25 +249,14 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
 
     _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
     addProperty(_scaleFactor);
-    _scaleFactor.onChange([&]() { _dataIsDirty = true; });
+    _scaleFactor.onChange([this]() { _dataIsDirty = true; });
 
-    if (p.labelFile.has_value()) {
-        _labelFile = absPath(*p.labelFile);
-        _hasLabel = true;
-
-        _textColor = p.textColor.value_or(_textColor);
-        _textColor.setViewOption(properties::Property::ViewOptions::Color);
-        addProperty(_textColor);
-        _textColor.onChange([&]() { _textColorIsDirty = true; });
-
-        _textOpacity = p.textOpacity.value_or(_textOpacity);
-        addProperty(_textOpacity);
-
-        _textSize = p.textSize.value_or(_textSize);
-        addProperty(_textSize);
-
-        _textMinSize = p.textMinSize.value_or(_textMinSize);
-        _textMaxSize = p.textMaxSize.value_or(_textMaxSize);
+    if (p.labels.has_value()) {
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
     }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
@@ -315,7 +265,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         { BlendModeNormal, "Normal" },
         { BlendModeAdditive, "Additive" }
     });
-    _blendMode.onChange([&]() {
+    _blendMode.onChange([this]() {
         switch (_blendMode) {
             case BlendModeNormal:
                 setRenderBin(Renderable::RenderBin::Opaque);
@@ -360,11 +310,17 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
 }
 
 bool RenderablePlanesCloud::isReady() const {
-    return (_program && (!_dataset.entries.empty())) || (!_labelset.entries.empty());
+    bool isReady = _program && !_dataset.entries.empty();
+
+    // If we have labels, they also need to be loaded
+    if (_hasLabels) {
+        isReady = isReady || _labels->isReady();
+    }
+    return isReady;
 }
 
 void RenderablePlanesCloud::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_hasSpeckFile && std::filesystem::is_regular_file(_speckFile)) {
         _dataset = speck::data::loadFileWithCache(_speckFile);
@@ -373,17 +329,14 @@ void RenderablePlanesCloud::initialize() {
         }
     }
 
-    if (!_labelFile.empty()) {
-        LINFO(fmt::format("Loading Label file {}", _labelFile));
-        _labelset = speck::label::loadFileWithCache(_labelFile);
-        for (speck::Labelset::Entry& e : _labelset.entries) {
-            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
-        }
+    if (_hasLabels) {
+        _labels->initialize();
+        _labels->loadLabels();
     }
 }
 
 void RenderablePlanesCloud::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         "RenderablePlanesCloud",
@@ -400,18 +353,6 @@ void RenderablePlanesCloud::initializeGL() {
 
     createPlanes();
     loadTextures();
-
-    if (_hasLabel) {
-        if (!_font) {
-            constexpr int FontSize = 30;
-            _font = global::fontManager->font(
-                "Mono",
-                static_cast<float>(FontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes,
-                ghoul::fontrendering::FontManager::LoadGlyphs::No
-            );
-        }
-    }
 }
 
 void RenderablePlanesCloud::deleteDataGPUAndCPU() {
@@ -488,39 +429,6 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
-void RenderablePlanesCloud::renderLabels(const RenderData& data,
-                                         const glm::dmat4& modelViewProjectionMatrix,
-                                         const glm::dvec3& orthoRight,
-                                         const glm::dvec3& orthoUp, float fadeInVariable)
-{
-    double scale = toMeter(_unit);
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity * fadeInVariable);
-
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-    labelInfo.orthoRight = orthoRight;
-    labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = _textMinSize;
-    labelInfo.maxSize = _textMaxSize;
-    labelInfo.cameraPos = data.camera.positionVec3();
-    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = _renderOption;
-    labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, _textSize);
-    labelInfo.enableDepth = true;
-    labelInfo.enableFalseDepth = false;
-
-    for (const speck::Labelset::Entry& e : _labelset.entries) {
-        glm::dvec3 scaledPos = glm::dvec3(e.position) * scale;
-        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
-            *_font,
-            scaledPos,
-            e.text,
-            textColor,
-            labelInfo
-        );
-    }
-}
-
 void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     const double scale = toMeter(_unit);
 
@@ -547,24 +455,25 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
 
     const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     const glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-    const glm::dmat4 mvpMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
-
-    const glm::dmat4 invMVPParts = glm::inverse(modelMatrix) *
-                                   glm::inverse(data.camera.combinedViewMatrix()) *
-                                   glm::inverse(glm::dmat4(projectionMatrix));
-    const glm::dvec3 orthoRight = glm::normalize(
-        glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))
-    );
-    const glm::dvec3 orthoUp = glm::normalize(
-        glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))
-    );
 
     if (_hasSpeckFile) {
         renderPlanes(data, modelViewMatrix, projectionMatrix, fadeInVariable);
     }
 
-    if (_hasLabel) {
-        renderLabels(data, mvpMatrix, orthoRight, orthoUp, fadeInVariable);
+    if (_hasLabels) {
+        const glm::dmat4 mvpMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+
+        const glm::dmat4 invMVPParts = glm::inverse(modelMatrix) *
+            glm::inverse(data.camera.combinedViewMatrix()) *
+            glm::inverse(glm::dmat4(projectionMatrix));
+        const glm::dvec3 orthoRight = glm::normalize(
+            glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))
+        );
+        const glm::dvec3 orthoUp = glm::normalize(
+            glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))
+        );
+
+        _labels->render(data, mvpMatrix, orthoRight, orthoUp, fadeInVariable);
     }
 }
 
@@ -752,10 +661,6 @@ void RenderablePlanesCloud::createPlanes() {
 
         setBoundingSphere(maxRadius * _scaleFactor);
         _fadeInDistances.setMaxValue(glm::vec2(10.f * maxSize));
-    }
-
-    if (_hasLabel && _labelDataIsDirty) {
-        _labelDataIsDirty = false;
     }
 }
 

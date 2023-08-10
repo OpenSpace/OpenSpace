@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -96,13 +96,13 @@ void ActionManager::triggerAction(const std::string& identifier,
     if (arguments.isEmpty()) {
         global::scriptEngine->queueScript(
             a.command,
-            scripting::ScriptEngine::RemoteScripting(a.synchronization)
+            scripting::ScriptEngine::RemoteScripting(!a.isLocal)
         );
     }
     else {
         global::scriptEngine->queueScript(
             fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command),
-            scripting::ScriptEngine::RemoteScripting(a.synchronization)
+            scripting::ScriptEngine::RemoteScripting(!a.isLocal)
         );
     }
 }

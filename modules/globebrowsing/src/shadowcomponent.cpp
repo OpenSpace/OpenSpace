@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,23 +54,36 @@
 namespace {
     constexpr std::string_view _loggerCat = "ShadowComponent";
 
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Enable/Disable Shadows",
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
         "Save Depth Texture",
-        "Debug"
+        "Debug",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceFractionInfo = {
         "DistanceFraction",
         "Distance Fraction",
         "Distance fraction of original distance from light source to the globe to be "
-        "considered as the new light source distance"
+        "considered as the new light source distance",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DepthMapSizeInfo = {
         "DepthMapSize",
         "Depth Map Size",
-        "The depth map size in pixels. You must entry the width and height values"
+        "The depth map size in pixels. You must entry the width and height values",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
@@ -158,7 +171,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "ShadowsComponent" })
     , _saveDepthTexture(SaveDepthTextureInfo)
     , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
-    , _enabled({ "Enabled", "Enabled", "Enable/Disable Shadows" }, true)
+    , _enabled(EnabledInfo, true)
 {
     using ghoul::filesystem::File;
 
@@ -178,7 +191,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     _distanceFraction = p.distanceFraction.value_or(_distanceFraction);
     addProperty(_distanceFraction);
 
-    _saveDepthTexture.onChange([&]() { _executeDepthTextureSave = true; });
+    _saveDepthTexture.onChange([this]() { _executeDepthTextureSave = true; });
 
     if (p.depthMapSize.has_value()) {
         _shadowDepthTextureWidth = p.depthMapSize->x;
@@ -204,7 +217,7 @@ bool ShadowComponent::isReady() const {
 }
 
 void ShadowComponent::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     createDepthTexture();
     createShadowFBO();
@@ -218,6 +231,15 @@ void ShadowComponent::deinitializeGL() {
 }
 
 RenderData ShadowComponent::begin(const RenderData& data) {
+    glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
+    if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
+        (_shadowDepthTextureHeight != renderingResolution.y)))
+    {
+        _shadowDepthTextureWidth = renderingResolution.x * 2;
+        _shadowDepthTextureHeight = renderingResolution.y * 2;
+        updateDepthTexture();
+    }
+
     // ===========================================
     // Builds light's ModelViewProjectionMatrix:
     // ===========================================
@@ -353,7 +375,7 @@ void ShadowComponent::end() {
 }
 
 void ShadowComponent::update(const UpdateData&) {
-    ZoneScoped
+    ZoneScoped;
 
     SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
     if (sun) {
@@ -361,15 +383,6 @@ void ShadowComponent::update(const UpdateData&) {
     }
     else {
         _sunPosition = glm::dvec3(0.0);
-    }
-
-    glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
-    if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
-        (_shadowDepthTextureHeight != renderingResolution.y)))
-    {
-        _shadowDepthTextureWidth = renderingResolution.x * 2;
-        _shadowDepthTextureHeight = renderingResolution.y * 2;
-        updateDepthTexture();
     }
 }
 

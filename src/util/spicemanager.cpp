@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -151,9 +151,9 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString(
 
 SpiceManager::SpiceManager() {
     // Set the SPICE library to not exit the program if an error occurs
-    erract_c("SET", 0, const_cast<char*>("REPORT")); // NOLINT
+    erract_c("SET", 0, const_cast<char*>("REPORT"));
     // But we do not want SPICE to print the errors, we will fetch them ourselves
-    errprt_c("SET", 0, const_cast<char*>("NONE")); // NOLINT
+    errprt_c("SET", 0, const_cast<char*>("NONE"));
 }
 
 SpiceManager::~SpiceManager() {
@@ -162,8 +162,8 @@ SpiceManager::~SpiceManager() {
     }
 
     // Set values back to default
-    erract_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
-    errprt_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
+    erract_c("SET", 0, const_cast<char*>("DEFAULT"));
+    errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
 }
 
 void SpiceManager::initialize() {
@@ -588,16 +588,23 @@ double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
 
 std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime, const char* format)
 {
-    char Buffer[128];
-    std::memset(Buffer, char(0), 128);
+    constexpr int BufferSize = 128;
+    char Buffer[BufferSize];
+    std::memset(Buffer, char(0), BufferSize);
 
-    timout_c(ephemerisTime, format, 128, Buffer);
+    timout_c(ephemerisTime, format, BufferSize, Buffer);
     if (failed_c()) {
         throwSpiceError(fmt::format(
             "Error converting ephemeris time '{}' to date with format '{}'",
             ephemerisTime, format
         ));
     }
+    if (Buffer[0] == '*') {
+        // The conversion failed and we need to use et2utc
+        constexpr int SecondsPrecision = 3;
+        et2utc_c(ephemerisTime, "C", SecondsPrecision, BufferSize, Buffer);
+    }
+
 
     return std::string(Buffer);
 }
@@ -1043,7 +1050,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     }
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
+        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);
 
 #if defined __clang__
 #pragma clang diagnostic pop
@@ -1102,7 +1109,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     }
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
+        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i);
 
 #if defined __clang__
 #pragma clang diagnostic pop
@@ -1142,7 +1149,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
                                               double ephemerisTime,
                                               double& lightTime) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(!target.empty(), "Target must not be empty");
     ghoul_assert(!observer.empty(), "Observer must not be empty");

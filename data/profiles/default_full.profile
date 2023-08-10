@@ -1,41 +1,20 @@
 {
-  "actions": [
-    {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Solar System/Earth",
-      "identifier": "profile.toggle.satellite",
-      "is_local": false,
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Refocuses the camera on the ISS",
-      "gui_path": "/Solar System/Earth",
-      "identifier": "profile.focus.iss",
-      "is_local": false,
-      "name": "Focus ISS",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    },
-    {
-      "documentation": "Retargets the camera on Earth",
-      "gui_path": "/Solar System/Earth",
-      "identifier": "profile.focus.earth",
-      "is_local": false,
-      "name": "Focus on Earth",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    },
-    {
-      "documentation": "Toggle on/off minor moon trails for all planets in the solar system",
-      "gui_path": "/Trails",
-      "identifier": "profile.toggle.minormoons",
-      "is_local": false,
-      "name": "Toggle Minor Moon Trails",
-      "script": "local list = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    }
-  ],
   "assets": [
     "base",
+    "base_keybindings",
     "events/toggle_sun",
+    "scene/milkyway/objects/orionnebula/orionnebula",
+    "scene/solarsystem/dwarf_planets/ceres/ceres",
+    "scene/solarsystem/dwarf_planets/ceres/default_layers",
+    "scene/solarsystem/dwarf_planets/ceres/trail",
+    "scene/solarsystem/dwarf_planets/eris/eris",
+    "scene/solarsystem/dwarf_planets/gonggong/gonggong",
+    "scene/solarsystem/dwarf_planets/haumea/haumea",
+    "scene/solarsystem/dwarf_planets/makemake/makemake",
+    "scene/solarsystem/dwarf_planets/orcus/orcus",
+    "scene/solarsystem/dwarf_planets/quaoar/quaoar",
+    "scene/solarsystem/dwarf_planets/sedna/sedna",
+    "scene/solarsystem/dwarf_planets/vesta/vesta",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/jupiter/major_moons",
@@ -45,8 +24,7 @@
     "scene/solarsystem/planets/saturn/major_moons",
     "scene/solarsystem/planets/saturn/minor_moons",
     "scene/solarsystem/planets/uranus/major_moons",
-    "scene/solarsystem/planets/uranus/minor_moons",
-    "scene/milkyway/objects/orionnebula/orionnebula"
+    "scene/solarsystem/planets/uranus/minor_moons"
   ],
   "camera": {
     "altitude": 17000000.0,
@@ -79,20 +57,16 @@
   ],
   "keybindings": [
     {
-      "action": "profile.toggle.satellite",
+      "action": "os.solarsystem.ToggleSatelliteTrails",
       "key": "S"
     },
     {
-      "action": "profile.focus.iss",
+      "action": "os.solarsystem.FocusIss",
       "key": "I"
     },
     {
-      "action": "profile.focus.earth",
+      "action": "os.solarsystem.FocusEarth",
       "key": "HOME"
-    },
-    {
-      "action": "profile.toggle.minormoons",
-      "key": "SHIFT+H"
     }
   ],
   "mark_nodes": [
@@ -125,11 +99,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "relative",
     "value": "-1d"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 2
   }
 }

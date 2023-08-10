@@ -1,5 +1,6 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
+local transforms = asset.require("./transforms")
+
 
 
 local textures = asset.syncedResource({
@@ -8,6 +9,7 @@ local textures = asset.syncedResource({
   Identifier = "sun_textures",
   Version = 4
 })
+
 
 local SunMarker = {
   Identifier = "SunMarker",
@@ -28,14 +30,15 @@ local SunMarker = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SunMarker)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SunMarker)
 end)
-  
+
 asset.export(SunMarker)
 
 

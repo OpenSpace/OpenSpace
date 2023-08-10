@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,6 +49,10 @@ void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
     commandLine->AppendSwitch("use-mock-keychain");
     commandLine->AppendSwitch("enable-begin-frame-scheduling");
     commandLine->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
+#ifdef __APPLE__
+    commandLine->AppendSwitch("--disable-gpu-sandbox");
+    commandLine->AppendSwitch("--no-sandbox");
+#endif
 }
 
 } // namespace openspace

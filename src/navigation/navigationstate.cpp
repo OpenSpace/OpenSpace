@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -115,6 +115,9 @@ CameraPose NavigationState::cameraPose() const {
 
     const glm::dmat3 referenceFrameTransform = referenceFrameNode->modelTransform();
 
+    // @TODO (2023-05-16, emmbr) This computation is wrong and has to be fixed! Only
+    // works if the reference frame is also the anchor node. I remember that fixing it
+    // was not as easy as using referenceFrameNode instead of anchor node though..
     resultingPose.position = anchorNode->worldPosition() +
         referenceFrameTransform * glm::dvec3(position);
 

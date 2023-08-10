@@ -20,8 +20,11 @@ local images = asset.syncedResource({
   Name = "Rosetta Images",
   Type = "HttpSynchronization",
   Identifier = "rosettaimages",
-  Version = 2
+  Version = 2,
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
 })
+
 
 local imagesDestination = images .. "images"
 
@@ -45,63 +48,60 @@ local Comet67P = {
   Identifier = "67P",
   Parent = Barycenter.Identifier,
   Transform = {
-      Rotation = {
-          Type = "SpiceRotation",
-          SourceFrame = "67P/C-G_CK",
-          DestinationFrame = "GALACTIC"
-      }
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "67P/C-G_CK",
+      DestinationFrame = "GALACTIC"
+    }
   },
+  BoundingSphere = 5000.0,
   Renderable = {
-      Type = "RenderableModelProjection",
-      GeometryFile = models .. "67P_rotated_5_130.obj",
-      Projection = {
-        Sequence   = { imagesDestination },
-        SequenceType = "image-sequence",
-        Observer   = "ROSETTA",
-        Target     = "CHURYUMOV-GERASIMENKO",
-        Aberration = "NONE",
-        TextureMap = true,
-        ShadowMap = true,
-
-        DataInputTranslation = {
-          Instrument = {
-            NAVCAM = {
-              DetectorType  = "Camera",
-              Spice  = { "ROS_NAVCAM-A" }
-            }
-          },
-          Target = { 
-            Read  = {
-              "TARGET_NAME",
-              "INSTRUMENT_HOST_NAME",
-              "INSTRUMENT_ID",
-              "START_TIME",
-              "STOP_TIME"
-            },
-            Convert = {
-              CHURYUMOV = { "CHURYUMOV-GERASIMENKO" },
-              ROSETTA = { "ROSETTA" },
-              ["ROSETTA-ORBITER"] = { "ROSETTA" },
-              CHURYUMOVGERASIMENKO11969R1 = { "CHURYUMOV-GERASIMENKO" },
-              CHURYUMOVGERASIMENKO = { "CHURYUMOV-GERASIMENKO" },
-              ["CHURYUMOV-GERASIMENKO1(1969R1)"] = { "CHURYUMOV-GERASIMENKO" },
-              CALIBRATION = { "CALIBRATION" },
-              ALPHALYR = { "ALPHALYR" },
-              ZETACAS = { "ZETACAS" }
-            }
+    Type = "RenderableModelProjection",
+    GeometryFile = models .. "67P_rotated_5_130.obj",
+    Projection = {
+      Sequence = { imagesDestination },
+      SequenceType = "image-sequence",
+      Observer = "ROSETTA",
+      Target = "CHURYUMOV-GERASIMENKO",
+      Aberration = "NONE",
+      TextureMap = true,
+      ShadowMap = true,
+      DataInputTranslation = {
+        Instrument = {
+          NAVCAM = {
+            DetectorType = "Camera",
+            Spice = { "ROS_NAVCAM-A" }
           }
         },
-
-        Instrument = {
-          Name       = "ROS_NAVCAM-A",
-          Method     = "ELLIPSOID",
-          Aberration = "NONE",
-          Fovy       = 5.00,
-          Aspect     = 1
+        Target = {
+          Read = {
+            "TARGET_NAME",
+            "INSTRUMENT_HOST_NAME",
+            "INSTRUMENT_ID",
+            "START_TIME",
+            "STOP_TIME"
+          },
+          Convert = {
+            CHURYUMOV = { "CHURYUMOV-GERASIMENKO" },
+            ROSETTA = { "ROSETTA" },
+            ["ROSETTA-ORBITER"] = { "ROSETTA" },
+            CHURYUMOVGERASIMENKO11969R1 = { "CHURYUMOV-GERASIMENKO" },
+            CHURYUMOVGERASIMENKO = { "CHURYUMOV-GERASIMENKO" },
+            ["CHURYUMOV-GERASIMENKO1(1969R1)"] = { "CHURYUMOV-GERASIMENKO" },
+            CALIBRATION = { "CALIBRATION" },
+            ALPHALYR = { "ALPHALYR" },
+            ZETACAS = { "ZETACAS" }
+          }
         }
-    },
-
-    BoundingSphereRadius = 5000.0
+      },
+      Instrument = {
+        Name = "ROS_NAVCAM-A",
+        Method = "ELLIPSOID",
+        Aberration = "NONE",
+        Fovy = 5.00,
+        Aspect = 1
+      }
+    }
   },
   GUI = {
     Name = "67P Churymov-Gerasimenko",
@@ -130,29 +130,69 @@ local Trail67P = {
   }
 }
 
-asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting Rosetta images")
-    openspace.unzipFile(images .. "images_v1_v2.zip", imagesDestination, true)
-  end
-end)
+-- actions
+local Focus67p = {
+  Identifier = "os.rosetta.Focus67p",
+  Name = "Focus on 67P",
+  Command = [[
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "67P")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+  ]],
+  Documentation = "Sets the focus of the camera on 67P",
+  GuiPath = "/Missions/Rosetta",
+  isLocal = false
+}
 
+local ClearImageProjections = {
+  Identifier = "os.rosetta.ClearImageProjections",
+  Name = "Clear 67P projections",
+  Command = [[
+    openspace.setPropertyValue("Scene.67P.Renderable.ProjectionComponent.ClearAllProjections", true)
+  ]],
+  Documentation = "Removes all image projections from 67P",
+  GuiPath = "/Missions/Rosetta",
+  isLocal = false
+}
+
+local Toggle67pProjection = {
+  Identifier = "os.rosetta.Toggle67pProjection",
+  Name = "Toggle 67P projection",
+  Command = [[
+    openspace.setPropertyValueSingle(
+      "Scene.67P.Renderable.ProjectionComponent.PerformProjection",
+      not openspace.propertyValue("Scene.67P.Renderable.ProjectionComponent.PerformProjection")
+    )
+  ]],
+  Documentation = "Enables or disables the image projection on 67P",
+  GuiPath = "/Missions/Rosetta",
+  isLocal = false
+}
 
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Barycenter)
   openspace.addSceneGraphNode(Comet67P)
   openspace.addSceneGraphNode(Trail67P)
+
+  openspace.action.registerAction(Focus67p)
+  openspace.action.registerAction(ClearImageProjections)
+  openspace.action.registerAction(Toggle67pProjection)
 end)
-    
+
 asset.onDeinitialize(function()
+  openspace.action.removeAction(Toggle67pProjection)
+  openspace.action.removeAction(ClearImageProjections)
+  openspace.action.removeAction(Focus67p)
+
   openspace.removeSceneGraphNode(Trail67P)
   openspace.removeSceneGraphNode(Comet67P)
   openspace.removeSceneGraphNode(Barycenter)
 end)
-    
-asset.export("Barycenter", Barycenter) -- @TODO: This double export should disappear
-asset.export(Barycenter)
-asset.export("Comet67P", Comet67P)  -- @TODO: This double export should disappear
-asset.export(Comet67P)
+
+asset.export("Barycenter", Barycenter)
+asset.export("Comet67P", Comet67P)
 asset.export(Trail67P)
+asset.export("Focus67p", Focus67p.Identifier)
+asset.export("ClearImageProjections", ClearImageProjections.Identifier)
+asset.export("Toggle67pProjection", Toggle67pProjection.Identifier)

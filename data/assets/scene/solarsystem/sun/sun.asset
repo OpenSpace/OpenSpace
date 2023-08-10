@@ -1,5 +1,7 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
+local transforms = asset.require("./transforms")
+
+
 
 local Sun = {
   Identifier = "Sun",
@@ -7,7 +9,7 @@ local Sun = {
   Renderable = {
     Type = "RenderableGlobe",
     Enabled = false,
-    Radii = { 6.957E8, 6.957E8, 6.957E8 },
+    Radii = { 695700000, 695700000, 695700000 },
     SegmentsPerPatch = 64,
     Layers = {},
     PerformShading = false
@@ -25,7 +27,7 @@ local SunLabel = {
   Parent = Sun.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Sun",
     FontSize = 70.0,
     Size = 14.17,
@@ -48,20 +50,21 @@ local SunLabel = {
 local LightSource = {
   Type = "SceneGraphLightSource",
   Identifier = "Sun",
-  Node = transforms.SolarSystemBarycenter.Identifier,
+  Node = Sun.Identifier,
   Intensity = 1.0
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Sun)
   openspace.addSceneGraphNode(SunLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SunLabel)
   openspace.removeSceneGraphNode(Sun)
 end)
-    
+
 asset.export(Sun)
 asset.export(SunLabel)
 asset.export("LightSource", LightSource)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,6 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-#include <openspace/util/collisionhelper.h>
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
@@ -45,8 +44,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "Path";
     constexpr float LengthEpsilon = 1e-5f;
-
-    constexpr const char* SunIdentifier = "Sun";
 
     // TODO: where should this documentation be?
     // It's nice to have these to interpret the dictionary when creating the path, but
@@ -178,6 +175,11 @@ CameraPose Path::traversePath(double dt, float speedScale) {
     return newPose;
 }
 
+void Path::quitPath() {
+    _traveledDistance = pathLength();
+    _shouldQuit = true;
+}
+
 std::string Path::currentAnchor() const {
     bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
     return (pastHalfway) ? _end.nodeIdentifier() : _start.nodeIdentifier();
@@ -187,6 +189,9 @@ bool Path::hasReachedEnd() const {
     if (_shouldQuit) {
         return true;
     }
+
+    // @TODO (emmbr, 2022-11-07) Handle linear paths separately, as they might
+    // abort prematurely due to the "isPositionFinished" condition
 
     bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
 
@@ -210,6 +215,7 @@ void Path::resetPlaybackVariables() {
 CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
     ghoul_assert(_type == Type::Linear, "Path type must be linear");
     const double relativeDistance = distance / pathLength();
+
     const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
     const double remainingDistance = glm::length(prevPosToEnd);
     CameraPose pose;
@@ -223,9 +229,27 @@ CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
         // Just move along line from the current position to the target
         const glm::dvec3 lineDir = glm::normalize(prevPosToEnd);
         pose.position = _prevPose.position - displacement * lineDir;
+
+        double newRemainingDistance = glm::length(pose.position - _end.position());
+        double diff = remainingDistance - newRemainingDistance;
+        // Avoid remaining distances close to zero, or even negative
+        if (relativeDistance > 0.5 && diff < LengthEpsilon) {
+            // The positions are too large, so we are not making progress because of
+            // insufficient precision
+            LWARNING("Quit camera path prematurely due to insufficient precision");
+            _shouldQuit = true;
+            return _prevPose;
+        }
     }
 
     pose.rotation = linearPathRotation(relativeDistance);
+
+    if (glm::any(glm::isnan(pose.rotation)) || glm::any(glm::isnan(pose.position))) {
+        // This should not happen, but guard for it anyways
+        _shouldQuit = true;
+        return _prevPose;
+    }
+
     return pose;
 }
 
@@ -432,163 +456,6 @@ double Path::speedAlongPath(double traveledDistance) const {
     return _speedFactorFromDuration * speed * dampeningFactor;
 }
 
-Waypoint waypointFromCamera() {
-    Camera* camera = global::navigationHandler->camera();
-    const glm::dvec3 pos = camera->positionVec3();
-    const glm::dquat rot = camera->rotationQuaternion();
-    const std::string node = global::navigationHandler->anchorNode()->identifier();
-    return Waypoint{ pos, rot, node };
-}
-
-SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
-    const std::vector<SceneGraphNode*>& relevantNodes =
-        global::navigationHandler->pathNavigator().relevantNodes();
-
-    for (SceneGraphNode* n : relevantNodes) {
-        bool isSame = (n->identifier() == node->identifier());
-        // If the nodes are in the very same position, they are probably representing
-        // the same object
-        isSame |=
-            glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
-
-        if (isSame) {
-            continue;
-        }
-
-        constexpr float proximityRadiusFactor = 3.f;
-
-        const float bs = static_cast<float>(n->boundingSphere());
-        const float proximityRadius = proximityRadiusFactor * bs;
-        const glm::dvec3 posInModelCoords =
-            glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
-
-        bool isClose = collision::isPointInsideSphere(
-            posInModelCoords,
-            glm::dvec3(0.0, 0.0, 0.0),
-            proximityRadius
-        );
-
-        if (isClose) {
-            return n;
-        }
-    }
-
-    return nullptr;
-}
-
-// Compute a target position close to the specified target node, using knowledge of
-// the start point and a desired distance from the node's center
-glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
-                                    const Waypoint& startPoint)
-{
-    const glm::dvec3 nodePos = targetNode->worldPosition();
-    const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
-    const SceneGraphNode* sun = sceneGraphNode(SunIdentifier);
-
-    // @TODO (2021-07-09, emmbr): Not nice to depend on a specific scene graph node,
-    // as it might not exist. Ideally, each SGN could know about their preferred
-    // direction to be viewed from (their "good side"), and then that could be queried
-    // and used instead.
-    if (closeNode) {
-        // If the node is close to another node in the scene, set the direction in a way
-        // that minimizes risk of collision
-        return glm::normalize(nodePos - closeNode->worldPosition());
-    }
-    else if (!sun) {
-        // Can't compute position from Sun position, so just use any direction. Z will do
-        return glm::dvec3(0.0, 0.0, 1.0);
-    }
-    else if (targetNode->identifier() == SunIdentifier) {
-        // Special case for when the target is the Sun, in which we want to avoid a zero
-        // vector. The Z axis is chosen to provide an overview of the solar system, and
-        // not stay in the orbital plane
-        return glm::dvec3(0.0, 0.0, 1.0);
-    }
-    else {
-        // Go to a point that is lit up by the sun, slightly offsetted from sun direction
-        const glm::dvec3 sunPos = sun->worldPosition();
-
-        const glm::dvec3 prevPos = startPoint.position();
-        const glm::dvec3 targetToPrev = prevPos - nodePos;
-        const glm::dvec3 targetToSun = sunPos - nodePos;
-
-        // Check against zero vectors, as this will lead to nan-values from cross product
-        if (glm::length(targetToSun) < LengthEpsilon ||
-            glm::length(targetToPrev) < LengthEpsilon)
-        {
-            // Same situation as if sun does not exist. Any direction will do
-            return glm::dvec3(0.0, 0.0, 1.0);
-        }
-
-        constexpr float defaultPositionOffsetAngle = -30.f; // degrees
-        constexpr float angle = glm::radians(defaultPositionOffsetAngle);
-        const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
-        const glm::dquat offsetRotation = angleAxis(static_cast<double>(angle), axis);
-
-        return glm::normalize(offsetRotation * targetToSun);
-    }
-}
-
-struct NodeInfo {
-    std::string identifier;
-    std::optional<glm::dvec3> position;
-    std::optional<double> height;
-    bool useTargetUpDirection;
-};
-
-Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& startPoint,
-                                     Path::Type type)
-{
-    const SceneGraphNode* targetNode = sceneGraphNode(info.identifier);
-    if (!targetNode) {
-        LERROR(fmt::format("Could not find target node '{}'", info.identifier));
-        return Waypoint();
-    }
-
-    glm::dvec3 targetPos;
-    if (info.position.has_value()) {
-        // The position in instruction is given in the targetNode's local coordinates.
-        // Convert to world coordinates
-        targetPos = glm::dvec3(
-            targetNode->modelTransform() * glm::dvec4(*info.position, 1.0)
-        );
-    }
-    else {
-        const PathNavigator& navigator = global::navigationHandler->pathNavigator();
-
-        const double radius = navigator.findValidBoundingSphere(targetNode);
-        const double defaultHeight = radius * navigator.arrivalDistanceFactor();
-        const double height = info.height.value_or(defaultHeight);
-        const double distanceFromNodeCenter = radius + height;
-
-        glm::dvec3 stepDir;
-        if (type == Path::Type::Linear) {
-            // If linear path, compute position along line form start to end point
-            glm::dvec3 endNodePos = targetNode->worldPosition();
-            stepDir = glm::normalize(startPoint.position() - endNodePos);
-        }
-        else {
-            stepDir = computeGoodStepDirection(targetNode, startPoint);
-        }
-
-        targetPos = targetNode->worldPosition() + stepDir * distanceFromNodeCenter;
-    }
-
-    glm::dvec3 up = global::navigationHandler->camera()->lookUpVectorWorldSpace();
-    if (info.useTargetUpDirection) {
-        // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth,
-        // which is where it matters the most. A better solution would be to make each
-        // sgn aware of its own 'up' and query
-        up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
-    }
-
-    // Compute rotation so the camera is looking at the targetted node
-    const glm::dvec3 lookAtPos = targetNode->worldPosition();
-    const glm::dquat targetRot = ghoul::lookAtQuaternion(targetPos, lookAtPos, up);
-
-    return Waypoint(targetPos, targetRot, info.identifier);
-}
-
 void checkVisibilityAndShowMessage(const SceneGraphNode* node) {
     auto isEnabled = [](const Renderable* r) {
         std::any propertyValueAny = r->property("Enabled")->get();
@@ -638,7 +505,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     bool hasStart = p.startState.has_value();
     const Waypoint startPoint = hasStart ?
         Waypoint(NavigationState(p.startState.value())) :
-        waypointFromCamera();
+        interaction::waypointFromCamera();
 
     std::vector<Waypoint> waypoints;
     switch (p.targetType) {
@@ -667,7 +534,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 ));
             }
 
-            NodeInfo info {
+            interaction::NodeCameraStateSpec info {
                 nodeIdentifier,
                 p.position,
                 p.height,
@@ -691,7 +558,8 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 type = Path::Type::Linear;
             }
 
-            waypoints = { computeWaypointFromNodeInfo(info, startPoint, type) };
+            bool isLinear = type == Path::Type::Linear;
+            waypoints = { computeWaypointFromNodeInfo(info, startPoint, isLinear) };
             break;
         }
         default:
@@ -723,7 +591,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
         LINFO(
             "Switching to a linear path, to avoid problems with precision due to "
-            "immense path length"
+            "immense path length or precision problems"
         );
 
         return createPathFromDictionary(dictionary, Path::Type::Linear);

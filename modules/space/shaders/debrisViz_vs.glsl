@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 
 #include "PowerScaling/powerScalingMath.hglsl"
 
-layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset, 
+layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
 layout (location = 1) in vec2 orbitData; // 1: epoch, 2: period
 
 out vec4 viewSpacePosition;

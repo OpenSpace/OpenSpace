@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -100,7 +100,7 @@ namespace {
 
         // A list of all identifiers that are exposed by this asset. This list is needed
         // to populate the descriptions in the main user interface
-        std::optional<std::vector<std::string>> identifiers;
+        std::optional<std::vector<std::string>> identifiers [[codegen::identifier()]];
     };
 
 #include "assetmanager_codegen.cpp"
@@ -141,7 +141,7 @@ AssetManager::~AssetManager() {
 }
 
 void AssetManager::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (Asset* asset : _rootAssets) {
         if (!asset->hasInitializedParent()) {
@@ -153,11 +153,11 @@ void AssetManager::deinitialize() {
 }
 
 void AssetManager::update() {
-    ZoneScoped
+    ZoneScoped;
 
     // Delete all the assets that have been marked for deletion in the previous frame
     {
-        ZoneScopedN("Deleting assets")
+        ZoneScopedN("Deleting assets");
 
         _toBeDeleted.clear();
     }
@@ -165,7 +165,7 @@ void AssetManager::update() {
     // Initialize all assets that have been loaded and synchronized but that not yet
     // initialized
     for (auto it = _toBeInitialized.cbegin(); it != _toBeInitialized.cend(); ++it) {
-        ZoneScopedN("Initializing queued assets")
+        ZoneScopedN("Initializing queued assets");
         Asset* a = *it;
 
         if (a->isInitialized() || !a->isSynchronized()) {
@@ -187,10 +187,17 @@ void AssetManager::update() {
 
     // Add all assets that have been queued for loading since the last `update` call
     for (const std::string& asset : _assetAddQueue) {
-        ZoneScopedN("Adding queued assets")
+        ZoneScopedN("Adding queued assets");
 
         std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
-        Asset* a = retrieveAsset(path, "");
+        Asset* a = nullptr;
+        try {
+            a = retrieveAsset(path, "");
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+            continue;
+        }
 
         const auto it = std::find(_rootAssets.cbegin(), _rootAssets.cend(), a);
         if (it != _rootAssets.cend()) {
@@ -217,7 +224,7 @@ void AssetManager::update() {
 
     // Remove assets
     for (const std::string& asset : _assetRemoveQueue) {
-        ZoneScopedN("Removing queued assets")
+        ZoneScopedN("Removing queued assets");
         std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
 
         const auto it = std::find_if(
@@ -293,24 +300,15 @@ void AssetManager::update() {
 void AssetManager::add(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
     // First check if the path is already in the remove queue. If so, remove it from there
-    const auto it = _assetRemoveQueue.find(path);
-    if (it != _assetRemoveQueue.end()) {
-        _assetRemoveQueue.erase(it);
-    }
-
-    _assetAddQueue.insert(path);
+    _assetRemoveQueue.remove(path);
+    _assetAddQueue.push_back(path);
 }
 
 void AssetManager::remove(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
-
     // First check if the path is already in the add queue. If so, remove it from there
-    const auto it = _assetAddQueue.find(path);
-    if (it != _assetAddQueue.end()) {
-        _assetAddQueue.erase(it);
-    }
-
-    _assetRemoveQueue.insert(path);
+    _assetAddQueue.remove(path);
+    _assetRemoveQueue.push_back(path);
 }
 
 std::vector<const Asset*> AssetManager::allAssets() const {
@@ -318,6 +316,15 @@ std::vector<const Asset*> AssetManager::allAssets() const {
     res.reserve(_assets.size());
     for (const std::unique_ptr<Asset>& asset : _assets) {
         res.push_back(asset.get());
+    }
+    return res;
+}
+
+std::vector<const Asset*> AssetManager::rootAssets() const {
+    std::vector<const Asset*> res;
+    res.reserve(_rootAssets.size());
+    for (Asset* asset : _rootAssets) {
+        res.push_back(asset);
     }
     return res;
 }
@@ -331,6 +338,11 @@ std::vector<const ResourceSynchronization*> AssetManager::allSynchronizations() 
         res.push_back(p.second->synchronization.get());
     }
     return res;
+}
+
+bool AssetManager::isRootAsset(const Asset* asset) const {
+    auto it = std::find(_rootAssets.begin(), _rootAssets.end(), asset);
+    return it != _rootAssets.end();
 }
 
 bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
@@ -486,13 +498,17 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 1);
-            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::localResourceLua");
+            ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::localResourceLua");
 
-            std::string name = ghoul::lua::value<std::string>(L);
-            std::filesystem::path path = thisAsset->path().parent_path() / name;
+            auto [name] = ghoul::lua::values<std::optional<std::string>>(L);
+            std::filesystem::path path =
+                name.has_value() ?
+                thisAsset->path().parent_path() / *name :
+                thisAsset->path().parent_path();
+
             ghoul::lua::push(L, path);
             return 1;
         },
@@ -506,7 +522,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
@@ -514,7 +530,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
             std::unique_ptr<ResourceSynchronization> s =
                 ResourceSynchronization::createFromDictionary(d);
-            
+
             std::string uid = d.value<std::string>("Type") + "/" + s->generateUid();
             SyncItem* syncItem = nullptr;
             auto it = manager->_synchronizations.find(uid);
@@ -550,7 +566,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* parent = ghoul::lua::userData<Asset>(L, 2);
@@ -612,7 +628,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
@@ -638,7 +654,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
@@ -720,7 +736,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
@@ -742,7 +758,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
@@ -796,15 +812,33 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     if (it != _assets.end()) {
         Asset* a = it->get();
         // We should warn if an asset is requested twice with different enable settings or
-        // else the resulting status will depend on the order of asset loading
+        // else the resulting status will depend on the order of asset loading.
         if (a->explicitEnabled() != explicitEnable) {
-            ghoul_assert(a->firstParent(), "Asset must have a parent at this point");
-            LWARNING(fmt::format(
-                "Loading asset {0} from {1} with enable state {3} different from initial "
-                "loading from {2} with state {4}. Only {4} will have an effect",
-                path, retriever, a->firstParent()->path(), explicitEnable,
-                a->explicitEnabled()
-            ));
+            if (a->firstParent()) {
+                // The first request came from another asset, so we can mention it in the
+                // error message
+                LWARNING(fmt::format(
+                    "Loading asset {0} from {1} with enable state {3} different from "
+                    "initial loading from {2} with state {4}. Only {4} will have an "
+                    "effect",
+                    path, retriever, a->firstParent()->path(), explicitEnable,
+                    a->explicitEnabled()
+                ));
+            }
+            else {
+                // This can only happen if the asset was loaded from the profile directly,
+                // in which case we don't have to warn the user since it won't depend on
+                // the load order as it is always guaranteed that the profile assets are
+                // loaded first
+                ghoul_assert(
+                    std::find(
+                        _rootAssets.begin(),
+                        _rootAssets.end(),
+                        a
+                    ) != _rootAssets.end(),
+                    "Asset not loaded from profile"
+                );
+            }
         }
         return it->get();
     }
@@ -820,7 +854,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
 }
 
 void AssetManager::callOnInitialize(Asset* asset) const {
-    ZoneScoped
+    ZoneScoped;
     ghoul_precondition(asset, "Asset must not be nullptr");
 
     auto it = _onInitializeFunctionRefs.find(asset);
@@ -843,7 +877,7 @@ void AssetManager::callOnInitialize(Asset* asset) const {
 }
 
 void AssetManager::callOnDeinitialize(Asset* asset) const {
-    ZoneScoped
+    ZoneScoped;
     ghoul_precondition(asset, "Asset must not be nullptr");
 
     auto it = _onDeinitializeFunctionRefs.find(asset);
@@ -921,8 +955,10 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
         {
             codegen::lua::Add,
             codegen::lua::Remove,
+            codegen::lua::RemoveAll,
             codegen::lua::IsLoaded,
-            codegen::lua::AllAssets
+            codegen::lua::AllAssets,
+            codegen::lua::RootAssets
         }
     };
 }

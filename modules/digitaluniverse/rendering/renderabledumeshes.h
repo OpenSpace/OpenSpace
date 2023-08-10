@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,6 +55,7 @@ public:
     explicit RenderableDUMeshes(const ghoul::Dictionary& dictionary);
     ~RenderableDUMeshes() override = default;
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -84,7 +85,7 @@ private:
         // "If you wish to draw a line between points, then numU will be 1 while
         // numV will equal the number of points to connect.
         // If you want a square, 4000×4000 grid with lines every 200 units,
-        // then numU numU will both equal 21
+        // then numU numV will both equal 21
         int numU;
         int numV;
         MeshType style;

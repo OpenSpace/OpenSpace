@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,19 +40,25 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
         "XColor",
         "X Color",
-        "This value determines the color of the x axis"
+        "This value determines the color of the x axis",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo YColorInfo = {
         "YColor",
         "Y Color",
-        "This value determines the color of the y axis"
+        "This value determines the color of the y axis",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZColorInfo = {
         "ZColor",
         "Z Color",
-        "This value determines the color of the z axis"
+        "This value determines the color of the z axis",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {

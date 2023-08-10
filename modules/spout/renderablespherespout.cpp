@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/sphere.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
 namespace openspace {
@@ -102,7 +101,7 @@ void RenderableSphereSpout::bindTexture() {
         glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
     }
     else {
-        RenderableSphere::bindTexture();
+        RenderableSphere::unbindTexture();
     }
 }
 

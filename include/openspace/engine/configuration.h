@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATION___H__
 #define __OPENSPACE_CORE___CONFIGURATION___H__
 
+#include <openspace/properties/property.h>
+#include <openspace/util/keys.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
 #include <filesystem>
@@ -46,7 +48,10 @@ struct Configuration {
     std::string windowConfiguration = "${CONFIG}/single.xml";
     std::string asset;
     std::string profile;
-    std::vector<std::string> readOnlyProfiles;
+
+    properties::Property::Visibility propertyVisibility =
+        properties::Property::Visibility::User;
+
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }
@@ -90,6 +95,8 @@ struct Configuration {
     bool isCheckingOpenGLState = false;
     bool isLoggingOpenGLCalls = false;
     bool isPrintingEvents = false;
+
+    Key consoleKey = Key::GraveAccent;
 
     float shutdownCountdown = 0.f;
 

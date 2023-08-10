@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,7 +54,7 @@ enum class JoystickAction : uint8_t {
  * The input state of a single joystick.
  */
 struct JoystickInputState {
-    /// Marks whether this joystick is connected. If this value is \c false, all other
+    /// Marks whether this joystick is connected. If this value is `false`, all other
     /// members of this struct are undefined
     bool isConnected = false;
 
@@ -120,7 +120,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
      * \param joystickName The name of the joystick, if empty all joysticks are combined
      * \param button The button that is to be checked
      * \param action The action which is checked for each button
-     * \return \c true if there is at least one joystick whose \param button is in the
+     * \return `true` if there is at least one joystick whose \p button is in the
      *         \p action state
      *
      * \pre \p button must be 0 or positive

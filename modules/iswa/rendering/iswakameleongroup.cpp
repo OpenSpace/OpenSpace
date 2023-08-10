@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,15 +38,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FieldlineSeedInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline Seedpoints",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
-
 } // namespace
 
 namespace openspace{

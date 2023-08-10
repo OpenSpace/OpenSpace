@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,6 +52,7 @@ private slots:
 
 private:
     void createWidgets();
+    QWidget* createNodeWidget();
     QWidget* createNavStateWidget();
     QWidget* createGeoWidget();
 
@@ -60,6 +61,12 @@ private:
 
     std::optional<openspace::Profile::CameraType>* _camera = nullptr;
     QTabWidget* _tabWidget = nullptr;
+
+    struct {
+        QLineEdit* anchor = nullptr;
+        QLineEdit* height = nullptr;
+    } _nodeState;
+
     struct {
         QLineEdit* anchor = nullptr;
         QLineEdit* aim = nullptr;

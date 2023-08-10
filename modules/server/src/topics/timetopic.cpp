@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -133,7 +133,7 @@ const json TimeTopic::getNextPrevDeltaTimeStepJson() {
 }
 
 void TimeTopic::sendCurrentTime() {
-    ZoneScoped
+    ZoneScoped;
 
     const json timeJson = {
         { "time", global::timeManager->time().ISO8601() }

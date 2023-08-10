@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -479,7 +479,7 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
 }
 
 bool TimeQuantizer::quantize(Time& t, bool clamp) {
-    ZoneScoped
+    ZoneScoped;
 
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
     constexpr int BufferSize = sizeof(Format);
@@ -551,7 +551,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
 void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, double value,
                                          char unit)
 {
-    ZoneScoped
+    ZoneScoped;
 
     switch (unit) {
         case 'y':

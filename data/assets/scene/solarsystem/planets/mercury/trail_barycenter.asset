@@ -1,5 +1,5 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -22,18 +22,19 @@ local MercuryBarycenterTrail = {
   GUI = {
     Name = "Mercury Barycenter Trail",
     Path = "/Solar System/Planets/Mercury",
-    Description = "Barycenter Trail of Mercury as observed by the Sun",
+    Description = "Barycenter Trail of Mercury as observed by the Sun"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MercuryBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MercuryBarycenterTrail)
 end)
-  
+
 asset.export(MercuryBarycenterTrail)
 
 

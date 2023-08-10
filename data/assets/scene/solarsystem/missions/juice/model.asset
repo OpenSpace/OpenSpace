@@ -1,5 +1,6 @@
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
 
 
 local model = asset.syncedResource({
@@ -8,6 +9,7 @@ local model = asset.syncedResource({
   Identifier = "juice_models",
   Version = 1
 })
+
 
 local JuiceModel = {
   Identifier = "JuiceModel",
@@ -62,12 +64,13 @@ end)
 asset.export(JuiceModel)
 
 
+
 asset.meta = {
   Name = "Juice Model",
   Version = "1.0",
   Description = [[
     The model of the JUICE spacecraft. The model file was taken from
-    https://www.cosmos.esa.int/web/esac-cmso/scifleet. 
+    https://www.cosmos.esa.int/web/esac-cmso/scifleet.
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

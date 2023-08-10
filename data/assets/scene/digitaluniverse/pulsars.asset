@@ -12,22 +12,26 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "Pulsars",
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "pulsar.label",
+      Color = { 0.7, 0.2, 0.2 },
+      Size = 15.77,
+      MinMaxSize = { 4, 20 },
+      Unit = "pc"
+    },
     Color = { 0.7, 0.0, 0.0 },
     Opacity = 1.0,
     File = speck .. "pulsar.speck",
     Texture = textures .. "point4.png",
     PolygonSides = 4,
-    LabelFile = speck .. "pulsar.label",
     Unit = "pc",
-    TextColor = { 0.7, 0.2, 0.2 },
-    ScaleFactor = 424,
-    TextSize = 15.77,
-    TextMinMaxSize = { 4, 20 },
+    ScaleFactor = 424.0,
     BillboardMinMaxSize = { 0.0, 500.0 },
     EnablePixelSizeControl = false
   },
@@ -45,19 +49,20 @@ local object = {
       cannot be packed any tighter. At this point, the star has a radius of about
       10-15 kilometers. The density of this material is so high that a teaspoonful
       would weigh about 100 million tons on Earth. (Description from URL) <br><br>
-      Data Reference: ATNF Pulsar Catalogue, (Manchester+, 2005)]],
+      Data Reference: ATNF Pulsar Catalogue, (Manchester+, 2005)]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
-  
-asset.export(object)
+
+asset.export(Object)
 
 
 

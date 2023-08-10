@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -125,6 +125,10 @@ Image ImageSequencer::latestImageForInstrument(const std::string& instrumentID) 
     else {
         return Image();
     }
+}
+
+const std::vector<double>& ImageSequencer::captureProgression() const {
+    return _captureProgression;
 }
 
 std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments(double time) {
@@ -345,7 +349,7 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
 
         // simple search function
         double min = 10;
-        auto findMin = [&](const std::vector<Image>& vec) -> double {
+        auto findMin = [&min](const std::vector<Image>& vec) -> double {
             for (size_t i = 1; i < vec.size(); ++i) {
                 double e = std::abs(vec[i].timeRange.start - vec[i - 1].timeRange.start);
                 min = std::min(e, min);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,27 +54,31 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
-        "This setting determines whether this object will be visible or not"
+        "Enabled",
+        "This setting determines whether this object will be visible or not",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is Collapsed",
-        "This setting determines whether this window is collapsed or not"
+        "This setting determines whether this window is collapsed or not",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
-        "explaining what impact they have on the visuals"
+        "explaining what impact they have on the visuals",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip Delay (in s)",
-        "This value determines the delay in seconds after which the tooltip is shown"
+        "This value determines the delay in seconds after which the tooltip is shown",
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 
@@ -125,8 +129,8 @@ ImGUIModule::ImGUIModule()
         addProperty(_helpTextDelay);
     }
 
-    global::callback::draw2D->emplace_back([&]() {
-        ZoneScopedN("ImGUI")
+    global::callback::draw2D->emplace_back([this]() {
+        ZoneScopedN("ImGUI");
 
         if (!_isEnabled) {
             return;
@@ -153,10 +157,10 @@ ImGUIModule::ImGUIModule()
     });
 
     global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier mod, KeyAction action,
-            IsGuiWindow isGuiWindow) -> bool
+        [this](Key key, KeyModifier mod, KeyAction action,
+               IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -166,10 +170,10 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::character->emplace_back(
-        [&](unsigned int codepoint, KeyModifier modifier,
-            IsGuiWindow isGuiWindow) -> bool
+        [this](unsigned int codepoint, KeyModifier modifier,
+               IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -179,7 +183,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mousePosition->emplace_back(
-        [&](double x, double y, IsGuiWindow isGuiWindow) {
+        [this](double x, double y, IsGuiWindow isGuiWindow) {
             if (!isGuiWindow) {
                 return; // do nothing
             }
@@ -188,10 +192,10 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseButton->emplace_back(
-        [&](MouseButton button, MouseAction action, KeyModifier,
-            IsGuiWindow isGuiWindow) -> bool
+        [this](MouseButton button, MouseAction action, KeyModifier,
+               IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow) {
                 return false;
@@ -209,8 +213,8 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseScrollWheel->emplace_back(
-        [&](double, double posY, IsGuiWindow isGuiWindow) -> bool {
-            ZoneScopedN("ImGUI")
+        [this](double, double posY, IsGuiWindow isGuiWindow) -> bool {
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -220,19 +224,19 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::touchDetected->emplace_back(
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             return touchDetectedCallback(input);
         }
     );
 
     global::callback::touchUpdated->emplace_back(
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             return touchUpdatedCallback(input);
         }
     );
 
     global::callback::touchExit->emplace_back(
-        [&](TouchInput input) {
+        [this](TouchInput input) {
             touchExitCallback(input);
         }
     );
@@ -322,13 +326,13 @@ void ImGUIModule::internalInitializeGL() {
         );
 
         ImGuiStyle& style = ImGui::GetStyle();
-        style.WindowPadding = { 4.f, 4.f };
+        style.WindowPadding = ImVec2(4.f, 4.f);
         style.WindowRounding = 0.f;
-        style.FramePadding = { 3.f, 3.f };
+        style.FramePadding = ImVec2(3.f, 3.f);
         style.FrameRounding = 0.f;
-        style.ItemSpacing = { 3.f, 2.f };
-        style.ItemInnerSpacing = { 3.f, 2.f };
-        style.TouchExtraPadding = { 1.f, 1.f };
+        style.ItemSpacing = ImVec2(3.f, 2.f);
+        style.ItemInnerSpacing = ImVec2(3.f, 2.f);
+        style.TouchExtraPadding = ImVec2(1.f, 1.f);
         style.IndentSpacing = 15.f;
         style.ScrollbarSize = 10.f;
         style.ScrollbarRounding = 0.f;
@@ -713,7 +717,7 @@ bool ImGUIModule::touchDetectedCallback(TouchInput input) {
         return false;
     }
     if (_validTouchStates.empty()) {
-        io.MousePos = { windowPos.x, windowPos.y };
+        io.MousePos = ImVec2(windowPos.x, windowPos.y);
         io.MouseClicked[0] = true;
     }
     _validTouchStates.push_back(input);
@@ -729,7 +733,7 @@ bool ImGUIModule::touchUpdatedCallback(TouchInput input) {
     auto it = std::find_if(
         _validTouchStates.cbegin(),
         _validTouchStates.cend(),
-        [&](const TouchInput& state) {
+        [&input](const TouchInput& state) {
             return state.fingerId == input.fingerId &&
                    state.touchDeviceId == input.touchDeviceId;
         }
@@ -755,7 +759,7 @@ void ImGUIModule::touchExitCallback(TouchInput input) {
     const auto found = std::find_if(
         _validTouchStates.cbegin(),
         _validTouchStates.cend(),
-        [&](const TouchInput& state) {
+        [&input](const TouchInput& state) {
             return state.fingerId == input.fingerId &&
                    state.touchDeviceId == input.touchDeviceId;
         }

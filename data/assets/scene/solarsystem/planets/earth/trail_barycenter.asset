@@ -1,5 +1,5 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -25,14 +25,15 @@ local EarthBarycenterTrail = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthBarycenterTrail)
 end)
-  
+
 asset.export(EarthBarycenterTrail)
 
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,8 +39,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "RenderablePlanetProjection";
-
     constexpr std::array<const char*, 12> MainUniformNames = {
         "sun_pos", "modelTransform", "modelViewProjectionTransform", "hasBaseMap",
         "hasHeightMap", "heightExaggeration", "meridianShift", "ambientBrightness",
@@ -52,7 +50,6 @@ namespace {
         "boresight", "radius", "segments"
     };
 
-    constexpr std::string_view KeyRadius = "Geometry.Radius";
     constexpr std::string_view NoImageText = "No Image";
 
     constexpr openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
@@ -61,14 +58,16 @@ namespace {
         "The texture path selected in this property is used as the base texture that is "
         "applied to the planet prior to any image projections. This menu always contains "
         "an empty option for not using a color map. If this value is specified in an "
-        "asset, the last texture is used"
+        "asset, the last texture is used",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddColorTextureInfo = {
         "AddColorTexture",
         "Add Color Base Texture",
         "Adds a new base color texture to the list of selectable base maps used prior to "
-        "any image projection"
+        "any image projection",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HeightTexturePathsInfo = {
@@ -76,13 +75,15 @@ namespace {
         "Heightmap Texture",
         "The texture path selected in this property is used as the height map on the "
         "planet. This menu always contains an empty option for not using a heightmap. If "
-        "this value is specified in an asset, the last texture is used"
+        "this value is specified in an asset, the last texture is used",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddHeightTextureInfo = {
         "AddHeightTexture",
         "Add Heightmap Texture",
-        "Adds a new height map texture to the list of selectable height maps used"
+        "Adds a new height map texture to the list of selectable height maps used",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
@@ -90,7 +91,8 @@ namespace {
         "Height Exaggeration",
         "This value determines the level of height exaggeration that is applied to a "
         "potential height field. A value of '0' inhibits the height field, whereas a "
-        "value of '1' uses the measured height field"
+        "value of '1' uses the measured height field",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MeridianShiftInfo = {
@@ -99,44 +101,51 @@ namespace {
         "If this value is enabled, a shift of the meridian by 180 degrees is performed. "
         "This is a fix especially for Pluto height maps, where the definition of the "
         "meridian has changed through the New Horizons mission and this requires this "
-        "shift"
+        "shift",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientBrightnessInfo = {
         "AmbientBrightness",
         "Ambient Brightness",
-        "This value determines the ambient brightness of the dark side of the planet"
+        "This value determines the ambient brightness of the dark side of the planet",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxProjectionsPerFrameInfo = {
         "MaxProjectionsPerFrame",
         "Max Projections Per Frame",
         "The maximum number of image projections to perform per frame. "
-        "Useful to avoid freezing the system for large delta times"
+        "Useful to avoid freezing the system for large delta times",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ProjectionsInBufferInfo = {
         "ProjectionsInBuffer",
         "Projections In Buffer",
-        "(Read only) The number of images that are currently waiting to be projected"
+        "(Read only) The number of images that are currently waiting to be projected",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClearProjectionBufferInfo = {
         "ClearProjectionBuffer",
         "Clear Projection Buffer",
-        "Remove all pending projections from the buffer"
+        "Remove all pending projections from the buffer",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
-        "This value specifies the radius of this sphere in meters"
+        "This value specifies the radius of this sphere in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
-        "This value specifies the number of segments that this sphere is split into"
+        "This value specifies the number of segments that this sphere is split into",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlanetProjection)]] Parameters {
@@ -256,15 +265,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     _meridianShift = p.meridianShift.value_or(_meridianShift);
     addProperty(_meridianShift);
 
-    // @TODO (abock, 2021-03-26)  Poking into the Geometry dictionary is not really
-    // optimal as we don't have local control over how the dictionary is checked. We
-    // should instead ask the geometry whether it has a radius or not
-    double radius = std::pow(10.0, 9.0);
-    if (dict.hasValue<double>(KeyRadius)) {
-        radius = dict.value<double>(KeyRadius);
-    }
-    setBoundingSphere(radius);
-
     addPropertySubOwner(_projectionComponent);
 
     _heightExaggeration.setExponent(3.f);
@@ -291,15 +291,16 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     else {
         _radius = std::get<glm::vec3>(p.radius);
     }
-    _radius.onChange([&]() { createSphere(); });
+    setBoundingSphere(glm::compMax(_radius.value()));
+    _radius.onChange([this]() { createSphere(); });
     addProperty(_radius);
 
     _segments = p.segments;
-    _segments.onChange([&]() { createSphere(); });
+    _segments.onChange([this]() { createSphere(); });
     addProperty(_segments);
 }
 
-RenderablePlanetProjection::~RenderablePlanetProjection() {} // NOLINT
+RenderablePlanetProjection::~RenderablePlanetProjection() {}
 
 void RenderablePlanetProjection::initializeGL() {
     _programObject = SpacecraftInstrumentsModule::ProgramObjectManager.request(

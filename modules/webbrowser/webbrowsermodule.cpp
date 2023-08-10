@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ namespace {
         constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
     #elif defined(__APPLE__)
         constexpr std::string_view SubprocessPath =
-            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace_Helper";
+            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
     #else
         constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
     #endif
@@ -58,14 +58,16 @@ namespace {
         "Update Browser Between Renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs "
-        "once per frame"
+        "once per frame",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser Update Interval",
         "The time in microseconds between running the message loop of the browser. "
-        "Only used if UpdateBrowserBetweenRenderables is true"
+        "Only used if UpdateBrowserBetweenRenderables is true",
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 
@@ -78,7 +80,7 @@ WebBrowserModule::WebBrowserModule()
     , _eventHandler(new EventHandler)
 {
     global::callback::deinitialize->emplace_back([this]() {
-        ZoneScopedN("WebBrowserModule")
+        ZoneScopedN("WebBrowserModule");
 
         deinitialize();
     });
@@ -103,7 +105,7 @@ WebBrowserModule::WebBrowserModule()
 }
 
 void WebBrowserModule::internalDeinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_enabled) {
         return;
@@ -128,7 +130,7 @@ std::filesystem::path WebBrowserModule::findHelperExecutable() {
 }
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-    ZoneScoped
+    ZoneScoped;
 
     if (dictionary.hasValue<bool>("WebHelperLocation")) {
         _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
@@ -166,7 +168,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 }
 
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_enabled) {
         _browsers.push_back(browser);

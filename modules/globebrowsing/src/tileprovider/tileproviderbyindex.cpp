@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,11 +65,11 @@ documentation::Documentation TileProviderByIndex::Documentation() {
 }
 
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    layers::Layer::ID typeID = layers::Layer::ID::DefaultTileLayer;
+    layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
     if (p.defaultProvider.hasValue<std::string>("Type")) {
         std::string type = p.defaultProvider.value<std::string>("Type");
         typeID = ghoul::from_string<layers::Layer::ID>(type);
@@ -88,7 +88,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             static_cast<uint8_t>(ip.tileIndex.level)
         );
 
-        layers::Layer::ID providerID = layers::Layer::ID::DefaultTileLayer;
+        layers::Layer::ID providerID = layers::Layer::ID::DefaultTileProvider;
         if (ip.tileProvider.hasValue<std::string>("Type")) {
             std::string type = ip.tileProvider.value<std::string>("Type");
             providerID = ghoul::from_string<layers::Layer::ID>(type);
@@ -108,7 +108,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
 }
 
 Tile TileProviderByIndex::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
     const auto it = _providers.find(tileIndex.hashKey());
     const bool hasProvider = it != _providers.end();
     return hasProvider ? it->second->tile(tileIndex) : Tile();

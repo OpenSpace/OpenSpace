@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,26 +57,30 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite"
+        "The path to the texture that should be used as the point sprite",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point"
+        "size of each point",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value is used to define the color of the astronomical object"
+        "This value is used to define the color of the astronomical object",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical object"
+        "The path to the color map file of the astronomical object",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePoints)]] Parameters {
@@ -129,8 +133,7 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _speckFile = absPath(p.file);
 
@@ -172,7 +175,7 @@ bool RenderablePoints::isReady() const {
 }
 
 void RenderablePoints::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _dataset = speck::data::loadFileWithCache(_speckFile);
 
@@ -182,7 +185,7 @@ void RenderablePoints::initialize() {
 }
 
 void RenderablePoints::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_hasSpriteTexture) {
         _program = DigitalUniverseModule::ProgramObjectManager.request(

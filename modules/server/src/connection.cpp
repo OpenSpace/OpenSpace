@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
+#include <modules/server/include/topics/missiontopic.h>
 #include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
 #include <modules/server/include/topics/shortcuttopic.h>
@@ -56,6 +57,7 @@ namespace {
     constexpr std::string_view MessageKeyType = "type";
     constexpr std::string_view MessageKeyPayload = "payload";
     constexpr std::string_view MessageKeyTopic = "topic";
+
 } // namespace
 
 namespace openspace {
@@ -81,6 +83,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
         }
     );
 
+    _topicFactory.registerClass<MissionTopic>("missions");
     _topicFactory.registerClass<DocumentationTopic>("documentation");
     _topicFactory.registerClass<GetPropertyTopic>("get");
     _topicFactory.registerClass<LuaScriptTopic>("luascript");
@@ -99,7 +102,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
 }
 
 void Connection::handleMessage(const std::string& message) {
-    ZoneScoped
+    ZoneScoped;
 
     try {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
@@ -140,7 +143,7 @@ void Connection::handleMessage(const std::string& message) {
 }
 
 void Connection::handleJson(const nlohmann::json& json) {
-    ZoneScoped
+    ZoneScoped;
 
     auto topicJson = json.find(MessageKeyTopic);
     auto payloadJson = json.find(MessageKeyPayload);
@@ -196,13 +199,13 @@ void Connection::handleJson(const nlohmann::json& json) {
 }
 
 void Connection::sendMessage(const std::string& message) {
-    ZoneScoped
+    ZoneScoped;
 
     _socket->putMessage(message);
 }
 
 void Connection::sendJson(const nlohmann::json& json) {
-    ZoneScoped
+    ZoneScoped;
 
     sendMessage(json.dump());
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,9 @@ namespace {
         "AllModules",
         "All Modules",
         "The list of all modules that were compiled for this version of OpenSpace in the "
-        "same order in which they were initialized"
+        "same order in which they were initialized",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -59,7 +61,7 @@ ModuleEngine::ModuleEngine()
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
 {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<OpenSpaceModule*> modules = AllModules();
 
@@ -82,22 +84,16 @@ void ModuleEngine::initialize(
             m->initialize(configuration);
         }
         catch (const documentation::SpecificationError& e) {
-            for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                LERRORC(e.component, o.offender + ": " + ghoul::to_string(o.reason));
-            }
-            for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                LWARNINGC(e.component, w.offender + ": " + ghoul::to_string(w.reason));
-            }
+            logError(e);
             throw;
         }
 
         addPropertySubOwner(m);
-
     }
 }
 
 void ModuleEngine::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Initializing OpenGL of modules");
     for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
@@ -108,7 +104,7 @@ void ModuleEngine::initializeGL() {
 }
 
 void ModuleEngine::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Deinitializing modules");
 
@@ -128,7 +124,7 @@ void ModuleEngine::deinitialize() {
 }
 
 void ModuleEngine::deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Deinitializing OpenGL of modules");
     for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
@@ -140,7 +136,7 @@ void ModuleEngine::deinitializeGL() {
 }
 
 void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(mod, "Module must not be nullptr");
 
@@ -153,12 +149,11 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod) {
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            "Module name '" + mod->identifier() + "' was registered before",
+            fmt::format("Module name '{}' was registered before", mod->identifier()),
             "ModuleEngine"
         );
     }
 
-    LDEBUG(fmt::format("Registering module '{}'", mod->identifier()));
     LDEBUG(fmt::format("Registered module '{}'", mod->identifier()));
     _modules.push_back(std::move(mod));
 }
@@ -173,7 +168,7 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
 }
 
 ghoul::systemcapabilities::Version ModuleEngine::requiredOpenGLVersion() const {
-    ghoul::systemcapabilities::Version version = { 0, 0, 0 };
+    ghoul::systemcapabilities::Version version = { .major = 0, .minor = 0, .release = 0 };
 
     for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
         version = std::max(version, m->requiredOpenGLVersion());

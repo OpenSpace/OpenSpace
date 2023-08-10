@@ -1,12 +1,14 @@
 local transforms = asset.require("./transforms")
 
 
+
 local texturesPath = asset.syncedResource({
   Name = "Earth Textures",
   Type = "HttpSynchronization",
   Identifier = "earth_textures",
   Version = 2
 })
+
 
 local EarthMarker = {
   Identifier = "EarthMarker",
@@ -26,14 +28,15 @@ local EarthMarker = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthMarker)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthMarker)
 end)
-  
+
 asset.export(EarthMarker)
 
 

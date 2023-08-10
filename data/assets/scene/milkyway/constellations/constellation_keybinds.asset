@@ -1,16 +1,19 @@
 local mainAsset = asset.require("./constellation_art")
 
-asset.onInitialize(function ()
-  openspace.bindKey("c", mainAsset.ShowArtAction.Identifier)
-  openspace.bindKey("SHIFT+c", mainAsset.HideArtAction.Identifier)
-  openspace.bindKey("CTRL+c", mainAsset.DisableArtAction.Identifier)
+
+
+asset.onInitialize(function()
+  openspace.bindKey("C", mainAsset.ShowArtAction)
+  openspace.bindKey("SHIFT+C", mainAsset.HideArtAction)
+  openspace.bindKey("CTRL+C", mainAsset.DisableArtAction)
 end)
 
-asset.onDeinitialize(function ()
-  openspace.clearKey("c")
-  openspace.clearKey("SHIFT+c")
-  openspace.clearKey("CTRL+c")
+asset.onDeinitialize(function()
+  openspace.clearKey("C")
+  openspace.clearKey("SHIFT+C")
+  openspace.clearKey("CTRL+C")
 end)
+
 
 
 asset.meta = {

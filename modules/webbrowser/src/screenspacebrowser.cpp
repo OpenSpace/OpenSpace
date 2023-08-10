@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,24 +41,29 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "Set the dimensions of the web browser windows"
+        "Set the dimensions of the web browser windows",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
-        "The URL to load"
+        "The URL to load",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Reload the web browser"
+        "Reload the web browser",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(ScreenSpaceBrowser)]] Parameters {
         std::optional<std::string> identifier;
         std::optional<std::string> url;
+        std::optional<glm::vec2> dimensions;
     };
 #include "screenspacebrowser_codegen.cpp"
 
@@ -89,7 +94,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     _url = p.url.value_or(_url);
 
     glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
-    _dimensions = windowDimensions;
+    _dimensions = p.dimensions.value_or(windowDimensions);
 
     _renderHandler = new ScreenSpaceRenderHandler;
     _keyboardHandler = new WebKeyboardHandler();

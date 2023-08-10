@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,8 @@
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
-out vec4 vs_gPosition;
 
+out vec4 vs_gPosition;
 out vec3 vs_gNormal;
 out float vs_screenSpaceDepth;
 out vec2 vs_st;
@@ -47,7 +47,7 @@ void main() {
 
   // G-Buffer
   vs_gNormal = vec3(0.0);
-  vs_gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space;
+  vs_gPosition = modelViewTransform * position; // Must be in SGCT eye space;
 
   vs_st = in_st;
   vs_screenSpaceDepth = positionScreenSpace.w;

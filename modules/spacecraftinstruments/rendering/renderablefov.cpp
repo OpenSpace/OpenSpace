@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,8 @@ namespace {
         "LineWidth",
         "Line Width",
         "This value determines width of the lines connecting the instrument to the "
-        "corners of the field of view"
+        "corners of the field of view",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
@@ -61,14 +62,17 @@ namespace {
         "distance of the plane to the focus object. If this value is '1', the field of "
         "view will be rendered exactly on the surface of, for example, a planet. With a "
         "value of smaller than 1, the field of view will hover of ther surface, thus "
-        "making it more visible"
+        "making it more visible",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlwaysDrawFovInfo = {
         "AlwaysDrawFov",
         "Always Draw FOV",
         "If this value is enabled, the field of view will always be drawn, regardless of "
-        "whether image information has been loaded or not"
+        "whether image information has been loaded or not",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
@@ -76,7 +80,8 @@ namespace {
         "Start of default color",
         "This value determines the color of the field of view frustum close to the "
         "instrument. The final colors are interpolated between this value and the end "
-        "color"
+        "color",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultEndColorInfo = {
@@ -84,21 +89,24 @@ namespace {
         "End of default color",
         "This value determines the color of the field of view frustum close to the "
         "target. The final colors are interpolated between this value and the start "
-        "color"
+        "color",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ActiveColorInfo = {
         "Colors.Active",
         "Active Color",
         "This value determines the color that is used when the instrument's field of "
-        "view is active"
+        "view is active",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetInFovInfo = {
         "Colors.TargetInFieldOfView",
         "Target in field-of-view Color",
         "This value determines the color that is used if the target is inside the field "
-        "of view of the instrument but the instrument is not yet active"
+        "of view of the instrument but the instrument is not yet active",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IntersectionStartInfo = {
@@ -106,7 +114,8 @@ namespace {
         "Start of the intersection",
         "This value determines the color that is used close to the instrument if one of "
         "the field of view corners is intersecting the target object. The final color is "
-        "retrieved by interpolating between this color and the intersection end color"
+        "retrieved by interpolating between this color and the intersection end color",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IntersectionEndInfo = {
@@ -114,7 +123,8 @@ namespace {
         "End of the intersection",
         "This value determines the color that is used close to the target if one of the "
         "field of view corners is intersecting the target object. The final color is "
-        "retrieved by interpolating between this color and the intersection begin color"
+        "retrieved by interpolating between this color and the intersection begin color",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SquareColorInfo = {
@@ -122,7 +132,8 @@ namespace {
         "Orthogonal Square",
         "This value determines the color that is used for the field of view square in "
         "the case that there is no intersection and that the instrument is not currently "
-        "active"
+        "active",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     template <typename Func>
@@ -480,7 +491,10 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
 
         // Regardless of what happens next, the position of every second element is going
         // to be the same. Only the color attribute might change
-        first = { { 0.f, 0.f, 0.f }, RenderInformation::VertexColorTypeDefaultStart};
+        first = {
+            .position = { 0.f, 0.f, 0.f },
+            .color = RenderInformation::VertexColorTypeDefaultStart
+        };
 
         if (!isInFov) {
             // If the target is not in the field of view, we don't need to perform any
@@ -488,9 +502,8 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
             const glm::vec3 o = orthogonalProjection(bound, time, target);
 
             second = {
-                { o.x, o.y, o.z },
-                 // This had a different color (0.4) before ---abock
-                RenderInformation::VertexColorTypeDefaultEnd
+                .position = { o.x, o.y, o.z },
+                .color = RenderInformation::VertexColorTypeDefaultEnd
             };
         }
         else {
@@ -531,16 +544,16 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                 srfVec *= _standOffDistance;
 
                 second = {
-                    { srfVec.x, srfVec.y, srfVec.z },
-                    RenderInformation::VertexColorTypeIntersectionEnd
+                    .position = { srfVec.x, srfVec.y, srfVec.z },
+                    .color = RenderInformation::VertexColorTypeIntersectionEnd
                 };
             }
             else {
                 // This point did not intersect the target though others did
                 const glm::vec3 o = orthogonalProjection(bound, time, target);
                 second = {
-                    { o.x, o.y, o.z },
-                    RenderInformation::VertexColorTypeInFieldOfView
+                    .position = { o.x, o.y, o.z },
+                    .color = RenderInformation::VertexColorTypeInFieldOfView
                 };
             }
         }
@@ -553,7 +566,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
     // Each boundary in _instrument.bounds has 'InterpolationSteps' steps between
     auto indexForBounds = [](size_t idx) -> size_t { return idx * InterpolationSteps; };
 
-    auto copyFieldOfViewValues = [&](size_t iBound, size_t begin, size_t end) -> void {
+    auto copyFieldOfViewValues = [this](size_t iBound, size_t begin, size_t end) -> void {
         std::fill(
             _orthogonalPlane.data.begin() + begin,
             _orthogonalPlane.data.begin() + end,
@@ -626,15 +639,15 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                 if (intercepts(tBound)) {
                     const glm::vec3 icpt = interceptVector(tBound);
                     _orthogonalPlane.data[indexForBounds(i) + m] = {
-                        { icpt.x, icpt.y, icpt.z },
-                        RenderInformation::VertexColorTypeSquare
+                        .position = { icpt.x, icpt.y, icpt.z },
+                        .color = RenderInformation::VertexColorTypeSquare
                     };
                 }
                 else {
                     const glm::vec3 o = orthogonalProjection(tBound, time, target);
                     _orthogonalPlane.data[indexForBounds(i) + m] = {
-                        { o.x, o.y, o.z },
-                        RenderInformation::VertexColorTypeSquare
+                        .position = { o.x, o.y, o.z },
+                        .color = RenderInformation::VertexColorTypeSquare
                     };
                 }
             }

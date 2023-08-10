@@ -19,7 +19,8 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local gaia_abundance_galah = {
+
+local GaiaAbundanceGalah = {
   Identifier = "GaiaAbundanceGalah",
   Renderable = {
     Type = "RenderableStars",
@@ -33,7 +34,7 @@ local gaia_abundance_galah = {
     ColorOption = "Other Data",
     OtherData = "FeH",
     ColorMap = colormaps .. "colorbv.cmap",
-    OtherDataColorMap = colormaps .. "RainbowGradient.cmap",
+    OtherDataColorMap = colormaps .. "rainbowgradient.cmap",
     ColorRange = { { -0.8, 0.6 } },
     StaticFilter = -9999,
     StaticFilterReplacement = 0.0,
@@ -55,15 +56,16 @@ local gaia_abundance_galah = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(gaia_abundance_galah)
+  openspace.addSceneGraphNode(GaiaAbundanceGalah)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(gaia_abundance_galah)
+  openspace.removeSceneGraphNode(GaiaAbundanceGalah)
 end)
-  
-asset.export(gaia_abundance_galah)
+
+asset.export(GaiaAbundanceGalah)
 
 
 

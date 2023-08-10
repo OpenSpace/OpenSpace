@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
@@ -69,7 +70,7 @@ public:
          * \param message The reason that caused this exception to be thrown
          * \param component The optional compoment that caused this exception to be thrown
          * \pre message may not be empty
-        */
+         */
         explicit InvalidSceneError(std::string msg, std::string comp = "");
     };
 
@@ -85,12 +86,6 @@ public:
     virtual ~Scene() override;
 
     /**
-     * Clear the scene graph,
-     * i.e. set the root node to nullptr and deallocate all scene graph nodes.
-     */
-    void clear();
-
-    /**
      * Attach node to the root
      */
     void attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node);
@@ -99,11 +94,6 @@ public:
      * Detach node from the root
      */
     ghoul::mm_unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
-
-    /**
-     * Set the camera of the scene
-     */
-    void setCamera(std::unique_ptr<Camera> camera);
 
     /**
      * Return the camera
@@ -131,7 +121,7 @@ public:
     const SceneGraphNode* root() const;
 
     /**
-     * Return the scenegraph node with the specified name or <code>nullptr</code> if that
+     * Return the scenegraph node with the specified name or `nullptr` if that
      * name does not exist.
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
@@ -147,8 +137,8 @@ public:
     void unregisterNode(SceneGraphNode* node);
 
     /**
-    * Mark the node registry as dirty
-    */
+     * Mark the node registry as dirty
+     */
     void markNodeRegistryDirty();
 
     /**
@@ -187,12 +177,16 @@ public:
      * \param prop The property that should be called to update itself every frame until
      *        \p durationSeconds seconds have passed
      * \param durationSeconds The number of seconds that the interpolation will run for
+     * \param postScript A Lua script that will be executed when the interpolation
+     *        finishes
+     * \param easingFunction A function that determines who the interpolation occurs
      *
-     * \pre \p prop must not be \c nullptr
+     * \pre \p prop must not be `nullptr`
      * \pre \p durationSeconds must be positive and not 0
      * \post A new interpolation record exists for \p that is not expired
      */
     void addPropertyInterpolation(properties::Property* prop, float durationSeconds,
+        std::string postScript = "",
         ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear);
 
     /**
@@ -208,11 +202,11 @@ public:
 
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
-     * using the Property::interpolateValue method, passing a parameter \c t which is \c 0
-     * if no time has passed between the #addInterpolation method and \c 1 if an amount of
-     * time equal to the requested interpolation time has passed. The parameter \c t is
+     * using the Property::interpolateValue method, passing a parameter `t` which is `0`
+     * if no time has passed between the #addInterpolation method and `1` if an amount of
+     * time equal to the requested interpolation time has passed. The parameter `t` is
      * updated with a resolution of 1 microsecond, which means that if this function is
-     * called twice within 1 microsecond, the passed parameter \c t might be the same for
+     * called twice within 1 microsecond, the passed parameter `t` might be the same for
      * both calls
      */
     void updateInterpolations();
@@ -221,7 +215,7 @@ public:
      * Adds the provided \p time as an interesting time to this scene. The same time can
      * be added multiple times.
      *
-     * \param The time that should be added
+     * \param time The time that should be added
      *
      * \pre \p time.time must not be empty
      * \pre \p time.name must not be empty
@@ -263,6 +257,13 @@ public:
      */
     std::vector<properties::Property*> propertiesMatchingRegex(
         std::string propertyString);
+
+    /**
+     * Returns a list of all unique tags that are used in the currently loaded scene.
+     *
+     * \return A list of all unique tags that are used in the currently loaded scene.
+     */
+    std::vector<std::string> allTags();
 
 private:
     /**
@@ -344,6 +345,8 @@ private:
         properties::Property* prop;
         std::chrono::time_point<std::chrono::steady_clock> beginTime;
         float durationSeconds;
+        std::string postScript;
+
         ghoul::EasingFunc<float> easingFunction;
         bool isExpired = false;
     };
@@ -351,6 +354,9 @@ private:
 
     ghoul::MemoryPool<4096> _memoryPool;
 };
+
+// Convert the input string to a format that is valid as an identifier
+std::string makeIdentifier(std::string str);
 
 } // namespace openspace
 

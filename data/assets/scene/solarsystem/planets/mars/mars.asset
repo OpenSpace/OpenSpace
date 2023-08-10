@@ -1,6 +1,8 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Mars Labels",
@@ -9,8 +11,9 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
--- local marsRadii = { 3396190.0, 3396190.0, 3376200.0 }
-local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
+
+-- local MarsRadii = { 3396190.0, 3396190.0, 3376200.0 }
+local MarsRadii = { 3396190.0, 3396190.0, 3396190.0 }
 
 local Mars = {
   Identifier = "Mars",
@@ -29,7 +32,7 @@ local Mars = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = marsRadii,
+    Radii = MarsRadii,
     SegmentsPerPatch = 90,
     Layers = {},
     Labels = {
@@ -58,11 +61,11 @@ local MarsLabel = {
   Parent = Mars.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Mars",
     FontSize = 70.0,
-    Size = 8.66,
-    MinMaxSize = { 1, 100 },
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     TransformationMatrix = {
@@ -71,6 +74,10 @@ local MarsLabel = {
       0.0, 0.0, 1.0, 1.0E7,
       0.0, 0.0, 0.0, 1.0
     },
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 40.0 },
+    FadeWidths = { 1.0, 50.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
@@ -80,16 +87,17 @@ local MarsLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mars)
   openspace.addSceneGraphNode(MarsLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MarsLabel)
   openspace.removeSceneGraphNode(Mars)
 end)
-    
+
 asset.export(Mars)
 asset.export(MarsLabel)
 

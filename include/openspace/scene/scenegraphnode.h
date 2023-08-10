@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -139,6 +139,8 @@ public:
     double reachFactor() const;
     double approachFactor() const;
 
+    bool supportsDirectInteraction() const;
+
     SceneGraphNode* childNode(const std::string& identifier);
 
     const Renderable* renderable() const;
@@ -178,7 +180,7 @@ private:
     properties::StringProperty _guiDisplayName;
     properties::StringProperty _guiDescription;
 
-    // Transformation defined by ephemeris, rotation and scale
+    // Transformation defined by translation, rotation and scale
     struct {
         ghoul::mm_unique_ptr<Translation> translation;
         ghoul::mm_unique_ptr<Rotation> rotation;
@@ -204,6 +206,7 @@ private:
     properties::DoubleProperty _distFromCamToNode;
     properties::DoubleProperty _screenSizeRadius;
     properties::FloatProperty _visibilityDistance;
+    properties::BoolProperty _supportsDirectInteraction;
 
     // This variable is used for the rate-limiting of the screenspace positions (if they
     // are calculated when _computeScreenSpaceValues is true)

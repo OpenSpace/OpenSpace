@@ -1,0 +1,53 @@
+<VRTDataset rasterXSize="32768" rasterYSize="16384">
+  <SRS>GEOGCS["GCS_Moon_2000",DATUM["Moon_2000",SPHEROID["Moon_2000_IAU_IAG",1737400,0]],PRIMEM["Reference_Meridian",0],UNIT["degree",0.0174532925199433]]</SRS>
+  <GeoTransform> -1.8000000000000000e+02,  1.0986328125000000e-02,  0.0000000000000000e+00,  9.0000000000000000e+01,  0.0000000000000000e+00, -1.0986328125000000e-02</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Red</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Coverage.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="32768" RasterYSize="16384" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="32768" ySize="16384" />
+      <DstRect xOff="0" yOff="0" xSize="32768" ySize="16384" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Green</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Coverage.wms</SourceFilename>
+      <SourceBand>2</SourceBand>
+      <SourceProperties RasterXSize="32768" RasterYSize="16384" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="32768" ySize="16384" />
+      <DstRect xOff="0" yOff="0" xSize="32768" ySize="16384" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="3">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Blue</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Coverage.wms</SourceFilename>
+      <SourceBand>3</SourceBand>
+      <SourceProperties RasterXSize="32768" RasterYSize="16384" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="32768" ySize="16384" />
+      <DstRect xOff="0" yOff="0" xSize="32768" ySize="16384" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="4">
+    <ColorInterp>Alpha</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Coverage.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="32768" RasterYSize="16384" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="32768" ySize="16384" />
+      <DstRect xOff="0" yOff="0" xSize="32768" ySize="16384" />
+      <ScaleOffset>255</ScaleOffset>
+      <ScaleRatio>0</ScaleRatio>
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>

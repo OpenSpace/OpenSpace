@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,15 +74,17 @@ namespace {
         "when interpolating"
     };
 
-    constexpr std::string_view DeltaTimeStepsKeybindsGuiPath = "/Time/Delta Time Steps";
-}
+    constexpr std::string_view DeltaTimeStepsGuiPath = "/Time/Simulation Speed/Steps";
+
+    constexpr std::string_view DeltaTimeActionPrefix = "core.time.delta_time";
+} // namespace
 
 namespace openspace {
 
 using datamessagestructures::TimeKeyframe;
 
 TimeManager::TimeManager()
-    : properties::PropertyOwner({ "TimeManager" })
+    : properties::PropertyOwner({ "TimeManager", "Time Manager" })
     , _defaultTimeInterpolationDuration(DefaultTimeInterpolationDurationInfo,
         2.f,
         0.f,
@@ -125,8 +127,18 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     const double now = currentApplicationTimeForInterpolation();
     const bool pause = isPaused();
 
-    const TimeKeyframeData current = { time(), deltaTime(), false, false };
-    const TimeKeyframeData next = { Time(targetTime), targetDeltaTime(), pause, false };
+    const TimeKeyframeData current = {
+        .time = time(),
+        .delta = deltaTime(),
+        .pause = false,
+        .jump = false
+    };
+    const TimeKeyframeData next = {
+        .time = Time(targetTime),
+        .delta = targetDeltaTime(),
+        .pause = pause,
+        .jump = false
+    };
 
     clearKeyframes();
     addKeyframe(now, current);
@@ -146,7 +158,7 @@ void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) 
 }
 
 void TimeManager::preSynchronization(double dt) {
-    ZoneScoped
+    ZoneScoped;
 
     removeKeyframesBefore(_latestConsumedTimestamp);
     progressTime(dt);
@@ -155,11 +167,11 @@ void TimeManager::preSynchronization(double dt) {
     const double newTime = time().j2000Seconds();
 
     if (newTime != _lastTime) {
-        ZoneScopedN("newTime != _lastTime")
+        ZoneScopedN("newTime != _lastTime");
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timeChangeCallbacks) {
-            ZoneScopedN("tcc")
+            ZoneScopedN("tcc");
             it.second();
         }
     }
@@ -167,11 +179,11 @@ void TimeManager::preSynchronization(double dt) {
         _timePaused != _lastTimePaused ||
         _targetDeltaTime != _lastTargetDeltaTime)
     {
-        ZoneScopedN("delta time changed")
+        ZoneScopedN("delta time changed");
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
-            ZoneScopedN("dtcc")
+            ZoneScopedN("dtcc");
             it.second();
         }
     }
@@ -183,11 +195,11 @@ void TimeManager::preSynchronization(double dt) {
         }
     }
     if (_timelineChanged) {
-        ZoneScopedN("timeline changed")
+        ZoneScopedN("timeline changed");
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
-            ZoneScopedN("tlcc")
+            ZoneScopedN("tlcc");
             it.second();
         }
     }
@@ -245,7 +257,7 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
 }
 
 void TimeManager::progressTime(double dt) {
-    ZoneScoped
+    ZoneScoped;
 
     OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::CameraPath) {
@@ -456,6 +468,7 @@ void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
     _deltaTimeSteps = std::move(deltaTimes);
     _deltaTimeStepsChanged = true;
 
+    clearDeltaTimesKeybindings();
     addDeltaTimesKeybindings();
 }
 
@@ -490,16 +503,16 @@ void TimeManager::addDeltaTimesKeybindings() {
     auto addDeltaTimeKeybind = [this](Key key, KeyModifier mod, double step) {
         const std::string s = fmt::format("{:.0f}", step);
 
-        std::string identifier = fmt::format("core.time.delta_time.{}", s);
+        std::string identifier = fmt::format("{}.{}", DeltaTimeActionPrefix, s);
         interaction::Action action;
         action.identifier = identifier;
         action.command = fmt::format("openspace.time.interpolateDeltaTime({})", s);
         action.documentation = fmt::format(
             "Setting the simulation speed to {} seconds per realtime second", s
         );
-        action.name = fmt::format("Set Simulation Speed: {}", s);
-        action.guiPath = DeltaTimeStepsKeybindsGuiPath;
-        action.synchronization = interaction::Action::IsSynchronized::No;
+        action.name = fmt::format("Set: {}", s);
+        action.guiPath = DeltaTimeStepsGuiPath;
+        action.isLocal = interaction::Action::IsLocal::Yes;
         global::actionManager->registerAction(std::move(action));
         global::keybindingManager->bindKey(key, mod, std::move(identifier));
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });
@@ -541,6 +554,15 @@ void TimeManager::addDeltaTimesKeybindings() {
 }
 
 void TimeManager::clearDeltaTimesKeybindings() {
+    // Iterate over all of the registered actions with the common prefix that we created
+    // in the addDeltaTimesKeybindings function
+    std::vector<interaction::Action> actions = global::actionManager->actions();
+    for (const interaction::Action& action : actions) {
+        if (action.identifier.starts_with(DeltaTimeActionPrefix)) {
+            global::actionManager->removeAction(action.identifier);
+        }
+    }
+
     for (const KeyWithModifier& kb : _deltaTimeStepKeybindings) {
         // Check if there are multiple keys bound to the same key
         auto bindings = global::keybindingManager->keyBinding(kb);
@@ -576,7 +598,7 @@ const Timeline<TimeKeyframeData>& TimeManager::timeline() const {
     return _timeline;
 }
 
-std::vector<Syncable*> TimeManager::getSyncables() {
+std::vector<Syncable*> TimeManager::syncables() {
     return { &_currentTime, &_integrateFromTime };
 }
 
@@ -748,8 +770,18 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
         time().j2000Seconds() + (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration
     );
 
-    TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
-    TimeKeyframeData futureKeyframe = { newTime, newDeltaTime, false, false };
+    TimeKeyframeData currentKeyframe = {
+        .time = time(),
+        .delta = _deltaTime,
+        .pause = false,
+        .jump = false
+    };
+    TimeKeyframeData futureKeyframe = {
+        .time = newTime,
+        .delta = newDeltaTime,
+        .pause = false,
+        .jump = false
+    };
 
     _targetDeltaTime = newDeltaTime;
 
@@ -854,8 +886,18 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         time().j2000Seconds() + (_deltaTime + targetDelta) * 0.5 * interpolationDuration
     );
 
-    TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
-    TimeKeyframeData futureKeyframe = { newTime, _targetDeltaTime, pause, false };
+    TimeKeyframeData currentKeyframe = {
+        .time = time(),
+        .delta = _deltaTime,
+        .pause = false,
+        .jump = false
+    };
+    TimeKeyframeData futureKeyframe = {
+        .time = newTime,
+        .delta = _targetDeltaTime,
+        .pause = pause,
+        .jump = false
+    };
     _timePaused = pause;
 
     double now = isPlayingBackSessionRecording() ?
@@ -897,23 +939,28 @@ bool TimeManager::isPlayingBackSessionRecording() const {
 
 void TimeManager::setTimeFromProfile(const Profile& p) {
     if (p.time.has_value()) {
-        switch (p.time.value().type) {
+        switch (p.time->type) {
             case Profile::Time::Type::Relative:
-                Time::setTimeRelativeFromProfile(p.time.value().value);
+            {
+                std::string t = Time::currentWallTime();
+                std::variant<std::string, double> t2 =
+                    Time::advancedTime(t, p.time->value);
+                ghoul_assert(std::holds_alternative<std::string>(t2), "Wrong type");
+                _currentTime.data() = Time(std::get<std::string>(t2));
                 break;
-
+            }
             case Profile::Time::Type::Absolute:
-                Time::setTimeAbsoluteFromProfile(p.time.value().value);
+                _currentTime.data() = Time(p.time->value);
                 break;
-
             default:
                 throw ghoul::MissingCaseException();
         }
+
+        setPause(p.time->startPaused);
     }
     else {
         // No value was specified so we are using 'now' instead
-        std::string now = std::string(Time::now().UTC());
-        Time::setTimeAbsoluteFromProfile(now);
+        _currentTime.data() = Time::now();
     }
 }
 

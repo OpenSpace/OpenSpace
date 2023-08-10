@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,7 @@
 #ifndef __OPENSPACE_CORE___FACTORYMANAGER___H__
 #define __OPENSPACE_CORE___FACTORYMANAGER___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
+#include <openspace/json.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/templatefactory.h>
 #include <memory>
@@ -38,17 +37,16 @@ namespace openspace {
  * them available through the #addFactory and #factory methods. Each
  * ghoul::TemplateFactory can only be added once and can be accessed by its type.
  */
-class FactoryManager : public DocumentationGenerator {
+class FactoryManager {
 public:
     /// This exception is thrown if the ghoul::TemplateFactory could not be found in the
     /// #factory method
     struct FactoryNotFoundError : public ghoul::RuntimeError {
         /**
          * Constructor for FactoryNotFoundError, the \p type is a human-readable (-ish)
-         * type descriptor for the type <code>T</code> for the TemplateFactory that could
+         * type descriptor for the type `T` for the TemplateFactory that could
          * not be found.
-         * \param t The type <code>T</code> for the <code>TemplateFactory<T></code>
-         * that could not be found
+         * \param t The type `T` for the `TemplateFactory<T>` that could not be found
          * \pre \p t must not be empty
          */
         explicit FactoryNotFoundError(std::string t);
@@ -73,8 +71,8 @@ public:
     static void deinitialize();
 
     /**
-     * Returns <code>true</code> if the static FactoryManager has already been
-     * initiailzed, <code>false</code> otherwise.
+     * Returns `true` if the static FactoryManager has already been
+     * initiailzed, `false` otherwise.
      * \return The initialization status of the static FactoryManager
      */
     static bool isInitialized();
@@ -102,14 +100,14 @@ public:
      * their type. The method will always return a proper ghoul::TemplateFactory or throw
      * an error if the appropriate ghoul::TemplateFactory was not registered.
      * \tparam T The type that the requested ghoul::TemplateFactory should create
-     * \return The ghoul::TemplateFactory that will create the pass type <code>T</code>
+     * \return The ghoul::TemplateFactory that will create the pass type `T`
      * \throw FactoryNotFoundError If the requested ghoul::TemplateFactory could not be
      * found
      */
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
 
-    std::string generateJson() const override;
+    nlohmann::json generateJson() const;
 
 private:
     /// Singleton member for the Factory Manager

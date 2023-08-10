@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,9 @@ namespace {
         "SourceType",
         "Source Type",
         "The type of position that is used as the triangle apex used to calculate the "
-        "angle. The default value is 'Camera'"
+        "angle. The default value is 'Camera'",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
@@ -59,7 +61,9 @@ namespace {
         "If a scene graph node is selected as type, this value specifies the name of the "
         "node that is to be used as the apex of the triangle used to calculate the "
         "angle. The computed angle is the incident angle to Source in the triangle ("
-        "Source, Reference, Destination)"
+        "Source, Reference, Destination)",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReferenceTypeInfo = {
@@ -67,14 +71,18 @@ namespace {
         "Reference Type",
         "The type of position that is used as the destination of the reference line used "
         "to calculate the angle. The computed angle is the incident angle to Source in "
-        "the triangle (Source, Reference, Destination)"
+        "the triangle (Source, Reference, Destination)",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReferenceNodeNameInfo = {
         "ReferenceNodeName",
         "Reference Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the reference direction to compute the angle"
+        "node that is to be used as the reference direction to compute the angle",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
@@ -82,14 +90,18 @@ namespace {
         "Destination Type",
         "The type of position that is used as the destination to calculate the angle. "
         "The computed angle is the incident angle to Source in the triangle ("
-        "Source, Reference, Destination). The default value for this is 'Focus'"
+        "Source, Reference, Destination). The default value for this is 'Focus'",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
         "DestinationNodeName",
         "Destination Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the destination for computing the angle"
+        "node that is to be used as the destination for computing the angle",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemAngle)]] Parameters {
@@ -279,7 +291,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 }
 
 void DashboardItemAngle::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);
     std::pair<glm::dvec3, std::string> referenceInfo = positionAndLabel(_reference);
@@ -316,7 +328,7 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemAngle::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     constexpr double Angle = 120;
     return _font->boundingBox("Angle: " + std::to_string(Angle));

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,8 @@ namespace {
         "UseMainDashboard",
         "Use main dashboard",
         "If this value is set to 'true', this ScreenSpaceDashboard will use the "
-        "main dashboard instead of creating an independent one"
+        "main dashboard instead of creating an independent one",
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
@@ -119,7 +120,7 @@ bool ScreenSpaceDashboard::isReady() const {
 void ScreenSpaceDashboard::update() {
     if (global::windowDelegate->windowHasResized()) {
         const glm::ivec2 size = global::windowDelegate->currentDrawBufferResolution();
-        _size = { 0.f, 0.f, size.x, size.y };
+        _size = glm::vec4(0.f, 0.f, size.x, size.y);
         createFramebuffer();
     }
 }

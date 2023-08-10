@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
-        "The file path to the data file to read"
+        "The file path to the data file to read",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
@@ -57,7 +58,9 @@ namespace {
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
         "10 (highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit"
+        "these automatically increase according to the eccentricity of the orbit",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -65,41 +68,48 @@ namespace {
         "Line Width",
         "This value specifies the line width of the trail if the selected rendering "
         "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored"
+        "ignored",
+        openspace::properties::Property::Visibility::NoviceUser
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the trail"
+        "This value determines the RGB main color for the lines and points of the trail",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property. "
+        "This value determines how fast the trail fades and is an appearance property.",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
         "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored)"
+        "be ignored)",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
         "RenderSize",
         "Contiguous Size of Render Block",
-        "Number of objects to render sequentially from StartRenderIdx"
+        "Number of objects to render sequentially from StartRenderIdx",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
         "Contiguous Mode",
         "If enabled, then the contiguous set of objects starting from StartRenderIdx "
         "of size RenderSize will be rendered. If disabled, then the number of objects "
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "
-        "full length of the data file."
+        "full length of the data file.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
@@ -157,10 +167,10 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 {
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _segmentQuality = static_cast<unsigned int>(p.segmentQuality);
-    _segmentQuality.onChange([this]() { initializeGL(); });
+    _segmentQuality.onChange([this]() { updateBuffers(); });
     addProperty(_segmentQuality);
 
     _appearance.lineColor = p.color;
@@ -169,7 +179,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addPropertySubOwner(_appearance);
 
     _path = p.path.string();
-    _path.onChange([this]() { initializeGL(); });
+    _path.onChange([this]() { updateBuffers(); });
     addProperty(_path);
 
     _format = codegen::map<kepler::Format>(p.format);
@@ -280,17 +290,14 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
     glLineWidth(_appearance.lineWidth);
 
-    const size_t nrOrbits = _segmentSize.size();
-    gl::GLint vertices = 0;
-
     //glDepthMask(false);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE)
 
+    GLint* _si = _startIndex.data();
+    GLint* _ss = _segmentSize.data();
+
     glBindVertexArray(_vertexArray);
-    for (size_t i = 0; i < nrOrbits; ++i) {
-        glDrawArrays(GL_LINE_STRIP, vertices, static_cast<GLsizei>(_segmentSize[i] + 1));
-        vertices = vertices + static_cast<GLint>(_segmentSize[i]) + 1;
-    }
+    glMultiDrawArrays(GL_LINE_STRIP, _si, _ss, static_cast<GLsizei>(_startIndex.size()));
     glBindVertexArray(0);
 
     _programObject->deactivate();
@@ -304,12 +311,12 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     _numObjects = parameters.size();
 
-    if (_startRenderIdx < 0 || _startRenderIdx >= _numObjects) {
+    if (_startRenderIdx >= _numObjects) {
         throw ghoul::RuntimeError(fmt::format(
             "Start index {} out of range [0, {}]", _startRenderIdx, _numObjects
         ));
     }
-    
+
     long long endElement = _startRenderIdx + _sizeRender - 1;
     endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
     if (endElement < 0 || endElement >= _numObjects) {
@@ -353,12 +360,17 @@ void RenderableOrbitalKepler::updateBuffers() {
     }
 
     _segmentSize.clear();
-    for (const kepler::Parameters& p : parameters) {
+    _startIndex.clear();
+    _startIndex.push_back(0);
+    for (int i = 0; i < parameters.size(); ++i) {
         const double scale = static_cast<double>(_segmentQuality) * 10.0;
+        const kepler::Parameters& p = parameters[i];
         _segmentSize.push_back(
             static_cast<size_t>(scale + (scale / pow(1 - p.eccentricity, 1.2)))
         );
+        _startIndex.push_back(_startIndex[i] + static_cast<GLint>(_segmentSize[i]) + 1);
     }
+    _startIndex.pop_back();
 
     size_t nVerticesTotal = 0;
 

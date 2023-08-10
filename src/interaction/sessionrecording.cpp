@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,21 +63,23 @@
 namespace {
     constexpr std::string_view _loggerCat = "SessionRecording";
 
+    constexpr bool UsingTimeKeyframes = false;
+
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
         "Render Playback Information",
-        "If enabled, information about a currently played back session "
-        "recording is rendering to screen"
+        "If enabled, information about a currently played back session recording is "
+        "rendering to screen",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IgnoreRecordedScaleInfo = {
         "IgnoreRecordedScale",
         "Ignore Recorded Scale",
         "If this value is enabled, the scale value from a recording is ignored and the "
-        "computed values are used instead"
+        "computed values are used instead",
+        openspace::properties::Property::Visibility::Hidden
     };
-
-    constexpr bool UsingTimeKeyframes = false;
 } // namespace
 
 namespace openspace::interaction {
@@ -107,7 +109,7 @@ SessionRecording::SessionRecording(bool isGlobal)
     }
 }
 
-SessionRecording::~SessionRecording() { // NOLINT
+SessionRecording::~SessionRecording() {
 }
 
 void SessionRecording::deinitialize() {
@@ -141,15 +143,6 @@ void SessionRecording::removeTrailingPathSlashes(std::string& filename) {
     while (filename.substr(filename.length() - 1, 1) == "\\") {
         filename.pop_back();
     }
-}
-
-void SessionRecording::extractFilenameFromPath(std::string& filename) {
-    size_t unixDelimiter = filename.find_last_of("/");
-    if (unixDelimiter != std::string::npos)
-        filename = filename.substr(unixDelimiter + 1);
-    size_t windowsDelimiter = filename.find_last_of("\\");
-    if (windowsDelimiter != std::string::npos)
-        filename = filename.substr(windowsDelimiter + 1);
 }
 
 bool SessionRecording::handleRecordingFile(std::string filenameIn) {
@@ -240,9 +233,9 @@ bool SessionRecording::startRecording(const std::string& filename) {
         // Record the current delta time as the first property to save in the file.
         // This needs to be saved as a baseline whether or not it changes during recording
         _timestamps3RecordStarted = {
-            _timestampRecordStarted,
-            0.0,
-            global::timeManager->time().j2000Seconds()
+            .timeOs = _timestampRecordStarted,
+            .timeRec = 0.0,
+            .timeSim = global::timeManager->time().j2000Seconds()
         };
 
         recordCurrentTimePauseState();
@@ -348,7 +341,7 @@ void SessionRecording::stopRecording() {
 bool SessionRecording::startPlayback(std::string& filename,
                                      KeyframeTimeRef timeMode,
                                      bool forceSimTimeAtStart,
-                                     bool loop)
+                                     bool loop, bool shouldWaitForFinishedTiles)
 {
     std::string absFilename;
     if (std::filesystem::is_regular_file(filename)) {
@@ -379,6 +372,7 @@ bool SessionRecording::startPlayback(std::string& filename,
     _playbackLineNum = 1;
     _playbackFilename = absFilename;
     _playbackLoopMode = loop;
+    _shouldWaitForFinishLoadingWhenPlayback = shouldWaitForFinishedTiles;
 
     // Open in ASCII first
     _playbackFile.open(_playbackFilename, std::ifstream::in);
@@ -964,7 +958,7 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
         if (!isPropAlreadySaved) {
             std::string initialScriptCommand = fmt::format(
                 "openspace.setPropertyValueSingle(\"{}\", {})",
-                propIdentifier, prop.getStringValue()
+                propIdentifier, prop.stringValue()
             );
             saveScriptKeyframeToPropertiesBaseline(initialScriptCommand);
             _propertyBaselinesSaved.push_back(propIdentifier);
@@ -982,7 +976,7 @@ bool SessionRecording::isPropertyAllowedForBaseline(const std::string& propStrin
 }
 
 void SessionRecording::preSynchronization() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_state == SessionState::Recording) {
         saveCameraKeyframeToTimeline();
@@ -1012,7 +1006,7 @@ void SessionRecording::preSynchronization() {
 }
 
 void SessionRecording::render() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!(_renderPlaybackInformation && isPlayingBack())) {
         return;
@@ -1053,6 +1047,10 @@ bool SessionRecording::isPlayingBack() const {
 
 bool SessionRecording::isSavingFramesDuringPlayback() const {
     return (isPlayingBack() && _saveRenderingDuringPlayback);
+}
+
+bool SessionRecording::shouldWaitForTileLoading() const {
+    return _shouldWaitForFinishLoadingWhenPlayback;
 }
 
 SessionRecording::SessionState SessionRecording::state() const {
@@ -1624,7 +1622,7 @@ std::string SessionRecording::isolateTermFromQuotes(std::string s) {
     }
     //If no quotes found, remove other possible characters from end
     std::string unwantedChars = " );";
-    while (unwantedChars.find(s.back()) != std::string::npos) {
+    while (!s.empty() && (unwantedChars.find(s.back()) != std::string::npos)) {
         s.pop_back();
     }
     return s;
@@ -1864,7 +1862,7 @@ void SessionRecording::moveAheadInTime() {
         _saveRendering_isFirstFrame = false;
         return;
     }
-    if (isSavingFramesDuringPlayback()) {
+    if (_shouldWaitForFinishLoadingWhenPlayback && isSavingFramesDuringPlayback()) {
         // Check if renderable in focus is still resolving tile loading
         // do not adjust time while we are doing this, or take screenshot
         const SceneGraphNode* focusNode =
@@ -2303,6 +2301,10 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     inputFstream.close();
 }
 
+void SessionRecording::convertFileRelativePath(std::string filenameRelative) {
+    convertFile(absPath(filenameRelative).string());
+}
+
 std::string SessionRecording::convertFile(std::string filename, int depth) {
     std::string conversionOutFilename = filename;
     std::ifstream conversionInFile;
@@ -2331,9 +2333,6 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
             //conversionInStream.seekg(conversionInStream.beg);
             newFilename = getLegacyConversionResult(filename, depth + 1);
             removeTrailingPathSlashes(newFilename);
-            if (isPath(newFilename)) {
-                extractFilenameFromPath(newFilename);
-            }
             if (filename == newFilename) {
                 return filename;
             }
@@ -2572,7 +2571,7 @@ std::string SessionRecording::determineConversionOutFilename(const std::string f
         filenameSansExtension = filename.substr(0, filename.find_last_of("."));
     }
     filenameSansExtension += "_" + fileFormatVersion() + "-" + targetFileFormatVersion();
-    return absPath("${RECORDINGS}/" + filenameSansExtension + fileExtension).string();
+    return filenameSansExtension + fileExtension;
 }
 
 bool SessionRecording_legacy_0085::convertScript(std::stringstream& inStream,

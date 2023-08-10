@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 
 #include <openspace/properties/optionproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -45,7 +46,7 @@ OptionProperty::OptionProperty(PropertyInfo info, DisplayType displayType)
     , _displayType(displayType)
 {}
 
-std::string OptionProperty::className() const {
+std::string_view OptionProperty::className() const {
     return "OptionProperty";
 }
 
@@ -58,7 +59,7 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
 }
 
 void OptionProperty::addOption(int value, std::string desc) {
-    Option option = { std::move(value), std::move(desc) };
+    Option option = { .value = std::move(value), .description = std::move(desc) };
 
     for (const Option& o : _options) {
         if (o.value == option.value) {
@@ -158,9 +159,9 @@ std::string OptionProperty::generateAdditionalJsonDescription() const {
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
         std::string v = std::to_string(o.value);
-        std::string vSan = sanitizeString(v);
+        std::string vSan = escapedJson(v);
         std::string d = o.description;
-        std::string dSan = sanitizeString(d);
+        std::string dSan = escapedJson(d);
 
         result += '{';
         result += fmt::format(R"("{}": "{}")", vSan, dSan);

@@ -1,16 +1,22 @@
--- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_VOLUME enabled
-
 -- Before using this example,
 -- the volume data itself needs to be generated,
 -- using the task 'data/tasks/volume/generate_spherical.task'
 
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local astronomicalUnit = 149597870700
 
-local volume = {
+
+local AstronomicalUnit = 149597870700
+
+local Volume = {
   Identifier = "GeneratedVolume",
   Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = AstronomicalUnit
+    }
+  },
   Renderable = {
     Type = "RenderableTimeVaryingVolume",
     SourceDirectory = asset.localResource("spherical"),
@@ -19,26 +25,21 @@ local volume = {
     MinValue = 0,
     MaxValue = 1,
     GridType = "Spherical",
-    SecondsBefore = 50*365*24*60*60, -- 50 years before
-    SecondsAfter = 50*365*24*60*60 -- 50 years after
+    SecondsBefore = 50 * 365 * 24 * 60 * 60, -- 50 years before
+    SecondsAfter = 50 * 365 * 24 * 60 * 60 -- 50 years after
   },
   GUI = {
     Path = "/Examples"
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = astronomicalUnit
-    }
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(volume)
-end)
-  
-asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(volume)
+  openspace.addSceneGraphNode(Volume)
 end)
 
-asset.export(volume)
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Volume)
+end)
+
+asset.export(Volume)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,7 +67,7 @@ DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
 {}
 
 void DashboardItemMission::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     if (!global::missionManager->hasCurrentMission()) {
         return;
@@ -184,7 +184,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemMission::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     // @TODO fix this up ---abock
     return { 0.f, 0.f };

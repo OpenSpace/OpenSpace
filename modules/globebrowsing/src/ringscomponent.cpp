@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,70 +53,85 @@
 namespace {
     constexpr std::string_view _loggerCat = "RingsComponent";
 
-    constexpr std::array<const char*, 9> UniformNames = {
+    constexpr std::array<const char*, 10> UniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
-        "zFightingPercentage"
+        "zFightingPercentage", "opacity"
     };
 
-    constexpr std::array<const char*, 15> UniformNamesAdvancedRings = {
+    constexpr std::array<const char*, 16> UniformNamesAdvancedRings = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd",
         "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor",
         "ringTextureTransparency", "shadowMatrix", "shadowMapTexture",
-        "zFightingPercentage"
+        "zFightingPercentage", "opacity"
     };
 
     constexpr std::array<const char*, 3> GeomUniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "ringTexture"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Enable/Disable Rings",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for these rings"
+        "texture which is used for these rings",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureFwrdInfo = {
         "TextureFwrd",
         "TextureFwrd",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for forward scattering light in these rings"
+        "texture which is used for forward scattering light in these rings",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureBckwrdInfo = {
         "TextureBckwrd",
         "TextureBckwrd",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for backward scattering light in these rings"
+        "texture which is used for backward scattering light in these rings",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureUnlitInfo = {
         "TextureUnlit",
         "TextureUnlit",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for unlit part in these rings"
+        "texture which is used for unlit part in these rings",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureColorInfo = {
         "TextureColor",
         "TextureColor",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture color which is used for unlit part in these rings"
+        "texture color which is used for unlit part in these rings",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureTransparencyInfo = {
         "TextureTransparency",
         "TextureTransparency",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture transparency which is used for unlit part in these rings"
+        "texture transparency which is used for unlit part in these rings",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the radius of the rings in meter"
+        "This value specifies the radius of the rings in meter",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
@@ -125,7 +140,8 @@ namespace {
         "This value is used to limit the width of the rings. Each of the two values is "
         "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
         "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
-        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}"
+        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
@@ -133,31 +149,41 @@ namespace {
         "Night Factor",
         "This value is a multiplicative factor that is applied to the side of the rings "
         "that is facing away from the Sun. If this value is equal to '1', no darkening "
-        "of the night side occurs"
+        "of the night side occurs",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorFilterInfo = {
         "ColorFilter",
         "Color Filter",
         "This value affects the filtering out of part of the rings depending on the "
-        "color values of the texture. The higher value, the more rings are filtered out"
+        "color values of the texture. The higher value, the more rings are filtered out",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
         "The percentage of the correct distance to the surface being shadowed. "
-        "Possible values: [0.0, 1.0]"
+        "Possible values: [0.0, 1.0]",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
         "Number of Shadow Samples",
         "The number of samples used during shadow mapping calculation "
-        "(Percentage Closer Filtering)"
+        "(Percentage Closer Filtering)",
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RingsComponent)]] Parameters {
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+
+        // This value determines the overall opacity of the rings
+        std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
+
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<std::filesystem::path> texture;
 
@@ -215,7 +241,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
     , _colorFilter(ColorFilterInfo, 0.15f, 0.f, 1.f)
-    , _enabled({ "Enabled", "Enabled", "Enable/Disable Rings" }, true)
+    , _enabled(EnabledInfo, true)
     , _zFightingPercentage(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f)
     , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 7)
     , _ringsDictionary(dictionary)
@@ -241,17 +267,21 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
 }
 
 void RingsComponent::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     using ghoul::filesystem::File;
 
     const Parameters p = codegen::bake<Parameters>(_ringsDictionary);
 
+    _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
+    _opacity = p.opacity.value_or(_opacity);
+    addProperty(Fadeable::_opacity);
+    addProperty(Fadeable::_fade);
 
     _size.setExponent(15.f);
     _size = p.size.value_or(_size);
-    _size.onChange([&]() { _planeIsDirty = true; });
+    _size.onChange([this]() { _planeIsDirty = true; });
     addProperty(_size);
 
     if (p.texture.has_value()) {
@@ -328,7 +358,7 @@ bool RingsComponent::isReady() const {
 }
 
 void RingsComponent::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     loadTexture();
     compileShadowShader();
@@ -473,6 +503,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 _uniformCacheAdvancedRings.ringTextureTransparency,
                 ringTextureTransparencyUnit
             );
+            _shader->setUniform(_uniformCacheAdvancedRings.opacityValue, opacity());
 
             // Adding the model transformation to the final shadow matrix so we have a
             // complete transformation from the model coordinates to the clip space of
@@ -507,7 +538,6 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
             glEnable(GL_DEPTH_TEST);
             glEnablei(GL_BLEND, 0);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
         }
         else {
             _shader->setUniform(
@@ -523,6 +553,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 _uniformCache.modelViewProjectionMatrix,
                 modelViewProjectionTransform
             );
+            _shader->setUniform(_uniformCache.opacityValue, opacity());
 
             ringTextureUnit.activate();
             _texture->bind();
@@ -582,7 +613,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
 }
 
 void RingsComponent::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_shader && _shader->isDirty()) {
         compileShadowShader();
@@ -814,7 +845,7 @@ void RingsComponent::createPlane() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, s)) // NOLINT
+        reinterpret_cast<void*>(offsetof(VertexData, s))
     );
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,8 @@ namespace {
         "If this value is enabled, images between different levels are interpolated, "
         "rather than switching between levels abruptly. This makes transitions smoother "
         "and more visually pleasing",
-        openspace::properties::Property::Visibility::Hidden
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 
@@ -69,7 +70,7 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
 }
 
 void LayerGroup::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (const std::unique_ptr<Layer>& l : _layers) {
         l->initialize();
@@ -77,7 +78,7 @@ void LayerGroup::initialize() {
 }
 
 void LayerGroup::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (const std::unique_ptr<Layer>& l : _layers) {
         l->deinitialize();
@@ -85,12 +86,12 @@ void LayerGroup::deinitialize() {
 }
 
 void LayerGroup::update() {
-    ZoneScoped
+    ZoneScoped;
 
     _activeLayers.clear();
 
     for (const std::unique_ptr<Layer>& layer : _layers) {
-        if (layer->enabled()) {
+        if (layer->enabled() && layer->isInitialized()) {
             layer->update();
             _activeLayers.push_back(layer.get());
         }
@@ -98,7 +99,7 @@ void LayerGroup::update() {
 }
 
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
-    ZoneScoped
+    ZoneScoped;
 
     documentation::TestResult res = documentation::testSpecification(
         Layer::Documentation(),

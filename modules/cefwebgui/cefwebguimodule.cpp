@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,32 +40,40 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
-        "This setting determines whether the browser should be enabled or not"
+        "Enabled",
+        "This setting determines whether the browser should be enabled or not",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Trigger this property to reload the browser"
+        "Trigger this property to reload the browser",
+        // @VISIBILITY(2.2)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "Visible",
         "Is Visible",
-        "This setting determines whether the browser should be visible or not"
+        "This setting determines whether the browser should be visible or not",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "GUI URL",
-        "The URL of the webpage that is used to load the WebGUI from"
+        "The URL of the webpage that is used to load the WebGUI from",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
         "GuiScale",
         "Gui Scale",
-        "GUI scale multiplier"
+        "GUI scale multiplier",
+        openspace::properties::Property::Visibility::Always
     };
 } // namespace
 
@@ -87,7 +95,7 @@ CefWebGuiModule::CefWebGuiModule()
 }
 
 void CefWebGuiModule::startOrStopGui() {
-    ZoneScoped
+    ZoneScoped;
 
     WebBrowserModule* webBrowserModule = global::moduleEngine->module<WebBrowserModule>();
 
@@ -103,7 +111,7 @@ void CefWebGuiModule::startOrStopGui() {
             );
             _instance->initialize();
             _instance->reshape(static_cast<glm::ivec2>(
-                static_cast<glm::vec2>(global::windowDelegate->currentSubwindowSize()) *
+                static_cast<glm::vec2>(global::windowDelegate->guiWindowResolution()) *
                 global::windowDelegate->dpiScaling()
             ));
             if (!_url.value().empty()) {
@@ -127,7 +135,7 @@ void CefWebGuiModule::startOrStopGui() {
 }
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    ZoneScoped
+    ZoneScoped;
 
     WebBrowserModule* webBrowserModule =
         global::moduleEngine->module<WebBrowserModule>();
@@ -139,13 +147,13 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     }
 
     _enabled.onChange([this]() {
-        ZoneScopedN("CefWebGuiModule::enabled")
+        ZoneScopedN("CefWebGuiModule::enabled");
 
         startOrStopGui();
     });
 
     _url.onChange([this]() {
-        ZoneScopedN("CefWebGuiModule::url")
+        ZoneScopedN("CefWebGuiModule::url");
 
         if (_instance) {
             _instance->loadUrl(_url);
@@ -153,7 +161,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     _reload.onChange([this]() {
-        ZoneScopedN("CefWebGuiModule::reload")
+        ZoneScopedN("CefWebGuiModule::reload");
 
         if (_instance) {
             _instance->reloadBrowser();
@@ -161,7 +169,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     _guiScale.onChange([this]() {
-        ZoneScopedN("CefWebGuiModule::guiScale")
+        ZoneScopedN("CefWebGuiModule::guiScale");
 
         if (_instance) {
             _instance->setZoom(_guiScale);
@@ -169,7 +177,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     _visible.onChange([this, webBrowserModule]() {
-        ZoneScopedN("CefWebGuiModule::visible")
+        ZoneScopedN("CefWebGuiModule::visible");
 
         if (_visible && _instance) {
             webBrowserModule->attachEventHandler(_instance.get());
@@ -189,7 +197,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
     _endpointCallback = webGuiModule->addEndpointChangeCallback(
         [this](const std::string& endpoint, bool exists) {
-            ZoneScopedN("CefWebGuiModule::endpointCallback")
+            ZoneScopedN("CefWebGuiModule::endpointCallback");
             if (exists && endpoint == "frontend" && _instance) {
                 _instance->reloadBrowser();
             }
@@ -213,17 +221,18 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::draw2D->emplace_back([this](){
-        ZoneScopedN("CefWebGuiModule")
+        ZoneScopedN("CefWebGuiModule");
 
         const bool isGuiWindow =
             global::windowDelegate->hasGuiWindow() ?
             global::windowDelegate->isGuiWindow() :
-            true;
+            global::windowDelegate->currentWindowId()
+                == global::windowDelegate->firstWindowId();
         const bool isMaster = global::windowDelegate->isMaster();
 
         if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate->windowHasResized() || _instance->_shouldReshape) {
-                glm::ivec2 csws = global::windowDelegate->currentSubwindowSize();
+                glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
                 _instance->reshape(static_cast<glm::ivec2>(
                     static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
                 ));
@@ -236,7 +245,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::deinitializeGL->emplace_back([this]() {
-        ZoneScopedN("CefWebGuiModule")
+        ZoneScopedN("CefWebGuiModule");
 
         if (_endpointCallback != -1) {
             WebGuiModule* m = global::moduleEngine->module<WebGuiModule>();

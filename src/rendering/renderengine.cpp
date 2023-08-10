@@ -1,8 +1,9 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,7 +84,8 @@ namespace {
         "ShowOverlayOnClients",
         "Show Overlay Information on Clients",
         "If this value is enabled, the overlay information text is also automatically "
-        "rendered on client nodes. This values is disabled by default"
+        "rendered on client nodes. This values is disabled by default",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowLogInfo = {
@@ -91,28 +93,34 @@ namespace {
         "Show the on-screen log",
         "This value determines whether the on-screen log will be shown or hidden. Even "
         "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
-        "log"
+        "log",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo VerticalLogOffsetInfo = {
         "VerticalLogOffset",
         "Vertical Log Offset",
         "The vertical offset for the on-screen log in [0,1] coordinates, a factor that "
-        "is scaled with the vertical resolution"
+        "is scaled with the vertical resolution",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowVersionInfo = {
         "ShowVersion",
         "Shows the version on-screen information",
         "This value determines whether the Git version information (branch and commit) "
-        "hash are shown on the screen"
+        "hash are shown on the screen",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowCameraInfo = {
         "ShowCamera",
         "Shows information about the current camera state, such as friction",
-        "This value determines whether the information about the current camrea state is "
-        "shown on the screen"
+        "This value determines whether the information about the current camera state is "
+        "shown on the screen",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenshotWindowIdsInfo = {
@@ -120,7 +128,8 @@ namespace {
         "Screenshow Window Ids",
         "The list of window identifiers whose screenshot will be taken the next time "
         "anyone triggers a screenshot. If this list is empty (the default), all windows "
-        "will have their screenshot taken. Id's that do not exist are silently ignored"
+        "will have their screenshot taken. Id's that do not exist are silently ignored",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
@@ -129,27 +138,32 @@ namespace {
         "This value determines whether a warping should be applied before taking a "
         "screenshot. If it is enabled, all post processing is applied as well, which "
         "includes everything rendered on top of the rendering, such as the user "
-        "interface"
+        "interface",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowStatisticsInfo = {
         "ShowStatistics",
         "Show Statistics",
-        "Show updating, rendering, and network statistics on all rendering nodes"
+        "Show updating, rendering, and network statistics on all rendering nodes",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
         "ScreenshotUseDate",
         "Screenshot Folder uses Date",
         "If this value is set to 'true', screenshots will be saved to a folder that "
-        "contains the time at which this value was enabled"
+        "contains the time at which this value was enabled",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameInformation",
         "Show Frame Information",
         "If this value is enabled, the current frame number and frame times are rendered "
-        "into the window"
+        "into the window",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
@@ -159,7 +173,8 @@ namespace {
         "Every other aspect of the application will be unaffected by this and it will "
         "still respond to user input. This setting is reasonably only useful in the case "
         "of multi-pipeline environments, such as planetariums, where the output of the "
-        "master node is not required and performance can be gained by disabling it"
+        "master node is not required and performance can be gained by disabling it",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GlobalRotationInfo = {
@@ -168,69 +183,81 @@ namespace {
         "Applies a global view rotation. Use this to rotate the position of the "
         "focus node away from the default location on the screen. This setting "
         "persists even when a new focus node is selected. Defined using pitch, yaw, "
-        "roll in radians"
+        "roll in radians",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpaceRotationInfo = {
         "ScreenSpaceRotation",
         "Screen Space Rotation",
-        "Applies a rotation to all screen space renderables. "
-        "Defined using pitch, yaw, roll in radians"
+        "Applies a rotation to all screen space renderables. Defined using pitch, yaw, "
+        "roll in radians",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
         "MasterRotation",
         "Master Rotation",
-        "Applies a view rotation for only the master node, defined using "
-        "pitch, yaw, roll in radians. This can be used to compensate the master view "
-        "direction for tilted display systems in clustered immersive environments"
+        "Applies a view rotation for only the master node, defined using pitch, yaw, "
+        "roll in radians.This can be used to compensate the master view direction for "
+        "tilted display systems in clustered immersive environments",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
        "DisableHDRPipeline",
        "Disable HDR Rendering",
-       "If this value is enabled, the rendering will disable the HDR color handling "
-       "and the LDR color pipeline will be used. Be aware of possible over exposure "
-       "in the final colors"
+       "If this value is enabled, the rendering will disable the HDR color handling and "
+       "the LDR color pipeline will be used. Be aware of possible over exposure in the "
+        "final colors",
+        openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {
         "HDRExposure",
         "HDR Exposure",
-        "This value determines the amount of light per unit area reaching the "
-        "equivalent of an electronic image sensor"
+        "This value determines the amount of light per unit area reaching the equivalent "
+        "of an electronic image sensor",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
-        "tristimulus values in the image"
+        "tristimulus values in the image",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HueInfo = {
         "Hue",
         "Hue",
-        "Hue"
+        "Hue",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaturationInfo = {
         "Saturation",
         "Saturation",
-        "Saturation"
+        "Saturation",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ValueInfo = {
         "Value",
         "Value",
-        "Value"
+        "Value",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FramerateLimitInfo = {
         "FramerateLimit",
         "Framerate Limit",
         "If set to a value bigger than 0, the framerate will be limited to that many "
-        "frames per second without using V-Sync"
+        "frames per second without using V-Sync",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
@@ -238,39 +265,46 @@ namespace {
         "Horizontal Field of View",
         "Adjusts the degrees of the horizontal field of view. The vertical field of "
         "view will be automatically adjusted to match, according to the current "
-        "aspect ratio"
+        "aspect ratio",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GlobalBlackoutFactorInfo = {
         "BlackoutFactor",
         "Blackout Factor",
         "The blackout factor of the rendering. This can be used for fading in or out the "
-        "rendering window"
+        "rendering window",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FXAAInfo = {
         "FXAA",
         "Enable FXAA",
-        "Enable FXAA"
+        "Enable FXAA",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledFontColorInfo = {
         "EnabledFontColor",
         "Enabled Font Color",
-        "The font color used for enabled options"
+        "The font color used for enabled options",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisabledFontColorInfo = {
         "DisabledFontColor",
         "Disabled Font Color",
-        "The font color used for disabled options"
+        "The font color used for disabled options",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
 namespace openspace {
 
 RenderEngine::RenderEngine()
-    : properties::PropertyOwner({ "RenderEngine" })
+    : properties::PropertyOwner({ "RenderEngine", "Render Engine" })
     , _showOverlayOnClients(ShowOverlayClientsInfo, false)
     , _showLog(ShowLogInfo, true)
     , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
@@ -411,10 +445,14 @@ RenderEngine::RenderEngine()
     addProperty(_disabledFontColor);
 }
 
-RenderEngine::~RenderEngine() {} // NOLINT
+RenderEngine::~RenderEngine() {}
+
+const FramebufferRenderer& RenderEngine::renderer() const {
+    return _renderer;
+}
 
 void RenderEngine::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
@@ -458,7 +496,7 @@ void RenderEngine::initialize() {
 }
 
 void RenderEngine::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     LTRACE("RenderEngine::initializeGL(begin)");
 
@@ -477,8 +515,8 @@ void RenderEngine::initializeGL() {
 
     configuration::Configuration::FontSizes fontSize = global::configuration->fontSize;
     {
-        ZoneScopedN("Fonts")
-        TracyGpuZone("Fonts")
+        ZoneScopedN("Fonts");
+        TracyGpuZone("Fonts");
         _fontFrameInfo = global::fontManager->font(KeyFontMono, fontSize.frameInfo);
         _fontShutdown = global::fontManager->font(KeyFontMono, fontSize.shutdown);
         _fontCameraInfo = global::fontManager->font(KeyFontMono, fontSize.cameraInfo);
@@ -487,7 +525,7 @@ void RenderEngine::initializeGL() {
     }
 
     {
-        ZoneScopedN("Log")
+        ZoneScopedN("Log");
         LINFO("Initializing Log");
         auto log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
         _log = log.get();
@@ -499,13 +537,13 @@ void RenderEngine::initializeGL() {
 }
 
 void RenderEngine::deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     _renderer.deinitialize();
 }
 
 void RenderEngine::updateScene() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_scene) {
         return;
@@ -526,7 +564,7 @@ void RenderEngine::updateScene() {
 }
 
 void RenderEngine::updateShaderPrograms() {
-    ZoneScoped
+    ZoneScoped;
 
     for (ghoul::opengl::ProgramObject* program : _programs) {
         try {
@@ -541,7 +579,7 @@ void RenderEngine::updateShaderPrograms() {
 }
 
 void RenderEngine::updateRenderer() {
-    ZoneScoped
+    ZoneScoped;
 
     const bool windowResized = global::windowDelegate->windowHasResized();
 
@@ -560,7 +598,7 @@ void RenderEngine::updateRenderer() {
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *global::screenSpaceRenderables) {
         ssr->update();
@@ -577,7 +615,7 @@ glm::ivec2 RenderEngine::fontResolution() const {
         return global::windowDelegate->currentViewportSize();
     }
     else {
-        return global::windowDelegate->currentSubwindowSize();
+        return global::windowDelegate->currentViewportResolution();
     }
 }
 
@@ -621,7 +659,7 @@ uint64_t RenderEngine::frameNumber() const {
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {
-    ZoneScoped
+    ZoneScoped;
 
     LTRACE("RenderEngine::render(begin)");
 
@@ -632,9 +670,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     glm::mat4 combinedGlobalRot = nodeRot * globalRot;
 
     if (_camera) {
-        _camera->sgctInternal.setViewMatrix(
-            viewMatrix * combinedGlobalRot * sceneMatrix
-        );
+        _camera->sgctInternal.setViewMatrix(viewMatrix * combinedGlobalRot * sceneMatrix);
         _camera->sgctInternal.setSceneMatrix(combinedGlobalRot * sceneMatrix);
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
         _camera->invalidateCache();
@@ -642,8 +678,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     const int fpsLimit = _framerateLimit;
     if (fpsLimit > 0) {
-        // Using a sleep here is not optimal, but we are not looking for FPS-perfect
-        // limiting
+        // Using a sleep here is not optimal, but we are not looking for perfect timing
         std::this_thread::sleep_until(_lastFrameTime);
         const double delta = (1.0 / fpsLimit) * 1000.0 * 1000.0;
         auto now = std::chrono::high_resolution_clock::now();
@@ -651,12 +686,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     const bool renderingEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
-    if (renderingEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
-        _renderer.render(
-            _scene,
-            _camera,
-            _globalBlackOutFactor
-        );
+    if (renderingEnabled && _globalBlackOutFactor > 0.f) {
+        _renderer.render(_scene, _camera, _globalBlackOutFactor);
     }
 
     // The CEF webbrowser fix has to be called at least once per frame and we are doing
@@ -668,7 +699,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     if (_showFrameInformation) {
-        ZoneScopedN("Show Frame Information")
+        ZoneScopedN("Show Frame Information");
 
         glm::vec2 penPosition = glm::vec2(
             fontResolution().x / 2 - 50,
@@ -698,7 +729,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     if (renderingEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
-        ZoneScopedN("Render Screenspace Renderable")
+        ZoneScopedN("Render Screenspace Renderable");
 
         std::vector<ScreenSpaceRenderable*> ssrs;
         ssrs.reserve(global::screenSpaceRenderables->size());
@@ -741,7 +772,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.rotation)) {
         constexpr const char ToggleRotationFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
-            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
             ToggleRotationFrictionScript,
@@ -753,7 +784,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.zoom)) {
         constexpr const char ToggleZoomFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
-            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
             ToggleZoomFrictionScript,
@@ -765,7 +796,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.roll)) {
         constexpr const char ToggleRollFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
-            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
             ToggleRollFrictionScript,
@@ -778,7 +809,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 }
 
 void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
-    ZoneScoped
+    ZoneScoped;
 
     const bool isMaster = global::windowDelegate->isMaster();
     if (isMaster || _showOverlayOnClients) {
@@ -804,7 +835,7 @@ void RenderEngine::renderEndscreen() {
 
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
+        glm::vec2(global::windowDelegate->firstWindowResolution()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
     constexpr std::string_view Text = "Shutting down";
@@ -817,7 +848,7 @@ void RenderEngine::renderEndscreen() {
 }
 
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
-    ZoneScoped
+    ZoneScoped;
 
     timer = std::max(timer, 0.f);
 
@@ -860,7 +891,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 }
 
 void RenderEngine::renderDashboard() {
-    ZoneScoped
+    ZoneScoped;
 
     glm::vec2 dashboardStart = global::dashboard->getStartPositionOffset();
     glm::vec2 penPosition = glm::vec2(
@@ -872,7 +903,7 @@ void RenderEngine::renderDashboard() {
 }
 
 void RenderEngine::postDraw() {
-    ZoneScoped
+    ZoneScoped;
 
     ++_frameNumber;
 }
@@ -896,7 +927,7 @@ ghoul::opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
     return *_openglStateCache;
 }
 
-float RenderEngine::globalBlackOutFactor() {
+float RenderEngine::globalBlackOutFactor() const {
     return _globalBlackOutFactor;
 }
 
@@ -982,12 +1013,7 @@ void RenderEngine::removeRenderProgram(ghoul::opengl::ProgramObject* program) {
         return;
     }
 
-    auto it = std::find(
-        _programs.begin(),
-        _programs.end(),
-        program
-    );
-
+    auto it = std::find(_programs.begin(), _programs.end(), program);
     if (it != _programs.end()) {
         _programs.erase(it);
     }
@@ -1039,6 +1065,14 @@ void RenderEngine::takeScreenshot() {
     );
 }
 
+/**
+ * Resets the screenshot index to 0
+ */
+void RenderEngine::resetScreenshotNumber() {
+    _latestScreenshotNumber = 0;
+    global::windowDelegate->resetScreenshotNumber();
+}
+
 unsigned int RenderEngine::latestScreenshotNumber() const {
     return _latestScreenshotNumber;
 }
@@ -1050,25 +1084,25 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             codegen::lua::AddScreenSpaceRenderable,
             codegen::lua::RemoveScreenSpaceRenderable,
             codegen::lua::TakeScreenshot,
-            codegen::lua::DpiScaling
+            codegen::lua::DpiScaling,
+            codegen::lua::ResetScreenshotNumber
         }
     };
 }
 
 void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s) {
-
     const std::string identifier = s->identifier();
 
-    if (std::find_if(
+    auto it = std::find_if(
         global::screenSpaceRenderables->begin(),
         global::screenSpaceRenderables->end(),
         [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& ssr) {
             return ssr->identifier() == identifier;
-        }) != global::screenSpaceRenderables->end()
-    ) {
+        }
+    );
+    if (it != global::screenSpaceRenderables->end()) {
         LERROR(fmt::format(
-            "Cannot add scene space renderable. "
-            "An element with identifier '{}' already exists",
+            "Cannot add scene space renderable. Identifier '{}' already exists",
             identifier
         ));
         return;
@@ -1136,13 +1170,13 @@ std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const
 }
 
 void RenderEngine::renderCameraInformation() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_showCameraInfo) {
         return;
     }
 
-    const glm::vec4 EnabledColor  = _enabledFontColor.value();
+    const glm::vec4 EnabledColor = _enabledFontColor.value();
     const glm::vec4 DisabledColor = _disabledFontColor.value();
 
     const glm::vec2 rotationBox = _fontCameraInfo->boundingBox("Rotation");
@@ -1157,12 +1191,12 @@ void RenderEngine::renderCameraInformation() {
 
     using FR = ghoul::fontrendering::FontRenderer;
 
-    _cameraButtonLocations.rotation = {
+    _cameraButtonLocations.rotation = glm::ivec4(
         fontResolution().x - rotationBox.x - XSeparation,
         fontResolution().y - penPosY,
         rotationBox.x,
         rotationBox.y
-    };
+    );
     FR::defaultRenderer().render(
         *_fontCameraInfo,
         glm::vec2(fontResolution().x - rotationBox.x - XSeparation, penPosY),
@@ -1173,12 +1207,12 @@ void RenderEngine::renderCameraInformation() {
 
     const glm::vec2 zoomBox = _fontCameraInfo->boundingBox("Zoom");
 
-    _cameraButtonLocations.zoom = {
+    _cameraButtonLocations.zoom = glm::ivec4(
         fontResolution().x - zoomBox.x - XSeparation,
         fontResolution().y - penPosY,
         zoomBox.x,
         zoomBox.y
-    };
+    );
     FR::defaultRenderer().render(
         *_fontCameraInfo,
         glm::vec2(fontResolution().x - zoomBox.x - XSeparation, penPosY),
@@ -1189,12 +1223,12 @@ void RenderEngine::renderCameraInformation() {
 
     const glm::vec2 rollBox = _fontCameraInfo->boundingBox("Roll");
 
-    _cameraButtonLocations.roll = {
+    _cameraButtonLocations.roll = glm::ivec4(
         fontResolution().x - rollBox.x - XSeparation,
         fontResolution().y - penPosY,
         rollBox.x,
         rollBox.y
-    };
+    );
     FR::defaultRenderer().render(
         *_fontCameraInfo,
         glm::vec2(fontResolution().x - rollBox.x - XSeparation, penPosY),
@@ -1204,7 +1238,7 @@ void RenderEngine::renderCameraInformation() {
 }
 
 void RenderEngine::renderVersionInformation() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_showVersionInfo) {
         return;
@@ -1216,10 +1250,7 @@ void RenderEngine::renderVersionInformation() {
 
     FR::defaultRenderer().render(
         *_fontVersionInfo,
-        glm::vec2(
-            fontResolution().x - versionBox.x - 10.f,
-            5.f
-        ),
+        glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
         _versionString,
         glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
     );
@@ -1238,17 +1269,35 @@ void RenderEngine::renderVersionInformation() {
         );
     }
 
+    [[maybe_unused]] float debugOffset = 0.f;
+#ifdef _DEBUG
+    {
+        const glm::vec2 debugBox = _fontVersionInfo->boundingBox("Debug build");
+        debugOffset = debugBox.y;
+        const glm::vec2 penPosition = glm::vec2(
+            fontResolution().x - debugBox.x - 10.f,
+            versionBox.y + commitBox.y + 5.f
+        );
+        FR::defaultRenderer().render(
+            *_fontVersionInfo,
+            penPosition,
+            "Debug build",
+            glm::vec4(0.2f, 0.75f, 0.15f, 1.f)
+        );
+    }
+#endif // _DEBUG
+
 #ifdef TRACY_ENABLE
     {
         // If we have Tracy enabled, we should inform the user about it that the
         // application will crash after a while if no profiler is attached
 
-        ZoneScopedN("Tracy Information")
+        ZoneScopedN("Tracy Information");
 
         const glm::vec2 tracyBox = _fontVersionInfo->boundingBox("TRACY PROFILING");
         const glm::vec2 penPosition = glm::vec2(
             fontResolution().x - tracyBox.x - 10.f,
-            versionBox.y + commitBox.y + 5.f
+            versionBox.y + commitBox.y + debugOffset + 5.f
         );
         FR::defaultRenderer().render(
             *_fontVersionInfo,
@@ -1262,7 +1311,7 @@ void RenderEngine::renderVersionInformation() {
 }
 
 void RenderEngine::renderScreenLog() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_showLog) {
         return;
@@ -1281,7 +1330,7 @@ void RenderEngine::renderScreenLog() {
     size_t nRows = 1;
     const auto now = std::chrono::steady_clock::now();
     for (size_t i = 1; i <= std::min(MaxNumberMessages, entries.size()); i += 1) {
-        ZoneScopedN("Entry")
+        ZoneScopedN("Entry");
 
         const ScreenLog::LogEntry& it = entries[entries.size() - i];
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___RENDERABLE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -33,6 +34,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <string_view>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {
@@ -51,20 +53,29 @@ namespace documentation { struct Documentation; }
 
 class Camera;
 
-class Renderable : public properties::PropertyOwner {
+// Unfortunately we can't move this struct into the Renderable until
+// https://bugs.llvm.org/show_bug.cgi?id=36684 is fixed
+struct RenderableSettings {
+    bool automaticallyUpdateRenderBin = true;
+    bool shouldUpdateIfDisabled = false;
+};
+
+class Renderable : public properties::PropertyOwner, public Fadeable {
 public:
     enum class RenderBin : int {
         Background = 1,
         Opaque = 2,
         PreDeferredTransparent = 4,
-        PostDeferredTransparent = 8,
-        Overlay = 16
+        Overlay = 8,
+        PostDeferredTransparent = 16,
+        Sticker = 32
     };
 
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
         ghoul::Dictionary dictionary);
 
-    Renderable(const ghoul::Dictionary& dictionary);
+    Renderable(const ghoul::Dictionary& dictionary,
+        RenderableSettings settings = RenderableSettings());
     virtual ~Renderable() override = default;
 
     virtual void initialize();
@@ -74,13 +85,16 @@ public:
 
     virtual bool isReady() const = 0;
     bool isEnabled() const;
-    bool shouldUpdateIfDisabled() const;
+    bool shouldUpdateIfDisabled() const noexcept;
 
-    double boundingSphere() const;
-    double interactionSphere() const;
+    double boundingSphere() const noexcept;
+    double interactionSphere() const noexcept;
 
-    virtual void render(const RenderData& data, RendererTasks& rendererTask);
+    std::string_view typeAsString() const noexcept;
+
     virtual void update(const UpdateData& data);
+    virtual void render(const RenderData& data, RendererTasks& rendererTask);
+    virtual void renderSecondary(const RenderData& data, RendererTasks& rendererTask);
 
     // The 'surface' in this case is the interaction sphere of this renderable. In some
     // cases (i.e., planets) this corresponds directly to the physical surface, but in
@@ -94,11 +108,11 @@ public:
 
     RenderBin renderBin() const;
     void setRenderBin(RenderBin bin);
-    bool matchesRenderBinMask(int binMask);
+    bool matchesRenderBinMask(int binMask) const noexcept;
 
-    void setFade(float fade);
+    bool matchesSecondaryRenderBin(int binMask) const noexcept;
 
-    bool isVisible() const;
+    bool isVisible() const override;
 
     void onEnabledChange(std::function<void(bool)> callback);
 
@@ -106,8 +120,6 @@ public:
 
 protected:
     properties::BoolProperty _enabled;
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
     properties::StringProperty _renderableType;
     properties::BoolProperty _dimInAtmosphere;
 
@@ -115,18 +127,31 @@ protected:
     void setInteractionSphere(double interactionSphere);
 
     void setRenderBinFromOpacity();
-    void registerUpdateRenderBinFromOpacity();
 
     /// Returns the full opacity constructed from the _opacity and _fade property values
-    float opacity() const;
+    float opacity() const noexcept override;
+
+    SceneGraphNode* parent() const noexcept;
+
+    bool automaticallyUpdatesRenderBin() const noexcept;
+    bool hasOverrideRenderBin() const noexcept;
+
+    RenderBin _renderBin = RenderBin::Opaque;
+
+    // An optional renderbin that renderables can use for certain components, in cases
+    // where all parts of the renderable should not be rendered in the same bin
+    std::optional<RenderBin> _secondaryRenderBin;
+private:
 
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;
     SceneGraphNode* _parent = nullptr;
-    bool _shouldUpdateIfDisabled = false;
-    RenderBin _renderBin = RenderBin::Opaque;
+    const bool _shouldUpdateIfDisabled = false;
+    bool _automaticallyUpdateRenderBin = true;
+    bool _hasOverrideRenderBin = false;
 
-private:
+    void registerUpdateRenderBinFromOpacity();
+
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
     // to provide a set method for this. Otherwise, anyone might mess around with our
     // parentage and that's no bueno

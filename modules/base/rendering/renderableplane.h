@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -72,7 +72,8 @@ protected:
     properties::OptionProperty _blendMode;
     properties::BoolProperty _billboard;
     properties::BoolProperty _mirrorBackside;
-    properties::FloatProperty _size;
+    properties::Vec2Property _size;
+    properties::BoolProperty _autoScale;
     properties::Vec3Property _multiplyColor;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;

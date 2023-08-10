@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -108,7 +108,7 @@ private:
     // line segments
     bool _shouldUpdateMaskingBuffer = false;
     // note Elon: rework the case of only one state
-    // hasBeenUpdated only gets sets once, first iteration of update function, to 
+    // hasBeenUpdated only gets sets once, first iteration of update function, to
     // guarantee the vertext position buffer to be initialized.
     bool _hasBeenUpdated = false;
 

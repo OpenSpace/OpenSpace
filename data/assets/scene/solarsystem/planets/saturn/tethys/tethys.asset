@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -9,6 +11,7 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Tethys = {
   Identifier = "Tethys",
   Parent = transforms.SaturnBarycenter.Identifier,
@@ -16,8 +19,7 @@ local Tethys = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "TETHYS",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Observer = "SATURN BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -45,19 +47,52 @@ local Tethys = {
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
-    Path = "/Solar System/Planets/Saturn/Moons"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Tethys"
   }
 }
 
+local TethysLabel = {
+  Identifier = "TethysLabel",
+  Parent = Tethys.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Tethys",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.3, 10.0 },
+    FadeWidths = { 0.15, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels", "moon_major_saturn" },
+  GUI = {
+    Name = "Tethys Label",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Tethys",
+    Description = "Label for Saturn's moon Tethys"
+  }
+}
+
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.sat441)
+
   openspace.addSceneGraphNode(Tethys)
+  openspace.addSceneGraphNode(TethysLabel)
 end)
-  
+
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TethysLabel)
   openspace.removeSceneGraphNode(Tethys)
+
+  openspace.spice.unloadKernel(kernel.sat441)
 end)
-  
+
 asset.export(Tethys)
+asset.export(TethysLabel)
 
 
 

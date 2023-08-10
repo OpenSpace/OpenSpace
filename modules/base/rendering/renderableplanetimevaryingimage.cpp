@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,14 +45,17 @@ namespace {
         "SourceFolder",
         "Source Folder",
         "This value specifies the image directory that is loaded from disk and "
-        "is used as a texture that is applied to this plane"
+        "is used as a texture that is applied to this plane",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderTypeInfo = {
        "RenderType",
        "Render Type",
        "This value specifies if the plane should be rendered in the Background, "
-       "Opaque, Transparent, or Overlay rendering step"
+       "Opaque, Transparent, or Overlay rendering step",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
@@ -195,7 +198,7 @@ void RenderablePlaneTimeVaryingImage::bindTexture() {
 }
 
 void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
     RenderablePlane::update(data);
 
     if (!_enabled || _startTimes.empty()) {
