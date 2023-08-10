@@ -21,7 +21,7 @@ asset.meta = {
   Name = "ScreenSpaceBrowser Example",
   Version = "1.0",
   Description = [[Example of how to load and show a webpage in the rendering. The loaded
-    webpage is shown in screen space]],
+    webpage is shown in screen space.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

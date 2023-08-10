@@ -31,7 +31,7 @@ local Mercury = {
   GUI = {
     Name = "Night Sky Mercury",
     Description = [[A night sky version of the planet Mercury, making it visible as
-      a bright object on the sky (textured representation)]],
+      a bright object on the sky (textured representation).]],
     Path = "/Other/Night Sky/Planets"
   }
 }
@@ -53,7 +53,7 @@ local Venus = {
   GUI = {
     Name = "Night Sky Venus",
     Description = [[A night sky version of the planet Venus, making it visible as
-      a bright object on the sky (textured representation)]],
+      a bright object on the sky (textured representation).]],
     Path = "/Other/Night Sky/Planets"
   }
 }
@@ -95,7 +95,7 @@ local Jupiter = {
   GUI = {
     Name = "Night Sky Jupiter",
     Description = [[A night sky version of the planet Jupiter, making it visible as
-      a bright object on the sky (textured representation)]],
+      a bright object on the sky (textured representation).]],
     Path = "/Other/Night Sky/Planets"
   }
 }
@@ -117,7 +117,7 @@ local Saturn = {
   GUI = {
     Name = "Night Sky Saturn",
     Description = [[A night sky version of the planet Saturn, making it visible as
-      a bright object on the sky (textured representation)]],
+      a bright object on the sky (textured representation).]],
     Path = "/Other/Night Sky/Planets"
   }
 }

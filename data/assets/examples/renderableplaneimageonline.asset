@@ -13,7 +13,7 @@ local RenderablePlaneImageOnline = {
     URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
   },
   GUI = {
-    Description = "A plane that loads a texture from the internet",
+    Description = "A plane that loads a texture from the internet.",
     Path = "/Examples"
   }
 }

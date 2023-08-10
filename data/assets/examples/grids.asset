@@ -19,7 +19,7 @@ local RadialGrid = {
   },
   GUI = {
     Name = "Example Radial Grid",
-    Description = [[A circular 2D grid, with segments based on the radius and angle]],
+    Description = [[A circular 2D grid, with segments based on the radius and angle.]],
     Path = "/Examples/Grids"
   }
 }
@@ -44,7 +44,7 @@ local PlanarGrid = {
   },
   GUI = {
     Name = "Example Grid",
-    Description = [[A basic 2D grid, with a given size and number of segments]],
+    Description = [[A basic 2D grid, with a given size and number of segments.]],
     Path = "/Examples/Grids"
   }
 }
@@ -116,7 +116,7 @@ asset.export(BoxGrid)
 asset.meta = {
   Name = "Example Grids",
   Version = "1.0",
-  Description = [[Example of different types of rendered grids.]],
+  Description = [[Examples of different types of rendered grids.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

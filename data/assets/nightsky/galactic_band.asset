@@ -22,7 +22,7 @@ local GalacticBand = {
     },
     GUI = {
         Name = "Galactic Equator Line",
-        Description = "A line representation of the Galactic Equator plane",
+        Description = "A line representation of the Galactic Equator plane.",
         Path = "/Other/Lines"
     }
 }

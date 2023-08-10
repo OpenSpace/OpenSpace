@@ -60,7 +60,7 @@ local CardinalDirectionSphere = {
   },
   GUI = {
     Name = "Cardinal Directions",
-    Description = [[A textures sphere showing the cardinal directions.
+    Description = [[A textured sphere showing the cardinal directions.
       The sphere is placed on the planet surface and follows the camera's movements.
     ]],
     Path = "/Other/Night Sky"

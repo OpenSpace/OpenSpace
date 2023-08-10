@@ -42,7 +42,7 @@ local ScaleModel = {
   GUI = {
     Name = "School bus",
     Desription = [[The average length of a full size US school bus is above 35 feet
-      (10.7 meters)]],
+      (10.7 meters).]],
     Path = "/Scale Objects"
   }
 }

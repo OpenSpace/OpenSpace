@@ -33,7 +33,7 @@ local EquatorialLine = {
   },
   GUI = {
     Name = "Equatorial Line",
-    Description = "A line representation of the Equatorial plane",
+    Description = "A line representation of the Equatorial plane.",
     Path = "/Other/Lines"
   }
 }

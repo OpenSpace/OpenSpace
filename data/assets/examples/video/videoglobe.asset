@@ -29,7 +29,7 @@ asset.export("layer", Layer)
 asset.meta = {
   Name = "Video Player on Globe Example",
   Version = "1.0",
-  Description = "An example asset that shows how to include a video on Earth",
+  Description = "An example asset that shows how to include a video on Earth.",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT"

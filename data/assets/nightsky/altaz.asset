@@ -56,8 +56,8 @@ local AltAzGrid = {
     Name = "Altitude/Azimuth Grid",
     Description = [[A local Altitude/Azimuth grid centered around your position on a
     planetary surface. The grid can be toggled, hidden or shown using the accompanying
-    actiions in the actions panel, under "Night Sky". Use these actions to move it to
-    another planet. The default is Earth]],
+    actions in the actions panel, under "Night Sky". Use these actions to move it to
+    another planet. The default is Earth.]],
     Path = "/Other/Night Sky"
   }
 }
@@ -131,7 +131,7 @@ asset.meta = {
   Version = "1.0",
   Description = [[A local Altitude/Azimuth grid centered around your position on a
     planetary surface. The asset also includes some actions to toggle, hide or
-    show the grid]],
+    show the grid.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

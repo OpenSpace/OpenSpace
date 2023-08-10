@@ -41,7 +41,7 @@ local ScaleModel = {
   },
   GUI = {
     Name = "Scientist",
-    Description = [[The average height of a human is a bit under 170 cm (5'7")]],
+    Description = [[The average height of a human is a bit under 170 cm (5'7").]],
     Path = "/Scale Objects"
   }
 }
