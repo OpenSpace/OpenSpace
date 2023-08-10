@@ -27,13 +27,14 @@
 
 #include <QDialog>
 #include <QSortFilterProxyModel>
-#include <QRegExp>
+#include <QRegularExpression>
 #include "assettreemodel.h"
 
 class QTextEdit;
 class QTreeView;
 
 class SearchProxyModel : public QSortFilterProxyModel {
+Q_OBJECT
 public:
     /**
      * Constructor for SearchProxyModel class
@@ -42,17 +43,19 @@ public:
      */
     SearchProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
 
+public slots:
     /**
      * Sets the regular expression pattern to apply to the filter
      *
      * \param pattern The QString reference containing the regex pattern
      */
-    void setFilterRegExp(const QString& pattern);
+    void setFilterRegularExpression(const QString& pattern);
 
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
 private:
+    QRegularExpression* _regExPattern = nullptr;
     bool acceptIndex(const QModelIndex& idx) const;
 };
 

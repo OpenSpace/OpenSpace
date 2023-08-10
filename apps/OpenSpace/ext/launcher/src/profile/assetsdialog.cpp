@@ -296,14 +296,17 @@ void AssetsDialog::searchTextChanged(const QString& text) {
     }
     else {
         _assetTree->setModel(_searchProxyModel);
-        _assetProxyModel->setFilterRegExp(text);
+        _searchProxyModel->setFilterRegularExpression(text);
         _assetTree->expandAll();
     }
 }
-    
-void SearchProxyModel::setFilterRegExp(const QString& pattern) {
-    QRegExp regex(pattern, Qt::CaseInsensitive, QRegExp::FixedString);
-    QSortFilterProxyModel::setFilterRegExp(regex);
+
+void SearchProxyModel::setFilterRegularExpression(const QString& pattern) {
+    _regExPattern = new QRegularExpression(
+        pattern,
+        QRegularExpression::CaseInsensitiveOption
+    );
+    QSortFilterProxyModel::setFilterRegularExpression(*_regExPattern);
 }
 
 bool SearchProxyModel::filterAcceptsRow(int sourceRow,
@@ -316,7 +319,11 @@ bool SearchProxyModel::filterAcceptsRow(int sourceRow,
 bool SearchProxyModel::acceptIndex(const QModelIndex& idx) const {
     if (idx.isValid()) {
         QString text = idx.data(Qt::DisplayRole).toString();
-        if (filterRegExp().indexIn(text) >= 0) {
+        if (!_regExPattern) {
+            return false;
+        }
+        QRegularExpressionMatchIterator matchIterator = _regExPattern->globalMatch(text);
+        if (matchIterator.hasNext()) {
             return true;
         }
         for (int row = 0; row < idx.model()->rowCount(idx); ++row) {
