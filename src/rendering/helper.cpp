@@ -423,25 +423,42 @@ std::vector<VertexXYZ> convert(std::vector<Vertex> v) {
     return result;
 }
 
+Vertex computeCircleVertex(int i, int nSegments, float radius,
+                           glm::vec4 color = glm::vec4(1.f))
+{
+    const float fsegments = static_cast<float>(nSegments);
+
+    const float fi = static_cast<float>(i);
+
+    const float theta = fi * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
+
+    const float x = radius * std::cos(theta);
+    const float y = radius * std::sin(theta);
+    const float z = 0.f;
+
+    const float u = std::cos(theta);
+    const float v = std::sin(theta);
+
+    return { x, y, z, u, v, color.r, color.g, color.b, color.a };
+}
+
 std::vector<Vertex> createRing(int nSegments, float radius, glm::vec4 colors) {
     const int nVertices = nSegments + 1;
     std::vector<Vertex> vertices(nVertices);
 
-    const float fsegments = static_cast<float>(nSegments);
+    for (int i = 0; i <= nSegments; ++i) {
+        vertices[i] = computeCircleVertex(i, nSegments, radius, colors);
+    }
+    return vertices;
+}
+
+std::vector<VertexXYZ> createRingXYZ(int nSegments, float radius) {
+    const int nVertices = nSegments + 1;
+    std::vector<VertexXYZ> vertices(nVertices);
 
     for (int i = 0; i <= nSegments; ++i) {
-        const float fi = static_cast<float>(i);
-
-        const float theta = fi * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
-
-        const float x = radius * std::cos(theta);
-        const float y = radius * std::sin(theta);
-        const float z = 0.f;
-
-        const float u = std::cos(theta);
-        const float v = std::sin(theta);
-
-        vertices[i] = { x, y, z, u, v, colors.r, colors.g, colors.b, colors.a };
+        Vertex fullVertex = computeCircleVertex(i, nSegments, radius);
+        vertices[i] = { fullVertex.xyz[0], fullVertex.xyz[1], fullVertex.xyz[2] };
     }
     return vertices;
 }
