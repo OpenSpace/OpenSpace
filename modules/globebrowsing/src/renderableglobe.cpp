@@ -97,6 +97,7 @@ namespace {
     // time being.  --abock  2018-10-30
     constexpr int DefaultSkirtedGridSegments = 64;
     constexpr int UnknownDesiredLevel = -1;
+    constexpr int DefaultHeightTileResolution = 512;
 
     const openspace::globebrowsing::GeodeticPatch Coverage =
         openspace::globebrowsing::GeodeticPatch(0, 0, 90, 180);
@@ -1610,11 +1611,11 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
 
         const glm::mat3& modelViewTransformMat3 = glm::mat3(modelViewTransform);
 
-        // This is an assumption that the height tile has a resolution of 64 * 64
+        // This is an assumption that the height tile has a resolution of 512 * 512
         // If it does not it will still produce "correct" normals. If the resolution is
         // higher the shadows will be softer, if it is lower, pixels will be visible.
-        // Since default is 64 this will most likely work fine.
-        constexpr float TileDelta = 1.f / 512;
+        // Since default is 512 this will most likely work fine.
+        constexpr float TileDelta = 1.f / DefaultHeightTileResolution;
         const glm::vec3 deltaTheta0 = modelViewTransformMat3 *
             (glm::vec3(corner10 - corner00) * TileDelta);
         const glm::vec3 deltaTheta1 = modelViewTransformMat3 *
