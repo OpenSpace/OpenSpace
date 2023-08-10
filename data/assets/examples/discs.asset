@@ -56,7 +56,7 @@ asset.export(FullEllipticDisc)
 asset.meta = {
   Name = "Example Discs",
   Version = "1.0",
-  Description = [[Example of different types of rendered discs.]],
+  Description = [[Examples of different types of rendered discs.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

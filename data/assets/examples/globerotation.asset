@@ -61,8 +61,8 @@ asset.meta = {
   Name = "Model Example",
   Version = "1.0",
   Description = [[An example that demonstrates how to load a 3D model from a geometry
-    file, together with some basic funcitonality. The model is placed on the surface
-    of a panet using a GlobeRotation and GlobeTranslation.]],
+    file, together with some basic functionality. The model is placed on the surface
+    of a planet using a GlobeRotation and GlobeTranslation.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
