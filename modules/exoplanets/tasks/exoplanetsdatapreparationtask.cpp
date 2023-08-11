@@ -118,7 +118,8 @@ void ExoplanetsDataPreparationTask::perform(
     int version = 1;
     binFile.write(reinterpret_cast<char*>(&version), sizeof(int));
 
-    // Read until the first line contaning the column names, and save them for later access
+    // Read until the first line contaning the column names, and save them for
+    // later access
     std::vector<std::string> columnNames = readFirstDataRow(inputDataFile);
 
     // Read total number of items
@@ -153,7 +154,10 @@ void ExoplanetsDataPreparationTask::perform(
         std::string planetName = planetData.host + " " + planetData.component;
         lutFile << planetName << "," << pos << std::endl;
 
-        binFile.write(reinterpret_cast<char*>(&planetData.dataEntry), sizeof(ExoplanetDataEntry));
+        binFile.write(
+            reinterpret_cast<char*>(&planetData.dataEntry),
+            sizeof(ExoplanetDataEntry)
+        );
     }
 
     progressCallback(1.f);
