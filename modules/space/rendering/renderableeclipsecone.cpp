@@ -135,7 +135,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableEclipseCone)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
-        std::optional<int> numberOfPoints [[codegen::key("AmountOfPoints")]];
+        std::optional<int> numberOfPoints;
 
         // [[codegen::verbatim(ShadowLengthInfo.description)]]
         std::optional<float> shadowLength;
