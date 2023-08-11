@@ -250,9 +250,9 @@ std::string ExoplanetsModule::lookUpTablePath() const {
 std::string ExoplanetsModule::teffToBvConversionFilePath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
-    return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder.value(), TeffToBvConversionFileName)
-    ).string();
+    return absPath(fmt::format(
+        "{}/{}", _exoplanetsDataFolder.value(), TeffToBvConversionFileName
+    )).string();
 }
 
 std::string ExoplanetsModule::bvColormapPath() const {

@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSDATAPREPARATIONTASK___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSDATAPREPARATIONTASK___H__
 
-#include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/util/task.h>
+
+#include <modules/exoplanets/exoplanetshelper.h>
 
 #include <openspace/properties/vector/vec3property.h>
 #include <filesystem>
@@ -53,8 +54,8 @@ public:
      * funciton skips those lines, as well as any empty lines, and continues reading
      * until it find the first valid data line (which will be the column names).
      *
-     * \param file The inpur file stream used for reading the file
-     * \return The ocntent of the first data row (i.e. the column names).
+     * \param file The input file stream used for reading the file
+     * \return The content of the first data row (i.e. the column names).
      */
     static std::vector<std::string> readFirstDataRow(std::ifstream& file);
 
@@ -66,12 +67,12 @@ public:
      * \param row The row to parse, given as a string
      * \param columnNames The list of column names in the file, from the CSV header
      * \param positionSourceFile A SPECK file to use for getting the position of the star.
-     *  This is used to make sur ethe position of the star matches those of other star
-     *  datasets. If not file is provided, the position from the CSV data file is read
-     *  and used instead
-     * \param bvFromTeffConversionFile A text file containing a mapping between Effective
-     *  temperatature (teff) values and B-V color index values. Each line should include
-     *  two values separated by a comma: first the teff value and hten the B-V value
+     *        This is used to make sure the position of the star matches those of other star
+     *        datasets. If no file is provided, the position from the CSV data file is read
+     *        and used instead
+     * \param bvFromTeffConversionFile A text file containing a mapping between effective
+     *        temperature (teff) values and B-V color index values. Each line should include
+     *        two values separated by a comma: first the teff value and hten the B-V value
      * \return An object containing the parsed information.
      */
     static PlanetData parseDataRow(std::string row,
@@ -90,7 +91,7 @@ private:
      * Try to find the star position from an input speck file. If not found, the
      * returned position will contain NaN values.
      *
-     * \param starName The name of the star, to look for in the file
+     * \param starName The name of the star to look for in the file
      * \param sourceFile The name of the file in which to look
      * \return The resulting star position, given in galactix XYZ
      */

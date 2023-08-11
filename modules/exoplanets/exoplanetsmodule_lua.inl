@@ -634,8 +634,8 @@ std::vector<std::string> hostStarsWithSufficientData() {
 }
 
 /**
- * Resturn a list with names of the host star of all the exoplanet systems
- * that have sufficient data for generating a visualization, base don the
+ * Returns a list with names of the host star of all the exoplanet systems
+ * that have sufficient data for generating a visualization, based on the
  * module's loaded data file.
  */
 [[codegen::luawrap]] std::vector<std::string> listOfExoplanets() {
@@ -688,7 +688,7 @@ listOfExoplanetsDeprecated()
  * Please remember to include all columns in the file download, as missing data columns
  * may lead to an incomplete visualization.
  *
- * Also, void loading to large files of planets, as each added system will affec the
+ * Also, avoid loading too large files of planets, as each added system will affect the
  * rendering performance.
  */
 [[codegen::luawrap]] void loadExoplanetsFromCsv(std::string csvFile) {
@@ -750,7 +750,7 @@ listOfExoplanetsDeprecated()
     }
 
     // Add all the added exoplanet systems
-    for (auto entry : hostNameToSystemDataMap) {
+    for (const std::pair<const std::string, ExoplanetSystem>& entry : hostNameToSystemDataMap) {
         const std::string& hostName = entry.first;
         const ExoplanetSystem& data = entry.second;
         createExoplanetSystem(hostName, data);

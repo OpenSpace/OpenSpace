@@ -180,5 +180,4 @@ void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p
     }
 }
 
-
 } // namespace openspace::exoplanets
