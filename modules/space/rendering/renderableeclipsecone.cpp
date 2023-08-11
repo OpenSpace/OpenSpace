@@ -446,7 +446,7 @@ void RenderableEclipseCone::createCone(double et) {
             lightSourceToShadower,
             distance * static_cast<double>(_shadowLength)
         );
-        
+
         // We need to duplicate the first two vertices to close the cylinder at the seam
         penumbralVertices.push_back(penumbralVertices[0]);
         penumbralVertices.push_back(penumbralVertices[1]);
@@ -477,7 +477,7 @@ void RenderableEclipseCone::createCone(double et) {
         umbralVertices.push_back(umbralVertices[1]);
     }
 
-    
+
     // 6. Combine vertices
     std::vector<VBOLayout> vertices;
     vertices.reserve(umbralVertices.size() + penumbralVertices.size());

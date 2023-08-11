@@ -882,7 +882,7 @@ namespace {
 // Returns a list of all scene graph nodes in the scene
 [[codegen::luawrap]] std::vector<std::string> sceneGraphNodes() {
     using namespace openspace;
-    
+
     const std::vector<SceneGraphNode*>& nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
     std::vector<std::string> res;
@@ -914,7 +914,7 @@ namespace {
 [[codegen::luawrap]] std::vector<std::string> screenSpaceRenderables() {
     using namespace openspace;
 
-    const std::vector<ScreenSpaceRenderable*>& ssrs = 
+    const std::vector<ScreenSpaceRenderable*>& ssrs =
         global::renderEngine->screenSpaceRenderables();
     std::vector<std::string> res;
     res.reserve(ssrs.size());

@@ -148,7 +148,9 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     );
     fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphereImageLocal>("RenderableSphereImageLocal");
-    fRenderable->registerClass<RenderableSphereImageOnline>("RenderableSphereImageOnline");
+    fRenderable->registerClass<RenderableSphereImageOnline>(
+        "RenderableSphereImageOnline"
+    );
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");

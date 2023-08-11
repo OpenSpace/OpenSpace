@@ -42,7 +42,7 @@ namespace {
 } // namespace
 
 namespace openspace::globebrowsing {
-    
+
 documentation::Documentation TileIndexTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileindextileprovider");
 }
