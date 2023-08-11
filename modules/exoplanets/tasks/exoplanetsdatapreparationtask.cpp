@@ -153,7 +153,7 @@ void ExoplanetsDataPreparationTask::perform(
         std::string planetName = planetData.host + " " + planetData.component;
         lutFile << planetName << "," << pos << std::endl;
 
-        binFile.write(reinterpret_cast<char*>(&(planetData.dataEntry)), sizeof(ExoplanetDataEntry));
+        binFile.write(reinterpret_cast<char*>(&planetData.dataEntry), sizeof(ExoplanetDataEntry));
     }
 
     progressCallback(1.f);
@@ -166,7 +166,7 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
 
     // Read past any comments and empty lines
     while (std::getline(file, line)) {
-        bool shouldSkip = line[0] == '#' || line.empty();
+        bool shouldSkip = line.empty() || line[0] == '#';
         if (!shouldSkip) {
             break;
         }
@@ -379,7 +379,7 @@ ExoplanetsDataPreparationTask::parseDataRow(std::string row,
         }
         // Is the planet orbiting a binary system?
         else if (column == "cb_flag") {
-            p.binary = static_cast<bool>(readIntegerData(data));
+            p.binary = readIntegerData(data) != 0;
         }
         // Number of stars in the system
         else if (column == "sy_snum") {
@@ -474,7 +474,7 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
 
     std::ifstream teffToBvFile(conversionFile);
     if (!teffToBvFile.good()) {
-        LERROR(fmt::format("Failed to open file '{}'", conversionFile));
+        LERROR(fmt::format("Failed to open file {}", conversionFile));
         return std::numeric_limits<float>::quiet_NaN();
     }
 
