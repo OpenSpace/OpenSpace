@@ -38,7 +38,7 @@ local Mission = {
       TimeRange = { Start = "2023 APR 05 16:25:00", End = "2031 JUL 01 00:00:00" },
     },
     {
-      Name = "Jupiter orbit ",
+      Name = "Jupiter orbit",
       TimeRange = { Start = "2031 JUL 01 00:00:00", End = "2033 NOV 01 00:00:00" },
       Phases = {
         {
