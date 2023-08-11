@@ -162,7 +162,9 @@ namespace {
         "ShowDebugSphere",
         "Show Debug Sphere",
         "If enabled the bounding sphere of this scene graph node is rendered as a debug "
-        "method",
+        "method. The interaction sphere is rendered in cyan and the bounding sphere in "
+        "purple. If only one is visible, this may be because the spheres have equal "
+        "size and are overlapping.",
         // @VISIBILITY(3.67)
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -770,11 +772,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         _renderable->renderSecondary(newData, tasks);
     }
 
-    if (!_renderable->matchesRenderBinMask(data.renderBinMask)) {
-        return;
-    }
-
-    {
+    if (_renderable->matchesRenderBinMask(data.renderBinMask)) {
         TracyGpuZone("Render")
 
         _renderable->render(newData, tasks);
@@ -784,13 +782,16 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         }
     }
 
-    if (_showDebugSphere) {
+    bool isInStickerBin =
+        data.renderBinMask & static_cast<int>(Renderable::RenderBin::Sticker);
+
+    if (_showDebugSphere && isInStickerBin) {
         if (const double bs = boundingSphere();  bs > 0.0) {
             renderDebugSphere(data.camera, bs, glm::vec4(0.5f, 0.15f, 0.5f, 0.75f));
         }
 
         if (const double is = interactionSphere();  is > 0.0) {
-            renderDebugSphere(data.camera, is, glm::vec4(0.15f, 0.35f, 0.85f, 0.75f));
+            renderDebugSphere(data.camera, is, glm::vec4(0.15f, 0.75f, 0.75f, 0.75f));
         }
     }
 }
@@ -812,20 +813,14 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size, glm::v
     _debugSphereProgram->setUniform("color", color);
 
     glEnable(GL_BLEND);
+    glEnable(GL_LINE_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 
     glBindVertexArray(rendering::helper::vertexObjects.sphere.vao);
-    glDrawElements(
-        GL_TRIANGLES,
-        rendering::helper::vertexObjects.sphere.nElements,
-        GL_UNSIGNED_SHORT,
-        nullptr
-    );
 
     glLineWidth(2.0);
-    _debugSphereProgram->setUniform("color", glm::vec4(1.f, 1.f, 1.f, 1.f));
     glDrawElements(
         GL_LINES,
         rendering::helper::vertexObjects.sphere.nElements,
