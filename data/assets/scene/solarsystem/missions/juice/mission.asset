@@ -44,7 +44,7 @@ local Mission = {
         {
           Name = "Jupiter inclined phase - Callisto flybys",
           TimeRange = { Start = "2032 AUG 01 00:00:00", End = "2033 AUG 01 00:00:00" },
-          Description = "ESA’s Jupiter Icy Moons Explorer – Juice – will catch its first glimpse of ancient, cratered Callisto in June 2032, going on to whizz past the moon 21 times before making a final flyby in 2034. During these close encounters, Juice will collect valuable scientific treasure about the moon.",
+          Description = "ESA's Jupiter Icy Moons Explorer - Juice - will catch its first glimpse of ancient, cratered Callisto in June 2032, going on to whizz past the moon 21 times before making a final flyby in 2034. During these close encounters, Juice will collect valuable scientific treasure about the moon.",
 
         }
       }
