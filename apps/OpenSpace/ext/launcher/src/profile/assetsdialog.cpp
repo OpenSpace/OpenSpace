@@ -64,7 +64,7 @@ namespace {
     {
         int startIndex = 0;
         std::string token = "${USER_ASSETS}/";
-        if (path.find(token) == 0) {
+        if (path.starts_with(token)) {
             startIndex = static_cast<int>(token.length());
         }
         const size_t slash = path.find_first_of('/', startIndex);
@@ -301,6 +301,10 @@ void AssetsDialog::searchTextChanged(const QString& text) {
     }
 }
 
+SearchProxyModel::SearchProxyModel(QObject* parent)
+    : QSortFilterProxyModel(parent)
+{}
+
 void SearchProxyModel::setFilterRegularExpression(const QString& pattern) {
     _regExPattern = new QRegularExpression(
         pattern,
@@ -317,20 +321,19 @@ bool SearchProxyModel::filterAcceptsRow(int sourceRow,
 }
 
 bool SearchProxyModel::acceptIndex(const QModelIndex& idx) const {
-    if (idx.isValid()) {
-        QString text = idx.data(Qt::DisplayRole).toString();
-        if (!_regExPattern) {
-            return false;
-        }
-        QRegularExpressionMatchIterator matchIterator = _regExPattern->globalMatch(text);
-        if (matchIterator.hasNext()) {
+    if (!idx.isValid() || !_regExPattern) {
+        return false;
+    }
+    QString text = idx.data(Qt::DisplayRole).toString();
+    QRegularExpressionMatchIterator matchIterator = _regExPattern->globalMatch(text);
+    if (matchIterator.hasNext()) {
+        return true;
+    }
+    for (int row = 0; row < idx.model()->rowCount(idx); ++row) {
+        if (acceptIndex(idx.model()->index(row, 0, idx))) {
             return true;
         }
-        for (int row = 0; row < idx.model()->rowCount(idx); ++row) {
-            if (acceptIndex(idx.model()->index(row, 0, idx))) {
-                return true;
-            }
-        }
     }
+
     return false;
 }

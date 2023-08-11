@@ -26,8 +26,8 @@
 #define __OPENSPACE_UI_LAUNCHER___ASSETSDIALOG___H__
 
 #include <QDialog>
-#include <QSortFilterProxyModel>
 #include <QRegularExpression>
+#include <QSortFilterProxyModel>
 #include "assettreemodel.h"
 
 class QTextEdit;
@@ -41,7 +41,7 @@ public:
      *
      * \param parent The QObject* object that is the Qt parent of this object
      */
-    SearchProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
+    SearchProxyModel(QObject* parent = nullptr);
 
 public slots:
     /**
@@ -55,8 +55,9 @@ protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
 private:
-    QRegularExpression* _regExPattern = nullptr;
     bool acceptIndex(const QModelIndex& idx) const;
+
+    QRegularExpression* _regExPattern = nullptr;
 };
 
 class AssetsDialog final : public QDialog {
