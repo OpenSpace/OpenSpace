@@ -669,6 +669,7 @@ asset.onDeinitialize(function()
     openspace.removeSceneGraphNode(EquatorialSphere)
     openspace.removeSceneGraphNode(EclipticSphereLabels)
     openspace.removeSceneGraphNode(EclipticSphere)
+    openspace.removeSceneGraphNode(OortSphere)
     openspace.removeSceneGraphNode(RadioSphere)
 end)
 
