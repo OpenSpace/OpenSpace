@@ -143,11 +143,16 @@ AssetManager::~AssetManager() {
 void AssetManager::deinitialize() {
     ZoneScoped;
 
-    for (Asset* asset : _rootAssets) {
+    // In general, the potential dependencies in the root assets are ordered, which is
+    // index 0 might be the parent of 1, but not vice versa. So it is safer to do the
+    // order deinitialization in reverse
+    while (!_rootAssets.empty()) {
+        Asset* asset = _rootAssets.back();
         if (!asset->hasInitializedParent()) {
             asset->deinitialize();
             asset->unload();
         }
+        _rootAssets.pop_back();
     }
     _toBeDeleted.clear();
 }

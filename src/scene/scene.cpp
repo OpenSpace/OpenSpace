@@ -116,6 +116,12 @@ Scene::~Scene() {
         if (node->identifier() == "Root") {
             continue;
         }
+
+        LWARNING(fmt::format(
+            "SceneGraphNode '{}' was not removed before shutdown",
+            node->identifier()
+        ));
+
         // There might still be scene graph nodes around that weren't removed by the asset
         // manager as they would have been added manually by the user. This also serves as
         // a backstop for assets that forgot to implement the onDeinitialize functions
