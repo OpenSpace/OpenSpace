@@ -87,7 +87,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
-        "Fade",
+        "LineFade",
         "Line fade",
         "The fading factor that is applied to the trail if the 'EnableFade' value is "
         "'true'. If it is 'false', this setting has no effect. The higher the number, "
@@ -139,7 +139,7 @@ namespace {
         std::optional<bool> enableFade;
 
         // [[codegen::verbatim(FadeInfo.description)]]
-        std::optional<float> fade;
+        std::optional<float> lineFade;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -211,7 +211,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 
     _appearance.lineColor = p.color;
     _appearance.useLineFade = p.enableFade.value_or(_appearance.useLineFade);
-    _appearance.lineFade = p.fade.value_or(_appearance.lineFade);
+    _appearance.lineFade = p.lineFade.value_or(_appearance.lineFade);
     _appearance.lineWidth = p.lineWidth.value_or(_appearance.lineWidth);
     _appearance.pointSize = p.pointSize.value_or(_appearance.pointSize);
 
