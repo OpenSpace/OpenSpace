@@ -91,6 +91,14 @@ struct VertexObjects {
 
     struct {
         GLuint vao = 0;
+        GLuint vbo = 0;
+        GLuint ibo = 0;
+
+        int nElements = 64;
+    } cylinder;
+
+    struct {
+        GLuint vao = 0;
     } empty;
 };
 
@@ -130,6 +138,9 @@ std::vector<VertexXYZ> createRingXYZ(int nSegments, float radius);
 
 std::pair<std::vector<Vertex>, std::vector<GLushort>>
 createSphere(int nSegments, glm::vec3 radii, glm::vec4 colors = glm::vec4(1.f));
+
+std::pair<std::vector<VertexXYZNormal>, std::vector<GLushort>>
+createCylinder(unsigned int nSegments, float radius, float size);
 
 /**
  * Data structure that can be used for rendering using multiple light directions

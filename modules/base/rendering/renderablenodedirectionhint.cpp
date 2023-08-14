@@ -30,6 +30,7 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/query/query.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/translation.h>
@@ -168,44 +169,6 @@ namespace {
         }
         glm::dvec3 diffPos = worldPos - anchorNodePos;
         return diffPos;
-    }
-
-    // @TODO (emmbr) put in some helper file?
-    // Generate vertices around a circle with the given radius, in a plane
-    // with with the given center point and normal
-    std::vector<glm::vec3> circleVertices(unsigned int count, float radius,
-                                          glm::vec3 center, glm::vec3 normal)
-    {
-        normal = glm::normalize(normal); // should be normalized, but want to be sure
-
-        std::vector<glm::vec3> vertices;
-        vertices.reserve(count);
-        float angleStep = glm::two_pi<float>() / count;
-
-        // Find the quaternion that represents a rotation from positive Z to normal.
-        // (this approach is the shortest arc)
-        // https://www.xarg.org/proof/quaternion-from-two-vectors/
-        constexpr const glm::vec3 Z = glm::vec3(0.f, 0.f, 1.f);
-        float w = 1 + glm::dot(Z, normal);
-        glm::quat zToNormal = glm::quat(w, glm::cross(Z, normal));
-        zToNormal = glm::normalize(zToNormal);
-        // TODO: handle parallel case
-
-        for (unsigned int i = 0; i < count; ++i) {
-            const float angle = i * angleStep;
-
-            // Start with xy plane
-            glm::vec3 v(0.f);
-            v.x = cos(angle) * radius;
-            v.y = sin(angle) * radius;
-
-            // Tranform to match input plane
-            v = glm::rotate(zToNormal, v);
-            v += center; // translate
-
-            vertices.push_back(v);
-        }
-        return vertices;
     }
 
     struct [[codegen::Dictionary(RenderableNodeDirectionHint)]] Parameters {
@@ -399,7 +362,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
             _offsetDistance.setExponent(3.f);
             _offsetDistance.setMaxValue(1000.f);
         }
-        });
+    });
     // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
 
     _useRelativeOffset = p.useRelativeOffset.value_or(_useRelativeOffset);
@@ -427,55 +390,20 @@ std::string RenderableNodeDirectionHint::end() const {
 
 void RenderableNodeDirectionHint::initializeGL() {
     _shaderProgram = BaseModule::ProgramObjectManager.request(
-        "3DArrowProgram",
+        "NodeDirectionLineProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                "3DArrowProgram",
+                "NodeDirectionLineProgram",
                 absPath("${MODULE_BASE}/shaders/arrow_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/arrow_fs.glsl")
             );
         }
     );
-
-    // Generate
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vBufferId);
-    glGenBuffers(1, &_iboId);
-
-    glBindVertexArray(_vaoId);
-
-    updateBufferData();
-
-    // Vertices
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
-
-    // Normals
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        6 * sizeof(float),
-        reinterpret_cast<void*>(3 * sizeof(float))
-    );
-
-    glBindVertexArray(0);
 }
 
 void RenderableNodeDirectionHint::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vBufferId);
-    _vBufferId = 0;
-
-    glDeleteBuffers(1, &_iboId);
-    _iboId = 0;
-
     BaseModule::ProgramObjectManager.release(
-        "NodeLineProgram",
+        "NodeDirectionLineProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -487,34 +415,6 @@ bool RenderableNodeDirectionHint::isReady() const {
     bool ready = true;
     ready &= (_shaderProgram != nullptr);
     return ready;
-}
-
-void RenderableNodeDirectionHint::unbindGL() {
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void RenderableNodeDirectionHint::bindGL() {
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-}
-
-void RenderableNodeDirectionHint::updateBufferData() {
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexArray.size() * sizeof(float),
-        _vertexArray.data(),
-        GL_STREAM_DRAW
-    );
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        _indexArray.size() * sizeof(unsigned int),
-        _indexArray.data(),
-        GL_STREAM_DRAW
-    );
 }
 
 void RenderableNodeDirectionHint::updateVertexData() {
@@ -570,209 +470,8 @@ void RenderableNodeDirectionHint::updateVertexData() {
     double adjacent = _arrowHeadSize * length;
     glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
 
-    _vertexArray.clear();
-    _indexArray.clear();
-
-    // OBS! These variables have to be kept in sync
-    constexpr int nVertexRingsRings = 6;
-    const int nVertices = nVertexRingsRings * _segments + 2;
-    const int nTriangles = 5 * _segments;
-    _vertexArray.reserve(nVertices);
-    _indexArray.reserve(nTriangles);
-
-    // TODO: Simplify. Just generate a simple cone and a cylinder or correctl size then
-    // Transform it to be located in the same position
-
-    // Vertice positions for arrow bottom
-    const std::vector<glm::vec3> bottomVertices = circleVertices(
-        _segments,
-        _width,
-        startPos,
-        arrowDirection
-    );
-
-    // Vertice positions for arrow top (close to head)
-    const std::vector<glm::vec3> topVertices = circleVertices(
-        _segments,
-        _width,
-        arrowHeadStartPos,
-        arrowDirection
-    );
-
-    // Vertice positions for arrow head
-    const std::vector<glm::vec3> arrowHeadVertices = circleVertices(
-        _segments,
-        _width * _arrowHeadWidthFactor,
-        arrowHeadStartPos,
-        arrowDirection
-    );
-
-    // Center bot vertex and normal
-    _vertexArray.push_back(static_cast<float>(startPos.x));
-    _vertexArray.push_back(static_cast<float>(startPos.y));
-    _vertexArray.push_back(static_cast<float>(startPos.z));
-
-    _vertexArray.push_back(static_cast<float>(-arrowDirection.x));
-    _vertexArray.push_back(static_cast<float>(-arrowDirection.y));
-    _vertexArray.push_back(static_cast<float>(-arrowDirection.z));
-
-    // Ring 0
-    // Vertices of bottom circle, with normals pointing down
-    for (const glm::vec3& v : bottomVertices) {
-        _vertexArray.push_back(v.x);
-        _vertexArray.push_back(v.y);
-        _vertexArray.push_back(v.z);
-
-        _vertexArray.push_back(static_cast<float>(-arrowDirection.x));
-        _vertexArray.push_back(static_cast<float>(-arrowDirection.y));
-        _vertexArray.push_back(static_cast<float>(-arrowDirection.z));
-    }
-
-    // Ring 1
-    // Bottom vertices of cylider sides with normals pointing outwards
-    for (const glm::vec3& v : bottomVertices) {
-        _vertexArray.push_back(v.x);
-        _vertexArray.push_back(v.y);
-        _vertexArray.push_back(v.z);
-
-        glm::vec3 normal = glm::normalize(glm::dvec3(v) - startPos);
-
-        _vertexArray.push_back(normal.x);
-        _vertexArray.push_back(normal.y);
-        _vertexArray.push_back(normal.z);
-    }
-
-    const unsigned int nSegments = _segments;
-
-    auto ringVerticeIndex = [&nSegments](unsigned int ringIndex, unsigned int i) {
-        return 1 + ringIndex * nSegments + i;
-    };
-
-    // Ring 2
-    // Then all top vertices of cylinder sides
-    for (const glm::vec3& v : topVertices) {
-        _vertexArray.push_back(v.x);
-        _vertexArray.push_back(v.y);
-        _vertexArray.push_back(v.z);
-
-        glm::vec3 normal = glm::normalize(glm::dvec3(v) - arrowHeadStartPos);
-        _vertexArray.push_back(normal.x);
-        _vertexArray.push_back(normal.y);
-        _vertexArray.push_back(normal.z);
-    }
-
-    // TODO: when generalizing, add another circle on top
-
-    // Ring 3
-    // Then all arrow head bottom vertices. Sore normal for top position use
-    std::vector<glm::vec3> coneNormals;
-    coneNormals.reserve(nSegments);
-    for (const glm::vec3& v : arrowHeadVertices) {
-        _vertexArray.push_back(v.x);
-        _vertexArray.push_back(v.y);
-        _vertexArray.push_back(v.z);
-
-        // Project vector from end to center on cone side to find normal
-        glm::vec3 c = glm::vec3(arrowHeadStartPos);
-        glm::vec3 side = glm::normalize(endPos - glm::dvec3(v));
-        glm::vec3 edgeToCenter = glm::normalize(c - v);
-        glm::vec3 projected = glm::proj(edgeToCenter, side);
-        glm::vec3 normal = glm::normalize(-edgeToCenter + projected);
-        coneNormals.push_back(normal);
-
-        _vertexArray.push_back(normal.x);
-        _vertexArray.push_back(normal.y);
-        _vertexArray.push_back(normal.z);
-    }
-
-    // Ring 4
-    // Center top vertex (arrow head point). Note that we need multiple vertices
-    // to get correct normal
-    int normalCounter = 0;
-    for (int i = 0; i < arrowHeadVertices.size(); ++i) {
-        _vertexArray.push_back(static_cast<float>(endPos.x));
-        _vertexArray.push_back(static_cast<float>(endPos.y));
-        _vertexArray.push_back(static_cast<float>(endPos.z));
-
-        glm::vec3 normal = coneNormals[normalCounter++];
-        _vertexArray.push_back(normal.x);
-        _vertexArray.push_back(normal.y);
-        _vertexArray.push_back(normal.z);
-    }
-
-    // Ring 5
-    // Bottom circle of cone
-    for (const glm::vec3& v : arrowHeadVertices) {
-        _vertexArray.push_back(static_cast<float>(v.x));
-        _vertexArray.push_back(static_cast<float>(v.y));
-        _vertexArray.push_back(static_cast<float>(v.z));
-
-        _vertexArray.push_back(static_cast<float>(-arrowDirection.x));
-        _vertexArray.push_back(static_cast<float>(-arrowDirection.y));
-        _vertexArray.push_back(static_cast<float>(-arrowDirection.z));
-    }
-
-    // Final vertex is the bottom center of the cone
-    _vertexArray.push_back(static_cast<float>(arrowHeadStartPos.x));
-    _vertexArray.push_back(static_cast<float>(arrowHeadStartPos.y));
-    _vertexArray.push_back(static_cast<float>(arrowHeadStartPos.z));
-
-    _vertexArray.push_back(static_cast<float>(-arrowDirection.x));
-    _vertexArray.push_back(static_cast<float>(-arrowDirection.y));
-    _vertexArray.push_back(static_cast<float>(-arrowDirection.z));
-
-    unsigned int botCenterIndex = 0;
-    unsigned int headBotCenterIndex =
-        static_cast<unsigned int>(_vertexArray.size()) / 6 - 1; // last
-
-    // Build triangle list from the given vertices
-    for (unsigned int i = 0; i < _segments; ++i) {
-        bool isLast = (i == _segments - 1);
-        unsigned int v0, v1, v2, v3;
-
-        // Bot triangle
-        v0 = ringVerticeIndex(0, i);
-        v1 = ringVerticeIndex(0, isLast ? 0 : i + 1);
-        _indexArray.push_back(botCenterIndex);
-        _indexArray.push_back(v1);
-        _indexArray.push_back(v0);
-
-        // Side of cylinder
-
-        // Bottom ring
-        v0 = ringVerticeIndex(1, i);
-        v1 = ringVerticeIndex(1, isLast ? 0 : i + 1);
-        // Top ring
-        v2 = ringVerticeIndex(2, i);
-        v3 = ringVerticeIndex(2, isLast ? 0 : i + 1);
-        _indexArray.push_back(v0);
-        _indexArray.push_back(v1);
-        _indexArray.push_back(v2);
-
-        _indexArray.push_back(v1);
-        _indexArray.push_back(v3);
-        _indexArray.push_back(v2);
-
-        // Arrow head cone sides
-
-        // Bottom vertices
-        v0 = ringVerticeIndex(3, i);
-        v1 = ringVerticeIndex(3, isLast ? 0 : i + 1);
-        // Top vertex
-        v3 = ringVerticeIndex(4, i);
-
-        _indexArray.push_back(v0);
-        _indexArray.push_back(v1);
-        _indexArray.push_back(v3);
-
-        // Arrow head bottom
-        v0 = ringVerticeIndex(5, i);
-        v1 = ringVerticeIndex(5, isLast ? 0 : i + 1);
-
-        _indexArray.push_back(headBotCenterIndex);
-        _indexArray.push_back(v1);
-        _indexArray.push_back(v0);
-    }
+    // TODO: Create transformation matrices to move unit cylinder to
+    // correct position
 
     _shapeIsDirty = false;
 }
@@ -807,7 +506,6 @@ void RenderableNodeDirectionHint::update(const UpdateData&) {
 
     if (shouldUpdate) {
         updateVertexData();
-        updateBufferData();
     }
 }
 
@@ -820,6 +518,8 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
             global::navigationHandler->orbitalNavigator().anchorNode()->worldPosition()
         );
     }
+
+    // TODO: update shape transformations
 
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -849,15 +549,16 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     glEnablei(GL_BLEND, 0);
 
     // Bind and draw shape
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
+    glBindVertexArray(rendering::helper::vertexObjects.cylinder.vao);
 
     glDrawElements(
         GL_TRIANGLES,
-        static_cast<GLsizei>(_indexArray.size()),
-        GL_UNSIGNED_INT,
+        rendering::helper::vertexObjects.cylinder.nElements,
+        GL_UNSIGNED_SHORT,
         nullptr
     );
+
+    // TODO: bring back the arrow head cone!
 
     // Restore GL State
     glBindVertexArray(0);

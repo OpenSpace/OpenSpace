@@ -59,21 +59,11 @@ private:
     void deinitializeGL() override;
 
     bool isReady() const override;
-    void updateBufferData();
     void updateVertexData();
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    void unbindGL();
-    void bindGL();
-
     ghoul::opengl::ProgramObject* _shaderProgram;
-
-    GLuint _vaoId = 0;
-    GLuint _iboId = 0;
-    GLuint _vBufferId = 0;
-    std::vector<float> _vertexArray;
-    std::vector<unsigned int> _indexArray;
 
     properties::StringProperty _start;
     properties::StringProperty _end;

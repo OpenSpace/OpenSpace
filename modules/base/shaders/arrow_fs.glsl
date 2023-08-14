@@ -44,24 +44,24 @@ Fragment getFragment() {
 
   // Simple phong shading (same color for diffuse and ambient. White specular)
   if (performShading) {
-  // TODO: send from code and make configurable
+    // TODO: send from code and make configurable
     const vec3 lightDirectionViewSpace = vec3(0.0, 0.0, 1.0);
     const float lightIntensity = 1.0;
     const float specularPower = 100.0;
 
-    vec3 c = normalize(vs_positionViewSpace.xyz);
-    vec3 n = normalize(vs_normal);
-    vec3 l = lightDirectionViewSpace;
-    vec3 r = reflect(l, n);
-
-    // Ambient color 
+    // Ambient color
     vec3 shadedColor = ambientIntensity  * color;
 
     // Diffuse
+    vec3 n = normalize(vs_normal);
+    vec3 l = lightDirectionViewSpace;
     shadedColor += diffuseIntensity * max(dot(n,l), 0.0) * color;
 
     // Specular
-    shadedColor += specularIntensity * pow(max(dot(c,r), 0), specularPower)  * color;
+    vec3 viewDir = normalize(vs_positionViewSpace.xyz);
+    vec3 reflectDir = reflect(l, n);
+    shadedColor +=
+        specularIntensity * pow(max(dot(viewDir,reflectDir), 0), specularPower) * color;
 
     // Light contribution (one light soruce)
     shadedColor *= lightIntensity * LightColor;
@@ -69,8 +69,6 @@ Fragment getFragment() {
     frag.color.xyz = shadedColor;
   }
 
-//  frag.color.xyz *= vs_normal;
-//
   frag.depth = vs_depth;
   frag.gPosition = vs_positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
