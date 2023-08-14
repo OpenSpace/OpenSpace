@@ -78,8 +78,7 @@ private:
         std::vector<GPUChunkTile> gpuChunkTiles;
 
         UniformCache(opacity, gamma, multiplier, offset, valueBlending, chromaKeyColor,
-            chromaKeyTolerance, paddingStartOffset, paddingSizeDifference, color,
-            depthOffset, depthScale) uniformCache;
+            chromaKeyTolerance, color, depthOffset, depthScale) uniformCache;
 
         bool isHeightLayer = false;
     };
