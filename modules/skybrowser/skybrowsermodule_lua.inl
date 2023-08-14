@@ -317,7 +317,7 @@ std::string prunedIdentifier(std::string identifier) {
 /**
  * Returns the AAS WorldWide Telescope image collection url.
  */
-[[codegen::luawrap]] ghoul::Dictionary getWwtImageCollectionUrl() {
+[[codegen::luawrap]] ghoul::Dictionary wwtImageCollectionUrl() {
     using namespace openspace;
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     ghoul::Dictionary url;
@@ -326,12 +326,26 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
+ * Deprecated in favor of 'wwtImageCollectionUrl'
+ */
+[[codegen::luawrap("getWwtImageCollectionUrl")]]
+ghoul::Dictionary wwtImageCollectionUrlDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getWwtImageCollectionUrl' function is deprecated and should be replaced with "
+        "'wwtImageCollectionUrl'"
+    );
+    return wwtImageCollectionUrl();
+}
+
+/**
  * Returns a list of all the loaded AAS WorldWide Telescope images that have been loaded.
  * Each image has a name, thumbnail url, equatorial spherical coordinates RA and Dec,
  * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
  * credits url and the identifier of the image which is a unique number.
  */
-[[codegen::luawrap]] ghoul::Dictionary getListOfImages() {
+[[codegen::luawrap]] ghoul::Dictionary listOfImages() {
     using namespace openspace;
 
     // Send image list to GUI
@@ -368,10 +382,23 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
+ * Deprecated in favor of 'listOfExoplanets'
+ */
+[[codegen::luawrap("getListOfImages")]] ghoul::Dictionary listOfImagesDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getListOfImages' function is deprecated and should be replaced with "
+        "'listOfImages'"
+    );
+    return listOfImages();
+}
+
+/**
  * Returns a table of data regarding the current view and the sky browsers and targets.
  * returns a table of data regarding the current targets.
  */
-[[codegen::luawrap]] ghoul::Dictionary getTargetData() {
+[[codegen::luawrap]] ghoul::Dictionary targetData() {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -435,6 +462,17 @@ std::string prunedIdentifier(std::string identifier) {
     }
 
     return data;
+}
+
+/**
+ * Deprecated in favor of 'targetData'
+ */
+[[codegen::luawrap("getTargetData")]] ghoul::Dictionary targetDataDeprecated() {
+    LWARNINGC(
+        "Deprecation",
+        "'getTargetData' function is deprecated and should be replaced with 'targetData'"
+    );
+    return targetData();
 }
 
 /**
