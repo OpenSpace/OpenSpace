@@ -582,51 +582,50 @@ createCylinder(unsigned int nSegments, float radius, float height)
         .normal = { 0.f, 0.f, -1.f }
     });
 
-    // Ring 0 - vertices of bottom circle, with normals pointing down
+    std::vector<VertexXYZNormal> verts0;
+    verts0.reserve(bottomVertices.size());
+    std::vector<VertexXYZNormal> verts1;
+    verts1.reserve(bottomVertices.size());
+    std::vector<VertexXYZNormal> verts2;
+    verts2.reserve(bottomVertices.size());
+    std::vector<VertexXYZNormal> verts3;
+    verts3.reserve(bottomVertices.size());
+
     for (const VertexXYZ& v : bottomVertices) {
-        VertexXYZNormal vWithNormal = {
+        const glm::vec3 sideNormal = glm::normalize(
+            glm::vec3(v.xyz[0], v.xyz[1], v.xyz[2])
+        );
+
+        // Ring 0 - vertices of bottom circle, with normals pointing down
+        verts0.push_back({
             .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] },
             .normal = { 0.f, 0.f, -1.f }
-        };
-        vertices.push_back(vWithNormal);
-    }
+        });
 
-    // Ring 1 - bottom vertices of cylider sides with normals pointing outwards
-    for (const VertexXYZ& v : bottomVertices) {
-        // Botton is at (0,0,0), so the normal is just the xyz coordinate
-        glm::vec3 normal = glm::normalize(
-            glm::vec3(v.xyz[0], v.xyz[1], v.xyz[2])
-        );
-
-        VertexXYZNormal vWithNormal = {
+        // Ring 1 - bottom vertices of cylider sides with normals pointing outwards
+        verts1.push_back({
             .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] },
-            .normal = { normal.x, normal.y, normal.z }
-        };
-        vertices.push_back(vWithNormal);
-    }
+            .normal = { sideNormal.x, sideNormal.y, sideNormal.z }
+        });
 
-    // Ring 2 - top vertices of cylinder side, normals pointing outwards
-    // Note that only difference between top and bottom is the height added to Z
-    for (const VertexXYZ& v : bottomVertices) {
-        glm::vec3 normal = glm::normalize(
-            glm::vec3(v.xyz[0], v.xyz[1], v.xyz[2])
-        );
-
-        VertexXYZNormal vWithNormal = {
+        // Ring 2 - top vertices of cylinder side, normals pointing outwards
+        // Note that only difference between top and bottom is the height added to Z
+        verts2.push_back({
             .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] + height },
-            .normal = { normal.x, normal.y, normal.z }
-        };
-        vertices.push_back(vWithNormal);
-    }
+            .normal = { sideNormal.x, sideNormal.y, sideNormal.z }
+        });
 
-    // Ring 3 - vertices of top circle, normals pointing up
-    for (const VertexXYZ& v : bottomVertices) {
-        VertexXYZNormal vWithNormal = {
+        // Ring 3 - vertices of top circle, normals pointing up
+        verts3.push_back({
             .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] + height },
             .normal = { 0.f, 0.f, 1.f }
-        };
-        vertices.push_back(vWithNormal);
+        });
     }
+
+    vertices.insert(vertices.end(), verts0.begin(), verts0.end());
+    vertices.insert(vertices.end(), verts1.begin(), verts1.end());
+    vertices.insert(vertices.end(), verts2.begin(), verts2.end());
+    vertices.insert(vertices.end(), verts3.begin(), verts3.end());
 
     // Center top vertex
     vertices.push_back({
@@ -648,8 +647,6 @@ createCylinder(unsigned int nSegments, float radius, float height)
     for (unsigned int i = 0; i < nSegments; ++i) {
         bool isLast = (i == nSegments - 1);
         GLushort v0, v1, v2, v3;
-
-        // TODO: verify triangle direction
 
         // Bot triangle
         v0 = ringVerticeIndex(0, i);
@@ -681,8 +678,6 @@ createCylinder(unsigned int nSegments, float radius, float height)
         indexArray.push_back(v1);
         indexArray.push_back(v0);
     }
-
-    // TODO: verify normals and order of indices!
 
     return { vertices, indexArray };
 }
