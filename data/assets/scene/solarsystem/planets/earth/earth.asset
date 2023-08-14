@@ -93,9 +93,9 @@ local ToggleSatelliteTrails = {
   Identifier = "os.solarsystem.ToggleSatelliteTrails",
   Name = "Toggle satellite trails",
   Command = [[
-    local list = openspace.getProperty("{earth_satellites}.Renderable.Enabled")
+    local list = openspace.property("{earth_satellites}.Renderable.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggle trails on or off for satellites around Earth",

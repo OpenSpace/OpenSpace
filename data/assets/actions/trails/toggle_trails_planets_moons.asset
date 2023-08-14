@@ -26,8 +26,8 @@ local ToggleTrails = {
   Identifier = "os.planetsmoons.ToggleTrails",
   Name = "Toggle planet and moon trails",
   Command = [[
-    local capList = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Fade")
-    local list = openspace.getProperty("{moonTrail_solarSystem}.Renderable.Fade")
+    local capList = openspace.property("{planetTrail_solarSystem}.Renderable.Fade")
+    local list = openspace.property("{moonTrail_solarSystem}.Renderable.Fade")
     if (#capList == 0) and (#list == 0) then
       openspace.printWarning("No trails to toggle")
     else
@@ -37,7 +37,7 @@ local ToggleTrails = {
       else
         prop = list[1]
       end
-      local currentFade = openspace.getPropertyValue(prop)
+      local currentFade = openspace.propertyValue(prop)
       local newFade = 0
       if currentFade < 1 then
         newFade = 1

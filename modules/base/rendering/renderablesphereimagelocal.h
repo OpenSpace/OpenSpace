@@ -22,55 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGELOCAL___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGELOCAL___H__
 
-in float vs_depth;
-flat in vec3 vs_normal;
-in vec4 vs_positionViewSpace;
+#include <modules/base/rendering/renderablesphere.h>
 
-uniform vec3 color;
-uniform float opacity;
+namespace ghoul::opengl { class Texture; }
 
-uniform float ambientIntensity = 0.2;
-uniform float diffuseIntensity = 0.8;
-uniform bool performShading = true;
+namespace openspace {
 
-uniform uint nLightSources;
-uniform vec3 lightDirectionsViewSpace[8];
-uniform float lightIntensities[8];
+struct RenderData;
+struct UpdateData;
 
-const vec3 LightColor = vec3(1.0);
+namespace documentation { struct Documentation; }
 
-Fragment getFragment() {
-  Fragment frag;
+class RenderableSphereImageLocal : public RenderableSphere {
+public:
+    RenderableSphereImageLocal(const ghoul::Dictionary& dictionary);
 
-  if (opacity == 0.0) {
-    discard;
-  }
-  frag.color = vec4(color, opacity);
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-  // Simple diffuse phong shading based on light sources
-  if (performShading && nLightSources > 0) {
-    // @TODO: Fix faulty triangle normals. This should not have to be inverted
-    vec3 n = -normalize(vs_normal);
+    bool isReady() const override;
 
-    // Ambient color
-    vec3 shadedColor = ambientIntensity  * color;
+    void update(const UpdateData& data) override;
 
-    for (int i = 0; i < nLightSources; ++i) {
-      vec3 l = lightDirectionsViewSpace[i];
+    static documentation::Documentation Documentation();
 
-      // Diffuse
-      vec3 diffuseColor = diffuseIntensity * max(dot(n,l), 0.0) * color;
+protected:
+    void bindTexture() override;
 
-      // Light contribution
-      shadedColor += lightIntensities[i] * (LightColor * diffuseColor);
-    }
-    frag.color.xyz = shadedColor;
-  }
+private:
+    void loadTexture();
 
-  frag.depth = vs_depth;
-  frag.gPosition = vs_positionViewSpace;
-  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-  return frag;
-}
+    properties::StringProperty _texturePath;
+
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    bool _isLoadingLazily = false;
+    bool _textureIsDirty = false;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGELOCAL___H__

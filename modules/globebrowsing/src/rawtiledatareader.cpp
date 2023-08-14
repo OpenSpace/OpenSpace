@@ -421,7 +421,6 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
         module.mrfCacheLocation(), _cacheProperties.path, datasetIdentifier);
     std::string root = absPath(path).string();
     std::string mrf = root + datasetIdentifier + ".mrf";
-    std::string cache = root + datasetIdentifier + ".mrfcache";
 
     if (!std::filesystem::exists(mrf)) {
         std::error_code ec;
@@ -450,7 +449,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
                 return std::nullopt;
             }
 
-            defer{ GDALClose(src); };
+            defer { GDALClose(src); };
 
             char** createOpts = nullptr;
             createOpts = CSLSetNameValue(
@@ -475,8 +474,6 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
                 "blocksize",
                 std::to_string(_cacheProperties.blockSize).c_str()
             );
-            createOpts = CSLSetNameValue(createOpts, "indexname", cache.c_str());
-            createOpts = CSLSetNameValue(createOpts, "DATANAME", cache.c_str());
 
             GDALDataset* dst = static_cast<GDALDataset*>(
                 driver->CreateCopy(mrf.c_str(), src, false, createOpts, nullptr, nullptr)

@@ -2,9 +2,9 @@ local ToggleMinorMoonTrails = {
   Identifier = "os.ToggleMinorMoonTrails",
   Name = "Toggle minor moon trails",
   Command = [[
-    local list = openspace.getProperty("{moonTrail_minor}.Renderable.Enabled")
+    local list = openspace.property("{moonTrail_minor}.Renderable.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggle on/off minor moon trails for all planets in the solar system",

@@ -52,6 +52,8 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <algorithm>
 #include <cctype>
 
@@ -470,6 +472,16 @@ int propertyGetValue(lua_State* L) {
     return 1;
 }
 
+int propertyGetValueDeprecated(lua_State* L) {
+    LWARNINGC(
+        "Deprecation",
+        "'getPropertyValue' function is deprecated and should be replaced with "
+        "'propertyValue'"
+    );
+
+    return propertyGetValue(L);
+}
+
 }  // namespace openspace::luascriptfunctions
 
 namespace {
@@ -485,7 +497,7 @@ namespace {
 /**
  * Returns a list of property identifiers that match the passed regular expression
  */
-[[codegen::luawrap]] std::vector<std::string> getProperty(std::string regex) {
+[[codegen::luawrap]] std::vector<std::string> property(std::string regex) {
     using namespace openspace;
 
     std::string groupName;
@@ -589,6 +601,19 @@ namespace {
     }
 
     return res;
+}
+
+/**
+ * Returns a list of property identifiers that match the passed regular expression
+ */
+[[codegen::luawrap("getProperty")]] std::vector<std::string> propertyDeprecated(
+                                                                        std::string regex)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getProperty' function is deprecated and should be replaced with 'property'"
+    );
+    return property(std::move(regex));
 }
 
 /**
@@ -852,6 +877,51 @@ namespace {
     using namespace openspace;
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(nodeName);
     return node != nullptr;
+}
+
+// Returns a list of all scene graph nodes in the scene
+[[codegen::luawrap]] std::vector<std::string> sceneGraphNodes() {
+    using namespace openspace;
+
+    const std::vector<SceneGraphNode*>& nodes =
+        global::renderEngine->scene()->allSceneGraphNodes();
+    std::vector<std::string> res;
+    res.reserve(nodes.size());
+    for (SceneGraphNode* node : nodes) {
+        res.push_back(node->identifier());
+    }
+    return res;
+}
+
+// Returns a list of all scene graph nodes in the scene that have a renderable of the
+// specific type
+[[codegen::luawrap]] std::vector<std::string> nodeByRenderableType(std::string type) {
+    using namespace openspace;
+
+    const std::vector<SceneGraphNode*>& nodes =
+        global::renderEngine->scene()->allSceneGraphNodes();
+    std::vector<std::string> res;
+    for (SceneGraphNode* node : nodes) {
+        Renderable* renderable = node->renderable();
+        if (renderable && renderable->typeAsString() == type) {
+            res.push_back(node->identifier());
+        }
+    }
+    return res;
+}
+
+// Returns a list of all screen-space renderables
+[[codegen::luawrap]] std::vector<std::string> screenSpaceRenderables() {
+    using namespace openspace;
+
+    const std::vector<ScreenSpaceRenderable*>& ssrs =
+        global::renderEngine->screenSpaceRenderables();
+    std::vector<std::string> res;
+    res.reserve(ssrs.size());
+    for (ScreenSpaceRenderable* ssr : ssrs) {
+        res.push_back(ssr->identifier());
+    }
+    return res;
 }
 
 /**

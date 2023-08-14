@@ -298,7 +298,7 @@ local ToggleImagePlane = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.ImagePlaneRosetta.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.ImagePlaneRosetta.Renderable.Enabled")
+      not openspace.propertyValue("Scene.ImagePlaneRosetta.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of the free floating image plane",
@@ -312,7 +312,7 @@ local TogglePhilaeTrail = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PhilaeTrail.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.PhilaeTrail.Renderable.Enabled")
+      not openspace.propertyValue("Scene.PhilaeTrail.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of Philae's trail",

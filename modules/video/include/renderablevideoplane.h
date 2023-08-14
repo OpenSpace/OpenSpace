@@ -48,7 +48,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture() override;
+    void bindTexture() override;
 
 private:
     VideoPlayer _videoPlayer;

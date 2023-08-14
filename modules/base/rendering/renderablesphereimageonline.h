@@ -22,55 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGEONLINE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGEONLINE___H__
 
-in float vs_depth;
-flat in vec3 vs_normal;
-in vec4 vs_positionViewSpace;
+#include <modules/base/rendering/renderablesphere.h>
 
-uniform vec3 color;
-uniform float opacity;
+#include <openspace/engine/downloadmanager.h>
 
-uniform float ambientIntensity = 0.2;
-uniform float diffuseIntensity = 0.8;
-uniform bool performShading = true;
+namespace ghoul::opengl { class Texture; }
 
-uniform uint nLightSources;
-uniform vec3 lightDirectionsViewSpace[8];
-uniform float lightIntensities[8];
+namespace openspace {
 
-const vec3 LightColor = vec3(1.0);
+struct RenderData;
+struct UpdateData;
 
-Fragment getFragment() {
-  Fragment frag;
+namespace documentation { struct Documentation; }
 
-  if (opacity == 0.0) {
-    discard;
-  }
-  frag.color = vec4(color, opacity);
+class RenderableSphereImageOnline : public RenderableSphere {
+public:
+    RenderableSphereImageOnline(const ghoul::Dictionary& dictionary);
 
-  // Simple diffuse phong shading based on light sources
-  if (performShading && nLightSources > 0) {
-    // @TODO: Fix faulty triangle normals. This should not have to be inverted
-    vec3 n = -normalize(vs_normal);
+    void deinitializeGL() override;
 
-    // Ambient color
-    vec3 shadedColor = ambientIntensity  * color;
+    void update(const UpdateData& data) override;
 
-    for (int i = 0; i < nLightSources; ++i) {
-      vec3 l = lightDirectionsViewSpace[i];
+    static documentation::Documentation Documentation();
 
-      // Diffuse
-      vec3 diffuseColor = diffuseIntensity * max(dot(n,l), 0.0) * color;
+protected:
+    void bindTexture() override;
 
-      // Light contribution
-      shadedColor += lightIntensities[i] * (LightColor * diffuseColor);
-    }
-    frag.color.xyz = shadedColor;
-  }
+private:
+    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
+        const std::string& url);
 
-  frag.depth = vs_depth;
-  frag.gPosition = vs_positionViewSpace;
-  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-  return frag;
-}
+    properties::StringProperty _textureUrl;
+
+    std::future<DownloadManager::MemoryFile> _imageFuture;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    bool _textureIsDirty = false;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHEREIMAGEONLINE___H__

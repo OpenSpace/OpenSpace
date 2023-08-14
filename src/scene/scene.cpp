@@ -835,20 +835,34 @@ scripting::LuaLibrary Scene::luaLibrary() {
             },
             {
                 "getPropertyValue",
+                &luascriptfunctions::propertyGetValueDeprecated,
+                {},
+                "",
+                "Returns the value the property, identified by the provided URI. "
+                "Deprecated in favor of the 'propertyValue' function",
+                {}
+            },
+            {
+                "propertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
-                "Returns the value the property, identified by the provided URI",
+                "Returns the value the property, identified by the provided URI. "
+                "Deprecated in favor of the 'propertyValue' function",
                 {}
             },
             codegen::lua::HasProperty,
-            codegen::lua::GetProperty,
+            codegen::lua::PropertyDeprecated,
+            codegen::lua::Property,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,
             codegen::lua::RemoveSceneGraphNode,
             codegen::lua::RemoveSceneGraphNodesFromRegex,
             codegen::lua::HasSceneGraphNode,
+            codegen::lua::SceneGraphNodes,
+            codegen::lua::NodeByRenderableType,
+            codegen::lua::ScreenSpaceRenderables,
             codegen::lua::AddInterestingTime,
             codegen::lua::WorldPosition,
             codegen::lua::WorldRotation,

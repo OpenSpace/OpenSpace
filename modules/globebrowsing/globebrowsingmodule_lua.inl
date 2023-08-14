@@ -118,8 +118,8 @@ namespace {
  * Returns the list of layers for the scene graph node specified in the first parameter.
  * The second parameter specifies which layer type should be queried.
  */
-[[codegen::luawrap]] std::vector<std::string> getLayers(std::string globeIdentifier,
-                                                        std::string layer)
+[[codegen::luawrap]] std::vector<std::string> layers(std::string globeIdentifier,
+                                                     std::string layer)
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -148,6 +148,23 @@ namespace {
         res.push_back(l->identifier());
     }
     return res;
+}
+
+/**
+ * Returns the list of layers for the scene graph node specified in the first parameter.
+ * The second parameter specifies which layer type should be queried. Deprecated in favor
+ * of 'layers'.
+ */
+[[codegen::luawrap("getLayers")]] std::vector<std::string> layersDeprecated(
+                                                              std::string globeIdentifier,
+                                                                        std::string layer)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getLayers' function is deprecated and should be replaced with 'layers'"
+    );
+
+    return layers(std::move(globeIdentifier), std::move(layer));
 }
 
 /**
@@ -398,8 +415,8 @@ namespace {
  */
 [[codegen::luawrap]]
 std::tuple<double, double, double>
-getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double longitude,
-                        double altitude)
+localPositionFromGeo(std::string globeIdentifier, double latitude, double longitude,
+                     double altitude)
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -419,12 +436,38 @@ getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double lon
 }
 
 /**
+ * Returns a position in the local Cartesian coordinate system of the globe identified by
+ * the first argument, that corresponds to the given geographic coordinates: latitude,
+ * longitude and altitude (in degrees and meters). In the local coordinate system, the
+ * position (0,0,0) corresponds to the globe's center. Deprecated in favor of
+ * 'localPositionFromGeo'.
+ */
+[[codegen::luawrap("getLocalPositionFromGeo")]]
+std::tuple<double, double, double>
+localPositionFromGeoDeprecated(std::string globeIdentifier, double latitude,
+                               double longitude, double altitude)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getLocalPositionFromGeo' function is deprecated and should be replaced with "
+        "'localPositionFromGeo'"
+    );
+
+    return localPositionFromGeo(
+        std::move(globeIdentifier),
+        latitude,
+        longitude,
+        altitude
+    );
+}
+
+/**
  * Get geographic coordinates of the camera position in latitude, longitude, and altitude
  * (degrees and meters). If the optional bool paramater is specified, the camera
  * eye postion will be used instead
  */
-[[codegen::luawrap]] std::tuple<double, double, double>
-getGeoPositionForCamera(bool useEyePosition = false)
+[[codegen::luawrap]] std::tuple<double, double, double> geoPositionForCamera(
+                                                              bool useEyePosition = false)
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -475,6 +518,24 @@ getGeoPositionForCamera(bool useEyePosition = false)
     );
 
     return { glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude };
+}
+
+/**
+ * Get geographic coordinates of the camera position in latitude, longitude, and altitude
+ * (degrees and meters). If the optional bool paramater is specified, the camera
+ * eye postion will be used instead. Deprecated in favor of 'geoPositionForCamera'.
+ */
+[[codegen::luawrap("getGeoPositionForCamera")]]
+std::tuple<double, double, double>
+geoPositionForCameraDeprecated(bool useEyePosition = false)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getGeoPositionForCamera' function is deprecated and should be replaced with "
+        "'geoPositionForCamera'"
+    );
+
+    return geoPositionForCamera(useEyePosition);
 }
 
 /**

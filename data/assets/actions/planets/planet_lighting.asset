@@ -6,7 +6,7 @@ local function illuminationCommand(node, global)
   if (global) then
     commandString = commandString .. [[
 if (openspace.hasProperty("Scene."..node..".Renderable.UseAccurateNormals")) then
-  local list = openspace.getProperty("Scene." .. node .. ".Renderable.Layers.NightLayers.*.Enabled")
+  local list = openspace.property("Scene." .. node .. ".Renderable.Layers.NightLayers.*.Enabled")
   if (#list > 0) then
     openspace.setPropertyValue("Scene." .. node .. ".Renderable.Layers.NightLayers.*.Enabled", false)
   else
@@ -24,7 +24,7 @@ end]]
   else
     --todo @micahnyc this 40 wont do once we have more rings
     commandString = commandString .. [[if (openspace.hasProperty("Scene."..node..".Renderable.UseAccurateNormals")) then
-local list = openspace.getProperty("Scene." .. node .. ".Renderable.Layers.NightLayers.*.Enabled")
+local list = openspace.property("Scene." .. node .. ".Renderable.Layers.NightLayers.*.Enabled")
 if (#list > 0) then
   openspace.setPropertyValue(list[1], true)
 else

@@ -38,11 +38,11 @@ local ToggleEuv = {
   Identifier = "os.solarsystem.ToggleEuv",
   Name = "Toggle EUV layer",
   Command = [[
-    if openspace.getPropertyValue("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled") then
+    if openspace.propertyValue("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled") then
       openspace.setPropertyValueSingle(
         "Scene.EUV-Layer-bastille-day-2000.Renderable.Fade",
         0.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear",
         'openspace.setPropertyValueSingle("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled", false)'
       )
@@ -51,7 +51,7 @@ local ToggleEuv = {
       openspace.setPropertyValueSingle(
         "Scene.EUV-Layer-bastille-day-2000.Renderable.Fade",
         1.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear"
       )
     end

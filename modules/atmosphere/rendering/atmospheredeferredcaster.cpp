@@ -271,7 +271,7 @@ void AtmosphereDeferredcaster::deinitialize() {
 void AtmosphereDeferredcaster::update(const UpdateData&) {}
 
 float AtmosphereDeferredcaster::eclipseShadow(glm::dvec3 position) {
-    // This code is copied from the atmosphere deferred fragment shader 
+    // This code is copied from the atmosphere deferred fragment shader
     // It is used to calculate the eclipse shadow
     if (_shadowDataArrayCache.empty() || !_shadowDataArrayCache.front().isShadowing) {
         return 1.f;
@@ -280,7 +280,8 @@ float AtmosphereDeferredcaster::eclipseShadow(glm::dvec3 position) {
     const ShadowRenderingStruct& shadow = _shadowDataArrayCache.front();
     const glm::dvec3 positionToCaster = shadow.casterPositionVec - position;
     const glm::dvec3 sourceToCaster = shadow.sourceCasterVec; // Normalized
-    const glm::dvec3 casterShadow = dot(positionToCaster, sourceToCaster) * sourceToCaster;
+    const glm::dvec3 casterShadow =
+        dot(positionToCaster, sourceToCaster) * sourceToCaster;
     const glm::dvec3 positionToShadow = positionToCaster - casterShadow;
 
     float distanceToShadow = static_cast<float>(length(positionToShadow));
@@ -469,7 +470,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
                 shadow.radiusCaster = actualCasterRadius;
                 shadow.sourceCasterVec = glm::normalize(sourceCasterVec);
                 shadow.penumbra = xpTest;
-                shadow.umbra = shadow.radiusCaster * scLength / (shadow.radiusSource - shadow.radiusCaster);
+                shadow.umbra =
+                    shadow.radiusCaster * scLength /
+                    (shadow.radiusSource - shadow.radiusCaster);
                 shadow.casterPositionVec = casterPos;
             }
             _shadowDataArrayCache.push_back(shadow);

@@ -29,7 +29,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/sphere.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
 namespace openspace {
@@ -102,7 +101,7 @@ void RenderableSphereSpout::bindTexture() {
         glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
     }
     else {
-        RenderableSphere::bindTexture();
+        RenderableSphere::unbindTexture();
     }
 }
 

@@ -692,15 +692,18 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         .functions = {
             codegen::lua::AddLayer,
             codegen::lua::DeleteLayer,
-            codegen::lua::GetLayers,
+            codegen::lua::Layers,
+            codegen::lua::LayersDeprecated,
             codegen::lua::MoveLayer,
             codegen::lua::GoToChunk,
             codegen::lua::GoToGeo,
             // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
             // paths work really well close to surfaces
             codegen::lua::FlyToGeo,
-            codegen::lua::GetLocalPositionFromGeo,
-            codegen::lua::GetGeoPositionForCamera,
+            codegen::lua::LocalPositionFromGeo,
+            codegen::lua::LocalPositionFromGeoDeprecated,
+            codegen::lua::GeoPositionForCamera,
+            codegen::lua::GeoPositionForCameraDeprecated,
             codegen::lua::LoadWMSCapabilities,
             codegen::lua::RemoveWMSServer,
             codegen::lua::CapabilitiesWMS,

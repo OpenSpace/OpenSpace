@@ -74,7 +74,7 @@ void RenderableVideoPlane::update(const UpdateData& data) {
         return;
     }
 
-    // Shape the plane based on the aspect ration of the video
+    // Shape the plane based on the aspect ratio of the video
     glm::vec2 textureDim = glm::vec2(_videoPlayer.frameTexture()->dimensions());
     if (_textureDimensions != textureDim) {
         float aspectRatio = textureDim.x / textureDim.y;
