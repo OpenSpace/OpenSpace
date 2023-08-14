@@ -14,7 +14,7 @@ local kernels = asset.syncedResource({
   Name = "Voyager 1 Kernels",
   Type = "HttpSynchronization",
   Identifier = "voyager1_spice",
-  Version = 1
+  Version = 2
 })
 
 
@@ -25,8 +25,9 @@ local Kernels = {
   kernels .. "voyager_1.ST+1991_a54418u.merged.bsp",
   kernels .. "vgr1_jup230.bsp",
   kernels .. "vgr1_sat337.bsp",
+  kernels .. "vgr1.x2100.bsp",
   kernels .. "vgr1_super.bc",
-  kernels .. "vgr1_super_v2.bc"
+  kernels .. "vgr1_super_v2.bc",
 }
 
 local RotationMatrix = {
@@ -227,9 +228,9 @@ local VoyagerTrailCruiseSaturnInf = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1980 NOV 16",
-    EndTime = "2021 JAN 01",
-    -- 14656 is the number of days between the Start and End time
-    SampleInterval = 14656 * 2
+    EndTime = "2100 JAN 01",
+    -- 43511 is the number of days between the Start and End time
+    SampleInterval = 43511 * 2
   },
   Tag = { "voyager1_trail" },
   GUI = {
