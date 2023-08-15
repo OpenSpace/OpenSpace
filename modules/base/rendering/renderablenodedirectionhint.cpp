@@ -40,6 +40,7 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <glm/gtx/projection.hpp>
+#include <glm/gtx/transform.hpp>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableNodeDirectionHint";
@@ -154,22 +155,6 @@ namespace {
         "This value determines whether the arrow model should be shaded by using the "
         "position of the Sun"
     };
-
-    // Returns a position that is relative to the current anchor node. This is a method to
-    // handle precision problems that occur when approaching a line end point
-    glm::dvec3 coordinatePosFromAnchorNode(const glm::dvec3& worldPos) {
-        using namespace openspace;
-        glm::dvec3 anchorNodePos(0.0);
-
-        const interaction::OrbitalNavigator& nav =
-            global::navigationHandler->orbitalNavigator();
-
-        if (nav.anchorNode()) {
-            anchorNodePos = nav.anchorNode()->worldPosition();
-        }
-        glm::dvec3 diffPos = worldPos - anchorNodePos;
-        return diffPos;
-    }
 
     struct [[codegen::Dictionary(RenderableNodeDirectionHint)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
@@ -453,8 +438,8 @@ void RenderableNodeDirectionHint::updateVertexData() {
     }
 
     // Update the position based on the arrowDirection of the nodes
-    glm::dvec3 startNodePos = coordinatePosFromAnchorNode(startNode->worldPosition());
-    glm::dvec3 endNodePos = coordinatePosFromAnchorNode(endNode->worldPosition());
+    glm::dvec3 startNodePos = startNode->worldPosition();
+    glm::dvec3 endNodePos = endNode->worldPosition();
 
     // TODO: check that distance is larger than arrow length?
 
@@ -470,8 +455,18 @@ void RenderableNodeDirectionHint::updateVertexData() {
     double adjacent = _arrowHeadSize * length;
     glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
 
-    // TODO: Create transformation matrices to move unit cylinder to
-    // correct position
+    // Create transformation matrices to reshape to size, position and orientation
+
+    // Translation to start position
+    _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
+
+    // Scale to size (z-direction and width)
+    double w = _width;
+    _cylinderScale = glm::scale(glm::dmat4(1.0), glm::dvec3(w, w, length));
+
+    // Rotation to point at the end node
+    glm::quat rotQuat = glm::rotation(glm::dvec3(0.0, 0.0, 1.0), arrowDirection);
+    _cylinderRotation = glm::toMat4(rotQuat);
 
     _shapeIsDirty = false;
 }
@@ -496,38 +491,19 @@ void RenderableNodeDirectionHint::update(const UpdateData&) {
         _prevEndNodePosition = endNode->worldPosition();
     }
 
-    // Check if the anchor changed: We might have to recompute the positions
-    // in relation to that anchor
-    const SceneGraphNode* anchor = global::navigationHandler->orbitalNavigator().anchorNode();
-    if (!shouldUpdate && (_prevAnchor != anchor->identifier())) {
-        shouldUpdate = true;
-    }
-    _prevAnchor = anchor->identifier();
-
     if (shouldUpdate) {
         updateVertexData();
     }
 }
 
 void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&) {
-    glm::dmat4 anchorTranslation(1.0);
-    // Update anchor node information, used to counter precision problems
-    if (global::navigationHandler->orbitalNavigator().anchorNode()) {
-        anchorTranslation = glm::translate(
-            glm::dmat4(1.0),
-            global::navigationHandler->orbitalNavigator().anchorNode()->worldPosition()
-        );
-    }
-
-    // TODO: update shape transformations
-
     const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+        _cylinderTranslation * glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        _cylinderRotation * glm::dmat4(data.modelTransform.rotation) *
+        _cylinderScale * glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-        modelTransform * anchorTranslation;
+        modelTransform;
 
     glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 

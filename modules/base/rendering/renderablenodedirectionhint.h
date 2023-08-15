@@ -94,6 +94,10 @@ private:
     std::string _prevAnchor = "";
     glm::dvec3 _prevStartNodePosition = glm::dvec3(0.0);
     glm::dvec3 _prevEndNodePosition = glm::dvec3(0.0);
+
+    glm::dmat4 _cylinderTranslation = glm::dmat4(1.0);
+    glm::dmat4 _cylinderScale = glm::dmat4(1.0);
+    glm::dmat4 _cylinderRotation = glm::dmat4(1.0);
 };
 
 } // namespace openspace
