@@ -33,6 +33,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <glm/gtx/closest_point.hpp>
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -598,14 +599,14 @@ VertexIndexListCombo<Vertex> createSphere(int nSegments, glm::vec3 radii,
     return { vertices, indices };
 }
 
-VertexIndexListCombo<VertexXYZNormal> createCylinder(unsigned int nSegments,
-                                                     float radius, float height)
+VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegments,
+                                                            float bottomRadius,
+                                                            float topRadius,
+                                                            float height)
 {
-    // Create a ring for the bottom vertices (XY plane)
-    std::vector<VertexXYZ> bottomVertices = createRingXYZ(
-        nSegments,
-        radius
-    );
+    // Create a ring for the top and bottom vertices (XY plane)
+    std::vector<VertexXYZ> bottomVertices = createRingXYZ(nSegments, bottomRadius);
+    std::vector<VertexXYZ> topVertices = createRingXYZ(nSegments, topRadius);
 
     // Build the 4 rings of vertices (with different normals), that will make up the
     // shape for the cylinder
@@ -627,33 +628,48 @@ VertexIndexListCombo<VertexXYZNormal> createCylinder(unsigned int nSegments,
     std::vector<VertexXYZNormal> verts3;
     verts3.reserve(bottomVertices.size());
 
-    for (const VertexXYZ& v : bottomVertices) {
-        const glm::vec3 sideNormal = glm::normalize(
-            glm::vec3(v.xyz[0], v.xyz[1], v.xyz[2])
-        );
+    for (size_t i = 0; i < bottomVertices.size(); i++) {
+        const VertexXYZ& vBot = bottomVertices[i];
+        VertexXYZ& vTop = topVertices[i];
+        vTop.xyz[2] += height;
+
+        glm::vec3 sideNormal;
+        if (std::abs(bottomRadius - topRadius) < std::numeric_limits<float>::epsilon()) {
+            sideNormal = glm::normalize(
+                glm::vec3(vBot.xyz[0], vBot.xyz[1], vBot.xyz[2])
+            );
+        }
+        else {
+            glm::vec3 p = glm::closestPointOnLine(
+                glm::vec3(0.f),
+                glm::vec3(vBot.xyz[0], vBot.xyz[1], vBot.xyz[2]),
+                glm::vec3(vTop.xyz[0], vTop.xyz[1], vTop.xyz[2])
+            );
+            sideNormal = glm::normalize(p);
+        }
 
         // Ring 0 - vertices of bottom circle, with normals pointing down
         verts0.push_back({
-            .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] },
+            .xyz = { vBot.xyz[0], vBot.xyz[1], vBot.xyz[2] },
             .normal = { 0.f, 0.f, -1.f }
         });
 
         // Ring 1 - bottom vertices of cylider sides with normals pointing outwards
         verts1.push_back({
-            .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] },
+            .xyz = { vBot.xyz[0], vBot.xyz[1], vBot.xyz[2] },
             .normal = { sideNormal.x, sideNormal.y, sideNormal.z }
         });
 
         // Ring 2 - top vertices of cylinder side, normals pointing outwards
         // Note that only difference between top and bottom is the height added to Z
         verts2.push_back({
-            .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] + height },
+            .xyz = { vTop.xyz[0], vTop.xyz[1], vTop.xyz[2] },
             .normal = { sideNormal.x, sideNormal.y, sideNormal.z }
         });
 
         // Ring 3 - vertices of top circle, normals pointing up
         verts3.push_back({
-            .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] + height },
+            .xyz = { vTop.xyz[0], vTop.xyz[1], vTop.xyz[2] },
             .normal = { 0.f, 0.f, 1.f }
         });
     }
@@ -718,102 +734,17 @@ VertexIndexListCombo<VertexXYZNormal> createCylinder(unsigned int nSegments,
     return { vertices, indexArray };
 }
 
+
+VertexIndexListCombo<VertexXYZNormal> createCylinder(unsigned int nSegments,
+                                                     float radius, float height)
+{
+    return createConicalCylinder(nSegments, radius, radius, height);
+}
+
 VertexIndexListCombo<VertexXYZNormal> createCone(unsigned int nSegments, float radius,
                                                  float height)
 {
-    // Create a ring for the bottom vertices (XY plane)
-    std::vector<VertexXYZ> bottomVertices = createRingXYZ(
-        nSegments,
-        radius
-    );
-
-    // Build the 3 rings of vertices (with different normals), that will make up the
-    // shape for the cylinder
-    std::vector<VertexXYZNormal> vertices;
-    vertices.reserve(3 * bottomVertices.size() + 1);
-
-    // Center bottom vertex
-    vertices.push_back({
-        .xyz = { 0.f, 0.f, 0.f },
-        .normal = { 0.f, 0.f, -1.f }
-    });
-
-    std::vector<VertexXYZNormal> verts0;
-    verts0.reserve(bottomVertices.size());
-    std::vector<VertexXYZNormal> verts1;
-    verts1.reserve(bottomVertices.size());
-    std::vector<VertexXYZNormal> verts2;
-    verts2.reserve(bottomVertices.size());
-
-    for (const VertexXYZ& v : bottomVertices) {
-        const glm::vec3 sideNormal = glm::normalize(
-            glm::vec3(v.xyz[0], v.xyz[1], v.xyz[2])
-        );
-
-        // Ring 0 - vertices of bottom circle, with normals pointing down
-        verts0.push_back({
-            .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] },
-            .normal = { 0.f, 0.f, -1.f }
-        });
-
-        // Ring 1 - bottom vertices of cylider sides with normals pointing outwards
-        verts1.push_back({
-            .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] },
-            .normal = { sideNormal.x, sideNormal.y, sideNormal.z }
-        });
-
-        // Ring 2 - top vertices of cylinder side, normals pointing outwards
-        // Note that only difference between top and bottom is the height added to Z
-        verts2.push_back({
-            .xyz = { 0.f, 0.f,  height },
-            .normal = { sideNormal.x, sideNormal.y, sideNormal.z }
-        });
-    }
-
-    vertices.insert(vertices.end(), verts0.begin(), verts0.end());
-    vertices.insert(vertices.end(), verts1.begin(), verts1.end());
-    vertices.insert(vertices.end(), verts2.begin(), verts2.end());
-
-    // Contruct the index list, based on the above vertex rings
-    std::vector<GLushort> indexArray;
-    indexArray.reserve(3 * 3 * nSegments);
-
-    auto ringVerticeIndex = [&nSegments](unsigned int ringIndex, unsigned int i) {
-        return static_cast<GLushort>(1 + ringIndex * (nSegments + 1) + i);
-    };
-
-    GLushort botCenterIndex = 0;
-    GLushort topCenterIndex = static_cast<GLushort>(vertices.size()) - 1;
-
-    for (unsigned int i = 0; i < nSegments; ++i) {
-        bool isLast = (i == nSegments - 1);
-        GLushort v0, v1, v2, v3;
-
-        // Bot triangle
-        v0 = ringVerticeIndex(0, i);
-        v1 = ringVerticeIndex(0, isLast ? 0 : i + 1);
-        indexArray.push_back(botCenterIndex);
-        indexArray.push_back(v1);
-        indexArray.push_back(v0);
-
-        // Side of cone
-
-        // Bottom ring
-        v0 = ringVerticeIndex(1, i);
-        v1 = ringVerticeIndex(1, isLast ? 0 : i + 1);
-        // Top ring
-        v2 = ringVerticeIndex(2, i);
-        v3 = ringVerticeIndex(2, isLast ? 0 : i + 1);
-        indexArray.push_back(v0);
-        indexArray.push_back(v1);
-        indexArray.push_back(v2);
-
-        indexArray.push_back(v1);
-        indexArray.push_back(v3);
-        indexArray.push_back(v2);
-    }
-
-    return { vertices, indexArray };
+    return createConicalCylinder(nSegments, radius, 0.f, height);
 }
 
 void LightSourceRenderData::updateBasedOnLightSources(const RenderData& renderData,
