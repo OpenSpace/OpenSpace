@@ -288,7 +288,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
 
         if (!_useRelativeLength) {
             // Recompute distance (previous value was relative)
-            _length = static_cast<float>(_length * startNode->boundingSphere());
+            _length = static_cast<float>(_length * boundingSphere);
             _length.setExponent(11.f);
             _length.setMaxValue(1e20f);
         }
@@ -300,7 +300,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
                 ));
                 return;
             }
-            _length = static_cast<float>(_length / startNode->boundingSphere());
+            _length = static_cast<float>(_length / boundingSphere);
             _length.setExponent(3.f);
             _length.setMaxValue(1000.f);
         }
