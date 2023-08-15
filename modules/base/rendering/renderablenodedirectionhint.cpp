@@ -402,7 +402,7 @@ bool RenderableNodeDirectionHint::isReady() const {
     return ready;
 }
 
-void RenderableNodeDirectionHint::updateVertexData() {
+void RenderableNodeDirectionHint::updateShapeTransforms() {
     SceneGraphNode* startNode = sceneGraphNode(_start);
     SceneGraphNode* endNode = sceneGraphNode(_end);
 
@@ -494,7 +494,7 @@ void RenderableNodeDirectionHint::update(const UpdateData&) {
     }
 
     if (shouldUpdate) {
-        updateVertexData();
+        updateShapeTransforms();
     }
 }
 
@@ -507,7 +507,7 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     );
 
     // Cylinder transforms
-    glm::dmat4 modelTransform = _cylinderTranslation * T * _cylinderRotation * R *
+    glm::dmat4 modelTransform = _cylinderTranslation * T * _pointDirectionRotation * R *
         _cylinderScale * S;
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
@@ -541,7 +541,7 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     );
 
     // Update transforms and render cone
-    modelTransform = _coneTranslation * T * _coneRotation * R * _coneScale * S;
+    modelTransform = _coneTranslation * T * _pointDirectionRotation * R * _coneScale * S;
     modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
     normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 

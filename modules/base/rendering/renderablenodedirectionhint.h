@@ -59,7 +59,7 @@ private:
     void deinitializeGL() override;
 
     bool isReady() const override;
-    void updateVertexData();
+    void updateShapeTransforms();
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
