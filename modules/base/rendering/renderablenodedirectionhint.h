@@ -42,7 +42,8 @@ namespace openspace {
 class Translation;
 
 /**
- * TODO
+ * Generates an arrow shape that points from the start node to the
+ * end node
  */
 class RenderableNodeDirectionHint : public Renderable {
 public:
@@ -51,16 +52,12 @@ public:
 
     static documentation::Documentation Documentation();
 
-    std::string start() const;
-    std::string end() const;
-
 private:
     void initializeGL() override;
     void deinitializeGL() override;
 
     bool isReady() const override;
-    void updateShapeTransforms();
-    void update(const UpdateData& data) override;
+    void updateShapeTransforms(const RenderData& data);
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     ghoul::opengl::ProgramObject* _shaderProgram;
@@ -89,11 +86,6 @@ private:
     properties::FloatProperty _length;
     properties::BoolProperty _useRelativeLength;
     properties::FloatProperty _width;
-
-    bool _shapeIsDirty = true;
-    std::string _prevAnchor = "";
-    glm::dvec3 _prevStartNodePosition = glm::dvec3(0.0);
-    glm::dvec3 _prevEndNodePosition = glm::dvec3(0.0);
 
     glm::dmat4 _cylinderTranslation = glm::dmat4(1.0);
     glm::dmat4 _cylinderScale = glm::dmat4(1.0);

@@ -263,23 +263,18 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     addProperty(_opacity);
 
     _segments = p.segments.value_or(_segments);
-    _segments.onChange([this]() { _shapeIsDirty = true; });
     addProperty(_segments);
 
     _invertArrowDirection = p.invert.value_or(_invertArrowDirection);
-    _invertArrowDirection.onChange([this]() { _shapeIsDirty = true; });
     addProperty(_invertArrowDirection);
 
     _arrowHeadSize = p.arrowHeadSize.value_or(_arrowHeadSize);
-    _arrowHeadSize.onChange([this]() { _shapeIsDirty = true; });
     addProperty(_arrowHeadSize);
 
     _arrowHeadWidthFactor = p.arrowHeadWidthFactor.value_or(_arrowHeadWidthFactor);
-    _arrowHeadWidthFactor.onChange([this]() { _shapeIsDirty = true; });
     addProperty(_arrowHeadWidthFactor);
 
     _width = p.width.value_or(_width);
-    _width.onChange([this]() { _shapeIsDirty = true; });
     _width.setExponent(10.f);
     addProperty(_width);
 
@@ -351,10 +346,8 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
 
     _useRelativeOffset = p.useRelativeOffset.value_or(_useRelativeOffset);
-    _useRelativeOffset.onChange([this]() { _shapeIsDirty = true; });
 
     _offsetDistance = p.offset.value_or(_offsetDistance);
-    _offsetDistance.onChange([this]() { _shapeIsDirty = true; });
     addProperty(_offsetDistance);
 
     if (!_useRelativeOffset) {
@@ -363,14 +356,6 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
 
     addProperty(_useRelativeLength);
     addProperty(_useRelativeOffset);
-}
-
-std::string RenderableNodeDirectionHint::start() const {
-    return _start;
-}
-
-std::string RenderableNodeDirectionHint::end() const {
-    return _end;
 }
 
 void RenderableNodeDirectionHint::initializeGL() {
@@ -402,7 +387,7 @@ bool RenderableNodeDirectionHint::isReady() const {
     return ready;
 }
 
-void RenderableNodeDirectionHint::updateShapeTransforms() {
+void RenderableNodeDirectionHint::updateShapeTransforms(const RenderData& data) {
     SceneGraphNode* startNode = sceneGraphNode(_start);
     SceneGraphNode* endNode = sceneGraphNode(_end);
 
@@ -437,11 +422,15 @@ void RenderableNodeDirectionHint::updateShapeTransforms() {
         length *= boundingSphere;
     }
 
+    // Take additional transformation scale into account
+    const glm::dmat4 S = glm::scale(
+        glm::dmat4(1.0),
+        glm::dvec3(data.modelTransform.scale)
+    );
+
     // Update the position based on the arrowDirection of the nodes
     glm::dvec3 startNodePos = startNode->worldPosition();
     glm::dvec3 endNodePos = endNode->worldPosition();
-
-    // TODO: check that distance is larger than arrow length?
 
     glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
     glm::dvec3 startPos = glm::dvec3(startNodePos + offset * arrowDirection);
@@ -454,62 +443,35 @@ void RenderableNodeDirectionHint::updateShapeTransforms() {
 
     double coneLength = _arrowHeadSize * length;
     double cylinderLength = length - coneLength;
-    glm::dvec3 arrowHeadStartPos = startPos + cylinderLength * arrowDirection;
     double arrowHeadWidth = _width * _arrowHeadWidthFactor;
 
     // Create transformation matrices to reshape to size and position
     _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
-    glm::dvec3 scale = glm::dvec3(_width, _width, cylinderLength);
-    _cylinderScale = glm::scale(glm::dmat4(1.0), scale);
+    glm::dvec3 cylinderScale = glm::dvec3(S * glm::dvec4(_width, _width, cylinderLength, 0.0));
+    _cylinderScale = glm::scale(glm::dmat4(1.0), cylinderScale);
+
+    // Adapt arrow head start to scaled size
+    glm::dvec3 arrowHeadStartPos = startPos + cylinderScale.z * arrowDirection;
 
     _coneTranslation = glm::translate(glm::dmat4(1.0), arrowHeadStartPos);
-    scale = glm::dvec3(arrowHeadWidth, arrowHeadWidth, coneLength);
-    _coneScale = glm::scale(glm::dmat4(1.0), scale);
+    glm::dvec3 coneScale = glm::dvec3(arrowHeadWidth, arrowHeadWidth, coneLength);
+    _coneScale = S * glm::scale(glm::dmat4(1.0), coneScale);
 
     // Rotation to point at the end node
     glm::quat rotQuat = glm::rotation(glm::dvec3(0.0, 0.0, 1.0), arrowDirection);
-    _pointDirectionRotation = glm::toMat4(rotQuat);
-
-    _shapeIsDirty = false;
-}
-
-void RenderableNodeDirectionHint::update(const UpdateData&) {
-    SceneGraphNode* startNode = sceneGraphNode(_start);
-    SceneGraphNode* endNode = sceneGraphNode(_end);
-
-    // Check if any of the targetted nodes moved
-    bool shouldUpdate = _shapeIsDirty;
-    if (startNode && endNode) {
-        constexpr float Epsilon = std::numeric_limits<float>::epsilon();
-        const float combinedDistanceChange = static_cast<float>(
-            glm::distance(startNode->worldPosition(), _prevStartNodePosition) +
-            glm::distance(endNode->worldPosition(), _prevEndNodePosition)
-        );
-        if (combinedDistanceChange > Epsilon) {
-            shouldUpdate = true;
-        }
-
-        _prevStartNodePosition = startNode->worldPosition();
-        _prevEndNodePosition = endNode->worldPosition();
-    }
-
-    if (shouldUpdate) {
-        updateShapeTransforms();
-    }
+    _pointDirectionRotation = glm::dmat4(glm::toMat4(rotQuat));
 }
 
 void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&) {
-    const glm::dmat4 T = glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
-    const glm::dmat4 R = glm::dmat4(data.modelTransform.rotation);
-    const glm::dmat4 S = glm::scale(
-        glm::dmat4(1.0),
-        glm::dvec3(data.modelTransform.scale)
-    );
+    updateShapeTransforms(data);
+
+    // Not used. Does not make sense when doing computations in world coordinates.
+    //const glm::dmat4 T = glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
+    //const glm::dmat4 R = glm::dmat4(data.modelTransform.rotation);
 
     // Cylinder transforms
-    glm::dmat4 modelTransform = _cylinderTranslation * T * _pointDirectionRotation * R *
-        _cylinderScale * S;
-
+    glm::dmat4 modelTransform = _cylinderTranslation * _pointDirectionRotation *
+        _cylinderScale;
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
     glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 
@@ -541,7 +503,7 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     );
 
     // Update transforms and render cone
-    modelTransform = _coneTranslation * T * _pointDirectionRotation * R * _coneScale * S;
+    modelTransform = _coneTranslation * _pointDirectionRotation * _coneScale;
     modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
     normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 
