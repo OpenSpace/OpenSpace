@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,7 +59,7 @@ namespace {
         "Defaults to 'Root' if not specified. "
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "This value determines the RGB color for the arrow"
@@ -163,7 +163,7 @@ namespace {
         // [[codegen::verbatim(EndNodeInfo.description)]]
         std::optional<std::string> endNode;
 
-        // [[codegen::verbatim(LineColorInfo.description)]]
+        // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
@@ -231,7 +231,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     : Renderable(dictionary)
     , _start(StartNodeInfo, "Root")
     , _end(EndNodeInfo, "Root")
-    , _color(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, 10, 3, 100)
     , _invertArrowDirection(InvertInfo, false)
     , _arrowHeadSize(ArrowHeadSizeInfo, 0.1f, 0.f, 1.f)
