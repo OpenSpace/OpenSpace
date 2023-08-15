@@ -700,19 +700,19 @@ VertexIndexListCombo<VertexXYZNormal> createCylinder(unsigned int nSegments,
         v2 = ringVerticeIndex(2, i);
         v3 = ringVerticeIndex(2, isLast ? 0 : i + 1);
         indexArray.push_back(v0);
-        indexArray.push_back(v2);
         indexArray.push_back(v1);
+        indexArray.push_back(v2);
 
         indexArray.push_back(v1);
-        indexArray.push_back(v2);
         indexArray.push_back(v3);
+        indexArray.push_back(v2);
 
         // Top triangle
         v0 = ringVerticeIndex(3, i);
         v1 = ringVerticeIndex(3, isLast ? 0 : i + 1);
         indexArray.push_back(topCenterIndex);
-        indexArray.push_back(v1);
         indexArray.push_back(v0);
+        indexArray.push_back(v1);
     }
 
     return { vertices, indexArray };
@@ -805,12 +805,12 @@ VertexIndexListCombo<VertexXYZNormal> createCone(unsigned int nSegments, float r
         v2 = ringVerticeIndex(2, i);
         v3 = ringVerticeIndex(2, isLast ? 0 : i + 1);
         indexArray.push_back(v0);
-        indexArray.push_back(v2);
         indexArray.push_back(v1);
+        indexArray.push_back(v2);
 
         indexArray.push_back(v1);
-        indexArray.push_back(v2);
         indexArray.push_back(v3);
+        indexArray.push_back(v2);
     }
 
     return { vertices, indexArray };
