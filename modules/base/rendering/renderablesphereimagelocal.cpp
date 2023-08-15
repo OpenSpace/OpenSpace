@@ -61,7 +61,8 @@ documentation::Documentation RenderableSphereImageLocal::Documentation() {
     return codegen::doc<Parameters>("base_renderable_sphere_image_local");
 }
 
-RenderableSphereImageLocal::RenderableSphereImageLocal(const ghoul::Dictionary& dictionary)
+RenderableSphereImageLocal::RenderableSphereImageLocal(
+                                                      const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _texturePath(TextureInfo)
 {

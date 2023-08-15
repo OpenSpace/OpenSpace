@@ -519,11 +519,12 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
 void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransform) {
     // Calculate if the camera is in the atmosphere and if it is in the sunny region
     const glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
-    // TODO: change the assumption that the Sun is placed in the origin 
-    const glm::dvec3 planetPos = glm::dvec3(modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
+    // TODO: change the assumption that the Sun is placed in the origin
+    const glm::dvec3 planetPos =
+        glm::dvec3(modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
     const glm::dvec3 normalUnderCamera = glm::normalize(cameraPos - planetPos);
     const glm::dvec3 vecToSun = glm::normalize(-planetPos);
-    
+
     float cameraDistance = static_cast<float>(glm::distance(planetPos, cameraPos));
     float cameraSunAngle = static_cast<float>(
         glm::degrees(glm::acos(glm::dot(vecToSun, normalUnderCamera))
@@ -536,7 +537,7 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     float atmosphereEdge = KM_TO_M * (_planetRadius + _atmosphereHeight);
     bool cameraIsInAtmosphere = cameraDistance < atmosphereEdge;
 
-    // Don't fade if camera is not in the sunny part of an atmosphere 
+    // Don't fade if camera is not in the sunny part of an atmosphere
     if (!cameraIsInAtmosphere || !cameraIsInSun) {
         return;
     }

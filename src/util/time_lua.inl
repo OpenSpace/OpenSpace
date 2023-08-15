@@ -322,7 +322,7 @@ namespace {
     else {
         b = openspace::Time(std::get<double>(base)).ISO8601();
     }
-    
+
     std::string c;
     if (std::holds_alternative<std::string>(change)) {
         c = std::get<std::string>(change);
