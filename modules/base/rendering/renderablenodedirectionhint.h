@@ -97,7 +97,11 @@ private:
 
     glm::dmat4 _cylinderTranslation = glm::dmat4(1.0);
     glm::dmat4 _cylinderScale = glm::dmat4(1.0);
-    glm::dmat4 _cylinderRotation = glm::dmat4(1.0);
+
+    glm::dmat4 _coneTranslation = glm::dmat4(1.0);
+    glm::dmat4 _coneScale = glm::dmat4(1.0);
+
+    glm::dmat4 _pointDirectionRotation = glm::dmat4(1.0);
 };
 
 } // namespace openspace

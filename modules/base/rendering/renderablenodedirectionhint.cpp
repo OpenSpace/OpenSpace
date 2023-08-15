@@ -452,21 +452,23 @@ void RenderableNodeDirectionHint::updateVertexData() {
         arrowDirection *= -1;
     }
 
-    double adjacent = _arrowHeadSize * length;
-    glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
+    double coneLength = _arrowHeadSize * length;
+    double cylinderLength = length - coneLength;
+    glm::dvec3 arrowHeadStartPos = startPos + cylinderLength * arrowDirection;
+    double arrowHeadWidth = _width * _arrowHeadWidthFactor;
 
-    // Create transformation matrices to reshape to size, position and orientation
-
-    // Translation to start position
+    // Create transformation matrices to reshape to size and position
     _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
+    glm::dvec3 scale = glm::dvec3(_width, _width, cylinderLength);
+    _cylinderScale = glm::scale(glm::dmat4(1.0), scale);
 
-    // Scale to size (z-direction and width)
-    double w = _width;
-    _cylinderScale = glm::scale(glm::dmat4(1.0), glm::dvec3(w, w, length));
+    _coneTranslation = glm::translate(glm::dmat4(1.0), arrowHeadStartPos);
+    scale = glm::dvec3(arrowHeadWidth, arrowHeadWidth, coneLength);
+    _coneScale = glm::scale(glm::dmat4(1.0), scale);
 
     // Rotation to point at the end node
     glm::quat rotQuat = glm::rotation(glm::dvec3(0.0, 0.0, 1.0), arrowDirection);
-    _cylinderRotation = glm::toMat4(rotQuat);
+    _pointDirectionRotation = glm::toMat4(rotQuat);
 
     _shapeIsDirty = false;
 }
@@ -497,14 +499,18 @@ void RenderableNodeDirectionHint::update(const UpdateData&) {
 }
 
 void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&) {
-    const glm::dmat4 modelTransform =
-        _cylinderTranslation * glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        _cylinderRotation * glm::dmat4(data.modelTransform.rotation) *
-        _cylinderScale * glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::dmat4 T = glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
+    const glm::dmat4 R = glm::dmat4(data.modelTransform.rotation);
+    const glm::dmat4 S = glm::scale(
+        glm::dmat4(1.0),
+        glm::dvec3(data.modelTransform.scale)
+    );
 
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-        modelTransform;
+    // Cylinder transforms
+    glm::dmat4 modelTransform = _cylinderTranslation * T * _cylinderRotation * R *
+        _cylinderScale * S;
 
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
     glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 
     _shaderProgram->activate();
@@ -512,6 +518,7 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     _shaderProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _shaderProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
     _shaderProgram->setUniform("normalTransform", glm::mat3(normalTransform));
+
     _shaderProgram->setUniform("color", _color);
     _shaderProgram->setUniform("opacity", opacity());
 
@@ -524,9 +531,8 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
 
-    // Bind and draw shape
+    // Draw cylinder
     glBindVertexArray(rendering::helper::vertexObjects.cylinder.vao);
-
     glDrawElements(
         GL_TRIANGLES,
         rendering::helper::vertexObjects.cylinder.nElements,
@@ -534,7 +540,21 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
         nullptr
     );
 
-    // TODO: bring back the arrow head cone!
+    // Update transforms and render cone
+    modelTransform = _coneTranslation * T * _coneRotation * R * _coneScale * S;
+    modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    normalTransform = glm::transpose(glm::inverse(modelViewTransform));
+
+    _shaderProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _shaderProgram->setUniform("normalTransform", glm::mat3(normalTransform));
+
+    glBindVertexArray(rendering::helper::vertexObjects.cone.vao);
+    glDrawElements(
+        GL_TRIANGLES,
+        rendering::helper::vertexObjects.cone.nElements,
+        GL_UNSIGNED_SHORT,
+        nullptr
+    );
 
     // Restore GL State
     glBindVertexArray(0);

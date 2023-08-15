@@ -250,7 +250,7 @@ void initialize() {
     //
     // Sphere vertex array object
     //
-    std::pair<std::vector<Vertex>, std::vector<GLushort>> sphereData = createSphere(
+    VertexIndexListCombo<Vertex> sphereData = createSphere(
         64, glm::vec3(1.f, 1.f, 1.f), glm::vec4(1.f, 1.f, 1.f, 1.f)
     );
 
@@ -262,16 +262,16 @@ void initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.sphere.vbo);
     glBufferData(
         GL_ARRAY_BUFFER,
-        sphereData.first.size() * sizeof(Vertex),
-        sphereData.first.data(),
+        sphereData.vertices.size() * sizeof(Vertex),
+        sphereData.vertices.data(),
         GL_STATIC_DRAW
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexObjects.sphere.ibo);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        sphereData.second.size() * sizeof(GLushort),
-        sphereData.second.data(),
+        sphereData.indices.size() * sizeof(GLushort),
+        sphereData.indices.data(),
         GL_STATIC_DRAW
     );
     glEnableVertexAttribArray(0);
@@ -283,14 +283,13 @@ void initialize() {
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         reinterpret_cast<GLvoid*>(offsetof(Vertex, rgba)));
     glBindVertexArray(0);
-    vertexObjects.sphere.nElements = static_cast<int>(sphereData.second.size());
+    vertexObjects.sphere.nElements = static_cast<int>(sphereData.indices.size());
 
 
     //
     // Cylinder vertex array object
     //
-    std::pair<std::vector<VertexXYZNormal>, std::vector<GLushort>> cylinderData =
-        createCylinder(64, 1.f, 1.f);
+    VertexIndexListCombo<VertexXYZNormal> cylinderData = createCylinder(64, 1.f, 1.f);
 
     glGenVertexArrays(1, &vertexObjects.cylinder.vao);
     glGenBuffers(1, &vertexObjects.cylinder.vbo);
@@ -300,16 +299,16 @@ void initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.cylinder.vbo);
     glBufferData(
         GL_ARRAY_BUFFER,
-        cylinderData.first.size() * sizeof(VertexXYZNormal),
-        cylinderData.first.data(),
+        cylinderData.vertices.size() * sizeof(VertexXYZNormal),
+        cylinderData.vertices.data(),
         GL_STATIC_DRAW
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexObjects.cylinder.ibo);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        cylinderData.second.size() * sizeof(GLushort),
-        cylinderData.second.data(),
+        cylinderData.indices.size() * sizeof(GLushort),
+        cylinderData.indices.data(),
         GL_STATIC_DRAW
     );
     glEnableVertexAttribArray(0);
@@ -318,7 +317,41 @@ void initialize() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal),
         reinterpret_cast<GLvoid*>(offsetof(VertexXYZNormal, normal)));
     glBindVertexArray(0);
-    vertexObjects.cylinder.nElements = static_cast<int>(cylinderData.second.size());
+    vertexObjects.cylinder.nElements = static_cast<int>(cylinderData.indices.size());
+
+
+    //
+    // Cone vertex array object
+    //
+    VertexIndexListCombo<VertexXYZNormal> coneData = createCone(64, 1.f, 1.f);
+
+    glGenVertexArrays(1, &vertexObjects.cone.vao);
+    glGenBuffers(1, &vertexObjects.cone.vbo);
+    glGenBuffers(1, &vertexObjects.cone.ibo);
+
+    glBindVertexArray(vertexObjects.cone.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.cone.vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        coneData.vertices.size() * sizeof(VertexXYZNormal),
+        coneData.vertices.data(),
+        GL_STATIC_DRAW
+    );
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexObjects.cone.ibo);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        coneData.indices.size() * sizeof(GLushort),
+        coneData.indices.data(),
+        GL_STATIC_DRAW
+    );
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYZNormal, normal)));
+    glBindVertexArray(0);
+    vertexObjects.cone.nElements = static_cast<int>(coneData.indices.size());
 
 
     //
@@ -359,6 +392,10 @@ void deinitialize() {
     glDeleteVertexArrays(1, &vertexObjects.cylinder.vao);
     glDeleteBuffers(1, &vertexObjects.cylinder.vbo);
     glDeleteBuffers(1, &vertexObjects.cylinder.ibo);
+
+    glDeleteVertexArrays(1, &vertexObjects.cone.vao);
+    glDeleteBuffers(1, &vertexObjects.cone.vbo);
+    glDeleteBuffers(1, &vertexObjects.cone.ibo);
 
     glDeleteVertexArrays(1, &vertexObjects.empty.vao);
 
@@ -503,9 +540,8 @@ std::vector<VertexXYZ> createRingXYZ(int nSegments, float radius) {
     return vertices;
 }
 
-std::pair<std::vector<Vertex>, std::vector<GLushort>> createSphere(int nSegments,
-                                                                   glm::vec3 radii,
-                                                                   glm::vec4 colors)
+VertexIndexListCombo<Vertex> createSphere(int nSegments, glm::vec3 radii,
+                                          glm::vec4 colors)
 {
     std::vector<Vertex> vertices;
     vertices.reserve(nSegments * nSegments);
@@ -562,8 +598,8 @@ std::pair<std::vector<Vertex>, std::vector<GLushort>> createSphere(int nSegments
     return { vertices, indices };
 }
 
-std::pair<std::vector<VertexXYZNormal>, std::vector<GLushort>>
-createCylinder(unsigned int nSegments, float radius, float height)
+VertexIndexListCombo<VertexXYZNormal> createCylinder(unsigned int nSegments,
+                                                     float radius, float height)
 {
     // Create a ring for the bottom vertices (XY plane)
     std::vector<VertexXYZ> bottomVertices = createRingXYZ(
@@ -635,7 +671,7 @@ createCylinder(unsigned int nSegments, float radius, float height)
 
     // Contruct the index list, based on the above vertex rings
     std::vector<GLushort> indexArray;
-    vertices.reserve(4 * 3 * nSegments);
+    indexArray.reserve(4 * 3 * nSegments);
 
     auto ringVerticeIndex = [&nSegments](unsigned int ringIndex, unsigned int i) {
         return static_cast<GLushort>(1 + ringIndex * (nSegments + 1) + i);
@@ -677,6 +713,104 @@ createCylinder(unsigned int nSegments, float radius, float height)
         indexArray.push_back(topCenterIndex);
         indexArray.push_back(v1);
         indexArray.push_back(v0);
+    }
+
+    return { vertices, indexArray };
+}
+
+VertexIndexListCombo<VertexXYZNormal> createCone(unsigned int nSegments, float radius,
+                                                 float height)
+{
+    // Create a ring for the bottom vertices (XY plane)
+    std::vector<VertexXYZ> bottomVertices = createRingXYZ(
+        nSegments,
+        radius
+    );
+
+    // Build the 3 rings of vertices (with different normals), that will make up the
+    // shape for the cylinder
+    std::vector<VertexXYZNormal> vertices;
+    vertices.reserve(3 * bottomVertices.size() + 1);
+
+    // Center bottom vertex
+    vertices.push_back({
+        .xyz = { 0.f, 0.f, 0.f },
+        .normal = { 0.f, 0.f, -1.f }
+    });
+
+    std::vector<VertexXYZNormal> verts0;
+    verts0.reserve(bottomVertices.size());
+    std::vector<VertexXYZNormal> verts1;
+    verts1.reserve(bottomVertices.size());
+    std::vector<VertexXYZNormal> verts2;
+    verts2.reserve(bottomVertices.size());
+
+    for (const VertexXYZ& v : bottomVertices) {
+        const glm::vec3 sideNormal = glm::normalize(
+            glm::vec3(v.xyz[0], v.xyz[1], v.xyz[2])
+        );
+
+        // Ring 0 - vertices of bottom circle, with normals pointing down
+        verts0.push_back({
+            .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] },
+            .normal = { 0.f, 0.f, -1.f }
+        });
+
+        // Ring 1 - bottom vertices of cylider sides with normals pointing outwards
+        verts1.push_back({
+            .xyz = { v.xyz[0], v.xyz[1], v.xyz[2] },
+            .normal = { sideNormal.x, sideNormal.y, sideNormal.z }
+        });
+
+        // Ring 2 - top vertices of cylinder side, normals pointing outwards
+        // Note that only difference between top and bottom is the height added to Z
+        verts2.push_back({
+            .xyz = { 0.f, 0.f,  height },
+            .normal = { sideNormal.x, sideNormal.y, sideNormal.z }
+        });
+    }
+
+    vertices.insert(vertices.end(), verts0.begin(), verts0.end());
+    vertices.insert(vertices.end(), verts1.begin(), verts1.end());
+    vertices.insert(vertices.end(), verts2.begin(), verts2.end());
+
+    // Contruct the index list, based on the above vertex rings
+    std::vector<GLushort> indexArray;
+    indexArray.reserve(3 * 3 * nSegments);
+
+    auto ringVerticeIndex = [&nSegments](unsigned int ringIndex, unsigned int i) {
+        return static_cast<GLushort>(1 + ringIndex * (nSegments + 1) + i);
+    };
+
+    GLushort botCenterIndex = 0;
+    GLushort topCenterIndex = static_cast<GLushort>(vertices.size()) - 1;
+
+    for (unsigned int i = 0; i < nSegments; ++i) {
+        bool isLast = (i == nSegments - 1);
+        GLushort v0, v1, v2, v3;
+
+        // Bot triangle
+        v0 = ringVerticeIndex(0, i);
+        v1 = ringVerticeIndex(0, isLast ? 0 : i + 1);
+        indexArray.push_back(botCenterIndex);
+        indexArray.push_back(v1);
+        indexArray.push_back(v0);
+
+        // Side of cone
+
+        // Bottom ring
+        v0 = ringVerticeIndex(1, i);
+        v1 = ringVerticeIndex(1, isLast ? 0 : i + 1);
+        // Top ring
+        v2 = ringVerticeIndex(2, i);
+        v3 = ringVerticeIndex(2, isLast ? 0 : i + 1);
+        indexArray.push_back(v0);
+        indexArray.push_back(v2);
+        indexArray.push_back(v1);
+
+        indexArray.push_back(v1);
+        indexArray.push_back(v2);
+        indexArray.push_back(v3);
     }
 
     return { vertices, indexArray };
