@@ -746,6 +746,12 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         .rotation = _camera->rotationQuaternion()
     };
 
+    if (glm::length(pose.position) == 0.0) {
+        // If the position is 0.0, a lot of the calculations downstairs will fail as we
+        // calculate relative offsets from the center of the anchor node
+        return;
+    }
+
     const bool hasPreviousPositions =
         _previousAnchorNodePosition.has_value() &&
         _previousAimNodePosition.has_value();
@@ -871,6 +877,11 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
     if (_useAdaptiveStereoscopicDepth) {
         const glm::dvec3 anchorPos = _anchorNode->worldPosition();
         const glm::dvec3 cameraPos = _camera->positionVec3();
+
+        if (glm::length(cameraPos) == 0.0) {
+            // Calculating the surface position fails for (0,0,0) vectors
+            return;
+        }
 
         SurfacePositionHandle posHandle =
             calculateSurfacePositionHandle(*_anchorNode, cameraPos);
@@ -1123,7 +1134,8 @@ void OrbitalNavigator::setRetargetInterpolationTime(float durationInSeconds) {
 
 bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPosition) const
 {
-    if (!_anchorNode || !_followAnchorNodeRotation) {
+    if (!_anchorNode || !_followAnchorNodeRotation || glm::length(cameraPosition) == 0.0)
+    {
         return false;
     }
 

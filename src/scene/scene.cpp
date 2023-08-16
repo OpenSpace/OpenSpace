@@ -888,7 +888,7 @@ std::string makeIdentifier(std::string s) {
     std::replace_if(
         s.begin(),
         s.end(),
-        [](char c) { return std::ispunct(c) != 0; },
+        [](unsigned char c) { return std::ispunct(c) != 0; },
         '-'
     );
     std::replace(s.begin(), s.end(), ' ', '_');

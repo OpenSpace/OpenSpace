@@ -739,9 +739,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             break;
         }
-        default: {
+        default:
             throw ghoul::MissingCaseException();
-        }
     }
 }
 
