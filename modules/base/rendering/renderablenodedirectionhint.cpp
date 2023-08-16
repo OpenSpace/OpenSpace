@@ -174,25 +174,25 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableNodeDirectionHint)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
-        std::optional<std::string> startNode;
+        std::optional<std::string> startNode [[codegen::notempty]];
 
         // [[codegen::verbatim(EndNodeInfo.description)]]
-        std::optional<std::string> endNode;
+        std::optional<std::string> endNode [[codegen::notempty]];
 
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
-        std::optional<int> segments;
+        std::optional<int> segments [[codegen::greaterequal(3)]];;
 
         // [[codegen::verbatim(InvertInfo.description)]]
         std::optional<bool> invert;
 
         // [[codegen::verbatim(ArrowHeadSizeInfo.description)]]
-        std::optional<float> arrowHeadSize;
+        std::optional<float> arrowHeadSize [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(ArrowHeadWidthInfo.description)]]
-        std::optional<float> arrowHeadWidthFactor;
+        std::optional<float> arrowHeadWidthFactor [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(OffsetDistanceInfo.description)]]
         std::optional<float> offset;
@@ -201,25 +201,25 @@ namespace {
         std::optional<bool> useRelativeOffset;
 
         // [[codegen::verbatim(LengthInfo.description)]]
-        std::optional<float> length;
+        std::optional<float> length [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(RelativeLengthInfo.description)]]
         std::optional<bool> useRelativeLength;
 
         // [[codegen::verbatim(WidthInfo.description)]]
-        std::optional<float> width;
+        std::optional<float> width [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(ShadingEnabledInfo.description)]]
         std::optional<float> performShading;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<float> ambientIntensity;
+        std::optional<float> ambientIntensity [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
-        std::optional<float> diffuseIntensity;
+        std::optional<float> diffuseIntensity [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(SpecularIntensityInfo.description)]]
-        std::optional<float> specularIntensity;
+        std::optional<float> specularIntensity [[codegen::greaterequal(0.f)]];
     };
 #include "renderablenodedirectionhint_codegen.cpp"
 } // namespace
