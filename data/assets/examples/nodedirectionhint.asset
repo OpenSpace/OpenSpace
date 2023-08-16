@@ -6,6 +6,7 @@ local EarthRadius = 6371000.0
 
 local NodeDirectionHintExample = {
   Identifier = "RenderableNodeDirectionHintExample",
+  Parent = earth.Earth.Identifier,
   Renderable = {
     Type = "RenderableNodeDirectionHint",
     StartNode = earth.Earth.Identifier,
@@ -25,6 +26,7 @@ local NodeDirectionHintExample = {
 -- Relative values: Multiplied with bounding sphere
 local NodeDirectionHintExample_RelativeUnits = {
   Identifier = "RenderableNodeDirectionHintExample_Relative",
+  Parent = earth.Earth.Identifier,
   Renderable = {
     Type = "RenderableNodeDirectionHint",
     StartNode = earth.Earth.Identifier,
