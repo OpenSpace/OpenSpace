@@ -18,7 +18,7 @@ local Nix = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "pluto_moon_minor" },
+  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix"
   }
