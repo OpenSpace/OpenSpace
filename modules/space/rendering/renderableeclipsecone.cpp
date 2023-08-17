@@ -49,7 +49,8 @@ namespace {
         "Points",
         "This value determines the number of control points that is used to construct "
         "the shadow geometry. The higher this number, the more detailed the shadow is, "
-        "but it will have a negative impact on the performance",
+        "but it will have a negative impact on the performance. Also note that rendering "
+        "errors will occur if this value is even",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -178,7 +179,7 @@ documentation::Documentation RenderableEclipseCone::Documentation() {
 
 RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
+    , _numberOfPoints(NumberPointsInfo, 191, 1, 300)
     , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 2.f)
     , _showUmbralShadow(ShowUmbralShadowInfo, true)
     , _umbralShadowColor(
@@ -335,7 +336,7 @@ std::vector<VBOLayout> calculateShadowPoints(const std::vector<glm::dvec3>& srcT
         const glm::dvec3 dir = glm::normalize(dst - src);
 
         // The start point is the terminator point on the Moon
-        glm::vec3 p1 = dst;
+        glm::vec3 p1 = dst -dir * lengthScale*1000.0;
         vertices.push_back({ p1.x, p1.y, p1.z });
 
         // The end point is calculated by forward propagating the incoming direction
@@ -346,6 +347,8 @@ std::vector<VBOLayout> calculateShadowPoints(const std::vector<glm::dvec3>& srcT
 }
 
 void RenderableEclipseCone::createCone(double et) {
+    ZoneScoped;
+
     // Big picture for the calculation for this example (lightSource = Sun,
     // shadower = Moon, shadowee = Earth). We get the limb (= penumbral terminator) of the
     // Sun as viewed from the Moon, then the limb of the Moon as viewed from the Sun.
@@ -375,6 +378,17 @@ void RenderableEclipseCone::createCone(double et) {
         p *= 1000.0;
     }
 
+    // 1a. For some reason in some situations the angular position of the first vertex is
+    // rotating, which causes a mismatch in the direction calculations. In order to
+    // prevent that, we rotate the positions so that the point with the highest z
+    // component is always the first point
+    auto it = std::max_element(
+        resSrc.terminatorPoints.begin(),
+        resSrc.terminatorPoints.end(),
+        [](const glm::dvec3& p1, const glm::dvec3& p2) { return p1.z > p2.z; }
+    );
+    std::rotate(resSrc.terminatorPoints.begin(), it, resSrc.terminatorPoints.end());
+
 
     // 2. Get the penumbral terminator of the shadower from the lightsource
     SpiceManager::TerminatorEllipseResult resDst = SpiceManager::ref().terminatorEllipse(
@@ -394,11 +408,20 @@ void RenderableEclipseCone::createCone(double et) {
     for (glm::dvec3& p : resDst.terminatorPoints) {
         p *= 1000.0;
     }
-    // Spice calculates the terminator points in a fixed clockwise/counterclockwise
-    // direction from the point of the view of the observer. Since we are switching target
-    // and observer, this means that one of the sets of points is clockwise, while the
-    // other is counterclockwise. In order for the right points to match up, we need to
-    // reverse the order of one of them. It doesn't matter which one, so we pick this one
+
+    // 2a. Doing the same as in 1a
+    auto jt = std::max_element(
+        resDst.terminatorPoints.begin(),
+        resDst.terminatorPoints.end(),
+        [](const glm::dvec3& p1, const glm::dvec3& p2) { return p1.z > p2.z; }
+    );
+    std::rotate(resDst.terminatorPoints.begin(), jt, resDst.terminatorPoints.end());
+
+    // 2b. Spice calculates the terminator points in a fixed counterclockwise direction
+    // from the point of the view of the observer. Since we are switching target and
+    // observer, this means that one of the sets of points is clockwise, while the other
+    // is counterclockwise. In order for the right points to match up, we need to reverse
+    // the order of one of them. It doesn't matter which one, so we pick this one
     std::reverse(resDst.terminatorPoints.begin(), resDst.terminatorPoints.end());
 
     ghoul_assert(
@@ -489,7 +512,7 @@ void RenderableEclipseCone::createCone(double et) {
         _nVertices = static_cast<int>(penumbralVertices.size());
     }
     if (_showUmbralShadow) {
-        _nVertices = static_cast<int>(penumbralVertices.size());
+        _nVertices = static_cast<int>(umbralVertices.size());
     }
 
     glBindVertexArray(_vao);
