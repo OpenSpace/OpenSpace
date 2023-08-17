@@ -64,7 +64,7 @@ local huygensState = {
     openspace.setPropertyValue('{moon_major_saturn}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValueSingle('Scene.Titan.Renderable.Opacity', 1.0, 3.0)
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoomOut.Enabled", false);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.EnabledMinimumAllowedDistanceLimit", false);
     openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
