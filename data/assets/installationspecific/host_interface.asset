@@ -6,7 +6,7 @@
 local pathToWebpage = "${BASE}/../Stort-webpage"
 
 asset.onInitialize(function()
-  local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
+  local directories = openspace.propertyValue("Modules.WebGui.Directories")
 
   -- The served directories are given as a pair:
   -- First the route

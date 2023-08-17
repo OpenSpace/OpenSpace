@@ -20,7 +20,7 @@ local endCassini = "2017 SEP 15 10:34:05.000"
 ------------------------------------------------------------------------------------------
 local Cassini_SSB = {
   Identifier = "Cassini_SSB",
-  Parent = transforms.CassiniSSB.Identifier, 
+  Parent = transforms.CassiniSSB.Identifier,
   Transform = {
     Rotation = {
       Type = "FixedRotation",
@@ -83,7 +83,7 @@ local Cassini_ROT = {
 ------------------------------------------------------------------------------------------
 local Cassini_SAT = {
   Identifier = "Cassini_SAT",
-  Parent = transforms.CassiniSAT.Identifier, 
+  Parent = transforms.CassiniSAT.Identifier,
   Transform = {
     Rotation = {
       Type = "FixedRotation",

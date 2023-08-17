@@ -2,7 +2,7 @@ local util = asset.require('./utility_functions')
 local flyHome = asset.require('./fly_home_alternatives')
 local defaultTime = asset.require('./default_time').time
 
----------------------------------------------------------------- 
+----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
 local startState = {
@@ -28,7 +28,7 @@ local homeState = {
     ]]
 }
 
--- An empty state that wil just be used to show a page in the GUI where the 
+-- An empty state that wil just be used to show a page in the GUI where the
 -- user can fly to the planets in the solar system
 local solarSystemState = {
   Identifier = "SolarSystem",
@@ -66,18 +66,18 @@ util.appendTable(states, substateVoyagerPioneer.states)
 util.appendTable(states, substateCBR.states)
 util.appendTable(states, substateExoplanets.states)
 
----------------------------------------------------------------- 
+----------------------------------------------------------------
 -- TRANSITIONS
 ----------------------------------------------------------------
 
 -- Ugly workaround: we set the time here since setting the correct time at start-up and also
--- pausing causes weirdnesss and leads to some things (such as the ISS rotation) to not update 
+-- pausing causes weirdnesss and leads to some things (such as the ISS rotation) to not update
 -- correctly. Clear scheduler after this has happened, to avoid it happening again by accident.
 local startupScript = string.gsub([[
     openspace.time.setPause(true);
     openspace.time.setTime(']] .. defaultTime .. [[');
     ]] .. flyHome.cameraPath .. [[;
-    openspace.scriptScheduler.clear(); 
+    openspace.scriptScheduler.clear();
   ]],
   "\n", ""
 )
@@ -85,7 +85,7 @@ local startupScript = string.gsub([[
 local transitions = {
   {
     From = "Start",
-    To = "Home", 
+    To = "Home",
     Action = [[openspace.scriptScheduler.loadScheduledScript(']] .. defaultTime .. [[', "]] .. startupScript .. [[");]]
   },
   -- SolarSystem <-> Home
@@ -93,9 +93,9 @@ local transitions = {
     From = "SolarSystem",
     To = "Home",
     Action = [[
-      local anchor = openspace.getPropertyValue("NavigationHandler.OrbitalNavigator.Anchor")
+      local anchor = openspace.propertyValue("NavigationHandler.OrbitalNavigator.Anchor")
       if (anchor ~= 'Sun-Handle' ) then ]]
-        .. flyHome.cameraPath .. 
+        .. flyHome.cameraPath ..
       [[end
     ]]
   },

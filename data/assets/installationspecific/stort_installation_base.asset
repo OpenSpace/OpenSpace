@@ -51,12 +51,9 @@ asset.require("scene/solarsystem/planets/earth/satellites/misc/iss")
 asset.require("scene/solarsystem/planets/jupiter/major_moons")
 asset.require("scene/solarsystem/planets/jupiter/minor_moons")
 asset.require("scene/solarsystem/planets/neptune/inner_moons")
-asset.require("scene/solarsystem/planets/neptune/irregular_prograde_moons")
-asset.require("scene/solarsystem/planets/neptune/irregular_retrograde_moons")
+asset.require("scene/solarsystem/planets/neptune/irregular_moons")
 asset.require("scene/solarsystem/planets/neptune/major_moons")
 asset.require("scene/solarsystem/planets/neptune/minor_moons")
-asset.require("scene/solarsystem/planets/neptune/neptune")
-asset.require("scene/solarsystem/planets/neptune/triton")
 asset.require("scene/solarsystem/planets/saturn/major_moons")
 asset.require("scene/solarsystem/planets/saturn/minor_moons")
 asset.require("scene/solarsystem/planets/uranus/major_moons")
@@ -66,9 +63,9 @@ asset.require("scene/solarsystem/planets/uranus/minor_moons")
 
 
 asset.onInitialize(function ()
-  -- Set a bunch of properties! To override the default values in the assets based on the configuraiton we want. 
+  -- Set a bunch of properties! To override the default values in the assets based on the configuraiton we want.
 
-  -- OBS! Need to match the desired startup for the state machine, so maybe some should really live in the 
+  -- OBS! Need to match the desired startup for the state machine, so maybe some should really live in the
   -- start state of the state machine (@TODO)
 
   -- Appearances

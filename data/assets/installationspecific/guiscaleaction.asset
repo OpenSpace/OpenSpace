@@ -2,7 +2,7 @@ local gui_scaleup_action = {
   Identifier = "gui.scaleup",
   Name = "Increase GUI scale",
   Command = [[
-      local guiScale = openspace.getPropertyValue('Modules.CefWebGui.GuiScale');
+      local guiScale = openspace.propertyValue('Modules.CefWebGui.GuiScale');
       openspace.setPropertyValueSingle('Modules.CefWebGui.GuiScale', guiScale + 0.05)
   ]],
   Documentation = "Increase GUI scale by 5%",
@@ -15,7 +15,7 @@ local gui_scaledown_action = {
   Identifier = "gui.scaledown",
   Name = "Decrease GUI scale",
   Command = [[
-      local guiScale = openspace.getPropertyValue('Modules.CefWebGui.GuiScale');
+      local guiScale = openspace.propertyValue('Modules.CefWebGui.GuiScale');
       openspace.setPropertyValueSingle('Modules.CefWebGui.GuiScale', guiScale - 0.05)
   ]],
   Documentation = "Decrease GUI scale by 5%",
