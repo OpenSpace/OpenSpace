@@ -39,7 +39,6 @@
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <filesystem>
 #include <fstream>
-
 #include "scriptengine_lua.inl"
 
 namespace {
@@ -82,85 +81,35 @@ namespace {
         return result;
     }
 
-    void toJson(const openspace::scripting::LuaLibrary& library, std::stringstream& json)
+    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f,
+                          bool includeSourceLocation)
     {
-        constexpr std::string_view replStr = R"("{}": "{}", )";
-        constexpr std::string_view replStr2 = R"("{}": "{}")";
-
         using namespace openspace;
         using namespace openspace::scripting;
+        nlohmann::json function;
+        function["name"] = f.name;
+        nlohmann::json arguments = nlohmann::json::array();
 
-        json << "{";
-        json << fmt::format(replStr, "library", library.name);
-        json << "\"functions\": [";
-
-        for (const LuaLibrary::Function& f : library.functions) {
-            json << "{";
-            json << fmt::format(replStr, "name", f.name);
-            json << "\"arguments\": [";
-            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
-                json << "{";
-                json << fmt::format(replStr, "name", escapedJson(arg.name));
-                json << fmt::format(replStr, "type", escapedJson(arg.type));
-                json << fmt::format(
-                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
-                );
-                json << "}";
-
-                if (&arg != &f.arguments.back()) {
-                    json << ",";
-                }
-            }
-            json << "],";
-            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
-            json << fmt::format(replStr, "help", escapedJson(f.helpText));
-            json << fmt::format(
-                "\"sourceLocation\": {{ \"file\": \"{}\", \"line\": {} }}",
-                escapedJson(f.sourceLocation.file), f.sourceLocation.line
-            );
-            json << "}";
-            if (&f != &library.functions.back() || !library.documentations.empty()) {
-                json << ",";
-            }
+        for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+            nlohmann::json argument;
+            argument["name"] = arg.name;
+            argument["type"] = arg.type;
+            argument["defaultValue"] = arg.defaultValue.value_or("");
+            arguments.push_back(argument);
         }
 
+        function["arguments"] = arguments;
+        function["returnType"] = f.returnType;
+        function["help"] = f.helpText;
 
-        for (const LuaLibrary::Function& f : library.documentations) {
-            json << "{";
-            json << fmt::format(replStr, "name", f.name);
-            json << "\"arguments\": [";
-            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
-                json << "{";
-                json << fmt::format(replStr, "name", escapedJson(arg.name));
-                json << fmt::format(replStr, "type", escapedJson(arg.type));
-                json << fmt::format(
-                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
-                );
-                json << "}";
-
-                if (&arg != &f.arguments.back()) {
-                    json << ",";
-                }
-            }
-            json << "],";
-            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
-            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
-            json << "}";
-            if (&f != &library.documentations.back()) {
-                json << ",";
-            }
+        if (includeSourceLocation) {
+            nlohmann::json sourceLocation;
+            sourceLocation["file"] = f.sourceLocation.file;
+            sourceLocation["line"] = f.sourceLocation.line;
+            function["sourceLocation"] = sourceLocation;
         }
 
-        json << "],";
-
-        json << "\"subLibraries\": [";
-        for (const LuaLibrary& sl : library.subLibraries) {
-            toJson(sl, json);
-            if (&sl != &library.subLibraries.back()) {
-                json << ",";
-            }
-        }
-        json << "]}";
+        return function;
     }
 
 #include "scriptengine_codegen.cpp"
@@ -168,17 +117,7 @@ namespace {
 
 namespace openspace::scripting {
 
-ScriptEngine::ScriptEngine()
-    : DocumentationGenerator(
-        "Script Documentation",
-        "scripting",
-        {
-            { "scriptingTemplate","${WEB}/documentation/scripting.hbs" },
-        }
-    )
-{
-    //tracy::LuaRegister(_state);
-}
+ScriptEngine::ScriptEngine() {}
 
 void ScriptEngine::initialize() {
     ZoneScoped;
@@ -411,11 +350,11 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         lua_pop(state, 1);
     }
 
+    library.documentations.clear();
     for (const std::filesystem::path& script : library.scripts) {
         // First we run the script to set its values in the current state
         ghoul::lua::runScriptFile(state, script.string());
 
-        library.documentations.clear();
 
         // Then, we extract the documentation information from the file
         ghoul::lua::push(state, "documentation");
@@ -509,25 +448,38 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     return result;
 }
 
-std::string ScriptEngine::generateJson() const {
+nlohmann::json ScriptEngine::generateJson() const {
     ZoneScoped;
 
-    // Create JSON
-    std::stringstream json;
-    json << "[";
+    nlohmann::json json;
 
-    bool first = true;
     for (const LuaLibrary& l : _registeredLibraries) {
-        if (!first) {
-            json << ",";
+        using namespace openspace;
+        using namespace openspace::scripting;
+
+        nlohmann::json library;
+        std::string libraryName = l.name;
+        // Keep the library key for backwards compatability
+        library["library"] = libraryName;
+        library["name"] = libraryName;
+        std::string os = "openspace";
+        library["fullName"] = libraryName.empty() ? os : os  + "." + libraryName;
+
+        for (const LuaLibrary::Function& f : l.functions) {
+            bool hasSourceLocation = true;
+            library["functions"].push_back(toJson(f, hasSourceLocation));
         }
-        first = false;
 
-        toJson(l, json);
+        for (const LuaLibrary::Function& f : l.documentations) {
+            bool hasSourceLocation = false;
+            library["functions"].push_back(toJson(f, hasSourceLocation));
+        }
+        sortJson(library["functions"], "name");
+        json.push_back(library);
+
+        sortJson(json, "library");
     }
-    json << "]";
-
-    return json.str();
+    return json;
 }
 
 void ScriptEngine::writeLog(const std::string& script) {
@@ -686,7 +638,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Trace'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             {
                 "printDebug",
@@ -695,7 +648,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Debug'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             {
                 "printInfo",
@@ -704,7 +658,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Info'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             {
                 "printWarning",
@@ -713,7 +668,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Warning'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             {
                 "printError",
@@ -722,7 +678,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Error'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             {
                 "printFatal",
@@ -731,7 +688,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Fatal'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             codegen::lua::AbsolutePath,
             codegen::lua::SetPathToken,

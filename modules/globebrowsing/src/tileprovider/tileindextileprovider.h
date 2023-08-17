@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/src/tileprovider/texttileprovider.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+
 namespace openspace::globebrowsing {
 
 class TileIndexTileProvider : public TextTileProvider {
@@ -40,6 +42,11 @@ public:
     int minLevel() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
+
+    static documentation::Documentation Documentation();
+
+private:
+    properties::BoolProperty _uniqueBackgroundColors;
 };
 
 } // namespace openspace::globebrowsing

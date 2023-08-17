@@ -1,6 +1,6 @@
-local toggle_trail = {
-  Identifier = "os.toggle_trail",
-  Name = "Toggle Trail",
+local ToggleTrail = {
+  Identifier = "os.ToggleTrail",
+  Name = "Toggle trail",
   Command = [[
     local node
     if is_declared("args") then
@@ -29,7 +29,7 @@ local toggle_trail = {
         return
       end
     else
-      visibility = not openspace.getPropertyValue("Scene." .. trail .. ".Renderable.Enabled")
+      visibility = not openspace.propertyValue("Scene." .. trail .. ".Renderable.Enabled")
     end
 
     if visibility then
@@ -44,11 +44,10 @@ local toggle_trail = {
   GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("toggle_trail", toggle_trail.Identifier)
 
-local hide_trail = {
-  Identifier = "os.hide_trail",
-  Name = "Hide Trail",
+local HideTrail = {
+  Identifier = "os.HideTrail",
+  Name = "Hide trail",
   Command = [[
     local node
     if is_declared("args") then
@@ -69,11 +68,10 @@ local hide_trail = {
   GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("hide_trail", hide_trail.Identifier)
 
-local show_trail = {
-  Identifier = "os.show_trail",
-  Name = "Show Trail",
+local ShowTrail = {
+  Identifier = "os.ShowTrail",
+  Name = "Show trail",
   Command = [[
     local node
     if is_declared("args") then
@@ -94,19 +92,24 @@ local show_trail = {
   GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("show_trail", show_trail.Identifier)
+
 
 asset.onInitialize(function()
-  openspace.action.registerAction(toggle_trail)
-  openspace.action.registerAction(show_trail)
-  openspace.action.registerAction(hide_trail)
+  openspace.action.registerAction(ToggleTrail)
+  openspace.action.registerAction(HideTrail)
+  openspace.action.registerAction(ShowTrail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggle_trail)
-  openspace.action.removeAction(show_trail)
-  openspace.action.removeAction(hide_trail)
+  openspace.action.removeAction(ShowTrail)
+  openspace.action.removeAction(HideTrail)
+  openspace.action.removeAction(ToggleTrail)
 end)
+
+asset.export("ToggleTrail", ToggleTrail.Identifier)
+asset.export("HideTrail", HideTrail.Identifier)
+asset.export("ShowTrail", ShowTrail.Identifier)
+
 
 
 asset.meta = {

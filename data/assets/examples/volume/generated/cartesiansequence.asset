@@ -1,14 +1,14 @@
--- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_VOLUME enabled
-
 -- Before using this example,
 -- the volume data itself needs to be generated,
 -- using the task 'data/tasks/volume/generate_cartesian_sequence.task'
 
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local sunRadius = 695508000
 
-local volume = {
+
+local SunRadius = 695508000
+
+local Volume = {
   Identifier = "GeneratedVolume",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
@@ -19,8 +19,8 @@ local volume = {
     MinValue = 0,
     MaxValue = 1,
     GridType = "Cartesian",
-    SecondsBefore = 50*365*24*60*60, -- 50 years before
-    SecondsAfter = 50*365*24*60*60 -- 50 years after
+    SecondsBefore = 50 * 365 * 24 * 60 * 60, -- 50 years before
+    SecondsAfter = 50 * 365 * 24 * 60 * 60 -- 50 years after
   },
   GUI = {
     Path = "/Examples"
@@ -28,17 +28,18 @@ local volume = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 1000 * sunRadius
+      Scale = 1000 * SunRadius
     }
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(volume)
+  openspace.addSceneGraphNode(Volume)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(volume)
+  openspace.removeSceneGraphNode(Volume)
 end)
 
-asset.export(volume)
+asset.export(Volume)

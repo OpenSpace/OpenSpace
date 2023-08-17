@@ -317,7 +317,7 @@ std::string prunedIdentifier(std::string identifier) {
 /**
  * Returns the AAS WorldWide Telescope image collection url.
  */
-[[codegen::luawrap]] ghoul::Dictionary getWwtImageCollectionUrl() {
+[[codegen::luawrap]] ghoul::Dictionary wwtImageCollectionUrl() {
     using namespace openspace;
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     ghoul::Dictionary url;
@@ -326,12 +326,26 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
+ * Deprecated in favor of 'wwtImageCollectionUrl'
+ */
+[[codegen::luawrap("getWwtImageCollectionUrl")]]
+ghoul::Dictionary wwtImageCollectionUrlDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getWwtImageCollectionUrl' function is deprecated and should be replaced with "
+        "'wwtImageCollectionUrl'"
+    );
+    return wwtImageCollectionUrl();
+}
+
+/**
  * Returns a list of all the loaded AAS WorldWide Telescope images that have been loaded.
  * Each image has a name, thumbnail url, equatorial spherical coordinates RA and Dec,
  * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
  * credits url and the identifier of the image which is a unique number.
  */
-[[codegen::luawrap]] ghoul::Dictionary getListOfImages() {
+[[codegen::luawrap]] ghoul::Dictionary listOfImages() {
     using namespace openspace;
 
     // Send image list to GUI
@@ -368,10 +382,23 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
+ * Deprecated in favor of 'listOfExoplanets'
+ */
+[[codegen::luawrap("getListOfImages")]] ghoul::Dictionary listOfImagesDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getListOfImages' function is deprecated and should be replaced with "
+        "'listOfImages'"
+    );
+    return listOfImages();
+}
+
+/**
  * Returns a table of data regarding the current view and the sky browsers and targets.
  * returns a table of data regarding the current targets.
  */
-[[codegen::luawrap]] ghoul::Dictionary getTargetData() {
+[[codegen::luawrap]] ghoul::Dictionary targetData() {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -438,6 +465,17 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
+ * Deprecated in favor of 'targetData'
+ */
+[[codegen::luawrap("getTargetData")]] ghoul::Dictionary targetDataDeprecated() {
+    LWARNINGC(
+        "Deprecation",
+        "'getTargetData' function is deprecated and should be replaced with 'targetData'"
+    );
+    return targetData();
+}
+
+/**
  * Takes an identifier to a sky browser or sky target. Rotates the camera so that the
  * target is placed in the center of the view.
  */
@@ -454,7 +492,7 @@ std::string prunedIdentifier(std::string identifier) {
  * Takes an identifier to a sky browser or sky target, an index to an image and a value
  * for the opacity.
  */
-[[codegen::luawrap]] void setOpacityOfImageLayer(std::string identifier, 
+[[codegen::luawrap]] void setOpacityOfImageLayer(std::string identifier,
                                                  std::string imageUrl, float opacity)
 {
     using namespace openspace;
@@ -525,7 +563,6 @@ std::string prunedIdentifier(std::string identifier) {
         "Name = '" + nameBrowser + "',"
         "Url = '" + url + "',"
         "FaceCamera = false,"
-        "Gamma = 2.2,"
         "CartesianPosition = " + ghoul::to_string(positionBrowser) +
      "}";
 
@@ -824,10 +861,11 @@ std::string prunedIdentifier(std::string identifier) {
         const std::vector<std::string>& images = pair->selectedImages();
         std::for_each(
             images.rbegin(), images.rend(),
-            [&](std::string imageUrl) {
-                const ImageData& image = module->wwtDataHandler().image(imageUrl).value();
+            [module, pair](std::string imageUrl) {
+                std::optional<ImageData> img = module->wwtDataHandler().image(imageUrl);
+                ghoul_assert(img.has_value(), "No image found");
                 // Index of image is used as layer ID as it's unique in the image data set
-                pair->browser()->addImageLayerToWwt(image.imageUrl);
+                pair->browser()->addImageLayerToWwt(img->imageUrl);
             }
         );
     }

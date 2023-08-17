@@ -1,7 +1,20 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "events/toggle_sun",
+    "scene/milkyway/objects/orionnebula/orionnebula",
+    "scene/solarsystem/dwarf_planets/ceres/ceres",
+    "scene/solarsystem/dwarf_planets/ceres/default_layers",
+    "scene/solarsystem/dwarf_planets/ceres/trail",
+    "scene/solarsystem/dwarf_planets/eris/eris",
+    "scene/solarsystem/dwarf_planets/gonggong/gonggong",
+    "scene/solarsystem/dwarf_planets/haumea/haumea",
+    "scene/solarsystem/dwarf_planets/makemake/makemake",
+    "scene/solarsystem/dwarf_planets/orcus/orcus",
+    "scene/solarsystem/dwarf_planets/quaoar/quaoar",
+    "scene/solarsystem/dwarf_planets/sedna/sedna",
+    "scene/solarsystem/dwarf_planets/vesta/vesta",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/jupiter/major_moons",
@@ -11,8 +24,7 @@
     "scene/solarsystem/planets/saturn/major_moons",
     "scene/solarsystem/planets/saturn/minor_moons",
     "scene/solarsystem/planets/uranus/major_moons",
-    "scene/solarsystem/planets/uranus/minor_moons",
-    "scene/milkyway/objects/orionnebula/orionnebula"
+    "scene/solarsystem/planets/uranus/minor_moons"
   ],
   "camera": {
     "altitude": 17000000.0,
@@ -45,20 +57,16 @@
   ],
   "keybindings": [
     {
-      "action": "os.solarsystem.earth.togglesatellitetrails",
+      "action": "os.solarsystem.ToggleSatelliteTrails",
       "key": "S"
     },
     {
-      "action": "os.solarsystem.earth.iss.focus",
+      "action": "os.solarsystem.FocusIss",
       "key": "I"
     },
     {
-      "action": "os.solarsystem.earth.focus",
+      "action": "os.solarsystem.FocusEarth",
       "key": "HOME"
-    },
-    {
-      "action": "os_default.toggle_minormoon_trails",
-      "key": "SHIFT+H"
     }
   ],
   "mark_nodes": [
@@ -91,11 +99,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "relative",
     "value": "-1d"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 2
   }
 }

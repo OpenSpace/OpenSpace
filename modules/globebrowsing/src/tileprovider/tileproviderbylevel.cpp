@@ -56,7 +56,14 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         ghoul::Dictionary& tileProviderDict = provider.tileProvider;
         tileProviderDict.setValue("LayerGroupID", static_cast<int>(group));
 
-        layers::Layer::ID typeID = layers::Layer::ID::DefaultTileLayer;
+        // Pass down the caching information from the enclosing dictionary
+        if (dictionary.hasValue<std::string>("GlobeName")) {
+            tileProviderDict.setValue(
+                "GlobeName",
+                dictionary.value<std::string>("GlobeName")
+            );
+        }
+        layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
         if (tileProviderDict.hasValue<std::string>("Type")) {
             std::string type = tileProviderDict.value<std::string>("Type");
             typeID = ghoul::from_string<layers::Layer::ID>(type);

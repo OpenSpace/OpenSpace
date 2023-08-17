@@ -63,21 +63,23 @@
 namespace {
     constexpr std::string_view _loggerCat = "SessionRecording";
 
+    constexpr bool UsingTimeKeyframes = false;
+
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
         "Render Playback Information",
         "If enabled, information about a currently played back session recording is "
-        "rendering to screen"
+        "rendering to screen",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IgnoreRecordedScaleInfo = {
         "IgnoreRecordedScale",
         "Ignore Recorded Scale",
         "If this value is enabled, the scale value from a recording is ignored and the "
-        "computed values are used instead"
+        "computed values are used instead",
+        openspace::properties::Property::Visibility::Hidden
     };
-
-    constexpr bool UsingTimeKeyframes = false;
 } // namespace
 
 namespace openspace::interaction {
@@ -339,7 +341,7 @@ void SessionRecording::stopRecording() {
 bool SessionRecording::startPlayback(std::string& filename,
                                      KeyframeTimeRef timeMode,
                                      bool forceSimTimeAtStart,
-                                     bool loop)
+                                     bool loop, bool shouldWaitForFinishedTiles)
 {
     std::string absFilename;
     if (std::filesystem::is_regular_file(filename)) {
@@ -370,6 +372,7 @@ bool SessionRecording::startPlayback(std::string& filename,
     _playbackLineNum = 1;
     _playbackFilename = absFilename;
     _playbackLoopMode = loop;
+    _shouldWaitForFinishLoadingWhenPlayback = shouldWaitForFinishedTiles;
 
     // Open in ASCII first
     _playbackFile.open(_playbackFilename, std::ifstream::in);
@@ -1044,6 +1047,10 @@ bool SessionRecording::isPlayingBack() const {
 
 bool SessionRecording::isSavingFramesDuringPlayback() const {
     return (isPlayingBack() && _saveRenderingDuringPlayback);
+}
+
+bool SessionRecording::shouldWaitForTileLoading() const {
+    return _shouldWaitForFinishLoadingWhenPlayback;
 }
 
 SessionRecording::SessionState SessionRecording::state() const {
@@ -1855,7 +1862,7 @@ void SessionRecording::moveAheadInTime() {
         _saveRendering_isFirstFrame = false;
         return;
     }
-    if (isSavingFramesDuringPlayback()) {
+    if (_shouldWaitForFinishLoadingWhenPlayback && isSavingFramesDuringPlayback()) {
         // Check if renderable in focus is still resolving tile loading
         // do not adjust time while we are doing this, or take screenshot
         const SceneGraphNode* focusNode =

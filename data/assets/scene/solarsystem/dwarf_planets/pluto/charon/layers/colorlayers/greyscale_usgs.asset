@@ -1,21 +1,25 @@
-local globeIdentifier = asset.require("../../charon").Charon.Identifier
+local charon = asset.require("../../charon")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Greyscale_USGS",
   Name = "Black & White [USGS]",
   Enabled = asset.enabled,
-  FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/charon_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_CHARON_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90.0003,359.972,90",
+  FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/charon_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_CHARON_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90.0003,359.972,90"
 }
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(charon.Charon.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(charon.Charon.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
 
 
 asset.meta = {

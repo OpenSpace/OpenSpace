@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,21 +25,52 @@
 #include "fragment.glsl"
 
 in float vs_depth;
+flat in vec3 vs_normal;
 in vec4 vs_positionViewSpace;
 
 uniform vec3 color;
 uniform float opacity;
 
+uniform float ambientIntensity = 0.2;
+uniform float diffuseIntensity = 0.8;
+uniform bool performShading = true;
+
+uniform uint nLightSources;
+uniform vec3 lightDirectionsViewSpace[8];
+uniform float lightIntensities[8];
+
+const vec3 LightColor = vec3(1.0);
+
 Fragment getFragment() {
-    Fragment frag;
+  Fragment frag;
 
-    if (opacity == 0.0) {
-        discard;
+  if (opacity == 0.0) {
+    discard;
+  }
+  frag.color = vec4(color, opacity);
+
+  // Simple diffuse phong shading based on light sources
+  if (performShading && nLightSources > 0) {
+    // @TODO: Fix faulty triangle normals. This should not have to be inverted
+    vec3 n = -normalize(vs_normal);
+
+    // Ambient color
+    vec3 shadedColor = ambientIntensity  * color;
+
+    for (int i = 0; i < nLightSources; ++i) {
+      vec3 l = lightDirectionsViewSpace[i];
+
+      // Diffuse
+      vec3 diffuseColor = diffuseIntensity * max(dot(n,l), 0.0) * color;
+
+      // Light contribution
+      shadedColor += lightIntensities[i] * (LightColor * diffuseColor);
     }
-    frag.color = vec4(color, opacity);
+    frag.color.xyz = shadedColor;
+  }
 
-    frag.depth = vs_depth;
-    frag.gPosition = vs_positionViewSpace;
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    return frag;
+  frag.depth = vs_depth;
+  frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  return frag;
 }

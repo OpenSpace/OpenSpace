@@ -1,5 +1,7 @@
 local transforms = asset.require("./transforms")
 
+
+
 local textures = asset.syncedResource({
   Name = "Bennu Textures",
   Type = "HttpSynchronization",
@@ -7,26 +9,16 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local BENNU_BODY = "2101955"
+
+local BennuBodyId = "2101955"
 
 local ImagePlane = {
   Identifier = "ImagePlaneBennu",
   Parent = transforms.BennuBarycenter.Identifier,
-  Transform = {
-    -- Translation = {
-    --     Type = "StaticTranslation",
-    --     Position = { -0.2476, 0.2710, 0.3364 }
-    -- },
-    -- Rotation = {
-    --     Type = "SpiceRotation",
-    --     SourceFrame = "ORX_OCAMS_POLYCAM",
-    --     DestinationFrame = "ORX_SPACECRAFT"
-    -- }
-  },
   Renderable = {
     Type = "RenderablePlaneProjection",
     Frame = "IAU_BENNU",
-    DefaultTarget = BENNU_BODY,
+    DefaultTarget = BennuBodyId,
     Spacecraft = "OSIRIS-REX",
     Instrument = "ORX_OCAMS_POLYCAM",
     Moving = false,

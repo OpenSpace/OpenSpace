@@ -1,23 +1,27 @@
-local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
-local kernels = asset.require('./kernels')
+local jupiterTransforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels = asset.require("./kernels")
+
 
 
 local Juice = {
   Identifier = "Juice",
   Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 APR 14 12:43:25.842",
+    End = "2035 OCT 05 00:00:00.000"
+  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "JUICE",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernels.Kernels
+      Observer = "JUPITER BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "JUICE_SPACECRAFT",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels.Kernels
-    },
+      DestinationFrame = "GALACTIC"
+    }
   },
   GUI = {
     Name = "Juice",
@@ -33,8 +37,7 @@ local GanymedePosition = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "GANYMEDE",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernels.Kernels
+      Observer = "JUPITER BARYCENTER"
     }
   },
   GUI = {
@@ -50,8 +53,7 @@ local GPHIO = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "GPHIO",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels.Kernels
+      DestinationFrame = "GALACTIC"
     }
   },
   GUI = {
@@ -67,6 +69,8 @@ local GPHIO = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.Kernels)
+
   openspace.addSceneGraphNode(Juice)
   openspace.addSceneGraphNode(GanymedePosition)
   openspace.addSceneGraphNode(GPHIO)
@@ -76,11 +80,14 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GPHIO)
   openspace.removeSceneGraphNode(GanymedePosition)
   openspace.removeSceneGraphNode(Juice)
+
+  openspace.spice.unloadKernel(kernels.Kernels)
 end)
 
 asset.export(Juice)
 asset.export(GanymedePosition)
 asset.export(GPHIO)
+
 
 
 asset.meta = {

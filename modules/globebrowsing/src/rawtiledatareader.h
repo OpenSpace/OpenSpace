@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/rawtile.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <modules/globebrowsing/src/tilecacheproperties.h>
 #include <ghoul/misc/boolean.h>
 #include <string>
 #include <mutex>
@@ -53,6 +54,7 @@ public:
      * \param baseDirectory, the base directory to use in future loading operations
      */
     RawTileDataReader(std::string filePath, TileTextureInitData initData,
+        TileCacheProperties cacheProperties,
         PerformPreprocessing preprocess = PerformPreprocessing::No);
     ~RawTileDataReader();
 
@@ -65,6 +67,8 @@ public:
     glm::ivec2 fullPixelSize() const;
 
 private:
+    std::optional<std::string> mrfCache();
+
     void initialize();
 
     RawTile::ReadError rasterRead(int rasterBand, const IODescription& io,
@@ -74,13 +78,6 @@ private:
         char* imageDataDest) const;
 
     IODescription ioDescription(const TileIndex& tileIndex) const;
-
-    /**
-     * A recursive function that is able to perform wrapping in case the read region of
-     * the given IODescription is outside of the given write region.
-     */
-    RawTile::ReadError repeatedRasterRead(int rasterBand, const IODescription& fullIO,
-        char* dataDestination, int depth = 0) const;
 
     TileMetaData tileMetaData(RawTile& rawTile, const PixelRegion& region) const;
 
@@ -97,6 +94,7 @@ private:
     int _maxChunkLevel = -1;
 
     const TileTextureInitData _initData;
+    const TileCacheProperties _cacheProperties;
     const PerformPreprocessing _preprocess;
     TileDepthTransform _depthTransform = { .scale = 0.f, .offset = 0.f };
 

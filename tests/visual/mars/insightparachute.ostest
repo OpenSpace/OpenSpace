@@ -6,7 +6,7 @@
     { "type": "navigationstate", 
       "value": "{Anchor='Insight',Pitch=-0.101682E0,Position={-4.087723E0,-4.039124E0,-8.183899E0},ReferenceFrame='Root',Up={0.827895E0,0.213243E0,-0.518765E0},Yaw=-0.398734E0}"},
     { "type": "action", 
-      "value": "os.fade_down_trails"},
+      "value": "os.FadeDownTrails"},
     { "type": "script", 
       "value": "openspace.setPropertyValueSingle('Scene.InsightTrail.Renderable.Enabled', false)"},
     { "type": "wait", 

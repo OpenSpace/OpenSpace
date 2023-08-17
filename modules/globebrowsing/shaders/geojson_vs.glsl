@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,22 +25,40 @@
 #version __CONTEXT__
 
 layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_normal;
+layout(location = 2) in float in_height;
 
 out float vs_depth;
+out vec3 vs_normal;
 out vec4 vs_positionViewSpace;
 
-uniform dmat4 modelViewTransform;
+uniform dmat4 modelTransform;
+uniform dmat4 viewTransform;
 uniform dmat4 projectionTransform;
-uniform float pointSize;
+uniform mat3 normalTransform;
+
+uniform float heightOffset;
+uniform bool useHeightMapData;
 
 void main() {
-    vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1.0));
+    dvec4 modelPos = dvec4(in_position, 1.0);
+
+    // Offset model pos based on height info
+    if (length(in_position) > 0) {
+        dvec3 outDirection = normalize(dvec3(in_position));
+        float height = heightOffset;
+        if (useHeightMapData) {
+          height += in_height;
+        }
+        modelPos += dvec4(outDirection * double(height), 0.0);
+    }
+
+    vs_positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
     vec4 positionScreenSpace = vec4(projectionTransform * vs_positionViewSpace);
     vs_depth = positionScreenSpace.w;
+    vs_normal = normalize(normalTransform * in_normal);
     gl_Position = positionScreenSpace;
-    gl_PointSize = pointSize;
 
     // Set z to 0 to disable near and far plane, unique handling for perspective in space
-    gl_Position.z = 0.f;
+    gl_Position.z = 0.0;
 }
-

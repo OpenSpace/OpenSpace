@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -9,6 +11,7 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Enceladus = {
   Identifier = "Enceladus",
   Parent = transforms.SaturnBarycenter.Identifier,
@@ -16,8 +19,7 @@ local Enceladus = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "ENCELADUS",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Observer = "SATURN BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -43,14 +45,13 @@ local Enceladus = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_saturn_major" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
   GUI = {
     Name = "Enceladus",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus",
     Description = "Enceladus globe with labels"
   }
 }
-
 
 local EnceladusLabel = {
   Identifier = "EnceladusLabel",
@@ -72,13 +73,15 @@ local EnceladusLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Enceladus Label",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus",
     Description = "Label for Saturn's moon Enceladus"
   }
 }
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.sat441)
+
   openspace.addSceneGraphNode(Enceladus)
   openspace.addSceneGraphNode(EnceladusLabel)
 end)
@@ -86,9 +89,12 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EnceladusLabel)
   openspace.removeSceneGraphNode(Enceladus)
+
+  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Enceladus)
+asset.export(EnceladusLabel)
 
 
 

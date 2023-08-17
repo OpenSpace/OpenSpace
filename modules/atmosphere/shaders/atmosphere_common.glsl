@@ -24,7 +24,7 @@
 
 /*****************************************************************************************
  * Modified parts of the code (4D texture mechanism, analytical transmittance etc)       *
- * from Eric Bruneton is used in the following code.                                     * 
+ * from Eric Bruneton is used in the following code.                                     *
  ****************************************************************************************/
 
 /**
@@ -67,17 +67,17 @@ const float ATM_EPSILON = 1.0;
 // Calculate the distance of the ray starting at x (height r) until the planet's ground
 // or top of atmosphere
 // r := || vec(x) || e [0, Rt]
-// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r 
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 float rayDistance(float r, float mu, float Rt, float Rg) {
   // The light ray starting at the observer in/on the atmosphere can have to possible end
   // points: the top of the atmosphere or the planet ground. So the shortest path is the
   // one we are looking for, otherwise we may be passing through the ground
-  
+
   // cosine law
   float atmRadiusEps2 = (Rt + ATM_EPSILON) * (Rt + ATM_EPSILON);
   float mu2 = mu * mu;
   float r2 = r * r;
-  float rayDistanceAtmosphere = -r * mu + sqrt(r2 * (mu2 - 1.0) + atmRadiusEps2); 
+  float rayDistanceAtmosphere = -r * mu + sqrt(r2 * (mu2 - 1.0) + atmRadiusEps2);
   float delta = r2 * (mu2 - 1.0) + Rg*Rg;
 
   // Ray may be hitting ground
@@ -108,7 +108,7 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, int SAMPLES_MU, float Rg, float Rt,
   // Pre-calculations
   float r2  = r * r;
   float Rg2 = Rg * Rg;
-  
+
   float halfSAMPLE_MU = float(SAMPLES_MU) / 2.0;
   // If the (vec(x) dot vec(v))/r is negative, i.e., the light ray has great probability
   // to touch the ground, we obtain mu considering the geometry of the ground
@@ -130,7 +130,7 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, int SAMPLES_MU, float Rg, float Rt,
     // cosine law: Rt^2 = r^2 + d^2 - 2rdcos(pi-theta) where cosine(theta) = mu
     mu = (Rt*Rt - r2 - d * d) / (2.0 * r * d);
   }
-  
+
   float modValueMuSun = mod(fragment.x, float(SAMPLES_MU_S)) / (float(SAMPLES_MU_S) - 1.0);
   // The following mapping is different from the paper. See Collienne for an details.
   muSun = tan((2.0 * modValueMuSun - 1.0 + 0.26) * 1.1) / tan(1.26 * 1.1);
@@ -148,7 +148,7 @@ vec3 transmittance(sampler2D tex, float r, float mu, float Rg, float Rt) {
   float u_r = sqrt((r - Rg) / (Rt - Rg));
   // See Collienne to understand the mapping
   float u_mu = atan((mu + 0.15) / 1.15 * tan(1.5)) / 1.5;
-  
+
   return texture(tex, vec2(u_mu, u_r)).rgb;
 }
 
@@ -161,7 +161,7 @@ vec3 transmittance(sampler2D tex, float r, float mu, float d, float Rg, float Rt
   // Here we use the transmittance property: T(x,v) = T(x,d)*T(d,v) to, given a distance
   // d, calculates that transmittance along that distance starting in x (height r):
   // T(x,d) = T(x,v)/T(d,v).
-  // 
+  //
   // From cosine law: c^2 = a^2 + b^2 - 2*a*b*cos(ab)
   float ri = sqrt(d * d + r * r + 2.0 * r * d * mu);
   // mu_i = (vec(d) dot vec(v)) / r_i

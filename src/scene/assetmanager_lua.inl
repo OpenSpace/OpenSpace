@@ -42,6 +42,18 @@ namespace {
 }
 
 /**
+ * Removes all assets that are currently loaded
+ */
+[[codegen::luawrap]] void removeAll() {
+    using namespace openspace;
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
+    std::reverse(as.begin(), as.end());
+    for (const Asset* asset : as) {
+        global::openSpaceEngine->assetManager().remove(asset->path().string());
+    }
+}
+
+/**
  * Returns true if the referenced asset already has been loaded. Otherwise false is
  * returned. The parameter to this function is the path of the asset that should be
  * tested.
@@ -64,6 +76,21 @@ namespace {
 [[codegen::luawrap]] std::vector<std::string> allAssets() {
     using namespace openspace;
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
+    std::vector<std::string> res;
+    res.reserve(as.size());
+    for (const Asset* a : as) {
+        res.push_back(a->path().string());
+    }
+    return res;
+}
+
+/**
+ * Returns the paths to all loaded root assets, which are assets that are loaded directly
+ * either through a profile or by calling the `openspace.asset.add` method.
+ */
+[[codegen::luawrap]] std::vector<std::string> rootAssets() {
+    using namespace openspace;
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
     std::vector<std::string> res;
     res.reserve(as.size());
     for (const Asset* a : as) {

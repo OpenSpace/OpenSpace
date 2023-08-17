@@ -6,7 +6,7 @@
     { "type": "navigationstate", 
       "value": "{Anchor='67P',Pitch=-0.608276E-2,Position={1.035920E3,1.090395E4,6.708170E3},Up={-0.972426E0,0.182052E0,-0.145753E0},Yaw=0.475854E-2}"},
     { "type": "action", 
-      "value": "os.fade_down_trails"}, 
+      "value": "os.FadeDownTrails"}, 
     { "type": "script", 
       "value": "openspace.setPropertyValueSingle('Scene.NAVCAM_FOV.Renderable.Enabled', false)"},
     { "type": "pause", 

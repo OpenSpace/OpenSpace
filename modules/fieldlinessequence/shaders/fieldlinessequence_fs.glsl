@@ -28,7 +28,7 @@ in vec4 vs_color;
 in float vs_depth;
 
 uniform bool usingAdditiveBlending;
-
+uniform float opacity;
 
 Fragment getFragment() {
   if (vs_color.a == 0) {
@@ -40,6 +40,7 @@ Fragment getFragment() {
   Fragment frag;
   frag.depth = vs_depth;
   frag.color = fragColor;
+  frag.color.a *= opacity;
 
   // G-Buffer
   frag.gPosition  = vec4(0.0);//vs_gPosition;

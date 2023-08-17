@@ -1,13 +1,16 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 local sssb = asset.syncedResource({
   Name = "Small SolarSystem Body Data (Centaur Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_centaur_asteroid",
-  Version = 1
+  Version = 3
 })
 
-local object = {
+
+local Object = {
   Identifier = "sssb_centaur_asteroid",
   Parent = transforms.SunECLIPJ2000.Identifier,
   Renderable = {
@@ -27,15 +30,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 
@@ -47,6 +51,6 @@ asset.meta = {
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
   License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
-    All documents available from this server may be protected under the U.S. and 
+    All documents available from this server may be protected under the U.S. and
     Foreign Copyright Laws]]
 }

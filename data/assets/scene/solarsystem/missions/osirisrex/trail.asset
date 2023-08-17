@@ -4,7 +4,7 @@ local earthTransforms = asset.require("scene/solarsystem/planets/earth/transform
 
 
 
-local BENNU_BODY = 2101955
+local BennuBodyId = 2101955
 
 local OsirisRexTrailEarth = {
   Identifier = "OsirisRexTrailEarth",
@@ -57,7 +57,7 @@ local OsirisRexTrailBennu = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "OSIRIS-REX",
-      Observer = BENNU_BODY
+      Observer = BennuBodyId
     },
     Color = { 0.9, 0.2, 0.9 },
     StartTime = "2018 SEP 4 00:00:00",
@@ -69,6 +69,7 @@ local OsirisRexTrailBennu = {
     Path = "/Solar System/Missions/OSIRIS REx"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OsirisRexTrailEarth)

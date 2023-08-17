@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
+#include <openspace/scene/scene.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/matrix/dmat2property.h>
 #include <openspace/properties/matrix/dmat3property.h>
@@ -51,6 +52,10 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <algorithm>
+#include <cctype>
 
 namespace {
 
@@ -279,7 +284,8 @@ bool doesUriContainGroupTag(const std::string& command, std::string& groupName) 
 }
 
 std::string removeGroupNameFromUri(const std::string& uri) {
-    return uri.substr(uri.find_first_of("."));
+    size_t pos = uri.find_first_of(".");
+    return pos == std::string::npos ? uri : uri.substr(pos);
 }
 
 } // namespace
@@ -466,6 +472,16 @@ int propertyGetValue(lua_State* L) {
     return 1;
 }
 
+int propertyGetValueDeprecated(lua_State* L) {
+    LWARNINGC(
+        "Deprecation",
+        "'getPropertyValue' function is deprecated and should be replaced with "
+        "'propertyValue'"
+    );
+
+    return propertyGetValue(L);
+}
+
 }  // namespace openspace::luascriptfunctions
 
 namespace {
@@ -481,7 +497,7 @@ namespace {
 /**
  * Returns a list of property identifiers that match the passed regular expression
  */
-[[codegen::luawrap]] std::vector<std::string> getProperty(std::string regex) {
+[[codegen::luawrap]] std::vector<std::string> property(std::string regex) {
     using namespace openspace;
 
     std::string groupName;
@@ -585,6 +601,19 @@ namespace {
     }
 
     return res;
+}
+
+/**
+ * Returns a list of property identifiers that match the passed regular expression
+ */
+[[codegen::luawrap("getProperty")]] std::vector<std::string> propertyDeprecated(
+                                                                        std::string regex)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getProperty' function is deprecated and should be replaced with 'property'"
+    );
+    return property(std::move(regex));
 }
 
 /**
@@ -850,6 +879,51 @@ namespace {
     return node != nullptr;
 }
 
+// Returns a list of all scene graph nodes in the scene
+[[codegen::luawrap]] std::vector<std::string> sceneGraphNodes() {
+    using namespace openspace;
+
+    const std::vector<SceneGraphNode*>& nodes =
+        global::renderEngine->scene()->allSceneGraphNodes();
+    std::vector<std::string> res;
+    res.reserve(nodes.size());
+    for (SceneGraphNode* node : nodes) {
+        res.push_back(node->identifier());
+    }
+    return res;
+}
+
+// Returns a list of all scene graph nodes in the scene that have a renderable of the
+// specific type
+[[codegen::luawrap]] std::vector<std::string> nodeByRenderableType(std::string type) {
+    using namespace openspace;
+
+    const std::vector<SceneGraphNode*>& nodes =
+        global::renderEngine->scene()->allSceneGraphNodes();
+    std::vector<std::string> res;
+    for (SceneGraphNode* node : nodes) {
+        Renderable* renderable = node->renderable();
+        if (renderable && renderable->typeAsString() == type) {
+            res.push_back(node->identifier());
+        }
+    }
+    return res;
+}
+
+// Returns a list of all screen-space renderables
+[[codegen::luawrap]] std::vector<std::string> screenSpaceRenderables() {
+    using namespace openspace;
+
+    const std::vector<ScreenSpaceRenderable*>& ssrs =
+        global::renderEngine->screenSpaceRenderables();
+    std::vector<std::string> res;
+    res.reserve(ssrs.size());
+    for (ScreenSpaceRenderable* ssr : ssrs) {
+        res.push_back(ssr->identifier());
+    }
+    return res;
+}
+
 /**
  * Adds an interesting time to the current scene. The first argument is the name of the
  * time and the second argument is the time itself in the format YYYY-MM-DDThh:mm:ss.uuu
@@ -1004,7 +1078,7 @@ enum class [[codegen::enum]] CustomPropertyType {
 
 /**
  * Creates a new property that lives in the `UserProperty` group.
- * 
+ *
  * \param identifier The identifier that is going to be used for the new property
  * \param type The type of the property, has to be one of "DMat2Property",
  *        "DMat3Property", "DMat4Property", "Mat2Property", "Mat3Property",
@@ -1159,6 +1233,14 @@ enum class [[codegen::enum]] CustomPropertyType {
             "Could not find user-defined property '{}'", identifier
         ));
     }
+}
+
+/**
+ * Create a valid identifier from the provided input string. Will replace invalid
+ * characters like whitespaces and some punctuation marks with valid alternatives
+ */
+[[codegen::luawrap]] std::string makeIdentifier(std::string input) {
+    return openspace::makeIdentifier(input);
 }
 
 } // namespace

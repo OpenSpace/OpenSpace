@@ -56,6 +56,9 @@ namespace {
         throw ghoul::lua::LuaError("Unknown layer group: " + layerGroupName);
     }
 
+    // Add the name of the enclosing globe to layer dict, it is used to identify a cache
+    layer.setValue("GlobeName", globeName);
+
     // Get the dictionary defining the layer
     Layer* l = globe->layerManager().addLayer(groupID, layer);
     if (l) {
@@ -115,8 +118,8 @@ namespace {
  * Returns the list of layers for the scene graph node specified in the first parameter.
  * The second parameter specifies which layer type should be queried.
  */
-[[codegen::luawrap]] std::vector<std::string> getLayers(std::string globeIdentifier,
-                                                        std::string layer)
+[[codegen::luawrap]] std::vector<std::string> layers(std::string globeIdentifier,
+                                                     std::string layer)
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -145,6 +148,23 @@ namespace {
         res.push_back(l->identifier());
     }
     return res;
+}
+
+/**
+ * Returns the list of layers for the scene graph node specified in the first parameter.
+ * The second parameter specifies which layer type should be queried. Deprecated in favor
+ * of 'layers'.
+ */
+[[codegen::luawrap("getLayers")]] std::vector<std::string> layersDeprecated(
+                                                              std::string globeIdentifier,
+                                                                        std::string layer)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getLayers' function is deprecated and should be replaced with 'layers'"
+    );
+
+    return layers(std::move(globeIdentifier), std::move(layer));
 }
 
 /**
@@ -182,7 +202,7 @@ namespace {
     if (group == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError(fmt::format("Unknown layer group: {}", layerGroup));
     }
-    
+
     LayerGroup& lg = globe->layerManager().layerGroup(group);
     if (std::holds_alternative<int>(source) && std::holds_alternative<int>(destination)) {
         // Short circut here, no need to get the layers
@@ -395,8 +415,8 @@ namespace {
  */
 [[codegen::luawrap]]
 std::tuple<double, double, double>
-getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double longitude,
-                        double altitude)
+localPositionFromGeo(std::string globeIdentifier, double latitude, double longitude,
+                     double altitude)
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -416,12 +436,38 @@ getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double lon
 }
 
 /**
+ * Returns a position in the local Cartesian coordinate system of the globe identified by
+ * the first argument, that corresponds to the given geographic coordinates: latitude,
+ * longitude and altitude (in degrees and meters). In the local coordinate system, the
+ * position (0,0,0) corresponds to the globe's center. Deprecated in favor of
+ * 'localPositionFromGeo'.
+ */
+[[codegen::luawrap("getLocalPositionFromGeo")]]
+std::tuple<double, double, double>
+localPositionFromGeoDeprecated(std::string globeIdentifier, double latitude,
+                               double longitude, double altitude)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getLocalPositionFromGeo' function is deprecated and should be replaced with "
+        "'localPositionFromGeo'"
+    );
+
+    return localPositionFromGeo(
+        std::move(globeIdentifier),
+        latitude,
+        longitude,
+        altitude
+    );
+}
+
+/**
  * Get geographic coordinates of the camera position in latitude, longitude, and altitude
  * (degrees and meters). If the optional bool paramater is specified, the camera
  * eye postion will be used instead
  */
-[[codegen::luawrap]] std::tuple<double, double, double>
-getGeoPositionForCamera(bool useEyePosition = false)
+[[codegen::luawrap]] std::tuple<double, double, double> geoPositionForCamera(
+                                                              bool useEyePosition = false)
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -475,6 +521,24 @@ getGeoPositionForCamera(bool useEyePosition = false)
 }
 
 /**
+ * Get geographic coordinates of the camera position in latitude, longitude, and altitude
+ * (degrees and meters). If the optional bool paramater is specified, the camera
+ * eye postion will be used instead. Deprecated in favor of 'geoPositionForCamera'.
+ */
+[[codegen::luawrap("getGeoPositionForCamera")]]
+std::tuple<double, double, double>
+geoPositionForCameraDeprecated(bool useEyePosition = false)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getGeoPositionForCamera' function is deprecated and should be replaced with "
+        "'geoPositionForCamera'"
+    );
+
+    return geoPositionForCamera(useEyePosition);
+}
+
+/**
  * Loads and parses the WMS capabilities xml file from a remote server. The first argument
  * is the name of the capabilities that can be used to later refer to the set of
  * capabilities. The second argument is the globe for which this server is applicable. The
@@ -525,6 +589,126 @@ getGeoPositionForCamera(bool useEyePosition = false)
         res.push_back(c);
     }
     return res;
+}
+
+/**
+ * Add a GeoJson layer specified by the given table to the globe specified by the
+ * 'globeName' argument
+ */
+[[codegen::luawrap]] void addGeoJson(std::string globeName, ghoul::Dictionary table)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    // Get the node and make sure it exists
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeName);
+    if (!n) {
+        throw ghoul::lua::LuaError("Unknown globe name: " + globeName);
+    }
+
+    // Get the renderable globe
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeName);
+    }
+
+    // Get the dictionary defining the layer
+    globe->geoJsonManager().addGeoJsonLayer(table);
+}
+
+/**
+ * Remove the GeoJson layer specified by the given table or string identifier from the
+ * globe specified by the 'globeName' argument
+ */
+[[codegen::luawrap]] void deleteGeoJson(std::string globeName,
+                          std::variant<std::string, ghoul::Dictionary> tableOrIdentifier)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    // Get the node and make sure it exists
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeName);
+    if (!n) {
+        throw ghoul::lua::LuaError("Unknown globe name: " + globeName);
+    }
+
+    // Get the renderable globe
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeName);
+    }
+
+    std::string identifier;
+    if (std::holds_alternative<std::string>(tableOrIdentifier)) {
+        identifier = std::get<std::string>(tableOrIdentifier);
+    }
+    else {
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(tableOrIdentifier);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError(
+                "Table passed to deleteLayer does not contain an Identifier"
+            );
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
+
+    globe->geoJsonManager().deleteLayer(identifier);
+}
+
+/**
+ * Add a GeoJson layer from the given file name and add it to the current anchor node,
+ * if it is a globe. Note that you might have to increase the height offset for the
+ * added feature to be visible on the globe, if using a height map
+ */
+[[codegen::luawrap]] void addGeoJsonFromFile(std::string filename,
+                                             std::optional<std::string> name)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    std::filesystem::path path = absPath(filename);
+    if (!std::filesystem::is_regular_file(path)) {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Could not find the provided file: '{}'", filename
+        ));
+    }
+
+    std::string extension = path.extension().string();
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+        [](unsigned char c) { return std::tolower(c); });
+
+    if (extension != ".geojson" && extension != ".json") {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Unexpected file type: '{}'. Expected '.geojson' or '.json' file", filename
+        ));
+    }
+
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
+        global::navigationHandler->anchorNode()->identifier()
+    );
+    if (!n) {
+        throw ghoul::lua::LuaError("Invalid anchor node");
+    }
+
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError(
+            "Current anchor is not a globe (Expected 'RenderableGlobe')"
+        );
+    }
+
+    // Make a minimal dictionary to represent the geojson component
+    ghoul::Dictionary d;
+
+    std::string identifier = makeIdentifier(name.value_or(path.stem().string()));
+    d.setValue("Identifier", identifier);
+    d.setValue("File", path.string());
+    if (name.has_value()) {
+        d.setValue("Name", *name);
+    }
+
+    // Get the dictionary defining the layer
+    globe->geoJsonManager().addGeoJsonLayer(d);
 }
 
 #include "globebrowsingmodule_lua_codegen.cpp"

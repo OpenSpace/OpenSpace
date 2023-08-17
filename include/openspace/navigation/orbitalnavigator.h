@@ -98,6 +98,8 @@ public:
     void tickIdleBehaviorTimer(double deltaTime);
     void triggerIdleBehavior(std::string_view choice = "");
 
+    void tickMovementTimer(float deltaTime);
+
     Camera* camera() const;
     void setCamera(Camera* camera);
     void clearPreviousState();
@@ -115,7 +117,7 @@ public:
     void updatePreviousStateVariables();
 
     void setMinimumAllowedDistance(float distance);
-    void setMaximumAllowedDistance(double distance);
+    void setMaximumAllowedDistance(float distance);
 
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
@@ -136,6 +138,7 @@ public:
     bool hasRollFriction() const;
 
     double minAllowedDistance() const;
+    double maxAllowedDistance() const;
 
     glm::dvec3 anchorNodeToCameraVector() const;
     glm::quat anchorNodeToCameraRotation() const;
@@ -148,8 +151,8 @@ public:
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
     /**
-    * \return The Lua library that contains all Lua functions available to affect the
-    * orbital navigation
+    * \return the Lua library that contains all Lua functions available to affect the
+    * OrbitalNavigator
     */
     static scripting::LuaLibrary luaLibrary();
 
@@ -197,18 +200,19 @@ private:
 
     properties::BoolProperty _followAnchorNodeRotation;
     properties::FloatProperty _followAnchorNodeRotationDistance;
-    properties::FloatProperty _minimumAllowedDistance;
-    properties::BoolProperty _enableMinimumAllowedDistanceLimit;
 
-    struct LimitZoomOut : public properties::PropertyOwner {
-        LimitZoomOut();
 
-        properties::BoolProperty isEnabled;
+    struct LimitZoom : public properties::PropertyOwner {
+        LimitZoom();
+
+        properties::BoolProperty enableZoomInLimit;
+        properties::FloatProperty minimumAllowedDistance;
+
+        properties::BoolProperty enableZoomOutLimit;
         properties::FloatProperty maximumAllowedDistance;
     };
 
-    LimitZoomOut _limitZoomOut;
-    properties::BoolProperty _disableZoom;
+    LimitZoom _limitZoom;
 
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
@@ -217,6 +221,8 @@ private:
     properties::BoolProperty _useAdaptiveStereoscopicDepth;
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
     properties::FloatProperty _staticViewScaleExponent;
+
+    properties::BoolProperty _constantVelocityFlight;
 
     properties::FloatProperty _retargetInterpolationTime;
     properties::FloatProperty _stereoInterpolationTime;
@@ -248,6 +254,8 @@ private:
 
     IdleBehavior _idleBehavior;
     float _idleBehaviorTriggerTimer = 0.f;
+
+    float _movementTimer = 0.f;
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by

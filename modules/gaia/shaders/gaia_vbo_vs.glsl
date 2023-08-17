@@ -38,7 +38,7 @@ out float vs_cameraDistFromSun;
 uniform dmat4 model;
 uniform dmat4 view;
 uniform dmat4 projection;
-uniform float time; 
+uniform float time;
 uniform int renderOption;
 uniform vec2 posXThreshold;
 uniform vec2 posYThreshold;
@@ -50,7 +50,7 @@ uniform vec2 distThreshold;
 // Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
 const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
+const int RENDEROPTION_MOTION = 2;
 const float EPS = 1e-5;
 const float Parsec = 3.0856776e16;
 
@@ -59,24 +59,24 @@ void main() {
   vs_brightness = in_brightness;
 
   // Check if we should filter this star by position. Thres depending on original values.
-  if ((abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) || 
-      (abs(posXThreshold.y) > EPS && in_position.x > posXThreshold.y) || 
-      (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) || 
-      (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
-      (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) || 
-      (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) || 
-      (abs(distThreshold.x - distThreshold.y) < EPS 
+  if ((abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) ||
+      (abs(posXThreshold.y) > EPS && in_position.x > posXThreshold.y) ||
+      (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) ||
+      (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) ||
+      (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) ||
+      (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) ||
+      (abs(distThreshold.x - distThreshold.y) < EPS
       && abs(length(in_position) - distThreshold.y) < EPS) ||
       (renderOption != RENDEROPTION_STATIC && (
       (abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
-      (abs(gMagThreshold.x - 20.0f) > EPS && in_brightness.x < gMagThreshold.x) || 
+      (abs(gMagThreshold.x - 20.0f) > EPS && in_brightness.x < gMagThreshold.x) ||
       (abs(gMagThreshold.y - 20.0f) > EPS && in_brightness.x > gMagThreshold.y) ||
       (abs(bpRpThreshold.x - bpRpThreshold.y) < EPS && abs(bpRpThreshold.x - in_brightness.y) < EPS) ||
-      (abs(bpRpThreshold.x) > EPS && in_brightness.y < bpRpThreshold.x) || 
+      (abs(bpRpThreshold.x) > EPS && in_brightness.y < bpRpThreshold.x) ||
       (abs(bpRpThreshold.y) > EPS && in_brightness.y > bpRpThreshold.y))))
   {
     // Discard star in geometry shader.
-    vs_gPosition = vec4(0.0);    
+    vs_gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
     return;
   }
@@ -92,12 +92,12 @@ void main() {
 
   // Thres moving stars by their new position.
   float distPosition = length(objectPosition.xyz / (1000.0 * Parsec));
-  if ((abs(distThreshold.x - distThreshold.y) > EPS && 
-      ((abs(distThreshold.x) > EPS && distPosition< distThreshold.x) || 
+  if ((abs(distThreshold.x - distThreshold.y) > EPS &&
+      ((abs(distThreshold.x) > EPS && distPosition< distThreshold.x) ||
       (abs(distThreshold.y) > EPS && distPosition > distThreshold.y))))
   {
     // Discard star in geometry shader.
-    vs_gPosition = vec4(0.0);    
+    vs_gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
     return;
   }
@@ -112,11 +112,11 @@ void main() {
   // Remove stars without position, happens when VBO chunk is stuffed with zeros.
   // Has to be done in Geometry shader because Vertices cannot be discarded here.
   if (length(in_position) > EPS) {
-    vs_gPosition = vec4(model * objectPosition);    
+    vs_gPosition = vec4(model * objectPosition);
     gl_Position = vec4(projection * viewPosition);
   }
   else {
-    vs_gPosition = vec4(0.0);    
+    vs_gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
   }
 }

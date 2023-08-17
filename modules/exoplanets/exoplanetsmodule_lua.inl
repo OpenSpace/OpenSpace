@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/scene/scene.h>
 #include <algorithm>
 #include <string>
 #include <string_view>
@@ -123,7 +124,7 @@ void createExoplanetSystem(const std::string& starName) {
     using namespace openspace;
     using namespace exoplanets;
 
-    const std::string starIdentifier = createIdentifier(starName);
+    const std::string starIdentifier = makeIdentifier(starName);
 
     std::string sanitizedStarName = starName;
     sanitizeNameString(sanitizedStarName);
@@ -286,7 +287,7 @@ void createExoplanetSystem(const std::string& starName) {
         double semiMajorAxisInMeter = planet.a * distanceconstants::AstronomicalUnit;
         double semiMajorAxisInKm = semiMajorAxisInMeter * 0.001;
 
-        const std::string planetIdentifier = createIdentifier(planetName);
+        const std::string planetIdentifier = makeIdentifier(planetName);
 
         const std::string planetKeplerTranslation = "{"
             "Type = 'KeplerTranslation',"
@@ -631,16 +632,30 @@ std::vector<std::string> hostStarsWithSufficientData() {
 [[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
     using namespace openspace;
     using namespace exoplanets;
-    const std::string starIdentifier = createIdentifier(std::move(starName));
+    const std::string starIdentifier = makeIdentifier(std::move(starName));
     global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
 
-[[codegen::luawrap]] std::vector<std::string> getListOfExoplanets() {
+[[codegen::luawrap]] std::vector<std::string> listOfExoplanets() {
     std::vector<std::string> names = hostStarsWithSufficientData();
     return names;
+}
+
+/**
+ * Deprecated in favor of 'listOfExoplanets'
+ */
+[[codegen::luawrap("getListOfExoplanets")]] std::vector<std::string>
+listOfExoplanetsDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getListOfExoplanets' function is deprecated and should be replaced with "
+        "'listOfExoplanets'"
+    );
+    return listOfExoplanets();
 }
 
 [[codegen::luawrap]] void listAvailableExoplanetSystems() {

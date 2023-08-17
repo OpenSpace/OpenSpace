@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("./../../phobos_globe").Phobos_Globe.Identifier
+local globe = asset.require("../../phobos_globe")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Phobos_Global_Shaded_Relief_USGS",
   Name = "Phobos Global Shaded Relief [USGS]",
   Enabled = asset.enabled,
@@ -8,15 +10,16 @@ local layer = {
   Description = "Viking-base Phobos shaded relief created by USGS"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Phobos_Globe.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Phobos_Globe.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

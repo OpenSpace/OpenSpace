@@ -1,17 +1,20 @@
-local Kernels = asset.syncedResource({
+local kernels = asset.syncedResource({
   Name = "Ceres Kernels",
   Type = "HttpSynchronization",
   Identifier = "ceres_kernels",
   Version = 1
 })
 
-local CeresKernels = {
-  Kernels .. "ceres_v01.tpc",
-  Kernels .. "sb_ceres_140724.bsp",
-  Kernels .. "sb_ceres_110211.bsp"
-}
+asset.export(
+  "CeresKernels",
+  {
+    kernels .. "ceres_v01.tpc",
+    kernels .. "sb_ceres_140724.bsp",
+    kernels .. "sb_ceres_110211.bsp"
+  }
+)
 
-asset.export("CeresKernels", CeresKernels)
+
 
 asset.meta = {
   Name = "Ceres Spice Kernels",

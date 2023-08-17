@@ -158,7 +158,6 @@ void logError(const SpecificationError& error, std::string component) {
     }
     else {
         LERRORC(fmt::format("{}: {}", component, error.component), error.message);
-        
     }
     for (const documentation::TestResult::Offense& o : error.result.offenses) {
         LERRORC(

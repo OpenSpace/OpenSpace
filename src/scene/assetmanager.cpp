@@ -100,7 +100,7 @@ namespace {
 
         // A list of all identifiers that are exposed by this asset. This list is needed
         // to populate the descriptions in the main user interface
-        std::optional<std::vector<std::string>> identifiers;
+        std::optional<std::vector<std::string>> identifiers [[codegen::identifier()]];
     };
 
 #include "assetmanager_codegen.cpp"
@@ -143,11 +143,16 @@ AssetManager::~AssetManager() {
 void AssetManager::deinitialize() {
     ZoneScoped;
 
-    for (Asset* asset : _rootAssets) {
+    // In general, the potential dependencies in the root assets are ordered, which is
+    // index 0 might be the parent of 1, but not vice versa. So it is safer to do the
+    // order deinitialization in reverse
+    while (!_rootAssets.empty()) {
+        Asset* asset = _rootAssets.back();
         if (!asset->hasInitializedParent()) {
             asset->deinitialize();
             asset->unload();
         }
+        _rootAssets.pop_back();
     }
     _toBeDeleted.clear();
 }
@@ -300,24 +305,15 @@ void AssetManager::update() {
 void AssetManager::add(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
     // First check if the path is already in the remove queue. If so, remove it from there
-    const auto it = _assetRemoveQueue.find(path);
-    if (it != _assetRemoveQueue.end()) {
-        _assetRemoveQueue.erase(it);
-    }
-
-    _assetAddQueue.insert(path);
+    _assetRemoveQueue.remove(path);
+    _assetAddQueue.push_back(path);
 }
 
 void AssetManager::remove(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
-
     // First check if the path is already in the add queue. If so, remove it from there
-    const auto it = _assetAddQueue.find(path);
-    if (it != _assetAddQueue.end()) {
-        _assetAddQueue.erase(it);
-    }
-
-    _assetRemoveQueue.insert(path);
+    _assetAddQueue.remove(path);
+    _assetRemoveQueue.push_back(path);
 }
 
 std::vector<const Asset*> AssetManager::allAssets() const {
@@ -325,6 +321,15 @@ std::vector<const Asset*> AssetManager::allAssets() const {
     res.reserve(_assets.size());
     for (const std::unique_ptr<Asset>& asset : _assets) {
         res.push_back(asset.get());
+    }
+    return res;
+}
+
+std::vector<const Asset*> AssetManager::rootAssets() const {
+    std::vector<const Asset*> res;
+    res.reserve(_rootAssets.size());
+    for (Asset* asset : _rootAssets) {
+        res.push_back(asset);
     }
     return res;
 }
@@ -338,6 +343,11 @@ std::vector<const ResourceSynchronization*> AssetManager::allSynchronizations() 
         res.push_back(p.second->synchronization.get());
     }
     return res;
+}
+
+bool AssetManager::isRootAsset(const Asset* asset) const {
+    auto it = std::find(_rootAssets.begin(), _rootAssets.end(), asset);
+    return it != _rootAssets.end();
 }
 
 bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
@@ -807,15 +817,33 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     if (it != _assets.end()) {
         Asset* a = it->get();
         // We should warn if an asset is requested twice with different enable settings or
-        // else the resulting status will depend on the order of asset loading
+        // else the resulting status will depend on the order of asset loading.
         if (a->explicitEnabled() != explicitEnable) {
-            ghoul_assert(a->firstParent(), "Asset must have a parent at this point");
-            LWARNING(fmt::format(
-                "Loading asset {0} from {1} with enable state {3} different from initial "
-                "loading from {2} with state {4}. Only {4} will have an effect",
-                path, retriever, a->firstParent()->path(), explicitEnable,
-                a->explicitEnabled()
-            ));
+            if (a->firstParent()) {
+                // The first request came from another asset, so we can mention it in the
+                // error message
+                LWARNING(fmt::format(
+                    "Loading asset {0} from {1} with enable state {3} different from "
+                    "initial loading from {2} with state {4}. Only {4} will have an "
+                    "effect",
+                    path, retriever, a->firstParent()->path(), explicitEnable,
+                    a->explicitEnabled()
+                ));
+            }
+            else {
+                // This can only happen if the asset was loaded from the profile directly,
+                // in which case we don't have to warn the user since it won't depend on
+                // the load order as it is always guaranteed that the profile assets are
+                // loaded first
+                ghoul_assert(
+                    std::find(
+                        _rootAssets.begin(),
+                        _rootAssets.end(),
+                        a
+                    ) != _rootAssets.end(),
+                    "Asset not loaded from profile"
+                );
+            }
         }
         return it->get();
     }
@@ -932,8 +960,10 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
         {
             codegen::lua::Add,
             codegen::lua::Remove,
+            codegen::lua::RemoveAll,
             codegen::lua::IsLoaded,
-            codegen::lua::AllAssets
+            codegen::lua::AllAssets,
+            codegen::lua::RootAssets
         }
     };
 }

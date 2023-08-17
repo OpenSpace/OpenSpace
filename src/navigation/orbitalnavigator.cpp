@@ -45,36 +45,48 @@
 namespace {
     constexpr std::string_view _loggerCat = "OrbitalNavigator";
 
-    constexpr double AngleEpsilon = 1E-7;
-    constexpr double DistanceRatioAimThreshold = 1E-4;
+    constexpr double AngleEpsilon = 1e-7;
+    constexpr double DistanceRatioAimThreshold = 1e-4;
+
+    constexpr std::string_view IdleKeyOrbit = "Orbit";
+    constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
+    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
 
     constexpr openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
         "Anchor",
         "The name of the scene graph node that is the origin of the camera interaction. "
         "The camera follows, orbits and dollies towards this node. Any scene graph node "
-        "can be the anchor node"
+        "can be the anchor node",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AimInfo = {
         "Aim",
         "Aim",
         "The name of the scene graph node that is the aim of the camera. The camera "
-        "direction is relative to the vector from the camera position to this node"
+        "direction is relative to the vector from the camera position to this node",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RetargetAnchorInfo = {
         "RetargetAnchor",
         "Retarget Anchor",
         "When triggered, this property starts an interpolation to reset the "
-        "camera direction to the anchor node"
+        "camera direction to the anchor node",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RetargetAimInfo = {
         "RetargetAim",
         "Retarget Aim",
         "When triggered, this property starts an interpolation to reset the "
-        "camera direction to the aim node"
+        "camera direction to the aim node",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RollFrictionInfo = {
@@ -82,7 +94,9 @@ namespace {
         "Roll Friction",
         "If this is enabled, a small friction is applied to the rolling part of the "
         "camera motion, thus slowing it down within a small time period. If this value "
-        "is disabled, the camera will roll forever"
+        "is disabled, the camera will roll forever",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationalFrictionInfo = {
@@ -90,7 +104,9 @@ namespace {
         "Rotational Friction",
         "If this is enabled, a small friction is applied to the rotational part of the "
         "camera motion, thus slowing it down within a small time period. If this value "
-        "is disabled, the camera will rotate forever"
+        "is disabled, the camera will rotate forever",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomFrictionInfo = {
@@ -98,28 +114,33 @@ namespace {
         "Zoom Friction",
         "If this is enabled, a small friction is applied to the zoom part of the camera "
         "motion, thus slowing it down within a small time period. If this value is "
-        "disabled, the camera will zoom in or out forever"
+        "disabled, the camera will zoom in or out forever",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
         "MouseSensitivity",
         "Mouse Sensitivity",
         "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
-        "the sensitivity is the less impact a mouse motion will have"
+        "the sensitivity is the less impact a mouse motion will have",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
         "JoystickSensitivity",
         "Joystick Sensitivity",
         "Determines the sensitivity of the camera motion thorugh a joystick. The lower "
-        "the sensitivity is the less impact a joystick motion will have"
+        "the sensitivity is the less impact a joystick motion will have",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo WebsocketSensitivityInfo = {
         "WebsocketSensitivity",
         "Websocket Sensitivity",
         "Determines the sensitivity of the camera motion thorugh a websocket. The lower "
-        "the sensitivity is the less impact a webstick motion will have"
+        "the sensitivity is the less impact a webstick motion will have",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
@@ -127,7 +148,8 @@ namespace {
         "Friction Factor",
         "Determines the factor that is applied if the 'Roll Friction', 'Rotational "
         "Friction', and 'Zoom Friction' values are enabled. The lower this value is, the "
-        "faster the camera movements will stop"
+        "faster the camera movements will stop",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FollowAnchorNodeInfo = {
@@ -136,7 +158,8 @@ namespace {
         "If true, the camera will rotate with the current achor node if within a "
         "certain distance from it. When this happens, the object will appear fixed in "
         "relation to the camera. The distance at which the change happens is controlled "
-        "through another property"
+        "through another property",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FollowAnchorNodeDistanceInfo =
@@ -145,36 +168,8 @@ namespace {
         "Follow Anchor Node Rotation Distance",
         "A factor used to determine the distance at which the camera starts rotating "
         "with the anchor node. The actual distance will be computed by multiplying "
-        "this factor with the approximate radius of the node"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
-        "MinimumAllowedDistance",
-        "Minimum Allowed Distance",
-        "Limits how close the camera can get to an object. The distance is given in "
-        "meters above the surface"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo EnabledMaximumDistanceInfo = {
-        "Enabled",
-        "Enable Maximum Allowed Distance",
-        "Enables or disables that the camera cannot go further away from an object than "
-        "the set maximum allowed distance"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo
-        EnabledMinimumAllowedDistanceLimitInfo = {
-        "EnabledMinimumAllowedDistanceLimit",
-        "Enable minimum allowed distance limit",
-        "Enables or disables that the camera cannot go closer to an object than "
-        "the set minimum allowed distance"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MaximumDistanceInfo = {
-        "MaximumAllowedDistance",
-        "Maximum Allowed Distance",
-        "Limits how far away the camera can get from an object. The distance is given in "
-        "meters above the surface"
+        "this factor with the approximate radius of the node",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StereoInterpolationTimeInfo =
@@ -182,7 +177,8 @@ namespace {
         "StereoInterpolationTime",
         "Stereo Interpolation Time",
         "The time to interpolate to a new stereoscopic depth when the anchor node is "
-        "changed, in seconds"
+        "changed, in seconds",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -191,14 +187,16 @@ namespace {
         "RetargetAnchorInterpolationTime",
         "Retarget Interpolation Time",
         "The time to interpolate the camera rotation when the anchor or aim node is "
-        "changed, in seconds"
+        "changed, in seconds",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FollowRotationInterpTimeInfo =
     {
         "FollowRotationInterpolationTime",
         "Follow Rotation Interpolation Time",
-        "The interpolation time when toggling following focus node rotation"
+        "The interpolation time when toggling following focus node rotation",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
@@ -206,7 +204,9 @@ namespace {
         "Invert Left and Right Mouse Buttons",
         "If this value is 'false', the left mouse button causes the camera to rotate "
         "around the object and the right mouse button causes the zooming motion. If this "
-        "value is 'true', these two functionalities are reversed"
+        "value is 'true', these two functionalities are reversed",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -217,7 +217,8 @@ namespace {
         "Dynamically adjust the view scaling based on the distance to the surface of "
         "the anchor and aim nodes. If enabled, view scale will be set to "
         "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). "
-        "If disabled, view scale will be set to 10^StaticViewScaleExponent"
+        "If disabled, view scale will be set to 10^StaticViewScaleExponent",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StaticViewScaleExponentInfo =
@@ -225,7 +226,8 @@ namespace {
         "StaticViewScaleExponent",
         "Static View Scale Exponent",
         "Statically scale the world by 10^StaticViewScaleExponent. Only used if "
-        "UseAdaptiveStereoscopicDepthInfo is set to false"
+        "UseAdaptiveStereoscopicDepthInfo is set to false",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -235,21 +237,36 @@ namespace {
         "Stereoscopic Depth of the Surface in Focus",
         "Set the stereoscopically perceived distance (in meters) to the closest point "
         "out of the surface of the anchor and the center of the aim node. Only used if "
-        "UseAdaptiveStereoscopicDepthInfo is set to true"
+        "UseAdaptiveStereoscopicDepthInfo is set to true",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ConstantVelocityFlight = {
+        "ConstantVelocityFlight",
+        "Constant Velocity Flight",
+        "If this value is enabled, the camera motion will not be affected by the "
+        "distance of the camera to the surface of a planet. When enabling this setting "
+        "consider adjusting the mouse sensitivity to a lower value",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyIdleBehaviorInfo = {
         "ApplyIdleBehavior",
         "Apply Idle Behavior",
         "When set to true, the chosen idle behavior will be applied to the camera, "
-        "moving the camera accordingly"
+        "moving the camera accordingly",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorInfo = {
         "IdleBehavior",
         "Idle Behavior",
         "The chosen camera behavior that will be triggered when the idle behavior is "
-        "applied. Each option represents a predefined camera behavior"
+        "applied. Each option represents a predefined camera behavior",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -258,14 +275,18 @@ namespace {
         "ShouldTriggerWhenIdle",
         "Should Trigger When Idle",
         "If true, the chosen idle behavior will trigger automatically after a certain "
-        "time (see 'IdleWaitTime' property)"
+        "time (see 'IdleWaitTime' property)",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleWaitTimeInfo = {
         "IdleWaitTime",
         "Idle Wait Time",
         "The time (seconds) until idle behavior starts, if no camera interaction "
-        "has been performed. Note that friction counts as camera interaction"
+        "has been performed. Note that friction counts as camera interaction",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorSpeedInfo = {
@@ -273,7 +294,8 @@ namespace {
         "Speed Factor",
         "A factor that can be used to increase or slow down the speed of an applied "
         "idle behavior. A negative value will invert the direction. Note that a speed "
-        "of exactly 0 leads to no movement at all"
+        "of exactly 0 leads to no movement at all",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertIdleBehaviorInfo = {
@@ -281,7 +303,9 @@ namespace {
         "Invert",
         "If true, the direction of the idle behavior motion will be inverted compared "
         "to the default. For example, the 'Orbit' option rotates to the right per "
-        "default, and will rotate to the left when inverted"
+        "default, and will rotate to the left when inverted",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AbortOnCameraInteractionInfo =
@@ -291,7 +315,9 @@ namespace {
         "If set to true, the idle behavior is aborted on camera interaction. If false, "
         "the behavior will be reapplied after the interaction. Examples of camera "
         "interaction are: changing the anchor node, starting a camera path or session "
-        "recording playback, or navigating manually using an input device"
+        "recording playback, or navigating manually using an input device",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -300,18 +326,54 @@ namespace {
         "DampenInterpolationTime",
         "Start/End Dampen Interpolation Time",
         "The time to interpolate to/from full speed when an idle behavior is triggered "
-        "or canceled, in seconds"
+        "or canceled, in seconds",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableZoomInfo = {
-        "DisableZoom",
-        "Disable Zoom navigation",
-        "If true, the zoom navigation is disabled. If false, then the Zoom navigation is enabled"
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
+        "LimitZoom",
+        "Limit Zoom",
+        "Settings to limit the camera from going to close to or too far away from the "
+        "current focus"
     };
 
-    constexpr std::string_view IdleKeyOrbit = "Orbit";
-    constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
-    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
+    constexpr openspace::properties::Property::PropertyInfo
+        EnabledMinimumAllowedDistanceInfo =
+    {
+        "EnabledMinimumAllowedDistance",
+        "Enable minimum allowed distance limit",
+        "Enables or disables that the camera cannot go closer to an object than "
+        "the set minimum allowed distance",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
+        "MinimumAllowedDistance",
+        "Minimum Allowed Distance",
+        "The limit of how close the camera can get to an object. The distance is given "
+        "in meters above the surface",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnabledMaximumDistanceInfo = {
+        "EnableMaximumAllowedDistance",
+        "Enable Maximum Allowed Distance limit",
+        "Enables or disables that the camera cannot go further away from an object than "
+        "the set maximum allowed distance",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MaximumDistanceInfo = {
+        "MaximumAllowedDistance",
+        "Maximum Allowed Distance",
+        "The limit of how far away the camera can get from an object. The distance is "
+        "given in meters above the surface",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -366,17 +428,24 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     addProperty(dampenInterpolationTime);
 }
 
-OrbitalNavigator::LimitZoomOut::LimitZoomOut()
-    : properties::PropertyOwner({ "LimitZoomOut" })
-    , isEnabled(EnabledMaximumDistanceInfo, false)
+OrbitalNavigator::LimitZoom::LimitZoom()
+    : properties::PropertyOwner(LimitZoomInfo)
+    , enableZoomInLimit(EnabledMinimumAllowedDistanceInfo, true)
+    , minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
+    , enableZoomOutLimit(EnabledMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
-        4E+27,
+        4e+27f,
         50.f,
-        4E+27
+        4e+27f
     )
 {
-    addProperty(isEnabled);
+    // Min
+    addProperty(enableZoomInLimit);
+    addProperty(minimumAllowedDistance);
+
+    // Max
+    addProperty(enableZoomOutLimit);
     addProperty(maximumAllowedDistance);
     maximumAllowedDistance.setExponent(20.f);
 }
@@ -389,8 +458,6 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetAim(RetargetAimInfo)
     , _followAnchorNodeRotation(FollowAnchorNodeInfo, true)
     , _followAnchorNodeRotationDistance(FollowAnchorNodeDistanceInfo, 5.f, 0.f, 20.f)
-    , _enableMinimumAllowedDistanceLimit(EnabledMinimumAllowedDistanceLimitInfo, true)
-    , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
@@ -402,6 +469,7 @@ OrbitalNavigator::OrbitalNavigator()
         500000
     )
     , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
+    , _constantVelocityFlight(ConstantVelocityFlight, false)
     , _retargetInterpolationTime(RetargetInterpolationTimeInfo, 2.0, 0.0, 10.0)
     , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
     , _followRotationInterpolationTime(FollowRotationInterpTimeInfo, 1.0, 0.0, 10.0)
@@ -409,7 +477,6 @@ OrbitalNavigator::OrbitalNavigator()
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
-    , _disableZoom(DisableZoomInfo, false)
 {
     _anchor.onChange([this]() {
         if (_anchor.value().empty()) {
@@ -489,50 +556,50 @@ OrbitalNavigator::OrbitalNavigator()
     );
 
     // Define callback functions for changed properties
-    _friction.roll.onChange([&]() {
+    _friction.roll.onChange([this]() {
         _mouseStates.setRotationalFriction(_friction.roll);
         _joystickStates.setRotationalFriction(_friction.roll);
         _websocketStates.setRotationalFriction(_friction.roll);
     });
-    _friction.rotational.onChange([&]() {
+    _friction.rotational.onChange([this]() {
         _mouseStates.setHorizontalFriction(_friction.rotational);
         _joystickStates.setHorizontalFriction(_friction.rotational);
         _websocketStates.setHorizontalFriction(_friction.rotational);
     });
-    _friction.zoom.onChange([&]() {
+    _friction.zoom.onChange([this]() {
         _mouseStates.setVerticalFriction(_friction.zoom);
         _joystickStates.setVerticalFriction(_friction.zoom);
         _websocketStates.setVerticalFriction(_friction.zoom);
     });
-    _friction.friction.onChange([&]() {
+    _friction.friction.onChange([this]() {
         _mouseStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
         _joystickStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
         _websocketStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
     });
 
-    _mouseSensitivity.onChange([&]() {
+    _mouseSensitivity.onChange([this]() {
         _mouseStates.setSensitivity(_mouseSensitivity * pow(10.0, -4));
     });
-    _joystickSensitivity.onChange([&]() {
+    _joystickSensitivity.onChange([this]() {
         _joystickStates.setSensitivity(_joystickSensitivity * 0.1);
     });
-    _websocketSensitivity.onChange([&]() {
+    _websocketSensitivity.onChange([this]() {
         _websocketStates.setSensitivity(_websocketSensitivity);
     });
 
     addPropertySubOwner(_friction);
     addPropertySubOwner(_idleBehavior);
-    addPropertySubOwner(_limitZoomOut);
+    addPropertySubOwner(_limitZoom);
 
     _idleBehaviorDampenInterpolator.setTransferFunction(
         ghoul::quadraticEaseInOut<double>
     );
-    _idleBehavior.dampenInterpolationTime.onChange([&]() {
+    _idleBehavior.dampenInterpolationTime.onChange([this]() {
         _idleBehaviorDampenInterpolator.setInterpolationTime(
             _idleBehavior.dampenInterpolationTime
         );
      });
-    _idleBehavior.apply.onChange([&]() {
+    _idleBehavior.apply.onChange([this]() {
         if (_idleBehavior.apply) {
             // Reset velocities to ensure that abort on interaction works correctly
             resetVelocities();
@@ -546,10 +613,10 @@ OrbitalNavigator::OrbitalNavigator()
             _idleBehavior.dampenInterpolationTime
         );
     });
-    _idleBehavior.shouldTriggerWhenIdle.onChange([&]() {
+    _idleBehavior.shouldTriggerWhenIdle.onChange([this]() {
         _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
     });
-    _idleBehavior.idleWaitTime.onChange([&]() {
+    _idleBehavior.idleWaitTime.onChange([this]() {
         _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
     });
 
@@ -559,18 +626,17 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_retargetAim);
     addProperty(_followAnchorNodeRotation);
     addProperty(_followAnchorNodeRotationDistance);
-    addProperty(_enableMinimumAllowedDistanceLimit);
-    addProperty(_minimumAllowedDistance);
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
+    addProperty(_constantVelocityFlight);
     _stereoscopicDepthOfFocusSurface.setExponent(3.f);
     addProperty(_stereoscopicDepthOfFocusSurface);
 
     addProperty(_retargetInterpolationTime);
     addProperty(_stereoInterpolationTime);
 
-    _followRotationInterpolationTime.onChange([&]() {
+    _followRotationInterpolationTime.onChange([this]() {
         _followRotationInterpolator.setInterpolationTime(
             _followRotationInterpolationTime
         );
@@ -586,7 +652,6 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
     addProperty(_websocketSensitivity);
-    addProperty(_disableZoom);
 }
 
 glm::dvec3 OrbitalNavigator::anchorNodeToCameraVector() const {
@@ -648,6 +713,19 @@ void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputSt
     else {
         tickIdleBehaviorTimer(deltaTime);
     }
+
+    bool cameraLocationChanged = _mouseStates.hasNonZeroVelocities(true) ||
+        _joystickStates.hasNonZeroVelocities(true) ||
+        _websocketStates.hasNonZeroVelocities(true) ||
+        _scriptStates.hasNonZeroVelocities(true);
+
+    if (cameraLocationChanged && (_movementTimer < 0.f)) {
+        global::eventEngine->publishEvent<events::EventCameraMovedPosition>();
+        _movementTimer = _idleBehavior.idleWaitTime;
+    }
+    else if (!cameraLocationChanged) {
+        tickMovementTimer(static_cast<float>(deltaTime));
+    }
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
@@ -667,6 +745,12 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         .position = _camera->positionVec3() + anchorDisplacement,
         .rotation = _camera->rotationQuaternion()
     };
+
+    if (glm::length(pose.position) == 0.0) {
+        // If the position is 0.0, a lot of the calculations downstairs will fail as we
+        // calculate relative offsets from the center of the anchor node
+        return;
+    }
 
     const bool hasPreviousPositions =
         _previousAnchorNodePosition.has_value() &&
@@ -775,16 +859,14 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         posHandle
     );
 
-    if (!_disableZoom) {
-        // Perform the vertical movements based on user input
-        pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
+    // Perform the vertical movements based on user input
+    pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
 
-        pose.position = pushToSurface(
-            pose.position,
-            anchorPos,
-            posHandle
-        );
-    }
+    pose.position = pushToSurface(
+        pose.position,
+        anchorPos,
+        posHandle
+    );
 
     pose.rotation = composeCameraRotation(camRot);
 
@@ -795,6 +877,11 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
     if (_useAdaptiveStereoscopicDepth) {
         const glm::dvec3 anchorPos = _anchorNode->worldPosition();
         const glm::dvec3 cameraPos = _camera->positionVec3();
+
+        if (glm::length(cameraPos) == 0.0) {
+            // Calculating the surface position fails for (0,0,0) vectors
+            return;
+        }
 
         SurfacePositionHandle posHandle =
             calculateSurfacePositionHandle(*_anchorNode, cameraPos);
@@ -837,6 +924,10 @@ void OrbitalNavigator::updateOnCameraInteraction() {
     if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
         resetIdleBehavior();
     }
+}
+
+void OrbitalNavigator::tickMovementTimer(float deltaTime) {
+    _movementTimer -= deltaTime;
 }
 
 void OrbitalNavigator::tickIdleBehaviorTimer(double deltaTime) {
@@ -967,26 +1058,26 @@ void OrbitalNavigator::updatePreviousStateVariables() {
 }
 
 void OrbitalNavigator::setMinimumAllowedDistance(float distance) {
-    if (_limitZoomOut.isEnabled && distance > _limitZoomOut.maximumAllowedDistance) {
-        LWARNING("Setting minumum allowed distance larger than maximum allowed distance");
+    if (_limitZoom.enableZoomOutLimit && distance > _limitZoom.maximumAllowedDistance) {
+        LWARNING("Setting minimum allowed distance larger than maximum allowed distance");
     }
 
-    _minimumAllowedDistance = distance;
+    _limitZoom.minimumAllowedDistance = distance;
 }
 
-void OrbitalNavigator::setMaximumAllowedDistance(double distance) {
+void OrbitalNavigator::setMaximumAllowedDistance(float distance) {
     if (distance < 50.f) {
         LWARNING("Setting maximum allowed distance below 50 meters is not allowed");
         return;
     }
 
-    if (_minimumAllowedDistance > distance) {
+    if (_limitZoom.minimumAllowedDistance > distance) {
         LWARNING(
-            "Setting maximum allowed distance smaller than minumum allowed distance"
+            "Setting maximum allowed distance smaller than minimum allowed distance"
         );
     }
 
-    _limitZoomOut.maximumAllowedDistance = distance;
+    _limitZoom.maximumAllowedDistance = distance;
 }
 
 void OrbitalNavigator::startRetargetAnchor() {
@@ -1043,7 +1134,8 @@ void OrbitalNavigator::setRetargetInterpolationTime(float durationInSeconds) {
 
 bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPosition) const
 {
-    if (!_anchorNode || !_followAnchorNodeRotation) {
+    if (!_anchorNode || !_followAnchorNodeRotation || glm::length(cameraPosition) == 0.0)
+    {
         return false;
     }
 
@@ -1093,7 +1185,11 @@ bool OrbitalNavigator::hasRollFriction() const {
 }
 
 double OrbitalNavigator::minAllowedDistance() const {
-    return _minimumAllowedDistance;
+    return _limitZoom.minimumAllowedDistance;
+}
+
+double OrbitalNavigator::maxAllowedDistance() const {
+    return _limitZoom.maximumAllowedDistance;
 }
 
 OrbitalNavigator::CameraRotationDecomposition
@@ -1446,16 +1542,28 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
         positionHandle.centerToReferenceSurface +
         positionHandle.referenceSurfaceOutDirection * positionHandle.heightToSurface;
 
-    const glm::dvec3 centerToActualSurface = glm::dmat3(modelTransform) *
-                                             centerToActualSurfaceModelSpace;
+    const glm::dvec3 centerToActualSurface =
+        glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
+
     const glm::dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
-    const double distFromSurfaceToCamera = glm::length(actualSurfaceToCamera);
+
+    const double distFromSurfaceToCamera = [&]() {
+        if (_constantVelocityFlight) {
+            const glm::dvec3 centerToRefSurface =
+                glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
+            const glm::dvec3 refSurfaceToCamera = posDiff - centerToRefSurface;
+            return glm::length(refSurfaceToCamera);
+        }
+        else {
+            return glm::length(actualSurfaceToCamera);
+        }
+    }();
 
     // Final values to be used
     const double distFromCenterToSurface = glm::length(centerToActualSurface);
     const double distFromCenterToCamera = glm::length(posDiff);
 
-    const double speedScale =
+    double speedScale =
         distFromCenterToSurface > 0.0 ?
         glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
         1.0;
@@ -1581,13 +1689,13 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
                                            const glm::dvec3& objectPosition,
                                         const SurfacePositionHandle& positionHandle) const
 {
-    double minHeight =_enableMinimumAllowedDistanceLimit ?
-        static_cast<double>(_minimumAllowedDistance) : 0.0;
+    double minHeight = _limitZoom.enableZoomInLimit ?
+        static_cast<double>(_limitZoom.minimumAllowedDistance) : 0.0;
 
-    double maxHeight = _limitZoomOut.isEnabled ?
-        static_cast<double>(_limitZoomOut.maximumAllowedDistance) : -1.0;
+    double maxHeight = _limitZoom.enableZoomOutLimit ?
+        static_cast<double>(_limitZoom.maximumAllowedDistance) : -1.0;
 
-    if (maxHeight > 0 && minHeight > maxHeight) {
+    if (maxHeight > 0.0 && minHeight > maxHeight) {
         LWARNING("Minimum allowed distance is larger than maximum allowed distance");
     }
 
@@ -1608,14 +1716,15 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
         glm::sign(dot(actualSurfaceToCamera, referenceSurfaceOutDirection));
 
     // Adjustment for if the camera is inside the min distance
-    double adjustment = 0.0;
-    if (std::abs(minHeight) > std::numeric_limits<double>::epsilon()) {
-        adjustment = glm::max(minHeight - surfaceToCameraSigned, 0.0);
-    }
+    double adjustment =
+        std::abs(minHeight) > std::numeric_limits<double>::epsilon() ?
+        glm::max(minHeight - surfaceToCameraSigned, 0.0) :
+        0.0;
 
     // Adjustment for if the camera is outside the max distance
     // Only apply if the min adjustment not already applied
-    if (maxHeight > 0 && adjustment < std::numeric_limits<double>::epsilon()) {
+    if (maxHeight > 0.0 && std::abs(adjustment) < std::numeric_limits<double>::epsilon())
+    {
         adjustment = glm::min(maxHeight - surfaceToCameraSigned, 0.0);
     }
 
@@ -1828,12 +1937,12 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime,
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
 
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-    const glm::dvec3 axisInWorldCoords =
-        glm::dmat3(modelTransform) * glm::normalize(axis);
+    const glm::dvec3 axisInWorldSpace =
+        glm::normalize(glm::dmat3(modelTransform) * glm::normalize(axis));
 
     // Compute rotation to be applied around the axis
     double angle = deltaTime * speedScale;
-    const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldCoords);
+    const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldSpace);
 
     // Rotate the position vector from the center to camera and update position
     const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();

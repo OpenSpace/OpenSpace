@@ -41,7 +41,8 @@ namespace {
         "If this value is enabled, images between different levels are interpolated, "
         "rather than switching between levels abruptly. This makes transitions smoother "
         "and more visually pleasing",
-        openspace::properties::Property::Visibility::Hidden
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 
@@ -90,7 +91,7 @@ void LayerGroup::update() {
     _activeLayers.clear();
 
     for (const std::unique_ptr<Layer>& layer : _layers) {
-        if (layer->enabled()) {
+        if (layer->enabled() && layer->isInitialized()) {
             layer->update();
             _activeLayers.push_back(layer.get());
         }

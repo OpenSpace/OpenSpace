@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
@@ -42,7 +43,7 @@ struct LayerGroup;
 struct TileIndex;
 struct TileProvider;
 
-class Layer : public properties::PropertyOwner {
+class Layer : public properties::PropertyOwner, public Fadeable {
 public:
     Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
 
@@ -57,6 +58,7 @@ public:
     TileDepthTransform depthTransform() const;
     void setEnabled(bool enabled);
     bool enabled() const;
+    bool isInitialized() const;
     TileProvider* tileProvider() const;
     glm::vec3 solidColor() const;
     const LayerRenderSettings& renderSettings() const;
@@ -66,8 +68,6 @@ public:
 
     void update();
 
-    glm::ivec2 tilePixelStartOffset() const;
-    glm::ivec2 tilePixelSizeDifference() const;
     glm::vec2 tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
         const glm::vec2& tileUV, const glm::uvec2& resolution);
 
@@ -86,18 +86,16 @@ private:
     properties::TriggerProperty _remove;
     properties::StringProperty _guiDescription;
 
-    layers::Layer::ID _type;
+    layers::Layer::ID _typeId;
     std::unique_ptr<TileProvider> _tileProvider;
     properties::Vec3Property _solidColor;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
 
-    glm::ivec2 _padTilePixelStartOffset = glm::ivec2(0);
-    glm::ivec2 _padTilePixelSizeDifference = glm::ivec2(0);
-
     const layers::Group::ID _layerGroupId;
 
     std::function<void(Layer*)> _onChangeCallback;
+    bool _isInitialized = false;
   };
 
 } // namespace openspace::globebrowsing

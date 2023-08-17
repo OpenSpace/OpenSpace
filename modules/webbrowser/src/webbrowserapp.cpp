@@ -49,6 +49,10 @@ void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
     commandLine->AppendSwitch("use-mock-keychain");
     commandLine->AppendSwitch("enable-begin-frame-scheduling");
     commandLine->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
+#ifdef __APPLE__
+    commandLine->AppendSwitch("--disable-gpu-sandbox");
+    commandLine->AppendSwitch("--no-sandbox");
+#endif
 }
 
 } // namespace openspace

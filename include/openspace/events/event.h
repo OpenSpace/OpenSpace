@@ -77,6 +77,9 @@ struct Event {
         PointSpacecraft,
         RenderableEnabled,
         RenderableDisabled,
+        CameraPathStarted,
+        CameraPathFinished,
+        CameraMovedPosition,
         Custom
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -517,7 +520,57 @@ struct EventRenderableDisabled : public Event {
      */
     explicit EventRenderableDisabled(const SceneGraphNode* node_);
 
-  const tstring node;
+    const tstring node;
+};
+
+/**
+ * This event is created when the a camera path is started
+ */
+struct EventCameraPathStarted : public Event {
+    static constexpr Type Type = Event::Type::CameraPathStarted;
+
+    /**
+     * Creates an instance of an EventCameraPathStarted event.
+     *
+     * \param origin_ The scene graph node from which the path started
+     * \param destination_ The scene graph node at which the path ends
+     */
+    EventCameraPathStarted(const SceneGraphNode* origin_,
+        const SceneGraphNode* destination_);
+
+    const tstring origin;
+    const tstring destination;
+};
+
+/**
+ * This event is created when the a camera path is finished
+ */
+struct EventCameraPathFinished : public Event {
+    static constexpr Type Type = Event::Type::CameraPathFinished;
+
+    /**
+     * Creates an instance of an EventCameraPathStarted event.
+     *
+     * \param origin_ The scene graph node from which the path started
+     * \param destination_ The scene graph node where the path ended
+     */
+    EventCameraPathFinished(const SceneGraphNode* origin_,
+        const SceneGraphNode* destination_);
+
+    const tstring origin;
+    const tstring destination;
+};
+
+/**
+ * This event is created when the a camera moves location
+ */
+struct EventCameraMovedPosition : public Event {
+    static constexpr Type Type = Event::Type::CameraMovedPosition;
+
+    /**
+     * Creates an instance of an EventCameraMovedPosition event.
+     */
+    EventCameraMovedPosition();
 };
 
 /**

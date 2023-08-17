@@ -117,10 +117,14 @@ struct [[codegen::Dictionary(Action)]] Action {
     a.documentation = action.documentation.value_or(a.documentation);
     a.guiPath = action.guiPath.value_or(a.guiPath);
     if (!a.guiPath.starts_with('/')) {
-        throw ghoul::RuntimeError("Action's GuiPath must start with /");
+        throw ghoul::RuntimeError(
+            fmt::format(
+                "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but "
+                "should be '/{}' ", a.name, a.guiPath, a.guiPath)
+        );
     }
     if (action.isLocal.has_value()) {
-        a.synchronization = interaction::Action::IsSynchronized(*action.isLocal);
+        a.isLocal = interaction::Action::IsLocal(*action.isLocal);
     }
     global::actionManager->registerAction(std::move(a));
 }
@@ -148,10 +152,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     res.setValue("Name", action.name);
     res.setValue("Documentation", action.documentation);
     res.setValue("GuiPath", action.guiPath);
-    res.setValue(
-        "Synchronization",
-        action.synchronization == interaction::Action::IsSynchronized::Yes
-    );
+    res.setValue("IsLocal", action.isLocal == interaction::Action::IsLocal::Yes);
     return res;
 }
 
@@ -172,11 +173,7 @@ struct [[codegen::Dictionary(Action)]] Action {
         d.setValue("Name", a.name);
         d.setValue("Documentation", a.documentation);
         d.setValue("GuiPath", a.guiPath);
-        d.setValue(
-            "Synchronization",
-            a.synchronization == interaction::Action::IsSynchronized::Yes
-        );
-
+        d.setValue("IsLocal", a.isLocal == interaction::Action::IsLocal::Yes);
         res.push_back(d);
     }
     return res;

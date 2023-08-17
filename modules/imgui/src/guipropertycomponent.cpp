@@ -42,7 +42,9 @@ namespace {
         "Use Tree Layout",
         "If this value is checked, this component will display the properties using a "
         "tree layout, rather than using a flat map. This value should only be set on "
-        "property windows that display SceneGraphNodes, or the application might crash"
+        "property windows that display SceneGraphNodes, or the application might crash",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrderingInfo = {
@@ -50,7 +52,9 @@ namespace {
         "Tree Ordering",
         "This list determines the order of the first tree layer if it is used. Elements "
         "present in this list will be shown first, with an alphabetical ordering for "
-        "elements not listed"
+        "elements not listed",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props)
@@ -363,14 +367,14 @@ void GuiPropertyComponent::render() {
                              (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&
                        dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
 
-    auto renderProp = [&](properties::PropertyOwner* pOwner) {
+    auto renderProp = [this, owners](properties::PropertyOwner* pOwner) {
         const int count = nVisibleProperties(pOwner->propertiesRecursive());
 
         if (count == 0) {
             return;
         }
 
-        auto header = [&]() -> bool {
+        auto header = [&owners, &pOwner]() -> bool {
             if (owners.size() > 1) {
                 // Create a header in case we have multiple owners
                 return ImGui::CollapsingHeader(pOwner->guiName().c_str());

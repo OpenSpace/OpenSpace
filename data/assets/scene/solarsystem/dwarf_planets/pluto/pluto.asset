@@ -3,12 +3,14 @@ asset.require("spice/base")
 asset.require("./trail")
 
 
+
 local labelsPath = asset.syncedResource({
   Name = "Pluto Labels",
   Type = "HttpSynchronization",
   Identifier = "pluto_labels",
   Version = 1
 })
+
 
 local Pluto = {
   Identifier = "Pluto",
@@ -27,7 +29,7 @@ local Pluto = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1.173E6, 1.173E6, 1.173E6 },
+    Radii = { 1173000, 1173000, 1173000 },
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {
@@ -73,6 +75,7 @@ local PlutoLabel = {
     Description = "Label for Pluto, visible at the solarsystem overview zoom level"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Pluto)

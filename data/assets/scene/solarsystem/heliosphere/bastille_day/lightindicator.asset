@@ -1,10 +1,12 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local travelSpeedIndicator = {
+
+
+local TravelSpeedIndicator = {
   Identifier = "TravelSpeedIndicator-2000",
   --SunIAU adds an extra rotation. Using barycenter, then offsetting to SunIAU
-  Parent =  sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 695700000.0,
@@ -17,7 +19,7 @@ local travelSpeedIndicator = {
   },
   Renderable = {
     Type = "RenderableTravelSpeed",
-    Target = earthTransforms.EarthCenter.Identifier,    --name of scene graph node. Earth by default
+    Target = earthTransforms.EarthCenter.Identifier,
     LineWidth = 4,
     IndicatorLength = 10,
     FadeLength = 10
@@ -29,15 +31,17 @@ local travelSpeedIndicator = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(travelSpeedIndicator)
+  openspace.addSceneGraphNode(TravelSpeedIndicator)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(travelSpeedIndicator)
+  openspace.removeSceneGraphNode(TravelSpeedIndicator)
 end)
 
-asset.export(travelSpeedIndicator)
+asset.export(TravelSpeedIndicator)
+
 
 
 asset.meta = {

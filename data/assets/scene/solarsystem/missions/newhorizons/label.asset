@@ -1,6 +1,5 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local transforms = asset.require("./transforms")
 local NewHorizonsModel = asset.require("./model")
+
 
 
 local models = asset.syncedResource({
@@ -23,6 +22,7 @@ local Labels = {
     Path = "/Solar System/Missions/New Horizons"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Labels)

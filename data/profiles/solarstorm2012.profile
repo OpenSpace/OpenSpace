@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "dashboard/default_dashboard",
     "scene/solarsystem/heliosphere/2012/sun_earth_2012_fieldlines",
     "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",
@@ -37,19 +38,19 @@
   ],
   "keybindings": [
     {
-      "action": "2012july.reset_loop",
+      "action": "os.2012july.ResetLoop",
       "key": "R"
     },
     {
-      "action": "2012july.dark_sun",
+      "action": "os.2012july.DarkSun",
       "key": "D"
     },
     {
-      "action": "2012july.loop_enlil",
+      "action": "os.2012july.LoopEnlil",
       "key": "E"
     },
     {
-      "action": "2012july.loop_batsrus",
+      "action": "os.2012july.LoopBatsrus",
       "key": "B"
     }
   ],

@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
 
 
 
@@ -15,13 +14,13 @@ local Kerberos = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 0.1E5, 0.1E5, 0.1E5 },
+    Radii = { 10000, 10000, 10000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
   Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "pluto_moon_minor" },
   GUI = {
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Kerberos"
   }
 }
 
@@ -48,7 +47,7 @@ local KerberosTrail = {
   },
   GUI = {
     Name = "Kerberos Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Kerberos"
   }
 }
 
@@ -71,11 +70,12 @@ local KerberosLabel = {
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
-    Name = "Cheron Label",
-    Path = "/Solar System/Dwarf Planets/Pluto/Moons",
+    Name = "Kerberos Label",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Kerberos",
     Description = "Label for Pluto's moon Kerberos"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Kerberos)
@@ -91,6 +91,7 @@ end)
 
 asset.export(Kerberos)
 asset.export(KerberosTrail)
+asset.export(KerberosLabel)
 
 
 

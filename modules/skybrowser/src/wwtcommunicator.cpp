@@ -32,8 +32,6 @@
 #include <deque>
 
 namespace {
-    constexpr std::string_view _loggerCat = "WwtCommunicator";
-
     // WWT messages
     ghoul::Dictionary moveCameraMessage(const glm::dvec2& celestCoords, double fov,
                                         double roll)
@@ -121,7 +119,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
         "VerticalFov",
         "Vertical Field Of View",
-        "The vertical field of view of the target."
+        "The vertical field of view of the target.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(WwtCommunicator)]] Parameters {
@@ -243,7 +242,7 @@ void WwtCommunicator::setEquatorialAim(glm::dvec2 equatorial) {
 }
 
 void WwtCommunicator::setBorderColor(glm::ivec3 color) {
-    _borderColor = std::move(color);
+    _wwtBorderColor = std::move(color);
     _borderColorIsDirty = true;
 }
 
@@ -256,7 +255,7 @@ void WwtCommunicator::setBorderRadius(double radius) {
 void WwtCommunicator::updateBorderColor() const {
     std::string script = fmt::format(
         "setBackgroundColor('rgb({},{},{})');",
-        _borderColor.x, _borderColor.y, _borderColor.z
+        _wwtBorderColor.x, _wwtBorderColor.y, _wwtBorderColor.z
     );
     executeJavascript(script);
 }
@@ -278,13 +277,13 @@ bool WwtCommunicator::isImageCollectionLoaded() const {
 }
 
 SelectedImageDeque::iterator WwtCommunicator::findSelectedImage(
-                                                              const std::string& imageUrl) 
+                                                              const std::string& imageUrl)
 {
     auto it = std::find_if(
         _selectedImages.begin(),
         _selectedImages.end(),
-        [imageUrl](const std::pair<std::string, double>& pair) { 
-            return pair.first == imageUrl; 
+        [imageUrl](const std::pair<std::string, double>& pair) {
+            return pair.first == imageUrl;
         }
     );
     return it;
@@ -356,7 +355,7 @@ void WwtCommunicator::setIdInBrowser(const std::string& id) const {
 }
 
 glm::ivec3 WwtCommunicator::borderColor() const {
-    return _borderColor;
+    return _wwtBorderColor;
 }
 
 double WwtCommunicator::verticalFov() const {

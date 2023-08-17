@@ -12,7 +12,8 @@ local speck = asset.syncedResource({
   Version = 3
 })
 
-local object = {
+
+local Object = {
   Identifier = "HIIRegions",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -30,7 +31,7 @@ local object = {
     Texture = textures .. "point4.png",
     PolygonSides = 6,
     Unit = "pc",
-    ScaleFactor = 420,
+    ScaleFactor = 420.0,
     BillboardMinMaxSize = { 0.0, 300.0 },
     EnablePixelSizeControl = false
   },
@@ -51,15 +52,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

@@ -50,6 +50,7 @@ private:
     std::unique_ptr<DefaultTileProvider> _currentTileProvider = nullptr;
 
     properties::IntProperty _index;
+    properties::IntProperty _nImages;
     properties::StringProperty _currentImage;
     properties::StringProperty _folderPath;
 

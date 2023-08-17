@@ -57,18 +57,10 @@ bool MissionManager::hasCurrentMission() const {
     return _currentMission != _missionMap.end();
 }
 
-std::string MissionManager::loadMission(const std::string& filename) {
-    ghoul_assert(!filename.empty(), "filename must not be empty");
-    ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
-    ghoul_assert(
-        std::filesystem::is_regular_file(filename),
-        "filename " + filename + " must exist"
-    );
 
+std::string MissionManager::loadMission(Mission mission) {
     // Changing the values might invalidate the _currentMission iterator
-    std::string currentMission =  hasCurrentMission() ? _currentMission->first : "";
-
-    Mission mission = missionFromFile(filename);
+    std::string currentMission = hasCurrentMission() ? _currentMission->first : "";
     std::string missionName = mission.name();
     _missionMap.insert({ missionName, std::move(mission) });
     if (_missionMap.size() == 1) {
@@ -105,6 +97,10 @@ const Mission& MissionManager::currentMission() {
     return _currentMission->second;
 }
 
+const std::map<std::string, Mission>& MissionManager::missionMap() {
+    return _missionMap;
+}
+
 scripting::LuaLibrary MissionManager::luaLibrary() {
     return {
         "",
@@ -118,6 +114,4 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
 }
 
 // Singleton
-
-
 }  // namespace openspace

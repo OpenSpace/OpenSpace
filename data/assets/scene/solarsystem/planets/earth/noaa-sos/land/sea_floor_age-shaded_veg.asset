@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Age of the Seafloor (vegetation)"
@@ -24,35 +25,36 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_base = {
+
+local LayerBase = {
   Identifier = Identifier,
   Name = Name,
   FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
 
-local layer_aol = {
+local LayerAol = {
   Identifier = Identifier .. "-aol",
   Name = Name .. " (AOL)",
   FilePath = syncedDirectory .. "4096_aol.png",
   Description = Description
 }
 
-local layer_no_labels = {
+local LayerNoLabels = {
   Identifier = Identifier .. "-no_labels",
   Name = Name .. " (No Labels)",
   FilePath = syncedDirectory .. "4096_nolabels.jpg",
   Description = Description
 }
 
-local layer_trans = {
+local LayerTrans = {
   Identifier = Identifier .. "-trans",
   Name = Name .. " (Trans)",
   FilePath = syncedDirectory .. "4096_trans.png",
   Description = Description
 }
 
-local colorbar = {
+local Colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -63,27 +65,28 @@ local colorbar = {
 }
 
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_aol)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_no_labels)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_trans)
-  openspace.addScreenSpaceRenderable(colorbar)
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerAol)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNoLabels)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerTrans)
+  openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_aol)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_no_labels)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_trans)
-  openspace.removeScreenSpaceRenderable(colorbar)
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerTrans)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNoLabels)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerAol)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
 end)
 
-asset.export(layer_base)
-asset.export(layer_aol)
-asset.export(layer_no_labels)
-asset.export(layer_trans)
-asset.export(colorbar)
+asset.export(LayerBase)
+asset.export(LayerAol)
+asset.export(LayerNoLabels)
+asset.export(LayerTrans)
+asset.export(Colorbar)
+
 
 
 asset.meta = {

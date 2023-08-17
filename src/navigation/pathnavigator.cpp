@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/pathnavigator.h>
@@ -47,7 +48,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <vector>
-
 #include "pathnavigator_lua.inl"
 
 namespace {
@@ -58,13 +58,15 @@ namespace {
         "Default Path Type",
         "The default path type chosen when generating a path or flying to a target. "
         "See wiki for alternatives. The shape of the generated path will be different "
-        "depending on the path type"
+        "depending on the path type",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
         "IncludeRoll",
         "Include Roll",
-        "If disabled, roll is removed from the interpolation of camera orientation"
+        "If disabled, roll is removed from the interpolation of camera orientation",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
@@ -72,14 +74,16 @@ namespace {
         "Speed Scale",
         "Scale factor that the speed will be multiplied with during path traversal. "
         "Can be used to speed up or slow down the camera motion, depending on if the "
-        "value is larger than or smaller than one"
+        "value is larger than or smaller than one",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorOnFinishInfo = {
         "ApplyIdleBehaviorOnFinish",
         "Apply Idle Behavior on Finish",
         "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
-        "triggered once the path has reached its target"
+        "triggered once the path has reached its target",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ArrivalDistanceFactorInfo = {
@@ -88,7 +92,8 @@ namespace {
         "A factor used to compute the default distance from a target scene graph node "
         "when creating a camera path. The factor will be multipled with the node's "
         "bounding sphere to compute the target height from the bounding sphere of the "
-        "object"
+        "object",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationSpeedFactorInfo = {
@@ -96,7 +101,9 @@ namespace {
         "Rotation Speed Factor (Linear Path)",
         "Affects how fast the camera rotates to the target rotation during a linear "
         "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
-        "seconds. A value of 2 means twice that fast, and so on"
+        "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
@@ -104,14 +111,17 @@ namespace {
         "Minimal Valid Bounding Sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "
         "computation of target positions and path generation, to avoid issues when "
-        "there is no bounding sphere"
+        "there is no bounding sphere",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RelevantNodeTagsInfo = {
         "RelevantNodeTags",
         "Relevant Node Tags",
         "List of tags for the nodes that are relevant for path creation, for example "
-        "when avoiding collisions"
+        "when avoiding collisions",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -127,7 +137,7 @@ PathNavigator::PathNavigator()
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
     , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
-    , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 1.f, 0.1f, 2.f)
+    , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 1.5f, 0.1f, 3.f)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
@@ -300,7 +310,8 @@ void PathNavigator::startPath() {
         return;
     }
 
-    if (!global::openSpaceEngine->setMode(OpenSpaceEngine::Mode::CameraPath)) {
+    bool success = global::openSpaceEngine->setMode(OpenSpaceEngine::Mode::CameraPath);
+    if (!success) {
         LERROR("Could not start camera path");
         return; // couldn't switch to camera path mode
     }
@@ -323,6 +334,11 @@ void PathNavigator::startPath() {
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
     global::navigationHandler->orbitalNavigator().resetVelocities();
+
+    global::eventEngine->publishEvent<events::EventCameraPathStarted>(
+        _currentPath->startPoint().node(),
+        _currentPath->endPoint().node()
+    );
 }
 
 void PathNavigator::abortPath() {
@@ -388,35 +404,17 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
         // than the interaction sphere of the node
         double bs = n->boundingSphere();
         double is = n->interactionSphere();
-        return is > bs ? is : bs;
+        return std::max(is, bs);
     };
 
     double result = sphere(node);
 
     if (result < _minValidBoundingSphere) {
-        // If the bs of the target is too small, try to find a good value in a child node.
-        // Only check the closest children, to avoid deep traversal in the scene graph.
-        // Alsp. the chance to find a bounding sphere that represents the visual size of
-        // the target well is higher for these nodes
-        for (SceneGraphNode* child : node->children()) {
-            result = sphere(child);
-            if (result > _minValidBoundingSphere) {
-                LDEBUG(fmt::format(
-                    "The scene graph node '{}' has no, or a very small, bounding sphere. "
-                    "Using bounding sphere of child node '{}' in computations",
-                    node->identifier(),
-                    child->identifier()
-                ));
-                return result;
-            }
-        }
-
         LDEBUG(fmt::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
-            "minimal value. This might lead to unexpected results",
-            node->identifier())
-        );
-
+            "minimal value of {}. This might lead to unexpected results",
+            node->identifier(), _minValidBoundingSphere
+        ));
         result = _minValidBoundingSphere;
     }
 
@@ -453,6 +451,11 @@ void PathNavigator::handlePathEnd() {
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
+
+    global::eventEngine->publishEvent<events::EventCameraPathFinished>(
+        _currentPath->startPoint().node(),
+        _currentPath->endPoint().node()
+    );
 }
 
 void PathNavigator::findRelevantNodes() {
@@ -466,7 +469,7 @@ void PathNavigator::findRelevantNodes() {
         return;
     }
 
-    auto isRelevant = [&](const SceneGraphNode* node) {
+    auto isRelevant = [&relevantTags](const SceneGraphNode* node) {
         const std::vector<std::string> tags = node->tags();
         auto result = std::find_first_of(
             relevantTags.begin(),

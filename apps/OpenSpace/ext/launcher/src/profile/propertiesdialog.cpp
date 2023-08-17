@@ -93,12 +93,12 @@ void PropertiesDialog::createWidgets() {
 
         box->addStretch();
 
-        _fillFromScriptLog = new QPushButton("Fill from ScriptLog");
+        _addFromScriptLog = new QPushButton("Add from ScriptLog");
         connect(
-            _fillFromScriptLog, &QPushButton::clicked,
+            _addFromScriptLog, &QPushButton::clicked,
             this, &PropertiesDialog::selectLineFromScriptLog
         );
-        box->addWidget(_fillFromScriptLog);
+        box->addWidget(_addFromScriptLog);
 
         layout->addLayout(box);
     }
@@ -316,6 +316,7 @@ void PropertiesDialog::transitionToEditMode() {
     _saveButton->setDisabled(true);
     _cancelButton->setDisabled(true);
     _buttonBox->setDisabled(true);
+    _addFromScriptLog->setDisabled(true);
 
     _commandLabel->setText("<font color='black'>Property Set Command</font>");
     _propertyLabel->setText("<font color='black'>Property</font>");
@@ -331,6 +332,7 @@ void PropertiesDialog::transitionFromEditMode() {
     _saveButton->setDisabled(false);
     _cancelButton->setDisabled(false);
     _buttonBox->setDisabled(false);
+    _addFromScriptLog->setDisabled(false);
 
     _commandLabel->setText("<font color='light gray'>Property Set Command</font>");
     _propertyLabel->setText("<font color='light gray'>Property</font>");

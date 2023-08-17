@@ -12,46 +12,48 @@ local planeSpeck = asset.syncedResource({
   Version = 1
 })
 
-local plane = {
-    Identifier = "MilkyWayGalaxyImage",
-    Parent = "Root",
-    Renderable = {
-      Type = "RenderablePlanesCloud",
-      Enabled = true,
-      Color = { 1.0, 1.0, 1.0 },
-      Opacity = 0.99,
-      ScaleFactor = 2.8,
-      File = planeSpeck .. "galaxy.speck",
-      TexturePath = planeTextures,
-      Luminosity = "size",
-      ScaleLuminosity = 1.0,
-      FadeInDistances = { 3000.0, 50000.0 },
-      PlaneMinSize = 5.0,
-      Unit = "pc"
-    },
-    GUI = {
-      Name = "Milky Way Galaxy Image",
-      Path = "/Milky Way",
-      Description = [[Census: 1 image. DU Version 2.2. <br> The exterior view of the
-        Milky Way is simply a two-dimensional image. The image is that of NGC 1232, a
-        galaxy thought to resemble our Milky Way. The image has been properly sized
-        and approximately oriented to function as a placeholder, allowing one to see
-        the context of the Galaxy relative to other data in the atlas. The features
-        you see in the image, of course, do not represent our Galaxy, per se, but
-        resemble similar features found in our Galaxy.(Description from URL)
-        <br><br> Data Reference: European Southern Observatory]]
-    }
+
+local Plane = {
+  Identifier = "MilkyWayGalaxyImage",
+  Parent = "Root",
+  Renderable = {
+    Type = "RenderablePlanesCloud",
+    Enabled = true,
+    Color = { 1.0, 1.0, 1.0 },
+    Opacity = 0.99,
+    ScaleFactor = 2.8,
+    File = planeSpeck .. "galaxy.speck",
+    TexturePath = planeTextures,
+    Luminosity = "size",
+    ScaleLuminosity = 1.0,
+    FadeInDistances = { 3000.0, 50000.0 },
+    PlaneMinSize = 5.0,
+    Unit = "pc"
+  },
+  GUI = {
+    Name = "Milky Way Galaxy Image",
+    Path = "/Milky Way",
+    Description = [[Census: 1 image. DU Version 2.2. <br> The exterior view of the
+      Milky Way is simply a two-dimensional image. The image is that of NGC 1232, a
+      galaxy thought to resemble our Milky Way. The image has been properly sized
+      and approximately oriented to function as a placeholder, allowing one to see
+      the context of the Galaxy relative to other data in the atlas. The features
+      you see in the image, of course, do not represent our Galaxy, per se, but
+      resemble similar features found in our Galaxy.(Description from URL)
+      <br><br> Data Reference: European Southern Observatory]]
+  }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(plane)
+  openspace.addSceneGraphNode(Plane)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(plane)
+  openspace.removeSceneGraphNode(Plane)
 end)
 
-asset.export(plane)
+asset.export(Plane)
 
 
 

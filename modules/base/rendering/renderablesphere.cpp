@@ -31,19 +31,33 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/sphere.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 5> UniformNames = {
-        "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
-        "mirrorTexture"
+    constexpr std::array<const char*, 6> UniformNames = {
+        "opacity", "modelViewProjection", "modelViewTransform", "modelViewRotation",
+        "colorTexture", "mirrorTexture"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+        "Size",
+        "Size (in meters)",
+        "This value specifies the radius of the sphere in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
+        "Segments",
+        "Number of Segments",
+        "This value specifies the number of segments that the sphere is separated in",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     enum class Orientation : int {
@@ -52,45 +66,26 @@ namespace {
         Both
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this sphere. This image is expected to be an equirectangular "
-        "projection"
+    constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
+        "Orientation",
+        "Orientation",
+        "Specifies whether the texture is applied to the inside of the sphere, the "
+        "outside of the sphere, or both",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
         "Mirror Texture",
-        "Mirror the texture along the x-axis"
+        "Mirror the texture along the x-axis",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
-        "Orientation",
-        "Orientation",
-        "Specifies whether the texture is applied to the inside of the sphere, the "
-        "outside of the sphere, or both"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Number of Segments",
-        "This value specifies the number of segments that the sphere is separated in"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
-        "Size",
-        "Size (in meters)",
-        "This value specifies the radius of the sphere in meters"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
-        "FadeOutThreshold",
-        "Fade-Out Threshold",
-        "This value determines percentage of the sphere that is visible before starting "
-        "to fade it out. A negative or zero value means no fading out will happen. This "
-        "is also the default"
+    constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
+        "DisableFadeInOut",
+        "Disable Fade-In/Fade-Out effects",
+        "Enables/Disables the fade in and out effects",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
@@ -99,13 +94,17 @@ namespace {
         "This value determines the distance from center of MilkyWay from where the "
         "astronomical object starts to fade in, given as a percentage of the size of "
         "the object. A negative or zero value means no fading in will happen. This is "
-        "also the default"
+        "also the default",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
-        "DisableFadeInOut",
-        "Disable Fade-In/Fade-Out effects",
-        "Enables/Disables the fade in and out effects"
+    constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
+        "FadeOutThreshold",
+        "Fade-Out Threshold",
+        "This value determines percentage of the sphere that is visible before starting "
+        "to fade it out. A negative or zero value means no fading out will happen. This "
+        "is also the default",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
@@ -114,9 +113,6 @@ namespace {
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
         int segments;
-
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::string texture;
 
         enum class [[codegen::map(Orientation)]] Orientation {
             Outside,
@@ -130,14 +126,14 @@ namespace {
         // [[codegen::verbatim(MirrorTextureInfo.description)]]
         std::optional<bool> mirrorTexture;
 
-        // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
-        std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
+        // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
+        std::optional<bool> disableFadeInOut;
 
         // [[codegen::verbatim(FadeInThresholdInfo.description)]]
         std::optional<float> fadeInThreshold;
 
-        // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
-        std::optional<bool> disableFadeInOut;
+        // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
+        std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
     };
 #include "renderablesphere_codegen.cpp"
 } // namespace
@@ -150,10 +146,9 @@ documentation::Documentation RenderableSphere::Documentation() {
 
 RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath(TextureInfo)
-    , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _segments(SegmentsInfo, 8, 4, 1000)
+    , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _mirrorTexture(MirrorTextureInfo, false)
     , _disableFadeInDistance(DisableFadeInOutInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, -1.f, -0.1f, 1.f, 0.001f)
@@ -161,27 +156,9 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _size = p.size;
-    _segments = p.segments;
-    _texturePath = p.texture;
-
-    _orientation.addOptions({
-        { static_cast<int>(Orientation::Outside), "Outside" },
-        { static_cast<int>(Orientation::Inside), "Inside" },
-        { static_cast<int>(Orientation::Both), "Both" }
-    });
-
-    if (p.orientation.has_value()) {
-        _orientation = static_cast<int>(codegen::map<Orientation>(*p.orientation));
-    }
-    else {
-        _orientation = static_cast<int>(Orientation::Outside);
-    }
-    addProperty(_orientation);
-
     _size.setExponent(15.f);
     _size.onChange([this]() {
         setBoundingSphere(_size);
@@ -189,30 +166,39 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     });
     addProperty(_size);
 
+    _segments = p.segments;
+    _segments.onChange([this]() {
+        _sphereIsDirty = true;
+    });
     addProperty(_segments);
-    _segments.onChange([this]() { _sphereIsDirty = true; });
 
-    addProperty(_texturePath);
-    _texturePath.onChange([this]() { loadTexture(); });
+    _orientation.addOptions({
+        { static_cast<int>(Orientation::Outside), "Outside" },
+        { static_cast<int>(Orientation::Inside), "Inside" },
+        { static_cast<int>(Orientation::Both), "Both" }
+    });
+    _orientation = p.orientation.has_value() ?
+        static_cast<int>(codegen::map<Orientation>(*p.orientation)):
+        static_cast<int>(Orientation::Outside);
+    addProperty(_orientation);
 
     _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
     addProperty(_mirrorTexture);
 
-    _fadeOutThreshold = p.fadeOutThreshold.value_or(_fadeOutThreshold);
-    addProperty(_fadeOutThreshold);
+    _disableFadeInDistance = p.disableFadeInOut.value_or(_disableFadeInDistance);
+    addProperty(_disableFadeInDistance);
 
     _fadeInThreshold = p.fadeInThreshold.value_or(_fadeInThreshold);
     addProperty(_fadeInThreshold);
 
-    _disableFadeInDistance = p.disableFadeInOut.value_or(_disableFadeInDistance);
-    addProperty(_disableFadeInDistance);
+    _fadeOutThreshold = p.fadeOutThreshold.value_or(_fadeOutThreshold);
+    addProperty(_fadeOutThreshold);
 
     setBoundingSphere(_size);
-    setRenderBinFromOpacity();
 }
 
 bool RenderableSphere::isReady() const {
-    return _shader && _texture;
+    return _shader != nullptr;
 }
 
 void RenderableSphere::initializeGL() {
@@ -231,12 +217,10 @@ void RenderableSphere::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
-
-    loadTexture();
 }
 
 void RenderableSphere::deinitializeGL() {
-    _texture = nullptr;
+    _sphere = nullptr;
 
     BaseModule::ProgramObjectManager.release(
         "Sphere",
@@ -244,6 +228,7 @@ void RenderableSphere::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
+
     _shader = nullptr;
 }
 
@@ -266,6 +251,10 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glm::mat4 modelViewProjection = data.camera.projectionMatrix() *
                              glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
     _shader->setUniform(_uniformCache.modelViewProjection, modelViewProjection);
+
+    const glm::dmat4 modelViewTransform =
+        data.camera.combinedViewMatrix() * modelTransform;
+    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
 
     glm::mat3 modelViewRotation = glm::mat3(
         glm::dmat3(data.camera.viewRotationMatrix()) * modelRotation
@@ -334,7 +323,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     }
 
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
-    _shader->setUniform(_uniformCache._mirrorTexture, _mirrorTexture.value());
+    _shader->setUniform(_uniformCache.mirrorTexture, _mirrorTexture.value());
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -354,20 +343,20 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
+    if (renderBin() == Renderable::RenderBin::PreDeferredTransparent) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
-    }
-
     _shader->setIgnoreUniformLocationError(IgnoreError::No);
     _shader->deactivate();
+
+    // Reset
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    unbindTexture();
 
     if (orientation == Orientation::Inside) {
         glCullFace(GL_BACK);
@@ -390,28 +379,8 @@ void RenderableSphere::update(const UpdateData&) {
     }
 }
 
-void RenderableSphere::bindTexture() {
-    _texture->bind();
-}
-
-void RenderableSphere::unbindTexture() {}
-
-void RenderableSphere::loadTexture() {
-    if (!_texturePath.value().empty()) {
-        std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(_texturePath, 2);
-
-        if (texture) {
-            LDEBUGC(
-                "RenderableSphere",
-                fmt::format("Loaded texture from {}", absPath(_texturePath))
-            );
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            texture->purgeFromRAM();
-            _texture = std::move(texture);
-        }
-    }
+void RenderableSphere::unbindTexture() {
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 } // namespace openspace
