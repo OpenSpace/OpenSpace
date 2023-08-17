@@ -39,7 +39,7 @@ local apollo8State = {
   Identifier = "Apollo8",
   Enter = [[
     ]] .. util.fadeInNodes({ "Apollo8EarthBarycenterTrail" }) .. [[
-    ]] .. util.fadeOutNodes({ "ISS_trail", "ISSModel" }) .. [[
+    ]] .. util.fadeOutNodes({ "ISS_trail", "ISS" }) .. [[
     ]] .. scripts.apolloScripts .. [[
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnabledMinimumAllowedDistance", false);
@@ -51,7 +51,7 @@ local apollo8State = {
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
     openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
     ]] .. util.fadeOutNodes({ "Apollo8EarthBarycenterTrail" }) .. [[
-    ]] .. util.fadeInNodes({ "ISS_trail", "ISSModel" }) .. [[
+    ]] .. util.fadeInNodes({ "ISS_trail", "ISS" }) .. [[
   ]]
 }
 
