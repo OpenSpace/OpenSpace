@@ -40,7 +40,7 @@ local ScaleModel = {
   },
   GUI = {
     Name = "Kuala Lumpur Tower",
-    Description = "The tower is 421 m (1,381 ft) tall",
+    Description = "The tower is 421 m (1,381 ft) tall.",
     Path = "/Scale Objects"
   }
 }
