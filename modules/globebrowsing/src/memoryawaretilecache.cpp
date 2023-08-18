@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/src/rawtile.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
 
 namespace {
@@ -211,22 +212,31 @@ void MemoryAwareTileCache::TextureContainer::reset() {
 
     _textures.clear();
     _freeTexture = 0;
+
+    using namespace ghoul::systemcapabilities;
+
+    ghoul::opengl::Texture::FilterMode mode =
+        OpenGLCap.gpuVendor() == OpenGLCapabilitiesComponent::Vendor::AmdATI ?
+        ghoul::opengl::Texture::FilterMode::Linear :
+        ghoul::opengl::Texture::FilterMode::AnisotropicMipMap;
+
     for (size_t i = 0; i < _numTextures; ++i) {
         using namespace ghoul::opengl;
+
         std::unique_ptr<Texture> tex = std::make_unique<Texture>(
             _initData.dimensions,
             GL_TEXTURE_2D,
             _initData.ghoulTextureFormat,
             toGlTextureFormat(_initData.glType, _initData.ghoulTextureFormat),
             _initData.glType,
-            Texture::FilterMode::AnisotropicMipMap,
+            mode,
             Texture::WrappingMode::ClampToEdge,
             Texture::AllocateData(_initData.shouldAllocateDataOnCPU)
         );
 
         tex->setDataOwnership(Texture::TakeOwnership::Yes);
         tex->uploadTexture();
-        tex->setFilter(Texture::FilterMode::AnisotropicMipMap);
+        tex->setFilter(mode);
 
         _textures.push_back(std::move(tex));
     }
@@ -475,7 +485,13 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile rawTile
         // Hi there, I know someone will be tempted to change this to a Linear filtering
         // mode at some point. This will introduce rendering artifacts when looking at the
         // globe at oblique angles (see #2752)
-        tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        using namespace ghoul::systemcapabilities;
+        ghoul::opengl::Texture::FilterMode mode =
+            OpenGLCap.gpuVendor() == OpenGLCapabilitiesComponent::Vendor::AmdATI ?
+            ghoul::opengl::Texture::FilterMode::Linear :
+            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap;
+
+        tex->setFilter(mode);
         Tile tile{ tex, std::move(rawTile.tileMetaData), Tile::Status::OK };
         TileTextureInitData::HashKey initDataKey = initData.hashKey;
         _textureContainerMap[initDataKey].second->put(std::move(key), std::move(tile));
