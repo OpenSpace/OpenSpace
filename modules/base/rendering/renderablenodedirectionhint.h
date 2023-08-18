@@ -35,10 +35,10 @@
 #include <ghoul/glm.h>
 
 namespace ghoul::opengl { class ProgramObject; }
-namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
 class Translation;
 
 /**

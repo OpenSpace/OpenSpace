@@ -71,7 +71,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value pecifies the number of segments that the shapes for the arrow are "
+        "This value specifies the number of segments that the shapes for the arrow are "
         "separated in. A higher number leads to a higher resolution",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -106,7 +106,7 @@ namespace {
         "Offset Distance",
         "The distance from the center of the start node where the arrow starts. "
         "If 'UseRelativeOffset' is true, the value should be given as a factor to "
-        "multiply with the boudning sphere of the node. Otherwise, the value is "
+        "multiply with the bounding sphere of the node. Otherwise, the value is "
         "specified in meters",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -276,7 +276,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _segments = p.segments.value_or(_segments);
     addProperty(_segments);
@@ -398,9 +398,7 @@ void RenderableNodeDirectionHint::deinitializeGL() {
 }
 
 bool RenderableNodeDirectionHint::isReady() const {
-    bool ready = true;
-    ready &= (_shaderProgram != nullptr);
-    return ready;
+    return _shaderProgram;
 }
 
 void RenderableNodeDirectionHint::updateShapeTransforms(const RenderData& data) {
@@ -439,7 +437,7 @@ void RenderableNodeDirectionHint::updateShapeTransforms(const RenderData& data) 
     }
 
     // Take additional transformation scale into account
-    const glm::dmat4 S = glm::scale(
+    const glm::dmat4 s = glm::scale(
         glm::dmat4(1.0),
         glm::dvec3(data.modelTransform.scale)
     );
@@ -454,7 +452,7 @@ void RenderableNodeDirectionHint::updateShapeTransforms(const RenderData& data) 
 
     if (_invertArrowDirection) {
         std::swap(startPos, endPos);
-        arrowDirection *= -1;
+        arrowDirection *= -1.0;
     }
 
     double coneLength = _arrowHeadSize * length;
@@ -463,7 +461,7 @@ void RenderableNodeDirectionHint::updateShapeTransforms(const RenderData& data) 
 
     // Create transformation matrices to reshape to size and position
     _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
-    glm::dvec3 cylinderScale = glm::dvec3(S * glm::dvec4(_width, _width, cylinderLength, 0.0));
+    glm::dvec3 cylinderScale = glm::dvec3(s * glm::dvec4(_width, _width, cylinderLength, 0.0));
     _cylinderScale = glm::scale(glm::dmat4(1.0), cylinderScale);
 
     // Adapt arrow head start to scaled size
@@ -481,13 +479,9 @@ void RenderableNodeDirectionHint::updateShapeTransforms(const RenderData& data) 
 void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&) {
     updateShapeTransforms(data);
 
-    // Not used. Does not make sense when doing computations in world coordinates.
-    //const glm::dmat4 T = glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
-    //const glm::dmat4 R = glm::dmat4(data.modelTransform.rotation);
-
     // Cylinder transforms
-    glm::dmat4 modelTransform = _cylinderTranslation * _pointDirectionRotation *
-        _cylinderScale;
+    glm::dmat4 modelTransform =
+        _cylinderTranslation * _pointDirectionRotation * _cylinderScale;
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
     glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 

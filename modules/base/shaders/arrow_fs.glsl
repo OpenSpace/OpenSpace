@@ -50,7 +50,7 @@ Fragment getFragment() {
     const float specularPower = 100.0;
 
     // Ambient color
-    vec3 shadedColor = ambientIntensity  * color;
+    vec3 shadedColor = ambientIntensity * color;
 
     // Diffuse
     vec3 n = normalize(vs_normal);

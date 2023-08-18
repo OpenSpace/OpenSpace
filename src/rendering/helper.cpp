@@ -508,7 +508,7 @@ Vertex computeCircleVertex(int i, int nSegments, float radius,
 
     const float fi = static_cast<float>(i);
 
-    const float theta = fi * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
+    const float theta = fi * glm::two_pi<float>() / fsegments;  // 0 -> 2*PI
 
     const float x = radius * std::cos(theta);
     const float y = radius * std::sin(theta);
@@ -733,7 +733,6 @@ VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegmen
 
     return { vertices, indexArray };
 }
-
 
 VertexIndexListCombo<VertexXYZNormal> createCylinder(unsigned int nSegments,
                                                      float radius, float height)

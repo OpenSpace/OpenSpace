@@ -52,7 +52,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(RenderableNodeDirectionHintExample)
+  openspace.removeSceneGraphNode(NodeDirectionHintExample_RelativeUnits)
   openspace.removeSceneGraphNode(NodeDirectionHintExample)
 end)
 
