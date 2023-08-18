@@ -34,8 +34,8 @@ local NodeDirectionHintExample_RelativeUnits = {
     Color = { 0.78, 0.0, 1.0 },
     UseRelativeOffset = true,
     UseRelativeLength = true,
-    Offset = 2.0, -- Same size as Earth
-    Length = 5.0,  -- Twice the size of Earth
+    Offset = 2.0,
+    Length = 5.0,
     Width = 900000.0,
     Invert = true -- Point to start node instead of end node
   },

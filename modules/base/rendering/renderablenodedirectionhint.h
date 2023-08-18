@@ -50,15 +50,26 @@ public:
     RenderableNodeDirectionHint(const ghoul::Dictionary& dictionary);
     ~RenderableNodeDirectionHint() override = default;
 
-    static documentation::Documentation Documentation();
-
-private:
     void initializeGL() override;
     void deinitializeGL() override;
 
     bool isReady() const override;
-    void updateShapeTransforms(const RenderData& data);
     void render(const RenderData& data, RendererTasks& rendererTask) override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    struct Shading : properties::PropertyOwner {
+        Shading();
+        properties::BoolProperty enabled;
+        properties::FloatProperty ambientIntensity;
+        properties::FloatProperty diffuseIntensity;
+        properties::FloatProperty specularIntensity;
+    };
+
+    void updateShapeTransforms(const RenderData& data);
+
+    Shading _shading;
 
     ghoul::opengl::ProgramObject* _shaderProgram;
 
@@ -68,15 +79,6 @@ private:
 
     properties::UIntProperty _segments;
     properties::BoolProperty _invertArrowDirection;
-
-    struct Shading : properties::PropertyOwner {
-        Shading();
-        properties::BoolProperty enabled;
-        properties::FloatProperty ambientIntensity;
-        properties::FloatProperty diffuseIntensity;
-        properties::FloatProperty specularIntensity;
-    };
-    Shading _shading;
 
     properties::FloatProperty _arrowHeadSize;
     properties::FloatProperty _arrowHeadWidthFactor;

@@ -700,7 +700,7 @@ VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegmen
         bool isLast = (i == nSegments - 1);
         GLushort v0, v1, v2, v3;
 
-        // Bot triangle
+        // Bottom triangle
         v0 = ringVerticeIndex(0, i);
         v1 = ringVerticeIndex(0, isLast ? 0 : i + 1);
         indexArray.push_back(botCenterIndex);

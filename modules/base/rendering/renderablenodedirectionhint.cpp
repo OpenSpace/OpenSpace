@@ -48,16 +48,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start Node",
-        "The identifier of the node the arrow starts from. "
-        "Defaults to 'Root' if not specified.",
+        "The identifier of the node the arrow starts from",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
         "End Node",
-        "The identifier of the node the arrow should point towards. "
-        "Defaults to 'Root' if not specified.",
+        "The identifier of the node the arrow should point towards",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -174,10 +172,10 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableNodeDirectionHint)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
-        std::optional<std::string> startNode [[codegen::notempty]];
+        std::string startNode [[codegen::notempty]];
 
         // [[codegen::verbatim(EndNodeInfo.description)]]
-        std::optional<std::string> endNode [[codegen::notempty]];
+        std::string endNode [[codegen::notempty]];
 
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -245,8 +243,8 @@ RenderableNodeDirectionHint::Shading::Shading()
 
 RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _start(StartNodeInfo, "Root")
-    , _end(EndNodeInfo, "Root")
+    , _start(StartNodeInfo)
+    , _end(EndNodeInfo)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, 10, 3, 100)
     , _invertArrowDirection(InvertInfo, false)
@@ -266,10 +264,10 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     _shading.diffuseIntensity = p.diffuseIntensity.value_or(_shading.diffuseIntensity);
     _shading.specularIntensity = p.specularIntensity.value_or(_shading.specularIntensity);
 
-    _start = p.startNode.value_or(_start);
+    _start = p.startNode;
     addProperty(_start);
 
-    _end = p.endNode.value_or(_end);
+    _end = p.endNode;
     addProperty(_end);
 
     _color = p.color.value_or(_color);
@@ -469,7 +467,7 @@ void RenderableNodeDirectionHint::updateShapeTransforms(const RenderData& data) 
 
     _coneTranslation = glm::translate(glm::dmat4(1.0), arrowHeadStartPos);
     glm::dvec3 coneScale = glm::dvec3(arrowHeadWidth, arrowHeadWidth, coneLength);
-    _coneScale = S * glm::scale(glm::dmat4(1.0), coneScale);
+    _coneScale = s * glm::scale(glm::dmat4(1.0), coneScale);
 
     // Rotation to point at the end node
     glm::quat rotQuat = glm::rotation(glm::dvec3(0.0, 0.0, 1.0), arrowDirection);
