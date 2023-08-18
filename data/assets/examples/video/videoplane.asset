@@ -1,4 +1,4 @@
--- To learn how you can include your own video, see the wiki 
+-- To learn how you can include your own video, see the wiki
 -- http://wiki.openspaceproject.com/docs/builders/assets/resources.html
 
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
@@ -40,9 +40,9 @@ asset.export(Plane)
 
 
 asset.meta = {
-  Name = "Video Plane Test",
+  Name = "Video Plane Example",
   Version = "1.0",
-  Description = "An example asset that shows how to include a video on a plane",
+  Description = "An example asset that shows how to include a video on a plane.",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT"

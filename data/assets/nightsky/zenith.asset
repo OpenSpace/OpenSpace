@@ -58,6 +58,9 @@ local ZenithDot = {
   },
   GUI = {
     Name = "Zenith",
+    Description = [[A dot representation of the Local Zenith, based on the camera's
+      current position on a planet. Use the provided show or toggle action to move it
+      between planets. The default is Earth.]],
     Path = "/Other/Points"
   }
 }
@@ -124,3 +127,14 @@ asset.export(ZenithDot)
 asset.export("ShowZenith", ShowZenith.Identifier)
 asset.export("HideZenith", HideZenith.Identifier)
 asset.export("ToggleZenith", ToggleZenith.Identifier)
+
+
+asset.meta = {
+  Name = "Zenith",
+  Version = "1.0",
+  Description = [[A dot representation of the Local Zenith (based on the current
+    camera positon), including actions to toggle, hide and show it.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

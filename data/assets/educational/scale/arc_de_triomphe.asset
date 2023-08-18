@@ -40,6 +40,8 @@ local ScaleModel = {
   },
   GUI = {
     Name = "Arc de Triomphe",
+    Description = [[The triumphal arch is 50 m (164 ft) tall and has a footprint of
+      45x22 m (148x72 ft).]],
     Path = "/Scale Objects"
   }
 }
@@ -83,3 +85,15 @@ end)
 asset.export(ScaleModel)
 asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
 asset.export("ResetPositionAction", ResetPositionAction.Identifier)
+
+
+asset.meta = {
+  Name = "Scale Model - Arc de Triomphe",
+  Version = "1.0",
+  Description = [[A 1:1 scale model of the Arc de Triomphe. Per default it is placed at
+    its actual position in Paris, France. But the asset also includes actions to move it
+    to a position under the camera, or back to its original position.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

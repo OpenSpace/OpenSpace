@@ -13,6 +13,7 @@ local RenderablePlaneImageOnline = {
     URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
   },
   GUI = {
+    Description = "A plane that loads a texture from the internet.",
     Path = "/Examples"
   }
 }
@@ -27,3 +28,14 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(RenderablePlaneImageOnline)
+
+
+asset.meta = {
+  Name = "RenderablePlaneImageOnline Example",
+  Version = "1.0",
+  Description = [[Example of how to create a textured plane in 3D space, where the
+    texture is loaded from a web URL]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

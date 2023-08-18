@@ -45,6 +45,8 @@ local ScaleModel = {
   },
   GUI = {
     Name = "Empire State Building",
+    Description = [[The building is 443 m (1,454 ft) tall, including the spire, and has
+      102 floors. It has a footprint of 129x57 m (424x187 ft).]],
     Path = "/Scale Objects"
   }
 }
@@ -88,3 +90,15 @@ end)
 asset.export(ScaleModel)
 asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
 asset.export("ResetPositionAction", ResetPositionAction.Identifier)
+
+
+asset.meta = {
+  Name = "Scale Model - Empire State Building",
+  Version = "1.0",
+  Description = [[A 1:1 scale model of the Empire State Building. Per default it is
+    placed at its actual position in New York City. But the asset also includes actions
+    to move it to a position under the camera, or back to its original position.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
