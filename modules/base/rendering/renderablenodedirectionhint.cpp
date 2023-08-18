@@ -165,8 +165,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShadingEnabledInfo = {
         "PerformShading",
         "Perform Shading",
-        "This value determines whether the arrow model should be shaded by using the "
-        "position of the Sun",
+        "This value determines whether shading should be applied to the arrow model",
         openspace::properties::Property::Visibility::User
     };
 
