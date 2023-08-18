@@ -48,7 +48,7 @@ struct ExoplanetDataEntry {
     float bigOmegaLower = std::numeric_limits<float>::quiet_NaN();
 
     // Star known to be binary?
-    bool binary;
+    bool binary = false;
 
     // Star B − V color
     float bmv = std::numeric_limits<float>::quiet_NaN();
