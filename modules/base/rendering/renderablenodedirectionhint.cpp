@@ -219,6 +219,40 @@ namespace {
         std::optional<float> specularIntensity [[codegen::greaterequal(0.f)]];
     };
 #include "renderablenodedirectionhint_codegen.cpp"
+
+    void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
+                                             bool useRelative,
+                                             openspace::properties::FloatProperty &prop)
+    {
+        using namespace::openspace;
+
+        SceneGraphNode* startNode = sceneGraphNode(nodeName);
+        if (!startNode) {
+            LERROR(fmt::format("Could not find start node '{}'", nodeName));
+            return;
+        }
+        const double boundingSphere = startNode->boundingSphere();
+
+        if (!useRelative) {
+            // Recompute distance (previous value was relative)
+            prop = static_cast<float>(prop * boundingSphere);
+            prop.setExponent(11.f);
+            prop.setMaxValue(1e20f);
+        }
+        else {
+            // Recompute distance (previous value was in meters)
+            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
+                LERROR(fmt::format(
+                    "Start node '{}' has invalid bounding sphere", nodeName
+                ));
+                return;
+            }
+            prop = static_cast<float>(prop / boundingSphere);
+            prop.setExponent(3.f);
+            prop.setMaxValue(1000.f);
+        }
+        // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
+    };
 } // namespace
 
 namespace openspace {
@@ -292,34 +326,8 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     addProperty(_width);
 
     _useRelativeLength.onChange([this]() {
-        SceneGraphNode* startNode = sceneGraphNode(_start);
-        if (!startNode) {
-            LERROR(fmt::format("Could not find start node '{}'", _start.value()));
-            return;
-        }
-        const double boundingSphere = startNode->boundingSphere();
-
-        if (!_useRelativeLength) {
-            // Recompute distance (previous value was relative)
-            _length = static_cast<float>(_length * boundingSphere);
-            _length.setExponent(11.f);
-            _length.setMaxValue(1e20f);
-        }
-        else {
-            // Recompute distance (previous value was in meters)
-            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
-                LERROR(fmt::format(
-                    "Start node '{}' has invalid bounding sphere", _start.value()
-                ));
-                return;
-            }
-            _length = static_cast<float>(_length / boundingSphere);
-            _length.setExponent(3.f);
-            _length.setMaxValue(1000.f);
-        }
+        updateDistanceBasedOnRelativeValues(_start, _useRelativeLength, _length);
     });
-    // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
-
     _useRelativeLength = p.useRelativeLength.value_or(_useRelativeLength);
 
     _length = p.length.value_or(_length);
@@ -330,34 +338,8 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     }
 
     _useRelativeOffset.onChange([this]() {
-        SceneGraphNode* startNode = sceneGraphNode(_start);
-        if (!startNode) {
-            LERROR(fmt::format("Could not find start node '{}'", _start.value()));
-            return;
-        }
-        const double boundingSphere = startNode->boundingSphere();
-
-        if (!_useRelativeOffset) {
-            // Recompute distance (previous value was relative)
-            _offsetDistance = static_cast<float>(_offsetDistance * boundingSphere);
-            _offsetDistance.setExponent(11.f);
-            _offsetDistance.setMaxValue(1e20f);
-        }
-        else {
-            // Recompute distance (previous value was in meters)
-            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
-                LERROR(fmt::format(
-                    "Start node '{}' has invalid bounding sphere", _start.value()
-                ));
-                return;
-            }
-            _offsetDistance = static_cast<float>(_offsetDistance / boundingSphere);
-            _offsetDistance.setExponent(3.f);
-            _offsetDistance.setMaxValue(1000.f);
-        }
+        updateDistanceBasedOnRelativeValues(_start, _useRelativeOffset, _offsetDistance);
     });
-    // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
-
     _useRelativeOffset = p.useRelativeOffset.value_or(_useRelativeOffset);
 
     _offsetDistance = p.offset.value_or(_offsetDistance);
