@@ -8,7 +8,7 @@ local handlePosition = { -5.397273407690904, 137.86468505859378 }
 local roverPosition = { -4.744157, 137.396317 } -- as of october 2021
 
 local Path = {
-  Identifier = "Mars-Curiosity-Rover-Path",
+  Identifier = "Curiosity-Rover-Path",
   File = asset.localResource("./geojson/roverpath_Curiosity.geojson"),
   HeightOffset = 200.0,
   CoordinateOffset = offset,

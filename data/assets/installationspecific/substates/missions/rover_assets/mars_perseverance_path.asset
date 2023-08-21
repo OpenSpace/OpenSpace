@@ -57,7 +57,7 @@ local Handle = {
 -------------------------------------
 
 local Path = {
-  Identifier = "Mars-Perseverance-Rover-Path",
+  Identifier = "Perseverance-Rover-Path",
   File = asset.localResource("./geojson/roverpath_perseverance_230113.geojson"),
   HeightOffset = 10,
   CoordinateOffset = LatLongOffset,
