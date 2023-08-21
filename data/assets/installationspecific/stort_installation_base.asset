@@ -75,9 +75,9 @@ asset.onInitialize(function ()
 
   -- Constellations
   openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 0.0)
+  openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0.0)
   openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", true)
-  openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0.0)
+  openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Fade", 0.0)
 
   -- Mars layers and rovers
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Enabled", false)
@@ -94,7 +94,7 @@ asset.onInitialize(function ()
 
   -- Exoplanets
   openspace.setPropertyValueSingle("Scene.Exoplanets.Renderable.Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Exoplanets.Renderable.Opacity", 0.0)
+  openspace.setPropertyValueSingle("Scene.Exoplanets.Renderable.Fade", 0.0)
 
   -- Apollo
   openspace.setPropertyValueSingle("Scene.Apollo8LaunchTrail.Renderable.Enabled", false)

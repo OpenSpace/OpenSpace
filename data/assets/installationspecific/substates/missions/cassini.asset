@@ -32,8 +32,8 @@ local cassiniState = {
     openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', true)
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitConstantLatitudeOnArrival() .. [[
-    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Opacity', 0.0, 3.0)
-    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Opacity', 0.0, 3.0)
+    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Fade', 0.0, 3.0)
+    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Fade', 0.0, 3.0)
     openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', false)
     ]] .. util.fadeInNodes(trails) .. [[
     ]] .. scripts.cassiniScripts .. [[
@@ -47,8 +47,8 @@ local cassiniState = {
     openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', false)
     ]] .. util.fadeOutNodes(trails) .. [[
     openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', true)
-    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Opacity', 1.0, 3.0)
-    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Opacity', 1.0, 3.0)
+    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Fade', 1.0, 3.0)
+    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Fade', 1.0, 3.0)
   ]]
 }
 
@@ -61,9 +61,9 @@ local huygensState = {
     openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', true)
-    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Opacity', 0.0, 3.0)
-    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Opacity', 0.0, 3.0)
-    openspace.setPropertyValueSingle('Scene.Titan.Renderable.Opacity', 1.0, 3.0)
+    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Fade', 0.0, 3.0)
+    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Fade', 0.0, 3.0)
+    openspace.setPropertyValueSingle('Scene.Titan.Renderable.Fade', 1.0, 3.0)
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnabledMinimumAllowedDistance", false);
     openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
@@ -78,8 +78,8 @@ local huygensState = {
     openspace.setPropertyValueSingle("Scene.CassiniTitanLabel.Renderable.Enabled", false)
     openspace.scriptScheduler.clear()
     ]] .. util.fadeOutNodes({ "huygensTrail" }) .. [[
-    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Opacity', 1.0, 3.0)
-    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Opacity', 1.0, 3.0)
+    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Fade', 1.0, 3.0)
+    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Fade', 1.0, 3.0)
     openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
   ]]

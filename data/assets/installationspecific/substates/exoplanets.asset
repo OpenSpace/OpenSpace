@@ -4,7 +4,7 @@ local flyHome = asset.require('./../fly_home_alternatives')
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
-local opacityUri = "Scene.Exoplanets.Renderable.Opacity"
+local opacityUri = "Scene.Exoplanets.Renderable.Fade"
 
 -- No zoom, no camera path to home to reset afterwards. Want to hide that the stars are not aligned with the rings.
 local exoplanetsState = {

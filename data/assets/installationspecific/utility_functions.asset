@@ -182,7 +182,7 @@ local fadeInNodes = function(identifiers)
         'Scene.]] .. identifier .. [[.Renderable.Enabled', true
       );
       openspace.setPropertyValueSingle(
-        'Scene.]] .. identifier .. [[.Renderable.Opacity', 1.0, 3.0
+        'Scene.]] .. identifier .. [[.Renderable.Fade', 1.0, 3.0
       );
     ]]
   end
@@ -194,7 +194,7 @@ local fadeOutNodes = function(identifiers)
   for key,identifier in ipairs(identifiers) do
     str = str .. [[
       openspace.setPropertyValueSingle(
-        "Scene.]] .. identifier .. [[.Renderable.Opacity", 0.0, 3.0
+        "Scene.]] .. identifier .. [[.Renderable.Fade", 0.0, 3.0
       );
     ]]
   end
