@@ -9,20 +9,16 @@ local roverPosition = { -4.744157, 137.396317 } -- as of october 2021
 
 local Path = {
   Identifier = "Mars-Curiosity-Rover-Path",
-  Parent = globeIdentifier,
-  Renderable = {
-    Type = "RenderableGeoJsonObject",
-    Globe = globeIdentifier,
-    File = asset.localResource("./geojson/roverpath_Curiosity.geojson"),
-    HeightOffset = 200.0,
-    CoordinateOffset = offset,
+  File = asset.localResource("./geojson/roverpath_Curiosity.geojson"),
+  HeightOffset = 200.0,
+  CoordinateOffset = offset,
+  IgnoreHeights = true,
+  PreventHeightUpdate = true, -- Prevent automatic updates form height map. Too performance heavy!
+  DefaultProperties = {
     LineWidth = 2.0,
-    UseHeightmap = true
+    AltitudeMode = "RelativeToGround"
   },
-  GUI = {
-    Name = "Curiosity Rover Path",
-    Path = "/Missions/Curiosity"
-  }
+  Name = "Curiosity Rover Path"
 }
 
 -- A "handle" that can be used for navigation and such
@@ -85,15 +81,17 @@ local RoverPosition = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Path)
+  openspace.globebrowsing.addGeoJson(mars.Mars.Identifier, Path)
+
   openspace.addSceneGraphNode(Handle)
   openspace.addSceneGraphNode(RoverPosition)
 end)
 
 asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(mars.Mars.Identifier, Path)
+
   openspace.removeSceneGraphNode(RoverPosition)
   openspace.removeSceneGraphNode(Handle)
-  openspace.removeSceneGraphNode(Path)
 end)
 
 asset.export(Path)

@@ -83,14 +83,14 @@ asset.onInitialize(function ()
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Enabled", false)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_LiU.Enabled", true)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Settings.Opacity", 0.0)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Fade", 0.0)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Settings.Opacity", 0.0)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Fade", 0.0)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Europe.Enabled", true)
 
   openspace.setPropertyValueSingle("Scene.PerseveranceModel.Renderable.LightSources.Camera.Intensity", 0.7)
   openspace.setPropertyValueSingle("Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled", false)
-  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.Mars.renderable.GeoJson.Mars-Perseverance-Rover-Path.Enabled", false)
 
   -- Exoplanets
   openspace.setPropertyValueSingle("Scene.Exoplanets.Renderable.Enabled", true)

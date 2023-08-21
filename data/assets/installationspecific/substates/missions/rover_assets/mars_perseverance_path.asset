@@ -58,20 +58,16 @@ local Handle = {
 
 local Path = {
   Identifier = "Mars-Perseverance-Rover-Path",
-  Parent = globeIdentifier,
-  Renderable = {
-    Type = "RenderableGeoJsonObject",
-    Globe = globeIdentifier,
-    File = asset.localResource("./geojson/roverpath_perseverance_230113.geojson"),
-    HeightOffset = 10.0,
-    CoordinateOffset = LatLongOffset,
+  File = asset.localResource("./geojson/roverpath_perseverance_230113.geojson"),
+  HeightOffset = 10,
+  CoordinateOffset = LatLongOffset,
+  IgnoreHeights = true,
+  PreventHeightUpdate = true, -- Prevent automatic updates form height map. Too performance heavy!
+  DefaultProperties = {
     LineWidth = 2.0,
-    UseHeightmap = true
+    AltitudeMode = "RelativeToGround"
   },
-  GUI = {
-    Name = "Perseverance Rover Path",
-    Path = "/Missions/Mars2020"
-  }
+  Name = "Perseverance Rover Path"
 }
 
 -------------------------------------
@@ -334,7 +330,7 @@ local IngenuityModel = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Handle)
 
-  openspace.addSceneGraphNode(Path)
+  openspace.globebrowsing.addGeoJson(mars.Mars.Identifier, Path)
 
   openspace.addSceneGraphNode(LandingPosition)
   openspace.addSceneGraphNode(RoverPosition)
@@ -358,7 +354,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(RoverPosition)
   openspace.removeSceneGraphNode(LandingPosition)
 
-  openspace.removeSceneGraphNode(Path)
+  openspace.globebrowsing.deleteGeoJson(mars.Mars.Identifier, Path)
 
   openspace.removeSceneGraphNode(Handle)
 end)
@@ -377,7 +373,7 @@ asset.meta = {
   Name = "Perseverance Rover & Ingenuity",
   Version = "1.0",
   Description = [[
-    Renderables used to show the traversal path of the Perseverance rover and the 
+    Renderables used to show the traversal path of the Perseverance rover and the
     position of the helicopter Ingenuity. Also includes models of te perseverance
     rover and ingenuity model.
   ]],
