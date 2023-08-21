@@ -102,6 +102,12 @@ asset.onInitialize(function ()
   openspace.setPropertyValueSingle("Scene.Apollo11LemDescentModel.Renderable.Enabled", false)
   openspace.setPropertyValueSingle("Scene.Apollo11.Renderable.Enabled", false)
 
+  -- Insignias - for some reason they have opacity 0.0 per default in the asset
+  openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1.0)
+
+  -- Have Cassini missing trails faded out per default
+  openspace.setPropertyValue("{cassini_trail}.Renderable.Fade", 0.0)
+
   -- Other planet color layers
   openspace.setPropertyValueSingle("Scene.Neptune.Renderable.Layers.ColorLayers.Texture.Enabled", true)
   openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma", 0.5)

@@ -36,7 +36,7 @@ local earthVenus = {
     StartTime = launchTime,
     EndTime = firstVenusFlyby,
     SampleInterval = 400,
-    Enabled = false 
+    Enabled = false
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -55,7 +55,7 @@ local earthVenus = {
 ------------------------------------------------------------------------------------------
 local venusVenus = {
   Identifier = "venusVenus",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier, 
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -68,7 +68,7 @@ local venusVenus = {
     StartTime = firstVenusFlyby,
     EndTime = secondVenusFlyby,
     SampleInterval = 400,
-    Enabled = false 
+    Enabled = false
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -100,7 +100,7 @@ local venusEarth = {
     StartTime = secondVenusFlyby,
     EndTime = earthMoonFlyby,
     SampleInterval = 400,
-    Enabled = false 
+    Enabled = false
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -132,7 +132,7 @@ local earthJupiter = {
     StartTime = earthMoonFlyby,
     EndTime = jupiterFlyby,
     SampleInterval = 400,
-    Enabled = false 
+    Enabled = false
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -164,7 +164,7 @@ local jupiterSaturn = {
     StartTime = jupiterFlyby,
     EndTime = orbitInsertion,
     SampleInterval = 400,
-    Enabled = false 
+    Enabled = false
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -204,6 +204,7 @@ local saturnEnd = {
     Start = orbitInsertion,
     End = endCassini
   },
+  Tag = { "cassini_trail" },
   GUI = {
     Name = "Saturn - End (SSB)",
     Path = "/Solar System/Missions/Cassini/Trails",
@@ -230,14 +231,14 @@ local primaryMission = {
     StartTime = beginSaturnOrbit,
     EndTime = missionEquinoxStart,
     SampleInterval = 15000,
-    Enabled = true,
-    Opacity = 0.0
+    Enabled = true
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = beginSaturnOrbit,
     End = missionEquinoxStart
   },
+  Tag = { "cassini_trail" },
   GUI = {
     Name = "Primary Mission (SAT)",
     Path = "/Solar System/Missions/Cassini/Trails",
@@ -264,14 +265,14 @@ local equinoxMission = {
     StartTime = missionEquinoxStart,
     EndTime = missionSolsticeStart,
     SampleInterval = 12500,
-    Enabled = true,
-    Opacity = 0.0
+    Enabled = true
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = missionEquinoxStart,
     End = missionSolsticeStart
   },
+  Tag = { "cassini_trail" },
   GUI = {
     Name = "Equinox Mission (SAT)",
     Path = "/Solar System/Missions/Cassini/Trails",
@@ -298,14 +299,14 @@ local solsticeMission = {
     StartTime = missionSolsticeStart,
     EndTime = startGrandFinale,
     SampleInterval = 10000,
-    Enabled = true,
-    Opacity = 0.0
+    Enabled = true
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = missionSolsticeStart,
     End = startGrandFinale
   },
+  Tag = { "cassini_trail" },
   GUI = {
     Name = "Solstice Mission (SAT)",
     Path = "/Solar System/Missions/Cassini/Trails",
@@ -332,14 +333,14 @@ local grandFinale = {
     StartTime = startGrandFinale,
     EndTime = endCassini,
     SampleInterval = 1000,
-    Enabled = true,
-    Opacity = 0.0
+    Enabled = true
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = startGrandFinale,
     End = endCassini
   },
+  Tag = { "cassini_trail" },
   GUI = {
     Name = "The Grand Finale (SAT)",
     Path = "/Solar System/Missions/Cassini/Trails",
@@ -350,7 +351,7 @@ local grandFinale = {
 ------------------------------------------------------------------------------------------
 -- HUYGENS Trail in relation to Saturn                                                  --
 ------------------------------------------------------------------------------------------
-local huygensTrail = { 
+local huygensTrail = {
   Identifier = "huygensTrail",
   Parent = saturnTransforms.SaturnBarycenter.Identifier,
   Renderable = {
@@ -366,14 +367,14 @@ local huygensTrail = {
     StartTime = huygensDetach,
     EndTime = endHuygens,
     SampleInterval = 15000,
-    Enabled = true,
-    Opacity = 0.0
+    Enabled = true
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = huygensDetach,
     End = endHuygens
   },
+  Tag = { "cassini_trail" },
   GUI = {
     Name = "Huygens Trail (SAT)",
     Path = "/Solar System/Missions/Cassini/Huygens Probe",
@@ -424,7 +425,7 @@ asset.export(huygensTrail)
 asset.meta = {
   Name = "Cassini Mission Trails",
   Version = "1.0",
-  Description = [[Includes trails for the different phases of the Cassini missions, 
+  Description = [[Includes trails for the different phases of the Cassini missions,
     and for the Huygens lander
   ]],
   Author = "OpenSpace Team",
