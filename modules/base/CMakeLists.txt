@@ -48,7 +48,7 @@ set(HEADER_FILES
   rendering/renderabledisc.h
   rendering/renderablelabel.h
   rendering/renderablemodel.h
-  rendering/renderablenodedirectionhint.h
+  rendering/renderablenodearrow.h
   rendering/renderablenodeline.h
   rendering/renderableplane.h
   rendering/renderableplaneimagelocal.h
@@ -107,7 +107,7 @@ set(SOURCE_FILES
   rendering/renderabledisc.cpp
   rendering/renderablelabel.cpp
   rendering/renderablemodel.cpp
-  rendering/renderablenodedirectionhint.cpp
+  rendering/renderablenodearrow.cpp
   rendering/renderablenodeline.cpp
   rendering/renderableplane.cpp
   rendering/renderableplaneimagelocal.cpp

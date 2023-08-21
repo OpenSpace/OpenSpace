@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablenodedirectionhint.h>
+#include <modules/base/rendering/renderablenodearrow.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/verifier.h>
@@ -43,7 +43,7 @@
 #include <glm/gtx/transform.hpp>
 
 namespace {
-    constexpr std::string_view _loggerCat = "RenderableNodeDirectionHint";
+    constexpr std::string_view _loggerCat = "RenderableNodeArrow";
 
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
@@ -169,7 +169,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(RenderableNodeDirectionHint)]] Parameters {
+    struct [[codegen::Dictionary(RenderableNodeArrow)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
         std::string startNode [[codegen::notempty]];
 
@@ -218,7 +218,7 @@ namespace {
         // [[codegen::verbatim(SpecularIntensityInfo.description)]]
         std::optional<float> specularIntensity [[codegen::greaterequal(0.f)]];
     };
-#include "renderablenodedirectionhint_codegen.cpp"
+#include "renderablenodearrow_codegen.cpp"
 
     void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
                                              bool useRelative,
@@ -257,11 +257,11 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation RenderableNodeDirectionHint::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_renderablenodedirectionhint");
+documentation::Documentation RenderableNodeArrow::Documentation() {
+    return codegen::doc<Parameters>("base_renderable_renderablenodearrow");
 }
 
-RenderableNodeDirectionHint::Shading::Shading()
+RenderableNodeArrow::Shading::Shading()
     : properties::PropertyOwner({ "Shading" })
     , enabled(ShadingEnabledInfo, true)
     , ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
@@ -274,7 +274,7 @@ RenderableNodeDirectionHint::Shading::Shading()
     addProperty(specularIntensity);
 }
 
-RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary& dictionary)
+RenderableNodeArrow::RenderableNodeArrow(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _start(StartNodeInfo)
     , _end(EndNodeInfo)
@@ -353,7 +353,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     addProperty(_useRelativeOffset);
 }
 
-void RenderableNodeDirectionHint::initializeGL() {
+void RenderableNodeArrow::initializeGL() {
     _shaderProgram = BaseModule::ProgramObjectManager.request(
         "NodeDirectionLineProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -366,7 +366,7 @@ void RenderableNodeDirectionHint::initializeGL() {
     );
 }
 
-void RenderableNodeDirectionHint::deinitializeGL() {
+void RenderableNodeArrow::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "NodeDirectionLineProgram",
         [](ghoul::opengl::ProgramObject* p) {
@@ -376,11 +376,11 @@ void RenderableNodeDirectionHint::deinitializeGL() {
     _shaderProgram = nullptr;
 }
 
-bool RenderableNodeDirectionHint::isReady() const {
+bool RenderableNodeArrow::isReady() const {
     return _shaderProgram;
 }
 
-void RenderableNodeDirectionHint::updateShapeTransforms(const RenderData& data) {
+void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     SceneGraphNode* startNode = sceneGraphNode(_start);
     SceneGraphNode* endNode = sceneGraphNode(_end);
 
@@ -455,7 +455,7 @@ void RenderableNodeDirectionHint::updateShapeTransforms(const RenderData& data) 
     _pointDirectionRotation = glm::dmat4(glm::toMat4(rotQuat));
 }
 
-void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&) {
+void RenderableNodeArrow::render(const RenderData& data, RendererTasks&) {
     updateShapeTransforms(data);
 
     // Cylinder transforms

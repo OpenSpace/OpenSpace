@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLENODEDIRECTIONHINT___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLENODEDIRECTIONHINT___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLENODEARROW___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLENODEARROW___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -45,10 +45,10 @@ class Translation;
  * Generates an arrow shape that points from the start node to the
  * end node
  */
-class RenderableNodeDirectionHint : public Renderable {
+class RenderableNodeArrow : public Renderable {
 public:
-    RenderableNodeDirectionHint(const ghoul::Dictionary& dictionary);
-    ~RenderableNodeDirectionHint() override = default;
+    RenderableNodeArrow(const ghoul::Dictionary& dictionary);
+    ~RenderableNodeArrow() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -100,4 +100,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLENODEDIRECTIONHINT___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLENODEARROW___H__

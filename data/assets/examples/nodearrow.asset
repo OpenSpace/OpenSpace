@@ -4,11 +4,11 @@ local mars = asset.require("scene/solarsystem/planets/mars/mars")
 
 local EarthRadius = 6371000.0
 
-local NodeDirectionHintExample = {
-  Identifier = "RenderableNodeDirectionHintExample",
+local ArrowExample = {
+  Identifier = "RenderableNodeArrowExample",
   Parent = earth.Earth.Identifier,
   Renderable = {
-    Type = "RenderableNodeDirectionHint",
+    Type = "RenderableNodeArrow",
     StartNode = earth.Earth.Identifier,
     EndNode = mars.Mars.Identifier,
     Color = { 0.8, 1.0, 0.8 },
@@ -17,18 +17,18 @@ local NodeDirectionHintExample = {
     Width = 900000.0
   },
   GUI = {
-    Name = "NodeDirectionHint Example",
+    Name = "Node Arrow Example",
     Path = "/Example",
-    Description = [[Example node direction hint arrow, using absolute sizes]]
+    Description = [[Example node direction arrow, using absolute sizes]]
   }
 }
 
 -- Relative values: Multiplied with bounding sphere
-local NodeDirectionHintExample_RelativeUnits = {
-  Identifier = "RenderableNodeDirectionHintExample_Relative",
+local ArrowExample_RelativeUnits = {
+  Identifier = "RenderableNodeArrowExample_Relative",
   Parent = earth.Earth.Identifier,
   Renderable = {
-    Type = "RenderableNodeDirectionHint",
+    Type = "RenderableNodeArrow",
     StartNode = earth.Earth.Identifier,
     EndNode = moon.Moon.Identifier,
     Color = { 0.78, 0.0, 1.0 },
@@ -40,31 +40,31 @@ local NodeDirectionHintExample_RelativeUnits = {
     Invert = true -- Point to start node instead of end node
   },
   GUI = {
-    Name = "NodeDirectionHint Example (relative units)",
+    Name = "Node Arrow Example (relative units)",
     Path = "/Example",
-    Description = [[Example node direction hint arrow, using relative sizes]]
+    Description = [[Example node direction arrow, using relative sizes]]
   }
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(NodeDirectionHintExample)
-  openspace.addSceneGraphNode(NodeDirectionHintExample_RelativeUnits)
+  openspace.addSceneGraphNode(ArrowExample)
+  openspace.addSceneGraphNode(ArrowExample_RelativeUnits)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(NodeDirectionHintExample_RelativeUnits)
-  openspace.removeSceneGraphNode(NodeDirectionHintExample)
+  openspace.removeSceneGraphNode(ArrowExample_RelativeUnits)
+  openspace.removeSceneGraphNode(ArrowExample)
 end)
 
-asset.export(NodeDirectionHintExample)
-asset.export(NodeDirectionHintExample_RelativeUnits)
+asset.export(ArrowExample)
+asset.export(ArrowExample_RelativeUnits)
 
 
 
 asset.meta = {
-  Name = "NodeDirectionHint Example asset",
+  Name = "RenderableNodeArrow Example asset",
   Version = "1.0",
-  Description = [[Examples of the NodeDirectionHint renderable, that can be used to draw
+  Description = [[Examples of the RenderableNodeArrow renderable, that can be used to draw
     an arrow pointing from one scene graph node in the direction of another. Note that
     the arrows are generated as objects in 3D space and need to have a size that is
     suitable for their 3D context.]],
