@@ -63,14 +63,14 @@ local curiosityState = {
   Enter = [[
     ]] .. reduceAmbientIntensity .. [[
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Fade", 1.0, 5.0);
-    openspace.setPropertyValueSingle("Scene.Mars.renderable.GeoJson.Curiosity-Rover-Path.Enabled", true);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Curiosity-Rover-Path.Enabled", true);
     ]] .. util.setOrbitSpeedFactor(0.8) .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
   Exit = [[
     ]] .. resetAmbientIntensity .. [[
     ]] .. util.stopOrbiting() .. [[
-    openspace.setPropertyValueSingle("Scene.Mars.renderable.GeoJson.Curiosity-Rover-Path.Enabled", false);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Curiosity-Rover-Path.Enabled", false);
     ]] .. util.disableRoll() .. [[
   ]]
 }
