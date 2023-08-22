@@ -290,7 +290,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
         // Do nothing
     }
     catch (const ghoul::RuntimeError& e) {
-        LERROR(fmt::format("Could not create path. Reason: ", e.message));
+        LERROR(fmt::format("Could not create path. Reason: {}", e.message));
         return;
     }
 
