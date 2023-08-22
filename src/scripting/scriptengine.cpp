@@ -534,12 +534,12 @@ void ScriptEngine::preSync(bool isMaster) {
             _incomingScripts.pop();
 
             _scriptsToSync.push_back(item.script);
-            const bool remoteScripting = item.remoteScripting;
+            const bool shouldSendToRemote = item.shouldSendToRemote;
 
             // Not really a received script but the master also needs to run the script...
             _masterScriptQueue.push(item);
 
-            if (global::parallelPeer->isHost() && remoteScripting) {
+            if (global::parallelPeer->isHost() && shouldSendToRemote) {
                 global::parallelPeer->sendScript(item.script);
             }
             if (global::sessionRecording->isRecording()) {
@@ -613,7 +613,7 @@ void ScriptEngine::postSync(bool isMaster) {
 }
 
 void ScriptEngine::queueScript(std::string script,
-                               ScriptEngine::RemoteScripting remoteScripting,
+                               ScriptEngine::ShouldSendToRemote shouldSendToRemote,
                                ScriptCallback callback)
 {
     ZoneScoped;
@@ -621,7 +621,7 @@ void ScriptEngine::queueScript(std::string script,
     if (script.empty()) {
         return;
     }
-    _incomingScripts.push({ std::move(script), remoteScripting, std::move(callback) });
+    _incomingScripts.push({ std::move(script), shouldSendToRemote, std::move(callback) });
 }
 
 

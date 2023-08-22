@@ -2088,7 +2088,7 @@ bool SessionRecording::processScriptKeyframe() {
         );
         global::scriptEngine->queueScript(
             nextScript,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 

@@ -467,7 +467,7 @@ void FlightControllerTopic::processLua(const nlohmann::json &json) {
     const std::string script = json[LuaScript];
     global::scriptEngine->queueScript(
         script,
-        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

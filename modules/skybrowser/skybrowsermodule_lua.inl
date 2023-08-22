@@ -248,7 +248,7 @@ std::string prunedIdentifier(std::string identifier) {
             );
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     }
@@ -256,7 +256,7 @@ std::string prunedIdentifier(std::string identifier) {
     // Do not send this script to the other nodes
     global::scriptEngine->queueScript(
         "openspace.skybrowser.sendOutIdsToBrowsers()",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -601,23 +601,23 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
 
     global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + browser + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + target + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 
     global::scriptEngine->queueScript(
         "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
         + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 
     global::scriptEngine->queueScript(
         "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -638,12 +638,12 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
         // Remove from engine
         global::scriptEngine->queueScript(
             "openspace.removeScreenSpaceRenderable('" + browser + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
 
         global::scriptEngine->queueScript(
             "openspace.removeSceneGraphNode('" + target + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }

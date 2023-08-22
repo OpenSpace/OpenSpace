@@ -76,11 +76,12 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RemoveScriptingInfo = {
-        "RemoteScripting",
-        "Remote scripting",
+    constexpr openspace::properties::Property::PropertyInfo ShouldSendToRemoteInfo = {
+        "ShouldSendToRemote",
+        "Should Send To Remote",
         "Determines whether the entered commands will only be executed locally (if this "
-        "is disabled), or whether they will be send to connected remove instances",
+        "is disabled), or whether they will be send to connected remote instances (other "
+        "peers through parallel connection)",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -134,7 +135,7 @@ namespace openspace {
 LuaConsole::LuaConsole()
     : properties::PropertyOwner({ "LuaConsole", "Lua Console" })
     , _isVisible(VisibleInfo, false)
-    , _remoteScripting(RemoveScriptingInfo, false)
+    , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
     , _backgroundColor(
         BackgroundColorInfo,
         glm::vec4(21.f / 255.f, 23.f / 255.f, 28.f / 255.f, 0.8f),
@@ -157,7 +158,7 @@ LuaConsole::LuaConsole()
     , _autoCompleteInfo({NoAutoComplete, false, ""})
 {
     addProperty(_isVisible);
-    addProperty(_remoteScripting);
+    addProperty(_shouldSendToRemote);
     addProperty(_historyLength);
 
     _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -282,8 +283,8 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         // Button left of 1 and above TAB
         // How to deal with different keyboard languages? ---abock
         if (_isVisible) {
-            if (_remoteScripting) {
-                _remoteScripting = false;
+            if (_shouldSendToRemote) {
+                _shouldSendToRemote = false;
             }
             else {
                 _isVisible = false;
@@ -294,7 +295,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         else {
             _isVisible = true;
             if (global::parallelPeer->status() == ParallelConnection::Status::Host) {
-                _remoteScripting = true;
+                _shouldSendToRemote = true;
             }
         }
 
@@ -432,8 +433,8 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     if (key == Key::Enter || key == Key::KeypadEnter) {
         std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
-            using RemoteScripting = scripting::ScriptEngine::RemoteScripting;
-            global::scriptEngine->queueScript(cmd, RemoteScripting(_remoteScripting));
+            using ShouldSendToRemote = scripting::ScriptEngine::ShouldSendToRemote;
+            global::scriptEngine->queueScript(cmd, ShouldSendToRemote(_shouldSendToRemote));
 
             // Only add the current command to the history if it hasn't been
             // executed before. We don't want two of the same commands in a row
@@ -806,7 +807,7 @@ void LuaConsole::render() {
         return glm::vec2(loc.x + res.x - bbox.x - 10.f, loc.y);
     };
 
-    if (_remoteScripting) {
+    if (_shouldSendToRemote) {
         const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
 
         ParallelConnection::Status status = global::parallelPeer->status();
@@ -847,7 +848,7 @@ void LuaConsole::addToCommand(std::string c) {
 }
 
 void LuaConsole::parallelConnectionChanged(const ParallelConnection::Status& status) {
-    _remoteScripting = (status == ParallelConnection::Status::Host);
+    _shouldSendToRemote = (status == ParallelConnection::Status::Host);
 }
 
 } // namespace openspace

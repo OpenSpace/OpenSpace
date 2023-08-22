@@ -213,7 +213,7 @@ void createExoplanetSystem(const std::string& starName,
 
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + starParent + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 
     // Planets
@@ -330,7 +330,7 @@ void createExoplanetSystem(const std::string& starName,
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + planetTrailNode + ");"
             "openspace.addSceneGraphNode(" + planetNode + ");",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
 
         bool hasUpperAUncertainty = !std::isnan(planet.aUpper);
@@ -379,7 +379,7 @@ void createExoplanetSystem(const std::string& starName,
 
             global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + discNode + ");",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     }
@@ -424,7 +424,7 @@ void createExoplanetSystem(const std::string& starName,
 
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + circle + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 
     // Habitable Zone
@@ -479,7 +479,7 @@ void createExoplanetSystem(const std::string& starName,
 
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
 
         // Star glare
@@ -520,7 +520,7 @@ void createExoplanetSystem(const std::string& starName,
 
             global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + starGlare + ");",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     }
@@ -629,7 +629,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
     const std::string starIdentifier = makeIdentifier(std::move(starName));
     global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

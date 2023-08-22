@@ -126,7 +126,7 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
                 fmt::format(
                     "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
                 ),
-                 scripting::ScriptEngine::RemoteScripting::Yes
+                 scripting::ScriptEngine::ShouldSendToRemote::Yes
              );
         }
     }

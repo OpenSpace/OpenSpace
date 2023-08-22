@@ -344,7 +344,7 @@ void GuiGlobeBrowsingComponent::render() {
                     l.name,
                     l.url
                 ),
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         };
 

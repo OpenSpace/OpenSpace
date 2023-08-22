@@ -66,7 +66,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
     global::scriptEngine->queueScript(
         addParentScript,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 
     // Get the poses along the path
@@ -98,7 +98,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
         global::scriptEngine->queueScript(
             fmt::format("openspace.addSceneGraphNode({})", pointNode),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     };
 
@@ -120,7 +120,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
         global::scriptEngine->queueScript(
             fmt::format("openspace.addSceneGraphNode({})", lineNode),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     };
 
@@ -157,7 +157,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
     using namespace openspace;
     global::scriptEngine->queueScript(
         fmt::format("openspace.removeSceneGraphNode('{}');", RenderedPathIdentifier),
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -189,7 +189,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
     global::scriptEngine->queueScript(
         addParentScript,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 
     const std::vector<glm::dvec3> points = currentPath->controlPoints();
@@ -226,7 +226,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
         global::scriptEngine->queueScript(
             fmt::format("openspace.addSceneGraphNode({})", node),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }
@@ -236,7 +236,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
     using namespace openspace;
     global::scriptEngine->queueScript(
         fmt::format("openspace.removeSceneGraphNode('{}');", RenderedPointsIdentifier),
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -291,7 +291,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
     global::scriptEngine->queueScript(
         fmt::format("openspace.addSceneGraphNode({});", axes),
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

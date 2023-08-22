@@ -51,7 +51,7 @@ namespace {
         );
         openspace::global::scriptEngine->queueScript(
             script,
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 } // namespace
@@ -327,7 +327,7 @@ void TargetBrowserPair::startFading(float goal, float fadeTime) {
 
     global::scriptEngine->queueScript(
         script,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

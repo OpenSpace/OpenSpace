@@ -1124,7 +1124,7 @@ void OpenSpaceEngine::preSynchronization() {
         for (const std::string& script : scheduledScripts) {
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
 
@@ -1577,7 +1577,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     std::string script = ghoul::lua::value<std::string>(s);
     global::scriptEngine->queueScript(
         script,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -1769,7 +1769,7 @@ void setCameraFromProfile(const Profile& p) {
                 geoScript += ")";
                 global::scriptEngine->queueScript(
                     geoScript,
-                    scripting::ScriptEngine::RemoteScripting::Yes
+                    scripting::ScriptEngine::ShouldSendToRemote::Yes
                 );
             },
             [&checkNodeExists](const Profile::CameraGoToNode& node) {
@@ -1800,7 +1800,7 @@ void setModulesFromProfile(const Profile& p) {
             if (mod.loadedInstruction.has_value()) {
                 global::scriptEngine->queueScript(
                     mod.loadedInstruction.value(),
-                    scripting::ScriptEngine::RemoteScripting::Yes
+                    scripting::ScriptEngine::ShouldSendToRemote::Yes
                 );
             }
         }
@@ -1808,7 +1808,7 @@ void setModulesFromProfile(const Profile& p) {
             if (mod.notLoadedInstruction.has_value()) {
                 global::scriptEngine->queueScript(
                     mod.notLoadedInstruction.value(),
-                    scripting::ScriptEngine::RemoteScripting::Yes
+                    scripting::ScriptEngine::ShouldSendToRemote::Yes
                 );
             }
         }
@@ -1872,7 +1872,7 @@ void setAdditionalScriptsFromProfile(const Profile& p) {
     for (const std::string& a : p.additionalScripts) {
         global::scriptEngine->queueScript(
             a,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }
