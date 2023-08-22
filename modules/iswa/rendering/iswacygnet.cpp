@@ -139,7 +139,7 @@ void IswaCygnet::initializeGL() {
             deinitialize();
             global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + identifier() + "')",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         });
     }
@@ -306,7 +306,7 @@ void IswaCygnet::initializeGroup() {
             LDEBUG(identifier() + " Event clearGroup");
             global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + identifier() + "')",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     );
