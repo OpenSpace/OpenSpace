@@ -49,13 +49,13 @@ namespace {
     };
 
     const std::array<TimeInterval, 7> TimeIntervals = {
-        TimeInterval(31536000, "year"),
-        TimeInterval(18144000, "month"),
-        TimeInterval(604800, "week"),
-        TimeInterval(86400, "day"),
-        TimeInterval(3600, "hour"),
-        TimeInterval(60, "minute"),
-        TimeInterval(1, "second")
+        TimeInterval{ 31536000, "year" },
+        TimeInterval{ 18144000, "month" },
+        TimeInterval{ 604800, "week" },
+        TimeInterval{ 86400, "day" },
+        TimeInterval{ 3600, "hour" },
+        TimeInterval{ 60, "minute" },
+        TimeInterval{ 1, "second" }
     };
 
     std::string checkForTimeDescription(int intervalIndex, double value) {
@@ -107,7 +107,7 @@ void DeltaTimesDialog::createWidgets() {
     _listWidget->setAutoScroll(true);
     _listWidget->setLayoutMode(QListView::SinglePass);
     layout->addWidget(_listWidget);
-    
+
     {
         QBoxLayout* buttonLayout = new QHBoxLayout;
         _addButton = new QPushButton("Add Entry");
@@ -130,7 +130,7 @@ void DeltaTimesDialog::createWidgets() {
 
     _adjustLabel = new QLabel("Set Simulation Time Increment for key");
     layout->addWidget(_adjustLabel);
-    
+
     {
         QBoxLayout* box = new QHBoxLayout;
         _seconds = new QLineEdit;
