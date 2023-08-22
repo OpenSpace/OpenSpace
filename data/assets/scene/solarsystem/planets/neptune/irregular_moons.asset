@@ -52,7 +52,8 @@ local HalimedeTrail = {
     "moonTrail_giants",
     "moonTrail_neptune",
     "moonTrail_minor",
-    "moonTrail_minor_neptune"
+    "moonTrail_minor_neptune",
+    "moonTrail_minor_irregular_neptune"
   },
   GUI = {
     Name = "Halimede Trail",
@@ -134,7 +135,8 @@ local PsamatheTrail = {
     "moonTrail_giants",
     "moonTrail_neptune",
     "moonTrail_minor",
-    "moonTrail_minor_neptune"
+    "moonTrail_minor_neptune",
+    "moonTrail_minor_irregular_neptune"
   },
   GUI = {
     Name = "Psamathe Trail",
@@ -216,7 +218,8 @@ local SaoTrail = {
     "moonTrail_giants",
     "moonTrail_neptune",
     "moonTrail_minor",
-    "moonTrail_minor_neptune"
+    "moonTrail_minor_neptune",
+    "moonTrail_minor_irregular_neptune"
   },
   GUI = {
     Name = "Sao Trail",
@@ -298,7 +301,8 @@ local LaomedeiaTrail = {
     "moonTrail_giants",
     "moonTrail_neptune",
     "moonTrail_minor",
-    "moonTrail_minor_neptune"
+    "moonTrail_minor_neptune",
+    "moonTrail_minor_irregular_neptune"
   },
   GUI = {
     Name = "Laomedeia Trail",
@@ -380,7 +384,8 @@ local NesoTrail = {
     "moonTrail_giants",
     "moonTrail_neptune",
     "moonTrail_minor",
-    "moonTrail_minor_neptune"
+    "moonTrail_minor_neptune",
+    "moonTrail_minor_irregular_neptune"
   },
   GUI = {
     Name = "Neso Trail",

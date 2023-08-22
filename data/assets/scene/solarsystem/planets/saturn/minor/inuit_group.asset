@@ -25,7 +25,8 @@ local Kiviuq = {
     "moon_saturn",
     "moon_inuit",
     "moon_minor",
-    "moon_minor_saturn"
+    "moon_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Kiviuq",
@@ -52,7 +53,8 @@ local KiviuqTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Kiviuq Trail",
@@ -134,7 +136,8 @@ local IjiraqTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Ijiraq Trail",
@@ -216,7 +219,8 @@ local PaaliaqTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Paaliaq Trail",
@@ -298,7 +302,8 @@ local SiarnaqTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Cyllene Trail",
@@ -380,7 +385,8 @@ local TarqeqTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Tarqeq Trail",
@@ -462,7 +468,8 @@ local S2004S29Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 29 Trail",
@@ -544,7 +551,8 @@ local S2004S31Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 31 Trail",
@@ -626,7 +634,8 @@ local S2019S01Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2019 S 01 Trail",

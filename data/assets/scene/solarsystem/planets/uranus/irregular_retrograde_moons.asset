@@ -52,7 +52,8 @@ local FranciscoTrail = {
     "moonTrail_giants",
     "moonTrail_uranus",
     "moonTrail_minor",
-    "moonTrail_minor_uranus"
+    "moonTrail_minor_uranus",
+    "moonTrail_minor_irregular_uranus"
   },
   GUI = {
     Name = "Francisco Trail",
@@ -134,7 +135,8 @@ local CalibanTrail = {
     "moonTrail_giants",
     "moonTrail_uranus",
     "moonTrail_minor",
-    "moonTrail_minor_uranus"
+    "moonTrail_minor_uranus",
+    "moonTrail_minor_irregular_uranus"
   },
   GUI = {
     Name = "Caliban Trail",
@@ -216,7 +218,8 @@ local StephanoTrail = {
     "moonTrail_giants",
     "moonTrail_uranus",
     "moonTrail_minor",
-    "moonTrail_minor_uranus"
+    "moonTrail_minor_uranus",
+    "moonTrail_minor_irregular_uranus"
   },
   GUI = {
     Name = "Stephano Trail",
@@ -298,7 +301,8 @@ local TrinculoTrail = {
     "moonTrail_giants",
     "moonTrail_uranus",
     "moonTrail_minor",
-    "moonTrail_minor_uranus"
+    "moonTrail_minor_uranus",
+    "moonTrail_minor_irregular_uranus"
   },
   GUI = {
     Name = "Trinculo Trail",
@@ -380,7 +384,8 @@ local SycoraxTrail = {
     "moonTrail_giants",
     "moonTrail_uranus",
     "moonTrail_minor",
-    "moonTrail_minor_uranus"
+    "moonTrail_minor_uranus",
+    "moonTrail_minor_irregular_uranus"
   },
   GUI = {
     Name = "Sycorax Trail",
@@ -462,7 +467,8 @@ local ProsperoTrail = {
     "moonTrail_giants",
     "moonTrail_uranus",
     "moonTrail_minor",
-    "moonTrail_minor_uranus"
+    "moonTrail_minor_uranus",
+    "moonTrail_minor_irregular_uranus"
   },
   GUI = {
     Name = "Prospero Trail",
@@ -544,7 +550,8 @@ local SetebosTrail = {
     "moonTrail_giants",
     "moonTrail_uranus",
     "moonTrail_minor",
-    "moonTrail_minor_uranus"
+    "moonTrail_minor_uranus",
+    "moonTrail_minor_irregular_uranus"
   },
   GUI = {
     Name = "Setebos Trail",
@@ -626,7 +633,8 @@ local FerdinandTrail = {
     "moonTrail_giants",
     "moonTrail_uranus",
     "moonTrail_minor",
-    "moonTrail_minor_uranus"
+    "moonTrail_minor_uranus",
+    "moonTrail_minor_irregular_uranus"
   },
   GUI = {
     Name = "Ferdinand Trail",
