@@ -18,7 +18,7 @@ local Kerberos = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
+  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "moon_minor_pluto" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto/Moons/Kerberos"
   }
@@ -42,7 +42,8 @@ local KerberosTrail = {
     "moonTrail_solarSystem",
     "moonTrail_dwarf",
     "moonTrail_pluto",
-    "moonTrail_minor"
+    "moonTrail_minor",
+    "moonTrail_minor_pluto"
   },
   GUI = {
     Name = "Kerberos Trail",
