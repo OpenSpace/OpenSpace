@@ -100,3 +100,15 @@ asset.export(Mission)
 asset.export(PropertyValue)
 asset.export(ElapsedTime)
 asset.export(InputState)
+
+
+asset.meta = {
+  Name = "Dashboard Items Example",
+  Version = "1.0",
+  Description = [[Examples of different types of dashboard items. These are dynamic
+    information texts that will be shown over the rendering (per default in the top
+    left corner, on flat screens).]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

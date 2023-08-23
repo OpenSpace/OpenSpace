@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___RENDERABLEECLIPSECONE___H__
-#define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___RENDERABLEECLIPSECONE___H__
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLEECLIPSECONE___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLEECLIPSECONE___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -84,4 +84,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___RENDERABLEECLIPSECONE___H__
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLEECLIPSECONE___H__

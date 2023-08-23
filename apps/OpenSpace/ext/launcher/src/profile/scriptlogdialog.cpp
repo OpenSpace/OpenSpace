@@ -167,7 +167,18 @@ void ScriptlogDialog::updateScriptList() {
 void ScriptlogDialog::saveChosenScripts() {
     std::vector<std::string> chosenScripts;
     QList<QListWidgetItem*> itemList = _scriptlogList->selectedItems();
-    for (QListWidgetItem* item : _scriptlogList->selectedItems()) {
+
+    // The selected items are returned in order of **selection** not in row-order, so we
+    // need to sort them first
+    std::sort(
+        itemList.begin(),
+        itemList.end(),
+        [this](QListWidgetItem* lhs, QListWidgetItem* rhs) {
+            return _scriptlogList->row(lhs) < _scriptlogList->row(rhs);
+        }
+    );
+
+    for (QListWidgetItem* item : itemList) {
         chosenScripts.push_back(item->text().toStdString());
     }
     emit scriptsSelected(chosenScripts);

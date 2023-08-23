@@ -39,10 +39,9 @@ class TileTextureInitData {
 public:
     using HashKey = uint64_t;
     BooleanType(ShouldAllocateDataOnCPU);
-    BooleanType(PadTiles);
 
     TileTextureInitData(size_t width, size_t height, GLenum type,
-        ghoul::opengl::Texture::Format textureFormat, PadTiles pad,
+        ghoul::opengl::Texture::Format textureFormat,
         ShouldAllocateDataOnCPU allocCpu = ShouldAllocateDataOnCPU::No);
 
     TileTextureInitData(const TileTextureInitData& original) = default;
@@ -54,8 +53,6 @@ public:
     ~TileTextureInitData() = default;
 
     const glm::ivec3 dimensions;
-    const glm::ivec2 tilePixelStartOffset;
-    const glm::ivec2 tilePixelSizeDifference;
     const GLenum glType;
     const ghoul::opengl::Texture::Format ghoulTextureFormat;
     const size_t nRasters;
@@ -64,11 +61,10 @@ public:
     const size_t bytesPerLine;
     const size_t totalNumBytes;
     const bool shouldAllocateDataOnCPU;
-    const bool padTiles;
     const HashKey hashKey;
 };
 
-TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTiles,
+TileTextureInitData tileTextureInitData(layers::Group::ID id,
     size_t preferredTileSize = 0);
 
 } // namespace openspace::globebrowsing

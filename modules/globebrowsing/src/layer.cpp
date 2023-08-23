@@ -132,10 +132,6 @@ namespace {
         // the layer is disabled
         std::optional<bool> enabled;
 
-        // Determines whether the downloaded tiles should have a padding added to the
-        // borders
-        std::optional<bool> padTiles;
-
         // The opacity value of the layer
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
@@ -233,11 +229,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         addProperty(_guiDescription);
     }
 
-    const bool padTiles = p.padTiles.value_or(true);
-
-    TileTextureInitData initData = tileTextureInitData(_layerGroupId, padTiles);
-    _padTilePixelStartOffset = initData.tilePixelStartOffset;
-    _padTilePixelSizeDifference = initData.tilePixelSizeDifference;
+    TileTextureInitData initData = tileTextureInitData(_layerGroupId);
 
     _opacity = p.opacity.value_or(_opacity);
     addProperty(Fadeable::_opacity);
@@ -472,25 +464,12 @@ void Layer::update() {
     }
 }
 
-glm::ivec2 Layer::tilePixelStartOffset() const {
-    return _padTilePixelStartOffset;
-}
-
-glm::ivec2 Layer::tilePixelSizeDifference() const {
-    return _padTilePixelSizeDifference;
-}
-
 glm::vec2 Layer::tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
                                                const glm::vec2& tileUV,
                                                const glm::uvec2& resolution)
 {
     glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
-
-    const glm::vec2 sourceSize = glm::vec2(resolution) +
-                                 glm::vec2(_padTilePixelSizeDifference);
-    const glm::vec2 currentSize = glm::vec2(resolution);
-    const glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
-    return sourceToCurrentSize * (uv - glm::vec2(_padTilePixelStartOffset) / sourceSize);
+    return uv;
 }
 
 void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDict) {

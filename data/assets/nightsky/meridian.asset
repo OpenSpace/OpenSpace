@@ -50,6 +50,7 @@ local MeridianPlane = {
   },
   GUI = {
     Name = "Local Meridian",
+    Description = [[A line representation of the Local Meridian]],
     Path = "/Other/Lines"
   }
 }
@@ -118,3 +119,14 @@ asset.export(MeridianPlane)
 asset.export("ShowMeridian", ShowMeridian.Identifier)
 asset.export("HideMeridian", HideMeridian.Identifier)
 asset.export("ToggleMeridian", ToggleMeridian.Identifier)
+
+
+asset.meta = {
+  Name = "Meridian",
+  Version = "1.0",
+  Description = [[A line representation of the Local Meridian, including actions
+    to toggle, hide and show it.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

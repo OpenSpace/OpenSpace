@@ -116,6 +116,12 @@ Scene::~Scene() {
         if (node->identifier() == "Root") {
             continue;
         }
+
+        LWARNING(fmt::format(
+            "SceneGraphNode '{}' was not removed before shutdown",
+            node->identifier()
+        ));
+
         // There might still be scene graph nodes around that weren't removed by the asset
         // manager as they would have been added manually by the user. This also serves as
         // a backstop for assets that forgot to implement the onDeinitialize functions
@@ -860,6 +866,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
             codegen::lua::RemoveSceneGraphNode,
             codegen::lua::RemoveSceneGraphNodesFromRegex,
             codegen::lua::HasSceneGraphNode,
+            codegen::lua::SceneGraphNodes,
+            codegen::lua::NodeByRenderableType,
+            codegen::lua::ScreenSpaceRenderables,
             codegen::lua::AddInterestingTime,
             codegen::lua::WorldPosition,
             codegen::lua::WorldRotation,
@@ -879,7 +888,7 @@ std::string makeIdentifier(std::string s) {
     std::replace_if(
         s.begin(),
         s.end(),
-        [](char c) { return std::ispunct(c) != 0; },
+        [](unsigned char c) { return std::ispunct(c) != 0; },
         '-'
     );
     std::replace(s.begin(), s.end(), ' ', '_');
