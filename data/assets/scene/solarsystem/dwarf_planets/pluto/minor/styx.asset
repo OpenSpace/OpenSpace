@@ -41,7 +41,8 @@ local StyxTrail = {
     "moonTrail_solarSystem",
     "moonTrail_dwarf",
     "moonTrail_pluto",
-    "moonTrail_minor"
+    "moonTrail_minor",
+    "moonTrail_minor_pluto"
   },
   GUI = {
     Name = "Styx Trail",
