@@ -195,7 +195,8 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn) {
 
     global::scriptEngine->queueScript(
         std::move(script),
-        scripting::ScriptEngine::ShouldSendToRemote::No,
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes,
         callback
     );
 }

@@ -51,10 +51,12 @@ namespace openspace::scripting {
 class ScriptEngine : public Syncable {
 public:
     using ScriptCallback = std::function<void(ghoul::Dictionary)>;
+    BooleanType(ShouldBeSynchronized);
     BooleanType(ShouldSendToRemote);
 
     struct QueueItem {
         std::string script;
+        ShouldBeSynchronized shouldBeSynchronized;
         ShouldSendToRemote shouldSendToRemote;
         ScriptCallback callback;
     };
@@ -89,8 +91,8 @@ public:
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    void queueScript(std::string script, ShouldSendToRemote shouldSendToRemote,
-        ScriptCallback cb = ScriptCallback());
+    void queueScript(std::string script, ShouldBeSynchronized shouldBeSynchronized,
+        ShouldSendToRemote shouldSendToRemote, ScriptCallback cb = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
 

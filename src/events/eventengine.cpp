@@ -164,7 +164,7 @@ void EventEngine::triggerActions() const {
                 if (ai.isEnabled &&
                     (!ai.filter.has_value() || params.isSubset(*ai.filter)))
                 {
-                    global::actionManager->triggerAction(ai.action, params);
+                    global::actionManager->triggerAction(ai.action, params, false);
                 }
             }
         }

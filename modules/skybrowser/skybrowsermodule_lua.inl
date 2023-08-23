@@ -248,15 +248,18 @@ std::string prunedIdentifier(std::string identifier) {
             );
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::No,
+                scripting::ScriptEngine::ShouldSendToRemote::No
             );
         }
     }
     // To ensure each node in a cluster calls its own instance of the wwt application
-    // Do not send this script to the other nodes
+    // Do not send this script to the other nodes. (Note malej 2023-AUG-23: Due to this
+    // already being inside a lua funciton that have already been synced out)
     global::scriptEngine->queueScript(
         "openspace.skybrowser.sendOutIdsToBrowsers()",
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 }
 
@@ -601,23 +604,28 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
 
     global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + browser + ");",
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + target + ");",
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     global::scriptEngine->queueScript(
         "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
         + idBrowser + "');",
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     global::scriptEngine->queueScript(
         "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 }
 
@@ -638,12 +646,14 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
         // Remove from engine
         global::scriptEngine->queueScript(
             "openspace.removeScreenSpaceRenderable('" + browser + "');",
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         global::scriptEngine->queueScript(
             "openspace.removeSceneGraphNode('" + target + "');",
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
 }

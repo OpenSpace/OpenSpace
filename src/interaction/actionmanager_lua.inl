@@ -192,7 +192,7 @@ struct [[codegen::Dictionary(Action)]] Action {
         throw ghoul::lua::LuaError(fmt::format("Action '{}' not found", id));
     }
 
-    global::actionManager->triggerAction(id, arg);
+    global::actionManager->triggerAction(id, arg, false);
 }
 
 #include "actionmanager_lua_codegen.cpp"

@@ -76,6 +76,15 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShouldBeSynchronizedInfo = {
+       "ShouldBeSynchronized",
+       "Should Be Synchronized",
+       "Determines whether the entered commands will only be executed locally (if this "
+       "is disabled), or whether they will be send to other connected nodes, for "
+       "example in a cluster envierment",
+       openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShouldSendToRemoteInfo = {
         "ShouldSendToRemote",
         "Should Send To Remote",
@@ -136,6 +145,7 @@ LuaConsole::LuaConsole()
     : properties::PropertyOwner({ "LuaConsole", "Lua Console" })
     , _isVisible(VisibleInfo, false)
     , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
+    , _shouldBeSynchronized(ShouldBeSynchronizedInfo, true)
     , _backgroundColor(
         BackgroundColorInfo,
         glm::vec4(21.f / 255.f, 23.f / 255.f, 28.f / 255.f, 0.8f),
@@ -158,6 +168,7 @@ LuaConsole::LuaConsole()
     , _autoCompleteInfo({NoAutoComplete, false, ""})
 {
     addProperty(_isVisible);
+    addProperty(_shouldBeSynchronized);
     addProperty(_shouldSendToRemote);
     addProperty(_historyLength);
 
@@ -279,12 +290,25 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
+    const bool modifierShift = (modifier == KeyModifier::Shift);
+    const bool modifierControl = (modifier == KeyModifier::Control);
+
+    // Button left of 1 and above TAB (default)
+    // Can be changed to any other key with the setCommandInputButton funciton
     if (key == _commandInputButton) {
-        // Button left of 1 and above TAB
-        // How to deal with different keyboard languages? ---abock
         if (_isVisible) {
-            if (_shouldSendToRemote) {
-                _shouldSendToRemote = false;
+            if (modifierShift) {
+                // Toggle ShouldBeSynchronized property for all scripts
+                _shouldBeSynchronized = !_shouldBeSynchronized;
+            }
+            else if (modifierControl) {
+                // Only allow this toggle if a ParallelConnection exists
+                if (_shouldSendToRemote) {
+                    _shouldSendToRemote = false;
+                }
+                else if (global::parallelPeer->status() == ParallelConnection::Status::Host) {
+                    _shouldSendToRemote = true;
+                }
             }
             else {
                 _isVisible = false;
@@ -294,9 +318,6 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         }
         else {
             _isVisible = true;
-            if (global::parallelPeer->status() == ParallelConnection::Status::Host) {
-                _shouldSendToRemote = true;
-            }
         }
 
         return true;
@@ -310,10 +331,6 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         _isVisible = false;
         return true;
     }
-
-
-    const bool modifierControl = (modifier == KeyModifier::Control);
-    const bool modifierShift = (modifier == KeyModifier::Shift);
 
     // Paste from clipboard
     if (modifierControl && (key == Key::V || key == Key::Y)) {
@@ -433,8 +450,13 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     if (key == Key::Enter || key == Key::KeypadEnter) {
         std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
+            using ShouldBeSynchronized = scripting::ScriptEngine::ShouldBeSynchronized;
             using ShouldSendToRemote = scripting::ScriptEngine::ShouldSendToRemote;
-            global::scriptEngine->queueScript(cmd, ShouldSendToRemote(_shouldSendToRemote));
+            global::scriptEngine->queueScript(
+                cmd,
+                ShouldBeSynchronized(_shouldBeSynchronized),
+                ShouldSendToRemote(_shouldSendToRemote)
+            );
 
             // Only add the current command to the history if it hasn't been
             // executed before. We don't want two of the same commands in a row
@@ -807,7 +829,15 @@ void LuaConsole::render() {
         return glm::vec2(loc.x + res.x - bbox.x - 10.f, loc.y);
     };
 
-    if (_shouldSendToRemote) {
+    if (!_shouldBeSynchronized) {
+        const glm::vec4 Yellow(1.0f, 1.0f, 0.f, 1.f);
+
+        const std::string masterOnlyExecutionText =
+            "Master only script execution (Nodes and Peers will not recieve scripts)";
+        const glm::vec2 loc = locationForRightJustifiedText(masterOnlyExecutionText);
+        RenderFont(*_font, loc, masterOnlyExecutionText, Yellow);
+    }
+    else if (_shouldSendToRemote) {
         const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
 
         ParallelConnection::Status status = global::parallelPeer->status();
@@ -827,7 +857,8 @@ void LuaConsole::render() {
     else if (global::parallelPeer->isHost()) {
         const glm::vec4 LightBlue(0.4f, 0.4f, 1.f, 1.f);
 
-        const std::string localExecutionText = "Local script execution";
+        const std::string localExecutionText =
+            "Local script execution (Peers will not recieve scripts)";
         const glm::vec2 loc = locationForRightJustifiedText(localExecutionText);
         RenderFont(*_font, loc, localExecutionText, LightBlue);
     }

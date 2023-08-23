@@ -80,7 +80,8 @@ std::vector<Action> ActionManager::actions() const {
 }
 
 void ActionManager::triggerAction(const std::string& identifier,
-                                  const ghoul::Dictionary& arguments) const
+                                  const ghoul::Dictionary& arguments,
+                                  bool shouldBeSynchronized) const
 {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
 
@@ -96,12 +97,14 @@ void ActionManager::triggerAction(const std::string& identifier,
     if (arguments.isEmpty()) {
         global::scriptEngine->queueScript(
             a.command,
+            scripting::ScriptEngine::ShouldBeSynchronized(shouldBeSynchronized),
             scripting::ScriptEngine::ShouldSendToRemote(!a.isLocal)
         );
     }
     else {
         global::scriptEngine->queueScript(
             fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command),
+            scripting::ScriptEngine::ShouldBeSynchronized(shouldBeSynchronized),
             scripting::ScriptEngine::ShouldSendToRemote(!a.isLocal)
         );
     }

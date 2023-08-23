@@ -356,6 +356,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
         );
         global::scriptEngine->queueScript(
             script,
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
@@ -379,6 +380,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
     );
     global::scriptEngine->queueScript(
         script,
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
         scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
@@ -392,6 +394,7 @@ void SkyBrowserModule::disableHoverCircle(bool useScript) {
             );
             global::scriptEngine->queueScript(
                 script,
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
                 scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }

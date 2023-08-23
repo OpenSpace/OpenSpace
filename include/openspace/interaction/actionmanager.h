@@ -42,7 +42,7 @@ public:
     std::vector<Action> actions() const;
 
     void triggerAction(const std::string& identifier,
-        const ghoul::Dictionary& arguments) const;
+        const ghoul::Dictionary& arguments, bool shouldBeSynchronized) const;
     static scripting::LuaLibrary luaLibrary();
 
 private:

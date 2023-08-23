@@ -44,6 +44,7 @@ void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
             fmt::format(
                 "openspace.setPropertyValueSingle(\"{}\", nil)", propertyKey
             ),
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }

@@ -52,7 +52,7 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
                 // bind a key to multiple actions, only one of which could be defined
                 continue;
             }
-            global::actionManager->triggerAction(it->second, ghoul::Dictionary());
+            global::actionManager->triggerAction(it->second, ghoul::Dictionary(), true);
         }
     }
 }

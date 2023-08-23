@@ -406,6 +406,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
             "openspace.removeScreenSpaceRenderable('" + identifier() + "');";
         global::scriptEngine->queueScript(
             script,
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
             scripting::ScriptEngine::ShouldSendToRemote::No
         );
     });

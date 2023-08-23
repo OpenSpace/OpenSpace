@@ -262,6 +262,7 @@ void ScriptScheduler::setCurrentTime(double time) {
         for (const std::string& script : scheduledScripts) {
             global::scriptEngine->queueScript(
                 script,
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
                 scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }

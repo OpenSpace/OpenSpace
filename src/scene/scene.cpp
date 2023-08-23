@@ -550,6 +550,7 @@ void Scene::updateInterpolations() {
             if (!i.postScript.empty()) {
                 global::scriptEngine->queueScript(
                     std::move(i.postScript),
+                    scripting::ScriptEngine::ShouldBeSynchronized::No,
                     scripting::ScriptEngine::ShouldSendToRemote::No
                 );
             }

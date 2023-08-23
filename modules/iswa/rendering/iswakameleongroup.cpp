@@ -153,6 +153,7 @@ void IswaKameleonGroup::updateFieldlineSeeds() {
 
             global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
                 scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
             std::get<2>(seedPath.second) = false;
@@ -180,6 +181,7 @@ void IswaKameleonGroup::clearFieldlines() {
 
             global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
                 scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
             std::get<2>(seedPath.second) = false;

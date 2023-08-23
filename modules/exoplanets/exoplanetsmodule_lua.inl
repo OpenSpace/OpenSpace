@@ -213,7 +213,8 @@ void createExoplanetSystem(const std::string& starName,
 
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + starParent + ");",
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     // Planets
@@ -330,7 +331,8 @@ void createExoplanetSystem(const std::string& starName,
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + planetTrailNode + ");"
             "openspace.addSceneGraphNode(" + planetNode + ");",
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         bool hasUpperAUncertainty = !std::isnan(planet.aUpper);
@@ -379,7 +381,8 @@ void createExoplanetSystem(const std::string& starName,
 
             global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + discNode + ");",
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::No,
+                scripting::ScriptEngine::ShouldSendToRemote::No
             );
         }
     }
@@ -424,7 +427,8 @@ void createExoplanetSystem(const std::string& starName,
 
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + circle + ");",
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     // Habitable Zone
@@ -479,7 +483,8 @@ void createExoplanetSystem(const std::string& starName,
 
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         // Star glare
@@ -520,7 +525,8 @@ void createExoplanetSystem(const std::string& starName,
 
             global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + starGlare + ");",
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::No,
+                scripting::ScriptEngine::ShouldSendToRemote::No
             );
         }
     }
@@ -629,7 +635,8 @@ std::vector<std::string> hostStarsWithSufficientData() {
     const std::string starIdentifier = makeIdentifier(std::move(starName));
     global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 }
 

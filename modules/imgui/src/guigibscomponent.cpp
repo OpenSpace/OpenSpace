@@ -147,6 +147,7 @@ void GuiGIBSComponent::render() {
         );
         global::scriptEngine->queueScript(
             script,
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }

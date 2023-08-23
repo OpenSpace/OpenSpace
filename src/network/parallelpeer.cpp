@@ -394,6 +394,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
 
             global::scriptEngine->queueScript(
                 sm._script,
+                scripting::ScriptEngine::ShouldBeSynchronized::No,
                 scripting::ScriptEngine::ShouldSendToRemote::No
             );
             break;
