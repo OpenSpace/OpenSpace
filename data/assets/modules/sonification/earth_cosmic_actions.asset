@@ -1,0 +1,131 @@
+
+local toggle_sonifications = {
+  Identifier = "module.sonification.toggle.enabled",
+  Name = "Toggle sonifications",
+  Command = [[
+    local value = openspace.getPropertyValue("Modules.Sonification.Enabled")
+    openspace.setPropertyValueSingle("Modules.Sonification.Enabled", not value)
+  ]],
+  Documentation = "Toggles whether the sonifications should be enabled or disabled",
+  GuiPath = "/Sonification",
+  isLocal = false
+}
+
+local enable_cosmic = {
+  Identifier = "module.sonification.enable.cosmic",
+  Name = "Enable cosmic sonification",
+  Command = [[
+    local navState = { Up = {-0.7576672111209941, -0.17453402491439934, 0.6288706316400182}, Pitch = -0.005408597124228873, Anchor = "Earth", Yaw = -0.005394233067171395, Position = {17437796.895799384, 6591989.028259964, 22838677.140913013} }
+    openspace.setPropertyValueSingle("RenderEngine.HorizFieldOfView", 120.000000)
+
+    openspace.setPropertyValue("{planet_solarSystem}.Renderable.Enabled", false)
+    openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Enabled", false)
+    openspace.setPropertyValue("{moon_solarSystem}.Renderable.Enabled", false)
+    openspace.setPropertyValue("{moonTrail_solarSystem}.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.MoonTrail.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled", false)
+
+    openspace.setPropertyValueSingle("Scene.VenusAtmosphere.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.MarsAtmosphere.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.TitanAtmosphere.Renderable.Enabled", false)
+
+    openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.MilkyWayGalaxyImage.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.MilkyWayVolume.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.SunStar.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Planck.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.SloanDigitalSkySurvey.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.TullyGalaxies.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.TullyGalaxiesImages.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Quasars.Renderable.Enabled", false)
+
+    openspace.setPropertyValueSingle("Scene.birds_consensus_species.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", true)
+
+    openspace.setPropertyValueSingle("Modules.Sonification.PlanetsSonification.Enabled", false)
+    openspace.setPropertyValueSingle("Modules.Sonification.CompareSonification.Enabled", false)
+    openspace.setPropertyValueSingle("Modules.Sonification.SolarSonification.Enabled", false)
+    openspace.setPropertyValueSingle("Modules.Sonification.CosmicSonification.Enabled", true)
+
+    openspace.pathnavigation.flyToNavigationState(navState, 0.0)
+  ]],
+  Documentation = "Enables the cosmic sonification, turn off the planets and jumps to the cosmic points",
+  GuiPath = "/Sonification",
+  isLocal = false
+}
+
+local enable_planets = {
+  Identifier = "module.sonification.enable.planets",
+  Name = "Enable planets sonification",
+  Command = [[
+    local navState = { Up = {-0.7576672111209941, -0.17453402491439934, 0.6288706316400182}, Pitch = -0.005408597124228873, Anchor = "Earth", Yaw = -0.005394233067171395, Position = {17437796.895799384, 6591989.028259964, 22838677.140913013} }
+    openspace.setPropertyValueSingle("RenderEngine.HorizFieldOfView", 82.555435)
+
+    openspace.setPropertyValue("{planet_solarSystem}.Renderable.Enabled", true)
+    openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Enabled", true)
+    openspace.setPropertyValue("{moon_solarSystem}.Renderable.Enabled", true)
+    openspace.setPropertyValue("{moonTrail_solarSystem}.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.MoonTrail.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled", true)
+
+    openspace.setPropertyValueSingle("Scene.VenusAtmosphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.MarsAtmosphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.TitanAtmosphere.Renderable.Enabled", true)
+
+    openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.MilkyWayGalaxyImage.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.MilkyWayVolume.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.SunStar.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Planck.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.SloanDigitalSkySurvey.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.TullyGalaxies.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.TullyGalaxiesImages.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Quasars.Renderable.Enabled", true)
+
+    openspace.setPropertyValueSingle("Scene.birds_consensus_species.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", false)
+
+    openspace.setPropertyValueSingle("Modules.Sonification.PlanetsSonification.Enabled", true)
+    openspace.setPropertyValueSingle("Modules.Sonification.CompareSonification.Enabled", false)
+    openspace.setPropertyValueSingle("Modules.Sonification.SolarSonification.Enabled", false)
+    openspace.setPropertyValueSingle("Modules.Sonification.CosmicSonification.Enabled", false)
+
+    openspace.pathnavigation.flyToNavigationState(navState, 0.0)
+
+  ]],
+  Documentation = "Enables the planets sonification, turn off the cosmic points and jumps to Earth",
+  GuiPath = "/Sonification",
+  isLocal = false
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(toggle_sonifications)
+  openspace.action.registerAction(enable_cosmic)
+  openspace.action.registerAction(enable_planets)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.action.removeAction(enable_planets)
+  openspace.action.removeAction(enable_cosmic)
+  openspace.action.removeAction(toggle_sonifications)
+end)
+
+asset.meta = {
+  Name = "Sonification Module Actions",
+  Version = "1.0",
+  Description = "Actions that are relevant for the sonification module",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
