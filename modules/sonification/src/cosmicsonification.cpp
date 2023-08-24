@@ -202,6 +202,7 @@ void CosmicSonification::update(const Camera* camera) {
             LWARNING(fmt::format("Could not find node {}", label.identifier));
             continue;
         }
+        glm::dmat4 transform = node->modelTransform();
 
         // Find the RenderableCosmicPoints
         Renderable* renderable = node->renderable();
@@ -234,19 +235,20 @@ void CosmicSonification::update(const Camera* camera) {
         for (int i = 0; i < label.labels->entries.size(); ++i) {
             glm::vec3 scaledPos(label.labels->entries[i].position);
             scaledPos *= toMeter(label.unit);
+            glm::vec3 transformedPos = transform * glm::vec4(scaledPos, 1.0);
 
             double distance = SonificationBase::calculateDistanceTo(
                 camera,
-                scaledPos,
+                transformedPos,
                 DistanceUnit::Meter
             );
             double angleH = SonificationBase::calculateAngleTo(
                 camera,
-                scaledPos
+                transformedPos
             );
             double angleV = SonificationBase::calculateElevationAngleTo(
                 camera,
-                scaledPos
+                transformedPos
             );
 
             if (abs(distance) < std::numeric_limits<double>::epsilon()) {
