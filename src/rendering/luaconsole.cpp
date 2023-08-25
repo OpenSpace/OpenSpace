@@ -822,7 +822,7 @@ void LuaConsole::render() {
 
         const glm::vec2 loc = glm::vec2(
             EntryFontSize * dpi / 2.f,
-            res.y - _currentHeight + EntryFontSize * dpi
+            res.y - EntryFontSize * dpi
         );
 
         const glm::vec2 bbox = _font->boundingBox(text);
