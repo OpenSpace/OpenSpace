@@ -241,14 +241,8 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
         cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 
-    glm::dmat4 modelTransform, modelViewTransform, modelViewProjectionTransform;
-    calcAllTransforms(
-        data,
-        modelTransform,
-        modelViewTransform,
-        modelViewProjectionTransform,
-        { .rotation = rotationTransform }
-    );
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data, { .rotation = rotationTransform });
 
     _shader->setUniform(
         "modelViewProjectionTransform",

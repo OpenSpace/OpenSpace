@@ -168,13 +168,8 @@ void RenderableBoxGrid::deinitializeGL() {
 void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    glm::dmat4 modelTransform, modelViewTransform, modelViewProjectionTransform;
-    calcAllTransforms(
-        data,
-        modelTransform,
-        modelViewTransform,
-        modelViewProjectionTransform
-    );
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data);
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
     _gridProgram->setUniform("MVPTransform", modelViewProjectionTransform);

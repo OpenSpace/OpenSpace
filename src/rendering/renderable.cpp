@@ -365,16 +365,20 @@ glm::dmat4 Renderable::calcModelViewProjectionTransform(const RenderData& data,
         modelMatrix;
 }
 
-void Renderable::calcAllTransforms(const RenderData& data,
-                                   glm::dmat4& ModelTransformResult,
-                                   glm::dmat4& ModelViewTransformResult,
-                                   glm::dmat4& ModelViewProjectionTransformResult,
-                                   const AlternativeTransform altModelTransform) const
+std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
+                                                                   const RenderData& data,
+                                       const AlternativeTransform altModelTransform) const
 {
-    ModelTransformResult = calcModelTransform(data, altModelTransform);
-    ModelViewTransformResult = calcModelViewTransform(data, ModelTransformResult);
-    ModelViewProjectionTransformResult =
-        calcModelViewProjectionTransform(data, ModelTransformResult);
+    glm::dmat4 modelTransform = calcModelTransform(data, altModelTransform);
+    glm::dmat4 modelViewTransformResult = calcModelViewTransform(data, modelTransform);
+    glm::dmat4 modelViewProjectionTransformResult =
+        calcModelViewProjectionTransform(data, modelTransform);
+
+    return std::tuple<glm::dmat4, glm::dmat4, glm::dmat4>{
+        modelTransform,
+        modelViewTransformResult,
+        modelViewProjectionTransformResult
+    };
 }
 
 }  // namespace openspace

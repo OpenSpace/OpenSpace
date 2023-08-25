@@ -157,10 +157,8 @@ protected:
     glm::dmat4 calcModelViewProjectionTransform(const RenderData& data,
         std::optional<const glm::dmat4> modelTransform = std::nullopt) const;
 
-    void calcAllTransforms(const RenderData& data, glm::dmat4& ModelTransformResult,
-        glm::dmat4& ModelViewTransformResult,
-        glm::dmat4& ModelViewProjectionTransformResult,
-        const AlternativeTransform altModelTransform = {}) const;
+    std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> calcAllTransforms(
+        const RenderData& data, const AlternativeTransform altModelTransform = {}) const;
 
 private:
     double _boundingSphere = 0.0;

@@ -240,13 +240,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
     _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    glm::dmat4 modelTransform, modelViewTransform, modelViewProjectionTransform;
-    calcAllTransforms(
-        data,
-        modelTransform,
-        modelViewTransform,
-        modelViewProjectionTransform
-    );
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data);
     glm::dmat3 modelRotation = glm::dmat3(data.modelTransform.rotation);
 
     _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
