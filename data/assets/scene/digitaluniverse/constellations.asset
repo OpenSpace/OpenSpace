@@ -116,7 +116,7 @@ local HideConstellations = {
   Identifier = "os.constellations.HideConstellations",
   Name = "Hide all",
   Command = [[
-    openspace.fadeOut("Scene.Constellations.Renderable", nil, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', false); openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", {})")
+    openspace.fadeOut("Scene.Constellations.Renderable", nil, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', false); openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
   ]],
   Documentation = "Hides all the constellations lines",
   GuiPath = "/Constellations/Lines",

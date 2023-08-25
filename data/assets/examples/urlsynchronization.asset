@@ -31,6 +31,9 @@ asset.syncedResource({
   Override = true
 })
 
+-- Load a resource without hashing, meaning that the bare directory name will be
+-- used for the downloaded file. If UseHash is true, the hash of the URL is appended
+-- to the directory name to produce a unique directory under all circumstances
 asset.syncedResource({
   Name = "Example No Hash",
   Type = "UrlSynchronization",
@@ -38,3 +41,16 @@ asset.syncedResource({
   Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
   UseHash = false
 })
+
+
+asset.meta = {
+  Name = "UrlSynchronization",
+  Version = "1.0",
+  Description = [[Example showing how to load resources (any type of data file) from
+    online sources, using the UrlSynchronization resource type. These can then be used
+    in other assets. See more information on resources on the OpenSpace wiki page.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -14,7 +14,7 @@ local kernels = asset.syncedResource({
   Name = "Voyager 2 Kernels",
   Type = "HttpSynchronization",
   Identifier = "voyager2_spice",
-  Version = 1
+  Version = 2
 })
 
 
@@ -27,6 +27,7 @@ local Kernels = {
   kernels .. "vgr2_sat337.bsp",
   kernels .. "vgr2_ura083.bsp",
   kernels .. "vgr2_nep081.bsp",
+  kernels .. "vgr2.x2100.bsp",
   kernels .. "vgr2_super.bc",
   kernels .. "vgr2_super_v2.bc"
 }
@@ -331,9 +332,9 @@ local VoyagerTrailCruiseNeptuneInf = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1989 AUG 26",
-    EndTime = "2021 JAN 01",
-    -- 11451 is the number of days between the Start and End time
-    SampleInterval = 11451 * 2
+    EndTime = "2100 JAN 01",
+    -- 40306 is the number of days between the Start and End time
+    SampleInterval = 40306 * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {

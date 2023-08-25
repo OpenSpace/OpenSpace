@@ -41,6 +41,10 @@ local ScaleModel = {
   },
   GUI = {
     Name = "Rose Bowl",
+    Description = [[The stadium seats over 92,000 people, with 77 rows of seats. It
+      measures 880 feet (268 meters) from the north rim to the south rim, and 695 feet
+      (212 meters) from east to west. The turfed area is 79,156 square feet (7354
+      square meters).]],
     Path = "/Scale Objects"
   }
 }
@@ -84,3 +88,15 @@ end)
 asset.export(ScaleModel)
 asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
 asset.export("ResetPositionAction", ResetPositionAction.Identifier)
+
+
+asset.meta = {
+  Name = "Scale Model - Rose Bowl Stadium",
+  Version = "1.0",
+  Description = [[A 1:1 scale model of the Rose Bowl Stadium. Per default it is placed
+    at its actual position in Pasadena, California. But the asset also includes actions
+    to move it to a position under the camera, or back to its original position.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

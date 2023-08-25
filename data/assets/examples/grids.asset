@@ -19,6 +19,7 @@ local RadialGrid = {
   },
   GUI = {
     Name = "Example Radial Grid",
+    Description = [[A circular 2D grid, with segments based on the radius and angle.]],
     Path = "/Examples/Grids"
   }
 }
@@ -43,6 +44,7 @@ local PlanarGrid = {
   },
   GUI = {
     Name = "Example Grid",
+    Description = [[A basic 2D grid, with a given size and number of segments.]],
     Path = "/Examples/Grids"
   }
 }
@@ -63,6 +65,7 @@ local SphericalGrid = {
   },
   GUI = {
     Name = "Example Spherical Grid",
+    Description = [[A grid in the form of a 3D sphere.]],
     Path = "/Examples/Grids"
   }
 }
@@ -84,6 +87,7 @@ local BoxGrid = {
   },
   GUI = {
     Name = "Example Box Grid",
+    Description = [[A grid in the form of a 3D box.]],
     Path = "/Examples/Grids"
   }
 }
@@ -107,3 +111,13 @@ asset.export(RadialGrid)
 asset.export(PlanarGrid)
 asset.export(SphericalGrid)
 asset.export(BoxGrid)
+
+
+asset.meta = {
+  Name = "Example Grids",
+  Version = "1.0",
+  Description = [[Examples of different types of rendered grids.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

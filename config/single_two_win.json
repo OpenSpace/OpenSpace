@@ -55,5 +55,13 @@
       "eyeseparation": 0.065,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
-  ]
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "Two 1280x720 windows each with identical planar projection rendering. Only the primary window has menu controls, but both have text overlays.",
+    "license": "MIT License",
+    "name": "Twin Planar",
+    "version": "1.0"
+  }
+
 }

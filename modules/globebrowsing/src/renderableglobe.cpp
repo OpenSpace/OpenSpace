@@ -69,7 +69,6 @@ namespace {
 
     // Global flags to modify the RenderableGlobe
     constexpr bool LimitLevelByAvailableData = true;
-    constexpr bool PerformFrustumCulling = true;
     constexpr bool PreformHorizonCulling = true;
 
     // Shadow structure
@@ -98,6 +97,7 @@ namespace {
     // time being.  --abock  2018-10-30
     constexpr int DefaultSkirtedGridSegments = 64;
     constexpr int UnknownDesiredLevel = -1;
+    constexpr int DefaultHeightTileResolution = 512;
 
     const openspace::globebrowsing::GeodeticPatch Coverage =
         openspace::globebrowsing::GeodeticPatch(0, 0, 90, 180);
@@ -124,6 +124,13 @@ namespace {
         "is used instead",
         // @VISIBILITY(?)
         openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PerformFrustumCullingInfo = {
+        "PerformFrustumCulling",
+        "Perform frusum culling",
+        "If this value is set to 'true', frustum culling will be performed.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
@@ -543,6 +550,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(ShowChunkEdgeInfo, false),
         BoolProperty(LevelProjectedAreaInfo, true),
         BoolProperty(ResetTileProviderInfo, false),
+        BoolProperty(PerformFrustumCullingInfo, true),
         IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
         IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
     })
@@ -649,6 +657,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
     _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
+    _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
 
@@ -1602,11 +1611,11 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
 
         const glm::mat3& modelViewTransformMat3 = glm::mat3(modelViewTransform);
 
-        // This is an assumption that the height tile has a resolution of 64 * 64
+        // This is an assumption that the height tile has a resolution of 512 * 512
         // If it does not it will still produce "correct" normals. If the resolution is
         // higher the shadows will be softer, if it is lower, pixels will be visible.
-        // Since default is 64 this will most likely work fine.
-        constexpr float TileDelta = 1.f / DefaultSkirtedGridSegments;
+        // Since default is 512 this will most likely work fine.
+        constexpr float TileDelta = 1.f / DefaultHeightTileResolution;
         const glm::vec3 deltaTheta0 = modelViewTransformMat3 *
             (glm::vec3(corner10 - corner00) * TileDelta);
         const glm::vec3 deltaTheta1 = modelViewTransformMat3 *
@@ -1890,7 +1899,7 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
     ZoneScoped;
 
     return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (PerformFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
+           (_debugProperties.performFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
@@ -2357,7 +2366,9 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
         const std::vector<Layer*>& lyrs = _layerManager.layerGroup(gi.id).activeLayers();
         for (Layer* layer : lyrs) {
             Tile::Status status = layer->tileStatus(chunk.tileIndex);
-            if (status == Tile::Status::OK) {
+            // Ensure that the current tile is OK and that the tileprovider for the current
+            // layer has enough data to support an additional level.
+            if (status == Tile::Status::OK && layer->tileProvider()->maxLevel() > currLevel + 1) {
                 return UnknownDesiredLevel;
             }
         }

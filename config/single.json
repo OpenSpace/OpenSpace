@@ -43,5 +43,12 @@
       "eyeseparation": 0.065,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
-  ]
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "A single 1280x720 window with planar projection rendering at 2560x1440 resolution.",
+    "license": "MIT License",
+    "name": "Single",
+    "version": "1.0"
+  }
 }

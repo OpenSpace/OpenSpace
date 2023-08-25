@@ -698,12 +698,13 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
 
             _featuresPropertyOwner.addPropertySubOwner(_features.back().get());
         }
-        catch (const ghoul::MissingCaseException&) {
+        catch (const ghoul::RuntimeError& error) {
             LERROR(fmt::format(
                 "Error creating GeoJson layer with identifier '{}'. Problem reading "
                 "feature {} in GeoJson file '{}'.",
                 identifier(), indexInFile, _geoJsonFile
             ));
+            LERRORC(error.component, error.message);
             // Do nothing
         }
     }

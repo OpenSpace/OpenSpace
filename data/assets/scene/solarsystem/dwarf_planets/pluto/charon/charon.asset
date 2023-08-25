@@ -44,7 +44,7 @@ local Charon = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_major", "moon_major_pluto" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto/Charon"
   }

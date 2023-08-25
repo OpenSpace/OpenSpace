@@ -56,7 +56,8 @@ documentation::Documentation RenderableSphereImageOnline::Documentation() {
     return codegen::doc<Parameters>("base_renderable_sphere_image_online");
 }
 
-RenderableSphereImageOnline::RenderableSphereImageOnline(const ghoul::Dictionary& dictionary)
+RenderableSphereImageOnline::RenderableSphereImageOnline(
+                                                      const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _textureUrl(TextureInfo)
 {
