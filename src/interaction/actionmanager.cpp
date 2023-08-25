@@ -94,20 +94,24 @@ void ActionManager::triggerAction(const std::string& identifier,
     }
 
     const Action& a = action(identifier);
+    std::string script;
     if (arguments.isEmpty()) {
-        global::scriptEngine->queueScript(
-            a.command,
-            scripting::ScriptEngine::ShouldBeSynchronized(shouldBeSynchronized),
-            scripting::ScriptEngine::ShouldSendToRemote(!a.isLocal)
-        );
+        script = a.command;
     }
     else {
-        global::scriptEngine->queueScript(
-            fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command),
-            scripting::ScriptEngine::ShouldBeSynchronized(shouldBeSynchronized),
-            scripting::ScriptEngine::ShouldSendToRemote(!a.isLocal)
-        );
+        script = fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
     }
+
+    using ShouldBeSynchronized = scripting::ScriptEngine::ShouldBeSynchronized;
+    using ShouldSendToRemote = scripting::ScriptEngine::ShouldSendToRemote;
+    ShouldBeSynchronized sync = ShouldBeSynchronized::Yes;
+    ShouldSendToRemote send = ShouldSendToRemote::Yes;
+    if (!shouldBeSynchronized || a.isLocal) {
+        sync = ShouldBeSynchronized::No;
+        send = ShouldSendToRemote::No;
+    }
+
+    global::scriptEngine->queueScript(script, sync, send);
 }
 
 scripting::LuaLibrary ActionManager::luaLibrary() {
