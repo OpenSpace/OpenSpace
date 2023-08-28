@@ -370,14 +370,14 @@ std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
                                        const AlternativeTransform altModelTransform) const
 {
     glm::dmat4 modelTransform = calcModelTransform(data, altModelTransform);
-    glm::dmat4 modelViewTransformResult = calcModelViewTransform(data, modelTransform);
-    glm::dmat4 modelViewProjectionTransformResult =
+    glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
+    glm::dmat4 modelViewProjectionTransform =
         calcModelViewProjectionTransform(data, modelTransform);
 
     return std::tuple<glm::dmat4, glm::dmat4, glm::dmat4>{
         modelTransform,
-        modelViewTransformResult,
-        modelViewProjectionTransformResult
+        modelViewTransform,
+        modelViewProjectionTransform
     };
 }
 
