@@ -246,6 +246,9 @@ std::string prunedIdentifier(std::string identifier) {
                 "openspace.skybrowser.setBorderColor('{}', {}, {}, {})",
                 id, color.r, color.g, color.b
             );
+
+            // No sync or send because this is already inside a lua script, therefor it
+            // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript(
                 script,
                 scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -602,6 +605,8 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
         "}"
     "}";
 
+    // No sync or send because this is already inside a lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + browser + ");",
         scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -643,7 +648,9 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
 
         module->removeTargetBrowserPair(identifier);
 
-        // Remove from engine
+        // Remove from engine.
+        // No sync or send because this is already inside a lua script, therefor it has
+        // already been synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.removeScreenSpaceRenderable('" + browser + "');",
             scripting::ScriptEngine::ShouldBeSynchronized::No,

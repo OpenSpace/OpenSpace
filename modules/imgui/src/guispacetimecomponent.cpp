@@ -200,6 +200,9 @@ void GuiSpaceTimeComponent::render() {
         for (size_t i = 0; i < interestingTimes.size(); ++i) {
             const Scene::InterestingTime& t = interestingTimes[i];
             if (ImGui::Button(t.name.c_str())) {
+
+                // No sync or send because time settings are always synced and sent
+                // to the connected nodes and peers
                 global::scriptEngine->queueScript(
                     "openspace.time.setTime(\"" + t.time + "\")",
                     scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -229,6 +232,8 @@ void GuiSpaceTimeComponent::render() {
         ImGuiInputTextFlags_EnterReturnsTrue
     );
     if (dateChanged) {
+        // No sync or send because time settings are always synced and sent to the
+        // connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.setTime(\"" + std::string(Buffer) + "\")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -262,7 +267,9 @@ void GuiSpaceTimeComponent::render() {
             j2000 + seconds;
 
         if (shift) {
-            // If any shift key is pressed we want to always jump to the time
+            // If any shift key is pressed we want to always jump to the time.
+            // No sync or send because time settings are always synced and sent
+            // to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.time.setTime(" + std::to_string(newTime) + ")",
                 scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -270,6 +277,8 @@ void GuiSpaceTimeComponent::render() {
             );
         }
         else {
+            // No sync or send because time settings are always synced and sent
+            // to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.time.interpolateTime(" + std::to_string(newTime) + ", " +
                 std::to_string(duration) + ")",
@@ -311,6 +320,8 @@ void GuiSpaceTimeComponent::render() {
         // setTime doesn't like the T in it and wants a space instead
         nowTime[11] = ' ';
 
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.setTime(\"" + nowTime + "\")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -392,6 +403,9 @@ void GuiSpaceTimeComponent::render() {
             // If the value changed, we want to change the delta time to the new value
 
             double newDt = convertTime(_deltaTime, _deltaTimeUnit, TimeUnit::Second);
+
+            // No sync or send because time settings are always synced and sent
+            // to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.time.interpolateDeltaTime(" + std::to_string(newDt) + ")",
                 scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -441,6 +455,8 @@ void GuiSpaceTimeComponent::render() {
                 TimeUnit::Second
             );
 
+            // No sync or send because time settings are always synced and sent
+            // to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
                 scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -449,6 +465,8 @@ void GuiSpaceTimeComponent::render() {
         }
         if (!ImGui::IsItemActive() && !ImGui::IsItemClicked()) {
             if (_slidingDelta != 0.f) {
+                // No sync or send because time settings are always synced and sent
+                // to the connected nodes and peers
                 global::scriptEngine->queueScript(
                     "openspace.time.setDeltaTime(" + std::to_string(_oldDeltaTime) + ")",
                     scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -477,6 +495,8 @@ void GuiSpaceTimeComponent::render() {
                 TimeUnit::Second
             );
 
+            // No sync or send because time settings are always synced and sent
+            // to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
                 scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -508,6 +528,8 @@ void GuiSpaceTimeComponent::render() {
         { ImGui::GetWindowWidth() / 2 - 7.5f, 0.f }
     );
     if (invert) {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.interpolateDeltaTime(-1 * openspace.time.deltaTime());",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -517,6 +539,8 @@ void GuiSpaceTimeComponent::render() {
 
     const bool minusDs = ImGui::Button("-1d/s");
     if (minusDs) {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.interpolateDeltaTime(" + std::to_string(-24 * 60 * 60) + ")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -527,6 +551,8 @@ void GuiSpaceTimeComponent::render() {
 
     const bool minusHs = ImGui::Button("-1h/s");
     if (minusHs) {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.interpolateDeltaTime(" + std::to_string(-60 * 60) + ")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -537,6 +563,8 @@ void GuiSpaceTimeComponent::render() {
 
     const bool minusMs = ImGui::Button("-1min/s");
     if (minusMs) {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.interpolateDeltaTime(" + std::to_string(-60) + ")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -547,6 +575,8 @@ void GuiSpaceTimeComponent::render() {
 
     const bool minusSs = ImGui::Button("-1s/s");
     if (minusSs) {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.interpolateDeltaTime(" + std::to_string(-1) + ")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -557,6 +587,8 @@ void GuiSpaceTimeComponent::render() {
 
     const bool zero = ImGui::Button("0");
     if (zero) {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.interpolateDeltaTime(" + std::to_string(0) + ")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -568,6 +600,8 @@ void GuiSpaceTimeComponent::render() {
 
     const bool plusSs = ImGui::Button("+1s/s");
     if (plusSs) {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.interpolateDeltaTime(" + std::to_string(1) + ")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -578,6 +612,8 @@ void GuiSpaceTimeComponent::render() {
 
     const bool plusMs = ImGui::Button("1min/s");
     if (plusMs) {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.interpolateDeltaTime(" + std::to_string(60) + ")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -588,6 +624,8 @@ void GuiSpaceTimeComponent::render() {
 
     const bool plusHs = ImGui::Button("1h/s");
     if (plusHs) {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.interpolateDeltaTime(" + std::to_string(60 * 60) + ")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,
@@ -598,6 +636,8 @@ void GuiSpaceTimeComponent::render() {
 
     const bool plusDs = ImGui::Button("1d/s");
     if (plusDs) {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.interpolateDeltaTime(" + std::to_string(24 * 60 * 60) + ")",
             scripting::ScriptEngine::ShouldBeSynchronized::No,

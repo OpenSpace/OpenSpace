@@ -192,6 +192,8 @@ struct [[codegen::Dictionary(Action)]] Action {
         throw ghoul::lua::LuaError(fmt::format("Action '{}' not found", id));
     }
 
+    // No sync because this is already inside a lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
     global::actionManager->triggerAction(id, arg, false);
 }
 

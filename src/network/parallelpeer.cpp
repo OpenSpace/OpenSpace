@@ -392,6 +392,8 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
 
+            // No sync or send because this has already been recived by a peer,
+            // don't send it back again
             global::scriptEngine->queueScript(
                 sm._script,
                 scripting::ScriptEngine::ShouldBeSynchronized::No,
