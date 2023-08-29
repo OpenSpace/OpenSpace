@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms_magnetosphere")
-local transferFunction = asset.localResource("./test1.txt")
+local transferFunction = asset.localResource("./coolToWarm.txt")
 
 
 local gamera = {
@@ -8,9 +8,9 @@ local gamera = {
   InteractionSphere = 6380000,  -- A value slightly bigger than earth radius
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    SourceFolder = "C:/Users/aemolin/Documents/GAMERAdata/dirFL2",
+    --SourceFolder = "C:/Users/aemolin/Documents/GAMERAdata/dirFL2",
    --SourceFolder = "C:/Users/kjjohnst/Documents/GAMERAdata/dir",
-  --SourceFolder = "/Users/juliajohnstone/Desktop/Exjobb/viz4sasha/dir",
+   SourceFolder = "/Users/juliajohnstone/Desktop/OpenSpaceData/dir",
     -- Hierarchy = {"/", "/Step#0" }, -- Hierarchical navigation in H5 file
     LineWidth = 1.0,
     ScalingUnit = "RE",
