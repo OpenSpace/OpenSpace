@@ -1953,22 +1953,8 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
     SurfacePositionHandle posHandle =
         calculateSurfacePositionHandle(*_anchorNode, position);
 
-    const glm::dvec3 centerToActualSurfaceModelSpace =
-        posHandle.centerToReferenceSurface +
-        posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
-
-    const glm::dvec3 centerToActualSurface = glm::dmat3(_anchorNode->modelTransform()) *
-        centerToActualSurfaceModelSpace;
-    const glm::dvec3 centerToCamera = position - _anchorNode->worldPosition();
-    const glm::dvec3 actualSurfaceToCamera = centerToCamera - centerToActualSurface;
-
-    const double distFromSurfaceToCamera = glm::length(actualSurfaceToCamera);
-    const double distFromCenterToSurface = glm::length(centerToActualSurface);
-
-    double speedScale =
-        distFromCenterToSurface > 0.0 ?
-        glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
-        1.0; // same as horizontal translation
+    // Same speed scale as horizontal translation
+    double speedScale = rotationSpeedScaleFromCameraHeight(position, posHandle);
 
     speedScale *= _idleBehavior.speedScaleFactor;
     speedScale *= 0.05; // without this scaling, the motion is way too fast
@@ -1981,12 +1967,12 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
     double s = _idleBehaviorDampenInterpolator.value();
     speedScale *= _invertIdleBehaviorInterpolation ? (1.0 - s) : s;
 
+    double angle = deltaTime * speedScale;
+
     // Apply the chosen behavior
     const IdleBehavior::Behavior choice = _idleBehavior.chosenBehavior.value_or(
         static_cast<IdleBehavior::Behavior>(_idleBehavior.defaultBehavior.value())
     );
-
-    double angle = deltaTime * speedScale;
 
     switch (choice) {
         case IdleBehavior::Behavior::Orbit:
