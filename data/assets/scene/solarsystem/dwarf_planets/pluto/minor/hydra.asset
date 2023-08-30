@@ -19,7 +19,7 @@ local Hydra = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
+  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "moon_minor_pluto" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto/Moons/Hydra"
   }
@@ -44,7 +44,7 @@ local HydraTrail = {
     "moonTrail_dwarf",
     "moonTrail_pluto",
     "moonTrail_minor",
-    "moonTrail_pluto_minor"
+    "moonTrail_minor_pluto"
   },
   GUI = {
     Name = "Hydra Trail",

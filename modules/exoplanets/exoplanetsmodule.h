@@ -44,6 +44,7 @@ public:
     bool hasDataFiles() const;
     std::string exoplanetsDataPath() const;
     std::string lookUpTablePath() const;
+    std::string teffToBvConversionFilePath() const;
     std::string bvColormapPath() const;
     std::string starTexturePath() const;
     std::string starGlareTexturePath() const;

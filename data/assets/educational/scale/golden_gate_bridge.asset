@@ -46,6 +46,7 @@ local ScaleModel = {
   },
   GUI = {
     Name = "Golden Gate Bridge",
+    Description = "The bridge is 2,737 m (8,980 ft) long and 227 m (746 ft) high.",
     Path = "/Scale Objects"
   }
 }
@@ -89,3 +90,15 @@ end)
 asset.export(ScaleModel)
 asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
 asset.export("ResetPositionAction", ResetPositionAction.Identifier)
+
+
+asset.meta = {
+  Name = "Scale Model - Golden Gate Bridge",
+  Version = "1.0",
+  Description = [[A 1:1 scale model of the Golden Gate Bridge. Per default it is placed
+    at its actual position in San Fransisco. But the asset also includes actions to move
+    it to a position under the camera, or back to its original position.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

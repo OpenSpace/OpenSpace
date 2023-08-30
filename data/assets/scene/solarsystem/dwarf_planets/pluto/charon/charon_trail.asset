@@ -22,7 +22,7 @@ local CharonBarycentricTrail = {
     "moonTrail_dwarf",
     "moonTrail_pluto",
     "moonTrail_major",
-    "moonTrail_pluto_major",
+    "moonTrail_major_pluto",
     "pluto_system"
   },
   GUI = {

@@ -1,4 +1,4 @@
--- To learn how you can include your own video, see the wiki 
+-- To learn how you can include your own video, see the wiki
 -- http://wiki.openspaceproject.com/docs/builders/assets/resources.html
 
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
@@ -27,9 +27,9 @@ asset.export("layer", Layer)
 
 
 asset.meta = {
-  Name = "Video Player Test",
+  Name = "Video Player on Globe Example",
   Version = "1.0",
-  Description = "An example asset that shows how to include a video on Earth",
+  Description = "An example asset that shows how to include a video on Earth.",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT"

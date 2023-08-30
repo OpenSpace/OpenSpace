@@ -48,6 +48,9 @@ local LightPollutionSphere = {
   },
   GUI = {
     Name = "Light Pollution Sphere",
+    Description = [[A sphere used to simulate the effect of light pollution on
+      the night sky. Different pollution levels can be set using the provided actions.
+      These alter the opacity of the sphere.]],
     Path = "/Other/Night Sky",
     Hidden = false
   }
@@ -250,3 +253,15 @@ asset.export("SetLightPollutionLevel7", SetLightPollutionLevel7.Identifier)
 asset.export("SetLightPollutionLevel8", SetLightPollutionLevel8.Identifier)
 asset.export("SetLightPollutionLevel9", SetLightPollutionLevel9.Identifier)
 asset.export("UndoLightPollution", UndoLightPollution.Identifier)
+
+
+asset.meta = {
+  Name = "Light Pollution",
+  Version = "1.0",
+  Description = [[Includes a sphere used to simulate the effect of light pollution on
+    the night sky, and actions to set the desired level of pollution (with a scale
+    from 1-9).]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

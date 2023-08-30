@@ -147,6 +147,7 @@ namespace {
 
     constexpr std::string_view ExoplanetsDataFileName = "exoplanets_data.bin";
     constexpr std::string_view LookupTableFileName = "lookup.txt";
+    constexpr std::string_view TeffToBvConversionFileName = "teff_bv.txt";
 
     struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
@@ -244,6 +245,14 @@ std::string ExoplanetsModule::lookUpTablePath() const {
     return absPath(
         fmt::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
     ).string();
+}
+
+std::string ExoplanetsModule::teffToBvConversionFilePath() const {
+    ghoul_assert(hasDataFiles(), "Data files not loaded");
+
+    return absPath(fmt::format(
+        "{}/{}", _exoplanetsDataFolder.value(), TeffToBvConversionFileName
+    )).string();
 }
 
 std::string ExoplanetsModule::bvColormapPath() const {
@@ -348,7 +357,8 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             codegen::lua::RemoveExoplanetSystem,
             codegen::lua::ListOfExoplanets,
             codegen::lua::ListOfExoplanetsDeprecated,
-            codegen::lua::ListAvailableExoplanetSystems
+            codegen::lua::ListAvailableExoplanetSystems,
+            codegen::lua::LoadExoplanetsFromCsv
         }
     };
 }

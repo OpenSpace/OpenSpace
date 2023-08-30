@@ -40,6 +40,7 @@ local EclipticLine = {
   },
   GUI = {
     Name = "Ecliptic Line",
+    Description = "A line representation of the Ecliptic plane.",
     Path = "/Other/Lines"
   }
 }
@@ -65,6 +66,7 @@ local EclipticBand = {
   },
   GUI = {
     Name = "Ecliptic Band",
+    Description = "A band representation of the Ecliptic plane.",
     Path = "/Other/Lines"
   }
 }
@@ -158,3 +160,14 @@ asset.export("ToggleEclipticLine", ToggleEclipticLine.Identifier)
 asset.export("ShowEclipticBand", ShowEclipticBand.Identifier)
 asset.export("HideEclipticBand", HideEclipticBand.Identifier)
 asset.export("ToggleEclipticBand", ToggleEclipticBand.Identifier)
+
+
+asset.meta = {
+  Name = "Ecliptic Band/Line",
+  Version = "1.0",
+  Description = [[A line and band representation of the Ecliptic plane, including actions
+    to toggle, hide and show each of them.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
