@@ -396,7 +396,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShouldRotateAroundUpInfo = {
         "ShouldRotateAroundUp",
         "Should Rotate Around Up",
-        "When set to true, TODO...",
+        "When set to true, global rotation interactions in the X-direction will lead to "
+        "a rotation around the specified up vector instead of just around the object. "
+        "The up vector is the local coordinate axis, and can be set to either the X-, Y- "
+        "or Z-axis through the 'UpToUseForRotation' property",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
