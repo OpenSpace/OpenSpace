@@ -419,13 +419,11 @@ private:
      *
      * Used for IdleBehavior::Behavior::Orbit
      *
-     * \param deltaTime The time step to use for the motion. Controls the rotation angle
+     * \param angle The rotation angle to use for the motion
      * \param position The position of the camera. Will be changed by the function
      * \param globalRotation The camera's global rotation. Will be changed by the function
-     * \param speedScale A speed scale that controls the speed of the motion
      */
-    void orbitAnchor(double deltaTime, glm::dvec3& position,
-        glm::dquat& globalRotation, double speedScale);
+    void orbitAnchor(double angle, glm::dvec3& position, glm::dquat& globalRotation);
 
     /**
      * Orbit the current anchor node, by adding a rotation around the given axis. For
@@ -438,13 +436,12 @@ private:
      * IdleBehavior::Behavior::OrbitAroundUp (axis = up = y-axis)
      *
      * \param axis The axis to arbit around, given in model coordinates of the anchor
-     * \param deltaTime The time step to use for the motion. Controls the rotation angle
+     * \param angle The rotation angle to use for the motion
      * \param position The position of the camera. Will be changed by the function
      * \param globalRotation The camera's global rotation. Will be changed by the function
-     * \param speedScale A speed scale that controls the speed of the motion
      */
-    void orbitAroundAxis(const glm::dvec3 axis, double deltaTime, glm::dvec3& position,
-        glm::dquat& globalRotation, double speedScale);
+    void orbitAroundAxis(const glm::dvec3 axis, double angle, glm::dvec3& position,
+        glm::dquat& globalRotation);
 };
 
 } // namespace openspace::interaction

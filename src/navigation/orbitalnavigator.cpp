@@ -900,7 +900,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     camRot.localRotation = rotateLocally(deltaTime, camRot.localRotation);
 
 
-
+    // WIP
     // Try to rotate around a point instead
     if (_shouldRotateAroundUp) {
         const glm::dmat4 modelTransform = _anchorNode->modelTransform();
@@ -957,7 +957,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // TODO: use all states
         double angle = _mouseStates.globalRotationVelocity().x * deltaTime * speedScale;
-        orbitAroundAxis(axis, angle, pose.position, camRot.globalRotation, 1.0);
+        orbitAroundAxis(axis, angle, pose.position, camRot.globalRotation);
     }
 
     // Horizontal translation based on user input
@@ -2037,9 +2037,11 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
         static_cast<IdleBehavior::Behavior>(_idleBehavior.defaultBehavior.value())
     );
 
+    double angle = deltaTime * speedScale;
+
     switch (choice) {
         case IdleBehavior::Behavior::Orbit:
-            orbitAnchor(deltaTime, position, globalRotation, speedScale);
+            orbitAnchor(angle, position, globalRotation);
             break;
         case IdleBehavior::Behavior::OrbitAtConstantLat: {
             // Assume that "north" coincides with the local z-direction
@@ -2047,13 +2049,13 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
             // north/up, so that we can query this information rather than assuming it.
             // The we could also combine this idle behavior with the next
             const glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
-            orbitAroundAxis(north, deltaTime, position, globalRotation, speedScale);
+            orbitAroundAxis(north, angle, position, globalRotation);
             break;
         }
         case IdleBehavior::Behavior::OrbitAroundUp: {
             // Assume that "up" coincides with the local y-direction
             const glm::dvec3 up = glm::dvec3(0.0, 1.0, 0.0);
-            orbitAroundAxis(up, deltaTime, position, globalRotation, speedScale);
+            orbitAroundAxis(up, angle, position, globalRotation);
             break;
         }
         default:
@@ -2061,15 +2063,15 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
     }
 }
 
-void OrbitalNavigator::orbitAnchor(double deltaTime, glm::dvec3& position,
-                                   glm::dquat& globalRotation, double speedScale)
+void OrbitalNavigator::orbitAnchor(double angle, glm::dvec3& position,
+                                   glm::dquat& globalRotation)
 {
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
 
     // Apply a rotation to the right, in camera space
     // (Maybe we should also let the user decide which direction to rotate?
     // Or provide a few different orbit options)
-    const glm::dvec3 eulerAngles = glm::dvec3(0.0, -1.0, 0.0) * deltaTime * speedScale;
+    const glm::dvec3 eulerAngles = glm::dvec3(0.0, -1.0, 0.0) * angle;
     const glm::dquat rotationDiffCameraSpace = glm::dquat(eulerAngles);
 
     const glm::dquat rotationDiffWorldSpace = globalRotation *
@@ -2084,9 +2086,8 @@ void OrbitalNavigator::orbitAnchor(double deltaTime, glm::dvec3& position,
     position += rotationDiffVec3;
 }
 
-void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime,
-                                       glm::dvec3& position, glm::dquat& globalRotation,
-                                       double speedScale)
+void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double angle,
+                                       glm::dvec3& position, glm::dquat& globalRotation)
 {
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
 
@@ -2095,7 +2096,6 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime,
         glm::normalize(glm::dmat3(modelTransform) * glm::normalize(axis));
 
     // Compute rotation to be applied around the axis
-    double angle = deltaTime * speedScale;
     const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldSpace);
 
     // Rotate the position vector from the center to camera and update position
