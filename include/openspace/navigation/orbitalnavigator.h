@@ -332,14 +332,24 @@ private:
         double targetDistance);
 
     /**
+     * Modify the camera position and global rotation to rotate around the up vector
+     * of the current anchor based on x-wise input
+     *
+     * The up-vector to rotate around is determined by the "_upToUseForRotation" property
+     */
+    void rotateAroundAnchorUp(double deltaTime, double speedScale,
+        glm::dvec3& cameraPosition, glm::dquat& globalCameraRotation);
+
+    /**
      * Translates the horizontal direction. If far from the anchor object, this will
      * result in an orbital rotation around the object. This function does not affect the
      * rotation but only the position.
      *
      * \return a position vector adjusted in the horizontal direction.
      */
-    glm::dvec3 translateHorizontally(double deltaTime, const glm::dvec3& cameraPosition,
-        const glm::dvec3& objectPosition, const glm::dquat& globalCameraRotation,
+    glm::dvec3 translateHorizontally(double deltaTime, double speedScale,
+        const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
+        const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
 
     /*

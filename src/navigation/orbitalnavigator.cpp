@@ -899,41 +899,25 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     camRot.localRotation = interpolateLocalRotation(deltaTime, camRot.localRotation);
     camRot.localRotation = rotateLocally(deltaTime, camRot.localRotation);
 
+    double horizontalTranslationSpeedScale =
+        rotationSpeedScaleFromCameraHeight(pose.position, posHandle);
 
-    // WIP
-    // Try to rotate around a point instead
+    // Rotation around target object's up vector based on user input
+    // (one kind of horizontal translation)
+    // Affects the position and global rotation
     if (_shouldRotateAroundUp) {
-        const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-        const glm::dvec3 outDirection = glm::normalize(glm::dmat3(modelTransform) *
-            posHandle.referenceSurfaceOutDirection);
-
-        double speedScale = rotationSpeedScaleFromCameraHeight(pose.position, posHandle);
-
-        glm::dvec3 axis;
-        switch (_upToUseForRotation) {
-            case static_cast<int>(UpDirectionChoice::XAxis):
-                axis = glm::dvec3(1.0, 0.0, 0.0);
-                break;
-            case static_cast<int>(UpDirectionChoice::YAxis):
-                axis = glm::dvec3(0.0, 1.0, 0.0);
-                break;
-            case static_cast<int>(UpDirectionChoice::ZAxis):
-                axis = glm::dvec3(0.0, 0.0, 1.0);
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
-        const glm::dvec3 axisInWorldSpace =
-            glm::normalize(glm::dmat3(modelTransform) * glm::normalize(axis));
-
-        // TODO: use all states
-        double angle = _mouseStates.globalRotationVelocity().x * deltaTime * speedScale;
-        orbitAroundAxis(axis, angle, pose.position, camRot.globalRotation);
+        rotateAroundAnchorUp(
+            deltaTime,
+            horizontalTranslationSpeedScale,
+            pose.position,
+            camRot.globalRotation
+        );
     }
 
     // Horizontal translation based on user input
     pose.position = translateHorizontally(
         deltaTime,
+        horizontalTranslationSpeedScale,
         pose.position,
         anchorPos,
         camRot.globalRotation,
@@ -1650,44 +1634,70 @@ double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,
     return result;
 }
 
-glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
+void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
+                                            glm::dvec3& cameraPosition,
+                                            glm::dquat& globalCameraRotation)
+{
+    glm::dvec3 axis;
+    switch (_upToUseForRotation) {
+    case static_cast<int>(UpDirectionChoice::XAxis):
+        axis = glm::dvec3(1.0, 0.0, 0.0);
+        break;
+    case static_cast<int>(UpDirectionChoice::YAxis):
+        axis = glm::dvec3(0.0, 1.0, 0.0);
+        break;
+    case static_cast<int>(UpDirectionChoice::ZAxis):
+        axis = glm::dvec3(0.0, 0.0, 1.0);
+        break;
+    default:
+        throw ghoul::MissingCaseException();
+    }
+
+    double combinedXInput = _mouseStates.globalRotationVelocity().x +
+        _joystickStates.globalRotationVelocity().x +
+        _websocketStates.globalRotationVelocity().x +
+        _scriptStates.globalRotationVelocity().x;
+
+    double angle = combinedXInput * deltaTime * speedScale;
+    orbitAroundAxis(axis, angle, cameraPosition, globalCameraRotation);
+}
+
+glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime, double speedScale,
                                                    const glm::dvec3& cameraPosition,
                                                    const glm::dvec3& objectPosition,
                                                    const glm::dquat& globalCameraRotation,
                                         const SurfacePositionHandle& positionHandle) const
 {
-    double speedScale = rotationSpeedScaleFromCameraHeight(cameraPosition, positionHandle);
-
     // If we are orbiting around an up vector, we only want to allow verical
     // movement and not use the x velocity
     bool useX = !_shouldRotateAroundUp;
 
-    double scale = deltaTime * speedScale;
+    double angleScale = deltaTime * speedScale;
 
     // Get rotation in camera space
     const glm::dquat mouseRotationDiffCamSpace = glm::dquat(glm::dvec3(
         -_mouseStates.globalRotationVelocity().y,
         useX ? -_mouseStates.globalRotationVelocity().x : 0.0,
         0.0
-    ) * scale);
+    ) * angleScale);
 
     const glm::dquat joystickRotationDiffCamSpace = glm::dquat(glm::dvec3(
         -_joystickStates.globalRotationVelocity().y,
         useX ? -_joystickStates.globalRotationVelocity().x : 0.0,
         0.0
-    ) * scale);
+    ) * angleScale);
 
     const glm::dquat scriptRotationDiffCamSpace = glm::dquat(glm::dvec3(
         -_scriptStates.globalRotationVelocity().y,
         useX ? -_scriptStates.globalRotationVelocity().x : 0.0,
         0.0
-    ) * scale);
+    ) * angleScale);
 
     const glm::dquat websocketRotationDiffCamSpace = glm::dquat(glm::dvec3(
         -_websocketStates.globalRotationVelocity().y,
         useX ? -_websocketStates.globalRotationVelocity().x : 0.0,
         0.0
-    ) * scale);
+    ) * angleScale);
 
     // Transform to world space
     const glm::dquat rotationDiffWorldSpace = globalCameraRotation *
