@@ -393,6 +393,21 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShouldRotateAroundUpInfo = {
+        "ShouldRotateAroundUp",
+        "Should Rotate Around Up",
+        "When set to true, TODO...",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UpToUseForRotationInfo = {
+        "UpToUseForRotation",
+        "Up To Use For Rotation",
+        "Specifies the local coordinate axis of the anchor node to use as up direction "
+        "when the camera is set to orbit around up. In general, the Z-axis is a good "
+        "choice for globes, and the Y-axis is a good choice for models",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -498,6 +513,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
+    , _shouldRotateAroundUp(ShouldRotateAroundUpInfo, false)
+    , _upToUseForRotation(UpToUseForRotationInfo)
 {
     _anchor.onChange([this]() {
         if (_anchor.value().empty()) {
@@ -698,6 +715,24 @@ OrbitalNavigator::OrbitalNavigator()
             LINFO("Camera roll has been enabled");
         }
     });
+
+    addProperty(_shouldRotateAroundUp);
+    _upToUseForRotation.addOptions({
+        {
+            static_cast<int>(UpDirectionChoice::XAxis),
+            "Local X"
+        },
+        {
+            static_cast<int>(UpDirectionChoice::YAxis),
+            "Local Y"
+        },
+        {
+            static_cast<int>(UpDirectionChoice::ZAxis),
+            "Local Z"
+        },
+    });
+    _upToUseForRotation = static_cast<int>(UpDirectionChoice::ZAxis);
+    addProperty(_upToUseForRotation);
 }
 
 glm::dvec3 OrbitalNavigator::anchorNodeToCameraVector() const {
@@ -867,9 +902,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
 
     // Try to rotate around a point instead
-    bool shoudlPreserveUp = true;
-
-    if (shoudlPreserveUp) {
+    if (_shouldRotateAroundUp) {
         const glm::dmat4 modelTransform = _anchorNode->modelTransform();
 
         const glm::dvec3 outDirection = glm::normalize(glm::dmat3(modelTransform) *
@@ -900,42 +933,41 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // Final values to be used
         const double distFromCenterToSurface = glm::length(centerToActualSurface);
-        const double distFromCenterToCamera = glm::length(posDiff);
-
         double speedScale =
             distFromCenterToSurface > 0.0 ?
             glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
             1.0;
 
-        glm::dvec3 axis = glm::dvec3(0.0, 0.0, 1.0);
+        glm::dvec3 axis;
+        switch (_upToUseForRotation) {
+            case static_cast<int>(UpDirectionChoice::XAxis):
+                axis = glm::dvec3(1.0, 0.0, 0.0);
+                break;
+            case static_cast<int>(UpDirectionChoice::YAxis):
+                axis = glm::dvec3(0.0, 1.0, 0.0);
+                break;
+            case static_cast<int>(UpDirectionChoice::ZAxis):
+                axis = glm::dvec3(0.0, 0.0, 1.0);
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
         const glm::dvec3 axisInWorldSpace =
             glm::normalize(glm::dmat3(modelTransform) * glm::normalize(axis));
 
-        // Compute rotation to be applied around the axis
+        // TODO: use all states
         double angle = _mouseStates.globalRotationVelocity().x * deltaTime * speedScale;
-        const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldSpace);
-
-        // Rotate the position vector from the center to camera and update position
-        const glm::dvec3 rotationDiffVec3 =
-            spinRotation * (distFromCenterToCamera * outDirection) - (distFromCenterToCamera * outDirection);
-
-        // Also apply the rotation to the global rotation, so the camera up vector is
-        // rotated around the axis as well
-        camRot.globalRotation = spinRotation * camRot.globalRotation;
-
-        pose.position += rotationDiffVec3;
-
+        orbitAroundAxis(axis, angle, pose.position, camRot.globalRotation, 1.0);
     }
-    //else {
-        // Horizontal translation based on user input
-        pose.position = translateHorizontally(
-            deltaTime,
-            pose.position,
-            anchorPos,
-            camRot.globalRotation,
-            posHandle
-        );
-    //}
+
+    // Horizontal translation based on user input
+    pose.position = translateHorizontally(
+        deltaTime,
+        pose.position,
+        anchorPos,
+        camRot.globalRotation,
+        posHandle
+    );
 
     // Apply any automatic idle behavior. Note that the idle behavior is aborted if there
     // is no input from interaction. So, it assumes that all the other effects from

@@ -233,6 +233,15 @@ private:
 
     properties::BoolProperty _invertMouseButtons;
 
+    properties::BoolProperty _shouldRotateAroundUp;
+
+    enum class UpDirectionChoice {
+        XAxis = 0,
+        YAxis,
+        ZAxis
+    };
+    properties::OptionProperty _upToUseForRotation;
+
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
     WebsocketCameraStates _websocketStates;
