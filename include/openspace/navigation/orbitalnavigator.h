@@ -442,6 +442,9 @@ private:
      */
     void orbitAroundAxis(const glm::dvec3 axis, double angle, glm::dvec3& position,
         glm::dquat& globalRotation);
+
+    double rotationSpeedScaleFromCameraHeight(const glm::dvec3& cameraPosition,
+        const SurfacePositionHandle& positionHandle) const;
 };
 
 } // namespace openspace::interaction

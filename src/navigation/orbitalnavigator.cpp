@@ -904,39 +904,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Try to rotate around a point instead
     if (_shouldRotateAroundUp) {
         const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-
         const glm::dvec3 outDirection = glm::normalize(glm::dmat3(modelTransform) *
             posHandle.referenceSurfaceOutDirection);
 
-        // Vector logic
-        const glm::dvec3 posDiff = pose.position - anchorPos;
-        const glm::dvec3 centerToActualSurfaceModelSpace =
-            posHandle.centerToReferenceSurface +
-            posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
-
-        const glm::dvec3 centerToActualSurface =
-            glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
-
-        const glm::dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
-
-        const double distFromSurfaceToCamera = [&]() {
-            if (_constantVelocityFlight) {
-                const glm::dvec3 centerToRefSurface =
-                    glm::dmat3(modelTransform) * posHandle.centerToReferenceSurface;
-                const glm::dvec3 refSurfaceToCamera = posDiff - centerToRefSurface;
-                return glm::length(refSurfaceToCamera);
-            }
-            else {
-                return glm::length(actualSurfaceToCamera);
-            }
-        }();
-
-        // Final values to be used
-        const double distFromCenterToSurface = glm::length(centerToActualSurface);
-        double speedScale =
-            distFromCenterToSurface > 0.0 ?
-            glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
-            1.0;
+        double speedScale = rotationSpeedScaleFromCameraHeight(pose.position, posHandle);
 
         glm::dvec3 axis;
         switch (_upToUseForRotation) {
@@ -1686,41 +1657,12 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
                                         const SurfacePositionHandle& positionHandle) const
 {
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-
     const glm::dvec3 outDirection = glm::normalize(glm::dmat3(modelTransform) *
                                     positionHandle.referenceSurfaceOutDirection);
 
-    // Vector logic
     const glm::dvec3 posDiff = cameraPosition - objectPosition;
-    const glm::dvec3 centerToActualSurfaceModelSpace =
-        positionHandle.centerToReferenceSurface +
-        positionHandle.referenceSurfaceOutDirection * positionHandle.heightToSurface;
-
-    const glm::dvec3 centerToActualSurface =
-        glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
-
-    const glm::dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
-
-    const double distFromSurfaceToCamera = [&]() {
-        if (_constantVelocityFlight) {
-            const glm::dvec3 centerToRefSurface =
-                glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
-            const glm::dvec3 refSurfaceToCamera = posDiff - centerToRefSurface;
-            return glm::length(refSurfaceToCamera);
-        }
-        else {
-            return glm::length(actualSurfaceToCamera);
-        }
-    }();
-
-    // Final values to be used
-    const double distFromCenterToSurface = glm::length(centerToActualSurface);
     const double distFromCenterToCamera = glm::length(posDiff);
-
-    double speedScale =
-        distFromCenterToSurface > 0.0 ?
-        glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
-        1.0;
+    double speedScale = rotationSpeedScaleFromCameraHeight(cameraPosition, positionHandle);
 
     // Get rotation in camera space
     const glm::dquat mouseRotationDiffCamSpace = glm::dquat(glm::dvec3(
@@ -2108,6 +2050,48 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double angle,
     // Also apply the rotation to the global rotation, so the camera up vector is
     // rotated around the axis as well
     globalRotation = spinRotation * globalRotation;
+}
+
+double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
+                                              const glm::dvec3& cameraPosition,
+                                       const SurfacePositionHandle& positionHandle) const
+{
+    const glm::dmat4 modelTransform = _anchorNode->modelTransform();
+    const glm::dvec3 anchorPos = _anchorNode->worldPosition();
+
+    const glm::dvec3 outDirection = glm::normalize(glm::dmat3(modelTransform) *
+        positionHandle.referenceSurfaceOutDirection);
+
+    // Vector logic
+    const glm::dvec3 posDiff = cameraPosition - anchorPos;
+    const glm::dvec3 centerToActualSurfaceModelSpace =
+        positionHandle.centerToReferenceSurface +
+        positionHandle.referenceSurfaceOutDirection * positionHandle.heightToSurface;
+
+    const glm::dvec3 centerToActualSurface =
+        glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
+
+    const glm::dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
+
+    const double distFromSurfaceToCamera = [&]() {
+        if (_constantVelocityFlight) {
+            const glm::dvec3 centerToRefSurface =
+                glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
+            const glm::dvec3 refSurfaceToCamera = posDiff - centerToRefSurface;
+            return glm::length(refSurfaceToCamera);
+        }
+        else {
+            return glm::length(actualSurfaceToCamera);
+        }
+    }();
+
+    // Final values to be used
+    const double distFromCenterToSurface = glm::length(centerToActualSurface);
+    const double distFromCenterToCamera = glm::length(posDiff);
+
+    return distFromCenterToSurface > 0.0 ?
+        glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
+        1.0;
 }
 
 scripting::LuaLibrary OrbitalNavigator::luaLibrary() {
