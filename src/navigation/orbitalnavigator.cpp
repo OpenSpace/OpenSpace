@@ -864,14 +864,78 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     camRot.localRotation = interpolateLocalRotation(deltaTime, camRot.localRotation);
     camRot.localRotation = rotateLocally(deltaTime, camRot.localRotation);
 
-    // Horizontal translation based on user input
-    pose.position = translateHorizontally(
-        deltaTime,
-        pose.position,
-        anchorPos,
-        camRot.globalRotation,
-        posHandle
-    );
+
+
+    // Try to rotate around a point instead
+    bool shoudlPreserveUp = true;
+
+    if (shoudlPreserveUp) {
+        const glm::dmat4 modelTransform = _anchorNode->modelTransform();
+
+        const glm::dvec3 outDirection = glm::normalize(glm::dmat3(modelTransform) *
+            posHandle.referenceSurfaceOutDirection);
+
+        // Vector logic
+        const glm::dvec3 posDiff = pose.position - anchorPos;
+        const glm::dvec3 centerToActualSurfaceModelSpace =
+            posHandle.centerToReferenceSurface +
+            posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+
+        const glm::dvec3 centerToActualSurface =
+            glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
+
+        const glm::dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
+
+        const double distFromSurfaceToCamera = [&]() {
+            if (_constantVelocityFlight) {
+                const glm::dvec3 centerToRefSurface =
+                    glm::dmat3(modelTransform) * posHandle.centerToReferenceSurface;
+                const glm::dvec3 refSurfaceToCamera = posDiff - centerToRefSurface;
+                return glm::length(refSurfaceToCamera);
+            }
+            else {
+                return glm::length(actualSurfaceToCamera);
+            }
+        }();
+
+        // Final values to be used
+        const double distFromCenterToSurface = glm::length(centerToActualSurface);
+        const double distFromCenterToCamera = glm::length(posDiff);
+
+        double speedScale =
+            distFromCenterToSurface > 0.0 ?
+            glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
+            1.0;
+
+        glm::dvec3 axis = glm::dvec3(0.0, 0.0, 1.0);
+        const glm::dvec3 axisInWorldSpace =
+            glm::normalize(glm::dmat3(modelTransform) * glm::normalize(axis));
+
+        // Compute rotation to be applied around the axis
+        double angle = _mouseStates.globalRotationVelocity().x * deltaTime * speedScale;
+        const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldSpace);
+
+        // Rotate the position vector from the center to camera and update position
+        const glm::dvec3 rotationDiffVec3 =
+            spinRotation * (distFromCenterToCamera * outDirection) - (distFromCenterToCamera * outDirection);
+
+        // Also apply the rotation to the global rotation, so the camera up vector is
+        // rotated around the axis as well
+        camRot.globalRotation = spinRotation * camRot.globalRotation;
+
+        pose.position += rotationDiffVec3;
+
+    }
+    //else {
+        // Horizontal translation based on user input
+        pose.position = translateHorizontally(
+            deltaTime,
+            pose.position,
+            anchorPos,
+            camRot.globalRotation,
+            posHandle
+        );
+    //}
 
     // Apply any automatic idle behavior. Note that the idle behavior is aborted if there
     // is no input from interaction. So, it assumes that all the other effects from
@@ -1629,18 +1693,18 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
     // Get rotation in camera space
     const glm::dquat mouseRotationDiffCamSpace = glm::dquat(glm::dvec3(
         -_mouseStates.globalRotationVelocity().y * deltaTime,
-        -_mouseStates.globalRotationVelocity().x * deltaTime,
+        0.0,//-_mouseStates.globalRotationVelocity().x * deltaTime,
         0.0) * speedScale);
 
     const glm::dquat joystickRotationDiffCamSpace = glm::dquat(glm::dvec3(
         -_joystickStates.globalRotationVelocity().y * deltaTime,
-        -_joystickStates.globalRotationVelocity().x * deltaTime,
+        0.0,//-_joystickStates.globalRotationVelocity().x * deltaTime,
         0.0) * speedScale
     );
 
     const glm::dquat scriptRotationDiffCamSpace = glm::dquat(glm::dvec3(
         -_scriptStates.globalRotationVelocity().y * deltaTime,
-        -_scriptStates.globalRotationVelocity().x * deltaTime,
+        0.0,//-_scriptStates.globalRotationVelocity().x * deltaTime,
         0.0) * speedScale
     );
 
