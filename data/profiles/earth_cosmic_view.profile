@@ -7,17 +7,20 @@
     "cosmic_view/birds_UMAP/sequence_lineage",
     "cosmic_view/birds_UMAP/sequences",
     "cosmic_view/birds_UMAP/taxon",
+    "cosmic_view/birds_UMAP/wandrileTest/consensus_species",
     "cosmic_view/consensus",
     "cosmic_view/density_volumes/volume",
     "cosmic_view/endangered",
+    "cosmic_view/geojson_points_outfacing",
     "cosmic_view/humans",
     "cosmic_view/images",
     "cosmic_view/lineage",
     "cosmic_view/mutations",
     "cosmic_view/superfamily",
+    "cosmic_view/wandrileTest/consensus_species",
     "events/toggle_image_trail",
-    "modules/sonification/earth_cosmic_actions",
     "modules/sonification/cosmic",
+    "modules/sonification/earth_cosmic_actions",
     "modules/sonification/planets"
   ],
   "camera": {
@@ -28,13 +31,14 @@
     "type": "goToGeo"
   },
   "delta_times": [
-    1.0,
-    5.0,
-    30.0,
+    0.0,
     60.0,
     300.0,
+	  600.0,
+	  1200.0,
     1800.0,
     3600.0,
+    7200.0,
     43200.0,
     86400.0,
     604800.0,
@@ -100,7 +104,12 @@
     {
       "name": "Scene.birds_lineage_29.Renderable.ScaleFactor",
       "type": "setPropertyValueSingle",
-      "value": "150"
+      "value": "180"
+    },
+    {
+      "name": "Scene.birds_lineage_29.Renderable.BillboardMinMaxSize",
+      "type": "setPropertyValueSingle",
+      "value": "{1.0, 10.0}"
     },
     {
       "name": "Scene.birds_lineage_31.Scale.Scale",
@@ -110,7 +119,12 @@
     {
       "name": "Scene.birds_lineage_31.Renderable.ScaleFactor",
       "type": "setPropertyValueSingle",
-      "value": "150"
+      "value": "180"
+    },
+    {
+      "name": "Scene.birds_lineage_31.Renderable.BillboardMinMaxSize",
+      "type": "setPropertyValueSingle",
+      "value": "{1.0, 10.0}"
     },
     {
       "name": "Scene.birds_consensus_species.Renderable.Enabled",
@@ -132,7 +146,6 @@
       "type": "setPropertyValueSingle",
       "value": "false"
     },
-
     {
       "name": "Scene.Cercopithecoidea_volume.Renderable.Enabled",
       "type": "setPropertyValueSingle",
@@ -272,14 +285,25 @@
       "name": "Scene.Quasars.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
+    },
+    {
+      "name": "Scene.EarthAtmosphere.Renderable.SunFollowingCamera",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Modules.Sonification.CosmicSonification.DistancePrecision",
+      "type": "setPropertyValueSingle",
+      "value": "100000.00"
     }
   ],
   "time": {
-    "type": "relative",
-    "value": "-1d"
+    "is_paused": true,
+    "type": "absolute",
+    "value": "2023-07-21T14:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 3
   }
 }

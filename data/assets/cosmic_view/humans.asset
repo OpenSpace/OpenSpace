@@ -30,9 +30,9 @@ local human_texture = asset.localResource("data/texture/point3A.png")
 
 
 -- Scale factor --
-local scale_factor_all = 0
-local scale_continents = 4
-local scale = 6
+local scale_factor_all = 200
+local scale_continents = 200
+local scale = 10000000000
 
 
 local test = {

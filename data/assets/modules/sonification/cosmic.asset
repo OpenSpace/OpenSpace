@@ -16,6 +16,7 @@ asset.onInitialize(function ()
 
   local labels = {
     "birds_lineage_29",
+	"birds_lineage_31",
     "lineage_19"
   }
 

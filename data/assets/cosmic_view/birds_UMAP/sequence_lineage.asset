@@ -21,14 +21,17 @@ local label_lineage_34 = asset.localResource("sequences/lineage_34.label")
 local cmap_lineage_34 = asset.localResource("sequences/lineage_34.cmap")
 local texture_file = asset.localResource("point3A.png")
 
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
 -- Set some parameters for OpenSpace settings
-local scale_factor = 90.0
+local scale_factor = 150
 local text_size = 2.75
 local text_min_size = 15
 local text_max_size = 30
 
 local birds_lineage_27 = {
     Identifier = "birds_lineage_27",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -60,6 +63,7 @@ local birds_lineage_27 = {
 
 local birds_lineage_28 = {
     Identifier = "birds_lineage_28",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -91,6 +95,7 @@ local birds_lineage_28 = {
 
 local birds_lineage_29 = {
     Identifier = "birds_lineage_29",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -122,6 +127,7 @@ local birds_lineage_29 = {
 
 local birds_lineage_30 = {
     Identifier = "birds_lineage_30",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -153,6 +159,7 @@ local birds_lineage_30 = {
 
 local birds_lineage_31 = {
     Identifier = "birds_lineage_31",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -184,6 +191,7 @@ local birds_lineage_31 = {
 
 local birds_lineage_32 = {
     Identifier = "birds_lineage_32",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -215,6 +223,7 @@ local birds_lineage_32 = {
 
 local birds_lineage_33 = {
     Identifier = "birds_lineage_33",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
