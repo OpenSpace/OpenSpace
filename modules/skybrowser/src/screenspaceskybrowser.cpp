@@ -314,16 +314,16 @@ bool ScreenSpaceSkyBrowser::deinitializeGL() {
     return true;
 }
 
-void ScreenSpaceSkyBrowser::render() {
+void ScreenSpaceSkyBrowser::render(float blackoutFactor) {
     WwtCommunicator::render();
 
     if (!_isHidden) {
-        draw(
+        glm::mat4 mat =
             globalRotationMatrix() *
             translationMatrix() *
             localRotationMatrix() *
-            scaleMatrix()
-        );
+            scaleMatrix();
+        draw(mat, blackoutFactor);
     }
 
     // Render the display copies
@@ -342,12 +342,12 @@ void ScreenSpaceSkyBrowser::render() {
                 ));
             }
 
-            draw(
+            glm::mat4 mat =
                 globalRotationMatrix() *
                 glm::translate(glm::mat4(1.f), coordinates) *
                 localRotation *
-                scaleMatrix()
-            );
+                scaleMatrix();
+            draw(mat, blackoutFactor);
         }
     }
 }
