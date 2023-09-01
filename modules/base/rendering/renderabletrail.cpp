@@ -86,7 +86,7 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LineFadeInfo = {
         "LineFade",
         "Line fade",
         "The fading factor that is applied to the trail if the 'EnableFade' value is "
@@ -138,7 +138,7 @@ namespace {
         // [[codegen::verbatim(EnableFadeInfo.description)]]
         std::optional<bool> enableFade;
 
-        // [[codegen::verbatim(FadeInfo.description)]]
+        // [[codegen::verbatim(LineFadeInfo.description)]]
         std::optional<float> lineFade;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
@@ -173,7 +173,7 @@ RenderableTrail::Appearance::Appearance()
     })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
-    , lineFade(FadeInfo, 1.f, 0.f, 30.f)
+    , lineFade(LineFadeInfo, 1.f, 0.f, 30.f)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
