@@ -2039,6 +2039,10 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double angle,
 {
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
 
+    if (glm::abs(angle) < AngleEpsilon) {
+        return;
+    }
+
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
     const glm::dvec3 axisInWorldSpace =
         glm::normalize(glm::dmat3(modelTransform) * glm::normalize(axis));
@@ -2050,6 +2054,10 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double angle,
     const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();
     const glm::dvec3 rotationDiffVec3 =
         spinRotation * anchorCenterToCamera - anchorCenterToCamera;
+
+    if (!(glm::length(rotationDiffVec3) > 0.0)) {
+        return;
+    }
 
     position += rotationDiffVec3;
 
