@@ -7,6 +7,7 @@
     "cosmic_view/birds_UMAP/sequence_lineage",
     "cosmic_view/birds_UMAP/sequences",
     "cosmic_view/birds_UMAP/taxon",
+    "cosmic_view/birds_UMAP/wandrileTest/consensus_species",
     "cosmic_view/consensus",
     "cosmic_view/density_volumes/volume",
     "cosmic_view/endangered",

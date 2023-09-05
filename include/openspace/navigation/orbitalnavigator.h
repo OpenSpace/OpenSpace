@@ -214,6 +214,9 @@ private:
 
     LimitZoom _limitZoom;
 
+    properties::BoolProperty _disableZoom;
+    properties::BoolProperty _disableRoll;
+
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
