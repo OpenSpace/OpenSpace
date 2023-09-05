@@ -1,0 +1,51 @@
+-- Cosmic View of Life on Earth / Birds: Consensus species
+-- This file is auto-generated in the make_asset() function inside consensus_species.py
+-- Author: Brian Abbott <abbott@amnh.org>
+
+local speck_consensus = asset.localResource("consensus_species/consensus.speck")
+local label_consensus = asset.localResource("consensus_species/consensus.label")
+local texture_file = asset.localResource("point3A.png")
+
+-- Set some parameters for OpenSpace settings
+local scale_factor = 105.0
+local text_size = 2.75
+local text_min_size = 15
+local text_max_size = 30
+
+local birds_mMDS_xy_3Dprojection_consensus_species = {
+    Identifier = "birds_mMDS_xy_3Dprojection_consensus_species",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.8, 0.8, 0.8 },
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_consensus,
+        DrawLabels = false,
+        LabelFile = label_consensus,
+        TextColor = { 1.0, 1.0, 1.0 },
+        TextSize = text_size,
+        TextMinMaxSize = { text_min_size, text_max_size },
+        --FadeLabelDistances = { 0.0, 0.5 },
+        --FadeLabelWidths = { 0.001, 0.5 },
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Consensus Species",
+        Path = "/Birds/mMDS_xy_3Dprojection",
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(birds_mMDS_xy_3Dprojection_consensus_species)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(birds_mMDS_xy_3Dprojection_consensus_species)
+end)
+
+asset.export(birds_mMDS_xy_3Dprojection_consensus_species)

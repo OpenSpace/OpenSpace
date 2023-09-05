@@ -1,0 +1,235 @@
+-- Cosmic View of Life on Earth / Birds: Labels and color maps for the lineage metadata
+-- This file is auto-generated in the make_asset() function inside sequence_lineage.py
+-- Author: Brian Abbott <abbott@amnh.org>
+
+local speck_sequences = asset.localResource("sequences/sequences.speck")
+local label_lineage_27 = asset.localResource("sequences/lineage_27.label")
+local cmap_lineage_27 = asset.localResource("sequences/lineage_27.cmap")
+local label_lineage_28 = asset.localResource("sequences/lineage_28.label")
+local cmap_lineage_28 = asset.localResource("sequences/lineage_28.cmap")
+local label_lineage_29 = asset.localResource("sequences/lineage_29.label")
+local cmap_lineage_29 = asset.localResource("sequences/lineage_29.cmap")
+local label_lineage_30 = asset.localResource("sequences/lineage_30.label")
+local cmap_lineage_30 = asset.localResource("sequences/lineage_30.cmap")
+local label_lineage_31 = asset.localResource("sequences/lineage_31.label")
+local cmap_lineage_31 = asset.localResource("sequences/lineage_31.cmap")
+local label_lineage_32 = asset.localResource("sequences/lineage_32.label")
+local cmap_lineage_32 = asset.localResource("sequences/lineage_32.cmap")
+local texture_file = asset.localResource("point3A.png")
+
+-- Set some parameters for OpenSpace settings
+local scale_factor = 105.0
+local text_size = 2.75
+local text_min_size = 15
+local text_max_size = 30
+
+local birds_mMDS_xy_3Dprojection_lineage_27 = {
+    Identifier = "birds_mMDS_xy_3Dprojection_lineage_27",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.8, 0.8, 0.8 },
+        ColorMap = cmap_lineage_27,
+        ColorOption = { "lineage_27_code" },
+        ColorRange = { { 27001, 27001 } },
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_sequences,
+        DrawLabels = false,
+        LabelFile = label_lineage_27,
+        TextColor = { 1.0, 1.0, 1.0 },
+        TextSize = text_size,
+        TextMinMaxSize = { text_min_size, text_max_size },
+        --FadeLabelDistances = { 0.0, 0.5 },
+        --FadeLabelWidths = { 0.001, 0.5 },
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Lineage 27",
+        Path = "/Birds/mMDS_xy_3Dprojection/Sequences",
+    }
+}
+
+local birds_mMDS_xy_3Dprojection_lineage_28 = {
+    Identifier = "birds_mMDS_xy_3Dprojection_lineage_28",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.8, 0.8, 0.8 },
+        ColorMap = cmap_lineage_28,
+        ColorOption = { "lineage_28_code" },
+        ColorRange = { { 28001, 28002 } },
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_sequences,
+        DrawLabels = false,
+        LabelFile = label_lineage_28,
+        TextColor = { 1.0, 1.0, 1.0 },
+        TextSize = text_size,
+        TextMinMaxSize = { text_min_size, text_max_size },
+        --FadeLabelDistances = { 0.0, 0.5 },
+        --FadeLabelWidths = { 0.001, 0.5 },
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Lineage 28",
+        Path = "/Birds/mMDS_xy_3Dprojection/Sequences",
+    }
+}
+
+local birds_mMDS_xy_3Dprojection_lineage_29 = {
+    Identifier = "birds_mMDS_xy_3Dprojection_lineage_29",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.8, 0.8, 0.8 },
+        ColorMap = cmap_lineage_29,
+        ColorOption = { "lineage_29_code" },
+        ColorRange = { { 29001, 29035 } },
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_sequences,
+        DrawLabels = false,
+        LabelFile = label_lineage_29,
+        TextColor = { 1.0, 1.0, 1.0 },
+        TextSize = text_size,
+        TextMinMaxSize = { text_min_size, text_max_size },
+        --FadeLabelDistances = { 0.0, 0.5 },
+        --FadeLabelWidths = { 0.001, 0.5 },
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Lineage 29",
+        Path = "/Birds/mMDS_xy_3Dprojection/Sequences",
+    }
+}
+
+local birds_mMDS_xy_3Dprojection_lineage_30 = {
+    Identifier = "birds_mMDS_xy_3Dprojection_lineage_30",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.8, 0.8, 0.8 },
+        ColorMap = cmap_lineage_30,
+        ColorOption = { "lineage_30_code" },
+        ColorRange = { { 30001, 30144 } },
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_sequences,
+        DrawLabels = false,
+        LabelFile = label_lineage_30,
+        TextColor = { 1.0, 1.0, 1.0 },
+        TextSize = text_size,
+        TextMinMaxSize = { text_min_size, text_max_size },
+        --FadeLabelDistances = { 0.0, 0.5 },
+        --FadeLabelWidths = { 0.001, 0.5 },
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Lineage 30",
+        Path = "/Birds/mMDS_xy_3Dprojection/Sequences",
+    }
+}
+
+local birds_mMDS_xy_3Dprojection_lineage_31 = {
+    Identifier = "birds_mMDS_xy_3Dprojection_lineage_31",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.8, 0.8, 0.8 },
+        ColorMap = cmap_lineage_31,
+        ColorOption = { "lineage_31_code" },
+        ColorRange = { { 31001, 32071 } },
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_sequences,
+        DrawLabels = false,
+        LabelFile = label_lineage_31,
+        TextColor = { 1.0, 1.0, 1.0 },
+        TextSize = text_size,
+        TextMinMaxSize = { text_min_size, text_max_size },
+        --FadeLabelDistances = { 0.0, 0.5 },
+        --FadeLabelWidths = { 0.001, 0.5 },
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Lineage 31",
+        Path = "/Birds/mMDS_xy_3Dprojection/Sequences",
+    }
+}
+
+local birds_mMDS_xy_3Dprojection_lineage_32 = {
+    Identifier = "birds_mMDS_xy_3Dprojection_lineage_32",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.8, 0.8, 0.8 },
+        ColorMap = cmap_lineage_32,
+        ColorOption = { "lineage_32_code" },
+        ColorRange = { { 32001, 32471 } },
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_sequences,
+        DrawLabels = false,
+        LabelFile = label_lineage_32,
+        TextColor = { 1.0, 1.0, 1.0 },
+        TextSize = text_size,
+        TextMinMaxSize = { text_min_size, text_max_size },
+        --FadeLabelDistances = { 0.0, 0.5 },
+        --FadeLabelWidths = { 0.001, 0.5 },
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Lineage 32",
+        Path = "/Birds/mMDS_xy_3Dprojection/Sequences",
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_27)
+    openspace.addSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_28)
+    openspace.addSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_29)
+    openspace.addSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_30)
+    openspace.addSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_31)
+    openspace.addSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_32)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_27)
+    openspace.removeSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_28)
+    openspace.removeSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_29)
+    openspace.removeSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_30)
+    openspace.removeSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_31)
+    openspace.removeSceneGraphNode(birds_mMDS_xy_3Dprojection_lineage_32)
+end)
+
+asset.export(birds_mMDS_xy_3Dprojection_lineage_27)
+asset.export(birds_mMDS_xy_3Dprojection_lineage_28)
+asset.export(birds_mMDS_xy_3Dprojection_lineage_29)
+asset.export(birds_mMDS_xy_3Dprojection_lineage_30)
+asset.export(birds_mMDS_xy_3Dprojection_lineage_31)
+asset.export(birds_mMDS_xy_3Dprojection_lineage_32)

@@ -10,7 +10,9 @@ local speck_haliaeetus_leucocephalus = asset.localResource("taxon/haliaeetus_leu
 local speck_larus_canus = asset.localResource("taxon/larus_canus.speck")
 local speck_turdus_migratorius = asset.localResource("taxon/turdus_migratorius.speck")
 
-local texture_file = asset.localResource("point3A.png")
+local texture_file = asset.localResource("point8K.png")
+
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 -- Set some parameters for OpenSpace settings
 local scale_factor = 90.0
@@ -20,6 +22,7 @@ local text_max_size = 30
 
 local birds_anas_platyrhynchos = {
     Identifier = "birds_anas_platyrhynchos",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 1.000000, 1.000000, 0.623529 },	-- Lemon Yellow
@@ -42,6 +45,7 @@ local birds_anas_platyrhynchos = {
 
 local birds_anas_platyrhynchos_center = {
     Identifier = "birds_anas_platyrhynchos_center",
+	Parent = transforms.EarthCenter.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -56,6 +60,7 @@ local birds_anas_platyrhynchos_center = {
 
 local birds_cardinalis_cardinalis = {
     Identifier = "birds_cardinalis_cardinalis",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.576471, 0.874510, 0.721569 },	-- Sea Green
@@ -78,6 +83,7 @@ local birds_cardinalis_cardinalis = {
 
 local birds_cardinalis_cardinalis_center = {
     Identifier = "birds_cardinalis_cardinalis_center",
+	Parent = transforms.EarthCenter.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -92,6 +98,7 @@ local birds_cardinalis_cardinalis_center = {
 
 local birds_columba_livia = {
     Identifier = "birds_columba_livia",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.764706, 0.803922, 0.90196 },	-- Periwinkle
@@ -114,10 +121,25 @@ local birds_columba_livia = {
 
 local birds_columba_livia_center = {
     Identifier = "birds_columba_livia_center",
+	Parent = transforms.EarthCenter.Identifier,
+	    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.000000, 0.584314, 0.717647 },	-- Periwinkle
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_columba_livia,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = { 80925.03353291181, 49438.291367072205, -36688.60902565133 }
+            Position = { 1064474460.4956818, 431698379.8510361, -715930282.405365 }
         }
     },
     GUI = {
@@ -128,6 +150,7 @@ local birds_columba_livia_center = {
 
 local birds_haliaeetus_leucocephalus = {
     Identifier = "birds_haliaeetus_leucocephalus",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.788235, 0.627451, 0.862745 },	-- Wisteria
@@ -150,6 +173,7 @@ local birds_haliaeetus_leucocephalus = {
 
 local birds_haliaeetus_leucocephalus_center = {
     Identifier = "birds_haliaeetus_leucocephalus_center",
+	Parent = transforms.EarthCenter.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -164,6 +188,7 @@ local birds_haliaeetus_leucocephalus_center = {
 
 local birds_larus_canus = {
     Identifier = "birds_larus_canus",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 1.000000, 0.650980, 0.788235 },	-- Carnation Pink
@@ -186,6 +211,7 @@ local birds_larus_canus = {
 
 local birds_larus_canus_center = {
     Identifier = "birds_larus_canus_center",
+	Parent = transforms.EarthCenter.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -200,6 +226,7 @@ local birds_larus_canus_center = {
 
 local birds_turdus_migratorius = {
     Identifier = "birds_turdus_migratorius",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.619608, 0.356863, 0.25098 },	-- Sepia
@@ -222,6 +249,7 @@ local birds_turdus_migratorius = {
 
 local birds_turdus_migratorius_center = {
     Identifier = "birds_turdus_migratorius_center",
+	Parent = transforms.EarthCenter.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",

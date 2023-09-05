@@ -7,7 +7,6 @@
     "cosmic_view/birds_UMAP/sequence_lineage",
     "cosmic_view/birds_UMAP/sequences",
     "cosmic_view/birds_UMAP/taxon",
-    "cosmic_view/birds_UMAP/wandrileTest/consensus_species",
     "cosmic_view/consensus",
     "cosmic_view/density_volumes/volume",
     "cosmic_view/endangered",
@@ -15,12 +14,34 @@
     "cosmic_view/humans",
     "cosmic_view/images",
     "cosmic_view/lineage",
+    "cosmic_view/mMDS_xy_3Dprojection/branches_anas",
+    "cosmic_view/mMDS_xy_3Dprojection/clades",
+    "cosmic_view/mMDS_xy_3Dprojection/consensus_species",
+    "cosmic_view/mMDS_xy_3Dprojection/sequence_lineage",
+    "cosmic_view/mMDS_xy_3Dprojection/sequences",
+    "cosmic_view/mMDS_xyz_3Dprojection/branches_anas",
+    "cosmic_view/mMDS_xyz_3Dprojection/clades",
+    "cosmic_view/mMDS_xyz_3Dprojection/consensus_species",
+    "cosmic_view/mMDS_xyz_3Dprojection/sequence_lineage",
+    "cosmic_view/mMDS_xyz_3Dprojection/sequences",
+    "cosmic_view/mMDS_xyz_sphere_3Dprojection/branches_anas",
+    "cosmic_view/mMDS_xyz_sphere_3Dprojection/clades",
+    "cosmic_view/mMDS_xyz_sphere_3Dprojection/consensus_species",
+    "cosmic_view/mMDS_xyz_sphere_3Dprojection/sequence_lineage",
+    "cosmic_view/mMDS_xyz_sphere_3Dprojection/sequences",
     "cosmic_view/mutations",
+    "cosmic_view/Sphere_projection_Families/consensus_species",
+    "cosmic_view/Sphere_projection_Families/sequences",
     "cosmic_view/superfamily",
-    "cosmic_view/wandrileTest/consensus_species",
+    "cosmic_view/UMAP_xyz_3Dprojection/branches_anas",
+    "cosmic_view/UMAP_xyz_3Dprojection/clades",
+    "cosmic_view/UMAP_xyz_3Dprojection/consensus_species",
+    "cosmic_view/UMAP_xyz_3Dprojection/sequence_lineage",
+    "cosmic_view/UMAP_xyz_3Dprojection/sequences",
     "events/toggle_image_trail",
     "modules/sonification/cosmic",
     "modules/sonification/earth_cosmic_actions",
+    "modules/sonification/kulturnatten_actions",
     "modules/sonification/planets"
   ],
   "camera": {
@@ -33,9 +54,12 @@
   "delta_times": [
     0.0,
     60.0,
+    120.0,
+    180.0,
+    240.0,
     300.0,
-	  600.0,
-	  1200.0,
+    600.0,
+    1200.0,
     1800.0,
     3600.0,
     7200.0,
@@ -295,6 +319,26 @@
       "name": "Modules.Sonification.CosmicSonification.DistancePrecision",
       "type": "setPropertyValueSingle",
       "value": "100000.00"
+    },
+    {
+      "name": "Scene.birds_lineage_29.Renderable.RenderOption",
+      "type": "setPropertyValueSingle",
+      "value": "1.000000"
+    },
+    {
+      "name": "Scene.birds_lineage_31.Renderable.RenderOption",
+      "type": "setPropertyValueSingle",
+      "value": "1.000000"
+    },
+    {
+      "name": "Scene.birds_lineage_27.Renderable.RenderOption",
+      "type": "setPropertyValueSingle",
+      "value": "1.000000"
+    },
+    {
+      "name": "Modules.Sonification.SurroundMode",
+      "type": "setPropertyValueSingle",
+      "value": "1.000000"
     }
   ],
   "time": {

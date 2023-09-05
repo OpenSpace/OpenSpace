@@ -1,0 +1,174 @@
+local constellationsCSV = asset.localResource("constellation_data.csv")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local constellations_helper = asset.require("util/constellations_helper")
+
+local enable_cosmicplanet = {
+  Identifier = "module.sonification.enable.cosmicplanet",
+  Name = "1. Earth&Stars",
+  Command = [[
+
+    --openspace.setPropertyValue("{planet_solarSystem}.Renderable.Enabled", true)
+    --openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Enabled", true)
+    --openspace.setPropertyValue("{moon_solarSystem}.Renderable.Enabled", true)
+    --openspace.setPropertyValue("{moonTrail_solarSystem}.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.Moon.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.MoonTrail.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled", true)
+	  openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled", true)
+
+    --openspace.setPropertyValueSingle("Scene.VenusAtmosphere.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.MarsAtmosphere.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.TitanAtmosphere.Renderable.Enabled", true)
+
+    --openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.MilkyWayGalaxyImage.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.MilkyWayVolume.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.SunStar.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.Planck.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.SloanDigitalSkySurvey.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.TullyGalaxies.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.TullyGalaxiesImages.Renderable.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.Quasars.Renderable.Enabled", true)
+
+    openspace.setPropertyValueSingle("Scene.birds_consensus_species.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", false)
+
+    --openspace.setPropertyValueSingle("Modules.Sonification.PlanetsSonification.Enabled", true)
+    --openspace.setPropertyValueSingle("Modules.Sonification.CompareSonification.Enabled", false)
+    --openspace.setPropertyValueSingle("Modules.Sonification.SolarSonification.Enabled", false)
+    --openspace.setPropertyValueSingle("Modules.Sonification.CosmicSonification.Enabled", false)
+
+    --False
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.Points-Example.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", false);
+    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
+
+  ]],
+  Documentation = "Enables the planets sonification, turn off the cosmic points and jumps to Earth",
+  GuiPath = "/Kulturnatten",
+  isLocal = false
+}
+
+local enable_geomarkers = {
+  Identifier = "module.sonification.enable.geomarkers",
+  Name = "2. Show Geomarkers",
+  Command = [[
+
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.Points-Example.Enabled", true)
+
+  ]],
+  Documentation = "Enables the planets sonification, turn off the cosmic points and jumps to Earth",
+  GuiPath = "/Kulturnatten",
+  isLocal = false
+}
+
+local ShowConstellations = {
+  Identifier = "module.sonification.enable.ShowConstellations",
+  Name = "3. Show constellations",
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", {})
+    openspace.fadeIn("Scene.Constellations.Renderable")
+
+    --openspace.fadeOut("Scene.Constellations.Renderable", nil, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', false); openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
+
+  ]],
+  Documentation = "Shows all the constellations lines",
+  GuiPath = "/Kulturnatten",
+  IsLocal = false
+}
+local ShowArt = {
+  Identifier = "module.sonification.enable.ConstellationArt",
+  Name = "4. Show constellation art",
+  Command = [[
+    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", true)
+    --openspace.fadeIn("Scene.ImageConstellation*.Renderable")
+  ]],
+  Documentation = "Enables and fades up constellation art work",
+  GuiPath = "/Kulturnatten",
+  IsLocal = false
+}
+
+local enable_cosmicdata = {
+  Identifier = "module.sonification.enable.cosmicdata",
+  Name = "5. Enable cosmic data",
+  Command = [[
+
+    openspace.setPropertyValue("{planet_solarSystem}.Renderable.Enabled", false)
+    openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Enabled", false)
+    openspace.setPropertyValue("{moon_solarSystem}.Renderable.Enabled", false)
+    openspace.setPropertyValue("{moonTrail_solarSystem}.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.MoonTrail.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled", false)
+
+    openspace.setPropertyValueSingle("Scene.VenusAtmosphere.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.MarsAtmosphere.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.TitanAtmosphere.Renderable.Enabled", false)
+
+    openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.MilkyWayGalaxyImage.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.MilkyWay.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.MilkyWayVolume.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Stars.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.SunStar.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Planck.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.SloanDigitalSkySurvey.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.TullyGalaxies.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.TullyGalaxiesImages.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Quasars.Renderable.Enabled", false)
+
+    openspace.setPropertyValueSingle("Scene.birds_consensus_species.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", true)
+
+    openspace.setPropertyValueSingle("Modules.Sonification.PlanetsSonification.Enabled", false)
+    openspace.setPropertyValueSingle("Modules.Sonification.CompareSonification.Enabled", false)
+    openspace.setPropertyValueSingle("Modules.Sonification.SolarSonification.Enabled", false)
+    openspace.setPropertyValueSingle("Modules.Sonification.CosmicSonification.Enabled", true)
+	
+    --False
+    openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.Points-Example.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.HeightLayers.Terrain_tileset.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", false);
+    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
+	
+
+  ]],
+  Documentation = "Actions for Kulturnatten Cosmic View show",
+  GuiPath = "/Kulturnatten",
+  isLocal = false
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(enable_cosmicplanet)
+  openspace.action.registerAction(enable_geomarkers)
+  openspace.action.registerAction(ShowConstellations)
+  openspace.action.registerAction(ShowArt)
+  openspace.action.registerAction(enable_cosmicdata)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.action.registerAction(enable_cosmicplanet)
+  openspace.action.registerAction(enable_geomarkers)
+  openspace.action.registerAction(ShowConstellations)
+  openspace.action.registerAction(ShowArt)
+  openspace.action.registerAction(enable_cosmicdata)
+end)
+
+asset.meta = {
+  Name = "Kulturnatten Actions",
+  Version = "1.0",
+  Description = "Actions that are relevant for kulturnatten",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

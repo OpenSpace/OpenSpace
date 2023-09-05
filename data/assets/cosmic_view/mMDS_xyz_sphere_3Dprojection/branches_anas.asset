@@ -1,0 +1,177 @@
+-- Cosmic View of Life on Earth / Birds: Traced lineage DNA sequence data for taxon Anas
+-- This file is auto-generated in the make_asset() function inside slice_by_lineage.py
+-- Author: Brian Abbott <abbott@amnh.org>
+
+-- Set file paths
+local speck_27001_aves = asset.localResource("lineage_branches/anas/27001_aves.speck")
+local speck_28001_neognathae = asset.localResource("lineage_branches/anas/28001_neognathae.speck")
+local speck_29002_anseriformes = asset.localResource("lineage_branches/anas/29002_anseriformes.speck")
+local speck_30005_anatidae = asset.localResource("lineage_branches/anas/30005_anatidae.speck")
+local speck_31013_anatinae = asset.localResource("lineage_branches/anas/31013_anatinae.speck")
+local speck_32054_anas = asset.localResource("lineage_branches/anas/32054_anas.speck")
+
+local texture_file = asset.localResource("point3A.png")
+
+-- Set some parameters for OpenSpace settings
+local scale_factor = 105.0
+local text_size = 2.75
+local text_min_size = 15
+local text_max_size = 30
+
+local birds_mMDS_xyz_sphere_3Dprojection_27001_aves_anas = {
+    Identifier = "birds_mMDS_xyz_sphere_3Dprojection_27001_aves_anas",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 1.000000, 0.796078, 0.643137 },	-- Peach
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_27001_aves,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "27001 Aves",
+        Path = "/Birds/mMDS_xyz_sphere_3Dprojection/Lineage Branches/Anas",
+    }
+}
+
+local birds_mMDS_xyz_sphere_3Dprojection_28001_neognathae_anas = {
+    Identifier = "birds_mMDS_xyz_sphere_3Dprojection_28001_neognathae_anas",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.756863, 0.329412, 0.756863 },	-- Fuchsia
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_28001_neognathae,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "28001 Neognathae",
+        Path = "/Birds/mMDS_xyz_sphere_3Dprojection/Lineage Branches/Anas",
+    }
+}
+
+local birds_mMDS_xyz_sphere_3Dprojection_29002_anseriformes_anas = {
+    Identifier = "birds_mMDS_xyz_sphere_3Dprojection_29002_anseriformes_anas",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.886275, 0.611765, 0.823529 },	-- Orchid
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_29002_anseriformes,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "29002 Anseriformes",
+        Path = "/Birds/mMDS_xyz_sphere_3Dprojection/Lineage Branches/Anas",
+    }
+}
+
+local birds_mMDS_xyz_sphere_3Dprojection_30005_anatidae_anas = {
+    Identifier = "birds_mMDS_xyz_sphere_3Dprojection_30005_anatidae_anas",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.309804, 0.411765, 0.77647 },	-- Indigo
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_30005_anatidae,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "30005 Anatidae",
+        Path = "/Birds/mMDS_xyz_sphere_3Dprojection/Lineage Branches/Anas",
+    }
+}
+
+local birds_mMDS_xyz_sphere_3Dprojection_31013_anatinae_anas = {
+    Identifier = "birds_mMDS_xyz_sphere_3Dprojection_31013_anatinae_anas",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.462745, 0.843137, 0.917647 },	-- Sky Blue
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_31013_anatinae,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "31013 Anatinae",
+        Path = "/Birds/mMDS_xyz_sphere_3Dprojection/Lineage Branches/Anas",
+    }
+}
+
+local birds_mMDS_xyz_sphere_3Dprojection_32054_anas_anas = {
+    Identifier = "birds_mMDS_xyz_sphere_3Dprojection_32054_anas_anas",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.482353, 0.627451, 0.356863 },	-- Asparagus
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_32054_anas,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "32054 Anas",
+        Path = "/Birds/mMDS_xyz_sphere_3Dprojection/Lineage Branches/Anas",
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_27001_aves_anas)
+    openspace.addSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_28001_neognathae_anas)
+    openspace.addSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_29002_anseriformes_anas)
+    openspace.addSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_30005_anatidae_anas)
+    openspace.addSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_31013_anatinae_anas)
+    openspace.addSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_32054_anas_anas)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_27001_aves_anas)
+    openspace.removeSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_28001_neognathae_anas)
+    openspace.removeSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_29002_anseriformes_anas)
+    openspace.removeSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_30005_anatidae_anas)
+    openspace.removeSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_31013_anatinae_anas)
+    openspace.removeSceneGraphNode(birds_mMDS_xyz_sphere_3Dprojection_32054_anas_anas)
+end)
+
+asset.export(birds_mMDS_xyz_sphere_3Dprojection_27001_aves_anas)
+asset.export(birds_mMDS_xyz_sphere_3Dprojection_28001_neognathae_anas)
+asset.export(birds_mMDS_xyz_sphere_3Dprojection_29002_anseriformes_anas)
+asset.export(birds_mMDS_xyz_sphere_3Dprojection_30005_anatidae_anas)
+asset.export(birds_mMDS_xyz_sphere_3Dprojection_31013_anatinae_anas)
+asset.export(birds_mMDS_xyz_sphere_3Dprojection_32054_anas_anas)
+
