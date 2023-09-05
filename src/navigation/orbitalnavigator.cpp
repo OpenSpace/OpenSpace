@@ -721,18 +721,9 @@ OrbitalNavigator::OrbitalNavigator()
 
     addProperty(_shouldRotateAroundUp);
     _upToUseForRotation.addOptions({
-        {
-            static_cast<int>(UpDirectionChoice::XAxis),
-            "Local X"
-        },
-        {
-            static_cast<int>(UpDirectionChoice::YAxis),
-            "Local Y"
-        },
-        {
-            static_cast<int>(UpDirectionChoice::ZAxis),
-            "Local Z"
-        },
+        { static_cast<int>(UpDirectionChoice::XAxis), "Local X" },
+        { static_cast<int>(UpDirectionChoice::YAxis), "Local Y" },
+        { static_cast<int>(UpDirectionChoice::ZAxis), "Local Z" }
     });
     _upToUseForRotation = static_cast<int>(UpDirectionChoice::ZAxis);
     addProperty(_upToUseForRotation);
@@ -1643,17 +1634,17 @@ void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
 {
     glm::dvec3 axis;
     switch (_upToUseForRotation) {
-    case static_cast<int>(UpDirectionChoice::XAxis):
-        axis = glm::dvec3(1.0, 0.0, 0.0);
-        break;
-    case static_cast<int>(UpDirectionChoice::YAxis):
-        axis = glm::dvec3(0.0, 1.0, 0.0);
-        break;
-    case static_cast<int>(UpDirectionChoice::ZAxis):
-        axis = glm::dvec3(0.0, 0.0, 1.0);
-        break;
-    default:
-        throw ghoul::MissingCaseException();
+        case static_cast<int>(UpDirectionChoice::XAxis):
+            axis = glm::dvec3(1.0, 0.0, 0.0);
+            break;
+        case static_cast<int>(UpDirectionChoice::YAxis):
+            axis = glm::dvec3(0.0, 1.0, 0.0);
+            break;
+        case static_cast<int>(UpDirectionChoice::ZAxis):
+            axis = glm::dvec3(0.0, 0.0, 1.0);
+            break;
+        default:
+            throw ghoul::MissingCaseException();
     }
 
     double combinedXInput = _mouseStates.globalRotationVelocity().x +
@@ -1709,12 +1700,14 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime, double spee
         glm::inverse(globalCameraRotation);
 
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-    const glm::dvec3 outDirection = glm::normalize(glm::dmat3(modelTransform) *
-        positionHandle.referenceSurfaceOutDirection);
+    const glm::dvec3 outDirection = glm::normalize(
+        glm::dmat3(modelTransform) *
+        positionHandle.referenceSurfaceOutDirection
+    );
 
     // Compute the vector to rotate to find the new position
     const double distFromCenterToCamera = glm::length(cameraPosition - objectPosition);
-    const glm::dvec3 outVector = (distFromCenterToCamera * outDirection);
+    const glm::dvec3 outVector = distFromCenterToCamera * outDirection;
 
     // Rotate and find the difference vector
     const glm::dvec3 rotationDiffVec3 = outVector * rotationDiffWorldSpace - outVector;
@@ -2055,7 +2048,7 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double angle,
     const glm::dvec3 rotationDiffVec3 =
         spinRotation * anchorCenterToCamera - anchorCenterToCamera;
 
-    if (!(glm::length(rotationDiffVec3) > 0.0)) {
+    if (glm::length(rotationDiffVec3 == 0.0)) {
         return;
     }
 
@@ -2067,14 +2060,16 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double angle,
 }
 
 double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
-                                              const glm::dvec3& cameraPosition,
-                                       const SurfacePositionHandle& positionHandle) const
+                                                         const glm::dvec3& cameraPosition,
+                                        const SurfacePositionHandle& positionHandle) const
 {
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
 
-    const glm::dvec3 outDirection = glm::normalize(glm::dmat3(modelTransform) *
-        positionHandle.referenceSurfaceOutDirection);
+    const glm::dvec3 outDirection = glm::normalize(
+        glm::dmat3(modelTransform) *
+        positionHandle.referenceSurfaceOutDirection
+    );
 
     const glm::dvec3 posDiff = cameraPosition - anchorPos;
     const glm::dvec3 centerToActualSurfaceModelSpace =
