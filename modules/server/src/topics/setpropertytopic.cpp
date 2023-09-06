@@ -127,7 +127,7 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
                     "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
                 ),
                 scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                 scripting::ScriptEngine::ShouldSendToRemote::Yes
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
              );
         }
     }

@@ -81,7 +81,7 @@ namespace {
        "Should Be Synchronized",
        "Determines whether the entered commands will only be executed locally (if this "
        "is disabled), or whether they will be send to other connected nodes, for "
-       "example in a cluster envierment",
+       "example in a cluster environment",
        openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -90,7 +90,7 @@ namespace {
         "Should Send To Remote",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remote instances (other "
-        "peers through parallel connection)",
+        "peers through a parallel connection)",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -450,12 +450,10 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     if (key == Key::Enter || key == Key::KeypadEnter) {
         std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
-            using ShouldBeSynchronized = scripting::ScriptEngine::ShouldBeSynchronized;
-            using ShouldSendToRemote = scripting::ScriptEngine::ShouldSendToRemote;
             global::scriptEngine->queueScript(
                 cmd,
-                ShouldBeSynchronized(_shouldBeSynchronized),
-                ShouldSendToRemote(_shouldSendToRemote)
+                scripting::ScriptEngine::ShouldBeSynchronized(_shouldBeSynchronized),
+                scripting::ScriptEngine::ShouldSendToRemote(_shouldSendToRemote)
             );
 
             // Only add the current command to the history if it hasn't been

@@ -94,13 +94,10 @@ void ActionManager::triggerAction(const std::string& identifier,
     }
 
     const Action& a = action(identifier);
-    std::string script;
-    if (arguments.isEmpty()) {
-        script = a.command;
-    }
-    else {
-        script = fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
-    }
+    std::string script =
+        arguments.isEmpty() ?
+        a.command :
+        fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
 
     using ShouldBeSynchronized = scripting::ScriptEngine::ShouldBeSynchronized;
     using ShouldSendToRemote = scripting::ScriptEngine::ShouldSendToRemote;

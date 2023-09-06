@@ -211,7 +211,7 @@ void createExoplanetSystem(const std::string& starName,
         "}"
     "}";
 
-    // No sync or send because this is already inside a lua script, therefor it has
+    // No sync or send because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + starParent + ");",
@@ -330,7 +330,7 @@ void createExoplanetSystem(const std::string& starName,
             "}"
         "}";
 
-        // No sync or send because this is already inside a lua script, therefor it has
+        // No sync or send because this is already inside a Lua script, therefor it has
         // already been synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + planetTrailNode + ");"
@@ -383,7 +383,7 @@ void createExoplanetSystem(const std::string& starName,
                 "}"
             "}";
 
-            // No sync or send because this is already inside a lua script, therefor it
+            // No sync or send because this is already inside a Lua script, therefor it
             // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + discNode + ");",
@@ -431,7 +431,7 @@ void createExoplanetSystem(const std::string& starName,
         "}"
     "}";
 
-    // No sync or send because this is already inside a lua script, therefor it has
+    // No sync or send because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + circle + ");",
@@ -489,7 +489,7 @@ void createExoplanetSystem(const std::string& starName,
             "}"
         "}";
 
-        // No sync or send because this is already inside a lua script, therefor it has
+        // No sync or send because this is already inside a Lua script, therefor it has
         // already been synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
@@ -533,7 +533,7 @@ void createExoplanetSystem(const std::string& starName,
                 "}"
             "}";
 
-            // No sync or send because this is already inside a lua script, therefor it
+            // No sync or send because this is already inside a Lua script, therefor it
             // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + starGlare + ");",
@@ -646,7 +646,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
     using namespace exoplanets;
     const std::string starIdentifier = makeIdentifier(std::move(starName));
 
-    // No sync or send because this is already inside a lua script, therefor it has
+    // No sync or send because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
