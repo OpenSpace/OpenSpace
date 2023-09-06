@@ -105,7 +105,7 @@ bool ScreenSpaceFramebuffer::deinitializeGL() {
     return true;
 }
 
-void ScreenSpaceFramebuffer::render() {
+void ScreenSpaceFramebuffer::render(float blackoutFactor) {
     const glm::vec2& resolution = global::windowDelegate->currentDrawBufferResolution();
     const glm::vec4& size = _size.value();
 
@@ -145,7 +145,7 @@ void ScreenSpaceFramebuffer::render() {
             glm::vec3((1.f / xratio), (1.f / yratio), 1.f)
         );
         const glm::mat4 modelTransform = globalRotation*translation*localRotation*scale;
-        draw(modelTransform);
+        draw(modelTransform, blackoutFactor);
     }
 }
 

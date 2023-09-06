@@ -55,7 +55,7 @@ public:
 
     bool initializeGL() override;
     bool deinitializeGL() override;
-    void render() override;
+    void render(float blackoutFactor) override;
     bool isReady() const override;
 
     void setSize(glm::vec4 size);
