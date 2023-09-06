@@ -43,9 +43,9 @@
 #include <variant>
 
 namespace {
-    constexpr std::array<const char*, 8> UniformNames = {
-        "color", "opacity", "mvpMatrix", "tex", "backgroundColor", "gamma", "borderColor",
-        "borderWidth"
+    constexpr std::array<const char*, 9> UniformNames = {
+        "color", "opacity", "blackoutFactor", "mvpMatrix", "tex", "backgroundColor",
+        "gamma", "borderColor", "borderWidth"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -53,6 +53,16 @@ namespace {
         "Enabled",
         "This setting determines whether this sceen space plane will be visible or not",
         openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderDuringBlackoutInfo = {
+        "RenderDuringBlackout",
+        "Render during Blackout",
+        "If this value is 'true', this screenspace renderable is going to ignore the "
+        "global blackout factor from the Render Engine and will always render at full "
+        "opacity. If it is 'false', it will adhere to the factor and fade out like the "
+        "rest of the 3D rendering",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -191,6 +201,9 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
+        // [[codegen::verbatim(RenderDuringBlackoutInfo.description)]]
+        std::optional<bool> renderDuringBlackout;
+
         // [[codegen::verbatim(UseRadiusAzimuthElevationInfo.description)]]
         std::optional<bool> useRadiusAzimuthElevation;
 
@@ -282,6 +295,7 @@ std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" })
     , _enabled(EnabledInfo, true)
+    , _renderDuringBlackout(RenderDuringBlackoutInfo, false)
     , _usePerspectiveProjection(UsePerspectiveProjectionInfo, false)
     , _useRadiusAzimuthElevation(UseRadiusAzimuthElevationInfo, false)
     , _faceCamera(FaceCameraInfo, true)
@@ -327,6 +341,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     }
 
     addProperty(_enabled);
+    _renderDuringBlackout = p.renderDuringBlackout.value_or(_renderDuringBlackout);
+    addProperty(_renderDuringBlackout);
     addProperty(_useRadiusAzimuthElevation);
     addProperty(_usePerspectiveProjection);
     addProperty(_faceCamera);
@@ -436,15 +452,15 @@ bool ScreenSpaceRenderable::deinitializeGL() {
     return true;
 }
 
-void ScreenSpaceRenderable::render() {
+void ScreenSpaceRenderable::render(float blackoutFactor) {
     ZoneScoped;
 
-    draw(
+    glm::mat4 mat =
         globalRotationMatrix() *
         translationMatrix() *
         localRotationMatrix() *
-        scaleMatrix()
-    );
+        scaleMatrix();
+    draw(mat, blackoutFactor);
 }
 
 bool ScreenSpaceRenderable::isReady() const {
@@ -622,7 +638,7 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix() {
     return glm::translate(glm::mat4(1.f), translation);
 }
 
-void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
+void ScreenSpaceRenderable::draw(glm::mat4 modelTransform, float blackoutFactor) {
     glDisable(GL_CULL_FACE);
 
     _shader->activate();
@@ -634,6 +650,10 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->setUniform(_uniformCache.color, _multiplyColor);
     _shader->setUniform(_uniformCache.opacity, opacity());
+    _shader->setUniform(
+        _uniformCache.blackoutFactor,
+        _renderDuringBlackout ? 1.f : blackoutFactor
+    );
     _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
     _shader->setUniform(_uniformCache.gamma, _gamma);
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
