@@ -281,7 +281,11 @@ void NavigationHandler::updateCameraTransitions() {
                 for (const std::string& action : anchorNode()->onExitAction()) {
                     // No sync because events are always synced and sent to the connected
                     // nodes and peers
-                    global::actionManager->triggerAction(action, dict, false);
+                    global::actionManager->triggerAction(
+                        action,
+                        dict,
+                        interaction::ActionManager::ShouldBeSynchronized::No
+                    );
                 }
             }
 
@@ -303,7 +307,11 @@ void NavigationHandler::updateCameraTransitions() {
                 for (const std::string& action : anchorNode()->onReachAction()) {
                     // No sync because events are always synced and sent to the connected
                     // nodes and peers
-                    global::actionManager->triggerAction(action, dict, false);
+                    global::actionManager->triggerAction(
+                        action,
+                        dict,
+                        interaction::ActionManager::ShouldBeSynchronized::No
+                    );
                 }
             }
 
@@ -326,7 +334,11 @@ void NavigationHandler::updateCameraTransitions() {
             for (const std::string& action : anchorNode()->onRecedeAction()) {
                 // No sync because events are always synced and sent to the connected
                 // nodes and peers
-                global::actionManager->triggerAction(action, dict, false);
+                global::actionManager->triggerAction(
+                    action,
+                    dict,
+                    interaction::ActionManager::ShouldBeSynchronized::No
+                );
             }
         }
 
@@ -349,7 +361,11 @@ void NavigationHandler::updateCameraTransitions() {
             for (const std::string& action : anchorNode()->onApproachAction()) {
                 // No sync because events are always synced and sent to the connected
                 // nodes and peers
-                global::actionManager->triggerAction(action, dict, false);
+                global::actionManager->triggerAction(
+                    action,
+                    dict,
+                    interaction::ActionManager::ShouldBeSynchronized::No
+                );
             }
         }
 

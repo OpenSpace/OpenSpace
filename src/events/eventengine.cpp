@@ -166,7 +166,11 @@ void EventEngine::triggerActions() const {
                 {
                     // No sync because events are always synced and sent to the connected
                     // nodes and peers
-                    global::actionManager->triggerAction(ai.action, params, false);
+                    global::actionManager->triggerAction(
+                        ai.action,
+                        params,
+                        interaction::ActionManager::ShouldBeSynchronized::No
+                    );
                 }
             }
         }

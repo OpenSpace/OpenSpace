@@ -81,7 +81,7 @@ std::vector<Action> ActionManager::actions() const {
 
 void ActionManager::triggerAction(const std::string& identifier,
                                   const ghoul::Dictionary& arguments,
-                                  bool shouldBeSynchronized) const
+                           ActionManager::ShouldBeSynchronized shouldBeSynchronized) const
 {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
 

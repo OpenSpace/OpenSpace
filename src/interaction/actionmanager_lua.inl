@@ -194,7 +194,11 @@ struct [[codegen::Dictionary(Action)]] Action {
 
     // No sync because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
-    global::actionManager->triggerAction(id, arg, false);
+    global::actionManager->triggerAction(
+        id,
+        arg,
+        interaction::ActionManager::ShouldBeSynchronized::No
+    );
 }
 
 #include "actionmanager_lua_codegen.cpp"
