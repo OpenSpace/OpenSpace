@@ -1,0 +1,51 @@
+local transforms = asset.require("./moon")
+
+
+
+local texturesPath = asset.syncedResource({
+  Name = "Moon Textures",
+  Type = "HttpSynchronization",
+  Identifier = "moon_textures",
+  Version = 3
+})
+
+
+local MoonMarker = {
+  Identifier = "MoonMarker",
+  Parent = transforms.Moon.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = false,
+    Size = 3.0E7,
+    Origin = "Center",
+    Billboard = true,
+    Texture = texturesPath .. "marker.png",
+    BlendMode = "Additive"
+  },
+  GUI = {
+    Name = "Moon Marker",
+    Path = "/Solar System/Planets/Earth/Moon"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MoonMarker)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MoonMarker)
+end)
+
+asset.export(MoonMarker)
+
+
+
+asset.meta = {
+  Name = "Moon marker",
+  Version = "1.0",
+  Description = "Moon marker with name, sized for Earth view",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

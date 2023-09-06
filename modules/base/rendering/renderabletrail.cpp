@@ -86,8 +86,8 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
-        "Fade",
+    constexpr openspace::properties::Property::PropertyInfo LineFadeInfo = {
+        "LineFade",
         "Line fade",
         "The fading factor that is applied to the trail if the 'EnableFade' value is "
         "'true'. If it is 'false', this setting has no effect. The higher the number, "
@@ -138,8 +138,8 @@ namespace {
         // [[codegen::verbatim(EnableFadeInfo.description)]]
         std::optional<bool> enableFade;
 
-        // [[codegen::verbatim(FadeInfo.description)]]
-        std::optional<float> fade;
+        // [[codegen::verbatim(LineFadeInfo.description)]]
+        std::optional<float> lineFade;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -173,7 +173,7 @@ RenderableTrail::Appearance::Appearance()
     })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
-    , lineFade(FadeInfo, 1.f, 0.f, 30.f)
+    , lineFade(LineFadeInfo, 1.f, 0.f, 30.f)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
@@ -211,7 +211,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 
     _appearance.lineColor = p.color;
     _appearance.useLineFade = p.enableFade.value_or(_appearance.useLineFade);
-    _appearance.lineFade = p.fade.value_or(_appearance.lineFade);
+    _appearance.lineFade = p.lineFade.value_or(_appearance.lineFade);
     _appearance.lineWidth = p.lineWidth.value_or(_appearance.lineWidth);
     _appearance.pointSize = p.pointSize.value_or(_appearance.pointSize);
 

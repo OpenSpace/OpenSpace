@@ -43,7 +43,7 @@ public:
     bool initializeGL() override;
     bool deinitializeGL() override;
     void update() override;
-    void render() override;
+    void render(float blackoutFactor) override;
 
     static documentation::Documentation Documentation();
 

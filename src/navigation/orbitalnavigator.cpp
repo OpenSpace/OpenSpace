@@ -374,6 +374,25 @@ namespace {
         // @VISIBILITY(?)
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableZoomInfo = {
+        "DisableZoom",
+        "Disable Zoom",
+        "When set to true, disables all vertical navigation based on input. This means "
+        "that the camera cannot be moved closer to or further away from the current "
+        "anchor node",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableRollInfo = {
+        "DisableRoll",
+        "Disable Roll",
+        "When set to true, disables all rolling camera motions based on input. This "
+        "means that the camera cannot be rotated to change the perceived up-direction "
+        "of the current anchor node, or rotate the horizon on a planet, for example",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
 } // namespace
 
 namespace openspace::interaction {
@@ -477,6 +496,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
+    , _disableZoom(DisableZoomInfo, false)
+    , _disableRoll(DisableRollInfo, false)
 {
     _anchor.onChange([this]() {
         if (_anchor.value().empty()) {
@@ -644,14 +665,39 @@ OrbitalNavigator::OrbitalNavigator()
     _followRotationInterpolator.setInterpolationTime(_followRotationInterpolationTime);
     addProperty(_followRotationInterpolationTime);
 
-    _invertMouseButtons.onChange(
-        [this]() { _mouseStates.setInvertMouseButton(_invertMouseButtons); }
-    );
+    _invertMouseButtons.onChange([this]() {
+        _mouseStates.setInvertMouseButton(_invertMouseButtons);
+    });
     addProperty(_invertMouseButtons);
 
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
     addProperty(_websocketSensitivity);
+
+    addProperty(_disableZoom);
+    _disableZoom.onChange([this]() {
+        if (_disableZoom) {
+            LWARNING(
+                "Zooming has been disabled. No vertical camera motion based on "
+                "input will occur until re-enabled. See setting in Orbital Navigator"
+            );
+        }
+        else {
+            LINFO("Zooming has been enabled");
+        }
+    });
+    addProperty(_disableRoll);
+    _disableRoll.onChange([this]() {
+        if (_disableRoll) {
+            LWARNING(
+                "Camera roll has been disabled. No rolling camera motion based on "
+                "input will occur until re-enabled. See setting in Orbital Navigator"
+            );
+        }
+        else {
+            LINFO("Camera roll has been enabled");
+        }
+    });
 }
 
 glm::dvec3 OrbitalNavigator::anchorNodeToCameraVector() const {
@@ -811,7 +857,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     );
 
     // Update local rotation based on user input
-    camRot.localRotation = roll(deltaTime, camRot.localRotation);
+    if (!_disableRoll) {
+        camRot.localRotation = roll(deltaTime, camRot.localRotation);
+    }
+
     camRot.localRotation = interpolateLocalRotation(deltaTime, camRot.localRotation);
     camRot.localRotation = rotateLocally(deltaTime, camRot.localRotation);
 
@@ -853,20 +902,29 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     );
 
     // Rotate around the surface out direction based on user input
-    camRot.globalRotation = rotateHorizontally(
-        deltaTime,
-        camRot.globalRotation,
-        posHandle
-    );
+    if (!_disableRoll) {
+        camRot.globalRotation = rotateHorizontally(
+            deltaTime,
+            camRot.globalRotation,
+            posHandle
+        );
+    }
 
     // Perform the vertical movements based on user input
-    pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
+    if (!_disableZoom) {
+        pose.position = translateVertically(
+            deltaTime,
+            pose.position,
+            anchorPos,
+            posHandle
+        );
 
-    pose.position = pushToSurface(
-        pose.position,
-        anchorPos,
-        posHandle
-    );
+        pose.position = pushToSurface(
+            pose.position,
+            anchorPos,
+            posHandle
+        );
+    }
 
     pose.rotation = composeCameraRotation(camRot);
 

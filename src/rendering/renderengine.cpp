@@ -728,7 +728,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         RenderFont(*_fontFrameInfo, penPosition, res);
     }
 
-    if (renderingEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+    if (renderingEnabled && !delegate.isGuiWindow()) {
         ZoneScopedN("Render Screenspace Renderable");
 
         std::vector<ScreenSpaceRenderable*> ssrs;
@@ -755,7 +755,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         for (ScreenSpaceRenderable* ssr : ssrs) {
-            ssr->render();
+            ssr->render(_globalBlackOutFactor);
         }
         glDisable(GL_BLEND);
     }
