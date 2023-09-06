@@ -187,7 +187,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform(
         _uniformCache.modelViewProjection,
-        calcModelViewProjectionTransform(data)
+        glm::mat4(calcModelViewProjectionTransform(data))
     );
     _shader->setUniform(_uniformCache.offset, _offset);
     _shader->setUniform(_uniformCache.opacity, opacity());
