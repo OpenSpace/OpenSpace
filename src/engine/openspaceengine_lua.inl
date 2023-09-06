@@ -22,8 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/downloadmanager.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/openspace.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
+#include <ghoul/glm.h>
 #include <ghoul/misc/csvreader.h>
+#include <ghoul/misc/dictionary.h>
+#include <filesystem>
 
 namespace {
 
