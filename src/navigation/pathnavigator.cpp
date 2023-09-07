@@ -322,7 +322,8 @@ void PathNavigator::startPath() {
     if (!global::timeManager->isPaused()) {
         openspace::global::scriptEngine->queueScript(
             "openspace.time.setPause(true)",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
 
         _startSimulationTimeOnFinish = true;
@@ -437,7 +438,8 @@ void PathNavigator::handlePathEnd() {
     if (_startSimulationTimeOnFinish) {
         openspace::global::scriptEngine->queueScript(
             "openspace.time.setPause(false)",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
         _startSimulationTimeOnFinish = false;
     }
@@ -448,7 +450,8 @@ void PathNavigator::handlePathEnd() {
                 "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
                 "true"
             ");",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 

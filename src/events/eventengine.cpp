@@ -164,7 +164,13 @@ void EventEngine::triggerActions() const {
                 if (ai.isEnabled &&
                     (!ai.filter.has_value() || params.isSubset(*ai.filter)))
                 {
-                    global::actionManager->triggerAction(ai.action, params);
+                    // No sync because events are always synced and sent to the connected
+                    // nodes and peers
+                    global::actionManager->triggerAction(
+                        ai.action,
+                        params,
+                        interaction::ActionManager::ShouldBeSynchronized::No
+                    );
                 }
             }
         }

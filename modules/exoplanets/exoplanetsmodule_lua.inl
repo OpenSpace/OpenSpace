@@ -231,9 +231,12 @@ void createExoplanetSystem(const std::string& starName) {
         "}"
     "}";
 
+    // No sync or send because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + starParent + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     // Planets
@@ -345,10 +348,13 @@ void createExoplanetSystem(const std::string& starName) {
             "}"
         "}";
 
+        // No sync or send because this is already inside a Lua script, therefor it has
+        // already been synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + planetTrailNode + ");"
             "openspace.addSceneGraphNode(" + planetNode + ");",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         bool hasUpperAUncertainty = !std::isnan(planet.aUpper);
@@ -395,9 +401,12 @@ void createExoplanetSystem(const std::string& starName) {
                 "}"
             "}";
 
+            // No sync or send because this is already inside a Lua script, therefor it
+            // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + discNode + ");",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::No,
+                scripting::ScriptEngine::ShouldSendToRemote::No
             );
         }
     }
@@ -440,9 +449,12 @@ void createExoplanetSystem(const std::string& starName) {
         "}"
     "}";
 
+    // No sync or send because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + circle + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     // Habitable Zone
@@ -495,9 +507,12 @@ void createExoplanetSystem(const std::string& starName) {
             "}"
         "}";
 
+        // No sync or send because this is already inside a Lua script, therefor it has
+        // already been synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         // Star glare
@@ -536,9 +551,12 @@ void createExoplanetSystem(const std::string& starName) {
                 "}"
             "}";
 
+            // No sync or send because this is already inside a Lua script, therefor it
+            // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + starGlare + ");",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::No,
+                scripting::ScriptEngine::ShouldSendToRemote::No
             );
         }
     }
@@ -633,9 +651,13 @@ std::vector<std::string> hostStarsWithSufficientData() {
     using namespace openspace;
     using namespace exoplanets;
     const std::string starIdentifier = makeIdentifier(std::move(starName));
+
+    // No sync or send because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 }
 
