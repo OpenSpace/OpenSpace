@@ -34,8 +34,10 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
+#include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/texture.h>
 #include <filesystem>
 
 namespace {
@@ -150,20 +152,16 @@ namespace {
     }
 
     std::filesystem::path fileName = FileSys.cacheManager()->cachedFilename(
-        name + ".ppm",
+        name + ".png",
         ""
     );
+
     const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
     if (hasCachedFile) {
         LDEBUGC("OpenSpaceEngine", fmt::format("Cached file '{}' used", fileName));
-        return fileName;
     }
     else {
-        // Write the color to a ppm file
-        static std::mutex fileMutex;
-        std::lock_guard guard(fileMutex);
-        std::ofstream ppmFile(fileName, std::ofstream::binary | std::ofstream::trunc);
-
+        // Write the color to a new file
         unsigned int width = 1;
         unsigned int height = 1;
         unsigned int size = width * height;
@@ -172,17 +170,26 @@ namespace {
         img[1] = static_cast<unsigned char>(255 * color.g);
         img[2] = static_cast<unsigned char>(255 * color.b);
 
-        if (!ppmFile.is_open()) {
-            throw ghoul::lua::LuaError("Could not open ppm file for writing");
-        }
+        ghoul::opengl::Texture textureFromData = ghoul::opengl::Texture(
+            reinterpret_cast<void*>(img.data()),
+            glm::uvec3(width, height, 1),
+            GL_TEXTURE_2D,
+            ghoul::opengl::Texture::Format::RGB
+        );
 
-        ppmFile << "P6" << std::endl;
-        ppmFile << width << " " << height << std::endl;
-        ppmFile << 255 << std::endl;
-        ppmFile.write(reinterpret_cast<char*>(img.data()), size * 3);
-        ppmFile.close();
-        return fileName;
+        try {
+            ghoul::io::TextureWriter::ref().saveTexture(textureFromData, fileName.string());
+        }
+        catch (const ghoul::io::TextureWriter::MissingWriterException& e) {
+            // This should not happen, as we know .png is a supported format
+            throw ghoul::lua::LuaError(e.message);
+        }
+        catch (const std::filesystem::filesystem_error& e) {
+            LERRORC("Exception: {}", e.what());
+        }
     }
+
+    return fileName;
 }
 
 /**
