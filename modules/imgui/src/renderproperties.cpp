@@ -74,7 +74,8 @@ void renderTooltip(Property* prop, double delay) {
 void executeSetPropertyScript(const std::string& id, const std::string& value) {
     global::scriptEngine->queueScript(
         fmt::format("openspace.setPropertyValueSingle('{}', {});", id, value),
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

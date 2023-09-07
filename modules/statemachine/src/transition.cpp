@@ -71,7 +71,8 @@ void Transition::performAction() const {
     }
     global::scriptEngine->queueScript(
         _action,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
