@@ -297,17 +297,17 @@ RenderableNodeArrow::RenderableNodeArrow(const ghoul::Dictionary& dictionary)
     _shading.specularIntensity = p.specularIntensity.value_or(_shading.specularIntensity);
     addPropertySubOwner(_shading);
 
-    _start = p.startNode;
-    addProperty(_start);
-
-    _end = p.endNode;
-    addProperty(_end);
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    addProperty(Fadeable::_opacity);
+    _start = p.startNode;
+    addProperty(_start);
+
+    _end = p.endNode;
+    addProperty(_end);
 
     _segments = p.segments.value_or(_segments);
     addProperty(_segments);
@@ -331,11 +331,10 @@ RenderableNodeArrow::RenderableNodeArrow(const ghoul::Dictionary& dictionary)
     _useRelativeLength = p.useRelativeLength.value_or(_useRelativeLength);
 
     _length = p.length.value_or(_length);
-    addProperty(_length);
-
     if (!_useRelativeLength) {
         _length.setExponent(11.f);
     }
+    addProperty(_length);
 
     _useRelativeOffset.onChange([this]() {
         updateDistanceBasedOnRelativeValues(_start, _useRelativeOffset, _offsetDistance);
@@ -343,11 +342,10 @@ RenderableNodeArrow::RenderableNodeArrow(const ghoul::Dictionary& dictionary)
     _useRelativeOffset = p.useRelativeOffset.value_or(_useRelativeOffset);
 
     _offsetDistance = p.offset.value_or(_offsetDistance);
-    addProperty(_offsetDistance);
-
     if (!_useRelativeOffset) {
         _offsetDistance.setExponent(11.f);
     }
+    addProperty(_offsetDistance);
 
     addProperty(_useRelativeLength);
     addProperty(_useRelativeOffset);
