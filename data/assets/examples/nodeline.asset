@@ -1,6 +1,8 @@
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
 
+
+
 local RenderableNodeLineExample = {
   Identifier = "RenderableNodeLineExample",
   Renderable = {
@@ -16,6 +18,7 @@ local RenderableNodeLineExample = {
     Description = [[Draws a line between two nodes in the scene.]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(RenderableNodeLineExample)

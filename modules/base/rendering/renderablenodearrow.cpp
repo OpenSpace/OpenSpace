@@ -87,14 +87,14 @@ namespace {
         "Arrow Head Size",
         "This size of the arrow head, given in relative value of the entire length of "
         "the arrow. For example, 0.1 makes the arrow head length be 10% of the full "
-        "arrow length.",
+        "arrow length",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ArrowHeadWidthInfo = {
         "ArrowHeadWidthFactor",
         "Arrow Head Width Factor",
-        "A factor that is multiplied with the width or the arrow itself, to determine "
+        "A factor that is multiplied with the width, or the arrow itself, to determine "
         "the width of the base of the arrow head",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -144,21 +144,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "A multiplier for ambient lighting",
+        "A multiplier for ambient lighting for the shading of the arrow",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse Intensity",
-        "A multiplier for diffuse lighting",
+        "A multiplier for diffuse lighting for the shading of the arrow",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular Intensity",
-        "A multiplier for specular lighting",
+        "A multiplier for specular lighting for the shading of the arrow",
         openspace::properties::Property::Visibility::User
     };
 
@@ -180,7 +180,7 @@ namespace {
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
-        std::optional<int> segments [[codegen::greaterequal(3)]];;
+        std::optional<int> segments [[codegen::greaterequal(3)]];
 
         // [[codegen::verbatim(InvertInfo.description)]]
         std::optional<bool> invert;
@@ -222,7 +222,7 @@ namespace {
 
     void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
                                              bool useRelative,
-                                             openspace::properties::FloatProperty &prop)
+                                             openspace::properties::FloatProperty& prop)
     {
         using namespace::openspace;
 
@@ -291,11 +291,11 @@ RenderableNodeArrow::RenderableNodeArrow(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addPropertySubOwner(_shading);
     _shading.enabled = p.performShading.value_or(_shading.enabled);
     _shading.ambientIntensity = p.ambientIntensity.value_or(_shading.ambientIntensity);
     _shading.diffuseIntensity = p.diffuseIntensity.value_or(_shading.diffuseIntensity);
     _shading.specularIntensity = p.specularIntensity.value_or(_shading.specularIntensity);
+    addPropertySubOwner(_shading);
 
     _start = p.startNode;
     addProperty(_start);

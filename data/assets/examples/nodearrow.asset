@@ -2,6 +2,8 @@ local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
 
+
+
 local EarthRadius = 6371000.0
 
 local ArrowExample = {
@@ -45,6 +47,7 @@ local ArrowExample_RelativeUnits = {
     Description = [[Example node direction arrow, using relative sizes]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ArrowExample)
