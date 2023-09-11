@@ -1632,20 +1632,18 @@ void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
                                             glm::dvec3& cameraPosition,
                                             glm::dquat& globalCameraRotation)
 {
-    glm::dvec3 axis;
-    switch (_upToUseForRotation) {
-        case static_cast<int>(UpDirectionChoice::XAxis):
-            axis = glm::dvec3(1.0, 0.0, 0.0);
-            break;
-        case static_cast<int>(UpDirectionChoice::YAxis):
-            axis = glm::dvec3(0.0, 1.0, 0.0);
-            break;
-        case static_cast<int>(UpDirectionChoice::ZAxis):
-            axis = glm::dvec3(0.0, 0.0, 1.0);
-            break;
-        default:
-            throw ghoul::MissingCaseException();
-    }
+    const glm::dvec3 axis = [](UpDirectionChoice upAxis) {
+        switch (upAxis) {
+            case UpDirectionChoice::XAxis:
+                return glm::dvec3(1.0, 0.0, 0.0);
+            case UpDirectionChoice::YAxis:
+                return glm::dvec3(0.0, 1.0, 0.0);
+            case UpDirectionChoice::ZAxis:
+                return glm::dvec3(0.0, 0.0, 1.0);
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }(UpDirectionChoice(_upToUseForRotation.value()));
 
     double combinedXInput = _mouseStates.globalRotationVelocity().x +
         _joystickStates.globalRotationVelocity().x +
@@ -2048,7 +2046,7 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double angle,
     const glm::dvec3 rotationDiffVec3 =
         spinRotation * anchorCenterToCamera - anchorCenterToCamera;
 
-    if (glm::length(rotationDiffVec3 == 0.0)) {
+    if (glm::length(rotationDiffVec3) == 0.0) {
         return;
     }
 
