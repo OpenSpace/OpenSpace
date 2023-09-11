@@ -29,3 +29,15 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(RenderableNodeLineExample)
+
+
+
+asset.meta = {
+  Name = "RenderableNodeLine Example asset",
+  Version = "1.0",
+  Description = [[Example of a RenderableNodeLine, that can be used to draw an line
+    between two scene graph nodes.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
