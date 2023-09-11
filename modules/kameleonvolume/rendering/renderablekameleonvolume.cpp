@@ -361,7 +361,7 @@ void RenderableKameleonVolume::load() {
 
 std::string RenderableKameleonVolume::cacheSuffix() const {
     glm::uvec3 dims = _dimensions;
-    return fmt::format(".{}.{}x{}x{}", _variable, dims[0], dims[1], dims[2]);
+    return fmt::format(".{}.{}x{}x{}", _variable.value(), dims[0], dims[1], dims[2]);
 }
 
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {

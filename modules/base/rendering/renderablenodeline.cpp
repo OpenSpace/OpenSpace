@@ -186,7 +186,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
                 "Trying to use relative offsets for start node '{}' that has no "
                 "bounding sphere. This will result in no offset. Use direct "
                 "values by setting UseRelativeOffsets to false",
-                parent()->identifier(), _start
+                parent()->identifier(), _start.value()
             ));
         }
     });
@@ -204,7 +204,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
                 "Trying to use relative offsets for end node '{}' that has no "
                 "bounding sphere. This will result in no offset. Use direct "
                 "values by setting UseRelativeOffsets to false",
-                parent()->identifier(), _end
+                parent()->identifier(), _end.value()
             ));
         }
      });
