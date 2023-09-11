@@ -9,7 +9,7 @@ local ToggleOuterPlanetaryTrails = {
   ]],
   Documentation = "Toggles the visibility of all trails further from the Sun than 67P",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 

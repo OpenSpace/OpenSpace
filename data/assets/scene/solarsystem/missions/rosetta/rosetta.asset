@@ -278,7 +278,7 @@ local FocusRosetta = {
   ]],
   Documentation = "Sets the focus of the camera on Rosetta",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 local SetupLanderRelease = {
@@ -289,7 +289,7 @@ local SetupLanderRelease = {
   ]],
   Documentation = "Jumps to the time when the Philae lander is released",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleImagePlane = {
@@ -303,7 +303,7 @@ local ToggleImagePlane = {
   ]],
   Documentation = "Toggles the visibility of the free floating image plane",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 local TogglePhilaeTrail = {
@@ -317,7 +317,7 @@ local TogglePhilaeTrail = {
   ]],
   Documentation = "Toggles the visibility of Philae's trail",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 

@@ -8,7 +8,7 @@ local FocusNewHorizons = {
   ]],
   Documentation = "Sets the focus of the camera on 'NewHorizons'",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local AimPluto = {
@@ -21,7 +21,7 @@ local AimPluto = {
   ]],
   Documentation = "Anchor at New Horizons, Aim at Pluto",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local FocusPluto = {
@@ -34,7 +34,7 @@ local FocusPluto = {
   ]],
   Documentation = "Sets the focus of the camera on 'Pluto'",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local FocusCharon = {
@@ -47,7 +47,7 @@ local FocusCharon = {
   ]],
   Documentation = "Sets the focus of the camera on 'Charon'",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleImageProjection = {
@@ -60,7 +60,7 @@ local ToggleImageProjection = {
   ]],
   Documentation = "Toggles New Horizons image projection",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local ClearImageProjections = {
@@ -72,7 +72,7 @@ local ClearImageProjections = {
   ]],
   Documentation = "Removes all image projections from Pluto and Charon",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local Approach = {
@@ -85,7 +85,7 @@ local Approach = {
   ]],
   Documentation = "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local IncreaseHeightmapPluto = {
@@ -99,7 +99,7 @@ local IncreaseHeightmapPluto = {
   ]],
   Documentation = "Increases the height map exaggeration on Pluto",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local DecreaseHeightmapPluto = {
@@ -113,7 +113,7 @@ local DecreaseHeightmapPluto = {
   ]],
   Documentation = "Decreases the height map exaggeration on Pluto",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local IncreaseHeightmapCharon = {
@@ -127,7 +127,7 @@ local IncreaseHeightmapCharon = {
   ]],
   Documentation = "Increases the height map exaggeration on Charon",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local DecreaseHeightmapCharon = {
@@ -141,7 +141,7 @@ local DecreaseHeightmapCharon = {
   ]],
   Documentation = "Decreases the height map exaggeration on Charon",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local TogglePlutoTrail = {
@@ -155,7 +155,7 @@ local TogglePlutoTrail = {
   ]],
   Documentation = "Toggles the visibility of the trail behind Pluto",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local TogglePlutoLabels = {
@@ -189,7 +189,7 @@ local TogglePlutoLabels = {
   ]],
   Documentation = "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleNewHorizonsLabels = {
@@ -205,7 +205,7 @@ local ToggleNewHorizonsLabels = {
   ]],
   Documentation = "Toggles the visibility of the labels for the New Horizons instruments",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleShadows = {
@@ -223,7 +223,7 @@ local ToggleShadows = {
   ]],
   Documentation = "Toggles the visibility of the shadow visualization of Pluto and Charon",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleNewHorizonsTrail = {
@@ -237,7 +237,7 @@ local ToggleNewHorizonsTrail = {
   ]],
   Documentation = "Toggles the trail of New Horizons",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 

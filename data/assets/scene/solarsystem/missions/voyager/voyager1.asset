@@ -249,7 +249,7 @@ local FocusVoyager1 = {
   ]],
   Documentation = "Set camera focus to Voyager 1",
   GuiPath = "/Missions/Voyager",
-  isLocal = false
+  IsLocal = false
 }
 
 

@@ -94,7 +94,7 @@ local FocusMoon = {
   ]],
   Documentation = "Set camera focus on the Moon",
   GuiPath = "/Solar System/Earth/Moon",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleMoonShading = {
@@ -108,7 +108,7 @@ local ToggleMoonShading = {
   ]],
   Documentation = "Toggles the shading of the Moon",
   GuiPath = "/Solar System/Earth/Moon",
-  isLocal = false
+  IsLocal = false
 }
 
 

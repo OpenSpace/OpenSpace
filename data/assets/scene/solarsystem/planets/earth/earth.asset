@@ -86,7 +86,7 @@ local FocusEarth = {
   ]],
   Documentation = "Set camera focus on the Earth",
   GuiPath = "/Solar System/Earth",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleSatelliteTrails = {
@@ -100,7 +100,7 @@ local ToggleSatelliteTrails = {
   ]],
   Documentation = "Toggle trails on or off for satellites around Earth",
   GuiPath = "/Solar System/Earth",
-  isLocal = false
+  IsLocal = false
 }
 
 

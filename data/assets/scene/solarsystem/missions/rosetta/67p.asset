@@ -141,7 +141,7 @@ local Focus67p = {
   ]],
   Documentation = "Sets the focus of the camera on 67P",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 local ClearImageProjections = {
@@ -152,7 +152,7 @@ local ClearImageProjections = {
   ]],
   Documentation = "Removes all image projections from 67P",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 local Toggle67pProjection = {
@@ -166,7 +166,7 @@ local Toggle67pProjection = {
   ]],
   Documentation = "Enables or disables the image projection on 67P",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 

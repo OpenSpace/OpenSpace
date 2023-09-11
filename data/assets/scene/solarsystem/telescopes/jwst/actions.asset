@@ -9,7 +9,7 @@ local ToggleLagrangianPoints = {
   ]],
   Documentation = "Toggle points and labels for the Lagrangian points for Earth Sun system",
   GuiPath = "/JWST",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleHudf = {
@@ -23,7 +23,7 @@ local ToggleHudf = {
   ]],
   Documentation = "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
   GuiPath = "/JWST",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleL2 = {
@@ -37,7 +37,7 @@ local ToggleL2 = {
   ]],
   Documentation = "Toggle L2 label, point and line",
   GuiPath = "/JWST",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleFov = {
@@ -51,7 +51,7 @@ local ToggleFov = {
   ]],
   Documentation = "Toggle James Webb Space Telecope field of view and view band",
   GuiPath = "/JWST",
-  isLocal = false
+  IsLocal = false
 }
 
 local SetupLaunch = {
@@ -63,7 +63,7 @@ local SetupLaunch = {
   ]],
   Documentation = "Set the time to the launch time of JWST",
   GuiPath = "/JWST",
-  isLocal = false
+  IsLocal = false
 }
 
 local SetupDetach = {
@@ -75,7 +75,7 @@ local SetupDetach = {
   ]],
   Documentation = "Set the time to the detach time of JWST",
   GuiPath = "/JWST",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleSunTrail = {
@@ -87,7 +87,7 @@ local ToggleSunTrail = {
   ]],
   Documentation = "Toggle JWST trail relative to the Sun",
   GuiPath = "/JWST",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleTrailsExceptMoon = {
@@ -106,7 +106,7 @@ local ToggleTrailsExceptMoon = {
   ]],
   Documentation = "Toggle all planet and moon trails, except the Moon",
   GuiPath = "/JWST",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleJwstTrails = {
@@ -124,7 +124,7 @@ local ToggleJwstTrails = {
   ]],
   Documentation = "Toggle JWST launch, cruise and L2 co-revolving orbit trails, not the Sun trail",
   GuiPath = "/JWST",
-  isLocal = false
+  IsLocal = false
 }
 
 
