@@ -1153,12 +1153,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2001-06-21.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2001 Dec 14 20:53:01",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2001-12-14.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2002 Jun 10 23:45:22",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2002-06-10.gif"
     },
@@ -1168,7 +1168,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2002-12-04.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2003 May 31 04:09:22",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2003-05-31.gif"
     },
@@ -1188,12 +1188,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2004-10-14.gif"
     },
     {
-       Name = "Hybrid Eclipse",
+      Name = "Hybrid Eclipse",
       Date = "2005 Apr 08 20:36:51",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2005-04-08.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2005 Oct 03 10:32:47",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2005-10-03.gif"
     },
@@ -1203,7 +1203,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2006-03-29.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2006 Sep 22 11:41:16",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2006-09-22.gif"
     },
@@ -1218,7 +1218,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2007-09-11.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2008 Feb 07 03:56:10",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2008-02-07.gif"
     },
@@ -1228,7 +1228,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2008-08-01.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2009 Jan 26 07:59:45",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2009-01-26.gif"
     },
@@ -1238,7 +1238,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2009-07-22.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2010 Jan 15 07:07:39",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2010-01-15.gif"
     },
@@ -1268,7 +1268,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2011-11-25.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2012 May 20 23:53:54",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2012-05-20.gif"
     },
@@ -1278,17 +1278,17 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2012-11-13.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2013 May 10 00:26:20",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2013-05-10.gif"
     },
     {
-       Name = "Hybrid Eclipse",
+      Name = "Hybrid Eclipse",
       Date = "2013 Nov 03 12:47:36",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2013-11-03.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2014 Apr 29 06:04:33",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2014-04-29.gif"
     },
@@ -1313,12 +1313,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2016-03-09.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2016 Sep 01 09:08:02",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2016-09-01.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2017 Feb 26 14:54:33",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2017-02-26.gif"
     },
@@ -1353,12 +1353,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2019-07-02.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2019 Dec 26 05:18:53",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2019-12-26.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2020 Jun 21 06:41:15",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2020-06-21.gif"
     },
@@ -1368,7 +1368,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2020-12-14.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2021 Jun 10 10:43:07",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2021-06-10.gif"
     },
@@ -1388,12 +1388,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2022-10-25.gif"
     },
     {
-       Name = "Hybrid Eclipse",
+      Name = "Hybrid Eclipse",
       Date = "2023 Apr 20 04:17:56",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2023-04-20.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2023 Oct 14 18:00:41",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2023-10-14.gif"
     },
@@ -1403,7 +1403,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2024-04-08.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2024 Oct 02 18:46:13",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2024-10-02.gif"
     },
@@ -1418,7 +1418,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2025-09-21.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2026 Feb 17 12:13:06",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2026-02-17.gif"
     },
@@ -1428,7 +1428,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2026-08-12.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2027 Feb 06 16:00:48",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2027-02-06.gif"
     },
@@ -1438,7 +1438,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2027-08-02.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2028 Jan 26 15:08:59",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2028-01-26.gif"
     },
@@ -1468,7 +1468,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2029-12-05.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2030 Jun 01 06:29:13",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2030-06-01.gif"
     },
@@ -1478,17 +1478,17 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2030-11-25.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2031 May 21 07:16:04",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2031-05-21.gif"
     },
     {
-       Name = "Hybrid Eclipse",
+      Name = "Hybrid Eclipse",
       Date = "2031 Nov 14 21:07:31",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2031-11-14.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2032 May 09 13:26:42",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2032-05-09.gif"
     },
@@ -1513,12 +1513,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2034-03-20.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2034 Sep 12 16:19:28",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2034-09-12.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2035 Mar 09 23:05:54",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2035-03-09.gif"
     },
@@ -1553,12 +1553,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2037-07-13.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2038 Jan 05 13:47:11",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2038-01-05.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2038 Jul 02 13:32:55",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2038-07-02.gif"
     },
@@ -1568,7 +1568,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2038-12-26.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2039 Jun 21 17:12:54",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2039-06-21.gif"
     },
@@ -1593,7 +1593,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2041-04-30.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2041 Oct 25 01:36:22",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2041-10-25.gif"
     },
@@ -1603,7 +1603,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2042-04-20.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2042 Oct 14 02:00:42",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2042-10-14.gif"
     },
@@ -1613,12 +1613,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2043-04-09.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2043 Oct 03 03:01:49",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2043-10-03.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2044 Feb 28 20:24:39",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2044-02-28.gif"
     },
@@ -1628,7 +1628,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2044-08-23.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2045 Feb 16 23:56:07",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2045-02-16.gif"
     },
@@ -1638,7 +1638,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2045-08-12.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2046 Feb 05 23:06:26",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2046-02-05.gif"
     },
@@ -1668,7 +1668,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2047-12-16.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2048 Jun 11 12:58:53",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2048-06-11.gif"
     },
@@ -1678,17 +1678,17 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2048-12-05.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2049 May 31 13:59:59",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2049-05-31.gif"
     },
     {
-       Name = "Hybrid Eclipse",
+      Name = "Hybrid Eclipse",
       Date = "2049 Nov 25 05:33:48",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2049-11-25.gif"
     },
     {
-       Name = "Hybrid Eclipse",
+      Name = "Hybrid Eclipse",
       Date = "2050 May 20 20:42:50",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2050-05-20.gif"
     },
@@ -1713,12 +1713,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2052-03-30.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2052 Sep 22 23:39:10",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2052-09-22.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2053 Mar 20 07:08:19",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2053-03-20.gif"
     },
@@ -1753,12 +1753,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2055-07-24.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2056 Jan 16 22:16:45",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2056-01-16.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2056 Jul 12 20:21:59",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2056-07-12.gif"
     },
@@ -1768,7 +1768,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2057-01-05.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2057 Jul 01 23:40:15",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2057-07-01.gif"
     },
@@ -1798,7 +1798,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2059-05-11.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2059 Nov 05 09:18:15",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2059-11-05.gif"
     },
@@ -1808,7 +1808,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2060-04-30.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2060 Oct 24 09:24:10",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2060-10-24.gif"
     },
@@ -1818,7 +1818,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2061-04-20.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2061 Oct 13 10:32:10",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2061-10-13.gif"
     },
@@ -1833,7 +1833,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2062-09-03.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2063 Feb 28 07:43:30",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2063-02-28.gif"
     },
@@ -1843,7 +1843,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2063-08-24.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2064 Feb 17 07:00:23",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2064-02-17.gif"
     },
@@ -1873,7 +1873,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2065-12-27.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2066 Jun 22 19:25:48",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2066-06-22.gif"
     },
@@ -1883,12 +1883,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2066-12-17.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2067 Jun 11 20:42:26",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2067-06-11.gif"
     },
     {
-       Name = "Hybrid Eclipse",
+      Name = "Hybrid Eclipse",
       Date = "2067 Dec 06 14:03:43",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2067-12-06.gif"
     },
@@ -1923,12 +1923,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2070-04-11.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2070 Oct 04 07:08:57",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2070-10-04.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2071 Mar 31 15:01:06",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2071-03-31.gif"
     },
@@ -1958,12 +1958,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2073-08-03.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2074 Jan 27 06:44:15",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2074-01-27.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2074 Jul 24 03:10:32",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2074-07-24.gif"
     },
@@ -1973,7 +1973,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2075-01-16.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2075 Jul 13 06:05:44",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2075-07-13.gif"
     },
@@ -2003,7 +2003,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2077-05-22.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2077 Nov 15 17:07:56",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2077-11-15.gif"
     },
@@ -2013,7 +2013,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2078-05-11.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2078 Nov 04 16:55:44",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2078-11-04.gif"
     },
@@ -2023,7 +2023,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2079-05-01.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2079 Oct 24 18:11:21",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2079-10-24.gif"
     },
@@ -2038,7 +2038,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2080-09-13.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2081 Mar 10 15:23:31",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2081-03-10.gif"
     },
@@ -2048,7 +2048,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2081-09-03.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2082 Feb 27 14:47:00",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2082-02-27.gif"
     },
@@ -2078,7 +2078,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2084-01-07.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2084 Jul 03 01:50:26",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2084-07-03.gif"
     },
@@ -2088,12 +2088,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2084-12-27.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2085 Jun 22 03:21:16",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2085-06-22.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2085 Dec 16 22:37:48",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2085-12-16.gif"
     },
@@ -2128,12 +2128,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2088-04-21.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2088 Oct 14 14:48:05",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2088-10-14.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2089 Apr 10 22:44:42",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2089-04-10.gif"
     },
@@ -2163,12 +2163,12 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2091-08-15.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2092 Feb 07 15:10:20",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2092-02-07.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2092 Aug 03 09:59:33",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2092-08-03.gif"
     },
@@ -2178,7 +2178,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2093-01-27.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2093 Jul 23 12:32:04",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2093-07-23.gif"
     },
@@ -2208,7 +2208,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2095-06-02.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2095 Nov 27 01:02:57",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2095-11-27.gif"
     },
@@ -2218,7 +2218,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2096-05-22.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2096 Nov 15 00:36:15",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2096-11-15.gif"
     },
@@ -2228,7 +2228,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2097-05-11.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2097 Nov 04 02:01:25",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2097-11-04.gif"
     },
@@ -2248,7 +2248,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2098-10-24.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2099 Mar 21 22:54:32",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2099-03-21.gif"
     },
@@ -2258,7 +2258,7 @@ local Timeline = {
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2099-09-14.gif"
     },
     {
-       Name = "Annular Eclipse",
+      Name = "Annular Eclipse",
       Date = "2100 Mar 10 22:28:11",
       Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2100-03-10.gif"
     },
