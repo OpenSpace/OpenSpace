@@ -48,6 +48,7 @@ set(HEADER_FILES
   rendering/renderabledisc.h
   rendering/renderablelabel.h
   rendering/renderablemodel.h
+  rendering/renderablenodearrow.h
   rendering/renderablenodeline.h
   rendering/renderableplane.h
   rendering/renderableplaneimagelocal.h
@@ -106,6 +107,7 @@ set(SOURCE_FILES
   rendering/renderabledisc.cpp
   rendering/renderablelabel.cpp
   rendering/renderablemodel.cpp
+  rendering/renderablenodearrow.cpp
   rendering/renderablenodeline.cpp
   rendering/renderableplane.cpp
   rendering/renderableplaneimagelocal.cpp
@@ -142,6 +144,8 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+  shaders/arrow_fs.glsl
+  shaders/arrow_vs.glsl
   shaders/axes_fs.glsl
   shaders/axes_vs.glsl
   shaders/disc_fs.glsl
