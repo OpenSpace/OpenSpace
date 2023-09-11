@@ -7,7 +7,7 @@ openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_b
 openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Settings.Opacity", 1.0, 2.0)]],
   Documentation = "Enables and fades in CTX layer for Mars",
   GuiPath = "/Solar System/Mars",
-  IsLocal = true
+  IsLocal = false
 }
 
 local CTXFadeOut = {
@@ -16,7 +16,7 @@ local CTXFadeOut = {
   Command = [[openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Settings.Opacity", 0.0, 2.0)]],
   Documentation = "Fade out CTX",
   GuiPath = "/Solar System/Mars",
-  IsLocal = true
+  IsLocal = false
 }
 
 local HiriseFadeIn = {
@@ -28,7 +28,7 @@ openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRIS
 openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0)]],
   Documentation = "Enables and fades in HiRise layer for Mars",
   GuiPath = "/Solar System/Mars",
-  IsLocal = true
+  IsLocal = false
 }
 
 local HiriseFadeOut = {
@@ -37,7 +37,7 @@ local HiriseFadeOut = {
   Command = [[openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0, 2.0)]],
   Documentation = "Fade out HiRISE layer for Mars",
   GuiPath = "/Solar System/Mars",
-  IsLocal = true
+  IsLocal = false
 }
 
 local LocalSetHiriseFadeIn = {
@@ -50,7 +50,7 @@ openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRIS
 openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Settings.Opacity", 1.0, 2.0)]],
   Documentation = "Enables and fades in HiRise local set layers for Mars (including height)",
   GuiPath = "/Solar System/Mars",
-  IsLocal = true
+  IsLocal = false
 }
 
 local LocalSetHiriseFadeOut = {
@@ -62,7 +62,7 @@ openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRI
 ]],
   Documentation = "Fade out HiRISE local set layer for Mars",
   GuiPath = "/Solar System/Mars",
-  IsLocal = true
+  IsLocal = false
 }
 
 

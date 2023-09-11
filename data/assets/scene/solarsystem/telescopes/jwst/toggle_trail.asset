@@ -53,7 +53,7 @@ local ToggleTrail = {
     node is currently in focus and only hide JWST trail if it is in focus (as the
     'Node') and 2) the transition direction (as 'Approaching' or 'Exiting')]],
   GuiPath = "/JWST/Events",
-  IsLocal = true
+  IsLocal = false
 }
 
 

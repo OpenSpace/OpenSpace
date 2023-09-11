@@ -26,7 +26,7 @@ local NeptuneMajorMoonsOn = {
   ]],
   Documentation = "Turn ON Neptune's major moons and their trails",
   GuiPath = "/Solar System/Neptune",
-  IsLocal = true
+  IsLocal = false
 }
 
 local NeptuneMajorMoonsOff = {
@@ -61,7 +61,7 @@ local NeptuneMajorMoonsOff = {
   ]],
   Documentation = "Turn OFF Neptune's major moons and their trails",
   GuiPath = "/Solar System/Neptune",
-  IsLocal = true
+  IsLocal = false
 }
 
 

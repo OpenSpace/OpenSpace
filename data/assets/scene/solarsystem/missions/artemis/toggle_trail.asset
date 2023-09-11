@@ -46,7 +46,7 @@ local ToggleTrail = {
     node is currently in focus and only hide Artemis trails if it is in focus (as the
     'Node') and 2) the transition direction (as 'Approaching' or 'Exiting')]],
   GuiPath = "/Artemis/Events",
-  IsLocal = true
+  IsLocal = false
 }
 
 

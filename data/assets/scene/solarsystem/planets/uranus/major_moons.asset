@@ -371,7 +371,7 @@ local UranusMajorMoonsOn = {
   ]],
   Documentation = "Turn ON Uranus's major moons and their trails",
   GuiPath = "/Solar System/Uranus",
-  IsLocal = true
+  IsLocal = false
 }
 
 local UranusMajorMoonsOff = {
@@ -406,7 +406,7 @@ local UranusMajorMoonsOff = {
   ]],
   Documentation = "Turn OFF Uranus's major moons and their trails",
   GuiPath = "/Solar System/Uranus",
-  IsLocal = true
+  IsLocal = false
 }
 
 

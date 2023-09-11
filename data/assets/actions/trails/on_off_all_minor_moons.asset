@@ -20,7 +20,7 @@ local MinorMoonsOn = {
   ]],
   Documentation = "Turn ON minor moons and their trails for all planets in the solar system",
   GuiPath = "/Solar System/Minor Moons",
-  IsLocal = true
+  IsLocal = false
 }
 
 local MinorMoonsOff = {
@@ -55,7 +55,7 @@ local MinorMoonsOff = {
   ]],
   Documentation = "Turn OFF minor moons and their trails for all planets in the solar system",
   GuiPath = "/Solar System/Minor Moons",
-  IsLocal = true
+  IsLocal = false
 }
 
 
