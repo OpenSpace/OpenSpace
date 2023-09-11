@@ -7,7 +7,7 @@ local FadeUpTrails = {
   ]],
   Documentation = "Fade up all planet and moon trails in the Scene",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 local FadeDownTrails = {
@@ -19,7 +19,7 @@ local FadeDownTrails = {
   ]],
   Documentation = "Fade down all planet and moon trails in the Scene",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 local ToggleTrails = {
@@ -48,7 +48,7 @@ local ToggleTrails = {
   ]],
   Documentation = "Toggle fade for planet and moon trails in the Scene",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 
