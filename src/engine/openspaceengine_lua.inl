@@ -165,20 +165,21 @@ namespace {
         unsigned int width = 1;
         unsigned int height = 1;
         unsigned int size = width * height;
-        std::vector<unsigned char> img(size * 3);
-        img[0] = static_cast<unsigned char>(255 * color.r);
-        img[1] = static_cast<unsigned char>(255 * color.g);
-        img[2] = static_cast<unsigned char>(255 * color.b);
+        std::vector<GLubyte> img(size * 3);
+        img[0] = static_cast<GLubyte>(255 * color.r);
+        img[1] = static_cast<GLubyte>(255 * color.g);
+        img[2] = static_cast<GLubyte>(255 * color.b);
 
-        ghoul::opengl::Texture textureFromData = ghoul::opengl::Texture(
+        using Texture = ghoul::opengl::Texture;
+        std::unique_ptr<Texture> textureFromData = std::make_unique<Texture>(
             reinterpret_cast<void*>(img.data()),
             glm::uvec3(width, height, 1),
             GL_TEXTURE_2D,
-            ghoul::opengl::Texture::Format::RGB
+            Texture::Format::RGB
         );
 
         try {
-            ghoul::io::TextureWriter::ref().saveTexture(textureFromData, fileName.string());
+            ghoul::io::TextureWriter::ref().saveTexture(*textureFromData, fileName.string());
         }
         catch (const ghoul::io::TextureWriter::MissingWriterException& e) {
             // This should not happen, as we know .png is a supported format
