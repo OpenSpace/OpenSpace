@@ -58,11 +58,14 @@ private:
     properties::StringProperty _JSONPath;
     properties::StringProperty _startTime;
     properties::IntProperty _resolution;
-    properties::Vec3Property _color;
+    properties::Vec3Property _lineColor;
+    properties::Vec3Property _pointColor;
     properties::FloatProperty _lineWidth;
+    properties::FloatProperty _pointSize;
     properties::FloatProperty _cutoff;
     properties::BoolProperty _renderFullTrail;
     properties::OptionProperty _kernelSize;
+    properties::OptionProperty _renderingMode;
 
     struct Feature {
         double _lat, _lon;
@@ -78,7 +81,8 @@ private:
     GLuint _quadVbo = 0;
     GeodeticPatch _bounds;
     glm::ivec2 _rendertargetDimensions;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _lineProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _pointProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program2;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _texture2;

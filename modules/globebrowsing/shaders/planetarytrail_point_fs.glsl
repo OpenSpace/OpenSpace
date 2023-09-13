@@ -31,8 +31,9 @@ in VertexData {
 } fs_in;
 
 Fragment getFragment() {
+  float fact = 1.0 - smoothstep(0.0, 1.0, length(gl_PointCoord - 0.5));
   Fragment frag;
-  frag.color = vec4(color, fs_in.opacity);
+  frag.color = vec4(color, fs_in.opacity * fact);
   frag.disableLDR2HDR = true;
   return frag;
 }
