@@ -1,0 +1,35 @@
+local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local data = asset.require('../total_data')
+
+
+
+local Layer = {
+  Identifier = "Total-2006-03-29",
+  Enabled = false,
+  File = data.path .. "2006-03-29.geojson",
+  HeightOffset = 2000.0,
+  DefaultProperties = {
+    LineWidth = 2.0,
+    Extrude = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Layer)
+end)
+
+
+
+asset.meta = {
+  Name = "Total 2006-03-29",
+  Version = "1.0",
+  Description = "Total eclipse map for 2006-03-29",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

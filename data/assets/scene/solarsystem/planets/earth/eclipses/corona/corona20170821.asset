@@ -1,0 +1,73 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local videos = asset.syncedResource({
+  Name = "Eclipse Corona Video",
+  Type = "HttpSynchronization",
+  Identifier = "earth-eclipse-corona",
+  Version = 1
+})
+
+
+local Plane = {
+  Identifier = "CoronaVideoPlane",
+  Parent = transforms.SunIAU.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 1.57, 0.0, 0.45 }
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 30.3
+    }
+  },
+  Renderable = {
+    Type = "RenderableVideoPlane",
+    Enabled = false,
+    MirrorBackside = true,
+    Size = 30000000,
+    Video = videos .. "corona20170821_0171.mp4",
+    PlaybackMode = "MapToSimulationTime",
+    StartTime = "2017 08 21 00:00:00",
+    EndTime = "2017 08 21 23:59:59",
+  },
+  GUI = {
+    Name = "Sun Corona",
+    Path = "/Solar System/Sun"
+  },
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Plane)
+
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017 AUG 21 00:00:00",
+    [[openspace.setPropertyValueSingle("Scene.CoronaVideoPlane.Renderable.Enabled", true)]],
+    [[openspace.setPropertyValueSingle("Scene.CoronaVideoPlane.Renderable.Enabled", false)]]
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017 AUG 21 23:59:59",
+    [[openspace.setPropertyValueSingle("Scene.CoronaVideoPlane.Renderable.Enabled", false)]],
+    [[openspace.setPropertyValueSingle("Scene.CoronaVideoPlane.Renderable.Enabled", true)]]
+  )
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Plane)
+end)
+
+asset.export(Plane)
+
+
+
+asset.meta = {
+  Name = "Corona 2017-08-21",
+  Version = "1.0",
+  Description = "An SDO video of the Sun for the day 2017-08-21",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
