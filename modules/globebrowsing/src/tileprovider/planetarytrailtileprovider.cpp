@@ -50,6 +50,12 @@ namespace {
         Thirteen = 13
     };
 
+    enum class RenderingMode {
+        Lines = 0,
+        Points,
+        LinesPoints
+    };
+
     constexpr openspace::properties::Property::PropertyInfo JSONPathInfo = {
         "JSON",
         "JSON",
@@ -72,10 +78,17 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "This value determines the RGB color for the planetary trail",
+    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+        "LineColor",
+        "Line Color",
+        "This value determines the RGB color of the lines composing the planetary trail",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PointColorInfo = {
+        "PointColor",
+        "Point Color",
+        "This value determines the RGB color of the points composing the planetary trail",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -90,7 +103,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width planetary trail.",
+        "This value specifies the line width of the planetary trail.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
+        "PointSize",
+        "Point Size",
+        "This value specifies the point size of the planetary trail.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -111,6 +131,15 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+        "Rendering",
+        "Rendering Mode",
+        "Determines how the trail should be rendered to the screen. If 'Lines' is "
+        "selected, only the line part is visible, if 'Points' is selected, only the "
+        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(PlanetaryTrailTileProvider)]] Parameters {
         // [[codegen::verbatim(JSONPathInfo.description)]]
         std::string JSON;
@@ -124,11 +153,17 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
+        // [[codegen::verbatim(PointSizeInfo.description)]]
+        std::optional<float> pointSize;
+
         // [[codegen::verbatim(CutoffInfo.description)]]
         std::optional<float> cutoff;
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        // [[codegen::verbatim(LineColorInfo.description)]]
+        std::optional<glm::vec3> lineColor [[codegen::color()]];
+
+        // [[codegen::verbatim(PointColorInfo.description)]]
+        std::optional<glm::vec3> pointColor [[codegen::color()]];
 
         // [[codegen::verbatim(RenderFullTrailInfo.description)]]
         std::optional<bool> renderFullTrail;
@@ -141,6 +176,14 @@ namespace {
         };
         // [[codegen::verbatim(KernelSizeInfo.description)]]
         std::optional<KernelSize> kernelSize;
+
+        enum class [[codegen::map(RenderingMode)]] RenderingMode {
+            Lines,
+            Points,
+            LinesPoints [[codegen::key("Lines+Points")]]
+        };
+        // [[codegen::verbatim(RenderingModeInfo.description)]]
+        std::optional<RenderingMode> renderingMode [[codegen::key("RenderingMode")]];
     };
 
 #include "planetarytrailtileprovider_codegen.cpp"
@@ -152,12 +195,18 @@ PlanetaryTrailTileProvider::PlanetaryTrailTileProvider(const ghoul::Dictionary& 
     _JSONPath(JSONPathInfo),
     _startTime(StartTimeInfo),
     _resolution(ResolutionInfo, 4096, 256, OpenGLCap.max2DTextureSize()),
-    _color(ColorInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(1.f)),
+    _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(1.f)),
+    _pointColor(PointColorInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(1.f)),
     _lineWidth(LineWidthInfo, 10.f, 1.f, 1000.f),
+    _pointSize(PointSizeInfo, 10.f, 1.f, 1000.f),
     _cutoff(CutoffInfo, 30.f, 0.f, 3600.f, 1.f),
     _renderFullTrail(RenderFullTrailInfo, false),
     _kernelSize(KernelSizeInfo,
         openspace::properties::OptionProperty::DisplayType::Dropdown),
+    _renderingMode(
+        RenderingModeInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    ),
     _start(0.0),
     _fbo(0),
     _vao(0),
@@ -176,10 +225,15 @@ PlanetaryTrailTileProvider::PlanetaryTrailTileProvider(const ghoul::Dictionary& 
     addProperty(_resolution);
     _resolution.setReadOnly(true);
 
-    _color.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_color);
+    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_lineColor);
+
+    _pointColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_pointColor);
 
     addProperty(_lineWidth);
+
+    addProperty(_pointSize);
 
     addProperty(_cutoff);
 
@@ -190,19 +244,32 @@ PlanetaryTrailTileProvider::PlanetaryTrailTileProvider(const ghoul::Dictionary& 
         { static_cast<int>(KernelSize::Five), "5" },
         { static_cast<int>(KernelSize::Nine), "9" },
         { static_cast<int>(KernelSize::Thirteen), "13" },
-        });
+    });
     addProperty(_kernelSize);
+
+    _renderingMode.addOptions({
+        { static_cast<int>(RenderingMode::Lines), "Lines" },
+        { static_cast<int>(RenderingMode::Points), "Points" },
+        { static_cast<int>(RenderingMode::LinesPoints), "Lines+Points" }
+    });
+    addProperty(_renderingMode);
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _JSONPath = p.JSON;
     _startTime = p.startTime;
     _resolution = p.resolution.value_or(_resolution);
-    _color = p.color.value_or(_color);
+    _lineColor = p.lineColor.value_or(_lineColor);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
+    _pointColor = p.pointColor.value_or(_pointColor);
+    _pointSize = p.pointSize.value_or(_pointSize);
     _cutoff = p.cutoff.value_or(_cutoff);
     _renderFullTrail = p.renderFullTrail.value_or(_renderFullTrail);
     if (p.kernelSize.has_value()) {
         _kernelSize = static_cast<int>(codegen::map<KernelSize>(*p.kernelSize));
+    }
+
+    if (p.renderingMode.has_value()) {
+        _renderingMode = static_cast<int>(codegen::map<RenderingMode>(*p.renderingMode));
     }
 }
 
@@ -264,11 +331,17 @@ void PlanetaryTrailTileProvider::internalInitialize() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    _program = global::renderEngine->buildRenderProgram(
-        "PlanetaryTrailProgram",
+    _lineProgram = global::renderEngine->buildRenderProgram(
+        "PlanetaryTrailLineProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/planetarytrail_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/planetarytrail_fs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/planetarytrail_gs.glsl")
+    );
+
+    _pointProgram = global::renderEngine->buildRenderProgram(
+        "PlanetaryTrailLineProgram",
+        absPath("${MODULE_GLOBEBROWSING}/shaders/planetarytrail_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/planetarytrail_point_fs.glsl")
     );
 
     const double aspect = halfSizeLon / halfSizeLat;
@@ -537,13 +610,8 @@ void PlanetaryTrailTileProvider::update() {
     glClearColor(.0f, .0f, .0f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    _program->activate();
-    _program->setUniform("viewport",
-        glm::vec2(_rendertargetDimensions.x, _rendertargetDimensions.y));
-    _program->setUniform("lineWidth", _lineWidth);
-    _program->setUniform("nPoints", static_cast<GLint>(points.size()-1));
-    _program->setUniform("color", _color);
-    _program->setUniform("projectionMatrix", projection);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glBindVertexArray(_vao);
 
@@ -554,7 +622,32 @@ void PlanetaryTrailTileProvider::update() {
         points.data(),
         GL_DYNAMIC_DRAW
     );
-    glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, points.size());
+
+    if (_renderingMode == static_cast<int>(RenderingMode::Lines) ||
+        _renderingMode == static_cast<int>(RenderingMode::LinesPoints)) {
+        _lineProgram->activate();
+        _lineProgram->setUniform("viewport",
+            glm::vec2(_rendertargetDimensions.x, _rendertargetDimensions.y));
+        _lineProgram->setUniform("lineWidth", _lineWidth);
+        _lineProgram->setUniform("nPoints", static_cast<GLint>(points.size() - 1));
+        _lineProgram->setUniform("color", _lineColor);
+        _lineProgram->setUniform("projectionMatrix", projection);
+        glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, points.size());
+    }
+
+    if (_renderingMode == static_cast<int>(RenderingMode::Points) ||
+        _renderingMode == static_cast<int>(RenderingMode::LinesPoints)
+        ) {
+        _pointProgram->activate();
+        _pointProgram->setUniform("color", _pointColor);
+        _pointProgram->setUniform("projectionMatrix", projection);
+
+        glPointSize(static_cast<GLfloat>(_pointSize));
+        // -2 to leave out leaves out the last point which
+        // is an interpolated point and not a real one +
+        // the duplication of that point necessary for line-rendering
+        glDrawArrays(GL_POINTS, 0, points.size() - 2);
+    }
 
     if (_kernelSize.value() != static_cast<int>(KernelSize::Disabled)) {
         // Two-pass blur
