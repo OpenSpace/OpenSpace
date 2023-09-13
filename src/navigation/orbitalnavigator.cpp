@@ -1102,6 +1102,7 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
 
     const bool changedAnchor = _anchorNode != anchorNode;
     _anchorNode = anchorNode;
+    _newAnchorName = anchorNode->identifier();
 
     // Need to reset velocities after the actual switch in anchor node,
     // since the reset behavior depends on the anchor node.
@@ -2096,6 +2097,20 @@ double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
     return distFromCenterToSurface > 0.0 ?
         glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
         1.0;
+}
+
+void OrbitalNavigator::updateAnchor() {
+    if (!_newAnchorName.data().empty()) {
+        setAnchorNode(_newAnchorName);
+    }
+}
+
+void OrbitalNavigator::postFrameCleanup() {
+    _newAnchorName = "";
+}
+
+std::vector<Syncable*> OrbitalNavigator::syncables() {
+    return { &_newAnchorName };
 }
 
 scripting::LuaLibrary OrbitalNavigator::luaLibrary() {

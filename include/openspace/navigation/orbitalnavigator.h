@@ -39,6 +39,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
 #include <optional>
@@ -150,6 +151,10 @@ public:
      */
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
+    void updateAnchor();
+    void postFrameCleanup();
+    std::vector<Syncable*> syncables();
+
     /**
     * \return the Lua library that contains all Lua functions available to affect the
     * OrbitalNavigator
@@ -247,6 +252,7 @@ private:
     WebsocketCameraStates _websocketStates;
     ScriptCameraStates _scriptStates;
 
+    SyncData<std::string> _newAnchorName;
     const SceneGraphNode* _anchorNode = nullptr;
     const SceneGraphNode* _aimNode = nullptr;
 
