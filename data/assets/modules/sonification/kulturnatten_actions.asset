@@ -22,16 +22,20 @@ local enable_cosmicplanet = {
 
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled", true)
 	  openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
+	  openspace.setPropertyValueSingle("Scene.Earth.Renderable.Enabled", true)
   
     openspace.setPropertyValueSingle("Scene.Stars.Renderable.Enabled", true)
 
     openspace.setPropertyValueSingle("Scene.birds_consensus_species.Renderable.Enabled", false)
     openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", false)
+	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", false)
+	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Renderable.Enabled", false)
 
     --False
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.Points-Example.Enabled", false)
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", false);
     openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false);
+	
 
   ]],
   Documentation = "Enables the planets sonification, turn off the cosmic points and jumps to Earth",
@@ -142,7 +146,7 @@ local enable_cosmicdata = {
     openspace.setPropertyValueSingle("Scene.TullyGalaxiesImages.Renderable.Enabled", false)
     openspace.setPropertyValueSingle("Scene.Quasars.Renderable.Enabled", false)
 
-    openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", true)
+   
 
     --openspace.setPropertyValueSingle("Scene.birds_consensus_species.Renderable.Enabled", true)
     --openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", true)
@@ -170,11 +174,10 @@ local enable_cosmicdata = {
 	
 	
 	
-	
-	
-	
     --openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
     openspace.fadeOut("Scene.ImageConstellation*.Renderable")
+	
+	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", true)
 	
 
   ]],

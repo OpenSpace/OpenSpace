@@ -61,10 +61,6 @@
     "cosmic_view/wandriletest/consensus_species",
     "cosmic_view/wandriletest/sequence_lineage",
     "cosmic_view/wandriletest/sequences",
-    "cosmic_view/mMDS_xyz_sphere_Galoan/clades",
-    "cosmic_view/mMDS_xyz_sphere_Galoan/consensus_species",
-    "cosmic_view/mMDS_xyz_sphere_Galoan/sequence_lineage",
-    "cosmic_view/mMDS_xyz_sphere_Galoan/sequences",
     "events/toggle_image_trail",
     "modules/sonification/cosmic",
     "modules/sonification/earth_cosmic_actions",
@@ -387,7 +383,6 @@
       "type": "setPropertyValueSingle",
       "value": "50.0"
     }
-	
   ],
   "time": {
     "is_paused": true,
