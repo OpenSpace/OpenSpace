@@ -51,7 +51,18 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
-  "properties": [],
+  "properties": [
+    {
+      "name": "Scene.MoonOrbitalPlaneRadialGrid.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.EarthEclipticRadialGrid.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    }
+  ],
   "time": {
     "type": "absolute",
     "value": "2023 Oct 14 18:00:41"
