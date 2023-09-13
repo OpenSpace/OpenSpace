@@ -6,14 +6,17 @@ local speck_sequences = asset.localResource("sequences/sequences.speck")
 local cmap_sequences_taxon = asset.localResource("sequences/sequences_taxon.cmap")
 local texture_file = asset.localResource("point3A.png")
 
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
 -- Set some parameters for OpenSpace settings
-local scale_factor = 105.0
-local text_size = 2.75
+local scale_factor = 150.0
+local text_size = 6
 local text_min_size = 15
 local text_max_size = 30
 
 local birds_Sphere_projection_Families_sequences = {
     Identifier = "birds_Sphere_projection_Families_sequences",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -23,7 +26,7 @@ local birds_Sphere_projection_Families_sequences = {
         Opacity = 1.0,
         ScaleFactor = scale_factor,
         File = speck_sequences,
-        DrawLabels = false,
+        DrawLabels = true,
         Unit = "Km",
         Texture = texture_file,
         BillboardMinMaxSize = { 0.0, 25.0 },

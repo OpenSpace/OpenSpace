@@ -17,14 +17,17 @@ local label_lineage_32 = asset.localResource("sequences/lineage_32.label")
 local cmap_lineage_32 = asset.localResource("sequences/lineage_32.cmap")
 local texture_file = asset.localResource("point3A.png")
 
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
 -- Set some parameters for OpenSpace settings
-local scale_factor = 105.0
-local text_size = 2.75
+local scale_factor = 140.0
+local text_size = 6
 local text_min_size = 15
 local text_max_size = 30
 
 local birds_mMDS_xyz_sphere_3Dprojection_lineage_27 = {
     Identifier = "birds_mMDS_xyz_sphere_3Dprojection_lineage_27",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -56,6 +59,7 @@ local birds_mMDS_xyz_sphere_3Dprojection_lineage_27 = {
 
 local birds_mMDS_xyz_sphere_3Dprojection_lineage_28 = {
     Identifier = "birds_mMDS_xyz_sphere_3Dprojection_lineage_28",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -87,6 +91,7 @@ local birds_mMDS_xyz_sphere_3Dprojection_lineage_28 = {
 
 local birds_mMDS_xyz_sphere_3Dprojection_lineage_29 = {
     Identifier = "birds_mMDS_xyz_sphere_3Dprojection_lineage_29",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -96,7 +101,7 @@ local birds_mMDS_xyz_sphere_3Dprojection_lineage_29 = {
         Opacity = 1.0,
         ScaleFactor = scale_factor,
         File = speck_sequences,
-        DrawLabels = false,
+        DrawLabels = true,
         LabelFile = label_lineage_29,
         TextColor = { 1.0, 1.0, 1.0 },
         TextSize = text_size,
@@ -118,6 +123,7 @@ local birds_mMDS_xyz_sphere_3Dprojection_lineage_29 = {
 
 local birds_mMDS_xyz_sphere_3Dprojection_lineage_30 = {
     Identifier = "birds_mMDS_xyz_sphere_3Dprojection_lineage_30",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -149,6 +155,7 @@ local birds_mMDS_xyz_sphere_3Dprojection_lineage_30 = {
 
 local birds_mMDS_xyz_sphere_3Dprojection_lineage_31 = {
     Identifier = "birds_mMDS_xyz_sphere_3Dprojection_lineage_31",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -180,6 +187,7 @@ local birds_mMDS_xyz_sphere_3Dprojection_lineage_31 = {
 
 local birds_mMDS_xyz_sphere_3Dprojection_lineage_32 = {
     Identifier = "birds_mMDS_xyz_sphere_3Dprojection_lineage_32",
+	Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },

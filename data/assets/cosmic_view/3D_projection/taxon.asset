@@ -1,0 +1,177 @@
+-- Cosmic View of Life on Earth / Birds: Larus canus DNA sequence data
+-- This file is auto-generated in the make_asset() function inside slice_by_taxon.py
+-- Author: Brian Abbott <abbott@amnh.org>
+
+-- Set file paths
+local speck_anas_platyrhynchos = asset.localResource("taxon/anas_platyrhynchos.speck")
+local speck_cardinalis_cardinalis = asset.localResource("taxon/cardinalis_cardinalis.speck")
+local speck_columba_livia = asset.localResource("taxon/columba_livia.speck")
+local speck_haliaeetus_leucocephalus = asset.localResource("taxon/haliaeetus_leucocephalus.speck")
+local speck_larus_canus = asset.localResource("taxon/larus_canus.speck")
+local speck_turdus_migratorius = asset.localResource("taxon/turdus_migratorius.speck")
+
+local texture_file = asset.localResource("point3A.png")
+
+-- Set some parameters for OpenSpace settings
+local scale_factor = 105.0
+local text_size = 2.75
+local text_min_size = 15
+local text_max_size = 30
+
+local birds_3D_projection_anas_platyrhynchos = {
+    Identifier = "birds_3D_projection_anas_platyrhynchos",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 1.000000, 1.000000, 0.623529 },	-- Lemon Yellow
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_anas_platyrhynchos,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Anas Platyrhynchos",
+        Path = "/Birds/3D_projection/Taxon",
+    }
+}
+
+local birds_3D_projection_cardinalis_cardinalis = {
+    Identifier = "birds_3D_projection_cardinalis_cardinalis",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.576471, 0.874510, 0.721569 },	-- Sea Green
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_cardinalis_cardinalis,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Cardinalis Cardinalis",
+        Path = "/Birds/3D_projection/Taxon",
+    }
+}
+
+local birds_3D_projection_columba_livia = {
+    Identifier = "birds_3D_projection_columba_livia",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.764706, 0.803922, 0.90196 },	-- Periwinkle
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_columba_livia,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Columba Livia",
+        Path = "/Birds/3D_projection/Taxon",
+    }
+}
+
+local birds_3D_projection_haliaeetus_leucocephalus = {
+    Identifier = "birds_3D_projection_haliaeetus_leucocephalus",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.788235, 0.627451, 0.862745 },	-- Wisteria
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_haliaeetus_leucocephalus,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Haliaeetus Leucocephalus",
+        Path = "/Birds/3D_projection/Taxon",
+    }
+}
+
+local birds_3D_projection_larus_canus = {
+    Identifier = "birds_3D_projection_larus_canus",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 1.000000, 0.650980, 0.788235 },	-- Carnation Pink
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_larus_canus,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Larus Canus",
+        Path = "/Birds/3D_projection/Taxon",
+    }
+}
+
+local birds_3D_projection_turdus_migratorius = {
+    Identifier = "birds_3D_projection_turdus_migratorius",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.619608, 0.356863, 0.25098 },	-- Sepia
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_turdus_migratorius,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Turdus Migratorius",
+        Path = "/Birds/3D_projection/Taxon",
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(birds_3D_projection_anas_platyrhynchos)
+    openspace.addSceneGraphNode(birds_3D_projection_cardinalis_cardinalis)
+    openspace.addSceneGraphNode(birds_3D_projection_columba_livia)
+    openspace.addSceneGraphNode(birds_3D_projection_haliaeetus_leucocephalus)
+    openspace.addSceneGraphNode(birds_3D_projection_larus_canus)
+    openspace.addSceneGraphNode(birds_3D_projection_turdus_migratorius)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(birds_3D_projection_anas_platyrhynchos)
+    openspace.removeSceneGraphNode(birds_3D_projection_cardinalis_cardinalis)
+    openspace.removeSceneGraphNode(birds_3D_projection_columba_livia)
+    openspace.removeSceneGraphNode(birds_3D_projection_haliaeetus_leucocephalus)
+    openspace.removeSceneGraphNode(birds_3D_projection_larus_canus)
+    openspace.removeSceneGraphNode(birds_3D_projection_turdus_migratorius)
+end)
+
+asset.export(birds_3D_projection_anas_platyrhynchos)
+asset.export(birds_3D_projection_cardinalis_cardinalis)
+asset.export(birds_3D_projection_columba_livia)
+asset.export(birds_3D_projection_haliaeetus_leucocephalus)
+asset.export(birds_3D_projection_larus_canus)
+asset.export(birds_3D_projection_turdus_migratorius)
+

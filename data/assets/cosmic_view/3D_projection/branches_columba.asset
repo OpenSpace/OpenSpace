@@ -1,0 +1,151 @@
+-- Cosmic View of Life on Earth / Birds: Traced lineage DNA sequence data for taxon Columba
+-- This file is auto-generated in the make_asset() function inside slice_by_lineage.py
+-- Author: Brian Abbott <abbott@amnh.org>
+
+-- Set file paths
+local speck_27001_aves = asset.localResource("lineage_branches/columba/27001_aves.speck")
+local speck_28001_neognathae = asset.localResource("lineage_branches/columba/28001_neognathae.speck")
+local speck_29010_columbiformes = asset.localResource("lineage_branches/columba/29010_columbiformes.speck")
+local speck_30030_columbidae = asset.localResource("lineage_branches/columba/30030_columbidae.speck")
+local speck_31239_columba = asset.localResource("lineage_branches/columba/31239_columba.speck")
+
+local texture_file = asset.localResource("point3A.png")
+
+-- Set some parameters for OpenSpace settings
+local scale_factor = 105.0
+local text_size = 2.75
+local text_min_size = 15
+local text_max_size = 30
+
+local birds_3D_projection_27001_aves_columba = {
+    Identifier = "birds_3D_projection_27001_aves_columba",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 1.000000, 0.796078, 0.643137 },	-- Peach
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_27001_aves,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "27001 Aves",
+        Path = "/Birds/3D_projection/Lineage Branches/Columba",
+    }
+}
+
+local birds_3D_projection_28001_neognathae_columba = {
+    Identifier = "birds_3D_projection_28001_neognathae_columba",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.756863, 0.329412, 0.756863 },	-- Fuchsia
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_28001_neognathae,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "28001 Neognathae",
+        Path = "/Birds/3D_projection/Lineage Branches/Columba",
+    }
+}
+
+local birds_3D_projection_29010_columbiformes_columba = {
+    Identifier = "birds_3D_projection_29010_columbiformes_columba",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.886275, 0.611765, 0.823529 },	-- Orchid
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_29010_columbiformes,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "29010 Columbiformes",
+        Path = "/Birds/3D_projection/Lineage Branches/Columba",
+    }
+}
+
+local birds_3D_projection_30030_columbidae_columba = {
+    Identifier = "birds_3D_projection_30030_columbidae_columba",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.309804, 0.411765, 0.77647 },	-- Indigo
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_30030_columbidae,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "30030 Columbidae",
+        Path = "/Birds/3D_projection/Lineage Branches/Columba",
+    }
+}
+
+local birds_3D_projection_31239_columba_columba = {
+    Identifier = "birds_3D_projection_31239_columba_columba",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.462745, 0.843137, 0.917647 },	-- Sky Blue
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_31239_columba,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "31239 Columba",
+        Path = "/Birds/3D_projection/Lineage Branches/Columba",
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(birds_3D_projection_27001_aves_columba)
+    openspace.addSceneGraphNode(birds_3D_projection_28001_neognathae_columba)
+    openspace.addSceneGraphNode(birds_3D_projection_29010_columbiformes_columba)
+    openspace.addSceneGraphNode(birds_3D_projection_30030_columbidae_columba)
+    openspace.addSceneGraphNode(birds_3D_projection_31239_columba_columba)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(birds_3D_projection_27001_aves_columba)
+    openspace.removeSceneGraphNode(birds_3D_projection_28001_neognathae_columba)
+    openspace.removeSceneGraphNode(birds_3D_projection_29010_columbiformes_columba)
+    openspace.removeSceneGraphNode(birds_3D_projection_30030_columbidae_columba)
+    openspace.removeSceneGraphNode(birds_3D_projection_31239_columba_columba)
+end)
+
+asset.export(birds_3D_projection_27001_aves_columba)
+asset.export(birds_3D_projection_28001_neognathae_columba)
+asset.export(birds_3D_projection_29010_columbiformes_columba)
+asset.export(birds_3D_projection_30030_columbidae_columba)
+asset.export(birds_3D_projection_31239_columba_columba)
+

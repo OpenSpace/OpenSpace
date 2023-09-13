@@ -1,13 +1,19 @@
 {
   "assets": [
     "base",
+    "cosmic_view/3D_projection/branches_anas",
+    "cosmic_view/3D_projection/branches_columba",
+    "cosmic_view/3D_projection/clades",
+    "cosmic_view/3D_projection/consensus_species",
+    "cosmic_view/3D_projection/sequence_lineage",
+    "cosmic_view/3D_projection/sequences",
+    "cosmic_view/3D_projection/taxon",
     "cosmic_view/birds_UMAP/branches_anas",
     "cosmic_view/birds_UMAP/clades",
     "cosmic_view/birds_UMAP/consensus_species",
     "cosmic_view/birds_UMAP/sequence_lineage",
     "cosmic_view/birds_UMAP/sequences",
     "cosmic_view/birds_UMAP/taxon",
-    "cosmic_view/birds_UMAP/wandrileTest/consensus_species",
     "cosmic_view/consensus",
     "cosmic_view/density_volumes/volume",
     "cosmic_view/endangered",
@@ -25,11 +31,19 @@
     "cosmic_view/mMDS_xyz_3Dprojection/consensus_species",
     "cosmic_view/mMDS_xyz_3Dprojection/sequence_lineage",
     "cosmic_view/mMDS_xyz_3Dprojection/sequences",
+    "cosmic_view/mMDS_xyz_Families/clades",
+    "cosmic_view/mMDS_xyz_Families/consensus_species",
+    "cosmic_view/mMDS_xyz_Families/sequence_lineage",
+    "cosmic_view/mMDS_xyz_Families/sequences",
     "cosmic_view/mMDS_xyz_sphere_3Dprojection/branches_anas",
     "cosmic_view/mMDS_xyz_sphere_3Dprojection/clades",
     "cosmic_view/mMDS_xyz_sphere_3Dprojection/consensus_species",
     "cosmic_view/mMDS_xyz_sphere_3Dprojection/sequence_lineage",
     "cosmic_view/mMDS_xyz_sphere_3Dprojection/sequences",
+    "cosmic_view/mMDS_xyz_sphere_V2/clades",
+    "cosmic_view/mMDS_xyz_sphere_V2/consensus_species",
+    "cosmic_view/mMDS_xyz_sphere_V2/sequence_lineage",
+    "cosmic_view/mMDS_xyz_sphere_V2/sequences",
     "cosmic_view/mutations",
     "cosmic_view/Sphere_projection_Families/consensus_species",
     "cosmic_view/Sphere_projection_Families/sequences",
@@ -39,6 +53,18 @@
     "cosmic_view/UMAP_xyz_3Dprojection/consensus_species",
     "cosmic_view/UMAP_xyz_3Dprojection/sequence_lineage",
     "cosmic_view/UMAP_xyz_3Dprojection/sequences",
+    "cosmic_view/UMAP_xyz_CenteredOnRoot/clades",
+    "cosmic_view/UMAP_xyz_CenteredOnRoot/consensus_species",
+    "cosmic_view/UMAP_xyz_CenteredOnRoot/sequence_lineage",
+    "cosmic_view/UMAP_xyz_CenteredOnRoot/sequences",
+    "cosmic_view/wandriletest/clades",
+    "cosmic_view/wandriletest/consensus_species",
+    "cosmic_view/wandriletest/sequence_lineage",
+    "cosmic_view/wandriletest/sequences",
+    "cosmic_view/mMDS_xyz_sphere_Galoan/clades",
+    "cosmic_view/mMDS_xyz_sphere_Galoan/consensus_species",
+    "cosmic_view/mMDS_xyz_sphere_Galoan/sequence_lineage",
+    "cosmic_view/mMDS_xyz_sphere_Galoan/sequences",
     "events/toggle_image_trail",
     "modules/sonification/cosmic",
     "modules/sonification/earth_cosmic_actions",
@@ -322,25 +348,46 @@
       "value": "100000.00"
     },
     {
-      "name": "Scene.birds_lineage_29.Renderable.RenderOption",
-      "type": "setPropertyValueSingle",
-      "value": "1.000000"
-    },
-    {
-      "name": "Scene.birds_lineage_31.Renderable.RenderOption",
-      "type": "setPropertyValueSingle",
-      "value": "1.000000"
-    },
-    {
-      "name": "Scene.birds_lineage_27.Renderable.RenderOption",
-      "type": "setPropertyValueSingle",
-      "value": "1.000000"
-    },
-    {
       "name": "Modules.Sonification.SurroundMode",
       "type": "setPropertyValueSingle",
       "value": "1.000000"
+    },
+    {
+      "name": "Scene.birds_columba_livia_center.Renderable.ScaleFactor",
+      "type": "setPropertyValueSingle",
+      "value": "140.000000"
+    },
+    {
+      "name": "Scene.birds_columba_livia_center.Scale.Scale",
+      "type": "setPropertyValueSingle",
+      "value": "0.000001"
+    },
+    {
+      "name": "Scene.birds_columba_livia_center.Renderable.EnablePixelSizeControl",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Modules.CefWebGui.GuiScale",
+      "type": "setPropertyValueSingle",
+      "value": "1.0"
+    },
+    {
+      "name": "Scene.birds_UMAP_xyz_CenteredOnRoot_lineage_29.Scale.Scale",
+      "type": "setPropertyValueSingle",
+      "value": "50.0"
+    },
+    {
+      "name": "Scene.birds_UMAP_xyz_CenteredOnRoot_lineage_28.Scale.Scale",
+      "type": "setPropertyValueSingle",
+      "value": "50.0"
+    },
+    {
+      "name": "Scene.birds_UMAP_xyz_CenteredOnRoot_lineage_30.Scale.Scale",
+      "type": "setPropertyValueSingle",
+      "value": "50.0"
     }
+	
   ],
   "time": {
     "is_paused": true,

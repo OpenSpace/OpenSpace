@@ -1,0 +1,47 @@
+-- Cosmic View of Life on Earth / Birds: Anas DNA sequence data (code 33084)
+-- This file is auto-generated in the make_asset() function inside slice_by_clade.py
+-- Author: Brian Abbott <abbott@amnh.org>
+
+-- Set file paths
+local speck_33084_anas = asset.localResource("clades/33084_anas.speck")
+
+local texture_file = asset.localResource("point3A.png")
+
+-- Set some parameters for OpenSpace settings
+local scale_factor = 105.0
+local text_size = 2.75
+local text_min_size = 15
+local text_max_size = 30
+
+local birds_wandriletest_clades_33084_anas = {
+    Identifier = "birds_wandriletest_clades_33084_anas",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 1.000000, 1.000000, 0.623529 },	-- Lemon Yellow
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_33084_anas,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "33084 Anas",
+        Path = "/Birds/wandriletest/Clades",
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(birds_wandriletest_clades_33084_anas)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(birds_wandriletest_clades_33084_anas)
+end)
+
+asset.export(birds_wandriletest_clades_33084_anas)
+
