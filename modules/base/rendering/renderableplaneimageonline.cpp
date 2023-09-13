@@ -134,7 +134,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         if (imageFile.corrupted) {
             LERRORC(
                 "ScreenSpaceImageOnline",
-                fmt::format("Error loading image from URL '{}'", _texturePath)
+                fmt::format("Error loading image from URL '{}'", _texturePath.value())
             );
             return;
         }

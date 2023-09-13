@@ -414,7 +414,7 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
         LDEBUG(fmt::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
             "minimal value of {}. This might lead to unexpected results",
-            node->identifier(), _minValidBoundingSphere
+            node->identifier(), _minValidBoundingSphere.value()
         ));
         result = _minValidBoundingSphere;
     }

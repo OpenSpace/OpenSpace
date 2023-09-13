@@ -369,7 +369,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         else {
             LERROR(fmt::format(
                 "Provided texture file does not exist: '{}'",
-                _defaultProperties.pointTexture
+                _defaultProperties.pointTexture.value()
             ));
         }
     });
@@ -593,7 +593,7 @@ void GeoJsonComponent::readFile() {
     std::ifstream file(_geoJsonFile);
 
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open GeoJSON file: {}", _geoJsonFile));
+        LERROR(fmt::format("Failed to open GeoJSON file: {}", _geoJsonFile.value()));
         return;
     }
 
@@ -628,7 +628,7 @@ void GeoJsonComponent::readFile() {
     catch (const geos::util::GEOSException& e) {
         LERROR(fmt::format(
             "Error creating GeoJson layer with identifier '{}'. Problem reading "
-            "GeoJson file '{}'. Error: '{}'", identifier(), _geoJsonFile, e.what()
+            "GeoJson file '{}'. Error: '{}'", identifier(), _geoJsonFile.value(), e.what()
         ));
     }
 
@@ -649,7 +649,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         // Null geometry => no geometries to add
         LWARNING(fmt::format(
             "Feature {} in GeoJson file '{}' is a null geometry and will not be loaded",
-            indexInFile, _geoJsonFile
+            indexInFile, _geoJsonFile.value()
         ));
         // @TODO (emmbr26) We should eventually support features with null geometry
     }
@@ -702,7 +702,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             LERROR(fmt::format(
                 "Error creating GeoJson layer with identifier '{}'. Problem reading "
                 "feature {} in GeoJson file '{}'.",
-                identifier(), indexInFile, _geoJsonFile
+                identifier(), indexInFile, _geoJsonFile.value()
             ));
             LERRORC(error.component, error.message);
             // Do nothing
