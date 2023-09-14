@@ -86,7 +86,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo InvertPolarityInfo = {
         "InvertPolarity",
-        "InvertPolarity",
+        "Invert polarity",
         "Decides what polarity is used for the sonification, true is inverted and false "
         "is normal (default is false)"
     };
@@ -280,6 +280,9 @@ void CosmicSonification::update(const Camera* camera) {
             continue;
         }
         glm::dmat4 transform = node->modelTransform();
+        const glm::dvec3 parentWorldPos = node->parent()->worldPosition();
+        const glm::dmat3 parentWorldRot = node->parent()->worldRotationMatrix();
+        const glm::dvec3 parentWorldScale = node->parent()->worldScale();
 
         // Find the RenderableCosmicPoints
         Renderable* renderable = node->renderable();
@@ -310,9 +313,14 @@ void CosmicSonification::update(const Camera* camera) {
 
         // Update distances to all labels
         for (int i = 0; i < label.labels->entries.size(); ++i) {
-            glm::vec3 scaledPos(label.labels->entries[i].position);
-            scaledPos *= toMeter(label.unit);
-            glm::vec3 transformedPos = transform * glm::vec4(scaledPos, 1.0);
+            const glm::dvec3 labelPos =
+                static_cast<glm::dvec3>(label.labels->entries[i].position);
+
+            glm::dvec3 labelWorldPos =
+                parentWorldPos + parentWorldRot * (parentWorldScale * labelPos);
+
+            labelWorldPos *= toMeter(label.unit);
+            glm::dvec3 transformedPos = transform * glm::vec4(labelWorldPos, 1.0);
 
             double distance = SonificationBase::calculateDistanceTo(
                 camera,
