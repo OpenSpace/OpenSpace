@@ -31,7 +31,7 @@ local text_max_size = 30
 
 local birds_UMAP_xyz_CenteredOnRoot_lineage_27 = {
     Identifier = "birds_UMAP_xyz_CenteredOnRoot_lineage_27",
-	Parent = transforms.EarthCenter.Identifier,
+	--Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -63,7 +63,7 @@ local birds_UMAP_xyz_CenteredOnRoot_lineage_27 = {
 
 local birds_UMAP_xyz_CenteredOnRoot_lineage_28 = {
     Identifier = "birds_UMAP_xyz_CenteredOnRoot_lineage_28",
-	Parent = transforms.EarthCenter.Identifier,
+	--Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -95,7 +95,7 @@ local birds_UMAP_xyz_CenteredOnRoot_lineage_28 = {
 
 local birds_UMAP_xyz_CenteredOnRoot_lineage_29 = {
     Identifier = "birds_UMAP_xyz_CenteredOnRoot_lineage_29",
-	Parent = transforms.EarthCenter.Identifier,
+	--Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -127,7 +127,7 @@ local birds_UMAP_xyz_CenteredOnRoot_lineage_29 = {
 
 local birds_UMAP_xyz_CenteredOnRoot_lineage_30 = {
     Identifier = "birds_UMAP_xyz_CenteredOnRoot_lineage_30",
-	Parent = transforms.EarthCenter.Identifier,
+	--Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -159,7 +159,7 @@ local birds_UMAP_xyz_CenteredOnRoot_lineage_30 = {
 
 local birds_UMAP_xyz_CenteredOnRoot_lineage_31 = {
     Identifier = "birds_UMAP_xyz_CenteredOnRoot_lineage_31",
-	Parent = transforms.EarthCenter.Identifier,
+	--Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -191,7 +191,7 @@ local birds_UMAP_xyz_CenteredOnRoot_lineage_31 = {
 
 local birds_UMAP_xyz_CenteredOnRoot_lineage_32 = {
     Identifier = "birds_UMAP_xyz_CenteredOnRoot_lineage_32",
-	Parent = transforms.EarthCenter.Identifier,
+	--Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -223,7 +223,7 @@ local birds_UMAP_xyz_CenteredOnRoot_lineage_32 = {
 
 local birds_UMAP_xyz_CenteredOnRoot_lineage_33 = {
     Identifier = "birds_UMAP_xyz_CenteredOnRoot_lineage_33",
-	Parent = transforms.EarthCenter.Identifier,
+	--Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },
@@ -255,7 +255,7 @@ local birds_UMAP_xyz_CenteredOnRoot_lineage_33 = {
 
 local birds_UMAP_xyz_CenteredOnRoot_lineage_34 = {
     Identifier = "birds_UMAP_xyz_CenteredOnRoot_lineage_34",
-	Parent = transforms.EarthCenter.Identifier,
+	--Parent = transforms.EarthCenter.Identifier,
     Renderable = {
         Type = "RenderableCosmicPoints",
         Color = { 0.8, 0.8, 0.8 },

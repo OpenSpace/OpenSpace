@@ -19,6 +19,9 @@ local enable_cosmicplanet = {
   Name = "A. Earth&Stars",
   Command = [[
 
+    local navState = { Up = {-0.7576672111209941, -0.17453402491439934, 0.6288706316400182}, Pitch = -0.005408597124228873, Anchor = "Earth", Yaw = -0.005394233067171395, Position = {17437796.895799384, 6591989.028259964, 22838677.140913013} }
+    openspace.setPropertyValueSingle("RenderEngine.HorizFieldOfView", 120.000000)
+
 
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled", true)
 	  openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
@@ -28,13 +31,15 @@ local enable_cosmicplanet = {
 
     openspace.setPropertyValueSingle("Scene.birds_consensus_species.Renderable.Enabled", false)
     openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", false)
-	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", false)
-	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Renderable.Enabled", false)
+	  openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", false)
+	  openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Renderable.Enabled", false)
 
     --False
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.Points-Example.Enabled", false)
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", false);
     openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false);
+
+    openspace.pathnavigation.flyToNavigationState(navState, 0.0)
 	
 
   ]],
@@ -119,6 +124,9 @@ local enable_cosmicdata = {
   Name = "G. Enable cosmic data V2_L28",
   Command = [[
 
+
+    local navState = { Yaw = 0.005573284314233272, Position = { [1] = 888856460.7948432, [2] = 552856715.2096369, [3] = -352003664.04601175 }, Pitch = 0.0012216224241184976, Up = { [1] = -0.5922238921526191, [2] = 0.6427349311065496, [3] = -0.48596570856292143 }, Anchor = "birds_mMDS_xyz_sphere_V2_lineage_29", ReferenceFrame = "Root" }
+
     openspace.setPropertyValue("{planet_solarSystem}.Renderable.Enabled", false)
     openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Enabled", false)
     openspace.setPropertyValue("{moon_solarSystem}.Renderable.Enabled", false)
@@ -178,6 +186,8 @@ local enable_cosmicdata = {
     openspace.fadeOut("Scene.ImageConstellation*.Renderable")
 	
 	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", true)
+
+  openspace.pathnavigation.flyToNavigationState(navState, 0.0)
 	
 
   ]],

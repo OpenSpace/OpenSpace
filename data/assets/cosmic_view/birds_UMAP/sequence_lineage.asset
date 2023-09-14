@@ -95,7 +95,7 @@ local birds_lineage_28 = {
 
 local birds_lineage_29 = {
   Identifier = "birds_lineage_29",
-  Parent = transforms.EarthCenter.Identifier,
+  --Parent = transforms.EarthCenter.Identifier,
   Renderable = {
     Type = "RenderableCosmicPoints",
     Color = { 0.8, 0.8, 0.8 },
