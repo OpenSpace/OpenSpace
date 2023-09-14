@@ -81,12 +81,12 @@ private:
     void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
-    bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
-    bool _hasSpriteTexture = false;
     bool _spriteTextureIsDirty = true;
+
+    bool _hasSpriteTexture = false;
+    bool _hasSpeckFile = false;
     bool _hasColorMapFile = false;
-    bool _isColorMapExact = false;
     bool _hasDatavarSize = false;
     bool _hasPolygon = false;
     bool _hasLabels = false;
@@ -116,14 +116,17 @@ private:
     struct ColorMapSettings : properties::PropertyOwner {
         ColorMapSettings();
 
-        // TODO: Add option to change the colormap?
-
         properties::BoolProperty enabled;
         properties::OptionProperty colorOption;
+
+        properties::StringProperty colorMapFile;
 
         properties::TriggerProperty setRangeFromData;
         properties::Vec2Property optionColorRangeData;
         properties::BoolProperty useLinearFiltering;
+
+        properties::BoolProperty  isColorMapExact;
+
     } _colorMapSettings;
 
     properties::Vec3Property _pointColor;
@@ -146,7 +149,6 @@ private:
     ) _uniformCache;
 
     std::string _speckFile;
-    std::string _colorMapFile;
     std::string _colorOptionString;
     std::string _datavarSizeOptionString;
 

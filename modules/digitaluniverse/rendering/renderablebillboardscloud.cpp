@@ -202,7 +202,7 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseLinearFiltering = {
+    constexpr openspace::properties::Property::PropertyInfo UseLinearFilteringInfo = {
         "UseLinearFiltering",
         "Use Linear Filtering",
         "Determines whether the provided color map should be sampled nearest neighbor "
@@ -211,7 +211,16 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SetRangeFromData = {
+    constexpr openspace::properties::Property::PropertyInfo IsColorMapExactInfo = {
+        "ExactColorMap",
+        "Exact Color Map",
+        "Set a 1-to-1 relationship between the color index variable and the colormap "
+        "entrered value, wihtout adjusting to the min/max vlaues. Overrides any other "
+        "sampling option", // @TODO: Clarify.
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SetRangeFromDataInfo = {
         "SetRangeFromData",
         "Set Data Range from Data",
         "Set the data range based on the available data",
@@ -261,8 +270,7 @@ namespace {
         // [[codegen::verbatim(ColorMapInfo.description)]]
         std::optional<std::string> colorMap;
 
-        // Set a 1 to 1 relationship between the color index variable and the colormap
-        // entrered value
+        // [[codegen::verbatim(ColorMapInfo.description)]]
         std::optional<bool> exactColorMap;
 
         // The number of sides for the polygon used to represent the astronomical object
@@ -303,7 +311,7 @@ namespace {
         // [[codegen::verbatim(PixelSizeControlInfo.description)]]
         std::optional<bool> enablePixelSizeControl;
 
-        // [[codegen::verbatim(UseLinearFiltering.description)]]
+        // [[codegen::verbatim(UseLinearFilteringInfo.description)]]
         std::optional<bool> useLinearFiltering;
     };
 
@@ -356,16 +364,20 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings()
     : properties::PropertyOwner({ "ColorMap", "Color Map", "" })
     , enabled(UseColorMapInfo, true)
     , colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , colorMapFile(ColorMapInfo)
     , optionColorRangeData(OptionColorRangeInfo, glm::vec2(0.f))
-    , useLinearFiltering(UseLinearFiltering, false)
-    , setRangeFromData(SetRangeFromData)
+    , useLinearFiltering(UseLinearFilteringInfo, false)
+    , setRangeFromData(SetRangeFromDataInfo)
+    , isColorMapExact(IsColorMapExactInfo, false) // TODO: Fix docs
 {
-    addProperty(colorOption);
-
     addProperty(enabled);
+    addProperty(colorOption);
+    addProperty(colorMapFile);
+    colorMapFile.setReadOnly(true); // Currently this can't be changed
     addProperty(optionColorRangeData);
     addProperty(setRangeFromData);
     addProperty(useLinearFiltering);
+    addProperty(isColorMapExact);
 }
 
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
@@ -487,7 +499,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     if (p.colorMap.has_value()) {
         _colorMapSettings.enabled = p.useColorMap.value_or(_colorMapSettings.enabled);
 
-        _colorMapFile = absPath(*p.colorMap).string();
+        _colorMapSettings.colorMapFile = absPath(*p.colorMap).string();
         _hasColorMapFile = true;
 
         if (p.colorOption.has_value()) {
@@ -504,7 +516,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             const glm::vec2 colorRange = _colorRangeData[optionIndex];
             _colorMapSettings.optionColorRangeData = colorRange;
             _colorOptionString = _optionConversionMap[optionIndex];
-            });
+        });
 
         _colorRangeData = p.colorRange.value_or(_colorRangeData);
         if (!_colorRangeData.empty()) {
@@ -516,8 +528,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _colorRangeData[optionIndex] = colorRange;
             _dataIsDirty = true;
         });
-
-        _isColorMapExact = p.exactColorMap.value_or(_isColorMapExact);
 
         _colorMapSettings.setRangeFromData.onChange([this]() {
             const int colorMapInUse =
@@ -538,6 +548,11 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             p.useLinearFiltering.value_or(_colorMapSettings.useLinearFiltering);
 
         _colorMapSettings.useLinearFiltering.onChange([this]() { _dataIsDirty = true; });
+
+        _colorMapSettings.isColorMapExact =
+            p.exactColorMap.value_or(_colorMapSettings.isColorMapExact);
+
+        _colorMapSettings.isColorMapExact.onChange([this]() { _dataIsDirty = true; });
 
         addPropertySubOwner(_colorMapSettings);
     }
@@ -561,7 +576,9 @@ void RenderableBillboardsCloud::initialize() {
     }
 
     if (_hasColorMapFile) {
-        _colorMap = speck::color::loadFileWithCache(_colorMapFile);
+        _colorMap = speck::color::loadFileWithCache(
+            _colorMapSettings.colorMapFile.value()
+        );
     }
 
     if (_hasLabels) {
@@ -963,49 +980,47 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
                 cmin = currentColorRange.x;
             }
 
-            if (_isColorMapExact) {
+            if (_colorMapSettings.isColorMapExact) {
                 int colorIndex = static_cast<int>(variableColor + cmin);
                 for (int j = 0; j < 4; ++j) {
                     result.push_back(_colorMap.entries[colorIndex][j]);
                 }
             }
-            else {
-                if (_colorMapSettings.useLinearFiltering) {
-                    float valueT = (variableColor - cmin) / (cmax - cmin); // in [0, 1)
-                    valueT = std::clamp(valueT, 0.f, 1.f);
+            else if (_colorMapSettings.useLinearFiltering) {
+                float valueT = (variableColor - cmin) / (cmax - cmin); // in [0, 1)
+                valueT = std::clamp(valueT, 0.f, 1.f);
 
-                    const float idx = valueT * (_colorMap.entries.size() - 1);
-                    const int floorIdx = static_cast<int>(std::floor(idx));
-                    const int ceilIdx = static_cast<int>(std::ceil(idx));
+                const float idx = valueT * (_colorMap.entries.size() - 1);
+                const int floorIdx = static_cast<int>(std::floor(idx));
+                const int ceilIdx = static_cast<int>(std::ceil(idx));
 
-                    const glm::vec4 floorColor = _colorMap.entries[floorIdx];
-                    const glm::vec4 ceilColor = _colorMap.entries[ceilIdx];
+                const glm::vec4 floorColor = _colorMap.entries[floorIdx];
+                const glm::vec4 ceilColor = _colorMap.entries[ceilIdx];
 
-                    glm::vec4 c = floorColor;
+                glm::vec4 c = floorColor;
 
-                    if (floorColor != ceilColor) {
-                        c = floorColor + idx * (ceilColor - floorColor);
-                    }
-
-                    result.push_back(c.r);
-                    result.push_back(c.g);
-                    result.push_back(c.b);
-                    result.push_back(c.a);
+                if (floorColor != ceilColor) {
+                    c = floorColor + idx * (ceilColor - floorColor);
                 }
-                else {
-                    float ncmap = static_cast<float>(_colorMap.entries.size());
-                    float normalization = ((cmax != cmin) && (ncmap > 2.f)) ?
-                        (ncmap - 2.f) / (cmax - cmin) : 0;
-                    int colorIndex = static_cast<int>(
-                        (variableColor - cmin) * normalization + 1.f
-                    );
-                    colorIndex = colorIndex < 0 ? 0 : colorIndex;
-                    colorIndex = colorIndex >= ncmap ?
-                        static_cast<int>(ncmap - 1.f) : colorIndex;
 
-                    for (int j = 0; j < 4; ++j) {
-                        result.push_back(_colorMap.entries[colorIndex][j]);
-                    }
+                result.push_back(c.r);
+                result.push_back(c.g);
+                result.push_back(c.b);
+                result.push_back(c.a);
+            }
+            else { // Nearest neighbor
+                float ncmap = static_cast<float>(_colorMap.entries.size());
+                float normalization = ((cmax != cmin) && (ncmap > 2.f)) ?
+                    (ncmap - 2.f) / (cmax - cmin) : 0;
+                int colorIndex = static_cast<int>(
+                    (variableColor - cmin) * normalization + 1.f
+                );
+                colorIndex = colorIndex < 0 ? 0 : colorIndex;
+                colorIndex = colorIndex >= ncmap ?
+                    static_cast<int>(ncmap - 1.f) : colorIndex;
+
+                for (int j = 0; j < 4; ++j) {
+                    result.push_back(_colorMap.entries[colorIndex][j]);
                 }
             }
         }
