@@ -1102,7 +1102,7 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
 
     const bool changedAnchor = _anchorNode != anchorNode;
     _anchorNode = anchorNode;
-    _newAnchorName = anchorNode->identifier();
+    _newAnchorName = anchorNode ? anchorNode->identifier() : "";
 
     // Need to reset velocities after the actual switch in anchor node,
     // since the reset behavior depends on the anchor node.
