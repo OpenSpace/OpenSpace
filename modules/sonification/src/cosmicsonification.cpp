@@ -203,7 +203,6 @@ void CosmicSonification::update(const Camera* camera) {
             continue;
         }
         glm::dmat4 transform = node->modelTransform();
-        glm::vec3 parentPos = node->parent()->worldPosition();
 
         // Find the RenderableCosmicPoints
         Renderable* renderable = node->renderable();
@@ -243,14 +242,12 @@ void CosmicSonification::update(const Camera* camera) {
                 transformedPos,
                 DistanceUnit::Meter
             );
-            double angleH = SonificationBase::calculateAngleFromAToB(
+            double angleH = SonificationBase::calculateAngleTo(
                 camera,
-                parentPos,
                 transformedPos
             );
-            double angleV = SonificationBase::calculateElevationAngleFromAToB(
+            double angleV = SonificationBase::calculateElevationAngleTo(
                 camera,
-                parentPos,
                 transformedPos
             );
 
