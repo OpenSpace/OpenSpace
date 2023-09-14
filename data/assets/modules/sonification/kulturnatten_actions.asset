@@ -45,7 +45,7 @@ local enable_cosmicplanet = {
   ]],
   Documentation = "Enables the planets sonification, turn off the cosmic points and jumps to Earth",
   GuiPath = "/Kulturnatten",
-  isLocal = false
+  IsLocal = false
 }
 
 local enable_geomarkers = {
@@ -58,7 +58,7 @@ local enable_geomarkers = {
   ]],
   Documentation = "Enables the planets sonification, turn off the cosmic points and jumps to Earth",
   GuiPath = "/Kulturnatten",
-  isLocal = false
+  IsLocal = false
 }
 
 local ShowConstellations = {
@@ -179,21 +179,21 @@ local enable_cosmicdata = {
 	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_3Dprojection_lineage_29.Renderable.Enabled", false)
 	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_3Dprojection_lineage_29.Renderable.Enabled", false)
 	openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", false)
-	
-	
-	
+
+
+
     --openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
     openspace.fadeOut("Scene.ImageConstellation*.Renderable")
-	
+
 	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", true)
 
   openspace.pathnavigation.flyToNavigationState(navState, 0.0)
-	
+
 
   ]],
   Documentation = "Actions for Kulturnatten Cosmic View show",
   GuiPath = "/Kulturnatten",
-  isLocal = false
+  IsLocal = false
 }
 
 local fade_in = {
@@ -204,10 +204,10 @@ local fade_in = {
   
     openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1.0, 1.0)
     --openspace.fadeIn("RenderEngine.BlackoutFactor")
-	
+
 	--openspace.fadeIn("RenderEngine.BlackoutFactor", nil, "openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1); openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 0)")
-	
-	
+
+
   ]],
   Documentation = "Fade in",
   GuiPath = "/Kulturnatten",
