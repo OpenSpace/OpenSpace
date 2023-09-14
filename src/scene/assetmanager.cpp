@@ -826,8 +826,8 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
                     "Loading asset {0} from {1} with enable state {3} different from "
                     "initial loading from {2} with state {4}. Only {4} will have an "
                     "effect",
-                    path, retriever, a->firstParent()->path(), explicitEnable,
-                    a->explicitEnabled()
+                    path, retriever, a->firstParent()->path(),
+                    explicitEnable.value_or(true), a->explicitEnabled().value_or(true)
                 ));
             }
             else {

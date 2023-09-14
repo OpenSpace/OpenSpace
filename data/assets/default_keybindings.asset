@@ -53,7 +53,7 @@ local ToggleRotationFriction = {
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
   Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely",
   GuiPath = "/Navigation",
-  IsLocal = false
+  IsLocal = true
 }
 
 local ToggleZoomFriction = {
@@ -62,7 +62,7 @@ local ToggleZoomFriction = {
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
   Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely",
   GuiPath = "/Navigation",
-  IsLocal = false
+  IsLocal = true
 }
 
 local ToggleRollFriction = {
@@ -71,7 +71,7 @@ local ToggleRollFriction = {
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
   Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely",
   GuiPath = "/Navigation",
-  IsLocal = false
+  IsLocal = true
 }
 
 local FadeToBlack = {

@@ -71,7 +71,8 @@ namespace {
     using namespace openspace;
     global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + name + "')",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -96,7 +97,8 @@ namespace {
 
     global::scriptEngine->queueScript(
         script,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

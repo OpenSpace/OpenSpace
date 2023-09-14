@@ -420,9 +420,13 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _delete.onChange([this](){
         std::string script =
             "openspace.removeScreenSpaceRenderable('" + identifier() + "');";
+        // No sync or send because this is already inside a Lua script that was triggered
+        // when this triggerProperty was pressed in the gui, therefor it has already been
+        // synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::No
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     });
     addProperty(_delete);

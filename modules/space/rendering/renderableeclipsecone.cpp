@@ -336,7 +336,7 @@ std::vector<VBOLayout> calculateShadowPoints(const std::vector<glm::dvec3>& srcT
         const glm::dvec3 dir = glm::normalize(dst - src);
 
         // The start point is the terminator point on the Moon
-        glm::vec3 p1 = dst -dir * lengthScale*1000.0;
+        glm::vec3 p1 = dst;
         vertices.push_back({ p1.x, p1.y, p1.z });
 
         // The end point is calculated by forward propagating the incoming direction

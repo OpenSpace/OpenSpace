@@ -1,0 +1,43 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
+
+
+
+local RenderableNodeLineExample = {
+  Identifier = "RenderableNodeLineExample",
+  Renderable = {
+    Type = "RenderableNodeLine",
+    StartNode = earth.Earth.Identifier,
+    EndNode = mars.Mars.Identifier,
+    Color = { 0.5, 0.5, 0.5 },
+    LineWidth = 2
+  },
+  GUI = {
+    Name = "RenderableNodeLine Example",
+    Path = "/Example",
+    Description = [[Draws a line between two nodes in the scene.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RenderableNodeLineExample)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RenderableNodeLineExample)
+end)
+
+asset.export(RenderableNodeLineExample)
+
+
+
+asset.meta = {
+  Name = "RenderableNodeLine Example asset",
+  Version = "1.0",
+  Description = [[Example of a RenderableNodeLine, that can be used to draw an line
+    between two scene graph nodes.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -97,20 +98,6 @@ namespace {
         // @VISIBILITY(2.8)
         openspace::properties::Property::Visibility::User
     };
-
-    // Generate vertices around the unit circle on the XY-plane
-    std::vector<float> unitCircleVertices(int sectorCount) {
-        std::vector<float> vertices;
-        vertices.reserve(2 * sectorCount);
-        float sectorStep = glm::two_pi<float>() / sectorCount;
-
-        for (int i = 0; i < sectorCount; ++i) {
-            float sectorAngle = i * sectorStep;
-            vertices.push_back(cos(sectorAngle)); // x
-            vertices.push_back(sin(sectorAngle)); // y
-        }
-        return vertices;
-    }
 
     struct [[codegen::Dictionary(RenderablePrism)]] Parameters {
         // [[codegen::verbatim(SegmentsInfo.description)]]
@@ -236,17 +223,16 @@ void RenderablePrism::updateVertexData() {
     _vertexArray.clear();
     _indexArray.clear();
 
+    using namespace rendering::helper;
+
     // Get unit circle vertices on the XY-plane
-    std::vector<float> unitVertices = unitCircleVertices(_nShapeSegments);
-    std::vector<float> unitVerticesLines = unitCircleVertices(_nLines);
+    std::vector<VertexXYZ> unitVertices = createRingXYZ(_nShapeSegments.value(), 1.f);
+    std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(_nLines.value(), 1.f);
 
     // Put base vertices into array
-    for (int j = 0, k = 0;
-        j < _nShapeSegments && k < static_cast<int>(unitVertices.size());
-        ++j, k += 2)
-    {
-        float ux = unitVertices[k];
-        float uy = unitVertices[k + 1];
+    for (int j = 0; j < _nShapeSegments; ++j) {
+        float ux = unitVertices[j].xyz[0];
+        float uy = unitVertices[j].xyz[1];
 
         _vertexArray.push_back(ux * _baseRadius); // x
         _vertexArray.push_back(uy * _baseRadius); // y
@@ -254,12 +240,9 @@ void RenderablePrism::updateVertexData() {
     }
 
     // Put top shape vertices into array
-    for (int j = 0, k = 0;
-        j < _nShapeSegments && k < static_cast<int>(unitVertices.size());
-        ++j, k += 2)
-    {
-        float ux = unitVertices[k];
-        float uy = unitVertices[k + 1];
+    for (int j = 0; j < _nShapeSegments; ++j) {
+        float ux = unitVertices[j].xyz[0];
+        float uy = unitVertices[j].xyz[1];
 
         _vertexArray.push_back(ux * _radius); // x
         _vertexArray.push_back(uy * _radius); // y
@@ -280,12 +263,9 @@ void RenderablePrism::updateVertexData() {
         _vertexArray.push_back(_length);
     }
     else {
-        for (int j = 0, k = 0;
-             j < _nLines && k < static_cast<int>(unitVerticesLines.size());
-             ++j, k += 2)
-        {
-            float ux = unitVerticesLines[k];
-            float uy = unitVerticesLines[k + 1];
+        for (int j = 0; j < _nLines; ++j) {
+            float ux = unitVerticesLines[j].xyz[0];
+            float uy = unitVerticesLines[j].xyz[1];
 
             // Base
             _vertexArray.push_back(ux * _baseRadius); // x

@@ -47,6 +47,7 @@
 #include <modules/base/rendering/renderabledisc.h>
 #include <modules/base/rendering/renderablelabel.h>
 #include <modules/base/rendering/renderablemodel.h>
+#include <modules/base/rendering/renderablenodearrow.h>
 #include <modules/base/rendering/renderablenodeline.h>
 #include <modules/base/rendering/renderablesphereimagelocal.h>
 #include <modules/base/rendering/renderablesphereimageonline.h>
@@ -136,6 +137,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableGrid>("RenderableGrid");
     fRenderable->registerClass<RenderableLabel>("RenderableLabel");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
+    fRenderable->registerClass<RenderableNodeArrow>("RenderableNodeArrow");
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
@@ -222,6 +224,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableGrid::Documentation(),
         RenderableLabel::Documentation(),
         RenderableModel::Documentation(),
+        RenderableNodeArrow::Documentation(),
         RenderableNodeLine::Documentation(),
         RenderablePlane::Documentation(),
         RenderablePlaneImageLocal::Documentation(),

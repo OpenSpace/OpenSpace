@@ -9,7 +9,7 @@ local ToggleMoonShading = {
   ]],
   Documentation = "Toggles the shading of the Moon",
   GuiPath = "/Missions/Apollo",
-  isLocal = false
+  IsLocal = false
 }
 
 local FocusMoon = {
@@ -22,7 +22,7 @@ local FocusMoon = {
   ]],
   Documentation = "Set camera focus on the Moon",
   GuiPath = "/Missions/Apollo",
-  isLocal = false
+  IsLocal = false
 }
 
 local FocusEarth = {
@@ -35,7 +35,7 @@ local FocusEarth = {
   ]],
   Documentation = "Set camera focus on the Earth",
   GuiPath = "/Missions/Apollo",
-  isLocal = false
+  IsLocal = false
 }
 
 

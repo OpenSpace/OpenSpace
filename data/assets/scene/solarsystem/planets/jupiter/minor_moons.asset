@@ -31,7 +31,7 @@ local JupiterMinorMoonsOn = {
   ]],
   Documentation = "Turn ON Jupiter's minor moons and their trails",
   GuiPath = "/Solar System/Jupiter",
-  IsLocal = true
+  IsLocal = false
 }
 
 local JupiterMinorMoonsOff = {
@@ -66,7 +66,7 @@ local JupiterMinorMoonsOff = {
   ]],
   Documentation = "Turn OFF Jupiter's minor moons and their trails",
   GuiPath = "/Solar System/Jupiter",
-  IsLocal = true
+  IsLocal = false
 }
 
 

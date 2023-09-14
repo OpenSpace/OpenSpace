@@ -8,7 +8,7 @@ local FocusOsirisRex = {
   ]],
   Documentation = "Sets the focus of the camera on 'OsirisRex'",
   GuiPath = "/Missions/Osiris Rex",
-  isLocal = false
+  IsLocal = false
 }
 
 local FocusBennu = {
@@ -21,7 +21,7 @@ local FocusBennu = {
   ]],
   Documentation = "Sets the focus of the camera on 'Bennu'",
   GuiPath = "/Missions/Osiris Rex",
-  isLocal = false
+  IsLocal = false
 }
 
 local SetupBennuApproach = {
@@ -33,7 +33,7 @@ local SetupBennuApproach = {
   ]],
   Documentation = "Sets the time to the approach at Bennu",
   GuiPath = "/Missions/Osiris Rex",
-  isLocal = false
+  IsLocal = false
 }
 
 local SetupBennuSurvey = {
@@ -45,7 +45,7 @@ local SetupBennuSurvey = {
   ]],
   Documentation = "Sets the time to the preliminary survey of Bennu",
   GuiPath = "/Missions/Osiris Rex",
-  isLocal = false
+  IsLocal = false
 }
 
 local SetupBennuEventB = {
@@ -57,7 +57,7 @@ local SetupBennuEventB = {
   ]],
   Documentation = "Sets the time to the orbital B event",
   GuiPath = "/Missions/Osiris Rex",
-  isLocal = false
+  IsLocal = false
 }
 
 local SetupBennuReconEvent = {
@@ -69,7 +69,7 @@ local SetupBennuReconEvent = {
   ]],
   Documentation = "Sets the time to the recon event",
   GuiPath = "/Missions/Osiris Rex",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleSunMarker = {
@@ -83,7 +83,7 @@ local ToggleSunMarker = {
   ]],
   Documentation = "Toggles the visibility of the text marking the location of the Sun",
   GuiPath = "/Missions/Osiris Rex",
-  isLocal = false
+  IsLocal = false
 }
 
 local AimAtBennu = {
@@ -119,7 +119,7 @@ local SetLaunchTime = {
   ]],
   Documentation = "Look at the launch of OSIRIS-REx",
   GuiPath = "/Missions/Osiris Rex",
-  isLocal = false
+  IsLocal = false
 }
 
 local LookImageCapture = {
@@ -133,7 +133,7 @@ local LookImageCapture = {
   ]],
   Documentation = "Look at the image capture of OSIRIS-REx",
   GuiPath = "/Missions/Osiris Rex",
-  isLocal = false
+  IsLocal = false
 }
 
 asset.onInitialize(function()
