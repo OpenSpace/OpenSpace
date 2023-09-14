@@ -771,7 +771,7 @@ void RenderableBillboardsCloud::updateBufferData() {
     }
 
     int attibutesPerPoint = 4;
-    if (_hasColorMapFile) {
+    if (_hasColorMapFile && _useColorMap) {
         attibutesPerPoint += 4;
     }
     if (_hasDatavarSize) {
@@ -796,7 +796,7 @@ void RenderableBillboardsCloud::updateBufferData() {
     );
     attributeCount += 4;
 
-    if (_hasColorMapFile) {
+    if (_hasColorMapFile && _useColorMap) {
         GLint colorMapAttrib = _program->attributeLocation("in_colormap");
         glEnableVertexAttribArray(colorMapAttrib);
         glVertexAttribPointer(
@@ -910,10 +910,13 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
         const double r = glm::length(position);
         maxRadius = std::max(maxRadius, r);
 
+        // Positions
+        for (int j = 0; j < 4; ++j) {
+            result.push_back(position[j]);
+        }
+
+        // Colors
         if (_hasColorMapFile && _useColorMap && !_colorMap.entries.empty()) {
-            for (int j = 0; j < 4; ++j) {
-                result.push_back(position[j]);
-            }
             biggestCoord = std::max(biggestCoord, glm::compMax(position));
             // Note: if exact colormap option is not selected, the first color and the
             // last color in the colormap file are the outliers colors.
@@ -948,19 +951,16 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
                     const glm::vec4 floorColor = _colorMap.entries[floorIdx];
                     const glm::vec4 ceilColor = _colorMap.entries[ceilIdx];
 
+                    glm::vec4 c = floorColor;
+
                     if (floorColor != ceilColor) {
-                        const glm::vec4 c = floorColor + idx * (ceilColor - floorColor);
-                        result.push_back(c.r);
-                        result.push_back(c.g);
-                        result.push_back(c.b);
-                        result.push_back(c.a);
+                        c = floorColor + idx * (ceilColor - floorColor);
                     }
-                    else {
-                        result.push_back(floorColor.r);
-                        result.push_back(floorColor.g);
-                        result.push_back(floorColor.b);
-                        result.push_back(floorColor.a);
-                    }
+
+                    result.push_back(c.r);
+                    result.push_back(c.g);
+                    result.push_back(c.b);
+                    result.push_back(c.a);
                 }
                 else {
                     float ncmap = static_cast<float>(_colorMap.entries.size());
@@ -978,21 +978,11 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
                     }
                 }
             }
+        }
 
-            if (_hasDatavarSize) {
-                result.push_back(e.data[sizeScalingInUse]);
-            }
-        }
-        else if (_hasDatavarSize) {
+        // Size data
+        if (_hasDatavarSize) {
             result.push_back(e.data[sizeScalingInUse]);
-            for (int j = 0; j < 4; ++j) {
-                result.push_back(position[j]);
-            }
-        }
-        else {
-            for (int j = 0; j < 4; ++j) {
-                result.push_back(position[j]);
-            }
         }
     }
     setBoundingSphere(maxRadius);
