@@ -77,20 +77,7 @@ void main() {
   vec4 pos = gl_in[0].gl_Position;
   gs_colorMap = colorMap[0];
 
-  double unit = PARSEC;
-
-  // Must be the same as the enum in RenderableBillboardsCloud.h
-  if (pos.w == 1.0) { unit = 1E3; }
-  else if (pos.w == 2.0) { unit = PARSEC; }
-  else if (pos.w == 3.0) { unit = 1E3 * PARSEC; }
-  else if (pos.w == 4.0) { unit = 1E6 * PARSEC; }
-  else if (pos.w == 5.0) { unit = 1E9 * PARSEC; }
-  else if (pos.w == 6.0) {
-    // Conversion factor from Parsecs to GigalightYears
-    unit = 306391534.73091 * PARSEC;
-  }
-
-  dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz) * unit, 1.0);
+  dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
 
   float scaleMultiply = exp(scaleFactor * 0.10);
   if (hasDvarScaling) {
