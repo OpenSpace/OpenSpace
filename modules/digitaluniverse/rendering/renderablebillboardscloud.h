@@ -69,6 +69,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    void updateBufferData();
     void updateSpriteTexture();
 
     std::vector<float> createDataSlice();

@@ -739,84 +739,94 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 void RenderableBillboardsCloud::update(const UpdateData&) {
     ZoneScoped;
 
-    if (_dataIsDirty && _hasSpeckFile) {
-        ZoneScopedN("Data dirty");
-        TracyGpuZone("Data dirty");
-        LDEBUG("Regenerating data");
+    if (_dataIsDirty) {
+        updateBufferData();
+    }
 
-        std::vector<float> slice = createDataSlice();
+    if (_spriteTextureIsDirty) {
+        updateSpriteTexture();
+    }
+}
 
-        int size = static_cast<int>(slice.size());
+void RenderableBillboardsCloud::updateBufferData() {
+    if (!_hasSpeckFile) {
+        return;
+    }
 
-        if (_vao == 0) {
-            glGenVertexArrays(1, &_vao);
-            LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
-        }
-        if (_vbo == 0) {
-            glGenBuffers(1, &_vbo);
-            LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
-        }
+    ZoneScopedN("Data dirty");
+    TracyGpuZone("Data dirty");
+    LDEBUG("Regenerating data");
 
-        int attibutesPerPoint = 4;
-        if (_hasColorMapFile) {
-            attibutesPerPoint += 4;
-        }
-        if (_hasDatavarSize) {
-            attibutesPerPoint += 1;
-        }
+    std::vector<float> slice = createDataSlice();
 
-        glBindVertexArray(_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
+    int size = static_cast<int>(slice.size());
 
-        int attributeCount = 0;
+    if (_vao == 0) {
+        glGenVertexArrays(1, &_vao);
+        LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
+    }
+    if (_vbo == 0) {
+        glGenBuffers(1, &_vbo);
+        LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
+    }
 
-        GLint positionAttrib = _program->attributeLocation("in_position");
-        glEnableVertexAttribArray(positionAttrib);
+    int attibutesPerPoint = 4;
+    if (_hasColorMapFile) {
+        attibutesPerPoint += 4;
+    }
+    if (_hasDatavarSize) {
+        attibutesPerPoint += 1;
+    }
+
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
+
+    int attributeCount = 0;
+
+    GLint positionAttrib = _program->attributeLocation("in_position");
+    glEnableVertexAttribArray(positionAttrib);
+    glVertexAttribPointer(
+        positionAttrib,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        attibutesPerPoint * sizeof(float),
+        nullptr
+    );
+    attributeCount += 4;
+
+    if (_hasColorMapFile) {
+        GLint colorMapAttrib = _program->attributeLocation("in_colormap");
+        glEnableVertexAttribArray(colorMapAttrib);
         glVertexAttribPointer(
-            positionAttrib,
+            colorMapAttrib,
             4,
             GL_FLOAT,
             GL_FALSE,
             attibutesPerPoint * sizeof(float),
-            nullptr
+            reinterpret_cast<void*>(attributeCount * sizeof(float))
         );
         attributeCount += 4;
-
-        if (_hasColorMapFile) {
-            GLint colorMapAttrib = _program->attributeLocation("in_colormap");
-            glEnableVertexAttribArray(colorMapAttrib);
-            glVertexAttribPointer(
-                colorMapAttrib,
-                4,
-                GL_FLOAT,
-                GL_FALSE,
-                attibutesPerPoint * sizeof(float),
-                reinterpret_cast<void*>(attributeCount * sizeof(float))
-            );
-            attributeCount += 4;
-        }
-
-        if (_hasDatavarSize) {
-            GLint dvarScalingAttrib = _program->attributeLocation("in_dvarScaling");
-            glEnableVertexAttribArray(dvarScalingAttrib);
-            glVertexAttribPointer(
-                dvarScalingAttrib,
-                1,
-                GL_FLOAT,
-                GL_FALSE,
-                attibutesPerPoint * sizeof(float),
-                reinterpret_cast<void*>(attributeCount * sizeof(float))
-            );
-            attributeCount += 1;
-        }
-
-        glBindVertexArray(0);
-
-        _dataIsDirty = false;
     }
 
-    updateSpriteTexture();
+    if (_hasDatavarSize) {
+        GLint dvarScalingAttrib = _program->attributeLocation("in_dvarScaling");
+        glEnableVertexAttribArray(dvarScalingAttrib);
+        glVertexAttribPointer(
+            dvarScalingAttrib,
+            1,
+            GL_FLOAT,
+            GL_FALSE,
+            attibutesPerPoint * sizeof(float),
+            reinterpret_cast<void*>(attributeCount * sizeof(float))
+        );
+        attributeCount += 1;
+    }
+
+    glBindVertexArray(0);
+
+    _dataIsDirty = false;
 }
 
 void RenderableBillboardsCloud::updateSpriteTexture() {
