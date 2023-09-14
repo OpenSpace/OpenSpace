@@ -95,22 +95,42 @@ private:
 
     GLuint _pTexture = 0;
 
-    properties::FloatProperty _scaleFactor;
-    properties::BoolProperty _useColorMap;
+    struct SizeSettings : properties::PropertyOwner {
+        SizeSettings();
+
+        properties::FloatProperty scaleFactor;
+
+        properties::BoolProperty pixelSizeControl;
+        properties::Vec2Property billboardMinMaxSize;
+        properties::FloatProperty correctionSizeEndDistance;
+        properties::FloatProperty correctionSizeFactor;
+    } _sizeSettings;
+
+    struct SizeFromData : properties::PropertyOwner {
+        SizeFromData();
+
+        //properties::BoolProperty useSizeFromData; // TODO: add
+        properties::OptionProperty datavarSizeOption;
+    } _sizeFromData;
+
+    struct ColorMapSettings : properties::PropertyOwner {
+        ColorMapSettings();
+
+        // TODO: Add option to change the colormap?
+
+        properties::BoolProperty enabled;
+        properties::OptionProperty colorOption;
+
+        properties::TriggerProperty setRangeFromData;
+        properties::Vec2Property optionColorRangeData;
+        properties::BoolProperty useLinearFiltering;
+    } _colorMapSettings;
+
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
     properties::BoolProperty _drawElements;
-    properties::BoolProperty _pixelSizeControl;
-    properties::OptionProperty _colorOption;
-    properties::Vec2Property _optionColorRangeData;
-    properties::OptionProperty _datavarSizeOption;
     properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _disableFadeInDistance;
-    properties::Vec2Property _billboardMinMaxSize;
-    properties::FloatProperty _correctionSizeEndDistance;
-    properties::FloatProperty _correctionSizeFactor;
-    properties::BoolProperty _useLinearFiltering;
-    properties::TriggerProperty _setRangeFromData;
     properties::OptionProperty _renderOption;
 
     ghoul::opengl::Texture* _polygonTexture = nullptr;
