@@ -77,16 +77,33 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    // Ability to filter what type of relationship between the birds are sonified
-    enum class BirdFilter {
-        None = 0,
-        Taxonomy,
-        Habitat,
-        Domesticated,
+    // Ability to change the amplitude mode for the sonification
+    enum class AmplitudeMode {
+        Distance = 0,
+        Always,
+        TaxDatanomy
     };
 
+    // Ability to change focus type for the sonification
+    enum class FocusType {
+        Panning = 0,
+        Distance
+    };
+
+    // Ability to filter what type of relationship between the birds are sonified
+    enum class Filter {
+        Focus = 0,
+        All,
+        Taxonomy,
+        Habitat,
+        Domesticated
+    };
+
+    void guiChangeAmpMode();
+    void guiChangeFocusType();
     void guiChangeFilter();
     void guiChangeLock();
+    void guiChangePolarity();
 
     // Precision of distances and angles
     properties::DoubleProperty _anglePrecision;
@@ -137,9 +154,14 @@ private:
 
     std::vector<NodeData> _nodes;
     std::vector<Labels> _labels;
-    properties::OptionProperty _filter;
-    BirdFilter _birdFilter = BirdFilter::None;
-    properties::BoolProperty _lockClosestBird;
+    properties::OptionProperty _amplitudeModeProperty;
+    properties::OptionProperty _focusTypeProperty;
+    properties::OptionProperty _filterProperty;
+    AmplitudeMode _amplitudeMode = AmplitudeMode::Distance;
+    FocusType _focusType = FocusType::Panning;
+    Filter _filter = Filter::Focus;
+    properties::BoolProperty _lockClosestItem;
+    properties::BoolProperty _invertPolarity;
 };
 
 } // openspace namespace

@@ -60,16 +60,35 @@ namespace {
         "The precision used for angles, given in radians"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BirdFilterInfo = {
-        "BirdFilter",
-        "Bird Filter",
-        "The type of relationship that the sonification focuses on for the birds"
+    constexpr openspace::properties::Property::PropertyInfo AmplitudeModeInfo = {
+        "AmplitudeMode",
+        "Amplitude Mode",
+        "The mode for what the amplitude is dependent on in the sonification"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LockClosestBirdInfo = {
-        "LockClosestBird",
-        "Lock Closest Bird",
-        "Locks the sonification to the current closest bird in the scene"
+    constexpr openspace::properties::Property::PropertyInfo FocusTypeInfo = {
+        "FocusType",
+        "Focus Type",
+        "The type of focus for the sonification"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FilterInfo = {
+        "Filter",
+        "Filter",
+        "The type of relationship that the sonification focuses on for the items"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LockClosestItemInfo = {
+        "LockClosestItem",
+        "Lock focused item",
+        "Locks the sonification to the current closest item in the scene"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InvertPolarityInfo = {
+        "InvertPolarity",
+        "InvertPolarity",
+        "Decides what polarity is used for the sonification, true is inverted and false "
+        "is normal (default is false)"
     };
 } // namespace
 #include "cosmicsonification_lua.inl"
@@ -80,32 +99,82 @@ CosmicSonification::CosmicSonification(const std::string& ip, int port)
     : SonificationBase(CosmicSonificationInfo, ip, port)
     , _distancePrecision(DistancePrecisionInfo, 0.1, 0.01, 1.0e3)
     , _anglePrecision(AnglePrecisionInfo, 0.05, 0.0, M_PI/2.0)
-    , _filter(
-        BirdFilterInfo,
+    , _amplitudeModeProperty(
+        AmplitudeModeInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _lockClosestBird(LockClosestBirdInfo, false)
+    , _focusTypeProperty(
+        FocusTypeInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
+    , _filterProperty(
+        FilterInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
+    , _lockClosestItem(LockClosestItemInfo, false)
+    , _invertPolarity(InvertPolarityInfo, false)
 {
     addProperty(_distancePrecision);
     _distancePrecision.setExponent(2);
     addProperty(_anglePrecision);
 
-    // Add options to the bird filter drop down menu
-    _filter.addOptions({
-        { 0, "None" },
-        { 1, "Taxonomy" },
-        { 2, "Habitat" },
-        { 3, "Domesticated" }
+    // Add options to the amplitude mode drop down menu
+    _amplitudeModeProperty.addOptions({
+        { 0, "Distance" },
+        { 1, "Always Full" },
+        { 2, "Data" }
     });
-    _filter.onChange([this]() { guiChangeFilter(); });
-    addProperty(_filter);
+    _amplitudeModeProperty.onChange([this]() { guiChangeAmpMode(); });
+    addProperty(_amplitudeModeProperty);
 
-    addProperty(_lockClosestBird);
-    _lockClosestBird.onChange([this]() { guiChangeLock(); });
+    // Add options to the fopcus type drop down menu
+    _focusTypeProperty.addOptions({
+        { 0, "Panning" },
+        { 1, "Distance" }
+    });
+    _focusTypeProperty.onChange([this]() { guiChangeFocusType(); });
+    addProperty(_focusTypeProperty);
+
+    // Add options to the filter drop down menu
+    _filterProperty.addOptions({
+        { 0, "Focus" },
+        { 1, "All" },
+        { 2, "Taxonomy" },
+        { 3, "Habitat" },
+        { 4, "Domesticated" }
+    });
+    _filterProperty.onChange([this]() { guiChangeFilter(); });
+    addProperty(_filterProperty);
+
+    addProperty(_lockClosestItem);
+    _lockClosestItem.onChange([this]() { guiChangeLock(); });
+
+    addProperty(_invertPolarity);
+    _invertPolarity.onChange([this]() { guiChangePolarity(); });
+}
+
+void CosmicSonification::guiChangeAmpMode() {
+    _amplitudeMode = static_cast<AmplitudeMode>(_amplitudeModeProperty.value());
+
+    std::string label = "/AmpMode";
+    std::vector<OscDataType> data(1);
+    data[0] = static_cast<int>(_amplitudeMode);
+
+    _connection->send(label, data);
+}
+
+void CosmicSonification::guiChangeFocusType() {
+    _focusType = static_cast<FocusType>(_focusTypeProperty.value());
+
+    std::string label = "/FocusType";
+    std::vector<OscDataType> data(1);
+    data[0] = static_cast<int>(_focusType);
+
+    _connection->send(label, data);
 }
 
 void CosmicSonification::guiChangeFilter() {
-    _birdFilter = static_cast<BirdFilter>(_filter.value());
+    _filter = static_cast<Filter>(_filterProperty.value());
 
     std::string label = "/BirdFilter";
     std::vector<OscDataType> data(1);
@@ -117,7 +186,15 @@ void CosmicSonification::guiChangeFilter() {
 void CosmicSonification::guiChangeLock() {
     std::string label = "/BirdLock";
     std::vector<OscDataType> data(1);
-    data[0] = static_cast<int>(_lockClosestBird);
+    data[0] = static_cast<int>(_lockClosestItem);
+
+    _connection->send(label, data);
+}
+
+void CosmicSonification::guiChangePolarity() {
+    std::string label = "/InvertPolarity";
+    std::vector<OscDataType> data(1);
+    data[0] = static_cast<int>(_invertPolarity);
 
     _connection->send(label, data);
 }
