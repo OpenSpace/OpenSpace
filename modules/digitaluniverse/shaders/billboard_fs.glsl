@@ -32,7 +32,6 @@ in float ta;
 uniform float alphaValue;
 uniform vec3 color;
 uniform sampler2D spriteTexture;
-uniform bool hasColorMap;
 uniform bool useColorMap;
 uniform float fadeInValue;
 
@@ -49,7 +48,7 @@ Fragment getFragment() {
 
   vec4 fullColor = textureColor;
 
-  if (hasColorMap && useColorMap) {
+  if (useColorMap) {
     fullColor *= gs_colorMap;
   }
   else {

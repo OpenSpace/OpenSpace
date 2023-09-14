@@ -54,12 +54,12 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableBillboardsCloud";
 
-    constexpr std::array<const char*, 21> UniformNames = {
+    constexpr std::array<const char*, 20> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
         "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
-        "hasColorMap", "useColorMap", "enabledRectSizeControl", "hasDvarScaling"
+        "useColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
     enum RenderOption {
@@ -673,8 +673,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
         _spriteTexture->bind();
     }
     _program->setUniform(_uniformCache.spriteTexture, textureUnit);
-    _program->setUniform(_uniformCache.hasColormap, _hasColorMapFile);
-    _program->setUniform(_uniformCache.useColormap, _useColorMap);
+    _program->setUniform(_uniformCache.useColormap, _hasColorMapFile && _useColorMap);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));

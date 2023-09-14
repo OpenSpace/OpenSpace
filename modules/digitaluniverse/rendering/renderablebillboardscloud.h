@@ -122,8 +122,7 @@ private:
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
         minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
         correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
-        screenSize, spriteTexture, hasColormap, useColormap, enabledRectSizeControl,
-        hasDvarScaling
+        screenSize, spriteTexture, useColormap, enabledRectSizeControl, hasDvarScaling
     ) _uniformCache;
 
     std::string _speckFile;
