@@ -757,22 +757,33 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
             LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
         }
 
+        int attibutesPerPoint = 4;
+        if (_hasColorMapFile) {
+            attibutesPerPoint += 4;
+        }
+        if (_hasDatavarSize) {
+            attibutesPerPoint += 1;
+        }
+
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
+
+        int attributeCount = 0;
+
         GLint positionAttrib = _program->attributeLocation("in_position");
+        glEnableVertexAttribArray(positionAttrib);
+        glVertexAttribPointer(
+            positionAttrib,
+            4,
+            GL_FLOAT,
+            GL_FALSE,
+            attibutesPerPoint * sizeof(float),
+            nullptr
+        );
+        attributeCount += 4;
 
-        if (_hasColorMapFile && _hasDatavarSize) {
-            glEnableVertexAttribArray(positionAttrib);
-            glVertexAttribPointer(
-                positionAttrib,
-                4,
-                GL_FLOAT,
-                GL_FALSE,
-                9 * sizeof(float),
-                nullptr
-            );
-
+        if (_hasColorMapFile) {
             GLint colorMapAttrib = _program->attributeLocation("in_colormap");
             glEnableVertexAttribArray(colorMapAttrib);
             glVertexAttribPointer(
@@ -780,10 +791,13 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                9 * sizeof(float),
-                reinterpret_cast<void*>(4 * sizeof(float))
+                attibutesPerPoint * sizeof(float),
+                reinterpret_cast<void*>(attributeCount * sizeof(float))
             );
+            attributeCount += 4;
+        }
 
+        if (_hasDatavarSize) {
             GLint dvarScalingAttrib = _program->attributeLocation("in_dvarScaling");
             glEnableVertexAttribArray(dvarScalingAttrib);
             glVertexAttribPointer(
@@ -791,64 +805,10 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 1,
                 GL_FLOAT,
                 GL_FALSE,
-                9 * sizeof(float),
-                reinterpret_cast<void*>(8 * sizeof(float))
+                attibutesPerPoint * sizeof(float),
+                reinterpret_cast<void*>(attributeCount * sizeof(float))
             );
-        }
-        else if (_hasColorMapFile) {
-            glEnableVertexAttribArray(positionAttrib);
-            glVertexAttribPointer(
-                positionAttrib,
-                4,
-                GL_FLOAT,
-                GL_FALSE,
-                8 * sizeof(float),
-                nullptr
-            );
-
-            GLint colorMapAttrib = _program->attributeLocation("in_colormap");
-            glEnableVertexAttribArray(colorMapAttrib);
-            glVertexAttribPointer(
-                colorMapAttrib,
-                4,
-                GL_FLOAT,
-                GL_FALSE,
-                8 * sizeof(float),
-                reinterpret_cast<void*>(4 * sizeof(float))
-            );
-        }
-        else if (_hasDatavarSize) {
-            glEnableVertexAttribArray(positionAttrib);
-            glVertexAttribPointer(
-                positionAttrib,
-                4,
-                GL_FLOAT,
-                GL_FALSE,
-                8 * sizeof(float),
-                nullptr
-            );
-
-            GLint dvarScalingAttrib = _program->attributeLocation("in_dvarScaling");
-            glEnableVertexAttribArray(dvarScalingAttrib);
-            glVertexAttribPointer(
-                dvarScalingAttrib,
-                1,
-                GL_FLOAT,
-                GL_FALSE,
-                5 * sizeof(float),
-                reinterpret_cast<void*>(4 * sizeof(float))
-            );
-        }
-        else {
-            glEnableVertexAttribArray(positionAttrib);
-            glVertexAttribPointer(
-                positionAttrib,
-                4,
-                GL_FLOAT,
-                GL_FALSE,
-                0,
-                nullptr
-            );
+            attributeCount += 1;
         }
 
         glBindVertexArray(0);
@@ -856,32 +816,40 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         _dataIsDirty = false;
     }
 
-    if (_hasSpriteTexture && _spriteTextureIsDirty && !_spriteTexturePath.value().empty())
-    {
-        ZoneScopedN("Sprite texture");
-        TracyGpuZone("Sprite texture");
+    updateSpriteTexture();
+}
 
-        ghoul::opengl::Texture* texture = _spriteTexture;
+void RenderableBillboardsCloud::updateSpriteTexture() {
+    bool shouldUpdate = _hasSpriteTexture && _spriteTextureIsDirty &&
+        !_spriteTexturePath.value().empty();
 
-        unsigned int hash = ghoul::hashCRC32File(_spriteTexturePath);
-
-        _spriteTexture = DigitalUniverseModule::TextureManager.request(
-            std::to_string(hash),
-            [path = _spriteTexturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
-                std::filesystem::path p = absPath(path);
-                LINFO(fmt::format("Loaded texture from {}", p));
-                std::unique_ptr<ghoul::opengl::Texture> t =
-                    ghoul::io::TextureReader::ref().loadTexture(p.string(), 2);
-                t->uploadTexture();
-                t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-                t->purgeFromRAM();
-                return t;
-            }
-        );
-
-        DigitalUniverseModule::TextureManager.release(texture);
-        _spriteTextureIsDirty = false;
+    if (!shouldUpdate) {
+        return;
     }
+
+    ZoneScopedN("Sprite texture");
+    TracyGpuZone("Sprite texture");
+
+    ghoul::opengl::Texture* texture = _spriteTexture;
+
+    unsigned int hash = ghoul::hashCRC32File(_spriteTexturePath);
+
+    _spriteTexture = DigitalUniverseModule::TextureManager.request(
+        std::to_string(hash),
+        [path = _spriteTexturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
+            std::filesystem::path p = absPath(path);
+            LINFO(fmt::format("Loaded texture from {}", p));
+            std::unique_ptr<ghoul::opengl::Texture> t =
+                ghoul::io::TextureReader::ref().loadTexture(p.string(), 2);
+            t->uploadTexture();
+            t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            t->purgeFromRAM();
+            return t;
+        }
+    );
+
+    DigitalUniverseModule::TextureManager.release(texture);
+    _spriteTextureIsDirty = false;
 }
 
 std::vector<float> RenderableBillboardsCloud::createDataSlice() {
