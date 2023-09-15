@@ -47,7 +47,7 @@ local enable_cosmicplanet = {
   ]],
   Documentation = "Enables the planets sonification, turn off the cosmic points and jumps to Earth",
   GuiPath = "/Kulturnatten",
-  isLocal = false
+  IsLocal = false
 }
 
 local enable_geomarkers = {
@@ -60,7 +60,7 @@ local enable_geomarkers = {
   ]],
   Documentation = "Enables the planets sonification, turn off the cosmic points and jumps to Earth",
   GuiPath = "/Kulturnatten",
-  isLocal = false
+  IsLocal = false
 }
 
 local ShowConstellations = {
@@ -199,7 +199,7 @@ local enable_cosmicdata = {
   ]],
   Documentation = "Actions for Kulturnatten Cosmic View show",
   GuiPath = "/Kulturnatten",
-  isLocal = false
+  IsLocal = false
 }
 
 local fade_in = {
@@ -210,10 +210,10 @@ local fade_in = {
   
     openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1.0, 1.0)
     --openspace.fadeIn("RenderEngine.BlackoutFactor")
-	
+
 	--openspace.fadeIn("RenderEngine.BlackoutFactor", nil, "openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1); openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 0)")
-	
-	
+
+
   ]],
   Documentation = "Fade in",
   GuiPath = "/Kulturnatten",
