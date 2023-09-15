@@ -43,6 +43,7 @@
     "cosmic_view/mMDS_xyz_sphere_V2/clades",
     "cosmic_view/mMDS_xyz_sphere_V2/consensus_species",
     "cosmic_view/mMDS_xyz_sphere_V2/sequence_lineage",
+    "cosmic_view/mMDS_xyz_sphere_V2/sequences/sphere_V2_lineage_29_labelImages",
     "cosmic_view/mMDS_xyz_sphere_V2/sequences",
     "cosmic_view/mutations",
     "cosmic_view/Sphere_projection_Families/consensus_species",
@@ -382,7 +383,29 @@
       "name": "Scene.birds_UMAP_xyz_CenteredOnRoot_lineage_30.Scale.Scale",
       "type": "setPropertyValueSingle",
       "value": "50.0"
+    },
+    {
+      "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Scale.Scale",
+      "type": "setPropertyValueSingle",
+      "value": "100.0"
+    },
+    {
+      "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Scale.Scale",
+      "type": "setPropertyValueSingle",
+      "value": "100.0"
+    },
+    {
+      "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.ScaleFactor",
+      "type": "setPropertyValueSingle",
+      "value": "190.0"
+    },
+    {
+      "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Renderable.ScaleFactor",
+      "type": "setPropertyValueSingle",
+      "value": "190.0"
     }
+	
+
   ],
   "time": {
     "is_paused": true,

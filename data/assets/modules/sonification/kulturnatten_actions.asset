@@ -19,7 +19,7 @@ local enable_cosmicplanet = {
   Name = "A. Earth&Stars",
   Command = [[
 
-    local navState = { Up = {-0.7576672111209941, -0.17453402491439934, 0.6288706316400182}, Pitch = -0.005408597124228873, Anchor = "Earth", Yaw = -0.005394233067171395, Position = {17437796.895799384, 6591989.028259964, 22838677.140913013} }
+    local navState = { Position = { [1] = 7092130.705031315, [2] = -4383381.027418943, [3] = 5375835.6752485335 }, Pitch = 0.735891794245777, Up = { [1] = -0.5237096047477654, [2] = 0.17512316143248896, [3] = 0.8337026617594729 }, Yaw = -0.03325272628305041, Anchor = "Earth" }
     openspace.setPropertyValueSingle("RenderEngine.HorizFieldOfView", 120.000000)
 
 
@@ -39,7 +39,9 @@ local enable_cosmicplanet = {
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", false);
     openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false);
 
-    openspace.pathnavigation.flyToNavigationState(navState, 0.0)
+    --openspace.pathnavigation.flyToNavigationState(navState, 0.0)
+
+    openspace.navigation.setNavigationState(navState)
 	
 
   ]],
@@ -125,7 +127,7 @@ local enable_cosmicdata = {
   Command = [[
 
 
-    local navState = { Yaw = 0.005573284314233272, Position = { [1] = 888856460.7948432, [2] = 552856715.2096369, [3] = -352003664.04601175 }, Pitch = 0.0012216224241184976, Up = { [1] = -0.5922238921526191, [2] = 0.6427349311065496, [3] = -0.48596570856292143 }, Anchor = "birds_mMDS_xyz_sphere_V2_lineage_29", ReferenceFrame = "Root" }
+    local navState = { ReferenceFrame = "Root", Position = { [1] = 9999550.761132305, [2] = -4400527.143855089, [3] = -972123.2006507313 }, Yaw = 0.005573284314238385, Up = { [1] = 0.22483381308311498, [2] = 0.6676789979014266, [3] = -0.7096862068941835 }, Anchor = "birds_mMDS_xyz_sphere_V2_lineage_29", Pitch = 0.0012216224240836394 }
 
     openspace.setPropertyValue("{planet_solarSystem}.Renderable.Enabled", false)
     openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Enabled", false)
@@ -173,21 +175,25 @@ local enable_cosmicdata = {
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled", false)
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled", false)
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", false);
-	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Renderable.Enabled", false)
-	openspace.setPropertyValueSingle("Scene.birds_UMAP_xyz_CenteredOnRoot_lineage_29.Renderable.Enabled", false)
-	openspace.setPropertyValueSingle("Scene.birds_mMDS_xy_3Dprojection_lineage_29.Renderable.Enabled", false)
-	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_3Dprojection_lineage_29.Renderable.Enabled", false)
-	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_3Dprojection_lineage_29.Renderable.Enabled", false)
-	openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", false)
-	
-	
-	
-    --openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
-    openspace.fadeOut("Scene.ImageConstellation*.Renderable")
-	
-	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.birds_UMAP_xyz_CenteredOnRoot_lineage_29.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.birds_mMDS_xy_3Dprojection_lineage_29.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_3Dprojection_lineage_29.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_3Dprojection_lineage_29.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", false)
+    
+    
+    
+      --openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
+      openspace.fadeOut("Scene.ImageConstellation*.Renderable")
+    
+      openspace.fadeOut("Scene.Kulturnatten*.Renderable")
 
-  openspace.pathnavigation.flyToNavigationState(navState, 0.0)
+    openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", true)
+
+    --openspace.pathnavigation.flyToNavigationState(navState, 0.0)
+
+    openspace.navigation.setNavigationState(navState)
 	
 
   ]],
@@ -214,9 +220,53 @@ local fade_in = {
   IsLocal = false
 }
 
+local ShowSwan = {
+  Identifier = "module.sonification.enable.ShowSwan",
+  Name = "I. Show Swan",
+  Command = [[
+    openspace.fadeIn("Scene.Kulturnatten_Anseriformes.Renderable")
+  ]],
+  Documentation = "Enables and fades up constellation art work",
+  GuiPath = "/Kulturnatten",
+  IsLocal = false
+}
+
+local ShowGalli = {
+  Identifier = "module.sonification.enable.ShowGalli",
+  Name = "J. Show Galli",
+  Command = [[
+    openspace.fadeIn("Scene.Kulturnatten_Galliformes.Renderable")
+  ]],
+  Documentation = "Enables and fades up constellation art work",
+  GuiPath = "/Kulturnatten",
+  IsLocal = false
+}
+
+local ShowOstrich = {
+  Identifier = "module.sonification.enable.ShowOstrich",
+  Name = "K. Show Ostrich",
+  Command = [[
+    openspace.fadeIn("Scene.Kulturnatten_Struthioniformes.Renderable")
+  ]],
+  Documentation = "Enables and fades up constellation art work",
+  GuiPath = "/Kulturnatten",
+  IsLocal = false
+}
+
+local ShowAllImages = {
+  Identifier = "module.sonification.enable.ShowAllImages",
+  Name = "L. Show all Bird Images",
+  Command = [[
+    openspace.fadeIn("Scene.Kulturnatten*.Renderable")
+  ]],
+  Documentation = "Enables and fades up constellation art work",
+  GuiPath = "/Kulturnatten",
+  IsLocal = false
+}
+
 local enable_birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection = {
   Identifier = "module.sonification.enable.birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection",
-  Name = "I. Enable V2_L29",
+  Name = "M. Enable V2_L29",
   Command = [[
 
   openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", false)
@@ -235,7 +285,7 @@ local enable_birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection = {
 
 local enable_birds_UMAP_xyz_3Dprojection = {
   Identifier = "module.sonification.enable.birds_UMAP_xyz_3Dprojection",
-  Name = "J. Enable UMAP_CenteredOnRoot",
+  Name = "N. Enable UMAP_CenteredOnRoot",
   Command = [[
 
   openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", false)
@@ -247,11 +297,28 @@ local enable_birds_UMAP_xyz_3Dprojection = {
 	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_3Dprojection_lineage_29.Renderable.Enabled", false)
 	openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", false)
 
+  openspace.fadeOut("Scene.Kulturnatten*.Renderable")
+
   ]],
   Documentation = "Enables birds_UMAP_xyz_3Dprojection",
   GuiPath = "/Kulturnatten",
   IsLocal = false
 }
+
+
+
+
+
+--local HideImages = {
+--  Identifier = "module.sonification.disable.ShowImages",
+--  Name = "Hide all",
+--  Command = [[
+--    openspace.fadeOut("Scene.Kulturnatten*.Renderable")
+--  ]],
+--  Documentation = "Fades out constellation artwork",
+--  GuiPath = "/Kulturnatten",
+--  IsLocal = false
+--}
 
 --DATA FOLDER
 
@@ -350,9 +417,11 @@ asset.onInitialize(function ()
   openspace.action.registerAction(enable_birds_UMAP_xyz_3Dprojection)
   openspace.action.registerAction(ShowBirdConstArt)
   openspace.action.registerAction(enable_birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection)
-  
-  
-  
+  openspace.action.registerAction(ShowSwan)
+  openspace.action.registerAction(ShowGalli)
+  openspace.action.registerAction(ShowOstrich)
+  openspace.action.registerAction(ShowAllImages)
+    
 
 end)
 
@@ -371,6 +440,10 @@ asset.onDeinitialize(function ()
   openspace.action.registerAction(enable_birds_UMAP_xyz_3Dprojection)
   openspace.action.registerAction(ShowBirdConstArt)
   openspace.action.registerAction(enable_birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection)
+  openspace.action.registerAction(ShowSwan)
+  openspace.action.registerAction(ShowGalli)
+  openspace.action.registerAction(ShowOstrich)
+  openspace.action.registerAction(ShowAllImages)
   
 end)
 

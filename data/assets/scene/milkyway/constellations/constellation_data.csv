@@ -1,0 +1,86 @@
+Data about Constellations columns are: group, IAUabbreviation, name, x, y, z, scale, imageName, rotX, rotY, rotZ, centerStar, origins
+northern,And,Andromeda,-32.8276,43.3946,-27.8475,1.4,And.png,-2.191593,-2.661593,-2.141593,HD6860,ancient
+southern,Ant,Antlia,-0.2233,-103.8908,42.794,1.3,Ant.png,1.848407,0.198407,-3.141593,HD90610,modern
+bird,Aps,Apus,31.637,-32.562,-16.5786,1.1,Aps.png,-1.691593,-2.281593,0.838407,HD149324,modern
+zodiac,Aqr,Aquarius,86.509,149.4078,-155.8102,1.3,Aqr.png,-2.961593,-2.471593,-2.861593,-2.511593,ancient
+bird,Aql,Aquila,11.7741,9.7467,-1.6418,1.2,Aql.png,-1.901593,-2.261593,2.758407,HD182640,ancient
+southern,Ara,Ara,164.9273,-75.6246,-35.31,1.1,Ara.png,-1.381593,-2.131593,1.048407,HD157244,ancient
+zodiac,Ari,Aries,-13.2892,9.4519,-11.9378,0.8,Ari.png,0.668407,0.538407,0.518407,Hamal,ancient
+northern,Aur,Auriga,-12.3062,3.8595,1.0302,1.5,Aur.png,1.378407,1.108407,1.178407,HD34029,ancient
+northern,Boo,Bootes,11.2468,14.9864,30.4945,2,Boo.png,-3.141593,-0.601593,-2.361593,HD135722,ancient
+southern,Cae,Caelum,-6.0961,-13.7926,-13.3392,1,Cae.png,-0.661593,0.948407,0.418407,HD29875,modern
+northern,Cam,Camelopardalis,-304.8155,179.062,71.1454,1.7,Cam.png,2.128407,1.228407,1.478407,HD31910,modern
+zodiac,Cnc,Cancer,-30.9209,-16.4584,22.6601,1,Cnc.png,2.678407,1.058407,3.068407,HD74442,ancient
+northern,CVn,Canes Venatici,-3.1198,5.7935,33.1368,1.3,CVn.png,0.148407,3.138407,0.428407,HD112413,modern
+southern,CMa,Canis Major,-1.7693,-1.9125,-0.4074,1.3,CMa.png,1.128407,1.048407,1.878407,HD48915,ancient
+northern,CMi,Canis Minor,-2.8348,-1.8906,0.7881,1.2,CMi.png,2.538407,1.138407,-3.141593,HD61421,ancient
+zodiac,Cap,Capricornus,32.9799,20.0621,-29.3945,1.3,Cap.png,1.158407,-0.881593,-0.561593,HD200761,ancient
+southern,Car,Carina Vela Puppis,14.1325,-188.6018,-42.2785,2,Car.png,1.788407,1.048407,-3.111593,HD71129,ancient
+northern,Cas,Cassiopeia,-36.3073,59.4424,-7.6926,1.4,Cas.png,-1.711593,-2.881593,-2.631593,HD3712,ancient
+southern,Cen,Centaurus,20.1398,-33.183,9.5915,2.7,Cen.png,-1.291593,3.088407,0.458407,HD110304,ancient
+northern,Cep,Cepheus,-2.8178,14.4985,2.3848,1.7,Cep.png,-1.331593,-2.291593,-2.931593,HD203280,ancient
+southern,Cet,Cetus,-28.796,7.2425,-73.6693,1.5,Cet.png,0.238407,0.368407,0.688407,HD11353,ancient
+southern,Cha,Chameleon,53.5121,-108.3624,-38.1807,1.1,Cha.png,-1.801593,2.738407,0.448407,HD92305,modern
+southern,Cir,Circinus,11.4255,-11.6937,-1.3129,1,Cir.png,1.448407,-0.391593,-2.211593,HD128898,modern
+bird,Col,Columba,-11.2568,-20.5973,-11.9895,1,Col.png,2.258407,2.178407,-2.851593,HD39425,modern
+northern,Com,Coma Berenices,1.9257,-1.2062,12.2465,1.4,Com.png,3.138407,-0.051593,-2.711593,HD114378,modern
+southern,CrA,Corona Australis,146.1322,-4.7492,-53.7124,1,CrA.png,-3.141593,-2.021593,-3.141593,HD178345,ancient
+northern,CrB,Corona Borealis,33.5737,32.0314,52.9729,1.3,CrB.png,-3.141593,-0.601593,-2.271593,HD143107,ancient
+bird,Crv,Corvus,8.0442,-16.8858,19.3984,1.1,Crv.png,2.198407,-0.041593,-2.221593,HD108767,ancient
+southern,Crt,Crater,1.5886,-43.9831,40.339,1.3,Crt.png,-0.521593,3.14,0.588407,HD98430,ancient
+southern,Cru,Crux,49.3509,-85.0446,-0.6223,1.1,Cru.png,1.718407,0.048407,-2.741593,HD108248,modern
+bird,Cyg,Cygnus,78.7445,375.244,12.4995,1.4,Cyg.png,1.668407,-0.931593,-0.261593,HD194093,ancient
+northern,Del,Delphinus,14.8599,24.615,-8.055,1.2,Del.png,1.308407,-0.951593,-0.241593,HD196524,ancient
+southern,Dor,Dorado,-0.646,-9.3172,-6.9654,1.2,Dor.png,2.118407,1.768407,-2.901593,HD33262,modern
+northern,Dra,Draco,-1.434,20.6566,23.5098,1.9,Dra.png,0.658407,-2.541593,1.058407,HD137759,ancient
+northern,Equ,Equuleus,27.7363,41.7071,-27.4371,1.2,Equ.png,-1.801593,-2.511593,2.558407,HD202447,ancient
+southern,Eri,Eridanus,-37.5153,-23.5231,-65.6368,2.1,Eri.png,0.128407,0.698407,0.998407,HD20720,ancient
+southern,For,Fornax,-14.0351,-17.8282,-46.5514,1.4,For.png,3.138407,2.678407,-2.351593,HD17652,modern
+zodiac,Gem,Gemini,-362.5493,-102.2245,79.403,0.85,Gem.png,-0.731593,2.268407,-0.451593,Mekbuda,ancient
+bird,Gru,Grus,18.6528,-3.2893,-24.6602,1.3,Gru.png,-3.141593,-2.511593,-2.901593,HD209952,modern
+northern,Her,Hercules,14.0526,14.9773,12.5478,1.4,Her.png,-0.361593,-1.941593,1.358407,HD156164,ancient
+southern,Hor,Horologium,2.1021,-27.131,-40.5136,1.2,Hor.png,2.868407,2.528407,-2.201593,HD16920,modern
+equatorial,Hya,Hydra,-2.9043,-33.5496,25.8962,3,Hya.png,-0.531593,2.838407,0.368407,HD93813,ancient
+southern,Hyi,Hydrus,3.2767,-4.7183,-4.7829,1.1,Hyi.png,2.438407,-3.141593,-2.381593,HD2151,modern
+southern,Ind,Indus,133.6149,-53.5569,-115.9552,1.5,Ind.png,-0.211593,-1.191593,0.048407,HD198700,modern
+northern,Lac,Lacerta,-6.0878,30.5794,-3.6064,1,Lac.png,-1.521593,-2.391593,3.138407,HD213558,modern
+zodiac,Leo,Leo,-17.903,-13.2719,31.4196,1.33,Leo.png,-0.131593,2.448407,0.418407,HD89484,ancient
+northern,LMi,Leo Minor,-23.3948,-2.577,38.0756,1.1,LMi.png,-3.141593,0.478407,-2.201593,HD90537,modern
+equatorial,Lep,Lepus,-212.6297,-184.4909,-132.1156,1.1,Lep.png,-2.551593,2.228407,-1.561593,HD36673,ancient
+zodiac,Lib,Libra,17.5393,-6.2768,14.5916,1.2,Lib.png,-0.761593,-2.521593,0.898407,HD130819,ancient
+southern,Lup,Lupus,129.1166,-102.2983,33.3251,1.2,Lup.png,-1.311593,-2.461593,1.018407,HD129056,ancient
+northern,Lyn,Lynx,-98.3174,4.483,67.2289,1.3,Lyn.png,3.138407,1.048407,2.728407,HD70272,modern
+northern,Lyr,Lyra,2.8086,6.763,2.5555,1,Lyr.png,-1.831593,-2.091593,3.1415,HD172167,ancient
+southern,Men,Mensa,2.4149,-8.5586,-4.8892,1.1,Men.png,-1.091593,1.338407,0.418407,HD43834,modern
+southern,Mic,Microscopium,51.0335,11.1671,-44.3692,1,Mic.png,0.728407,-0.831593,-0.561593,HD199951,modern
+equatorial,Mon,Monoceros,-93.0725,-66.8909,8.6548,1.2,Mon.png,-1.331593,1.988407,-0.891593,HD55185,modern
+southern,Mus,Musca,48.8888,-79.2952,-10.2828,1.25,Mus.png,-1.871593,3.138407,0.358407,HD109668,modern
+southern,Nor,Norma,34.9251,-17.5643,0.0068,1,Nor.png,-1.631593,-2.421593,1.298407,HD146686,modern
+southern,Oct,Octans,22.0434,-27.8601,-24.3108,1,Oct.png,-0.911593,0.398407,1.198407,HD214846,modern
+northern,Oph,Ophiuchus,127.9419,14.0822,56.2015,3.2,Oph.png,2.178407,-0.781593,-1.681593,HD149757,ancient
+equatorial,Ori,Orion,-550.8742,-259.3621,-188.962,1.7,Ori.png,1.128407,1.058407,1.668407,HD37128,ancient
+bird,Pav,Pavo,4.4549,-2.5959,-3.2739,1.3,Pav.png,-2.391593,-2.171593,1.648407,HD190248,modern
+northern,Peg,Pegasus,0.9791,32.5947,-27.7339,2.3,Peg.png,0.918407,-0.591593,-0.101593,HD218045,ancient
+northern,Per,Perseus,-139.8202,79.8063,-16.2631,1.3,Per.png,-1.751593,2.428407,-2.411593,HD22928,ancient
+southern,Phe,Phoenix,5.0172,-4.2096,-22.8088,1.4,Phe.png,2.708407,-3.081593,-2.701593,HD6595,modern
+southern,Pic,Pictor,-4.5417,-45.5649,-27.1768,1,Pic.png,2.568407,2.138407,-2.081593,HD39523,modern
+zodiac,Psc,Pisces,-28.0235,45.315,-76.8893,1.6,Psc.png,0.728407,0.048407,0.638407,HD4656,ancient
+southern,PsA,Piscis Austrinus,99.9977,47.6679,-199.6345,1,PsA.png,3.138407,-2.541593,-2.881593,HD214748,ancient
+southern,Pyx,Pyxis,-66.7424,-248.9639,26.0445,1.2,Pyx.png,1.838407,-1.651593,2.708407,HD74575,modern
+southern,Ret,Reticulum,2.813,-37.2904,-33.2644,1.5,Ret.png,1.998407,2.188407,-2.591593,HD27256,modern
+northern,Sge,Sagitta,44.3886,70.9446,-7.6264,1.2,Sge.png,-0.741593,-2.231593,2.108407,HD189319,ancient
+zodiac,Sgr,Sagittarius,66.2304,11.1498,-14.8095,1.2,Sgr.png,1.728407,-1.321593,-1.751593,HD175191,ancient
+zodiac,Sco,Scorpius,137.4378,-19.4456,37.3606,1.2,Sco.png,1.698407,-1.001593,-1.751593,HD148478,ancient
+southern,Scl,Sculptor,21.6545,-6.8861,-166.524,1.3,Scl.png,-0.071593,-0.221593,0.638407,HD2429,modern
+southern,Sct,Scutum,48.8939,21.5158,-0.1629,1.2,Sct.png,1.188407,-1.271593,-0.971593,HD171443,modern
+southern,Sex,Sextans,-31.6009,-57.267,59.0296,1.2,Sex.png,2.428407,0.778407,-2.931593,HD87887,modern
+zodiac,Tau,Taurus,-18.7277,-0.3175,-6.9092,1.2,Tau.png,1.198407,0.908407,1.378407,Aldebran,ancient
+southern,Tel,Telescopium,72.3444,-14.5016,-20.0248,1.2,Tel.png,-0.461593,-1.731593,0.298407,HD169467,modern
+northern,Tri,Triangulum,-26.6263,21.9119,-16.2254,1.2,Tri.png,1.168407,0.218407,0.558407,HD13161,ancient
+southern,TrA,Triangulum Australe,96.2283,-76.4459,-33.5257,1.2,TrA.png,-1.991593,-2.491593,1.128407,HD150798,modern
+bird,Tuc,Tucana,35.395,-20.2535,-45.2324,1.1,Tuc.png,-0.351593,-0.161593,0.308407,HD211416,modern
+northern,Uma,Ursa Major,-12.0503,7.1931,19.8974,1.6,UMa.png,0.618407,2.758407,0.348407,HD95418,ancient
+northern,UMi,Ursa Minor,-11.3527,27.21,25.1835,1.7,UMi.png,-2.211593,-0.501593,-2.401593,HD131873,ancient
+zodiac,Vir,Virgo,36.5809,-35.1877,62.3341,1.6,Vir.png,-0.371593,3.138407,0.518407,HD116658,ancient
+southern,Vol,Volans,37.6,-182.7856,-62.6559,1.2,Vol.png,-2.441593,1.988407,-0.351593,HD68520,modern
+northern,Vul,Vulpecula,46.754,77.778,5.3953,1.1,Vul.png,-2.301593,-2.061593,-3.141593,HD131873,modern

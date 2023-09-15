@@ -75,7 +75,7 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
           Enabled = false,
           Origin = "Center",
           Billboard = false,
-          LazyLoading = true,
+          LazyLoading = false,
           Texture = images .. imageName,
           BlendMode = "Additive",
           Opacity = 0.1,
@@ -157,7 +157,10 @@ local nodes = {}
 
 
 asset.onInitialize(function()
-  local constellationsCSV = images .. "constellation_data.csv"
+  --local constellationsCSV = images .. "constellation_data.csv"
+
+  --local constellationsCSV = asset.localResource("constellation_data.csv")
+  
 
   nodes = createConstellations("ImageConstellation", "Constellation Art", constellationsCSV)
   for _, n in ipairs(nodes) do

@@ -120,8 +120,8 @@ CosmicSonification::CosmicSonification(const std::string& ip, int port)
 
     // Add options to the amplitude mode drop down menu
     _amplitudeModeProperty.addOptions({
-        { 0, "Distance" },
-        { 1, "Always Full" },
+        { 0, "Always Full" },
+        { 1, "Distance" },
         { 2, "Data" }
     });
     _amplitudeModeProperty.onChange([this]() { guiChangeAmpMode(); });
