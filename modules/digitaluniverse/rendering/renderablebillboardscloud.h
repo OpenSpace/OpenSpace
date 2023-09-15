@@ -125,8 +125,9 @@ private:
         properties::Vec2Property optionColorRangeData;
         properties::BoolProperty useLinearFiltering;
 
-        properties::BoolProperty  isColorMapExact;
+        properties::BoolProperty isColorMapExact;
 
+        std::vector<glm::vec2> colorRangeData;
     } _colorMapSettings;
 
     properties::Vec3Property _pointColor;
@@ -157,8 +158,6 @@ private:
 
     // Everything related to the labels is handled by LabelsComponent
     std::unique_ptr<LabelsComponent> _labels;
-
-    std::vector<glm::vec2> _colorRangeData;
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 

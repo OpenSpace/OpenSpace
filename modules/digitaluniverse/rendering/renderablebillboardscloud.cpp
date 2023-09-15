@@ -395,6 +395,33 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
     colorMapFile.setReadOnly(true); // Currently this can't be changed
     addProperty(colorMapFile);
 
+    colorRangeData = p.colorRange.value_or(colorRangeData);
+    if (!colorRangeData.empty()) {
+        optionColorRangeData = colorRangeData[colorRangeData.size() - 1];
+    }
+
+    optionColorRangeData.onChange([this]() {
+        const glm::vec2 colorRange = optionColorRangeData;
+        colorRangeData[colorOption.value()] = colorRange;
+    });
+
+    if (p.colorOption.has_value()) {
+        std::vector<std::string> opts = *p.colorOption;
+        for (size_t i = 0; i < opts.size(); ++i) {
+            colorOption.addOption(static_cast<int>(i), opts[i]);
+        }
+    }
+    colorOption.onChange([this]() {
+        const glm::vec2 colorRange = colorRangeData[colorOption.value()];
+        optionColorRangeData = colorRange;
+    });
+
+    if (colorRangeData.size() > 0) {
+        // Following DU behavior here. The last colormap variable
+        // entry is the one selected by default.
+        colorOption.setValue(static_cast<int>(colorRangeData.size() - 1));
+    }
+
     addProperty(optionColorRangeData);
     addProperty(setRangeFromData);
 
@@ -513,18 +540,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         _colorMapSettings.isColorMapExact.onChange([this]() { _dataIsDirty = true; });
         _colorMapSettings.useLinearFiltering.onChange([this]() { _dataIsDirty = true; });
-
-        _colorRangeData = p.colorRange.value_or(_colorRangeData);
-        if (!_colorRangeData.empty()) {
-            _colorMapSettings.optionColorRangeData = _colorRangeData[_colorRangeData.size() - 1];
-        }
-
-        _colorMapSettings.optionColorRangeData.onChange([this]() {
-            const glm::vec2 colorRange = _colorMapSettings.optionColorRangeData;
-            int optionIndex = _colorMapSettings.colorOption.value();
-            _colorRangeData[optionIndex] = colorRange;
-            _dataIsDirty = true;
-        });
+        _colorMapSettings.optionColorRangeData.onChange([this]() { _dataIsDirty = true; });
+        _colorMapSettings.colorOption.onChange([this]() { _dataIsDirty = true; });
 
         _colorMapSettings.setRangeFromData.onChange([this]() {
             const int colorMapInUse = _hasColorMapFile ?
@@ -539,20 +556,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             }
 
             _colorMapSettings.optionColorRangeData = glm::vec2(minValue, maxValue);
-        });
-
-        // Add options and create conversion map
-        if (p.colorOption.has_value()) {
-            std::vector<std::string> opts = *p.colorOption;
-            for (size_t i = 0; i < opts.size(); ++i) {
-                _colorMapSettings.colorOption.addOption(static_cast<int>(i), opts[i]);
-            }
-        }
-        _colorMapSettings.colorOption.onChange([this]() {
-            _dataIsDirty = true;
-            int optionIndex = _colorMapSettings.colorOption.value();
-            const glm::vec2 colorRange = _colorRangeData[optionIndex];
-            _colorMapSettings.optionColorRangeData = colorRange;
         });
 
         addPropertySubOwner(_colorMapSettings);
@@ -585,12 +588,6 @@ void RenderableBillboardsCloud::initialize() {
     if (_hasLabels) {
         _labels->initialize();
         _labels->loadLabels();
-    }
-
-    if (_colorRangeData.size() > 0) {
-        // Following DU behavior here. The last colormap variable
-        // entry is the one selected by default.
-        _colorMapSettings.colorOption.setValue(static_cast<int>(_colorRangeData.size() - 1));
     }
 
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
@@ -971,12 +968,13 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             float variableColor = e.data[colorMapInUse];
 
             float cmax, cmin;
-            if (_colorRangeData.empty()) {
+            if (_colorMapSettings.colorRangeData.empty()) {
                 cmax = maxColorIdx; // Max value of datavar used for the index color
                 cmin = minColorIdx; // Min value of datavar used for the index color
             }
             else {
-                glm::vec2 currentColorRange = _colorRangeData[_colorMapSettings.colorOption.value()];
+                glm::vec2 currentColorRange =
+                    _colorMapSettings.colorRangeData[_colorMapSettings.colorOption.value()];
                 cmax = currentColorRange.y;
                 cmin = currentColorRange.x;
             }
