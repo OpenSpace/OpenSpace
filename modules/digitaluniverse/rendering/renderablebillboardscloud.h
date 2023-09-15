@@ -69,6 +69,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    int nAttributesPerPoint() const;
     void updateBufferData();
     void updateSpriteTexture();
 

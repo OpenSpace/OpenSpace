@@ -793,6 +793,13 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
     }
 }
 
+int RenderableBillboardsCloud::nAttributesPerPoint() const {
+    int n = 4; // position
+    n += _hasColorMapFile ? 4: 0;
+    n += _hasDatavarSize ? 1: 0;
+    return n;
+}
+
 void RenderableBillboardsCloud::updateBufferData() {
     if (!_hasSpeckFile) {
         return;
@@ -815,18 +822,11 @@ void RenderableBillboardsCloud::updateBufferData() {
         LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
-    int attibutesPerPoint = 4;
-    if (_hasColorMapFile) {
-        attibutesPerPoint += 4;
-    }
-    if (_hasDatavarSize) {
-        attibutesPerPoint += 1;
-    }
-
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
 
+    const int attibutesPerPoint = nAttributesPerPoint();
     int attributeCount = 0;
 
     GLint positionAttrib = _program->attributeLocation("in_position");
@@ -915,12 +915,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     }
 
     std::vector<float> result;
-    if (_hasColorMapFile) {
-        result.reserve(8 * _dataset.entries.size());
-    }
-    else {
-        result.reserve(4 * _dataset.entries.size());
-    }
+    result.reserve(nAttributesPerPoint() * _dataset.entries.size());
 
     // what datavar in use for the index color
     int colorMapInUse = _hasColorMapFile ?
@@ -944,13 +939,13 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     }
 
     double maxRadius = 0.0;
-
     float biggestCoord = -1.f;
+
     for (const speck::Dataset::Entry& e : _dataset.entries) {
         const double unitMeter = toMeter(_unit);
-        glm::vec4 position = glm::vec4(_transformationMatrix * glm::dvec4(
-            glm::dvec3(e.position) * unitMeter, 1.0
-        ));
+        glm::vec4 position = glm::vec4(
+            _transformationMatrix * glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0)
+        );
 
         const double r = glm::length(position);
         maxRadius = std::max(maxRadius, r);
@@ -965,7 +960,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             biggestCoord = std::max(biggestCoord, glm::compMax(position));
             // Note: if exact colormap option is not selected, the first color and the
             // last color in the colormap file are the outliers colors.
-            float variableColor = e.data[colorMapInUse];
+            float valueToColorFrom = e.data[colorMapInUse];
 
             float cmax, cmin;
             if (_colorMapSettings.colorRangeData.empty()) {
@@ -980,13 +975,13 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             }
 
             if (_colorMapSettings.isColorMapExact) {
-                int colorIndex = static_cast<int>(variableColor + cmin);
+                int colorIndex = static_cast<int>(valueToColorFrom + cmin);
                 for (int j = 0; j < 4; ++j) {
                     result.push_back(_colorMap.entries[colorIndex][j]);
                 }
             }
             else if (_colorMapSettings.useLinearFiltering) {
-                float valueT = (variableColor - cmin) / (cmax - cmin); // in [0, 1)
+                float valueT = (valueToColorFrom - cmin) / (cmax - cmin); // in [0, 1)
                 valueT = std::clamp(valueT, 0.f, 1.f);
 
                 const float idx = valueT * (_colorMap.entries.size() - 1);
@@ -1012,7 +1007,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
                 float normalization = ((cmax != cmin) && (ncmap > 2.f)) ?
                     (ncmap - 2.f) / (cmax - cmin) : 0;
                 int colorIndex = static_cast<int>(
-                    (variableColor - cmin) * normalization + 1.f
+                    (valueToColorFrom - cmin) * normalization + 1.f
                 );
                 colorIndex = colorIndex < 0 ? 0 : colorIndex;
                 colorIndex = colorIndex >= ncmap ?
