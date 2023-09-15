@@ -327,7 +327,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
     return codegen::doc<Parameters>("digitaluniverse_RenderableBillboardsCloud");
 }
 
-RenderableBillboardsCloud::SizeSettings::SizeSettings()
+RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "SizeSetting", "Size Settings", ""})
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
     , pixelSizeControl(PixelSizeControlInfo, false)
@@ -340,27 +340,39 @@ RenderableBillboardsCloud::SizeSettings::SizeSettings()
     , correctionSizeEndDistance(CorrectionSizeEndDistanceInfo, 17.f, 12.f, 25.f)
     , correctionSizeFactor(CorrectionSizeFactorInfo, 8.f, 0.f, 20.f)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    scaleFactor = p.scaleFactor.value_or(scaleFactor);
     addProperty(scaleFactor);
+
+    pixelSizeControl = p.enablePixelSizeControl.value_or(pixelSizeControl);
     addProperty(pixelSizeControl);
-    addProperty(billboardMinMaxSize);
+
+    billboardMinMaxSize = p.billboardMinMaxSize.value_or(billboardMinMaxSize);
     billboardMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    addProperty(billboardMinMaxSize);
 
     // TODO: Make these clearer
+    correctionSizeEndDistance = p.correctionSizeEndDistance.value_or(correctionSizeEndDistance);
     addProperty(correctionSizeEndDistance);
+    correctionSizeFactor = p.correctionSizeFactor.value_or(correctionSizeFactor);
     addProperty(correctionSizeFactor);
 }
 
-RenderableBillboardsCloud::SizeFromData::SizeFromData()
+RenderableBillboardsCloud::SizeFromData::SizeFromData(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "SizeFromData", "Size From Data", "" })
     , datavarSizeOption(
         SizeOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     addProperty(datavarSizeOption);
 }
 
-RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings()
+RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
+                                                      const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "ColorMap", "Color Map", "" })
     , enabled(UseColorMapInfo, true)
     , colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -370,13 +382,26 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings()
     , setRangeFromData(SetRangeFromDataInfo)
     , isColorMapExact(IsColorMapExactInfo, false) // TODO: Fix docs
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    enabled = p.useColorMap.value_or(enabled);
     addProperty(enabled);
+
     addProperty(colorOption);
-    addProperty(colorMapFile);
+
+    if (p.colorMap.has_value()) {
+        colorMapFile = absPath(*p.colorMap).string();
+    }
     colorMapFile.setReadOnly(true); // Currently this can't be changed
+    addProperty(colorMapFile);
+
     addProperty(optionColorRangeData);
     addProperty(setRangeFromData);
+
+    useLinearFiltering = p.useLinearFiltering.value_or(useLinearFiltering);
     addProperty(useLinearFiltering);
+
+    isColorMapExact = p.exactColorMap.value_or(isColorMapExact);
     addProperty(isColorMapExact);
 }
 
@@ -393,6 +418,9 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     )
     , _disableFadeInDistance(DisableFadeInInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _sizeSettings(dictionary)
+    , _sizeFromData(dictionary)
+    , _colorMapSettings(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -440,8 +468,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_pointColor);
 
-    _sizeSettings.scaleFactor = p.scaleFactor.value_or(_sizeSettings.scaleFactor);
-
     _polygonSides = p.polygonSides.value_or(_polygonSides);
     _hasPolygon = p.polygonSides.has_value();
 
@@ -467,14 +493,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     if (p.sizeOption.has_value()) {
         std::vector<std::string> opts = *p.sizeOption;
         for (size_t i = 0; i < opts.size(); ++i) {
+            // Note that options are added in order
             _sizeFromData.datavarSizeOption.addOption(static_cast<int>(i), opts[i]);
-            _optionConversionSizeMap.insert({ static_cast<int>(i), opts[i] });
-            _datavarSizeOptionString = opts[i];
         }
 
         _sizeFromData.datavarSizeOption.onChange([this]() {
             _dataIsDirty = true;
-            _datavarSizeOptionString = _optionConversionSizeMap[_sizeFromData.datavarSizeOption];
         });
 
         _hasDatavarSize = true;
@@ -482,46 +506,19 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         addPropertySubOwner(_sizeFromData);
     }
 
-    _sizeSettings.pixelSizeControl =
-        p.enablePixelSizeControl.value_or(_sizeSettings.pixelSizeControl);
-
-    _sizeSettings.billboardMinMaxSize =
-        p.billboardMinMaxSize.value_or(_sizeSettings.billboardMinMaxSize);
-
-    _sizeSettings.correctionSizeEndDistance =
-        p.correctionSizeEndDistance.value_or(_sizeSettings.correctionSizeEndDistance);
-
-    _sizeSettings.correctionSizeFactor =
-        p.correctionSizeFactor.value_or(_sizeSettings.correctionSizeFactor);
-
     addPropertySubOwner(_sizeSettings);
 
     if (p.colorMap.has_value()) {
-        _colorMapSettings.enabled = p.useColorMap.value_or(_colorMapSettings.enabled);
-
-        _colorMapSettings.colorMapFile = absPath(*p.colorMap).string();
         _hasColorMapFile = true;
 
-        if (p.colorOption.has_value()) {
-            std::vector<std::string> opts = *p.colorOption;
-            for (size_t i = 0; i < opts.size(); ++i) {
-                _colorMapSettings.colorOption.addOption(static_cast<int>(i), opts[i]);
-                _optionConversionMap.insert({ static_cast<int>(i), opts[i] });
-                _colorOptionString = opts[i];
-            }
-        }
-        _colorMapSettings.colorOption.onChange([this]() {
-            _dataIsDirty = true;
-            int optionIndex = _colorMapSettings.colorOption.value();
-            const glm::vec2 colorRange = _colorRangeData[optionIndex];
-            _colorMapSettings.optionColorRangeData = colorRange;
-            _colorOptionString = _optionConversionMap[optionIndex];
-        });
+        _colorMapSettings.isColorMapExact.onChange([this]() { _dataIsDirty = true; });
+        _colorMapSettings.useLinearFiltering.onChange([this]() { _dataIsDirty = true; });
 
         _colorRangeData = p.colorRange.value_or(_colorRangeData);
         if (!_colorRangeData.empty()) {
             _colorMapSettings.optionColorRangeData = _colorRangeData[_colorRangeData.size() - 1];
         }
+
         _colorMapSettings.optionColorRangeData.onChange([this]() {
             const glm::vec2 colorRange = _colorMapSettings.optionColorRangeData;
             int optionIndex = _colorMapSettings.colorOption.value();
@@ -530,8 +527,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         });
 
         _colorMapSettings.setRangeFromData.onChange([this]() {
-            const int colorMapInUse =
-                _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
+            const int colorMapInUse = _hasColorMapFile ?
+                _dataset.index(_colorMapSettings.colorOption.option().description) : 0;
 
             float minValue = std::numeric_limits<float>::max();
             float maxValue = -std::numeric_limits<float>::max();
@@ -544,15 +541,19 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _colorMapSettings.optionColorRangeData = glm::vec2(minValue, maxValue);
         });
 
-        _colorMapSettings.useLinearFiltering =
-            p.useLinearFiltering.value_or(_colorMapSettings.useLinearFiltering);
-
-        _colorMapSettings.useLinearFiltering.onChange([this]() { _dataIsDirty = true; });
-
-        _colorMapSettings.isColorMapExact =
-            p.exactColorMap.value_or(_colorMapSettings.isColorMapExact);
-
-        _colorMapSettings.isColorMapExact.onChange([this]() { _dataIsDirty = true; });
+        // Add options and create conversion map
+        if (p.colorOption.has_value()) {
+            std::vector<std::string> opts = *p.colorOption;
+            for (size_t i = 0; i < opts.size(); ++i) {
+                _colorMapSettings.colorOption.addOption(static_cast<int>(i), opts[i]);
+            }
+        }
+        _colorMapSettings.colorOption.onChange([this]() {
+            _dataIsDirty = true;
+            int optionIndex = _colorMapSettings.colorOption.value();
+            const glm::vec2 colorRange = _colorRangeData[optionIndex];
+            _colorMapSettings.optionColorRangeData = colorRange;
+        });
 
         addPropertySubOwner(_colorMapSettings);
     }
@@ -586,7 +587,7 @@ void RenderableBillboardsCloud::initialize() {
         _labels->loadLabels();
     }
 
-    if (!_colorOptionString.empty() && (_colorRangeData.size() > 1)) {
+    if (_colorRangeData.size() > 0) {
         // Following DU behavior here. The last colormap variable
         // entry is the one selected by default.
         _colorMapSettings.colorOption.setValue(static_cast<int>(_colorRangeData.size() - 1));
@@ -925,12 +926,12 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     }
 
     // what datavar in use for the index color
-    int colorMapInUse =
-        _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
+    int colorMapInUse = _hasColorMapFile ?
+        _dataset.index(_colorMapSettings.colorOption.option().description) : 0;
 
     // what datavar in use for the size scaling (if present)
-    int sizeScalingInUse =
-        _hasDatavarSize ? _dataset.index(_datavarSizeOptionString) : -1;
+    int sizeScalingInUse = _hasDatavarSize ?
+        _dataset.index(_sizeFromData.datavarSizeOption.option().description) : -1;
 
     float minColorIdx = std::numeric_limits<float>::max();
     float maxColorIdx = -std::numeric_limits<float>::max();

@@ -96,7 +96,7 @@ private:
     GLuint _pTexture = 0;
 
     struct SizeSettings : properties::PropertyOwner {
-        SizeSettings();
+        SizeSettings(const ghoul::Dictionary& dictionary);
 
         properties::FloatProperty scaleFactor;
 
@@ -107,14 +107,14 @@ private:
     } _sizeSettings;
 
     struct SizeFromData : properties::PropertyOwner {
-        SizeFromData();
+        SizeFromData(const ghoul::Dictionary& dictionary);
 
         //properties::BoolProperty useSizeFromData; // TODO: add
         properties::OptionProperty datavarSizeOption;
     } _sizeFromData;
 
     struct ColorMapSettings : properties::PropertyOwner {
-        ColorMapSettings();
+        ColorMapSettings(const ghoul::Dictionary& dictionary);
 
         properties::BoolProperty enabled;
         properties::OptionProperty colorOption;
@@ -149,8 +149,6 @@ private:
     ) _uniformCache;
 
     std::string _speckFile;
-    std::string _colorOptionString;
-    std::string _datavarSizeOptionString;
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 
@@ -161,8 +159,6 @@ private:
     std::unique_ptr<LabelsComponent> _labels;
 
     std::vector<glm::vec2> _colorRangeData;
-    std::unordered_map<int, std::string> _optionConversionMap;
-    std::unordered_map<int, std::string> _optionConversionSizeMap;
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
