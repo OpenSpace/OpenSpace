@@ -38,8 +38,6 @@ local DeepSkyObjects = {
     Unit = "pc",
     --FadeInDistances = { 0.05, 1.0 }, -- Fade in value in the same unit as "Unit"
     BillboardMinMaxSize = { 0.0, 8.22 }, -- in pixels
-    --CorrectionSizeEndDistance = 22.0,
-    --CorrectionSizeFactor = 10.45
     EnablePixelSizeControl = true
   },
   Transform = {

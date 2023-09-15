@@ -34,8 +34,6 @@ local Object = {
     ColorOption = { "typeindex" },
     --ColorRange = { { 1.0, 4.0} },
     ScaleFactor = 372.1,
-    --CorrectionSizeEndDistance = 16.1,
-    --CorrectionSizeFactor = 7.75,
     BillboardMinMaxSize = { 0.0, 20.0 },
     EnablePixelSizeControl = true
   },

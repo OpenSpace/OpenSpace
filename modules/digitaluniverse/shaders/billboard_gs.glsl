@@ -51,8 +51,6 @@ uniform vec3 right;
 // RenderOption: CameraPositionNormal
 uniform dvec3 cameraPosition;
 uniform vec3 cameraLookUp;
-uniform float correctionSizeFactor;
-uniform float correctionSizeEndDistance;
 
 // Pixel size control: true
 uniform vec2 screenSize;
@@ -68,7 +66,6 @@ const vec2 corners[4] = vec2[4](
 
 const int RenderOptionCameraViewDirection = 0;
 const int RenderOptionCameraPositionNormal = 1;
-
 
 void main() {
   ta = 1.0;
@@ -93,13 +90,6 @@ void main() {
     vec3 normal = vec3(normalize(cameraPosition - dpos.xyz));
     vec3 newRight = normalize(cross(cameraLookUp, normal));
     vec3 newUp = cross(normal, newRight);
-
-    if (!enabledRectSizeControl) {
-      double distCamera = length(cameraPosition - dpos.xyz);
-      float expVar = float(-distCamera) / pow(10.0, correctionSizeEndDistance);
-      float factorVar = pow(10.0, correctionSizeFactor);
-      scaleMultiply *= 1.0 / (1.0 + factorVar * exp(expVar));
-    }
 
     scaledRight = scaleMultiply * newRight * 0.5;
     scaledUp = scaleMultiply * newUp * 0.5;

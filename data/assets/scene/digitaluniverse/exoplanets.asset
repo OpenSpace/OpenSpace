@@ -31,8 +31,6 @@ local Object = {
     File = speck .. "expl.speck",
     Unit = "pc",
     ScaleFactor = 388.67923,
-    CorrectionSizeEndDistance = 15.23,
-    CorrectionSizeFactor = 13.3,
     BillboardMinMaxSize = { 0.0, 75.0 },
     EnablePixelSizeControl = true
   },

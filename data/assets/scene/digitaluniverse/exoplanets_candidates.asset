@@ -24,8 +24,6 @@ local Object = {
     File = speck .. "exoplanet_candidates.speck",
     Unit = "pc",
     Texture = textures .. "halo.png",
-    CorrectionSizeEndDistance = 15.86,
-    CorrectionSizeFactor = 8.59,
     BillboardMinMaxSize = { 0.0, 30.0 },
     EnablePixelSizeControl = true
   },

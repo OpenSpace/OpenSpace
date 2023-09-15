@@ -54,10 +54,9 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableBillboardsCloud";
 
-    constexpr std::array<const char*, 20> UniformNames = {
+    constexpr std::array<const char*, 18> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
-        "renderOption", "minBillboardSize", "maxBillboardSize",
-        "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
+        "renderOption", "minBillboardSize", "maxBillboardSize", "color", "alphaValue",
         "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
         "useColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
@@ -186,22 +185,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        CorrectionSizeEndDistanceInfo =
-    {
-        "CorrectionSizeEndDistance",
-        "Distance in 10^X meters where correction size stops acting",
-        "Distance in 10^X meters where correction size stops acting",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
-        "CorrectionSizeFactor",
-        "Control variable for distance size",
-        "",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo UseLinearFilteringInfo = {
         "UseLinearFiltering",
         "Use Linear Filtering",
@@ -302,12 +285,6 @@ namespace {
         // [[codegen::verbatim(BillboardMinMaxSizeInfo.description)]]
         std::optional<glm::vec2> billboardMinMaxSize;
 
-        // [[codegen::verbatim(CorrectionSizeEndDistanceInfo.description)]]
-        std::optional<float> correctionSizeEndDistance;
-
-        // [[codegen::verbatim(CorrectionSizeFactorInfo.description)]]
-        std::optional<float> correctionSizeFactor;
-
         // [[codegen::verbatim(PixelSizeControlInfo.description)]]
         std::optional<bool> enablePixelSizeControl;
 
@@ -337,8 +314,6 @@ RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& d
         glm::vec2(0.f),
         glm::vec2(1000.f)
     )
-    , correctionSizeEndDistance(CorrectionSizeEndDistanceInfo, 17.f, 12.f, 25.f)
-    , correctionSizeFactor(CorrectionSizeFactorInfo, 8.f, 0.f, 20.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -351,12 +326,6 @@ RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& d
     billboardMinMaxSize = p.billboardMinMaxSize.value_or(billboardMinMaxSize);
     billboardMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(billboardMinMaxSize);
-
-    // TODO: Make these clearer
-    correctionSizeEndDistance = p.correctionSizeEndDistance.value_or(correctionSizeEndDistance);
-    addProperty(correctionSizeEndDistance);
-    correctionSizeFactor = p.correctionSizeFactor.value_or(correctionSizeFactor);
-    addProperty(correctionSizeFactor);
 }
 
 RenderableBillboardsCloud::SizeFromData::SizeFromData(const ghoul::Dictionary& dictionary)
@@ -696,12 +665,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
-    _program->setUniform(
-        _uniformCache.correctionSizeEndDistance,
-        _sizeSettings.correctionSizeEndDistance
-    );
-    _program->setUniform(_uniformCache.correctionSizeFactor, _sizeSettings.correctionSizeFactor);
-
     _program->setUniform(_uniformCache.enabledRectSizeControl, _sizeSettings.pixelSizeControl);
 
     _program->setUniform(_uniformCache.hasDvarScaling, _hasDatavarSize);
@@ -827,7 +790,7 @@ void RenderableBillboardsCloud::updateBufferData() {
     glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
 
     const int attibutesPerPoint = nAttributesPerPoint();
-    int attributeCount = 0;
+    int attributeOffset= 0;
 
     GLint positionAttrib = _program->attributeLocation("in_position");
     glEnableVertexAttribArray(positionAttrib);
@@ -839,7 +802,7 @@ void RenderableBillboardsCloud::updateBufferData() {
         attibutesPerPoint * sizeof(float),
         nullptr
     );
-    attributeCount += 4;
+    attributeOffset += 4;
 
     if (_hasColorMapFile) {
         GLint colorMapAttrib = _program->attributeLocation("in_colormap");
@@ -850,9 +813,9 @@ void RenderableBillboardsCloud::updateBufferData() {
             GL_FLOAT,
             GL_FALSE,
             attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeCount * sizeof(float))
+            reinterpret_cast<void*>(attributeOffset * sizeof(float))
         );
-        attributeCount += 4;
+        attributeOffset += 4;
     }
 
     if (_hasDatavarSize) {
@@ -864,9 +827,9 @@ void RenderableBillboardsCloud::updateBufferData() {
             GL_FLOAT,
             GL_FALSE,
             attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeCount * sizeof(float))
+            reinterpret_cast<void*>(attributeOffset * sizeof(float))
         );
-        attributeCount += 1;
+        attributeOffset += 1;
     }
 
     glBindVertexArray(0);
