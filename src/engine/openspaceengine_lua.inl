@@ -151,10 +151,8 @@ namespace {
         );
     }
 
-    std::filesystem::path fileName = FileSys.cacheManager()->cachedFilename(
-        name + ".png",
-        ""
-    );
+    const std::string namePng = fmt::format("{}.png", name);
+    std::filesystem::path fileName = FileSys.cacheManager()->cachedFilename(namePng, "");
 
     const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
     if (hasCachedFile) {
@@ -171,15 +169,16 @@ namespace {
         img[2] = static_cast<GLubyte>(255 * color.b);
 
         using Texture = ghoul::opengl::Texture;
-        std::unique_ptr<Texture> textureFromData = std::make_unique<Texture>(
+        Texture textureFromData = Texture(
             reinterpret_cast<void*>(img.data()),
             glm::uvec3(width, height, 1),
             GL_TEXTURE_2D,
             Texture::Format::RGB
         );
+        textureFromData.setDataOwnership(Texture::TakeOwnership::No);
 
         try {
-            ghoul::io::TextureWriter::ref().saveTexture(*textureFromData, fileName.string());
+            ghoul::io::TextureWriter::ref().saveTexture(textureFromData, fileName.string());
         }
         catch (const ghoul::io::TextureWriter::MissingWriterException& e) {
             // This should not happen, as we know .png is a supported format
