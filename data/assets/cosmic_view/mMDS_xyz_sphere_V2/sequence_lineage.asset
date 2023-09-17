@@ -19,12 +19,14 @@ local label_lineage_33 = asset.localResource("sequences/lineage_33.label")
 local cmap_lineage_33 = asset.localResource("sequences/lineage_33.cmap")
 local label_lineage_34 = asset.localResource("sequences/lineage_34.label")
 local cmap_lineage_34 = asset.localResource("sequences/lineage_34.cmap")
-local texture_file = asset.localResource("point3A.png")
+--local texture_file = asset.localResource("point3A.png")
+
+local texture_file = asset.localResource("wingsSquare.png")
 
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 -- Set some parameters for OpenSpace settings
-local scale_factor = 150.0
+local scale_factor = 210.0
 local text_size = 6
 local text_min_size = 15
 local text_max_size = 30

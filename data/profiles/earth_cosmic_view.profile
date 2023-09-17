@@ -393,16 +393,6 @@
       "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Scale.Scale",
       "type": "setPropertyValueSingle",
       "value": "100.0"
-    },
-    {
-      "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.ScaleFactor",
-      "type": "setPropertyValueSingle",
-      "value": "190.0"
-    },
-    {
-      "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Renderable.ScaleFactor",
-      "type": "setPropertyValueSingle",
-      "value": "190.0"
     }
 	
 

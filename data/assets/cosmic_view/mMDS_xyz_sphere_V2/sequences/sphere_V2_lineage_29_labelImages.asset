@@ -36,8 +36,8 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
   for line in io.lines(openspace.absPath(constellationfile)) do
     if (notFirstLine) then
       -- describes the data
-      local matchstring = "(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$"
-      local x, y, z, text, name, hash, number, imageName, rotX, rotY, rotZ, scale = line:match(matchstring)
+      local matchstring = "(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$"
+      local x, y, z, text, name, hash, number, imageName, rotX, rotY, rotZ, scale, colorR, colorG, colorB = line:match(matchstring)
       local magVec = math.sqrt(x*x + y*y + z*z)
       local normx = x / magVec
       local normy = y / magVec
@@ -75,6 +75,8 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
           Size = tonumber(baseScale * scale * distanceMultiplier / 10),
           Enabled = false,
           Origin = "Center",
+          --MultiplyColor = {colorR,colorG,colorB},
+		  MultiplyColor = {tonumber(colorR),tonumber(colorG),tonumber(colorB)},
           Billboard = false, --might want true, for dome
           LazyLoading = false, --false, set to false to load in start, could for constellations also
           Texture = images .. imageName,
