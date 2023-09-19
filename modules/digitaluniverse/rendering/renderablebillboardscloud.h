@@ -123,7 +123,6 @@ protected:
         properties::TriggerProperty setRangeFromData;
         properties::Vec2Property optionColorRangeData;
 
-        properties::BoolProperty useLinearFiltering;
         properties::BoolProperty isColorMapExact;
 
         std::vector<glm::vec2> colorRangeData;

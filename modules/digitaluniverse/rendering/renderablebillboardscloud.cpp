@@ -183,20 +183,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseLinearFilteringInfo = {
-        "UseLinearFiltering",
-        "Use Linear Filtering",
-        "Determines whether the provided color map should be sampled nearest neighbor "
-        "(=off) or linearly (=on)",
-        // @VISIBILITY(3.25)
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo IsColorMapExactInfo = {
         "ExactColorMap",
         "Exact Color Map",
         "Set a 1-to-1 relationship between the color index variable and the colormap "
-        "entrered value, wihtout adjusting to the min/max vlaues. Overrides any other "
+        "entrered value, wihtout adjusting to the min/max values. Overrides any other "
         "sampling option", // @TODO: Clarify.
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -282,9 +273,6 @@ namespace {
 
         // [[codegen::verbatim(PixelSizeControlInfo.description)]]
         std::optional<bool> enablePixelSizeControl;
-
-        // [[codegen::verbatim(UseLinearFilteringInfo.description)]]
-        std::optional<bool> useLinearFiltering;
     };
 
 
@@ -342,7 +330,6 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
     , colorParameterOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , colorMapFile(ColorMapInfo)
     , optionColorRangeData(OptionColorRangeInfo, glm::vec2(0.f))
-    , useLinearFiltering(UseLinearFilteringInfo, false)
     , setRangeFromData(SetRangeFromDataInfo)
     , isColorMapExact(IsColorMapExactInfo, false) // TODO: Fix docs
 {
@@ -389,9 +376,6 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
 
     addProperty(optionColorRangeData);
     addProperty(setRangeFromData);
-
-    useLinearFiltering = p.useLinearFiltering.value_or(useLinearFiltering);
-    addProperty(useLinearFiltering);
 
     isColorMapExact = p.exactColorMap.value_or(isColorMapExact);
     addProperty(isColorMapExact);
@@ -497,7 +481,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _hasColorMapFile = true;
 
         _colorMapSettings.isColorMapExact.onChange([this]() { _dataIsDirty = true; });
-        _colorMapSettings.useLinearFiltering.onChange([this]() { _dataIsDirty = true; });
         _colorMapSettings.optionColorRangeData.onChange([this]() { _dataIsDirty = true; });
         _colorMapSettings.colorParameterOption.onChange([this]() { _dataIsDirty = true; });
 
@@ -883,25 +866,6 @@ glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom,
     if (_colorMapSettings.isColorMapExact) {
         int colorIndex = static_cast<int>(valueToColorFrom + cmin);
         return _colorMap.entries[colorIndex];
-    }
-    else if (_colorMapSettings.useLinearFiltering) {
-        float valueT = (valueToColorFrom - cmin) / (cmax - cmin); // in [0, 1)
-        valueT = std::clamp(valueT, 0.f, 1.f);
-
-        const float idx = valueT * (_colorMap.entries.size() - 1);
-        const int floorIdx = static_cast<int>(std::floor(idx));
-        const int ceilIdx = static_cast<int>(std::ceil(idx));
-
-        const glm::vec4 floorColor = _colorMap.entries[floorIdx];
-        const glm::vec4 ceilColor = _colorMap.entries[ceilIdx];
-
-        glm::vec4 c = floorColor;
-
-        if (floorColor != ceilColor) {
-            c = floorColor + idx * (ceilColor - floorColor);
-        }
-
-        return c;
     }
     else { // Nearest neighbor
         // Note that the first color and the last color in the colormap file are the
