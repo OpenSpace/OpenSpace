@@ -22,53 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/digitaluniversemodule.h>
+#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOLYGONCLOUD___H__
+#define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOLYGONCLOUD___H__
 
 #include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
-#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
-#include <modules/digitaluniverse/rendering/renderableplanescloud.h>
-#include <modules/digitaluniverse/rendering/renderablepolygoncloud.h>
-#include <modules/digitaluniverse/rendering/renderablepoints.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-ghoul::opengl::ProgramObjectManager DigitalUniverseModule::ProgramObjectManager;
-ghoul::opengl::TextureManager DigitalUniverseModule::TextureManager;
+namespace documentation { struct Documentation; }
 
-DigitalUniverseModule::DigitalUniverseModule()
-    : OpenSpaceModule(DigitalUniverseModule::Name)
-{}
+/**
+ * A billboards cloud, but with dynamically created polygon shapes instead of a
+ * custom texture. Overwrites the sprite set in
+ */
+class RenderablePolygonCloud : public RenderableBillboardsCloud {
+public:
+    explicit RenderablePolygonCloud(const ghoul::Dictionary& dictionary);
+    ~RenderablePolygonCloud() override = default;
 
-void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-    fRenderable->registerClass<RenderablePoints>("RenderablePoints");
-    fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
-    fRenderable->registerClass<RenderablePlanesCloud>("RenderablePlanesCloud");
-    fRenderable->registerClass<RenderablePolygonCloud>("RenderablePolygonCloud");
-    fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
-}
+    bool isReady() const override;
 
-void DigitalUniverseModule::internalDeinitializeGL() {
-    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
-    TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
-}
+    void update(const UpdateData& data) override;
 
-std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
-    return {
-        RenderablePoints::Documentation(),
-        RenderableBillboardsCloud::Documentation(),
-        RenderablePlanesCloud::Documentation(),
-        RenderablePolygonCloud::Documentation(),
-        RenderableDUMeshes::Documentation()
-    };
-}
+    static documentation::Documentation Documentation();
+
+private:
+    void createPolygonTexture();
+    void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
+        GLuint textureHeight);
+    void loadPolygonGeometryForRendering();
+    void renderPolygonGeometry(GLuint vao);
+
+    void bindTextureForRendering() const override;
+
+    int _polygonSides = 0;
+
+    GLuint _pTexture = 0;
+    ghoul::opengl::Texture* _polygonTexture = nullptr;
+
+    GLuint _polygonVao = 0;
+    GLuint _polygonVbo = 0;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOLYGONCLOUD___H__

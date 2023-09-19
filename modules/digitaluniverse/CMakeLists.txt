@@ -29,6 +29,7 @@ set(HEADER_FILES
   rendering/renderabledumeshes.h
   rendering/renderablebillboardscloud.h
   rendering/renderableplanescloud.h
+  rendering/renderablepolygoncloud.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -37,6 +38,7 @@ set(SOURCE_FILES
   rendering/renderabledumeshes.cpp
   rendering/renderablebillboardscloud.cpp
   rendering/renderableplanescloud.cpp
+  rendering/renderablepolygoncloud.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

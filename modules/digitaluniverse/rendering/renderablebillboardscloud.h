@@ -40,9 +40,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <functional>
-#include <unordered_map>
 
-namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -68,17 +66,15 @@ public:
 
     static documentation::Documentation Documentation();
 
-private:
+protected:
     int nAttributesPerPoint() const;
     void updateBufferData();
     void updateSpriteTexture();
 
     std::vector<float> createDataSlice();
-    void createPolygonTexture();
-    void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
-        GLuint textureHeight);
-    void loadPolygonGeometryForRendering();
-    void renderPolygonGeometry(GLuint vao);
+
+    virtual void bindTextureForRendering() const;
+
     void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
@@ -89,12 +85,7 @@ private:
     bool _hasSpeckFile = false;
     bool _hasColorMapFile = false;
     bool _hasDatavarSize = false;
-    bool _hasPolygon = false;
     bool _hasLabels = false;
-
-    int _polygonSides = 0;
-
-    GLuint _pTexture = 0;
 
     struct SizeSettings : properties::PropertyOwner {
         SizeSettings(const ghoul::Dictionary& dictionary);
@@ -136,10 +127,8 @@ private:
     properties::BoolProperty _disableFadeInDistance;
     properties::OptionProperty _renderOption;
 
-    ghoul::opengl::Texture* _polygonTexture = nullptr;
     ghoul::opengl::Texture* _spriteTexture = nullptr;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
@@ -155,17 +144,12 @@ private:
     speck::Dataset _dataset;
     speck::ColorMap _colorMap;
 
-    // Everything related to the labels is handled by LabelsComponent
     std::unique_ptr<LabelsComponent> _labels;
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
-
-    // For polygons
-    GLuint _polygonVao = 0;
-    GLuint _polygonVbo = 0;
 };
 
 } // namespace openspace

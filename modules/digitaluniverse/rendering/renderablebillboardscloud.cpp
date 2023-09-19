@@ -256,9 +256,6 @@ namespace {
         // [[codegen::verbatim(ColorMapInfo.description)]]
         std::optional<bool> exactColorMap;
 
-        // The number of sides for the polygon used to represent the astronomical object
-        std::optional<int> polygonSides;
-
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("space_labelscomponent")]];
@@ -464,9 +461,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_pointColor);
 
-    _polygonSides = p.polygonSides.value_or(_polygonSides);
-    _hasPolygon = p.polygonSides.has_value();
-
     if (p.labels.has_value()) {
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
@@ -577,23 +571,7 @@ void RenderableBillboardsCloud::initializeGL() {
         }
     );
 
-    _renderToPolygonProgram = DigitalUniverseModule::ProgramObjectManager.request(
-        "RenderableBillboardsCloud_Polygon",
-        []() {
-            return ghoul::opengl::ProgramObject::Build(
-                "RenderableBillboardsCloud_Polygon",
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
-            );
-        }
-    );
-
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
-
-    if (_hasPolygon) {
-        createPolygonTexture();
-    }
 }
 
 void RenderableBillboardsCloud::deinitializeGL() {
@@ -610,17 +588,13 @@ void RenderableBillboardsCloud::deinitializeGL() {
     );
     _program = nullptr;
 
-    DigitalUniverseModule::ProgramObjectManager.release(
-        "RenderableBillboardsCloud_Polygon"
-    );
-    _renderToPolygonProgram = nullptr;
-
     DigitalUniverseModule::TextureManager.release(_spriteTexture);
     _spriteTexture = nullptr;
+}
 
-    if (_hasPolygon) {
-        _polygonTexture = nullptr;
-        glDeleteTextures(1, &_pTexture);
+void RenderableBillboardsCloud::bindTextureForRendering() const {
+    if (_spriteTexture) {
+        _spriteTexture->bind();
     }
 }
 
@@ -675,12 +649,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     ghoul::opengl::TextureUnit textureUnit;
     textureUnit.activate();
-    if (_hasPolygon) {
-        glBindTexture(GL_TEXTURE_2D, _pTexture);
-    }
-    else if (_spriteTexture) {
-        _spriteTexture->bind();
-    }
+    bindTextureForRendering();
     _program->setUniform(_uniformCache.spriteTexture, textureUnit);
     _program->setUniform(_uniformCache.useColormap, _hasColorMapFile && _colorMapSettings.enabled);
 
@@ -990,97 +959,6 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     setBoundingSphere(maxRadius);
     _fadeInDistances.setMaxValue(glm::vec2(10.f * biggestCoord));
     return result;
-}
-
-void RenderableBillboardsCloud::createPolygonTexture() {
-    ZoneScoped;
-
-    LDEBUG("Creating Polygon Texture");
-
-    glGenTextures(1, &_pTexture);
-    glBindTexture(GL_TEXTURE_2D, _pTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_RGBA, GL_BYTE, nullptr);
-
-    renderToTexture(_pTexture, 256, 256);
-}
-
-void RenderableBillboardsCloud::renderToTexture(GLuint textureToRenderTo,
-                                                GLuint textureWidth, GLuint textureHeight)
-{
-    LDEBUG("Rendering to Texture");
-
-    // Saves initial Application's OpenGL State
-    GLint defaultFBO;
-    GLint viewport[4];
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    GLuint textureFBO;
-    glGenFramebuffers(1, &textureFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
-    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, drawBuffers);
-
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
-
-    glViewport(viewport[0], viewport[1], textureWidth, textureHeight);
-
-    loadPolygonGeometryForRendering();
-    renderPolygonGeometry(_polygonVao);
-
-    // Restores Applications' OpenGL State
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
-    glDeleteBuffers(1, &_polygonVbo);
-    glDeleteVertexArrays(1, &_polygonVao);
-    glDeleteFramebuffers(1, &textureFBO);
-}
-
-void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
-    glGenVertexArrays(1, &_polygonVao);
-    glGenBuffers(1, &_polygonVbo);
-    glBindVertexArray(_polygonVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
-
-    constexpr std::array<GLfloat, 4> VertexData = {
-        //      x      y     z     w
-        0.f, 0.f, 0.f, 1.f,
-    };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-}
-
-void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
-    std::unique_ptr<ghoul::opengl::ProgramObject> program =
-        ghoul::opengl::ProgramObject::Build(
-            "RenderableBillboardsCloud_Polygon",
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
-        );
-
-    program->activate();
-    constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
-    glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
-
-    program->setUniform("sides", _polygonSides);
-    program->setUniform("polygonColor", _pointColor);
-
-    glBindVertexArray(vao);
-    glDrawArrays(GL_POINTS, 0, 1);
-    glBindVertexArray(0);
-
-    program->deactivate();
 }
 
 } // namespace openspace
