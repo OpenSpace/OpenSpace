@@ -47,10 +47,6 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
-    void update(const UpdateData& data) override;
-
     static documentation::Documentation Documentation();
 
 private:
@@ -62,10 +58,9 @@ private:
 
     void bindTextureForRendering() const override;
 
-    int _polygonSides = 0;
+    int _polygonSides = 3;
 
     GLuint _pTexture = 0;
-    ghoul::opengl::Texture* _polygonTexture = nullptr;
 
     GLuint _polygonVao = 0;
     GLuint _polygonVbo = 0;

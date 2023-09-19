@@ -76,10 +76,6 @@ RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictiona
     _polygonSides = p.polygonSides.value_or(_polygonSides);
 }
 
-bool RenderablePolygonCloud::isReady() const {
-    return RenderableBillboardsCloud::isReady() && _pTexture;
-}
-
 void RenderablePolygonCloud::initializeGL() {
     ZoneScoped;
 
@@ -93,23 +89,11 @@ void RenderablePolygonCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_polygonVao);
     _polygonVao = 0;
 
-    _polygonTexture = nullptr;
     glDeleteTextures(1, &_pTexture);
 }
 
 void RenderablePolygonCloud::bindTextureForRendering() const {
     glBindTexture(GL_TEXTURE_2D, _pTexture);
-}
-
-void RenderablePolygonCloud::update(const UpdateData& data) {
-    ZoneScoped;
-
-    RenderableBillboardsCloud::update(data);
-
-    // TODO: Polygon texture is dirty
-    //if (_spriteTextureIsDirty) {
-    //    updateSpriteTexture();
-    //}
 }
 
 void RenderablePolygonCloud::createPolygonTexture() {
