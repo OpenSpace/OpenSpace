@@ -25,7 +25,6 @@ local Object = {
       MinMaxSize = { 10, 100 },
       Unit = "pc"
     },
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 1.0,
     Texture = textures .. "target-blue.png",
     File = speck .. "expl.speck",

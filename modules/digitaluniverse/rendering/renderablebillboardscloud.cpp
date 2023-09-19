@@ -207,7 +207,7 @@ namespace {
         std::optional<std::string> file;
 
         // [[codegen::verbatim(ColorInfo.description)]]
-        glm::vec3 color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
         std::optional<std::string> texture;
@@ -409,7 +409,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
     addProperty(Fadeable::_opacity);
 
-    _pointColor = p.color;
+    _pointColor = p.color.value_or(_pointColor);
     _pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_pointColor);
 

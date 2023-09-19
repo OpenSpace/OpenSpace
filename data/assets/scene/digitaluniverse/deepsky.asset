@@ -25,7 +25,6 @@ local DeepSkyObjects = {
       MinMaxSize = { 16, 20 },
       Unit = "pc"
     },
-    Color = { 1.0, 1.0, 0.0 },
     Opacity = 0.99,
     ScaleFactor = 500.0,
     File = speck .. "dso.speck",

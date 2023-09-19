@@ -27,7 +27,6 @@ local Object = {
       Unit = "Mpc"
     },
     DrawElements = false,
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     File = speck .. "superclust.speck",
     Texture = textures .. "point3A.png",

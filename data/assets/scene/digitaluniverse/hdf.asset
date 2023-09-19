@@ -25,7 +25,6 @@ local Object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 1.0,
     File = HUDFSpeck .. "hudf.speck",
     Texture = circle .. "circle.png",

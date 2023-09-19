@@ -137,7 +137,6 @@ local EclipticSphereLabels = {
       Unit = "pc",
       TransformationMatrix = EclipticTransformationMatrix
     },
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc",
     TransformationMatrix = EclipticTransformationMatrix
@@ -189,7 +188,6 @@ local EquatorialSphereLabels = {
       Unit = "pc",
       TransformationMatrix = EquatorialTransformationMatrix
     },
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc",
     TransformationMatrix = EquatorialTransformationMatrix
@@ -236,7 +234,6 @@ local GalacticSphereLabels = {
       MinMaxSize = { 1, 100 },
       Unit = "pc"
     },
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc"
   },

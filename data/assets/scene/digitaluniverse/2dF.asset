@@ -18,7 +18,6 @@ local Object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 1.0,
     File = speck .. "2dF.speck",
     Unit = "Mpc",
