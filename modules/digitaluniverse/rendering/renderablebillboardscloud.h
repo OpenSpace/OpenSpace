@@ -71,6 +71,9 @@ protected:
     void updateBufferData();
     void updateSpriteTexture();
 
+    glm::vec2 findColorRange(int indexOfColorParameter) const;
+    glm::vec4 colorFromColorMap(float valueToColorFrom,
+        float minValue, float maxValue) const;
     std::vector<float> createDataSlice();
 
     virtual void bindTextureForRendering() const;
@@ -107,17 +110,17 @@ protected:
         ColorMapSettings(const ghoul::Dictionary& dictionary);
 
         properties::BoolProperty enabled;
-        properties::OptionProperty colorOption;
 
+        properties::OptionProperty colorParameterOption;
         properties::StringProperty colorMapFile;
-
         properties::TriggerProperty setRangeFromData;
         properties::Vec2Property optionColorRangeData;
-        properties::BoolProperty useLinearFiltering;
 
+        properties::BoolProperty useLinearFiltering;
         properties::BoolProperty isColorMapExact;
 
         std::vector<glm::vec2> colorRangeData;
+
     } _colorMapSettings;
 
     properties::Vec3Property _pointColor;
