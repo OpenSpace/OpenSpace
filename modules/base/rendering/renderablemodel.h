@@ -102,6 +102,7 @@ private:
 
     properties::BoolProperty _enableDepthTest;
     properties::OptionProperty _blendingFuncOption;
+    properties::BoolProperty _renderWireframe;
 
     std::string _vertexShaderPath;
     std::string _fragmentShaderPath;

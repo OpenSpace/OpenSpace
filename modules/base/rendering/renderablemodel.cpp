@@ -160,6 +160,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RenderWireframeInfo = {
+        "RenderWireframe",
+        "Enable Wireframe Rendering",
+        "Enable Wireframe rendering for the Model",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
@@ -271,6 +278,9 @@ namespace {
         // [[codegen::verbatim(EnableDepthTestInfo.description)]]
         std::optional<bool> enableDepthTest;
 
+        // [[codegen::verbatim(RenderWireframeInfo.description)]]
+        std::optional<bool> renderWireframe;
+
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
         std::optional<std::string> blendingOption;
 
@@ -312,6 +322,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _modelScale(ModelScaleInfo, 1.0, std::numeric_limits<double>::epsilon(), 4e+27)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableDepthTest(EnableDepthTestInfo, true)
+    , _renderWireframe(RenderWireframeInfo, false)
     , _blendingFuncOption(
         BlendingOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -410,6 +421,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _performShading = p.performShading.value_or(_performShading);
     _enableDepthTest = p.enableDepthTest.value_or(_enableDepthTest);
     _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
+    _renderWireframe = p.renderWireframe.value_or(_renderWireframe);
 
     if (p.vertexShader.has_value()) {
         _vertexShaderPath = p.vertexShader->string();
@@ -437,6 +449,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_performShading);
     addProperty(_enableFaceCulling);
     addProperty(_enableDepthTest);
+    addProperty(_renderWireframe);
     addProperty(_modelTransform);
     addProperty(_pivot);
     addProperty(_rotationVec);
@@ -840,6 +853,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_DEPTH_TEST);
     }
 
+    if (_renderWireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
 
     if (!_shouldRenderTwice) {
         // Reset manual depth test
@@ -982,6 +999,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     if (!_enableDepthTest) {
         glEnable(GL_DEPTH_TEST);
+    }
+
+    if (_renderWireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     global::renderEngine->openglStateCache().resetBlendState();
