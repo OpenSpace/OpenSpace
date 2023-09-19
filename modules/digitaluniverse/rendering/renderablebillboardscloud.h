@@ -71,12 +71,19 @@ protected:
     void updateBufferData();
     void updateSpriteTexture();
 
-    glm::vec2 findColorRange(int indexOfColorParameter) const;
+    /// Find the index of the currently chosen color parameter in the dataset
+    int colorParameterIndex() const;
+    /// Find the index of the currently chosen size parameter in the dataset
+    int sizeParameterIndex() const;
+
+    glm::vec2 findColorRange() const;
     glm::vec4 colorFromColorMap(float valueToColorFrom,
         float minValue, float maxValue) const;
     std::vector<float> createDataSlice();
 
     virtual void bindTextureForRendering() const;
+
+    float computeDistanceFadeValue(const RenderData& data) const;
 
     void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);

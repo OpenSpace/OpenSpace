@@ -423,9 +423,9 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     addProperty(_pointColor);
 
     if (p.file.has_value()) {
+        _hasSpeckFile = true;
         _speckFile = absPath(*p.file).string();
     }
-    _hasSpeckFile = p.file.has_value();
 
     _drawElements = p.drawElements.value_or(_drawElements);
     _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
@@ -486,12 +486,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _sizeFromData.datavarSizeOption.addOption(static_cast<int>(i), opts[i]);
         }
 
-        _sizeFromData.datavarSizeOption.onChange([this]() {
-            _dataIsDirty = true;
-        });
-
+        _sizeFromData.datavarSizeOption.onChange([this]() { _dataIsDirty = true; });
         _hasDatavarSize = true;
-
         addPropertySubOwner(_sizeFromData);
     }
 
@@ -506,18 +502,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _colorMapSettings.colorParameterOption.onChange([this]() { _dataIsDirty = true; });
 
         _colorMapSettings.setRangeFromData.onChange([this]() {
-            const int colorMapInUse = _hasColorMapFile ?
-                _dataset.index(_colorMapSettings.colorParameterOption.option().description) : 0;
-
-            float minValue = std::numeric_limits<float>::max();
-            float maxValue = -std::numeric_limits<float>::max();
-            for (const speck::Dataset::Entry& e : _dataset.entries) {
-                float color = e.data[colorMapInUse];
-                minValue = std::min(minValue, color);
-                maxValue = std::max(maxValue, color);
-            }
-
-            _colorMapSettings.optionColorRangeData = glm::vec2(minValue, maxValue);
+            _colorMapSettings.optionColorRangeData = findColorRange();
         });
 
         addPropertySubOwner(_colorMapSettings);
@@ -597,6 +582,23 @@ void RenderableBillboardsCloud::bindTextureForRendering() const {
     }
 }
 
+float RenderableBillboardsCloud::computeDistanceFadeValue(const RenderData& data) const {
+    float fadeValue = 1.f;
+    bool shouldFade = !_disableFadeInDistance;
+    if (shouldFade) {
+        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        const glm::vec2 fadeRange = _fadeInDistances;
+        const float a = static_cast<float>(
+            1.f / ((fadeRange.y - fadeRange.x) * toMeter(_unit))
+        );
+        const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        const float funcValue = a * distCamera + b;
+        fadeValue *= std::min(1.f, funcValue);
+    }
+
+    return fadeValue;
+}
+
 void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
                                                  const glm::dmat4& modelMatrix,
                                                  const glm::dvec3& orthoRight,
@@ -662,20 +664,10 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 }
 
 void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
-    float fadeInVar = 1.f;
-    if (!_disableFadeInDistance) {
-        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
-        const glm::vec2 fadeRange = _fadeInDistances;
-        const float a = static_cast<float>(
-            1.f / ((fadeRange.y - fadeRange.x) * toMeter(_unit))
-        );
-        const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        const float funcValue = a * distCamera + b;
-        fadeInVar *= funcValue > 1.f ? 1.f : funcValue;
+    float fadeInVar = computeDistanceFadeValue(data);
 
-        if (funcValue < 0.01f) {
-            return;
-        }
+    if (fadeInVar < 0.01f) {
+        return;
     }
 
     glm::dmat4 modelMatrix =
@@ -838,7 +830,21 @@ void RenderableBillboardsCloud::updateSpriteTexture() {
     _spriteTextureIsDirty = false;
 }
 
-glm::vec2 RenderableBillboardsCloud::findColorRange(int indexOfColorParameter) const {
+int RenderableBillboardsCloud::colorParameterIndex() const {
+    return _hasColorMapFile ?
+        _dataset.index(_colorMapSettings.colorParameterOption.option().description) :
+        0;
+}
+
+int RenderableBillboardsCloud::sizeParameterIndex() const {
+    return _hasDatavarSize ?
+        _dataset.index(_sizeFromData.datavarSizeOption.option().description) :
+        -1;
+}
+
+glm::vec2 RenderableBillboardsCloud::findColorRange() const {
+    int indexOfColorParameter = colorParameterIndex();
+
     float minValue = std::numeric_limits<float>::max();
     float maxValue = -std::numeric_limits<float>::max();
     for (const speck::Dataset::Entry& e : _dataset.entries) {
@@ -898,15 +904,19 @@ glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom,
         return c;
     }
     else { // Nearest neighbor
-        float ncmap = static_cast<float>(_colorMap.entries.size());
-        float normalization = ((cmax != cmin) && (ncmap > 2.f)) ?
-            (ncmap - 2.f) / (cmax - cmin) : 0;
+        // Note that the first color and the last color in the colormap file are the
+        // outliers colors.
+        float nColors = static_cast<float>(_colorMap.entries.size());
+        float normalization = ((cmax != cmin) && (nColors > 2.f)) ?
+            (nColors - 2.f) / (cmax - cmin) : 0;
+
         int colorIndex = static_cast<int>(
             (valueToColorFrom - cmin) * normalization + 1.f
         );
+
         colorIndex = colorIndex < 0 ? 0 : colorIndex;
-        colorIndex = colorIndex >= ncmap ?
-            static_cast<int>(ncmap - 1.f) : colorIndex;
+        colorIndex = colorIndex >= nColors ?
+            static_cast<int>(nColors - 1.f) : colorIndex;
 
         return _colorMap.entries[colorIndex];
     }
@@ -923,16 +933,12 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     result.reserve(nAttributesPerPoint() * _dataset.entries.size());
 
     // what datavar in use for the index color
-    int colorMapInUse = _hasColorMapFile ?
-        _dataset.index(_colorMapSettings.colorParameterOption.option().description) :
-        0;
+    int colorParamIndex = colorParameterIndex();
 
     // what datavar in use for the size scaling (if present)
-    int sizeScalingInUse = _hasDatavarSize ?
-        _dataset.index(_sizeFromData.datavarSizeOption.option().description) :
-        -1;
+    int sizeParamIndex = sizeParameterIndex();
 
-    glm::vec2 range = findColorRange(colorMapInUse);
+    glm::vec2 range = findColorRange();
     float minValue = range[0];
     float maxValue = range[1];
 
@@ -958,7 +964,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             biggestCoord = std::max(biggestCoord, glm::compMax(position));
             // Note: if exact colormap option is not selected, the first color and the
             // last color in the colormap file are the outliers colors.
-            float valueToColorFrom = e.data[colorMapInUse];
+            float valueToColorFrom = e.data[colorParamIndex];
 
             glm::vec4 c = colorFromColorMap(valueToColorFrom, minValue, maxValue);
             result.push_back(c.r);
@@ -969,7 +975,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
 
         // Size data
         if (_hasDatavarSize) {
-            result.push_back(e.data[sizeScalingInUse]);
+            result.push_back(e.data[sizeParamIndex]);
         }
     }
     setBoundingSphere(maxRadius);
