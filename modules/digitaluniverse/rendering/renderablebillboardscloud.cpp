@@ -95,7 +95,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value is used to define the color of the astronomical object",
+        "This value is used to define the color of the points, when no color map is"
+        "used",
         // @VISIBILITY(1.5)
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -103,14 +104,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical object",
+        "The path to the color map file to use for coloring the points",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects",
+        "Enables/Disables the drawing of the points",
         // @VISIBILITY(1.25)
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -118,14 +119,14 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the astronomical objects"
+        "The labels for the points"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
-        "This value determines which paramenter is used for default color of the "
-        "astronomical objects",
+        "This value determines which paramenter is used for coloring the points based "
+        "on the color map",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -140,7 +141,7 @@ namespace {
         "SizeOption",
         "Size Option Variable",
         "This value determines which paramenter (datavar) is used for scaling of the "
-        "astronomical objects",
+        "point",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -156,8 +157,7 @@ namespace {
         "FadeInDistances",
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
-        "our galaxy from which the astronomical object will start and end "
-        "fading-in",
+        "our galaxy from which the object will start and end fading-in",
         // @VISIBILITY(3.25)
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -181,7 +181,7 @@ namespace {
         "BillboardMinMaxSize",
         "Billboard Min/Max Size in Pixels",
         "The minimum and maximum size (in pixels) for the billboard representing the "
-        "astronomical object",
+        "point",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -206,7 +206,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SetRangeFromDataInfo = {
         "SetRangeFromData",
         "Set Data Range from Data",
-        "Set the data range based on the available data",
+        "Set the data range for the color mapping based on the available data",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
