@@ -35,8 +35,8 @@ local Object = {
     BillboardMinMaxSize = { 0.0, 11.1 },
     EnablePixelSizeControl = true,
     ColorMap = colormaps .. "viridis.cmap",
-    ColorOption = { "redshift", "Tlookback", "distMpc" },
-    ColorRange = { { 0.102, 7.085 }, { 1.4, 13.0 }, { 440.5, 8852.099609 } },
+    ColorParameterOptions = { "redshift", "Tlookback", "distMpc" },
+    ColorParameterRanges = { { 0.102, 7.085 }, { 1.4, 13.0 }, { 440.5, 8852.099609 } },
     UseColorMap = false
   },
   GUI = {

@@ -27,7 +27,7 @@ local Object = {
     },
     Color = { 0.5, 1.0, 0.2 },
     ColorMap = speck .. "localgroup.cmap",
-    ColorOption = { "association" },
+    ColorParameterOptions = { "association" },
     Opacity = 0.3,
     File = speck .. "localgroup.speck",
     PolygonSides = 12,

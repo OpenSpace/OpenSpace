@@ -120,17 +120,17 @@ namespace {
         "The labels for the points"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
-        "ColorOption",
-        "Color Option",
+    constexpr openspace::properties::Property::PropertyInfo ColorParameterInfo = {
+        "ColorParameter",
+        "Color Parameter",
         "This value determines which paramenter is used for coloring the points based "
         "on the color map",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OptionColorRangeInfo = {
-        "OptionColorRange",
-        "Option Color Range",
+    constexpr openspace::properties::Property::PropertyInfo ColorRangeInfo = {
+        "ValueRange",
+        "Value Range",
         "This value changes the range of values to be mapped with the current color map",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -160,10 +160,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
-        "DisableFadeIn",
-        "Disable Fade-in Effect",
-        "Enables/Disables the Fade-in effect",
+    constexpr openspace::properties::Property::PropertyInfo EnableDistanceFadeInfo = {
+        "EnableDistanceFading",
+        "Enable Distance-based Fading",
+        "Enables/Disables the Fade-in effect based on camera distance. Automatically set "
+        "to true if FadeInDistances are specified in the asset.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -195,7 +196,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SetRangeFromDataInfo = {
         "SetRangeFromData",
         "Set Data Range from Data",
-        "Set the data range for the color mapping based on the available data",
+        "Set the data range for the color mapping based on the available data for the "
+        "curently selected data column",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -249,15 +251,18 @@ namespace {
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("space_labelscomponent")]];
 
-        // [[codegen::verbatim(ColorOptionInfo.description)]]
-        std::optional<std::vector<std::string>> colorOption;
-
         // [[codegen::verbatim(SizeOptionInfo.description)]]
         std::optional<std::vector<std::string>> sizeOption;
 
-        // This value determines the colormap ranges for the color parameters of the
-        // astronomical objects
-        std::optional<std::vector<glm::vec2>> colorRange;
+        // This value determines the available data varialbes that can be used to color
+        // the data points by. There should also be a corresponding parameter range per
+        // option
+        std::optional<std::vector<std::string>> colorParameterOptions;
+
+        // This value determines the colormap ranges to use when selecting one of the
+        // color parameters options for the data points. The ranges should be specified
+        // in the same order as the coor parameter options
+        std::optional<std::vector<glm::vec2>> colorParameterRanges;
 
         // Transformation matrix to be applied to each astronomical object
         std::optional<glm::dmat4x4> transformationMatrix;
@@ -265,8 +270,8 @@ namespace {
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
 
-        // [[codegen::verbatim(DisableFadeInInfo.description)]]
-        std::optional<bool> disableFadeIn;
+        // [[codegen::verbatim(EnableDistanceFadeInfo.description)]]
+        std::optional<bool> enableFadeIn;
 
         // [[codegen::verbatim(BillboardMinMaxSizeInfo.description)]]
         std::optional<glm::vec2> billboardMinMaxSize;
@@ -327,9 +332,9 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
                                                       const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "ColorMap", "Color Map", "" })
     , enabled(UseColorMapInfo, true)
-    , colorParameterOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , colorParameterOption(ColorParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
     , colorMapFile(ColorMapInfo)
-    , optionColorRangeData(OptionColorRangeInfo, glm::vec2(0.f))
+    , valueRange(ColorRangeInfo, glm::vec2(0.f))
     , setRangeFromData(SetRangeFromDataInfo)
     , isColorMapExact(IsColorMapExactInfo, false) // TODO: Fix docs
 {
@@ -340,32 +345,28 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
 
     addProperty(colorParameterOption);
 
-    if (p.colorMap.has_value()) {
-        colorMapFile = absPath(*p.colorMap).string();
-    }
-    colorMapFile.setReadOnly(true); // Currently this can't be changed
-    addProperty(colorMapFile);
-
-    colorRangeData = p.colorRange.value_or(colorRangeData);
+    colorRangeData = p.colorParameterRanges.value_or(colorRangeData);
     if (!colorRangeData.empty()) {
-        optionColorRangeData = colorRangeData[colorRangeData.size() - 1];
+        valueRange = colorRangeData[colorRangeData.size() - 1];
     }
 
-    // There should be one range per color parameter option
-    optionColorRangeData.onChange([this]() {
-        const glm::vec2 colorRange = optionColorRangeData;
-        colorRangeData[colorParameterOption.value()] = colorRange;
-    });
+    // TODO: Handle the onchange of the value range differently
+    // There should be one range per color parameter
+    //valueRange.onChange([this]() {
+    //    const glm::vec2 colorRange = valueRange;
+    //    colorRangeData[colorParameterOption.value()] = colorRange;
+    //});
 
-    if (p.colorOption.has_value()) {
-        std::vector<std::string> opts = *p.colorOption;
+    // Add one option for each of the provided data varaibles
+    if (p.colorParameterOptions.has_value()) {
+        std::vector<std::string> opts = *p.colorParameterOptions;
         for (size_t i = 0; i < opts.size(); ++i) {
             colorParameterOption.addOption(static_cast<int>(i), opts[i]);
         }
     }
     colorParameterOption.onChange([this]() {
         const glm::vec2 colorRange = colorRangeData[colorParameterOption.value()];
-        optionColorRangeData = colorRange;
+        valueRange = colorRange;
     });
 
     if (colorRangeData.size() > 0) {
@@ -374,11 +375,17 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
         colorParameterOption.setValue(static_cast<int>(colorRangeData.size() - 1));
     }
 
-    addProperty(optionColorRangeData);
+    addProperty(valueRange);
     addProperty(setRangeFromData);
 
     isColorMapExact = p.exactColorMap.value_or(isColorMapExact);
     addProperty(isColorMapExact);
+
+    if (p.colorMap.has_value()) {
+        colorMapFile = absPath(*p.colorMap).string();
+    }
+    colorMapFile.setReadOnly(true); // Currently this can't be changed
+    addProperty(colorMapFile);
 }
 
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
@@ -392,7 +399,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         glm::vec2(0.f),
         glm::vec2(100.f)
     )
-    , _disableFadeInDistance(DisableFadeInInfo, true)
+    , _fadeInDistanceEnabled(EnableDistanceFadeInfo, false)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _sizeSettings(dictionary)
     , _sizeFromData(dictionary)
@@ -459,8 +466,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
         addProperty(_fadeInDistances);
 
-        _disableFadeInDistance = false;
-        addProperty(_disableFadeInDistance);
+        _fadeInDistanceEnabled = true;
+        addProperty(_fadeInDistanceEnabled);
     }
 
     if (p.sizeOption.has_value()) {
@@ -481,11 +488,11 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _hasColorMapFile = true;
 
         _colorMapSettings.isColorMapExact.onChange([this]() { _dataIsDirty = true; });
-        _colorMapSettings.optionColorRangeData.onChange([this]() { _dataIsDirty = true; });
+        _colorMapSettings.valueRange.onChange([this]() { _dataIsDirty = true; });
         _colorMapSettings.colorParameterOption.onChange([this]() { _dataIsDirty = true; });
 
         _colorMapSettings.setRangeFromData.onChange([this]() {
-            _colorMapSettings.optionColorRangeData = findColorRange();
+            _colorMapSettings.valueRange = findColorRange();
         });
 
         addPropertySubOwner(_colorMapSettings);
@@ -567,8 +574,7 @@ void RenderableBillboardsCloud::bindTextureForRendering() const {
 
 float RenderableBillboardsCloud::computeDistanceFadeValue(const RenderData& data) const {
     float fadeValue = 1.f;
-    bool shouldFade = !_disableFadeInDistance;
-    if (shouldFade) {
+    if (_fadeInDistanceEnabled) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
         const glm::vec2 fadeRange = _fadeInDistances;
         const float a = static_cast<float>(
@@ -814,18 +820,24 @@ void RenderableBillboardsCloud::updateSpriteTexture() {
 }
 
 int RenderableBillboardsCloud::colorParameterIndex() const {
-    return _hasColorMapFile ?
+    bool hasOptions = _colorMapSettings.colorParameterOption.options().size() > 0;
+    return _hasColorMapFile && hasOptions ?
         _dataset.index(_colorMapSettings.colorParameterOption.option().description) :
         0;
 }
 
 int RenderableBillboardsCloud::sizeParameterIndex() const {
-    return _hasDatavarSize ?
+    bool hasOptions = _sizeFromData.datavarSizeOption.options().size() > 0;
+    return _hasDatavarSize && hasOptions ?
         _dataset.index(_sizeFromData.datavarSizeOption.option().description) :
         -1;
 }
 
 glm::vec2 RenderableBillboardsCloud::findColorRange() const {
+    if (!_hasColorMapFile) {
+        return glm::vec2(0.f);
+    }
+
     int indexOfColorParameter = colorParameterIndex();
 
     float minValue = std::numeric_limits<float>::max();
@@ -863,14 +875,19 @@ glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom,
         cmin = currentColorRange.x;
     }
 
+    float nColors = static_cast<float>(_colorMap.entries.size());
+
     if (_colorMapSettings.isColorMapExact) {
         int colorIndex = static_cast<int>(valueToColorFrom + cmin);
+        if (colorIndex > nColors - 1) {
+            LERROR(fmt::format("Invalid use of \"exact\" color map")); // TODO: Make sure we can't end up here.
+            return glm::vec4(_pointColor.value(), 1.f);
+        }
         return _colorMap.entries[colorIndex];
     }
     else { // Nearest neighbor
         // Note that the first color and the last color in the colormap file are the
         // outliers colors.
-        float nColors = static_cast<float>(_colorMap.entries.size());
         float normalization = ((cmax != cmin) && (nColors > 2.f)) ?
             (nColors - 2.f) / (cmax - cmin) : 0;
 

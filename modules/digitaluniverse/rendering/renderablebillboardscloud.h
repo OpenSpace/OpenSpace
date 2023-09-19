@@ -121,10 +121,12 @@ protected:
         properties::OptionProperty colorParameterOption;
         properties::StringProperty colorMapFile;
         properties::TriggerProperty setRangeFromData;
-        properties::Vec2Property optionColorRangeData;
+
+        properties::Vec2Property valueRange;
 
         properties::BoolProperty isColorMapExact;
 
+        // One item per color parameter option
         std::vector<glm::vec2> colorRangeData;
 
     } _colorMapSettings;
@@ -133,7 +135,7 @@ protected:
     properties::StringProperty _spriteTexturePath;
     properties::BoolProperty _drawElements;
     properties::Vec2Property _fadeInDistances;
-    properties::BoolProperty _disableFadeInDistance;
+    properties::BoolProperty _fadeInDistanceEnabled;
     properties::OptionProperty _renderOption;
 
     ghoul::opengl::Texture* _spriteTexture = nullptr;
