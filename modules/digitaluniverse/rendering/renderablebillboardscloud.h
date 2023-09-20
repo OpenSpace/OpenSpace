@@ -77,8 +77,7 @@ protected:
     int currentSizeParameterIndex() const;
 
     glm::vec2 findValueRange(int parameterIndex) const;
-    glm::vec4 colorFromColorMap(float valueToColorFrom,
-        float minValue, float maxValue) const;
+    glm::vec4 colorFromColorMap(float valueToColorFrom) const;
     std::vector<float> createDataSlice();
 
     virtual void bindTextureForRendering() const;

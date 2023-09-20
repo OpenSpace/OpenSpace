@@ -862,9 +862,7 @@ glm::vec2 RenderableBillboardsCloud::findValueRange(int parameterIndex) const {
     return { minValue, maxValue };
 }
 
-glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom,
-                                                       float minValue, float maxValue) const
-{
+glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom) const {
     // Note: if exact colormap option is not selected, the first color and the
     // last color in the colormap file are the outliers colors.
 
@@ -916,25 +914,21 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     // what datavar in use for the size scaling (if present)
     int sizeParamIndex = currentSizeParameterIndex();
 
-    //glm::vec2 range = findValueRange();
-    float minValue = _colorMapSettings.valueRange.value()[0];
-    float maxValue = _colorMapSettings.valueRange.value()[1];
 
     double maxRadius = 0.0;
-    float biggestCoord = -1.f;
+    double biggestCoord = -1.0;
 
     for (const speck::Dataset::Entry& e : _dataset.entries) {
         const double unitMeter = toMeter(_unit);
-        glm::vec4 position = glm::vec4(
-            _transformationMatrix * glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0)
-        );
+        glm::dvec4 position = glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0);
+        position = _transformationMatrix * position;
 
         const double r = glm::length(position);
         maxRadius = std::max(maxRadius, r);
 
         // Positions
         for (int j = 0; j < 4; ++j) {
-            result.push_back(position[j]);
+            result.push_back(static_cast<float>(position[j]));
         }
 
         // Colors
@@ -944,7 +938,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             // last color in the colormap file are the outliers colors.
             float valueToColorFrom = e.data[colorParamIndex];
 
-            glm::vec4 c = colorFromColorMap(valueToColorFrom, minValue, maxValue);
+            glm::vec4 c = colorFromColorMap(valueToColorFrom);
             result.push_back(c.r);
             result.push_back(c.g);
             result.push_back(c.b);
@@ -957,7 +951,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
         }
     }
     setBoundingSphere(maxRadius);
-    _fadeInDistances.setMaxValue(glm::vec2(10.f * biggestCoord));
+    _fadeInDistances.setMaxValue(glm::vec2(static_cast<float>(10.0 * biggestCoord)));
     return result;
 }
 
