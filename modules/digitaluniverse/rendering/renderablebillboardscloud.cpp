@@ -254,15 +254,16 @@ namespace {
         // [[codegen::verbatim(SizeOptionInfo.description)]]
         std::optional<std::vector<std::string>> sizeOption;
 
-        // This value determines the available data varialbes that can be used to color
-        // the data points by. There should also be a corresponding parameter range per
-        // option
-        std::optional<std::vector<std::string>> colorParameterOptions;
+        struct ColorMapParameter {
+            // The key for the datavar to use for color
+            std::string key;
 
-        // This value determines the colormap ranges to use when selecting one of the
-        // color parameters options for the data points. The ranges should be specified
-        // in the same order as the coor parameter options
-        std::optional<std::vector<glm::vec2>> colorParameterRanges;
+            // An optional value range to use for coloring when this option is selected.
+            // If not included, the range will be set from the min and max value in the
+            // dataset
+            std::optional<glm::vec2> range;
+        };
+        std::optional<std::vector<ColorMapParameter>> colorParameterOptions;
 
         // Transformation matrix to be applied to each astronomical object
         std::optional<glm::dmat4x4> transformationMatrix;
@@ -279,9 +280,6 @@ namespace {
         // [[codegen::verbatim(PixelSizeControlInfo.description)]]
         std::optional<bool> enablePixelSizeControl;
     };
-
-
-    // TODO: bunch Size settings inputs etc into one
 
 #include "renderablebillboardscloud_codegen.cpp"
 }  // namespace
@@ -345,35 +343,25 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
 
     addProperty(colorParameterOption);
 
-    colorRangeData = p.colorParameterRanges.value_or(colorRangeData);
-    if (!colorRangeData.empty()) {
-        valueRange = colorRangeData[colorRangeData.size() - 1];
-    }
-
-    // TODO: Handle the onchange of the value range differently
-    // There should be one range per color parameter
-    //valueRange.onChange([this]() {
-    //    const glm::vec2 colorRange = valueRange;
-    //    colorRangeData[colorParameterOption.value()] = colorRange;
-    //});
-
-    // Add one option for each of the provided data varaibles
     if (p.colorParameterOptions.has_value()) {
-        std::vector<std::string> opts = *p.colorParameterOptions;
+        std::vector<Parameters::ColorMapParameter> opts = *p.colorParameterOptions;
+        colorRangeData.reserve(opts.size());
         for (size_t i = 0; i < opts.size(); ++i) {
-            colorParameterOption.addOption(static_cast<int>(i), opts[i]);
-        }
-    }
-    colorParameterOption.onChange([this]() {
-        const glm::vec2 colorRange = colorRangeData[colorParameterOption.value()];
-        valueRange = colorRange;
-    });
+            colorParameterOption.addOption(static_cast<int>(i), opts[i].key);
 
-    if (colorRangeData.size() > 0) {
+            // TODO: set default value to be the data range
+            colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
+        }
+
         // Following DU behavior here. The last colormap variable
         // entry is the one selected by default.
         colorParameterOption.setValue(static_cast<int>(colorRangeData.size() - 1));
+        valueRange = colorRangeData.back();
     }
+
+    colorParameterOption.onChange([this]() {
+        valueRange = colorRangeData[colorParameterOption.value()];
+    });
 
     addProperty(valueRange);
     addProperty(setRangeFromData);
@@ -492,7 +480,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _colorMapSettings.colorParameterOption.onChange([this]() { _dataIsDirty = true; });
 
         _colorMapSettings.setRangeFromData.onChange([this]() {
-            _colorMapSettings.valueRange = findColorRange();
+            int parameterIndex = currentColorParameterIndex();
+            _colorMapSettings.valueRange = findValueRange(parameterIndex);
         });
 
         addPropertySubOwner(_colorMapSettings);
@@ -528,6 +517,24 @@ void RenderableBillboardsCloud::initialize() {
     }
 
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+
+    // Initialize empty colormap ranges based on dataset
+    for (const properties::OptionProperty::Option& option :
+            _colorMapSettings.colorParameterOption.options())
+    {
+        int optionIndex = option.value;
+        int colorParameterIndex = _dataset.index(option.description);
+
+        glm::vec2& range = _colorMapSettings.colorRangeData[optionIndex];
+        if (glm::length(range) < glm::epsilon<float>()) {
+            range = findValueRange(colorParameterIndex);
+        }
+    }
+
+    // Set the value range again, to make sure that it's updated
+    if (!_colorMapSettings.colorRangeData.empty()) {
+        _colorMapSettings.valueRange = _colorMapSettings.colorRangeData.back();
+    }
 }
 
 void RenderableBillboardsCloud::initializeGL() {
@@ -819,32 +826,30 @@ void RenderableBillboardsCloud::updateSpriteTexture() {
     _spriteTextureIsDirty = false;
 }
 
-int RenderableBillboardsCloud::colorParameterIndex() const {
+int RenderableBillboardsCloud::currentColorParameterIndex() const {
     bool hasOptions = _colorMapSettings.colorParameterOption.options().size() > 0;
     return _hasColorMapFile && hasOptions ?
         _dataset.index(_colorMapSettings.colorParameterOption.option().description) :
         0;
 }
 
-int RenderableBillboardsCloud::sizeParameterIndex() const {
+int RenderableBillboardsCloud::currentSizeParameterIndex() const {
     bool hasOptions = _sizeFromData.datavarSizeOption.options().size() > 0;
     return _hasDatavarSize && hasOptions ?
         _dataset.index(_sizeFromData.datavarSizeOption.option().description) :
         -1;
 }
 
-glm::vec2 RenderableBillboardsCloud::findColorRange() const {
+glm::vec2 RenderableBillboardsCloud::findValueRange(int parameterIndex) const {
     if (!_hasColorMapFile) {
         return glm::vec2(0.f);
     }
-
-    int indexOfColorParameter = colorParameterIndex();
 
     float minValue = std::numeric_limits<float>::max();
     float maxValue = -std::numeric_limits<float>::max();
     for (const speck::Dataset::Entry& e : _dataset.entries) {
         if (e.data.size() > 0) {
-            float value = e.data[indexOfColorParameter];
+            float value = e.data[parameterIndex];
             minValue = std::min(value, minValue);
             maxValue = std::max(value, maxValue);
         }
@@ -863,17 +868,9 @@ glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom,
     // Note: if exact colormap option is not selected, the first color and the
     // last color in the colormap file are the outliers colors.
 
-    float cmax, cmin;
-    if (_colorMapSettings.colorRangeData.empty()) {
-        cmax = maxValue; // Max value of datavar used for the index color
-        cmin = minValue; // Min value of datavar used for the index color
-    }
-    else {
-        glm::vec2 currentColorRange =
-            _colorMapSettings.colorRangeData[_colorMapSettings.colorParameterOption.value()];
-        cmax = currentColorRange.y;
-        cmin = currentColorRange.x;
-    }
+    glm::vec2 currentColorRange = _colorMapSettings.valueRange;
+    float cmax = currentColorRange.y;
+    float cmin = currentColorRange.x;
 
     float nColors = static_cast<float>(_colorMap.entries.size());
 
@@ -914,14 +911,14 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     result.reserve(nAttributesPerPoint() * _dataset.entries.size());
 
     // what datavar in use for the index color
-    int colorParamIndex = colorParameterIndex();
+    int colorParamIndex = currentColorParameterIndex();
 
     // what datavar in use for the size scaling (if present)
-    int sizeParamIndex = sizeParameterIndex();
+    int sizeParamIndex = currentSizeParameterIndex();
 
-    glm::vec2 range = findColorRange();
-    float minValue = range[0];
-    float maxValue = range[1];
+    //glm::vec2 range = findValueRange();
+    float minValue = _colorMapSettings.valueRange.value()[0];
+    float maxValue = _colorMapSettings.valueRange.value()[1];
 
     double maxRadius = 0.0;
     float biggestCoord = -1.f;

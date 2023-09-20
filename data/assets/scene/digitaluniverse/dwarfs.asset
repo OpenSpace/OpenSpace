@@ -31,8 +31,9 @@ local Object = {
     Texture = textures .. "point3.png",
     Unit = "pc",
     ColorMap = speck .. "dwarfs.cmap",
-    ColorParameterOptions = { "typeindex" },
-    --ColorParameterRanges = { { 1.0, 4.0} },
+    ColorParameterOptions = {
+      { Key = "typeindex", Range = { 1.0, 4.0 } }
+    },
     ScaleFactor = 372.1,
     BillboardMinMaxSize = { 0.0, 20.0 },
     EnablePixelSizeControl = true

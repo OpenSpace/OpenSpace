@@ -39,8 +39,9 @@ local TullyGalaxies = {
     File = speck .. "tully.speck",
     Texture = textures .. "point3A.png",
     ColorMap = speck .. "lss.cmap",
-    ColorParameterOptions = { "prox5Mpc" },
-    ColorParameterRanges = { { 1.0, 30.0 } },
+    ColorParameterOptions = {
+      { Key = "prox5Mpc", Range = { 1.0, 30.0 } }
+    },
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
     FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"

@@ -24,8 +24,10 @@ local Object = {
     Unit = "Mpc",
     Texture = textures .. "point3A.png",
     ColorMap = speck .. "lss.cmap",
-    ColorParameterOptions = { "redshift", "prox5Mpc" },
-    ColorParameterRanges = { { 0.0, 0.075 }, { 1.0, 50.0 } },
+    ColorParameterOptions = {
+      { Key = "redshift", Range = { 0.0, 0.075 } },
+      { Key = "prox5Mpc", Range = { 1.0, 50.0 } }
+    },
     ScaleFactor = 510.78,
     BillboardMinMaxSize = { 0.0, 11.15 },
     EnablePixelSizeControl = true

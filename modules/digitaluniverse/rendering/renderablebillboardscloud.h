@@ -72,11 +72,11 @@ protected:
     void updateSpriteTexture();
 
     /// Find the index of the currently chosen color parameter in the dataset
-    int colorParameterIndex() const;
+    int currentColorParameterIndex() const;
     /// Find the index of the currently chosen size parameter in the dataset
-    int sizeParameterIndex() const;
+    int currentSizeParameterIndex() const;
 
-    glm::vec2 findColorRange() const;
+    glm::vec2 findValueRange(int parameterIndex) const;
     glm::vec4 colorFromColorMap(float valueToColorFrom,
         float minValue, float maxValue) const;
     std::vector<float> createDataSlice();

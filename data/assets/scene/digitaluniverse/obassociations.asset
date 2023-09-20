@@ -26,7 +26,9 @@ local Object = {
       Unit = "pc"
     },
     ColorMap = speck .. "ob.cmap",
-    ColorParameterOptions = { "arm" },
+    ColorParameterOptions = {
+      { Key = "arm" }
+    },
     SizeOption = { "diameter" },
     ExactColorMap = true,
     Opacity = 0.7,

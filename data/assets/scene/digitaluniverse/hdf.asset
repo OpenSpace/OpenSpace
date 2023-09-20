@@ -29,8 +29,11 @@ local Object = {
     File = HUDFSpeck .. "hudf.speck",
     Texture = circle .. "circle.png",
     ColorMap = ColorMap .. "hudf.cmap",
-    ColorParameterOptions = { "redshift", "proximity" },
-    ColorParameterRanges = { { 0.0, 0.075 }, { 1.0, 25.0 } },
+    ColorMap = speck .. "6dF.cmap",
+    ColorParameterOptions = {
+      { Key = "redshift", Range = { 0.0, 0.075 } },
+      { Key = "proximity", Range = { 1.0, 25.0 } }
+    },
     Unit = "Mpc",
     ScaleFactor = 505.0,
     BillboardMaxSize = 4.7,
