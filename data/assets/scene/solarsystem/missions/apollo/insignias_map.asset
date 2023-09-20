@@ -182,7 +182,7 @@ local ShowInsignias = {
   Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, 0.5)]],
   Documentation = "Show patches of the Apollo missions on their respective landing sites",
   GuiPath = "/Missions/Apollo",
-  IsLocal = true
+  IsLocal = false
 }
 
 local HideInsignias = {
@@ -191,7 +191,7 @@ local HideInsignias = {
   Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, 0.5)]],
   Documentation = "Hide patches of the Apollo missions on their respective landing sites",
   GuiPath = "/Missions/Apollo",
-  IsLocal = true
+  IsLocal = false
 }
 
 asset.onInitialize(function()

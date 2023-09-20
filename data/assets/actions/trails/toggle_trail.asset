@@ -42,7 +42,7 @@ local ToggleTrail = {
     This action takes optional arguments to 1) determine which trail to hide (as the
     'Node') and 2) the transition direction (as 'After' and 'Before')]],
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 local HideTrail = {
@@ -66,7 +66,7 @@ local HideTrail = {
     optional argument to determine whose trail to hide. If no argument is provided, the
     current focus node is used instead]],
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 local ShowTrail = {
@@ -90,7 +90,7 @@ local ShowTrail = {
     optional argument to determine whose trail to hide. If no argument is provided, the
     current focus node is used instead]],
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 

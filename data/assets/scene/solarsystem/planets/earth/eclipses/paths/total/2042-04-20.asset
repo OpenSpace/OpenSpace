@@ -1,0 +1,37 @@
+local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local data = asset.require('../total_data')
+
+
+
+local Layer = {
+  Identifier = "Total-2042-04-20",
+  Enabled = false,
+  File = data.path .. "2042-04-20.geojson",
+  HeightOffset = 2000.0,
+  DefaultProperties = {
+    LineWidth = 2.0,
+    Extrude = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.printWarning("The map for the total eclipse of 20th April 2042 contains a geometry that cannot be read right now")
+  -- @TODO:  The file contains a non-simple geometry which is currently not supported
+  -- openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Layer)
+end)
+
+asset.onDeinitialize(function()
+  -- openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Layer)
+end)
+
+
+
+asset.meta = {
+  Name = "Total 2042-04-20",
+  Version = "1.0",
+  Description = "Total eclipse map for 2042-04-20",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

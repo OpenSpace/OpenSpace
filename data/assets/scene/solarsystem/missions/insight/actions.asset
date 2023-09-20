@@ -20,7 +20,7 @@ local Setup = {
   ]],
   Documentation = "Set and goto Insight Landing",
   GuiPath = "/Missions/Insight",
-  isLocal = false
+  IsLocal = false
 }
 
 local DisableLayers = {
@@ -34,7 +34,7 @@ local DisableLayers = {
   ]],
   Documentation = "Disable Mars layer settings used for insight EDL",
   GuiPath = "/Missions/Insight",
-  isLocal = false
+  IsLocal = false
 }
 
 

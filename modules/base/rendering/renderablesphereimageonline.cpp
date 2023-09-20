@@ -98,7 +98,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
         if (imageFile.corrupted) {
             LERRORC(
                 "RenderableSphereImageOnline",
-                fmt::format("Error loading image from URL '{}'", _textureUrl)
+                fmt::format("Error loading image from URL '{}'", _textureUrl.value())
             );
             return;
         }

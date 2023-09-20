@@ -233,6 +233,15 @@ private:
 
     properties::BoolProperty _invertMouseButtons;
 
+    properties::BoolProperty _shouldRotateAroundUp;
+
+    enum class UpDirectionChoice {
+        XAxis = 0,
+        YAxis,
+        ZAxis
+    };
+    properties::OptionProperty _upToUseForRotation;
+
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
     WebsocketCameraStates _websocketStates;
@@ -323,14 +332,24 @@ private:
         double targetDistance);
 
     /**
+     * Modify the camera position and global rotation to rotate around the up vector
+     * of the current anchor based on x-wise input
+     *
+     * The up-vector to rotate around is determined by the "_upToUseForRotation" property
+     */
+    void rotateAroundAnchorUp(double deltaTime, double speedScale,
+        glm::dvec3& cameraPosition, glm::dquat& globalCameraRotation);
+
+    /**
      * Translates the horizontal direction. If far from the anchor object, this will
      * result in an orbital rotation around the object. This function does not affect the
      * rotation but only the position.
      *
      * \return a position vector adjusted in the horizontal direction.
      */
-    glm::dvec3 translateHorizontally(double deltaTime, const glm::dvec3& cameraPosition,
-        const glm::dvec3& objectPosition, const glm::dquat& globalCameraRotation,
+    glm::dvec3 translateHorizontally(double deltaTime, double speedScale,
+        const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
+        const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
 
     /*
@@ -410,13 +429,11 @@ private:
      *
      * Used for IdleBehavior::Behavior::Orbit
      *
-     * \param deltaTime The time step to use for the motion. Controls the rotation angle
+     * \param angle The rotation angle to use for the motion
      * \param position The position of the camera. Will be changed by the function
      * \param globalRotation The camera's global rotation. Will be changed by the function
-     * \param speedScale A speed scale that controls the speed of the motion
      */
-    void orbitAnchor(double deltaTime, glm::dvec3& position,
-        glm::dquat& globalRotation, double speedScale);
+    void orbitAnchor(double angle, glm::dvec3& position, glm::dquat& globalRotation);
 
     /**
      * Orbit the current anchor node, by adding a rotation around the given axis. For
@@ -429,13 +446,15 @@ private:
      * IdleBehavior::Behavior::OrbitAroundUp (axis = up = y-axis)
      *
      * \param axis The axis to arbit around, given in model coordinates of the anchor
-     * \param deltaTime The time step to use for the motion. Controls the rotation angle
+     * \param angle The rotation angle to use for the motion
      * \param position The position of the camera. Will be changed by the function
      * \param globalRotation The camera's global rotation. Will be changed by the function
-     * \param speedScale A speed scale that controls the speed of the motion
      */
-    void orbitAroundAxis(const glm::dvec3 axis, double deltaTime, glm::dvec3& position,
-        glm::dquat& globalRotation, double speedScale);
+    void orbitAroundAxis(const glm::dvec3 axis, double angle, glm::dvec3& position,
+        glm::dquat& globalRotation);
+
+    double rotationSpeedScaleFromCameraHeight(const glm::dvec3& cameraPosition,
+        const SurfacePositionHandle& positionHandle) const;
 };
 
 } // namespace openspace::interaction

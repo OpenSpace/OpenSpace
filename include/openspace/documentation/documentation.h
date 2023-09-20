@@ -56,6 +56,7 @@ struct TestResult {
          * The Reason for the offense
          */
         enum class Reason {
+            Unknown,          ///< Unknown reason
             MissingKey,       ///< The offending key that was requested was not found
             WrongType,        ///< The key's value was not of the expected type
             Verification,     ///< The value did not pass a necessary non-type verifier
@@ -65,7 +66,7 @@ struct TestResult {
         /// this value will be the fully qualified name of the key
         std::string offender;
         /// The Reason that caused this offense
-        Reason reason;
+        Reason reason = Reason::Unknown;
         /// An optional explanation for when a verification fails
         std::string explanation;
     };

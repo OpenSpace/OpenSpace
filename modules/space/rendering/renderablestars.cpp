@@ -662,7 +662,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
             _colorTextureIsDirty = true;
         }
         else {
-            LWARNING(fmt::format("File not found: {}", _colorTexturePath));
+            LWARNING(fmt::format("File not found: {}", _colorTexturePath.value()));
         }
     });
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
@@ -682,7 +682,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
             _otherDataColorMapIsDirty = true;
         }
         else {
-            LWARNING(fmt::format("File not found: {}", _otherDataColorMapPath));
+            LWARNING(fmt::format("File not found: {}", _otherDataColorMapPath.value()));
         }
     });
 

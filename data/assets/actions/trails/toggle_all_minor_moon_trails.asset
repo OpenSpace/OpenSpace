@@ -9,7 +9,7 @@ local ToggleMinorMoonTrails = {
   ]],
   Documentation = "Toggle on/off minor moon trails for all planets in the solar system",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 

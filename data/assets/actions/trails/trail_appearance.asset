@@ -20,7 +20,7 @@ local function highlightAction(identifierString, value, nameString)
     Command = highlightCommand(identifierString, value),
     Documentation = "Animates the trail fade of " .. nameString .. "'s Trail",
     GuiPath = "/Trails/Appearance",
-    IsLocal = true
+    IsLocal = false
   }
 end
 
@@ -43,7 +43,7 @@ else
 end]],
     Documentation = "Animates the trail fade of " .. nameString .. "'s trail",
     GuiPath = "/Trails/Appearance",
-    IsLocal = true
+    IsLocal = false
   }
 end
 
@@ -57,7 +57,7 @@ local EnableTrailFading = {
   ]],
   Documentation = "Set orbits to fade out towards the end",
   GuiPath = "/Trails/Appearance",
-  IsLocal = true
+  IsLocal = false
 }
 
 local DisableTrailFading = {
@@ -69,7 +69,7 @@ local DisableTrailFading = {
   ]],
   Documentation = "Sets trails not to fade out torwards end",
   GuiPath = "/Trails/Appearance",
-  IsLocal = true
+  IsLocal = false
 }
 
 local ToggleTrailFading = {
@@ -95,7 +95,7 @@ local ToggleTrailFading = {
   ]],
   Documentation = "Toggle trails to fade out towards the end for all trails in the Scene",
   GuiPath = "/Trails/Appearance",
-  IsLocal = true
+  IsLocal = false
 }
 
 local HighlightEarthTrail = highlightAction("Scene.EarthTrail", 10, "Earth")

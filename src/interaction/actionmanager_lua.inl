@@ -36,7 +36,7 @@ namespace {
 }
 
 /**
- * Removes an existing action from the list of possible actions.The action is identifies
+ * Removes an existing action from the list of possible actions. The action is identifies
  * either by the passed name, or if it is a table, the value behind the 'Identifier' key
  * is extract and used instead.
  */
@@ -192,7 +192,13 @@ struct [[codegen::Dictionary(Action)]] Action {
         throw ghoul::lua::LuaError(fmt::format("Action '{}' not found", id));
     }
 
-    global::actionManager->triggerAction(id, arg);
+    // No sync because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
+    global::actionManager->triggerAction(
+        id,
+        arg,
+        interaction::ActionManager::ShouldBeSynchronized::No
+    );
 }
 
 #include "actionmanager_lua_codegen.cpp"

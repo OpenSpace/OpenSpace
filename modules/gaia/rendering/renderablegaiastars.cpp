@@ -511,7 +511,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             _dataIsDirty = true;
         }
         else {
-            LWARNING(fmt::format("File not found: {}", _filePath));
+            LWARNING(fmt::format("File not found: {}", _filePath.value()));
         }
     });
     addProperty(_filePath);

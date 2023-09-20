@@ -533,17 +533,23 @@ void ScriptEngine::preSync(bool isMaster) {
             QueueItem item = std::move(_incomingScripts.front());
             _incomingScripts.pop();
 
-            _scriptsToSync.push_back(item.script);
-            const bool remoteScripting = item.remoteScripting;
-
             // Not really a received script but the master also needs to run the script...
             _masterScriptQueue.push(item);
 
-            if (global::parallelPeer->isHost() && remoteScripting) {
-                global::parallelPeer->sendScript(item.script);
-            }
             if (global::sessionRecording->isRecording()) {
                 global::sessionRecording->saveScriptKeyframeToTimeline(item.script);
+            }
+
+            // Sync out to other nodes (cluster)
+            if (!item.shouldBeSynchronized) {
+                continue;
+            }
+            _scriptsToSync.push_back(item.script);
+
+            // Send to other peers (parallel connection)
+            const bool shouldSendToRemote = item.shouldSendToRemote;
+            if (global::parallelPeer->isHost() && shouldSendToRemote) {
+                global::parallelPeer->sendScript(item.script);
             }
         }
     }
@@ -613,7 +619,8 @@ void ScriptEngine::postSync(bool isMaster) {
 }
 
 void ScriptEngine::queueScript(std::string script,
-                               ScriptEngine::RemoteScripting remoteScripting,
+                               ScriptEngine::ShouldBeSynchronized shouldBeSynchronized,
+                               ScriptEngine::ShouldSendToRemote shouldSendToRemote,
                                ScriptCallback callback)
 {
     ZoneScoped;
@@ -621,7 +628,12 @@ void ScriptEngine::queueScript(std::string script,
     if (script.empty()) {
         return;
     }
-    _incomingScripts.push({ std::move(script), remoteScripting, std::move(callback) });
+    _incomingScripts.push({
+        std::move(script),
+        shouldBeSynchronized,
+        shouldSendToRemote,
+        std::move(callback)
+    });
 }
 
 
