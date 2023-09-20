@@ -76,7 +76,7 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
           Enabled = false,
           Origin = "Center",
           --MultiplyColor = {colorR,colorG,colorB},
-		  MultiplyColor = {tonumber(colorR),tonumber(colorG),tonumber(colorB)},
+		      MultiplyColor = {tonumber(colorR),tonumber(colorG),tonumber(colorB)},
           Billboard = false, --might want true, for dome
           LazyLoading = false, --false, set to false to load in start, could for constellations also
           Texture = images .. imageName,

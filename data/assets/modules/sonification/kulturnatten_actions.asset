@@ -2,6 +2,9 @@ local constellationsCSV = asset.localResource("constellation_data.csv")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local constellations_helper = asset.require("util/constellations_helper")
 
+local treeoflifeBW =  asset.localResource("ToLBW.png")
+local treeoflifeEdited =  asset.localResource("ToLEdited.png")
+
 --local zodiacs = {
 --  "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
 --}
@@ -11,7 +14,38 @@ local constellations_helper = asset.require("util/constellations_helper")
 ---}
 
 
+--local treeoflife_image = {
+--  Identifier = "module.sonification.treeofLife",
+--  Name = "Tree of life",
+--  Type = "ScreenSpaceImageLocal",
+--  TexturePath = treeoflife2,
+--  FaceCamera = false,
+--  Scale = 0.3,
+--  CartesianPosition = { 1.23, -0.59, -2.0 },
+--  Enabled = false
+--}
 
+local treeoflife_image = {
+  Identifier = "treeofLife_BW",
+  Name = "treeofLife_BW",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = treeoflifeBW,
+  FaceCamera = false,
+  Scale = 0.35,
+  CartesianPosition = { -1.7, 0.0, -2.3 },
+  Enabled = false
+}
+
+local treeoflifeEdited_image = {
+  Identifier = "treeofLife_Edited",
+  Name = "treeofLife_Edited",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = treeoflifeEdited,
+  FaceCamera = false,
+  Scale = 0.35,
+  CartesianPosition = { -1.7, 0.0, -2.3 },
+  Enabled = false
+}
 
 
 local enable_cosmicplanet = {
@@ -38,9 +72,9 @@ local enable_cosmicplanet = {
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.Points-Example.Enabled", false)
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", false);
     openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false);
+    openspace.setPropertyValueSingle("module.sonification.treeofLife.Enabled", false)
 
     --openspace.pathnavigation.flyToNavigationState(navState, 0.0)
-
     openspace.navigation.setNavigationState(navState)
 	
 
@@ -55,7 +89,9 @@ local enable_geomarkers = {
   Name = "B. Show Geomarkers",
   Command = [[
 
-    openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.Points-Example.Enabled", true)
+    --openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.Points-Example.Enabled", true)
+
+    openspace.fadeIn("Scene.Earth.Renderable.GeoJson.Points-Example")
 
   ]],
   Documentation = "Enables the planets sonification, turn off the cosmic points and jumps to Earth",
@@ -225,6 +261,8 @@ local ShowSwan = {
   Name = "I. Show Swan",
   Command = [[
     openspace.fadeIn("Scene.Kulturnatten_Anseriformes.Renderable")
+    openspace.setPropertyValueSingle("Scene.Kulturnatten_Anseriformes.Renderable.MultiplyColor", {0.576471, 0.874510, 0.721569})
+
   ]],
   Documentation = "Enables and fades up constellation art work",
   GuiPath = "/Kulturnatten",
@@ -236,6 +274,7 @@ local ShowGalli = {
   Name = "J. Show Galli",
   Command = [[
     openspace.fadeIn("Scene.Kulturnatten_Galliformes.Renderable")
+    openspace.setPropertyValueSingle("Scene.Kulturnatten_Galliformes.Renderable.MultiplyColor", {0.576471, 0.874510, 0.721569})
   ]],
   Documentation = "Enables and fades up constellation art work",
   GuiPath = "/Kulturnatten",
@@ -247,17 +286,9 @@ local ShowOstrich = {
   Name = "K. Show Ostrich",
   Command = [[
     openspace.fadeIn("Scene.Kulturnatten_Struthioniformes.Renderable")
-  ]],
-  Documentation = "Enables and fades up constellation art work",
-  GuiPath = "/Kulturnatten",
-  IsLocal = false
-}
+    openspace.setPropertyValueSingle("Scene.Kulturnatten_Struthioniformes.Renderable.MultiplyColor", {0.764706, 0.803922, 0.901961})
 
-local ShowAllImages = {
-  Identifier = "module.sonification.enable.ShowAllImages",
-  Name = "L. Show all Bird Images",
-  Command = [[
-    openspace.fadeIn("Scene.Kulturnatten*.Renderable")
+    
   ]],
   Documentation = "Enables and fades up constellation art work",
   GuiPath = "/Kulturnatten",
@@ -266,7 +297,7 @@ local ShowAllImages = {
 
 local enable_birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection = {
   Identifier = "module.sonification.enable.birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection",
-  Name = "M. Enable V2_L29",
+  Name = "L. Enable V2_L29",
   Command = [[
 
   openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.Enabled", false)
@@ -277,8 +308,24 @@ local enable_birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection = {
   openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_sphere_3Dprojection_lineage_29.Renderable.Enabled", true)
 	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_3Dprojection_lineage_29.Renderable.Enabled", false)
 	openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", false)
+
+  openspace.setPropertyValueSingle("Scene.Kulturnatten_Anseriformes.Renderable.MultiplyColor", {1.000000, 0.96, 1.000000})
+  openspace.setPropertyValueSingle("Scene.Kulturnatten_Galliformes.Renderable.MultiplyColor", {1.0000, 0.9, 0.61})
+  openspace.setPropertyValueSingle("Scene.Kulturnatten_Struthioniformes.Renderable.MultiplyColor", {1.000000, 0.650980, 0.788235})
+
   ]],
   Documentation = "Enable V2_L29",
+  GuiPath = "/Kulturnatten",
+  IsLocal = false
+}
+
+local ShowAllImages = {
+  Identifier = "module.sonification.enable.ShowAllImages",
+  Name = "M. Show all Bird Images",
+  Command = [[
+    openspace.fadeIn("Scene.Kulturnatten*.Renderable")
+  ]],
+  Documentation = "Enables and fades up constellation art work",
   GuiPath = "/Kulturnatten",
   IsLocal = false
 }
@@ -421,29 +468,37 @@ asset.onInitialize(function ()
   openspace.action.registerAction(ShowGalli)
   openspace.action.registerAction(ShowOstrich)
   openspace.action.registerAction(ShowAllImages)
-    
+
+
+  openspace.addScreenSpaceRenderable(treeoflife_image)
+
+  openspace.addScreenSpaceRenderable(treeoflifeEdited_image)
+
+  
+
 
 end)
 
 asset.onDeinitialize(function ()
-  openspace.action.registerAction(enable_cosmicplanet)
-  openspace.action.registerAction(enable_geomarkers)
-  openspace.action.registerAction(ShowConstellations)
-  openspace.action.registerAction(ShowArt)
-  openspace.action.registerAction(enable_cosmicdata)
-  openspace.action.registerAction(enable_birds_lineage_29)
-  openspace.action.registerAction(enable_mMDS_xyz_3Dprojection)
-  openspace.action.registerAction(enable_birds_mMDS_xyz_sphere_3Dprojection)
-  openspace.action.registerAction(fade_in)
-  openspace.action.registerAction(fade_out)
-  openspace.action.registerAction(enable_birds_mMDS_xy_3Dprojection)
-  openspace.action.registerAction(enable_birds_UMAP_xyz_3Dprojection)
-  openspace.action.registerAction(ShowBirdConstArt)
-  openspace.action.registerAction(enable_birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection)
-  openspace.action.registerAction(ShowSwan)
-  openspace.action.registerAction(ShowGalli)
-  openspace.action.registerAction(ShowOstrich)
-  openspace.action.registerAction(ShowAllImages)
+  openspace.action.removeAction(enable_cosmicplanet)
+  openspace.action.removeAction(enable_geomarkers)
+  openspace.action.removeAction(ShowConstellations)
+  openspace.action.removeAction(ShowArt)
+  openspace.action.removeAction(enable_cosmicdata)
+  openspace.action.removeAction(enable_birds_lineage_29)
+  openspace.action.removeAction(enable_mMDS_xyz_3Dprojection)
+  openspace.action.removeAction(enable_birds_mMDS_xyz_sphere_3Dprojection)
+  openspace.action.removeAction(fade_in)
+  openspace.action.removeAction(fade_out)
+  openspace.action.removeAction(enable_birds_mMDS_xy_3Dprojection)
+  openspace.action.removeAction(enable_birds_UMAP_xyz_3Dprojection)
+  openspace.action.removeAction(ShowBirdConstArt)
+  openspace.action.removeAction(enable_birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection)
+  openspace.action.removeAction(ShowSwan)
+  openspace.action.removeAction(ShowGalli)
+  openspace.action.removeAction(ShowOstrich)
+  openspace.action.removeAction(ShowAllImages)
+
   
 end)
 

@@ -20,11 +20,12 @@ local cmap_lineage_33 = asset.localResource("sequences/lineage_33.cmap")
 local label_lineage_34 = asset.localResource("sequences/lineage_34.label")
 local cmap_lineage_34 = asset.localResource("sequences/lineage_34.cmap")
 local texture_file = asset.localResource("point3A.png")
+local texture_file2 = asset.localResource("wingsSquare.png")
 
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 -- Set some parameters for OpenSpace settings
-local scale_factor = 150
+local scale_factor = 200
 local text_size = 6
 local text_min_size = 15
 local text_max_size = 30
@@ -113,7 +114,7 @@ local birds_UMAP_xyz_CenteredOnRoot_lineage_29 = {
         --FadeLabelDistances = { 0.0, 0.5 },
         --FadeLabelWidths = { 0.001, 0.5 },
         Unit = "Km",
-        Texture = texture_file,
+        Texture = texture_file2,
         BillboardMinMaxSize = { 0.0, 25.0 },
         EnablePixelSizeControl = true,
         EnableLabelFading = false,
