@@ -291,9 +291,10 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     // We pass in the model view transformation matrix as double in order to maintain
     // high precision for vertices; especially for the trails, a high vertex precision
     // is necessary as they are usually far away from their reference
+    glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
     _programObject->setUniform(
         _uniformCache.modelView,
-        calcModelViewTransform(data, modelTransform) * info._localTransform
+        modelViewTransform * info._localTransform
     );
 
     const int sorting = [](RenderInformation::VertexSorting s) {

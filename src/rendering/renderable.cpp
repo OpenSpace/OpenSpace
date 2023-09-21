@@ -361,8 +361,9 @@ glm::dmat4 Renderable::calcModelViewProjectionTransform(const RenderData& data,
                                            std::optional<glm::dmat4> modelTransform) const
 {
     glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
-    return glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix() *
-        modelMatrix;
+    glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
+    glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+    return glm::dmat4(projectionMatrix * viewMatrix * modelMatrix);
 }
 
 std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
@@ -371,8 +372,10 @@ std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
 {
     glm::dmat4 modelTransform = calcModelTransform(data, altModelTransform);
     glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
-    glm::dmat4 modelViewProjectionTransform =
-        calcModelViewProjectionTransform(data, modelTransform);
+    glm::dmat4 modelViewProjectionTransform = calcModelViewProjectionTransform(
+        data,
+        modelTransform
+    );
 
     return {
         modelTransform,

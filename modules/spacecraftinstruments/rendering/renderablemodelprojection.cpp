@@ -262,8 +262,9 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     const glm::vec3 bodyPos = data.modelTransform.translation;
 
     // Model transform and view transform needs to be in double precision
-    const glm::dmat4 modelTransform =
-        glm::scale(calcModelTransform(data), glm::dvec3(_modelScale));
+    const glm::dmat4 modelTransform = glm::scale(
+        calcModelTransform(data), glm::dvec3(_modelScale)
+    );
     const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
 
     // malej 2023-FEB-23: The light sources should probably not be hard coded

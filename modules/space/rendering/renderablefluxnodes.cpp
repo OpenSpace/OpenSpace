@@ -677,8 +677,10 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
 
     // Calculate Model View MatrixProjection
     const glm::dmat4 rotationTransform = glm::dmat4(data.modelTransform.rotation);
-    const glm::dmat4 modelTransform =
-        calcModelTransform(data, { .rotation = rotationTransform });
+    const glm::dmat4 modelTransform = calcModelTransform(
+        data,
+        { .rotation = rotationTransform }
+    );
 
     _shaderProgram->setUniform(
         "modelViewProjection",
@@ -689,8 +691,9 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     if (!earthNode) {
         LWARNING("Could not find scene graph node 'Earth'");
     }
-    glm::vec3 earthPos =
-        glm::vec3(earthNode->worldPosition() * data.modelTransform.rotation);
+    glm::vec3 earthPos = glm::vec3(
+        earthNode->worldPosition() * data.modelTransform.rotation
+    );
 
     _shaderProgram->setUniform(_uniformCache.streamColor, _streamColor);
     _shaderProgram->setUniform(_uniformCache.nodeSize, _nodeSize);
