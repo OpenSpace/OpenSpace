@@ -37,7 +37,7 @@ flat out float vs_screenSpaceDepth;
 out float ta;
 
 // General settings
-uniform float scaleFactor;
+uniform float scaleExponent;
 uniform int renderOption;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
@@ -74,7 +74,7 @@ void main() {
 
   dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
 
-  float scaleMultiply = exp(scaleFactor * 0.10);
+  float scaleMultiply = exp(scaleExponent * 0.10);
   if (hasDvarScaling) {
     scaleMultiply *= dvarScaling[0];
   }

@@ -29,7 +29,7 @@ local Object = {
     Texture = textures .. "target-blue.png",
     File = speck .. "expl.speck",
     Unit = "pc",
-    ScaleFactor = 388.67923,
+    ScaleExponent = 388.67923,
     BillboardMinMaxSize = { 0.0, 75.0 },
     EnablePixelSizeControl = true
   },

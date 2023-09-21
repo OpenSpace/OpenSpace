@@ -57,7 +57,7 @@ namespace {
     constexpr std::array<const char*, 18> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize", "color", "alphaValue",
-        "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
+        "scaleExponent", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
         "useColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
@@ -73,11 +73,10 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
-        "ScaleFactor",
-        "Scale Factor",
-        "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point",
+    constexpr openspace::properties::Property::PropertyInfo ScaleExponentInfo = {
+        "ScaleExponent",
+        "Scale Exponent",
+        "This value is used as in exponential scaling to set the size of the point",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
@@ -235,8 +234,8 @@ namespace {
         // distances/positions in the data files
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(ScaleFactorInfo.description)]]
-        std::optional<float> scaleFactor;
+        // [[codegen::verbatim(ScaleExponentInfo.description)]]
+        std::optional<float> scaleExponent;
 
         // [[codegen::verbatim(UseColorMapInfo.description)]]
         std::optional<bool> useColorMap;
@@ -292,7 +291,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
 
 RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "SizeSetting", "Size Settings", ""})
-    , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
+    , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 600.f)
     , pixelSizeControl(PixelSizeControlInfo, false)
     , billboardMinMaxSize(
         BillboardMinMaxSizeInfo,
@@ -303,8 +302,8 @@ RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& d
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    scaleFactor = p.scaleFactor.value_or(scaleFactor);
-    addProperty(scaleFactor);
+    scaleExponent = p.scaleExponent.value_or(scaleExponent);
+    addProperty(scaleExponent);
 
     pixelSizeControl = p.enablePixelSizeControl.value_or(pixelSizeControl);
     addProperty(pixelSizeControl);
@@ -631,7 +630,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.maxBillboardSize, maxBillboardSize);
     _program->setUniform(_uniformCache.color, _pointColor);
     _program->setUniform(_uniformCache.alphaValue, opacity());
-    _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
+    _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
@@ -873,16 +872,6 @@ glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom) c
     float nColors = static_cast<float>(_colorMap.entries.size());
 
     if (_colorMapSettings.isColorMapExact) {
-        int colorIndex = static_cast<int>(valueToColorFrom + cmin);
-        if (colorIndex > nColors - 1) {
-            LERROR(fmt::format("Invalid use of \"exact\" color map")); // TODO: Make sure we can't end up here.
-            return glm::vec4(_pointColor.value(), 1.f);
-        }
-        return _colorMap.entries[colorIndex];
-    }
-    else { // Nearest neighbor
-        // Note that the first color and the last color in the colormap file are the
-        // outliers colors.
         float normalization = ((cmax != cmin) && (nColors > 2.f)) ?
             (nColors - 2.f) / (cmax - cmin) : 0;
 
@@ -890,8 +879,25 @@ glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom) c
             (valueToColorFrom - cmin) * normalization + 1.f
         );
 
+        colorIndex = colorIndex < 1 ? 1 : colorIndex;
+        colorIndex = colorIndex >= nColors - 1 ?
+            static_cast<int>(nColors) - 2 : colorIndex;
+
+        return _colorMap.entries[colorIndex];
+    }
+    else { // Nearest neighbor
+        // Note that the first color and the last color in the colormap file are the
+        // outliers colors
+        float normalization = ((cmax != cmin) && (nColors > 2.f)) ?
+            (nColors - 1.f) / (cmax - cmin) : 0;
+
+        int colorIndex = static_cast<int>(
+            (valueToColorFrom - cmin) * normalization + 1.f
+        );
+
+        // Set to outlier values if outside
         colorIndex = colorIndex < 0 ? 0 : colorIndex;
-        colorIndex = colorIndex >= nColors ?
+        colorIndex = colorIndex >= nColors - 1 ?
             static_cast<int>(nColors - 1.f) : colorIndex;
 
         return _colorMap.entries[colorIndex];

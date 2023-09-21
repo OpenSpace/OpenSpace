@@ -30,7 +30,7 @@ local Object = {
     File = speck .. "h2.speck",
     PolygonSides = 6,
     Unit = "pc",
-    ScaleFactor = 420.0,
+    ScaleExponent = 420.0,
     BillboardMinMaxSize = { 0.0, 300.0 },
     EnablePixelSizeControl = false
   },

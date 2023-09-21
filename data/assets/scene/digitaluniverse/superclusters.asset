@@ -31,7 +31,7 @@ local Object = {
     File = speck .. "superclust.speck",
     Texture = textures .. "point3A.png",
     Unit = "Mpc",
-    ScaleFactor = 531.0,
+    ScaleExponent = 531.0,
     -- BillboardMinMaxSize = { 0.0, 7.2 },
     EnablePixelSizeControl = true
   },

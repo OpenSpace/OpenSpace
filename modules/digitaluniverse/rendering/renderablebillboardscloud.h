@@ -99,7 +99,7 @@ protected:
     struct SizeSettings : properties::PropertyOwner {
         SizeSettings(const ghoul::Dictionary& dictionary);
 
-        properties::FloatProperty scaleFactor;
+        properties::FloatProperty scaleExponent;
 
         properties::BoolProperty pixelSizeControl;
         properties::Vec2Property billboardMinMaxSize;
@@ -142,7 +142,7 @@ protected:
 
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
-        minBillboardSize, maxBillboardSize, color, alphaValue, scaleFactor, up, right,
+        minBillboardSize, maxBillboardSize, color, alphaValue, scaleExponent, up, right,
         fadeInValue, screenSize, spriteTexture, useColormap, enabledRectSizeControl,
         hasDvarScaling
     ) _uniformCache;

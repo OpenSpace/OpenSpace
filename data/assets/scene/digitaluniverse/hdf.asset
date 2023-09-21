@@ -35,7 +35,7 @@ local Object = {
       { Key = "proximity", Range = { 1.0, 25.0 } }
     },
     Unit = "Mpc",
-    ScaleFactor = 505.0,
+    ScaleExponent = 505.0,
     BillboardMaxSize = 4.7,
     EnablePixelSizeControl = true
   },

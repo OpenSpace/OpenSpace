@@ -26,7 +26,7 @@ local DeepSkyObjects = {
       Unit = "pc"
     },
     Opacity = 0.99,
-    ScaleFactor = 500.0,
+    ScaleExponent = 500.0,
     File = speck .. "dso.speck",
     Texture = textures .. "point3.png",
     Unit = "pc",
@@ -54,7 +54,7 @@ local DeepSkyObjectsImages = {
     Enabled = false,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.99,
-    ScaleFactor = 1.0,
+    ScaleExponent = 1.0,
     File = speck .. "dso.speck",
     TexturePath = textures,
     Luminosity = "radius",
