@@ -72,7 +72,6 @@ local enable_cosmicplanet = {
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.Points-Example.Enabled", false)
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", false);
     openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false);
-    openspace.setPropertyValueSingle("module.sonification.treeofLife.Enabled", false)
 
     --openspace.pathnavigation.flyToNavigationState(navState, 0.0)
     openspace.navigation.setNavigationState(navState)

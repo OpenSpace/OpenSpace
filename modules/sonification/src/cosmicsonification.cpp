@@ -66,6 +66,12 @@ namespace {
         "The mode for what the amplitude is dependent on in the sonification"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MappingModeInfo = {
+        "MappingMode",
+        "Mapping Mode",
+        "The mode for what mapping the sonificaiton uses"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo FocusTypeInfo = {
         "FocusType",
         "Focus Type",
@@ -103,6 +109,10 @@ CosmicSonification::CosmicSonification(const std::string& ip, int port)
         AmplitudeModeInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _mappingModeProperty(
+        MappingModeInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _focusTypeProperty(
         FocusTypeInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -126,6 +136,14 @@ CosmicSonification::CosmicSonification(const std::string& ip, int port)
     });
     _amplitudeModeProperty.onChange([this]() { guiChangeAmpMode(); });
     addProperty(_amplitudeModeProperty);
+
+    // Add options to the mapping mode drop down menu
+    _mappingModeProperty.addOptions({
+        { 0, "Reverb" },
+        { 1, "Frequency" },
+    });
+    _mappingModeProperty.onChange([this]() { guiChangeMappingMode(); });
+    addProperty(_mappingModeProperty);
 
     // Add options to the fopcus type drop down menu
     _focusTypeProperty.addOptions({
@@ -159,6 +177,16 @@ void CosmicSonification::guiChangeAmpMode() {
     std::string label = "/AmpMode";
     std::vector<OscDataType> data(1);
     data[0] = static_cast<int>(_amplitudeMode);
+
+    _connection->send(label, data);
+}
+
+void CosmicSonification::guiChangeMappingMode() {
+    _mappingMode = static_cast<MappingMode>(_mappingModeProperty.value());
+
+    std::string label = "/MappingMode";
+    std::vector<OscDataType> data(1);
+    data[0] = static_cast<int>(_mappingMode);
 
     _connection->send(label, data);
 }

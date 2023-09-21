@@ -84,6 +84,11 @@ private:
         TaxDatanomy
     };
 
+    enum class MappingMode {
+        Reverb = 0,
+        Frequency
+    };
+
     // Ability to change focus type for the sonification
     enum class FocusType {
         Panning = 0,
@@ -100,6 +105,7 @@ private:
     };
 
     void guiChangeAmpMode();
+    void guiChangeMappingMode();
     void guiChangeFocusType();
     void guiChangeFilter();
     void guiChangeLock();
@@ -155,9 +161,11 @@ private:
     std::vector<NodeData> _nodes;
     std::vector<Labels> _labels;
     properties::OptionProperty _amplitudeModeProperty;
+    properties::OptionProperty _mappingModeProperty;
     properties::OptionProperty _focusTypeProperty;
     properties::OptionProperty _filterProperty;
     AmplitudeMode _amplitudeMode = AmplitudeMode::Distance;
+    MappingMode _mappingMode = MappingMode::Reverb;
     FocusType _focusType = FocusType::Panning;
     Filter _filter = Filter::Focus;
     properties::BoolProperty _lockClosestItem;
