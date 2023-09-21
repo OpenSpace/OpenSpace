@@ -702,15 +702,9 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         }
     }
 
-    glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
-
-    glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
+    glm::dmat4 modelMatrix = calcModelTransform(data);
+    glm::dmat4 modelViewProjectionMatrix =
+        calcModelViewProjectionTransform(data, modelMatrix);
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();

@@ -629,17 +629,14 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
             glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
     );
 
-    glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) * rotMatrix *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    AlternativeTransform altTransform;
+    altTransform.rotation = glm::dmat4(data.modelTransform.rotation) * rotMatrix;
+    glm::dmat4 modelTransform = calcModelTransform(data, altTransform);
 
-    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+    glm::dmat4 cameraViewProjectionMatrix =
+        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
 
-    glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
-        data.camera.combinedViewMatrix();
-
-    _pointsProgram->setUniform(_uniformCachePoints.modelMatrix, modelMatrix);
+    _pointsProgram->setUniform(_uniformCachePoints.modelMatrix, modelTransform);
     _pointsProgram->setUniform(
         _uniformCachePoints.cameraViewProjectionMatrix,
         cameraViewProjectionMatrix
@@ -682,17 +679,14 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
             glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
     );
 
-    glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) * rotMatrix *
-        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
+    AlternativeTransform altTransform;
+    altTransform.rotation = glm::dmat4(data.modelTransform.rotation) * rotMatrix;
+    glm::dmat4 modelTransform = calcModelTransform(data, altTransform);
 
-    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+    glm::dmat4 cameraViewProjectionMatrix =
+        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
 
-    glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
-        data.camera.combinedViewMatrix();
-
-    _billboardsProgram->setUniform(_uniformCacheBillboards.modelMatrix, modelMatrix);
+    _billboardsProgram->setUniform(_uniformCacheBillboards.modelMatrix, modelTransform);
     _billboardsProgram->setUniform(
         _uniformCacheBillboards.cameraViewProjectionMatrix,
         cameraViewProjectionMatrix

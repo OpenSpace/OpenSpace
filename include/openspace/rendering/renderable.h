@@ -141,8 +141,72 @@ protected:
     // An optional renderbin that renderables can use for certain components, in cases
     // where all parts of the renderable should not be rendered in the same bin
     std::optional<RenderBin> _secondaryRenderBin;
-private:
 
+    struct AlternativeTransform {
+        std::optional<glm::dvec3> translation = std::nullopt;
+        std::optional<glm::dmat3> rotation = std::nullopt;
+        std::optional<glm::dvec3> scale = std::nullopt;
+    };
+
+    /**
+     * Calculates the model transformation matrix with the given data and returns it
+     *
+     * \param data the RenderData for the object that the model transformation matrix
+     *        should be calculated for
+     * \param altTransform an object containing alternative transformations to use instead
+     *        of those given in data. The transforms can be translation, rotation and
+     *        scale.
+     *
+     * \return the resulting model transformation matrix in double precision
+     */
+    glm::dmat4 calcModelTransform(const RenderData& data,
+        const AlternativeTransform& altTransform = {}) const;
+
+    /**
+     * Calculates the model view transformation matrix with the given data and returns it
+     *
+     * \param data the RenderData for the object that the model view transformation matrix
+     *        should be calculated for
+     * \param modelTransform an alternative model transformation matrix to use. If not
+     *        provided the function will calculate a new one.
+     *
+     * \return the resulting model view transformation matrix in double precision
+     */
+    glm::dmat4 calcModelViewTransform(const RenderData& data,
+        std::optional<glm::dmat4> modelTransform = std::nullopt) const;
+
+    /**
+     * Calculates the model view projection transformation matrix with the given data and
+     * returns it
+     *
+     * \param data the RenderData for the object that the model view projection
+     *        transformation matrix should be calculated for
+     * \param modelTransform an alternative model transformation matrix to use. If not
+     *        provided the function will calculate a new one.
+     *
+     * \return the resulting model view projection transformation matrix in double
+     *         precision
+     */
+    glm::dmat4 calcModelViewProjectionTransform(const RenderData& data,
+        std::optional<glm::dmat4> modelTransform = std::nullopt) const;
+
+    /**
+     * Calculates the model, model view, and the model view projection transformation
+     * matricies with the given data and returns them in a tuple object
+     *
+     * \param data the RenderData for the object that the transforms should be
+     *        calculated for
+     * \param altModelTransform an object containing alternative transformations to use
+     *        instead of those given in data. The transforms can be translation, rotation
+     *        and scale.
+     *
+     * \return a tuple object containing the resulting model, model view, and the
+     *         model view projection transformation matrices
+     */
+    std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> calcAllTransforms(
+        const RenderData& data, const AlternativeTransform& altModelTransform = {}) const;
+
+private:
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;
     SceneGraphNode* _parent = nullptr;
