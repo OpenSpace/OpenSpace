@@ -283,16 +283,11 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
 }
 
 void RenderableConstellationLines::render(const RenderData& data, RendererTasks& tasks) {
-    const glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data);
+    const glm::dmat4 projectionTransform = data.camera.projectionMatrix();
 
     if (_drawElements) {
-        renderConstellations(data, modelViewMatrix, projectionMatrix);
+        renderConstellations(data, modelViewTransform, projectionTransform);
     }
 
     RenderableConstellationsBase::render(data, tasks);

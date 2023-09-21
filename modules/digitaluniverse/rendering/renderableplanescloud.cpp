@@ -376,8 +376,8 @@ void RenderablePlanesCloud::deinitializeGL() {
 }
 
 void RenderablePlanesCloud::renderPlanes(const RenderData&,
-                                         const glm::dmat4& modelViewMatrix,
-                                         const glm::dmat4& projectionMatrix,
+                                         const glm::dmat4& modelViewTransform,
+                                         const glm::dmat4& projectionTransform,
                                          const float fadeInVariable)
 {
     glEnablei(GL_BLEND, 0);
@@ -387,10 +387,11 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
 
     _program->activate();
 
-    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+    glm::dmat4 modelViewProjectionTransform =
+        glm::dmat4(projectionTransform) * modelViewTransform;
     _program->setUniform(
         _uniformCache.modelViewProjectionTransform,
-        modelViewProjectionMatrix
+        modelViewProjectionTransform
     );
     _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
@@ -448,24 +449,21 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
         }
     }
 
-    const glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    const glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+    const glm::dmat4 modelTransform = calcModelTransform(data);
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
+    const glm::mat4 projectionTransform = data.camera.projectionMatrix();
 
     if (_hasSpeckFile) {
-        renderPlanes(data, modelViewMatrix, projectionMatrix, fadeInVariable);
+        renderPlanes(data, modelViewTransform, projectionTransform, fadeInVariable);
     }
 
     if (_hasLabels) {
-        const glm::dmat4 mvpMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+        const glm::dmat4 modelViewProjectionTransform =
+            glm::dmat4(projectionTransform) * modelViewTransform;
 
-        const glm::dmat4 invMVPParts = glm::inverse(modelMatrix) *
+        const glm::dmat4 invMVPParts = glm::inverse(modelTransform) *
             glm::inverse(data.camera.combinedViewMatrix()) *
-            glm::inverse(glm::dmat4(projectionMatrix));
+            glm::inverse(glm::dmat4(projectionTransform));
         const glm::dvec3 orthoRight = glm::normalize(
             glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))
         );
@@ -473,7 +471,7 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
             glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))
         );
 
-        _labels->render(data, mvpMatrix, orthoRight, orthoUp, fadeInVariable);
+        _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp, fadeInVariable);
     }
 }
 

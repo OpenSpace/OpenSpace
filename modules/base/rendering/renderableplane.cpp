@@ -29,14 +29,11 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
@@ -44,6 +41,11 @@
 #include <variant>
 
 namespace {
+    constexpr std::array<const char*, 6> UniformNames = {
+        "modelViewProjection", "modelViewTransform", "colorTexture", "opacity",
+        "mirrorBackside", "multiplyColor"
+    };
+
     enum BlendMode {
         Normal = 0,
         Additive
@@ -213,6 +215,8 @@ void RenderablePlane::initializeGL() {
             );
         }
     );
+
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 void RenderablePlane::deinitializeGL() {
@@ -237,9 +241,9 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     ZoneScoped;
 
     _shader->activate();
-    _shader->setUniform("opacity", opacity());
+    _shader->setUniform(_uniformCache.opacity, opacity());
 
-    _shader->setUniform("mirrorBackside", _mirrorBackside);
+    _shader->setUniform(_uniformCache.mirrorBackside, _mirrorBackside);
 
     glm::dvec3 objectPositionWorld = glm::dvec3(
         glm::translate(
@@ -262,26 +266,23 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
         cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        rotationTransform *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-    const glm::dmat4 modelViewTransform =
-        data.camera.combinedViewMatrix() * modelTransform;
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data, { .rotation = rotationTransform });
 
-    _shader->setUniform("modelViewProjectionTransform",
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
-
-    _shader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _shader->setUniform(
+        _uniformCache.modelViewProjection,
+        glm::mat4(modelViewProjectionTransform)
+    );
+    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     bindTexture();
     defer { unbindTexture(); };
 
-    _shader->setUniform("texture1", unit);
+    _shader->setUniform(_uniformCache.colorTexture, unit);
 
-    _shader->setUniform("multiplyColor", _multiplyColor);
+    _shader->setUniform(_uniformCache.multiplyColor, _multiplyColor);
 
     bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
     if (additiveBlending) {
@@ -311,6 +312,7 @@ void RenderablePlane::update(const UpdateData&) {
 
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
 
     if (_planeIsDirty) {
