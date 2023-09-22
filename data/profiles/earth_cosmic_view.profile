@@ -393,6 +393,26 @@
       "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Scale.Scale",
       "type": "setPropertyValueSingle",
       "value": "100.0"
+    },
+    {
+      "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.RenderOption",
+      "type": "setPropertyValueSingle",
+      "value": "1.000000"
+    },
+    {
+      "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Renderable.RenderOption",
+      "type": "setPropertyValueSingle",
+      "value": "1.000000"
+    },
+    {
+      "name": "Scene.birds_UMAP_xyz_CenteredOnRoot_lineage_28.Renderable.RenderOption",
+      "type": "setPropertyValueSingle",
+      "value": "1.000000"
+    },
+    {
+      "name": "Scene.birds_UMAP_xyz_CenteredOnRoot_lineage_29.Renderable.RenderOption",
+      "type": "setPropertyValueSingle",
+      "value": "1.000000"
     }
 	
 
