@@ -32,7 +32,7 @@ local Object = {
     Texture = textures .. "point3A.png",
     Unit = "Mpc",
     ScaleExponent = 53.1,
-    -- BillboardMinMaxSize = { 0.0, 7.2 },
+    BillboardMinMaxSize = { 0.0, 7.2 },
     EnablePixelSizeControl = true
   },
   GUI = {

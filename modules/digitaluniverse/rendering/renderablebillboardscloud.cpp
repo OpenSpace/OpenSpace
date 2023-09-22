@@ -424,7 +424,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
 
     _drawElements = p.drawElements.value_or(_drawElements);
-    _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
     _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
