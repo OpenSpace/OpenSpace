@@ -54,11 +54,11 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableBillboardsCloud";
 
-    constexpr std::array<const char*, 18> UniformNames = {
+    constexpr std::array<const char*, 19> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize", "color", "alphaValue",
-        "scaleExponent", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
-        "useColorMap", "enabledRectSizeControl", "hasDvarScaling"
+        "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "screenSize",
+        "spriteTexture", "useColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
     enum RenderOption {
@@ -76,8 +76,18 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleExponentInfo = {
         "ScaleExponent",
         "Scale Exponent",
-        "This value is used as in exponential scaling to set the size of the point",
-        // @VISIBILITY(2.5)
+        "This value is used as in exponential scaling to set the absolute size of the "
+        "point. In general, the larger distance the dataset covers, the larger this "
+        "value should be.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+        "ScaleFactor",
+        "Scale Factor",
+        "This value is used as a multiplicative factor to adjust the size of the points, "
+        "after the exponential scaling and any pixel-size control effects. Simply just "
+        "increases or decreases the visual size of the points",
         openspace::properties::Property::Visibility::User
     };
 
@@ -237,6 +247,9 @@ namespace {
         // [[codegen::verbatim(ScaleExponentInfo.description)]]
         std::optional<float> scaleExponent;
 
+        // [[codegen::verbatim(ScaleFactorInfo.description)]]
+        std::optional<float> scaleFactor;
+
         // [[codegen::verbatim(UseColorMapInfo.description)]]
         std::optional<bool> useColorMap;
 
@@ -292,6 +305,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
 RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "SizeSetting", "Size Settings", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 600.f)
+    , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
     , pixelSizeControl(PixelSizeControlInfo, false)
     , billboardMinMaxSize(
         BillboardMinMaxSizeInfo,
@@ -302,7 +316,11 @@ RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& d
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    scaleFactor = p.scaleFactor.value_or(scaleFactor);
+    addProperty(scaleFactor);
+
     scaleExponent = p.scaleExponent.value_or(scaleExponent);
+    scaleExponent.setExponent(2.f);
     addProperty(scaleExponent);
 
     pixelSizeControl = p.enablePixelSizeControl.value_or(pixelSizeControl);
@@ -631,6 +649,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.color, _pointColor);
     _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
+    _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);

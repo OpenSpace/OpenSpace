@@ -100,6 +100,7 @@ protected:
         SizeSettings(const ghoul::Dictionary& dictionary);
 
         properties::FloatProperty scaleExponent;
+        properties::FloatProperty scaleFactor;
 
         properties::BoolProperty pixelSizeControl;
         properties::Vec2Property billboardMinMaxSize;
@@ -142,9 +143,9 @@ protected:
 
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
-        minBillboardSize, maxBillboardSize, color, alphaValue, scaleExponent, up, right,
-        fadeInValue, screenSize, spriteTexture, useColormap, enabledRectSizeControl,
-        hasDvarScaling
+        minBillboardSize, maxBillboardSize, color, alphaValue, scaleExponent, scaleFactor,
+        up, right, fadeInValue, screenSize, spriteTexture, useColormap,
+        enabledRectSizeControl, hasDvarScaling
     ) _uniformCache;
 
     std::string _speckFile;

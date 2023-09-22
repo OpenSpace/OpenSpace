@@ -38,6 +38,7 @@ out float ta;
 
 // General settings
 uniform float scaleExponent;
+uniform float scaleFactor;
 uniform int renderOption;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
@@ -134,8 +135,10 @@ void main() {
 
   // Saving one matrix multiplication:
   vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
-  vec4 scaledRightClip = vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
-  vec4 scaledUpClip = vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
+  vec4 scaledRightClip = scaleFactor *
+    vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
+  vec4 scaledUpClip = scaleFactor *
+    vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
 
   vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
   vs_screenSpaceDepth = initialPosition.w;
