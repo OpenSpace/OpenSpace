@@ -30,7 +30,7 @@ local Object = {
     File = speck .. "pn.speck",
     PolygonSides = 3,
     Unit = "pc",
-    ScaleExponent = 425.0,
+    ScaleExponent = 42.5,
     BillboardMinMaxSize = { 0.0, 500.0 },
     EnablePixelSizeControl = true
   },

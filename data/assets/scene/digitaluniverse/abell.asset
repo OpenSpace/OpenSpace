@@ -41,7 +41,7 @@ local Object = {
     Texture = textures .. "point3A.png",
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
-    ScaleExponent = 520.0,
+    ScaleExponent = 52.0,
     BillboardMinMaxSize = { 0.0, 7.0 },
     EnablePixelSizeControl = true
   },

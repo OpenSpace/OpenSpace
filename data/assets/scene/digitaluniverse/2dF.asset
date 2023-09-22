@@ -27,7 +27,7 @@ local Object = {
       { Key = "redshift", Range = { 0.0, 0.075 } },
       { Key = "proximity", Range = { 1.0, 25.0 } }
     },
-    ScaleExponent = 520.0,
+    ScaleExponent = 52.0,
     BillboardMinMaxSize = { 0.0, 4.7 },
     EnablePixelSizeControl = true
   },

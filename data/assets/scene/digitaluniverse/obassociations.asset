@@ -35,7 +35,7 @@ local Object = {
     Unit = "pc",
     Texture = textures .. "point4.png",
     PolygonSides = 7,
-    ScaleExponent = 390.0,
+    ScaleExponent = 39.0,
     BillboardMinMaxSize = { 0.0, 450.0 },
     EnablePixelSizeControl = true
   },

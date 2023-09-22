@@ -30,7 +30,7 @@ local Object = {
     File = speck .. "pulsar.speck",
     PolygonSides = 4,
     Unit = "pc",
-    ScaleExponent = 424.0,
+    ScaleExponent = 42.4,
     BillboardMinMaxSize = { 0.0, 500.0 },
     EnablePixelSizeControl = false
   },

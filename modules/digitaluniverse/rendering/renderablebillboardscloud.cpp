@@ -304,7 +304,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
 
 RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "SizeSetting", "Size Settings", ""})
-    , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 600.f)
+    , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 60.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
     , pixelSizeControl(PixelSizeControlInfo, false)
     , billboardMinMaxSize(

@@ -34,7 +34,7 @@ local Object = {
     ColorParameterOptions = {
       { Key = "typeindex", Range = { 1.0, 4.0 } }
     },
-    ScaleExponent = 372.1,
+    ScaleExponent = 37.21,
     BillboardMinMaxSize = { 0.0, 20.0 },
     EnablePixelSizeControl = true
   },

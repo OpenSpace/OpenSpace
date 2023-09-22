@@ -35,7 +35,7 @@ local TullyGalaxies = {
     },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
-    ScaleExponent = 504.0,
+    ScaleExponent = 50.4,
     File = speck .. "tully.speck",
     Texture = textures .. "point3A.png",
     ColorMap = speck .. "lss.cmap",
