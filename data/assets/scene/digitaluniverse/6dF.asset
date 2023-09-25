@@ -30,9 +30,11 @@ local Object = {
         { Key = "proximity", Range = { 1.0, 10.0 } }
       }
     },
-    ScaleExponent = 53.4,
-    BillboardMinMaxSize = { 0.0, 9.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 53.4,
+      BillboardMinMaxSize = { 0.0, 9.0 },
+      EnablePixelSizeControl = true
+    }
   },
   GUI = {
     Name = "6dF Galaxies",

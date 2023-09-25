@@ -35,7 +35,6 @@ local TullyGalaxies = {
     },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
-    ScaleExponent = 50.4,
     File = speck .. "tully.speck",
     Texture = textures .. "point3A.png",
     ColorMapSettings = {
@@ -47,8 +46,11 @@ local TullyGalaxies = {
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
     FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"
-    BillboardMinMaxSize = { 0.0, 7.0 }, -- in pixels
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 50.4,
+      BillboardMinMaxSize = { 0.0, 7.0 }, -- in pixels
+      EnablePixelSizeControl = true
+    }
   },
   GUI = {
     Name = "Tully Galaxies",

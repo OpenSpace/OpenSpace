@@ -20,7 +20,6 @@ local Object = {
     Enabled = true,
     Color = { 0.8, 0.8, 1.0 },
     Opacity = 0.8,
-    ScaleExponent = 52.0,
     File = speck .. "SDSSgals.speck",
     ColorMapSettings = {
       ColorMap = speck .. "SDSSgals.cmap",
@@ -32,10 +31,11 @@ local Object = {
     Texture = textures .. "point3A.png",
     Unit = "Mpc",
     FadeInDistances = { 220.0, 650.0 }, -- Fade in value in the same unit as "Unit"
-    BillboardMinMaxSize = { 0.0, 5.5 },
-    TextSize = 14.8,
-    TextMinMaxSize = { 10, 50 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 52.0,
+      BillboardMinMaxSize = { 0.0, 5.5 },
+      EnablePixelSizeControl = true
+    }
   },
   GUI = {
     Name = "Sloan Digital Sky Survey",

@@ -41,9 +41,11 @@ local Object = {
     Texture = textures .. "point3A.png",
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
-    ScaleExponent = 52.0,
-    BillboardMinMaxSize = { 0.0, 7.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 52.0,
+      BillboardMinMaxSize = { 0.0, 7.0 },
+      EnablePixelSizeControl = true
+    }
   },
   GUI = {
     Name = "Abell Galaxy Clusters",

@@ -30,9 +30,11 @@ local Object = {
     File = speck .. "oc.speck",
     Unit = "pc",
     PolygonSides = 12,
-    ScaleExponent = 40.575,
-    BillboardMinMaxSize = { 0.0, 604.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 40.575,
+      BillboardMinMaxSize = { 0.0, 604.0 },
+      EnablePixelSizeControl = true
+    }
   },
   GUI = {
     Name = "Open Star Clusters",

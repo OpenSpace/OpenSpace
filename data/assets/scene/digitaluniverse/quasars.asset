@@ -30,10 +30,7 @@ local Object = {
     File = speck .. "quasars.speck",
     Texture = textures .. "point3A.png",
     Unit = "Mpc",
-    ScaleExponent = 54.09,
     FadeInDistances = { 1000.0, 10000.0 }, -- Fade in value in the same unit as "Unit"
-    BillboardMinMaxSize = { 0.0, 11.1 },
-    EnablePixelSizeControl = true,
     ColorMapSettings = {
       ColorMap = colormaps .. "viridis.cmap",
       ColorParameterOptions = {
@@ -42,6 +39,11 @@ local Object = {
         { Key = "distMpc", Range = { 440.5, 8852.099609 } }
       },
       Enabled = false
+    },
+    SizeSettings = {
+      ScaleExponent = 54.09,
+      BillboardMinMaxSize = { 0.0, 11.1 },
+      EnablePixelSizeControl = true
     }
   },
   GUI = {

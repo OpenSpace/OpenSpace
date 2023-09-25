@@ -29,12 +29,14 @@ local HomeLabel = {
     },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
-    ScaleExponent = 50.0,
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
     FadeInDistances = { 0.05, 1.0 },
-    BillboardMinMaxSize = { 0.0, 8.22 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 50.0,
+      BillboardMinMaxSize = { 0.0, 8.22 },
+      EnablePixelSizeControl = true
+    }
   },
   GUI = {
     Name = "Home Label",

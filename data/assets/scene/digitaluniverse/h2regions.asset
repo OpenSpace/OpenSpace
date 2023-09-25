@@ -30,9 +30,11 @@ local Object = {
     File = speck .. "h2.speck",
     PolygonSides = 6,
     Unit = "pc",
-    ScaleExponent = 42.0,
-    BillboardMinMaxSize = { 0.0, 300.0 },
-    EnablePixelSizeControl = false
+    SizeSettings = {
+      ScaleExponent = 42.0,
+      BillboardMinMaxSize = { 0.0, 300.0 },
+      EnablePixelSizeControl = false
+    }
   },
   GUI = {
     Name = "HII Regions",

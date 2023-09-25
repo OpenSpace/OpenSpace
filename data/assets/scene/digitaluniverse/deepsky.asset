@@ -26,13 +26,15 @@ local DeepSkyObjects = {
       Unit = "pc"
     },
     Opacity = 0.99,
-    ScaleExponent = 50.0,
     File = speck .. "dso.speck",
     Texture = textures .. "point3.png",
     Unit = "pc",
     --FadeInDistances = { 0.05, 1.0 }, -- Fade in value in the same unit as "Unit"
-    BillboardMinMaxSize = { 0.0, 8.22 }, -- in pixels
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 50.0,
+      BillboardMinMaxSize = { 0.0, 8.22 }, -- in pixels
+      EnablePixelSizeControl = true
+    }
   },
   Transform = {
     Rotation = {

@@ -36,9 +36,11 @@ local Object = {
         { Key = "typeindex", Range = { 1.0, 4.0 } }
       },
     },
-    ScaleExponent = 37.21,
-    BillboardMinMaxSize = { 0.0, 20.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 37.21,
+      BillboardMinMaxSize = { 0.0, 20.0 },
+      EnablePixelSizeControl = true
+    }
   },
   GUI = {
     Name = "Brown Dwarfs",

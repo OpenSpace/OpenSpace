@@ -36,9 +36,11 @@ local Object = {
     File = speck .. "localgroup.speck",
     PolygonSides = 12,
     Unit = "Mpc",
-    ScaleExponent = 46.5,
-    BillboardMinMaxSize = { 0.0, 20.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 46.5,
+      BillboardMinMaxSize = { 0.0, 20.0 },
+      EnablePixelSizeControl = true
+    }
   },
   GUI = {
     Name = "Local Group",
