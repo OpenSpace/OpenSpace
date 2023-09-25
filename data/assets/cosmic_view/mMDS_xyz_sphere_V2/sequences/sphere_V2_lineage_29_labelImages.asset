@@ -36,8 +36,8 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
   for line in io.lines(openspace.absPath(constellationfile)) do
     if (notFirstLine) then
       -- describes the data
-      local matchstring = "(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$"
-      local x, y, z, text, name, hash, number, imageName, rotX, rotY, rotZ, scale, colorR, colorG, colorB = line:match(matchstring)
+      local matchstring = "(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$"
+      local x, y, z, text, name, hash, number, imageName, rotX, rotY, rotZ, scale, opacity, colorR, colorG, colorB = line:match(matchstring)
       local magVec = math.sqrt(x*x + y*y + z*z)
       local normx = x / magVec
       local normy = y / magVec
@@ -68,11 +68,15 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
           Rotation = {
             Type = "StaticRotation",
             Rotation = { tonumber(rotX), tonumber(rotY), tonumber(rotZ) }
+          },
+          Scale = {
+            Type = "StaticScale",
+            Scale = tonumber(scale)
           }
         },
         Renderable = {
           Type = "RenderablePlaneImageLocal",
-          Size = tonumber(baseScale * scale * distanceMultiplier / 10),
+          Size = tonumber(baseScale * distanceMultiplier / 10),
           Enabled = false,
           Origin = "Center",
           --MultiplyColor = {colorR,colorG,colorB},
@@ -81,7 +85,7 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
           LazyLoading = false, --false, set to false to load in start, could for constellations also
           Texture = images .. imageName,
           BlendMode = "Additive",
-          Opacity = 0.2,
+          Opacity = tonumber(opacity),
           DimInAtmosphere = true
         },
         Tag = {"lineage_29_label"},

@@ -4,6 +4,8 @@ local constellations_helper = asset.require("util/constellations_helper")
 
 local treeoflifeBW =  asset.localResource("ToLBW.png")
 local treeoflifeEdited =  asset.localResource("ToLEdited.png")
+local treeoflifeColored =  asset.localResource("ToLColored.png")
+local qrkulturnatten =  asset.localResource("QRwithText.png")
 
 --local zodiacs = {
 --  "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
@@ -30,9 +32,9 @@ local treeoflife_image = {
   Name = "treeofLife_BW",
   Type = "ScreenSpaceImageLocal",
   TexturePath = treeoflifeBW,
-  FaceCamera = false,
-  Scale = 0.35,
-  CartesianPosition = { -1.7, 0.0, -2.3 },
+  FaceCamera = true,
+  Scale = 0.4,
+  CartesianPosition = { 0.0, 1.0, -2 },
   Enabled = false
 }
 
@@ -41,9 +43,31 @@ local treeoflifeEdited_image = {
   Name = "treeofLife_Edited",
   Type = "ScreenSpaceImageLocal",
   TexturePath = treeoflifeEdited,
-  FaceCamera = false,
-  Scale = 0.35,
-  CartesianPosition = { -1.7, 0.0, -2.3 },
+  FaceCamera = true,
+  Scale = 0.4,
+  CartesianPosition = { 0.0, 1.0, -2 },
+  Enabled = false
+}
+
+local treeoflifeColored_image = {
+  Identifier = "treeoflifeColored",
+  Name = "treeoflifeColored",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = treeoflifeColored,
+  FaceCamera = true,
+  Scale = 0.4,
+  CartesianPosition = { 0.0, 1.0, -2 },
+  Enabled = false
+}
+
+local qrkulturnatten_image = {
+  Identifier = "qrkulturnatten",
+  Name = "qrkulturnatten",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = qrkulturnatten,
+  FaceCamera = true,
+  Scale = 0.4,
+  CartesianPosition = { 0.0, 1.0, -2 },
   Enabled = false
 }
 
@@ -308,7 +332,7 @@ local enable_birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection = {
 	openspace.setPropertyValueSingle("Scene.birds_mMDS_xyz_3Dprojection_lineage_29.Renderable.Enabled", false)
 	openspace.setPropertyValueSingle("Scene.birds_lineage_29.Renderable.Enabled", false)
 
-  openspace.setPropertyValueSingle("Scene.Kulturnatten_Anseriformes.Renderable.MultiplyColor", {1.000000, 0.96, 1.000000})
+  openspace.setPropertyValueSingle("Scene.Kulturnatten_Anseriformes.Renderable.MultiplyColor", {1.000000, 0.71, 1.000000})
   openspace.setPropertyValueSingle("Scene.Kulturnatten_Galliformes.Renderable.MultiplyColor", {1.0000, 0.9, 0.61})
   openspace.setPropertyValueSingle("Scene.Kulturnatten_Struthioniformes.Renderable.MultiplyColor", {1.000000, 0.650980, 0.788235})
 
@@ -470,8 +494,9 @@ asset.onInitialize(function ()
 
 
   openspace.addScreenSpaceRenderable(treeoflife_image)
-
   openspace.addScreenSpaceRenderable(treeoflifeEdited_image)
+  openspace.addScreenSpaceRenderable(qrkulturnatten_image)
+  
 
   
 
