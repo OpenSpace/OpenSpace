@@ -28,11 +28,12 @@ local Object = {
     Opacity = 1.0,
     File = HUDFSpeck .. "hudf.speck",
     Texture = circle .. "circle.png",
-    ColorMap = ColorMap .. "hudf.cmap",
-    ColorMap = speck .. "6dF.cmap",
-    ColorParameterOptions = {
-      { Key = "redshift", Range = { 0.0, 0.075 } },
-      { Key = "proximity", Range = { 1.0, 25.0 } }
+    ColorMapSettings = {
+      ColorMap = ColorMap .. "hudf.cmap",
+      ColorParameterOptions = {
+        { Key = "redshift", Range = { 0.0, 0.075 } },
+        { Key = "proximity", Range = { 1.0, 25.0 } }
+      },
     },
     Unit = "Mpc",
     ScaleExponent = 50.5,

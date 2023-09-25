@@ -91,15 +91,6 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
-        "Enabled",
-        "Color Map Enabled",
-        "If this value is set to 'true', the provided color map is used (if one was "
-        "provided in the configuration). If no color map was provided, changing this "
-        "setting does not do anything",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
@@ -108,25 +99,20 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ColorMapEnabledInfo = {
+        "Enabled",
+        "Color Map Enabled",
+        "If this value is set to 'true', the provided color map is used (if one was "
+        "provided in the configuration). If no color map was provided, changing this "
+        "setting does not do anything",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
         "The path to the color map file to use for coloring the points",
         openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
-        "DrawElements",
-        "Draw Elements",
-        "Enables/Disables the drawing of the points",
-        // @VISIBILITY(1.25)
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
-        "Labels",
-        "Labels",
-        "The labels for the points"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorParameterInfo = {
@@ -142,6 +128,20 @@ namespace {
         "Value Range",
         "This value changes the range of values to be mapped with the current color map",
         openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
+        "DrawElements",
+        "Draw Elements",
+        "Enables/Disables the drawing of the points",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        "Labels",
+        "Labels",
+        "The labels for the points"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
@@ -250,15 +250,6 @@ namespace {
         // [[codegen::verbatim(ScaleFactorInfo.description)]]
         std::optional<float> scaleFactor;
 
-        // [[codegen::verbatim(UseColorMapInfo.description)]]
-        std::optional<bool> useColorMap;
-
-        // [[codegen::verbatim(ColorMapInfo.description)]]
-        std::optional<std::string> colorMap;
-
-        // [[codegen::verbatim(ColorMapInfo.description)]]
-        std::optional<bool> exactColorMap;
-
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("space_labelscomponent")]];
@@ -266,16 +257,29 @@ namespace {
         // [[codegen::verbatim(SizeOptionInfo.description)]]
         std::optional<std::vector<std::string>> sizeOption;
 
-        struct ColorMapParameter {
-            // The key for the datavar to use for color
-            std::string key;
+        struct ColorMapSettings {
+            // [[codegen::verbatim(ColorMapEnabledInfo.description)]]
+            std::optional<bool> enabled;
 
-            // An optional value range to use for coloring when this option is selected.
-            // If not included, the range will be set from the min and max value in the
-            // dataset
-            std::optional<glm::vec2> range;
+            // [[codegen::verbatim(ColorMapInfo.description)]]
+            std::optional<std::string> colorMap;
+
+            struct ColorMapParameter {
+                // The key for the datavar to use for color
+                std::string key;
+
+                // An optional value range to use for coloring when this option is selected.
+                // If not included, the range will be set from the min and max value in the
+                // dataset
+                std::optional<glm::vec2> range;
+            };
+            std::optional<std::vector<ColorMapParameter>> colorParameterOptions;
+
+            // [[codegen::verbatim(ColorMapInfo.description)]]
+            std::optional<bool> exactColorMap;
         };
-        std::optional<std::vector<ColorMapParameter>> colorParameterOptions;
+        // Settings related to the choice of color map, parameters, et. cetera
+        std::optional<ColorMapSettings> colorMapSettings;
 
         // Transformation matrix to be applied to each astronomical object
         std::optional<glm::dmat4x4> transformationMatrix;
@@ -346,7 +350,7 @@ RenderableBillboardsCloud::SizeFromData::SizeFromData(const ghoul::Dictionary& d
 RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
                                                       const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "ColorMap", "Color Map", "" })
-    , enabled(UseColorMapInfo, true)
+    , enabled(ColorMapEnabledInfo, true)
     , colorParameterOption(ColorParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
     , colorMapFile(ColorMapInfo)
     , valueRange(ColorRangeInfo, glm::vec2(0.f))
@@ -355,40 +359,50 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    enabled = p.useColorMap.value_or(enabled);
-    addProperty(enabled);
+    if (p.colorMapSettings.has_value()) {
+        const Parameters::ColorMapSettings settings = p.colorMapSettings.value();
 
-    addProperty(colorParameterOption);
+        enabled = settings.enabled.value_or(enabled);
 
-    if (p.colorParameterOptions.has_value()) {
-        std::vector<Parameters::ColorMapParameter> opts = *p.colorParameterOptions;
-        colorRangeData.reserve(opts.size());
-        for (size_t i = 0; i < opts.size(); ++i) {
-            colorParameterOption.addOption(static_cast<int>(i), opts[i].key);
+        if (settings.colorParameterOptions.has_value()) {
+            std::vector<Parameters::ColorMapSettings::ColorMapParameter> opts =
+                *settings.colorParameterOptions;
 
-            // TODO: set default value to be the data range
-            colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
+            colorRangeData.reserve(opts.size());
+            for (size_t i = 0; i < opts.size(); ++i) {
+                colorParameterOption.addOption(static_cast<int>(i), opts[i].key);
+
+                // TODO: set default value to be the data range
+                colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
+            }
+
+            // Following DU behavior here. The last colormap variable
+            // entry is the one selected by default.
+            colorParameterOption.setValue(static_cast<int>(colorRangeData.size() - 1));
+            valueRange = colorRangeData.back();
         }
 
-        // Following DU behavior here. The last colormap variable
-        // entry is the one selected by default.
-        colorParameterOption.setValue(static_cast<int>(colorRangeData.size() - 1));
-        valueRange = colorRangeData.back();
+        colorParameterOption.onChange([this]() {
+            valueRange = colorRangeData[colorParameterOption.value()];
+        });
+
+        // TODO: read valueRange from asset if specified
+
+        isColorMapExact = settings.exactColorMap.value_or(isColorMapExact);
+
+        if (settings.colorMap.has_value()) {
+            colorMapFile = absPath(*settings.colorMap).string();
+        }
     }
 
-    colorParameterOption.onChange([this]() {
-        valueRange = colorRangeData[colorParameterOption.value()];
-    });
+    addProperty(enabled);
+    addProperty(colorParameterOption);
 
     addProperty(valueRange);
     addProperty(setRangeFromData);
 
-    isColorMapExact = p.exactColorMap.value_or(isColorMapExact);
     addProperty(isColorMapExact);
 
-    if (p.colorMap.has_value()) {
-        colorMapFile = absPath(*p.colorMap).string();
-    }
     colorMapFile.setReadOnly(true); // Currently this can't be changed
     addProperty(colorMapFile);
 }
@@ -488,7 +502,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
     addPropertySubOwner(_sizeSettings);
 
-    if (p.colorMap.has_value()) {
+    if (p.colorMapSettings.has_value()) {
         _hasColorMapFile = true;
 
         _colorMapSettings.isColorMapExact.onChange([this]() { _dataIsDirty = true; });

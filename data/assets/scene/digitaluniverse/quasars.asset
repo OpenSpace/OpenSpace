@@ -34,13 +34,15 @@ local Object = {
     FadeInDistances = { 1000.0, 10000.0 }, -- Fade in value in the same unit as "Unit"
     BillboardMinMaxSize = { 0.0, 11.1 },
     EnablePixelSizeControl = true,
-    ColorMap = colormaps .. "viridis.cmap",
-    ColorParameterOptions = {
-      { Key = "redshift", Range = { 0.102, 7.085 } },
-      { Key = "Tlookback", Range = { 1.4, 13.0 } },
-      { Key = "distMpc", Range = { 440.5, 8852.099609 } }
-    },
-    UseColorMap = false
+    ColorMapSettings = {
+      ColorMap = colormaps .. "viridis.cmap",
+      ColorParameterOptions = {
+        { Key = "redshift", Range = { 0.102, 7.085 } },
+        { Key = "Tlookback", Range = { 1.4, 13.0 } },
+        { Key = "distMpc", Range = { 440.5, 8852.099609 } }
+      },
+      Enabled = false
+    }
   },
   GUI = {
     Name = "Quasars",

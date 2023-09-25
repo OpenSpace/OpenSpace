@@ -38,9 +38,11 @@ local TullyGalaxies = {
     ScaleExponent = 50.4,
     File = speck .. "tully.speck",
     Texture = textures .. "point3A.png",
-    ColorMap = speck .. "lss.cmap",
-    ColorParameterOptions = {
-      { Key = "prox5Mpc", Range = { 1.0, 30.0 } }
+    ColorMapSettings = {
+      ColorMap = speck .. "lss.cmap",
+      ColorParameterOptions = {
+        { Key = "prox5Mpc", Range = { 1.0, 30.0 } }
+      }
     },
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,

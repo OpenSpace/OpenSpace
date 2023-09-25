@@ -26,9 +26,11 @@ local Object = {
       Unit = "Mpc"
     },
     Color = { 0.5, 1.0, 0.2 },
-    ColorMap = speck .. "localgroup.cmap",
-    ColorParameterOptions = {
-      { Key = "association" }
+    ColorMapSettings = {
+      ColorMap = speck .. "localgroup.cmap",
+      ColorParameterOptions = {
+        { Key = "association" }
+      }
     },
     Opacity = 0.3,
     File = speck .. "localgroup.speck",

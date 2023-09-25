@@ -30,9 +30,11 @@ local Object = {
     File = speck .. "dwarfs.speck",
     Texture = textures .. "point3.png",
     Unit = "pc",
-    ColorMap = speck .. "dwarfs.cmap",
-    ColorParameterOptions = {
-      { Key = "typeindex", Range = { 1.0, 4.0 } }
+    ColorMapSettings = {
+      ColorMap = speck .. "dwarfs.cmap",
+      ColorParameterOptions = {
+        { Key = "typeindex", Range = { 1.0, 4.0 } }
+      },
     },
     ScaleExponent = 37.21,
     BillboardMinMaxSize = { 0.0, 20.0 },

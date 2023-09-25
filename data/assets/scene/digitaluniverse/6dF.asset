@@ -23,10 +23,12 @@ local Object = {
     File = speck .. "6dF.speck",
     Unit = "Mpc",
     Texture = textures .. "point3A.png",
-    ColorMap = speck .. "6dF.cmap",
-    ColorParameterOptions = {
-      { Key = "redshift", Range = { 0.0, 0.075 } },
-      { Key = "proximity", Range = { 1.0, 10.0 } }
+    ColorMapSettings = {
+      ColorMap = speck .. "6dF.cmap",
+      ColorParameterOptions = {
+        { Key = "redshift", Range = { 0.0, 0.075 } },
+        { Key = "proximity", Range = { 1.0, 10.0 } }
+      }
     },
     ScaleExponent = 53.4,
     BillboardMinMaxSize = { 0.0, 9.0 },
