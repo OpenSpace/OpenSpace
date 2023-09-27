@@ -306,10 +306,12 @@ local ShowGalli = {
 
 local ShowOstrich = {
   Identifier = "module.sonification.enable.ShowOstrich",
-  Name = "K. Show Ostrich",
+  Name = "K. Show Ostrich&Emu",
   Command = [[
     openspace.fadeIn("Scene.Kulturnatten_Struthioniformes.Renderable")
+    openspace.fadeIn("Scene.Kulturnatten_Casuariiformes.Renderable")
     openspace.setPropertyValueSingle("Scene.Kulturnatten_Struthioniformes.Renderable.MultiplyColor", {0.764706, 0.803922, 0.901961})
+    openspace.setPropertyValueSingle("Scene.Kulturnatten_Casuariiformes.Renderable.MultiplyColor", {0.764706, 0.803922, 0.901961})
 
     
   ]],
@@ -335,6 +337,7 @@ local enable_birds_mMDS_xyz_sphere_V2_lineage_29_3Dprojection = {
   openspace.setPropertyValueSingle("Scene.Kulturnatten_Anseriformes.Renderable.MultiplyColor", {1.000000, 0.71, 1.000000})
   openspace.setPropertyValueSingle("Scene.Kulturnatten_Galliformes.Renderable.MultiplyColor", {1.0000, 0.9, 0.61})
   openspace.setPropertyValueSingle("Scene.Kulturnatten_Struthioniformes.Renderable.MultiplyColor", {1.000000, 0.650980, 0.788235})
+  openspace.setPropertyValueSingle("Scene.Kulturnatten_Casuariiformes.Renderable.MultiplyColor", {0.482353, 0.627451, 0.356863})
 
   ]],
   Documentation = "Enable V2_L29",
