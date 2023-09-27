@@ -108,22 +108,37 @@
     }
   ],
   "mark_nodes": [
-    "Earth",
-    "Mars",
-    "Moon",
-    "Sun",
-    "Venus",
-    "ISS"
+    "Earth"
   ],
   "meta": {
-    "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles.",
+    "author": "OpenSpace Team & Elias Elmquist",
+    "description": "Profile for Kulturnatten 2023 with the cosmic view of life dataset and its sonification",
     "license": "MIT License",
-    "name": "Default",
+    "name": "Kulturnatten 2023 Elias",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
   "properties": [
+    {
+      "name": "RenderEngine.MasterRotation",
+      "type": "setPropertyValueSingle",
+      "value": "{-1.16437, 0.0, 0.0}"
+    },
+    {
+      "name": "NavigationHandler.OrbitalNavigator.StereoscopicDepthOfFocusSurface",
+      "type": "setPropertyValueSingle",
+      "value": "8.0"
+    },
+    {
+      "name": "NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime",
+      "type": "setPropertyValueSingle",
+      "value": "6.0"
+    },
+    {
+      "name": "OpenSpaceEngine.FadeDuration",
+      "type": "setPropertyValueSingle",
+      "value": "3.0"
+    },
     {
       "name": "RenderEngine.HorizFieldOfView",
       "type": "setPropertyValueSingle",
@@ -347,12 +362,12 @@
     {
       "name": "Modules.Sonification.SurroundMode",
       "type": "setPropertyValueSingle",
-      "value": "1.000000"
+      "value": "1.0"
     },
     {
       "name": "Scene.birds_columba_livia_center.Renderable.ScaleFactor",
       "type": "setPropertyValueSingle",
-      "value": "140.000000"
+      "value": "140.0"
     },
     {
       "name": "Scene.birds_columba_livia_center.Scale.Scale",
@@ -395,27 +410,10 @@
       "value": "100.0"
     },
     {
-      "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_28.Renderable.RenderOption",
-      "type": "setPropertyValueSingle",
-      "value": "1.000000"
-    },
-    {
-      "name": "Scene.birds_mMDS_xyz_sphere_V2_lineage_29.Renderable.RenderOption",
-      "type": "setPropertyValueSingle",
-      "value": "1.000000"
-    },
-    {
-      "name": "Scene.birds_UMAP_xyz_CenteredOnRoot_lineage_28.Renderable.RenderOption",
-      "type": "setPropertyValueSingle",
-      "value": "1.000000"
-    },
-    {
-      "name": "Scene.birds_UMAP_xyz_CenteredOnRoot_lineage_29.Renderable.RenderOption",
-      "type": "setPropertyValueSingle",
-      "value": "1.000000"
+      "name": "Scene.*.Renderable.RenderOption",
+      "type": "setPropertyValue",
+      "value": "1.0"
     }
-	
-
   ],
   "time": {
     "is_paused": true,
