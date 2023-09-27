@@ -1,11 +1,8 @@
 {
   "assets": [
-    "base",
-    "events/toggle_sun",
+    "${USER_ASSETS}/Kosmos/shows/default_show",
     "modules/sonification/actions",
-    "modules/sonification/planets",
-    "scene/solarsystem/planets/earth/earth",
-    "scene/solarsystem/planets/earth/satellites/satellites"
+    "modules/sonification/planets"
   ],
   "camera": {
     "altitude": 17000000.0,
@@ -38,16 +35,148 @@
   ],
   "keybindings": [
     {
-      "action": "os.solarsystem.earth.togglesatellitetrails",
-      "key": "S"
+      "action": "blackout.on",
+      "key": "KP_0"
     },
     {
-      "action": "os.solarsystem.earth.iss.focus",
-      "key": "I"
+      "action": "blackout.off",
+      "key": "CTRL+KP_0"
     },
     {
-      "action": "os.solarsystem.earth.focus",
+      "action": "satellites.visual.on",
+      "key": "KP_4"
+    },
+    {
+      "action": "satellites.visual.off",
+      "key": "CTRL+KP_4"
+    },
+    {
+      "action": "satellites.gps.on",
+      "key": "KP_5"
+    },
+    {
+      "action": "satellites.gps.off",
+      "key": "CTRL+KP_5"
+    },
+    {
+      "action": "satellites.geostationary.on",
+      "key": "KP_6"
+    },
+    {
+      "action": "satellites.geostationary.off",
+      "key": "CTRL+KP_6"
+    },
+    {
+      "action": "apollo8.setup_earthrise",
+      "key": "E"
+    },
+    {
+      "action": "apollo8.setup_launch",
+      "key": "U"
+    },
+    {
+      "action": "apollo8.show_barycenter_trial",
+      "key": "KP_7"
+    },
+    {
+      "action": "apollo8.show_barycenter_trial",
+      "key": "CTRL+KP_7"
+    },
+    {
+      "action": "apollo17.show_landing_site_layers.usgs",
+      "key": "KP_8"
+    },
+    {
+      "action": "apollo17.travmap.on",
+      "key": "KP_9"
+    },
+    {
+      "action": "apollo17.travmap.off",
+      "key": "F7"
+    },
+    {
+      "action": "apollo17.show_station_6",
+      "key": "KP_DIVIDE"
+    },
+    {
+      "action": "apollo17.show_images",
+      "key": "KP_2"
+    },
+    {
+      "action": "apollo17.hide_images",
+      "key": "CTRL+KP_2"
+    },
+    {
+      "action": "apollo8.show_earthrise",
+      "key": "KP_1"
+    },
+    {
+      "action": "apollo8.hide_earthrise",
+      "key": "CTRL+KP_1"
+    },
+    {
+      "action": "mars.ctx.on",
+      "key": "KP_SUBTRACT"
+    },
+    {
+      "action": "mars.candor_chasma.on",
+      "key": "KP_ENTER"
+    },
+    {
+      "action": "asteroids.potentially_hazardous.on",
       "key": "HOME"
+    },
+    {
+      "action": "asteroids.potentially_hazardous.off",
+      "key": "SHIFT+HOME"
+    },
+    {
+      "action": "pioneervoyager.trails.on",
+      "key": "PAGEUP"
+    },
+    {
+      "action": "pioneervoyager.trails.off",
+      "key": "SHIFT+PAGEUP"
+    },
+    {
+      "action": "grandtour.constellations.on",
+      "key": "ALT+KP_1"
+    },
+    {
+      "action": "grandtour.constellations.off",
+      "key": "ALT+CTRL+KP_1"
+    },
+    {
+      "action": "grandtour.orion.on",
+      "key": "ALT+KP_2"
+    },
+    {
+      "action": "grandtour.orion.off",
+      "key": "ALT+CTRL+KP_2"
+    },
+    {
+      "action": "grandtour.radiosphere.on",
+      "key": "ALT+KP_3"
+    },
+    {
+      "action": "grandtour.radiosphere.off",
+      "key": "ALT+CTRL+KP_3"
+    },
+    {
+      "action": "grandtour.exoplanets.on",
+      "key": "ALT+KP_4"
+    },
+    {
+      "action": "grandtour.exoplanets.off",
+      "key": "ALT+CTRL+KP_4"
+    },
+    {
+      "action": "grandtour.sunorbit.on",
+      "key": "ALT+KP_5"
+    },
+    {
+      "action": "grandtour.sunorbit.off",
+      "key": "ALT+CTRL+KP_5"
     }
   ],
   "mark_nodes": [
@@ -60,19 +189,12 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Profile that adds sonification for the planets in different ways. The sonificaiton needs to be run in a seperate program called SuperCollider.",
+    "description": "Profile that adds sonification for the planets. The sonificaiton needs to be run in SuperCollider in parallel to OpenSpace.",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
-  "properties": [
-    {
-      "name": "{earth_satellites}.Renderable.Enabled",
-      "type": "setPropertyValue",
-      "value": "false"
-    }
-  ],
   "time": {
     "is_paused": false,
     "type": "relative",

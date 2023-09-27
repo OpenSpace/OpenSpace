@@ -3,7 +3,7 @@ local toggle_sonifications = {
   Identifier = "module.sonification.toggle.enabled",
   Name = "Toggle sonifications",
   Command = [[
-    local value = openspace.getPropertyValue("Modules.Sonification.Enabled")
+    local value = openspace.propertyValue("Modules.Sonification.Enabled")
     openspace.setPropertyValueSingle("Modules.Sonification.Enabled", not value)
   ]],
   Documentation = "Toggles whether the sonifications should be enabled or disabled",
