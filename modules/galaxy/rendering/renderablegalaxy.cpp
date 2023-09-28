@@ -175,6 +175,10 @@ namespace {
         // [[codegen::verbatim(EmissionMultiplyInfo.description)]]
         std::optional<float> emissionMultiply;
 
+        // If this value is specified, the default raycasting shader is overwritten and
+        // the shader found at the provided location is used instead
+        std::optional<std::filesystem::path> raycastingShader;
+
         enum class [[codegen::map(StarRenderingMethod)]] StarRenderingMethod {
             Points,
             Billboards
@@ -285,6 +289,7 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     _stepSize = p.stepSizeInfo.value_or(_stepSize);
     _absorptionMultiply = p.absorptionMultiply.value_or(_absorptionMultiply);
     _emissionMultiply = p.emissionMultiply.value_or(_emissionMultiply);
+    _raycastingShader = p.raycastingShader.value_or(_raycastingShader);
 
     _starRenderingMethod.addOptions({
         { StarRenderingMethod::Points, "Points" },
@@ -417,7 +422,12 @@ void RenderableGalaxy::initializeGL() {
     _texture->setDimensions(_volume->dimensions());
     _texture->uploadTexture();
 
-    _raycaster = std::make_unique<GalaxyRaycaster>(*_texture);
+    if (_raycastingShader.empty()) {
+        _raycaster = std::make_unique<GalaxyRaycaster>(*_texture);
+    }
+    else {
+        _raycaster = std::make_unique<GalaxyRaycaster>(*_texture, _raycastingShader);
+    }
     _raycaster->initialize();
 
     // We no longer need the data
