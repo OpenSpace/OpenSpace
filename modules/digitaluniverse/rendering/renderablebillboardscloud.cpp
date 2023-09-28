@@ -54,11 +54,11 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableBillboardsCloud";
 
-    constexpr std::array<const char*, 19> UniformNames = {
+    constexpr std::array<const char*, 18> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
-        "renderOption", "minBillboardSize", "maxBillboardSize", "color", "alphaValue",
+        "renderOption", "maxBillboardSize", "color", "alphaValue",
         "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "screenSize",
-        "spriteTexture", "useColorMap", "enabledRectSizeControl", "hasDvarScaling"
+        "spriteTexture", "useColorMap", "enablePixelSizeControl", "hasDvarScaling"
     };
 
     enum RenderOption {
@@ -180,16 +180,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable Pixel Size Control",
-        "Enable pixel size control for rectangular projections. If set to true, the "
-        "billboard size is restricted by the min/max size in pixels property",
+        "If true, the Max Size in Pixels property will be used as an upper limit for the "
+        "size of the point. Limits the maximum size of the points when navigating closely"
+        "to them. Currenlty computed base don rectangular displays and might look weird "
+        "in other projections",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BillboardMinMaxSizeInfo = {
-        "BillboardMinMaxSize",
-        "Billboard Min/Max Size in Pixels",
-        "The minimum and maximum size (in pixels) for the billboard representing the "
-        "point",
+    constexpr openspace::properties::Property::PropertyInfo BillboardMaxPixelSizeInfo = {
+        "BillboardMaxPixelSize",
+        "Billboard Max Size in Pixels",
+        "The maximum size (in pixels) for the billboard representing the point.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -244,12 +245,6 @@ namespace {
         // distances/positions in the data files
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(ScaleExponentInfo.description)]]
-        std::optional<float> scaleExponent;
-
-        // [[codegen::verbatim(ScaleFactorInfo.description)]]
-        std::optional<float> scaleFactor;
-
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("space_labelscomponent")]];
@@ -281,6 +276,23 @@ namespace {
         // Settings related to the choice of color map, parameters, et. cetera
         std::optional<ColorMapSettings> colorMapSettings;
 
+        struct SizeSettings {
+            // [[codegen::verbatim(ScaleExponentInfo.description)]]
+            std::optional<float> scaleExponent;
+
+            // [[codegen::verbatim(ScaleFactorInfo.description)]]
+            std::optional<float> scaleFactor;
+
+            // [[codegen::verbatim(PixelSizeControlInfo.description)]]
+            std::optional<bool> enablePixelSizeControl;
+
+            // [[codegen::verbatim(BillboardMaxPixelSizeInfo.description)]]
+            std::optional<float> billboardMaxPixelSize;
+        };
+        // Settings related to the scale of the points, whether they should limit to
+        // a certain pixel size, et. cetera
+        std::optional<SizeSettings> sizeSettings;
+
         // Transformation matrix to be applied to each astronomical object
         std::optional<glm::dmat4x4> transformationMatrix;
 
@@ -289,12 +301,6 @@ namespace {
 
         // [[codegen::verbatim(EnableDistanceFadeInfo.description)]]
         std::optional<bool> enableFadeIn;
-
-        // [[codegen::verbatim(BillboardMinMaxSizeInfo.description)]]
-        std::optional<glm::vec2> billboardMinMaxSize;
-
-        // [[codegen::verbatim(PixelSizeControlInfo.description)]]
-        std::optional<bool> enablePixelSizeControl;
     };
 
 #include "renderablebillboardscloud_codegen.cpp"
@@ -307,32 +313,30 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
 }
 
 RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "SizeSetting", "Size Settings", ""})
+    : properties::PropertyOwner({ "SizeSettings", "Size Settings", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 60.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
     , pixelSizeControl(PixelSizeControlInfo, false)
-    , billboardMinMaxSize(
-        BillboardMinMaxSizeInfo,
-        glm::vec2(0.f, 400.f),
-        glm::vec2(0.f),
-        glm::vec2(1000.f)
-    )
+    , billboardMaxPixelSize(BillboardMaxPixelSizeInfo, 400.f, 0.f, 1000.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    scaleFactor = p.scaleFactor.value_or(scaleFactor);
+    if (p.sizeSettings.has_value()) {
+        const Parameters::SizeSettings settings = p.sizeSettings.value();
+
+        scaleFactor = settings.scaleFactor.value_or(scaleFactor);
+        scaleExponent = settings.scaleExponent.value_or(scaleExponent);
+        pixelSizeControl = settings.enablePixelSizeControl.value_or(pixelSizeControl);
+        billboardMaxPixelSize = settings.billboardMaxPixelSize.value_or(billboardMaxPixelSize);
+    }
+
     addProperty(scaleFactor);
 
-    scaleExponent = p.scaleExponent.value_or(scaleExponent);
     scaleExponent.setExponent(2.f);
     addProperty(scaleExponent);
 
-    pixelSizeControl = p.enablePixelSizeControl.value_or(pixelSizeControl);
     addProperty(pixelSizeControl);
-
-    billboardMinMaxSize = p.billboardMinMaxSize.value_or(billboardMinMaxSize);
-    billboardMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-    addProperty(billboardMinMaxSize);
+    addProperty(billboardMaxPixelSize);
 }
 
 RenderableBillboardsCloud::SizeFromData::SizeFromData(const ghoul::Dictionary& dictionary)
@@ -655,10 +659,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
     );
 
-    const float minBillboardSize = _sizeSettings.billboardMinMaxSize.value().x; // in pixels
-    const float maxBillboardSize = _sizeSettings.billboardMinMaxSize.value().y; // in pixels
-    _program->setUniform(_uniformCache.minBillboardSize, minBillboardSize);
-    _program->setUniform(_uniformCache.maxBillboardSize, maxBillboardSize);
+    _program->setUniform(_uniformCache.maxBillboardSize, _sizeSettings.billboardMaxPixelSize);
     _program->setUniform(_uniformCache.color, _pointColor);
     _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
@@ -667,7 +668,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
-    _program->setUniform(_uniformCache.enabledRectSizeControl, _sizeSettings.pixelSizeControl);
+    _program->setUniform(_uniformCache.enablePixelSizeControl, _sizeSettings.pixelSizeControl);
 
     _program->setUniform(_uniformCache.hasDvarScaling, _hasDatavarSize);
 

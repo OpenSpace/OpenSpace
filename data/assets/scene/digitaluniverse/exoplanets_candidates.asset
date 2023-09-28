@@ -25,7 +25,7 @@ local Object = {
     Texture = textures .. "halo.png",
     SizeSettings = {
       ScaleExponent = 41.0,
-      BillboardMinMaxSize = { 0.0, 30.0 },
+      BillboardMaxPixelSize = 30.0,
       EnablePixelSizeControl = true
     }
   },

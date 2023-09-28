@@ -42,7 +42,7 @@ uniform float scaleFactor;
 uniform int renderOption;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
-uniform bool enabledRectSizeControl;
+uniform bool enablePixelSizeControl;
 uniform bool hasDvarScaling;
 
 // RenderOption: CameraViewDirection
@@ -56,7 +56,6 @@ uniform vec3 cameraLookUp;
 // Pixel size control: true
 uniform vec2 screenSize;
 uniform float maxBillboardSize;
-uniform float minBillboardSize;
 
 const vec2 corners[4] = vec2[4](
   vec2(0.0, 0.0),
@@ -96,7 +95,7 @@ void main() {
     scaledUp = scaleMultiply * newUp * 0.5;
   }
 
-  if (enabledRectSizeControl) {
+  if (enablePixelSizeControl) {
     vec4 initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
       dvec4(dpos.xyz - dvec3(scaledRight - scaledUp), dpos.w)));
 
@@ -113,24 +112,13 @@ void main() {
     // width and height
     vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
 
-    if (enabledRectSizeControl && (length(sizes) > maxBillboardSize)) {
+    if (length(sizes) > maxBillboardSize) {
       float correctionScale = maxBillboardSize / length(sizes);
-
       scaledRight *= correctionScale;
       scaledUp *= correctionScale;
     }
-    else {
-      // linear alpha decay
-      if (sizes.x < 2.0 * minBillboardSize) {
-        float maxVar = 2.0 * minBillboardSize;
-        float minVar = minBillboardSize;
-        float var = sizes.y + sizes.x;
-        ta = (var - minVar) / (maxVar - minVar);
-        if (ta == 0.0) {
-          return;
-        }
-      }
-    }
+
+    // TODO: add checks for whther the generated plane covers too many or too few pixels
   }
 
   // Saving one matrix multiplication:

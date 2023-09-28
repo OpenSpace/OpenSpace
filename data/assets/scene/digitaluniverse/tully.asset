@@ -48,7 +48,7 @@ local TullyGalaxies = {
     FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"
     SizeSettings = {
       ScaleExponent = 50.4,
-      BillboardMinMaxSize = { 0.0, 7.0 }, -- in pixels
+      BillboardMaxPixelSize = 7.0,
       EnablePixelSizeControl = true
     }
   },

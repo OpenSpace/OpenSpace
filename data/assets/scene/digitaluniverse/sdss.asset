@@ -33,7 +33,7 @@ local Object = {
     FadeInDistances = { 220.0, 650.0 }, -- Fade in value in the same unit as "Unit"
     SizeSettings = {
       ScaleExponent = 52.0,
-      BillboardMinMaxSize = { 0.0, 5.5 },
+      BillboardMaxPixelSize = 5.5,
       EnablePixelSizeControl = true
     }
   },

@@ -34,7 +34,7 @@ local HomeLabel = {
     FadeInDistances = { 0.05, 1.0 },
     SizeSettings = {
       ScaleExponent = 50.0,
-      BillboardMinMaxSize = { 0.0, 8.22 },
+      BillboardMaxPixelSize = 8.22,
       EnablePixelSizeControl = true
     }
   },

@@ -32,7 +32,7 @@ local DeepSkyObjects = {
     --FadeInDistances = { 0.05, 1.0 }, -- Fade in value in the same unit as "Unit"
     SizeSettings = {
       ScaleExponent = 50.0,
-      BillboardMinMaxSize = { 0.0, 8.22 }, -- in pixels
+      BillboardMaxPixelSize = 8.22,
       EnablePixelSizeControl = true
     }
   },

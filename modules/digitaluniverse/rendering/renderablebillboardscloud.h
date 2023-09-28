@@ -103,7 +103,7 @@ protected:
         properties::FloatProperty scaleFactor;
 
         properties::BoolProperty pixelSizeControl;
-        properties::Vec2Property billboardMinMaxSize;
+        properties::FloatProperty billboardMaxPixelSize;
     } _sizeSettings;
 
     struct SizeFromData : properties::PropertyOwner {
@@ -143,9 +143,9 @@ protected:
 
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
-        minBillboardSize, maxBillboardSize, color, alphaValue, scaleExponent, scaleFactor,
-        up, right, fadeInValue, screenSize, spriteTexture, useColormap,
-        enabledRectSizeControl, hasDvarScaling
+        maxBillboardSize, color, alphaValue, scaleExponent, scaleFactor, up, right,
+        fadeInValue, screenSize, spriteTexture, useColormap, enablePixelSizeControl,
+        hasDvarScaling
     ) _uniformCache;
 
     std::string _speckFile;
