@@ -160,7 +160,9 @@ protected:
      * \return the resulting model transformation matrix in double precision
      */
     glm::dmat4 calcModelTransform(const RenderData& data,
-        const AlternativeTransform& altTransform = {}) const;
+        const AlternativeTransform& altTransform = {
+            std::nullopt, std::nullopt, std::nullopt
+        }) const;
 
     /**
      * Calculates the model view transformation matrix with the given data and returns it
@@ -204,7 +206,9 @@ protected:
      *         model view projection transformation matrices
      */
     std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> calcAllTransforms(
-        const RenderData& data, const AlternativeTransform& altModelTransform = {}) const;
+        const RenderData& data, const AlternativeTransform& altModelTransform = {
+            std::nullopt, std::nullopt, std::nullopt
+        }) const;
 
 private:
     double _boundingSphere = 0.0;
