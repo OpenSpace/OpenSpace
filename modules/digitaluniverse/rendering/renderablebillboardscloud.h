@@ -50,6 +50,11 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
+/**
+ * This class describes a point cloud renderable that can be used to draw billboraded
+ * points based on a data file with 3D positions.  Alternatively the points can also
+ * be colored and sized based on a separate column in the data file.
+ */
 class RenderableBillboardsCloud : public Renderable {
 public:
     explicit RenderableBillboardsCloud(const ghoul::Dictionary& dictionary);
@@ -118,7 +123,7 @@ protected:
 
         properties::BoolProperty enabled;
 
-        properties::OptionProperty colorParameterOption;
+        properties::OptionProperty dataColumn;
         properties::StringProperty colorMapFile;
         properties::TriggerProperty setRangeFromData;
 

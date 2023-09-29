@@ -116,10 +116,11 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorParameterInfo = {
-        "ColorParameter",
-        "Color Parameter",
+        "DataColumn",
+        "Data Column",
         "This value determines which paramenter is used for coloring the points based "
-        "on the color map",
+        "on the color map. The property is set based on predefined options specified in "
+        "the asset file",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -355,7 +356,7 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
                                                       const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "ColorMap", "Color Map", "" })
     , enabled(ColorMapEnabledInfo, true)
-    , colorParameterOption(ColorParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , dataColumn(ColorParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
     , colorMapFile(ColorMapInfo)
     , valueRange(ColorRangeInfo, glm::vec2(0.f))
     , setRangeFromData(SetRangeFromDataInfo)
@@ -374,7 +375,7 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
 
             colorRangeData.reserve(opts.size());
             for (size_t i = 0; i < opts.size(); ++i) {
-                colorParameterOption.addOption(static_cast<int>(i), opts[i].key);
+                dataColumn.addOption(static_cast<int>(i), opts[i].key);
 
                 // TODO: set default value to be the data range
                 colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
@@ -382,12 +383,12 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
 
             // Following DU behavior here. The last colormap variable
             // entry is the one selected by default.
-            colorParameterOption.setValue(static_cast<int>(colorRangeData.size() - 1));
+            dataColumn.setValue(static_cast<int>(colorRangeData.size() - 1));
             valueRange = colorRangeData.back();
         }
 
-        colorParameterOption.onChange([this]() {
-            valueRange = colorRangeData[colorParameterOption.value()];
+        dataColumn.onChange([this]() {
+            valueRange = colorRangeData[dataColumn.value()];
         });
 
         // TODO: read valueRange from asset if specified
@@ -400,7 +401,7 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
     }
 
     addProperty(enabled);
-    addProperty(colorParameterOption);
+    addProperty(dataColumn);
 
     addProperty(valueRange);
     addProperty(setRangeFromData);
@@ -511,7 +512,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         _colorMapSettings.isColorMapExact.onChange([this]() { _dataIsDirty = true; });
         _colorMapSettings.valueRange.onChange([this]() { _dataIsDirty = true; });
-        _colorMapSettings.colorParameterOption.onChange([this]() { _dataIsDirty = true; });
+        _colorMapSettings.dataColumn.onChange([this]() { _dataIsDirty = true; });
 
         _colorMapSettings.setRangeFromData.onChange([this]() {
             int parameterIndex = currentColorParameterIndex();
@@ -554,7 +555,7 @@ void RenderableBillboardsCloud::initialize() {
 
     // Initialize empty colormap ranges based on dataset
     for (const properties::OptionProperty::Option& option :
-            _colorMapSettings.colorParameterOption.options())
+            _colorMapSettings.dataColumn.options())
     {
         int optionIndex = option.value;
         int colorParameterIndex = _dataset.index(option.description);
@@ -859,9 +860,9 @@ void RenderableBillboardsCloud::updateSpriteTexture() {
 }
 
 int RenderableBillboardsCloud::currentColorParameterIndex() const {
-    bool hasOptions = _colorMapSettings.colorParameterOption.options().size() > 0;
+    bool hasOptions = _colorMapSettings.dataColumn.options().size() > 0;
     return _hasColorMapFile && hasOptions ?
-        _dataset.index(_colorMapSettings.colorParameterOption.option().description) :
+        _dataset.index(_colorMapSettings.dataColumn.option().description) :
         0;
 }
 
