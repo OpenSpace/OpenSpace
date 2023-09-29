@@ -56,8 +56,9 @@ local BatsrusJ12OpenClosed = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.openClosed,
     InputFileType = "Osfls",
+    ShowAtAllTimes = false,
     Color = { 0.7, 0.4, 0.0, 0.6 }, -- Default color
-    ColorMethod = "By Quantity", -- Color by Quantity
+    ColorMethod = "ByQuantity", -- Color by Quantity
     ColorQuantity = 0, -- Temperature
     ColorTablePaths = {
       batsrusTemperatureColorTable,
@@ -86,7 +87,8 @@ local BatsrusJ12FlowLines = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.velocityFlow,
     InputFileType = "Osfls",
-    ColorMethod = "By Quantity", -- Color by Quantity
+    ShowAtAllTimes = false,
+    ColorMethod = "ByQuantity", -- Color by Quantity
     ColorQuantity = 3, -- Velocity
     Color = { 0.7, 0.4, 0.0, 0.12 }, -- Default color
     ColorTablePaths = {
@@ -114,6 +116,7 @@ local BatsrusAsherStaticSeedsFlowLines = {
     SourceFolder = unzippedDataDestination.asherStatic,
     Enabled = false,
     InputFileType = "Osfls",
+    ShowAtAllTimes = false,
     ColorTablePaths = {
       batsrusTemperatureColorTable,
       batsrusDensityColorTable,

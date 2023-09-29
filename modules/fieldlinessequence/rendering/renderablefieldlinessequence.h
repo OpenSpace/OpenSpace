@@ -95,9 +95,14 @@ public:
             return timestamp < other.timestamp;
         }
     };
+
+//    struct VariableInfo {
+//        std::optional<std::filesystem::path> transferFunction;
+//        std::optional<glm::vec2> minMaxRange;
+//        std::optional<glm::vec2> selectedRange;
+//    };
+//    std::optional<std::map<std::string, VariableInfo>> variables;
 private:
-
-
 
     void definePropertyCallbackFunctions();
     void setupProperties();
@@ -192,10 +197,14 @@ private:
     // Index of the extra quantity to color lines by.
     //TODO: Change to options instead of index
     properties::OptionProperty _colorQuantity;
-    // Used to save property for later initialization
-    int _colorQuantityTemp = 0;
+    // Used to save property for later initialization, because firstUpdate needs to run
+    // first, to populate _colorQuantity with options.
+    int _colorQuantityTemp;
+    std::vector<glm::vec2> _colorTableRanges;
     // Color table/transfer function selected min and max range
     properties::Vec2Property _selectedColorRange;
+    // Paths to color tables. One for each 'extraQuantity'
+    std::vector<std::filesystem::path> _colorTablePaths;
     // Color table/transfer function for "By Quantity" coloring
     properties::StringProperty _colorTablePath;
     // Uniform Field Line Color

@@ -21,9 +21,9 @@ local fieldlineTest = {
     SimulationModel = "Batsrus",
     ColorMethod = "ByQuantity",
     ColorQuantity = 4, --speed
-    ColorTableRange = {50,300},
+    ColorTableRanges = {{50,300}},
     ColorMinMaxRange = {0, 1000},
-    ColorTablePath = transferFunction,
+    ColorTablePaths = {transferFunction},
     ShowAtAllTimes = true,
     MaskingEnabled = true,
     MaskingQuantity = 5,      -- corresponds to "topology"
@@ -51,5 +51,5 @@ asset.meta = {
   Description = "Generic static magnetosphere fieldlines. Actual timestep 2012-07-14T00-00-00-000. Defaultly colored by speed; 50-300 km/s",
   Author = "CCMC",
   URL = "",
-License = "CC-BY"
-  }
+  License = "CC-BY"
+}

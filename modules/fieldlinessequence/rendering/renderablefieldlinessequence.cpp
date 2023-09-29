@@ -168,10 +168,10 @@ namespace {
         std::optional<glm::vec4> color [[codegen::color()]];
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters
-        std::optional<std::string> colorTablePath;
+        std::optional<std::vector<std::string>> colorTablePaths;
         // Ranges for which their corresponding parameters values will be
         // colorized by. Should be entered as min value, max value
-        std::optional<glm::vec2> colorTableRange;
+        std::optional<std::vector<glm::vec2>> colorTableRanges;
         // Specifies the total range
         std::optional<glm::vec2> colorMinMaxRange;
 
@@ -429,8 +429,10 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         computeSequenceEndTime();
     }
     // Color group
-    if (p.colorTablePath.has_value()) {
-        _colorTablePath = *p.colorTablePath;
+    if (p.colorTablePaths.has_value()) {
+        for (auto path : *p.colorTablePaths) {
+            _colorTablePaths.push_back(path);
+        }
     }
     else {
         _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile;
@@ -449,7 +451,20 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _colorMethod = static_cast<int>(ColorMethod::Uniform);
     }
     _colorQuantityTemp = p.colorQuantity.value_or(_colorQuantityTemp);
-    _selectedColorRange = p.colorTableRange.value_or(_selectedColorRange);
+    _colorQuantity.addOption(-1, "dummy_default");
+    _colorQuantity = -1;
+
+    if (p.colorTableRanges.has_value()) {
+        _colorTableRanges = *p.colorTableRanges;
+        // This causes error since colorTableRanges has not had its option assigned to
+        // it yet:
+        //_selectedColorRange = _colorTableRanges[_colorQuantityTemp];
+    }
+    else {
+        _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
+        _selectedColorRange = glm::vec2(0.f, 1.f);
+    }
+
     if (p.colorMinMaxRange.has_value()) {
         _selectedColorRange.setMinValue(glm::vec2(p.colorMinMaxRange->x));
         _selectedColorRange.setMaxValue(glm::vec2(p.colorMinMaxRange->y));
@@ -656,9 +671,10 @@ extractSeedPointsFromFiles(std::filesystem::path filePath)
 }
 
 void RenderableFieldlinesSequence::initialize() {
-    _transferFunction = std::make_unique<TransferFunction>(
-        absPath(_colorTablePath).string()
-    );
+// not needed here because color path (singular) will be set in firstupdate()
+//    _transferFunction = std::make_unique<TransferFunction>(
+//        absPath(_colorTablePath).string()
+//    );
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
@@ -721,10 +737,25 @@ void RenderableFieldlinesSequence::setupProperties() {
 }
 
 void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
-
     _colorQuantity.onChange([this]() {
-        _transferFunction->setPath(_colorTablePath);
+        if (_colorTablePaths.size() == 0){
+            return;
+        }
         _shouldUpdateColorBuffer = true;
+        //_selectedColorRange not needed to be set in constructor, due to this onChnage is
+        // declared before firstupdate() function that sets _colorQuantity.
+        if (_colorTableRanges.size() > _colorQuantity) {
+            _selectedColorRange = _colorTableRanges[_colorQuantity];
+        }
+        else {
+            _selectedColorRange = _colorTableRanges[0];
+        }
+        if (_colorTablePaths.size() > _colorQuantity) {
+            _colorTablePath = _colorTablePaths[_colorQuantity].string();
+        }
+        else {
+            _colorTablePath = _colorTablePaths[0].string();
+        }
     });
 
     _maskingQuantity.onChange([this]() {
@@ -733,7 +764,10 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     });
 
     _colorTablePath.onChange([this]() {
-        _transferFunction->setPath(_colorTablePath);
+        //_transferFunction->setPath(_colorTablePath);
+        _transferFunction = std::make_unique<TransferFunction>(
+            absPath(_colorTablePath).string()
+        );
     });
 }
 
