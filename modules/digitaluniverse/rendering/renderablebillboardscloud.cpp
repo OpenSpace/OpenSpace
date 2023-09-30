@@ -131,6 +131,23 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SetRangeFromDataInfo = {
+        "SetRangeFromData",
+        "Set Data Range from Data",
+        "Set the data range for the color mapping based on the available data for the "
+        "curently selected data column",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HideOutliersInfo = {
+        "HideOutliers",
+        "Hide Outliers",
+        "If true, points with values outside the provided range for the coloring will be "
+        "rendered as transparent, i.e. not shown. Otherwise, the values will be clamped "
+        "to use the color at the max VS min limit of the color map, respectively.",
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
@@ -195,23 +212,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IsColorMapExactInfo = {
-        "ExactColorMap",
-        "Exact Color Map",
-        "Set a 1-to-1 relationship between the color index variable and the colormap "
-        "entrered value, wihtout adjusting to the min/max values. Overrides any other "
-        "sampling option", // @TODO: Clarify.
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SetRangeFromDataInfo = {
-        "SetRangeFromData",
-        "Set Data Range from Data",
-        "Set the data range for the color mapping based on the available data for the "
-        "curently selected data column",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     struct [[codegen::Dictionary(RenderableBillboardsCloud)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
         // object being rendered
@@ -271,8 +271,8 @@ namespace {
             };
             std::optional<std::vector<ColorMapParameter>> colorParameterOptions;
 
-            // [[codegen::verbatim(ColorMapInfo.description)]]
-            std::optional<bool> exactColorMap;
+            // [[codegen::verbatim(HideOutliersInfo.description)]]
+            std::optional<bool> hideOutliers;
         };
         // Settings related to the choice of color map, parameters, et. cetera
         std::optional<ColorMapSettings> colorMapSettings;
@@ -360,7 +360,7 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
     , colorMapFile(ColorMapInfo)
     , valueRange(ColorRangeInfo, glm::vec2(0.f))
     , setRangeFromData(SetRangeFromDataInfo)
-    , isColorMapExact(IsColorMapExactInfo, false) // TODO: Fix docs
+    , hideOutliers(HideOutliersInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -393,7 +393,7 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
 
         // TODO: read valueRange from asset if specified
 
-        isColorMapExact = settings.exactColorMap.value_or(isColorMapExact);
+        hideOutliers = settings.hideOutliers.value_or(hideOutliers);
 
         if (settings.colorMap.has_value()) {
             colorMapFile = absPath(*settings.colorMap).string();
@@ -406,7 +406,7 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
     addProperty(valueRange);
     addProperty(setRangeFromData);
 
-    addProperty(isColorMapExact);
+    addProperty(hideOutliers);
 
     colorMapFile.setReadOnly(true); // Currently this can't be changed
     addProperty(colorMapFile);
@@ -510,7 +510,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     if (p.colorMapSettings.has_value()) {
         _hasColorMapFile = true;
 
-        _colorMapSettings.isColorMapExact.onChange([this]() { _dataIsDirty = true; });
+        _colorMapSettings.hideOutliers.onChange([this]() { _dataIsDirty = true; });
         _colorMapSettings.valueRange.onChange([this]() { _dataIsDirty = true; });
         _colorMapSettings.dataColumn.onChange([this]() { _dataIsDirty = true; });
 
@@ -896,46 +896,30 @@ glm::vec2 RenderableBillboardsCloud::findValueRange(int parameterIndex) const {
 }
 
 glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom) const {
-    // Note: if exact colormap option is not selected, the first color and the
-    // last color in the colormap file are the outliers colors.
-
     glm::vec2 currentColorRange = _colorMapSettings.valueRange;
     float cmax = currentColorRange.y;
     float cmin = currentColorRange.x;
 
     float nColors = static_cast<float>(_colorMap.entries.size());
 
-    if (_colorMapSettings.isColorMapExact) {
-        float normalization = ((cmax != cmin) && (nColors > 2.f)) ?
-            (nColors - 2.f) / (cmax - cmin) : 0;
+    if (_colorMapSettings.hideOutliers) {
+        bool isOutsideRange = valueToColorFrom < cmin || valueToColorFrom > cmax;
 
-        int colorIndex = static_cast<int>(
-            (valueToColorFrom - cmin) * normalization + 1.f
-        );
-
-        colorIndex = colorIndex < 1 ? 1 : colorIndex;
-        colorIndex = colorIndex >= nColors - 1 ?
-            static_cast<int>(nColors) - 2 : colorIndex;
-
-        return _colorMap.entries[colorIndex];
+        if (isOutsideRange) {
+            return glm::vec4(0.f);
+        }
     }
-    else { // Nearest neighbor
-        // Note that the first color and the last color in the colormap file are the
-        // outliers colors
-        float normalization = ((cmax != cmin) && (nColors > 2.f)) ?
-            (nColors - 1.f) / (cmax - cmin) : 0;
 
-        int colorIndex = static_cast<int>(
-            (valueToColorFrom - cmin) * normalization + 1.f
-        );
+    // Nearest neighbor
 
-        // Set to outlier values if outside
-        colorIndex = colorIndex < 0 ? 0 : colorIndex;
-        colorIndex = colorIndex >= nColors - 1 ?
-            static_cast<int>(nColors - 1.f) : colorIndex;
+    float normalization = (cmax != cmin) ? (nColors) / (cmax - cmin) : 0;
+    int colorIndex = static_cast<int>((valueToColorFrom - cmin) * normalization);
 
-        return _colorMap.entries[colorIndex];
-    }
+    // Clamp color index to valid range
+    colorIndex = std::max(colorIndex, 0);
+    colorIndex = std::min(colorIndex, static_cast<int>(nColors) - 1);
+
+    return _colorMap.entries[colorIndex];
 }
 
 std::vector<float> RenderableBillboardsCloud::createDataSlice() {
@@ -951,7 +935,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     // what datavar in use for the index color
     int colorParamIndex = currentColorParameterIndex();
 
-    // what datavar in use for the size scaling (if present)
+    // what datavar in use for the size scaling (if present)z
     int sizeParamIndex = currentSizeParameterIndex();
 
 

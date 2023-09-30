@@ -129,11 +129,10 @@ protected:
 
         properties::Vec2Property valueRange;
 
-        properties::BoolProperty isColorMapExact;
+        properties::BoolProperty hideOutliers;
 
         // One item per color parameter option
         std::vector<glm::vec2> colorRangeData;
-
     } _colorMapSettings;
 
     properties::Vec3Property _pointColor;
