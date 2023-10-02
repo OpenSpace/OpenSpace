@@ -169,11 +169,11 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
-        "SizeOption",
-        "Size Option Variable",
+    constexpr openspace::properties::Property::PropertyInfo SizeMappingOptionInfo = {
+        "Parameter",
+        "Parameter Option",
         "This value determines which paramenter (datavar) is used for scaling of the "
-        "point",
+        "point", // @TODO: Clarify how it's applied
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -257,9 +257,6 @@ namespace {
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("space_labelscomponent")]];
 
-        // [[codegen::verbatim(SizeOptionInfo.description)]]
-        std::optional<std::vector<std::string>> sizeOption;
-
         struct ColorMapSettings {
             // [[codegen::verbatim(ColorMapEnabledInfo.description)]]
             std::optional<bool> enabled;
@@ -285,6 +282,10 @@ namespace {
         std::optional<ColorMapSettings> colorMapSettings;
 
         struct SizeSettings {
+            // A list specifying all parameters that may be use for size mapping, i.e.
+            // scaling the points based on the provided data columns
+            std::optional<std::vector<std::string>> sizeMapping;
+
             // [[codegen::verbatim(ScaleExponentInfo.description)]]
             std::optional<float> scaleExponent;
 
@@ -321,7 +322,7 @@ documentation::Documentation RenderablePointCloud::Documentation() {
 }
 
 RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "SizeSettings", "Size Settings", ""})
+    : properties::PropertyOwner({ "Sizing", "Sizing", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 60.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
     , pixelSizeControl(PixelSizeControlInfo, false)
@@ -336,6 +337,17 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
         scaleExponent = settings.scaleExponent.value_or(scaleExponent);
         pixelSizeControl = settings.enablePixelSizeControl.value_or(pixelSizeControl);
         billboardMaxPixelSize = settings.billboardMaxPixelSize.value_or(billboardMaxPixelSize);
+
+        if (settings.sizeMapping.has_value()) {
+            std::vector<std::string> opts = *settings.sizeMapping;
+            for (size_t i = 0; i < opts.size(); ++i) {
+                // Note that options are added in order
+                sizeMapping.parameterOption.addOption(static_cast<int>(i), opts[i]);
+            }
+            sizeMapping.enabled = true;
+        }
+
+        addPropertySubOwner(sizeMapping);
     }
 
     addProperty(scaleFactor);
@@ -347,20 +359,16 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
     addProperty(billboardMaxPixelSize);
 }
 
-RenderablePointCloud::SizeFromData::SizeFromData(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "SizeFromData", "Size From Data", "" })
+RenderablePointCloud::SizeSettings::SizeMapping::SizeMapping()
+    : properties::PropertyOwner({ "SizeMapping", "Size Mapping", "" })
     , enabled(SizeMappingEnabledInfo, false)
-    , datavarSizeOption(
-        SizeOptionInfo,
+    , parameterOption(
+        SizeMappingOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
 {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    // TODO: read enabled from asset
-
     addProperty(enabled);
-    addProperty(datavarSizeOption);
+    addProperty(parameterOption);
 }
 
 RenderablePointCloud::ColorMapSettings::ColorMapSettings(
@@ -437,7 +445,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _fadeInDistanceEnabled(EnableDistanceFadeInfo, false)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _sizeSettings(dictionary)
-    , _sizeFromData(dictionary)
     , _colorMapSettings(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -504,19 +511,11 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         addProperty(_fadeInDistanceEnabled);
     }
 
-    if (p.sizeOption.has_value()) {
-        std::vector<std::string> opts = *p.sizeOption;
-        for (size_t i = 0; i < opts.size(); ++i) {
-            // Note that options are added in order
-            _sizeFromData.datavarSizeOption.addOption(static_cast<int>(i), opts[i]);
-        }
-
-        _sizeFromData.datavarSizeOption.onChange([this]() { _dataIsDirty = true; });
-        _sizeFromData.enabled = true;
-
+    if (p.sizeSettings.has_value() && (*p.sizeSettings).sizeMapping.has_value()) {
+        _sizeSettings.sizeMapping.parameterOption.onChange([this]() {
+            _dataIsDirty = true;
+        });
         _hasDatavarSize = true;
-
-        addPropertySubOwner(_sizeFromData);
     }
 
     addPropertySubOwner(_sizeSettings);
@@ -685,7 +684,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     _program->setUniform(_uniformCache.enablePixelSizeControl, _sizeSettings.pixelSizeControl);
 
-    _program->setUniform(_uniformCache.hasDvarScaling, _sizeFromData.enabled);
+    _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -695,7 +694,10 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     textureUnit.activate();
     bindTextureForRendering();
     _program->setUniform(_uniformCache.spriteTexture, textureUnit);
-    _program->setUniform(_uniformCache.useColormap, _hasColorMapFile && _colorMapSettings.enabled);
+    _program->setUniform(
+        _uniformCache.useColormap,
+        _hasColorMapFile && _colorMapSettings.enabled
+    );
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
@@ -881,9 +883,9 @@ int RenderablePointCloud::currentColorParameterIndex() const {
 }
 
 int RenderablePointCloud::currentSizeParameterIndex() const {
-    bool hasOptions = _sizeFromData.datavarSizeOption.options().size() > 0;
+    bool hasOptions = _sizeSettings.sizeMapping.parameterOption.options().size() > 0;
     return _hasDatavarSize && hasOptions ?
-        _dataset.index(_sizeFromData.datavarSizeOption.option().description) :
+        _dataset.index(_sizeSettings.sizeMapping.parameterOption.option().description) :
         -1;
 }
 

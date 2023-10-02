@@ -104,19 +104,18 @@ protected:
     struct SizeSettings : properties::PropertyOwner {
         SizeSettings(const ghoul::Dictionary& dictionary);
 
+        struct SizeMapping : properties::PropertyOwner {
+            SizeMapping();
+            properties::BoolProperty enabled;
+            properties::OptionProperty parameterOption;
+        } sizeMapping;
+
         properties::FloatProperty scaleExponent;
         properties::FloatProperty scaleFactor;
 
         properties::BoolProperty pixelSizeControl;
         properties::FloatProperty billboardMaxPixelSize;
     } _sizeSettings;
-
-    struct SizeFromData : properties::PropertyOwner {
-        SizeFromData(const ghoul::Dictionary& dictionary);
-
-        properties::BoolProperty enabled;
-        properties::OptionProperty datavarSizeOption;
-    } _sizeFromData;
 
     struct ColorMapSettings : properties::PropertyOwner {
         ColorMapSettings(const ghoul::Dictionary& dictionary);
