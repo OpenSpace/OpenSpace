@@ -4,14 +4,6 @@ if string.find(fullOS, "Darwin") then
   return
 end
 
--- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
-local starsFolder = asset.syncedResource({
-  Name = "Gaia Stars RV",
-  Type = "HttpSynchronization",
-  Identifier = "gaia_stars_rv_octree",
-  Version = 1
-})
-
 local colormaps = asset.syncedResource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
@@ -30,12 +22,12 @@ local GaiaStars = {
   Identifier = "GaiaStars",
   Renderable = {
     Type = "RenderableGaiaStars",
-    File = "C:/Users/addee/Desktop/testdata/GALAH_AMNH.csv",
+    File = "${USER_ASSETS}/data/GALAH_AMNH.csv", 
     FileReaderOption = "Csv",
     RenderMode = "Motion",
     ShaderOption = "Point_SSBO",
     Texture = textures .. "halo.png",
-    ColorMap = "C:/Users/addee/Desktop/testdata/rainbowgradient.cmap", --colormaps .. "colorbv.cmap",
+    ColorMap = colormaps .. "rainbowgradient.cmap", --colorbv.cmap
     LuminosityMultiplier = 35,
     MagnitudeBoost = 8.0,
     CutOffThreshold = 38,
@@ -76,37 +68,13 @@ local GaiaStars = {
 
 local sun = asset.require("scene/solarsystem/sun/sun")
 
-local starVolumes = {
-  Identifier = "GaiaStarsVolumes",
-  -- Parent = "GaiaStars",
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "GAIASTARS",
-    GeometryFile = "C:/Users/addee/Desktop/testdata/starvolume.obj",
-    ModelScale = 'Parsec',
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.4
-      }
-    }
-  },
-  GUI = {
-    Name = "Gaia Volume",
-    Path = "/Volumes"
-  }
-}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaStars)
-  openspace.addSceneGraphNode(starVolumes)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GaiaStars)
-  openspace.removeSceneGraphNode(starVolumes)
 end)
 
 asset.export(GaiaStars)
