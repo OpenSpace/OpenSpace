@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEBILLBOARDSCLOUD___H__
-#define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEBILLBOARDSCLOUD___H__
+#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTCLOUD___H__
+#define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTCLOUD___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -55,10 +55,10 @@ namespace documentation { struct Documentation; }
  * points based on a data file with 3D positions.  Alternatively the points can also
  * be colored and sized based on a separate column in the data file.
  */
-class RenderableBillboardsCloud : public Renderable {
+class RenderablePointCloud : public Renderable {
 public:
-    explicit RenderableBillboardsCloud(const ghoul::Dictionary& dictionary);
-    ~RenderableBillboardsCloud() override = default;
+    explicit RenderablePointCloud(const ghoul::Dictionary& dictionary);
+    ~RenderablePointCloud() override = default;
 
     void initialize() override;
     void initializeGL() override;
@@ -169,4 +169,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEBILLBOARDSCLOUD___H__
+#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTCLOUD___H__

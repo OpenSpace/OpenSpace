@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
+#include <modules/digitaluniverse/rendering/renderablepointcloud.h>
 
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
@@ -52,7 +52,7 @@
 #include <string>
 
 namespace {
-    constexpr std::string_view _loggerCat = "RenderableBillboardsCloud";
+    constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
     constexpr std::array<const char*, 18> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
@@ -180,8 +180,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Option wether the billboards should face the camera or not. Used for non-linear "
-        "display environments such as fisheye.",
+        "Option wether the point billboards should face the camera or not. Used for "
+        "non-linear display environments such as fisheye.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -219,7 +219,7 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    struct [[codegen::Dictionary(RenderableBillboardsCloud)]] Parameters {
+    struct [[codegen::Dictionary(RenderablePointCloud)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
         // object being rendered
         std::optional<std::string> file;
@@ -311,16 +311,16 @@ namespace {
         std::optional<bool> enableFadeIn;
     };
 
-#include "renderablebillboardscloud_codegen.cpp"
+#include "renderablepointcloud_codegen.cpp"
 }  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableBillboardsCloud::Documentation() {
-    return codegen::doc<Parameters>("digitaluniverse_RenderableBillboardsCloud");
+documentation::Documentation RenderablePointCloud::Documentation() {
+    return codegen::doc<Parameters>("digitaluniverse_renderablepointcloud");
 }
 
-RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
+RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "SizeSettings", "Size Settings", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 60.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
@@ -347,7 +347,7 @@ RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& d
     addProperty(billboardMaxPixelSize);
 }
 
-RenderableBillboardsCloud::SizeFromData::SizeFromData(const ghoul::Dictionary& dictionary)
+RenderablePointCloud::SizeFromData::SizeFromData(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "SizeFromData", "Size From Data", "" })
     , enabled(SizeMappingEnabledInfo, false)
     , datavarSizeOption(
@@ -363,7 +363,7 @@ RenderableBillboardsCloud::SizeFromData::SizeFromData(const ghoul::Dictionary& d
     addProperty(datavarSizeOption);
 }
 
-RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
+RenderablePointCloud::ColorMapSettings::ColorMapSettings(
                                                       const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "ColorMap", "Color Map", "" })
     , enabled(ColorMapEnabledInfo, true)
@@ -423,7 +423,7 @@ RenderableBillboardsCloud::ColorMapSettings::ColorMapSettings(
     addProperty(colorMapFile);
 }
 
-RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
+RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
@@ -537,7 +537,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
 }
 
-bool RenderableBillboardsCloud::isReady() const {
+bool RenderablePointCloud::isReady() const {
     bool isReady = _program && !_dataset.entries.empty();
 
     // If we have labels, they also need to be loaded
@@ -547,7 +547,7 @@ bool RenderableBillboardsCloud::isReady() const {
     return isReady;
 }
 
-void RenderableBillboardsCloud::initialize() {
+void RenderablePointCloud::initialize() {
     ZoneScoped;
 
     if (_hasSpeckFile) {
@@ -586,17 +586,17 @@ void RenderableBillboardsCloud::initialize() {
     }
 }
 
-void RenderableBillboardsCloud::initializeGL() {
+void RenderablePointCloud::initializeGL() {
     ZoneScoped;
 
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        "RenderableBillboardsCloud",
+        "RenderablePointCloud",
         []() {
             return global::renderEngine->buildRenderProgram(
-                "RenderableBillboardsCloud",
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_gs.glsl")
+                "RenderablePointCloud",
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpoint_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpoint_fs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpoint_gs.glsl")
             );
         }
     );
@@ -604,14 +604,14 @@ void RenderableBillboardsCloud::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 }
 
-void RenderableBillboardsCloud::deinitializeGL() {
+void RenderablePointCloud::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        "RenderableBillboardsCloud",
+        "RenderablePointCloud",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -622,13 +622,13 @@ void RenderableBillboardsCloud::deinitializeGL() {
     _spriteTexture = nullptr;
 }
 
-void RenderableBillboardsCloud::bindTextureForRendering() const {
+void RenderablePointCloud::bindTextureForRendering() const {
     if (_spriteTexture) {
         _spriteTexture->bind();
     }
 }
 
-float RenderableBillboardsCloud::computeDistanceFadeValue(const RenderData& data) const {
+float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) const {
     float fadeValue = 1.f;
     if (_fadeInDistanceEnabled) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
@@ -644,7 +644,7 @@ float RenderableBillboardsCloud::computeDistanceFadeValue(const RenderData& data
     return fadeValue;
 }
 
-void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
+void RenderablePointCloud::renderBillboards(const RenderData& data,
                                                  const glm::dmat4& modelMatrix,
                                                  const glm::dvec3& orthoRight,
                                                  const glm::dvec3& orthoUp,
@@ -706,7 +706,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     global::renderEngine->openglStateCache().resetDepthState();
 }
 
-void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
+void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     float fadeInVar = computeDistanceFadeValue(data);
 
     if (fadeInVar < 0.01f) {
@@ -747,7 +747,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     }
 }
 
-void RenderableBillboardsCloud::update(const UpdateData&) {
+void RenderablePointCloud::update(const UpdateData&) {
     ZoneScoped;
 
     if (_dataIsDirty) {
@@ -759,14 +759,14 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
     }
 }
 
-int RenderableBillboardsCloud::nAttributesPerPoint() const {
+int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 4; // position
     n += _hasColorMapFile ? 4: 0;
     n += _hasDatavarSize ? 1: 0;
     return n;
 }
 
-void RenderableBillboardsCloud::updateBufferData() {
+void RenderablePointCloud::updateBufferData() {
     if (!_hasSpeckFile) {
         return;
     }
@@ -840,7 +840,7 @@ void RenderableBillboardsCloud::updateBufferData() {
     _dataIsDirty = false;
 }
 
-void RenderableBillboardsCloud::updateSpriteTexture() {
+void RenderablePointCloud::updateSpriteTexture() {
     bool shouldUpdate = _hasSpriteTexture && _spriteTextureIsDirty &&
         !_spriteTexturePath.value().empty();
 
@@ -873,21 +873,21 @@ void RenderableBillboardsCloud::updateSpriteTexture() {
     _spriteTextureIsDirty = false;
 }
 
-int RenderableBillboardsCloud::currentColorParameterIndex() const {
+int RenderablePointCloud::currentColorParameterIndex() const {
     bool hasOptions = _colorMapSettings.dataColumn.options().size() > 0;
     return _hasColorMapFile && hasOptions ?
         _dataset.index(_colorMapSettings.dataColumn.option().description) :
         0;
 }
 
-int RenderableBillboardsCloud::currentSizeParameterIndex() const {
+int RenderablePointCloud::currentSizeParameterIndex() const {
     bool hasOptions = _sizeFromData.datavarSizeOption.options().size() > 0;
     return _hasDatavarSize && hasOptions ?
         _dataset.index(_sizeFromData.datavarSizeOption.option().description) :
         -1;
 }
 
-glm::vec2 RenderableBillboardsCloud::findValueRange(int parameterIndex) const {
+glm::vec2 RenderablePointCloud::findValueRange(int parameterIndex) const {
     if (!_hasColorMapFile) {
         return glm::vec2(0.f);
     }
@@ -909,7 +909,7 @@ glm::vec2 RenderableBillboardsCloud::findValueRange(int parameterIndex) const {
     return { minValue, maxValue };
 }
 
-glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom) const {
+glm::vec4 RenderablePointCloud::colorFromColorMap(float valueToColorFrom) const {
     glm::vec2 currentColorRange = _colorMapSettings.valueRange;
     float cmax = currentColorRange.y;
     float cmin = currentColorRange.x;
@@ -936,7 +936,7 @@ glm::vec4 RenderableBillboardsCloud::colorFromColorMap(float valueToColorFrom) c
     return _colorMap.entries[colorIndex];
 }
 
-std::vector<float> RenderableBillboardsCloud::createDataSlice() {
+std::vector<float> RenderablePointCloud::createDataSlice() {
     ZoneScoped;
 
     if (_dataset.entries.empty()) {

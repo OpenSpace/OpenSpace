@@ -24,9 +24,9 @@
 
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 
-#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
 #include <modules/digitaluniverse/rendering/renderabledumeshes.h>
 #include <modules/digitaluniverse/rendering/renderableplanescloud.h>
+#include <modules/digitaluniverse/rendering/renderablepointcloud.h>
 #include <modules/digitaluniverse/rendering/renderablepolygoncloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
@@ -48,7 +48,7 @@ void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
-    fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
+    fRenderable->registerClass<RenderablePointCloud>("RenderablePointCloud");
     fRenderable->registerClass<RenderablePlanesCloud>("RenderablePlanesCloud");
     fRenderable->registerClass<RenderablePolygonCloud>("RenderablePolygonCloud");
     fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
@@ -61,7 +61,7 @@ void DigitalUniverseModule::internalDeinitializeGL() {
 
 std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
     return {
-        RenderableBillboardsCloud::Documentation(),
+        RenderablePointCloud::Documentation(),
         RenderablePlanesCloud::Documentation(),
         RenderablePolygonCloud::Documentation(),
         RenderableDUMeshes::Documentation()

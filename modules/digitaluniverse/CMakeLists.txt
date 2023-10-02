@@ -26,31 +26,31 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   rendering/renderabledumeshes.h
-  rendering/renderablebillboardscloud.h
   rendering/renderableplanescloud.h
+  rendering/renderablepointcloud.h
   rendering/renderablepolygoncloud.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   rendering/renderabledumeshes.cpp
-  rendering/renderablebillboardscloud.cpp
   rendering/renderableplanescloud.cpp
+  rendering/renderablepointcloud.cpp
   rendering/renderablepolygoncloud.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  shaders/billboard_fs.glsl
-  shaders/billboard_gs.glsl
-  shaders/billboard_vs.glsl
-  shaders/billboardpolygon_fs.glsl
-  shaders/billboardpolygon_gs.glsl
-  shaders/billboardpolygon_vs.glsl
+  shaders/billboardpoint_fs.glsl
+  shaders/billboardpoint_gs.glsl
+  shaders/billboardpoint_vs.glsl
   shaders/dumesh_vs.glsl
   shaders/dumesh_fs.glsl
   shaders/plane_vs.glsl
   shaders/plane_fs.glsl
+  shaders/polygon_fs.glsl
+  shaders/polygon_gs.glsl
+  shaders/polygon_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

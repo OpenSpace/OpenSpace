@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOLYGONCLOUD___H__
 #define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOLYGONCLOUD___H__
 
-#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
+#include <modules/digitaluniverse/rendering/renderablepointcloud.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -36,10 +36,10 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * A billboards cloud, but with dynamically created polygon shapes instead of a
+ * A billboarded point cloud, but with dynamically created polygon shapes instead of a
  * custom texture. Overwrites the sprite set in
  */
-class RenderablePolygonCloud : public RenderableBillboardsCloud {
+class RenderablePolygonCloud : public RenderablePointCloud {
 public:
     explicit RenderablePolygonCloud(const ghoul::Dictionary& dictionary);
     ~RenderablePolygonCloud() override = default;

@@ -69,7 +69,7 @@ documentation::Documentation RenderablePolygonCloud::Documentation() {
 }
 
 RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictionary)
-    : RenderableBillboardsCloud(dictionary)
+    : RenderablePointCloud(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -79,7 +79,7 @@ RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictiona
 void RenderablePolygonCloud::initializeGL() {
     ZoneScoped;
 
-    RenderableBillboardsCloud::initializeGL();
+    RenderablePointCloud::initializeGL();
     createPolygonTexture();
 }
 
@@ -173,10 +173,10 @@ void RenderablePolygonCloud::loadPolygonGeometryForRendering() {
 void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) {
     std::unique_ptr<ghoul::opengl::ProgramObject> program =
         ghoul::opengl::ProgramObject::Build(
-            "RenderableBillboardsCloud_Polygon",
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
+            "RenderablePointCloud_Polygon",
+            absPath("${MODULE_DIGITALUNIVERSE}/shaders/polygon_vs.glsl"),
+            absPath("${MODULE_DIGITALUNIVERSE}/shaders/polygon_fs.glsl"),
+            absPath("${MODULE_DIGITALUNIVERSE}/shaders/polygon_gs.glsl")
         );
 
     program->activate();
