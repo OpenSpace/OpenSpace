@@ -33,6 +33,7 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec4property.h>
 
 namespace openspace {
 
@@ -48,7 +49,7 @@ public:
     ~ColorMapComponent() override = default;
 
     /**
-     * Initialize the color map informaiton (ranges, etc.) based on the input dataset
+     * Initialize the color map information (ranges, etc.) based on the input dataset
      *
      * \param dataset the *loaded* input dataset
      */
@@ -63,7 +64,15 @@ public:
     properties::StringProperty colorMapFile;
     properties::Vec2Property valueRange;
     properties::TriggerProperty setRangeFromData;
-    properties::BoolProperty hideOutliers;
+
+    struct OutlierSettings : public properties::PropertyOwner {
+        OutlierSettings();
+
+        properties::BoolProperty hide;
+
+        properties::BoolProperty useMinColor;
+        properties::Vec4Property outsideMinColor;
+    } outliers;
 
 private:
     // One item per color parameter option

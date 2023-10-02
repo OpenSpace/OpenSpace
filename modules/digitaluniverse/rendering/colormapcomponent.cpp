@@ -72,12 +72,28 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo HideOutliersInfo = {
-        "HideOutliers",
+        "Hide",
         "Hide Outliers",
         "If true, points with values outside the provided range for the coloring will be "
         "rendered as transparent, i.e. not shown. Otherwise, the values will be clamped "
         "to use the color at the max VS min limit of the color map, respectively.",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseMinOutlierColorInfo = {
+        "UseMinColor",
+        "Use Outside Min Color",
+        "If true, use a separate color for items with values smaller than the minimum "
+        "value of the specified value range",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MinOutlierColorInfo = {
+        "OutsideMinColor",
+        "Outside Min Color",
+        "The color to use for items with values smaller than the minimum value of the "
+        "specified value range, if enabled",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ColorMapComponent)]] Parameters {
@@ -98,8 +114,19 @@ namespace {
         };
         std::optional<std::vector<ColorMapParameter>> parameterOptions;
 
-        // [[codegen::verbatim(HideOutliersInfo.description)]]
-        std::optional<bool> hideOutliers;
+        struct Outliers {
+            // [[codegen::verbatim(HideOutliersInfo.description)]]
+            std::optional<bool> hide;
+
+            // [[codegen::verbatim(UseMinOutlierColorInfo.description)]]
+            std::optional<bool> useMinColor;
+
+            // [[codegen::verbatim(MinOutlierColorInfo.description)]]
+            std::optional<glm::vec4> outsideMinColor [[codegen::color()]];
+        };
+        // A table with details about how to handle values outside of the
+        // specified value range
+        std::optional<Outliers> outliers;
     };
 #include "colormapcomponent_codegen.cpp"
 }  // namespace
@@ -110,6 +137,25 @@ documentation::Documentation ColorMapComponent::Documentation() {
     return codegen::doc<Parameters>("digitaluniverse_colormapcomponent");
 }
 
+ColorMapComponent::OutlierSettings::OutlierSettings()
+    : properties::PropertyOwner({ "Outliers", "Outliers", "" })
+    , hide(HideOutliersInfo, false)
+    , useMinColor(UseMinOutlierColorInfo, false)
+    , outsideMinColor(
+        MinOutlierColorInfo,
+        glm::vec4(0.5f, 0.5f, 0.5f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+{
+    // @TODO (2023-10-02, emmbr) Are all these settings really needed? My thought is to
+    // somehow also include missing vlaues here
+    addProperty(hide);
+    addProperty(useMinColor);
+    outsideMinColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(outsideMinColor);
+}
+
 ColorMapComponent::ColorMapComponent()
     : properties::PropertyOwner({ "ColorMap", "Color Map", "" })
     , enabled(EnabledInfo, true)
@@ -117,7 +163,6 @@ ColorMapComponent::ColorMapComponent()
     , colorMapFile(FileInfo)
     , valueRange(ColorRangeInfo, glm::vec2(0.f))
     , setRangeFromData(SetRangeFromDataInfo)
-    , hideOutliers(HideOutliersInfo, false)
 {
     addProperty(enabled);
     addProperty(dataColumn);
@@ -125,10 +170,10 @@ ColorMapComponent::ColorMapComponent()
     addProperty(valueRange);
     addProperty(setRangeFromData);
 
-    addProperty(hideOutliers);
-
     colorMapFile.setReadOnly(true); // Currently this can't be changed
     addProperty(colorMapFile);
+
+    addPropertySubOwner(outliers);
 }
 
 ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
@@ -161,7 +206,12 @@ ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
 
     // TODO: read valueRange from asset if specified
 
-    hideOutliers = p.hideOutliers.value_or(hideOutliers);
+    if (p.outliers.has_value()) {
+        Parameters::Outliers o = *p.outliers;
+        outliers.hide = o.hide.value_or(outliers.hide);
+        outliers.useMinColor = o.useMinColor.value_or(outliers.useMinColor);
+        outliers.outsideMinColor = o.outsideMinColor.value_or(outliers.outsideMinColor);
+    }
 
     if (p.file.has_value()) {
         colorMapFile = absPath(*p.file).string();
@@ -195,15 +245,18 @@ glm::vec4 ColorMapComponent::colorFromColorMap(float valueToColorFrom) const {
 
     float nColors = static_cast<float>(_colorMap.entries.size());
 
-    if (hideOutliers) {
-        bool isOutsideRange = valueToColorFrom < cmin || valueToColorFrom > cmax;
+    bool isOutsideMin = valueToColorFrom < cmin;
+    bool isOutsideMax = valueToColorFrom > cmax;
 
-        if (isOutsideRange) {
-            return glm::vec4(0.f);
-        }
+    if (outliers.hide && (isOutsideMin || isOutsideMax)) {
+        return glm::vec4(0.f);
     }
 
-    // Nearest neighbor
+    if (outliers.useMinColor && isOutsideMin) {
+        return outliers.outsideMinColor;
+    }
+
+    // Find color value using Nearest neighbor
 
     float normalization = (cmax != cmin) ? (nColors) / (cmax - cmin) : 0;
     int colorIndex = static_cast<int>((valueToColorFrom - cmin) * normalization);

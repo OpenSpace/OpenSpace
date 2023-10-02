@@ -381,10 +381,12 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         addProperty(_fadeInDistanceEnabled);
     }
 
+    auto dirtyDataFunc = [this]() {
+        _dataIsDirty = true;
+    };
+
     if (p.sizeSettings.has_value() && (*p.sizeSettings).sizeMapping.has_value()) {
-        _sizeSettings.sizeMapping.parameterOption.onChange([this]() {
-            _dataIsDirty = true;
-        });
+        _sizeSettings.sizeMapping.parameterOption.onChange(dirtyDataFunc);
         _hasDatavarSize = true;
     }
 
@@ -395,9 +397,12 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _hasColorMapFile = true;
         addPropertySubOwner(_colorMapSettings.get());
 
-        _colorMapSettings->hideOutliers.onChange([this]() { _dataIsDirty = true; });
-        _colorMapSettings->valueRange.onChange([this]() { _dataIsDirty = true; });
-        _colorMapSettings->dataColumn.onChange([this]() { _dataIsDirty = true; });
+        // @TODO Gotta be able to do this in a nicer way
+        _colorMapSettings->outliers.hide.onChange(dirtyDataFunc);
+        _colorMapSettings->outliers.useMinColor.onChange(dirtyDataFunc);
+        _colorMapSettings->outliers.outsideMinColor.onChange(dirtyDataFunc);
+        _colorMapSettings->valueRange.onChange(dirtyDataFunc);
+        _colorMapSettings->dataColumn.onChange(dirtyDataFunc);
 
         _colorMapSettings->setRangeFromData.onChange([this]() {
             int parameterIndex = currentColorParameterIndex();
