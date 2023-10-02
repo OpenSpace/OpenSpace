@@ -114,7 +114,7 @@ protected:
     struct SizeFromData : properties::PropertyOwner {
         SizeFromData(const ghoul::Dictionary& dictionary);
 
-        //properties::BoolProperty useSizeFromData; // TODO: add
+        properties::BoolProperty enabled;
         properties::OptionProperty datavarSizeOption;
     } _sizeFromData;
 

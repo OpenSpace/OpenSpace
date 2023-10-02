@@ -162,6 +162,13 @@ namespace {
         "The labels for the points"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
+        "Enabled",
+        "Size Mapping Enabled",
+        "If this value is set to 'true' ....",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
@@ -342,6 +349,7 @@ RenderableBillboardsCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& d
 
 RenderableBillboardsCloud::SizeFromData::SizeFromData(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "SizeFromData", "Size From Data", "" })
+    , enabled(SizeMappingEnabledInfo, false)
     , datavarSizeOption(
         SizeOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -349,6 +357,9 @@ RenderableBillboardsCloud::SizeFromData::SizeFromData(const ghoul::Dictionary& d
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    // TODO: read enabled from asset
+
+    addProperty(enabled);
     addProperty(datavarSizeOption);
 }
 
@@ -501,7 +512,10 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         }
 
         _sizeFromData.datavarSizeOption.onChange([this]() { _dataIsDirty = true; });
+        _sizeFromData.enabled = true;
+
         _hasDatavarSize = true;
+
         addPropertySubOwner(_sizeFromData);
     }
 
@@ -671,7 +685,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     _program->setUniform(_uniformCache.enablePixelSizeControl, _sizeSettings.pixelSizeControl);
 
-    _program->setUniform(_uniformCache.hasDvarScaling, _hasDatavarSize);
+    _program->setUniform(_uniformCache.hasDvarScaling, _sizeFromData.enabled);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
