@@ -100,6 +100,7 @@ void RenderablePolygonCloud::createPolygonTexture() {
     ZoneScoped;
 
     LDEBUG("Creating Polygon Texture");
+    constexpr gl::GLsizei TexSize = 512;
 
     glGenTextures(1, &_pTexture);
     glBindTexture(GL_TEXTURE_2D, _pTexture);
@@ -109,9 +110,9 @@ void RenderablePolygonCloud::createPolygonTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_RGBA, GL_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, TexSize, TexSize, 0, GL_RGBA, GL_BYTE, nullptr);
 
-    renderToTexture(_pTexture, 256, 256);
+    renderToTexture(_pTexture, TexSize, TexSize);
 }
 
 void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
