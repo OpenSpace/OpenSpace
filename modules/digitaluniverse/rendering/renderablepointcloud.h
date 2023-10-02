@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/digitaluniverse/rendering/colormapcomponent.h>
 #include <modules/space/labelscomponent.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -117,22 +118,7 @@ protected:
         properties::FloatProperty billboardMaxPixelSize;
     } _sizeSettings;
 
-    struct ColorMapSettings : properties::PropertyOwner {
-        ColorMapSettings(const ghoul::Dictionary& dictionary);
-
-        properties::BoolProperty enabled;
-
-        properties::OptionProperty dataColumn;
-        properties::StringProperty colorMapFile;
-        properties::TriggerProperty setRangeFromData;
-
-        properties::Vec2Property valueRange;
-
-        properties::BoolProperty hideOutliers;
-
-        // One item per color parameter option
-        std::vector<glm::vec2> colorRangeData;
-    } _colorMapSettings;
+    std::unique_ptr<ColorMapComponent> _colorMapSettings;
 
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
@@ -156,7 +142,7 @@ protected:
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     speck::Dataset _dataset;
-    speck::ColorMap _colorMap;
+    speck::ColorMap _colorMap; // TODO: move to component
 
     std::unique_ptr<LabelsComponent> _labels;
 

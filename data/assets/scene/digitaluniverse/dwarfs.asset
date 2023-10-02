@@ -30,11 +30,11 @@ local Object = {
     File = speck .. "dwarfs.speck",
     Texture = textures .. "point3.png",
     Unit = "pc",
-    ColorMapSettings = {
-      ColorMap = speck .. "dwarfs.cmap",
-      ColorParameterOptions = {
+    ColorMap = {
+      File = speck .. "dwarfs.cmap",
+      ParameterOptions = {
         { Key = "typeindex", Range = { 1.0, 4.0 } }
-      },
+      }
     },
     SizeSettings = {
       ScaleExponent = 37.21,

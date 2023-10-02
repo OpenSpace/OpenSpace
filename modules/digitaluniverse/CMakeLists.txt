@@ -25,6 +25,7 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
+  rendering/colormapcomponent.h
   rendering/renderabledumeshes.h
   rendering/renderableplanescloud.h
   rendering/renderablepointcloud.h
@@ -33,6 +34,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+  rendering/colormapcomponent.cpp
   rendering/renderabledumeshes.cpp
   rendering/renderableplanescloud.cpp
   rendering/renderablepointcloud.cpp

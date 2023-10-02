@@ -21,12 +21,12 @@ local Object = {
     Color = { 0.8, 0.8, 1.0 },
     Opacity = 0.8,
     File = speck .. "SDSSgals.speck",
-    ColorMapSettings = {
-      ColorMap = speck .. "SDSSgals.cmap",
-      ColorParameterOptions = {
+    ColorMap = {
+      File = speck .. "SDSSgals.cmap",
+      ParameterOptions = {
         { Key = "redshift", Range = { 0.0, 0.075 } },
         { Key = "proximity", Range = { 1.0, 50.0 } }
-      },
+      }
     },
     Texture = textures .. "point3A.png",
     Unit = "Mpc",

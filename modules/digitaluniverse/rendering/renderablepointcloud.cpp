@@ -99,55 +99,6 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorMapEnabledInfo = {
-        "Enabled",
-        "Color Map Enabled",
-        "If this value is set to 'true', the provided color map is used (if one was "
-        "provided in the configuration). If no color map was provided, changing this "
-        "setting does not do anything",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
-        "ColorMap",
-        "Color Map File",
-        "The path to the color map file to use for coloring the points",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ColorParameterInfo = {
-        "DataColumn",
-        "Data Column",
-        "This value determines which paramenter is used for coloring the points based "
-        "on the color map. The property is set based on predefined options specified in "
-        "the asset file",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ColorRangeInfo = {
-        "ValueRange",
-        "Value Range",
-        "This value changes the range of values to be mapped with the current color map",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SetRangeFromDataInfo = {
-        "SetRangeFromData",
-        "Set Data Range from Data",
-        "Set the data range for the color mapping based on the available data for the "
-        "curently selected data column",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo HideOutliersInfo = {
-        "HideOutliers",
-        "Hide Outliers",
-        "If true, points with values outside the provided range for the coloring will be "
-        "rendered as transparent, i.e. not shown. Otherwise, the values will be clamped "
-        "to use the color at the max VS min limit of the color map, respectively.",
-        openspace::properties::Property::Visibility::User
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
@@ -165,7 +116,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
         "Enabled",
         "Size Mapping Enabled",
-        "If this value is set to 'true' ....",
+        "If this value is set to 'true' ....", // @ TODO
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -257,29 +208,9 @@ namespace {
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("space_labelscomponent")]];
 
-        struct ColorMapSettings {
-            // [[codegen::verbatim(ColorMapEnabledInfo.description)]]
-            std::optional<bool> enabled;
-
-            // [[codegen::verbatim(ColorMapInfo.description)]]
-            std::optional<std::string> colorMap;
-
-            struct ColorMapParameter {
-                // The key for the datavar to use for color
-                std::string key;
-
-                // An optional value range to use for coloring when this option is selected.
-                // If not included, the range will be set from the min and max value in the
-                // dataset
-                std::optional<glm::vec2> range;
-            };
-            std::optional<std::vector<ColorMapParameter>> colorParameterOptions;
-
-            // [[codegen::verbatim(HideOutliersInfo.description)]]
-            std::optional<bool> hideOutliers;
-        };
         // Settings related to the choice of color map, parameters, et. cetera
-        std::optional<ColorMapSettings> colorMapSettings;
+        std::optional<ghoul::Dictionary> colorMap
+            [[codegen::reference("digitaluniverse_colormapcomponent")]];
 
         struct SizeSettings {
             // A list specifying all parameters that may be use for size mapping, i.e.
@@ -371,66 +302,6 @@ RenderablePointCloud::SizeSettings::SizeMapping::SizeMapping()
     addProperty(parameterOption);
 }
 
-RenderablePointCloud::ColorMapSettings::ColorMapSettings(
-                                                      const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "ColorMap", "Color Map", "" })
-    , enabled(ColorMapEnabledInfo, true)
-    , dataColumn(ColorParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , colorMapFile(ColorMapInfo)
-    , valueRange(ColorRangeInfo, glm::vec2(0.f))
-    , setRangeFromData(SetRangeFromDataInfo)
-    , hideOutliers(HideOutliersInfo, false)
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    if (p.colorMapSettings.has_value()) {
-        const Parameters::ColorMapSettings settings = p.colorMapSettings.value();
-
-        enabled = settings.enabled.value_or(enabled);
-
-        if (settings.colorParameterOptions.has_value()) {
-            std::vector<Parameters::ColorMapSettings::ColorMapParameter> opts =
-                *settings.colorParameterOptions;
-
-            colorRangeData.reserve(opts.size());
-            for (size_t i = 0; i < opts.size(); ++i) {
-                dataColumn.addOption(static_cast<int>(i), opts[i].key);
-
-                // TODO: set default value to be the data range
-                colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
-            }
-
-            // Following DU behavior here. The last colormap variable
-            // entry is the one selected by default.
-            dataColumn.setValue(static_cast<int>(colorRangeData.size() - 1));
-            valueRange = colorRangeData.back();
-        }
-
-        dataColumn.onChange([this]() {
-            valueRange = colorRangeData[dataColumn.value()];
-        });
-
-        // TODO: read valueRange from asset if specified
-
-        hideOutliers = settings.hideOutliers.value_or(hideOutliers);
-
-        if (settings.colorMap.has_value()) {
-            colorMapFile = absPath(*settings.colorMap).string();
-        }
-    }
-
-    addProperty(enabled);
-    addProperty(dataColumn);
-
-    addProperty(valueRange);
-    addProperty(setRangeFromData);
-
-    addProperty(hideOutliers);
-
-    colorMapFile.setReadOnly(true); // Currently this can't be changed
-    addProperty(colorMapFile);
-}
-
 RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -445,7 +316,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _fadeInDistanceEnabled(EnableDistanceFadeInfo, false)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _sizeSettings(dictionary)
-    , _colorMapSettings(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -520,19 +390,19 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     addPropertySubOwner(_sizeSettings);
 
-    if (p.colorMapSettings.has_value()) {
+    if (p.colorMap.has_value()) {
+        _colorMapSettings = std::make_unique<ColorMapComponent>(*p.colorMap);
         _hasColorMapFile = true;
+        addPropertySubOwner(_colorMapSettings.get());
 
-        _colorMapSettings.hideOutliers.onChange([this]() { _dataIsDirty = true; });
-        _colorMapSettings.valueRange.onChange([this]() { _dataIsDirty = true; });
-        _colorMapSettings.dataColumn.onChange([this]() { _dataIsDirty = true; });
+        _colorMapSettings->hideOutliers.onChange([this]() { _dataIsDirty = true; });
+        _colorMapSettings->valueRange.onChange([this]() { _dataIsDirty = true; });
+        _colorMapSettings->dataColumn.onChange([this]() { _dataIsDirty = true; });
 
-        _colorMapSettings.setRangeFromData.onChange([this]() {
+        _colorMapSettings->setRangeFromData.onChange([this]() {
             int parameterIndex = currentColorParameterIndex();
-            _colorMapSettings.valueRange = findValueRange(parameterIndex);
+            _colorMapSettings->valueRange = findValueRange(parameterIndex);
         });
-
-        addPropertySubOwner(_colorMapSettings);
     }
 }
 
@@ -555,8 +425,26 @@ void RenderablePointCloud::initialize() {
 
     if (_hasColorMapFile) {
         _colorMap = speck::color::loadFileWithCache(
-            _colorMapSettings.colorMapFile.value()
+            _colorMapSettings->colorMapFile.value()
         );
+
+        // Initialize empty colormap ranges based on dataset
+        for (const properties::OptionProperty::Option& option :
+            _colorMapSettings->dataColumn.options())
+        {
+            int optionIndex = option.value;
+            int colorParameterIndex = _dataset.index(option.description);
+
+            glm::vec2& range = _colorMapSettings->colorRangeData[optionIndex];
+            if (glm::length(range) < glm::epsilon<float>()) {
+                range = findValueRange(colorParameterIndex);
+            }
+        }
+
+        // Set the value range again, to make sure that it's updated
+        if (!_colorMapSettings->colorRangeData.empty()) {
+            _colorMapSettings->valueRange = _colorMapSettings->colorRangeData.back();
+        }
     }
 
     if (_hasLabels) {
@@ -565,24 +453,6 @@ void RenderablePointCloud::initialize() {
     }
 
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-
-    // Initialize empty colormap ranges based on dataset
-    for (const properties::OptionProperty::Option& option :
-            _colorMapSettings.dataColumn.options())
-    {
-        int optionIndex = option.value;
-        int colorParameterIndex = _dataset.index(option.description);
-
-        glm::vec2& range = _colorMapSettings.colorRangeData[optionIndex];
-        if (glm::length(range) < glm::epsilon<float>()) {
-            range = findValueRange(colorParameterIndex);
-        }
-    }
-
-    // Set the value range again, to make sure that it's updated
-    if (!_colorMapSettings.colorRangeData.empty()) {
-        _colorMapSettings.valueRange = _colorMapSettings.colorRangeData.back();
-    }
 }
 
 void RenderablePointCloud::initializeGL() {
@@ -696,7 +566,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.spriteTexture, textureUnit);
     _program->setUniform(
         _uniformCache.useColormap,
-        _hasColorMapFile && _colorMapSettings.enabled
+        _hasColorMapFile && _colorMapSettings->enabled
     );
 
     glBindVertexArray(_vao);
@@ -876,9 +746,9 @@ void RenderablePointCloud::updateSpriteTexture() {
 }
 
 int RenderablePointCloud::currentColorParameterIndex() const {
-    bool hasOptions = _colorMapSettings.dataColumn.options().size() > 0;
+    bool hasOptions = _colorMapSettings->dataColumn.options().size() > 0;
     return _hasColorMapFile && hasOptions ?
-        _dataset.index(_colorMapSettings.dataColumn.option().description) :
+        _dataset.index(_colorMapSettings->dataColumn.option().description) :
         0;
 }
 
@@ -912,13 +782,13 @@ glm::vec2 RenderablePointCloud::findValueRange(int parameterIndex) const {
 }
 
 glm::vec4 RenderablePointCloud::colorFromColorMap(float valueToColorFrom) const {
-    glm::vec2 currentColorRange = _colorMapSettings.valueRange;
+    glm::vec2 currentColorRange = _colorMapSettings->valueRange;
     float cmax = currentColorRange.y;
     float cmin = currentColorRange.x;
 
     float nColors = static_cast<float>(_colorMap.entries.size());
 
-    if (_colorMapSettings.hideOutliers) {
+    if (_colorMapSettings->hideOutliers) {
         bool isOutsideRange = valueToColorFrom < cmin || valueToColorFrom > cmax;
 
         if (isOutsideRange) {

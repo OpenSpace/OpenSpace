@@ -22,9 +22,9 @@ local Object = {
     File = speck .. "2dF.speck",
     Unit = "Mpc",
     Texture = textures .. "point3A.png",
-    ColorMapSettings = {
-      ColorMap = speck .. "2dF.cmap",
-      ColorParameterOptions = {
+    ColorMap = {
+      File = speck .. "2dF.cmap",
+      ParameterOptions = {
         { Key = "redshift", Range = { 0.0, 0.075 } },
         { Key = "proximity", Range = { 1.0, 25.0 } }
       }

@@ -22,52 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/digitaluniversemodule.h>
+#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___COLORMAPCOMPONENT___H__
+#define __OPENSPACE_MODULE_DIGITALUNIVERSE___COLORMAPCOMPONENT___H__
 
-#include <modules/digitaluniverse/rendering/colormapcomponent.h>
-#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
-#include <modules/digitaluniverse/rendering/renderableplanescloud.h>
-#include <modules/digitaluniverse/rendering/renderablepointcloud.h>
-#include <modules/digitaluniverse/rendering/renderablepolygoncloud.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 
 namespace openspace {
 
-ghoul::opengl::ProgramObjectManager DigitalUniverseModule::ProgramObjectManager;
-ghoul::opengl::TextureManager DigitalUniverseModule::TextureManager;
+namespace documentation { struct Documentation; }
 
-DigitalUniverseModule::DigitalUniverseModule()
-    : OpenSpaceModule(DigitalUniverseModule::Name)
-{}
+/**
+ * TODO:
+ */
+class ColorMapComponent : public properties::PropertyOwner {
+public:
+    ColorMapComponent();
+    explicit ColorMapComponent(const ghoul::Dictionary& dictionary);
+    ~ColorMapComponent() override = default;
 
-void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    static documentation::Documentation Documentation();
 
-    fRenderable->registerClass<RenderablePointCloud>("RenderablePointCloud");
-    fRenderable->registerClass<RenderablePlanesCloud>("RenderablePlanesCloud");
-    fRenderable->registerClass<RenderablePolygonCloud>("RenderablePolygonCloud");
-    fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
-}
+    //glm::vec4 colorFromColorMap(float valueToColorFrom) const;
 
-void DigitalUniverseModule::internalDeinitializeGL() {
-    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
-    TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
-}
+    properties::BoolProperty enabled;
+    properties::OptionProperty dataColumn;
+    properties::StringProperty colorMapFile;
+    properties::Vec2Property valueRange;
+    properties::TriggerProperty setRangeFromData;
+    properties::BoolProperty hideOutliers;
 
-std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
-    return {
-        ColorMapComponent::Documentation(),
-        RenderablePointCloud::Documentation(),
-        RenderablePlanesCloud::Documentation(),
-        RenderablePolygonCloud::Documentation(),
-        RenderableDUMeshes::Documentation()
-    };
-}
+    // One item per color parameter option
+    std::vector<glm::vec2> colorRangeData;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___COLORMAPCOMPONENT___H__
