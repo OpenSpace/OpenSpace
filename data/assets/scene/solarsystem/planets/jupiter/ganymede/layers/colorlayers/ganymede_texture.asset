@@ -2,7 +2,7 @@ local globe = asset.require("../../ganymede")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Ganymede Textures",
   Type = "HttpSynchronization",
   Identifier = "ganymede_textures",

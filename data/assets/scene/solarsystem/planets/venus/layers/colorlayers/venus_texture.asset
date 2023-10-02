@@ -2,7 +2,7 @@ local globe = asset.require("../../venus")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Venus Textures",
   Type = "HttpSynchronization",
   Identifier = "venus_textures",

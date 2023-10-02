@@ -2,7 +2,7 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Cardinal Directions Textures",
   Type = "HttpSynchronization",
   Identifier = "cardinal_directions_textures",

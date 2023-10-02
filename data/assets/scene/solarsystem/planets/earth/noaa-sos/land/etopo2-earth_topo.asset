@@ -17,7 +17,7 @@ use green, yellow, orange, red and white to denote increasing elevation of the l
 local URL = "https://sos.noaa.gov/catalog/datasets/etopo2-topography-and-bathymetry-natural-colors/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

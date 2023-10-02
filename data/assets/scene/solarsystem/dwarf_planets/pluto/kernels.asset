@@ -1,4 +1,4 @@
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Pluto Kernels",
   Type = "HttpSynchronization",
   Identifier = "pluto_kernels",

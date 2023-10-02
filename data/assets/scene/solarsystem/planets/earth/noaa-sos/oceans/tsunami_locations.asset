@@ -22,7 +22,7 @@ pronounced ocean features, such as volcanic islands, rift zones, and plate bound
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-locations-2000-bce-2014/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

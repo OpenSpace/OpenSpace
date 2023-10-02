@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local omm = asset.syncedResource({
+local omm = asset.resource({
   Name = "Satellite OMM Data (Active)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_active",

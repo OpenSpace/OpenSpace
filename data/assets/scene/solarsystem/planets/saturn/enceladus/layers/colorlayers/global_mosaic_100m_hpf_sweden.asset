@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "Global_Mosaic_100m_HPF_Sweden",
   Name = "Cassini Global Mosaic 100m HPF [Sweden]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("global_mosaic_100m_hpf_sweden.wms"),
+  FilePath = asset.resource("global_mosaic_100m_hpf_sweden.wms"),
   Description = [[This mosaic represents the completion of a global control network of
     Enceladus containing Cassini Imaging Science Subsystem (ISS) images. A total of
     586 images in CLR, GRN, UV3, and IR3 filters were selected for the control

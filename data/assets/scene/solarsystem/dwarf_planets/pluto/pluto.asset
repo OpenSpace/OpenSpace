@@ -4,7 +4,7 @@ asset.require("./trail")
 
 
 
-local labelsPath = asset.syncedResource({
+local labelsPath = asset.resource({
   Name = "Pluto Labels",
   Type = "HttpSynchronization",
   Identifier = "pluto_labels",

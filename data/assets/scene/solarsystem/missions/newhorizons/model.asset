@@ -3,7 +3,7 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "New Horizons Model",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_model",

@@ -19,7 +19,7 @@ the plate boundary faults responsible for the majority of all of these earthquak
 local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-of-the-20th-century/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
