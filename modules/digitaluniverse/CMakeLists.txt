@@ -25,7 +25,6 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-  rendering/renderablepoints.h
   rendering/renderabledumeshes.h
   rendering/renderablebillboardscloud.h
   rendering/renderableplanescloud.h
@@ -34,7 +33,6 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  rendering/renderablepoints.cpp
   rendering/renderabledumeshes.cpp
   rendering/renderablebillboardscloud.cpp
   rendering/renderableplanescloud.cpp
@@ -53,8 +51,6 @@ set(SHADER_FILES
   shaders/dumesh_fs.glsl
   shaders/plane_vs.glsl
   shaders/plane_fs.glsl
-  shaders/points_sprite_fs.glsl
-  shaders/points_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
