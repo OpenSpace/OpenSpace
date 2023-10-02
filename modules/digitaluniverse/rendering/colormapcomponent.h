@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -46,9 +47,16 @@ public:
     explicit ColorMapComponent(const ghoul::Dictionary& dictionary);
     ~ColorMapComponent() override = default;
 
+    /**
+     * Initialize the color map informaiton (ranges, etc.) based on the input dataset
+     *
+     * \param dataset the *loaded* input dataset
+     */
+    void initialize(const speck::Dataset& dataset);
+
     static documentation::Documentation Documentation();
 
-    //glm::vec4 colorFromColorMap(float valueToColorFrom) const;
+    glm::vec4 colorFromColorMap(float valueToColorFrom) const;
 
     properties::BoolProperty enabled;
     properties::OptionProperty dataColumn;
@@ -57,8 +65,11 @@ public:
     properties::TriggerProperty setRangeFromData;
     properties::BoolProperty hideOutliers;
 
+private:
     // One item per color parameter option
-    std::vector<glm::vec2> colorRangeData;
+    std::vector<glm::vec2> _colorRangeData;
+
+    speck::ColorMap _colorMap;
 };
 
 } // namespace openspace

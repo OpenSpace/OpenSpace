@@ -141,22 +141,22 @@ ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
     if (p.parameterOptions.has_value()) {
         std::vector<Parameters::ColorMapParameter> opts = *p.parameterOptions;
 
-        colorRangeData.reserve(opts.size());
+        _colorRangeData.reserve(opts.size());
         for (size_t i = 0; i < opts.size(); ++i) {
             dataColumn.addOption(static_cast<int>(i), opts[i].key);
 
             // TODO: set default value to be the data range
-            colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
+            _colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
         }
 
         // Following DU behavior here. The last colormap variable
         // entry is the one selected by default.
-        dataColumn.setValue(static_cast<int>(colorRangeData.size() - 1));
-        valueRange = colorRangeData.back();
+        dataColumn.setValue(static_cast<int>(_colorRangeData.size() - 1));
+        valueRange = _colorRangeData.back();
     }
 
     dataColumn.onChange([this]() {
-        valueRange = colorRangeData[dataColumn.value()];
+        valueRange = _colorRangeData[dataColumn.value()];
     });
 
     // TODO: read valueRange from asset if specified
@@ -168,31 +168,51 @@ ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
     }
 }
 
-//glm::vec4 ColorMapComponent::colorFromColorMap(float valueToColorFrom) const {
-//    glm::vec2 currentColorRange = valueRange;
-//    float cmax = currentColorRange.y;
-//    float cmin = currentColorRange.x;
-//
-//    float nColors = static_cast<float>(_colorMap.entries.size());
-//
-//    if (hideOutliers) {
-//        bool isOutsideRange = valueToColorFrom < cmin || valueToColorFrom > cmax;
-//
-//        if (isOutsideRange) {
-//            return glm::vec4(0.f);
-//        }
-//    }
-//
-//    // Nearest neighbor
-//
-//    float normalization = (cmax != cmin) ? (nColors) / (cmax - cmin) : 0;
-//    int colorIndex = static_cast<int>((valueToColorFrom - cmin) * normalization);
-//
-//    // Clamp color index to valid range
-//    colorIndex = std::max(colorIndex, 0);
-//    colorIndex = std::min(colorIndex, static_cast<int>(nColors) - 1);
-//
-//    return _colorMap.entries[colorIndex];
-//}
+void ColorMapComponent::initialize(const speck::Dataset& dataset) {
+    _colorMap = speck::color::loadFileWithCache(colorMapFile.value());
+
+    // Initialize empty colormap ranges based on dataset
+    for (const properties::OptionProperty::Option& option : dataColumn.options()) {
+        int optionIndex = option.value;
+        int colorParameterIndex = dataset.index(option.description);
+
+        glm::vec2& range = _colorRangeData[optionIndex];
+        if (glm::length(range) < glm::epsilon<float>()) {
+            range = dataset.findValueRange(colorParameterIndex);
+        }
+    }
+
+    // Set the value range again, to make sure that it's updated
+    if (!_colorRangeData.empty()) {
+        valueRange = _colorRangeData.back();
+    }
+}
+
+glm::vec4 ColorMapComponent::colorFromColorMap(float valueToColorFrom) const {
+    glm::vec2 currentColorRange = valueRange;
+    float cmax = currentColorRange.y;
+    float cmin = currentColorRange.x;
+
+    float nColors = static_cast<float>(_colorMap.entries.size());
+
+    if (hideOutliers) {
+        bool isOutsideRange = valueToColorFrom < cmin || valueToColorFrom > cmax;
+
+        if (isOutsideRange) {
+            return glm::vec4(0.f);
+        }
+    }
+
+    // Nearest neighbor
+
+    float normalization = (cmax != cmin) ? (nColors) / (cmax - cmin) : 0;
+    int colorIndex = static_cast<int>((valueToColorFrom - cmin) * normalization);
+
+    // Clamp color index to valid range
+    colorIndex = std::max(colorIndex, 0);
+    colorIndex = std::min(colorIndex, static_cast<int>(nColors) - 1);
+
+    return _colorMap.entries[colorIndex];
+}
 
 } // namespace openspace

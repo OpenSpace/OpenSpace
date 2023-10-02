@@ -82,8 +82,6 @@ protected:
     /// Find the index of the currently chosen size parameter in the dataset
     int currentSizeParameterIndex() const;
 
-    glm::vec2 findValueRange(int parameterIndex) const;
-    glm::vec4 colorFromColorMap(float valueToColorFrom) const;
     std::vector<float> createDataSlice();
 
     virtual void bindTextureForRendering() const;
@@ -142,7 +140,6 @@ protected:
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     speck::Dataset _dataset;
-    speck::ColorMap _colorMap; // TODO: move to component
 
     std::unique_ptr<LabelsComponent> _labels;
 

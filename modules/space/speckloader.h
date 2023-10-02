@@ -61,6 +61,8 @@ struct Dataset {
 
     int index(std::string_view variableName) const;
     bool normalizeVariable(std::string_view variableName);
+    glm::vec2 findValueRange(int variableIndex) const;
+    glm::vec2 findValueRange(std::string_view variableName) const;
 };
 
 struct Labelset {

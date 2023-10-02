@@ -276,9 +276,9 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
                 sizeMapping.parameterOption.addOption(static_cast<int>(i), opts[i]);
             }
             sizeMapping.enabled = true;
-        }
 
-        addPropertySubOwner(sizeMapping);
+            addPropertySubOwner(sizeMapping);
+        }
     }
 
     addProperty(scaleFactor);
@@ -401,7 +401,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
         _colorMapSettings->setRangeFromData.onChange([this]() {
             int parameterIndex = currentColorParameterIndex();
-            _colorMapSettings->valueRange = findValueRange(parameterIndex);
+            _colorMapSettings->valueRange = _dataset.findValueRange(parameterIndex);
         });
     }
 }
@@ -421,29 +421,9 @@ void RenderablePointCloud::initialize() {
 
     if (_hasSpeckFile) {
         _dataset = speck::data::loadFileWithCache(_speckFile);
-    }
 
-    if (_hasColorMapFile) {
-        _colorMap = speck::color::loadFileWithCache(
-            _colorMapSettings->colorMapFile.value()
-        );
-
-        // Initialize empty colormap ranges based on dataset
-        for (const properties::OptionProperty::Option& option :
-            _colorMapSettings->dataColumn.options())
-        {
-            int optionIndex = option.value;
-            int colorParameterIndex = _dataset.index(option.description);
-
-            glm::vec2& range = _colorMapSettings->colorRangeData[optionIndex];
-            if (glm::length(range) < glm::epsilon<float>()) {
-                range = findValueRange(colorParameterIndex);
-            }
-        }
-
-        // Set the value range again, to make sure that it's updated
-        if (!_colorMapSettings->colorRangeData.empty()) {
-            _colorMapSettings->valueRange = _colorMapSettings->colorRangeData.back();
+        if (_hasColorMapFile) {
+            _colorMapSettings->initialize(_dataset);
         }
     }
 
@@ -759,55 +739,6 @@ int RenderablePointCloud::currentSizeParameterIndex() const {
         -1;
 }
 
-glm::vec2 RenderablePointCloud::findValueRange(int parameterIndex) const {
-    if (!_hasColorMapFile) {
-        return glm::vec2(0.f);
-    }
-
-    float minValue = std::numeric_limits<float>::max();
-    float maxValue = -std::numeric_limits<float>::max();
-    for (const speck::Dataset::Entry& e : _dataset.entries) {
-        if (e.data.size() > 0) {
-            float value = e.data[parameterIndex];
-            minValue = std::min(value, minValue);
-            maxValue = std::max(value, maxValue);
-        }
-        else {
-            minValue = 0.f;
-            maxValue = 0.f;
-        }
-    }
-
-    return { minValue, maxValue };
-}
-
-glm::vec4 RenderablePointCloud::colorFromColorMap(float valueToColorFrom) const {
-    glm::vec2 currentColorRange = _colorMapSettings->valueRange;
-    float cmax = currentColorRange.y;
-    float cmin = currentColorRange.x;
-
-    float nColors = static_cast<float>(_colorMap.entries.size());
-
-    if (_colorMapSettings->hideOutliers) {
-        bool isOutsideRange = valueToColorFrom < cmin || valueToColorFrom > cmax;
-
-        if (isOutsideRange) {
-            return glm::vec4(0.f);
-        }
-    }
-
-    // Nearest neighbor
-
-    float normalization = (cmax != cmin) ? (nColors) / (cmax - cmin) : 0;
-    int colorIndex = static_cast<int>((valueToColorFrom - cmin) * normalization);
-
-    // Clamp color index to valid range
-    colorIndex = std::max(colorIndex, 0);
-    colorIndex = std::min(colorIndex, static_cast<int>(nColors) - 1);
-
-    return _colorMap.entries[colorIndex];
-}
-
 std::vector<float> RenderablePointCloud::createDataSlice() {
     ZoneScoped;
 
@@ -842,13 +773,13 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         }
 
         // Colors
-        if (_hasColorMapFile && !_colorMap.entries.empty()) {
+        if (_hasColorMapFile) {
             biggestCoord = std::max(biggestCoord, glm::compMax(position));
             // Note: if exact colormap option is not selected, the first color and the
             // last color in the colormap file are the outliers colors.
             float valueToColorFrom = e.data[colorParamIndex];
 
-            glm::vec4 c = colorFromColorMap(valueToColorFrom);
+            glm::vec4 c = _colorMapSettings->colorFromColorMap(valueToColorFrom);
             result.push_back(c.r);
             result.push_back(c.g);
             result.push_back(c.b);

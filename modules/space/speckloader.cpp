@@ -950,15 +950,9 @@ int Dataset::index(std::string_view variableName) const {
 }
 
 bool Dataset::normalizeVariable(std::string_view variableName) {
-    std::optional<int> idx;
-    for (const Dataset::Variable& var : variables) {
-        if (var.name == variableName) {
-            idx = var.index;
-            break;
-        }
-    }
+    int idx = index(variableName);
 
-    if (!idx.has_value()) {
+    if (idx == -1) {
         // We didn't find the variable that was specified
         return false;
     }
@@ -966,15 +960,54 @@ bool Dataset::normalizeVariable(std::string_view variableName) {
     float minValue = std::numeric_limits<float>::max();
     float maxValue = -std::numeric_limits<float>::max();
     for (Dataset::Entry& e : entries) {
-        minValue = std::min(minValue, e.data[*idx]);
-        maxValue = std::max(maxValue, e.data[*idx]);
+        minValue = std::min(minValue, e.data[idx]);
+        maxValue = std::max(maxValue, e.data[idx]);
     }
 
     for (Dataset::Entry& e : entries) {
-        e.data[*idx] = (e.data[*idx] - minValue) / (maxValue - minValue);
+        e.data[idx] = (e.data[idx] - minValue) / (maxValue - minValue);
     }
 
     return true;
+}
+
+glm::vec2 Dataset::findValueRange(int variableIndex) const {
+    if (entries.empty()) {
+        // Can't find range if there are no entries
+        return glm::vec2(0.f);
+    }
+
+    if (variableIndex >= entries[0].data.size()) {
+        // The index is not a valid variable index
+        return glm::vec2(0.f);
+    }
+
+    float minValue = std::numeric_limits<float>::max();
+    float maxValue = -std::numeric_limits<float>::max();
+    for (const openspace::speck::Dataset::Entry& e : entries) {
+        if (e.data.size() > 0) {
+            float value = e.data[variableIndex];
+            minValue = std::min(value, minValue);
+            maxValue = std::max(value, maxValue);
+        }
+        else {
+            minValue = 0.f;
+            maxValue = 0.f;
+        }
+    }
+
+    return { minValue, maxValue };
+}
+
+glm::vec2 Dataset::findValueRange(std::string_view variableName) const {
+    int idx = index(variableName);
+
+    if (idx == -1) {
+        // We didn't find the variable that was specified
+        return glm::vec2(0.f);
+    }
+
+    return findValueRange(idx);
 }
 
 } // namespace openspace::speck
