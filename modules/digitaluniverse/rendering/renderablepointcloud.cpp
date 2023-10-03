@@ -425,7 +425,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _colorSettings.colorMapComponent->valueRange.onChange(dirtyDataFunc);
         _colorSettings.colorMapComponent->dataColumn.onChange(dirtyDataFunc);
 
-        // TODO: move this to the component
         _colorSettings.colorMapComponent->setRangeFromData.onChange([this]() {
             int parameterIndex = currentColorParameterIndex();
             _colorSettings.colorMapComponent->valueRange = _dataset.findValueRange(
