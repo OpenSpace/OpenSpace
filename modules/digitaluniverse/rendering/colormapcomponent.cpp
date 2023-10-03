@@ -202,7 +202,8 @@ ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
         valueRange = _colorRangeData[dataColumn.value()];
     });
 
-    // TODO: read valueRange from asset if specified
+    // @TODO: read valueRange from asset if specified. How to avoid overriding it
+    // in initialize?
 
     if (p.outliers.has_value()) {
         Parameters::Outliers o = *p.outliers;

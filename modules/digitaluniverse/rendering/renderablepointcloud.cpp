@@ -757,9 +757,7 @@ int RenderablePointCloud::currentColorParameterIndex() const {
     const properties::OptionProperty& property =
         _colorSettings.colorMapComponent->dataColumn;
 
-    bool hasOptions = property.options().size() > 0;
-
-    if (!hasOptions || !_hasColorMapFile) {
+    if (property.options().empty() || !_hasColorMapFile) {
         return 0;
     }
 
@@ -767,10 +765,14 @@ int RenderablePointCloud::currentColorParameterIndex() const {
 }
 
 int RenderablePointCloud::currentSizeParameterIndex() const {
-    bool hasOptions = _sizeSettings.sizeMapping.parameterOption.options().size() > 0;
-    return _hasDatavarSize && hasOptions ?
-        _dataset.index(_sizeSettings.sizeMapping.parameterOption.option().description) :
-        -1;
+    const properties::OptionProperty& property =
+        _sizeSettings.sizeMapping.parameterOption;
+
+    if (property.options().empty() || !_hasColorMapFile) {
+        return 0;
+    }
+
+    return _dataset.index(property.option().description);
 }
 
 std::vector<float> RenderablePointCloud::createDataSlice() {
@@ -788,7 +790,6 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
 
     // what datavar in use for the size scaling (if present)z
     int sizeParamIndex = currentSizeParameterIndex();
-
 
     double maxRadius = 0.0;
     double biggestCoord = -1.0;
