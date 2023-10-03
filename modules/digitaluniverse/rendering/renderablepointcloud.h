@@ -116,9 +116,12 @@ protected:
         properties::FloatProperty billboardMaxPixelSize;
     } _sizeSettings;
 
-    std::unique_ptr<ColorMapComponent> _colorMapSettings;
+    struct ColorSettings : properties::PropertyOwner {
+        ColorSettings(const ghoul::Dictionary& dictionary);
+        properties::Vec3Property pointColor;
+        std::unique_ptr<ColorMapComponent> colorMapComponent;
+    } _colorSettings;
 
-    properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
     properties::BoolProperty _drawElements;
     properties::Vec2Property _fadeInDistances;

@@ -25,7 +25,9 @@ local Object = {
       MinMaxSize = { 4, 25 },
       Unit = "pc"
     },
-    Color = { 0.4, 0.4, 0.9 },
+    Coloring = {
+      FixedColor = { 0.4, 0.4, 0.9 }
+    },
     Opacity = 0.65,
     File = speck .. "pn.speck",
     PolygonSides = 3,

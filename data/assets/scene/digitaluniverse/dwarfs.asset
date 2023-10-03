@@ -25,15 +25,17 @@ local Object = {
       MinMaxSize = { 10, 20 },
       Unit = "pc"
     },
-    Color = { 0.4, 0.0, 0.1 },
     Opacity = 1.0,
     File = speck .. "dwarfs.speck",
     Texture = textures .. "point3.png",
     Unit = "pc",
-    ColorMap = {
-      File = speck .. "dwarfs.cmap",
-      ParameterOptions = {
-        { Key = "typeindex", Range = { 1.0, 4.0 } }
+    Coloring = {
+      FixedColor = { 0.4, 0.0, 0.1 },
+      ColorMap = {
+        File = speck .. "dwarfs.cmap",
+        ParameterOptions = {
+          { Key = "typeindex", Range = { 1.0, 4.0 } }
+        }
       }
     },
     SizeSettings = {

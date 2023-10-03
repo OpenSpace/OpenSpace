@@ -18,11 +18,13 @@ local Object = {
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
-    Color = { 1.0, 1.0, 0.0 },
     Opacity = 0.99,
     File = speck .. "exoplanet_candidates.speck",
     Unit = "pc",
     Texture = textures .. "halo.png",
+    Coloring = {
+      FixedColor = { 1.0, 1.0, 0.0 }
+    },
     SizeSettings = {
       ScaleExponent = 41.0,
       BillboardMaxPixelSize = 30.0,

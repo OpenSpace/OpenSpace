@@ -25,7 +25,9 @@ local Object = {
       MinMaxSize = { 4, 30 },
       Unit = "pc"
     },
-    Color = { 0.1, 0.8, 0.4 },
+    Coloring = {
+      FixedColor = { 0.1, 0.8, 0.4 }
+    },
     Opacity = 0.5,
     File = speck .. "oc.speck",
     Unit = "pc",

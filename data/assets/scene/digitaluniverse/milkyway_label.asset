@@ -27,7 +27,9 @@ local HomeLabel = {
       Unit = "Mpc",
       TransformationMatrix = TransformMatrix
     },
-    Color = { 1.0, 0.4, 0.2 },
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 }
+    },
     Opacity = 0.99,
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,

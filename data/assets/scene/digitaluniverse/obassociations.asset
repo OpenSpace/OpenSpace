@@ -25,10 +25,12 @@ local Object = {
       MinMaxSize = { 4, 25 },
       Unit = "pc"
     },
-    ColorMap = {
-      File = speck .. "ob.cmap",
-      ParameterOptions = {
-        { Key = "arm" }
+    Coloring = {
+      ColorMap = {
+        File = speck .. "ob.cmap",
+        ParameterOptions = {
+          { Key = "arm" }
+        }
       }
     },
     Opacity = 0.7,

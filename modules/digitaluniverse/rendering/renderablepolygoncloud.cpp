@@ -184,7 +184,7 @@ void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) {
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
 
     program->setUniform("sides", _polygonSides);
-    program->setUniform("polygonColor", _pointColor);
+    program->setUniform("polygonColor", _colorSettings.pointColor);
 
     glBindVertexArray(vao);
     glDrawArrays(GL_POINTS, 0, 1);

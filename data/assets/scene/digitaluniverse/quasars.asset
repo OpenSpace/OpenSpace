@@ -25,20 +25,22 @@ local Object = {
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = true,
-    Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.95,
     File = speck .. "quasars.speck",
     Texture = textures .. "point3A.png",
     Unit = "Mpc",
     FadeInDistances = { 1000.0, 10000.0 }, -- Fade in value in the same unit as "Unit"
-    ColorMap = {
-      File = colormaps .. "viridis.cmap",
-      ParameterOptions = {
-        { Key = "redshift", Range = { 0.102, 7.085 } },
-        { Key = "Tlookback", Range = { 1.4, 13.0 } },
-        { Key = "distMpc", Range = { 440.5, 8852.099609 } }
-      },
-      Enabled = false
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 },
+      ColorMap = {
+        File = colormaps .. "viridis.cmap",
+        ParameterOptions = {
+          { Key = "redshift", Range = { 0.102, 7.085 } },
+          { Key = "Tlookback", Range = { 1.4, 13.0 } },
+          { Key = "distMpc", Range = { 440.5, 8852.099609 } }
+        },
+        Enabled = false
+      }
     },
     SizeSettings = {
       ScaleExponent = 54.09,

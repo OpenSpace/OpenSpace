@@ -25,7 +25,9 @@ local Object = {
       MinMaxSize = { 4, 100 },
       Unit = "pc"
     },
-    Color = { 1.0, 0.5, 0.0 },
+    Coloring = {
+      FixedColor = { 1.0, 0.5, 0.0 }
+    },
     Opacity = 0.32,
     File = speck .. "snr.speck",
     PolygonSides = 7,

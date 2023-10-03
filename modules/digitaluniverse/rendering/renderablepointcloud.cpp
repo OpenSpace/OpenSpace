@@ -91,10 +91,10 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "This value is used to define the color of the points, when no color map is"
+    constexpr openspace::properties::Property::PropertyInfo PointColorInfo = {
+        "FixedColor",
+        "Fixed Color",
+        "This value is used to define the color of the points when no color map is"
         "used",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -175,9 +175,6 @@ namespace {
         // object being rendered
         std::optional<std::string> file;
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
-
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
         std::optional<std::string> texture;
 
@@ -208,10 +205,6 @@ namespace {
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("space_labelscomponent")]];
 
-        // Settings related to the choice of color map, parameters, et. cetera
-        std::optional<ghoul::Dictionary> colorMap
-            [[codegen::reference("digitaluniverse_colormapcomponent")]];
-
         struct SizeSettings {
             // A list specifying all parameters that may be use for size mapping, i.e.
             // scaling the points based on the provided data columns
@@ -232,6 +225,18 @@ namespace {
         // Settings related to the scale of the points, whether they should limit to
         // a certain pixel size, et. cetera
         std::optional<SizeSettings> sizeSettings;
+
+        struct ColorSettings {
+            // [[codegen::verbatim(PointColorInfo.description)]]
+            std::optional<glm::vec3> fixedColor [[codegen::color()]];
+
+            // Settings related to the choice of color map, parameters, et. cetera
+            std::optional<ghoul::Dictionary> colorMap
+                [[codegen::reference("digitaluniverse_colormapcomponent")]];
+        };
+        // Settings related to the coloring of the points, such as a fixed color,
+        // color map, etc.
+        std::optional<ColorSettings> coloring;
 
         // Transformation matrix to be applied to each astronomical object
         std::optional<glm::dmat4x4> transformationMatrix;
@@ -262,7 +267,7 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     if (p.sizeSettings.has_value()) {
-        const Parameters::SizeSettings settings = p.sizeSettings.value();
+        const Parameters::SizeSettings settings = *p.sizeSettings;
 
         scaleFactor = settings.scaleFactor.value_or(scaleFactor);
         scaleExponent = settings.scaleExponent.value_or(scaleExponent);
@@ -302,9 +307,29 @@ RenderablePointCloud::SizeSettings::SizeMapping::SizeMapping()
     addProperty(parameterOption);
 }
 
+RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "Coloring", "Coloring", "" })
+    , pointColor(PointColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.coloring.has_value()) {
+        const Parameters::ColorSettings settings = *p.coloring;
+        pointColor = settings.fixedColor.value_or(pointColor);
+
+        if (settings.colorMap.has_value()) {
+            colorMapComponent = std::make_unique<ColorMapComponent>(
+                *settings.colorMap
+           );
+           addPropertySubOwner(colorMapComponent.get());
+        }
+    }
+    pointColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(pointColor);
+}
+
 RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
     , _drawElements(DrawElementsInfo, true)
     , _fadeInDistances(
@@ -316,14 +341,11 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _fadeInDistanceEnabled(EnableDistanceFadeInfo, false)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _sizeSettings(dictionary)
+    , _colorSettings(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(Fadeable::_opacity);
-
-    _pointColor = p.color.value_or(_pointColor);
-    _pointColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_pointColor);
 
     if (p.file.has_value()) {
         _hasSpeckFile = true;
@@ -391,22 +413,24 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     }
 
     addPropertySubOwner(_sizeSettings);
+    addPropertySubOwner(_colorSettings);
 
-    if (p.colorMap.has_value()) {
-        _colorMapSettings = std::make_unique<ColorMapComponent>(*p.colorMap);
+    if (p.coloring.has_value() && (*p.coloring).colorMap.has_value()) {
         _hasColorMapFile = true;
-        addPropertySubOwner(_colorMapSettings.get());
 
         // @TODO Gotta be able to do this in a nicer way
-        _colorMapSettings->outliers.hide.onChange(dirtyDataFunc);
-        _colorMapSettings->outliers.useMinColor.onChange(dirtyDataFunc);
-        _colorMapSettings->outliers.outsideMinColor.onChange(dirtyDataFunc);
-        _colorMapSettings->valueRange.onChange(dirtyDataFunc);
-        _colorMapSettings->dataColumn.onChange(dirtyDataFunc);
+        _colorSettings.colorMapComponent->outliers.hide.onChange(dirtyDataFunc);
+        _colorSettings.colorMapComponent->outliers.useMinColor.onChange(dirtyDataFunc);
+        _colorSettings.colorMapComponent->outliers.outsideMinColor.onChange(dirtyDataFunc);
+        _colorSettings.colorMapComponent->valueRange.onChange(dirtyDataFunc);
+        _colorSettings.colorMapComponent->dataColumn.onChange(dirtyDataFunc);
 
-        _colorMapSettings->setRangeFromData.onChange([this]() {
+        // TODO: move this to the component
+        _colorSettings.colorMapComponent->setRangeFromData.onChange([this]() {
             int parameterIndex = currentColorParameterIndex();
-            _colorMapSettings->valueRange = _dataset.findValueRange(parameterIndex);
+            _colorSettings.colorMapComponent->valueRange = _dataset.findValueRange(
+                parameterIndex
+            );
         });
     }
 }
@@ -428,7 +452,7 @@ void RenderablePointCloud::initialize() {
         _dataset = speck::data::loadFileWithCache(_speckFile);
 
         if (_hasColorMapFile) {
-            _colorMapSettings->initialize(_dataset);
+            _colorSettings.colorMapComponent->initialize(_dataset);
         }
     }
 
@@ -529,7 +553,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     );
 
     _program->setUniform(_uniformCache.maxBillboardSize, _sizeSettings.billboardMaxPixelSize);
-    _program->setUniform(_uniformCache.color, _pointColor);
+    _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
     _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
@@ -551,7 +575,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.spriteTexture, textureUnit);
     _program->setUniform(
         _uniformCache.useColormap,
-        _hasColorMapFile && _colorMapSettings->enabled
+        _hasColorMapFile && _colorSettings.colorMapComponent->enabled
     );
 
     glBindVertexArray(_vao);
@@ -731,10 +755,16 @@ void RenderablePointCloud::updateSpriteTexture() {
 }
 
 int RenderablePointCloud::currentColorParameterIndex() const {
-    bool hasOptions = _colorMapSettings->dataColumn.options().size() > 0;
-    return _hasColorMapFile && hasOptions ?
-        _dataset.index(_colorMapSettings->dataColumn.option().description) :
-        0;
+    const properties::OptionProperty& property =
+        _colorSettings.colorMapComponent->dataColumn;
+
+    bool hasOptions = property.options().size() > 0;
+
+    if (!hasOptions || !_hasColorMapFile) {
+        return 0;
+    }
+
+    return _dataset.index(property.option().description);
 }
 
 int RenderablePointCloud::currentSizeParameterIndex() const {
@@ -784,7 +814,9 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
             // last color in the colormap file are the outliers colors.
             float valueToColorFrom = e.data[colorParamIndex];
 
-            glm::vec4 c = _colorMapSettings->colorFromColorMap(valueToColorFrom);
+            glm::vec4 c = _colorSettings.colorMapComponent->colorFromColorMap(
+                valueToColorFrom
+            );
             result.push_back(c.r);
             result.push_back(c.g);
             result.push_back(c.b);

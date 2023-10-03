@@ -18,16 +18,18 @@ local Object = {
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
-    Color = { 1.0, 1.0, 0.0 },
     Opacity = 1.0,
     File = speck .. "6dF.speck",
     Unit = "Mpc",
     Texture = textures .. "point3A.png",
-    ColorMap = {
-      File = speck .. "6dF.cmap",
-      ParameterOptions = {
-        { Key = "redshift", Range = { 0.0, 0.075 } },
-        { Key = "proximity", Range = { 1.0, 10.0 } }
+    Coloring = {
+      FixedColor = { 1.0, 1.0, 0.0 },
+      ColorMap = {
+        File = speck .. "6dF.cmap",
+        ParameterOptions = {
+          { Key = "redshift", Range = { 0.0, 0.075 } },
+          { Key = "proximity", Range = { 1.0, 10.0 } }
+        }
       }
     },
     SizeSettings = {

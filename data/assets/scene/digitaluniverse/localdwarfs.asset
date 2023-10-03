@@ -25,11 +25,13 @@ local Object = {
       MinMaxSize = { 7, 20 },
       Unit = "Mpc"
     },
-    Color = { 0.5, 1.0, 0.2 },
-    ColorMap = {
-      File = speck .. "localgroup.cmap",
-      ParameterOptions = {
-        { Key = "association" }
+    Coloring = {
+      FixedColor = { 0.5, 1.0, 0.2 },
+      ColorMap = {
+        File = speck .. "localgroup.cmap",
+        ParameterOptions = {
+          { Key = "association" }
+        }
       }
     },
     Opacity = 0.3,

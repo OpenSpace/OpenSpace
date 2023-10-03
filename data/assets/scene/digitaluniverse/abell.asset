@@ -34,9 +34,11 @@ local Object = {
       Unit = "Mpc",
       TransformationMatrix = TransformMatrix
     },
-    Color = { 1.0, 0.4, 0.2 },
     Opacity = 1.0,
-    --ColorMap = speck .. "abell.cmap", -- TODO: Decide whether to add
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 },
+      --ColorMap = speck .. "abell.cmap", -- TODO: Decide whether to add
+    },
     File = speck .. "abell.speck",
     Texture = textures .. "point3A.png",
     Unit = "Mpc",

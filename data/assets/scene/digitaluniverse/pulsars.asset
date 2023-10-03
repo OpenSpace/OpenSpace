@@ -25,7 +25,9 @@ local Object = {
       MinMaxSize = { 4, 20 },
       Unit = "pc"
     },
-    Color = { 0.7, 0.0, 0.0 },
+    Coloring = {
+      FixedColor = { 0.7, 0.0, 0.0 }
+    },
     Opacity = 1.0,
     File = speck .. "pulsar.speck",
     PolygonSides = 4,
