@@ -189,8 +189,6 @@ ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
         _colorRangeData.reserve(opts.size());
         for (size_t i = 0; i < opts.size(); ++i) {
             dataColumn.addOption(static_cast<int>(i), opts[i].key);
-
-            // TODO: set default value to be the data range
             _colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
         }
 
@@ -232,7 +230,22 @@ void ColorMapComponent::initialize(const speck::Dataset& dataset) {
         }
     }
 
-    // Set the value range again, to make sure that it's updated
+    // If no options were added, add each dataset parameter and its range as options
+    if (dataColumn.options().empty() && !dataset.entries.empty()) {
+        int i = 0;
+        _colorRangeData.reserve(dataset.variables.size());
+        for (const speck::Dataset::Variable& v : dataset.variables) {
+            dataColumn.addOption(i, v.name);
+            _colorRangeData.push_back(dataset.findValueRange(v.index));
+            i++;
+        }
+
+        if (_colorRangeData.size() > 1) {
+            dataColumn = static_cast<int>(_colorRangeData.size() - 1);
+        }
+    }
+
+    // Set the value range and selected option again, to make sure that it's updated
     if (!_colorRangeData.empty()) {
         valueRange = _colorRangeData.back();
     }
