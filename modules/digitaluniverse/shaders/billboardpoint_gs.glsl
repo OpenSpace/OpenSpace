@@ -118,7 +118,7 @@ void main() {
       scaledUp *= correctionScale;
     }
 
-    // TODO: add checks for whther the generated plane covers too many or too few pixels
+    // TODO: add checks for wether the generated plane covers too many or too few pixels
   }
 
   // Saving one matrix multiplication:

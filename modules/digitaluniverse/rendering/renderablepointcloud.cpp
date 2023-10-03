@@ -163,6 +163,17 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseAdditiveBlendingInfo = {
+        "UseAdditiveBlending",
+        "Use Additive Blending",
+        "If true (default), the color of points rendered on top of each other is "
+        "blended additively, resulting in a brighter color where points overlap. "
+        "If false, no such blending will take place and the color of the point "
+        "will not be modified by blending. Note that this may lead to weird behaviors "
+        "when the points are rendered with transparency.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BillboardMaxPixelSizeInfo = {
         "BillboardMaxPixelSize",
         "Billboard Max Size in Pixels",
@@ -187,6 +198,9 @@ namespace {
         };
         // [[codegen::verbatim(RenderOptionInfo.description)]]
         std::optional<RenderOption> renderOption;
+
+        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
+        std::optional<bool> useAdditiveBlending;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -339,6 +353,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         glm::vec2(100.f)
     )
     , _fadeInDistanceEnabled(EnableDistanceFadeInfo, false)
+    , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _sizeSettings(dictionary)
     , _colorSettings(dictionary)
@@ -365,6 +380,9 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _renderOption = RenderOption::ViewDirection;
     }
     addProperty(_renderOption);
+
+    _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
+    addProperty(_useAdditiveBlending);
 
     if (p.unit.has_value()) {
         _unit = codegen::map<DistanceUnit>(*p.unit);
@@ -527,10 +545,17 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
                                                  const glm::dvec3& orthoUp,
                                                  float fadeInVariable)
 {
-    glDepthMask(false);
-
     glEnablei(GL_BLEND, 0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    if (_useAdditiveBlending) {
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+    else {
+        // Normal blending, with transparency
+        glDepthMask(true);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
 
     _program->activate();
 
@@ -751,7 +776,7 @@ int RenderablePointCloud::currentColorParameterIndex() const {
     const properties::OptionProperty& property =
         _colorSettings.colorMapComponent->dataColumn;
 
-    if (property.options().empty() || !_hasColorMapFile) {
+    if (!_hasColorMapFile || property.options().empty()) {
         return 0;
     }
 
@@ -762,7 +787,7 @@ int RenderablePointCloud::currentSizeParameterIndex() const {
     const properties::OptionProperty& property =
         _sizeSettings.sizeMapping.parameterOption;
 
-    if (property.options().empty() || !_hasColorMapFile) {
+    if (!_hasDatavarSize || property.options().empty()) {
         return 0;
     }
 

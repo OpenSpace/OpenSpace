@@ -123,6 +123,9 @@ protected:
     } _colorSettings;
 
     properties::StringProperty _spriteTexturePath;
+
+    properties::BoolProperty _useAdditiveBlending;
+
     properties::BoolProperty _drawElements;
     properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _fadeInDistanceEnabled;

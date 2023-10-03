@@ -42,7 +42,7 @@ Fragment getFragment() {
   }
 
   vec4 textureColor = texture(spriteTexture, texCoord);
-  if (textureColor.a == 0.0) {
+  if (textureColor.a < 0.01) {
     discard;
   }
 
@@ -55,12 +55,10 @@ Fragment getFragment() {
     fullColor.rgb *= color;
   }
 
-  float textureOpacity = dot(fullColor.rgb, vec3(1.0));
-  if (textureOpacity == 0.0) {
+  fullColor.a *= alphaValue * fadeInValue * ta;
+  if (fullColor.a < 0.01) {
     discard;
   }
-
-  fullColor.a *= alphaValue * fadeInValue * ta;
 
   Fragment frag;
   frag.color = fullColor;
