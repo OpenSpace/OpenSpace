@@ -79,9 +79,9 @@ void ScreenSpaceVideo::update() {
     }
 }
 
-void ScreenSpaceVideo::render() {
+void ScreenSpaceVideo::render(float blackoutFactor) {
     if (_videoPlayer.isInitialized()) {
-        ScreenSpaceRenderable::render();
+        ScreenSpaceRenderable::render(blackoutFactor);
     }
 }
 

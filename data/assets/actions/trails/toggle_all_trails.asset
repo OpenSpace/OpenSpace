@@ -13,7 +13,7 @@ local FadeUpTrails = {
   ]],
   Documentation = "Fade up all enabled trails in the Scene",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 local FadeDownTrails = {
@@ -31,7 +31,7 @@ local FadeDownTrails = {
   ]],
   Documentation = "Fade down all enabled trails in the Scene",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 local ToggleTrails = {
@@ -60,7 +60,7 @@ local ToggleTrails = {
   ]],
   Documentation = "Toggle fade for all trails in the Scene",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 

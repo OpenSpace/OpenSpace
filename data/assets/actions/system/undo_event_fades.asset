@@ -4,10 +4,10 @@ local UndoEventFade = {
   Command = [[
     openspace.setPropertyValue("Scene.*.Renderable.Fade", 1.0, 0.5)
   ]],
-  Documentation = [[Sets the 'Fade' value of all renderables to 1. This internval values
+  Documentation = [[Sets the 'Fade' value of all renderables to 1. This internal values
     is managed by events]],
   GuiPath = "/System/Rendering",
-  IsLocal = true
+  IsLocal = false
 }
 
 

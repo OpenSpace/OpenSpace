@@ -163,7 +163,9 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
     if (auto signature = answer.find("signature");  signature != answer.end()) {
         if (auto source = signature->find("source");  source != signature->end()) {
             if (*source != static_cast<std::string>(ApiSource)) {
-                LWARNING(fmt::format("Horizons answer from unkown source '{}'", *source));
+                LWARNING(fmt::format(
+                    "Horizons answer from unknown source '{}'", source->dump()
+                ));
             }
         }
         else {
@@ -178,7 +180,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
             if (v != CurrentMajorVersion) {
                 LWARNING(fmt::format(
                     "Unknown Horizons major version '{}' found. The currently supported "
-                    "major version is {}", *version, CurrentMajorVersion
+                    "major version is {}", version->dump(), CurrentMajorVersion
                 ));
             }
         }

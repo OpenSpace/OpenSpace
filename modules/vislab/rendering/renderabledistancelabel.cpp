@@ -155,7 +155,9 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         }
     }
     else {
-        LERROR(fmt::format("There is no scenegraph node with id {}", _nodelineId));
+        LERROR(fmt::format(
+            "There is no scenegraph node with id {}", _nodelineId.value()
+        ));
         _errorThrown = true;
     }
 }

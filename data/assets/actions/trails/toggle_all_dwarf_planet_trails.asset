@@ -9,7 +9,7 @@ local ToggleDwarfPlanetTrails = {
   ]],
   Documentation = "Toggle on/off trails for all dwarf planets in the solar system",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 

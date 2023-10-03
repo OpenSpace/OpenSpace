@@ -228,7 +228,7 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
- * Starts the setup process of the sky browers. This function calls the lua function
+ * Starts the setup process of the sky browers. This function calls the Lua function
  * 'sendOutIdsToBrowsers' in all nodes in the cluster.
  */
 [[codegen::luawrap]] void startSetup() {
@@ -246,17 +246,23 @@ std::string prunedIdentifier(std::string identifier) {
                 "openspace.skybrowser.setBorderColor('{}', {}, {}, {})",
                 id, color.r, color.g, color.b
             );
+
+            // No sync or send because this is already inside a Lua script, therefor it
+            // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::No,
+                scripting::ScriptEngine::ShouldSendToRemote::No
             );
         }
     }
     // To ensure each node in a cluster calls its own instance of the wwt application
-    // Do not send this script to the other nodes
+    // Do not send this script to the other nodes. (Note malej 2023-AUG-23: Due to this
+    // already being inside a Lua function that have already been synced out)
     global::scriptEngine->queueScript(
         "openspace.skybrowser.sendOutIdsToBrowsers()",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 }
 
@@ -599,25 +605,31 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
         "}"
     "}";
 
+    // No sync or send because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + browser + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + target + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     global::scriptEngine->queueScript(
         "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
         + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     global::scriptEngine->queueScript(
         "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 }
 
@@ -635,15 +647,19 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
 
         module->removeTargetBrowserPair(identifier);
 
-        // Remove from engine
+        // Remove from engine.
+        // No sync or send because this is already inside a Lua script, therefor it has
+        // already been synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.removeScreenSpaceRenderable('" + browser + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         global::scriptEngine->queueScript(
             "openspace.removeSceneGraphNode('" + target + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
 }

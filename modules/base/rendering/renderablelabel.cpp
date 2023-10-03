@@ -412,10 +412,8 @@ void RenderableLabel::render(const RenderData& data, RendererTasks&) {
     }
 
     glm::dmat4 modelMatrix(1.0);
-    glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
-
-    glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
+    const glm::dmat4 modelViewProjectionTransform =
+        calcModelViewProjectionTransform(data, modelMatrix);
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -432,7 +430,7 @@ void RenderableLabel::render(const RenderData& data, RendererTasks&) {
     }
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
-    renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
+    renderLabels(data, modelViewProjectionTransform, orthoRight, orthoUp, fadeInVariable);
 
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
