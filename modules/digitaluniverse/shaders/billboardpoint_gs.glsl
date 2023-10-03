@@ -34,7 +34,6 @@ layout(triangle_strip, max_vertices = 4) out;
 flat out vec4 gs_colorMap;
 out vec2 texCoord;
 flat out float vs_screenSpaceDepth;
-out float ta;
 
 // General settings
 uniform float scaleExponent;
@@ -68,7 +67,6 @@ const int RenderOptionCameraViewDirection = 0;
 const int RenderOptionCameraPositionNormal = 1;
 
 void main() {
-  ta = 1.0;
   vec4 pos = gl_in[0].gl_Position;
   gs_colorMap = colorMap[0];
 

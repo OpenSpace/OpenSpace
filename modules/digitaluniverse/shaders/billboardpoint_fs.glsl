@@ -27,7 +27,6 @@
 flat in vec4 gs_colorMap;
 flat in float vs_screenSpaceDepth;
 in vec2 texCoord;
-in float ta;
 
 uniform float alphaValue;
 uniform vec3 color;
@@ -37,7 +36,7 @@ uniform float fadeInValue;
 
 
 Fragment getFragment() {
-  if (gs_colorMap.a == 0.0 || ta == 0.0 || fadeInValue == 0.0 || alphaValue == 0.0) {
+  if (gs_colorMap.a == 0.0 || fadeInValue == 0.0 || alphaValue == 0.0) {
     discard;
   }
 
@@ -55,7 +54,7 @@ Fragment getFragment() {
     fullColor.rgb *= color;
   }
 
-  fullColor.a *= alphaValue * fadeInValue * ta;
+  fullColor.a *= alphaValue * fadeInValue;
   if (fullColor.a < 0.01) {
     discard;
   }
