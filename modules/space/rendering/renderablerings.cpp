@@ -184,16 +184,9 @@ void RenderableRings::deinitializeGL() {
 void RenderableRings::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-
     _shader->setUniform(
         _uniformCache.modelViewProjection,
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+        glm::mat4(calcModelViewProjectionTransform(data))
     );
     _shader->setUniform(_uniformCache.textureOffset, _offset);
     _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);

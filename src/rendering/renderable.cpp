@@ -337,4 +337,51 @@ bool Renderable::hasOverrideRenderBin() const noexcept {
     return _hasOverrideRenderBin;
 }
 
+glm::dmat4 Renderable::calcModelTransform(const RenderData& data,
+                                          const AlternativeTransform& altTransform) const
+{
+    glm::dvec3 translation =
+        altTransform.translation.value_or(data.modelTransform.translation);
+    glm::dmat3 rotation = altTransform.rotation.value_or(data.modelTransform.rotation);
+    glm::dvec3 scale = altTransform.scale.value_or(data.modelTransform.scale);
+
+    return glm::translate(glm::dmat4(1.0), translation) *
+        glm::dmat4(rotation) *
+        glm::scale(glm::dmat4(1.0), scale);
+}
+
+glm::dmat4 Renderable::calcModelViewTransform(const RenderData& data,
+                                           std::optional<glm::dmat4> modelTransform) const
+{
+    glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    return data.camera.combinedViewMatrix() * modelMatrix;
+}
+
+glm::dmat4 Renderable::calcModelViewProjectionTransform(const RenderData& data,
+                                           std::optional<glm::dmat4> modelTransform) const
+{
+    glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
+    glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+    return glm::dmat4(projectionMatrix * viewMatrix * modelMatrix);
+}
+
+std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
+                                                                   const RenderData& data,
+                                      const AlternativeTransform& altModelTransform) const
+{
+    glm::dmat4 modelTransform = calcModelTransform(data, altModelTransform);
+    glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
+    glm::dmat4 modelViewProjectionTransform = calcModelViewProjectionTransform(
+        data,
+        modelTransform
+    );
+
+    return {
+        modelTransform,
+        modelViewTransform,
+        modelViewProjectionTransform
+    };
+}
+
 }  // namespace openspace

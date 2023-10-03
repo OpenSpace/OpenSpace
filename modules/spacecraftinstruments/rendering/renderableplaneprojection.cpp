@@ -125,10 +125,14 @@ void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(_stateMatrix);
-    glm::mat4 mvp = data.camera.projectionMatrix() *
-                    glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
 
-    _shader->setUniform("modelViewProjectionTransform", mvp);
+    const glm::dmat4 ModelViewProjectionTransform =
+        calcModelViewProjectionTransform(data, modelTransform);
+
+    _shader->setUniform(
+        "modelViewProjectionTransform",
+        glm::mat4(ModelViewProjectionTransform)
+    );
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();

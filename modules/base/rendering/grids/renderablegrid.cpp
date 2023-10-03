@@ -245,12 +245,9 @@ void RenderableGrid::deinitializeGL() {
 void RenderableGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    const glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::dmat4 modelTransform = calcModelTransform(data);
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
 
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelMatrix;
     const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
 
     const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
@@ -260,7 +257,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     glm::vec3 right = glm::cross(viewDirection, lookup);
     const glm::vec3 up = glm::cross(right, viewDirection);
 
-    const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+    const glm::mat4 worldToModelTransform = glm::inverse(modelTransform);
     glm::vec3 orthoRight = glm::normalize(
         glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
     );
