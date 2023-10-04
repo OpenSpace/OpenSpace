@@ -167,6 +167,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseCacheInfo = {
+        "UseCache",
+        "Enable model caching",
+        "Enable cache for the Model",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
@@ -289,6 +296,9 @@ namespace {
 
         // The path to a fragment shader program to use instead of the default shader.
         std::optional<std::filesystem::path> fragmentShader;
+
+        // [[codegen::verbatim(UseCacheInfo.description)]]
+        std::optional<bool> useCache;
     };
 #include "renderablemodel_codegen.cpp"
 } // namespace
@@ -323,6 +333,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _renderWireframe(RenderWireframeInfo, false)
+    , _useCache(UseCacheInfo, true)
     , _blendingFuncOption(
         BlendingOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -441,6 +452,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
+    _useCache = p.useCache.value_or(_useCache);
+
     addProperty(_enableAnimation);
     addPropertySubOwner(_lightSourcePropertyOwner);
     addProperty(_ambientIntensity);
@@ -453,6 +466,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_modelTransform);
     addProperty(_pivot);
     addProperty(_rotationVec);
+    addProperty(_useCache);
 
     addProperty(_modelScale);
     _modelScale.setExponent(20.f);
@@ -537,7 +551,8 @@ void RenderableModel::initializeGL() {
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         _file,
         ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped),
+        _useCache
     );
     _modelHasAnimation = _geometry->hasAnimation();
 
