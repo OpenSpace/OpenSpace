@@ -104,6 +104,8 @@ private:
     properties::OptionProperty _blendingFuncOption;
     properties::BoolProperty _renderWireframe;
 
+    properties::BoolProperty _useCache;
+
     std::string _vertexShaderPath;
     std::string _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
