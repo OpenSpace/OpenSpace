@@ -548,10 +548,13 @@ void PlanetaryTrailTileProvider::update() {
                 if (_start + feature._time > now) {
                     break;
                 }
-                double opacity = 1.0 - glm::smoothstep(
-                    static_cast<double>(_start + feature._time),
-                    static_cast<double>(_start + feature._time + _cutoff),
-                    now);
+                double opacity = 1.0;
+                if (_cutoff > 0) {
+                    opacity -= glm::smoothstep(
+                        static_cast<double>(_start + feature._time),
+                        static_cast<double>(_start + feature._time + _cutoff),
+                        now);
+                }
                 points.push_back({ feature._lat, feature._lon, opacity });
                 last = feature;
                 index++;
