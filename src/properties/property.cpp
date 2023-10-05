@@ -54,9 +54,9 @@ uint64_t Property::Identifier = 0;
 #endif
 
 Property::Property(PropertyInfo info)
-    : _identifier(std::move(info.identifier))
-    , _guiName(std::move(info.guiName))
-    , _description(std::move(info.description))
+    : _identifier(info.identifier)
+    , _guiName(info.guiName)
+    , _description(info.description)
 #ifdef _DEBUG
     , _id(Identifier++)
 #endif

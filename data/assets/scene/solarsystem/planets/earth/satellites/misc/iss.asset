@@ -130,7 +130,7 @@ local FocusIss = {
   ]],
   Documentation = "Refocuses the camera on the ISS",
   GuiPath = "/Solar System/Earth",
-  isLocal = false
+  IsLocal = false
 }
 
 

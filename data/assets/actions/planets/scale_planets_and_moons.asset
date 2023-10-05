@@ -20,7 +20,7 @@ local function scaleAction(identifier, scale, name, speed)
     Command = scaleCommand(identifier, scale, speed),
     Documentation = "Scales " .. name .. " to " .. scale .. "x",
     GuiPath = "/Solar System/Scale",
-    IsLocal = true
+    IsLocal = false
   }
 end
 
@@ -45,7 +45,7 @@ end
 ]],
     GuiPath = "/Solar System/Scale",
     Documentation = "Toggle the scale of " .. name,
-    IsLocal = true
+    IsLocal = false
   }
 end
 

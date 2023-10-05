@@ -186,7 +186,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
                 "Trying to use relative offsets for start node '{}' that has no "
                 "bounding sphere. This will result in no offset. Use direct "
                 "values by setting UseRelativeOffsets to false",
-                parent()->identifier(), _start
+                parent()->identifier(), _start.value()
             ));
         }
     });
@@ -204,7 +204,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
                 "Trying to use relative offsets for end node '{}' that has no "
                 "bounding sphere. This will result in no offset. Use direct "
                 "values by setting UseRelativeOffsets to false",
-                parent()->identifier(), _end
+                parent()->identifier(), _end.value()
             ));
         }
      });
@@ -386,13 +386,9 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
         );
     }
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-        modelTransform * anchorTranslation;
+    const glm::dmat4 modelTransform = calcModelTransform(data);
+    const glm::dmat4 modelViewTransform =
+        calcModelViewTransform(data, modelTransform) * anchorTranslation;
 
     _program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());

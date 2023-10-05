@@ -782,7 +782,8 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 
         global::scriptEngine->queueScript(
             ToggleRotationFrictionScript,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
         return true;
     }
@@ -794,7 +795,8 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 
         global::scriptEngine->queueScript(
             ToggleZoomFrictionScript,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
         return true;
     }
@@ -806,7 +808,8 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 
         global::scriptEngine->queueScript(
             ToggleRollFrictionScript,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
         return true;
     }

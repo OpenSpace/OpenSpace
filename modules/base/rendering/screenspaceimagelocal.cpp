@@ -85,7 +85,9 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
         if (!std::filesystem::is_regular_file(absPath(_texturePath))) {
             LWARNINGC(
                 "ScreenSpaceImageLocal",
-                fmt::format("Image {} did not exist for {}", _texturePath, _identifier)
+                fmt::format(
+                    "Image {} did not exist for {}", _texturePath.value(), _identifier
+                )
             );
         }
         else {

@@ -172,9 +172,12 @@ NSArray* focusIdentifiers;
     }
 
     - (void)pauseResumeButtonAction:(id)sender {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.togglePause();",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         NSButton* button = static_cast<NSButton*>(sender);
@@ -197,7 +200,8 @@ NSArray* focusIdentifiers;
         );
         global::scriptEngine->queueScript(
             str,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 
@@ -211,7 +215,8 @@ NSArray* focusIdentifiers;
              openspace.setPropertyValueSingle('RenderEngine.ShowLog', not isEnabled);\
              openspace.setPropertyValueSingle('RenderEngine.ShowVersion', not isEnabled);\
              openspace.setPropertyValueSingle('RenderEngine.ShowCamera', not isEnabled)",
-            scripting::ScriptEngine::RemoteScripting::No
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
 
@@ -220,8 +225,9 @@ NSArray* focusIdentifiers;
         (void)sender;
         global::scriptEngine->queueScript(
             "local isEnabled = openspace.propertyValue('Modules.CefWebGui.Visible');\
-            openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', not isEnabled);",
-            scripting::ScriptEngine::RemoteScripting::No
+             openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', not isEnabled);",
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
 @end

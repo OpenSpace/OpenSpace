@@ -28,7 +28,7 @@ local SaturnMinorMoonsOn = {
   ]],
   Documentation = "Turn ON Saturn's minor moons and their trails",
   GuiPath = "/Solar System/Saturn",
-  IsLocal = true
+  IsLocal = false
 }
 
 local SaturnMinorMoonsOff = {
@@ -63,7 +63,7 @@ local SaturnMinorMoonsOff = {
   ]],
   Documentation = "Turn OFF Saturn's minor moons and their trails",
   GuiPath = "/Solar System/Saturn",
-  IsLocal = true
+  IsLocal = false
 }
 
 

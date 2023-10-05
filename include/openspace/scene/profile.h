@@ -101,7 +101,7 @@ public:
             Relative
         };
 
-        Type type;
+        Type type = Type::Relative;
         std::string value;
         bool startPaused = false;
     };
@@ -129,8 +129,8 @@ public:
         static constexpr std::string_view Type = "goToGeo";
 
         std::string anchor;
-        double latitude;
-        double longitude;
+        double latitude = 0.0;
+        double longitude = 0.0;
         std::optional<double> altitude;
     };
 

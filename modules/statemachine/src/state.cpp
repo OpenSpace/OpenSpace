@@ -62,14 +62,16 @@ State::State(const ghoul::Dictionary& dictionary) {
 void State::enter() const {
     global::scriptEngine->queueScript(
         _enter,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
 void State::exit() const {
     global::scriptEngine->queueScript(
         _exit,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

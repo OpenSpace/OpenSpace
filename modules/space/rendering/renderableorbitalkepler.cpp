@@ -271,15 +271,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.opacity, opacity());
     _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    _programObject->setUniform(
-        _uniformCache.modelView,
-        data.camera.combinedViewMatrix() * modelTransform
-    );
+    _programObject->setUniform(_uniformCache.modelView, calcModelViewTransform(data));
 
     // Because we want the property to work similar to the planet trails
     const float fade = pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.f);
@@ -313,7 +305,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     if (_startRenderIdx >= _numObjects) {
         throw ghoul::RuntimeError(fmt::format(
-            "Start index {} out of range [0, {}]", _startRenderIdx, _numObjects
+            "Start index {} out of range [0, {}]", _startRenderIdx.value(), _numObjects
         ));
     }
 
