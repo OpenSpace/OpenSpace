@@ -1,0 +1,12 @@
+asset.require("./colorlayers/venus_texture", false)
+
+
+
+asset.meta = {
+  Name = "Base Venus Layers",
+  Version = "1.1",
+  Description = "Base Venus layers are: Venus Magellan Mosaic and Venus Magellan DEM",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
