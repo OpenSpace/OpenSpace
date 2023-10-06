@@ -32,15 +32,30 @@ uniform float alphaValue;
 uniform vec3 color;
 
 uniform sampler2D spriteTexture;
+
+uniform bool useColorMap;
 uniform sampler1D colorMapTexture;
 uniform float cmapRangeMin;
 uniform float cmapRangeMax;
+uniform bool hideOutsideRange;
 
-uniform bool useColorMap;
 uniform float fadeInValue;
 
+// TODO: make configurable
+bool useNanColor = true;
+vec4 nanColor = vec4(0.5);
+
 vec4 sampleColorMap(float dataValue) {
-    float t = (gs_colorParameter - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
+    if (useNanColor && isnan(dataValue)) {
+        return nanColor;
+    }
+
+    bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
+    if (hideOutsideRange && isOutside) {
+        discard;
+    }
+
+    float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
     t = clamp(t, 0.0, 1.0);
     return texture(colorMapTexture, t);
 }

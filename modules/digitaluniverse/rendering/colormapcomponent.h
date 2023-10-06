@@ -73,14 +73,9 @@ public:
     properties::Vec2Property valueRange;
     properties::TriggerProperty setRangeFromData;
 
-    struct OutlierSettings : public properties::PropertyOwner {
-        OutlierSettings();
-
-        properties::BoolProperty hide;
-
-        properties::BoolProperty useMinColor;
-        properties::Vec4Property outsideMinColor;
-    } outliers;
+    properties::BoolProperty hideOutsideRange;
+    properties::BoolProperty useNanColor;
+    properties::Vec4Property nanColor;
 
 private:
     // One item per color parameter option

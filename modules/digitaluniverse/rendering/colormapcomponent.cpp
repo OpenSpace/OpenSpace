@@ -71,28 +71,28 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HideOutliersInfo = {
-        "Hide",
-        "Hide Outliers",
+    constexpr openspace::properties::Property::PropertyInfo HideOutsideInfo = {
+        "HideValuesOutsideRange",
+        "Hide Values Outside Range",
         "If true, points with values outside the provided range for the coloring will be "
         "rendered as transparent, i.e. not shown. Otherwise, the values will be clamped "
         "to use the color at the max VS min limit of the color map, respectively.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseMinOutlierColorInfo = {
-        "UseMinColor",
-        "Use Outside Min Color",
-        "If true, use a separate color for items with values smaller than the minimum "
-        "value of the specified value range",
+    constexpr openspace::properties::Property::PropertyInfo UseNoDataColorInfo = {
+        "ShowMissingData",
+        "Show Missing Data",
+        "If true, use a separate color (see NoDataColor) for items with values "
+        "corresponding to missing data values",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MinOutlierColorInfo = {
-        "OutsideMinColor",
-        "Outside Min Color",
-        "The color to use for items with values smaller than the minimum value of the "
-        "specified value range, if enabled",
+    constexpr openspace::properties::Property::PropertyInfo NoDataColorInfo = {
+        "NoDataColor",
+        "No Data Color",
+        "The color to use for items with values corresponding to missing data values, "
+        "if enabled",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -114,19 +114,14 @@ namespace {
         };
         std::optional<std::vector<ColorMapParameter>> parameterOptions;
 
-        struct Outliers {
-            // [[codegen::verbatim(HideOutliersInfo.description)]]
-            std::optional<bool> hide;
+        // [[codegen::verbatim(HideOutsideInfo.description)]]
+        std::optional<bool> hideValuesOutsideRange;
 
-            // [[codegen::verbatim(UseMinOutlierColorInfo.description)]]
-            std::optional<bool> useMinColor;
+        // [[codegen::verbatim(UseNoDataColorInfo.description)]]
+        std::optional<bool> showMissingData;
 
-            // [[codegen::verbatim(MinOutlierColorInfo.description)]]
-            std::optional<glm::vec4> outsideMinColor [[codegen::color()]];
-        };
-        // A table with details about how to handle values outside of the
-        // specified value range
-        std::optional<Outliers> outliers;
+        // [[codegen::verbatim(NoDataColorInfo.description)]]
+        std::optional<glm::vec4> noDataColor [[codegen::color()]];
     };
 #include "colormapcomponent_codegen.cpp"
 }  // namespace
@@ -137,25 +132,6 @@ documentation::Documentation ColorMapComponent::Documentation() {
     return codegen::doc<Parameters>("digitaluniverse_colormapcomponent");
 }
 
-ColorMapComponent::OutlierSettings::OutlierSettings()
-    : properties::PropertyOwner({ "Outliers", "Outliers", "" })
-    , hide(HideOutliersInfo, false)
-    , useMinColor(UseMinOutlierColorInfo, false)
-    , outsideMinColor(
-        MinOutlierColorInfo,
-        glm::vec4(0.5f, 0.5f, 0.5f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-{
-    // @TODO (2023-10-02, emmbr) Are all these settings really needed? My thought is to
-    // somehow also include missing vlaues here
-    addProperty(hide);
-    addProperty(useMinColor);
-    outsideMinColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(outsideMinColor);
-}
-
 ColorMapComponent::ColorMapComponent()
     : properties::PropertyOwner({ "ColorMap", "Color Map", "" })
     , enabled(EnabledInfo, true)
@@ -163,6 +139,14 @@ ColorMapComponent::ColorMapComponent()
     , colorMapFile(FileInfo)
     , valueRange(ColorRangeInfo, glm::vec2(0.f))
     , setRangeFromData(SetRangeFromDataInfo)
+    , hideOutsideRange(HideOutsideInfo, false)
+    , useNanColor(UseNoDataColorInfo, false)
+    , nanColor(
+        NoDataColorInfo,
+        glm::vec4(0.5f, 0.5f, 0.5f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
 {
     addProperty(enabled);
     addProperty(dataColumn);
@@ -173,7 +157,10 @@ ColorMapComponent::ColorMapComponent()
     colorMapFile.setReadOnly(true); // Currently this can't be changed
     addProperty(colorMapFile);
 
-    addPropertySubOwner(outliers);
+    addProperty(hideOutsideRange);
+    addProperty(useNanColor);
+    nanColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(nanColor);
 }
 
 ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
@@ -205,12 +192,9 @@ ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
     // @TODO: read valueRange from asset if specified. How to avoid overriding it
     // in initialize?
 
-    if (p.outliers.has_value()) {
-        Parameters::Outliers o = *p.outliers;
-        outliers.hide = o.hide.value_or(outliers.hide);
-        outliers.useMinColor = o.useMinColor.value_or(outliers.useMinColor);
-        outliers.outsideMinColor = o.outsideMinColor.value_or(outliers.outsideMinColor);
-    }
+    hideOutsideRange = p.hideValuesOutsideRange.value_or(hideOutsideRange);
+    useNanColor = p.showMissingData.value_or(useNanColor);
+    nanColor = p.noDataColor.value_or(nanColor);
 
     if (p.file.has_value()) {
         colorMapFile = absPath(*p.file).string();
@@ -302,16 +286,15 @@ glm::vec4 ColorMapComponent::colorFromColorMap(float valueToColorFrom) const {
     bool isOutsideMin = valueToColorFrom < cmin;
     bool isOutsideMax = valueToColorFrom > cmax;
 
-    if (outliers.hide && (isOutsideMin || isOutsideMax)) {
+    if (hideOutsideRange && (isOutsideMin || isOutsideMax)) {
         return glm::vec4(0.f);
     }
 
-    if (outliers.useMinColor && isOutsideMin) {
-        return outliers.outsideMinColor;
+    if (useNanColor && std::isnan(valueToColorFrom)) {
+        return nanColor;
     }
 
-    // Find color value using Nearest neighbor
-
+    // Find color value using Nearest neighbor (same as texture)
     float normalization = (cmax != cmin) ? (nColors) / (cmax - cmin) : 0;
     int colorIndex = static_cast<int>((valueToColorFrom - cmin) * normalization);
 

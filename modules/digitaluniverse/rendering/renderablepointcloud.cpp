@@ -54,12 +54,12 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 21> UniformNames = {
+    constexpr std::array<const char*, 22> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "maxBillboardSize", "color", "alphaValue", "scaleExponent",
         "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
         "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
-        "enablePixelSizeControl", "hasDvarScaling"
+        "hideOutsideRange", "enablePixelSizeControl", "hasDvarScaling"
     };
 
     enum RenderOption {
@@ -540,10 +540,10 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
 }
 
 void RenderablePointCloud::renderBillboards(const RenderData& data,
-                                                 const glm::dmat4& modelMatrix,
-                                                 const glm::dvec3& orthoRight,
-                                                 const glm::dvec3& orthoUp,
-                                                 float fadeInVariable)
+                                            const glm::dmat4& modelMatrix,
+                                            const glm::dvec3& orthoRight,
+                                            const glm::dvec3& orthoUp,
+                                            float fadeInVariable)
 {
     glEnablei(GL_BLEND, 0);
 
@@ -610,6 +610,12 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
         const glm::vec2 range = _colorSettings.colorMapComponent->valueRange;
         _program->setUniform(_uniformCache.cmapRangeMin, range.x);
         _program->setUniform(_uniformCache.cmapRangeMax, range.y);
+        _program->setUniform(
+            _uniformCache.hideOutsideRange,
+            _colorSettings.colorMapComponent->hideOutsideRange
+        );
+
+        // @TODO: NanColors
     }
 
     glBindVertexArray(_vao);
