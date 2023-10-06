@@ -34,6 +34,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
 
@@ -48,12 +49,19 @@ public:
     explicit ColorMapComponent(const ghoul::Dictionary& dictionary);
     ~ColorMapComponent() override = default;
 
+    ghoul::opengl::Texture* texture() const;
+
     /**
      * Initialize the color map information (ranges, etc.) based on the input dataset
      *
      * \param dataset the *loaded* input dataset
      */
     void initialize(const speck::Dataset& dataset);
+
+    /**
+     * Initialize a 1D texture based on the entries in the color map file
+     */
+    void initializeTexture();
 
     static documentation::Documentation Documentation();
 
@@ -77,6 +85,8 @@ public:
 private:
     // One item per color parameter option
     std::vector<glm::vec2> _colorRangeData;
+
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     speck::ColorMap _colorMap;
 };

@@ -24,19 +24,29 @@
 
 #include "fragment.glsl"
 
-flat in vec4 gs_colorMap;
+flat in float gs_colorParameter;
 flat in float vs_screenSpaceDepth;
 in vec2 texCoord;
 
 uniform float alphaValue;
 uniform vec3 color;
+
 uniform sampler2D spriteTexture;
+uniform sampler1D colorMapTexture;
+uniform float cmapRangeMin;
+uniform float cmapRangeMax;
+
 uniform bool useColorMap;
 uniform float fadeInValue;
 
+vec4 sampleColorMap(float dataValue) {
+    float t = (gs_colorParameter - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
+    t = clamp(t, 0.0, 1.0);
+    return texture(colorMapTexture, t);
+}
 
 Fragment getFragment() {
-  if (gs_colorMap.a == 0.0 || fadeInValue == 0.0 || alphaValue == 0.0) {
+  if (fadeInValue == 0.0 || alphaValue == 0.0) {
     discard;
   }
 
@@ -48,7 +58,7 @@ Fragment getFragment() {
   vec4 fullColor = textureColor;
 
   if (useColorMap) {
-    fullColor *= gs_colorMap;
+    fullColor *= sampleColorMap(gs_colorParameter);
   }
   else {
     fullColor.rgb *= color;

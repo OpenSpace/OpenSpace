@@ -137,8 +137,8 @@ protected:
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
         maxBillboardSize, color, alphaValue, scaleExponent, scaleFactor, up, right,
-        fadeInValue, screenSize, spriteTexture, useColormap, enablePixelSizeControl,
-        hasDvarScaling
+        fadeInValue, screenSize, spriteTexture, useColormap, colorMapTexture,
+        cmapRangeMin, cmapRangeMax, enablePixelSizeControl, hasDvarScaling
     ) _uniformCache;
 
     std::string _speckFile;

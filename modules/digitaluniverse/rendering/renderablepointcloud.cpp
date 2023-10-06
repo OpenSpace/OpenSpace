@@ -54,11 +54,12 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 18> UniformNames = {
+    constexpr std::array<const char*, 21> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
-        "renderOption", "maxBillboardSize", "color", "alphaValue",
-        "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "screenSize",
-        "spriteTexture", "useColorMap", "enablePixelSizeControl", "hasDvarScaling"
+        "renderOption", "maxBillboardSize", "color", "alphaValue", "scaleExponent",
+        "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
+        "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
+        "enablePixelSizeControl", "hasDvarScaling"
     };
 
     enum RenderOption {
@@ -421,12 +422,10 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         addProperty(_fadeInDistanceEnabled);
     }
 
-    auto dirtyDataFunc = [this]() {
-        _dataIsDirty = true;
-    };
-
     if (p.sizeSettings.has_value() && (*p.sizeSettings).sizeMapping.has_value()) {
-        _sizeSettings.sizeMapping.parameterOption.onChange(dirtyDataFunc);
+        _sizeSettings.sizeMapping.parameterOption.onChange(
+            [this]() { _dataIsDirty = true; }
+        );
         _hasDatavarSize = true;
     }
 
@@ -436,12 +435,9 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     if (p.coloring.has_value() && (*p.coloring).colorMap.has_value()) {
         _hasColorMapFile = true;
 
-        // @TODO Gotta be able to do this in a nicer way
-        _colorSettings.colorMapComponent->outliers.hide.onChange(dirtyDataFunc);
-        _colorSettings.colorMapComponent->outliers.useMinColor.onChange(dirtyDataFunc);
-        _colorSettings.colorMapComponent->outliers.outsideMinColor.onChange(dirtyDataFunc);
-        _colorSettings.colorMapComponent->valueRange.onChange(dirtyDataFunc);
-        _colorSettings.colorMapComponent->dataColumn.onChange(dirtyDataFunc);
+        _colorSettings.colorMapComponent->dataColumn.onChange(
+            [this]() { _dataIsDirty = true; }
+        );
 
         _colorSettings.colorMapComponent->setRangeFromData.onChange([this]() {
             int parameterIndex = currentColorParameterIndex();
@@ -497,6 +493,10 @@ void RenderablePointCloud::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+
+    if (_hasColorMapFile) {
+        _colorSettings.colorMapComponent->initializeTexture();
+    }
 }
 
 void RenderablePointCloud::deinitializeGL() {
@@ -576,31 +576,41 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
     );
 
-    _program->setUniform(_uniformCache.maxBillboardSize, _sizeSettings.billboardMaxPixelSize);
-    _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
-    _program->setUniform(_uniformCache.alphaValue, opacity());
-    _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
-    _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
 
+    _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
+    _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
     _program->setUniform(_uniformCache.enablePixelSizeControl, _sizeSettings.pixelSizeControl);
-
+    _program->setUniform(_uniformCache.maxBillboardSize, _sizeSettings.billboardMaxPixelSize);
     _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
-    ghoul::opengl::TextureUnit textureUnit;
-    textureUnit.activate();
+    ghoul::opengl::TextureUnit spriteTextureUnit;
+    spriteTextureUnit.activate();
     bindTextureForRendering();
-    _program->setUniform(_uniformCache.spriteTexture, textureUnit);
-    _program->setUniform(
-        _uniformCache.useColormap,
-        _hasColorMapFile && _colorSettings.colorMapComponent->enabled
-    );
+    _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
+
+    _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
+
+    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapComponent->enabled;
+    _program->setUniform(_uniformCache.useColormap, useColorMap);
+    if (useColorMap && _colorSettings.colorMapComponent->texture()) {
+        ghoul::opengl::TextureUnit colorMapTextureUnit;
+        colorMapTextureUnit.activate();
+        _colorSettings.colorMapComponent->texture()->bind();
+
+        _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
+
+        const glm::vec2 range = _colorSettings.colorMapComponent->valueRange;
+        _program->setUniform(_uniformCache.cmapRangeMin, range.x);
+        _program->setUniform(_uniformCache.cmapRangeMax, range.y);
+    }
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
@@ -660,7 +670,7 @@ void RenderablePointCloud::update(const UpdateData&) {
 
 int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 4; // position
-    n += _hasColorMapFile ? 4: 0;
+    n += _hasColorMapFile ? 1: 0;
     n += _hasDatavarSize ? 1: 0;
     return n;
 }
@@ -707,24 +717,24 @@ void RenderablePointCloud::updateBufferData() {
     attributeOffset += 4;
 
     if (_hasColorMapFile) {
-        GLint colorMapAttrib = _program->attributeLocation("in_colormap");
-        glEnableVertexAttribArray(colorMapAttrib);
+        GLint colorParamAttrib = _program->attributeLocation("in_colorParameter");
+        glEnableVertexAttribArray(colorParamAttrib);
         glVertexAttribPointer(
-            colorMapAttrib,
-            4,
+            colorParamAttrib,
+            1,
             GL_FLOAT,
             GL_FALSE,
             attibutesPerPoint * sizeof(float),
             reinterpret_cast<void*>(attributeOffset * sizeof(float))
         );
-        attributeOffset += 4;
+        attributeOffset += 1;
     }
 
     if (_hasDatavarSize) {
-        GLint dvarScalingAttrib = _program->attributeLocation("in_dvarScaling");
-        glEnableVertexAttribArray(dvarScalingAttrib);
+        GLint scalingAttrib = _program->attributeLocation("in_scalingParameter");
+        glEnableVertexAttribArray(scalingAttrib);
         glVertexAttribPointer(
-            dvarScalingAttrib,
+            scalingAttrib,
             1,
             GL_FLOAT,
             GL_FALSE,
@@ -829,17 +839,7 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         // Colors
         if (_hasColorMapFile) {
             biggestCoord = std::max(biggestCoord, glm::compMax(position));
-            // Note: if exact colormap option is not selected, the first color and the
-            // last color in the colormap file are the outliers colors.
-            float valueToColorFrom = e.data[colorParamIndex];
-
-            glm::vec4 c = _colorSettings.colorMapComponent->colorFromColorMap(
-                valueToColorFrom
-            );
-            result.push_back(c.r);
-            result.push_back(c.g);
-            result.push_back(c.b);
-            result.push_back(c.a);
+            result.push_back(e.data[colorParamIndex]);
         }
 
         // Size data

@@ -27,11 +27,11 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
-flat in vec4 colorMap[];
-flat in float dvarScaling[];
+flat in float colorParameter[];
+flat in float scalingParameter[];
 
 layout(triangle_strip, max_vertices = 4) out;
-flat out vec4 gs_colorMap;
+flat out float gs_colorParameter;
 out vec2 texCoord;
 flat out float vs_screenSpaceDepth;
 
@@ -68,13 +68,13 @@ const int RenderOptionCameraPositionNormal = 1;
 
 void main() {
   vec4 pos = gl_in[0].gl_Position;
-  gs_colorMap = colorMap[0];
+  gs_colorParameter = colorParameter[0];
 
   dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
 
   float scaleMultiply = exp(scaleExponent);
   if (hasDvarScaling) {
-    scaleMultiply *= dvarScaling[0];
+    scaleMultiply *= scalingParameter[0];
   }
 
   vec3 scaledRight = vec3(0.0);

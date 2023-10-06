@@ -217,6 +217,10 @@ ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
     }
 }
 
+ghoul::opengl::Texture* ColorMapComponent::texture() const {
+    return _texture.get();
+}
+
 void ColorMapComponent::initialize(const speck::Dataset& dataset) {
     _colorMap = speck::color::loadFileWithCache(colorMapFile.value());
 
@@ -250,6 +254,42 @@ void ColorMapComponent::initialize(const speck::Dataset& dataset) {
     if (!_colorRangeData.empty()) {
         valueRange = _colorRangeData.back();
     }
+}
+
+void ColorMapComponent::initializeTexture() {
+    if (_colorMap.entries.empty()) {
+        return;
+    }
+
+    unsigned int width = static_cast<unsigned int>(_colorMap.entries.size());
+    unsigned int height = 1;
+    unsigned int size = width * height;
+    std::vector<GLubyte> img;
+    img.reserve(size * 4);
+
+    for (const glm::vec4& c : _colorMap.entries) {
+        img.push_back(static_cast<GLubyte>(255 * c.r));
+        img.push_back(static_cast<GLubyte>(255 * c.g));
+        img.push_back(static_cast<GLubyte>(255 * c.b));
+        img.push_back(static_cast<GLubyte>(255 * c.a));
+    }
+
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width, height, 1),
+        GL_TEXTURE_1D,
+        ghoul::opengl::Texture::Format::RGBA
+
+    );
+
+    // TODO: update this for linear mapping?
+    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    _texture->setPixelData(
+        reinterpret_cast<char*>(img.data()),
+        ghoul::opengl::Texture::TakeOwnership::No
+    );
+
+    _texture->uploadTexture();
 }
 
 glm::vec4 ColorMapComponent::colorFromColorMap(float valueToColorFrom) const {
