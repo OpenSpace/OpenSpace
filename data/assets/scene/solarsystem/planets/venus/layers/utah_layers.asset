@@ -1,6 +1,6 @@
 asset.require("./base_layers", false)
 asset.require("./colorlayers/magellan_mosaic_utah", false)
-asset.require("./colorlayers/clouds_magellan_combo", asset.enabled)
+asset.require("./colorlayers/clouds_magellan_combo_utah", asset.enabled)
 
 asset.require("./heightlayers/magellan_utah", asset.enabled)
 
