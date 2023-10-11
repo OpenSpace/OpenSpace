@@ -28,7 +28,6 @@ set(HEADER_FILES
   horizonsfile.h
   kepler.h
   labelscomponent.h
-  speckloader.h
   rendering/renderableconstellationsbase.h
   rendering/renderableconstellationbounds.h
   rendering/renderableconstellationlines.h
@@ -52,7 +51,6 @@ set(SOURCE_FILES
   kepler.cpp
   spacemodule_lua.inl
   labelscomponent.cpp
-  speckloader.cpp
   rendering/renderableconstellationsbase.cpp
   rendering/renderableconstellationbounds.cpp
   rendering/renderableconstellationlines.cpp

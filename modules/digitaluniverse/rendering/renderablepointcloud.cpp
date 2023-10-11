@@ -462,7 +462,7 @@ void RenderablePointCloud::initialize() {
     ZoneScoped;
 
     if (_hasSpeckFile) {
-        _dataset = speck::data::loadFileWithCache(_speckFile);
+        _dataset = dataloader::data::loadFileWithCache(_speckFile);
 
         if (_hasColorMapFile) {
             _colorSettings.colorMapComponent->initialize(_dataset);
@@ -829,7 +829,7 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     double maxRadius = 0.0;
     double biggestCoord = -1.0;
 
-    for (const speck::Dataset::Entry& e : _dataset.entries) {
+    for (const dataloader::Dataset::Entry& e : _dataset.entries) {
         const double unitMeter = toMeter(_unit);
         glm::dvec4 position = glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0);
         position = _transformationMatrix * position;

@@ -195,7 +195,7 @@ void RenderableConstellationsBase::initialize() {
     _labels->initialize();
     _labels->loadLabels();
 
-    for (speck::Labelset::Entry& entry : _labels->labelSet().entries) {
+    for (dataloader::Labelset::Entry& entry : _labels->labelSet().entries) {
         if (!entry.identifier.empty()) {
             std::string fullName = constellationFullName(entry.identifier);
             if (!fullName.empty()) {

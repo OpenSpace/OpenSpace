@@ -146,7 +146,7 @@ protected:
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 
-    speck::Dataset _dataset;
+    dataloader::Dataset _dataset;
 
     std::unique_ptr<LabelsComponent> _labels;
 

@@ -27,7 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/space/speckloader.h>
+#include <openspace/data/dataloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -56,7 +56,7 @@ public:
      *
      * \param dataset the *loaded* input dataset
      */
-    void initialize(const speck::Dataset& dataset);
+    void initialize(const dataloader::Dataset& dataset);
 
     /**
      * Initialize a 1D texture based on the entries in the color map file
@@ -83,7 +83,7 @@ private:
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    speck::ColorMap _colorMap;
+    dataloader::ColorMap _colorMap;
 };
 
 } // namespace openspace

@@ -205,8 +205,8 @@ ghoul::opengl::Texture* ColorMapComponent::texture() const {
     return _texture.get();
 }
 
-void ColorMapComponent::initialize(const speck::Dataset& dataset) {
-    _colorMap = speck::color::loadFileWithCache(colorMapFile.value());
+void ColorMapComponent::initialize(const dataloader::Dataset& dataset) {
+    _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
 
     // Initialize empty colormap ranges based on dataset
     for (const properties::OptionProperty::Option& option : dataColumn.options()) {
@@ -223,7 +223,7 @@ void ColorMapComponent::initialize(const speck::Dataset& dataset) {
     if (dataColumn.options().empty() && !dataset.entries.empty()) {
         int i = 0;
         _colorRangeData.reserve(dataset.variables.size());
-        for (const speck::Dataset::Variable& v : dataset.variables) {
+        for (const dataloader::Dataset::Variable& v : dataset.variables) {
             dataColumn.addOption(i, v.name);
             _colorRangeData.push_back(dataset.findValueRange(v.index));
             i++;

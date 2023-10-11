@@ -22,8 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/space/speckloader.h>
+#include <openspace/data/speckloader.h>
 
+#include <openspace/data/dataloader.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
@@ -36,10 +37,6 @@
 #include <string_view>
 
 namespace {
-    constexpr int8_t DataCacheFileVersion = 10;
-    constexpr int8_t LabelCacheFileVersion = 11;
-    constexpr int8_t ColorCacheFileVersion = 10;
-
     bool startsWith(std::string lhs, std::string_view rhs) noexcept {
         for (size_t i = 0; i < lhs.size(); i++) {
             lhs[i] = static_cast<char>(tolower(lhs[i]));
@@ -70,71 +67,11 @@ namespace {
         }
     }
 
-    template <typename T, typename U>
-    void checkSize(U value, std::string_view message) {
-        if (value > std::numeric_limits<U>::max()) {
-            throw ghoul::RuntimeError(fmt::format("Error saving file: {}", message));
-        }
-    }
-
-    template <typename T>
-    using LoadCacheFunc = std::function<std::optional<T>(std::filesystem::path)>;
-
-    template <typename T>
-    using SaveCacheFunc = std::function<void(const T&, std::filesystem::path)>;
-
-    template <typename T>
-    using LoadSpeckFunc = std::function<T(
-        std::filesystem::path, openspace::speck::SkipAllZeroLines)>;
-
-
-
-    template <typename T>
-    T internalLoadFileWithCache(std::filesystem::path speckPath,
-                                     openspace::speck::SkipAllZeroLines skipAllZeroLines,
-                                     LoadSpeckFunc<T> loadSpeckFunction,
-                                     LoadCacheFunc<T> loadCacheFunction,
-                                     SaveCacheFunc<T> saveCacheFunction)
-    {
-        static_assert(
-            std::is_same_v<T, openspace::speck::Dataset> ||
-            std::is_same_v<T, openspace::speck::Labelset> ||
-            std::is_same_v<T, openspace::speck::ColorMap>
-        );
-
-        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(speckPath);
-
-        if (std::filesystem::exists(cached)) {
-            LINFOC(
-                "SpeckLoader",
-                fmt::format("Cached file {} used for file {}", cached, speckPath)
-            );
-
-            std::optional<T> dataset = loadCacheFunction(cached);
-            if (dataset.has_value()) {
-                // We could load the cache file and we are now done with this
-                return *dataset;
-            }
-            else {
-                FileSys.cacheManager()->removeCacheFile(cached);
-            }
-        }
-        LINFOC("SpeckLoader", fmt::format("Loading file {}", speckPath));
-        T dataset = loadSpeckFunction(speckPath, skipAllZeroLines);
-
-        if (!dataset.entries.empty()) {
-            LINFOC("SpeckLoader", "Saving cache");
-            saveCacheFunction(dataset, cached);
-        }
-        return dataset;
-    }
 } // namespace
 
-namespace openspace::speck {
+namespace openspace::dataloader::speck {
 
-namespace data {
-
-Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) {
+Dataset loadSpeckFile(std::filesystem::path path) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
@@ -371,7 +308,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
             }
         }
 
-        if (skipAllZeroLines && allZero) {
+        if (allZero) {
             continue;
         }
 
@@ -402,203 +339,12 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
     return res;
 }
 
-std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
-    std::ifstream file(path, std::ios::binary);
-    if (!file.good()) {
-        return std::nullopt;
-    }
-
-    Dataset result;
-
-    int8_t fileVersion;
-    file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
-    if (fileVersion != DataCacheFileVersion) {
-        // Incompatible version and we won't be able to read the file
-        return std::nullopt;
-    }
-
-    //
-    // Read variables
-    uint16_t nVariables;
-    file.read(reinterpret_cast<char*>(&nVariables), sizeof(uint16_t));
-    result.variables.resize(nVariables);
-    for (int i = 0; i < nVariables; i += 1) {
-        Dataset::Variable var;
-
-        int16_t idx;
-        file.read(reinterpret_cast<char*>(&idx), sizeof(int16_t));
-        var.index = idx;
-
-        uint16_t len;
-        file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
-        var.name.resize(len);
-        file.read(var.name.data(), len);
-
-        result.variables[i] = std::move(var);
-    }
-
-    //
-    // Read textures
-    uint16_t nTextures;
-    file.read(reinterpret_cast<char*>(&nTextures), sizeof(uint16_t));
-    result.textures.resize(nTextures);
-    for (int i = 0; i < nTextures; i += 1) {
-        Dataset::Texture tex;
-
-        int16_t idx;
-        file.read(reinterpret_cast<char*>(&idx), sizeof(int16_t));
-        tex.index = idx;
-
-        uint16_t len;
-        file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
-        tex.file.resize(len);
-        file.read(tex.file.data(), len);
-
-        result.textures[i] = std::move(tex);
-    }
-
-    //
-    // Read indices
-    int16_t texDataIdx;
-    file.read(reinterpret_cast<char*>(&texDataIdx), sizeof(int16_t));
-    result.textureDataIndex = texDataIdx;
-
-    int16_t oriDataIdx;
-    file.read(reinterpret_cast<char*>(&oriDataIdx), sizeof(int16_t));
-    result.orientationDataIndex = oriDataIdx;
-
-    //
-    // Read entries
-    uint64_t nEntries;
-    file.read(reinterpret_cast<char*>(&nEntries), sizeof(uint64_t));
-    result.entries.reserve(nEntries);
-    for (uint64_t i = 0; i < nEntries; i += 1) {
-        Dataset::Entry e;
-        file.read(reinterpret_cast<char*>(&e.position.x), sizeof(float));
-        file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
-        file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
-
-        uint16_t nValues;
-        file.read(reinterpret_cast<char*>(&nValues), sizeof(uint16_t));
-        e.data.resize(nValues);
-        file.read(reinterpret_cast<char*>(e.data.data()), nValues * sizeof(float));
-
-        uint16_t len;
-        file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
-        if (len > 0) {
-            std::string comment;
-            comment.resize(len);
-            file.read(comment.data(), len);
-            e.comment = std::move(comment);
-        }
-
-        result.entries.push_back(std::move(e));
-    }
-
-    return result;
-}
-
-void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
-    std::ofstream file(path, std::ofstream::binary);
-
-    file.write(reinterpret_cast<const char*>(&DataCacheFileVersion), sizeof(int8_t));
-
-    //
-    // Store variables
-    checkSize<uint16_t>(dataset.variables.size(), "Too many variables");
-    uint16_t nVariables = static_cast<uint16_t>(dataset.variables.size());
-    file.write(reinterpret_cast<const char*>(&nVariables), sizeof(uint16_t));
-    for (const Dataset::Variable& var : dataset.variables) {
-        checkSize<int16_t>(var.index, "Variable index too large");
-        int16_t idx = static_cast<int16_t>(var.index);
-        file.write(reinterpret_cast<const char*>(&idx), sizeof(int16_t));
-
-        checkSize<uint16_t>(var.name.size(), "Variable name too long");
-        uint16_t len = static_cast<uint16_t>(var.name.size());
-        file.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));
-        file.write(var.name.data(), len);
-    }
-
-    //
-    // Store textures
-    checkSize<uint16_t>(dataset.textures.size(), "Too many textures");
-    uint16_t nTextures = static_cast<uint16_t>(dataset.textures.size());
-    file.write(reinterpret_cast<const char*>(&nTextures), sizeof(uint16_t));
-    for (const Dataset::Texture& tex : dataset.textures) {
-        checkSize<int16_t>(tex.index, "Texture index too large");
-        int16_t idx = static_cast<int16_t>(tex.index);
-        file.write(reinterpret_cast<const char*>(&idx), sizeof(int16_t));
-
-
-        checkSize<uint16_t>(tex.file.size(), "Texture file too long");
-        uint16_t len = static_cast<uint16_t>(tex.file.size());
-        file.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));
-        file.write(tex.file.data(), len);
-    }
-
-    //
-    // Store indices
-    checkSize<int16_t>(dataset.textureDataIndex, "Texture index too large");
-    int16_t texIdx = static_cast<int16_t>(dataset.textureDataIndex);
-    file.write(reinterpret_cast<const char*>(&texIdx), sizeof(int16_t));
-
-    checkSize<int16_t>(dataset.orientationDataIndex, "Orientation index too large");
-    int16_t orientationIdx = static_cast<int16_t>(dataset.orientationDataIndex);
-    file.write(reinterpret_cast<const char*>(&orientationIdx), sizeof(int16_t));
-
-    //
-    // Store entries
-    checkSize<uint64_t>(dataset.entries.size(), "Too many entries");
-    uint64_t nEntries = static_cast<uint64_t>(dataset.entries.size());
-    file.write(reinterpret_cast<const char*>(&nEntries), sizeof(uint64_t));
-    for (const Dataset::Entry& e : dataset.entries) {
-        file.write(reinterpret_cast<const char*>(&e.position.x), sizeof(float));
-        file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(float));
-        file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(float));
-
-        checkSize<uint16_t>(e.data.size(), "Too many data variables");
-        uint16_t nValues = static_cast<uint16_t>(e.data.size());
-        file.write(reinterpret_cast<const char*>(&nValues), sizeof(uint16_t));
-        file.write(
-            reinterpret_cast<const char*>(e.data.data()),
-            e.data.size() * sizeof(float)
-        );
-
-        if (e.comment.has_value()) {
-            checkSize<uint16_t>(e.comment->size(), "Comment too long");
-        }
-        uint16_t commentLen = e.comment.has_value() ?
-            static_cast<uint16_t>(e.comment->size()) :
-            0;
-        file.write(reinterpret_cast<const char*>(&commentLen), sizeof(uint16_t));
-        if (e.comment.has_value()) {
-            file.write(e.comment->data(), e.comment->size());
-        }
-    }
-}
-
-Dataset loadFileWithCache(std::filesystem::path speckPath,
-                               SkipAllZeroLines skipAllZeroLines)
-{
-    return internalLoadFileWithCache<Dataset>(
-        speckPath,
-        skipAllZeroLines,
-        &loadFile,
-        &loadCachedFile,
-        &saveCachedFile
-    );
-}
-
-} // namespace data
-
-namespace label {
-
-Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
+Labelset loadLabelFile(std::filesystem::path path) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open speck file {}", path));
+        throw ghoul::RuntimeError(fmt::format("Failed to open dataset file {}", path));
     }
 
     Labelset res;
@@ -636,7 +382,6 @@ Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
                     "Error loading label file {}: Textcolor defined twice", path
                 ));
             }
-
 
             std::stringstream str(line);
             std::string dummy;
@@ -728,109 +473,12 @@ Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
     return res;
 }
 
-std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
-    std::ifstream file(path, std::ios::binary);
-    if (!file.good()) {
-        return std::nullopt;
-    }
-
-    int8_t fileVersion;
-    file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
-    if (fileVersion != LabelCacheFileVersion) {
-        // Incompatible version and we won't be able to read the file
-        return std::nullopt;
-    }
-
-    Labelset result;
-
-    int16_t textColorIdx;
-    file.read(reinterpret_cast<char*>(&textColorIdx), sizeof(int16_t));
-    result.textColorIndex = textColorIdx;
-
-    uint32_t nEntries;
-    file.read(reinterpret_cast<char*>(&nEntries), sizeof(uint32_t));
-    result.entries.reserve(nEntries);
-    for (unsigned int i = 0; i < nEntries; i += 1) {
-        Labelset::Entry e;
-        file.read(reinterpret_cast<char*>(&e.position.x), sizeof(float));
-        file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
-        file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
-
-        // Identifier
-        uint8_t idLen;
-        file.read(reinterpret_cast<char*>(&idLen), sizeof(uint8_t));
-        e.identifier.resize(idLen);
-        file.read(e.identifier.data(), idLen);
-
-        // Text
-        uint16_t len;
-        file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
-        e.text.resize(len);
-        file.read(e.text.data(), len);
-
-        result.entries.push_back(e);
-    }
-
-    return result;
-}
-
-void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
-    std::ofstream file(path, std::ofstream::binary);
-
-    file.write(reinterpret_cast<const char*>(&LabelCacheFileVersion), sizeof(int8_t));
-
-    //
-    // Storage text color
-    checkSize<int16_t>(labelset.textColorIndex, "Too high text color");
-    int16_t textColorIdx = static_cast<int16_t>(labelset.textColorIndex);
-    file.write(reinterpret_cast<const char*>(&textColorIdx), sizeof(int16_t));
-
-    //
-    // Storage text lines
-    checkSize<uint32_t>(labelset.entries.size(), "Too many entries");
-    uint32_t nEntries = static_cast<uint32_t>(labelset.entries.size());
-    file.write(reinterpret_cast<const char*>(&nEntries), sizeof(uint32_t));
-    for (const Labelset::Entry& e : labelset.entries) {
-        file.write(reinterpret_cast<const char*>(&e.position.x), sizeof(float));
-        file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(float));
-        file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(float));
-
-        // Identifier
-        checkSize<uint8_t>(e.identifier.size(), "Identifier too long");
-        uint8_t idLen = static_cast<uint8_t>(e.identifier.size());
-        file.write(reinterpret_cast<const char*>(&idLen), sizeof(uint8_t));
-        file.write(e.identifier.data(), idLen);
-
-        // Text
-        checkSize<uint16_t>(e.text.size(), "Text too long");
-        uint16_t len = static_cast<uint16_t>(e.text.size());
-        file.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));
-        file.write(e.text.data(), len);
-    }
-}
-
-Labelset loadFileWithCache(std::filesystem::path speckPath,
-                                SkipAllZeroLines skipAllZeroLines)
-{
-    return internalLoadFileWithCache<Labelset>(
-        speckPath,
-        skipAllZeroLines,
-        &loadFile,
-        &loadCachedFile,
-        &saveCachedFile
-    );
-}
-
-} // namespace label
-
-namespace color {
-
-ColorMap loadFile(std::filesystem::path path, SkipAllZeroLines) {
+ColorMap loadCmapFile(std::filesystem::path path) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open speck file {}", path));
+        throw ghoul::RuntimeError(fmt::format("Failed to open color map file {}", path));
     }
 
     ColorMap res;
@@ -883,131 +531,4 @@ ColorMap loadFile(std::filesystem::path path, SkipAllZeroLines) {
     return res;
 }
 
-std::optional<ColorMap> loadCachedFile(std::filesystem::path path) {
-    std::ifstream file(path, std::ios::binary);
-    if (!file.good()) {
-        return std::nullopt;
-    }
-
-    int8_t fileVersion;
-    file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
-    if (fileVersion != ColorCacheFileVersion) {
-        // Incompatible version and we won't be able to read the file
-        return std::nullopt;
-    }
-
-    ColorMap result;
-
-    uint32_t nColors;
-    file.read(reinterpret_cast<char*>(&nColors), sizeof(uint32_t));
-    result.entries.reserve(nColors);
-    for (unsigned int i = 0; i < nColors; i += 1) {
-        glm::vec4 color;
-        file.read(reinterpret_cast<char*>(&color.x), sizeof(float));
-        file.read(reinterpret_cast<char*>(&color.y), sizeof(float));
-        file.read(reinterpret_cast<char*>(&color.z), sizeof(float));
-        file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
-        result.entries.push_back(color);
-    }
-    return result;
-}
-
-void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path) {
-    std::ofstream file(path, std::ofstream::binary);
-
-    file.write(reinterpret_cast<const char*>(&ColorCacheFileVersion), sizeof(int8_t));
-
-    uint32_t nColors = static_cast<uint32_t>(colorMap.entries.size());
-    file.write(reinterpret_cast<const char*>(&nColors), sizeof(uint32_t));
-    for (const glm::vec4& color : colorMap.entries) {
-        file.write(reinterpret_cast<const char*>(&color.x), sizeof(float));
-        file.write(reinterpret_cast<const char*>(&color.y), sizeof(float));
-        file.write(reinterpret_cast<const char*>(&color.z), sizeof(float));
-        file.write(reinterpret_cast<const char*>(&color.w), sizeof(float));
-    }
-}
-
-ColorMap loadFileWithCache(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines)
-{
-    return internalLoadFileWithCache<ColorMap>(
-        path,
-        skipAllZeroLines,
-        &loadFile,
-        &loadCachedFile,
-        &saveCachedFile
-    );
-}
-
-} // namespace color
-
-int Dataset::index(std::string_view variableName) const {
-    for (const Dataset::Variable& v : variables) {
-        if (v.name == variableName) {
-            return v.index;
-        }
-    }
-    return -1;
-}
-
-bool Dataset::normalizeVariable(std::string_view variableName) {
-    int idx = index(variableName);
-
-    if (idx == -1) {
-        // We didn't find the variable that was specified
-        return false;
-    }
-
-    float minValue = std::numeric_limits<float>::max();
-    float maxValue = -std::numeric_limits<float>::max();
-    for (Dataset::Entry& e : entries) {
-        minValue = std::min(minValue, e.data[idx]);
-        maxValue = std::max(maxValue, e.data[idx]);
-    }
-
-    for (Dataset::Entry& e : entries) {
-        e.data[idx] = (e.data[idx] - minValue) / (maxValue - minValue);
-    }
-
-    return true;
-}
-
-glm::vec2 Dataset::findValueRange(int variableIndex) const {
-    if (entries.empty()) {
-        // Can't find range if there are no entries
-        return glm::vec2(0.f);
-    }
-
-    if (variableIndex >= entries[0].data.size()) {
-        // The index is not a valid variable index
-        return glm::vec2(0.f);
-    }
-
-    float minValue = std::numeric_limits<float>::max();
-    float maxValue = -std::numeric_limits<float>::max();
-    for (const openspace::speck::Dataset::Entry& e : entries) {
-        if (e.data.size() > 0) {
-            float value = e.data[variableIndex];
-            minValue = std::min(value, minValue);
-            maxValue = std::max(value, maxValue);
-        }
-        else {
-            minValue = 0.f;
-            maxValue = 0.f;
-        }
-    }
-
-    return { minValue, maxValue };
-}
-
-glm::vec2 Dataset::findValueRange(std::string_view variableName) const {
-    int idx = index(variableName);
-
-    if (idx == -1) {
-        // We didn't find the variable that was specified
-        return glm::vec2(0.f);
-    }
-
-    return findValueRange(idx);
-}
-
-} // namespace openspace::speck
+} // namespace openspace::dataloader::speck

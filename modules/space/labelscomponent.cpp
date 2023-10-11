@@ -216,11 +216,11 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 }
 
-speck::Labelset& LabelsComponent::labelSet() {
+dataloader::Labelset& LabelsComponent::labelSet() {
     return _labelset;
 }
 
-const speck::Labelset& LabelsComponent::labelSet() const {
+const dataloader::Labelset& LabelsComponent::labelSet() const {
     return _labelset;
 }
 
@@ -235,7 +235,7 @@ void LabelsComponent::initialize() {
 
 void LabelsComponent::loadLabels() {
     LINFO(fmt::format("Loading label file {}", _labelFile));
-    _labelset = speck::label::loadFileWithCache(_labelFile);
+    _labelset = dataloader::label::loadFileWithCache(_labelFile);
 }
 
 bool LabelsComponent::isReady() const {
@@ -273,7 +273,7 @@ void LabelsComponent::render(const RenderData& data,
 
     glm::vec4 textColor = glm::vec4(glm::vec3(_color), opacity() * fadeInVariable);
 
-    for (const speck::Labelset::Entry& e : _labelset.entries) {
+    for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         if (!e.isEnabled) {
             continue;
         }
