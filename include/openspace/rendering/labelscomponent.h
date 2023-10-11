@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
-#define __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+#ifndef __OPENSPACE_CORE___LABELSCOMPONENT___H__
+#define __OPENSPACE_CORE___LABELSCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
@@ -85,4 +85,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+#endif // __OPENSPACE_CORE___LABELSCOMPONENT___H__

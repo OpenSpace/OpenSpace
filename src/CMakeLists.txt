@@ -129,6 +129,7 @@ set(OPENSPACE_SOURCE
   rendering/deferredcastermanager.cpp
   rendering/fadeable.cpp
   rendering/helper.cpp
+  rendering/labelscomponent.cpp
   rendering/loadingscreen.cpp
   rendering/luaconsole.cpp
   rendering/raycastermanager.cpp
@@ -321,6 +322,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/loadingscreen.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/luaconsole.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/helper.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/labelscomponent.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/raycasterlistener.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/raycastermanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/renderable.h

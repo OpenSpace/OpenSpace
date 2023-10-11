@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/space/labelscomponent.h>
+#include <openspace/rendering/labelscomponent.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
