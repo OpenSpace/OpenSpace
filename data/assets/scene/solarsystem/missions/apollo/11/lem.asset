@@ -22,6 +22,12 @@ local Apollo11Lem = {
       Latitude = 0.67402,
       Altitude = -1927.65,
       UseHeightMap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = moon_asset.Moon.Identifier,
+      Longitude = -360+23.47306,
+      Latitude = 0.67402,
     }
   },
   GUI = {
@@ -42,7 +48,7 @@ local Apollo11LemModel = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = lem_model .. "LM-2_ver2clean.obj",
-    RotationVector = { 91.044090, 171.229706, 111.666664 },
+    RotationVector = { -90.0, 0, 0 },
     LightSources = {
       sun.LightSource,
       {
