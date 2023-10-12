@@ -224,7 +224,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
 
         struct SizeSettings {
             // A list specifying all parameters that may be use for size mapping, i.e.
