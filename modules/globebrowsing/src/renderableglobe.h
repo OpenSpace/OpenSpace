@@ -255,6 +255,7 @@ private:
     void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
 
+    std::vector<std::string> _shadowers;
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
     LayerManager _layerManager;

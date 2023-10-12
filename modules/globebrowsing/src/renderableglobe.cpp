@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/base/rendering/renderablemodel.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
-
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
@@ -51,6 +51,7 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <ghoul/io/model/modelgeometry.h>
 #include <numeric>
 #include <queue>
 #include <vector>
@@ -682,6 +683,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         addProperty(_generalProperties.eclipseHardShadows);
     }
 
+    _shadowers = p.shadowers.value_or(_shadowers);
+
     _shadowMappingPropertyOwner.addProperty(_generalProperties.shadowMapping);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.zFightingPercentage);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.nShadowSamples);
@@ -831,8 +834,117 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     constexpr int res = 2880;
     const double distance = res * boundingSphere() / tfov;
 
+    // --- SHM stuff
+    static GLuint dfbo = 0;
+    static GLuint dmap = 0;
+    static auto dw = global::renderEngine->renderingResolution().x;
+    static auto dh = global::renderEngine->renderingResolution().y;
+    static std::unique_ptr<ghoul::opengl::ProgramObject> prog;
+    if (dfbo == 0) {
+        prog = global::renderEngine->buildRenderProgram(
+            "shdw",
+            absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl"),
+            absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl")
+        );
+        prog->setIgnoreAttributeLocationError(
+            ghoul::opengl::ProgramObject::IgnoreError::Yes
+        );
+        prog->setIgnoreUniformLocationError(
+            ghoul::opengl::ProgramObject::IgnoreError::Yes
+        );
+
+        glGenFramebuffers(1, &dfbo);
+
+        glGenTextures(1, &dmap);
+        glBindTexture(GL_TEXTURE_2D, dmap);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_DEPTH_COMPONENT,
+            dw,
+            dh,
+            0,
+            GL_DEPTH_COMPONENT,
+            GL_FLOAT,
+            nullptr
+        );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        global::renderEngine->setDebugTextureRendering(dmap);
+
+        GLint prevFBO;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFBO);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, dfbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, dmap, 0);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+        glBindFramebuffer(GL_FRAMEBUFFER, prevFBO);
+    }
+    // --- SHM stuff
     if ((distanceToCamera < distance) || (_generalProperties.renderAtDistance)) {
         try {
+            if (_shadowers.size() > 0) {
+                ghoul::GLDebugGroup group("SHMAP");
+                for (const std::string& shadower : _shadowers) {
+                    SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(shadower);
+                    SceneGraphNode* lightsource = global::renderEngine->scene()->sceneGraphNode("Sun");
+                    if (node) {
+                        const auto rndl = dynamic_cast<RenderableModel*>(node->renderable());
+                        if (rndl) {
+                            prog->activate();
+
+                            glm::dvec3 node_pos = glm::dvec3(node->worldPosition());
+
+                            glm::dmat4 model = glm::translate(glm::dmat4(1), node_pos);
+                            prog->setUniform("model", model);
+
+                            glm::dvec3 light_pos = lightsource->worldPosition();
+                            glm::dvec3 light_dir = glm::normalize(node_pos - light_pos);
+                            glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), light_dir));
+
+                            glm::dvec3 eye = node_pos + light_dir * 500.;
+                            glm::dvec3 center = node_pos;
+                            glm::dvec3 up = glm::cross(right, light_dir);
+                            glm::dmat4 view = glm::lookAt(eye, center, up);
+                            prog->setUniform("view", view);
+
+                            double aspect = static_cast<double>(dw) / static_cast<double>(dh);
+                            double near = 0.1;
+                            double far = 5000.;
+                            glm::dmat4 projection = glm::perspective(glm::radians(90.), aspect, near, far);
+                            prog->setUniform("projection", projection);
+
+                            GLint prevfbo;
+                            glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevfbo);
+
+                            GLint prevvp[4];
+                            glGetIntegerv(GL_VIEWPORT, prevvp);
+
+                            glBindFramebuffer(GL_FRAMEBUFFER, dfbo);
+                            glViewport(0, 0, dw, dh);
+                            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+                            rndl->geometry()->render(*prog, false, true);
+
+                            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                            prog->deactivate();
+
+                            // Restore
+                            glBindFramebuffer(GL_FRAMEBUFFER, prevfbo);
+                            glViewport(prevvp[0], prevvp[1], prevvp[2], prevvp[3]);
+                        }
+                        else {
+                            LERROR(fmt::format("Could not find renderable node for shadower {}", shadower));
+                        }
+                    }
+                }
+            }
             if (_shadowComponent && _shadowComponent->isEnabled()) {
                 // Set matrices and other GL states
                 const RenderData lightRenderData(_shadowComponent->begin(data));

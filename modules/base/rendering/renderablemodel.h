@@ -67,6 +67,8 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
+    const ghoul::modelgeometry::ModelGeometry* geometry() const { return _geometry.get(); }
+
     static documentation::Documentation Documentation();
 
 private:
