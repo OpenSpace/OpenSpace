@@ -122,7 +122,10 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataLoadSpecs> specs)
         res = speck::loadSpeckFile(path.string(), specs);
     }
     else {
-        throw ghoul::MissingCaseException();
+        LERRORC("DataLoader", fmt::format(
+            "Could not read data file {}. File format {} is not supported",
+            path, path.extension()
+        ));
     }
 
     // @TODO: add CSV support
@@ -337,7 +340,10 @@ Labelset loadFile(std::filesystem::path path, std::optional<DataLoadSpecs>) {
         res = speck::loadLabelFile(path.string());
     }
     else {
-        throw ghoul::MissingCaseException();
+        LERRORC("DataLoader", fmt::format(
+            "Could not read label data file {}. File format {} is not supported",
+            path, path.extension()
+        ));
     }
 
     return res;
@@ -456,7 +462,10 @@ ColorMap loadFile(std::filesystem::path path, std::optional<DataLoadSpecs>) {
         res = speck::loadCmapFile(path.string());
     }
     else {
-        throw ghoul::MissingCaseException();
+        LERRORC("DataLoader", fmt::format(
+            "Could not read color map file {}. File format {} is not supported",
+            path, path.extension()
+        ));
     }
 
     return res;
