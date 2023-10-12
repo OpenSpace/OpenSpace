@@ -24,7 +24,6 @@
 
 #include <openspace/data/speckloader.h>
 
-#include <openspace/data/dataloader.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
@@ -71,7 +70,7 @@ namespace {
 
 namespace openspace::dataloader::speck {
 
-Dataset loadSpeckFile(std::filesystem::path path) {
+Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataLoadSpecs> specs) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
@@ -293,6 +292,15 @@ Dataset loadSpeckFile(std::filesystem::path path) {
                 valueStream.clear();
                 valueStream.str(value);
                 valueStream >> entry.data[i];
+
+                // Check if value corresponds to a missing value
+                if (specs.has_value() && (*specs).missingDataValue.has_value()) {
+                    float missingDataValue = (*specs).missingDataValue.value();
+                    float diff = std::abs(entry.data[i] - missingDataValue);
+                    if (diff < std::numeric_limits<float>::epsilon()) {
+                        entry.data[i] = std::numeric_limits<float>::quiet_NaN();
+                    }
+                }
 
                 allZero &= (entry.data[i] == 0.0);
                 if (valueStream.fail()) {

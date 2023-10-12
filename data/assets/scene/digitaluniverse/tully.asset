@@ -35,6 +35,7 @@ local TullyGalaxies = {
     },
     Opacity = 0.99,
     File = speck .. "tully.speck",
+    MissingDataValue = 0,
     Texture = textures .. "point3A.png",
     Coloring = {
       FixedColor = { 1.0, 0.4, 0.2 },

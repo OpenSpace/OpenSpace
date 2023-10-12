@@ -56,10 +56,13 @@ namespace {
     using SaveCacheFunc = std::function<void(const T&, std::filesystem::path)>;
 
     template <typename T>
-    using LoadDataFunc = std::function<T(std::filesystem::path)>;
+    using LoadDataFunc = std::function<T(
+        std::filesystem::path, std::optional<openspace::dataloader::DataLoadSpecs> specs
+    )>;
 
     template <typename T>
     T internalLoadFileWithCache(std::filesystem::path filePath,
+                                std::optional<openspace::dataloader::DataLoadSpecs> specs,
                                 LoadDataFunc<T> loadFunction,
                                 LoadCacheFunc<T> loadCacheFunction,
                                 SaveCacheFunc<T> saveCacheFunction)
@@ -88,7 +91,7 @@ namespace {
             }
         }
         LINFOC("DataLoader", fmt::format("Loading file {}", filePath));
-        T dataset = loadFunction(filePath);
+        T dataset = loadFunction(filePath, specs);
 
         if (!dataset.entries.empty()) {
             LINFOC("DataLoader", "Saving cache");
@@ -102,7 +105,7 @@ namespace openspace::dataloader {
 
 namespace data {
 
-Dataset loadFile(std::filesystem::path path) {
+Dataset loadFile(std::filesystem::path path, std::optional<DataLoadSpecs> specs) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
@@ -115,8 +118,8 @@ Dataset loadFile(std::filesystem::path path) {
         [](unsigned char c) { return std::tolower(c); });
 
     Dataset res;
-    if (extension == "speck") {
-        res = speck::loadSpeckFile(path.string());
+    if (extension == ".speck") {
+        res = speck::loadSpeckFile(path.string(), specs);
     }
     else {
         throw ghoul::MissingCaseException();
@@ -302,10 +305,11 @@ void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
     }
 }
 
-Dataset loadFileWithCache(std::filesystem::path filePath)
+Dataset loadFileWithCache(std::filesystem::path filePath, std::optional<DataLoadSpecs> specs)
 {
     return internalLoadFileWithCache<Dataset>(
         filePath,
+        specs,
         &loadFile,
         &loadCachedFile,
         &saveCachedFile
@@ -316,7 +320,7 @@ Dataset loadFileWithCache(std::filesystem::path filePath)
 
 namespace label {
 
-Labelset loadFile(std::filesystem::path path) {
+Labelset loadFile(std::filesystem::path path, std::optional<DataLoadSpecs>) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
@@ -329,7 +333,7 @@ Labelset loadFile(std::filesystem::path path) {
         [](unsigned char c) { return std::tolower(c); });
 
     Labelset res;
-    if (extension == "label") {
+    if (extension == ".label") {
         res = speck::loadLabelFile(path.string());
     }
     else {
@@ -424,6 +428,7 @@ Labelset loadFileWithCache(std::filesystem::path filePath)
 {
     return internalLoadFileWithCache<Labelset>(
         filePath,
+        std::nullopt,
         &loadFile,
         &loadCachedFile,
         &saveCachedFile
@@ -434,7 +439,7 @@ Labelset loadFileWithCache(std::filesystem::path filePath)
 
 namespace color {
 
-ColorMap loadFile(std::filesystem::path path) {
+ColorMap loadFile(std::filesystem::path path, std::optional<DataLoadSpecs>) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
@@ -447,7 +452,7 @@ ColorMap loadFile(std::filesystem::path path) {
         [](unsigned char c) { return std::tolower(c); });
 
     ColorMap res;
-    if (extension == "cmap") {
+    if (extension == ".cmap") {
         res = speck::loadCmapFile(path.string());
     }
     else {
@@ -505,6 +510,7 @@ ColorMap loadFileWithCache(std::filesystem::path path)
 {
     return internalLoadFileWithCache<ColorMap>(
         path,
+        std::nullopt,
         &loadFile,
         &loadCachedFile,
         &saveCachedFile
@@ -533,12 +539,20 @@ bool Dataset::normalizeVariable(std::string_view variableName) {
     float minValue = std::numeric_limits<float>::max();
     float maxValue = -std::numeric_limits<float>::max();
     for (Dataset::Entry& e : entries) {
-        minValue = std::min(minValue, e.data[idx]);
-        maxValue = std::max(maxValue, e.data[idx]);
+        float value = e.data[idx];
+        if (std::isnan(value)) {
+            continue;
+        }
+        minValue = std::min(minValue, value);
+        maxValue = std::max(maxValue, value);
     }
 
     for (Dataset::Entry& e : entries) {
-        e.data[idx] = (e.data[idx] - minValue) / (maxValue - minValue);
+        float value = e.data[idx];
+        if (std::isnan(value)) {
+            continue;
+        }
+        e.data[idx] = (value - minValue) / (maxValue - minValue);
     }
 
     return true;
@@ -560,6 +574,9 @@ glm::vec2 Dataset::findValueRange(int variableIndex) const {
     for (const Dataset::Entry& e : entries) {
         if (e.data.size() > 0) {
             float value = e.data[variableIndex];
+            if (std::isnan(value)) {
+                continue;
+            }
             minValue = std::min(value, minValue);
             maxValue = std::max(value, maxValue);
         }

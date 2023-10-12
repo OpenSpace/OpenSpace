@@ -25,17 +25,14 @@
 #ifndef __OPENSPACE_CORE___SPECKLOADER___H__
 #define __OPENSPACE_CORE___SPECKLOADER___H__
 
+#include <openspace/data/dataloader.h>
 #include <filesystem>
-
-namespace openspace::dataloader {
-    struct Dataset;
-    struct Labelset;
-    struct ColorMap;
-}
+#include <optional>
 
 namespace openspace::dataloader::speck {
 
-Dataset loadSpeckFile(std::filesystem::path path);
+Dataset loadSpeckFile(std::filesystem::path path,
+    std::optional<DataLoadSpecs> specs = std::nullopt);
 
 Labelset loadLabelFile(std::filesystem::path path);
 

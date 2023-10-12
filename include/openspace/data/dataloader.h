@@ -87,31 +87,40 @@ struct ColorMap {
     std::vector<glm::vec4> entries;
 };
 
+struct DataLoadSpecs {
+    std::optional<float> missingDataValue;
+    // @TODO: can add column names for positionmal data in CSV, for example
+};
+
 namespace data {
 
-    Dataset loadFile(std::filesystem::path path);
+    Dataset loadFile(std::filesystem::path path,
+        std::optional<DataLoadSpecs> specs = std::nullopt);
 
     std::optional<Dataset> loadCachedFile(std::filesystem::path path);
     void saveCachedFile(const Dataset& dataset, std::filesystem::path path);
 
-    Dataset loadFileWithCache(std::filesystem::path speckPath);
+    Dataset loadFileWithCache(std::filesystem::path path,
+        std::optional<DataLoadSpecs> specs = std::nullopt);
 
 } // namespace data
 
 namespace label {
 
-    Labelset loadFile(std::filesystem::path path);
+    Labelset loadFile(std::filesystem::path path,
+        std::optional<DataLoadSpecs> specs = std::nullopt);
 
     std::optional<Labelset> loadCachedFile(std::filesystem::path path);
     void saveCachedFile(const Labelset& labelset, std::filesystem::path path);
 
-    Labelset loadFileWithCache(std::filesystem::path speckPath);
+    Labelset loadFileWithCache(std::filesystem::path path);
 
 } // namespace label
 
 namespace color {
 
-    ColorMap loadFile(std::filesystem::path path);
+    ColorMap loadFile(std::filesystem::path path,
+        std::optional<DataLoadSpecs> specs = std::nullopt);
 
     std::optional<ColorMap> loadCachedFile(std::filesystem::path path);
     void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path);

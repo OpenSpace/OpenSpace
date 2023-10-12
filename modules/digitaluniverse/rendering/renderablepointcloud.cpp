@@ -54,12 +54,12 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 22> UniformNames = {
+    constexpr std::array<const char*, 24> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "maxBillboardSize", "color", "alphaValue", "scaleExponent",
         "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
-        "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
-        "hideOutsideRange", "enablePixelSizeControl", "hasDvarScaling"
+        "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax", "nanColor",
+        "useNanColor", "hideOutsideRange", "enablePixelSizeControl", "hasDvarScaling"
     };
 
     enum RenderOption {
@@ -186,6 +186,12 @@ namespace {
         // The path to the SPECK file that contains information about the astronomical
         // object being rendered
         std::optional<std::string> file;
+
+        // If the data file has a numeric value that corresponds to missing data points,
+        // this setting can be used to interpret point with this value as having no data.
+        // Note that this does however have its limitations, as the same value will be
+        // used across all columns in the dataset.
+        std::optional<float> missingDataValue;
 
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
         std::optional<std::string> texture;
@@ -368,6 +374,10 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _speckFile = absPath(*p.file).string();
     }
 
+    if (p.missingDataValue.has_value()) {
+        _missingDataValue = p.missingDataValue;
+    }
+
     _drawElements = p.drawElements.value_or(_drawElements);
     addProperty(_drawElements);
 
@@ -462,7 +472,10 @@ void RenderablePointCloud::initialize() {
     ZoneScoped;
 
     if (_hasSpeckFile) {
-        _dataset = dataloader::data::loadFileWithCache(_speckFile);
+        dataloader::DataLoadSpecs specs = {
+            .missingDataValue = _missingDataValue
+        };
+        _dataset = dataloader::data::loadFileWithCache(_speckFile, specs);
 
         if (_hasColorMapFile) {
             _colorSettings.colorMapComponent->initialize(_dataset);
@@ -597,6 +610,8 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
 
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
+    _program->setUniform(_uniformCache.nanColor, _colorSettings.colorMapComponent->nanColor);
+    _program->setUniform(_uniformCache.useNanColor, _colorSettings.colorMapComponent->useNanColor);
 
     bool useColorMap = _hasColorMapFile && _colorSettings.colorMapComponent->enabled;
     _program->setUniform(_uniformCache.useColormap, useColorMap);

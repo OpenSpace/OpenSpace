@@ -138,8 +138,8 @@ protected:
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
         maxBillboardSize, color, alphaValue, scaleExponent, scaleFactor, up, right,
         fadeInValue, screenSize, spriteTexture, useColormap, colorMapTexture,
-        cmapRangeMin, cmapRangeMax, hideOutsideRange, enablePixelSizeControl,
-        hasDvarScaling
+        cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
+        enablePixelSizeControl, hasDvarScaling
     ) _uniformCache;
 
     std::string _speckFile;
@@ -147,6 +147,7 @@ protected:
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     dataloader::Dataset _dataset;
+    std::optional<float> _missingDataValue;
 
     std::unique_ptr<LabelsComponent> _labels;
 

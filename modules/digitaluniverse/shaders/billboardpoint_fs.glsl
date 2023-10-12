@@ -31,6 +31,9 @@ in vec2 texCoord;
 uniform float alphaValue;
 uniform vec3 color;
 
+uniform vec4 nanColor = vec4(0.5);
+uniform bool useNanColor = true;
+
 uniform sampler2D spriteTexture;
 
 uniform bool useColorMap;
@@ -40,10 +43,6 @@ uniform float cmapRangeMax;
 uniform bool hideOutsideRange;
 
 uniform float fadeInValue;
-
-// TODO: make configurable
-bool useNanColor = true;
-vec4 nanColor = vec4(0.5);
 
 vec4 sampleColorMap(float dataValue) {
     if (useNanColor && isnan(dataValue)) {
