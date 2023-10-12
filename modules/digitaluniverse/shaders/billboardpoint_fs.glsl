@@ -34,6 +34,7 @@ uniform vec3 color;
 uniform vec4 nanColor = vec4(0.5);
 uniform bool useNanColor = true;
 
+uniform bool hasSpriteTexture;
 uniform sampler2D spriteTexture;
 
 uniform bool useColorMap;
@@ -64,12 +65,18 @@ Fragment getFragment() {
     discard;
   }
 
-  vec4 textureColor = texture(spriteTexture, texCoord);
-  if (textureColor.a < 0.01) {
-    discard;
+   if (!hasSpriteTexture) {
+    // Moving the origin to the center
+    vec2 st = (texCoord - vec2(0.5)) * 2.0;
+    if (length(st) > 1.0) {
+      discard;
+    }
   }
 
-  vec4 fullColor = textureColor;
+  vec4 fullColor = vec4(1.0);
+  if (hasSpriteTexture) {
+    fullColor = texture(spriteTexture, texCoord);
+  }
 
   if (useColorMap) {
     fullColor *= sampleColorMap(gs_colorParameter);

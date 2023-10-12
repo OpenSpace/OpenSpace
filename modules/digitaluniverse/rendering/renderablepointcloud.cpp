@@ -54,12 +54,13 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 24> UniformNames = {
+    constexpr std::array<const char*, 25> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "maxBillboardSize", "color", "alphaValue", "scaleExponent",
-        "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
-        "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax", "nanColor",
-        "useNanColor", "hideOutsideRange", "enablePixelSizeControl", "hasDvarScaling"
+        "scaleFactor", "up", "right", "fadeInValue", "screenSize", "hasSpriteTexture",
+        "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
+        "nanColor", "useNanColor", "hideOutsideRange", "enablePixelSizeControl",
+        "hasDvarScaling"
     };
 
     enum RenderOption {
@@ -71,6 +72,14 @@ namespace {
         "Texture",
         "Point Sprite Texture",
         "The path to the texture that should be used as the point sprite",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseSpriteTextureInfo = {
+        "UseTexture",
+        "Use Texture",
+        "If true, use the provided sprite texture to render the point. If false, draw "
+        "the points using the default point shape",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -195,6 +204,9 @@ namespace {
 
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
         std::optional<std::string> texture;
+
+        // [[codegen::verbatim(UseSpriteTextureInfo.description)]]
+        std::optional<bool> useTexture;
 
         // [[codegen::verbatim(DrawElementsInfo.description)]]
         std::optional<bool> drawElements;
@@ -352,6 +364,7 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
 RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _spriteTexturePath(SpriteTextureInfo)
+    , _useSpriteTexture(UseSpriteTextureInfo, true)
     , _drawElements(DrawElementsInfo, true)
     , _fadeInDistances(
         FadeInDistancesInfo,
@@ -402,15 +415,16 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _unit = DistanceUnit::Meter;
     }
 
+    _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
+    addProperty(_spriteTexturePath);
+
+    _useSpriteTexture = p.useTexture.value_or(_useSpriteTexture);
+    addProperty(_useSpriteTexture);
+
     if (p.texture.has_value()) {
         _spriteTexturePath = absPath(*p.texture).string();
-        _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
-
-        // @TODO (abock, 2021-01-31) I don't know why we only add this property if the
-        // texture is given, but I think it's a bug
-        // @TODO (emmbr, 2021-05-24) This goes for several properties in this renderable
-        addProperty(_spriteTexturePath);
     }
+
     _hasSpriteTexture = p.texture.has_value();
 
     if (p.labels.has_value()) {
@@ -604,14 +618,14 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     glGetIntegerv(GL_VIEWPORT, viewport);
     _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
+    bool useTexture = _hasSpriteTexture && _useSpriteTexture;
+    _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
     ghoul::opengl::TextureUnit spriteTextureUnit;
     spriteTextureUnit.activate();
     bindTextureForRendering();
     _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
 
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
-    _program->setUniform(_uniformCache.nanColor, _colorSettings.colorMapComponent->nanColor);
-    _program->setUniform(_uniformCache.useNanColor, _colorSettings.colorMapComponent->useNanColor);
 
     bool useColorMap = _hasColorMapFile && _colorSettings.colorMapComponent->enabled;
     _program->setUniform(_uniformCache.useColormap, useColorMap);
@@ -630,7 +644,8 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
             _colorSettings.colorMapComponent->hideOutsideRange
         );
 
-        // @TODO: NanColors
+        _program->setUniform(_uniformCache.nanColor, _colorSettings.colorMapComponent->nanColor);
+        _program->setUniform(_uniformCache.useNanColor, _colorSettings.colorMapComponent->useNanColor);
     }
 
     glBindVertexArray(_vao);

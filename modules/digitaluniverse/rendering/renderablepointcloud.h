@@ -122,6 +122,7 @@ protected:
         std::unique_ptr<ColorMapComponent> colorMapComponent;
     } _colorSettings;
 
+    properties::BoolProperty _useSpriteTexture;
     properties::StringProperty _spriteTexturePath;
 
     properties::BoolProperty _useAdditiveBlending;
@@ -137,9 +138,9 @@ protected:
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
         maxBillboardSize, color, alphaValue, scaleExponent, scaleFactor, up, right,
-        fadeInValue, screenSize, spriteTexture, useColormap, colorMapTexture,
-        cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
-        enablePixelSizeControl, hasDvarScaling
+        fadeInValue, screenSize, hasSpriteTexture, spriteTexture, useColormap,
+        colorMapTexture, cmapRangeMin, cmapRangeMax, nanColor, useNanColor,
+        hideOutsideRange, enablePixelSizeControl, hasDvarScaling
     ) _uniformCache;
 
     std::string _speckFile;
