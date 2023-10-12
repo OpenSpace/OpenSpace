@@ -50,7 +50,7 @@ vec4 sampleColorMap(float dataValue) {
     }
 
     bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
-    if (hideOutsideRange && isOutside) {
+    if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
         discard;
     }
 
