@@ -133,7 +133,7 @@ documentation::Documentation ColorMapComponent::Documentation() {
 }
 
 ColorMapComponent::ColorMapComponent()
-    : properties::PropertyOwner({ "ColorMap", "Color Map", "" })
+    : properties::PropertyOwner({ "ColorMapping", "Color Mapping", "" })
     , enabled(EnabledInfo, true)
     , dataColumn(ColorParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
     , colorMapFile(FileInfo)
