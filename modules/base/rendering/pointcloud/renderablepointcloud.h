@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTCLOUD___H__
-#define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTCLOUD___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPOINTCLOUD___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPOINTCLOUD___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -160,4 +160,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTCLOUD___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPOINTCLOUD___H__

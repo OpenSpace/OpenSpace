@@ -28,8 +28,6 @@ set(HEADER_FILES
   rendering/colormapcomponent.h
   rendering/renderabledumeshes.h
   rendering/renderableplanescloud.h
-  rendering/renderablepointcloud.h
-  rendering/renderablepolygoncloud.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -37,22 +35,14 @@ set(SOURCE_FILES
   rendering/colormapcomponent.cpp
   rendering/renderabledumeshes.cpp
   rendering/renderableplanescloud.cpp
-  rendering/renderablepointcloud.cpp
-  rendering/renderablepolygoncloud.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  shaders/billboardpoint_fs.glsl
-  shaders/billboardpoint_gs.glsl
-  shaders/billboardpoint_vs.glsl
   shaders/dumesh_vs.glsl
   shaders/dumesh_fs.glsl
   shaders/plane_vs.glsl
   shaders/plane_fs.glsl
-  shaders/polygon_fs.glsl
-  shaders/polygon_gs.glsl
-  shaders/polygon_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

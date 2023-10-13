@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOLYGONCLOUD___H__
-#define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOLYGONCLOUD___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPOLYGONCLOUD___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPOLYGONCLOUD___H__
 
-#include <modules/digitaluniverse/rendering/renderablepointcloud.h>
+#include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -68,4 +68,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOLYGONCLOUD___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPOLYGONCLOUD___H__

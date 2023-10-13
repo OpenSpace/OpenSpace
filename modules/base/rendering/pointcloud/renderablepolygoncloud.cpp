@@ -22,34 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/rendering/renderablepolygoncloud.h>
+#include <modules/base/rendering/pointcloud/renderablepolygoncloud.h>
 
-#include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <glm/gtx/string_cast.hpp>
-#include <array>
-#include <cstdint>
-#include <filesystem>
-#include <fstream>
-#include <locale>
 #include <optional>
-#include <string>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePolygonCloud";
@@ -65,7 +46,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePolygonCloud::Documentation() {
-    return codegen::doc<Parameters>("digitaluniverse_RenderablePolygonCloud");
+    return codegen::doc<Parameters>("base_RenderablePolygonCloud");
 }
 
 RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictionary)
@@ -174,9 +155,9 @@ void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) {
     std::unique_ptr<ghoul::opengl::ProgramObject> program =
         ghoul::opengl::ProgramObject::Build(
             "RenderablePointCloud_Polygon",
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/polygon_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/polygon_fs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/polygon_gs.glsl")
+            absPath("${MODULE_BASE}/shaders/polygon_vs.glsl"),
+            absPath("${MODULE_BASE}/shaders/polygon_fs.glsl"),
+            absPath("${MODULE_BASE}/shaders/polygon_gs.glsl")
         );
 
     program->activate();

@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/rendering/renderablepointcloud.h>
+#include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 
-#include <modules/digitaluniverse/digitaluniversemodule.h>
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -287,7 +287,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePointCloud::Documentation() {
-    return codegen::doc<Parameters>("digitaluniverse_renderablepointcloud");
+    return codegen::doc<Parameters>("base_renderablepointcloud");
 }
 
 RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
@@ -507,14 +507,14 @@ void RenderablePointCloud::initialize() {
 void RenderablePointCloud::initializeGL() {
     ZoneScoped;
 
-    _program = DigitalUniverseModule::ProgramObjectManager.request(
+    _program = BaseModule::ProgramObjectManager.request(
         "RenderablePointCloud",
         []() {
             return global::renderEngine->buildRenderProgram(
                 "RenderablePointCloud",
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpoint_vs.glsl"),
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpoint_fs.glsl"),
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpoint_gs.glsl")
+                absPath("${MODULE_BASE}/shaders/billboardpoint_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/billboardpoint_fs.glsl"),
+                absPath("${MODULE_BASE}/shaders/billboardpoint_gs.glsl")
             );
         }
     );
@@ -532,7 +532,7 @@ void RenderablePointCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
-    DigitalUniverseModule::ProgramObjectManager.release(
+    BaseModule::ProgramObjectManager.release(
         "RenderablePointCloud",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
@@ -540,7 +540,7 @@ void RenderablePointCloud::deinitializeGL() {
     );
     _program = nullptr;
 
-    DigitalUniverseModule::TextureManager.release(_spriteTexture);
+    BaseModule::TextureManager.release(_spriteTexture);
     _spriteTexture = nullptr;
 }
 
@@ -800,7 +800,7 @@ void RenderablePointCloud::updateSpriteTexture() {
 
     unsigned int hash = ghoul::hashCRC32File(_spriteTexturePath);
 
-    _spriteTexture = DigitalUniverseModule::TextureManager.request(
+    _spriteTexture = BaseModule::TextureManager.request(
         std::to_string(hash),
         [path = _spriteTexturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
             std::filesystem::path p = absPath(path);
@@ -814,7 +814,7 @@ void RenderablePointCloud::updateSpriteTexture() {
         }
     );
 
-    DigitalUniverseModule::TextureManager.release(texture);
+    BaseModule::TextureManager.release(texture);
     _spriteTextureIsDirty = false;
 }
 
