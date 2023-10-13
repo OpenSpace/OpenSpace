@@ -37,6 +37,7 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <openspace/rendering/renderable.h>
@@ -60,6 +61,7 @@
 namespace openspace {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
+    engine.addDocumentation(ColorMappingComponent::Documentation());
     engine.addDocumentation(LogFactoryDocumentation());
     engine.addDocumentation(LabelsComponent::Documentation());
     engine.addDocumentation(Mission::Documentation());

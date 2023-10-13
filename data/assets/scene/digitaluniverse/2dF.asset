@@ -23,7 +23,7 @@ local Object = {
     Unit = "Mpc",
     Texture = textures .. "point3A.png",
     Coloring = {
-      ColorMap = {
+      ColorMapping = {
         File = speck .. "2dF.cmap",
         ParameterOptions = {
           { Key = "redshift", Range = { 0.0, 0.075 } },

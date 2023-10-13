@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___COLORMAPCOMPONENT___H__
-#define __OPENSPACE_MODULE_DIGITALUNIVERSE___COLORMAPCOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_BASE___COLORMAPCOMPONENT___H__
+#define __OPENSPACE_MODULE_BASE___COLORMAPCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -41,13 +41,20 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * TODO:
+ * This is a component that can be used to consistently hold parameters and properties
+ * for controlling color mapping between different renderables. This includes things
+ * like the the color map file itself, converted to a texture, colors to use for missing
+ * values and the available data columns and value ranges.
+ *
+ * @TODO Also provide a small shader snippet that can be included in fragment shaders
+ * that use this color mapping. As well as a set of uniforms? Now every
+ * renderable needs to handle this separately.  (emmbr, 2023-10-13)
  */
-class ColorMapComponent : public properties::PropertyOwner {
+class ColorMappingComponent : public properties::PropertyOwner {
 public:
-    ColorMapComponent();
-    explicit ColorMapComponent(const ghoul::Dictionary& dictionary);
-    ~ColorMapComponent() override = default;
+    ColorMappingComponent();
+    explicit ColorMappingComponent(const ghoul::Dictionary& dictionary);
+    ~ColorMappingComponent() override = default;
 
     ghoul::opengl::Texture* texture() const;
 
@@ -88,4 +95,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___COLORMAPCOMPONENT___H__
+#endif // __OPENSPACE_MODULE_BASE___COLORMAPCOMPONENT___H__

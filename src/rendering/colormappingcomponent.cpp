@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/rendering/colormapcomponent.h>
+#include <openspace/rendering/colormappingcomponent.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -96,7 +96,7 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    struct [[codegen::Dictionary(ColorMapComponent)]] Parameters {
+    struct [[codegen::Dictionary(ColorMappingComponent)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
@@ -123,16 +123,16 @@ namespace {
         // [[codegen::verbatim(NoDataColorInfo.description)]]
         std::optional<glm::vec4> noDataColor [[codegen::color()]];
     };
-#include "colormapcomponent_codegen.cpp"
+#include "colormappingcomponent_codegen.cpp"
 }  // namespace
 
 namespace openspace {
 
-documentation::Documentation ColorMapComponent::Documentation() {
-    return codegen::doc<Parameters>("digitaluniverse_colormapcomponent");
+documentation::Documentation ColorMappingComponent::Documentation() {
+    return codegen::doc<Parameters>("colormappingcomponent");
 }
 
-ColorMapComponent::ColorMapComponent()
+ColorMappingComponent::ColorMappingComponent()
     : properties::PropertyOwner({ "ColorMapping", "Color Mapping", "" })
     , enabled(EnabledInfo, true)
     , dataColumn(ColorParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -163,8 +163,8 @@ ColorMapComponent::ColorMapComponent()
     addProperty(nanColor);
 }
 
-ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
-    : ColorMapComponent()
+ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary)
+    : ColorMappingComponent()
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -201,11 +201,11 @@ ColorMapComponent::ColorMapComponent(const ghoul::Dictionary& dictionary)
     }
 }
 
-ghoul::opengl::Texture* ColorMapComponent::texture() const {
+ghoul::opengl::Texture* ColorMappingComponent::texture() const {
     return _texture.get();
 }
 
-void ColorMapComponent::initialize(const dataloader::Dataset& dataset) {
+void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
     _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
 
     // Initialize empty colormap ranges based on dataset
@@ -240,7 +240,7 @@ void ColorMapComponent::initialize(const dataloader::Dataset& dataset) {
     }
 }
 
-void ColorMapComponent::initializeTexture() {
+void ColorMappingComponent::initializeTexture() {
     if (_colorMap.entries.empty()) {
         return;
     }
@@ -276,7 +276,7 @@ void ColorMapComponent::initializeTexture() {
     _texture->uploadTexture();
 }
 
-glm::vec4 ColorMapComponent::colorFromColorMap(float valueToColorFrom) const {
+glm::vec4 ColorMappingComponent::colorFromColorMap(float valueToColorFrom) const {
     glm::vec2 currentColorRange = valueRange;
     float cmax = currentColorRange.y;
     float cmin = currentColorRange.x;

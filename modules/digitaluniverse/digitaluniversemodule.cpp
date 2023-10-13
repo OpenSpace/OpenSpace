@@ -24,7 +24,6 @@
 
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 
-#include <modules/digitaluniverse/rendering/colormapcomponent.h>
 #include <modules/digitaluniverse/rendering/renderabledumeshes.h>
 #include <modules/digitaluniverse/rendering/renderableplanescloud.h>
 #include <openspace/documentation/documentation.h>
@@ -58,7 +57,6 @@ void DigitalUniverseModule::internalDeinitializeGL() {
 
 std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
     return {
-        ColorMapComponent::Documentation(),
         RenderablePlanesCloud::Documentation(),
         RenderableDUMeshes::Documentation()
     };

@@ -29,7 +29,7 @@ local Object = {
     File = HUDFSpeck .. "hudf.speck",
     Texture = circle .. "circle.png",
     Coloring = {
-      ColorMap = {
+      ColorMapping = {
         File = ColorMap .. "hudf.cmap",
         ParameterOptions = {
           { Key = "redshift", Range = { 0.0, 0.075 } },

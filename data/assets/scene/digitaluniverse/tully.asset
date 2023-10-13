@@ -39,7 +39,7 @@ local TullyGalaxies = {
     Texture = textures .. "point3A.png",
     Coloring = {
       FixedColor = { 1.0, 0.4, 0.2 },
-      ColorMap = {
+      ColorMapping = {
         File = speck .. "lss.cmap",
         ParameterOptions = {
           { Key = "prox5Mpc", Range = { 1.0, 30.0 } }

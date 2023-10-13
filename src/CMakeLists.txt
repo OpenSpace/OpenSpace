@@ -121,6 +121,7 @@ set(OPENSPACE_SOURCE
   properties/vector/vec3property.cpp
   properties/vector/vec4property.cpp
   query/query.cpp
+  rendering/colormappingcomponent.cpp
   rendering/dashboard.cpp
   rendering/dashboard_lua.inl
   rendering/dashboarditem.cpp
@@ -311,6 +312,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/vector/vec3property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/vector/vec4property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/query/query.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/colormappingcomponent.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/dashboard.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/dashboarditem.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/dashboardtextitem.h

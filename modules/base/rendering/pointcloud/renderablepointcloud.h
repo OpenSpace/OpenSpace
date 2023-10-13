@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/digitaluniverse/rendering/colormapcomponent.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -36,6 +35,7 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -119,7 +119,7 @@ protected:
     struct ColorSettings : properties::PropertyOwner {
         ColorSettings(const ghoul::Dictionary& dictionary);
         properties::Vec3Property pointColor;
-        std::unique_ptr<ColorMapComponent> colorMapComponent;
+        std::unique_ptr<ColorMappingComponent> colorMapping;
     } _colorSettings;
 
     properties::BoolProperty _useSpriteTexture;

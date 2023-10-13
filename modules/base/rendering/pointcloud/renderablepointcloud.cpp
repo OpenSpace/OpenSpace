@@ -264,8 +264,8 @@ namespace {
             std::optional<glm::vec3> fixedColor [[codegen::color()]];
 
             // Settings related to the choice of color map, parameters, et. cetera
-            std::optional<ghoul::Dictionary> colorMap
-                [[codegen::reference("digitaluniverse_colormapcomponent")]];
+            std::optional<ghoul::Dictionary> colorMapping
+                [[codegen::reference("colormappingcomponent")]];
         };
         // Settings related to the coloring of the points, such as a fixed color,
         // color map, etc.
@@ -350,11 +350,11 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
         const Parameters::ColorSettings settings = *p.coloring;
         pointColor = settings.fixedColor.value_or(pointColor);
 
-        if (settings.colorMap.has_value()) {
-            colorMapComponent = std::make_unique<ColorMapComponent>(
-                *settings.colorMap
+        if (settings.colorMapping.has_value()) {
+            colorMapping = std::make_unique<ColorMappingComponent>(
+                *settings.colorMapping
            );
-           addPropertySubOwner(colorMapComponent.get());
+           addPropertySubOwner(colorMapping.get());
         }
     }
     pointColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -456,16 +456,16 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_sizeSettings);
     addPropertySubOwner(_colorSettings);
 
-    if (p.coloring.has_value() && (*p.coloring).colorMap.has_value()) {
+    if (p.coloring.has_value() && (*p.coloring).colorMapping.has_value()) {
         _hasColorMapFile = true;
 
-        _colorSettings.colorMapComponent->dataColumn.onChange(
+        _colorSettings.colorMapping->dataColumn.onChange(
             [this]() { _dataIsDirty = true; }
         );
 
-        _colorSettings.colorMapComponent->setRangeFromData.onChange([this]() {
+        _colorSettings.colorMapping->setRangeFromData.onChange([this]() {
             int parameterIndex = currentColorParameterIndex();
-            _colorSettings.colorMapComponent->valueRange = _dataset.findValueRange(
+            _colorSettings.colorMapping->valueRange = _dataset.findValueRange(
                 parameterIndex
             );
         });
@@ -492,7 +492,7 @@ void RenderablePointCloud::initialize() {
         _dataset = dataloader::data::loadFileWithCache(_speckFile, specs);
 
         if (_hasColorMapFile) {
-            _colorSettings.colorMapComponent->initialize(_dataset);
+            _colorSettings.colorMapping->initialize(_dataset);
         }
     }
 
@@ -522,7 +522,7 @@ void RenderablePointCloud::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     if (_hasColorMapFile) {
-        _colorSettings.colorMapComponent->initializeTexture();
+        _colorSettings.colorMapping->initializeTexture();
     }
 }
 
@@ -627,25 +627,31 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
 
-    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapComponent->enabled;
+    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled;
     _program->setUniform(_uniformCache.useColormap, useColorMap);
-    if (useColorMap && _colorSettings.colorMapComponent->texture()) {
+    if (useColorMap && _colorSettings.colorMapping->texture()) {
         ghoul::opengl::TextureUnit colorMapTextureUnit;
         colorMapTextureUnit.activate();
-        _colorSettings.colorMapComponent->texture()->bind();
+        _colorSettings.colorMapping->texture()->bind();
 
         _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
 
-        const glm::vec2 range = _colorSettings.colorMapComponent->valueRange;
+        const glm::vec2 range = _colorSettings.colorMapping->valueRange;
         _program->setUniform(_uniformCache.cmapRangeMin, range.x);
         _program->setUniform(_uniformCache.cmapRangeMax, range.y);
         _program->setUniform(
             _uniformCache.hideOutsideRange,
-            _colorSettings.colorMapComponent->hideOutsideRange
+            _colorSettings.colorMapping->hideOutsideRange
         );
 
-        _program->setUniform(_uniformCache.nanColor, _colorSettings.colorMapComponent->nanColor);
-        _program->setUniform(_uniformCache.useNanColor, _colorSettings.colorMapComponent->useNanColor);
+        _program->setUniform(
+            _uniformCache.nanColor,
+            _colorSettings.colorMapping->nanColor
+        );
+        _program->setUniform(
+            _uniformCache.useNanColor,
+            _colorSettings.colorMapping->useNanColor
+        );
     }
 
     glBindVertexArray(_vao);
@@ -820,7 +826,7 @@ void RenderablePointCloud::updateSpriteTexture() {
 
 int RenderablePointCloud::currentColorParameterIndex() const {
     const properties::OptionProperty& property =
-        _colorSettings.colorMapComponent->dataColumn;
+        _colorSettings.colorMapping->dataColumn;
 
     if (!_hasColorMapFile || property.options().empty()) {
         return 0;

@@ -24,7 +24,7 @@ local Object = {
     Texture = textures .. "point3A.png",
     Coloring = {
       FixedColor = { 1.0, 1.0, 0.0 },
-      ColorMap = {
+      ColorMapping = {
         File = speck .. "6dF.cmap",
         ParameterOptions = {
           { Key = "redshift", Range = { 0.0, 0.075 } },

@@ -22,7 +22,7 @@ local Object = {
     File = speck .. "SDSSgals.speck",
     Coloring = {
       FixedColor = { 0.8, 0.8, 1.0 },
-      ColorMap = {
+      ColorMapping = {
         File = speck .. "SDSSgals.cmap",
         ParameterOptions = {
           { Key = "redshift", Range = { 0.0, 0.075 } },
