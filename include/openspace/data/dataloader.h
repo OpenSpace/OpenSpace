@@ -87,6 +87,10 @@ struct ColorMap {
     std::vector<glm::vec4> entries;
 };
 
+// @TODO: Make sure the cashed file is updated when these values changes.
+// E.g. by making a has out of all the values and add that to the filename
+// when caching.
+// @TODO: Also make sure to update cache data versions!
 struct DataLoadSpecs {
     std::optional<float> missingDataValue;
     // @TODO: can add column names for positionmal data in CSV, for example
