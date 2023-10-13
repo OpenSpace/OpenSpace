@@ -834,59 +834,6 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     constexpr int res = 2880;
     const double distance = res * boundingSphere() / tfov;
 
-    // --- SHM stuff
-    static GLuint dfbo = 0;
-    static GLuint dmap = 0;
-    static auto dw = global::renderEngine->renderingResolution().x;
-    static auto dh = global::renderEngine->renderingResolution().y;
-    static std::unique_ptr<ghoul::opengl::ProgramObject> prog;
-    if (dfbo == 0) {
-        prog = global::renderEngine->buildRenderProgram(
-            "shdw",
-            absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl"),
-            absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl")
-        );
-        prog->setIgnoreAttributeLocationError(
-            ghoul::opengl::ProgramObject::IgnoreError::Yes
-        );
-        prog->setIgnoreUniformLocationError(
-            ghoul::opengl::ProgramObject::IgnoreError::Yes
-        );
-
-        glGenFramebuffers(1, &dfbo);
-
-        glGenTextures(1, &dmap);
-        glBindTexture(GL_TEXTURE_2D, dmap);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_DEPTH_COMPONENT,
-            dw,
-            dh,
-            0,
-            GL_DEPTH_COMPONENT,
-            GL_FLOAT,
-            nullptr
-        );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        global::renderEngine->setDebugTextureRendering(dmap);
-
-        GLint prevFBO;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFBO);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, dfbo);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, dmap, 0);
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-        glBindFramebuffer(GL_FRAMEBUFFER, prevFBO);
-    }
-    // --- SHM stuff
     if ((distanceToCamera < distance) || (_generalProperties.renderAtDistance)) {
         try {
             if (_shadowers.size() > 0) {
@@ -1437,12 +1384,13 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     }
     _globalRenderer.program->deactivate();
 
-
+    LINFO("------------");
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
     for (int i = 0; i < localCount; i++) {
         renderChunkLocally(*_localChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
+    LINFO("------------");
     _localRenderer.program->deactivate();
 
     if (global::sessionRecording->isSavingFramesDuringPlayback() &&
@@ -1574,6 +1522,155 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     ZoneScoped;
     TracyGpuZone("renderChunkLocally");
 
+    // --- SHM stuff
+    static GLuint dfbo = 0;
+    static GLuint dmap = 0;
+    static auto dw = 512; // global::renderEngine->renderingResolution().x;
+    static auto dh = 512; // global::renderEngine->renderingResolution().y;
+    static std::unique_ptr<ghoul::opengl::ProgramObject> prog;
+    if (dfbo == 0) {
+        prog = global::renderEngine->buildRenderProgram(
+            "shdw",
+            absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl"),
+            absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl")
+        );
+        prog->setIgnoreAttributeLocationError(
+            ghoul::opengl::ProgramObject::IgnoreError::Yes
+        );
+        prog->setIgnoreUniformLocationError(
+            ghoul::opengl::ProgramObject::IgnoreError::Yes
+        );
+
+        glGenFramebuffers(1, &dfbo);
+
+        glGenTextures(1, &dmap);
+        glBindTexture(GL_TEXTURE_2D, dmap);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_DEPTH_COMPONENT,
+            dw,
+            dh,
+            0,
+            GL_DEPTH_COMPONENT,
+            GL_FLOAT,
+            nullptr
+        );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        global::renderEngine->setDebugTextureRendering(dmap);
+
+        GLint prevFBO;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFBO);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, dfbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, dmap, 0);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+        glBindFramebuffer(GL_FRAMEBUFFER, prevFBO);
+    }
+
+    for (const std::string& shadower : _shadowers) {
+        SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(shadower);
+        glm::dvec3 pos = node->parent()->position();
+
+        Geodetic2 geo = _ellipsoid.cartesianToGeodetic2(pos);
+        glm::dvec3 n = _ellipsoid.geodeticSurfaceNormal(geo);
+        glm::dvec3 u = glm::normalize(glm::cross(n, glm::dvec3(1, 0, 0)));
+        glm::dvec3 v = glm::normalize(glm::cross(n, u));
+
+        double r = node->boundingSphere();
+        glm::dvec3 p0 = pos - u * r - v * r;
+        glm::dvec3 p1 = pos - u * r + v * r;
+        glm::dvec3 p2 = pos + u * r - v * r;
+        glm::dvec3 p3 = pos + u * r + v * r;
+
+        Geodetic2 g0 = _ellipsoid.cartesianToGeodetic2(p0);
+        Geodetic2 g1 = _ellipsoid.cartesianToGeodetic2(p1);
+        Geodetic2 g2 = _ellipsoid.cartesianToGeodetic2(p2);
+        Geodetic2 g3 = _ellipsoid.cartesianToGeodetic2(p3);
+
+        double mila = std::min({ g0.lat, g1.lat, g2.lat, g3.lat });
+        double milo = std::min({ g0.lon, g1.lon, g2.lon, g3.lon });
+        double mala = std::max({ g0.lat, g1.lat, g2.lat, g3.lat });
+        double malo = std::max({ g0.lon, g1.lon, g2.lon, g3.lon });
+        GeodeticPatch patch(geo.lat, geo.lon, std::abs(mala - mila) / 2., std::abs(malo - milo) / 2.);
+        if (chunk.surfacePatch.overlaps(patch)) {
+            LINFO(fmt::format("Contains! {}, {}", chunk.tileIndex.x, chunk.tileIndex.y));
+
+            GLint prevprog;
+            glGetIntegerv(GL_CURRENT_PROGRAM, &prevprog);
+
+            GLint prevfbo;
+            glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevfbo);
+
+            GLint prevvp[4];
+            glGetIntegerv(GL_VIEWPORT, prevvp);
+
+            const auto rndl = dynamic_cast<RenderableModel*>(node->renderable());
+            prog->activate();
+
+            glm::dmat4 model = glm::translate(glm::dmat4(1), node->worldPosition());
+            prog->setUniform("model", node->modelTransform());
+
+            SceneGraphNode* lightsource = global::renderEngine->scene()->sceneGraphNode("Sun");
+           
+            auto moon_local_position = this->parent()->position();
+            auto moon_world_position = this->parent()->worldPosition();
+            auto moon_local_rotation = this->parent()->rotationMatrix();
+
+            auto handle = this->calculateSurfacePositionHandle(
+                _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch.center())
+            );
+            auto chunk_local_position = _ellipsoid.cartesianPosition(
+                { chunk.surfacePatch.center(), handle.heightToSurface }
+            );
+            auto chunk_world_position = moon_world_position + moon_local_rotation * chunk_local_position;
+            auto chunk_local_normal = _ellipsoid.geodeticSurfaceNormal(chunk.surfacePatch.center());
+            auto chunk_world_normal = chunk_local_normal * moon_local_rotation;
+
+            auto eye = chunk_world_position + chunk_world_normal * rndl->boundingSphere() * 3.0;
+            auto center = chunk_world_position;
+            auto right = glm::cross(glm::dvec3(0, 1, 0), -chunk_world_normal);
+            auto up = glm::cross(-chunk_world_normal, right);
+            auto view = glm::lookAt(eye, center, up);
+            prog->setUniform("view", view);
+
+            double aspect = static_cast<double>(dw) / static_cast<double>(dh);
+            double near = 0.1;
+            double far = 5000.;
+            glm::dmat4 projection = glm::perspective(glm::radians(90.), aspect, near, far);
+            
+            glm::dvec3 nw = _ellipsoid.cartesianSurfacePosition(patch.corner(globebrowsing::NORTH_WEST));
+            glm::dvec3 se = _ellipsoid.cartesianSurfacePosition(patch.corner(globebrowsing::SOUTH_EAST));
+            
+            //glm::dmat4 projection = glm::ortho(nw.x, se.x, nw.y, se.y, near, far);
+            prog->setUniform("projection", projection);
+
+
+            glBindFramebuffer(GL_FRAMEBUFFER, dfbo);
+            glViewport(0, 0, dw, dh);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            rndl->geometry()->render(*prog, false, true);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            prog->deactivate();
+
+            // Restore
+            glUseProgram(prevprog);
+            glBindFramebuffer(GL_FRAMEBUFFER, prevfbo);
+            glViewport(prevvp[0], prevvp[1], prevvp[2], prevvp[3]);
+        }
+    }
+
+    // --- SHM stuff
+    
     //PerfMeasure("locally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_localRenderer.program;
