@@ -14,9 +14,10 @@ asset.require("./overlays/size_reference", false)
 asset.meta = {
   Name = "Base Mars Layers",
   Version = "1.0",
-  Description = [[Base Mars layers are: MOC WA Color, Viking MDIM, MOLA Pseudo Color,
-    MOLA HRSC, Themis IR Day, Themis IR Night, CTX Mosaic, CTX Blended beta01, HiRISE, and
-    HiRISE Local Set]],
+  Description = [[Base Mars layers are: Mars texture, CTX Blended, HiRISE,
+    HiRISE Local Set, MDEM200M (3D), HiRISE Local Set DEM (3D), Tile Indicies,
+    and Size Reference.
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

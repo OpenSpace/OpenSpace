@@ -4,9 +4,12 @@ asset.require("./colorlayers/voyager_global_mosaic_local", asset.enabled)
 
 
 asset.meta = {
-  Name = "Europa Mosaic Layer (Local)",
-  Version = "1.0",
-  Description = "The Mosaic Europa texture, loaded locally",
+  Name = "Default Europa Layers (Local)",
+  Version = "1.1",
+  Description = [[Default Europa layers are: Europa Texture & Voyager Global Mosaic.
+    <br>
+    Layers only loaded locally
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

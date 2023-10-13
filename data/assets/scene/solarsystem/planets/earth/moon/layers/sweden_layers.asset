@@ -12,9 +12,11 @@ asset.require("./heightlayers/loladem_sweden", asset.enabled)
 asset.meta = {
   Name = "Default Moon layers (Sweden)",
   Version = "1.0",
-  Description = [[This asset adds the default layers to the Moon globe.
-  <br>
-  Layers only loaded from the Sweden server]],
+  Description = [[Default Moon layers are: WAC, Clem Uvvis, Uvvis Hybrid, Kaguya,
+    LRO LOLA Color Shaded Relief 388m v4, Lola Shade, and Lola DEM (3D).
+    <br>
+    Layers only loaded from the Sweden server
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -9,9 +9,11 @@ asset.require("./heightlayers/magellan_utah", asset.enabled)
 asset.meta = {
   Name = "Default Venus Layers (Utah)",
   Version = "1.1",
-  Description = [[Default Venus layers are: Venus Magellan Mosaic and Venus Magellan DEM
+  Description = [[Default Venus layers are: Venus Texture, Magellan Mosaic,
+    Clouds Magellan Combo, and Magellan Elevation (3D).
     <br>
-    Layers only loaded from the Utah server]],
+    Layers only loaded from the Utah server
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

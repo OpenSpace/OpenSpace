@@ -8,15 +8,17 @@ asset.require("./layers/newyork_layers", false)
 asset.meta = {
   Name = "Default Earth Layers",
   Version = "1.1",
-  Description = [[Default Earth layers are: ESRI VIIRS Combo, ESRI World Imagery, VIIRS
-    SNPP (Temporal), Aqua Modis (Temporal), Terra Modis (Temporal), BMNG, AMSR2 GCOM
-    W1 Sea Ice Concentration (Temporal), MODIS Terra Chlorophyll A (Temporal), GHRSST,
-    L4 G1SST Sea Surface Temperature (Temporal), GHRSST L4 MUR Sea Surface Temperature
-    (Temporal), World Elevation (3D), Earth at Night 2012, Coastlines, Reference
-    Features, Reference Labels, Tile Indicies, Size Reference, Gebco, and Modis Water
-    Mask.
+  Description = [[Default Earth layers are: Blue Marble,
+    ESRI VIIRS Combo, ESRI NOAA20 Combo, ESRI World Imagery, VIIRS SNPP (Temporal),
+    Aqua Modis (Temporal), Terra Modis (Temporal),
+    AMSR2 GCOM W1 Sea Ice Concentration (Temporal), MODIS Terra Chlorophyll A (Temporal),
+    GHRSST L4 MUR Sea Surface Temperature (Temporal), BMNG, Blue Marble Height (3D),
+    World Elevation (3D), Earth at Night 2012, Earth at Night Texture,
+    Earth at Night (Temporal), Coastlines, Reference Features, Reference Labels,
+    Tile Indicies, Size Reference, Gebco and Modis Water Mask.
     <br>
-    Layers loaded from all servers]],
+    Layers loaded from all servers
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

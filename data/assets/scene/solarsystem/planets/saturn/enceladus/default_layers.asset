@@ -6,11 +6,12 @@ asset.require("./layers/newyork_layers", true)
 
 asset.meta = {
   Name = "Default Enceladus Layers",
-  Version = "1.0",
-  Description = [[Default Enceladus layers are: Enceladus Texture and Cassini Global
-    Mosaic 100m HPF
+  Version = "1.1",
+  Description = [[Default Enceladus layers are: Enceladus Texture,
+    and Cassini Global Mosaic 100m HPF.
     <br>
-    Layers loaded from all available servers]],
+    Layers loaded from all available servers
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

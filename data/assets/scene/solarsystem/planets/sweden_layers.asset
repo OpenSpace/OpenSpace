@@ -6,7 +6,7 @@ asset.require("./../jupiter/europa/layers/sweden_layers")
 asset.require("./../mars/layers/sweden_layers")
 asset.require("./../mercury/layers/sweden_layers")
 asset.require("./../saturn/enceladus/layers/sweden_layers")
--- The Sweden server does not have these maps, use the New York server for now
+-- The Sweden server does not have these layers, use the New York server for now
 asset.require("./../venus/layers/newyork_layers")
 
 
@@ -17,7 +17,8 @@ asset.meta = {
   Description = [[Adds default layers for all planets. Remove this asset and include
     individual layers for planets to customize planet layers
     <br>
-    Layers only loaded from the Sweden server]],
+    Layers only loaded from the Sweden server
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

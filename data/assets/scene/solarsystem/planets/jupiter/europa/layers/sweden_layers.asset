@@ -4,9 +4,12 @@ asset.require("./colorlayers/voyager_global_mosaic_sweden", asset.enabled)
 
 
 asset.meta = {
-  Name = "Europa Mosaic Layer (Sweden)",
+  Name = "Default Europa Layers (Sweden)",
   Version = "1.0",
-  Description = "The Mosaic Europa texture, loaded from the Sweden server",
+  Description = [[Default Europa layers are: Europa Texture & Voyager Global Mosaic.
+    <br>
+    Layers only loaded from the Sweden server
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
