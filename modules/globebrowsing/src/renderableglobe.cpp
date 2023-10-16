@@ -69,7 +69,6 @@ namespace {
 
     // Global flags to modify the RenderableGlobe
     constexpr bool LimitLevelByAvailableData = true;
-    constexpr bool PerformFrustumCulling = true;
     constexpr bool PreformHorizonCulling = true;
 
     // Shadow structure
@@ -124,6 +123,13 @@ namespace {
         "is used instead",
         // @VISIBILITY(?)
         openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PerformFrustumCullingInfo = {
+        "PerformFrustumCulling",
+        "Perform frustum culling",
+        "If this value is set to 'true', frustum culling will be performed.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
@@ -543,6 +549,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(ShowChunkEdgeInfo, false),
         BoolProperty(LevelProjectedAreaInfo, true),
         BoolProperty(ResetTileProviderInfo, false),
+        BoolProperty(PerformFrustumCullingInfo, false),
         IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
         IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
     })
@@ -649,6 +656,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
     _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
+    _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
 
@@ -1891,7 +1899,8 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
     ZoneScoped;
 
     return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (PerformFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
+           (_debugProperties.performFrustumCulling &&
+               isCullableByFrustum(chunk, renderData, mvp));
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,

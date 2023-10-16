@@ -130,6 +130,7 @@ private:
         properties::BoolProperty showChunkEdges;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
+        properties::BoolProperty performFrustumCulling;
         properties::IntProperty  modelSpaceRenderingCutoffLevel;
         properties::IntProperty  dynamicLodIterationCount;
     } _debugProperties;
