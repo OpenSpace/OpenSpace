@@ -1523,8 +1523,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     // --- SHM stuff
     static GLuint dfbo = 0;
     static GLuint dmap = 0;
-    static auto dw = 512; // global::renderEngine->renderingResolution().x;
-    static auto dh = 512; // global::renderEngine->renderingResolution().y;
+    static auto dw = 2. * global::renderEngine->renderingResolution().x;
+    static auto dh = 2. * global::renderEngine->renderingResolution().y;
     static std::unique_ptr<ghoul::opengl::ProgramObject> prog;
     if (dfbo == 0) {
         prog = global::renderEngine->buildRenderProgram(
@@ -1648,19 +1648,63 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
             glm::dvec3 up = glm::cross(right, light_dir);
             glm::dmat4 view = glm::lookAt(eye, center, up);
-            prog->setUniform("view", view);
+
+            /*auto eye = data.camera.positionVec3();
+            auto center = node->worldPosition();
+            auto dir = glm::normalize(center - eye);
+            auto right = glm::cross(glm::dvec3(0, 1, 0), dir);
+            auto up = glm::cross(dir, right);
+            auto view = glm::lookAt(eye, center, up);
+            prog->setUniform("view", view);*/
 
             // Projection
             double aspect = static_cast<double>(dw) / static_cast<double>(dh);
             double near = 0.1;
-            double far = 5000.;
+            double far = 500.;
             glm::dmat4 projection = glm::perspective(glm::radians(90.), aspect, near, far);
-            
-            glm::dvec3 nw = _ellipsoid.cartesianSurfacePosition(patch.corner(globebrowsing::NORTH_WEST));
-            glm::dvec3 se = _ellipsoid.cartesianSurfacePosition(patch.corner(globebrowsing::SOUTH_EAST));
-            
-            //glm::dmat4 projection = glm::ortho(nw.x, se.x, nw.y, se.y, near, far);
-            prog->setUniform("projection", projection);
+
+            prog->setUniform("light_vp", projection* view);
+
+            //// NW
+            //auto nw = chunk.surfacePatch.corner(globebrowsing::Quad::NORTH_WEST);
+            //handle = this->calculateSurfacePositionHandle(
+            //    _ellipsoid.cartesianSurfacePosition(nw)
+            //);
+            //auto nw_local_position = _ellipsoid.cartesianPosition({ nw, handle.heightToSurface });
+            //auto nw_global_position = moon_world_position + moon_local_rotation * nw_local_position;
+
+            //// NE
+            //auto ne = chunk.surfacePatch.corner(globebrowsing::Quad::NORTH_EAST);
+            //handle = this->calculateSurfacePositionHandle(
+            //    _ellipsoid.cartesianSurfacePosition(ne)
+            //);
+            //auto ne_local_position = _ellipsoid.cartesianPosition({ ne, handle.heightToSurface });
+            //auto ne_global_position = moon_world_position + moon_local_rotation * ne_local_position;
+
+            //// SW
+            //auto sw = chunk.surfacePatch.corner(globebrowsing::Quad::SOUTH_WEST);
+            //handle = this->calculateSurfacePositionHandle(
+            //    _ellipsoid.cartesianSurfacePosition(sw)
+            //);
+            //auto sw_local_position = _ellipsoid.cartesianPosition({ sw, handle.heightToSurface });
+            //auto sw_global_position = moon_world_position + moon_local_rotation * sw_local_position;
+
+            //// SE
+            //auto se = chunk.surfacePatch.corner(globebrowsing::Quad::SOUTH_EAST);
+            //handle = this->calculateSurfacePositionHandle(
+            //    _ellipsoid.cartesianSurfacePosition(se)
+            //);
+            //auto se_local_position = _ellipsoid.cartesianPosition({ se, handle.heightToSurface });
+            //auto se_global_position = moon_world_position + moon_local_rotation * se_local_position;
+
+            //auto l = std::min({ nw_global_position.x, ne_global_position.x, sw_global_position.x, se_global_position.x });
+            //auto r = std::max({ nw_global_position.x, ne_global_position.x, sw_global_position.x, se_global_position.x });
+            //auto t = std::max({ nw_global_position.y, ne_global_position.y, sw_global_position.y, se_global_position.y });
+            //auto b = std::max({ nw_global_position.y, ne_global_position.y, sw_global_position.y, se_global_position.y });
+            //auto n = std::max({ nw_global_position.z, ne_global_position.z, sw_global_position.z, se_global_position.z });
+            //auto f = std::max({ nw_global_position.z, ne_global_position.z, sw_global_position.z, se_global_position.z });
+            //glm::dmat4 projection = glm::ortho(l, r, b, t, n, f);
+            // prog->setUniform("projection", projection);
 
 
             glBindFramebuffer(GL_FRAMEBUFFER, dfbo);
@@ -1676,6 +1720,9 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             glUseProgram(prevprog);
             glBindFramebuffer(GL_FRAMEBUFFER, prevfbo);
             glViewport(prevvp[0], prevvp[1], prevvp[2], prevvp[3]);
+
+            _localRenderer.program->setUniform("light_vp", projection* view);
+            _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
         }
     }
 
@@ -1798,6 +1845,12 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         glBindTexture(GL_TEXTURE_2D, _shadowComponent->dDepthTexture());
         program.setUniform("shadowMapTexture", shadowMapUnit);
     }
+
+    ghoul::opengl::TextureUnit depthmapUnit;
+    depthmapUnit.activate();
+    glBindTexture(GL_TEXTURE_2D, dmap);
+    _localRenderer.program->setUniform("light_depth_map", depthmapUnit);
+
 
     glEnable(GL_DEPTH_TEST);
     if (!renderGeomOnly) {

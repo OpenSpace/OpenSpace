@@ -743,7 +743,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             glBindVertexArray(0);
 
             prog = buildRenderProgram(
-                "PlanetaryTrailBlurProgram",
+                "dbg_tex_program",
                 absPath("${MODULE_BASE}/shaders/dbg_tex_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/dbg_tex_fs.glsl")
             );
@@ -755,7 +755,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         glBindTexture(GL_TEXTURE_2D, _debugTextureRender);
 
         glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        //glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
         glBindTexture(GL_TEXTURE_2D, 0);
