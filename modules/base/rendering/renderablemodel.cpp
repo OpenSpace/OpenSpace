@@ -1117,4 +1117,16 @@ void RenderableModel::update(const UpdateData& data) {
     }
 }
 
+const ghoul::modelgeometry::ModelGeometry* RenderableModel::geometry() const
+{
+    return _geometry.get();
+}
+
+const glm::dmat4 RenderableModel::transform() const
+{
+    glm::dmat4 transform = glm::translate(glm::dmat4(1), glm::dvec3(_pivot.value()));
+    transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
+    return transform;
+}
+
 }  // namespace openspace

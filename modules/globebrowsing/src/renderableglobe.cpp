@@ -1384,13 +1384,11 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     }
     _globalRenderer.program->deactivate();
 
-    LINFO("------------");
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
     for (int i = 0; i < localCount; i++) {
         renderChunkLocally(*_localChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
-    LINFO("------------");
     _localRenderer.program->deactivate();
 
     if (global::sessionRecording->isSavingFramesDuringPlayback() &&
@@ -1601,8 +1599,6 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         double malo = std::max({ g0.lon, g1.lon, g2.lon, g3.lon });
         GeodeticPatch patch(geo.lat, geo.lon, std::abs(mala - mila) / 2., std::abs(malo - milo) / 2.);
         if (chunk.surfacePatch.overlaps(patch)) {
-            LINFO(fmt::format("Contains! {}, {}", chunk.tileIndex.x, chunk.tileIndex.y));
-
             GLint prevprog;
             glGetIntegerv(GL_CURRENT_PROGRAM, &prevprog);
 
@@ -1615,11 +1611,12 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             const auto rndl = dynamic_cast<RenderableModel*>(node->renderable());
             prog->activate();
 
-            glm::dmat4 model = glm::translate(glm::dmat4(1), node->worldPosition());
-            prog->setUniform("model", node->modelTransform());
+            // Model
+            glm::dmat4 model = node->modelTransform();
+            //prog->setUniform("model", model);
+            prog->setUniform("model", model * rndl->transform());
 
-            SceneGraphNode* lightsource = global::renderEngine->scene()->sceneGraphNode("Sun");
-           
+            // View
             auto moon_local_position = this->parent()->position();
             auto moon_world_position = this->parent()->worldPosition();
             auto moon_local_rotation = this->parent()->rotationMatrix();
@@ -1634,13 +1631,26 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             auto chunk_local_normal = _ellipsoid.geodeticSurfaceNormal(chunk.surfacePatch.center());
             auto chunk_world_normal = chunk_local_normal * moon_local_rotation;
 
-            auto eye = chunk_world_position + chunk_world_normal * rndl->boundingSphere() * 3.0;
+            /*auto eye = chunk_world_position + chunk_world_normal * rndl->boundingSphere() * 3.0;
             auto center = chunk_world_position;
             auto right = glm::cross(glm::dvec3(0, 1, 0), -chunk_world_normal);
             auto up = glm::cross(-chunk_world_normal, right);
             auto view = glm::lookAt(eye, center, up);
+            prog->setUniform("view", view);*/
+
+            SceneGraphNode* lightsource = global::renderEngine->scene()->sceneGraphNode("Sun");
+            glm::dvec3 center = node->worldPosition();
+            glm::dvec3 light_pos = lightsource->worldPosition();
+            glm::dvec3 light_dir = glm::normalize(center - light_pos);
+            glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), -light_dir));
+
+            glm::dvec3 eye = center + light_dir * rndl->boundingSphere();
+
+            glm::dvec3 up = glm::cross(right, light_dir);
+            glm::dmat4 view = glm::lookAt(eye, center, up);
             prog->setUniform("view", view);
 
+            // Projection
             double aspect = static_cast<double>(dw) / static_cast<double>(dh);
             double near = 0.1;
             double far = 5000.;
