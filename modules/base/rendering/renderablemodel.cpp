@@ -1214,25 +1214,30 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap(const glm::dvec3 l
 
     _depthMapProgram->activate();
 
-    // Model transform
+    const double size = boundingSphere();
+
+    // Model
     glm::dmat4 transform = glm::translate(glm::dmat4(1), glm::dvec3(_pivot.value()));
     transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
     glm::dmat4 model = this->parent()->modelTransform() * transform;
 
-    // View transform
+    // View
     glm::dvec3 center = this->parent()->worldPosition();
     glm::dvec3 light_dir = glm::normalize(center - light_position);
     glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), -light_dir));
-    glm::dvec3 eye = center + light_dir * this->boundingSphere();
+    glm::dvec3 eye = center + light_dir * size;
     glm::dvec3 up = glm::cross(right, light_dir);
     glm::dmat4 view = glm::lookAt(eye, center, up);
 
-    // Projection transform
-    double aspect =
-        static_cast<double>(_depthMapResolution.x) / static_cast<double>(_depthMapResolution.y);
-    double znear = 0.1;
-    double zfar = 500.;
-    glm::dmat4 projection = glm::perspective(glm::radians(90.), aspect, znear, zfar);
+    // Projection
+    glm::dmat4 projection = glm::ortho(
+        -size * 2.,
+        size * 2.,
+        -size * 2.,
+        size * 2.,
+        size * 0.1,
+        size * 10.
+    );
 
     glm::dmat4 viewProjection = projection * view;
     _depthMapProgram->setUniform("model", model);
