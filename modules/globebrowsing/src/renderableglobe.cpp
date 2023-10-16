@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablemodel.h>
+
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/src/basictypes.h>
@@ -309,7 +309,6 @@ namespace {
         // globe.
         std::optional<ShadowGroup> shadowGroup;
 
-        // Details about the rings of the globe, if it has any.
         std::optional<ghoul::Dictionary> rings
             [[codegen::reference("globebrowsing_rings_component")]];
 
@@ -682,8 +681,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         addProperty(_generalProperties.eclipseShadowsEnabled);
         addProperty(_generalProperties.eclipseHardShadows);
     }
-
-    _shadowers = p.shadowers.value_or(_shadowers);
 
     _shadowMappingPropertyOwner.addProperty(_generalProperties.shadowMapping);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.zFightingPercentage);
@@ -1321,6 +1318,13 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
+    SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
+    std::vector<const RenderableModel*> shadowers = shadowingChildren(this->parent());
+    std::vector<RenderableModel::DepthMapData> depthMapData;
+    for (const RenderableModel* model : shadowers) {
+        depthMapData.push_back(model->renderDepthMap(sun->worldPosition()));
+    }
+
     int globalCount = 0;
     int localCount = 0;
 
@@ -1386,8 +1390,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
-    for (int i = 0; i < localCount; i++) {
-        renderChunkLocally(*_localChunkBuffer[i], data, shadowData, renderGeomOnly);
+    for (int i = 0; i < localCount; ++i) {
+        renderChunkLocally(*_localChunkBuffer[i], data, shadowData, renderGeomOnly, depthMapData);
     }
     _localRenderer.program->deactivate();
 
@@ -1515,219 +1519,12 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data,
                                          const ShadowComponent::ShadowMapData& shadowData,
-                                         bool renderGeomOnly)
+                                         bool renderGeomOnly,
+                                         std::vector<RenderableModel::DepthMapData> depthMapData)
 {
     ZoneScoped;
     TracyGpuZone("renderChunkLocally");
 
-    // --- SHM stuff
-    static GLuint dfbo = 0;
-    static GLuint dmap = 0;
-    static auto dw = 2. * global::renderEngine->renderingResolution().x;
-    static auto dh = 2. * global::renderEngine->renderingResolution().y;
-    static std::unique_ptr<ghoul::opengl::ProgramObject> prog;
-    if (dfbo == 0) {
-        prog = global::renderEngine->buildRenderProgram(
-            "shdw",
-            absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl"),
-            absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl")
-        );
-        prog->setIgnoreAttributeLocationError(
-            ghoul::opengl::ProgramObject::IgnoreError::Yes
-        );
-        prog->setIgnoreUniformLocationError(
-            ghoul::opengl::ProgramObject::IgnoreError::Yes
-        );
-
-        glGenFramebuffers(1, &dfbo);
-
-        glGenTextures(1, &dmap);
-        glBindTexture(GL_TEXTURE_2D, dmap);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_DEPTH_COMPONENT,
-            dw,
-            dh,
-            0,
-            GL_DEPTH_COMPONENT,
-            GL_FLOAT,
-            nullptr
-        );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        global::renderEngine->setDebugTextureRendering(dmap);
-
-        GLint prevFBO;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFBO);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, dfbo);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, dmap, 0);
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-        glBindFramebuffer(GL_FRAMEBUFFER, prevFBO);
-    }
-
-    for (const std::string& shadower : _shadowers) {
-        SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(shadower);
-        glm::dvec3 pos = node->parent()->position();
-
-        Geodetic2 geo = _ellipsoid.cartesianToGeodetic2(pos);
-        glm::dvec3 n = _ellipsoid.geodeticSurfaceNormal(geo);
-        glm::dvec3 u = glm::normalize(glm::cross(n, glm::dvec3(1, 0, 0)));
-        glm::dvec3 v = glm::normalize(glm::cross(n, u));
-
-        double r = node->boundingSphere();
-        glm::dvec3 p0 = pos - u * r - v * r;
-        glm::dvec3 p1 = pos - u * r + v * r;
-        glm::dvec3 p2 = pos + u * r - v * r;
-        glm::dvec3 p3 = pos + u * r + v * r;
-
-        Geodetic2 g0 = _ellipsoid.cartesianToGeodetic2(p0);
-        Geodetic2 g1 = _ellipsoid.cartesianToGeodetic2(p1);
-        Geodetic2 g2 = _ellipsoid.cartesianToGeodetic2(p2);
-        Geodetic2 g3 = _ellipsoid.cartesianToGeodetic2(p3);
-
-        double mila = std::min({ g0.lat, g1.lat, g2.lat, g3.lat });
-        double milo = std::min({ g0.lon, g1.lon, g2.lon, g3.lon });
-        double mala = std::max({ g0.lat, g1.lat, g2.lat, g3.lat });
-        double malo = std::max({ g0.lon, g1.lon, g2.lon, g3.lon });
-        GeodeticPatch patch(geo.lat, geo.lon, std::abs(mala - mila) / 2., std::abs(malo - milo) / 2.);
-        if (chunk.surfacePatch.overlaps(patch)) {
-            GLint prevprog;
-            glGetIntegerv(GL_CURRENT_PROGRAM, &prevprog);
-
-            GLint prevfbo;
-            glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevfbo);
-
-            GLint prevvp[4];
-            glGetIntegerv(GL_VIEWPORT, prevvp);
-
-            const auto rndl = dynamic_cast<RenderableModel*>(node->renderable());
-            prog->activate();
-
-            // Model
-            glm::dmat4 model = node->modelTransform();
-            //prog->setUniform("model", model);
-            prog->setUniform("model", model * rndl->transform());
-
-            // View
-            auto moon_local_position = this->parent()->position();
-            auto moon_world_position = this->parent()->worldPosition();
-            auto moon_local_rotation = this->parent()->rotationMatrix();
-
-            auto handle = this->calculateSurfacePositionHandle(
-                _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch.center())
-            );
-            auto chunk_local_position = _ellipsoid.cartesianPosition(
-                { chunk.surfacePatch.center(), handle.heightToSurface }
-            );
-            auto chunk_world_position = moon_world_position + moon_local_rotation * chunk_local_position;
-            auto chunk_local_normal = _ellipsoid.geodeticSurfaceNormal(chunk.surfacePatch.center());
-            auto chunk_world_normal = chunk_local_normal * moon_local_rotation;
-
-            /*auto eye = chunk_world_position + chunk_world_normal * rndl->boundingSphere() * 3.0;
-            auto center = chunk_world_position;
-            auto right = glm::cross(glm::dvec3(0, 1, 0), -chunk_world_normal);
-            auto up = glm::cross(-chunk_world_normal, right);
-            auto view = glm::lookAt(eye, center, up);
-            prog->setUniform("view", view);*/
-
-            SceneGraphNode* lightsource = global::renderEngine->scene()->sceneGraphNode("Sun");
-            glm::dvec3 center = node->worldPosition();
-            glm::dvec3 light_pos = lightsource->worldPosition();
-            glm::dvec3 light_dir = glm::normalize(center - light_pos);
-            glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), -light_dir));
-
-            glm::dvec3 eye = center + light_dir * rndl->boundingSphere();
-
-            glm::dvec3 up = glm::cross(right, light_dir);
-            glm::dmat4 view = glm::lookAt(eye, center, up);
-
-            /*auto eye = data.camera.positionVec3();
-            auto center = node->worldPosition();
-            auto dir = glm::normalize(center - eye);
-            auto right = glm::cross(glm::dvec3(0, 1, 0), dir);
-            auto up = glm::cross(dir, right);
-            auto view = glm::lookAt(eye, center, up);
-            prog->setUniform("view", view);*/
-
-            // Projection
-            double aspect = static_cast<double>(dw) / static_cast<double>(dh);
-            double near = 0.1;
-            double far = 500.;
-            glm::dmat4 projection = glm::perspective(glm::radians(90.), aspect, near, far);
-
-            prog->setUniform("light_vp", projection* view);
-
-            //// NW
-            //auto nw = chunk.surfacePatch.corner(globebrowsing::Quad::NORTH_WEST);
-            //handle = this->calculateSurfacePositionHandle(
-            //    _ellipsoid.cartesianSurfacePosition(nw)
-            //);
-            //auto nw_local_position = _ellipsoid.cartesianPosition({ nw, handle.heightToSurface });
-            //auto nw_global_position = moon_world_position + moon_local_rotation * nw_local_position;
-
-            //// NE
-            //auto ne = chunk.surfacePatch.corner(globebrowsing::Quad::NORTH_EAST);
-            //handle = this->calculateSurfacePositionHandle(
-            //    _ellipsoid.cartesianSurfacePosition(ne)
-            //);
-            //auto ne_local_position = _ellipsoid.cartesianPosition({ ne, handle.heightToSurface });
-            //auto ne_global_position = moon_world_position + moon_local_rotation * ne_local_position;
-
-            //// SW
-            //auto sw = chunk.surfacePatch.corner(globebrowsing::Quad::SOUTH_WEST);
-            //handle = this->calculateSurfacePositionHandle(
-            //    _ellipsoid.cartesianSurfacePosition(sw)
-            //);
-            //auto sw_local_position = _ellipsoid.cartesianPosition({ sw, handle.heightToSurface });
-            //auto sw_global_position = moon_world_position + moon_local_rotation * sw_local_position;
-
-            //// SE
-            //auto se = chunk.surfacePatch.corner(globebrowsing::Quad::SOUTH_EAST);
-            //handle = this->calculateSurfacePositionHandle(
-            //    _ellipsoid.cartesianSurfacePosition(se)
-            //);
-            //auto se_local_position = _ellipsoid.cartesianPosition({ se, handle.heightToSurface });
-            //auto se_global_position = moon_world_position + moon_local_rotation * se_local_position;
-
-            //auto l = std::min({ nw_global_position.x, ne_global_position.x, sw_global_position.x, se_global_position.x });
-            //auto r = std::max({ nw_global_position.x, ne_global_position.x, sw_global_position.x, se_global_position.x });
-            //auto t = std::max({ nw_global_position.y, ne_global_position.y, sw_global_position.y, se_global_position.y });
-            //auto b = std::max({ nw_global_position.y, ne_global_position.y, sw_global_position.y, se_global_position.y });
-            //auto n = std::max({ nw_global_position.z, ne_global_position.z, sw_global_position.z, se_global_position.z });
-            //auto f = std::max({ nw_global_position.z, ne_global_position.z, sw_global_position.z, se_global_position.z });
-            //glm::dmat4 projection = glm::ortho(l, r, b, t, n, f);
-            // prog->setUniform("projection", projection);
-
-
-            glBindFramebuffer(GL_FRAMEBUFFER, dfbo);
-            glViewport(0, 0, dw, dh);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            rndl->geometry()->render(*prog, false, true);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            prog->deactivate();
-
-            // Restore
-            glUseProgram(prevprog);
-            glBindFramebuffer(GL_FRAMEBUFFER, prevfbo);
-            glViewport(prevvp[0], prevvp[1], prevvp[2], prevvp[3]);
-
-            _localRenderer.program->setUniform("light_vp", projection* view);
-            _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
-        }
-    }
-
-    // --- SHM stuff
-    
     //PerfMeasure("locally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_localRenderer.program;
@@ -1846,11 +1643,15 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         program.setUniform("shadowMapTexture", shadowMapUnit);
     }
 
-    ghoul::opengl::TextureUnit depthmapUnit;
-    depthmapUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, dmap);
-    _localRenderer.program->setUniform("light_depth_map", depthmapUnit);
+    if (depthMapData.size() > 0) {
+        _localRenderer.program->setUniform("light_vp", depthMapData[0].viewProjecion);
+        _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
 
+        ghoul::opengl::TextureUnit depthmapUnit;
+        depthmapUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, depthMapData[0].depthMap);
+        _localRenderer.program->setUniform("light_depth_map", depthmapUnit);
+    }
 
     glEnable(GL_DEPTH_TEST);
     if (!renderGeomOnly) {
@@ -2837,6 +2638,24 @@ void RenderableGlobe::freeChunkNode(Chunk* n) {
         }
     }
     n->children.fill(nullptr);
+}
+
+std::vector<const RenderableModel*> RenderableGlobe::shadowingChildren(const SceneGraphNode* node) {
+	std::vector<const RenderableModel*> shadowers;
+
+	if (node) {
+		const RenderableModel* model = dynamic_cast<const RenderableModel*>(node->renderable());
+		if (model && model->isCastingShadow()) {
+			shadowers.push_back(model);
+		}
+
+		for (const SceneGraphNode* child : node->children()) {
+			std::vector<const RenderableModel*> res = shadowingChildren(child);
+			shadowers.insert(shadowers.end(), res.begin(), res.end());
+		}
+	}
+
+	return shadowers;
 }
 
 void RenderableGlobe::mergeChunkNode(Chunk& cn) {

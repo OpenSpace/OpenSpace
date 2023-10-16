@@ -7,5 +7,5 @@ uniform dmat4 light_vp;
 uniform mat4 meshTransform;
 
 void main() {
-  gl_Position = vec4(light_vp * model * in_position);
+  gl_Position = vec4(light_vp * model * meshTransform * in_position);
 }

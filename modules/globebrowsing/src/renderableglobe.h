@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__
 
 #include <openspace/rendering/renderable.h>
-
+#include <modules/base/rendering/renderablemodel.h>
 #include <modules/globebrowsing/src/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
@@ -221,7 +221,8 @@ private:
      * higher chunk levels.
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
-        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
+        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false,
+        std::vector<RenderableModel::DepthMapData> depthMapData = {}
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
@@ -255,7 +256,8 @@ private:
     void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
 
-    std::vector<std::string> _shadowers;
+    std::vector<const RenderableModel*> shadowingChildren(const SceneGraphNode* node);
+
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
     LayerManager _layerManager;

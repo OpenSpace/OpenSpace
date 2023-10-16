@@ -174,6 +174,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo CastShadowInfo = {
+        "CastShadow",
+        "Enable model to cast shadow",
+        "Enable model to cast shadow on its parent renderable",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
@@ -299,6 +306,9 @@ namespace {
 
         // [[codegen::verbatim(UseCacheInfo.description)]]
         std::optional<bool> useCache;
+
+        // [[codegen::verbatim(CastShadowInfo.description)]]
+        std::optional<bool> castShadow;
     };
 #include "renderablemodel_codegen.cpp"
 } // namespace
@@ -334,6 +344,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _renderWireframe(RenderWireframeInfo, false)
     , _useCache(UseCacheInfo, true)
+    , _castShadow(CastShadowInfo, false)
     , _blendingFuncOption(
         BlendingOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -453,6 +464,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     }
 
     _useCache = p.useCache.value_or(_useCache);
+    _castShadow = p.castShadow.value_or(_castShadow);
 
     addProperty(_enableAnimation);
     addPropertySubOwner(_lightSourcePropertyOwner);
@@ -722,6 +734,63 @@ void RenderableModel::initializeGL() {
 
     // Set Interaction sphere size to be 10% of the bounding sphere
     setInteractionSphere(boundingSphere() * 0.1);
+
+    if (_castShadow) {
+        _depthMapProgram = BaseModule::ProgramObjectManager.request(
+            "ModelDepthMapProgram",
+            [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                std::filesystem::path vs =
+                    absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl");
+                std::filesystem::path fs =
+                    absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl");
+
+                std::unique_ptr<ghoul::opengl::ProgramObject> prog =
+                    global::renderEngine->buildRenderProgram(
+                        "ModelDepthMapProgram",
+                        vs,
+                        fs
+                    );
+                prog->setIgnoreAttributeLocationError(
+                    ghoul::opengl::ProgramObject::IgnoreError::Yes
+                );
+                prog->setIgnoreUniformLocationError(
+                    ghoul::opengl::ProgramObject::IgnoreError::Yes
+                );
+                return prog;
+            }
+        );
+
+        // Twice the res
+        _depthMapResolution = global::renderEngine->renderingResolution() * 2;
+
+        glGenFramebuffers(1, &_depthMapFBO);
+
+        glGenTextures(1, &_depthMap);
+        glBindTexture(GL_TEXTURE_2D, _depthMap);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_DEPTH_COMPONENT,
+            _depthMapResolution.x,
+            _depthMapResolution.y,
+            0,
+            GL_DEPTH_COMPONENT,
+            GL_FLOAT,
+            nullptr
+        );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthMap, 0);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
 }
 
 void RenderableModel::deinitializeGL() {
@@ -757,6 +826,18 @@ void RenderableModel::deinitializeGL() {
     _program = nullptr;
     _quadProgram = nullptr;
     ghoul::opengl::FramebufferObject::deactivate();
+
+    if (_castShadow) {
+        BaseModule::ProgramObjectManager.release(
+            "ModelDepthMapProgram",
+            [](ghoul::opengl::ProgramObject* p) {
+                global::renderEngine->removeRenderProgram(p);
+            }
+        );
+
+        glDeleteFramebuffers(1, &_depthMapFBO);
+        glDeleteTextures(1, &_depthMap);
+    }
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
@@ -1117,16 +1198,57 @@ void RenderableModel::update(const UpdateData& data) {
     }
 }
 
-const ghoul::modelgeometry::ModelGeometry* RenderableModel::geometry() const
-{
-    return _geometry.get();
+const bool RenderableModel::isCastingShadow() const {
+    return _castShadow;
 }
 
-const glm::dmat4 RenderableModel::transform() const
-{
+RenderableModel::DepthMapData RenderableModel::renderDepthMap(const glm::dvec3 light_position) const {
+    GLint prevProg;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &prevProg);
+
+    GLint prevFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+
+    GLint prevVp[4];
+    glGetIntegerv(GL_VIEWPORT, prevVp);
+
+    _depthMapProgram->activate();
+
+    // Model transform
     glm::dmat4 transform = glm::translate(glm::dmat4(1), glm::dvec3(_pivot.value()));
     transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
-    return transform;
+    glm::dmat4 model = this->parent()->modelTransform() * transform;
+
+    // View transform
+    glm::dvec3 center = this->parent()->worldPosition();
+    glm::dvec3 light_dir = glm::normalize(center - light_position);
+    glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), -light_dir));
+    glm::dvec3 eye = center + light_dir * this->boundingSphere();
+    glm::dvec3 up = glm::cross(right, light_dir);
+    glm::dmat4 view = glm::lookAt(eye, center, up);
+
+    // Projection transform
+    double aspect =
+        static_cast<double>(_depthMapResolution.x) / static_cast<double>(_depthMapResolution.y);
+    double znear = 0.1;
+    double zfar = 500.;
+    glm::dmat4 projection = glm::perspective(glm::radians(90.), aspect, znear, zfar);
+
+    glm::dmat4 viewProjection = projection * view;
+    _depthMapProgram->setUniform("model", model);
+    _depthMapProgram->setUniform("light_vp", viewProjection);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
+    glViewport(0, 0, _depthMapResolution.x, _depthMapResolution.y);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    _geometry->render(*_depthMapProgram, false, true);
+
+
+    glUseProgram(prevProg);
+    glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
+    glViewport(prevVp[0], prevVp[1], prevVp[2], prevVp[3]);
+
+    return { viewProjection, _depthMap };
 }
 
 }  // namespace openspace
