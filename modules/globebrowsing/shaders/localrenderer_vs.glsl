@@ -67,9 +67,10 @@ uniform float chunkMinHeight;
 uniform float distanceScaleFactor;
 uniform int chunkLevel;
 
+const int n_depthmaps = 10;
 uniform dmat4 inv_vp;
-uniform dmat4 light_vp;
-out vec4 position_lightspace;
+uniform dmat4 light_vps[n_depthmaps];
+out vec4 positions_lightspace[n_depthmaps];
 
 
 vec3 bilinearInterpolation(vec2 uv) {
@@ -131,5 +132,7 @@ void main() {
   shadowCoords = vec4(shadowMatrix * dvec4(p, 1.0));
 #endif // SHADOW_MAPPING_ENABLED
 
-  position_lightspace = vec4(light_vp * (inv_vp * dvec4(p, 1.0)));
+  for (int idx = 0; idx < n_depthmaps; ++idx) {
+    positions_lightspace[idx] = vec4(light_vps[idx] * (inv_vp * dvec4(p, 1.0)));
+  }
 }

@@ -1643,15 +1643,21 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         program.setUniform("shadowMapTexture", shadowMapUnit);
     }
 
-    if (depthMapData.size() > 0) {
-        _localRenderer.program->setUniform("light_vp", depthMapData[0].viewProjecion);
-        _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
 
-        ghoul::opengl::TextureUnit depthmapUnit;
-        depthmapUnit.activate();
+    std::vector<glm::dmat4> light_vps;
+    std::vector<GLint> depthmaps;
+    for (const RenderableModel::DepthMapData& data : depthMapData) {
+        light_vps.push_back(data.viewProjecion);
+        ghoul::opengl::TextureUnit unit;
+        depthmaps.push_back(unit);
+        unit.activate();
         glBindTexture(GL_TEXTURE_2D, depthMapData[0].depthMap);
-        _localRenderer.program->setUniform("light_depth_map", depthmapUnit);
     }
+
+    _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
+    _localRenderer.program->setUniform("light_depth_maps", depthmaps);
+    GLint loc = glGetUniformLocation(*_localRenderer.program, "light_vps");
+    glUniformMatrix4dv(loc, light_vps.size(), GL_FALSE, glm::value_ptr(light_vps.front()));
 
     glEnable(GL_DEPTH_TEST);
     if (!renderGeomOnly) {

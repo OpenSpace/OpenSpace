@@ -100,7 +100,8 @@ vec3 getLevelWeights(float distToVertexOnEllipsoid) {
   );
 }
 
-out vec4 position_lightspace;
+const int n_depthmaps = 10;
+out vec4 positions_lightspace[n_depthmaps];
 
 void main() {
   PositionNormalPair pair = globalInterpolation(in_uv);
