@@ -1318,7 +1318,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
-    SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
     std::vector<const RenderableModel*> shadowers = shadowingChildren(this->parent());
     std::vector<RenderableModel::DepthMapData> depthMapData;
     for (const RenderableModel* model : shadowers) {
