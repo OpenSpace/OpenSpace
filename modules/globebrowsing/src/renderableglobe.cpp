@@ -1322,7 +1322,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     std::vector<const RenderableModel*> shadowers = shadowingChildren(this->parent());
     std::vector<RenderableModel::DepthMapData> depthMapData;
     for (const RenderableModel* model : shadowers) {
-        depthMapData.push_back(model->renderDepthMap(sun->worldPosition()));
+        depthMapData.push_back(model->renderDepthMap());
     }
 
     int globalCount = 0;

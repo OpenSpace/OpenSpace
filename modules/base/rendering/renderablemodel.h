@@ -73,7 +73,7 @@ public:
     void update(const UpdateData& data) override;
 
     const bool isCastingShadow() const;
-    DepthMapData renderDepthMap(const glm::dvec3 light_position) const;
+    DepthMapData renderDepthMap() const;
 
     static documentation::Documentation Documentation();
 
