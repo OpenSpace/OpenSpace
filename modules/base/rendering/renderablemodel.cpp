@@ -25,6 +25,7 @@
 #include <modules/base/rendering/renderablemodel.h>
 
 #include <modules/base/basemodule.h>
+#include <modules/base/lightsource/scenegraphlightsource.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -1202,7 +1203,11 @@ const bool RenderableModel::isCastingShadow() const {
     return _castShadow;
 }
 
-RenderableModel::DepthMapData RenderableModel::renderDepthMap(const glm::dvec3 light_position) const {
+RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
+
+    const openspace::SceneGraphLightSource* light =
+        dynamic_cast<const openspace::SceneGraphLightSource*>(_lightSources.front().get());
+
     GLint prevProg;
     glGetIntegerv(GL_CURRENT_PROGRAM, &prevProg);
 
@@ -1223,7 +1228,7 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap(const glm::dvec3 l
 
     // View
     glm::dvec3 center = this->parent()->worldPosition();
-    glm::dvec3 light_dir = glm::normalize(center - light_position);
+    glm::dvec3 light_dir = glm::normalize(center - light->positionWorldSpace());
     glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), -light_dir));
     glm::dvec3 eye = center + light_dir * size;
     glm::dvec3 up = glm::cross(right, light_dir);
