@@ -65,6 +65,7 @@
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
 #define SHADOW_MAPPING_ENABLED #{enableShadowMapping}
+#define USE_DEPTHMAP_SHADOWS #{useDepthmapShadows}
 
 const vec3 DefaultLevelWeights = vec3(1.0, 0.0, 0.0);
 

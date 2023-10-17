@@ -100,9 +100,6 @@ vec3 getLevelWeights(float distToVertexOnEllipsoid) {
   );
 }
 
-const int n_depthmaps = 10;
-out vec4 positions_lightspace[n_depthmaps];
-
 void main() {
   PositionNormalPair pair = globalInterpolation(in_uv);
   float distToVertexOnEllipsoid = length((pair.normal * chunkMinHeight + pair.position) - cameraPosition);

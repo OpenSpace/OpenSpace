@@ -1927,6 +1927,9 @@ void RenderableGlobe::recompileShaders() {
         _ellipsoid.shadowConfigurationArray().size()
     );
     shaderDictionary.setValue("nEclipseShadows", nEclipseShadows - 1);
+
+    // Local shader uses depthmap shadows
+    shaderDictionary.setValue("useDepthmapShadows", 1);
     //
     // Create local shader
     //
@@ -1947,6 +1950,8 @@ void RenderableGlobe::recompileShaders() {
         _localRenderer.uniformCache
     );
 
+    // Global shader does not use depthmap shadows
+    shaderDictionary.setValue("useDepthmapShadows", 0);
 
     //
     // Create global shader
