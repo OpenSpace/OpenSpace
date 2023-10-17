@@ -298,13 +298,14 @@ Fragment getFragment() {
 #endif
 
 #if USE_DEPTHMAP_SHADOWS
+  const float bias = 0.005;
   bool shadowed = false;
   for (int idx = 0; idx < n_depthmaps; ++idx) {
     vec3 coords = positions_lightspace[idx].xyz / positions_lightspace[idx].w;
     coords = coords * 0.5 + 0.5;
     float sampled_depth = texture(light_depth_maps[idx], coords.xy).r;
     float current_depth = coords.z;
-    if (current_depth > sampled_depth) {
+    if (current_depth < 1.0 && current_depth - bias > sampled_depth) {
       shadowed = true;
     }
   }
