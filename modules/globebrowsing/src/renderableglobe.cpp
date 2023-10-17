@@ -1654,6 +1654,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
 
     _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
+    _localRenderer.program->setUniform("n_depthmaps", static_cast<int>(depthMapData.size()));
     _localRenderer.program->setUniform("light_depth_maps", depthmaps);
     GLint loc = glGetUniformLocation(*_localRenderer.program, "light_vps");
     glUniformMatrix4dv(loc, light_vps.size(), GL_FALSE, glm::value_ptr(light_vps.front()));
