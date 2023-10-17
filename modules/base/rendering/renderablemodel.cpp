@@ -1217,6 +1217,9 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
     GLint prevVp[4];
     glGetIntegerv(GL_VIEWPORT, prevVp);
 
+    GLint prevCullface;
+    glGetIntegerv(GL_CULL_FACE_MODE, &prevCullface);
+
     _depthMapProgram->activate();
 
     const double size = boundingSphere();
@@ -1251,12 +1254,14 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
     glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
     glViewport(0, 0, _depthMapResolution.x, _depthMapResolution.y);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glCullFace(GL_FRONT);
     _geometry->render(*_depthMapProgram, false, true);
 
 
     glUseProgram(prevProg);
     glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
     glViewport(prevVp[0], prevVp[1], prevVp[2], prevVp[3]);
+    glCullFace(static_cast<GLenum>(prevCullface));
 
     return { viewProjection, _depthMap };
 }
