@@ -1223,6 +1223,7 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
     _depthMapProgram->activate();
 
     const double size = boundingSphere();
+    const double dist = size * 10000.;
 
     // Model
     glm::dmat4 transform = glm::translate(glm::dmat4(1), glm::dvec3(_pivot.value()));
@@ -1233,7 +1234,7 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
     glm::dvec3 center = this->parent()->worldPosition();
     glm::dvec3 light_dir = glm::normalize(center - light->positionWorldSpace());
     glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), -light_dir));
-    glm::dvec3 eye = center + light_dir * size;
+    glm::dvec3 eye = center + light_dir * dist;
     glm::dvec3 up = glm::cross(right, light_dir);
     glm::dmat4 view = glm::lookAt(eye, center, up);
 
@@ -1243,8 +1244,8 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
         size * 2.,
         -size * 2.,
         size * 2.,
-        size * 0.1,
-        size * 10.
+        dist * 0.1,
+        dist * 1.1
     );
 
     glm::dmat4 viewProjection = projection * view;
