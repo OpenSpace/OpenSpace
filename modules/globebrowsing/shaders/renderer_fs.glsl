@@ -155,9 +155,10 @@ in vec3 positionWorldSpace;
 uniform float opacity;
 
 #if USE_DEPTHMAP_SHADOWS
-const int n_depthmaps = 10;
-in vec4 positions_lightspace[n_depthmaps];
-uniform sampler2D light_depth_maps[n_depthmaps];
+const int max_depthmaps = 20;
+uniform int n_depthmaps;
+in vec4 positions_lightspace[max_depthmaps];
+uniform sampler2D light_depth_maps[max_depthmaps];
 #endif // USE_DEPTHMAP_SHADOWS
 
 Fragment getFragment() {
@@ -298,21 +299,18 @@ Fragment getFragment() {
 #endif
 
 #if USE_DEPTHMAP_SHADOWS
+  float accumulated_shadow= 0.f;
   const float bias = 0.005;
-  bool shadowed = false;
   for (int idx = 0; idx < n_depthmaps; ++idx) {
-    vec3 coords = positions_lightspace[idx].xyz / positions_lightspace[idx].w;
-    coords = coords * 0.5 + 0.5;
-    float sampled_depth = texture(light_depth_maps[idx], coords.xy).r;
-    float current_depth = coords.z;
-    if (current_depth < 1.0 && current_depth - bias > sampled_depth) {
-      shadowed = true;
+    vec3 coords = 0.5 + 0.5 * positions_lightspace[idx].xyz / positions_lightspace[idx].w;
+    float depth = texture(light_depth_maps[idx], coords.xy).r;
+    if (coords.z < 1.0 && coords.z - bias > depth) {
+      accumulated_shadow++;
     }
   }
 
-  if (shadowed) {
-    frag.color.xyz *= 0.1;
-  }
+  float ambient = .2f;
+  frag.color.xyz *= (ambient + (1.f - ambient) * (1.f - accumulated_shadow));
 #endif // USE_DEPTHMAP_SHADOWS
 
   frag.color.a *= opacity;
