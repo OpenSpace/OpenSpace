@@ -256,7 +256,7 @@ private:
     void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
 
-    std::vector<const RenderableModel*> shadowingChildren(const SceneGraphNode* node);
+    std::vector<const RenderableModel*> getShadowers(const SceneGraphNode* node);
 
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
@@ -307,6 +307,10 @@ private:
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
+
+    std::vector<const RenderableModel*> _shadowers;
+    bool _shadowersUpdated = false;
+    bool _shadowersOk = false;
 
     // Components
     std::unique_ptr<RingsComponent> _ringsComponent;

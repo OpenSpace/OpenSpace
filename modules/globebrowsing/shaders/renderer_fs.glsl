@@ -155,10 +155,11 @@ in vec3 positionWorldSpace;
 uniform float opacity;
 
 #if USE_DEPTHMAP_SHADOWS
-const int max_depthmaps = 20;
-uniform int n_depthmaps;
-in vec4 positions_lightspace[max_depthmaps];
-uniform sampler2D light_depth_maps[max_depthmaps];
+#define nDepthMaps #{nDepthMaps}
+#if nDepthMaps > 0
+  in vec4 positions_lightspace[nDepthMaps];
+  uniform sampler2DShadow light_depth_maps[nDepthMaps];
+#endif // nDepthMaps > 0
 #endif // USE_DEPTHMAP_SHADOWS
 
 Fragment getFragment() {
@@ -298,20 +299,18 @@ Fragment getFragment() {
   frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.3, 0.0, 1.0) : shadow;
 #endif
 
-#if USE_DEPTHMAP_SHADOWS
-  float accumulated_shadow= 0.f;
+#if USE_DEPTHMAP_SHADOWS && nDepthMaps > 0
+  float contrib = 0.f;
+  float shadow = 1.f;
   const float bias = 0.005;
-  for (int idx = 0; idx < n_depthmaps; ++idx) {
-    vec3 coords = 0.5 + 0.5 * positions_lightspace[idx].xyz / positions_lightspace[idx].w;
-    float depth = texture(light_depth_maps[idx], coords.xy).r;
-    if (coords.z < 1.0 && coords.z - bias > depth) {
-      accumulated_shadow++;
-    }
+  for (int i = 0; i < nDepthMaps; ++i) {
+    vec3 coords = 0.5 + 0.5 * positions_lightspace[i].xyz / positions_lightspace[i].w;
+    shadow = min(shadow, texture(light_depth_maps[i], coords.xyz, bias));
+    contrib += float(texture(light_depth_maps[i], coords.xyz, bias) < 1.f);
   }
-
   float ambient = .2f;
-  frag.color.xyz *= (ambient + (1.f - ambient) * (1.f - accumulated_shadow));
-#endif // USE_DEPTHMAP_SHADOWS
+  frag.color.xyz *= pow(ambient + (1.f - ambient) * shadow, contrib);
+#endif // USE_DEPTHMAP_SHADOWS && nDepthMaps > 0
 
   frag.color.a *= opacity;
   frag.color = clamp(frag.color, 0.0, 1.0);
