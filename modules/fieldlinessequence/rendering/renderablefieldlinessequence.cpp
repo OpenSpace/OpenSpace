@@ -955,7 +955,7 @@ int RenderableFieldlinesSequence::updateActiveIndex(const double nowTime) {
 }
 
 bool RenderableFieldlinesSequence::isReady() const {
-    return true; // _shaderProgram != nullptr;
+    return _shaderProgram != nullptr;
 }
 
 void RenderableFieldlinesSequence::updateDynamicDownloading(const double currentTime,
@@ -1230,7 +1230,7 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
         success
     );
 
-    if (!_havePrintedQuantityRange) {
+    if (!_havePrintedQuantityRange && !quantities.empty()) {
         float i = *std::min_element(quantities.begin(), quantities.end());
         std::string min = std::to_string(i);
         float a = *std::max_element(quantities.begin(), quantities.end());

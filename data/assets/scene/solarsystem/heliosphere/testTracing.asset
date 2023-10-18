@@ -1,0 +1,39 @@
+local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere.asset')
+
+local datafolder = "C:/Users/eolsson/Documents/openspace/data/simon&maans/volumedata"
+local seeds = "C:/Users/eolsson/Documents/openspace/data/simon&maans"
+
+local testTrace = {
+    Identifier = "testTrace",
+    Parent = transforms.GSMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        SourceFolder = datafolder,
+        SeedPointDirectory = seeds,
+        ShowAtAllTimes = true,
+        InputFileType = "Cdf",
+    },
+    GUI = {
+        Path = "/Solar System/traceTest",
+        Name = "TraceTest"
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(testTrace)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(testTrace)
+end)
+
+asset.export(testTrace)
+
+asset.meta = {
+    Name = "fieldline trace test",
+    Version = "",
+    Description = "test tracing to remove boost",
+    Author = "CCMC",
+    URL = "",
+    License = "CC-BY"
+}
