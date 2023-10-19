@@ -11,7 +11,7 @@ body:
      label: Version
      description: What version of OpenSpace are you running?
      options:
-       - `master` branch
+       - master branch
        - 0.19.2 
        - 0.19.1 
        - 0.19.0 
