@@ -1,4 +1,4 @@
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Habitable Zone Textures",
   Type = "HttpSynchronization",
   Identifier = "habitable_zone_textures",

@@ -1,18 +1,18 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Quasars Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_quasars_textures",
   Version = 2
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Quasars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_quasars_speck",
   Version = 2
 })
 
-local colormaps = asset.syncedResource({
+local colormaps = asset.resource({
   Name = "Quasars Colormap",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_quasars_colormap",

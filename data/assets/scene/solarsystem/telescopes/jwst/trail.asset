@@ -5,7 +5,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "JWST Kernel",
   Type = "HttpSynchronization",
   Identifier = "jwst_kernels",

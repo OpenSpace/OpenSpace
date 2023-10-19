@@ -18,7 +18,7 @@ evacuation. PTWC canceled all tsunami alerts about four hours after the earthqua
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-samoa-2009/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

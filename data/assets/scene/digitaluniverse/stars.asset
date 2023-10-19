@@ -1,25 +1,25 @@
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Stars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "stars_du",
   Version = 5
 })
 
-local sunspeck = asset.syncedResource({
+local sunspeck = asset.resource({
   Name = "Stars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_sunstar_speck",
   Version = 1
 })
 
-local colormaps = asset.syncedResource({
+local colormaps = asset.resource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",
   Version = 3
 })
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Stars Textures",
   Type = "HttpSynchronization",
   Identifier = "stars_textures",

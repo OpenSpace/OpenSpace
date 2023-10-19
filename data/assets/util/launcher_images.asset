@@ -1,4 +1,4 @@
-local DataPath = asset.syncedResource({
+local DataPath = asset.resource({
   Name = "Launcher Images",
   Type = "HttpSynchronization",
   Identifier = "launcher_images",

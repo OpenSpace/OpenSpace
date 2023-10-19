@@ -3,7 +3,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Type = "HttpSynchronization",
   Name = "Sun textures",
   Identifier = "sun_textures",

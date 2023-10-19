@@ -3,7 +3,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local modelFolder = asset.syncedResource({
+local modelFolder = asset.resource({
   Name = "Makemake Model",
   Type = "HttpSynchronization",
   Identifier = "makemake_model",

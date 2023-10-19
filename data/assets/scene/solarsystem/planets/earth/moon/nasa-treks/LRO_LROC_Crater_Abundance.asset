@@ -9,161 +9,161 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_NAC_CratAbnd_17S173E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_17S173E_150cmp",
   Name = [[LRO LROC Crater Abundance, Aitken Crater]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Aitken_Crater.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Aitken_Crater.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_13S358E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_13S358E_2mp",
   Name = [[LRO LROC Crater Abundance, Alphonsus Crater]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Alphonsus_Crater.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Alphonsus_Crater.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_73N350E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_73N350E_150cmp",
   Name = [[LRO LROC Crater Abundance, Anaxagoras Crater]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Anaxagoras_Crater.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Anaxagoras_Crater.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_26N004E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_26N004E_150cmp",
   Name = [[LRO LROC Crater Abundance, Apollo 15]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Apollo_15.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Apollo_15.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_09S015E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_09S015E_150cmp",
   Name = [[LRO LROC Crater Abundance, Apollo 16]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Apollo_16.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Apollo_16.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_37S206E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_37S206E_150cmp",
   Name = [[LRO LROC Crater Abundance, Apollo Basin]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Apollo_Basin.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Apollo_Basin.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_25N311E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_25N311E_2mp",
   Name = [[LRO LROC Crater Abundance, Aristarchus 1]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Aristarchus_1.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Aristarchus_1.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_28N307E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_28N307E_150cmp",
   Name = [[LRO LROC Crater Abundance, Aristarchus 2]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Aristarchus_2.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Aristarchus_2.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_19S070E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_19S070E_150cmp",
   Name = [[LRO LROC Crater Abundance, Balmer Basin]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Balmer_Basin.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Balmer_Basin.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_20S337E_400cmp = {
   Identifier = "LRO_NAC_CratAbnd_20S337E_400cmp",
   Name = [[LRO LROC Crater Abundance, Bullialdus Crater]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Bullialdus_Crater.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Bullialdus_Crater.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_36N320E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_36N320E_2mp",
   Name = [[LRO LROC Crater Abundance, Gruithuisen Domes]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Gruithuisen_Domes.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Gruithuisen_Domes.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_00N234E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_00N234E_150cmp",
   Name = [[LRO LROC Crater Abundance, Hertzsprung]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Hertzsprung.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Hertzsprung.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_08N332E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_08N332E_2mp",
   Name = [[LRO LROC Crater Abundance, Hortensius Domes]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Hortensius_Domes.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Hortensius_Domes.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_06N120E_200cmp = {
   Identifier = "LRO_NAC_CratAbnd_06N120E_200cmp",
   Name = [[LRO LROC Crater Abundance, King Crater]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/King_Crater.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/King_Crater.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_32N292E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_32N292E_2mp",
   Name = [[LRO LROC Crater Abundance, Lichtenberg Crater]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Lichtenberg_Crater.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Lichtenberg_Crater.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_10N058E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_10N058E_150cmp",
   Name = [[LRO LROC Crater Abundance, Mare Crisium]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Mare_Crisium.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Mare_Crisium.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_16S041E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_16S041E_150cmp",
   Name = [[LRO LROC Crater Abundance, Montes Pyrenaeus]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Montes_Pyrenaeus.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Montes_Pyrenaeus.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_26S265E_200cmp = {
   Identifier = "LRO_NAC_CratAbnd_26S265E_200cmp",
   Name = [[LRO LROC Crater Abundance, Orientale 1]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Orientale_1.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Orientale_1.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_53N354E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_53N354E_150cmp",
   Name = [[LRO LROC Crater Abundance, Plato Ejecta]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Plato_Ejecta.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Plato_Ejecta.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_60S200E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_60S200E_150cmp",
   Name = [[LRO LROC Crater Abundance, South Pole-Aitken Basin Interior]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/South_Pole-Aitken_Basin_Interior.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/South_Pole-Aitken_Basin_Interior.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_02S167E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_02S167E_150cmp",
   Name = [[LRO LROC Crater Abundance, Stratton (Dewar) High Fe Anomaly]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Stratton_Dewar_High_Fe_Anomaly.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Stratton_Dewar_High_Fe_Anomaly.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_20N010E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_20N010E_2mp",
   Name = [[LRO LROC Crater Abundance, Sulpicius Gallus]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Sulpicius_Gallus.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Sulpicius_Gallus.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_NAC_CratAbnd_43S349E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_43S349E_150cmp",
   Name = [[LRO LROC Crater Abundance, Tycho Crater]],
-  FilePath = asset.localResource("LRO_LROC_Crater_Abundance/Tycho_Crater.vrt"),
+  FilePath = asset.resource("LRO_LROC_Crater_Abundance/Tycho_Crater.vrt"),
   Description = [[]]
 }
 

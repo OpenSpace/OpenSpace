@@ -3,14 +3,14 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "ISS Models",
   Type = "HttpSynchronization",
   Identifier = "iss_model",
   Version = 3
 })
 
-local omm = asset.syncedResource({
+local omm = asset.resource({
   Name = "Satellite OMM Data (ISS)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_iss",

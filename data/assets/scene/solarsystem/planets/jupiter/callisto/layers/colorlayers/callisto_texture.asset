@@ -2,7 +2,7 @@ local globe = asset.require("../../callisto")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Callisto Textures",
   Type = "HttpSynchronization",
   Identifier = "callisto_textures",

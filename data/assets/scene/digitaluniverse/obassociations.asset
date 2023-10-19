@@ -1,11 +1,11 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "OB Associations Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_obassociations_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "OB Associations Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_obassociations_speck",
