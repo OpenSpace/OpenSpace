@@ -30,42 +30,30 @@ local switch_color_layer = {
 }
 
 asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(
-    "Sun",
-    "ColorLayers",
-    {
-      Type = "ImageSequenceTileLayer",
-      Identifier = "magnetograms",
-      Name = "magnetograms",   --"Magnetogram-" .. i,
-      Description = "",
-      FolderPath = magnetogramDirectory,
-      Enabled = false
-    }
-  )
-  -- magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory);
-  -- rawset(_G, "magnetogramsTextureIndex", -1)
-  -- for i, imagename in ipairs(magnetograms) do
-  --   openspace.globebrowsing.addLayer(
-  --     "Sun",
-  --     "ColorLayers",
-  --     {
-  --       Type = "ImageSequenceTileProvider",
-  --       Identifier = "magnetogram-" .. i,
-  --       Name = imagename,   --"Magnetogram-" .. i,
-  --       Description = "",
-  --       FilePath = imagename,
-  --       Enabled = false
-  --     }
-  --   )
-  -- end
+  magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory);
+  rawset(_G, "magnetogramsTextureIndex", -1)
+  for i, imagename in ipairs(magnetograms) do
+    openspace.globebrowsing.addLayer(
+      "Sun",
+      "ColorLayers",
+      {
+        Type = "ImageSequenceTileProvider",
+        Identifier = "magnetogram-" .. i,
+        Name = imagename,   --"Magnetogram-" .. i,
+        Description = "",
+        FilePath = imagename,
+        Enabled = false
+      }
+    )
+  end
 
   openspace.action.registerAction(switch_color_layer)
 end)
 
 asset.onDeinitialize(function ()
-  --for i, imagename in ipairs(magnetograms) do
-    openspace.globebrowsing.deleteLayer("Sun", "ColorLayers", "magnetograms")
-  --end
+  for i, imagename in ipairs(magnetograms) do
+    openspace.globebrowsing.deleteLayer("Sun", "ColorLayers", "magnetograms" .. i)
+  end
   openspace.action.removeAction(switch_color_layer)
 end)
 
