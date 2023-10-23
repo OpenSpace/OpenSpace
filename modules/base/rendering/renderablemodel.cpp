@@ -546,7 +546,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableModel::isReady() const {
-    return _program && _quadProgram && _depthMapProgram;
+    return _program && _quadProgram && (!_castShadow || _depthMapProgram);
 }
 
 void RenderableModel::initialize() {
