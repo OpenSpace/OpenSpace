@@ -62,6 +62,7 @@ set(HEADER_FILES
   rendering/renderabletrail.h
   rendering/renderabletrailorbit.h
   rendering/renderabletrailtrajectory.h
+  rendering/renderabletube.h
   rendering/screenspacedashboard.h
   rendering/screenspaceframebuffer.h
   rendering/screenspaceimagelocal.h
@@ -121,6 +122,7 @@ set(SOURCE_FILES
   rendering/renderabletrail.cpp
   rendering/renderabletrailorbit.cpp
   rendering/renderabletrailtrajectory.cpp
+  rendering/renderabletube.cpp
   rendering/screenspacedashboard.cpp
   rendering/screenspacedashboard_lua.inl
   rendering/screenspaceframebuffer.cpp
@@ -168,6 +170,8 @@ set(SHADER_FILES
   shaders/screenspace_vs.glsl
   shaders/sphere_fs.glsl
   shaders/sphere_vs.glsl
+  shaders/tube_fs.glsl
+  shaders/tube_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
