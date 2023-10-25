@@ -1044,7 +1044,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         // check index again after updating
         if (_activeIndex == -1) return;
         // If we have a new index, buffers needs to update
-        if (previousIndex != _activeIndex) {
+        if (previousIndex != _activeIndex && !_firstLoad) {
             _shouldUpdateColorBuffer = true;
             _shouldUpdateMaskingBuffer = true;
         }
@@ -1183,8 +1183,6 @@ void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
     const FieldlinesState& state = _files[_activeIndex].state;
     const std::vector<glm::vec3>& vertPos = state.vertexPositions();
 
-
-
     glBufferData(
         GL_ARRAY_BUFFER,
         vertPos.size() * sizeof(glm::vec3),
@@ -1221,8 +1219,8 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
         glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
         unbindGL();
+        _shouldUpdateColorBuffer = false;
     }
-    _shouldUpdateColorBuffer = false;
 }
 
 void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
@@ -1259,9 +1257,10 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
 
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+        unbindGL();
+        _shouldUpdateMaskingBuffer = false;
     }
-    unbindGL();
-    _shouldUpdateMaskingBuffer = false;
 }
 
 } // namespace openspace
