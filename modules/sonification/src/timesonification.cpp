@@ -27,20 +27,22 @@
 #include <openspace/util/timemanager.h>
 
 namespace {
-    constexpr double TimePrecision = 0.0001;
+    constexpr double TimeSpeedPrecision = 0.0001;
+    constexpr double TimePrecision = 1;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         TimeSonificationInfo =
     {
        "TimeSonification",
        "Time Sonification",
-       "Sonification that alters all other sonificatoins based on the current delta time"
+       "Sonification that alters all other sonificatoins based on the current time and "
+       "delta time"
     };
 
     constexpr openspace::properties::Property::PropertyInfo UnitOptionInfo = {
         "UnitOption",
-        "Time Unit",
-        "Choose a ´time unit that the sonification should use"
+        "Time Speed Unit",
+        "Choose a time unit that the sonification should use for the delta time"
     };
 
 } // namespace
@@ -52,6 +54,7 @@ TimeSonification::TimeSonification(const std::string& ip, int port)
     , _unitOption(UnitOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     _timeSpeed = 0.0;
+    _currentTime = 0.0;
 
     // Add time units option
     _unitOption.addOptions({
@@ -77,15 +80,20 @@ void TimeSonification::update(const Camera*) {
         return;
     }
 
+    double currentTime = global::timeManager->time().j2000Seconds();
     double timeSpeed = convertTime(global::timeManager->deltaTime(), TimeUnit::Second, _unit);
 
-    if (_unitDirty || abs(_timeSpeed - timeSpeed) > TimePrecision) {
+    if (_unitDirty || abs(_timeSpeed - timeSpeed) > TimeSpeedPrecision ||
+        abs(_currentTime - currentTime) > TimePrecision)
+    {
         _timeSpeed = timeSpeed;
+        _currentTime = currentTime;
 
         std::string label = "/Time";
-        std::vector<OscDataType> data(2);
+        std::vector<OscDataType> data(3);
         data[0] = _timeSpeed;
         data[1] = nameForTimeUnit(_unit).data();
+        data[2] = _currentTime;
 
         _connection->send(label, data);
 

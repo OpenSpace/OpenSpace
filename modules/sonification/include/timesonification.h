@@ -58,6 +58,7 @@ private:
     bool _unitDirty = false;
 
     double _timeSpeed;
+    double _currentTime;
 };
 
 } // namespace openspace
