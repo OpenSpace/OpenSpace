@@ -17,9 +17,9 @@ asset.onInitialize(function ()
   local labels = {
     "birds_lineage_29",
 	"birds_mMDS_xyz_sphere_V2_lineage_29",
-	"birds_UMAP_xyz_CenteredOnRoot_lineage_29"
+	"birds_UMAP_xyz_CenteredOnRoot_lineage_29",
 	--"birds_lineage_31",
-    --"lineage_19",
+    "lineage_19",
 	--"birds_mMDS_xyz_3Dprojection_lineage_29",
 	--"birds_mMDS_xyz_sphere_3Dprojection_lineage_29"
   }

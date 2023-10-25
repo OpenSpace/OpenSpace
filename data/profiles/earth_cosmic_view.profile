@@ -413,6 +413,16 @@
       "name": "Scene.*.Renderable.RenderOption",
       "type": "setPropertyValue",
       "value": "1.0"
+    },
+    {
+      "name": "OpenSpaceEngine.PropertyVisibility",
+      "type": "setPropertyValueSingle",
+      "value": "3.000000"
+    },
+    {
+      "name": "RenderEngine.MasterRotation",
+      "type": "setPropertyValueSingle",
+      "value": "{0.000000,0.000000,0.000000}"
     }
   ],
   "time": {
