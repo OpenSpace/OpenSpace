@@ -4,7 +4,7 @@ local rot = asset.require("./carrington_to_heeq_rotation")
 
 
 
-local fluxNodesBinaries = asset.syncedResource({
+local fluxNodesBinaries = asset.resource({
   Name = "Bastille day Flux nodes binaries",
   Type = "HttpSynchronization",
   Identifier = "bastille_day_streamnodes_binaries",
@@ -25,7 +25,7 @@ local Fluxnodes = {
   Renderable = {
     Type = "RenderableFluxNodes",
     SourceFolder = fluxNodesBinaries,
-    ColorTablePath = asset.localResource("transferfunctions/CMR.txt"),
+    ColorTablePath = asset.resource("transferfunctions/CMR.txt"),
     ColorTableRange = { -2.0, 4.0 }
   },
   GUI = {

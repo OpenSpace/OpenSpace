@@ -2,7 +2,7 @@ local globe = asset.require("../../iapetus")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Iapetus textures",
   Type = "HttpSynchronization",
   Identifier = "iapetus_textures",

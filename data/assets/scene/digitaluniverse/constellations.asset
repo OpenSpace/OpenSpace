@@ -2,7 +2,7 @@ local constellations_helper = asset.require("util/constellations_helper")
 
 
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Constellation Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_constellations_data",

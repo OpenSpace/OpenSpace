@@ -6,7 +6,7 @@ local kernels = asset.require("./kernels")
 
 
 
-local model = asset.syncedResource({
+local model = asset.resource({
   Name = "Juno Model",
   Type = "HttpSynchronization",
   Identifier = "juno_model",

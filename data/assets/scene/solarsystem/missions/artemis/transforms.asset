@@ -3,7 +3,7 @@ local earthTransforms = asset.require("scene/solarsystem/planets/earth/transform
 
 
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Artemis Kernels",
   Type = "HttpSynchronization",
   Identifier = "artemis_1_kernels",

@@ -3,7 +3,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local modelFolder = asset.syncedResource({
+local modelFolder = asset.resource({
   Name = "Eris Model",
   Type = "HttpSynchronization",
   Identifier = "eris_model",

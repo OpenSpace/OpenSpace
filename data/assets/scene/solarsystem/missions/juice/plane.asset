@@ -4,7 +4,7 @@ local transforms = asset.require("./transforms")
 
 -- Datasets created using the script found at:
 -- https://github.com/OpenSpace/scripts/tree/master/juice-gphio-image-conversion
-local data = asset.syncedResource({
+local data = asset.resource({
   Type = "HttpSynchronization",
   Name = "Ganymede Plane Simulations",
   Identifier = "juice_ganymede_plane_cuts",

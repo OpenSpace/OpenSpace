@@ -2,28 +2,28 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Vesta Kernels",
   Type = "HttpSynchronization",
   Identifier = "vesta_kernels",
   Version = 1
 })
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Vesta Textures",
   Type = "HttpSynchronization",
   Identifier = "vesta_textures",
   Version = 1
 })
 
-local images = asset.syncedResource({
+local images = asset.resource({
   Name = "Vesta Images",
   Type = "HttpSynchronization",
   Identifier = "vesta_images",
   Version = 1
 })
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Vesta Models",
   Type = "HttpSynchronization",
   Identifier = "vesta_model",

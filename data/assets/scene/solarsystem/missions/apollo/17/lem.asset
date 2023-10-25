@@ -3,7 +3,7 @@ local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
-local model = asset.syncedResource({
+local model = asset.resource({
   Name = "Apollo Lem Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_lem_model",

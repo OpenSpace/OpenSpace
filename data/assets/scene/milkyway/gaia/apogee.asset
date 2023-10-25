@@ -1,18 +1,18 @@
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Apogee Speck Files",
   Type = "HttpSynchronization",
   Identifier = "gaia_apogee",
   Version = 1
 })
 
-local colormaps = asset.syncedResource({
+local colormaps = asset.resource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",
   Version = 3
 })
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Stars Textures",
   Type = "HttpSynchronization",
   Identifier = "stars_textures",

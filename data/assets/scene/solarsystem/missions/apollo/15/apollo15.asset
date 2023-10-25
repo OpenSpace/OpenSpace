@@ -6,7 +6,7 @@ local kernels = asset.require("scene/solarsystem/missions/apollo/15/kernels")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Apollo Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_models",

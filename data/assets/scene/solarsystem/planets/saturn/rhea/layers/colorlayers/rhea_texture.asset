@@ -2,7 +2,7 @@ local globe = asset.require("../../rhea")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Rhea textures",
   Type = "HttpSynchronization",
   Identifier = "rhea_textures",

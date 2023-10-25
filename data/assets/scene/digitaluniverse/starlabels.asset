@@ -1,4 +1,4 @@
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Star Labels Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_starlabels_speck",

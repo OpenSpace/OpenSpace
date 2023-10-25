@@ -3,7 +3,7 @@ local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
 
 
 
-local kernelsFolder = asset.syncedResource({
+local kernelsFolder = asset.resource({
   Name = "Pioneer Kernels",
   Type = "HttpSynchronization",
   Identifier = "pioneer_10_spice",

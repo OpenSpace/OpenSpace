@@ -10,7 +10,7 @@ constellations in the night sky]]
 local URL = "https://sos.noaa.gov/catalog/datasets/light-pollution-artificial-sky-brightness/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

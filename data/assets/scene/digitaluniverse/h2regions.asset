@@ -1,11 +1,11 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "HII Regions Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_h2regions_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "HII Regions Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_h2regions_speck",

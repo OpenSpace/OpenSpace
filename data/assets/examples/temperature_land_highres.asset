@@ -2,7 +2,7 @@ local globe = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
-local path = asset.syncedResource({
+local path = asset.resource({
   Name = "Earth Textures Climate",
   Type = "HttpSynchronization",
   Identifier = "earth_textures_climate",
