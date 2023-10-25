@@ -1039,9 +1039,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         // time represented by another state
         (nextIndex < _files.size() && currentTime >= _files[nextIndex].timestamp))
     {
+        int previousIndex = _activeIndex;
         _activeIndex = updateActiveIndex(currentTime);
         // check index again after updating
         if (_activeIndex == -1) return;
+        // If we have a new index, buffers needs to update
+        if (previousIndex != _activeIndex) {
+            _shouldUpdateColorBuffer = true;
+            _shouldUpdateMaskingBuffer = true;
+        }
         // here, for DynamicLoading, the dataset is known, but files not loaded yet
         if (_files[_activeIndex].status == File::FileStatus::Downloaded) {
             // if LoadingType is StaticLoading all files will be Loaded
