@@ -30,6 +30,8 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconversion.h>
@@ -177,8 +179,15 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CastShadowInfo = {
         "CastShadow",
-        "Enable model to cast shadow",
+        "Cast shadow",
         "Enable model to cast shadow on its parent renderable",
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FrustumSizeInfo = {
+        "FrustumSize",
+        "Size of the depth-pass view frustum",
+        "Sets the width & height (effectively left/right & top/bottom)"
+        " of the depth-pass view frustum, z-near & z-far are calculated.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -296,6 +305,9 @@ namespace {
         // [[codegen::verbatim(RenderWireframeInfo.description)]]
         std::optional<bool> renderWireframe;
 
+        // [[codegen::verbatim(FrustumSizeInfo.description)]]
+        std::optional<float> frustumSize;
+
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
         std::optional<std::string> blendingOption;
 
@@ -344,6 +356,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _renderWireframe(RenderWireframeInfo, false)
+    , _frustumSize(FrustumSizeInfo, 1.f)
     , _useCache(UseCacheInfo, true)
     , _castShadow(CastShadowInfo, false)
     , _blendingFuncOption(
@@ -476,6 +489,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_enableFaceCulling);
     addProperty(_enableDepthTest);
     addProperty(_renderWireframe);
+    addProperty(_castShadow);
+    addProperty(_frustumSize);
     addProperty(_modelTransform);
     addProperty(_pivot);
     addProperty(_rotationVec);
@@ -483,6 +498,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     addProperty(_modelScale);
     _modelScale.setExponent(20.f);
+
+    _autoSizeFrustum = !p.frustumSize.has_value();
 
     _modelScale.onChange([this]() {
         if (!_geometry) {
@@ -496,6 +513,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
         // Set Interaction sphere size to be 10% of the bounding sphere
         setInteractionSphere(boundingSphere() * 0.1);
+
+        if (_autoSizeFrustum) {
+            const float radius = _geometry->boundingRadius() * _modelScale;
+            _frustumSize = radius;
+            _frustumSize.setMinValue(radius * .1f);
+            _frustumSize.setMaxValue(radius * 3.f);
+        }
     });
 
     _rotationVec.onChange([this]() {
@@ -524,6 +548,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             }
             _geometry->enableAnimation(_enableAnimation);
         }
+    });
+
+    _castShadow.onChange([]() {
+        // To update list of shadowers for our parent
+        global::eventEngine->publishEvent<events::CustomEvent>("Cast Shadow Changed", "nada");
     });
 
     if (p.rotationVector.has_value()) {
@@ -732,6 +761,13 @@ void RenderableModel::initializeGL() {
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
     setBoundingSphere(_geometry->boundingRadius() * _modelScale);
+
+    if (_autoSizeFrustum) {
+        const float radius = _geometry->boundingRadius() * _modelScale;
+        _frustumSize = radius;
+        _frustumSize.setMinValue(radius * .1f);
+        _frustumSize.setMaxValue(radius * 3.f);
+    }
 
     // Set Interaction sphere size to be 10% of the bounding sphere
     setInteractionSphere(boundingSphere() * 0.1);
@@ -1220,8 +1256,8 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
 
     _depthMapProgram->activate();
 
-    const double size = boundingSphere();
-    const double dist = size * 10000.;
+    const double frustumSize = static_cast<double>(_frustumSize);
+    const double distance = frustumSize * 10000.;
 
     // Model
     glm::dmat4 transform = glm::translate(glm::dmat4(1), glm::dvec3(_pivot.value()));
@@ -1229,21 +1265,21 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
     glm::dmat4 model = this->parent()->modelTransform() * transform;
 
     // View
-    glm::dvec3 center = this->parent()->worldPosition();
+    glm::dvec3 center = model * glm::dvec4(_geometry->center(), 1.);
     glm::dvec3 light_dir = glm::normalize(center - light->positionWorldSpace());
     glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), -light_dir));
-    glm::dvec3 eye = center + light_dir * dist;
+    glm::dvec3 eye = center + light_dir * distance;
     glm::dvec3 up = glm::cross(right, light_dir);
     glm::dmat4 view = glm::lookAt(eye, center, up);
 
     // Projection
     glm::dmat4 projection = glm::ortho(
-        -size,
-        size,
-        -size,
-        size,
-        dist * 0.1,
-        dist * 1.1
+        -frustumSize,
+        frustumSize,
+        -frustumSize,
+        frustumSize,
+        distance * 0.1,
+        distance * 1.1
     );
 
     glm::dmat4 viewProjection = projection * view;

@@ -111,9 +111,12 @@ private:
     properties::BoolProperty _enableDepthTest;
     properties::OptionProperty _blendingFuncOption;
     properties::BoolProperty _renderWireframe;
+    properties::FloatProperty _frustumSize;
 
     properties::BoolProperty _useCache;
     properties::BoolProperty _castShadow;
+
+    bool _autoSizeFrustum = false;
 
     std::string _vertexShaderPath;
     std::string _fragmentShaderPath;
