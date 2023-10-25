@@ -4,7 +4,7 @@ local rot = asset.require("./carrington_to_heeq_rotation")
 
 
 
-local fieldlinesDirectory = asset.syncedResource({
+local fieldlinesDirectory = asset.resource({
   Name = "Bastille Day MAS Fieldlines",
   Type = "HttpSynchronization",
   Identifier = "bastille_day_mas_fieldlines",
@@ -34,8 +34,8 @@ local Fieldlines = {
     AlphaBlendlingEnabled = false,
     InputFileType = "Osfls",
     ColorTablePaths = {
-      asset.localResource("transferfunctions/density-fieldlines.txt"),
-      asset.localResource("transferfunctions/velocity-fieldlines.txt")
+      asset.resource("transferfunctions/density-fieldlines.txt"),
+      asset.resource("transferfunctions/velocity-fieldlines.txt")
     },
     ColorTableRanges = {
       { 0, 1000000 },

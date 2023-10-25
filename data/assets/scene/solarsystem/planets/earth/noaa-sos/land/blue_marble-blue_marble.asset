@@ -17,7 +17,7 @@ poles using thermal infrared imagery.]]
 local URL = "https://sos.noaa.gov/catalog/datasets/blue-marble/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

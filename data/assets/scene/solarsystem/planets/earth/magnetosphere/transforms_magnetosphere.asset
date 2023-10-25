@@ -3,7 +3,7 @@ asset.require("spice/base")
 
 
 
-local GSMKernel = asset.localResource("../kernels/GSM.ti")
+local GSMKernel = asset.resource("../kernels/GSM.ti")
 
 local GSMReferenceFrame = {
   Identifier = "GSMReferenceFrame",

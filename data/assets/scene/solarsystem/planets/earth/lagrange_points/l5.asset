@@ -3,14 +3,14 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local circle = asset.syncedResource({
+local circle = asset.resource({
   Name = "Circle",
   Type = "HttpSynchronization",
   Identifier = "circle_image",
   Version = 1
 })
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Lagrange Kernels",
   Type = "HttpSynchronization",
   Identifier = "earth_lagrange_kernels",

@@ -3,7 +3,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local sync = asset.syncedResource({
+local sync = asset.resource({
   Name = "Orion Nebula Model",
   Type = "HttpSynchronization",
   Identifier = "orion_nebula_model",

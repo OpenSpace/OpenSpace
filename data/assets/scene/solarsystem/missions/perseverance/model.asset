@@ -5,7 +5,7 @@ local spice = asset.require("./spice")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Perseverance Model",
   Type = "HttpSynchronization",
   Identifier = "perseverance_models",

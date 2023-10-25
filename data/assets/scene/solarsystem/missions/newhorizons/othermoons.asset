@@ -5,28 +5,28 @@ local Styx = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/styx")
 
 
 
-local hydraTextures = asset.syncedResource({
+local hydraTextures = asset.resource({
   Name = "Hydra Textures",
   Type = "HttpSynchronization",
   Identifier = "hydra_textures",
   Version = 1
 })
 
-local kerberosTextures = asset.syncedResource({
+local kerberosTextures = asset.resource({
   Name = "Kerberos Textures",
   Type = "HttpSynchronization",
   Identifier = "kerberos_textures",
   Version = 1
 })
 
-local nixTextures = asset.syncedResource({
+local nixTextures = asset.resource({
   Name = "Nix Textures",
   Type = "HttpSynchronization",
   Identifier = "nix_textures",
   Version = 1
 })
 
-local styxTextures = asset.syncedResource({
+local styxTextures = asset.resource({
   Name = "Styx Textures",
   Type = "HttpSynchronization",
   Identifier = "styx_textures",

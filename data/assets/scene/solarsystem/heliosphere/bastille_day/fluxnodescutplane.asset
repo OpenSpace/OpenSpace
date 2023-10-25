@@ -4,14 +4,14 @@ local rot = asset.require("./carrington_to_heeq_rotation")
 
 
 
-local TexturesPathEquatorial = asset.syncedResource({
+local TexturesPathEquatorial = asset.resource({
 Type = "HttpSynchronization",
   Name = "cutplanes_textures",
   Identifier = "cutplanes_textures",
   Version = 1
 })
 
-local TexturesPathMeridial = asset.syncedResource({
+local TexturesPathMeridial = asset.resource({
   Type = "HttpSynchronization",
   Name = "cutplane_meridial_textures",
   Identifier = "cutplane_meridial_textures",

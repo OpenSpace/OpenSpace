@@ -2,7 +2,7 @@ local globe = asset.require("../../tethys")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Tethys textures",
   Type = "HttpSynchronization",
   Identifier = "tethys_textures",

@@ -1,6 +1,6 @@
 local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
 
-local localFolder = asset.syncedResource({
+local localFolder = asset.resource({
   Name = "Mercury Magnetosphere",
   Type = "HttpSynchronization",
   Identifier = "mercury_magnetosphere",

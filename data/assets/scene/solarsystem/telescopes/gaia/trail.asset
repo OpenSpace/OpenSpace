@@ -3,7 +3,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local trail = asset.syncedResource({
+local trail = asset.resource({
   Name = "Gaia Trail",
   Type = "HttpSynchronization",
   Identifier = "gaia_trail",

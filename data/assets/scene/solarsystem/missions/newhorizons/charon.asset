@@ -3,7 +3,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Charon Textures",
   Type = "HttpSynchronization",
   Identifier = "charon_textures",

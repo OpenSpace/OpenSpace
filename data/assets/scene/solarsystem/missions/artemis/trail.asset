@@ -6,7 +6,7 @@ local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon"
 
 local ArtemisSpiceId = "-1023"
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Artemis Kernels",
   Type = "HttpSynchronization",
   Identifier = "artemis_1_kernels",
