@@ -278,21 +278,21 @@ float AtmosphereDeferredcaster::eclipseShadow(glm::dvec3 position) {
     }
 
     const ShadowRenderingStruct& shadow = _shadowDataArrayCache.front();
-    const glm::dvec3 positionToCaster = shadow.casterPositionVec - position;
-    const glm::dvec3 sourceToCaster = shadow.sourceCasterVec; // Normalized
-    const glm::dvec3 casterShadow =
+    const glm::vec3 positionToCaster = shadow.casterPositionVec -
+        static_cast<glm::vec3>(position);
+    const glm::vec3 sourceToCaster =
+        static_cast<glm::vec3>(shadow.sourceCasterVec); // Normalized
+    const glm::vec3 casterShadow =
         dot(positionToCaster, sourceToCaster) * sourceToCaster;
-    const glm::dvec3 positionToShadow = positionToCaster - casterShadow;
+    const glm::vec3 positionToShadow = positionToCaster - casterShadow;
 
     float distanceToShadow = static_cast<float>(length(positionToShadow));
-    double shadowLength = length(casterShadow);
+    float shadowLength = length(casterShadow);
 
-    float radiusPenumbra = static_cast<float>(
-        shadow.radiusCaster * (shadowLength + shadow.penumbra) / shadow.penumbra
-    );
-    float radiusUmbra = static_cast<float>(
-        shadow.radiusCaster * (shadow.umbra - shadowLength) / shadow.umbra
-    );
+    float radiusPenumbra = 
+        shadow.radiusCaster * (shadowLength + shadow.penumbra) / shadow.penumbra;
+    float radiusUmbra = 
+        shadow.radiusCaster * (shadow.umbra - shadowLength) / shadow.umbra;
 
     // Is the position in the umbra - the fully shaded part
     if (distanceToShadow < radiusUmbra) {
@@ -318,12 +318,14 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
     ZoneScoped;
 
     // Atmosphere Frustum Culling
-    glm::dvec3 tPlanetPos = glm::dvec3(_modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
+    glm::dvec3 tPlanetPos = glm::dvec3(static_cast<glm::dmat4>(_modelTransform) *
+        glm::vec4(0.0, 0.0, 0.0, 1.0));
     const double distance = glm::distance(tPlanetPos, data.camera.eyePositionVec3());
 
     // Radius is in KM
     const double scaledRadius = glm::length(
-        glm::dmat3(_modelTransform) * glm::dvec3(KM_TO_M * _atmosphereRadius, 0.0, 0.0)
+        glm::dmat3(static_cast<glm::dmat4>(_modelTransform)) *
+        glm::dvec3(KM_TO_M * _atmosphereRadius, 0.0, 0.0)
     );
 
     // Number of planet radii to use as distance threshold for culling
@@ -357,37 +359,40 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         prg.setUniform(_uniformCache.sunAngularSize, glm::radians(_sunAngularSize));
 
         // Object Space
-        glm::dmat4 invModelMatrix = glm::inverse(_modelTransform);
+        glm::mat4 invModelMatrix = glm::inverse(_modelTransform);
         prg.setUniform(_uniformCache.inverseModelTransformMatrix, invModelMatrix);
         prg.setUniform(_uniformCache.modelTransformMatrix, _modelTransform);
 
-        glm::dmat4 viewToWorldMatrix = glm::inverse(data.camera.combinedViewMatrix());
+        glm::mat4 viewToWorldMatrix =
+            glm::inverse(static_cast<glm::mat4>(data.camera.combinedViewMatrix()));
 
         // Eye Space to World Space
         prg.setUniform(_uniformCache.viewToWorldMatrix, viewToWorldMatrix);
 
         // Projection to Eye Space
-        glm::dmat4 dInvProj = glm::inverse(glm::dmat4(data.camera.projectionMatrix()));
+        glm::mat4 dInvProj = glm::inverse(data.camera.projectionMatrix());
 
-        glm::dmat4 invWholePipeline = invModelMatrix * viewToWorldMatrix * dInvProj;
+        glm::mat4 invWholePipeline = invModelMatrix * viewToWorldMatrix * dInvProj;
 
         prg.setUniform(_uniformCache.projectionToModelTransform, invWholePipeline);
 
-        glm::dvec4 camPosObjCoords =
-            invModelMatrix * glm::dvec4(data.camera.eyePositionVec3(), 1.0);
-        prg.setUniform(_uniformCache.camPosObj, glm::dvec3(camPosObjCoords));
+        glm::vec4 camPosObjCoords = invModelMatrix *
+            glm::vec4(static_cast<glm::vec3>(data.camera.eyePositionVec3()), 1.0);
+        prg.setUniform(_uniformCache.camPosObj, glm::vec3(camPosObjCoords));
 
         SceneGraphNode* node = sceneGraph()->sceneGraphNode("Sun");
         glm::dvec3 sunPosWorld = node ? node->worldPosition() : glm::dvec3(0.0);
 
-        glm::dvec3 sunPosObj;
+        glm::vec3 sunPosObj;
         // Sun following camera position
         if (_sunFollowingCameraEnabled) {
-            sunPosObj = invModelMatrix * glm::dvec4(data.camera.eyePositionVec3(), 1.0);
+            sunPosObj = invModelMatrix *
+                glm::vec4(glm::vec3(data.camera.eyePositionVec3()), 1.0);
         }
         else {
-            sunPosObj = invModelMatrix *
-                glm::dvec4((sunPosWorld - data.modelTransform.translation) * 1000.0, 1.0);
+            sunPosObj = invModelMatrix * static_cast<glm::vec4>(
+                glm::dvec4((sunPosWorld - data.modelTransform.translation) * 1000.0, 1.0)
+            );
         }
 
         // Sun Position in Object Space
@@ -467,13 +472,13 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
                 // The current caster is shadowing the current planet
                 shadow.isShadowing = true;
                 shadow.radiusSource = actualSourceRadius;
-                shadow.radiusCaster = actualCasterRadius;
+                shadow.radiusCaster = static_cast<float>(actualCasterRadius);
                 shadow.sourceCasterVec = glm::normalize(sourceCasterVec);
-                shadow.penumbra = xpTest;
+                shadow.penumbra = static_cast<float>(xpTest);
                 shadow.umbra =
-                    shadow.radiusCaster * scLength /
+                    shadow.radiusCaster * static_cast<float>(scLength) /
                     (shadow.radiusSource - shadow.radiusCaster);
-                shadow.casterPositionVec = casterPos;
+                shadow.casterPositionVec = static_cast<glm::vec3>(casterPos);
             }
             _shadowDataArrayCache.push_back(shadow);
         }
@@ -495,7 +500,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
                 std::strcpy(bf, "].rc\0");
                 prg.setUniform(_uniformNameBuffer, sd.radiusCaster);
                 std::strcpy(bf, "].sourceCasterVec\0");
-                prg.setUniform(_uniformNameBuffer, sd.sourceCasterVec);
+                prg.setUniform(_uniformNameBuffer,
+                    static_cast<glm::vec3>(sd.sourceCasterVec));
                 std::strcpy(bf, "].casterPositionVec\0");
                 prg.setUniform(_uniformNameBuffer, sd.casterPositionVec);
             }
@@ -546,7 +552,7 @@ void AtmosphereDeferredcaster::initializeCachedVariables(
 }
 
 void AtmosphereDeferredcaster::setModelTransform(glm::dmat4 transform) {
-    _modelTransform = std::move(transform);
+    _modelTransform = std::move(static_cast<glm::mat4>(transform));
 }
 
 void AtmosphereDeferredcaster::setOpacity(float opacity) {

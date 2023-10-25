@@ -34,7 +34,7 @@ uniform mat4 projectionTransform;
 
 
 void main() {
-  vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1));
+  vs_positionViewSpace = vec4(modelViewTransform * vec4(in_position, 1));
   vec4 positionScreenSpace = projectionTransform * vs_positionViewSpace;
   vs_depth = positionScreenSpace.w;
   gl_Position  = positionScreenSpace;

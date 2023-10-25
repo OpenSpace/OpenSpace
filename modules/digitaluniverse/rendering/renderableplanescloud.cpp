@@ -391,7 +391,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         glm::dmat4(projectionTransform) * modelViewTransform;
     _program->setUniform(
         _uniformCache.modelViewProjectionTransform,
-        modelViewProjectionTransform
+        static_cast<glm::mat4>(modelViewProjectionTransform)
     );
     _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);

@@ -34,18 +34,18 @@ out vec3 vs_color;
 out float vs_screenSpaceDepth;
 out float vs_starBrightness;
 
-uniform dmat4 viewProjectionMatrix;
-uniform dmat4 modelMatrix;
-uniform dvec3 eyePosition;
+uniform mat4 viewProjectionMatrix;
+uniform mat4 modelMatrix;
+uniform vec3 eyePosition;
 
-const double PARSEC = 3.08567756E16;
+const float PARSEC = 3.08567756E16;
 
 
 void main() {
 	vs_position = vec4(in_position, 1.0);
-	dvec4 dpos = dvec4(vs_position);
+	vec4 dpos = vs_position;
 
-	double distanceToStar = length(dpos.xyz - eyePosition);
+	float distanceToStar = length(dpos.xyz - eyePosition);
 	vs_starBrightness = clamp(float(8000.0 * PARSEC / distanceToStar), 0.0, 1.0);
 
 	dpos.xyz *= 8.0;

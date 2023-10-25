@@ -77,10 +77,10 @@ uniform float zFightingPercentage;
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
  *******************************************************************************/
 struct ShadowRenderingStruct {
-  double xu, xp;
-  double rs, rc;
-  dvec3 sourceCasterVec;
-  dvec3 casterPositionVec;
+  float xu, xp;
+  float rs, rc;
+  vec3 sourceCasterVec;
+  vec3 casterPositionVec;
   bool isShadowing;
 };
 
@@ -92,17 +92,17 @@ uniform int shadows;
 uniform bool hardShadows;
 
 vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[NSEclipseShadows],
-                const dvec3 position, const bool ground)
+                const vec3 position, const bool ground)
 {
   #for i in 0..#{nEclipseShadows}
     if (shadowInfoArray[#{i}].isShadowing) {
-      dvec3 pc = shadowInfoArray[#{i}].casterPositionVec - position;
-      dvec3 sc_norm = shadowInfoArray[#{i}].sourceCasterVec;
-      dvec3 pc_proj = dot(pc, sc_norm) * sc_norm;
-      dvec3 d = pc - pc_proj;
+      vec3 pc = shadowInfoArray[#{i}].casterPositionVec - position;
+      vec3 sc_norm = shadowInfoArray[#{i}].sourceCasterVec;
+      vec3 pc_proj = dot(pc, sc_norm) * sc_norm;
+      vec3 d = pc - pc_proj;
 
       float length_d = float(length(d));
-      double length_pc_proj = length(pc_proj);
+      float length_pc_proj = length(pc_proj);
 
       float r_p_pi = float(shadowInfoArray[#{i}].rc * (length_pc_proj + shadowInfoArray[#{i}].xp) / shadowInfoArray[#{i}].xp);
       float r_u_pi = float(shadowInfoArray[#{i}].rc * (shadowInfoArray[#{i}].xu - length_pc_proj) / shadowInfoArray[#{i}].xu);
@@ -212,7 +212,7 @@ Fragment getFragment() {
 #endif // PERFORM_SHADING
 
 #if USE_ECLIPSE_SHADOWS
-  frag.color *= calcShadow(shadowDataArray, dvec3(positionWorldSpace), true);
+  frag.color *= calcShadow(shadowDataArray, vec3(positionWorldSpace), true);
 #endif // USE_ECLIPSE_SHADOWS
 
 #if USE_OVERLAY

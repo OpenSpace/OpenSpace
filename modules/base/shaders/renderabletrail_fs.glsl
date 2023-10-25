@@ -68,8 +68,8 @@ Fragment getFragment() {
   vec2 xy = vec2(gl_FragCoord.xy);
   xy -= viewport.xy;
 
-  double distanceCenter = length(mathLine - xy);
-  double dLW = double(lineWidth);
+  float distanceCenter = length(mathLine - xy);
+  float dLW = lineWidth;
   const float blendFactor = 20.0;
 
   if (distanceCenter > dLW) {

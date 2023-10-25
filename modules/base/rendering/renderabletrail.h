@@ -146,7 +146,7 @@ protected:
         VertexSorting sorting = VertexSorting::NoSorting;
 
         /// Local model matrix transformation, used for rendering in camera space
-        glm::dmat4 _localTransform = glm::dmat4(1.0);
+        glm::mat4 _localTransform = glm::mat4(1.0);
 
         /// The vertex array object for this RenderInformation
         GLuint _vaoID = 0;

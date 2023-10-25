@@ -330,8 +330,14 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     _program->activate();
 
-    _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
-    _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
+    _program->setUniform(
+        _uniformCache.modelViewTransform,
+        static_cast<glm::mat4>(modelViewMatrix)
+    );
+    _program->setUniform(
+        _uniformCache.projectionTransform,
+        static_cast<glm::mat4>(projectionMatrix)
+    );
     _program->setUniform(_uniformCache.alphaValue, opacity());
 
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {

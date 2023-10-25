@@ -39,7 +39,7 @@ out float ge_starDistFromSun;
 out float ge_cameraDistFromSun;
 out float ge_observedDist;
 
-uniform dmat4 view;
+uniform mat4 view;
 uniform float viewScaling;
 uniform float cutOffThreshold;
 

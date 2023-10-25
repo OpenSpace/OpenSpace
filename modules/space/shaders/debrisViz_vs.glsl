@@ -34,9 +34,9 @@ out float viewSpaceDepth;
 out float periodFraction;
 out float offsetPeriods;
 
-uniform dmat4 modelViewTransform;
+uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
-uniform double inGameTime;
+uniform float inGameTime;
 
 
 void main() {
@@ -53,9 +53,9 @@ void main() {
 
   // calculate nr of periods, get fractional part to know where the vertex closest to the
   // debris part is right now
-  double nrOfRevolutions = (inGameTime - epoch) / period;
-  double frac = double(int(nrOfRevolutions));
-  double periodFractiond = nrOfRevolutions - frac;
+  float nrOfRevolutions = (inGameTime - epoch) / period;
+  float frac = float(int(nrOfRevolutions));
+  float periodFractiond = nrOfRevolutions - frac;
   if (periodFractiond < 0.0) {
     periodFractiond += 1.0;
   }

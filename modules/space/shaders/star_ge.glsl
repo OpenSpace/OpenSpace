@@ -40,17 +40,17 @@ flat out float ge_speed;
 flat out float gs_screenSpaceDepth;
 
 uniform float magnitudeExponent;
-uniform dvec3 eyePosition;
-uniform dvec3 cameraUp;
+uniform vec3 eyePosition;
+uniform vec3 cameraUp;
 uniform int psfParamConf;
 uniform float lumCent;
 uniform float radiusCent;
 uniform float brightnessCent;
-uniform dmat4 cameraViewProjectionMatrix;
-uniform dmat4 modelMatrix;
+uniform mat4 cameraViewProjectionMatrix;
+uniform mat4 modelMatrix;
 
-const double PARSEC = 3.08567756E16;
-//const double PARSEC = 3.08567782E16;
+const float PARSEC = 3.08567756E16;
+//const float PARSEC = 3.08567782E16;
 
 // FRAGILE
 // All of these values have to be synchronized with the values in the optionproperty
@@ -71,45 +71,45 @@ float bvToKelvin(float bv) {
   return 4600 * (1.0 / (tmp + 1.7) + 1.0 / (tmp + 0.62));
 }
 
-double scaleForApparentBrightness(dvec3 dpos, float luminance) {
+float scaleForApparentBrightness(vec3 dpos, float luminance) {
   // Working like Partiview
-  double pSize = pow(10, 29.0 + magnitudeExponent);
+  float pSize = pow(10, 29.0 + magnitudeExponent);
   float luminosity = luminance * 10.0;
-  double distanceToStar = length(dpos - eyePosition);
+  float distanceToStar = length(dpos - eyePosition);
   return (pSize * luminosity) / distanceToStar;
 }
 
-double scaleForLuminositySize(float bv, float luminance, float absMagnitude) {
-  double adjustedLuminance = luminance + 5E9;
+float scaleForLuminositySize(float bv, float luminance, float absMagnitude) {
+  float adjustedLuminance = luminance + 5E9;
   float L_over_Lsun = pow(2.51, SunAbsMagnitude - absMagnitude);
   float temperature = bvToKelvin(bv);
   float relativeTemperature = SunTemperature / temperature;
-  double starRadius = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
+  float starRadius = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
   return (lumCent * adjustedLuminance + (radiusCent * starRadius)) * pow(10.0, magnitudeExponent);
 }
 
-double scaleForLuminositySizeAppBrightness(dvec3 dpos, float bv, float luminance, float absMagnitude) {
-  double luminosity = double(1.0 - luminance);
-  double distanceToStarInParsecs = trunc(length(dpos - eyePosition) / PARSEC);
-  double apparentBrightness = luminosity / distanceToStarInParsecs;
+float scaleForLuminositySizeAppBrightness(vec3 dpos, float bv, float luminance, float absMagnitude) {
+  float luminosity = 1.0 - luminance;
+  float distanceToStarInParsecs = trunc(length(dpos - eyePosition) / PARSEC);
+  float apparentBrightness = luminosity / distanceToStarInParsecs;
   float L_over_Lsun = pow(2.51, SunAbsMagnitude - absMagnitude);
   float temperature = bvToKelvin(bv);
   float relativeTemperature = SunTemperature / temperature;
-  double starRadius = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
+  float starRadius = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
 
-  double scaledLuminance = lumCent * (luminance + 5E9);
-  double scaledStarRadius = radiusCent * starRadius;
-  double scaledBrightness = brightnessCent * apparentBrightness * 5E15;
+  float scaledLuminance = lumCent * (luminance + 5E9);
+  float scaledStarRadius = radiusCent * starRadius;
+  float scaledBrightness = brightnessCent * apparentBrightness * 5E15;
   return (scaledLuminance + scaledStarRadius + scaledBrightness) * pow(10.0, magnitudeExponent);
 }
 
-double scaleForAbsoluteMagnitude(float absMagnitude) {
+float scaleForAbsoluteMagnitude(float absMagnitude) {
   return (-absMagnitude + 35) * pow(10.0, magnitudeExponent + 8.5);
 }
 
-double scaleForApparentMagnitude(dvec3 dpos, float absMag) {
-  double distanceToStarInMeters = length(dpos - eyePosition);
-  double distanceToCenterInMeters = length(eyePosition);
+float scaleForApparentMagnitude(vec3 dpos, float absMag) {
+  float distanceToStarInMeters = length(dpos - eyePosition);
+  float distanceToCenterInMeters = length(eyePosition);
   float distanceToStarInParsecs = float(distanceToStarInMeters/PARSEC);
   //float appMag = absMag + 5*log(distanceToStarInParsecs) - 5.0;
   float appMag = absMag + 5.0 * (log(distanceToStarInParsecs/10.0)/log(2.0));
@@ -126,7 +126,7 @@ double scaleForApparentMagnitude(dvec3 dpos, float absMag) {
   // return pow(10.0, (appMag - absMag)*(1.0/5.0) + 1.0) * pow(10.0, magnitudeExponent + 3.f);
 }
 
-double scaleForDistanceModulus(float absMag) {
+float scaleForDistanceModulus(float absMag) {
   return exp((-30.623 - absMag) * 0.462) * pow(10.0, magnitudeExponent + 12.5) * 2000;
 }
 
@@ -134,13 +134,13 @@ double scaleForDistanceModulus(float absMag) {
 void main() {
   vec3 pos = gl_in[0].gl_Position.xyz;
   vs_position = pos; // in object space
-  dvec4 dpos  = modelMatrix * dvec4(pos, 1.0);
+  vec4 dpos  = modelMatrix * vec4(pos, 1.0);
 
   ge_bv = vs_bvLumAbsMagAppMag[0].x;
   ge_velocity = vs_velocity[0];
   ge_speed = vs_speed[0];
 
-  double scaleMultiply = 1.0;
+  float scaleMultiply = 1.0;
 
   if (psfParamConf == SizeCompositionOptionAppBrightness) {
     float luminance = vs_bvLumAbsMagAppMag[0].y;
@@ -177,26 +177,26 @@ void main() {
     scaleMultiply = scaleForDistanceModulus(absMagnitude);
   }
 
-  dvec3 normal = eyePosition - dpos.xyz;
-  dvec3 newRight = normalize(cross(cameraUp, normal));
-  dvec3 newUp = normalize(cross(normal, newRight));
-  dvec3 scaledRight = scaleMultiply * newRight;
-  dvec3 scaledUp = scaleMultiply * newUp;
+  vec3 normal = eyePosition - dpos.xyz;
+  vec3 newRight = normalize(cross(cameraUp, normal));
+  vec3 newUp = normalize(cross(normal, newRight));
+  vec3 scaledRight = scaleMultiply * newRight;
+  vec3 scaledUp = scaleMultiply * newUp;
 
   vec4 lowerLeft = z_normalization(
-    vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w))
+    vec4(cameraViewProjectionMatrix * vec4(dpos.xyz - scaledRight - scaledUp, dpos.w))
   );
 
   vec4 upperRight = z_normalization(
-    vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))
+    vec4(cameraViewProjectionMatrix * vec4(dpos.xyz + scaledUp + scaledRight, dpos.w))
   );
 
   vec4 lowerRight = z_normalization(
-    vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w))
+    vec4(cameraViewProjectionMatrix * vec4(dpos.xyz + scaledRight - scaledUp, dpos.w))
   );
 
   vec4 upperLeft = z_normalization(
-    vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w))
+    vec4(cameraViewProjectionMatrix * vec4(dpos.xyz + scaledUp - scaledRight, dpos.w))
   );
 
   gs_screenSpaceDepth = lowerLeft.w;

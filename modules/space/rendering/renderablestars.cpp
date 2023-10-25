@@ -1042,10 +1042,10 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glm::dvec3 eyePosition = glm::dvec3(
         glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
-    _program->setUniform(_uniformCache.eyePosition, eyePosition);
+    _program->setUniform(_uniformCache.eyePosition, static_cast<glm::vec3>(eyePosition));
 
     glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
-    _program->setUniform(_uniformCache.cameraUp, cameraUp);
+    _program->setUniform(_uniformCache.cameraUp, static_cast<glm::vec3>(cameraUp));
 
     glm::dmat4 modelMatrix = calcModelTransform(data);
 
@@ -1054,10 +1054,10 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
                                             data.camera.combinedViewMatrix();
 
-    _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
+    _program->setUniform(_uniformCache.modelMatrix, static_cast<glm::mat4>(modelMatrix));
     _program->setUniform(
         _uniformCache.cameraViewProjectionMatrix,
-        cameraViewProjectionMatrix
+        static_cast<glm::mat4>(cameraViewProjectionMatrix)
     );
     _program->setUniform(_uniformCache.colorOption, _colorOption);
     _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);

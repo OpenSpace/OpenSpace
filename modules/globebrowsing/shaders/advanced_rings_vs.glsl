@@ -33,21 +33,21 @@ out vec2 vs_st;
 out float vs_screenSpaceDepth;
 out vec4 shadowCoords;
 
-uniform dmat4 modelViewProjectionMatrix;
+uniform mat4 modelViewProjectionMatrix;
 
 // ShadowMatrix is the matrix defined by:
 // textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
 // where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
-uniform dmat4 shadowMatrix;
+uniform mat4 shadowMatrix;
 
 
 void main() {
   vs_st = in_st;
 
-  dvec4 positionClipSpace  = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
+  vec4 positionClipSpace  = modelViewProjectionMatrix * vec4(in_position, 0.0, 1.0);
   vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
 
-  shadowCoords = vec4(shadowMatrix * dvec4(in_position, 0.0, 1.0));
+  shadowCoords = vec4(shadowMatrix * vec4(in_position, 0.0, 1.0));
   vs_screenSpaceDepth  = positionClipSpaceZNorm.w;
   gl_Position = positionClipSpaceZNorm;
 }

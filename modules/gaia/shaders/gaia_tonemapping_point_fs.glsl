@@ -27,7 +27,7 @@
 in vec2 uv;
 
 uniform sampler2D renderedTexture;
-uniform dmat4 projection;
+uniform mat4 projection;
 uniform vec2 screenSize;
 uniform int filterSize;
 uniform float sigma;

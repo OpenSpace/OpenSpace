@@ -238,7 +238,7 @@ void RenderablePoints::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform(
         _uniformCache.modelViewProjectionTransform,
-        calcModelViewProjectionTransform(data, glm::dmat4(1.0))
+        static_cast<glm::mat4>(calcModelViewProjectionTransform(data, glm::dmat4(1.0)))
     );
 
     _program->setUniform(_uniformCache.color, _pointColor);

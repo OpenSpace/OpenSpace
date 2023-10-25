@@ -32,12 +32,12 @@ out vec3 modelPosition;
 out vec4 viewPosition;
 
 uniform mat4 projectionTransform;
-uniform dmat4 modelViewTransform;
+uniform mat4 modelViewTransform;
 
 
 void main() {
   modelPosition = vertPosition.xyz;
-  dvec4 vp = modelViewTransform * vertPosition;
+  vec4 vp = modelViewTransform * vertPosition;
   viewPosition = vec4(vp);
 
   gl_Position = z_normalization(vec4(projectionTransform * viewPosition));

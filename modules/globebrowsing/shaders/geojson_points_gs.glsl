@@ -37,9 +37,9 @@ out vec4 vs_positionViewSpace;
 flat out vec3 vs_normal;
 
 // General settings
-uniform dmat4 modelTransform;
-uniform dmat4 viewTransform;
-uniform dmat4 projectionTransform;
+uniform mat4 modelTransform;
+uniform mat4 viewTransform;
+uniform mat4 projectionTransform;
 
 uniform float heightOffset;
 uniform bool useHeightMapData;
@@ -47,7 +47,7 @@ uniform bool useHeightMapData;
 // Camera information
 uniform vec3 cameraUp;
 uniform vec3 cameraRight;
-uniform dvec3 cameraPosition; // world coordinates
+uniform vec3 cameraPosition; // world coordinates
 uniform vec3 cameraLookUp;
 
 // Render mode
@@ -74,16 +74,16 @@ const vec2 corners[4] = vec2[4](
 void main() {
   vec4 pos = gl_in[0].gl_Position;
   vs_normal = normal[0];
-  dvec4 dpos = dvec4(dvec3(pos.xyz), 1.0);
+  vec4 dpos = vec4(vec3(pos.xyz), 1.0);
 
   // Offset position based on height information
   if (length(pos.xyz) > 0) {
-      dvec3 outDirection = normalize(dvec3(dpos));
+      vec3 outDirection = normalize(vec3(dpos));
       float height = heightOffset;
       if (useHeightMapData) {
         height += dynamicHeight[0];
       }
-      dpos += dvec4(outDirection * double(height), 0.0);
+      dpos += vec4(outDirection * height, 0.0);
   }
   // World coordinates
   dpos = modelTransform * dpos;
@@ -111,10 +111,10 @@ void main() {
     right = cross(up, worldNormal);
   }
 
-  dvec4 scaledRight = pointSize * dvec4(right, 0.0) * 0.5;
-  dvec4 scaledUp = pointSize * dvec4(up, 0.0) * 0.5;
+  vec4 scaledRight = pointSize * vec4(right, 0.0) * 0.5;
+  vec4 scaledUp = pointSize * vec4(up, 0.0) * 0.5;
 
-  dmat4 cameraViewProjectionMatrix = projectionTransform * viewTransform;
+  mat4 cameraViewProjectionMatrix = projectionTransform * viewTransform;
 
   vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
   vec4 scaledRightClip = textureWidthFactor * vec4(cameraViewProjectionMatrix * scaledRight);

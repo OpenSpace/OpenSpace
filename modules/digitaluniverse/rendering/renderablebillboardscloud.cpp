@@ -627,16 +627,21 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
         glm::vec2(global::renderEngine->renderingResolution())
     );
 
-    _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
+    _program->setUniform(
+        _uniformCache.cameraPos,
+        static_cast<glm::vec3>(data.camera.positionVec3())
+    );
     _program->setUniform(
         _uniformCache.cameraLookup,
         glm::vec3(data.camera.lookUpVectorWorldSpace())
     );
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
-    _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
+    _program->setUniform(_uniformCache.modelMatrix, static_cast<glm::mat4>(modelMatrix));
     _program->setUniform(
         _uniformCache.cameraViewProjectionMatrix,
-        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
+        static_cast<glm::mat4>(
+            glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
+        )
     );
 
     const float minBillboardSize = _billboardMinMaxSize.value().x; // in pixels

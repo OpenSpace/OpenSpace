@@ -33,7 +33,7 @@ out vec4 vs_gPosition;
 out float fade;
 noperspective out vec2 mathLine;
 
-uniform dmat4 modelViewTransform;
+uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform int idOffset;
 uniform int nVertices;
@@ -74,7 +74,7 @@ void main() {
     fade = 1.0;
   }
 
-  vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+  vs_gPosition = vec4(modelViewTransform * vec4(in_point_position, 1));
   vec4 vs_positionClipSpace = projectionTransform * vs_gPosition;
   vec4 vs_positionNDC = vs_positionClipSpace / vs_positionClipSpace.w;
   vs_positionDepth = vs_positionClipSpace.w;

@@ -88,14 +88,14 @@ uniform sampler3D inscatterTexture;
 uniform sampler2D mainPositionTexture;
 uniform sampler2D mainNormalTexture;
 uniform sampler2D mainColorTexture;
-uniform dmat4 inverseModelTransformMatrix;
-uniform dmat4 modelTransformMatrix;
-uniform dmat4 viewToWorldMatrix;
-uniform dmat4 projectionToModelTransformMatrix;
+uniform mat4 inverseModelTransformMatrix;
+uniform mat4 modelTransformMatrix;
+uniform mat4 viewToWorldMatrix;
+uniform mat4 projectionToModelTransformMatrix;
 uniform vec4 viewport;
 uniform vec2 resolution;
-uniform dvec3 camPosObj;
-uniform dvec3 sunDirectionObj;
+uniform vec3 camPosObj;
+uniform vec3 sunDirectionObj;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
@@ -105,12 +105,12 @@ const uint numberOfShadows = 1;
 
 
 struct ShadowRenderingStruct {
-  double xu;
-  double xp;
-  double rs;
-  double rc;
-  dvec3 sourceCasterVec;
-  dvec3 casterPositionVec;
+  float xu;
+  float xp;
+  float rs;
+  float rc;
+  vec3 sourceCasterVec;
+  vec3 casterPositionVec;
   bool isShadowing;
 };
 
@@ -122,20 +122,20 @@ uniform bool hardShadows;
 
 // Returns whether there is an eclipse in the x component and the strength of the
 // shadowing in the y component
-vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 position,
+vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], vec3 position,
                  bool ground)
 {
   if (!shadowInfoArray[0].isShadowing) {
     return vec2(0.0, 1.0);
   }
 
-  dvec3 pc = shadowInfoArray[0].casterPositionVec - position;
-  dvec3 scNorm = shadowInfoArray[0].sourceCasterVec;
-  dvec3 pcProj = dot(pc, scNorm) * scNorm;
-  dvec3 d = pc - pcProj;
+  vec3 pc = shadowInfoArray[0].casterPositionVec - position;
+  vec3 scNorm = shadowInfoArray[0].sourceCasterVec;
+  vec3 pcProj = dot(pc, scNorm) * scNorm;
+  vec3 d = pc - pcProj;
 
   float length_d = float(length(d));
-  double lengthPcProj = length(pcProj);
+  float lengthPcProj = length(pcProj);
 
   float r_p_pi = float(shadowInfoArray[0].rc * (lengthPcProj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp);
   float r_u_pi = float(shadowInfoArray[0].rc * (shadowInfoArray[0].xu - lengthPcProj) / shadowInfoArray[0].xu);
@@ -191,8 +191,8 @@ vec3 irradiance(sampler2D s, float r, float muSun) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 struct Ray {
-  dvec3 origin;
-  dvec3 direction;
+  vec3 origin;
+  vec3 direction;
 };
 
 /*
@@ -209,13 +209,13 @@ struct Ray {
  *                outside the atmosphere or the initial (and only) intersection of the ray
  *                with atmosphere when the eye position is inside atmosphere.
  */
-bool atmosphereIntersection(Ray ray, double atmRadius, out double offset,
-                            out double maxLength)
+bool atmosphereIntersection(Ray ray, float atmRadius, out float offset,
+                            out float maxLength)
 {
-  dvec3 l = -ray.origin;
-  double s = dot(l, ray.direction);
-  double l2 = dot(l, l);
-  double r2 = atmRadius * atmRadius; // avoiding surface acne
+  vec3 l = -ray.origin;
+  float s = dot(l, ray.direction);
+  float l2 = dot(l, l);
+  float r2 = atmRadius * atmRadius; // avoiding surface acne
 
   offset = 0.0;
   maxLength = 0.0;
@@ -225,7 +225,7 @@ bool atmosphereIntersection(Ray ray, double atmRadius, out double offset,
     return false;
   }
 
-  double m2 = l2 - s * s;
+  float m2 = l2 - s * s;
 
   // Ray misses atmosphere
   if (m2 > r2) {
@@ -233,7 +233,7 @@ bool atmosphereIntersection(Ray ray, double atmRadius, out double offset,
   }
 
   // If q = 0.0, there is only one intersection
-  double q = sqrt(r2 - m2);
+  float q = sqrt(r2 - m2);
 
   // If l2 < r2, the ray origin is inside the sphere
   if (l2 > r2) {
@@ -256,17 +256,17 @@ bool atmosphereIntersection(Ray ray, double atmRadius, out double offset,
  */
 Ray calculateRayRenderableGlobe(vec2 st) {
   vec2 interpolatedNDCPos = (st - 0.5) * 2.0;
-  dvec4 clipCoords = dvec4(interpolatedNDCPos, 1.0, 1.0);
+  vec4 clipCoords = vec4(interpolatedNDCPos, 1.0, 1.0);
 
   // Clip to Object Coords
-  dvec4 objectCoords = projectionToModelTransformMatrix * clipCoords;
+  vec4 objectCoords = projectionToModelTransformMatrix * clipCoords;
   objectCoords.xyz /= objectCoords.w;
 
   // Building Ray
   // Ray in object space (in KM)
   Ray ray;
   ray.origin = camPosObj * 0.001;
-  ray.direction = normalize(objectCoords.xyz * dvec3(0.001) - ray.origin);
+  ray.direction = normalize(objectCoords.xyz * vec3(0.001) - ray.origin);
   return ray;
 }
 
@@ -289,7 +289,7 @@ Ray calculateRayRenderableGlobe(vec2 st) {
  *                the reflectance R[L]
  */
 vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3 v, vec3 s,
-                       float r, vec3 fragPosObj, double maxLength, double pixelDepth,
+                       float r, vec3 fragPosObj, float maxLength, float pixelDepth,
                        vec3 spaceColor, float sunIntensity,
                        out float mu, out vec3 attenuation, out bool groundHit)
 {
@@ -498,7 +498,7 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 gr
  * attenuation := transmittance T(x,x0)
  */
 vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
-  // v = normalize(vec3(inverseModelTransformMatrix * dvec4(sunWorld, 1.0)));
+  // v = normalize(vec3(inverseModelTransformMatrix * vec4(sunWorld, 1.0)));
   float angle = dot(v, s);
 
   // JCC: Change this function to a impostor texture with gaussian decay color weighted
@@ -540,8 +540,8 @@ void main() {
   // Get the ray from camera to atm in object space
   Ray ray = calculateRayRenderableGlobe(texCoord);
 
-  double offset = 0.0;   // in KM
-  double maxLength = 0.0;   // in KM
+  float offset = 0.0;   // in KM
+  float maxLength = 0.0;   // in KM
   bool intersect = atmosphereIntersection(ray, Rt - (ATM_EPSILON * 0.001), offset, maxLength);
   if (!intersect) {
     renderTarget.rgb = color;
@@ -556,9 +556,9 @@ void main() {
 
   // Normal is stored in view space and transformed to the current object space
   vec4 normalViewSpaceAndWaterReflectance = texture(mainNormalTexture, st);
-  dvec4 normalViewSpace = vec4(normalViewSpaceAndWaterReflectance.xyz, 0.0);
-  dvec4 normalWorldSpace = viewToWorldMatrix * normalViewSpace;
-  vec4 normal = vec4(inverseModelTransformMatrix * normalWorldSpace);
+  vec4 normalViewSpace = vec4(normalViewSpaceAndWaterReflectance.xyz, 0.0);
+  vec4 normalWorldSpace = viewToWorldMatrix * normalViewSpace;
+  vec4 normal = inverseModelTransformMatrix * normalWorldSpace;
   normal.xyz = normalize(normal.xyz);
   normal.w = normalViewSpaceAndWaterReflectance.w;
 
@@ -566,15 +566,15 @@ void main() {
   vec4 position = texture(mainPositionTexture, st);
 
   // OS Eye to World coords
-  dvec4 positionWorldCoords = viewToWorldMatrix * position;
+  vec4 positionWorldCoords = viewToWorldMatrix * position;
 
   // World to Object (Normal and Position in meters)
-  dvec3 positionObjectsCoords = (inverseModelTransformMatrix * positionWorldCoords).xyz;
+  vec3 positionObjectsCoords = (inverseModelTransformMatrix * positionWorldCoords).xyz;
 
   // Distance of the pixel in the gBuffer to the observer
   // JCC (12/12/2017): AMD distance function is buggy.
-  //double pixelDepth = distance(cameraPositionInObject.xyz, positionObjectsCoords.xyz);
-  double pixelDepth = length(camPosObj - positionObjectsCoords);
+  //float pixelDepth = distance(cameraPositionInObject.xyz, positionObjectsCoords.xyz);
+  float pixelDepth = length(camPosObj - positionObjectsCoords);
 
   // JCC (12/13/2017): Trick to remove floating error in texture.
   // We see a squared noise on planet's surface when seeing the planet from far away
@@ -590,7 +590,7 @@ void main() {
     const float diffDist = x2 - x1;
     const float varA = diffGreek / diffDist;
     const float varB = (alpha - varA * x1);
-    pixelDepth += double(varA * dC + varB);
+    pixelDepth += float(varA * dC + varB);
   }
 
   // All calculations are done in KM:
@@ -604,7 +604,7 @@ void main() {
   }
 
   // Following paper nomenclature
-  double t = offset;
+  float t = offset;
 
   // Moving observer from camera location to top atmosphere. If the observer is already
   // inside the atm, offset = 0.0 and no changes at all
@@ -612,7 +612,7 @@ void main() {
   float r = length(x);
   vec3 v = vec3(ray.direction);
   float mu = 0.0; // dot(x, v) / r;
-  vec3 s = vec3(sunDirectionObj);
+  vec3 s = sunDirectionObj;
   float tF = float(maxLength - t);
 
   // Because we may move the camera origin to the top of atmosphere we also need to
@@ -620,7 +620,7 @@ void main() {
   // comparison with the planet's ground make sense:
   pixelDepth -= offset;
 
-  dvec3 onATMPos = (modelTransformMatrix * dvec4(x * 1000.0, 1.0)).xyz;
+  vec3 onATMPos = (modelTransformMatrix * vec4(x * 1000.0, 1.0)).xyz;
   vec2 eclipseShadowATM = calcShadow(shadowDataArray, onATMPos, false);
   float sunIntensityInscatter = sunRadiance * eclipseShadowATM.y;
 
