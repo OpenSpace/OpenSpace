@@ -300,16 +300,26 @@ Fragment getFragment() {
 #endif
 
 #if USE_DEPTHMAP_SHADOWS && nDepthMaps > 0
-  float contrib = 0.f;
-  float shadow = 1.f;
+  float intensity = 1.f;
   const float bias = 0.005;
+  const int samples = 7;
+  const float norm = pow(2.f * samples + 1.f, 2.f);
   for (int i = 0; i < nDepthMaps; ++i) {
+    float contrib = 1.f;
+    vec2 ssz = 1.f / textureSize(light_depth_maps[i], 0);
     vec3 coords = 0.5 + 0.5 * positions_lightspace[i].xyz / positions_lightspace[i].w;
-    shadow = min(shadow, texture(light_depth_maps[i], coords.xyz, bias));
-    contrib += float(texture(light_depth_maps[i], coords.xyz, bias) < 1.f);
+    for (int x = -samples; x <= samples; ++x) {
+      for (int y = -samples; y <= samples; ++y) {
+        float shadow_sample = texture(light_depth_maps[i], coords.xyz + vec3(x * ssz.x, y * ssz.y, 1), bias);
+        contrib += shadow_sample;
+      }
+    }
+
+    intensity = min(intensity, contrib / norm);
   }
-  float ambient = .2f;
-  frag.color.xyz *= pow(ambient + (1.f - ambient) * shadow, contrib);
+
+  float ambient = .1f;
+  frag.color.xyz *= (ambient + (1.f - ambient) * intensity);
 #endif // USE_DEPTHMAP_SHADOWS && nDepthMaps > 0
 
   frag.color.a *= opacity;
