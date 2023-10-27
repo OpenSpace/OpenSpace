@@ -33,7 +33,14 @@ function(DownloadNodeJs version download_dir)
     set(path "v${version}/win-x64/${filename}")
   endif ()
   if (APPLE)
-    set(basename "node-v${version}-darwin-x64")
+
+    if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm64")
+      set(basename "node-v${version}-darwin-arm64")
+    else ()
+      set(basename "node-v${version}-darwin-x64")
+    endif ()
+
+
     set(filename "${basename}.tar.gz")
     set(path "v${version}/${filename}")
   endif ()

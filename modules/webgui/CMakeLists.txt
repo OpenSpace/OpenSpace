@@ -40,7 +40,8 @@ source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Specify the NodeJs distribution version.
-set(NODEJS_VERSION "8.11.4")
+#set(NODEJS_VERSION "8.11.4")
+set(NODEJS_VERSION "16.20.2")
 
 include(nodejs_support)
 DownloadNodeJs("${NODEJS_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/nodejs")
