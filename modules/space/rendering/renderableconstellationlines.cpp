@@ -251,8 +251,8 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
 
     _program->activate();
 
-    _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
-    _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
+    _program->setUniform(_uniformCache.modelViewTransform, static_cast<glm::mat4>(modelViewMatrix));
+    _program->setUniform(_uniformCache.projectionTransform, static_cast<glm::mat4>(projectionMatrix));
     _program->setUniform(_uniformCache.opacity, opacity());
 
     using ConstellationKeyValuePair = std::pair<const int, ConstellationLine>;

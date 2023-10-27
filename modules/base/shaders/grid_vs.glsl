@@ -29,14 +29,14 @@ layout(location = 0) in vec3 in_position;
 out float vs_depthClipSpace;
 out vec4 vs_positionViewSpace;
 
-uniform dmat4 modelViewTransform;
-uniform dmat4 MVPTransform;
+uniform mat4 modelViewTransform;
+uniform mat4 MVPTransform;
 
 
 void main() {
-  dvec4 objPosDouble = dvec4(in_position, 1.0);
-  dvec4 positionViewSpace = modelViewTransform * objPosDouble;
-  dvec4 positionClipSpace = MVPTransform * objPosDouble;
+  vec4 objPosDouble = vec4(in_position, 1.0);
+  vec4 positionViewSpace = modelViewTransform * objPosDouble;
+  vec4 positionClipSpace = MVPTransform * objPosDouble;
 
   positionClipSpace.z = 0.0;
 

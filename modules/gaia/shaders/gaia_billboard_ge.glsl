@@ -40,10 +40,10 @@ out float ge_starDistFromSun;
 out float ge_cameraDistFromSun;
 out float ge_observedDist;
 
-uniform dmat4 view;
-uniform dmat4 projection;
-uniform dvec3 cameraPos;
-uniform dvec3 cameraLookUp;
+uniform mat4 view;
+uniform mat4 projection;
+uniform vec3 cameraPos;
+uniform vec3 cameraLookUp;
 uniform float viewScaling;
 uniform float cutOffThreshold;
 uniform float closeUpBoostDist;
@@ -105,9 +105,9 @@ void main() {
 
   vec4 centerWorldPos = vs_gPosition[0];
 
-  dvec3 cameraNormal = normalize(cameraPos - dvec3(centerWorldPos.xyz));
-  dvec3 newRight = normalize(cross(cameraLookUp, cameraNormal));
-  dvec3 newUp = cross(cameraNormal, newRight);
+  vec3 cameraNormal = normalize(cameraPos - vec3(centerWorldPos.xyz));
+  vec3 newRight = normalize(cross(cameraLookUp, cameraNormal));
+  vec3 newUp = cross(cameraNormal, newRight);
   vec4 wCameraRight = vec4(newRight, 0.0);
   vec4 wCameraUp = vec4(newUp, 0.0);
 

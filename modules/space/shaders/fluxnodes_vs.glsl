@@ -77,7 +77,7 @@ uniform float   fluxColorAlpha;
 uniform vec3    earthPos;
 uniform float   distanceThreshold;
 uniform float   proximityNodesSize;
-uniform double  time;
+uniform float  time;
 
 // Speicific uniforms for cameraperspective
 uniform float maxNodeDistanceSize;

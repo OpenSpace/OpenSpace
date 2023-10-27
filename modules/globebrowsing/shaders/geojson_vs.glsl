@@ -32,25 +32,25 @@ out float vs_depth;
 out vec3 vs_normal;
 out vec4 vs_positionViewSpace;
 
-uniform dmat4 modelTransform;
-uniform dmat4 viewTransform;
-uniform dmat4 projectionTransform;
+uniform mat4 modelTransform;
+uniform mat4 viewTransform;
+uniform mat4 projectionTransform;
 uniform mat3 normalTransform;
 
 uniform float heightOffset;
 uniform bool useHeightMapData;
 
 void main() {
-    dvec4 modelPos = dvec4(in_position, 1.0);
+    vec4 modelPos = vec4(in_position, 1.0);
 
     // Offset model pos based on height info
     if (length(in_position) > 0) {
-        dvec3 outDirection = normalize(dvec3(in_position));
+        vec3 outDirection = normalize(vec3(in_position));
         float height = heightOffset;
         if (useHeightMapData) {
           height += in_height;
         }
-        modelPos += dvec4(outDirection * double(height), 0.0);
+        modelPos += vec4(outDirection * height, 0.0);
     }
 
     vs_positionViewSpace = vec4(viewTransform * modelTransform * modelPos);

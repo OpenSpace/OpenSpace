@@ -37,21 +37,21 @@ out vec2 psfCoords;
 flat out vec3 ge_color;
 flat out float ge_screenSpaceDepth;
 
-uniform dvec3 eyePosition;
-uniform dvec3 cameraUp;
-uniform dmat4 viewProjectionMatrix;
-uniform dmat4 modelMatrix;
+uniform vec3 eyePosition;
+uniform vec3 cameraUp;
+uniform mat4 viewProjectionMatrix;
+uniform mat4 modelMatrix;
 
-const double PARSEC = 3.08567756E16;
+const float PARSEC = 3.08567756E16;
 
 
 void main() {
   vs_position = gl_in[0].gl_Position;
   ge_color = vs_color[0];
 
-  double scaleMultiply = 8.0;
+  float scaleMultiply = 8.0;
 
-  dvec4 dpos = dvec4(vs_position);
+  vec4 dpos = vec4(vs_position);
   dpos.xyz *= scaleMultiply;
   dpos = modelMatrix * dpos;
   dpos /= PARSEC;
@@ -60,27 +60,27 @@ void main() {
 
   scaleMultiply *= 4.0;
 
-  dvec3 normal = normalize(eyePosition - dpos.xyz);
-  dvec3 newRight = normalize(cross(cameraUp, normal));
-  dvec3 newUp = cross(normal, newRight);
-  dvec3 scaledRight = scaleMultiply * newRight;
-  dvec3 scaledUp = scaleMultiply * newUp;
+  vec3 normal = normalize(eyePosition - dpos.xyz);
+  vec3 newRight = normalize(cross(cameraUp, normal));
+  vec3 newUp = cross(normal, newRight);
+  vec3 scaledRight = scaleMultiply * newRight;
+  vec3 scaledUp = scaleMultiply * newUp;
 
   vec4 bottomLeftVertex = z_normalization(
-    vec4(viewProjectionMatrix * dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w))
+    vec4(viewProjectionMatrix * vec4(dpos.xyz - scaledRight - scaledUp, dpos.w))
   );
 
   ge_screenSpaceDepth  = bottomLeftVertex.w;
 
   vec4 topRightVertex = z_normalization(
-    vec4(viewProjectionMatrix * dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))
+    vec4(viewProjectionMatrix * vec4(dpos.xyz + scaledUp + scaledRight, dpos.w))
   );
 
   vec4 bottomRightVertex = z_normalization(
-    vec4(viewProjectionMatrix * dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w))
+    vec4(viewProjectionMatrix * vec4(dpos.xyz + scaledRight - scaledUp, dpos.w))
   );
   vec4 topLeftVertex = z_normalization(
-    vec4(viewProjectionMatrix * dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w))
+    vec4(viewProjectionMatrix * vec4(dpos.xyz + scaledUp - scaledRight, dpos.w))
   );
 
   // Build primitive

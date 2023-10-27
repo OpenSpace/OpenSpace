@@ -269,9 +269,9 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, opacity());
-    _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
+    _programObject->setUniform(_uniformCache.inGameTime, static_cast<float>(data.time.j2000Seconds()));
 
-    _programObject->setUniform(_uniformCache.modelView, calcModelViewTransform(data));
+    _programObject->setUniform(_uniformCache.modelView, static_cast<glm::mat4>(calcModelViewTransform(data)));
 
     // Because we want the property to work similar to the planet trails
     const float fade = pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.f);

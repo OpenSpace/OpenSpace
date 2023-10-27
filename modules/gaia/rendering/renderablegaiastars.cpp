@@ -1205,9 +1205,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     _program->activate();
 
-    _program->setUniform(_uniformCache.model, model);
-    _program->setUniform(_uniformCache.view, view);
-    _program->setUniform(_uniformCache.projection, projection);
+    _program->setUniform(_uniformCache.model, static_cast<glm::mat4>(model));
+    _program->setUniform(_uniformCache.view, static_cast<glm::mat4>(view));
+    _program->setUniform(_uniformCache.projection, static_cast<glm::mat4>(projection));
     _program->setUniform(
         _uniformCache.time,
         static_cast<float>(data.time.j2000Seconds())
@@ -1250,11 +1250,11 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         case gaia::ShaderOption::BillboardSSBONoFBO:
             _program->setUniform(
                 _uniformCache.cameraPos,
-                data.camera.positionVec3()
+                static_cast<glm::vec3>(data.camera.positionVec3())
             );
             _program->setUniform(
                 _uniformCache.cameraLookUp,
-                data.camera.lookUpVectorWorldSpace()
+                static_cast<glm::vec3>(data.camera.lookUpVectorWorldSpace())
             );
             _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
             _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
@@ -1274,11 +1274,11 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         case gaia::ShaderOption::BillboardVBO:
             _program->setUniform(
                 _uniformCache.cameraPos,
-                data.camera.positionVec3()
+                static_cast<glm::vec3>(data.camera.positionVec3())
             );
             _program->setUniform(
                 _uniformCache.cameraLookUp,
-                data.camera.lookUpVectorWorldSpace()
+                static_cast<glm::vec3>(data.camera.lookUpVectorWorldSpace())
             );
             _program->setUniform(_uniformCache.closeUpBoostDist,
                 _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
@@ -1335,7 +1335,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
             _programTM->setUniform(_uniformCacheTM.filterSize, _tmPointFilterSize);
             _programTM->setUniform(_uniformCacheTM.sigma, _tmPointSigma);
-            _programTM->setUniform(_uniformCacheTM.projection, projection);
+            _programTM->setUniform(_uniformCacheTM.projection, static_cast<glm::mat4>(projection));
             _programTM->setUniform(
                 _uniformCacheTM.pixelWeightThreshold,
                 _tmPointPixelWeightThreshold

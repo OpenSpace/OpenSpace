@@ -32,12 +32,12 @@ layout(location = 1) in vec2 in_st;
 out vec2 vs_st;
 out float vs_screenSpaceDepth;
 
-uniform dmat4 modelViewProjectionTransform;
+uniform mat4 modelViewProjectionTransform;
 
 
 void main() {
   vs_st = in_st;
-  vec4 positionClipSpace = vec4(modelViewProjectionTransform * dvec4(in_position));
+  vec4 positionClipSpace = vec4(modelViewProjectionTransform * vec4(in_position));
   vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
   vs_screenSpaceDepth = positionScreenSpace.w;

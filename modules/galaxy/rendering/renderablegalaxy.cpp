@@ -646,17 +646,23 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
     glm::dmat4 cameraViewProjectionMatrix =
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
 
-    _pointsProgram->setUniform(_uniformCachePoints.modelMatrix, modelTransform);
+    _pointsProgram->setUniform(
+        _uniformCachePoints.modelMatrix,
+        static_cast<glm::mat4>(modelTransform)
+    );
     _pointsProgram->setUniform(
         _uniformCachePoints.cameraViewProjectionMatrix,
-        cameraViewProjectionMatrix
+        static_cast<glm::mat4>(cameraViewProjectionMatrix)
     );
 
     glm::dvec3 eyePosition = glm::dvec3(
         glm::inverse(data.camera.combinedViewMatrix()) *
         glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
-    _pointsProgram->setUniform(_uniformCachePoints.eyePosition, eyePosition);
+    _pointsProgram->setUniform(
+        _uniformCachePoints.eyePosition,
+        static_cast<glm::vec3>(eyePosition)
+    );
     _pointsProgram->setUniform(
         _uniformCachePoints.opacityCoefficient,
         _opacityCoefficient
@@ -696,20 +702,29 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
     glm::dmat4 cameraViewProjectionMatrix =
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
 
-    _billboardsProgram->setUniform(_uniformCacheBillboards.modelMatrix, modelTransform);
+    _billboardsProgram->setUniform(
+        _uniformCacheBillboards.modelMatrix,
+        static_cast<glm::mat4>(modelTransform)
+    );
     _billboardsProgram->setUniform(
         _uniformCacheBillboards.cameraViewProjectionMatrix,
-        cameraViewProjectionMatrix
+        static_cast<glm::mat4>(cameraViewProjectionMatrix)
     );
 
     glm::dvec3 eyePosition = glm::dvec3(
         glm::inverse(data.camera.combinedViewMatrix()) *
         glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
-    _billboardsProgram->setUniform(_uniformCacheBillboards.eyePosition, eyePosition);
+    _billboardsProgram->setUniform(
+        _uniformCacheBillboards.eyePosition,
+        static_cast<glm::vec3>(eyePosition)
+    );
 
     glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
-    _billboardsProgram->setUniform(_uniformCacheBillboards.cameraUp, cameraUp);
+    _billboardsProgram->setUniform(
+        _uniformCacheBillboards.cameraUp,
+        static_cast<glm::vec3>(cameraUp)
+    );
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();

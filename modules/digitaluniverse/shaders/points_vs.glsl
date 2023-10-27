@@ -26,14 +26,14 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-in dvec4 in_position;
-in dvec4 in_colormap;
+in vec4 in_position;
+in vec4 in_colormap;
 
 out float vs_screenSpaceDepth;
 out float vs_scaleFactor;
 out vec4 colorMap;
 
-uniform dmat4 modelViewProjectionTransform;
+uniform mat4 modelViewProjectionTransform;
 uniform float scaleFactor;
 
 

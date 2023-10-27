@@ -35,9 +35,9 @@ out vec4 vs_gPosition;
 out float vs_starDistFromSun;
 out float vs_cameraDistFromSun;
 
-uniform dmat4 model;
-uniform dmat4 view;
-uniform dmat4 projection;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 uniform float time;
 uniform int renderOption;
 uniform vec2 posXThreshold;
@@ -103,7 +103,7 @@ void main() {
   }
 
   // Apply camera transforms.
-  dvec4 viewPosition = view * model * objectPosition;
+  vec4 viewPosition = view * model * objectPosition;
   vec4 sunPosition = vec4(view * model * vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
   vs_starDistFromSun = safeLength(objectPosition);

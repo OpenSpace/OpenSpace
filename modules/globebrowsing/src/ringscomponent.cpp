@@ -440,7 +440,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
         if (_isAdvancedTextureEnabled) {
             _shader->setUniform(
                 _uniformCacheAdvancedRings.modelViewProjectionMatrix,
-                modelViewProjectionTransform
+                static_cast<glm::mat4>(modelViewProjectionTransform)
             );
             _shader->setUniform(_uniformCacheAdvancedRings.textureOffset, _offset);
             _shader->setUniform(
@@ -466,7 +466,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
             );
             _shader->setUniform(
                 _uniformCacheAdvancedRings.modelViewProjectionMatrix,
-                modelViewProjectionTransform
+                static_cast<glm::mat4>(modelViewProjectionTransform)
             );
 
             ringTextureFwrdUnit.activate();
@@ -510,7 +510,8 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
             // the light position.
             _shader->setUniform(
                 _uniformCacheAdvancedRings.shadowMatrix,
-                shadowData.shadowMatrix * modelTransform
+                (static_cast<glm::mat4>(shadowData.shadowMatrix) *
+                 static_cast<glm::mat4>(modelTransform))
             );
 
             const glm::dmat4 camToObjectTransform = glm::inverse(
@@ -542,7 +543,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
         else {
             _shader->setUniform(
                 _uniformCache.modelViewProjectionMatrix,
-                modelViewProjectionTransform
+                static_cast<glm::mat4>(modelViewProjectionTransform)
             );
             _shader->setUniform(_uniformCache.textureOffset, _offset);
             _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);
@@ -564,7 +565,8 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
             // the light position.
             _shader->setUniform(
                 _uniformCache.shadowMatrix,
-                shadowData.shadowMatrix * modelTransform
+                (static_cast<glm::mat4>(shadowData.shadowMatrix) *
+                 static_cast<glm::mat4>(modelTransform))
             );
 
             ghoul::opengl::TextureUnit shadowMapUnit;
@@ -580,7 +582,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
     else if (renderPass == RenderPass::GeometryOnly) {
         _geometryOnlyShader->setUniform(
             _geomUniformCache.modelViewProjectionMatrix,
-            modelViewProjectionTransform
+            static_cast<glm::mat4>(modelViewProjectionTransform)
         );
         _geometryOnlyShader->setUniform(_geomUniformCache.textureOffset, _offset);
 

@@ -294,7 +294,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
     _programObject->setUniform(
         _uniformCache.modelView,
-        modelViewTransform * info._localTransform
+        static_cast<glm::mat4>(modelViewTransform) * info._localTransform
     );
 
     const int sorting = [](RenderInformation::VertexSorting s) {

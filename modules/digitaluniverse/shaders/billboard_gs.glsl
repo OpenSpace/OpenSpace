@@ -39,8 +39,8 @@ out float ta;
 // General settings
 uniform float scaleFactor;
 uniform int renderOption;
-uniform dmat4 cameraViewProjectionMatrix;
-uniform dmat4 modelMatrix;
+uniform mat4 cameraViewProjectionMatrix;
+uniform mat4 modelMatrix;
 uniform bool enabledRectSizeControl;
 uniform bool hasDvarScaling;
 
@@ -49,7 +49,7 @@ uniform vec3 up;
 uniform vec3 right;
 
 // RenderOption: CameraPositionNormal
-uniform dvec3 cameraPosition;
+uniform vec3 cameraPosition;
 uniform vec3 cameraLookUp;
 uniform float correctionSizeFactor;
 uniform float correctionSizeEndDistance;
@@ -59,7 +59,7 @@ uniform vec2 screenSize;
 uniform float maxBillboardSize;
 uniform float minBillboardSize;
 
-const double PARSEC = 0.308567756e17LF;
+const float PARSEC = 0.308567756e17F;
 
 const vec2 corners[4] = vec2[4](
   vec2(0.0, 0.0),
@@ -77,7 +77,7 @@ void main() {
   vec4 pos = gl_in[0].gl_Position;
   gs_colorMap = colorMap[0];
 
-  double unit = PARSEC;
+  float unit = PARSEC;
 
   // Must be the same as the enum in RenderableBillboardsCloud.h
   if (pos.w == 1.0) { unit = 1E3; }
@@ -90,7 +90,7 @@ void main() {
     unit = 306391534.73091 * PARSEC;
   }
 
-  dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz) * unit, 1.0);
+  vec4 dpos = modelMatrix * vec4(pos.xyz * unit, 1.0);
 
   float scaleMultiply = exp(scaleFactor * 0.10);
   if (hasDvarScaling) {
@@ -110,7 +110,7 @@ void main() {
     vec3 newUp = cross(normal, newRight);
 
     if (!enabledRectSizeControl) {
-      double distCamera = length(cameraPosition - dpos.xyz);
+      float distCamera = length(cameraPosition - dpos.xyz);
       float expVar = float(-distCamera) / pow(10.0, correctionSizeEndDistance);
       float factorVar = pow(10.0, correctionSizeFactor);
       scaleMultiply *= 1.0 / (1.0 + factorVar * exp(expVar));
@@ -122,12 +122,12 @@ void main() {
 
   if (enabledRectSizeControl) {
     vec4 initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
-      dvec4(dpos.xyz - dvec3(scaledRight - scaledUp), dpos.w)));
+      vec4(dpos.xyz - (scaledRight - scaledUp), dpos.w)));
 
     vs_screenSpaceDepth = initialPosition.w;
 
     vec4 crossCorner = z_normalization(vec4(cameraViewProjectionMatrix *
-      dvec4(dpos.xyz + dvec3(scaledRight + scaledUp), dpos.w)));
+      vec4(dpos.xyz + (scaledRight + scaledUp), dpos.w)));
 
     // Testing size for rectangular viewport:
     vec2 halfViewSize = screenSize * 0.5;
@@ -159,8 +159,8 @@ void main() {
 
   // Saving one matrix multiplication:
   vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
-  vec4 scaledRightClip = vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
-  vec4 scaledUpClip = vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
+  vec4 scaledRightClip = vec4(cameraViewProjectionMatrix * vec4(scaledRight, 0.0));
+  vec4 scaledUpClip = vec4(cameraViewProjectionMatrix * vec4(scaledUp, 0.0));
 
   vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
   vs_screenSpaceDepth = initialPosition.w;
