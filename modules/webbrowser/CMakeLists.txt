@@ -22,14 +22,22 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
+# wanted by CEF
+set(PROJECT_ARCH "x86_64")
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+  if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm64")
+    set(CEF_PLATFORM "macosarm64" PARENT_SCOPE)
+  endif ()
+endif ()
+
+
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 include(cmake/webbrowser_helpers.cmake)
 
 set(WEBBROWSER_MODULE_NAME WebBrowser)
 set(WEBBROWSER_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBBROWSER_MODULE_PATH")
 
-# wanted by CEF
-set(PROJECT_ARCH "x86_64")
 
 ##########################################################################################
 # Download CEF
