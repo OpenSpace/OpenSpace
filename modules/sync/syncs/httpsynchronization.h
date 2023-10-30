@@ -92,6 +92,13 @@ public:
 
     static documentation::Documentation Documentation();
 
+protected:
+    void createSyncFile(bool fullySynchronized) const override;
+
+    /// Check ossync file and returns true if all files are downloaded or false
+    /// if partially synched or if there is an ossync file error (rejected)
+    bool checkSyncFile();
+
 private:
     /// Tries to get a reply from the provided URL and returns that success to the caller
     bool trySyncFromUrl(std::string url);
@@ -110,6 +117,16 @@ private:
 
     // The thread that will be doing the synchronization
     std::thread _syncThread;
+
+    //The files that have already been synchronized
+    std::vector<std::string> _existingSyncedFiles;
+
+    //The files that have been synchronized this time
+    std::vector<std::string> _newSyncedFiles;
+
+    const std::string _ossyncVersionNumber = "1.0";
+
+    const std::string _synchronizationToken = "Synchronized";
 };
 
 } // namespace openspace
