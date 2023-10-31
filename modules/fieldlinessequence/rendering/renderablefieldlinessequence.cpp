@@ -642,13 +642,21 @@ extractSeedPointsFromFiles(std::filesystem::path filePath)
         LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
         std::string line;
         std::vector<glm::vec3> outVec;
+        int linenumber =0;
         while (std::getline(seedFile, line)) {
+            ++linenumber;
             std::stringstream ss(line);
             glm::vec3 point;
-            ss >> point.x;
-            ss >> point.y;
-            ss >> point.z;
-            outVec.push_back(std::move(point));
+            if (!(ss >> point.x) || !(ss >> point.y) || !(ss >> point.z)) {
+                LERROR(fmt::format(
+                    "Could not read line '{}' in file '{}'. ",
+                    "Line is not formatted with 3 values representing a point",
+                    linenumber, seedFilePath
+                ));
+            }
+            else {
+                outVec.push_back(std::move(point));
+            }
         }
 
         if (outVec.empty()) {
@@ -747,6 +755,15 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         if (_colorTableRanges.size() > _colorQuantity) {
             _selectedColorRange = _colorTableRanges[_colorQuantity];
         }
+        // If fewer data ranges to be colored per parameter is given than
+        // there are parameters in the data.
+        // This would be the case where a better structure would be needed, because
+        // it creates descrepancy which range belongs to which parameter
+        //else if (
+        //    _colorTableRanges.size() < _files[_activeIndex].state.nExtraQuantities())
+        //{
+        //
+        //}
         else {
             _selectedColorRange = _colorTableRanges[0];
         }
