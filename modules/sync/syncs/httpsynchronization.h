@@ -93,7 +93,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    void createSyncFile(bool fullySynchronized) const override;
+    void createSyncFile(bool isFullySynchronized) const override;
 
     /// Check ossync file and returns true if all files are downloaded or false
     /// if partially synched or if there is an ossync file error (rejected)

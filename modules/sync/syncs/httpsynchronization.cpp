@@ -29,8 +29,8 @@
 #include <openspace/util/httprequest.h>
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <ghoul/logging/logmanager.h>
-#include <unordered_map>
 #include <fstream>
+#include <unordered_map>
 
 namespace {
     constexpr std::string_view _loggerCat = "HttpSynchronization";
@@ -124,11 +124,13 @@ void HttpSynchronization::start() {
                 return;
             }
             else {
-                
                 //If it was not successful we should add any files that were potentially
                 //downloaded, so we dont download them again from the new repository
-                _existingSyncedFiles.insert(_existingSyncedFiles.end(),
-                    _newSyncedFiles.begin(), _newSyncedFiles.end());
+                _existingSyncedFiles.insert(
+                    _existingSyncedFiles.end(),
+                    _newSyncedFiles.begin(),
+                    _newSyncedFiles.end()
+                );
                 _newSyncedFiles.clear();
                 createSyncFile(success);
 
@@ -168,11 +170,12 @@ void HttpSynchronization::createSyncFile(bool fullySynchronized = true) const {
     syncFile << _ossyncVersionNumber << '\n' <<
         (fullySynchronized ? _synchronizationToken : "Partial Synchronized") << '\n';
 
-    if (fullySynchronized)
-        return; //All files successfully downloaded, no need to write anything else to file.
+    if (fullySynchronized) {
+        return; // All files successfully downloaded, no need to write anything else to file
+    }
 
     //Store all files that successfully downloaded
-    for (std::string const& fileURL : _existingSyncedFiles) {
+    for (const std::string& fileURL : _existingSyncedFiles) {
         syncFile << fileURL << '\n';
     }
     //If we we fill _existingSyncedFiles before calling this func this loop is uneccessary
@@ -190,9 +193,8 @@ bool HttpSynchronization::checkSyncFile() {
     }
 
     //Read contents of file
-    std::ifstream file{ path };
+    std::ifstream file(path);
     std::string line;
-    std::string ossyncVersion;
 
     file >> line;
     //Ossync files that does not have a version number are already resolved
@@ -201,7 +203,7 @@ bool HttpSynchronization::checkSyncFile() {
         return true;
     }
     //Otherwise first line is the version number.
-    ossyncVersion = line;
+    std::string ossyncVersion = line;
 
     /*
     Format of 1.0 ossync:
@@ -226,9 +228,13 @@ bool HttpSynchronization::checkSyncFile() {
         }
     }
     else {
-        LWARNING(fmt::format("{}: Unknown ossync version number read."
-            "Got{} while {} and below are valid!"
-            , _identifier, ossyncVersion, _ossyncVersionNumber));
+        LWARNING(fmt::format(
+            "{}: Unknown ossync version number read."
+            "Got {} while {} and below are valid!",
+            _identifier,
+            ossyncVersion,
+            _ossyncVersionNumber
+        ));
         _state = State::Rejected;
     }
     return false;
@@ -285,7 +291,8 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         }
 
         //Check if the file exists in stored files in ossync, if so we ignore that download. 
-        if (std::find(_existingSyncedFiles.begin(),_existingSyncedFiles.end(), line) != _existingSyncedFiles.end()) {
+        auto it = std::find(_existingSyncedFiles.begin() ,_existingSyncedFiles.end(), line);
+        if (it != _existingSyncedFiles.end()) {
             //File has already been synced. TODO: Ok? Unless there is some form of force download all new files?
             continue;
         }
@@ -332,7 +339,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     startedAllDownloads = true;
 
     //TODO: Set number of retries from e.g., cfg or other setting?
-    int downloadRetries = 10;
+    constexpr int MaxDownloadRetries = 10;
     int downloadTry = 0;
     bool downloadFailed = false;
     //If a download has failed try to restart it
