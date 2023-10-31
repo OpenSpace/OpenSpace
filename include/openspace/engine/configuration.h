@@ -147,8 +147,27 @@ struct Configuration {
 
 std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
-Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
+Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
+    const std::filesystem::path& settingsFile,
     const glm::ivec2& primaryMonitorResolution, std::string_view overrideScript);
+
+
+struct Settings {
+    std::optional<std::string> configuration;
+    std::optional<std::string> profile;
+    std::optional<properties::Property::Visibility> visibility;
+
+    struct MRF {
+        std::optional<bool> isEnabled;
+        std::optional<std::string> location;
+    };
+    std::optional<MRF> mrf;
+};
+
+std::filesystem::path findSettings(const std::string& filename = "settings.json");
+
+Settings loadSettings(const std::filesystem::path& filename);
+void saveSettings(const Settings& settings, const std::filesystem::path& filename);
 
 } // namespace openspace::configuration
 

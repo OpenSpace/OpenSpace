@@ -31,6 +31,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
+#include <json/json.hpp>
 #include <optional>
 
 namespace {
@@ -456,6 +457,37 @@ void parseLuaState(Configuration& configuration) {
     c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
 }
 
+void patchConfiguration(Configuration& configuration, const Settings& settings) {
+    if (settings.configuration.has_value()) {
+        configuration.windowConfiguration = *settings.configuration;
+        configuration.sgctConfigNameInitialized.clear();
+    }
+    if (settings.profile.has_value()) {
+        configuration.profile = *settings.profile;
+    }
+    if (settings.visibility.has_value()) {
+        configuration.propertyVisibility = *settings.visibility;
+    }
+    if (settings.mrf.has_value()) {
+        auto it = configuration.moduleConfigurations.find("GlobeBrowsing");
+        // Just in case we have a configuration file that does not specify anything
+        // about the globebrowsing module
+        if (it == configuration.moduleConfigurations.end()) {
+            configuration.moduleConfigurations["GlobeBrowsing"] = ghoul::Dictionary();
+        }
+        if (settings.mrf->isEnabled.has_value()) {
+            configuration.moduleConfigurations["GlobeBrowsing"].setValue(
+                "MRFCacheEnabled", *settings.mrf->isEnabled
+            );
+        }
+        if (settings.mrf->location.has_value()) {
+            configuration.moduleConfigurations["GlobeBrowsing"].setValue(
+                "MRFCacheLocation", *settings.mrf->location
+            );
+        }
+    }
+}
+
 documentation::Documentation Configuration::Documentation =
     codegen::doc<Parameters>("core_configuration");
 
@@ -483,11 +515,12 @@ std::filesystem::path findConfiguration(const std::string& filename) {
     }
 }
 
-Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
+Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
+                                        const std::filesystem::path& settingsFile,
                                         const glm::ivec2& primaryMonitorResolution,
                                         std::string_view overrideScript)
 {
-    ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
+    ghoul_assert(std::filesystem::is_regular_file(configurationFile), "File must exist");
 
     Configuration result;
 
@@ -504,7 +537,7 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
     }
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(result.state, filename.string());
+    ghoul::lua::runScriptFile(result.state, configurationFile.string());
 
     if (!overrideScript.empty()) {
         LDEBUGC("Configuration", "Executing Lua script passed through the commandline:");
@@ -514,7 +547,141 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
 
     parseLuaState(result);
 
+    if (std::filesystem::is_regular_file(settingsFile)) {
+        Settings settings = loadSettings(settingsFile);
+
+        patchConfiguration(result, settings);
+    }
+
     return result;
+}
+
+namespace {
+template <typename T>
+std::optional<T> get_to(nlohmann::json& obj, const std::string& key)
+{
+    auto it = obj.find(key);
+    if (it != obj.end()) {
+        return it->get<T>();
+    }
+    else {
+        return std::nullopt;
+    }
+}
+} // namespace
+
+namespace version1 {
+    Settings parseSettings(nlohmann::json json) {
+        ghoul_assert(json.at("version").get<int>() == 1, "Wrong value");
+
+        Settings settings;
+        settings.configuration = get_to<std::string>(json, "config");
+        settings.profile = get_to<std::string>(json, "profile");
+        std::optional<std::string> visibility = get_to<std::string>(json, "visibility");
+        if (visibility.has_value()) {
+            if (*visibility == "NoviceUser") {
+                settings.visibility = properties::Property::Visibility::NoviceUser;
+            }
+            else if (*visibility == "User") {
+                settings.visibility = properties::Property::Visibility::User;
+            }
+            else if (*visibility == "AdvancedUser") {
+                settings.visibility = properties::Property::Visibility::AdvancedUser;
+            }
+            else if (*visibility == "Developer") {
+                settings.visibility = properties::Property::Visibility::Developer;
+            }
+            else {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Unknown visibility value {}", *visibility
+                ));
+            }
+        }
+
+        if (auto it = json.find("mrf");  it != json.end()) {
+            Settings::MRF mrf;
+            mrf.isEnabled = get_to<bool>(*it, "enabled");
+            mrf.location = get_to<std::string>(*it, "location");
+
+            if (mrf.isEnabled.has_value() || mrf.location.has_value()) {
+                settings.mrf = mrf;
+            }
+        }
+
+        return settings;
+    }
+} // namespace version1
+
+std::filesystem::path findSettings(const std::string& filename) {
+    // Right now the settings file lives next to the openspace.cfg file
+
+    std::filesystem::path path = findConfiguration();
+    std::filesystem::path result = path.parent_path() / filename;
+    return result;
+}
+
+Settings loadSettings(const std::filesystem::path& filename) {
+    ghoul_assert(std::filesystem::is_regular_file(filename), "filename must exist");
+
+    std::ifstream f(filename);
+    std::stringstream buffer;
+    buffer << f.rdbuf();
+    std::string contents = buffer.str();
+
+    nlohmann::json setting = nlohmann::json::parse(contents);
+    int version = setting.at("version").get<int>();
+    if (version == 1) {
+        return version1::parseSettings(setting);
+    }
+
+    throw ghoul::RuntimeError(fmt::format(
+        "Unrecognized version for setting: {}", version
+    ));
+}
+
+void saveSettings(const Settings& settings, const std::filesystem::path& filename) {
+    nlohmann::json json = nlohmann::json::object();
+
+    json["version"] = 1;
+    if (settings.configuration.has_value()) {
+        json["config"] = *settings.configuration;
+    }
+    if (settings.profile.has_value()) {
+        json["profile"] = *settings.profile;
+    }
+    if (settings.visibility.has_value()) {
+        switch (*settings.visibility) {
+            case properties::Property::Visibility::NoviceUser:
+                json["visibility"] = "NoviceUser";
+                break;
+            case properties::Property::Visibility::User:
+                json["visibility"] = "User";
+                break;
+            case properties::Property::Visibility::AdvancedUser:
+                json["visibility"] = "AdvancedUser";
+                break;
+            case properties::Property::Visibility::Developer:
+                json["visibility"] = "Developer";
+                break;
+
+        }
+    }
+    if (settings.mrf.has_value()) {
+        nlohmann::json mrf = nlohmann::json::object();
+        if (settings.mrf->isEnabled.has_value()) {
+            mrf["enabled"] = *settings.mrf->isEnabled;
+        }
+        if (settings.mrf->location.has_value()) {
+            mrf["location"] = *settings.mrf->location;
+        }
+
+        json["mrf"] = mrf;
+    }
+
+
+    std::string content = json.dump(2);
+    std::ofstream f(filename);
+    f << content;
 }
 
 } // namespace openspace::configuration

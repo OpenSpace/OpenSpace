@@ -1,0 +1,645 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2023                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+
+#include <openspace/engine/configuration.h>
+#include <json/json.hpp>
+#include <filesystem>
+#include <fstream>
+
+namespace openspace::configuration {
+    bool operator==(const Settings::MRF& lhs, const Settings::MRF& rhs) noexcept {
+        return lhs.isEnabled == rhs.isEnabled &&
+               lhs.location == rhs.location;
+    }
+
+    bool operator==(const Settings& lhs, const Settings& rhs) noexcept {
+        return lhs.configuration == rhs.configuration &&
+               lhs.profile == rhs.profile &&
+               lhs.visibility == rhs.visibility &&
+               lhs.mrf == rhs.mrf;
+    }
+
+} // namespace openspace::configuration
+
+TEST_CASE("Settings Load: Empty", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_empty.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.mrf.has_value());
+}
+
+TEST_CASE("Settings Save: Empty", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_empty.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings;
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: Configuration", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "config": "abc"
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_config.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    REQUIRE(settings.configuration.has_value());
+    CHECK(*settings.configuration == "abc");
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.mrf.has_value());
+}
+
+TEST_CASE("Settings Save: Configuration", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_config.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .configuration = "abc"
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: Profile", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "profile": "def"
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_profile.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    REQUIRE(settings.profile.has_value());
+    CHECK(*settings.profile == "def");
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.mrf.has_value());
+}
+
+TEST_CASE("Settings Save: Profile", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_profile.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .profile = "def"
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: Visibility/NoviceUser", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "visibility": "NoviceUser"
+}
+)";
+
+    using namespace openspace;
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_visibility_novice.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.profile.has_value());
+    REQUIRE(settings.visibility.has_value());
+    CHECK(*settings.visibility == properties::Property::Visibility::NoviceUser);
+    CHECK(!settings.mrf.has_value());
+}
+
+TEST_CASE("Settings Save: Visibility/NoviceUser", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_noviceuser.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .visibility = openspace::properties::Property::Visibility::NoviceUser
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: Visibility/User", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "visibility": "User"
+}
+)";
+
+    using namespace openspace;
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_visibility_user.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.profile.has_value());
+    REQUIRE(settings.visibility.has_value());
+    CHECK(*settings.visibility == properties::Property::Visibility::User);
+    CHECK(!settings.mrf.has_value());
+}
+
+TEST_CASE("Settings Save: Visibility/User", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_user.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .visibility = openspace::properties::Property::Visibility::User
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: Visibility/AdvancedUser", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "visibility": "AdvancedUser"
+}
+)";
+
+    using namespace openspace;
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_visibility_advanced.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.profile.has_value());
+    REQUIRE(settings.visibility.has_value());
+    CHECK(*settings.visibility == properties::Property::Visibility::AdvancedUser);
+    CHECK(!settings.mrf.has_value());
+}
+
+TEST_CASE("Settings Save: Visibility/AdvancedUser", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_advanceduser.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .visibility = openspace::properties::Property::Visibility::AdvancedUser
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: Visibility/Developer", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "visibility": "Developer"
+}
+)";
+
+    using namespace openspace;
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_visibility_developer.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.profile.has_value());
+    REQUIRE(settings.visibility.has_value());
+    CHECK(*settings.visibility == properties::Property::Visibility::Developer);
+    CHECK(!settings.mrf.has_value());
+}
+
+TEST_CASE("Settings Save: Visibility/Developer", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_developer.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .visibility = openspace::properties::Property::Visibility::Developer
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: MRF Empty", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "mrf": {}
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_mrf_empty.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.mrf.has_value());
+}
+
+TEST_CASE("Settings Save: MRF Empty", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_mrf_empty.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .mrf = {}
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: MRF IsEnabled", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "mrf": {
+        "enabled": true
+    }
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_mrf_isenabled.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.visibility.has_value());
+    REQUIRE(settings.mrf.has_value());
+    REQUIRE(settings.mrf->isEnabled.has_value());
+    CHECK(*settings.mrf->isEnabled == true);
+    CHECK(!settings.mrf->location.has_value());
+}
+
+TEST_CASE("Settings Save: MRF IsEnabled", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_mrf_isenabled.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .mrf = Settings::MRF {
+            .isEnabled = true
+        }
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: MRF Location", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "mrf": {
+        "location": "ghi"
+    }
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_mrf_location.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.visibility.has_value());
+    REQUIRE(settings.mrf.has_value());
+    CHECK(!settings.mrf->isEnabled.has_value());
+    REQUIRE(settings.mrf->location.has_value());
+    CHECK(*settings.mrf->location == "ghi");
+}
+
+TEST_CASE("Settings Save: MRF Location", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_mrf_location.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .mrf = Settings::MRF {
+            .location = "ghi"
+        }
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: Full", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "config": "abc",
+    "profile": "def",
+    "visibility": "NoviceUser",
+    "mrf": {
+        "enabled": true,
+        "location": "ghi"
+    }
+}
+)";
+
+    using namespace openspace;
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_full.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    REQUIRE(settings.configuration.has_value());
+    CHECK(*settings.configuration == "abc");
+    REQUIRE(settings.profile.has_value());
+    CHECK(*settings.profile == "def");
+    REQUIRE(settings.visibility.has_value());
+    CHECK(*settings.visibility == properties::Property::Visibility::NoviceUser);
+    REQUIRE(settings.mrf.has_value());
+    REQUIRE(settings.mrf->isEnabled.has_value());
+    CHECK(*settings.mrf->isEnabled == true);
+    REQUIRE(settings.mrf->location.has_value());
+    CHECK(*settings.mrf->location == "ghi");
+}
+
+TEST_CASE("Settings Save: Full", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_full.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .configuration = "abc",
+        .profile = "def",
+        .visibility = openspace::properties::Property::Visibility::NoviceUser,
+        .mrf = Settings::MRF {
+            .isEnabled = true,
+            .location = "ghi"
+        }
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load Fail: Missing version", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_fail_missing_version.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: Illegal version", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": -1
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_fail_illegal_version.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: Config", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "config": 1
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_fail_config.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: Profile", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "profile": 1
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_fail_profile.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: Visibility type", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "visibility": 1
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_fail_visibility_type.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: Visibility value", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "visibility": "abc"
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_fail_visibility_value.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}

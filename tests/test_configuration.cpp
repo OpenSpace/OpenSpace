@@ -55,7 +55,12 @@ FontSize = {
         std::string file = (path / filename).string();
         writeConfig(file, content);
         try {
-            Configuration conf = loadConfigurationFromFile(file, glm::ivec2(0), content);
+            Configuration conf = loadConfigurationFromFile(
+                file,
+                "",
+                glm::ivec2(0),
+                content
+            );
             std::filesystem::remove(file);
             return conf;
         }
