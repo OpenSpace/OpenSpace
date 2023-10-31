@@ -492,7 +492,7 @@ void ProfileEdit::approved() {
     std::filesystem::path p = fmt::format(
         "{}/{}.profile", _builtInProfilesPath, profileName
     );
-    if (std::filesystem::exists(p)) {
+    if (false && std::filesystem::exists(p)) {
         // The filename exists in the OpenSpace-provided folder, so we don't want to allow
         // a user to overwrite it
         _errorMsg->setText(
