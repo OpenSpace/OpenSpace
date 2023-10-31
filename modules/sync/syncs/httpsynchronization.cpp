@@ -174,8 +174,9 @@ void HttpSynchronization::createSyncFile(bool isFullySynchronized = true) const 
     syncFile << _ossyncVersionNumber << '\n' <<
         (isFullySynchronized ? _synchronizationToken : "Partial Synchronized") << '\n';
 
-    if (fullySynchronized) {
-        return; // All files successfully downloaded, no need to write anything else to file
+    if (isFullySynchronized) {
+        // All files successfully downloaded, no need to write anything else to file
+        return;
     }
 
     // Store all files that successfully downloaded
@@ -297,7 +298,8 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         // Check if the file exists in stored files in ossync, if so we ignore that download. 
         auto it = std::find(_existingSyncedFiles.begin() ,_existingSyncedFiles.end(), line);
         if (it != _existingSyncedFiles.end()) {
-            // File has already been synced. TODO: Ok? Unless there is some form of force download all new files?
+            // File has already been synced.
+            // TODO: Ok? Unless there is some form of force download all new files?
             continue;
         }
 
@@ -347,7 +349,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     int downloadTry = 0;
     bool downloadFailed = false;
     //If a download has failed try to restart it
-    while (downloadTry < downloadRetries) {
+    while (downloadTry < MaxDownloadRetries) {
         for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
             d->wait();
             if (d->hasFailed()) {
