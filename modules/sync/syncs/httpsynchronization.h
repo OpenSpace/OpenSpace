@@ -97,7 +97,7 @@ protected:
 
     /// Check ossync file and returns true if all files are downloaded or false
     /// if partially synched or if there is an ossync file error (rejected)
-    bool checkSyncFile();
+    bool isEachFileDownloaded();
 
 private:
     /// Tries to get a reply from the provided URL and returns that success to the caller
@@ -123,10 +123,6 @@ private:
 
     //The files that have been synchronized this time
     std::vector<std::string> _newSyncedFiles;
-
-    const std::string _ossyncVersionNumber = "1.0";
-
-    const std::string _synchronizationToken = "Synchronized";
 };
 
 } // namespace openspace

@@ -37,6 +37,9 @@ namespace {
 
     constexpr int ApplicationVersion = 1;
 
+    constexpr std::string_view _ossyncVersionNumber = "1.0";
+    constexpr std::string_view _synchronizationToken = "Synchronized";
+
     struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
         // The unique identifier for this resource that is used to request a set of files
         // from the synchronization servers
@@ -98,7 +101,8 @@ void HttpSynchronization::start() {
     }
     _state = State::Syncing;
 
-    if (checkSyncFile()) {
+    bool isSynced = isEachFileDownloaded();
+    if (isSynced) {
         _state = State::Resolved;
         return;
     }
@@ -121,20 +125,19 @@ void HttpSynchronization::start() {
             if (success) {
                 _state = State::Resolved;
                 createSyncFile(success);
-                return;
+                break;
             }
             else {
-                
-                //If it was not successful we should add any files that were potentially
-                //downloaded, so we dont download them again from the new repository
+                // If it was not successful we should add any files that were potentially
+                // downloaded, so we dont download them again from the new repository
                 _existingSyncedFiles.insert(_existingSyncedFiles.end(),
                     _newSyncedFiles.begin(), _newSyncedFiles.end());
                 _newSyncedFiles.clear();
                 createSyncFile(success);
 
-                //TODO: What should status be if only partially synched, rn it does not
+                // TODO: What should status be if only partially synched, rn it does not
                 // exit gracefully and one have to restart openspace
-                //_state = State::PartialResolved;
+                // _state = State::PartialResolved;
                 
                 // I believe setting another status than syncing
                 // will mess with download screen splash as it depends on status being state::Syncing
@@ -158,7 +161,7 @@ std::string HttpSynchronization::generateUid() {
     return fmt::format("{}/{}", _identifier, _version);
 }
 
-void HttpSynchronization::createSyncFile(bool fullySynchronized = true) const {
+void HttpSynchronization::createSyncFile(bool isFullySynchronized = true) const {
     std::filesystem::path dir = directory();
     std::filesystem::create_directories(dir);
 
@@ -166,41 +169,41 @@ void HttpSynchronization::createSyncFile(bool fullySynchronized = true) const {
     std::ofstream syncFile(dir, std::ofstream::out);
 
     syncFile << _ossyncVersionNumber << '\n' <<
-        (fullySynchronized ? _synchronizationToken : "Partial Synchronized") << '\n';
+        (isFullySynchronized ? _synchronizationToken : "Partial Synchronized") << '\n';
 
-    if (fullySynchronized)
+    if (isFullySynchronized)
         return; //All files successfully downloaded, no need to write anything else to file.
 
-    //Store all files that successfully downloaded
+    // Store all files that successfully downloaded
     for (std::string const& fileURL : _existingSyncedFiles) {
         syncFile << fileURL << '\n';
     }
-    //If we we fill _existingSyncedFiles before calling this func this loop is uneccessary
+    // If we we fill _existingSyncedFiles before calling this func this loop is uneccessary
     for (std::string const& fileURL : _newSyncedFiles) {
         syncFile << fileURL << '\n';
     }
 }
 
-bool HttpSynchronization::checkSyncFile() {
+bool HttpSynchronization::isEachFileDownloaded() {
     std::filesystem::path path = directory();
     path.replace_extension("ossync");
-    //Check if file exists at all
+    // Check if file exists at all
     if (!std::filesystem::is_regular_file(path)) {
         return false;
     }
 
-    //Read contents of file
+    // Read contents of file
     std::ifstream file{ path };
     std::string line;
     std::string ossyncVersion;
 
     file >> line;
-    //Ossync files that does not have a version number are already resolved
-    //As they are of the previous format.
+    // Ossync files that does not have a version number are already resolved
+    // As they are of the previous format.
     if (line == "Synchronized" /*_synchronizationToken*/) {
         return true;
     }
-    //Otherwise first line is the version number.
+    // Otherwise first line is the version number.
     ossyncVersion = line;
 
     /*
@@ -211,11 +214,11 @@ bool HttpSynchronization::checkSyncFile() {
     */
 
     if (ossyncVersion == "1.0" /*_ossyncVersionNumber*/) {
-        std::getline(file >> std::ws, line); //Read synchronization status
+        std::getline(file >> std::ws, line); // Read synchronization status
         if (line == _synchronizationToken) {
             return true;
         }
-        //File is only partially synchronized,
+        // File is only partially synchronized,
         // store file urls that have been synched already. 
         while (file >> line) {
             if (line.empty() || line[0] == '#') {
@@ -284,9 +287,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             continue;
         }
 
-        //Check if the file exists in stored files in ossync, if so we ignore that download. 
+        // Check if the file exists in stored files in ossync, if so we ignore that download. 
         if (std::find(_existingSyncedFiles.begin(),_existingSyncedFiles.end(), line) != _existingSyncedFiles.end()) {
-            //File has already been synced. TODO: Ok? Unless there is some form of force download all new files?
+            // File has already been synced. TODO: Ok? Unless there is some form of force download all new files?
             continue;
         }
 
@@ -307,7 +310,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             if (!totalBytes.has_value() || !startedAllDownloads) {
                 return !_shouldCancel;
             }
-            //Sets automatic fail for a specific file, to produce possible download fail 
+            // Sets automatic fail for a specific file, to produce possible download fail 
             //if (line == "http://liu-se.cdn.openspaceproject.com/files/digitaluniverse/sloandss/speck/v1_v2/SDSSgals.speck")
             //    return false;
 
@@ -331,7 +334,6 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     }
     startedAllDownloads = true;
 
-    //TODO: Set number of retries from e.g., cfg or other setting?
     int downloadRetries = 10;
     int downloadTry = 0;
     bool downloadFailed = false;
