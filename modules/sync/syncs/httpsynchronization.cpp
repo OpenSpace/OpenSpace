@@ -118,36 +118,36 @@ void HttpSynchronization::start() {
 
     _syncThread = std::thread(
         [this](const std::string& q) {
-        for (const std::string& url : _syncRepositories) {
-            //TODO: handle multiple syncRepositories, before it would only create
-            // syncfile from first success and then continue
-            const bool success = trySyncFromUrl(url + q);
-            if (success) {
-                _state = State::Resolved;
-                createSyncFile(success);
-                break;
-            }
-            else {
-                // If it was not successful we should add any files that were potentially
-                // downloaded, so we dont download them again from the new repository
-                _existingSyncedFiles.insert(
-                    _existingSyncedFiles.end(),
-                    _newSyncedFiles.begin(),
-                    _newSyncedFiles.end()
-                );
-                _newSyncedFiles.clear();
-                createSyncFile(success);
+            for (const std::string& url : _syncRepositories) {
+                //TODO: handle multiple syncRepositories, before it would only create
+                // syncfile from first success and then continue
+                const bool success = trySyncFromUrl(url + q);
+                if (success) {
+                    _state = State::Resolved;
+                    createSyncFile(success);
+                    break;
+                }
+                else {
+                    // If it was not successful we should add any files that were potentially
+                    // downloaded, so we dont download them again from the new repository
+                    _existingSyncedFiles.insert(
+                        _existingSyncedFiles.end(),
+                        _newSyncedFiles.begin(),
+                        _newSyncedFiles.end()
+                    );
+                    _newSyncedFiles.clear();
+                    createSyncFile(success);
 
-                // TODO: What should status be if only partially synched, rn it does not
-                // exit gracefully and one have to restart openspace
-                // _state = State::PartialResolved;
+                    // TODO: What should status be if only partially synched, rn it does not
+                    // exit gracefully and one have to restart openspace
+                    // _state = State::PartialResolved;
                 
-                // I believe setting another status than syncing
-                // will mess with download screen splash as it depends on status being state::Syncing
-                // Or it might mess with other parts of the sync module?
+                    // I believe setting another status than syncing
+                    // will mess with download screen splash as it depends on status being
+                    // state::Syncing or it might mess with other parts of the sync module?
                 }
             }
-            if (!_shouldCancel) {
+            if (!isResolved() && !_shouldCancel) {
                 _state = State::Rejected;
             }
         },
