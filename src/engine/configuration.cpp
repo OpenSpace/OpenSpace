@@ -468,23 +468,24 @@ void patchConfiguration(Configuration& configuration, const Settings& settings) 
     if (settings.visibility.has_value()) {
         configuration.propertyVisibility = *settings.visibility;
     }
-    if (settings.mrf.has_value()) {
-        auto it = configuration.moduleConfigurations.find("GlobeBrowsing");
-        // Just in case we have a configuration file that does not specify anything
-        // about the globebrowsing module
-        if (it == configuration.moduleConfigurations.end()) {
-            configuration.moduleConfigurations["GlobeBrowsing"] = ghoul::Dictionary();
-        }
-        if (settings.mrf->isEnabled.has_value()) {
-            configuration.moduleConfigurations["GlobeBrowsing"].setValue(
-                "MRFCacheEnabled", *settings.mrf->isEnabled
-            );
-        }
-        if (settings.mrf->location.has_value()) {
-            configuration.moduleConfigurations["GlobeBrowsing"].setValue(
-                "MRFCacheLocation", *settings.mrf->location
-            );
-        }
+    if (settings.bypassLauncher.has_value()) {
+        configuration.bypassLauncher = *settings.bypassLauncher;
+    }
+    auto it = configuration.moduleConfigurations.find("GlobeBrowsing");
+    // Just in case we have a configuration file that does not specify anything
+    // about the globebrowsing module
+    if (it == configuration.moduleConfigurations.end()) {
+        configuration.moduleConfigurations["GlobeBrowsing"] = ghoul::Dictionary();
+    }
+    if (settings.mrf.isEnabled.has_value()) {
+        configuration.moduleConfigurations["GlobeBrowsing"].setValue(
+            "MRFCacheEnabled", *settings.mrf.isEnabled
+        );
+    }
+    if (settings.mrf.location.has_value()) {
+        configuration.moduleConfigurations["GlobeBrowsing"].setValue(
+            "MRFCacheLocation", *settings.mrf.location
+        );
     }
 }
 
@@ -576,7 +577,9 @@ namespace version1 {
 
         Settings settings;
         settings.configuration = get_to<std::string>(json, "config");
+        settings.rememberLastConfiguration = get_to<bool>(json, "config-remember");
         settings.profile = get_to<std::string>(json, "profile");
+        settings.rememberLastProfile = get_to<bool>(json, "profile-remember");
         std::optional<std::string> visibility = get_to<std::string>(json, "visibility");
         if (visibility.has_value()) {
             if (*visibility == "NoviceUser") {
@@ -597,8 +600,12 @@ namespace version1 {
                 ));
             }
         }
+        settings.bypassLauncher = get_to<bool>(json, "bypass");
 
         if (auto it = json.find("mrf");  it != json.end()) {
+            if (!it->is_object()) {
+                throw ghoul::RuntimeError("'mrf' is not an object");
+            }
             Settings::MRF mrf;
             mrf.isEnabled = get_to<bool>(*it, "enabled");
             mrf.location = get_to<std::string>(*it, "location");
@@ -646,8 +653,14 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
     if (settings.configuration.has_value()) {
         json["config"] = *settings.configuration;
     }
+    if (settings.rememberLastConfiguration.has_value()) {
+        json["config-remember"] = *settings.rememberLastConfiguration;
+    }
     if (settings.profile.has_value()) {
         json["profile"] = *settings.profile;
+    }
+    if (settings.rememberLastProfile.has_value()) {
+        json["profile-remember"] = *settings.rememberLastProfile;
     }
     if (settings.visibility.has_value()) {
         switch (*settings.visibility) {
@@ -666,17 +679,18 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
 
         }
     }
-    if (settings.mrf.has_value()) {
-        nlohmann::json mrf = nlohmann::json::object();
-        if (settings.mrf->isEnabled.has_value()) {
-            mrf["enabled"] = *settings.mrf->isEnabled;
-        }
-        if (settings.mrf->location.has_value()) {
-            mrf["location"] = *settings.mrf->location;
-        }
-
-        json["mrf"] = mrf;
+    if (settings.bypassLauncher.has_value()) {
+        json["bypass"] = *settings.bypassLauncher;
     }
+    nlohmann::json mrf = nlohmann::json::object();
+    if (settings.mrf.isEnabled.has_value()) {
+        mrf["enabled"] = *settings.mrf.isEnabled;
+    }
+    if (settings.mrf.location.has_value()) {
+        mrf["location"] = *settings.mrf.location;
+    }
+
+    json["mrf"] = mrf;
 
 
     std::string content = json.dump(2);

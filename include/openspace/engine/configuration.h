@@ -153,15 +153,23 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
 
 
 struct Settings {
+    auto operator<=>(const Settings&) const = default;
+
     std::optional<std::string> configuration;
+    std::optional<bool> rememberLastConfiguration;
     std::optional<std::string> profile;
+    std::optional<bool> rememberLastProfile;
     std::optional<properties::Property::Visibility> visibility;
+    std::optional<bool> bypassLauncher;
 
     struct MRF {
+        auto operator<=>(const MRF&) const = default;
+
         std::optional<bool> isEnabled;
         std::optional<std::string> location;
+
     };
-    std::optional<MRF> mrf;
+    MRF mrf;
 };
 
 std::filesystem::path findSettings(const std::string& filename = "settings.json");

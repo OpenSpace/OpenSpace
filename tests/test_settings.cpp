@@ -31,21 +31,6 @@
 #include <filesystem>
 #include <fstream>
 
-namespace openspace::configuration {
-    bool operator==(const Settings::MRF& lhs, const Settings::MRF& rhs) noexcept {
-        return lhs.isEnabled == rhs.isEnabled &&
-               lhs.location == rhs.location;
-    }
-
-    bool operator==(const Settings& lhs, const Settings& rhs) noexcept {
-        return lhs.configuration == rhs.configuration &&
-               lhs.profile == rhs.profile &&
-               lhs.visibility == rhs.visibility &&
-               lhs.mrf == rhs.mrf;
-    }
-
-} // namespace openspace::configuration
-
 TEST_CASE("Settings Load: Empty", "[settings]") {
     constexpr std::string_view Source = R"(
 {
@@ -65,9 +50,13 @@ TEST_CASE("Settings Load: Empty", "[settings]") {
     Settings settings = loadSettings(file);
 
     CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
     CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
-    CHECK(!settings.mrf.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
 }
 
 TEST_CASE("Settings Save: Empty", "[settings]") {
@@ -104,9 +93,14 @@ TEST_CASE("Settings Load: Configuration", "[settings]") {
 
     REQUIRE(settings.configuration.has_value());
     CHECK(*settings.configuration == "abc");
+    CHECK(!settings.rememberLastConfiguration.has_value());
     CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
-    CHECK(!settings.mrf.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+
 }
 
 TEST_CASE("Settings Save: Configuration", "[settings]") {
@@ -117,6 +111,52 @@ TEST_CASE("Settings Save: Configuration", "[settings]") {
 
     Settings srcSettings = {
         .configuration = "abc"
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: Configuration Remember", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "config-remember": true
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_config_remember.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    REQUIRE(settings.rememberLastConfiguration.has_value());
+    CHECK(*settings.rememberLastConfiguration == true);
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+
+}
+
+TEST_CASE("Settings Save: Configuration Remember", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_config)remember.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .rememberLastConfiguration = true
     };
     saveSettings(srcSettings, file);
 
@@ -144,10 +184,61 @@ TEST_CASE("Settings Load: Profile", "[settings]") {
     Settings settings = loadSettings(file);
 
     CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
     REQUIRE(settings.profile.has_value());
     CHECK(*settings.profile == "def");
+    CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
-    CHECK(!settings.mrf.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+
+}
+
+TEST_CASE("Settings Save: Profile", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_save_profile.json").string();
+
+    using namespace openspace::configuration;
+
+    Settings srcSettings = {
+        .profile = "def"
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: Profile Remember", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "profile-remember": false
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_profile_remember.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    REQUIRE(settings.rememberLastProfile.has_value());
+    CHECK(*settings.rememberLastProfile == false);
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+
 }
 
 TEST_CASE("Settings Save: Profile", "[settings]") {
@@ -186,10 +277,15 @@ TEST_CASE("Settings Load: Visibility/NoviceUser", "[settings]") {
     Settings settings = loadSettings(file);
 
     CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
     CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
     REQUIRE(settings.visibility.has_value());
     CHECK(*settings.visibility == properties::Property::Visibility::NoviceUser);
-    CHECK(!settings.mrf.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+
 }
 
 TEST_CASE("Settings Save: Visibility/NoviceUser", "[settings]") {
@@ -228,10 +324,15 @@ TEST_CASE("Settings Load: Visibility/User", "[settings]") {
     Settings settings = loadSettings(file);
 
     CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
     CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
     REQUIRE(settings.visibility.has_value());
     CHECK(*settings.visibility == properties::Property::Visibility::User);
-    CHECK(!settings.mrf.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+
 }
 
 TEST_CASE("Settings Save: Visibility/User", "[settings]") {
@@ -270,10 +371,15 @@ TEST_CASE("Settings Load: Visibility/AdvancedUser", "[settings]") {
     Settings settings = loadSettings(file);
 
     CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
     CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
     REQUIRE(settings.visibility.has_value());
     CHECK(*settings.visibility == properties::Property::Visibility::AdvancedUser);
-    CHECK(!settings.mrf.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+
 }
 
 TEST_CASE("Settings Save: Visibility/AdvancedUser", "[settings]") {
@@ -312,10 +418,15 @@ TEST_CASE("Settings Load: Visibility/Developer", "[settings]") {
     Settings settings = loadSettings(file);
 
     CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
     CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
     REQUIRE(settings.visibility.has_value());
     CHECK(*settings.visibility == properties::Property::Visibility::Developer);
-    CHECK(!settings.mrf.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+
 }
 
 TEST_CASE("Settings Save: Visibility/Developer", "[settings]") {
@@ -333,18 +444,18 @@ TEST_CASE("Settings Save: Visibility/Developer", "[settings]") {
     CHECK(srcSettings == cmpSettings);
 }
 
-TEST_CASE("Settings Load: MRF Empty", "[settings]") {
+TEST_CASE("Settings Load: Bypass Launcher", "[settings]") {
     constexpr std::string_view Source = R"(
 {
     "version": 1,
-    "mrf": {}
+    "bypass": false
 }
 )";
 
     using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::string file = (path / "test_settings_load_mrf_empty.json").string();
+    std::string file = (path / "test_settings_load_bypass.json").string();
     {
         std::ofstream f(file);
         f << Source;
@@ -353,19 +464,25 @@ TEST_CASE("Settings Load: MRF Empty", "[settings]") {
     Settings settings = loadSettings(file);
 
     CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
     CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
-    CHECK(!settings.mrf.has_value());
+    REQUIRE(settings.bypassLauncher.has_value());
+    CHECK(*settings.bypassLauncher == false);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+
 }
 
-TEST_CASE("Settings Save: MRF Empty", "[settings]") {
+TEST_CASE("Settings Save: Bypass Launcher", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::string file = (path / "test_settings_save_mrf_empty.json").string();
+    std::string file = (path / "test_settings_save_bypass.json").string();
 
     using namespace openspace::configuration;
 
     Settings srcSettings = {
-        .mrf = {}
+        .bypassLauncher = false
     };
     saveSettings(srcSettings, file);
 
@@ -395,12 +512,14 @@ TEST_CASE("Settings Load: MRF IsEnabled", "[settings]") {
     Settings settings = loadSettings(file);
 
     CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
     CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
-    REQUIRE(settings.mrf.has_value());
-    REQUIRE(settings.mrf->isEnabled.has_value());
-    CHECK(*settings.mrf->isEnabled == true);
-    CHECK(!settings.mrf->location.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.mrf.isEnabled.has_value());
+    CHECK(*settings.mrf.isEnabled == true);
+    CHECK(!settings.mrf.location.has_value());
 }
 
 TEST_CASE("Settings Save: MRF IsEnabled", "[settings]") {
@@ -442,12 +561,14 @@ TEST_CASE("Settings Load: MRF Location", "[settings]") {
     Settings settings = loadSettings(file);
 
     CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
     CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
-    REQUIRE(settings.mrf.has_value());
-    CHECK(!settings.mrf->isEnabled.has_value());
-    REQUIRE(settings.mrf->location.has_value());
-    CHECK(*settings.mrf->location == "ghi");
+    CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.mrf.isEnabled.has_value());
+    REQUIRE(settings.mrf.location.has_value());
+    CHECK(*settings.mrf.location == "ghi");
 }
 
 TEST_CASE("Settings Save: MRF Location", "[settings]") {
@@ -472,8 +593,11 @@ TEST_CASE("Settings Load: Full", "[settings]") {
 {
     "version": 1,
     "config": "abc",
+    "config-remember": true,
     "profile": "def",
+    "profile-remember": false,
     "visibility": "NoviceUser",
+    "bypass": false,
     "mrf": {
         "enabled": true,
         "location": "ghi"
@@ -495,15 +619,20 @@ TEST_CASE("Settings Load: Full", "[settings]") {
 
     REQUIRE(settings.configuration.has_value());
     CHECK(*settings.configuration == "abc");
+    REQUIRE(settings.rememberLastConfiguration.has_value());
+    CHECK(*settings.rememberLastConfiguration == true);
     REQUIRE(settings.profile.has_value());
     CHECK(*settings.profile == "def");
+    REQUIRE(settings.rememberLastProfile.has_value());
+    CHECK(*settings.rememberLastProfile == false);
     REQUIRE(settings.visibility.has_value());
     CHECK(*settings.visibility == properties::Property::Visibility::NoviceUser);
-    REQUIRE(settings.mrf.has_value());
-    REQUIRE(settings.mrf->isEnabled.has_value());
-    CHECK(*settings.mrf->isEnabled == true);
-    REQUIRE(settings.mrf->location.has_value());
-    CHECK(*settings.mrf->location == "ghi");
+    REQUIRE(settings.bypassLauncher.has_value());
+    CHECK(*settings.bypassLauncher == false);
+    REQUIRE(settings.mrf.isEnabled.has_value());
+    CHECK(*settings.mrf.isEnabled == true);
+    REQUIRE(settings.mrf.location.has_value());
+    CHECK(*settings.mrf.location == "ghi");
 }
 
 TEST_CASE("Settings Save: Full", "[settings]") {
@@ -514,8 +643,11 @@ TEST_CASE("Settings Save: Full", "[settings]") {
 
     Settings srcSettings = {
         .configuration = "abc",
+        .rememberLastConfiguration = true,
         .profile = "def",
+        .rememberLastProfile = false,
         .visibility = openspace::properties::Property::Visibility::NoviceUser,
+        .bypassLauncher = false,
         .mrf = Settings::MRF {
             .isEnabled = true,
             .location = "ghi"
@@ -636,6 +768,90 @@ TEST_CASE("Settings Load Fail: Visibility value", "[settings]") {
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_visibility_value.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: Bypass Launcher", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "bypass": 1
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_fail_bypass.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: MRF", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "mrf": 1
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_fail_mrf.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: MRF/enabled", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "mrf": {
+        "enabled": 1
+    }
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_fail_mrf_enabled.json").string();
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: MRF/location", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "mrf": {
+        "location": 1
+    }
+}
+)";
+
+    using namespace openspace::configuration;
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::string file = (path / "test_settings_load_fail_mrf_location.json").string();
     {
         std::ofstream f(file);
         f << Source;
