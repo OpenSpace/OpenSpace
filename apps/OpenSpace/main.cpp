@@ -1447,6 +1447,28 @@ int main(int argc, char* argv[]) {
     // Only timeout after 15 minutes
     Engine::instance().setSyncParameters(false, 15.f * 60.f);
 
+    {
+        using namespace configuration;
+        configuration::Settings settings = loadSettings(findSettings());
+        settings.hasStartedBefore = true;
+
+        if (settings.rememberLastProfile) {
+            std::filesystem::path p = global::configuration->profile;
+            std::filesystem::path reducedName = p.filename().replace_extension();
+            settings.profile = reducedName.string();
+        }
+
+        if (settings.rememberLastConfiguration &&
+            !global::configuration->sgctConfigNameInitialized.empty())
+        {
+            // We only want to store the window configuration if it was not a dynamically
+            // created one
+            settings.configuration = global::configuration->windowConfiguration;
+        }
+
+        saveSettings(settings, findSettings());
+    }
+
     LINFO("Starting rendering loop");
     Engine::instance().exec();
     LINFO("Ending rendering loop");

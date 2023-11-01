@@ -576,6 +576,7 @@ namespace version1 {
         ghoul_assert(json.at("version").get<int>() == 1, "Wrong value");
 
         Settings settings;
+        settings.hasStartedBefore = get_to<bool>(json, "started-before");
         settings.configuration = get_to<std::string>(json, "config");
         settings.rememberLastConfiguration = get_to<bool>(json, "config-remember");
         settings.profile = get_to<std::string>(json, "profile");
@@ -636,6 +637,10 @@ Settings loadSettings(const std::filesystem::path& filename) {
     std::string contents = buffer.str();
 
     nlohmann::json setting = nlohmann::json::parse(contents);
+    if (setting.empty()) {
+        return Settings();
+    }
+
     int version = setting.at("version").get<int>();
     if (version == 1) {
         return version1::parseSettings(setting);
@@ -650,6 +655,10 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
     nlohmann::json json = nlohmann::json::object();
 
     json["version"] = 1;
+
+    if (settings.hasStartedBefore.has_value()) {
+        json["started-before"] = *settings.hasStartedBefore;
+    }
     if (settings.configuration.has_value()) {
         json["config"] = *settings.configuration;
     }
@@ -690,7 +699,9 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
         mrf["location"] = *settings.mrf.location;
     }
 
-    json["mrf"] = mrf;
+    if (!mrf.empty()) {
+        json["mrf"] = mrf;
+    }
 
 
     std::string content = json.dump(2);

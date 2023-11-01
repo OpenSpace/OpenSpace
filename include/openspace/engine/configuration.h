@@ -155,6 +155,8 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
 struct Settings {
     auto operator<=>(const Settings&) const = default;
 
+    std::optional<bool> hasStartedBefore;
+
     std::optional<std::string> configuration;
     std::optional<bool> rememberLastConfiguration;
     std::optional<std::string> profile;

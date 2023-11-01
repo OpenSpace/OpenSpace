@@ -50,12 +50,12 @@ void SettingsDialog::createWidgets() {
     // Layout of this dialog:
     //
     // -------------------------------------------------------
-    // | Configuration                                       |
-    // | Starting Configuration:    | [oooooooooooooooooooo] |
-    // | [] Keep Last Configuration                          |
     // | Profile                                             |
     // | Starting Profile:          | [oooooooooooooooooooo] |
     // | [] Keep Last Profile                                |
+    // | Configuration                                       |
+    // | Starting Configuration:    | [oooooooooooooooooooo] |
+    // | [] Keep Last Configuration                          |
     // | User Interface                                      |
     // | Property Visibility        | DDDDDDDDDDDDDDDDDDDDD> |
     // | [] Bypass Launcher                                  |
@@ -67,64 +67,23 @@ void SettingsDialog::createWidgets() {
     // -------------------------------------------------------
      
     QGridLayout* layout = new QGridLayout(this);
-
-    {
-        QLabel* label = new QLabel("Configuration");
-        label->setObjectName("heading");
-        layout->addWidget(label, 0, 0, 1, 2);
-
-        QLabel* conf = new QLabel("Starting Configuration");
-        layout->addWidget(conf, 1, 0);
-
-        _configuration = new QLineEdit;
-        connect(
-            _configuration,
-            &QLineEdit::editingFinished,
-            [this]() {
-                std::string v = _configuration->text().toStdString();
-                if (v.empty()) {
-                    _currentEdit.configuration = std::nullopt;
-                }
-                else {
-                    _currentEdit.configuration = v;
-                }
-
-                updateSaveButton();
-            }
-        );
-        layout->addWidget(_configuration, 1, 1);
-
-        _rememberLastConfiguration = new QCheckBox("Keep Last Configuration");
-        connect(
-            _rememberLastConfiguration,
-            &QCheckBox::stateChanged,
-            [this]() {
-                if (_rememberLastConfiguration->isChecked()) {
-                    _currentEdit.rememberLastConfiguration = true;
-                }
-                else {
-                    _currentEdit.rememberLastConfiguration = std::nullopt;
-                }
-                updateSaveButton();
-            }
-        );
-        layout->addWidget(_rememberLastConfiguration, 2, 0, 1, 2);
-    }
-
-    layout->addWidget(new Line(), 3, 0, 1, 2);
-
+    
     {
         QLabel* label = new QLabel("Profile");
         label->setObjectName("heading");
-        layout->addWidget(label, 4, 0, 1, 2);
+        layout->addWidget(label, 0, 0, 1, 2);
 
         QLabel* conf = new QLabel("Starting Profile");
-        layout->addWidget(conf, 5, 0);
+        layout->addWidget(conf, 1, 0);
 
         _profile = new QLineEdit;
+        _profile->setToolTip(
+            "With this setting, you can choose a profile that will be loaded the next "
+            "time you start the application"
+        );
         connect(
             _profile,
-            &QLineEdit::editingFinished,
+            &QLineEdit::textChanged,
             [this]() {
                 std::string v = _profile->text().toStdString();
                 if (v.empty()) {
@@ -137,9 +96,13 @@ void SettingsDialog::createWidgets() {
                 updateSaveButton();
             }
         );
-        layout->addWidget(_profile, 5, 1);
+        layout->addWidget(_profile, 1, 1);
 
         _rememberLastProfile = new QCheckBox("Keep Last Profile");
+        _rememberLastProfile->setToolTip(
+            "If this setting is checked, the application will remember the profile that "
+            "was loaded into OpenSpace and will use it at the next startup as well"
+        );
         connect(
             _rememberLastProfile,
             &QCheckBox::stateChanged,
@@ -151,10 +114,66 @@ void SettingsDialog::createWidgets() {
                     _currentEdit.rememberLastProfile = std::nullopt;
                 }
 
+                _profile->setDisabled(_rememberLastProfile->isChecked());
                 updateSaveButton();
             }
         );
-        layout->addWidget(_rememberLastProfile, 6, 0, 1, 2);
+        layout->addWidget(_rememberLastProfile, 2, 0, 1, 2);
+    }
+
+    layout->addWidget(new Line(), 3, 0, 1, 2);
+
+    
+    {
+        QLabel* label = new QLabel("Configuration");
+        label->setObjectName("heading");
+        layout->addWidget(label, 4, 0, 1, 2);
+
+        QLabel* conf = new QLabel("Starting Configuration");
+        layout->addWidget(conf, 5, 0);
+
+        _configuration = new QLineEdit;
+        _configuration->setToolTip(
+            "With this setting, you can choose a window configuration that will be "
+            "loaded the next time you start the application"
+        );
+        connect(
+            _configuration,
+            &QLineEdit::textChanged,
+            [this]() {
+                std::string v = _configuration->text().toStdString();
+                if (v.empty()) {
+                    _currentEdit.configuration = std::nullopt;
+                }
+                else {
+                    _currentEdit.configuration = v;
+                }
+
+                updateSaveButton();
+            }
+        );
+        layout->addWidget(_configuration, 5, 1);
+
+        _rememberLastConfiguration = new QCheckBox("Keep Last Configuration");
+        _rememberLastConfiguration->setToolTip(
+            "If this setting is checked, the application will remember the window "
+            "configuration and will use it at the next startup as well"
+        );
+        connect(
+            _rememberLastConfiguration,
+            &QCheckBox::stateChanged,
+            [this]() {
+                if (_rememberLastConfiguration->isChecked()) {
+                    _currentEdit.rememberLastConfiguration = true;
+                }
+                else {
+                    _currentEdit.rememberLastConfiguration = std::nullopt;
+                }
+                _configuration->setDisabled(_rememberLastConfiguration->isChecked());
+                updateSaveButton();
+            }
+        );
+        layout->addWidget(_rememberLastConfiguration, 6, 0, 1, 2);
     }
 
     layout->addWidget(new Line(), 7, 0, 1, 2);
@@ -168,12 +187,18 @@ void SettingsDialog::createWidgets() {
         layout->addWidget(conf, 9, 0);
 
         _propertyVisibility = new QComboBox;
+        _propertyVisibility->setToolTip(
+            "This setting sets the default visibility for properties in the application. "
+            "Note that these values are ordered, so all properties shown as a 'Novice "
+            "User' are also visible when selecting 'User', etc."
+        );
         _propertyVisibility->addItems({
             "Novice User",
             "User",
             "Advanced User",
             "Developer"
         });
+        _propertyVisibility->setCurrentText("User");
         connect(
             _propertyVisibility,
             &QComboBox::textActivated,
@@ -202,6 +227,11 @@ void SettingsDialog::createWidgets() {
         layout->addWidget(_propertyVisibility, 9, 1);
 
         _bypassLauncher = new QCheckBox("Bypass Launcher");
+        _bypassLauncher->setToolTip(
+            "If this value is selected, the Launcher will no longer be shown at startup. "
+            "Note that this also means that it will not be easy to get back to this "
+            "setting to reenable the Launcher either."
+        );
         connect(
             _bypassLauncher,
             &QCheckBox::stateChanged,
@@ -238,6 +268,13 @@ void SettingsDialog::createWidgets() {
         layout->addWidget(label, 13, 0, 1, 2);
 
         _mrf.isEnabled = new QCheckBox("Enable caching");
+        _mrf.isEnabled->setToolTip(
+            "If this setting is checked, the MRF caching for globe layers will be "
+            "enabled. This means that all planetary images that are loaded over the "
+            "internet will also be cached locally and stored between application runs. "
+            "This will speedup the loading the second time at the expense of hard disk "
+            "space."
+        );
         connect(
             _mrf.isEnabled,
             &QCheckBox::stateChanged,
@@ -248,6 +285,8 @@ void SettingsDialog::createWidgets() {
                 else {
                     _currentEdit.mrf.isEnabled = std::nullopt;
                 }
+
+                _mrf.location->setDisabled(!_mrf.isEnabled->isChecked());
                 updateSaveButton();
             }
         );
@@ -257,6 +296,14 @@ void SettingsDialog::createWidgets() {
         layout->addWidget(conf, 15, 0);
 
         _mrf.location = new QLineEdit;
+        _mrf.location->setToolTip(
+            "This is the place where the MRF cache files are located. Please note that "
+            "these files can potentially become quite large when using OpenSpace for a "
+            "long while and when visiting new places regularly. If this value is left "
+            "blank, it will be stored in the 'mrf_cache' folder in the OpenSpace base "
+            "folder."
+        );
+        _mrf.location->setDisabled(true);
         connect(
             _mrf.location,
             &QLineEdit::editingFinished,
