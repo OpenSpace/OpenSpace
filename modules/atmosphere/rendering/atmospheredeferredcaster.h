@@ -46,12 +46,12 @@ struct DeferredcastData;
 struct ShadowConfiguration;
 
 struct ShadowRenderingStruct {
-    float umbra = 0.0;
-    float penumbra = 0.0;
-    float radiusSource = 0.0;
-    float radiusCaster = 0.0;
-    glm::dvec3 sourceCasterVec = glm::vec3(0.0);
-    glm::vec3 casterPositionVec = glm::vec3(0.0);
+    double umbra = 0.0;
+    double penumbra = 0.0;
+    double radiusSource = 0.0;
+    double radiusCaster = 0.0;
+    glm::dvec3 sourceCasterVec = glm::dvec3(0.0);
+    glm::dvec3 casterPositionVec = glm::dvec3(0.0);
     bool isShadowing = false;
 };
 
@@ -158,7 +158,7 @@ private:
     const int _rSamples;
     const glm::ivec3 _textureSize;
 
-    glm::mat4 _modelTransform;
+    glm::dmat4 _modelTransform;
     float _opacity = 1.f;
 
     // Eclipse Shadows
