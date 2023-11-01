@@ -35,7 +35,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-SettingsDialog::SettingsDialog(openspace::configuration::Settings settings,
+SettingsDialog::SettingsDialog(openspace::Settings settings,
                                QWidget* parent)
     : QDialog(parent)
     , _startEdit(settings)
@@ -339,9 +339,8 @@ void SettingsDialog::createWidgets() {
     layout->addWidget(_dialogButtons, 17, 1, 1, 1, Qt::AlignRight);
 }
 
-void SettingsDialog::loadFromSettings(const openspace::configuration::Settings& settings)
-{
-    using namespace openspace::configuration;
+void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
+    using namespace openspace;
 
     if (settings.configuration.has_value()) {
         _configuration->setText(QString::fromStdString(*settings.configuration));

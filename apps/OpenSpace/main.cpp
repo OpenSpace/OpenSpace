@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/configuration.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/openspace.h>
@@ -288,7 +289,7 @@ void mainInitFunc(GLFWwindow*) {
     // to them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", screenshotPath);
-    Settings::instance().setCapturePath(screenshotPath.string());
+    sgct::Settings::instance().setCapturePath(screenshotPath.string());
 
     LDEBUG("Initializing OpenSpace Engine started");
     global::openSpaceEngine->initialize();
@@ -899,7 +900,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.takeScreenshot = [](bool applyWarping, std::vector<int> windowIds) {
         ZoneScoped;
 
-        Settings::instance().setCaptureFromBackBuffer(applyWarping);
+        sgct::Settings::instance().setCaptureFromBackBuffer(applyWarping);
         Engine::instance().takeScreenshot(std::move(windowIds));
         return Engine::instance().screenShotNumber();
     };
@@ -976,7 +977,7 @@ void setSgctDelegateFunctions() {
         return currentWindow->swapGroupFrameNumber();
     };
     sgctDelegate.setScreenshotFolder = [](std::string path) {
-        Settings::instance().setCapturePath(std::move(path));
+        sgct::Settings::instance().setCapturePath(std::move(path));
     };
     sgctDelegate.showStatistics = [](bool enabled) {
         Engine::instance().setStatsGraphVisibility(enabled);
@@ -1050,7 +1051,7 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
                                         bool haveCliSGCTConfig,
                                         const std::string& sgctFunctionName)
 {
-    configuration::Configuration& config = *global::configuration;
+    openspace::Configuration& config = *global::configuration;
 
     std::string preset;
     bool sgctConfigFileSpecifiedByLuaFunction = !config.sgctConfigNameInitialized.empty();
@@ -1215,7 +1216,7 @@ int main(int argc, char* argv[]) {
         }
         else {
             LDEBUG("Finding configuration");
-            configurationFilePath = configuration::findConfiguration();
+            configurationFilePath = findConfiguration();
         }
 
         if (!std::filesystem::is_regular_file(configurationFilePath)) {
@@ -1253,9 +1254,9 @@ int main(int argc, char* argv[]) {
         for (const std::string& arg : commandlineArguments.configurationOverride) {
             override += arg + ";";
         }
-        *global::configuration = configuration::loadConfigurationFromFile(
+        *global::configuration = loadConfigurationFromFile(
             configurationFilePath.string(),
-            configuration::findSettings(),
+            findSettings(),
             size,
             override
         );
@@ -1381,7 +1382,7 @@ int main(int argc, char* argv[]) {
 
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
-    Configuration config = parseArguments(arg);
+    sgct::Configuration config = parseArguments(arg);
     config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
 
     Engine::Callbacks callbacks;
@@ -1448,8 +1449,7 @@ int main(int argc, char* argv[]) {
     Engine::instance().setSyncParameters(false, 15.f * 60.f);
 
     {
-        using namespace configuration;
-        configuration::Settings settings = loadSettings(findSettings());
+        openspace::Settings settings = loadSettings(findSettings());
         settings.hasStartedBefore = true;
 
         if (settings.rememberLastProfile) {

@@ -34,9 +34,9 @@
 #include <string>
 #include <vector>
 
-namespace openspace::documentation { struct Documentation; }
+namespace openspace {
 
-namespace openspace::configuration {
+namespace documentation { struct Documentation; }
 
 struct Configuration {
     Configuration() = default;
@@ -151,34 +151,6 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     const std::filesystem::path& settingsFile,
     const glm::ivec2& primaryMonitorResolution, std::string_view overrideScript);
 
-
-struct Settings {
-    auto operator<=>(const Settings&) const = default;
-
-    std::optional<bool> hasStartedBefore;
-
-    std::optional<std::string> configuration;
-    std::optional<bool> rememberLastConfiguration;
-    std::optional<std::string> profile;
-    std::optional<bool> rememberLastProfile;
-    std::optional<properties::Property::Visibility> visibility;
-    std::optional<bool> bypassLauncher;
-
-    struct MRF {
-        auto operator<=>(const MRF&) const = default;
-
-        std::optional<bool> isEnabled;
-        std::optional<std::string> location;
-
-    };
-    MRF mrf;
-};
-
-std::filesystem::path findSettings(const std::string& filename = "settings.json");
-
-Settings loadSettings(const std::filesystem::path& filename);
-void saveSettings(const Settings& settings, const std::filesystem::path& filename);
-
-} // namespace openspace::configuration
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___CONFIGURATION___H__

@@ -26,10 +26,12 @@
 #include <catch2/matchers/catch_matchers_exception.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include <openspace/engine/configuration.h>
+#include <openspace/engine/settings.h>
 #include <json/json.hpp>
 #include <filesystem>
 #include <fstream>
+
+using namespace openspace;
 
 TEST_CASE("Settings Load: Empty", "[settings]") {
     constexpr std::string_view Source = R"(
@@ -38,7 +40,6 @@ TEST_CASE("Settings Load: Empty", "[settings]") {
 }
 )";
 
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_empty.json").string();
@@ -63,8 +64,6 @@ TEST_CASE("Settings Save: Empty", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_empty.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings;
     saveSettings(srcSettings, file);
 
@@ -79,8 +78,6 @@ TEST_CASE("Settings Load: Configuration", "[settings]") {
     "config": "abc"
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_config.json").string();
@@ -107,8 +104,6 @@ TEST_CASE("Settings Save: Configuration", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_config.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .configuration = "abc"
     };
@@ -125,8 +120,6 @@ TEST_CASE("Settings Load: Configuration Remember", "[settings]") {
     "config-remember": true
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_config_remember.json").string();
@@ -153,8 +146,6 @@ TEST_CASE("Settings Save: Configuration Remember", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_config)remember.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .rememberLastConfiguration = true
     };
@@ -171,8 +162,6 @@ TEST_CASE("Settings Load: Profile", "[settings]") {
     "profile": "def"
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_profile.json").string();
@@ -199,8 +188,6 @@ TEST_CASE("Settings Save: Profile", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_profile.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .profile = "def"
     };
@@ -217,8 +204,6 @@ TEST_CASE("Settings Load: Profile Remember", "[settings]") {
     "profile-remember": false
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_profile_remember.json").string();
@@ -245,8 +230,6 @@ TEST_CASE("Settings Save: Profile", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_profile.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .profile = "def"
     };
@@ -263,9 +246,6 @@ TEST_CASE("Settings Load: Visibility/NoviceUser", "[settings]") {
     "visibility": "NoviceUser"
 }
 )";
-
-    using namespace openspace;
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_visibility_novice.json").string();
@@ -292,8 +272,6 @@ TEST_CASE("Settings Save: Visibility/NoviceUser", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_noviceuser.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .visibility = openspace::properties::Property::Visibility::NoviceUser
     };
@@ -310,9 +288,6 @@ TEST_CASE("Settings Load: Visibility/User", "[settings]") {
     "visibility": "User"
 }
 )";
-
-    using namespace openspace;
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_visibility_user.json").string();
@@ -339,8 +314,6 @@ TEST_CASE("Settings Save: Visibility/User", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_user.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .visibility = openspace::properties::Property::Visibility::User
     };
@@ -357,9 +330,6 @@ TEST_CASE("Settings Load: Visibility/AdvancedUser", "[settings]") {
     "visibility": "AdvancedUser"
 }
 )";
-
-    using namespace openspace;
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_visibility_advanced.json").string();
@@ -386,8 +356,6 @@ TEST_CASE("Settings Save: Visibility/AdvancedUser", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_advanceduser.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .visibility = openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -404,9 +372,6 @@ TEST_CASE("Settings Load: Visibility/Developer", "[settings]") {
     "visibility": "Developer"
 }
 )";
-
-    using namespace openspace;
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_visibility_developer.json").string();
@@ -433,8 +398,6 @@ TEST_CASE("Settings Save: Visibility/Developer", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_developer.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .visibility = openspace::properties::Property::Visibility::Developer
     };
@@ -451,8 +414,6 @@ TEST_CASE("Settings Load: Bypass Launcher", "[settings]") {
     "bypass": false
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_bypass.json").string();
@@ -479,8 +440,6 @@ TEST_CASE("Settings Save: Bypass Launcher", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_bypass.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .bypassLauncher = false
     };
@@ -499,8 +458,6 @@ TEST_CASE("Settings Load: MRF IsEnabled", "[settings]") {
     }
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_mrf_isenabled.json").string();
@@ -526,8 +483,6 @@ TEST_CASE("Settings Save: MRF IsEnabled", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_mrf_isenabled.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .mrf = Settings::MRF {
             .isEnabled = true
@@ -548,8 +503,6 @@ TEST_CASE("Settings Load: MRF Location", "[settings]") {
     }
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_mrf_location.json").string();
@@ -574,8 +527,6 @@ TEST_CASE("Settings Load: MRF Location", "[settings]") {
 TEST_CASE("Settings Save: MRF Location", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_mrf_location.json").string();
-
-    using namespace openspace::configuration;
 
     Settings srcSettings = {
         .mrf = Settings::MRF {
@@ -604,9 +555,6 @@ TEST_CASE("Settings Load: Full", "[settings]") {
     }
 }
 )";
-
-    using namespace openspace;
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_full.json").string();
@@ -639,8 +587,6 @@ TEST_CASE("Settings Save: Full", "[settings]") {
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_save_full.json").string();
 
-    using namespace openspace::configuration;
-
     Settings srcSettings = {
         .configuration = "abc",
         .rememberLastConfiguration = true,
@@ -665,8 +611,6 @@ TEST_CASE("Settings Load Fail: Missing version", "[settings]") {
 }
 )";
 
-    using namespace openspace::configuration;
-
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_missing_version.json").string();
     {
@@ -683,8 +627,6 @@ TEST_CASE("Settings Load Fail: Illegal version", "[settings]") {
     "version": -1
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_illegal_version.json").string();
@@ -704,8 +646,6 @@ TEST_CASE("Settings Load Fail: Config", "[settings]") {
 }
 )";
 
-    using namespace openspace::configuration;
-
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_config.json").string();
     {
@@ -723,8 +663,6 @@ TEST_CASE("Settings Load Fail: Profile", "[settings]") {
     "profile": 1
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_profile.json").string();
@@ -744,8 +682,6 @@ TEST_CASE("Settings Load Fail: Visibility type", "[settings]") {
 }
 )";
 
-    using namespace openspace::configuration;
-
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_visibility_type.json").string();
     {
@@ -763,8 +699,6 @@ TEST_CASE("Settings Load Fail: Visibility value", "[settings]") {
     "visibility": "abc"
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_visibility_value.json").string();
@@ -784,8 +718,6 @@ TEST_CASE("Settings Load Fail: Bypass Launcher", "[settings]") {
 }
 )";
 
-    using namespace openspace::configuration;
-
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_bypass.json").string();
     {
@@ -803,8 +735,6 @@ TEST_CASE("Settings Load Fail: MRF", "[settings]") {
     "mrf": 1
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_mrf.json").string();
@@ -826,8 +756,6 @@ TEST_CASE("Settings Load Fail: MRF/enabled", "[settings]") {
 }
 )";
 
-    using namespace openspace::configuration;
-
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_mrf_enabled.json").string();
     {
@@ -847,8 +775,6 @@ TEST_CASE("Settings Load Fail: MRF/location", "[settings]") {
     }
 }
 )";
-
-    using namespace openspace::configuration;
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::string file = (path / "test_settings_load_fail_mrf_location.json").string();

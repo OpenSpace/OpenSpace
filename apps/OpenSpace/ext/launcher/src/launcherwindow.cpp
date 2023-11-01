@@ -213,7 +213,7 @@ namespace {
 using namespace openspace;
 
 LauncherWindow::LauncherWindow(bool profileEnabled,
-                               const configuration::Configuration& globalConfig,
+                               const Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
@@ -393,7 +393,7 @@ QWidget* LauncherWindow::createCentralWidget() {
         settingsButton,
         &QPushButton::released,
         [this]() {
-            using namespace openspace::configuration;
+            using namespace openspace;
 
             Settings settings = loadSettings(findSettings());
 

@@ -29,7 +29,7 @@
 #include <filesystem>
 #include <fstream>
 
-using namespace openspace::configuration;
+using namespace openspace;
 
 namespace {
     // The absolute minimal configuration that is still expected to be loaded

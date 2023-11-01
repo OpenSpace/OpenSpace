@@ -22,56 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___SETTINGSDIALOG___H__
-#define __OPENSPACE_UI_LAUNCHER___SETTINGSDIALOG___H__
+#ifndef __OPENSPACE_CORE___SETTINGS___H__
+#define __OPENSPACE_CORE___SETTINGS___H__
 
-#include <QDialog>
+#include <openspace/properties/property.h>
+#include <filesystem>
+#include <optional>
 
-#include <openspace/engine/settings.h>
+namespace openspace {
 
-class QCheckBox;
-class QComboBox;
-class QDialogButtonBox;
-class QLabel;
-class QLineEdit;
+struct Settings {
+    auto operator<=>(const Settings&) const = default;
 
-class SettingsDialog : public QDialog {
-Q_OBJECT
-public:
-    SettingsDialog(openspace::Settings settings,
-        QWidget* parent = nullptr);
+    std::optional<bool> hasStartedBefore;
 
-signals:
-    void saveSettings(openspace::Settings settings);
+    std::optional<std::string> configuration;
+    std::optional<bool> rememberLastConfiguration;
+    std::optional<std::string> profile;
+    std::optional<bool> rememberLastProfile;
+    std::optional<properties::Property::Visibility> visibility;
+    std::optional<bool> bypassLauncher;
 
-private:
-    void createWidgets();
-    void loadFromSettings(const openspace::Settings& settings);
-    void updateSaveButton();
+    struct MRF {
+        auto operator<=>(const MRF&) const = default;
 
-    void save();
-    void reject();
+        std::optional<bool> isEnabled;
+        std::optional<std::string> location;
 
-    QLineEdit* _configuration = nullptr;
-    QCheckBox* _rememberLastConfiguration = nullptr;
-    QLineEdit* _profile = nullptr;
-    QCheckBox* _rememberLastProfile = nullptr;
-    QComboBox* _propertyVisibility = nullptr;
-    QCheckBox* _bypassLauncher = nullptr;
-    QLabel* _bypassInformation = nullptr;
-
-    struct {
-        QCheckBox* isEnabled = nullptr;
-        QLineEdit* location = nullptr;
-    } _mrf;
-
-    QDialogButtonBox* _dialogButtons = nullptr;
-
-    // The set of settings that we had when we started the dialog
-    openspace::Settings _startEdit;
-
-    // The set of settings that we have while editing
-    openspace::Settings _currentEdit;
+    };
+    MRF mrf;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___SETTINGSDIALOG___H__
+std::filesystem::path findSettings(const std::string& filename = "settings.json");
+
+Settings loadSettings(const std::filesystem::path& filename);
+void saveSettings(const Settings& settings, const std::filesystem::path& filename);
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___SETTINGS___H__
