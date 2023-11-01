@@ -55,7 +55,7 @@ struct Settings {
 
 std::filesystem::path findSettings(const std::string& filename = "settings.json");
 
-Settings loadSettings(const std::filesystem::path& filename);
+Settings loadSettings(const std::filesystem::path& filename = findSettings());
 void saveSettings(const Settings& settings, const std::filesystem::path& filename);
 
 } // namespace openspace

@@ -1449,7 +1449,7 @@ int main(int argc, char* argv[]) {
     Engine::instance().setSyncParameters(false, 15.f * 60.f);
 
     {
-        openspace::Settings settings = loadSettings(findSettings());
+        openspace::Settings settings = loadSettings();
         settings.hasStartedBefore = true;
 
         if (settings.rememberLastProfile) {

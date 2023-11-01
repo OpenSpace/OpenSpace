@@ -395,7 +395,7 @@ QWidget* LauncherWindow::createCentralWidget() {
         [this]() {
             using namespace openspace;
 
-            Settings settings = loadSettings(findSettings());
+            Settings settings = loadSettings();
 
             SettingsDialog dialog(std::move(settings), this);
             connect(
