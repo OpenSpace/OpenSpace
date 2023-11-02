@@ -77,6 +77,11 @@ public:
 
     static documentation::Documentation Documentation();
 
+protected:
+    /// Check ossync file and returns true if downloaded files exists and are valid,
+    /// false if they are missing or old. 
+    bool isEachFileValid();
+
 private:
     /// The list of URLs that will be downloaded
     std::vector<std::string> _urls;

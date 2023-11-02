@@ -27,6 +27,9 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/httprequest.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <numeric>
 #include <mutex>
@@ -35,6 +38,9 @@
 #include <variant>
 
 namespace {
+    constexpr std::string_view _loggerCat = "UrlSynchronization";
+    constexpr std::string_view _ossyncVersionNumber = "1.0";
+
     struct [[codegen::Dictionary(UrlSynchronization)]] Parameters {
         // The URL or urls from where the files are downloaded. If multiple URLs are
         // provided, all files will be downloaded to the same directory and the filename
@@ -132,8 +138,17 @@ void UrlSynchronization::start() {
     }
     _state = State::Syncing;
 
-    if (hasSyncFile() && !_forceOverride) {
+    //TODO: What is the expected behavior if forceOverride is also set?
+    //So say we put in that a file is valid for 24h and forceOverride is set to true
+    //Should we wait 24h before downloading and then use forceOverride as a meassure
+    //to check if the file already exists then if we want to override it or not?
+    //this becomes sort of double checking the same thing?
+    if (isEachFileValid() && !_forceOverride) {
         _state = State::Resolved;
+        return;
+    }
+
+    if (isRejected()) {
         return;
     }
 
@@ -251,6 +266,65 @@ void UrlSynchronization::cancel() {
 
 std::string UrlSynchronization::generateUid() {
     return _identifier;
+}
+
+bool UrlSynchronization::isEachFileValid() {
+    std::filesystem::path path = directory();
+    path.replace_extension("ossync");
+
+    if (!std::filesystem::is_regular_file(path)) {
+        return false;
+    }
+
+    std::ifstream file(path);
+    std::string line;
+
+    file >> line;
+    // Ossync files that does not have a version number are already resolved, due to 
+    // previous format. 
+    if (line == "Synchronized") {
+        return true;
+    }
+
+    //Otherwise first line is ossync version number.
+    std::string ossyncVersion = line;
+
+    /*
+    Format of 1.0 ossync:
+    Version number: e.g., 1.0
+    Valid to: yyyy mm dd hh:mm:ss
+    */
+    if (ossyncVersion == "1.0") {
+        //TODO: find other way to convert time to/from doubles
+        SpiceManager::KernelHandle kernel = SpiceManager::ref().loadKernel(
+            absPath("${SYNC}/http/general_lsk/1/naif0012.tls").string()
+        );
+
+        std::getline(file >> std::ws, line);
+        std::string& fileIsValidToDate = line;
+
+        //TODO: rename asset file to SecsUntilRefresh RefreshAfterSecs
+        //ResyncAfterSecs, SecondsUntilResync
+        //Remove Override, but what to do for backwards compatibility?
+        double validFileDate = Time::convertTime(fileIsValidToDate);
+
+        std::string timeNowAsISO8601 = Time::currentWallTime();
+        double timeNowInJ2000 = Time::convertTime(timeNowAsISO8601);
+
+        return validFileDate >= timeNowInJ2000;
+    }
+    else {
+        LWARNING(fmt::format(
+            "{}: Unknown ossync version number read."
+            "Got {} while {} and below are valid!",
+            _identifier,
+            ossyncVersion,
+            _ossyncVersionNumber
+        ));
+        _state = State::Rejected;
+    }
+
+    return false;
 }
 
 } // namespace openspace
