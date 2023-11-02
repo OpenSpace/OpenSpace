@@ -36,63 +36,12 @@ local Fieldlines = {
     LineWidth = 1,
     ShowAtAllTimes = false,
     ColorQuantity = 0,
-    ColorTablePath = asset.localResource("transferfunctions/density-fieldlines.txt"),
+    ColorTablePath = asset.resource("transferfunctions/density-fieldlines.txt"),
     ColorMinMaxRange = {
-      0, 1000000,
+      0, 1000000
       --{ 100, 2000 }
     },
 
---[[
-    --------Game plane--------:
-    -> vectors<data> (actually skipping support for vectors of ranges etc for now)
-
-    map<std::string, VariableInfo>  -> vectors<data>
-
-    map<std::string, VariableInfo> -> data
-
-    creating the meta file
-
-    loading the meta file
-    --------Parameter--------
-        struct VariableInfo {
-            std::optional<std::string> tf;
-            std::optional<glm::vec2> minMaxRange;
-            std::optional<glm::vec2> selectedRange;
-        };
-        std::optional<std::map<std::string, VariableInfo>> variables;
-    --------
-    meta = openspace.ccmc.loadEntireMetaFile(asset.localResource("bla")),
-    meta["T"].selectedRange = { 0, 500 }
-
-    DefaultTransferFunction = asset.localResource("transferfunctions/density-fieldlines.txt"),
-    Variable = {
-      T = {
-        TransferFunction = asset.localResource("transferfunctions/density-fieldlines.txt"),
-        Range = { 0, 1000000 },
-        selectedRange = {0, 500},
-      },
-      U = {
-        TransferFunction = asset.localResource("transferfunctions/velocity-fieldlines.txt"),
-        Range = { 100, 2000 }
-      },
-      V = {
-        TransferFunction = meta.V.transferfunction,
-        Range = meta.V.range
-      },
-      V =  meta.V,
-      Topology = {
-        Masking = { openspace.ccmc.metaFileMapToNumber("Topology", { "open_south", "open_north" }),  openspace.ccmc.metaFileMapToNumber("Topology", "open_north"  }
-      }
-    },
-
-    Variable = openspace.ccmc.loadEntireMetaFile(asset.localResource("..."))
-    ColorQuantity = Variable[1].name,
-
-    ColorQuanity = "T",
-    MaskingQuanity = "Topology"
-]]--
-
-    --SimulationModel = "mas",
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day 2000",

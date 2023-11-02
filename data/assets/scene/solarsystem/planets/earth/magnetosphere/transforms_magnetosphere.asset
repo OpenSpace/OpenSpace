@@ -1,7 +1,7 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
 
-local GSMKernel = asset.localResource("../kernels/GSM.tf")
+local GSMKernel = asset.resource("../kernels/GSM.tf")
 
 local GSMReferenceFrame = {
   Identifier = "GSMReferenceFrame",
