@@ -1,13 +1,15 @@
 local transforms = asset.require("./transforms")
-local textures = asset.require("scene/milkyway/habitable_zones/habitable_zone_textures").TexturesPath
+local textures = asset.require("scene/milkyway/habitable_zones/habitable_zone_textures")
+
+
 
 local HabitableZone = {
   Identifier = "SunHabitableZone",
-  Parent =  transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunECLIPJ2000.Identifier,
   Renderable = {
     Type = "RenderableHabitableZone",
     Enabled = false,
-    Texture = textures .. "hot_to_cold_faded.png",
+    Texture = textures.TexturesPath .. "hot_to_cold_faded.png",
     EffectiveTemperature = 5780, -- Kelvin
     Luminosity = 1, -- solar
     Opacity = 0.1,
@@ -20,6 +22,7 @@ local HabitableZone = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HabitableZone)
 end)
@@ -29,6 +32,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(HabitableZone)
+
 
 
 asset.meta = {

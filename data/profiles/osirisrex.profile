@@ -42,31 +42,31 @@
   ],
   "keybindings": [
     {
-      "action": "os.missions.osirisrex.focus",
+      "action": "os.osirisrex.FocusOsirisRex",
       "key": "A"
     },
     {
-      "action": "os.missions.osirisrex.bennu.focus",
+      "action": "os.osirisrex.FocusBennu",
       "key": "S"
     },
     {
-      "action": "os.missions.osirisrex.setup.bennuapproach",
+      "action": "os.osirisrex.SetupBennuApproach",
       "key": "F8"
     },
     {
-      "action": "os.missions.osirisrex.setup.bennusurvey",
+      "action": "os.osirisrex.SetupBennuSurvey",
       "key": "F9"
     },
     {
-      "action": "os.missions.osirisrex.setup.bennueventb",
+      "action": "os.osirisrex.SetupBennuEventB",
       "key": "F10"
     },
     {
-      "action": "os.missions.osirisrex.setup.bennureconevent",
+      "action": "os.osirisrex.SetupBennuReconEvent",
       "key": "F11"
     },
     {
-      "action": "os.missions.osirisrex.togglesunmarker",
+      "action": "os.osirisrex.ToggleSunMarker",
       "key": "Q"
     }
   ],

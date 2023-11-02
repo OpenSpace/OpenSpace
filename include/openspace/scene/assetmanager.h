@@ -92,7 +92,24 @@ public:
      */
     std::vector<const Asset*> allAssets() const;
 
+    /**
+     * Returns all root assets, which are assets that have been loaded directly from the
+     * profile or by calling the #add method.
+     *
+     * \return A list of all root assets
+     */
+    std::vector<const Asset*> rootAssets() const;
+
     std::vector<const ResourceSynchronization*> allSynchronizations() const;
+
+    /**
+     * Returns whether the provided \p asset has been loaded directly by the user or
+     * loaded through a profile file.
+     *
+     * \param asset The asset that should be tested
+     * \return Whether the \p asset has been loaded directly or included in a profile
+     */
+    bool isRootAsset(const Asset* asset) const;
 
     /**
      * Loads the provided \p asset as a child of the provided \p parent. Loading an asset

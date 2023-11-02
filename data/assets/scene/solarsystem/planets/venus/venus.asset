@@ -1,13 +1,16 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Venus Labels",
   Type = "HttpSynchronization",
   Identifier = "venus_labels",
   Version = 1
 })
+
 
 local Venus = {
   Identifier = "Venus",
@@ -75,6 +78,7 @@ local VenusLabel = {
       Description = "Label for Venus, viewable within the solar system"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Venus)

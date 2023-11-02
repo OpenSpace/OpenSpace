@@ -41,6 +41,13 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+documentation::Documentation VideoTileProvider::Documentation() {
+    documentation::Documentation doc = VideoPlayer::Documentation();
+    doc.name = "VideoTileProvider";
+    doc.id = "video_videotileprovider";
+    return doc;
+}
+
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     : _videoPlayer(dictionary)
 {
@@ -99,7 +106,7 @@ void VideoTileProvider::update() {
 }
 
 void VideoTileProvider::reset() {
-    _videoPlayer.reset();
+    _videoPlayer.reload();
 }
 
 ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {

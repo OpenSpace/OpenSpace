@@ -1,14 +1,17 @@
 local transforms = asset.require("./transforms_magnetosphere")
-local transferFunction = asset.localResource("./CMR-illuminance2.txt")
 
-local fieldlinesDirectory = asset.syncedResource({
+
+
+local transferFunction = asset.resource("CMR-illuminance2.txt")
+
+local fieldlinesDirectory = asset.resource({
   Name = "Magnetosphere 2012 event",
   Type = "HttpSynchronization",
   Identifier = "magnetosphere_2012_event",
   Version = 1
 })
 
-local earthMagnetosphere = {
+local EarthMagnetosphere = {
   Identifier = "EarthMagnetosphere",
   Parent = transforms.GSMReferenceFrame.Identifier,
   InteractionSphere = 6380000,  -- A value slightly bigger than earth radius
@@ -32,18 +35,21 @@ local earthMagnetosphere = {
   GUI = {
     Path = "/Solar System/Planets/Earth",
     Name = "Magnetosphere"
-  },
+  }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(earthMagnetosphere)
+  openspace.addSceneGraphNode(EarthMagnetosphere)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(earthMagnetosphere)
+  openspace.removeSceneGraphNode(EarthMagnetosphere)
 end)
 
-asset.export(earthMagnetosphere)
+asset.export(EarthMagnetosphere)
+
+
 
 asset.meta = {
   Name = "Static generic magnetosphere of fieldlines",

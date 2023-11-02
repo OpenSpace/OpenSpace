@@ -1,9 +1,10 @@
-local kernelsFolder = asset.syncedResource({
+local kernelsFolder = asset.resource({
   Name = "Apollo Kernels",
   Type = "HttpSynchronization",
   Identifier = "apollo_spice",
   Version = 1
 })
+
 
 local kernels = {
   kernelsFolder .. "moon_080317.tf",

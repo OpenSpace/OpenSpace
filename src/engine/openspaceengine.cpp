@@ -1124,7 +1124,8 @@ void OpenSpaceEngine::preSynchronization() {
         for (const std::string& script : scheduledScripts) {
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
 
@@ -1577,7 +1578,8 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     std::string script = ghoul::lua::value<std::string>(s);
     global::scriptEngine->queueScript(
         script,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -1690,7 +1692,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::CreateSingleColorImage,
             codegen::lua::IsMaster,
             codegen::lua::Version,
-            codegen::lua::ReadCSVFile
+            codegen::lua::ReadCSVFile,
+            codegen::lua::ResetCamera
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
@@ -1717,19 +1720,30 @@ void setCameraFromProfile(const Profile& p) {
         return;
     }
 
+    auto checkNodeExists = [](const std::string& node) {
+        if (global::renderEngine->scene()->sceneGraphNode(node) == nullptr) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error when setting camera from profile. Could not find node '{}'", node
+            ));
+        }
+    };
+
     std::visit(
-        overloaded{
-            [](const Profile::CameraNavState& navStateProfile) {
+        overloaded {
+            [&checkNodeExists](const Profile::CameraNavState& navStateProfile) {
                 interaction::NavigationState nav;
                 nav.anchor = navStateProfile.anchor;
-                if (navStateProfile.aim.has_value()) {
+                checkNodeExists(nav.anchor);
+                if (navStateProfile.aim.has_value() && !(*navStateProfile.aim).empty()) {
                     nav.aim = navStateProfile.aim.value();
+                    checkNodeExists(nav.aim);
                 }
                 if (navStateProfile.referenceFrame.empty()) {
                     nav.referenceFrame = nav.anchor;
                 }
                 else {
                     nav.referenceFrame = navStateProfile.referenceFrame;
+                    checkNodeExists(navStateProfile.referenceFrame);
                 }
                 nav.position = navStateProfile.position;
                 if (navStateProfile.up.has_value()) {
@@ -1743,11 +1757,12 @@ void setCameraFromProfile(const Profile& p) {
                 }
                 global::navigationHandler->setNavigationStateNextFrame(nav);
             },
-            [](const Profile::CameraGoToGeo& geo) {
-                // Instead of direct calls to navigation state code, lua commands with
+            [&checkNodeExists](const Profile::CameraGoToGeo& geo) {
+                // Instead of direct calls to navigation state code, Lua commands with
                 // globebrowsing goToGeo are used because this prevents a module
                 // dependency in this core code. Eventually, goToGeo will be incorporated
                 // in the OpenSpace core and this code will change.
+                checkNodeExists(geo.anchor);
                 std::string geoScript = fmt::format("openspace.globebrowsing.goToGeo"
                     "([[{}]], {}, {}", geo.anchor, geo.latitude, geo.longitude);
                 if (geo.altitude.has_value()) {
@@ -1756,16 +1771,20 @@ void setCameraFromProfile(const Profile& p) {
                 geoScript += ")";
                 global::scriptEngine->queueScript(
                     geoScript,
-                    scripting::ScriptEngine::RemoteScripting::Yes
+                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                    scripting::ScriptEngine::ShouldSendToRemote::Yes
                 );
             },
-            [](const Profile::CameraGoToNode& node) {
+            [&checkNodeExists](const Profile::CameraGoToNode& node) {
                 using namespace interaction;
-                NodeCameraStateSpec spec;
-                spec.identifier = node.anchor;
-                spec.height = node.height;
-                spec.useTargetUpDirection = true;
 
+                checkNodeExists(node.anchor);
+
+                NodeCameraStateSpec spec = {
+                    .identifier = node.anchor,
+                    .height = node.height,
+                    .useTargetUpDirection = true
+                };
                 global::navigationHandler->setCameraFromNodeSpecNextFrame(spec);
             }
         },
@@ -1784,7 +1803,8 @@ void setModulesFromProfile(const Profile& p) {
             if (mod.loadedInstruction.has_value()) {
                 global::scriptEngine->queueScript(
                     mod.loadedInstruction.value(),
-                    scripting::ScriptEngine::RemoteScripting::Yes
+                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                    scripting::ScriptEngine::ShouldSendToRemote::Yes
                 );
             }
         }
@@ -1792,7 +1812,8 @@ void setModulesFromProfile(const Profile& p) {
             if (mod.notLoadedInstruction.has_value()) {
                 global::scriptEngine->queueScript(
                     mod.notLoadedInstruction.value(),
-                    scripting::ScriptEngine::RemoteScripting::Yes
+                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                    scripting::ScriptEngine::ShouldSendToRemote::Yes
                 );
             }
         }
@@ -1856,7 +1877,8 @@ void setAdditionalScriptsFromProfile(const Profile& p) {
     for (const std::string& a : p.additionalScripts) {
         global::scriptEngine->queueScript(
             a,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }

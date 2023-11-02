@@ -1,18 +1,19 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Sloan Digital Sky Survey Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_sloandss_textures",
   Version = 2
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Sloan Digital Sky Survey Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_sloandss_speck",
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "SloanDigitalSkySurvey",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -55,15 +56,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

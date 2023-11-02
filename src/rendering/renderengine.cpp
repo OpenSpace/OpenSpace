@@ -278,6 +278,14 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ApplyBlackoutToMasterInfo = {
+        "ApplyBlackoutToMaster",
+        "Apply Blackout to Master",
+        "If this value is 'true', the blackout factor is applied to the master node. "
+        "Regardless of this value, the clients will always adhere to the factor",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo FXAAInfo = {
         "FXAA",
         "Enable FXAA",
@@ -317,6 +325,7 @@ RenderEngine::RenderEngine()
     , _showFrameInformation(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
+    , _applyBlackoutToMaster(ApplyBlackoutToMasterInfo, true)
     , _enableFXAA(FXAAInfo, true)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
     , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.f)
@@ -377,6 +386,7 @@ RenderEngine::RenderEngine()
     addProperty(_value);
 
     addProperty(_globalBlackOutFactor);
+    addProperty(_applyBlackoutToMaster);
     addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
 
@@ -686,8 +696,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     const bool renderingEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
-    if (renderingEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
-        _renderer.render(_scene, _camera, _globalBlackOutFactor);
+    if (renderingEnabled && combinedBlackoutFactor() > 0.f) {
+        _renderer.render(_scene, _camera, combinedBlackoutFactor());
     }
 
     // The CEF webbrowser fix has to be called at least once per frame and we are doing
@@ -728,7 +738,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         RenderFont(*_fontFrameInfo, penPosition, res);
     }
 
-    if (renderingEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+    if (renderingEnabled && !delegate.isGuiWindow()) {
         ZoneScopedN("Render Screenspace Renderable");
 
         std::vector<ScreenSpaceRenderable*> ssrs;
@@ -755,7 +765,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         for (ScreenSpaceRenderable* ssr : ssrs) {
-            ssr->render();
+            ssr->render(combinedBlackoutFactor());
         }
         glDisable(GL_BLEND);
     }
@@ -772,11 +782,12 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.rotation)) {
         constexpr const char ToggleRotationFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
-            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
             ToggleRotationFrictionScript,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
         return true;
     }
@@ -784,11 +795,12 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.zoom)) {
         constexpr const char ToggleZoomFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
-            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
             ToggleZoomFrictionScript,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
         return true;
     }
@@ -796,11 +808,12 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.roll)) {
         constexpr const char ToggleRollFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
-            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
             ToggleRollFrictionScript,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
         return true;
     }
@@ -902,6 +915,15 @@ void RenderEngine::renderDashboard() {
     global::dashboard->render(penPosition);
 }
 
+float RenderEngine::combinedBlackoutFactor() const {
+    if (global::windowDelegate->isMaster()) {
+        return _applyBlackoutToMaster ? _globalBlackOutFactor : 1.f;
+    }
+    else {
+        return _globalBlackOutFactor;
+    }
+}
+
 void RenderEngine::postDraw() {
     ZoneScoped;
 
@@ -925,14 +947,6 @@ ghoul::opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
         _openglStateCache = ghoul::opengl::OpenGLStateCache::instance();
     }
     return *_openglStateCache;
-}
-
-float RenderEngine::globalBlackOutFactor() const {
-    return _globalBlackOutFactor;
-}
-
-void RenderEngine::setGlobalBlackOutFactor(float opacity) {
-    _globalBlackOutFactor = opacity;
 }
 
 float RenderEngine::hdrExposure() const {
@@ -1110,6 +1124,9 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
 
     s->initialize();
     s->initializeGL();
+
+    // We should do one update cycle to make sure that we have all the data that we need
+    s->update();
 
     ScreenSpaceRenderable* ssr = s.get();
     global::screenSpaceRootPropertyOwner->addPropertySubOwner(ssr);

@@ -60,7 +60,8 @@ void TextTileProvider::internalDeinitialize() {
 }
 
 Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string& text,
-                                  const glm::vec2& position, const glm::vec4& color)
+                                  const glm::vec2& position, const glm::vec4& color,
+                                  const glm::vec4& backgroundColor)
 {
     ZoneScoped;
     TracyGpuZone("tile");
@@ -86,8 +87,14 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
 
         GLsizei w = static_cast<GLsizei>(texture->width());
         GLsizei h = static_cast<GLsizei>(texture->height());
+        global::renderEngine->openglStateCache().loadCurrentGLState();
         glViewport(0, 0, w, h);
-        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glClearColor(
+            backgroundColor.r,
+            backgroundColor.g,
+            backgroundColor.b,
+            backgroundColor.a
+        );
         glClear(GL_COLOR_BUFFER_BIT);
 
         fontRenderer->render(*font, position, text, color);
@@ -98,7 +105,7 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
         // Reset FBO, shader program and viewport
         glUseProgram(prevProgram);
         glBindFramebuffer(GL_FRAMEBUFFER, prevFBO);
-        global::renderEngine->openglStateCache().resetViewportState();
+        global::renderEngine->openglStateCache().resetCachedStates();
     }
     return tile;
 }

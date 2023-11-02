@@ -339,6 +339,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    addProperty(Fadeable::_opacity);
+
     _inputFileType = codegen::map<SourceFileType>(p.inputFileType);
     if (p.loadingType.has_value()) {
         _loadingType = codegen::map<LoadingType>(*p.loadingType);
@@ -1140,6 +1142,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         "time",
         global::windowDelegate->applicationTime() * (_flowReversed ? -1 : 1)
     );
+
+    _shaderProgram->setUniform("opacity", opacity());
 
     bool additiveBlending = false;
     if (_colorABlendEnabled) {

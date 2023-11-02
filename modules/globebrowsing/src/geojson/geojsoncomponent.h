@@ -98,7 +98,7 @@ private:
     };
 
     void readFile();
-    void parseSingleFeature(const geos::io::GeoJSONFeature& feature);
+    void parseSingleFeature(const geos::io::GeoJSONFeature& feature, int indexInFile);
 
     /**
      * Add meta properties to the feature, to allow things like flying to it,
@@ -114,6 +114,8 @@ private:
      * overview of all features in the collection.
      */
     void flyToFeature(std::optional<int> index = std::nullopt) const;
+
+    void triggerDeletion() const;
 
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
@@ -145,6 +147,9 @@ private:
     properties::Vec2Property _centerLatLong;
     float _bboxDiagonalSize = 0.f;
     properties::TriggerProperty _flyToFeature;
+
+    properties::PropertyOwner _deletePropertyOwner;
+    properties::TriggerProperty _deleteThisComponent;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
     std::unique_ptr<LightSource> _defaultLightSource;

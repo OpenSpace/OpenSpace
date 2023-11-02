@@ -45,7 +45,8 @@ struct RaycastData;
 
 class GalaxyRaycaster : public VolumeRaycaster {
 public:
-    GalaxyRaycaster(ghoul::opengl::Texture& texture);
+    GalaxyRaycaster(ghoul::opengl::Texture& texture,
+        std::optional<std::filesystem::path> raycastingShader = std::nullopt);
     ~GalaxyRaycaster() override = default;
 
     void initialize();
@@ -87,6 +88,7 @@ private:
     float _emissionMultiply = 0.f;
     ghoul::opengl::Texture& _texture;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
+    std::filesystem::path _raycastingShader;
 
 }; // GalaxyRaycaster
 

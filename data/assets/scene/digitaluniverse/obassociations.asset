@@ -1,18 +1,19 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "OB Associations Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_obassociations_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "OB Associations Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_obassociations_speck",
   Version = 3
 })
 
-local object = {
+
+local Object = {
   Identifier = "OBAssociations",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -55,15 +56,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

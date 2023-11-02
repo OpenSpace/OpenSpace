@@ -199,19 +199,11 @@ void RenderableRadialGrid::deinitializeGL() {
 void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    const glm::dmat4 modelViewTransform =
-        data.camera.combinedViewMatrix() * modelTransform;
-    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
-
-    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data);
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
+    _gridProgram->setUniform("MVPTransform", modelViewProjectionTransform);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
@@ -261,7 +253,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
         const glm::vec3 orthoUp = glm::normalize(
             glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
         );
-        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+        _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp);
     }
 }
 

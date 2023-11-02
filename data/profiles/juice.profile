@@ -9,6 +9,7 @@
     "scene/solarsystem/missions/juice/model",
     "scene/solarsystem/missions/juice/plane",
     "scene/solarsystem/missions/juice/trail",
+    "scene/solarsystem/missions/juice/mission",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/jupiter/layers/colorlayers/jupiter_video"
   ],
@@ -110,6 +111,16 @@
       "name": "Scene.GanymedeMagnetosphere.Renderable.FlowEnabled",
       "type": "setPropertyValueSingle",
       "value": "true"
+    },
+    {
+      "name": "Scene.JuiceNavCam.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceJanus.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {

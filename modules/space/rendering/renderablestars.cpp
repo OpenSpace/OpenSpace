@@ -662,7 +662,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
             _colorTextureIsDirty = true;
         }
         else {
-            LWARNING(fmt::format("File not found: {}", _colorTexturePath));
+            LWARNING(fmt::format("File not found: {}", _colorTexturePath.value()));
         }
     });
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
@@ -682,7 +682,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
             _otherDataColorMapIsDirty = true;
         }
         else {
-            LWARNING(fmt::format("File not found: {}", _otherDataColorMapPath));
+            LWARNING(fmt::format("File not found: {}", _otherDataColorMapPath.value()));
         }
     });
 
@@ -1047,10 +1047,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
     _program->setUniform(_uniformCache.cameraUp, cameraUp);
 
-    glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
+    glm::dmat4 modelMatrix = calcModelTransform(data);
 
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 

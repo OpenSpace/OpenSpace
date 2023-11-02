@@ -1,11 +1,12 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "ESO Milky Way Textures",
   Type = "HttpSynchronization",
   Identifier = "milkyway-eso_textures",
   Version = 1
 })
 
-local object = {
+
+local Object = {
   Identifier = "MilkyWay-ESO",
   Transform = {
     Rotation = {
@@ -14,7 +15,7 @@ local object = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Size = 9.2E20,
     Segments = 40,
     Opacity = 0.4,
@@ -31,16 +32,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
-
+asset.export(Object)
 
 
 

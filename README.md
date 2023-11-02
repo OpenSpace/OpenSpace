@@ -47,4 +47,9 @@ Feel free to create issues for missing features, bug reports, or compile problem
 ![Image](https://github.com/OpenSpace/openspace.github.io/raw/master/assets/images/himalaya-nkpg-dome.jpg)
 
 # License
-The contents of this repository is under an [MIT license](https://github.com/OpenSpace/OpenSpace/blob/master/LICENSE.md).
+The contents of this repository provided under an [MIT license](https://github.com/OpenSpace/OpenSpace/blob/master/LICENSE.md).
+
+# Support
+OpenSpace is supported by the following institutions:
+
+![Image](https://github.com/OpenSpace/openspace.github.io/raw/master/assets/logos/sponsors.png)

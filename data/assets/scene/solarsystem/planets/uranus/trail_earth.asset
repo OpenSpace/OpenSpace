@@ -1,12 +1,11 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local UranusTrailEarth = {
   Identifier = "UranusTrailEarth",
-  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Parent = transforms.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
@@ -23,10 +22,10 @@ local UranusTrailEarth = {
   GUI = {
     Name = "Uranus trail from Earth",
     Path = "/Solar System/Planets/Uranus",
-    Hidden = false,
-    Description = "Trail of Uranus as observed by the Earth",
+    Description = "Trail of Uranus as observed by the Earth"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(UranusTrailEarth)

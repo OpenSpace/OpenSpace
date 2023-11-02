@@ -758,14 +758,8 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
     // Model transform and view transform needs to be in double precision
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
     glm::mat4 modelViewProjectionTransform =
-        data.camera.projectionMatrix() *
-        glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
+        calcModelViewProjectionTransform(data);
 
     _program->setUniform(_uniformCache.modelViewProjection, modelViewProjectionTransform);
 

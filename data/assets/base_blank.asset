@@ -5,7 +5,7 @@ asset.require("spice/base")
 
 asset.require("dashboard/default_dashboard")
 -- Load default key bindings applicable to most scenes
-asset.require("util/default_keybindings")
+asset.require("./default_keybindings")
 
 -- Load web gui
 local webGui = asset.require("util/webgui")
@@ -20,7 +20,7 @@ asset.require("util/launcher_images")
 asset.require("modules/touch/default_settings")
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   webGui.setCefRoute("onscreen")
   openspace.setDefaultGuiSorting()
   openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.100000)

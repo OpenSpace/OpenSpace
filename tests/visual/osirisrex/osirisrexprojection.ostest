@@ -6,7 +6,7 @@
     { "type": "navigationstate", 
       "value": "{Anchor='BennuBarycenter',Pitch=-0.249726E-1,Position={6.343195E2,-7.381825E1,-2.105395E2},ReferenceFrame='Root',Up={0.260217E0,-0.340701E0,0.903444E0},Yaw=0.593456E-1}"},
     { "type": "action", 
-      "value": "os.fade_down_trails"},
+      "value": "os.FadeDownTrails"},
     { "type": "script", 
       "value": "openspace.setPropertyValueSingle('Scene.POLYCAM FOV.Renderable.Enabled', false)"},
     { "type": "script", 

@@ -97,7 +97,6 @@ void TileProvider::initializeDefaultTile() {
         8,
         GL_UNSIGNED_BYTE,
         Texture::Format::RGBA,
-        TileTextureInitData::PadTiles::No,
         TileTextureInitData::ShouldAllocateDataOnCPU::Yes
     );
     char* pixels = new char[initData.totalNumBytes];

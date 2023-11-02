@@ -32,6 +32,7 @@ set(HEADER_FILES
   rendering/renderableconstellationsbase.h
   rendering/renderableconstellationbounds.h
   rendering/renderableconstellationlines.h
+  rendering/renderableeclipsecone.h
   rendering/renderablefluxnodes.h
   rendering/renderablehabitablezone.h
   rendering/renderablerings.h
@@ -55,6 +56,7 @@ set(SOURCE_FILES
   rendering/renderableconstellationsbase.cpp
   rendering/renderableconstellationbounds.cpp
   rendering/renderableconstellationlines.cpp
+  rendering/renderableeclipsecone.cpp
   rendering/renderablefluxnodes.cpp
   rendering/renderablehabitablezone.cpp
   rendering/renderablerings.cpp

@@ -37,6 +37,17 @@
 
 namespace openspace {
 
+documentation::Documentation ScreenSpaceVideo::Documentation() {
+    documentation::Documentation doc = ScreenSpaceRenderable::Documentation();
+    doc.name = "ScreenSpaceVideo";
+    doc.id = "video_screenspacevideo";
+
+    documentation::Documentation vp = VideoPlayer::Documentation();
+    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
+
+    return doc;
+}
+
 ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _videoPlayer(dictionary)
@@ -68,9 +79,9 @@ void ScreenSpaceVideo::update() {
     }
 }
 
-void ScreenSpaceVideo::render() {
+void ScreenSpaceVideo::render(float blackoutFactor) {
     if (_videoPlayer.isInitialized()) {
-        ScreenSpaceRenderable::render();
+        ScreenSpaceRenderable::render(blackoutFactor);
     }
 }
 

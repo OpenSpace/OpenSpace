@@ -1,13 +1,14 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local magnetogramDirectory = asset.require("./magnetogram")
 
+
 local magnetograms
 
 local SwitchColorLayer = {
-  Identifier = "os.events.bastilleday.magnetogramtexture.SwitchColorLayer",
+  Identifier = "os.bastilleday.magnetogramtexture.SwitchColorLayer",
   Name = "Next sun texture",
   Command = [[
-    local textureList = openspace.globebrowsing.getLayers("Sun", "ColorLayers")
+    local textureList = openspace.globebrowsing.layers("Sun", "ColorLayers")
     if (magnetogramsTextureIndex == -1) then
       magnetogramsTextureIndex = 2
     end
@@ -28,8 +29,9 @@ local SwitchColorLayer = {
   IsLocal = false
 }
 
-asset.onInitialize(function ()
-  magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory.TexturesPath);
+
+asset.onInitialize(function()
+  magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory.TexturesPath)
   rawset(_G, "magnetogramsTextureIndex", -1)
   for i, imagename in ipairs(magnetograms) do
     openspace.globebrowsing.addLayer(
@@ -42,7 +44,6 @@ asset.onInitialize(function ()
         FilePath = imagename,
         Enabled = false,
         CacheSettings = { Enabled = false }
-        --Type = "ImageSequenceTileProvider",
       }
     )
   end
@@ -50,7 +51,7 @@ asset.onInitialize(function ()
   openspace.action.registerAction(SwitchColorLayer)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   for i, imagename in ipairs(magnetograms) do
     openspace.globebrowsing.deleteLayer("Sun", "ColorLayers", "magnetograms" .. i)
   end

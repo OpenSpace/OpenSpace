@@ -68,7 +68,7 @@ public:
     bool initializeGL() override;
     bool deinitializeGL() override;
 
-    void render() override;
+    void render(float blackoutFactor) override;
     void update() override;
     bool isReady() const override;
 

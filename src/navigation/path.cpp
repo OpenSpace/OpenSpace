@@ -517,6 +517,14 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             const NavigationState navigationState =
                 NavigationState(p.navigationState.value());
 
+            const SceneGraphNode* targetNode = sceneGraphNode(navigationState.anchor);
+            if (!targetNode) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Could not find anchor node '{}' in provided navigation state",
+                    navigationState.anchor
+                ));
+            }
+
             waypoints = { Waypoint(navigationState) };
             break;
         }

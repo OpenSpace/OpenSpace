@@ -737,7 +737,6 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
         prev.texture->dimensions().y,
         prev.texture->dataType(),
         prev.texture->format(),
-        TileTextureInitData::PadTiles::No,
         TileTextureInitData::ShouldAllocateDataOnCPU::No
     );
 

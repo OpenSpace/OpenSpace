@@ -1,5 +1,7 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local VenusBarycenterTrail = {
   Identifier = "VenusBarycenterTrail",
@@ -20,10 +22,10 @@ local VenusBarycenterTrail = {
   GUI = {
     Name = "Venus Barycenter Trail",
     Path = "/Solar System/Planets/Venus",
-    Description = "Berycenter trail for Venus",
-    Hidden = false
+    Description = "Berycenter trail for Venus"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(VenusBarycenterTrail)
@@ -34,6 +36,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(VenusBarycenterTrail)
+
 
 
 asset.meta = {

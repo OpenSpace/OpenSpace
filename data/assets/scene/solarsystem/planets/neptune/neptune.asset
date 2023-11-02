@@ -1,7 +1,9 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
-local kernel = asset.require("./kernels").nep097
+local transforms = asset.require("./transforms")
+local kernel = asset.require("./kernels")
+
+
 
 local Neptune = {
   Identifier = "Neptune",
@@ -10,8 +12,7 @@ local Neptune = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "NEPTUNE",
-      Observer = "NEPTUNE BARYCENTER",
-      Kernels = kernel
+      Observer = "NEPTUNE BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -54,11 +55,14 @@ local NeptuneLabel = {
   GUI = {
     Name = "Neptune Label",
     Path = "/Solar System/Planets/Neptune",
-    Description = "Main planet label for Neptune",
+    Description = "Main planet label for Neptune"
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.nep097)
+
   openspace.addSceneGraphNode(Neptune)
   openspace.addSceneGraphNode(NeptuneLabel)
 end)
@@ -66,6 +70,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneLabel)
   openspace.removeSceneGraphNode(Neptune)
+
+  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(Neptune)

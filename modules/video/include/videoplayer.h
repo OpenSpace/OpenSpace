@@ -67,7 +67,7 @@ public:
     const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
     bool isInitialized() const;
 
-    void reset();
+    void reload();
     void destroy();
     void update();
 
@@ -76,7 +76,8 @@ public:
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    documentation::Documentation Documentation();
+    static documentation::Documentation Documentation();
+
 private:
     // Libmpv keys
     enum class MpvKey : uint64_t {
@@ -122,7 +123,7 @@ private:
     properties::TriggerProperty _play;
     properties::TriggerProperty _pause;
     properties::TriggerProperty _goToStart;
-    properties::TriggerProperty _reset;
+    properties::TriggerProperty _reload;
     properties::BoolProperty _playAudio;
     properties::BoolProperty _loopVideo;
 

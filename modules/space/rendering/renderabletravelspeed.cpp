@@ -299,15 +299,10 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
     }
     _shaderProgram->activate();
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
-
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-        modelTransform;
-
-    _shaderProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _shaderProgram->setUniform(
+        "modelViewTransform",
+        glm::mat4(calcModelViewTransform(data))
+    );
     _shaderProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
 
 #ifndef __APPLE__

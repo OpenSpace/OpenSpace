@@ -87,7 +87,8 @@ namespace {
         std::string idStr = std::to_string(id);
         openspace::global::scriptEngine->queueScript(
             "openspace.iswa.addScreenSpaceCygnet({CygnetId =" + idStr + "});",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 } // namespace
@@ -546,7 +547,8 @@ void IswaManager::createPlane(MetadataFuture& data) {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
         global::scriptEngine->queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }
@@ -579,7 +581,8 @@ void IswaManager::createSphere(MetadataFuture& data) {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
         global::scriptEngine->queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }
@@ -612,7 +615,8 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     }
@@ -653,7 +657,8 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     }

@@ -88,7 +88,7 @@ glm::vec3 computeStarColor(float bv) {
     const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * (nValues - 1)));
     std::string color;
     for (int i = 0; i < t + 1; i++) {
-        getline(colorMap, color);
+        std::getline(colorMap, color);
     }
     colorMap.close();
 
@@ -159,6 +159,25 @@ void sanitizeNameString(std::string& s) {
     // when a string is translated to a script call
     s.erase(remove(s.begin(), s.end(), '\"'), s.end());
     s.erase(remove(s.begin(), s.end(), '\''), s.end());
+}
+
+void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p) {
+    const glm::vec3 pos = glm::vec3(p.positionX, p.positionY, p.positionZ);
+    if (starData.position != pos && isValidPosition(pos)) {
+        starData.position = pos;
+    }
+    if (starData.radius != p.rStar && !std::isnan(p.rStar)) {
+        starData.radius = p.rStar;
+    }
+    if (starData.bv != p.bmv && !std::isnan(p.bmv)) {
+        starData.bv = p.bmv;
+    }
+    if (starData.teff != p.teff && !std::isnan(p.teff)) {
+        starData.teff = p.teff;
+    }
+    if (starData.luminosity != p.luminosity && !std::isnan(p.luminosity)) {
+        starData.luminosity = p.luminosity;
+    }
 }
 
 } // namespace openspace::exoplanets

@@ -66,16 +66,16 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
 
         switch (al.type()) {
             // Intentional fall through. Same for all tile layers
-            case layers::Layer::ID::DefaultTileLayer:
-            case layers::Layer::ID::SingleImageTileLayer:
-            case layers::Layer::ID::SpoutImageTileLayer:
-            case layers::Layer::ID::VideoTileLayer:
-            case layers::Layer::ID::ImageSequenceTileLayer:
-            case layers::Layer::ID::SizeReferenceTileLayer:
-            case layers::Layer::ID::TemporalTileLayer:
-            case layers::Layer::ID::TileIndexTileLayer:
-            case layers::Layer::ID::ByIndexTileLayer:
-            case layers::Layer::ID::ByLevelTileLayer: {
+            case layers::Layer::ID::DefaultTileProvider:
+            case layers::Layer::ID::SingleImageProvider:
+            case layers::Layer::ID::SpoutImageProvider:
+            case layers::Layer::ID::VideoTileProvider:
+            case layers::Layer::ID::ImageSequenceTileProvider:
+            case layers::Layer::ID::SizeReferenceTileProvider:
+            case layers::Layer::ID::TemporalTileProvider:
+            case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByIndex:
+            case layers::Layer::ID::TileProviderByLevel: {
                 const ChunkTilePile& ctp = al.chunkTilePile(
                     tileIndex,
                     layerGroup.pileSize()
@@ -94,12 +94,6 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                     program.setUniform(t.uniformCache.uvOffset, ct.uvTransform.uvOffset);
                     program.setUniform(t.uniformCache.uvScale, ct.uvTransform.uvScale);
                 }
-
-                program.setUniform(galuc.paddingStartOffset, al.tilePixelStartOffset());
-                program.setUniform(
-                    galuc.paddingSizeDifference,
-                    al.tilePixelSizeDifference()
-                );
                 break;
             }
             case layers::Layer::ID::SolidColor:
@@ -146,16 +140,16 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
 
         switch (al.type()) {
             // Intentional fall through. Same for all tile layers
-            case layers::Layer::ID::DefaultTileLayer:
-            case layers::Layer::ID::SingleImageTileLayer:
-            case layers::Layer::ID::SpoutImageTileLayer:
-            case layers::Layer::ID::VideoTileLayer:
-            case layers::Layer::ID::ImageSequenceTileLayer:
-            case layers::Layer::ID::SizeReferenceTileLayer:
-            case layers::Layer::ID::TemporalTileLayer:
-            case layers::Layer::ID::TileIndexTileLayer:
-            case layers::Layer::ID::ByIndexTileLayer:
-            case layers::Layer::ID::ByLevelTileLayer: {
+            case layers::Layer::ID::DefaultTileProvider:
+            case layers::Layer::ID::SingleImageProvider:
+            case layers::Layer::ID::SpoutImageProvider:
+            case layers::Layer::ID::VideoTileProvider:
+            case layers::Layer::ID::ImageSequenceTileProvider:
+            case layers::Layer::ID::SizeReferenceTileProvider:
+            case layers::Layer::ID::TemporalTileProvider:
+            case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByIndex:
+            case layers::Layer::ID::TileProviderByLevel: {
                 gal.gpuChunkTiles.resize(pileSize);
                 for (size_t j = 0; j < gal.gpuChunkTiles.size(); ++j) {
                     GPULayer::GPUChunkTile& t = gal.gpuChunkTiles[j];
@@ -166,14 +160,6 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
                     tuc.uvOffset = p.uniformLocation(n + "uvTransform.uvOffset");
                     tuc.uvScale = p.uniformLocation(n + "uvTransform.uvScale");
                 }
-
-                galuc.paddingStartOffset = p.uniformLocation(
-                    name + "padding.startOffset"
-                );
-                galuc.paddingSizeDifference = p.uniformLocation(
-                    name + "padding.sizeDifference"
-                );
-
                 break;
             }
             case layers::Layer::ID::SolidColor:

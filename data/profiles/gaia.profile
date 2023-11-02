@@ -5,9 +5,9 @@
     "scene/milkyway/gaia/apogee",
     "scene/milkyway/gaia/gaiastars",
     "scene/milkyway/gaia/galah",
-    "scene/solarsystem/missions/gaia/dashboard",
-    "scene/solarsystem/missions/gaia/gaia",
-    "scene/solarsystem/missions/gaia/trail"
+    "scene/solarsystem/telescopes/gaia/dashboard",
+    "scene/solarsystem/telescopes/gaia/gaia",
+    "scene/solarsystem/telescopes/gaia/trail"
   ],
   "camera": {
     "aim": "",

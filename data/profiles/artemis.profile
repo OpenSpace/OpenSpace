@@ -89,7 +89,7 @@
       "value": "false"
     },
     {
-      "name": "Scene.ISSModel.Renderable.Enabled",
+      "name": "Scene.ISS.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
     },

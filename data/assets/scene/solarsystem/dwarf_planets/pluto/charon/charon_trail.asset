@@ -2,7 +2,8 @@ local transforms = asset.require("../transforms")
 asset.require("spice/base")
 
 
-local CharonTrailBarycentric = {
+
+local CharonBarycentricTrail = {
   Identifier = "CharonBarycentricTrail",
   Parent = transforms.PlutoBarycenter.Identifier,
   Renderable = {
@@ -20,7 +21,8 @@ local CharonTrailBarycentric = {
     "moonTrail_solarSystem",
     "moonTrail_dwarf",
     "moonTrail_pluto",
-    "moonTrail_minor"
+    "moonTrail_major",
+    "moonTrail_major_pluto"
   },
   GUI = {
     Name = "Charon Barycentric Trail",
@@ -28,15 +30,16 @@ local CharonTrailBarycentric = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(CharonTrailBarycentric)
+  openspace.addSceneGraphNode(CharonBarycentricTrail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(CharonTrailBarycentric)
+  openspace.removeSceneGraphNode(CharonBarycentricTrail)
 end)
 
-asset.export(CharonTrailBarycentric)
+asset.export(CharonBarycentricTrail)
 
 
 

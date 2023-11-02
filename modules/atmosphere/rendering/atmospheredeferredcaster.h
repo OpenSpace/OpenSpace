@@ -46,10 +46,10 @@ struct DeferredcastData;
 struct ShadowConfiguration;
 
 struct ShadowRenderingStruct {
-    double xu = 0.0;
-    double xp = 0.0;
-    double rs = 0.0;
-    double rc = 0.0;
+    double umbra = 0.0;
+    double penumbra = 0.0;
+    double radiusSource = 0.0;
+    double radiusCaster = 0.0;
     glm::dvec3 sourceCasterVec = glm::dvec3(0.0);
     glm::dvec3 casterPositionVec = glm::dvec3(0.0);
     bool isShadowing = false;
@@ -75,6 +75,7 @@ public:
     void initializeCachedVariables(ghoul::opengl::ProgramObject& program) override;
 
     void update(const UpdateData&) override;
+    float eclipseShadow(glm::dvec3 position);
 
     void calculateAtmosphereParameters();
 
@@ -87,7 +88,7 @@ public:
         float mieHeightScale, float miePhaseConstant, float sunRadiance,
         glm::vec3 rayScatteringCoefficients, glm::vec3 ozoneExtinctionCoefficients,
         glm::vec3 mieScatteringCoefficients, glm::vec3 mieExtinctionCoefficients,
-        bool sunFollowing);
+        bool sunFollowing, float sunAngularSize);
 
     void setHardShadows(bool enabled);
 
@@ -118,7 +119,7 @@ private:
         betaOzoneExtinction, SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU,
         inverseModelTransformMatrix, modelTransformMatrix, projectionToModelTransform,
         viewToWorldMatrix, camPosObj, sunDirectionObj, hardShadows, transmittanceTexture,
-        irradianceTexture, inscatterTexture) _uniformCache;
+        irradianceTexture, inscatterTexture, sunAngularSize) _uniformCache;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
@@ -140,6 +141,7 @@ private:
     float _mieHeightScale = 0.f;
     float _miePhaseConstant = 0.f;
     float _sunRadianceIntensity = 5.f;
+    float _sunAngularSize = 0.3f;
 
     glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.f);
     glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);

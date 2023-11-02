@@ -80,7 +80,8 @@ std::vector<Action> ActionManager::actions() const {
 }
 
 void ActionManager::triggerAction(const std::string& identifier,
-                                  const ghoul::Dictionary& arguments) const
+                                  const ghoul::Dictionary& arguments,
+                           ActionManager::ShouldBeSynchronized shouldBeSynchronized) const
 {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
 
@@ -93,18 +94,21 @@ void ActionManager::triggerAction(const std::string& identifier,
     }
 
     const Action& a = action(identifier);
-    if (arguments.isEmpty()) {
-        global::scriptEngine->queueScript(
-            a.command,
-            scripting::ScriptEngine::RemoteScripting(!a.isLocal)
-        );
+    std::string script =
+        arguments.isEmpty() ?
+        a.command :
+        fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
+
+    using ShouldBeSynchronized = scripting::ScriptEngine::ShouldBeSynchronized;
+    using ShouldSendToRemote = scripting::ScriptEngine::ShouldSendToRemote;
+    ShouldBeSynchronized sync = ShouldBeSynchronized::Yes;
+    ShouldSendToRemote send = ShouldSendToRemote::Yes;
+    if (!shouldBeSynchronized || a.isLocal) {
+        sync = ShouldBeSynchronized::No;
+        send = ShouldSendToRemote::No;
     }
-    else {
-        global::scriptEngine->queueScript(
-            fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command),
-            scripting::ScriptEngine::RemoteScripting(!a.isLocal)
-        );
-    }
+
+    global::scriptEngine->queueScript(script, sync, send);
 }
 
 scripting::LuaLibrary ActionManager::luaLibrary() {

@@ -1,18 +1,19 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Pulsars Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_pulsars_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Pulsars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_pulsars_speck",
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "Pulsars",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -30,7 +31,7 @@ local object = {
     Texture = textures .. "point4.png",
     PolygonSides = 4,
     Unit = "pc",
-    ScaleFactor = 424,
+    ScaleFactor = 424.0,
     BillboardMinMaxSize = { 0.0, 500.0 },
     EnablePixelSizeControl = false
   },
@@ -52,15 +53,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

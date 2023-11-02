@@ -1,4 +1,3 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 local HEEQ180Kernel = asset.localResource("../sun/kernels/HEEQ180.tf")
 
@@ -15,8 +14,8 @@ local HEEQ180ReferenceFrame = {
       Type = "SpiceRotation",
       SourceFrame = "HEEQ180",
       DestinationFrame = "GALACTIC",
-      Kernels = HEEQ180Kernel
-    },
+      Kernels = asset.resource("kernels/HEEQ180.tf")
+    }
   },
   GUI = {
     Name = "HEEQ180 Reference Frame",
@@ -53,6 +52,7 @@ end)
 
 asset.export(HEEQ180ReferenceFrame)
 asset.export(TransformGONG)
+
 
 asset.meta = {
   Name = "Sun Transform, HEEQ180",

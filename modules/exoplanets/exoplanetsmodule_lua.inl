@@ -23,7 +23,9 @@
  ****************************************************************************************/
 
 #include <openspace/scene/scene.h>
+#include <ghoul/misc/csvreader.h>
 #include <algorithm>
+#include <map>
 #include <string>
 #include <string_view>
 
@@ -95,32 +97,16 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
         system.planetNames.push_back(name);
         system.planetsData.push_back(p);
 
-        // Star data - Should not vary between planets, but one data entry might lack data
-        // for the host star while another does not. So for every planet, update star data
-        // if needed
-        const glm::vec3 pos = glm::vec3(p.positionX, p.positionY, p.positionZ);
-        if (system.starData.position != pos && isValidPosition(pos)) {
-            system.starData.position = pos;
-        }
-        if (system.starData.radius != p.rStar && !std::isnan(p.rStar)) {
-            system.starData.radius = p.rStar;
-        }
-        if (system.starData.bv != p.bmv && !std::isnan(p.bmv)) {
-            system.starData.bv = p.bmv;
-        }
-        if (system.starData.teff != p.teff && !std::isnan(p.teff)) {
-            system.starData.teff = p.teff;
-        }
-        if (system.starData.luminosity != p.luminosity && !std::isnan(p.luminosity)) {
-            system.starData.luminosity = p.luminosity;
-        }
+        updateStarDataFromNewPlanet(system.starData, p);
     }
 
     system.starName = starName;
     return system;
 }
 
-void createExoplanetSystem(const std::string& starName) {
+void createExoplanetSystem(const std::string& starName,
+                           openspace::exoplanets::ExoplanetSystem system)
+{
     using namespace openspace;
     using namespace exoplanets;
 
@@ -137,12 +123,6 @@ void createExoplanetSystem(const std::string& starName) {
             "Adding of exoplanet system '{}' failed. The system has already been added",
             starName
         ));
-        return;
-    }
-
-    ExoplanetSystem system = findExoplanetSystemInData(starName);
-    if (system.planetsData.empty()) {
-        LERROR(fmt::format("Exoplanet system '{}' could not be found", starName));
         return;
     }
 
@@ -231,13 +211,18 @@ void createExoplanetSystem(const std::string& starName) {
         "}"
     "}";
 
+    // No sync or send because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + starParent + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     // Planets
     for (size_t i = 0; i < system.planetNames.size(); i++) {
+        // Note that we are here overriding some invalid parameters in the planet data.
+        // Use a reference, so that it is changed down the line
         ExoplanetDataEntry& planet = system.planetsData[i];
         const std::string planetName = system.planetNames[i];
 
@@ -345,10 +330,13 @@ void createExoplanetSystem(const std::string& starName) {
             "}"
         "}";
 
+        // No sync or send because this is already inside a Lua script, therefor it has
+        // already been synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + planetTrailNode + ");"
             "openspace.addSceneGraphNode(" + planetNode + ");",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         bool hasUpperAUncertainty = !std::isnan(planet.aUpper);
@@ -395,9 +383,12 @@ void createExoplanetSystem(const std::string& starName) {
                 "}"
             "}";
 
+            // No sync or send because this is already inside a Lua script, therefor it
+            // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + discNode + ");",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::No,
+                scripting::ScriptEngine::ShouldSendToRemote::No
             );
         }
     }
@@ -440,9 +431,12 @@ void createExoplanetSystem(const std::string& starName) {
         "}"
     "}";
 
+    // No sync or send because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + circle + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     // Habitable Zone
@@ -495,9 +489,12 @@ void createExoplanetSystem(const std::string& starName) {
             "}"
         "}";
 
+        // No sync or send because this is already inside a Lua script, therefor it has
+        // already been synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         // Star glare
@@ -536,9 +533,12 @@ void createExoplanetSystem(const std::string& starName) {
                 "}"
             "}";
 
+            // No sync or send because this is already inside a Lua script, therefor it
+            // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + starGlare + ");",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::No,
+                scripting::ScriptEngine::ShouldSendToRemote::No
             );
         }
     }
@@ -616,32 +616,67 @@ std::vector<std::string> hostStarsWithSufficientData() {
 [[codegen::luawrap]] void addExoplanetSystem(
                             std::variant<std::string, std::vector<std::string>> starNames)
 {
+    std::vector<std::string> starsToAdd;
+
     if (std::holds_alternative<std::string>(starNames)) {
         // The user provided a single name
-        std::string starName = std::get<std::string>(starNames);
-        createExoplanetSystem(starName);
+        const std::string starName = std::get<std::string>(starNames);
+        starsToAdd.push_back(starName);
     }
     else {
-        std::vector<std::string> sns = std::get<std::vector<std::string>>(starNames);
-        for (const std::string& starName : sns) {
-            createExoplanetSystem(starName);
-        }
+        starsToAdd = std::get<std::vector<std::string>>(starNames);
     }
+
+    for (const std::string& starName : starsToAdd) {
+        openspace::exoplanets::ExoplanetSystem systemData =
+            findExoplanetSystemInData(starName);
+
+        if (systemData.planetsData.empty()) {
+            LERROR(fmt::format("Exoplanet system '{}' could not be found", starName));
+            return;
+        }
+
+        createExoplanetSystem(starName, systemData);
+    }
+
 }
 
 [[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
     using namespace openspace;
     using namespace exoplanets;
     const std::string starIdentifier = makeIdentifier(std::move(starName));
+
+    // No sync or send because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 }
 
-[[codegen::luawrap]] std::vector<std::string> getListOfExoplanets() {
+/**
+ * Returns a list with names of the host star of all the exoplanet systems
+ * that have sufficient data for generating a visualization, based on the
+ * module's loaded data file.
+ */
+[[codegen::luawrap]] std::vector<std::string> listOfExoplanets() {
     std::vector<std::string> names = hostStarsWithSufficientData();
     return names;
+}
+
+/**
+ * Deprecated in favor of 'listOfExoplanets'
+ */
+[[codegen::luawrap("getListOfExoplanets")]] std::vector<std::string>
+listOfExoplanetsDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getListOfExoplanets' function is deprecated and should be replaced with "
+        "'listOfExoplanets'"
+    );
+    return listOfExoplanets();
 }
 
 [[codegen::luawrap]] void listAvailableExoplanetSystems() {
@@ -657,6 +692,96 @@ std::vector<std::string> hostStarsWithSufficientData() {
     LINFO(fmt::format(
         "There is data available for the following {} exoplanet systems: {}",
         names.size(), output
+    ));
+}
+
+/**
+ * Load a set of exoplanets based on custom data, in the form of a CSV file, and add
+ * them to the rendering. Can be used to load custom datasets, or more recent planets
+ * than what are included in the internal data file that is released with OpenSpace.
+ *
+ * The format and column names in the CSV sould be the same as the ones provided by the
+ * NASA Exoplanet Archive. https://exoplanetarchive.ipac.caltech.edu/
+ *
+ * We recommend downloading the file from the Exoplanet Archive's Composite data table,
+ * where multiple sources are combined into one row per planet.
+ * https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
+ *
+ * Please remember to include all columns in the file download, as missing data columns
+ * may lead to an incomplete visualization.
+ *
+ * Also, avoid loading too large files of planets, as each added system will affect the
+ * rendering performance.
+ */
+[[codegen::luawrap]] void loadExoplanetsFromCsv(std::string csvFile) {
+    using namespace openspace;
+    using namespace exoplanets;
+
+    using PlanetData = ExoplanetsDataPreparationTask::PlanetData;
+
+    std::ifstream inputDataFile(csvFile);
+    if (!inputDataFile.good()) {
+        LERROR(fmt::format("Failed to open input file {}", csvFile));
+        return;
+    }
+
+    std::vector<std::string> columnNames =
+        ExoplanetsDataPreparationTask::readFirstDataRow(inputDataFile);
+
+    const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
+    const std::string teffBvConversionPath = module->teffToBvConversionFilePath();
+
+    std::map<std::string, ExoplanetSystem> hostNameToSystemDataMap;
+
+    // Parse the file line by line to compose system information
+    std::string row;
+    while (std::getline(inputDataFile, row)) {
+        PlanetData planetData = ExoplanetsDataPreparationTask::parseDataRow(
+            row,
+            columnNames,
+            "",
+            module->teffToBvConversionFilePath()
+        );
+
+        LINFO(fmt::format("Reading data for planet: '{}' ", planetData.name));
+
+        if (!hasSufficientData(planetData.dataEntry)) {
+            LWARNING(fmt::format("Insufficient data for exoplanet: '{}'", planetData.name));
+            continue;
+        }
+
+        auto found = hostNameToSystemDataMap.find(planetData.host);
+        if (found != hostNameToSystemDataMap.end()) {
+            // Found a match. Add the planet to the system data
+            ExoplanetSystem& system = found->second;
+            sanitizeNameString(planetData.name);
+            system.planetNames.push_back(planetData.name);
+            system.planetsData.push_back(planetData.dataEntry);
+            updateStarDataFromNewPlanet(system.starData, planetData.dataEntry);
+        }
+        else {
+            // No host found. Add a new one
+            ExoplanetSystem system;
+            sanitizeNameString(planetData.name);
+            system.planetNames.push_back(planetData.name);
+            system.planetsData.push_back(planetData.dataEntry);
+            updateStarDataFromNewPlanet(system.starData, planetData.dataEntry);
+
+            hostNameToSystemDataMap[planetData.host] = system;
+        }
+    }
+
+    // Add all the added exoplanet systems
+    for (const std::pair<const std::string, ExoplanetSystem>& entry : hostNameToSystemDataMap) {
+        const std::string& hostName = entry.first;
+        const ExoplanetSystem& data = entry.second;
+        createExoplanetSystem(hostName, data);
+    }
+
+    LINFO(fmt::format(
+        "Read data for {} exoplanet systems from CSV file: '{}'. Please wait until "
+        "they are all finished initializing. You may have to reload the user interface.",
+        hostNameToSystemDataMap.size(), csvFile
     ));
 }
 

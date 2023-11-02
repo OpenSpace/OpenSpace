@@ -84,6 +84,7 @@ local SunECLIPJ2000 = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SolarSystemBarycenter)
   openspace.addSceneGraphNode(SunCenter)

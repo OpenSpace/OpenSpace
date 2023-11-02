@@ -142,13 +142,7 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
     _program->activate();
     _frameCounter++;
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    glm::dmat4 modelViewProjectionTransform = data.camera.projectionMatrix() *
-                             glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
+    glm::dmat4 modelViewProjectionTransform = calcModelViewProjectionTransform(data);
 
     _program->setUniform("modelViewProjection", modelViewProjectionTransform);
 

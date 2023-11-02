@@ -61,7 +61,7 @@ public:
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceRenderable() override;
 
-    virtual void render();
+    virtual void render(float blackoutFactor);
 
     virtual bool initialize();
     virtual bool initializeGL();
@@ -102,7 +102,7 @@ protected:
     glm::vec3 raeToCartesian(const glm::vec3& rae) const;
     glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
-    void draw(glm::mat4 modelTransform);
+    void draw(glm::mat4 modelTransform, float blackoutFactor);
 
     virtual void bindTexture() = 0;
     virtual void unbindTexture();
@@ -114,6 +114,7 @@ protected:
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
 
     properties::BoolProperty _enabled;
+    properties::BoolProperty _renderDuringBlackout;
     properties::BoolProperty _usePerspectiveProjection;
     properties::BoolProperty _useRadiusAzimuthElevation;
     properties::BoolProperty _faceCamera;
@@ -129,6 +130,10 @@ protected:
     // Local rotation (roll, pitch, yaw)
     properties::Vec3Property _localRotation;
 
+    // Border
+    properties::FloatProperty _borderWidth;
+    properties::Vec3Property _borderColor;
+
     properties::FloatProperty _scale;
     properties::FloatProperty _gamma;
     properties::Vec3Property _multiplyColor;
@@ -136,7 +141,8 @@ protected:
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
-    UniformCache(color, opacity, mvp, texture, backgroundColor, gamma) _uniformCache;
+    UniformCache(color, opacity, blackoutFactor, mvp, texture, backgroundColor, gamma,
+        borderColor, borderWidth) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 

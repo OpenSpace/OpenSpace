@@ -60,6 +60,18 @@ double Time::convertTime(const char* time) {
     return SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
+std::string Time::currentWallTime() {
+    std::time_t t = std::time(nullptr);
+    std::tm* utcTime = std::gmtime(&t);
+
+    std::string time = fmt::format(
+        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
+        utcTime->tm_year + 1900, utcTime->tm_mon + 1, utcTime->tm_mday,
+        utcTime->tm_hour, utcTime->tm_min, utcTime->tm_sec
+    );
+    return time;
+}
+
 Time::Time(double secondsJ2000) : _time(secondsJ2000) {}
 
 Time::Time(const std::string& time) :
@@ -132,14 +144,57 @@ void Time::ISO8601(char* buffer) const {
     SpiceManager::ref().dateFromEphemerisTime(_time, buffer, S, Format);
 }
 
-void Time::setTimeRelativeFromProfile(const std::string& setTime) {
-    std::string t = currentWallTime();
-    std::variant<std::string, double> t2 = advancedTime(t, setTime);
-    ::setTime(std::get<std::string>(t2));
-}
+std::string Time::advancedTime(std::string base, std::string change) {
+    double j2000Seconds = Time::convertTime(base);
 
-void Time::setTimeAbsoluteFromProfile(const std::string& setTime) {
-    ::setTime(setTime);
+    double dt = 0.0;
+    if (change.empty()) {
+        throw ghoul::RuntimeError("Modifier string must not be empty");
+    }
+    ghoul::trimWhitespace(change);
+    bool isNegative = false;
+    if (change[0] == '-') {
+        isNegative = true;
+        change = change.substr(1);
+    }
+
+    auto it = std::find_if(
+        change.begin(), change.end(),
+        [](unsigned char c) {
+            const bool digit = std::isdigit(c) != 0;
+            const bool isDot = c == '.';
+            return !digit && !isDot;
+        }
+    );
+
+    try {
+        double value = std::stod(std::string(change.begin(), it));
+        std::string uName = std::string(it, change.end());
+
+        TimeUnit unit = TimeUnit::Second;
+        if (uName == "s") { unit = TimeUnit::Second; }
+        else if (uName == "m") { unit = TimeUnit::Minute; }
+        else if (uName == "h") { unit = TimeUnit::Hour; }
+        else if (uName == "d") { unit = TimeUnit::Day; }
+        else if (uName == "M") { unit = TimeUnit::Month; }
+        else if (uName == "y") { unit = TimeUnit::Year; }
+        else {
+            throw ghoul::RuntimeError(fmt::format("Unknown unit '{}'", uName));
+        }
+
+        dt = openspace::convertTime(value, unit, TimeUnit::Second);
+        if (isNegative) {
+            dt *= -1.0;
+        }
+    }
+    catch (...) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error parsing relative time offset '{}'", change
+        ));
+    }
+
+    std::string_view ret = Time(j2000Seconds + dt).ISO8601();
+    return std::string(ret);
 }
 
 scripting::LuaLibrary Time::luaLibrary() {

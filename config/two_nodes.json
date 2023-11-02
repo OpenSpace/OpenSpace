@@ -60,5 +60,12 @@
       "eyeseparation": 0.065,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
-  ]
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "Two individual nodes, each with a 1280x720 window with planar projection rendering.",
+    "license": "MIT License",
+    "name": "Two Nodes",
+    "version": "1.0"
+  }
 }
