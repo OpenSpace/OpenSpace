@@ -16,7 +16,7 @@ local omm = asset.syncedResource({
   Identifier = "satellite_omm_data_iss",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25544&FORMAT=kvn",
   Filename = "ISS.txt",
-  Override = true
+  SecondsUntilResync = 60 * 60 * 24
 })
 
 

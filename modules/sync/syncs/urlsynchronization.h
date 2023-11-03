@@ -78,11 +78,15 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    /// Check ossync file and returns true if downloaded files exists and are valid,
-    /// false if they are missing or old. 
-    bool isEachFileValid();
+    /// Read the ossync file and check if the downloaded files can be used, returns true 
+    /// if they are valid and false if we should download them again
+    bool isEachFileValid() ;
 
 private:
+    /// Creates a file next to the directory that indicates that this
+    /// ResourceSynchronization has successfully synchronized its contents
+    void createSyncFile(bool isFullySynchronized = true) const override;
+
     /// The list of URLs that will be downloaded
     std::vector<std::string> _urls;
 
@@ -98,6 +102,9 @@ private:
 
     // The thread that will be doing the synchronization
     std::thread _syncThread;
+
+    /// Determines how long the file is valid before it should be downloaded again.
+    double _secondsUntilResync;
 };
 
 } // namespace openspace

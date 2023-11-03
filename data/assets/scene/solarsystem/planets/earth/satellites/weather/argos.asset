@@ -8,7 +8,7 @@ local omm = asset.syncedResource({
   Identifier = "satellite_omm_data_argos",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=argos&FORMAT=kvn",
   Filename = "argos.txt",
-  Override = true
+  SecondsUntilResync = 60 * 60 * 24
 })
 
 

@@ -6,7 +6,8 @@ local data = asset.syncedResource({
   Name = "GeoJSON Example Outfacing",
   Type = "UrlSynchronization",
   Identifier = "geojson_example_points",
-  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/points.geojson"
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/points.geojson",
+  SecondsUntilResync = math.huge
 })
 
 

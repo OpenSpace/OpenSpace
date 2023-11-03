@@ -8,7 +8,7 @@ local omm = asset.syncedResource({
   Identifier = "satellite_omm_data_stations",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=stations&FORMAT=kvn",
   Filename = "stations.txt",
-  Override = true
+  SecondsUntilResync = 60 * 60 * 24
 })
 
 

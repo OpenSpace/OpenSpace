@@ -8,7 +8,7 @@ local omm = asset.syncedResource({
   Identifier = "satellite_omm_data_aqua",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=27424&FORMAT=kvn",
   Filename = "Aqua.txt",
-  Override = true
+  SecondsUntilResync = 60 * 60 * 24
 })
 
 

@@ -6,7 +6,8 @@ local data = asset.syncedResource({
   Name = "GeoJSON Example Polygon with holes",
   Type = "UrlSynchronization",
   Identifier = "geojson_example_polygon_with_holes",
-  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_with_holes.geojson"
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_with_holes.geojson",
+  SecondsUntilResync = math.huge
 })
 
 

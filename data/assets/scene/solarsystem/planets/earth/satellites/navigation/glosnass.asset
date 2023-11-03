@@ -8,7 +8,7 @@ local omm = asset.syncedResource({
   Identifier = "satellite_omm_data_glo-ops",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=glo-ops&FORMAT=kvn",
   Filename = "glo-ops.txt",
-  Override = true
+  SecondsUntilResync = 60 * 60 * 24
 })
 
 

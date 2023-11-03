@@ -176,8 +176,7 @@ protected:
         Unsynced,
         Syncing,
         Resolved,
-        Rejected,
-        PartialResolved
+        Rejected
     };
 
     /// Creates a file next to the directory that indicates that this

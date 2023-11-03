@@ -7,7 +7,8 @@ local data = asset.syncedResource({
   Name = "GeoJSON Example Africa",
   Type = "UrlSynchronization",
   Identifier = "geojson_example_polygon_extruded_africa",
-  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_extruded_africa.geojson"
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_extruded_africa.geojson",
+  SecondsUntilResync = math.huge
 })
 
 

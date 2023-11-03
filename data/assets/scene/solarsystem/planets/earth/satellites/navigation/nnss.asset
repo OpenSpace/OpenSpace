@@ -8,7 +8,7 @@ local omm = asset.syncedResource({
   Identifier = "satellite_omm_data_nnss",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=nnss&FORMAT=kvn",
   Filename = "nnss.txt",
-  Override = true
+  SecondsUntilResync = 60 * 60 * 24
 })
 
 

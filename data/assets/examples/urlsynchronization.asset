@@ -2,7 +2,8 @@ asset.syncedResource({
   Name = "Example Single",
   Type = "UrlSynchronization",
   Identifier = "example_single",
-  Url = "http://celestrak.com/NORAD/elements/geo.txt"
+  Url = "http://celestrak.com/NORAD/elements/geo.txt",
+  SecondsUntilResync = math.huge
 })
 
 asset.syncedResource({
@@ -12,7 +13,8 @@ asset.syncedResource({
   Url = {
     "http://celestrak.com/NORAD/elements/stations.txt",
     "http://celestrak.com/NORAD/elements/gps-ops.txt"
-  }
+  },
+  SecondsUntilResync = math.huge
 })
 
 asset.syncedResource({
@@ -20,7 +22,7 @@ asset.syncedResource({
   Type = "UrlSynchronization",
   Identifier = "example_large",
   Url = "http://ipv4.download.thinkbroadband.com/100MB.zip",
-  Override = true
+  SecondsUntilResync = 0
 })
 
 asset.syncedResource({
@@ -28,7 +30,7 @@ asset.syncedResource({
   Type = "UrlSynchronization",
   Identifier = "example_medium",
   Url = "http://ipv4.download.thinkbroadband.com/5MB.zip",
-  Override = true
+  SecondsUntilResync = 0
 })
 
 -- Load a resource without hashing, meaning that the bare directory name will be
@@ -39,7 +41,8 @@ asset.syncedResource({
   Type = "UrlSynchronization",
   Identifier = "no_hash",
   Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
-  UseHash = false
+  UseHash = false,
+  SecondsUntilResync = math.huge
 })
 
 

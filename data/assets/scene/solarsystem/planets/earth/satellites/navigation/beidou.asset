@@ -8,7 +8,7 @@ local omm = asset.syncedResource({
   Identifier = "satellite_omm_data_beidou",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=beidou&FORMAT=kvn",
   Filename = "beidou.txt",
-  Override = true
+  SecondsUntilResync = 60 * 60 * 24
 })
 
 
