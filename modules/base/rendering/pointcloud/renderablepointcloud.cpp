@@ -54,12 +54,13 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 25> UniformNames = {
+    constexpr std::array<const char*, 29> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "maxBillboardSize", "color", "alphaValue", "scaleExponent",
         "scaleFactor", "up", "right", "fadeInValue", "screenSize", "hasSpriteTexture",
         "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
         "nanColor", "useNanColor", "hideOutsideRange", "enablePixelSizeControl",
+        "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
         "hasDvarScaling"
     };
 
@@ -651,6 +652,24 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
         _program->setUniform(
             _uniformCache.useNanColor,
             _colorSettings.colorMapping->useNanColor
+        );
+
+        _program->setUniform(
+            _uniformCache.aboveRangeColor,
+            _colorSettings.colorMapping->aboveRangeColor
+        );
+        _program->setUniform(
+            _uniformCache.useAboveRangeColor,
+            _colorSettings.colorMapping->useAboveRangeColor
+        );
+
+        _program->setUniform(
+            _uniformCache.belowRangeColor,
+            _colorSettings.colorMapping->belowRangeColor
+        );
+        _program->setUniform(
+            _uniformCache.useBelowRangeColor,
+            _colorSettings.colorMapping->useBelowRangeColor
         );
     }
 

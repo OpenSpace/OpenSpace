@@ -40,7 +40,7 @@
 namespace {
     constexpr int8_t DataCacheFileVersion = 10;
     constexpr int8_t LabelCacheFileVersion = 11;
-    constexpr int8_t ColorCacheFileVersion = 10;
+    constexpr int8_t ColorCacheFileVersion = 11;
 
     template <typename T, typename U>
     void checkSize(U value, std::string_view message) {
@@ -497,6 +497,42 @@ std::optional<ColorMap> loadCachedFile(std::filesystem::path path) {
         file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
         result.entries.push_back(color);
     }
+
+    glm::vec4 color;
+
+    bool hasBelowColor = false;
+    file.read(reinterpret_cast<char*>(&hasBelowColor), sizeof(bool));
+    file.read(reinterpret_cast<char*>(&color.x), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.y), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.z), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
+
+    if (hasBelowColor) {
+        result.belowRangeColor = color;
+    }
+
+    bool hasAboveColor = false;
+    file.read(reinterpret_cast<char*>(&hasAboveColor), sizeof(bool));
+    file.read(reinterpret_cast<char*>(&color.x), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.y), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.z), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
+
+    if (hasAboveColor) {
+        result.aboveRangeColor = color;
+    }
+
+    bool hasNanColor = false;
+    file.read(reinterpret_cast<char*>(&hasNanColor), sizeof(bool));
+    file.read(reinterpret_cast<char*>(&color.x), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.y), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.z), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
+
+    if (hasNanColor) {
+        result.nanColor = color;
+    }
+
     return result;
 }
 
@@ -513,6 +549,30 @@ void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path) {
         file.write(reinterpret_cast<const char*>(&color.z), sizeof(float));
         file.write(reinterpret_cast<const char*>(&color.w), sizeof(float));
     }
+
+    bool hasBelowColor = colorMap.belowRangeColor.has_value();
+    const glm::vec4 belowColor = colorMap.belowRangeColor.value_or(glm::vec4(0.f));
+    file.write(reinterpret_cast<const char*>(&hasBelowColor), sizeof(bool));
+    file.write(reinterpret_cast<const char*>(&belowColor.x), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&belowColor.y), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&belowColor.z), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&belowColor.w), sizeof(float));
+
+    bool hasAboveColor = colorMap.aboveRangeColor.has_value();
+    const glm::vec4 aboveColor = colorMap.aboveRangeColor.value_or(glm::vec4(0.f));
+    file.write(reinterpret_cast<const char*>(&hasAboveColor), sizeof(bool));
+    file.write(reinterpret_cast<const char*>(&aboveColor.x), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&aboveColor.y), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&aboveColor.z), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&aboveColor.w), sizeof(float));
+
+    bool hasNanColor = colorMap.nanColor.has_value();
+    const glm::vec4 nanColor = colorMap.nanColor.value_or(glm::vec4(0.f));
+    file.write(reinterpret_cast<const char*>(&hasNanColor), sizeof(bool));
+    file.write(reinterpret_cast<const char*>(&nanColor.x), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&nanColor.y), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&nanColor.z), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&nanColor.w), sizeof(float));
 }
 
 ColorMap loadFileWithCache(std::filesystem::path path)

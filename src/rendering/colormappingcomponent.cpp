@@ -75,8 +75,7 @@ namespace {
         "HideValuesOutsideRange",
         "Hide Values Outside Range",
         "If true, points with values outside the provided range for the coloring will be "
-        "rendered as transparent, i.e. not shown. Otherwise, the values will be clamped "
-        "to use the color at the max VS min limit of the color map, respectively.",
+        "rendered as transparent, i.e. not shown",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -92,7 +91,52 @@ namespace {
         "NoDataColor",
         "No Data Color",
         "The color to use for items with values corresponding to missing data values, "
-        "if enabled",
+        "if enabled. This color can also be read from the color map, but setting this "
+        "value overrides any value in the color map. If a color value for the below "
+        "range values is provided, the ShowMissingData property will automatically be "
+        "set to true",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseAboveRangeColorInfo = {
+        "UseAboveRangeColor",
+        "Use Above Range Color",
+        "If true, use a separate color (see AboveRangeColor) for items with values "
+        "larger than the one in the provided data range. Otherwise, the values will "
+        "be clamped to use the color at the upper limit of the color map. If a color is "
+        "provided in the color map, this value will automatically be set to true",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AboveRangeColorInfo = {
+        "AboveRangeColor",
+        "Above Range Color",
+        "The color to use for items with values larger than the one in the provided "
+        "data range, if enabled. This color can also be read from the color map, but "
+        "setting this value overrides any value in the color map. If a color value for "
+        "the above range values is provided, the UseAboveRangeColor property will "
+        "automatically be set to true",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseBelowRangeColorInfo = {
+        "UseBelowRangeColor",
+        "Use Below Range Color",
+        "If true, use a separate color (see BelowRangeColor) for items with values "
+        "smaller than the one in the provided data range. Otherwise, the values will "
+        "be clamped to use the color at the lower limit of the color map. If a color is "
+        "provided in the color map, this value will automatically be set to true",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BelowRangeColorInfo = {
+        "BelowRangeColor",
+        "Below Range Color",
+        "The color to use for items with values smaller than the one in the provided "
+        "data range, if enabled. This color can also be read from the color map, but "
+        "setting this value overrides any value in the color map. If a color value for "
+        "the below range values is provided, the UseBelowRangeColor property will "
+        "automatically be set to true",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -122,6 +166,18 @@ namespace {
 
         // [[codegen::verbatim(NoDataColorInfo.description)]]
         std::optional<glm::vec4> noDataColor [[codegen::color()]];
+
+        // [[codegen::verbatim(UseAboveRangeColorInfo.description)]]
+        std::optional<bool> useAboveRangeColor;
+
+        // [[codegen::verbatim(AboveRangeColorInfo.description)]]
+        std::optional<glm::vec4> aboveRangeColor [[codegen::color()]];
+
+        // [[codegen::verbatim(UseBelowRangeColorInfo.description)]]
+        std::optional<bool> useBelowRangeColor;
+
+        // [[codegen::verbatim(BelowRangeColorInfo.description)]]
+        std::optional<glm::vec4> belowRangeColor [[codegen::color()]];
     };
 #include "colormappingcomponent_codegen.cpp"
 }  // namespace
@@ -147,6 +203,10 @@ ColorMappingComponent::ColorMappingComponent()
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
+    , useAboveRangeColor(UseAboveRangeColorInfo, false)
+    , aboveRangeColor(AboveRangeColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , useBelowRangeColor(UseBelowRangeColorInfo, false)
+    , belowRangeColor(BelowRangeColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
 {
     addProperty(enabled);
     addProperty(dataColumn);
@@ -161,6 +221,14 @@ ColorMappingComponent::ColorMappingComponent()
     addProperty(useNanColor);
     nanColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(nanColor);
+
+    addProperty(useAboveRangeColor);
+    aboveRangeColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(aboveRangeColor);
+
+    addProperty(useBelowRangeColor);
+    belowRangeColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(belowRangeColor);
 }
 
 ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary)
@@ -193,8 +261,27 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
     // in initialize?
 
     hideOutsideRange = p.hideValuesOutsideRange.value_or(hideOutsideRange);
+
     useNanColor = p.showMissingData.value_or(useNanColor);
-    nanColor = p.noDataColor.value_or(nanColor);
+    if (p.noDataColor.has_value()) {
+        useNanColor = p.showMissingData.value_or(true);
+        nanColor = *p.noDataColor;
+        _nanColorInAsset = true;
+    }
+
+    useAboveRangeColor = p.useAboveRangeColor.value_or(useAboveRangeColor);
+    if (p.aboveRangeColor.has_value()) {
+        useAboveRangeColor = p.useAboveRangeColor.value_or(true);
+        aboveRangeColor = *p.aboveRangeColor;
+        _aboveRangeColorInAsset = true;
+    }
+
+    useBelowRangeColor = p.useBelowRangeColor.value_or(useBelowRangeColor);
+    if (p.belowRangeColor.has_value()) {
+        useBelowRangeColor = p.useBelowRangeColor.value_or(true);
+        belowRangeColor = *p.belowRangeColor;
+        _belowRangeColorInAsset = true;
+    }
 
     if (p.file.has_value()) {
         colorMapFile = absPath(*p.file).string();
@@ -232,6 +319,21 @@ void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
         if (_colorRangeData.size() > 1) {
             dataColumn = static_cast<int>(_colorRangeData.size() - 1);
         }
+    }
+
+    if (_colorMap.nanColor.has_value() && !_nanColorInAsset) {
+        nanColor = *_colorMap.nanColor;
+        useNanColor = true; // @ TODO: Avoid overriding value set in asset? (also for useBelow and useAbove)
+    }
+
+    if (_colorMap.belowRangeColor.has_value() && !_belowRangeColorInAsset) {
+        belowRangeColor = *_colorMap.belowRangeColor;
+        useBelowRangeColor = true;
+    }
+
+    if (_colorMap.aboveRangeColor.has_value() && !_aboveRangeColorInAsset) {
+        aboveRangeColor = *_colorMap.aboveRangeColor;
+        useAboveRangeColor = true;
     }
 
     // Set the value range and selected option again, to make sure that it's updated

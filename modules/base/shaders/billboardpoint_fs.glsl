@@ -34,6 +34,12 @@ uniform vec3 color;
 uniform vec4 nanColor = vec4(0.5);
 uniform bool useNanColor = true;
 
+uniform vec4 aboveRangeColor;
+uniform bool useAboveRangeColor;
+
+uniform vec4 belowRangeColor;
+uniform bool useBelowRangeColor;
+
 uniform bool hasSpriteTexture;
 uniform sampler2D spriteTexture;
 
@@ -53,6 +59,14 @@ vec4 sampleColorMap(float dataValue) {
     bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
     if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
         discard;
+    }
+
+    if (useBelowRangeColor && dataValue < cmapRangeMin) {
+        return belowRangeColor;
+    }
+
+    if (useAboveRangeColor && dataValue > cmapRangeMax) {
+        return aboveRangeColor;
     }
 
     float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);

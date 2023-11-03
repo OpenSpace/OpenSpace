@@ -492,9 +492,6 @@ ColorMap loadCmapFile(std::filesystem::path path) {
     ColorMap res;
     int nColorLines = -1;
 
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (std::getline(file, line)) {
         // Ignore empty line or commented-out lines
@@ -510,11 +507,11 @@ ColorMap loadCmapFile(std::filesystem::path path) {
 
         strip(line);
 
-        std::stringstream str(line);
         if (nColorLines == -1) {
             // This is the first time we get this far, it will have to be the first number
             // meaning that it is the number of color values
 
+            std::stringstream str(line);
             str >> nColorLines;
             res.entries.reserve(nColorLines);
         }
@@ -523,10 +520,33 @@ ColorMap loadCmapFile(std::filesystem::path path) {
             // reading the individual value lines
 
             glm::vec4 color;
-            str >> color.x >> color.y >> color.z >> color.w;
-            res.entries.push_back(std::move(color));
+            std::string dummy;
+            // Note that startwith converts the input string to all lowercase
+            if (startsWith(line, "belowrange")) {
+                std::stringstream str(line);
+                str >> dummy >> color.x >> color.y >> color.z >> color.w;
+                res.belowRangeColor = color;
+            }
+            else if (startsWith(line, "aboverange")) {
+                std::stringstream str(line);
+                str >> dummy >> color.x >> color.y >> color.z >> color.w;
+                res.aboveRangeColor = color;
+            }
+            else if (startsWith(line, "nan")) {
+                std::stringstream str(line);
+                str >> dummy >> color.x >> color.y >> color.z >> color.w;
+                res.nanColor = color;
+            }
+            else {
+                // TODO: Catch when this is not a color!
+                std::stringstream str(line);
+                str >> color.x >> color.y >> color.z >> color.w;
+                res.entries.push_back(std::move(color));
+            }
         }
     }
+
+    res.entries.shrink_to_fit();
 
     if (nColorLines != static_cast<int>(res.entries.size())) {
         LWARNINGC("SpeckLoader", fmt::format(

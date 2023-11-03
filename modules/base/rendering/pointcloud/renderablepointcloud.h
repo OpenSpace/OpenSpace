@@ -140,7 +140,8 @@ protected:
         maxBillboardSize, color, alphaValue, scaleExponent, scaleFactor, up, right,
         fadeInValue, screenSize, hasSpriteTexture, spriteTexture, useColormap,
         colorMapTexture, cmapRangeMin, cmapRangeMax, nanColor, useNanColor,
-        hideOutsideRange, enablePixelSizeControl, hasDvarScaling
+        hideOutsideRange, enablePixelSizeControl, aboveRangeColor, useAboveRangeColor,
+        belowRangeColor, useBelowRangeColor, hasDvarScaling
     ) _uniformCache;
 
     std::string _speckFile;

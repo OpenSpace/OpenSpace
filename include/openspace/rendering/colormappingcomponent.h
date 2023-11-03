@@ -84,6 +84,12 @@ public:
     properties::BoolProperty useNanColor;
     properties::Vec4Property nanColor;
 
+    properties::BoolProperty useAboveRangeColor;
+    properties::Vec4Property aboveRangeColor;
+
+    properties::BoolProperty useBelowRangeColor;
+    properties::Vec4Property belowRangeColor;
+
 private:
     // One item per color parameter option
     std::vector<glm::vec2> _colorRangeData;
@@ -91,6 +97,10 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     dataloader::ColorMap _colorMap;
+
+    bool _nanColorInAsset = false;
+    bool _belowRangeColorInAsset = false;
+    bool _aboveRangeColorInAsset = false;
 };
 
 } // namespace openspace

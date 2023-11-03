@@ -84,6 +84,9 @@ struct Labelset {
 };
 
 struct ColorMap {
+    std::optional<glm::vec4> belowRangeColor;
+    std::optional<glm::vec4> aboveRangeColor;
+    std::optional<glm::vec4> nanColor;
     std::vector<glm::vec4> entries;
 };
 
