@@ -119,15 +119,19 @@ void HttpSynchronization::start() {
     _syncThread = std::thread(
         [this](const std::string& q) {
             for (const std::string& url : _syncRepositories) {
-                //TODO: handle multiple syncRepositories, before it would only create
-                // syncfile from first success and then continue
-                const bool success = trySyncFromUrl(url + q);
-                if (success) {
-                    _state = State::Resolved;
-                    createSyncFile(success);
-                    break;
+                const SynchronizationState syncState = trySyncFromUrl(url + q);
+
+                // Could not get this sync repository list of files. 
+                if (syncState == SynchronizationState::ListDownloadFail) {
+                    continue;
                 }
-                else {
+
+                if (syncState == SynchronizationState::Success) {
+                    _state = State::Resolved;
+                    bool isFullySynchronized = true;
+                    createSyncFile(isFullySynchronized);
+                }
+                else if(syncState == SynchronizationState::FileDownloadFail) {
                     // If it was not successful we should add any files that were potentially
                     // downloaded, so we dont download them again from the new repository
                     _existingSyncedFiles.insert(
@@ -136,17 +140,12 @@ void HttpSynchronization::start() {
                         _newSyncedFiles.end()
                     );
                     _newSyncedFiles.clear();
-                    createSyncFile(success);
-
-                    // TODO: What should status be if only partially synched, rn it does not
-                    // exit gracefully and one have to restart openspace
-                    // _state = State::PartialResolved;
-                
-                    // I believe setting another status than syncing
-                    // will mess with download screen splash as it depends on status being
-                    // state::Syncing or it might mess with other parts of the sync module?
+                    bool isFullySynchronized = false;
+                    createSyncFile(isFullySynchronized);
                 }
+                break;
             }
+            
             if (!isResolved() && !_shouldCancel) {
                 _state = State::Rejected;
             }
@@ -164,7 +163,7 @@ std::string HttpSynchronization::generateUid() {
     return fmt::format("{}/{}", _identifier, _version);
 }
 
-void HttpSynchronization::createSyncFile(bool isFullySynchronized = true) const {
+void HttpSynchronization::createSyncFile(bool isFullySynchronized) const {
     std::filesystem::path dir = directory();
     std::filesystem::create_directories(dir);
 
@@ -181,10 +180,6 @@ void HttpSynchronization::createSyncFile(bool isFullySynchronized = true) const 
 
     // Store all files that successfully downloaded
     for (const std::string& fileURL : _existingSyncedFiles) {
-        syncFile << fileURL << '\n';
-    }
-    // If we we fill _existingSyncedFiles before calling this func this loop is uneccessary
-    for (std::string const& fileURL : _newSyncedFiles) {
         syncFile << fileURL << '\n';
     }
 }
@@ -245,7 +240,8 @@ bool HttpSynchronization::isEachFileDownloaded() {
     return false;
 }
 
-bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
+HttpSynchronization::SynchronizationState
+HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     HttpMemoryDownload fileListDownload(std::move(listUrl));
     fileListDownload.onProgress([&c = _shouldCancel](int64_t, std::optional<int64_t>) {
         return !c;
@@ -256,7 +252,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     const std::vector<char>& buffer = fileListDownload.downloadedData();
     if (!success) {
         LERRORC("HttpSynchronization", std::string(buffer.begin(), buffer.end()));
-        return false;
+        return SynchronizationState::ListDownloadFail;
     }
 
     _nSynchronizedBytes = 0;
@@ -299,7 +295,6 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         auto it = std::find(_existingSyncedFiles.begin() ,_existingSyncedFiles.end(), line);
         if (it != _existingSyncedFiles.end()) {
             // File has already been synced.
-            // TODO: Ok? Unless there is some form of force download all new files?
             continue;
         }
 
@@ -320,9 +315,6 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             if (!totalBytes.has_value() || !startedAllDownloads) {
                 return !_shouldCancel;
             }
-            // Sets automatic fail for a specific file, to produce possible download fail 
-            //if (line == "http://liu-se.cdn.openspaceproject.com/files/digitaluniverse/sloandss/speck/v1_v2/SDSSgals.speck")
-            //    return false;
 
             std::lock_guard guard(mutex);
 
@@ -344,8 +336,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     }
     startedAllDownloads = true;
 
-    //TODO: Set number of retries from e.g., cfg or other setting?
-    constexpr int MaxDownloadRetries = 10;
+    constexpr int MaxDownloadRetries = 5;
     int downloadTry = 0;
     bool downloadFailed = false;
     //If a download has failed try to restart it
@@ -360,6 +351,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         if (downloadFailed) {
             ++downloadTry;
             downloadFailed = false;
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         else {
             break;
@@ -422,15 +414,14 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     }
     if (failed) {
         for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
-            d->cancel(); //TODO: Because we d->wait() for all downloads above, this call is pointless?
-            
             //Store all files that were synced to the ossync 
             if (d->hasSucceeded()) {
                 _newSyncedFiles.push_back(d->url());
             }
         }
+        return SynchronizationState::FileDownloadFail;
     }
-    return !failed;
+    return SynchronizationState::Success;
 }
 
 } // namespace openspace
