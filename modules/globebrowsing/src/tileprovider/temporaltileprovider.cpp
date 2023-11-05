@@ -452,7 +452,8 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
                 );
                 return std::string_view(it->second);
             }
-            default:  throw ghoul::MissingCaseException();
+            default:
+                throw ghoul::MissingCaseException();
         };
     }();
 
@@ -650,7 +651,8 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
                 return tileProvider<Mode::Folder, true>(time);
             case Mode::Prototype:
                 return tileProvider<Mode::Prototype, true>(time);
-            default: throw ghoul::MissingCaseException();
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
     else {
@@ -659,7 +661,8 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
                 return tileProvider<Mode::Folder, false>(time);
             case Mode::Prototype:
                 return tileProvider<Mode::Prototype, false>(time);
-            default: throw ghoul::MissingCaseException();
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
 }

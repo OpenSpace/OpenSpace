@@ -101,8 +101,6 @@ void EngineModeTopic::sendJsonData() {
         case OpenSpaceEngine::Mode::CameraPath:
             modeString = "camera_path";
             break;
-        default:
-            throw ghoul::MissingCaseException();
     }
     stateJson["mode"] = modeString;
 

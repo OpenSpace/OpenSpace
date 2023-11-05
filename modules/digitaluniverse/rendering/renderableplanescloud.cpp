@@ -266,15 +266,14 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         { BlendModeAdditive, "Additive" }
     });
     _blendMode.onChange([this]() {
-        switch (_blendMode) {
+        BlendMode m = static_cast<BlendMode>(_blendMode.value());
+        switch (m) {
             case BlendModeNormal:
                 setRenderBin(Renderable::RenderBin::Opaque);
                 break;
             case BlendModeAdditive:
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
     });
 

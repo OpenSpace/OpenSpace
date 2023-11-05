@@ -99,8 +99,6 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
             case layers::Layer::ID::SolidColor:
                 program.setUniform(galuc.color, al.solidColor());
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
 
         if (gal.isHeightLayer) {
@@ -165,8 +163,6 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
             case layers::Layer::ID::SolidColor:
                 galuc.color = p.uniformLocation(name + "color");
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
 
         if (gal.isHeightLayer) {

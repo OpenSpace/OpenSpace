@@ -92,8 +92,8 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
         case HorizonsType::Observer:
             url = ObserverUrl;
             break;
-        default:
-            throw ghoul::MissingCaseException();
+        case HorizonsType::Invalid:
+            break;
     }
 
     url += fmt::format(
