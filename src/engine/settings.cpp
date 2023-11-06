@@ -100,7 +100,9 @@ std::filesystem::path findSettings(const std::string& filename) {
 }
 
 Settings loadSettings(const std::filesystem::path& filename) {
-    ghoul_assert(std::filesystem::is_regular_file(filename), "filename must exist");
+    if (!std::filesystem::is_regular_file(filename)) {
+        return Settings();
+    }
 
     std::ifstream f(filename);
     std::stringstream buffer;
