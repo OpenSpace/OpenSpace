@@ -206,12 +206,10 @@ bool HttpSynchronization::isEachFileDownloaded() {
     // Otherwise first line is the version number.
     std::string ossyncVersion = line;
 
-    /*
-    Format of 1.0 ossync:
-    Version number: E.g., 1.0
-    Synchronization status: Synchronized or Partial Synchronized
-    Optionally list of already synched files
-    */
+    //Format of 1.0 ossync:
+    //Version number: E.g., 1.0
+    //Synchronization status: Synchronized or Partial Synchronized
+    //Optionally list of already synched files
 
     if (ossyncVersion == OssyncVersionNumber) {
         std::getline(file >> std::ws, line); // Read synchronization status
