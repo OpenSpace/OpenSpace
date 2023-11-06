@@ -73,10 +73,6 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
     if (p.defaultProvider.hasValue<std::string>("Type")) {
         std::string type = p.defaultProvider.value<std::string>("Type");
         typeID = ghoul::from_string<layers::Layer::ID>(type);
-
-        if (typeID == layers::Layer::ID::Unknown) {
-            throw ghoul::RuntimeError("Unknown layer type: " + type);
-        }
     }
 
     _defaultTileProvider = createFromDictionary(typeID, p.defaultProvider);
@@ -92,10 +88,6 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
         if (ip.tileProvider.hasValue<std::string>("Type")) {
             std::string type = ip.tileProvider.value<std::string>("Type");
             providerID = ghoul::from_string<layers::Layer::ID>(type);
-
-            if (providerID == layers::Layer::ID::Unknown) {
-                throw ghoul::RuntimeError("Unknown layer type: " + type);
-            }
         }
 
         std::unique_ptr<TileProvider> stp = createFromDictionary(

@@ -1,4 +1,4 @@
-asset.syncedResource({
+asset.resource({
   Name = "Example Single",
   Type = "UrlSynchronization",
   Identifier = "example_single",
@@ -6,7 +6,7 @@ asset.syncedResource({
   SecondsUntilResync = math.huge
 })
 
-asset.syncedResource({
+asset.resource({
   Name = "Example Multiple",
   Type = "UrlSynchronization",
   Identifier = "example_multiple",
@@ -17,7 +17,7 @@ asset.syncedResource({
   SecondsUntilResync = math.huge
 })
 
-asset.syncedResource({
+asset.resource({
   Name = "Example Large",
   Type = "UrlSynchronization",
   Identifier = "example_large",
@@ -25,7 +25,7 @@ asset.syncedResource({
   SecondsUntilResync = 0
 })
 
-asset.syncedResource({
+asset.resource({
   Name = "Example Medium",
   Type = "UrlSynchronization",
   Identifier = "example_medium",
@@ -36,7 +36,7 @@ asset.syncedResource({
 -- Load a resource without hashing, meaning that the bare directory name will be
 -- used for the downloaded file. If UseHash is true, the hash of the URL is appended
 -- to the directory name to produce a unique directory under all circumstances
-asset.syncedResource({
+asset.resource({
   Name = "Example No Hash",
   Type = "UrlSynchronization",
   Identifier = "no_hash",

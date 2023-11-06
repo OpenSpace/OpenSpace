@@ -3,21 +3,21 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Bennu Models",
   Type = "HttpSynchronization",
   Identifier = "bennu_models",
   Version = 2
 })
 
-local images = asset.syncedResource({
+local images = asset.resource({
   Name = "Bennu Images Approach",
   Type = "HttpSynchronization",
   Identifier = "osirisrex_bennu_images_approach",
   Version = 1
 })
 
-local imagesA = asset.syncedResource({
+local imagesA = asset.resource({
   Name = "Bennu Images A",
   Type = "HttpSynchronization",
   Identifier = "osirisrex_bennu_images_orbit_a",

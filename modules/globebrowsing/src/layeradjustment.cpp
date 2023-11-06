@@ -126,8 +126,6 @@ void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmen
             case Parameters::Type::TransferFunction:
                 _typeOption = static_cast<int>(layers::Adjustment::ID::TransferFunction);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
     }
 

@@ -1,4 +1,4 @@
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "JUICE Kernels",
   Type = "HttpSynchronization",
   Identifier = "juice_kernels",

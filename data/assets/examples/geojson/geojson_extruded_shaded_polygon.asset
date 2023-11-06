@@ -3,7 +3,7 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "GeoJSON Example Africa",
   Type = "UrlSynchronization",
   Identifier = "geojson_example_polygon_extruded_africa",

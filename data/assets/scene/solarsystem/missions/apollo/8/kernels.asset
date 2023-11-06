@@ -1,4 +1,4 @@
-local kernelsFolder = asset.syncedResource({
+local kernelsFolder = asset.resource({
   Name = "Apollo Kernels",
   Type = "HttpSynchronization",
   Identifier = "apollo_spice",

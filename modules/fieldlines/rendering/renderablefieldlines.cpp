@@ -359,8 +359,6 @@ void RenderableFieldlines::loadSeedPoints() {
         case SeedPointSourceTable:
             loadSeedPointsFromTable();
             break;
-        default:
-            throw ghoul::MissingCaseException();
     }
 }
 

@@ -4,21 +4,21 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Dawn Kernels",
   Type = "HttpSynchronization",
   Identifier = "dawn_kernels",
   Version = 3
 })
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Dawn Textures",
   Type = "HttpSynchronization",
   Identifier = "dawn_textures",
   Version = 1
 })
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Dawn Models",
   Type = "HttpSynchronization",
   Identifier = "dawn_model",

@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local sssb = asset.syncedResource({
+local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Centaur Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_centaur_asteroid",

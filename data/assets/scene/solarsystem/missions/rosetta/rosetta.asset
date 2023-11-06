@@ -4,14 +4,14 @@ local transforms = asset.require("./67p")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Rosetta Models",
   Type = "HttpSynchronization",
   Identifier = "rosetta_model",
   Version = 5
 })
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Rosetta Kernels",
   Type = "HttpSynchronization",
   Identifier = "rosetta_kernels",

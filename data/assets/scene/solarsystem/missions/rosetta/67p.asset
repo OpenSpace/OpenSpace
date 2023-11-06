@@ -2,21 +2,21 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "67P Textures",
   Type = "HttpSynchronization",
   Identifier = "67p_textures",
   Version = 2
 })
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "67P Models",
   Type = "HttpSynchronization",
   Identifier = "67p_models",
   Version = 1
 })
 
-local images = asset.syncedResource({
+local images = asset.resource({
   Name = "Rosetta Images",
   Type = "HttpSynchronization",
   Identifier = "rosettaimages",

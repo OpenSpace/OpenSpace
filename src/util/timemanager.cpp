@@ -952,8 +952,6 @@ void TimeManager::setTimeFromProfile(const Profile& p) {
             case Profile::Time::Type::Absolute:
                 _currentTime.data() = Time(p.time->value);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
 
         setPause(p.time->startPaused);

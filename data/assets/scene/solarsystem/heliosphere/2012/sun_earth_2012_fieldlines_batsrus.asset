@@ -3,14 +3,14 @@ local transforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/
 
 
 
-local transferFunctions = asset.syncedResource({
+local transferFunctions = asset.resource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-fieldlines_transferfunctions",
   Version = 2
 })
 
-local fieldlineData = asset.syncedResource({
+local fieldlineData = asset.resource({
   Name = "Fieldlines Data BATSRUS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-batsrus",

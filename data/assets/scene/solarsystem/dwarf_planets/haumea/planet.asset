@@ -3,7 +3,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local modelFolder = asset.syncedResource({
+local modelFolder = asset.resource({
   Name = "Hamuea Model",
   Type = "HttpSynchronization",
   Identifier = "hamuea_model",

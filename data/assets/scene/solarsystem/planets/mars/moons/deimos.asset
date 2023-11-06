@@ -4,14 +4,14 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local model = asset.syncedResource({
+local model = asset.resource({
   Name = "Deimos Model",
   Type = "HttpSynchronization",
   Identifier = "deimos_model",
   Version = 1
 })
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Mars Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "mars_kernels",

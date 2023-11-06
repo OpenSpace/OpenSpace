@@ -5,7 +5,7 @@ local earthAsset = asset.require("../earth")
 
 
 
-local labelsPath = asset.syncedResource({
+local labelsPath = asset.resource({
   Name = "Moon Labels",
   Type = "HttpSynchronization",
   Identifier = "moon_labels",
