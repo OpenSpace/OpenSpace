@@ -78,9 +78,9 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    /// Read the ossync file and check if the downloaded files can be used, returns true 
-    /// if they are valid and false if we should download them again
-    bool isEachFileValid() ;
+    /// Read the `ossync` file and check if the downloaded files can be used, returns 
+    /// `true` if they are valid and `false` if we should download them again
+    bool isEachFileValid();
 
 private:
     /// Creates a file next to the directory that indicates that this

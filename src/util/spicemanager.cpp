@@ -154,6 +154,7 @@ SpiceManager::SpiceManager() {
     erract_c("SET", 0, const_cast<char*>("REPORT"));
     // But we do not want SPICE to print the errors, we will fetch them ourselves
     errprt_c("SET", 0, const_cast<char*>("NONE"));
+
     loadLeapSecondsSpiceKernel();
 }
 
@@ -1351,7 +1352,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
 }
 
 void SpiceManager::loadLeapSecondsSpiceKernel() {
-    constexpr std::string_view naif00012tslSource = R"(
+    constexpr std::string_view Naif00012tlsSource = R"(
 KPL/LSK
 
 
@@ -1506,10 +1507,10 @@ DELTET/DELTA_AT        = ( 10,   @1972-JAN-1
 
 )";
     std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "naif0012.tsl";
+    std::filesystem::path file = path / "naif0012.tls";
     {
         std::ofstream f(file);
-        f << naif00012tslSource;
+        f << Naif00012tlsSource;
     }
     loadKernel(file.string());
     std::filesystem::remove(file);

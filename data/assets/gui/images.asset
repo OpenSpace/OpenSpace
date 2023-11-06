@@ -18,7 +18,6 @@ asset.resource({
     "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/io.png"
   },
   UseHash = false,
-  SecondsUntilResync = math.huge
 })
 
 asset.resource({
@@ -34,7 +33,6 @@ asset.resource({
     "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_example.png"
   },
   UseHash = false,
-  SecondsUntilResync = math.huge
 })
 
 asset.resource({
@@ -43,5 +41,4 @@ asset.resource({
   Identifier = "images",
   Url = "http://data.openspaceproject.com/files/webgui/assets/images/instructions.png",
   UseHash = false,
-  SecondsUntilResync = math.huge
 })

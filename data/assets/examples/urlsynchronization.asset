@@ -3,7 +3,6 @@ asset.resource({
   Type = "UrlSynchronization",
   Identifier = "example_single",
   Url = "http://celestrak.com/NORAD/elements/geo.txt",
-  SecondsUntilResync = math.huge
 })
 
 asset.resource({
@@ -14,7 +13,6 @@ asset.resource({
     "http://celestrak.com/NORAD/elements/stations.txt",
     "http://celestrak.com/NORAD/elements/gps-ops.txt"
   },
-  SecondsUntilResync = math.huge
 })
 
 asset.resource({
@@ -42,7 +40,6 @@ asset.resource({
   Identifier = "no_hash",
   Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
   UseHash = false,
-  SecondsUntilResync = math.huge
 })
 
 

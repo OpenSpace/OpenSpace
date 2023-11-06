@@ -1085,7 +1085,7 @@ private:
     glm::dmat3 getEstimatedTransformMatrix(const std::string& fromFrame,
         const std::string& toFrame, double time) const;
 
-    /// Loads pre defined leap seconds time kernel (naif00012.tsl).
+    /// Loads pre defined leap seconds time kernel (naif00012.tls).
     void loadLeapSecondsSpiceKernel();
 
     /// A list of all loaded kernels

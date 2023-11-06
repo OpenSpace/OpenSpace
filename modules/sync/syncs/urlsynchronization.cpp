@@ -41,7 +41,7 @@ namespace {
     constexpr std::string_view _loggerCat = "UrlSynchronization";
     constexpr std::string_view OssyncVersionNumber = "1.0";
     constexpr std::string_view SynchronizationToken = "Synchronized";
-    constexpr double MAX_DATE_AS_J2000 = 252424036869.18289;
+    constexpr double MaxDateAsJ2000 = 252424036869.18289;
 
     struct [[codegen::Dictionary(UrlSynchronization)]] Parameters {
         // The URL or urls from where the files are downloaded. If multiple URLs are
@@ -53,7 +53,7 @@ namespace {
         // manually find the downloaded folder in the synchronization folder
         std::string identifier [[codegen::identifier()]];
 
-        // Deprecated, use SecondsUntilResync instead!
+        // Deprecated, use SecondsUntilResync instead
         std::optional<bool> forceOverride [[codegen::key("Override")]];
 
         // If this value is set to 'true' (the default), the hash of the URL is appended
@@ -70,9 +70,8 @@ namespace {
 
         // This variable determines the validity period of a file(s) in seconds before it 
         // needs to be re-downloaded. The default value keeps the file permanently cached, 
-        // while a value of 0 forces the file to be downloaded on every startup. Valid 
-        // values range from 0 (always download) to math.huge (permanent cached).
-        std::optional<double> secondsUntillResync [[codegen::key("SecondsUntilResync")]];
+        // while a value of 0 forces the file to be downloaded on every startup.
+        std::optional<double> secondsUntilResync [[codegen::greaterequal(0.0)]];
     };
 #include "urlsynchronization_codegen.cpp"
 } // namespace
@@ -113,10 +112,10 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
     // (anden88 2023-11-03) TODO: When we decide to remove override variable this should
     // be cleaned up.
     // Mimic behavior of time to live if override is specified (true => force download,
-    // false keeps the file permanently).
-    _secondsUntilResync = _forceOverride ? 0 : MAX_DATE_AS_J2000;
+    // false keeps the file permanently (default behavior)).
+    _secondsUntilResync = _forceOverride ? 0 : MaxDateAsJ2000;
     // Disregard override variable if user specified a specific time to live.
-    _secondsUntilResync = p.secondsUntillResync.value_or(_secondsUntilResync);
+    _secondsUntilResync = p.secondsUntilResync.value_or(_secondsUntilResync);
 
     const bool useHash = p.useHash.value_or(true);
 
@@ -137,7 +136,8 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
         LWARNING(fmt::format(
             "{}: The variable ForceOverride has been deprecated."
             "Optionally, use SecondsUntilResync instead to specify file validity date.",
-            p.identifier));
+            p.identifier
+        ));
     }
 }
 
@@ -298,25 +298,26 @@ bool UrlSynchronization::isEachFileValid() {
     std::string line;
 
     file >> line;
-    // Update ossync files that does not have a version number to new format.
+    // Update ossync files that does not have a version number to new format
     if (line == SynchronizationToken) {
         if (_secondsUntilResync == 0) {
-            return false; // Force download new file.
+            return false; // Force download new file
         }
 
+        // We must close file early because createSyncFile writes to it
         file.close();
         createSyncFile();
-        return true; // File is valid until some date.
+        // File is valid until some date
+        return true; 
     }
     // Otherwise first line is the version number.
     std::string ossyncVersion = line;
 
-    /*
-    Format of 1.0 ossync:
-    Version number: e.g., 1.0
-    Date that specifies how long the files are valid for in ISO8601 format
-    Valid to: yyyy-mm-ddThr:mn:sc.xxx
-    */
+    //Format of 1.0 ossync:
+    //Version number: e.g., 1.0
+    //Date that specifies how long the files are valid for in ISO8601 format
+    //Valid to: yyyy-mm-ddThr:mn:sc.xxx
+
     if (ossyncVersion == "1.0") {
         std::getline(file >> std::ws, line);
         std::string& fileIsValidToDate = line;
@@ -326,15 +327,14 @@ bool UrlSynchronization::isEachFileValid() {
         double todaysDateAsJ2000 = Time::convertTime(todaysDate);
 
         // Issue warning if file is kept but user changed setting to download on startup.
-        if ((fileValidAsJ2000 > todaysDateAsJ2000) && _secondsUntilResync == 0){
+        if ((fileValidAsJ2000 > todaysDateAsJ2000) && _secondsUntilResync == 0) {
             LWARNING(fmt::format(
                 "{}: File is valid to {} but asset specifies SecondsUntilResync = {} "
                 "Did you mean to re-download the file? If so, remove file from sync "
-                "folder to resync.",
+                "folder to resync",
                 _identifier,
                 fileIsValidToDate,
                 _secondsUntilResync
-
             ));
         }
 
@@ -345,7 +345,7 @@ bool UrlSynchronization::isEachFileValid() {
     else {
         LERROR(fmt::format(
             "{}: Unknown ossync version number read. "
-            "Got {} while {} and below are valid!",
+            "Got {} while {} and below are valid",
             _identifier,
             ossyncVersion,
             OssyncVersionNumber
@@ -370,7 +370,7 @@ void UrlSynchronization::createSyncFile(bool isFullySynchronized) const {
     // Limit the future date to year 9999
     double futureTimeAsJ2000 = std::min(
         currentTimeAsJ2000 + _secondsUntilResync,
-        MAX_DATE_AS_J2000
+        MaxDateAsJ2000
     );
        
     std::string fileIsValidTo = SpiceManager::ref().dateFromEphemerisTime(

@@ -9,7 +9,6 @@ local modelFolder = asset.resource({
   Identifier = "scale_model_burj_khalifa",
   Url = "https://wms.openspace.amnh.org/static/sync/url/scalemodels/Burj_Khalifa.osmodel",
   Filename = "Burj_Khalifa.osmodel",
-  SecondsUntilResync = math.huge
 })
 
 

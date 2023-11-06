@@ -7,7 +7,6 @@ local data = asset.resource({
   Type = "UrlSynchronization",
   Identifier = "geojson_example_path_perseverance",
   Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/path_perseverance.geojson",
-  SecondsUntilResync = math.huge
 })
 
 

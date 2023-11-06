@@ -5,7 +5,6 @@ local backend = asset.resource({
   Name = "Web Gui Backend",
   Type = "UrlSynchronization",
   Url = "http://data.openspaceproject.com/files/webgui/backend/" ..  BackendHash .. "/backend.zip",
-  SecondsUntilResync = math.huge
 })
 
 
