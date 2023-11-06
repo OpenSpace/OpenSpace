@@ -550,9 +550,9 @@ ColorMap loadCmapFile(std::filesystem::path path) {
 
     if (nColorLines != static_cast<int>(res.entries.size())) {
         LWARNINGC("SpeckLoader", fmt::format(
-            "While loading color map, the expected number of color values '{}' was "
+            "While loading color map '{}', the expected number of color values '{}' was "
             "different from the actual number of color values '{}'",
-            nColorLines, res.entries.size()
+            path, nColorLines, res.entries.size()
         ));
     }
 
