@@ -105,7 +105,7 @@ const std::string& ResourceSynchronization::name() const {
     return _name;
 }
 
-void ResourceSynchronization::createSyncFile() const {
+void ResourceSynchronization::createSyncFile(bool isFullySynchronized) const {
     std::filesystem::path dir = directory();
     std::filesystem::create_directories(dir);
 
