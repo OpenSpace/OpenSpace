@@ -37,8 +37,8 @@ namespace {
 
     constexpr int ApplicationVersion = 1;
 
-    constexpr std::string_view _ossyncVersionNumber = "1.0";
-    constexpr std::string_view _synchronizationToken = "Synchronized";
+    constexpr std::string_view OssyncVersionNumber = "1.0";
+    constexpr std::string_view SynchronizationToken = "Synchronized";
 
     struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
         // The unique identifier for this resource that is used to request a set of files
@@ -128,20 +128,18 @@ void HttpSynchronization::start() {
 
                 if (syncState == SynchronizationState::Success) {
                     _state = State::Resolved;
-                    bool isFullySynchronized = true;
-                    createSyncFile(isFullySynchronized);
+                    createSyncFile(true);
                 }
-                else if(syncState == SynchronizationState::FileDownloadFail) {
-                    // If it was not successful we should add any files that were potentially
-                    // downloaded, so we dont download them again from the new repository
+                else if (syncState == SynchronizationState::FileDownloadFail) {
+                    // If it was not successful we should add any files that were 
+                    // potentially downloaded to avoid downloading from other repositories
                     _existingSyncedFiles.insert(
                         _existingSyncedFiles.end(),
                         _newSyncedFiles.begin(),
                         _newSyncedFiles.end()
                     );
                     _newSyncedFiles.clear();
-                    bool isFullySynchronized = false;
-                    createSyncFile(isFullySynchronized);
+                    createSyncFile(false);
                 }
                 break;
             }
@@ -170,8 +168,11 @@ void HttpSynchronization::createSyncFile(bool isFullySynchronized) const {
     dir.replace_extension("ossync");
     std::ofstream syncFile(dir, std::ofstream::out);
 
-    syncFile << _ossyncVersionNumber << '\n' <<
-        (isFullySynchronized ? _synchronizationToken : "Partial Synchronized") << '\n';
+    syncFile << fmt::format(
+        "{}\n{}\n",
+        OssyncVersionNumber,
+        (isFullySynchronized ? SynchronizationToken : "Partial Synchronized")
+    );
 
     if (isFullySynchronized) {
         // All files successfully downloaded, no need to write anything else to file
@@ -192,14 +193,14 @@ bool HttpSynchronization::isEachFileDownloaded() {
         return false;
     }
 
-    //Read contents of file
+    // Read contents of file
     std::ifstream file(path);
     std::string line;
 
     file >> line;
     // Ossync files that does not have a version number are already resolved
     // As they are of the previous format.
-    if (line == "Synchronized" /*_synchronizationToken*/) {
+    if (line == SynchronizationToken) {
         return true;
     }
     // Otherwise first line is the version number.
@@ -212,13 +213,13 @@ bool HttpSynchronization::isEachFileDownloaded() {
     Optionally list of already synched files
     */
 
-    if (ossyncVersion == "1.0" /*_ossyncVersionNumber*/) {
+    if (ossyncVersion == OssyncVersionNumber) {
         std::getline(file >> std::ws, line); // Read synchronization status
-        if (line == _synchronizationToken) {
+        if (line == SynchronizationToken) {
             return true;
         }
         // File is only partially synchronized,
-        // store file urls that have been synched already. 
+        // store file urls that have been synched already
         while (file >> line) {
             if (line.empty() || line[0] == '#') {
                 // Skip all empty lines and commented out lines
@@ -228,12 +229,12 @@ bool HttpSynchronization::isEachFileDownloaded() {
         }
     }
     else {
-        LWARNING(fmt::format(
+        LERROR(fmt::format(
             "{}: Unknown ossync version number read."
-            "Got {} while {} and below are valid!",
+            "Got {} while {} and below are valid.",
             _identifier,
             ossyncVersion,
-            _ossyncVersionNumber
+            OssyncVersionNumber
         ));
         _state = State::Rejected;
     }
@@ -291,10 +292,15 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             continue;
         }
 
-        // Check if the file exists in stored files in ossync, if so we ignore that download. 
-        auto it = std::find(_existingSyncedFiles.begin() ,_existingSyncedFiles.end(), line);
+        // If the file is among the stored files in ossync we ignore that download
+        auto it = std::find(
+            _existingSyncedFiles.begin(),
+            _existingSyncedFiles.end(),
+            line
+        );
+
         if (it != _existingSyncedFiles.end()) {
-            // File has already been synced.
+            // File has already been synced
             continue;
         }
 
@@ -338,23 +344,23 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
     constexpr int MaxDownloadRetries = 5;
     int downloadTry = 0;
-    bool downloadFailed = false;
-    //If a download has failed try to restart it
+    // If a download has failed try to restart it
     while (downloadTry < MaxDownloadRetries) {
+        bool downloadSucceeded = true;
+
         for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
             d->wait();
             if (d->hasFailed()) {
                 d->start();
-                downloadFailed = true;
+                downloadSucceeded = false;
             }
         }
-        if (downloadFailed) {
-            ++downloadTry;
-            downloadFailed = false;
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+        if (downloadSucceeded) {
+            break;
         }
         else {
-            break;
+            ++downloadTry;
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
 
@@ -414,7 +420,7 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     }
     if (failed) {
         for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
-            //Store all files that were synced to the ossync 
+            // Store all files that were synced to the ossync 
             if (d->hasSucceeded()) {
                 _newSyncedFiles.push_back(d->url());
             }

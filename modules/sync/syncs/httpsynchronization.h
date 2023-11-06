@@ -127,10 +127,10 @@ private:
     // The thread that will be doing the synchronization
     std::thread _syncThread;
 
-    //The files that have already been synchronized
+    // The files that have already been synchronized
     std::vector<std::string> _existingSyncedFiles;
 
-    //The files that have been synchronized this time
+    // The files that have been synchronized this time
     std::vector<std::string> _newSyncedFiles;
 };
 
