@@ -321,9 +321,6 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             if (!totalBytes.has_value() || !startedAllDownloads) {
                 return !_shouldCancel;
             }
-            // Sets automatic fail for a specific file, to produce possible download fail 
-            //if (line == "http://liu-se.cdn.openspaceproject.com/files/digitaluniverse/sloandss/speck/v1_v2/SDSSgals.speck")
-            //    return false;
 
             std::lock_guard guard(mutex);
 
