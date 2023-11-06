@@ -270,7 +270,7 @@ void SettingsDialog::createWidgets() {
         label->setObjectName("heading");
         layout->addWidget(label, 13, 0, 1, 2);
 
-        _mrf.isEnabled = new QCheckBox("Enable caching");
+        _mrf.isEnabled = new QCheckBox("Enable Caching");
         _mrf.isEnabled->setToolTip(
             "If this setting is checked, the MRF caching for globe layers will be "
             "enabled. This means that all planetary images that are loaded over the "
