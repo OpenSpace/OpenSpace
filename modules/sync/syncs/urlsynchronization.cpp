@@ -39,7 +39,8 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "UrlSynchronization";
-    constexpr std::string_view _ossyncVersionNumber = "1.0";
+    constexpr std::string_view OssyncVersionNumber = "1.0";
+    constexpr std::string_view SynchronizationToken = "Synchronized";
     constexpr double MAX_DATE_AS_J2000 = 252424036869.18289;
 
     struct [[codegen::Dictionary(UrlSynchronization)]] Parameters {
@@ -109,10 +110,10 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
     _filename = p.filename.value_or(_filename);
     _forceOverride = p.forceOverride.value_or(_forceOverride);
 
-    //(anden88 2023-11-03) TODO: When we decide to remove override variable this should
+    // (anden88 2023-11-03) TODO: When we decide to remove override variable this should
     // be cleaned up.
-    // If override is specified set value based on that behaviour (true = force download,
-    // false keep file permanently).
+    // Mimic behavior of time to live if override is specified (true => force download,
+    // false keeps the file permanently).
     _secondsUntilResync = _forceOverride ? 0 : MAX_DATE_AS_J2000;
     // Disregard override variable if user specified a specific time to live.
     _secondsUntilResync = p.secondsUntillResync.value_or(_secondsUntilResync);
@@ -292,14 +293,13 @@ bool UrlSynchronization::isEachFileValid() {
         return false;
     }
 
-    //Read contents of file
+    // Read contents of file
     std::ifstream file(path);
     std::string line;
 
     file >> line;
     // Update ossync files that does not have a version number to new format.
-    // Keeps same behaviour as before with forceOverride. 
-    if (line == "Synchronized" /*_synchronizationToken*/) {
+    if (line == SynchronizationToken) {
         if (_secondsUntilResync == 0) {
             return false; // Force download new file.
         }
@@ -348,7 +348,7 @@ bool UrlSynchronization::isEachFileValid() {
             "Got {} while {} and below are valid!",
             _identifier,
             ossyncVersion,
-            _ossyncVersionNumber
+            OssyncVersionNumber
         ));
         _state = State::Rejected;
     }
@@ -378,8 +378,10 @@ void UrlSynchronization::createSyncFile(bool isFullySynchronized) const {
         "YYYY-MM-DDTHR:MN:SC.###"
     );
    
-    syncFile << _ossyncVersionNumber << '\n'
-        << fileIsValidTo << '\n';
-}
+    syncFile << fmt::format(
+        "{}\n{}\n",
+        OssyncVersionNumber,
+        fileIsValidTo
+    );
 
 } // namespace openspace
