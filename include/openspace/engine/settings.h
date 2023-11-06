@@ -48,7 +48,6 @@ struct Settings {
 
         std::optional<bool> isEnabled;
         std::optional<std::string> location;
-
     };
     MRF mrf;
 };

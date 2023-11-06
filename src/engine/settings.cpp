@@ -176,7 +176,6 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
         json["mrf"] = mrf;
     }
 
-
     std::string content = json.dump(2);
     std::ofstream f(filename);
     f << content;

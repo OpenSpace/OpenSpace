@@ -65,8 +65,9 @@ void SettingsDialog::createWidgets() {
     // | Cache location             | [oooooooooooooooooooo] |
     // |                            | <Save>        <Cancel> |
     // -------------------------------------------------------
-     
+
     QGridLayout* layout = new QGridLayout(this);
+    layout->setSizeConstraint(QLayout::SetFixedSize);
     
     {
         QLabel* label = new QLabel("Profile");
@@ -74,13 +75,14 @@ void SettingsDialog::createWidgets() {
         layout->addWidget(label, 0, 0, 1, 2);
 
         QLabel* conf = new QLabel("Starting Profile");
-        layout->addWidget(conf, 1, 0);
-
-        _profile = new QLineEdit;
-        _profile->setToolTip(
+        conf->setToolTip(
             "With this setting, you can choose a profile that will be loaded the next "
             "time you start the application"
         );
+        layout->addWidget(conf, 1, 0);
+
+        _profile = new QLineEdit;
+        _profile->setToolTip(conf->toolTip());
         connect(
             _profile,
             &QLineEdit::textChanged,
@@ -123,20 +125,20 @@ void SettingsDialog::createWidgets() {
 
     layout->addWidget(new Line(), 3, 0, 1, 2);
 
-    
     {
         QLabel* label = new QLabel("Configuration");
         label->setObjectName("heading");
         layout->addWidget(label, 4, 0, 1, 2);
 
         QLabel* conf = new QLabel("Starting Configuration");
-        layout->addWidget(conf, 5, 0);
-
-        _configuration = new QLineEdit;
-        _configuration->setToolTip(
+        conf->setToolTip(
             "With this setting, you can choose a window configuration that will be "
             "loaded the next time you start the application"
         );
+        layout->addWidget(conf, 5, 0);
+
+        _configuration = new QLineEdit;
+        _configuration->setToolTip(conf->toolTip());
         connect(
             _configuration,
             &QLineEdit::textChanged,
@@ -184,14 +186,15 @@ void SettingsDialog::createWidgets() {
         layout->addWidget(label, 8, 0, 1, 2);
 
         QLabel* conf = new QLabel("Property Visibility");
-        layout->addWidget(conf, 9, 0);
-
-        _propertyVisibility = new QComboBox;
-        _propertyVisibility->setToolTip(
+        conf->setToolTip(
             "This setting sets the default visibility for properties in the application. "
             "Note that these values are ordered, so all properties shown as a 'Novice "
             "User' are also visible when selecting 'User', etc."
         );
+        layout->addWidget(conf, 9, 0);
+
+        _propertyVisibility = new QComboBox;
+        _propertyVisibility->setToolTip(conf->toolTip());
         _propertyVisibility->addItems({
             "Novice User",
             "User",
@@ -293,16 +296,17 @@ void SettingsDialog::createWidgets() {
         layout->addWidget(_mrf.isEnabled, 14, 0, 1, 2);
 
         QLabel* conf = new QLabel("Cache Location");
-        layout->addWidget(conf, 15, 0);
-
-        _mrf.location = new QLineEdit;
-        _mrf.location->setToolTip(
+        conf->setToolTip(
             "This is the place where the MRF cache files are located. Please note that "
             "these files can potentially become quite large when using OpenSpace for a "
             "long while and when visiting new places regularly. If this value is left "
-            "blank, it will be stored in the 'mrf_cache' folder in the OpenSpace base "
-            "folder."
+            "blank, the cached files will be stored in the 'mrf_cache' folder in the "
+            "OpenSpace base folder."
         );
+        layout->addWidget(conf, 15, 0);
+
+        _mrf.location = new QLineEdit;
+        _mrf.location->setToolTip(conf->toolTip());
         _mrf.location->setDisabled(true);
         connect(
             _mrf.location,
@@ -313,7 +317,6 @@ void SettingsDialog::createWidgets() {
                 }
                 else {
                     _currentEdit.mrf.location = _mrf.location->text().toStdString();
-
                 }
                 updateSaveButton();
             }

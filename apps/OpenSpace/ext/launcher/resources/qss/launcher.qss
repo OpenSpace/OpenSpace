@@ -95,7 +95,6 @@ LauncherWindow  QPushButton#small:disabled {
 LauncherWindow  QPushButton#settings {
   border-image: url(:/images/cogwheel);
   background-repeat: no-repeat;
-  /* background: transparent; */
 }
 
 LauncherWindow  QPushButton#settings:hover {
@@ -223,7 +222,6 @@ WindowControl QLabel#notice {
 
 /*
  * Settings
- *
  */
 SettingsWidget  QLabel#information {
   font-style: italic;

@@ -208,7 +208,6 @@ TEST_CASE("Settings Load: Configuration Remember", "[settings]") {
     CHECK(!settings.bypassLauncher.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
-
 }
 
 TEST_CASE("Settings Save: Configuration Remember", "[settings]") {
@@ -251,7 +250,6 @@ TEST_CASE("Settings Load: Profile", "[settings]") {
     CHECK(!settings.bypassLauncher.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
-
 }
 
 TEST_CASE("Settings Save: Profile", "[settings]") {
@@ -294,7 +292,6 @@ TEST_CASE("Settings Load: Profile Remember", "[settings]") {
     CHECK(!settings.bypassLauncher.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
-
 }
 
 TEST_CASE("Settings Save: Profile Remember", "[settings]") {
@@ -379,7 +376,6 @@ TEST_CASE("Settings Load: Visibility/User", "[settings]") {
     CHECK(!settings.bypassLauncher.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
-
 }
 
 TEST_CASE("Settings Save: Visibility/User", "[settings]") {
@@ -422,7 +418,6 @@ TEST_CASE("Settings Load: Visibility/AdvancedUser", "[settings]") {
     CHECK(!settings.bypassLauncher.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
-
 }
 
 TEST_CASE("Settings Save: Visibility/AdvancedUser", "[settings]") {
@@ -465,7 +460,6 @@ TEST_CASE("Settings Load: Visibility/Developer", "[settings]") {
     CHECK(!settings.bypassLauncher.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
-
 }
 
 TEST_CASE("Settings Save: Visibility/Developer", "[settings]") {
@@ -508,7 +502,6 @@ TEST_CASE("Settings Load: Bypass Launcher", "[settings]") {
     CHECK(*settings.bypassLauncher == false);
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
-
 }
 
 TEST_CASE("Settings Save: Bypass Launcher", "[settings]") {
