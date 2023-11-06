@@ -93,15 +93,24 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    void createSyncFile(bool isFullySynchronized) const override;
+    /// Creates a file next to the directory that indicates that this
+    /// ResourceSynchronization has successfully synchronized its contents
+    void createSyncFile(bool isFullySynchronized = true) const override;
 
     /// Check ossync file and returns true if all files are downloaded or false
     /// if partially synched or if there is an ossync file error (rejected)
     bool isEachFileDownloaded();
 
+    /// Representation of 'global' synchronization state that encodes where a fail happen.
+    enum class SynchronizationState {
+        Success,
+        ListDownloadFail,
+        FileDownloadFail
+    };
+
 private:
     /// Tries to get a reply from the provided URL and returns that success to the caller
-    bool trySyncFromUrl(std::string url);
+    SynchronizationState trySyncFromUrl(std::string url);
 
     /// Contains a flag whether the current transfer should be cancelled
     std::atomic_bool _shouldCancel = false;
@@ -118,10 +127,10 @@ private:
     // The thread that will be doing the synchronization
     std::thread _syncThread;
 
-    //The files that have already been synchronized
+    // The files that have already been synchronized
     std::vector<std::string> _existingSyncedFiles;
 
-    //The files that have been synchronized this time
+    // The files that have been synchronized this time
     std::vector<std::string> _newSyncedFiles;
 };
 
