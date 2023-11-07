@@ -160,18 +160,19 @@ namespace {
     }
     else {
         // Write the color to a new file
-        unsigned int width = 1;
-        unsigned int height = 1;
-        unsigned int size = width * height;
-        std::vector<GLubyte> img(size * 3);
-        img[0] = static_cast<GLubyte>(255 * color.r);
-        img[1] = static_cast<GLubyte>(255 * color.g);
-        img[2] = static_cast<GLubyte>(255 * color.b);
+        constexpr unsigned int Width = 1;
+        constexpr unsigned int Height = 1;
+        constexpr unsigned int Size = Width * Height;
+        std::array<GLubyte, Size * 3> img = {
+            static_cast<GLubyte>(255 * color.r),
+            static_cast<GLubyte>(255 * color.g),
+            static_cast<GLubyte>(255 * color.b)
+        };
 
         using Texture = ghoul::opengl::Texture;
         Texture textureFromData = Texture(
             reinterpret_cast<void*>(img.data()),
-            glm::uvec3(width, height, 1),
+            glm::uvec3(Width, Height, 1),
             GL_TEXTURE_2D,
             Texture::Format::RGB
         );
