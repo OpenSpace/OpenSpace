@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "Magellan_Mosaic_Utah",
   Name = "Magellan Mosaic [Utah]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("magellan_mosaic_utah.vrt"),
+  FilePath = asset.resource("magellan_mosaic_utah.vrt"),
   BlendMode = "Color",
   Settings = { Gamma = 2.0 },
   Description = [[Color layer for Venus. This mosaic was created from the Magellan

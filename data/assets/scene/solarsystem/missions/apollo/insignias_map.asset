@@ -6,7 +6,7 @@ local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
-local insigniasPath = asset.syncedResource({
+local insigniasPath = asset.resource({
   Name = "Apollo Insignias",
   Type = "HttpSynchronization",
   Identifier = "apollo_insignias",

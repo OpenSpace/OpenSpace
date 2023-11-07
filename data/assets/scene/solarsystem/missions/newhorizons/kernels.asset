@@ -1,4 +1,4 @@
-local Kernels = asset.syncedResource({
+local Kernels = asset.resource({
   Name = "New Horizons Kernels",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_kernels",

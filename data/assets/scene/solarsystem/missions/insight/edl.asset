@@ -6,14 +6,14 @@ local mars = asset.require("scene/solarsystem/planets/mars/mars")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Insight Models Chutes",
   Type = "HttpSynchronization",
   Identifier = "insight_models",
   Version = 2
 })
 
-local ikernels = asset.syncedResource({
+local ikernels = asset.resource({
   Name = "Insight Kernels",
   Type = "HttpSynchronization",
   Identifier = "insight_kernels",

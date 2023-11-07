@@ -1,4 +1,4 @@
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Uranus Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "uranus_kernels",

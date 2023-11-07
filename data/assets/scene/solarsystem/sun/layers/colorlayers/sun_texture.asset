@@ -2,7 +2,7 @@ local globe = asset.require("../../sun")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Type = "HttpSynchronization",
   Name = "Sun textures",
   Identifier = "sun_textures",

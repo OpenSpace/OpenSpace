@@ -3,7 +3,7 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local model = asset.syncedResource({
+local model = asset.resource({
   Name = "Gaia Model",
   Type = "HttpSynchronization",
   Identifier = "gaia_model",

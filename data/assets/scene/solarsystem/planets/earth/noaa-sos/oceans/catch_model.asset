@@ -18,7 +18,7 @@ catch in these areas]]
 local URL = "https://sos.noaa.gov/catalog/datasets/fisheries-catch-model-2005-vs-2050/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

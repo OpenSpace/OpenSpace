@@ -3,7 +3,7 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local model = asset.syncedResource({
+local model = asset.resource({
   Name = "Animated Box",
   Type = "HttpSynchronization",
   Identifier = "animated_box",

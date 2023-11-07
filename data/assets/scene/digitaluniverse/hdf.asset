@@ -1,18 +1,18 @@
-local circle = asset.syncedResource({
+local circle = asset.resource({
   Name = "Circle",
   Type = "HttpSynchronization",
   Identifier = "circle_image",
   Version = 1
 })
 
-local HUDFSpeck = asset.syncedResource({
+local HUDFSpeck = asset.resource({
   Name = "HUDF Speck",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_hudf_speck",
   Version = 1
 })
 
-local ColorMap = asset.syncedResource({
+local ColorMap = asset.resource({
   Name = "HUDF color map",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_hudf_textures",

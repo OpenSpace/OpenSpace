@@ -2,7 +2,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local data = asset.syncedResource({
+local data = asset.resource({
   Type = "HttpSynchronization",
   Name = "Ganymede Plane Simulations",
   Identifier = "juice_ganymede_fieldlines",
@@ -21,7 +21,7 @@ local GanymedeMagnetosphere = {
     ColorMethod = "By Quantity",
     ColorQuantity = 0,
     ColorTableRanges = { { 62.556353386366766, 1665.5534182835445 } },
-    ColorTablePaths = { asset.localResource("CMR-illuminance2.txt") },
+    ColorTablePaths = { asset.resource("CMR-illuminance2.txt") },
     Color = { 0.03, 0.0, 0.0, 1.0 },
     ParticleSpacing = 42.0,
     ParticleSize = 30.0,

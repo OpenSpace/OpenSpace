@@ -6,7 +6,7 @@ local kernels = asset.require("./kernels")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Osiris Rex Models",
   Type = "HttpSynchronization",
   Identifier = "osirisrex_models",

@@ -456,34 +456,9 @@ void RenderableEclipseCone::createCone(double et) {
     );
 
 
-    // 4. Construct the penumbral shadow
-    std::vector<VBOLayout> penumbralVertices;
-    if (_showPenumbralShadow) {
-        penumbralVertices = calculateShadowPoints(
-            resSrc.terminatorPoints,
-            resDst.terminatorPoints,
-            shadowerToLightSource,
-            lightSourceToShadower,
-            distance * static_cast<double>(_shadowLength)
-        );
-
-        // We need to duplicate the first two vertices to close the cylinder at the seam
-        penumbralVertices.push_back(penumbralVertices[0]);
-        penumbralVertices.push_back(penumbralVertices[1]);
-    }
-
-
-    // 5. Construct the umbral shadow
+    // 4. Construct the umbral shadow
     std::vector<VBOLayout> umbralVertices;
     if (_showUmbralShadow) {
-        // For the umbral shadow, we need to mix the terminator points with a 180
-        // degree phase shift, so that the top terminator point of the sun gets matched
-        // with the bottom terminator point of the Moon, etc
-        std::rotate(
-            resSrc.terminatorPoints.begin(),
-            resSrc.terminatorPoints.begin() + resSrc.terminatorPoints.size() / 2,
-            resSrc.terminatorPoints.end()
-        );
         umbralVertices = calculateShadowPoints(
             resSrc.terminatorPoints,
             resDst.terminatorPoints,
@@ -495,6 +470,31 @@ void RenderableEclipseCone::createCone(double et) {
         // We need to duplicate the first two vertices to close the cylinder at the seam
         umbralVertices.push_back(umbralVertices[0]);
         umbralVertices.push_back(umbralVertices[1]);
+    }
+
+
+    // 5. Construct the penumbral shadow
+    std::vector<VBOLayout> penumbralVertices;
+    if (_showPenumbralShadow) {
+        // For the penumbral shadow, we need to mix the terminator points with a 180
+        // degree phase shift, so that the top terminator point of the sun gets matched
+        // with the bottom terminator point of the Moon, etc
+        std::rotate(
+            resSrc.terminatorPoints.begin(),
+            resSrc.terminatorPoints.begin() + resSrc.terminatorPoints.size() / 2,
+            resSrc.terminatorPoints.end()
+        );
+        penumbralVertices = calculateShadowPoints(
+            resSrc.terminatorPoints,
+            resDst.terminatorPoints,
+            shadowerToLightSource,
+            lightSourceToShadower,
+            distance * static_cast<double>(_shadowLength)
+        );
+
+        // We need to duplicate the first two vertices to close the cylinder at the seam
+        penumbralVertices.push_back(penumbralVertices[0]);
+        penumbralVertices.push_back(penumbralVertices[1]);
     }
 
 

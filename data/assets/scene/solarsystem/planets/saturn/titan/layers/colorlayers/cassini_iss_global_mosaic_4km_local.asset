@@ -2,7 +2,7 @@ local globe = asset.require("../../titan")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Type = "HttpSynchronization",
   Name = "Titan textures",
   Identifier = "titan_textures",

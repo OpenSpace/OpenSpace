@@ -1,4 +1,4 @@
-local homespeck = asset.syncedResource({
+local homespeck = asset.resource({
   Name = "Home Speck File",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_home_speck",

@@ -1,4 +1,4 @@
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Osiris Rex Kernels",
   Type = "HttpSynchronization",
   Identifier = "osirisrex_kernels",

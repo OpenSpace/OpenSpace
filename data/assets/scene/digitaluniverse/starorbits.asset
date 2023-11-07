@@ -3,7 +3,7 @@ local earth_transforms = asset.require("scene/solarsystem/planets/earth/transfor
 
 
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Grids Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_starorbits_speck",

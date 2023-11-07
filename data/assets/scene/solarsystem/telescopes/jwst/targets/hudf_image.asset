@@ -1,4 +1,4 @@
-local image = asset.syncedResource({
+local image = asset.resource({
   Name = "HUDF Image",
   Type = "HttpSynchronization",
   Identifier = "hudf_image",

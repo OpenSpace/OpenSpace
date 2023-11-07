@@ -16,7 +16,7 @@ lasts for about 18 months]]
 local URL = "https://sos.noaa.gov/catalog/datasets/el-nino-and-la-nina-seasonal-impacts/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
