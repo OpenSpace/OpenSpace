@@ -179,7 +179,10 @@ namespace {
         textureFromData.setDataOwnership(Texture::TakeOwnership::No);
 
         try {
-            ghoul::io::TextureWriter::ref().saveTexture(textureFromData, fileName.string());
+            ghoul::io::TextureWriter::ref().saveTexture(
+                textureFromData,
+                fileName.string()
+            );
         }
         catch (const ghoul::io::TextureWriter::MissingWriterException& e) {
             // This should not happen, as we know .png is a supported format
