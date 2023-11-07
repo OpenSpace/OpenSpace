@@ -64,8 +64,11 @@ struct ShutdownInformation {
 };
 
 struct CommandlineArguments {
-    std::string configurationName;
-    std::vector<std::string> configurationOverride;
+    std::optional<std::string> configuration;
+    std::optional<std::string> windowConfig;
+    std::optional<std::string> profile;
+    std::optional<std::string> propertyVisibility;
+    std::optional<bool> bypassLauncher;
 };
 
 class OpenSpaceEngine : public properties::PropertyOwner {

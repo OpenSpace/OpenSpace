@@ -1047,16 +1047,14 @@ void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& ha
 }
 
 std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
-                                        bool haveCliSGCTConfig,
-                                        const std::string& sgctFunctionName)
+                                        bool haveCliSGCTConfig)
 {
     configuration::Configuration& config = *global::configuration;
 
     std::string preset;
     bool sgctConfigFileSpecifiedByLuaFunction = !config.sgctConfigNameInitialized.empty();
     if (haveCliSGCTConfig) {
-        preset = sgctFunctionName.empty() ? config.windowConfiguration : sgctFunctionName;
-        preset += " (from CLI)";
+        preset = fmt::format("{} (from CLI)", config.windowConfiguration);
     }
     else if (sgctConfigFileSpecifiedByLuaFunction) {
         preset = config.sgctConfigNameInitialized + labelFromCfgFile;
@@ -1162,23 +1160,35 @@ int main(int argc, char* argv[]) {
 
     CommandlineArguments commandlineArguments;
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.configurationName, "--file", "-f",
+        commandlineArguments.configuration, "--file", "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
         "current working directory"
     ));
-
-    parser.addCommand(std::make_unique<ghoul::cmdparser::MultipleCommand<std::string>>(
-        commandlineArguments.configurationOverride, "--config", "-c",
-        "Provides the ability to pass arbitrary Lua code to the application that will be "
-        "evaluated after the configuration file has been loaded but before the other "
-        "commandline arguments are triggered. This can be used to manipulate the "
-        "configuration file without editing the file on disk, for example in a "
-        "planetarium environment. Please not that the Lua script must not contain any - "
-        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
-        "evaluated before it is passed to OpenSpace. Windows does not approve of using \""
-        "either, so it is recommended to deliniate strings with [[ ]] instead. For "
-        "example:  OpenSpace --config Profile=[[jwst]]"
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.windowConfig, "--config", "-c",
+        "Specifies the window configuration file that should be used to start OpenSpace "
+        "and that will override whatever is specified in the `openspace.cfg` or the "
+        "settings. This value can include path tokens, so for example "
+        "`${CONFIG}/single.json` is a valid value."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.profile, "--profile", "-p",
+        "Specifies the profile that should be used to start OpenSpace and that overrides "
+        "the profile specified in the `openspace.cfg` and the settings."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.propertyVisibility, "--propertyVisibility", "",
+        "Specifies UI visibility settings for properties that this OpenSpace is using. "
+        "This value overrides the values specified in the `openspace.cfg` and the "
+        "settings and also the environment variable, if that value is provided. Allowed "
+        "values for this parameter are: `Developer`, `AdvancedUser`, `User`, and "
+        "`NoviceUser`."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommandZeroArguments>(
+        commandlineArguments.bypassLauncher, "--bypassLauncher", "-b",
+        "Specifies whether the Launcher should be shown at startup or not. This value "
+        "overrides the value specified in the `openspace.cfg` and the settings."
     ));
 
     // setCommandLine returns a reference to the vector that will be filled later
@@ -1210,8 +1220,8 @@ int main(int argc, char* argv[]) {
     try {
         // Find configuration
         std::filesystem::path configurationFilePath;
-        if (!commandlineArguments.configurationName.empty()) {
-            configurationFilePath = absPath(commandlineArguments.configurationName);
+        if (commandlineArguments.configuration.has_value()) {
+            configurationFilePath = absPath(*commandlineArguments.configuration);
         }
         else {
             LDEBUG("Finding configuration");
@@ -1249,15 +1259,46 @@ int main(int argc, char* argv[]) {
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
-        std::string override;
-        for (const std::string& arg : commandlineArguments.configurationOverride) {
-            override += arg + ";";
-        }
         *global::configuration = configuration::loadConfigurationFromFile(
             configurationFilePath.string(),
-            size,
-            override
+            size
         );
+
+        // Override configuration with commandline arguments
+        if (commandlineArguments.windowConfig.has_value()) {
+            global::configuration->windowConfiguration =
+                *commandlineArguments.windowConfig;
+        }
+        if (commandlineArguments.profile.has_value()) {
+            global::configuration->profile = *commandlineArguments.profile;
+        }
+        if (commandlineArguments.propertyVisibility.has_value()) {
+            if (commandlineArguments.propertyVisibility == "NoviceUser") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::NoviceUser;
+            }
+            else if (commandlineArguments.propertyVisibility == "User") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::User;
+            }
+            else if (commandlineArguments.propertyVisibility == "AdvancedUser") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::AdvancedUser;
+            }
+            else if (commandlineArguments.propertyVisibility == "Developer") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::Developer;
+            }
+            else {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Unknown property visibility value '{}'",
+                    *commandlineArguments.propertyVisibility
+                ));
+            }
+        }
+        if (commandlineArguments.bypassLauncher.has_value()) {
+            global::configuration->bypassLauncher = *commandlineArguments.bypassLauncher;
+        }
 
         // Determining SGCT configuration file
         LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);
@@ -1282,17 +1323,11 @@ int main(int argc, char* argv[]) {
 
     global::openSpaceEngine->registerPathTokens();
 
-    bool hasSGCTConfig = false;
-    bool hasProfile = false;
-    std::string sgctFunctionName;
-    checkCommandLineForSettings(argc, argv, hasSGCTConfig, hasProfile, sgctFunctionName);
-
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
     std::string windowCfgPreset = setWindowConfigPresetForGui(
         labelFromCfgFile,
-        hasSGCTConfig,
-        sgctFunctionName
+        commandlineArguments.windowConfig.has_value()
     );
 
     //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
@@ -1308,9 +1343,7 @@ int main(int argc, char* argv[]) {
     QApplication app(qac, nullptr);
 #endif // __APPLE__
 
-    bool skipLauncher =
-        (hasProfile && hasSGCTConfig) || global::configuration->bypassLauncher;
-    if (!skipLauncher) {
+    if (!global::configuration->bypassLauncher) {
 #ifndef __APPLE__
         int qac = 0;
         QApplication app(qac, nullptr);
@@ -1330,9 +1363,9 @@ int main(int argc, char* argv[]) {
         }
 
         LauncherWindow win(
-            !hasProfile,
+            !commandlineArguments.profile.has_value(),
             *global::configuration,
-            !hasSGCTConfig,
+            !commandlineArguments.windowConfig.has_value(),
             windowCfgPreset,
             nullptr
         );
@@ -1347,7 +1380,7 @@ int main(int argc, char* argv[]) {
         global::configuration->profile = win.selectedProfile();
         windowConfiguration = selectedSgctProfileFromLauncher(
             win,
-            hasSGCTConfig,
+            commandlineArguments.windowConfig.has_value(),
             windowConfiguration,
             labelFromCfgFile
         );

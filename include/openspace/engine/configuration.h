@@ -148,7 +148,7 @@ struct Configuration {
 std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
-    const glm::ivec2& primaryMonitorResolution, std::string_view overrideScript);
+    const glm::ivec2& primaryMonitorResolution);
 
 } // namespace openspace::configuration
 
