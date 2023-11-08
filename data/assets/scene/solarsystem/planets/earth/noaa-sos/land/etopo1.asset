@@ -16,7 +16,7 @@ modeling and Earth visualization]]
 local URL = "https://sos.noaa.gov/catalog/datasets/etopo1-topography-and-bathymetry/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

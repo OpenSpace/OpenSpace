@@ -3,14 +3,14 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Voyager Model",
   Type = "HttpSynchronization",
   Identifier = "voyager_model",
   Version = 1
 })
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Voyager 2 Kernels",
   Type = "HttpSynchronization",
   Identifier = "voyager2_spice",

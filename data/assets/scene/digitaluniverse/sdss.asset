@@ -1,11 +1,11 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Sloan Digital Sky Survey Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_sloandss_textures",
   Version = 2
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Sloan Digital Sky Survey Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_sloandss_speck",

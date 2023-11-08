@@ -1,11 +1,11 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Exoplanets Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Exoplanets Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_speck",

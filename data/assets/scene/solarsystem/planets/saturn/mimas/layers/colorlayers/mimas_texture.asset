@@ -2,7 +2,7 @@ local globe = asset.require("../../mimas")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Mimas textures",
   Type = "HttpSynchronization",
   Identifier = "mimas_textures",

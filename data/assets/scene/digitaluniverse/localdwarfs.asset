@@ -1,11 +1,11 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Local Dwarfs Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_localdwarfs_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Local Dwarfs Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_localdwarfs_speck",

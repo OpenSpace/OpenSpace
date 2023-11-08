@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "Mola_Europe",
   Name = "Mola Elevation [Sweden]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("mola_sweden.wms"),
+  FilePath = asset.resource("mola_sweden.wms"),
   TilePixelSize = 360,
   Description = [[This digital elevation model (DEM) is based on data from the Mars
     Orbiter Laser Altimeter (MOLA; Smith et al., 2001), an instrument on NASA's Mars

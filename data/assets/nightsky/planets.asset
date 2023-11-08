@@ -6,7 +6,7 @@ local saturn = asset.require("scene/solarsystem/planets/saturn/transforms")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Night Sky Planet Textures",
   Type = "HttpSynchronization",
   Identifier = "night_sky_planet_textures",

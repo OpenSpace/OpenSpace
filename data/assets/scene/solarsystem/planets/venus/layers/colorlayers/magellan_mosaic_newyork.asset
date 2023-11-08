@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "Magellan_Mosaic_NewYork",
   Name = "Magellan Mosaic [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("magellan_mosaic_newyork.vrt"),
+  FilePath = asset.resource("magellan_mosaic_newyork.vrt"),
   BlendMode = "Color",
   Settings = { Gamma = 2.0 },
   Description = [[Color layer for Venus. This mosaic was created from the Magellan

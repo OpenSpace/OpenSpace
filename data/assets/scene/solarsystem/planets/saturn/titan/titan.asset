@@ -4,7 +4,7 @@ local kernel = asset.require("../kernels")
 
 
 
-local labelsPath = asset.syncedResource({
+local labelsPath = asset.resource({
   Name = "Saturn Labels",
   Type = "HttpSynchronization",
   Identifier = "saturn_labels",

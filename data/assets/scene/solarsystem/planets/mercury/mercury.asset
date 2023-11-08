@@ -4,7 +4,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local labelsPath = asset.syncedResource({
+local labelsPath = asset.resource({
   Name = "Mercury Labels",
   Type = "HttpSynchronization",
   Identifier = "mercury_labels",
