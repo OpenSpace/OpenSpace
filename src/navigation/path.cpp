@@ -96,9 +96,10 @@ namespace {
 
 namespace openspace::interaction {
 
-Path::Path(Waypoint start, Waypoint end, Type type,
-           std::optional<double> duration)
-    : _start(start), _end(end), _type(type)
+Path::Path(Waypoint start, Waypoint end, Type type, std::optional<double> duration)
+    : _start(start)
+    , _end(end)
+    , _type(type)
 {
     switch (_type) {
         case Type::AvoidCollision:
@@ -111,9 +112,6 @@ Path::Path(Waypoint start, Waypoint end, Type type,
         case Type::ZoomOutOverview:
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
-        default:
-            LERROR("Could not create curve. Type does not exist");
-            throw ghoul::MissingCaseException();
     }
 
     _prevPose = _start.pose();
@@ -133,11 +131,17 @@ Path::Path(Waypoint start, Waypoint end, Type type,
     }
 }
 
-Waypoint Path::startPoint() const { return _start; }
+Waypoint Path::startPoint() const {
+    return _start;
+}
 
-Waypoint Path::endPoint() const { return _end; }
+Waypoint Path::endPoint() const {
+    return _end;
+}
 
-double Path::pathLength() const { return _curve->length(); }
+double Path::pathLength() const {
+    return _curve->length();
+}
 
 std::vector<glm::dvec3> Path::controlPoints() const {
     return _curve->points();
@@ -570,8 +574,6 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             waypoints = { computeWaypointFromNodeInfo(info, startPoint, isLinear) };
             break;
         }
-        default:
-            throw ghoul::MissingCaseException();
     }
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints

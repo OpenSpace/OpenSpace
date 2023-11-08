@@ -107,7 +107,8 @@ void log(int i, const EventCameraFocusTransition& e) {
                 return "Receding";
             case EventCameraFocusTransition::Transition::Exiting:
                 return "Exiting";
-            default:                                  throw ghoul::MissingCaseException();
+            default:
+                throw ghoul::MissingCaseException();
         }
     }(e.transition);
 
@@ -349,8 +350,6 @@ ghoul::Dictionary toParameter(const Event& e) {
                 case EventParallelConnection::State::HostshipLost:
                     d.setValue("State", "HostshipLost"s);
                     break;
-                default:
-                    throw ghoul::MissingCaseException();
             }
             break;
         case Event::Type::ApplicationShutdown:
@@ -400,8 +399,6 @@ ghoul::Dictionary toParameter(const Event& e) {
                 case EventCameraFocusTransition::Transition::Exiting:
                     d.setValue("Transition", "Exiting"s);
                     break;
-                default:
-                    throw ghoul::MissingCaseException();
             }
             break;
         case Event::Type::PlanetEclipsed:
@@ -592,11 +589,12 @@ void logAllEvents(const Event* e) {
             case Event::Type::CameraPathFinished:
                 log(i, *static_cast<const EventCameraPathFinished*>(e));
                 break;
+            case Event::Type::CameraMovedPosition:
+                log(i, *static_cast<const EventCameraMovedPosition*>(e));
+                break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
 
         i++;

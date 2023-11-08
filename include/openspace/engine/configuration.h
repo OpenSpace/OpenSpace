@@ -149,7 +149,7 @@ std::filesystem::path findConfiguration(const std::string& filename = "openspace
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
     const std::filesystem::path& settingsFile,
-    const glm::ivec2& primaryMonitorResolution, std::string_view overrideScript);
+    const glm::ivec2& primaryMonitorResolution);
 
 } // namespace openspace
 
