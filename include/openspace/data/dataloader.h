@@ -27,6 +27,7 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
+#include <ghoul/misc/csvreader.h>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -96,7 +97,7 @@ struct ColorMap {
 // @TODO: Also make sure to update cache data versions!
 struct DataLoadSpecs {
     std::optional<float> missingDataValue;
-    // @TODO: can add column names for positionmal data in CSV, for example
+    // @TODO: can add column names for positional data in CSV, for example
 };
 
 namespace data {
@@ -108,6 +109,9 @@ namespace data {
     void saveCachedFile(const Dataset& dataset, std::filesystem::path path);
 
     Dataset loadFileWithCache(std::filesystem::path path,
+        std::optional<DataLoadSpecs> specs = std::nullopt);
+
+    Dataset loadCsvFile(std::filesystem::path path,
         std::optional<DataLoadSpecs> specs = std::nullopt);
 
 } // namespace data
