@@ -53,14 +53,14 @@ namespace {
         "on the color map. The property is set based on predefined options specified in "
         "the asset file. When changing the parameter, the value range to used for the"
         "mapping will also be changed",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorRangeInfo = {
         "ValueRange",
         "Value Range",
         "This value changes the range of values to be mapped with the current color map",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SetRangeFromDataInfo = {
@@ -68,7 +68,7 @@ namespace {
         "Set Data Range from Data",
         "Set the data range for the color mapping based on the available data for the "
         "curently selected data column",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HideOutsideInfo = {
@@ -84,7 +84,7 @@ namespace {
         "Show Missing Data",
         "If true, use a separate color (see NoDataColor) for items with values "
         "corresponding to missing data values",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo NoDataColorInfo = {
@@ -95,7 +95,7 @@ namespace {
         "value overrides any value in the color map. If a color value for the below "
         "range values is provided, the ShowMissingData property will automatically be "
         "set to true",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseAboveRangeColorInfo = {
