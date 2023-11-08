@@ -1,44 +1,154 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
--- Color mapped points close to Earth
-local Object = {
-  Identifier = "Example_renderablePoints",
+-- Color mapped points close to Earth, with some different settings for color and
+-- sizing, and a rotation that makes them not overlap
+
+local FixedColor_FixedSize = {
+  Identifier = "ExamplePoints_FixedSize",
   Parent = earthAsset.Earth.Identifier,
-  Transform = {
-    -- Scale point cloud up so that we can actually see it
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1000
-    }
-  }
   Renderable = {
     Type = "RenderablePointCloud",
     File = asset.localResource("data/dummydata.csv"),
     Coloring = {
-      ColorMap = {
-        File = asset.localResource("viridis.cmap")
-      }
+      FixedColor = { 0.0, 0.5, 0.0 }
     },
     SizeSettings = {
-      ScaleExponent = 32.0,
+      ScaleExponent = 14.0
+    }
+  },
+  GUI = {
+    Name = "Dummy Point Cloud - Fixed Color / Fixed Size",
+    Path = "/Example",
+    Description = "Point cloud with a fixed color and fixed sizing"
+  }
+}
+
+
+local FixedColor_MaxPixelSize = {
+  Identifier = "ExamplePoints_MaxPixelSize",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, 0.5 * math.pi }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.localResource("data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.0, 1.0, 1.0 }
+    },
+    SizeSettings = {
+      ScaleExponent = 14.0,
       BillboardMaxPixelSize = 4.7,
       EnablePixelSizeControl = true
     }
   },
   GUI = {
-    Name = "Dummy Point Cloud",
+    Name = "Dummy Point Cloud - Fixed Color / Max Pixel Size",
     Path = "/Example",
-    Description = [[]]
+    Description = "Point cloud with a fixed color and sizing with a given max pixel size"
+  }
+}
+
+
+local ColorMapped_FixedSize = {
+  Identifier = "ExamplePoints_ColorMapped",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, -0.5 * math.pi }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.localResource("data/dummydata.csv"),
+    Coloring = {
+      ColorMapping = {
+        File = asset.localResource("viridis.cmap")
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 15.0
+    }
+  },
+  GUI = {
+    Name = "Dummy Point Cloud - Color Mapped",
+    Path = "/Example",
+    Description = "Color mapped point cloud with fixed sizing"
+  }
+}
+
+
+local ColorMappedAdvanced_NoBlend = {
+  Identifier = "ExamplePoints_ColorMappedNoBlend",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.pi }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.localResource("data/dummydata.csv"),
+    UseAdditiveBlending = false, -- Disable additive blending
+    Coloring = {
+      ColorMapping = {
+        File = asset.localResource("viridis.cmap"),
+        -- Map specific column options to color map based on
+        ParameterOptions = {
+          { Key = "number_withNan" }, -- no range => compute min and max
+          { Key = "normaldist_withMissing", Range = { -0.5, 0.5 } }
+        },
+        -- Show missing data values in a specific color
+        ShowMissingData = true,
+        NoDataColor = { 0.5, 0.5, 0.5, 1.0 }
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 15.0
+    }
+  },
+  GUI = {
+    Name = "Dummy Point Cloud - Color Mapped (Advanced) - No blending",
+    Path = "/Example",
+    Description = [[Color mapped point cloud without addtive blending, with missing
+      values shown in grey, and a limited choice of parameter options to use for
+      the color mapping.]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Object)
+  openspace.addSceneGraphNode(FixedColor_FixedSize)
+  openspace.addSceneGraphNode(FixedColor_MaxPixelSize)
+  openspace.addSceneGraphNode(ColorMapped_FixedSize)
+  openspace.addSceneGraphNode(ColorMappedAdvanced_NoBlend)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Object)
+  openspace.removeSceneGraphNode(ColorMappedAdvanced_NoBlend)
+  openspace.removeSceneGraphNode(ColorMapped_FixedSize)
+  openspace.removeSceneGraphNode(FixedColor_MaxPixelSize)
+  openspace.removeSceneGraphNode(FixedColor_FixedSize)
 end)
 
-asset.export(Object)
+asset.export(FixedColor_FixedSize)
+asset.export(FixedColor_MaxPixelSize)
+asset.export(ColorMapped_FixedSize)
+asset.export(ColorMappedAdvanced_NoBlend)
+
+
+
+asset.meta = {
+  Name = "Example - Point Clouds",
+  Version = "1.0",
+  Description = [[Examples of point clouds with a few different settings for sizing and
+    coloring]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
