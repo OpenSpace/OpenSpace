@@ -384,7 +384,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataLoadSpecs>
         else {
             res.variables.push_back({
                 .index = nDataColumns,
-                .name = c
+                .name = col
             });
             nDataColumns++;
         }
