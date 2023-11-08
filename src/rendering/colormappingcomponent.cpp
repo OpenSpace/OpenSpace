@@ -320,6 +320,27 @@ void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
             dataColumn = static_cast<int>(_colorRangeData.size() - 1);
         }
     }
+    else {
+        // Otherwise, check if the selected columns exist
+        for (int i = 0; i < dataColumn.options().size(); ++i) {
+            std::string o = dataColumn.options()[i].description;
+            const std::vector<dataloader::Dataset::Variable>& vars = dataset.variables;
+
+            bool found = false;
+            for (const dataloader::Dataset::Variable& v : dataset.variables) {
+                if (v.name == o) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                LWARNINGC("ColorMapping", fmt::format(
+                    "Dataset does not contain specified parameter '{}'", o
+                ));
+            }
+        }
+    }
 
     if (_colorMap.nanColor.has_value() && !_nanColorInAsset) {
         nanColor = *_colorMap.nanColor;
