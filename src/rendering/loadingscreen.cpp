@@ -65,6 +65,7 @@ namespace {
 
     constexpr float LoadingTextPosition = 0.275f;  // in NDC
     constexpr float StatusMessageOffset = 0.225f;  // in NDC
+    constexpr float LogBackgroundPosition = 0.12f; // in NDC
 
     constexpr int MaxNumberLocationSamples = 1000;
 
@@ -97,13 +98,19 @@ namespace {
 
 namespace openspace {
 
-LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
-    ScreenLog* loadScreenLog)
+LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames)
     : _showMessage(showMessage)
     , _showNodeNames(showNodeNames)
-    , _log(loadScreenLog)
     , _randomEngine(_randomDevice())
 {
+    constexpr std::chrono::seconds ScreenLogTimeToLive(20);
+    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(
+        ScreenLogTimeToLive,
+        ScreenLog::LogLevel::Warning
+    );
+    _log = log.get();
+    ghoul::logging::LogManager::ref().addLog(std::move(log));
+
     _loadingFont = global::fontManager->font(
         "Loading",
         LoadingFontSize,
@@ -245,10 +252,17 @@ void LoadingScreen::render() {
         renderer.render(*_messageFont, messageLl, _message);
     }
 
-    glm::vec2 logLl = glm::vec2(0, 0);
-    glm::vec2 logUr = glm::vec2(
-        res.x / 2.f,
-        res.y * StatusMessageOffset
+    glm::vec2 logLl = glm::vec2(0.f, 0.f);
+    glm::vec2 logUr = glm::vec2(res.x, res.y * LogBackgroundPosition);
+
+    // Font rendering enables depth testing so we disable again to render the log box
+    glDisable(GL_DEPTH_TEST);
+    constexpr glm::vec4 DarkGray = glm::vec4(glm::vec3(0.04f), 1.0f);
+    rendering::helper::renderBox(
+        glm::vec2(0.f, 1.f),
+        glm::vec2(1.f, LogBackgroundPosition),
+        DarkGray,
+        rendering::helper::Anchor::SW
     );
 
     if (_showNodeNames) {
@@ -432,8 +446,8 @@ void LoadingScreen::render() {
 void LoadingScreen::renderLogMessages() const {
     ZoneScoped;
 
-    constexpr size_t MaxNumberMessages = 10;
-    constexpr int MessageLength = 90;
+    constexpr size_t MaxNumberMessages = 4;
+    constexpr int MessageLength = 209;
 
     using FR = ghoul::fontrendering::FontRenderer;
     const FR& renderer = FR::defaultRenderer();
@@ -441,7 +455,7 @@ void LoadingScreen::renderLogMessages() const {
     _log->removeExpiredEntries();
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
 
-    size_t nRows = 1;
+    size_t nRows = 0;
     for (size_t i = 1; i <= std::min(MaxNumberMessages, entries.size()); i++) {
         ZoneScopedN("Entry");
 
@@ -467,25 +481,25 @@ void LoadingScreen::renderLogMessages() const {
             }
         }
 
-        const glm::vec4 white(0.9f, 0.9f, 0.9f, 1.0);
-        const glm::vec4 color = [&white](ScreenLog::LogLevel level) {
+        constexpr glm::vec4 White(0.9f, 0.9f, 0.9f, 1.f);
+        const glm::vec4 color = [&White](ScreenLog::LogLevel level) {
             switch (level) {
-            case ghoul::logging::LogLevel::Warning:
-                return glm::vec4(1.f, 1.f, 0.f, 1.0);
-            case ghoul::logging::LogLevel::Error:
-                return glm::vec4(1.f, 0.f, 0.f, 1.0);
-            case ghoul::logging::LogLevel::Fatal:
-                return glm::vec4(0.3f, 0.3f, 0.85f, 1.0);
-            default:
-                return white;
+                case ghoul::logging::LogLevel::Warning:
+                    return glm::vec4(1.f, 1.f, 0.f, 1.f);
+                case ghoul::logging::LogLevel::Error:
+                    return glm::vec4(1.f, 0.f, 0.f, 1.f);
+                case ghoul::logging::LogLevel::Fatal:
+                    return glm::vec4(0.3f, 0.3f, 0.85f, 1.f);
+                default:
+                    return White;
             }
         }(it.level);
 
         renderer.render(
             *_logFont,
             glm::vec2(
-                5,
-                _logFont->pointSize() * nRows * 2
+                10,
+                10 + _logFont->pointSize() * nRows * 2
             ),
             it.message.size() < MessageLength ? it.message : result.str(),
             color

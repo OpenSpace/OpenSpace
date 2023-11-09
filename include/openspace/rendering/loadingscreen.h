@@ -52,8 +52,7 @@ public:
     BooleanType(ShowNodeNames);
     BooleanType(CatastrophicError);
 
-    LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
-        ScreenLog* loadScreenLog);
+    LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames);
     ~LoadingScreen();
 
     void render();

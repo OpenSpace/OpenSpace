@@ -471,23 +471,14 @@ void OpenSpaceEngine::initializeGL() {
 
     loadFonts();
 
-    constexpr std::chrono::seconds ScreenLogTimeToLive(20);
-    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(
-        ScreenLogTimeToLive,
-        ScreenLog::LogLevel::Warning
-    );
-    ScreenLog* loadScreenLogger = log.get();
-    ghoul::logging::LogManager::ref().addLog(std::move(log));
-
     _loadingScreen = std::make_unique<LoadingScreen>(
         LoadingScreen::ShowMessage(
             global::configuration->loadingScreen.isShowingMessages
         ),
         LoadingScreen::ShowNodeNames(
             global::configuration->loadingScreen.isShowingNodeNames
-        ),
-        loadScreenLogger
-        );
+        )
+    );
 
     _loadingScreen->render();
 
