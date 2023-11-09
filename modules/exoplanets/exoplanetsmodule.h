@@ -52,6 +52,7 @@ public:
     std::string orbitDiscTexturePath() const;
     std::string habitableZoneTexturePath() const;
     bool showComparisonCircle() const;
+    bool showOrbitUncertainty() const;
     bool showHabitableZone() const;
     bool useOptimisticZone() const;
     float habitableZoneOpacity() const;
@@ -72,6 +73,7 @@ protected:
     properties::StringProperty _habitableZoneTexturePath;
 
     properties::BoolProperty _showComparisonCircle;
+    properties::BoolProperty _showOrbitUncertainty;
     properties::BoolProperty _showHabitableZone;
     properties::BoolProperty _useOptimisticZone;
 

@@ -119,6 +119,14 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShowOrbitUncertaintyInfo = {
+        "ShowOrbitUncertainty",
+        "Show Orbit Uncertainty",
+        "If true, a disc showing the uncertainty for each planetary orbit is enabled per "
+        "default when an exoplanet system is created",
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowHabitableZoneInfo = {
         "ShowHabitableZone",
         "Show Habitable Zone",
@@ -177,6 +185,9 @@ namespace {
        // [[codegen::verbatim(ShowComparisonCircleInfo.description)]]
        std::optional<bool> showComparisonCircle;
 
+       // [[codegen::verbatim(ShowOrbitUncertaintyInfo.description)]]
+       std::optional<bool> showOrbitUncertainty;
+
        // [[codegen::verbatim(ShowHabitableZoneInfo.description)]]
        std::optional<bool> showHabitableZone;
 
@@ -204,6 +215,7 @@ ExoplanetsModule::ExoplanetsModule()
     , _orbitDiscTexturePath(OrbitDiscTextureInfo)
     , _habitableZoneTexturePath(HabitableZoneTextureInfo)
     , _showComparisonCircle(ShowComparisonCircleInfo, false)
+    , _showOrbitUncertainty(ShowOrbitUncertaintyInfo, true)
     , _showHabitableZone(ShowHabitableZoneInfo, true)
     , _useOptimisticZone(UseOptimisticZoneInfo, true)
     , _habitableZoneOpacity(HabitableZoneOpacityInfo, 0.1f, 0.f, 1.f)
@@ -221,6 +233,7 @@ ExoplanetsModule::ExoplanetsModule()
     addProperty(_habitableZoneTexturePath);
 
     addProperty(_showComparisonCircle);
+    addProperty(_showOrbitUncertainty);
     addProperty(_showHabitableZone);
     addProperty(_useOptimisticZone);
 
@@ -283,6 +296,10 @@ bool ExoplanetsModule::showComparisonCircle() const {
     return _showComparisonCircle;
 }
 
+bool ExoplanetsModule::showOrbitUncertainty() const {
+    return _showOrbitUncertainty;
+}
+
 bool ExoplanetsModule::showHabitableZone() const {
     return _showHabitableZone;
 }
@@ -329,6 +346,7 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     }
 
     _showComparisonCircle = p.showComparisonCircle.value_or(_showComparisonCircle);
+    _showOrbitUncertainty = p.showOrbitUncertainty.value_or(_showOrbitUncertainty);
     _showHabitableZone = p.showHabitableZone.value_or(_showHabitableZone);
     _useOptimisticZone = p.useOptimisticZone.value_or(_useOptimisticZone);
 
