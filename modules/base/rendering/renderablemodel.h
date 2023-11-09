@@ -100,6 +100,7 @@ private:
     properties::FloatProperty _ambientIntensity;
     properties::FloatProperty _diffuseIntensity;
     properties::FloatProperty _specularIntensity;
+    properties::FloatProperty _specularPower;
 
     properties::BoolProperty _performShading;
     properties::BoolProperty _enableFaceCulling;
@@ -123,7 +124,7 @@ private:
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, normalTransform, meshTransform,
         meshNormalTransform, ambientIntensity, diffuseIntensity,
-        specularIntensity, performShading, use_forced_color, has_texture_diffuse,
+        specularIntensity, specularPower, performShading, use_forced_color, has_texture_diffuse,
         has_texture_normal, has_texture_specular, has_color_specular,
         texture_diffuse, texture_normal, texture_specular, color_diffuse,
         color_specular, opacity, nLightSources, lightDirectionsViewSpace,
