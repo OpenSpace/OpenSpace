@@ -49,11 +49,9 @@ class LoadingScreen {
 public:
     BooleanType(ShowMessage);
     BooleanType(ShowNodeNames);
-    BooleanType(ShowProgressbar);
     BooleanType(CatastrophicError);
 
     LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
-        ShowProgressbar showProgressbar);
     ~LoadingScreen();
 
     void render();
@@ -62,10 +60,6 @@ public:
     void setCatastrophicError(CatastrophicError catastrophicError);
 
     void finalize();
-
-    void setItemNumber(int nItems);
-    int itemNumber();
-    void tickItem();
 
     enum class Phase {
         PreStart,
@@ -96,11 +90,8 @@ public:
 private:
     bool _showMessage;
     bool _showNodeNames;
-    bool _showProgressbar;
 
     Phase _phase = Phase::PreStart;
-    std::atomic_int _iProgress = 0;
-    std::atomic_int _nItems = 0;
 
     std::unique_ptr<ghoul::opengl::Texture> _logoTexture;
 

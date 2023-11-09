@@ -51,12 +51,6 @@ namespace {
     constexpr glm::vec2 LogoCenter = glm::vec2(0.f, 0.525f);  // in NDC
     constexpr glm::vec2 LogoSize = glm::vec2(0.275f, 0.275);  // in NDC
 
-    constexpr glm::vec2 ProgressbarCenter = glm::vec2(0.f, -0.75f);  // in NDC
-    constexpr glm::vec2 ProgressbarSize = glm::vec2(0.7f, 0.0075f);  // in NDC
-    constexpr float ProgressbarLineWidth = 0.0025f;  // in NDC
-
-    constexpr glm::vec4 ProgressbarOutlineColor = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
-
     constexpr glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
     constexpr glm::vec4 PhaseColorSynchronization = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
     constexpr glm::vec4 PhaseColorInitialization = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
@@ -103,10 +97,8 @@ namespace {
 namespace openspace {
 
 LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
-                             ShowProgressbar showProgressbar)
     : _showMessage(showMessage)
     , _showNodeNames(showNodeNames)
-    , _showProgressbar(showProgressbar)
     , _randomEngine(_randomDevice())
 {
     _loadingFont = global::fontManager->font(
@@ -202,59 +194,6 @@ void LoadingScreen::render() {
     );
 
     //
-    // Render progress bar
-    //
-    const glm::vec2 progressbarSize = glm::vec2(
-        ProgressbarSize.x,
-        ProgressbarSize.y * screenAspectRatio
-    );
-
-    if (_showProgressbar) {
-        const float progress = _nItems != 0 ?
-            static_cast<float>(_iProgress) / static_cast<float>(_nItems) :
-            0.f;
-
-        const float w = ProgressbarLineWidth / screenAspectRatio;
-        const float h = ProgressbarLineWidth;
-        rendering::helper::renderBox(
-            glm::vec2(1.f) - ((ProgressbarCenter + glm::vec2(1.f)) / 2.f),
-            progressbarSize + glm::vec2(2 * w, 2 * h),
-            ProgressbarOutlineColor,
-            rendering::helper::Anchor::Center
-        );
-
-        rendering::helper::renderBox(
-            glm::vec2(1.f) - ((ProgressbarCenter + glm::vec2(1.f)) / 2.f),
-            progressbarSize,
-            glm::vec4(0.f, 0.f, 0.f, 1.f),
-            rendering::helper::Anchor::Center
-        );
-
-        glm::vec4 color = glm::vec4(0.f);
-        switch (_phase) {
-            case Phase::PreStart:
-                break;
-            case Phase::Construction:
-                color = PhaseColorConstruction;
-                break;
-            case Phase::Synchronization:
-                color = PhaseColorSynchronization;
-                break;
-            case Phase::Initialization:
-                color = PhaseColorInitialization;
-                break;
-        }
-
-        glm::vec2 p = glm::vec2(1.f) - ((ProgressbarCenter + glm::vec2(1.f)) / 2.f);
-        rendering::helper::renderBox(
-            p - progressbarSize / 2.f,
-            progressbarSize * glm::vec2(progress, 1.f),
-            color,
-            rendering::helper::Anchor::NW
-        );
-    }
-
-    //
     // "Loading" text
     //
     using FR = ghoul::fontrendering::FontRenderer;
@@ -303,15 +242,6 @@ void LoadingScreen::render() {
         const glm::vec2 logoLl = glm::vec2(LogoCenter.x - size.x,  LogoCenter.y - size.y);
         const glm::vec2 logoUr = glm::vec2(LogoCenter.x + size.x,  LogoCenter.y + size.y);
 
-        const glm::vec2 progressbarLl = glm::vec2(
-            ProgressbarCenter.x - progressbarSize.x,
-            ProgressbarCenter.y - progressbarSize.y
-        );
-        const glm::vec2 progressbarUr = glm::vec2(
-            ProgressbarCenter.x + progressbarSize.x ,
-            ProgressbarCenter.y + progressbarSize.y
-        );
-
         for (Item& item : _items) {
             if (!item.hasLocation) {
                 // Compute a new location
@@ -351,16 +281,7 @@ void LoadingScreen::render() {
                         rectOverlaps(messageLl, messageUr, ll, ur) :
                         false;
 
-                    const bool barOverlap = _showProgressbar ?
-                        rectOverlaps(
-                            ndcToScreen(progressbarLl, res),
-                            ndcToScreen(progressbarUr, res),
-                            ll,
-                            ur
-                        ) :
-                        false;
 
-                    if (logoOverlap || loadingOverlap || messageOverlap || barOverlap) {
                         // We never want to have an overlap with these, so this try didn't
                         // count against the maximum, thus ensuring that (if there has to
                         // be an overlap, it's over other text that might disappear before
@@ -506,22 +427,8 @@ void LoadingScreen::finalize() {
     render();
 }
 
-
-void LoadingScreen::setItemNumber(int nItems) {
-    _nItems = nItems;
-}
-
-int LoadingScreen::itemNumber() {
-    return _nItems;
-}
-
-void LoadingScreen::tickItem() {
-    ++_iProgress;
-}
-
 void LoadingScreen::setPhase(Phase phase) {
     _phase = phase;
-    _iProgress = 0;
 }
 
 void LoadingScreen::updateItem(const std::string& itemIdentifier,

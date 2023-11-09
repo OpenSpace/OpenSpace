@@ -477,9 +477,6 @@ void OpenSpaceEngine::initializeGL() {
         LoadingScreen::ShowNodeNames(
             global::configuration->loadingScreen.isShowingNodeNames
         ),
-        LoadingScreen::ShowProgressbar(
-            global::configuration->loadingScreen.isShowingProgressbar
-        )
         );
 
     _loadingScreen->render();
@@ -786,7 +783,6 @@ void OpenSpaceEngine::loadAssets() {
             }
         }
 
-        _loadingScreen->setItemNumber(static_cast<int>(allSyncs.size()));
 
         if (_shouldAbortLoading) {
             global::windowDelegate->terminate();
@@ -844,7 +840,6 @@ void OpenSpaceEngine::loadAssets() {
                 LoadingScreen::ProgressInfo progressInfo;
                 progressInfo.progress = 1.f;
 
-                _loadingScreen->tickItem();
                 _loadingScreen->updateItem(
                     (*it)->identifier(),
                     (*it)->name(),

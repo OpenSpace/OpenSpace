@@ -230,10 +230,6 @@ TEST_CASE("Configuration: loadingscreen", "[configuration]") {
             defaultConf.loadingScreen.isShowingMessages
         );
         CHECK(
-            c.loadingScreen.isShowingProgressbar ==
-            defaultConf.loadingScreen.isShowingProgressbar
-        );
-        CHECK(
             c.loadingScreen.isShowingNodeNames ==
             defaultConf.loadingScreen.isShowingNodeNames
         );
@@ -243,24 +239,6 @@ TEST_CASE("Configuration: loadingscreen", "[configuration]") {
         constexpr std::string_view Extra = R"(LoadingScreen = { ShowMessage = true })";
         const Configuration c = loadConfiguration("loadingscreen2", Extra);
         CHECK(c.loadingScreen.isShowingMessages == true);
-        CHECK(
-            c.loadingScreen.isShowingProgressbar ==
-            defaultConf.loadingScreen.isShowingProgressbar
-        );
-        CHECK(
-            c.loadingScreen.isShowingNodeNames ==
-            defaultConf.loadingScreen.isShowingNodeNames
-        );
-    }
-    {
-        // isShowingProgressbar
-        constexpr std::string_view Extra = R"(LoadingScreen = { ShowProgressbar = true })";
-        const Configuration c = loadConfiguration("loadingscreen3", Extra);
-        CHECK(
-            c.loadingScreen.isShowingMessages ==
-            defaultConf.loadingScreen.isShowingMessages
-        );
-        CHECK(c.loadingScreen.isShowingProgressbar == true);
         CHECK(
             c.loadingScreen.isShowingNodeNames ==
             defaultConf.loadingScreen.isShowingNodeNames
@@ -273,10 +251,6 @@ TEST_CASE("Configuration: loadingscreen", "[configuration]") {
         CHECK(
             c.loadingScreen.isShowingMessages ==
             defaultConf.loadingScreen.isShowingMessages
-        );
-        CHECK(
-            c.loadingScreen.isShowingProgressbar ==
-            defaultConf.loadingScreen.isShowingProgressbar
         );
         CHECK(c.loadingScreen.isShowingNodeNames == true);
     }
