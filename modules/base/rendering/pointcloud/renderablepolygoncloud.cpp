@@ -46,7 +46,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePolygonCloud::Documentation() {
-    return codegen::doc<Parameters>("base_RenderablePolygonCloud");
+    return codegen::doc<Parameters>(
+        "base_renderablepolygoncloud",
+        RenderablePointCloud::Documentation()
+    );
 }
 
 RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictionary)
