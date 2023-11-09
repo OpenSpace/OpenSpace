@@ -2,7 +2,7 @@ asset.resource({
   Name = "Example Single",
   Type = "UrlSynchronization",
   Identifier = "example_single",
-  Url = "http://celestrak.com/NORAD/elements/geo.txt",
+  Url = "http://celestrak.com/NORAD/elements/geo.txt"
 })
 
 asset.resource({
@@ -12,7 +12,7 @@ asset.resource({
   Url = {
     "http://celestrak.com/NORAD/elements/stations.txt",
     "http://celestrak.com/NORAD/elements/gps-ops.txt"
-  },
+  }
 })
 
 asset.resource({
@@ -39,7 +39,7 @@ asset.resource({
   Type = "UrlSynchronization",
   Identifier = "no_hash",
   Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
-  UseHash = false,
+  UseHash = false
 })
 
 

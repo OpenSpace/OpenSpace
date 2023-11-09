@@ -6,7 +6,7 @@ local data = asset.resource({
   Name = "GeoJSON Example Lines",
   Type = "UrlSynchronization",
   Identifier = "geojson_example_lines",
-  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/lines.geojson",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/lines.geojson"
 })
 
 

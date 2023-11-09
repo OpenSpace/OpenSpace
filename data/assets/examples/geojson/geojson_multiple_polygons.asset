@@ -9,7 +9,7 @@ local data = asset.resource({
   Url = {
     "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_multiple.geojson",
     "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_different_heights.geojson"
-  },
+  }
 })
 
 

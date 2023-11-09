@@ -17,7 +17,7 @@ asset.resource({
     "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/ganymede.png",
     "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/io.png"
   },
-  UseHash = false,
+  UseHash = false
 })
 
 asset.resource({
@@ -32,7 +32,7 @@ asset.resource({
     "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_galaxies.png",
     "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_example.png"
   },
-  UseHash = false,
+  UseHash = false
 })
 
 asset.resource({
@@ -40,5 +40,5 @@ asset.resource({
   Name = "Instructions",
   Identifier = "images",
   Url = "http://data.openspaceproject.com/files/webgui/assets/images/instructions.png",
-  UseHash = false,
+  UseHash = false
 })

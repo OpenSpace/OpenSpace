@@ -6,7 +6,7 @@ local data = asset.resource({
   Name = "GeoJSON Example Toronto Neighborhoods",
   Type = "UrlSynchronization",
   Identifier = "geojson_example_toronto_neighborhoods",
-  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/toronto_neighborhoods.geojson",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/toronto_neighborhoods.geojson"
 })
 
 
