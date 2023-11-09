@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "Milkyway Volume Data",
   Type = "HttpSynchronization",
   Identifier = "milkyway_volume_data",
@@ -30,7 +30,7 @@ local MilkyWayVolume = {
     AbsorptionMultiply = 200,
     EmissionMultiply = 250,
     Rotation = { math.pi, 3.1248, 4.45741 },
-    RaycastingShader = asset.localResource("galaxyraycast2.glsl"),
+    RaycastingShader = asset.resource("galaxyraycast2.glsl"),
     Volume = {
       Type = "Volume",
       Filename = data .. "MilkyWayRGBAVolume1024x1024x128.raw",

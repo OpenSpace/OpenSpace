@@ -2,7 +2,7 @@ local transforms = asset.require("../transforms")
 
 
 
-local syncedKernels = asset.syncedResource({
+local syncedKernels = asset.resource({
   Name = "Saturn Shepherd Moons Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "saturn_shepherd_kernels",

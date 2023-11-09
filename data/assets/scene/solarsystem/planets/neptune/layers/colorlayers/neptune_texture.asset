@@ -2,7 +2,7 @@ local globe = asset.require("../../neptune")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Neptune textures",
   Type = "HttpSynchronization",
   Identifier = "neptune_textures",

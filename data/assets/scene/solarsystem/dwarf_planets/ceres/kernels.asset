@@ -1,4 +1,4 @@
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Ceres Kernels",
   Type = "HttpSynchronization",
   Identifier = "ceres_kernels",

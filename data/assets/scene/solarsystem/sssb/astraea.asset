@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local horizons = asset.syncedResource({
+local horizons = asset.resource({
   Name = "5 Astraea Trajectory",
   Type = "HttpSynchronization",
   Identifier = "astraea_horizons",

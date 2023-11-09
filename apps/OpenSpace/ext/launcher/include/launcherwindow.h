@@ -55,7 +55,7 @@ public:
      */
     LauncherWindow(bool profileEnabled,
         const openspace::configuration::Configuration& globalConfig,
-        bool sgctConfigEnabled,  std::string sgctConfigName, QWidget* parent);
+        bool sgctConfigEnabled, std::string sgctConfigName, QWidget* parent);
 
     /**
       * Returns bool for whether "start OpenSpace" was chosen when this window closed.

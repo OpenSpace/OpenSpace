@@ -1,4 +1,4 @@
-local sphereTextures = asset.syncedResource({
+local sphereTextures = asset.resource({
   Name = "Milky Way Sphere Textures",
   Type = "HttpSynchronization",
   Identifier = "milkyway_textures",

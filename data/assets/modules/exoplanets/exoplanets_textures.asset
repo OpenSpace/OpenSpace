@@ -4,14 +4,14 @@ local habitableZoneTextures = asset.require(
 
 
 
-local sunTextures = asset.syncedResource({
+local sunTextures = asset.resource({
   Type = "HttpSynchronization",
   Name = "Sun textures",
   Identifier = "sun_textures",
   Version = 4
 })
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Exoplanet Textures",
   Type = "HttpSynchronization",
   Identifier = "exoplanets_textures",

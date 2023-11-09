@@ -4,7 +4,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local textureSourcePath = asset.syncedResource({
+local textureSourcePath = asset.resource({
   Type = "HttpSynchronization",
   Name = "euv_textures_bastille_event",
   Identifier = "euv_textures_bastille_event",

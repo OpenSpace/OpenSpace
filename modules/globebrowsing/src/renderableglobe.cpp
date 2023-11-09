@@ -128,7 +128,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PerformFrustumCullingInfo = {
         "PerformFrustumCulling",
-        "Perform frusum culling",
+        "Perform frustum culling",
         "If this value is set to 'true', frustum culling will be performed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

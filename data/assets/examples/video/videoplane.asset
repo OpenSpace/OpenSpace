@@ -18,7 +18,7 @@ local Plane = {
     Type = "RenderableVideoPlane",
     MirrorBackside = true,
     Size = 3E7,
-    Video = asset.localResource("examplevideo.mp4"),
+    Video = asset.resource("examplevideo.mp4"),
   },
   GUI = {
     Name = "Video Plane Example",

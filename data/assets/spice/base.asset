@@ -1,18 +1,18 @@
-local lsk = asset.syncedResource({
+local lsk = asset.resource({
   Name = "General LSK Kernels",
   Type = "HttpSynchronization",
   Identifier = "general_lsk",
   Version = 1
 })
 
-local pck = asset.syncedResource({
+local pck = asset.resource({
   Name = "General PCK Kernels",
   Type = "HttpSynchronization",
   Identifier = "general_pck",
   Version = 1
 })
 
-local spk = asset.syncedResource({
+local spk = asset.resource({
   Name = "General SPK Kernels",
   Type = "HttpSynchronization",
   Identifier = "general_spk",

@@ -1,4 +1,4 @@
-asset.syncedResource({
+asset.resource({
   Type = "UrlSynchronization",
   Name = "Icons",
   Identifier = "planet_icons",
@@ -20,7 +20,7 @@ asset.syncedResource({
   UseHash = false
 })
 
-asset.syncedResource({
+asset.resource({
   Type = "UrlSynchronization",
   Name = "Stories",
   Identifier = "story_images",
@@ -35,7 +35,7 @@ asset.syncedResource({
   UseHash = false
 })
 
-asset.syncedResource({
+asset.resource({
   Type = "UrlSynchronization",
   Name = "Instructions",
   Identifier = "images",

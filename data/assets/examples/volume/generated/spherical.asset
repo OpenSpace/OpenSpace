@@ -19,8 +19,8 @@ local Volume = {
   },
   Renderable = {
     Type = "RenderableTimeVaryingVolume",
-    SourceDirectory = asset.localResource("spherical"),
-    TransferFunction = asset.localResource("../transferfunction.txt"),
+    SourceDirectory = asset.resource("spherical"),
+    TransferFunction = asset.resource("../transferfunction.txt"),
     StepSize = 0.01,
     MinValue = 0,
     MaxValue = 1,

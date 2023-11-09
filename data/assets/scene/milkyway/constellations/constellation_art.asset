@@ -1,17 +1,17 @@
-local constellationsCSV = asset.localResource("constellation_data.csv")
+local constellationsCSV = asset.resource("constellation_data.csv")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local constellations_helper = asset.require("util/constellations_helper")
 
 
 
-local images = asset.syncedResource({
+local images = asset.resource({
   Name = "Constellation Images",
   Type = "HttpSynchronization",
   Identifier = "constellation_images",
   Version = 4
 })
 
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "Constellation Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_constellations_data",

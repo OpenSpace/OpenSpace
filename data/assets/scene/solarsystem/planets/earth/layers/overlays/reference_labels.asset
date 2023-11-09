@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "Reference_Labels",
   Name = "Reference Labels",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("reference_labels.wms")
+  FilePath = asset.resource("reference_labels.wms")
 }
 
 
