@@ -14,7 +14,6 @@ local spk = asset.resource({
 
 
 local kernels = {
-  lsk .. "naif0012.tls",
   pck .. "pck00011.tpc",
   spk .. "de430.bsp"
 }

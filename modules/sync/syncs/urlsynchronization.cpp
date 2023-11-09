@@ -41,7 +41,6 @@ namespace {
     constexpr std::string_view _loggerCat = "UrlSynchronization";
     constexpr std::string_view OssyncVersionNumber = "1.0";
     constexpr std::string_view SynchronizationToken = "Synchronized";
-    constexpr double MaxDateAsJ2000 = 252424036869.18289;
 
     struct [[codegen::Dictionary(UrlSynchronization)]] Parameters {
         // The URL or urls from where the files are downloaded. If multiple URLs are
@@ -293,7 +292,6 @@ bool UrlSynchronization::isEachFileValid() {
         return false;
     }
 
-    // Read contents of file
     std::ifstream file(path);
     std::string line;
 
@@ -313,10 +311,10 @@ bool UrlSynchronization::isEachFileValid() {
     // Otherwise first line is the version number.
     std::string ossyncVersion = line;
 
-    //Format of 1.0 ossync:
-    //Version number: e.g., 1.0
-    //Date that specifies how long the files are valid for in ISO8601 format
-    //Valid to: yyyy-mm-ddThr:mn:sc.xxx
+    // Format of 1.0 ossync:
+    // Version number: e.g., 1.0
+    // Date that specifies how long the files are valid for in ISO8601 format
+    // Valid to: yyyy-mm-ddThr:mn:sc.xxx
 
     if (ossyncVersion == "1.0") {
         std::getline(file >> std::ws, line);
@@ -344,11 +342,8 @@ bool UrlSynchronization::isEachFileValid() {
     }
     else {
         LERROR(fmt::format(
-            "{}: Unknown ossync version number read. "
-            "Got {} while {} and below are valid",
-            _identifier,
-            ossyncVersion,
-            OssyncVersionNumber
+            "{}: Unknown ossync version number read. Got {} while {} and below are valid",
+            _identifier, ossyncVersion, OssyncVersionNumber
         ));
         _state = State::Rejected;
     }
@@ -365,23 +360,21 @@ void UrlSynchronization::createSyncFile(bool isFullySynchronized) const {
 
     std::string currentTimeAsISO8601 = Time::currentWallTime();
     double currentTimeAsJ2000 = Time::convertTime(currentTimeAsISO8601);
-    
+
     // With the format YYYY-MM... any year thats larger than 4 digits throws an error
     // Limit the future date to year 9999
     double futureTimeAsJ2000 = std::min(
         currentTimeAsJ2000 + _secondsUntilResync,
         MaxDateAsJ2000
     );
-       
+
     std::string fileIsValidTo = SpiceManager::ref().dateFromEphemerisTime(
         futureTimeAsJ2000,
         "YYYY-MM-DDTHR:MN:SC.###"
     );
-   
-    syncFile << fmt::format(
-        "{}\n{}\n",
-        OssyncVersionNumber,
-        fileIsValidTo
-    );
+
+    const std::string msg = fmt::format("{}\n{}\n", OssyncVersionNumber, fileIsValidTo);
+    syncFile << msg;
+}
 
 } // namespace openspace
