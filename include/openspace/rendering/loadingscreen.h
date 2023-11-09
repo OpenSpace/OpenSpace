@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___LOADINGSCREEN___H__
 #define __OPENSPACE_CORE___LOADINGSCREEN___H__
 
+#include <openspace/util/screenlog.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -52,9 +53,11 @@ public:
     BooleanType(CatastrophicError);
 
     LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
+        ScreenLog* loadScreenLog);
     ~LoadingScreen();
 
     void render();
+    void renderLogMessages() const;
 
     void postMessage(std::string message);
     void setCatastrophicError(CatastrophicError catastrophicError);
@@ -98,6 +101,7 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _loadingFont;
     std::shared_ptr<ghoul::fontrendering::Font> _messageFont;
     std::shared_ptr<ghoul::fontrendering::Font> _itemFont;
+    std::shared_ptr<ghoul::fontrendering::Font> _logFont;
 
     bool _hasCatastrophicErrorOccurred = false;
     std::string _message;
@@ -121,6 +125,9 @@ private:
 
     std::random_device _randomDevice;
     std::default_random_engine _randomEngine;
+
+    // Non owning but we remove the log from LogManager on destruction
+    ScreenLog* _log;
 };
 
 } // namespace openspace

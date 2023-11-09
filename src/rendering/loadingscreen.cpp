@@ -47,6 +47,7 @@ namespace {
     constexpr float LoadingFontSize = 25.f;
     constexpr float MessageFontSize = 22.f;
     constexpr float ItemFontSize = 10.f;
+    constexpr float LogFontSize = 10.f;
 
     constexpr glm::vec2 LogoCenter = glm::vec2(0.f, 0.525f);  // in NDC
     constexpr glm::vec2 LogoSize = glm::vec2(0.275f, 0.275);  // in NDC
@@ -97,8 +98,10 @@ namespace {
 namespace openspace {
 
 LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
+    ScreenLog* loadScreenLog)
     : _showMessage(showMessage)
     , _showNodeNames(showNodeNames)
+    , _log(loadScreenLog)
     , _randomEngine(_randomDevice())
 {
     _loadingFont = global::fontManager->font(
@@ -126,6 +129,13 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         );
     }
 
+    _logFont = global::fontManager->font(
+        "Loading",
+        LogFontSize,
+        ghoul::fontrendering::FontManager::Outline::No,
+        ghoul::fontrendering::FontManager::LoadGlyphs::No
+    );
+
     {
         // Logo stuff
         _logoTexture = ghoul::io::TextureReader::ref().loadTexture(
@@ -142,6 +152,7 @@ LoadingScreen::~LoadingScreen() {
     _loadingFont = nullptr;
     _messageFont = nullptr;
     _itemFont = nullptr;
+    ghoul::logging::LogManager::ref().removeLog(_log);
 }
 
 void LoadingScreen::render() {
@@ -234,6 +245,12 @@ void LoadingScreen::render() {
         renderer.render(*_messageFont, messageLl, _message);
     }
 
+    glm::vec2 logLl = glm::vec2(0, 0);
+    glm::vec2 logUr = glm::vec2(
+        res.x / 2.f,
+        res.y * StatusMessageOffset
+    );
+
     if (_showNodeNames) {
         std::lock_guard guard(_itemsMutex);
 
@@ -281,7 +298,12 @@ void LoadingScreen::render() {
                         rectOverlaps(messageLl, messageUr, ll, ur) :
                         false;
 
+                    const bool logOverlap = rectOverlaps(
+                        logLl, logUr,
+                        ll, ur
+                    );
 
+                    if (logoOverlap || loadingOverlap || messageOverlap || logOverlap) {
                         // We never want to have an overlap with these, so this try didn't
                         // count against the maximum, thus ensuring that (if there has to
                         // be an overlap, it's over other text that might disappear before
@@ -383,7 +405,7 @@ void LoadingScreen::render() {
                 _items.end(),
                 [now](const Item& i) {
                     if (i.status == ItemStatus::Finished) {
-                        return i.finishedTime > now + TTL;
+                        return (i.finishedTime + TTL) < now;
                     }
                     else {
                         return false;
@@ -395,12 +417,81 @@ void LoadingScreen::render() {
 
     }
 
+    // Render log messages last to make them slightly more visible if a download item
+    // is slightly overlapping
+    renderLogMessages();
+
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 
     std::this_thread::sleep_for(RefreshRate);
     global::windowDelegate->swapBuffer();
     FrameMarkEnd("Loading");
+}
+
+void LoadingScreen::renderLogMessages() const {
+    ZoneScoped;
+
+    constexpr size_t MaxNumberMessages = 10;
+    constexpr int MessageLength = 90;
+
+    using FR = ghoul::fontrendering::FontRenderer;
+    const FR& renderer = FR::defaultRenderer();
+
+    _log->removeExpiredEntries();
+    const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
+
+    size_t nRows = 1;
+    for (size_t i = 1; i <= std::min(MaxNumberMessages, entries.size()); i++) {
+        ZoneScopedN("Entry");
+
+        const ScreenLog::LogEntry& it = entries[entries.size() - i];
+
+        std::ostringstream result;
+        // Split really long messages into multiple lines for better readability
+        if (it.message.size() > MessageLength) {
+            std::istringstream is(it.message);
+
+            int charactersSinceNewLine = 0;
+            std::string word;
+            while (is >> word) {
+                charactersSinceNewLine += word.size();
+                // Insert a new line when we exceede messageLength
+                if (charactersSinceNewLine > MessageLength) {
+                    result << '\n';
+                    charactersSinceNewLine = word.size();
+                    ++nRows;
+                }
+                result << word << ' ';
+                ++charactersSinceNewLine;
+            }
+        }
+
+        const glm::vec4 white(0.9f, 0.9f, 0.9f, 1.0);
+        const glm::vec4 color = [&white](ScreenLog::LogLevel level) {
+            switch (level) {
+            case ghoul::logging::LogLevel::Warning:
+                return glm::vec4(1.f, 1.f, 0.f, 1.0);
+            case ghoul::logging::LogLevel::Error:
+                return glm::vec4(1.f, 0.f, 0.f, 1.0);
+            case ghoul::logging::LogLevel::Fatal:
+                return glm::vec4(0.3f, 0.3f, 0.85f, 1.0);
+            default:
+                return white;
+            }
+        }(it.level);
+
+        renderer.render(
+            *_logFont,
+            glm::vec2(
+                5,
+                _logFont->pointSize() * nRows * 2
+            ),
+            it.message.size() < MessageLength ? it.message : result.str(),
+            color
+        );
+        ++nRows;
+    }
 }
 
 void LoadingScreen::postMessage(std::string message) {
@@ -462,7 +553,7 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         Item item = {
             .identifier = itemIdentifier,
             .name = itemName,
-            .status = ItemStatus::Started,
+            .status = newStatus,
             .progress = std::move(progressInfo),
             .hasLocation = false,
             .finishedTime = std::chrono::system_clock::from_time_t(0)
