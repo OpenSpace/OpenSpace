@@ -48,7 +48,7 @@ local Apollo11LemModel = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = lem_model .. "LM-2_ver2clean.obj",
-    RotationVector = { -90.0, 0, 0 },
+    RotationVector = { -90.0, 283.86999, 0 },
     LightSources = {
       sun.LightSource,
       {
