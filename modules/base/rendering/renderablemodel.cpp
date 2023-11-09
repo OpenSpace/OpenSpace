@@ -72,6 +72,20 @@ namespace {
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
+    constexpr std::array<const char*, 27> UniformNames = {
+        "modelViewTransform", "projectionTransform", "normalTransform", "meshTransform",
+        "meshNormalTransform", "ambientIntensity", "diffuseIntensity",
+        "specularIntensity", "specularPower", "performShading", "use_forced_color", "has_texture_diffuse",
+        "has_texture_normal", "has_texture_specular", "has_color_specular",
+        "texture_diffuse", "texture_normal", "texture_specular", "color_diffuse",
+        "color_specular", "opacity", "nLightSources", "lightDirectionsViewSpace",
+        "lightIntensities", "performManualDepthTest", "gBufferDepthTexture", "resolution"
+    };
+
+    constexpr std::array<const char*, 5> UniformOpacityNames = {
+        "opacity", "colorTexture", "depthTexture", "viewport", "resolution"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable Animation",
@@ -97,6 +111,14 @@ namespace {
         "SpecularIntensity",
         "Specular Intensity",
         "A multiplier for specular lighting.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SpecularPowerInfo = {
+        "SpecularPower",
+        "Specular Power",
+        "Power factor for specular component, higher value gives narrower specularity",
+        // @VISIBILITY(2.4)
         openspace::properties::Property::Visibility::User
     };
 
@@ -280,6 +302,9 @@ namespace {
         // [[codegen::verbatim(SpecularIntensityInfo.description)]]
         std::optional<float> specularIntensity;
 
+        // [[codegen::verbatim(SpecularPowerInfo.description)]]
+        std::optional<float> specularPower;
+
         // [[codegen::verbatim(ShadingInfo.description)]]
         std::optional<bool> performShading;
 
@@ -338,6 +363,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
+    , _specularPower(SpecularPowerInfo, 100.f, 0.5f, 100.f)
     , _performShading(ShadingInfo, true)
     , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _modelTransform(
@@ -454,6 +480,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _ambientIntensity = p.ambientIntensity.value_or(_ambientIntensity);
     _diffuseIntensity = p.diffuseIntensity.value_or(_diffuseIntensity);
     _specularIntensity = p.specularIntensity.value_or(_specularIntensity);
+    _specularPower = p.specularPower.value_or(_specularPower);
     _performShading = p.performShading.value_or(_performShading);
     _enableDepthTest = p.enableDepthTest.value_or(_enableDepthTest);
     _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
@@ -485,6 +512,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
+    addProperty(_specularPower);
     addProperty(_performShading);
     addProperty(_enableFaceCulling);
     addProperty(_enableDepthTest);
@@ -943,6 +971,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
         _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
         _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
+        _program->setUniform(_uniformCache.specularPower, _specularPower);
     }
 
     _program->setUniform(

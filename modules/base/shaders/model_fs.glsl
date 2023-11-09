@@ -34,6 +34,7 @@ in vec3 vs_color;
 uniform float ambientIntensity = 0.2;
 uniform float diffuseIntensity = 1.0;
 uniform float specularIntensity = 1.0;
+uniform float specularPower = 100.0;
 uniform bool performShading = true;
 
 uniform bool use_forced_color = false;
@@ -144,7 +145,6 @@ Fragment getFragment() {
 
     // Could be seperated into ambinet, diffuse and specular and passed in as uniforms
     const vec3 lightColor = vec3(1.0);
-    const float specularPower = 100.0;
 
     // Ambient light
     vec3 totalLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
