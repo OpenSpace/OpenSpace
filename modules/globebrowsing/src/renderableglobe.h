@@ -133,6 +133,7 @@ private:
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
         properties::BoolProperty performFrustumCulling;
+        properties::BoolProperty performHorizonCulling;
         properties::IntProperty  modelSpaceRenderingCutoffLevel;
         properties::IntProperty  dynamicLodIterationCount;
     } _debugProperties;
