@@ -98,6 +98,7 @@ local Textured = {
     Type = "RenderablePointCloud",
     File = asset.resource("data/dummydata.csv"),
     Texture = openspace.absPath("${DATA}/test3.jpg"),
+    UseAdditiveBlending = false, -- Disable additive blending
     Coloring = {
       Enabled = false, -- @TODO This setting is currently ignored. It shouldn't be
       ColorMapping = {
