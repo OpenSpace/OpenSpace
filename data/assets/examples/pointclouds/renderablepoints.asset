@@ -61,7 +61,7 @@ local FixedColor_ScaleBasedOnData = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, math.pi, 0 }
+      Rotation = { 0, 0.5 * math.pi, 0 }
     }
   },
   Renderable = {
@@ -80,6 +80,38 @@ local FixedColor_ScaleBasedOnData = {
     Path = "/Example",
     Description = [[Point cloud with a fixed color and sizing that can be set based on a
     column in the dataset]]
+  }
+}
+
+-- Point cloud with textures. Textured points can also be color mapped, but here it
+-- is disabled per default
+local Textured = {
+  Identifier = "ExamplePoints_Textured",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, math.pi, 0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Texture = openspace.absPath("${DATA}/test3.jpg"),
+    Coloring = {
+      Enabled = false, -- @TODO This setting is currently ignored. It shouldn't be
+      ColorMapping = {
+        File = asset.resource("viridis.cmap")
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 15.0
+    }
+  },
+  GUI = {
+    Name = "Point Cloud - Textured",
+    Path = "/Example",
+    Description = "Point cloud with a texture per point"
   }
 }
 
@@ -160,6 +192,7 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(FixedColor_FixedSize)
   openspace.addSceneGraphNode(FixedColor_MaxPixelSize)
   openspace.addSceneGraphNode(FixedColor_ScaleBasedOnData)
+  openspace.addSceneGraphNode(Textured)
   openspace.addSceneGraphNode(ColorMapped_FixedSize)
   openspace.addSceneGraphNode(ColorMappedAdvanced_NoBlend)
 end)
@@ -167,6 +200,7 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ColorMappedAdvanced_NoBlend)
   openspace.removeSceneGraphNode(ColorMapped_FixedSize)
+  openspace.removeSceneGraphNode(Textured)
   openspace.removeSceneGraphNode(FixedColor_ScaleBasedOnData)
   openspace.removeSceneGraphNode(FixedColor_MaxPixelSize)
   openspace.removeSceneGraphNode(FixedColor_FixedSize)
@@ -175,6 +209,7 @@ end)
 asset.export(FixedColor_FixedSize)
 asset.export(FixedColor_MaxPixelSize)
 asset.export(FixedColor_ScaleBasedOnData)
+asset.export(Textured)
 asset.export(ColorMapped_FixedSize)
 asset.export(ColorMappedAdvanced_NoBlend)
 
