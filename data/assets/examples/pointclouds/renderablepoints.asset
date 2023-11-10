@@ -3,6 +3,7 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 -- Color mapped points close to Earth, with some different settings for color and
 -- sizing, and a rotation that makes them not overlap
 
+-- Point cloud with fixed color and world-scale size
 local FixedColor_FixedSize = {
   Identifier = "ExamplePoints_FixedSize",
   Parent = earthAsset.Earth.Identifier,
@@ -17,13 +18,14 @@ local FixedColor_FixedSize = {
     }
   },
   GUI = {
-    Name = "Dummy Point Cloud - Fixed Color / Fixed Size",
+    Name = "Point Cloud - Fixed Color / Fixed Size",
     Path = "/Example",
     Description = "Point cloud with a fixed color and fixed sizing"
   }
 }
 
-
+-- Point cloud with fixed color and size scaling that is limited by a certain size,
+-- in pixels
 local FixedColor_MaxPixelSize = {
   Identifier = "ExamplePoints_MaxPixelSize",
   Parent = earthAsset.Earth.Identifier,
@@ -46,13 +48,42 @@ local FixedColor_MaxPixelSize = {
     }
   },
   GUI = {
-    Name = "Dummy Point Cloud - Fixed Color / Max Pixel Size",
+    Name = "Point Cloud - Fixed Color / Max Pixel Size",
     Path = "/Example",
     Description = "Point cloud with a fixed color and sizing with a given max pixel size"
   }
 }
 
+-- Point cloud with fixed color and size scaling from a selected data column
+local FixedColor_ScaleBasedOnData = {
+  Identifier = "ExamplePoints_ScaleFromData",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, math.pi, 0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.5, 0.5, 0.0 }
+    },
+    SizeSettings = {
+      ScaleExponent = 11.5,
+      SizeMapping = { "number_withNan", "a" }
+    }
+  },
+  GUI = {
+    Name = "Point Cloud - Fixed Color / Size From Data",
+    Path = "/Example",
+    Description = [[Point cloud with a fixed color and sizing that can be set based on a
+    column in the dataset]]
+  }
+}
 
+-- Point cloud with color mapping and fixed point sizing
 local ColorMapped_FixedSize = {
   Identifier = "ExamplePoints_ColorMapped",
   Parent = earthAsset.Earth.Identifier,
@@ -75,13 +106,18 @@ local ColorMapped_FixedSize = {
     }
   },
   GUI = {
-    Name = "Dummy Point Cloud - Color Mapped",
+    Name = "Point Cloud - Color Mapped",
     Path = "/Example",
     Description = "Color mapped point cloud with fixed sizing"
   }
 }
 
 
+-- Point cloud with more advanced color mapping and fixed point sizing.
+-- Here we have predefined a couple of parameters to use for the color mapping.
+-- Also, missing/NaN values are mapped to a specific color.
+-- Finally, no daditive blending is used for the color, meaning that the color of
+-- overlapping points will not be mixed/addded
 local ColorMappedAdvanced_NoBlend = {
   Identifier = "ExamplePoints_ColorMappedNoBlend",
   Parent = earthAsset.Earth.Identifier,
@@ -98,12 +134,10 @@ local ColorMappedAdvanced_NoBlend = {
     Coloring = {
       ColorMapping = {
         File = asset.resource("viridis.cmap"),
-        -- Map specific column options to color map based on
         ParameterOptions = {
           { Key = "number_withNan" }, -- no range => compute min and max
           { Key = "normaldist_withMissing", Range = { -0.5, 0.5 } }
         },
-        -- Show missing data values in a specific color
         ShowMissingData = true,
         NoDataColor = { 0.5, 0.5, 0.5, 1.0 }
       }
@@ -113,9 +147,9 @@ local ColorMappedAdvanced_NoBlend = {
     }
   },
   GUI = {
-    Name = "Dummy Point Cloud - Color Mapped (Advanced) - No blending",
+    Name = "Point Cloud - Color Mapped (Advanced) - No blending",
     Path = "/Example",
-    Description = [[Color mapped point cloud without addtive blending, with missing
+    Description = [[Color mapped point cloud without additive blending, with missing
       values shown in grey, and a limited choice of parameter options to use for
       the color mapping.]]
   }
@@ -125,6 +159,7 @@ local ColorMappedAdvanced_NoBlend = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(FixedColor_FixedSize)
   openspace.addSceneGraphNode(FixedColor_MaxPixelSize)
+  openspace.addSceneGraphNode(FixedColor_ScaleBasedOnData)
   openspace.addSceneGraphNode(ColorMapped_FixedSize)
   openspace.addSceneGraphNode(ColorMappedAdvanced_NoBlend)
 end)
@@ -132,12 +167,14 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ColorMappedAdvanced_NoBlend)
   openspace.removeSceneGraphNode(ColorMapped_FixedSize)
+  openspace.removeSceneGraphNode(FixedColor_ScaleBasedOnData)
   openspace.removeSceneGraphNode(FixedColor_MaxPixelSize)
   openspace.removeSceneGraphNode(FixedColor_FixedSize)
 end)
 
 asset.export(FixedColor_FixedSize)
 asset.export(FixedColor_MaxPixelSize)
+asset.export(FixedColor_ScaleBasedOnData)
 asset.export(ColorMapped_FixedSize)
 asset.export(ColorMappedAdvanced_NoBlend)
 
