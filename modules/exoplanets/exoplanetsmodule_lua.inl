@@ -406,6 +406,7 @@ void createExoplanetSystem(const std::string& starName,
     const glm::dmat3 meanOrbitPlaneRotationMatrix = static_cast<glm::dmat3>(rotation);
 
     bool isCircleEnabled = module->showComparisonCircle();
+    glm::vec3 circleColor = module->comparisonCircleColor();
 
     // 1 AU Size Comparison Circle
     const std::string circle = "{"
@@ -415,7 +416,7 @@ void createExoplanetSystem(const std::string& starName,
             "Type = 'RenderableRadialGrid',"
             "Enabled = " + (isCircleEnabled ? "true" : "false") + ","
             "Radii = { 0.0, 1.0 },"
-            "Color = { 0.0, 0.8, 0.8 },"
+            "Color = " + ghoul::to_string(circleColor) + ","
             "CircleSegments = 64,"
             "LineWidth = 2.0,"
         "},"

@@ -110,6 +110,15 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ComparisonCircleColorInfo = {
+        "ComparisonCircleColor",
+        "Comparison Circle Color",
+        "Decides the color of the 1 AU size comparson circles that are generated as part "
+        "of an exoplanet system. Changing the color will not modify already existing "
+        "circles",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowComparisonCircleInfo = {
         "ShowComparisonCircle",
         "Show Comparison Circle",
@@ -182,6 +191,9 @@ namespace {
        // [[codegen::verbatim(HabitableZoneTextureInfo.description)]]
        std::optional<std::filesystem::path> habitableZoneTexture;
 
+       // [[codegen::verbatim(ComparisonCircleColorInfo.description)]]
+       std::optional<glm::vec3> comparisonCircleColor [[codegen::color()]];
+
        // [[codegen::verbatim(ShowComparisonCircleInfo.description)]]
        std::optional<bool> showComparisonCircle;
 
@@ -214,6 +226,12 @@ ExoplanetsModule::ExoplanetsModule()
     , _noDataTexturePath(NoDataTextureInfo)
     , _orbitDiscTexturePath(OrbitDiscTextureInfo)
     , _habitableZoneTexturePath(HabitableZoneTextureInfo)
+    , _comparisonCircleColor(
+        ComparisonCircleColorInfo,
+        glm::vec3(0.f, 0.8f, 0.8f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
+    )
     , _showComparisonCircle(ShowComparisonCircleInfo, false)
     , _showOrbitUncertainty(ShowOrbitUncertaintyInfo, true)
     , _showHabitableZone(ShowHabitableZoneInfo, true)
@@ -232,6 +250,8 @@ ExoplanetsModule::ExoplanetsModule()
     addProperty(_orbitDiscTexturePath);
     addProperty(_habitableZoneTexturePath);
 
+    _comparisonCircleColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_comparisonCircleColor);
     addProperty(_showComparisonCircle);
     addProperty(_showOrbitUncertainty);
     addProperty(_showHabitableZone);
@@ -292,6 +312,10 @@ std::string ExoplanetsModule::habitableZoneTexturePath() const {
     return _habitableZoneTexturePath;
 }
 
+glm::vec3 ExoplanetsModule::comparisonCircleColor() const {
+    return _comparisonCircleColor;
+}
+
 bool ExoplanetsModule::showComparisonCircle() const {
     return _showComparisonCircle;
 }
@@ -345,6 +369,7 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
         _habitableZoneTexturePath = p.habitableZoneTexture.value().string();
     }
 
+    _comparisonCircleColor = p.comparisonCircleColor.value_or(_comparisonCircleColor);
     _showComparisonCircle = p.showComparisonCircle.value_or(_showComparisonCircle);
     _showOrbitUncertainty = p.showOrbitUncertainty.value_or(_showOrbitUncertainty);
     _showHabitableZone = p.showHabitableZone.value_or(_showHabitableZone);
