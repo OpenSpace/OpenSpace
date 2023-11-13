@@ -33,6 +33,7 @@ namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
+struct Configuration;
 class Dashboard;
 class DeferredcasterManager;
 class DownloadManager;
@@ -50,7 +51,6 @@ class SyncEngine;
 class TimeManager;
 class VersionChecker;
 struct WindowDelegate;
-namespace configuration { struct Configuration; }
 namespace interaction {
     struct JoystickInputStates;
     struct WebsocketInputStates;
@@ -88,7 +88,7 @@ inline SyncEngine* syncEngine;
 inline TimeManager* timeManager;
 inline VersionChecker* versionChecker;
 inline WindowDelegate* windowDelegate;
-inline configuration::Configuration* configuration;
+inline Configuration* configuration;
 inline interaction::ActionManager* actionManager;
 inline interaction::InteractionMonitor* interactionMonitor;
 inline interaction::JoystickInputStates* joystickInputStates;

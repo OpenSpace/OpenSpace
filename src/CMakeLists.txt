@@ -40,6 +40,7 @@ set(OPENSPACE_SOURCE
   engine/moduleengine_lua.inl
   engine/openspaceengine.cpp
   engine/openspaceengine_lua.inl
+  engine/settings.cpp
   engine/syncengine.cpp
   events/event.cpp
   events/eventengine.cpp
@@ -221,6 +222,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/engine/moduleengine.h
   ${PROJECT_SOURCE_DIR}/include/openspace/engine/moduleengine.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/engine/openspaceengine.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/engine/settings.h
   ${PROJECT_SOURCE_DIR}/include/openspace/engine/syncengine.h
   ${PROJECT_SOURCE_DIR}/include/openspace/engine/windowdelegate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/events/event.h

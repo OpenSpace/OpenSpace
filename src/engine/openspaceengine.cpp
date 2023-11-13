@@ -321,7 +321,7 @@ void OpenSpaceEngine::initialize() {
             DocEng.addDocumentation(doc);
         }
     }
-    DocEng.addDocumentation(configuration::Configuration::Documentation);
+    DocEng.addDocumentation(Configuration::Documentation);
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
@@ -519,7 +519,7 @@ void OpenSpaceEngine::initializeGL() {
         bool synchronous = global::configuration->openGLDebugContext.isSynchronous;
         setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
 
-        for (const configuration::Configuration::OpenGLDebugContext::IdentifierFilter& f :
+        for (const Configuration::OpenGLDebugContext::IdentifierFilter& f :
             global::configuration->openGLDebugContext.identifierFilters)
         {
             setDebugMessageControl(

@@ -523,7 +523,7 @@ void RenderEngine::initializeGL() {
     // initialized window
     _horizFieldOfView = static_cast<float>(global::windowDelegate->getHorizFieldOfView());
 
-    configuration::Configuration::FontSizes fontSize = global::configuration->fontSize;
+    Configuration::FontSizes fontSize = global::configuration->fontSize;
     {
         ZoneScopedN("Fonts");
         TracyGpuZone("Fonts");
