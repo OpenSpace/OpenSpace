@@ -294,6 +294,10 @@ namespace {
             // all of the nodes with their respective status (created, loaded,
             // initialized)
             std::optional<bool> showNodeNames;
+
+            // If this value is set to 'true', the loading screen will display a list of
+            // warning and error messages
+            std::optional<bool> showLogMessages;
         };
         // Values in this table describe the behavior of the loading screen that is
         // displayed while the scene graph is created and initialized
@@ -409,6 +413,8 @@ void parseLuaState(Configuration& configuration) {
             l.showMessage.value_or(c.loadingScreen.isShowingMessages);
         c.loadingScreen.isShowingNodeNames =
             l.showNodeNames.value_or(c.loadingScreen.isShowingNodeNames);
+        c.loadingScreen.isShowingLogMessages =
+            l.showLogMessages.value_or(c.loadingScreen.isShowingLogMessages);
     }
 
     c.moduleConfigurations = p.moduleConfigurations.value_or(c.moduleConfigurations);

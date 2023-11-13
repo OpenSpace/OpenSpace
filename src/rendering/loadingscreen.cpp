@@ -98,9 +98,11 @@ namespace {
 
 namespace openspace {
 
-LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames)
+LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
+                             ShowLogMessages showLogMessages)
     : _showMessage(showMessage)
     , _showNodeNames(showNodeNames)
+    , _showLog(showLogMessages)
     , _randomEngine(_randomDevice())
 {
     constexpr std::chrono::seconds ScreenLogTimeToLive(20);
@@ -111,9 +113,11 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     _log = log.get();
     ghoul::logging::LogManager::ref().addLog(std::move(log));
 
+    const float fontScaling = global::windowDelegate->osDpiScaling();
+
     _loadingFont = global::fontManager->font(
         "Loading",
-        LoadingFontSize,
+        LoadingFontSize * fontScaling,
         ghoul::fontrendering::FontManager::Outline::No,
         ghoul::fontrendering::FontManager::LoadGlyphs::No
     );
@@ -121,7 +125,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     if (_showMessage) {
         _messageFont = global::fontManager->font(
             "Loading",
-            MessageFontSize,
+            MessageFontSize * fontScaling,
             ghoul::fontrendering::FontManager::Outline::No,
             ghoul::fontrendering::FontManager::LoadGlyphs::No
         );
@@ -130,18 +134,20 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     if (_showNodeNames) {
         _itemFont = global::fontManager->font(
             "Loading",
-            ItemFontSize,
+            ItemFontSize * fontScaling,
             ghoul::fontrendering::FontManager::Outline::No,
             ghoul::fontrendering::FontManager::LoadGlyphs::No
         );
     }
 
-    _logFont = global::fontManager->font(
-        "Loading",
-        LogFontSize,
-        ghoul::fontrendering::FontManager::Outline::No,
-        ghoul::fontrendering::FontManager::LoadGlyphs::No
-    );
+    if (_showLog) {
+        _logFont = global::fontManager->font(
+            "Loading",
+            LogFontSize * fontScaling,
+            ghoul::fontrendering::FontManager::Outline::No,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
+    }
 
     {
         // Logo stuff
@@ -160,6 +166,7 @@ LoadingScreen::~LoadingScreen() {
     _messageFont = nullptr;
     _itemFont = nullptr;
     ghoul::logging::LogManager::ref().removeLog(_log);
+    _log = nullptr;
 }
 
 void LoadingScreen::render() {
@@ -253,17 +260,19 @@ void LoadingScreen::render() {
     }
 
     glm::vec2 logLl = glm::vec2(0.f, 0.f);
-    glm::vec2 logUr = glm::vec2(res.x, res.y * LogBackgroundPosition);
+    glm::vec2 logUr = glm::vec2(res.x, res.y * (LogBackgroundPosition + 0.015));
 
     // Font rendering enables depth testing so we disable again to render the log box
     glDisable(GL_DEPTH_TEST);
-    constexpr glm::vec4 DarkGray = glm::vec4(glm::vec3(0.04f), 1.0f);
-    rendering::helper::renderBox(
-        glm::vec2(0.f, 1.f),
-        glm::vec2(1.f, LogBackgroundPosition),
-        DarkGray,
-        rendering::helper::Anchor::SW
-    );
+    if (_showLog) {
+        constexpr glm::vec4 DarkGray = glm::vec4(glm::vec3(0.04f), 1.f);
+        rendering::helper::renderBox(
+            glm::vec2(0.f, 1.f),
+            glm::vec2(1.f, LogBackgroundPosition),
+            DarkGray,
+            rendering::helper::Anchor::SW
+        );
+    }
 
     if (_showNodeNames) {
         std::lock_guard guard(_itemsMutex);
@@ -433,8 +442,9 @@ void LoadingScreen::render() {
 
     // Render log messages last to make them slightly more visible if a download item
     // is slightly overlapping
-    renderLogMessages();
-
+    if (_showLog) {
+        renderLogMessages();
+    }
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 
@@ -469,11 +479,11 @@ void LoadingScreen::renderLogMessages() const {
             int charactersSinceNewLine = 0;
             std::string word;
             while (is >> word) {
-                charactersSinceNewLine += word.size();
+                charactersSinceNewLine += static_cast<int>(word.size());
                 // Insert a new line when we exceede messageLength
                 if (charactersSinceNewLine > MessageLength) {
                     result << '\n';
-                    charactersSinceNewLine = word.size();
+                    charactersSinceNewLine = static_cast<int>(word.size());
                     ++nRows;
                 }
                 result << word << ' ';
@@ -528,7 +538,7 @@ void LoadingScreen::finalize() {
         ),
         _items.end()
     );
-
+    _showLog = _showLog && !_log->entries().empty();
     render();
 }
 

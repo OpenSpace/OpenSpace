@@ -477,14 +477,13 @@ void OpenSpaceEngine::initializeGL() {
         ),
         LoadingScreen::ShowNodeNames(
             global::configuration->loadingScreen.isShowingNodeNames
+        ),
+        LoadingScreen::ShowLogMessages(
+            global::configuration->loadingScreen.isShowingLogMessages
         )
     );
 
     _loadingScreen->render();
-
-
-
-
 
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
     try {

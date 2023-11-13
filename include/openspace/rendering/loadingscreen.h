@@ -50,13 +50,14 @@ class LoadingScreen {
 public:
     BooleanType(ShowMessage);
     BooleanType(ShowNodeNames);
+    BooleanType(ShowLogMessages);
     BooleanType(CatastrophicError);
 
-    LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames);
+    LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
+        ShowLogMessages showLogMessages);
     ~LoadingScreen();
 
     void render();
-    void renderLogMessages() const;
 
     void postMessage(std::string message);
     void setCatastrophicError(CatastrophicError catastrophicError);
@@ -90,8 +91,12 @@ public:
         ItemStatus newStatus, ProgressInfo progressInfo);
 
 private:
-    bool _showMessage;
-    bool _showNodeNames;
+
+    void renderLogMessages() const;
+
+    bool _showMessage = true;
+    bool _showNodeNames = true;
+    bool _showLog = true;
 
     Phase _phase = Phase::PreStart;
 
@@ -126,7 +131,7 @@ private:
     std::default_random_engine _randomEngine;
 
     // Non owning but we remove the log from LogManager on destruction
-    ScreenLog* _log;
+    ScreenLog* _log = nullptr;
 };
 
 } // namespace openspace
