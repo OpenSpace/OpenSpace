@@ -67,9 +67,6 @@ private:
 
     QDialogButtonBox* _dialogButtons = nullptr;
 
-    // The set of settings that we had when we started the dialog
-    openspace::Settings _startEdit;
-
     // The set of settings that we have while editing
     openspace::Settings _currentEdit;
 };

@@ -38,12 +38,15 @@
 SettingsDialog::SettingsDialog(openspace::Settings settings,
                                QWidget* parent)
     : QDialog(parent)
-    , _startEdit(settings)
     , _currentEdit(settings)
 {
     setWindowTitle("Settings");
     createWidgets();
     loadFromSettings(settings);
+
+    // Setting the startup values for the control will have caused the Save button to be
+    // enabled, so we need to manually disable it again here
+    _dialogButtons->button(QDialogButtonBox::Save)->setEnabled(false);
 }
 
 void SettingsDialog::createWidgets() {
@@ -338,7 +341,6 @@ void SettingsDialog::createWidgets() {
         _dialogButtons, &QDialogButtonBox::rejected,
         this, &SettingsDialog::reject
     );
-    _dialogButtons->button(QDialogButtonBox::Save)->setEnabled(false);
     layout->addWidget(_dialogButtons, 17, 1, 1, 1, Qt::AlignRight);
 }
 
@@ -375,6 +377,9 @@ void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
             case Visibility::Developer:
                 _propertyVisibility->setCurrentText("Developer");
                 break;
+            case Visibility::Always:
+            case Visibility::Hidden:
+                break;
         }
     }
 
@@ -391,17 +396,12 @@ void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
 }
 
 void SettingsDialog::updateSaveButton() {
-    const bool hasChanges = _startEdit != _currentEdit;
-    _dialogButtons->button(QDialogButtonBox::Save)->setEnabled(hasChanges);
+    _dialogButtons->button(QDialogButtonBox::Save)->setEnabled(true);
 }
 
 void SettingsDialog::save() {
-    ghoul_assert(
-        _startEdit != _currentEdit,
-        "The save button should only be available if we have changes"
-    );
-
     emit saveSettings(_currentEdit);
+    _dialogButtons->button(QDialogButtonBox::Save)->setEnabled(false);
     QDialog::accept();
 }
 
