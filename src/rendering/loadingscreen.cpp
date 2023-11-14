@@ -65,7 +65,7 @@ namespace {
 
     constexpr float LoadingTextPosition = 0.275f;  // in NDC
     constexpr float StatusMessageOffset = 0.225f;  // in NDC
-    constexpr float LogBackgroundPosition = 0.12f; // in NDC
+    constexpr float LogBackgroundPosition = 0.125f; // in NDC
 
     constexpr int MaxNumberLocationSamples = 1000;
 
@@ -456,20 +456,21 @@ void LoadingScreen::render() {
 void LoadingScreen::renderLogMessages() const {
     ZoneScoped;
 
-    constexpr size_t MaxNumberMessages = 4;
+    constexpr size_t MaxNumberMessages = 6;
     constexpr int MessageLength = 209;
 
     using FR = ghoul::fontrendering::FontRenderer;
     const FR& renderer = FR::defaultRenderer();
 
-    _log->removeExpiredEntries();
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
 
     size_t nRows = 0;
-    for (size_t i = 1; i <= std::min(MaxNumberMessages, entries.size()); i++) {
+    size_t j = std::min(MaxNumberMessages, entries.size());
+    for (size_t i = 1; i <= j; i++) {
         ZoneScopedN("Entry");
 
-        const ScreenLog::LogEntry& it = entries[entries.size() - i];
+        // Show only the j:th first log entries
+        const ScreenLog::LogEntry& it = entries[j - i];
 
         std::ostringstream result;
         // Split really long messages into multiple lines for better readability
@@ -491,20 +492,6 @@ void LoadingScreen::renderLogMessages() const {
             }
         }
 
-        constexpr glm::vec4 White(0.9f, 0.9f, 0.9f, 1.f);
-        const glm::vec4 color = [&White](ScreenLog::LogLevel level) {
-            switch (level) {
-                case ghoul::logging::LogLevel::Warning:
-                    return glm::vec4(1.f, 1.f, 0.f, 1.f);
-                case ghoul::logging::LogLevel::Error:
-                    return glm::vec4(1.f, 0.f, 0.f, 1.f);
-                case ghoul::logging::LogLevel::Fatal:
-                    return glm::vec4(0.3f, 0.3f, 0.85f, 1.f);
-                default:
-                    return White;
-            }
-        }(it.level);
-
         renderer.render(
             *_logFont,
             glm::vec2(
@@ -512,9 +499,33 @@ void LoadingScreen::renderLogMessages() const {
                 10 + _logFont->pointSize() * nRows * 2
             ),
             it.message.size() < MessageLength ? it.message : result.str(),
-            color
+            ghoul::to_color(it.level)
         );
         ++nRows;
+    }
+
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
+    const glm::ivec2 res =
+        glm::vec2(global::windowDelegate->firstWindowResolution()) * dpiScaling;
+
+    // Render # of warnings and error messages
+    std::map<ghoul::logging::LogLevel, size_t> numberOfErrorsPerLevel;
+    for (auto& entry : _log->entries()) {
+        numberOfErrorsPerLevel[entry.level]++;
+    }
+    size_t row = 0;
+    for (auto& [level, amount] : numberOfErrorsPerLevel) {
+        const std::string text = fmt::format("{}: {}", ghoul::to_string(level), amount);
+        renderer.render(
+            *_logFont,
+            glm::vec2(
+                res.x - 0.07 * res.x,
+                10 + _logFont->pointSize() * row * 2
+            ),
+            text,
+            ghoul::to_color(level)
+        );
+        ++row;
     }
 }
 
@@ -538,6 +549,7 @@ void LoadingScreen::finalize() {
         ),
         _items.end()
     );
+    _log->removeExpiredEntries();
     _showLog = _showLog && !_log->entries().empty();
     render();
 }
