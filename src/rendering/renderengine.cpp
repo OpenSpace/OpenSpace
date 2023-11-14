@@ -1395,7 +1395,7 @@ void RenderEngine::renderScreenLog() {
         }
 
         {
-            glm::vec4 color = ghoul::to_color(it.level);
+            glm::vec4 color = ghoul::toColor(it.level);
             color.a = alpha;
 
             const std::string_view lvl = ghoul::to_string(it.level);

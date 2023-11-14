@@ -499,7 +499,7 @@ void LoadingScreen::renderLogMessages() const {
                 10 + _logFont->pointSize() * nRows * 2
             ),
             it.message.size() < MessageLength ? it.message : result.str(),
-            ghoul::to_color(it.level)
+            ghoul::toColor(it.level)
         );
         ++nRows;
     }
@@ -523,7 +523,7 @@ void LoadingScreen::renderLogMessages() const {
                 10 + _logFont->pointSize() * row * 2
             ),
             text,
-            ghoul::to_color(level)
+            ghoul::toColor(level)
         );
         ++row;
     }
