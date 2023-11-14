@@ -392,12 +392,12 @@ void LoadingScreen::render() {
 #endif // LOADINGSCREEN_DEBUGGING
 
             std::string text = item.name;
-            if (item.status == ItemStatus::Started && item.progress.progress > 0) {
+            if (item.status == ItemStatus::Started && item.progress.currentSize > 0) {
                 ProgressInfo& info = item.progress;
-                bool hasSecondLine = (info.totalSize != -1 && info.currentSize != -1);
+                const bool isTotalSizeKnown = info.totalSize != -1;
 
                 int p = static_cast<int>(std::round(info.progress * 100));
-                if (hasSecondLine) {
+                if (isTotalSizeKnown) {
                     if (info.totalSize < 1024 * 1024) { // 1MB
                         text = fmt::format(
                             "{} ({}%)\n{}/{} {}",
@@ -415,7 +415,14 @@ void LoadingScreen::render() {
                     }
                 }
                 else {
-                    text = fmt::format("{} ({}%)", text, p);
+                    // We don't know the total size but we have started downloading data
+                    if (info.currentSize < 1024 * 1024) {
+                        text = fmt::format("{}\n{} {}", text, info.currentSize, "bytes");
+                    }
+                    else {
+                        float curr = info.currentSize / (1024.f * 1024.f);
+                        text = fmt::format("{}\n{:.3f} {}", text, curr, "MB");
+                    }
                 }
             }
 

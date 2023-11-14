@@ -780,8 +780,8 @@ void OpenSpaceEngine::loadAssets() {
                         static_cast<float>(sync->nTotalBytes());
                 }(*it);
 
+                progressInfo.currentSize = (*it)->nSynchronizedBytes();
                 if ((*it)->nTotalBytesIsKnown()) {
-                    progressInfo.currentSize = (*it)->nSynchronizedBytes();
                     progressInfo.totalSize = (*it)->nTotalBytes();
                 }
 
