@@ -167,109 +167,13 @@ void UrlSynchronization::start() {
     }
 
     _syncThread = std::thread([this]() {
-        std::unordered_map<std::string, size_t> fileSizes;
-        std::mutex fileSizeMutex;
-        size_t nDownloads = 0;
-        std::atomic_bool startedAllDownloads = false;
-        std::vector<std::unique_ptr<HttpFileDownload>> downloads;
+        const bool success = trySyncUrls();
 
-        for (const std::string& url : _urls) {
-            if (_filename.empty() || _urls.size() > 1) {
-                std::filesystem::path fn = std::filesystem::path(url).filename();
-                if (fn.empty() && url.back() == '/') {
-                    // If the user provided a path that ends in / the `filename` will
-                    // result in an empty path with causes the downloading to fail
-                    fn = std::filesystem::path(url).parent_path().filename();
-                }
-                std::string name = fn.string();
-
-                // We can not create filenames with question marks
-                name.erase(std::remove(name.begin(), name.end(), '?'), name.end());
-                _filename = name;
-            }
-            std::filesystem::path destination = directory() / (_filename + ".tmp");
-
-            auto download = std::make_unique<HttpFileDownload>(
-                url,
-                destination,
-                HttpFileDownload::Overwrite::Yes
-            );
-            HttpFileDownload* dl = download.get();
-
-            downloads.push_back(std::move(download));
-
-            ++nDownloads;
-
-            dl->onProgress(
-                [this, url, &fileSizes, &fileSizeMutex,
-                &startedAllDownloads, &nDownloads](int64_t,
-                                                   std::optional<int64_t> totalBytes)
-            {
-                if (!totalBytes.has_value()) {
-                    return !_shouldCancel;
-                }
-
-                std::lock_guard guard(fileSizeMutex);
-                fileSizes[url] = *totalBytes;
-
-                if (!_nTotalBytesKnown && startedAllDownloads &&
-                    fileSizes.size() == nDownloads)
-                {
-                    _nTotalBytesKnown = true;
-                    _nTotalBytes = 0;
-                    for (const std::pair<const std::string, size_t>& fs : fileSizes) {
-                        _nTotalBytes += fs.second;
-                    }
-                }
-                return !_shouldCancel;
-            });
-
-            dl->start();
-        }
-
-        startedAllDownloads = true;
-
-        bool failed = false;
-        for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
-            d->wait();
-            if (!d->hasSucceeded()) {
-                failed = true;
-                LERROR(fmt::format("Error downloading file from URL {}", d->url()));
-                continue;
-            }
-
-            // If we are forcing the override, we download to a temporary file first, so
-            // when we are done here, we need to rename the file to the original name
-
-            std::filesystem::path tempName = d->destination();
-            std::filesystem::path originalName = tempName;
-            // Remove the .tmp extension
-            originalName.replace_extension("");
-
-            if (std::filesystem::is_regular_file(originalName)) {
-                std::filesystem::remove(originalName);
-            }
-
-            std::error_code ec;
-            std::filesystem::rename(tempName, originalName, ec);
-            if (ec) {
-                LERRORC(
-                    "URLSynchronization",
-                    fmt::format("Error renaming file {} to {}", tempName, originalName)
-                );
-
-                failed = true;
-            }
-        }
-
-        if (!failed) {
+        if (success) {
             createSyncFile();
             _state = State::Resolved;
         }
         else {
-            for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
-                d->cancel();
-            }
             _state = State::Rejected;
         }
     });
@@ -351,7 +255,7 @@ bool UrlSynchronization::isEachFileValid() {
     return false;
 }
 
-void UrlSynchronization::createSyncFile(bool isFullySynchronized) const {
+void UrlSynchronization::createSyncFile(bool) const {
     std::filesystem::path dir = directory();
     std::filesystem::create_directories(dir);
 
@@ -375,6 +279,116 @@ void UrlSynchronization::createSyncFile(bool isFullySynchronized) const {
 
     const std::string msg = fmt::format("{}\n{}\n", OssyncVersionNumber, fileIsValidTo);
     syncFile << msg;
+}
+
+bool UrlSynchronization::trySyncUrls() {
+    struct SizeData {
+        int64_t downloadedBytes = 0;
+        std::optional<int64_t> totalBytes;
+    };
+
+    std::unordered_map<std::string, SizeData> sizeData;
+    std::mutex fileSizeMutex;
+    size_t nDownloads = 0;
+    std::atomic_bool startedAllDownloads = false;
+    std::vector<std::unique_ptr<HttpFileDownload>> downloads;
+
+    for (const std::string& url : _urls) {
+        if (_filename.empty() || _urls.size() > 1) {
+            std::filesystem::path fn = std::filesystem::path(url).filename();
+            if (fn.empty() && url.back() == '/') {
+                // If the user provided a path that ends in / the `filename` will
+                // result in an empty path with causes the downloading to fail
+                fn = std::filesystem::path(url).parent_path().filename();
+            }
+            std::string name = fn.string();
+
+            // We can not create filenames with question marks
+            name.erase(std::remove(name.begin(), name.end(), '?'), name.end());
+            _filename = name;
+        }
+        std::filesystem::path destination = directory() / (_filename + ".tmp");
+
+        if (sizeData.find(url) != sizeData.end()) {
+            LWARNING(fmt::format("{}: Duplicate entry for {}", _identifier, url));
+            continue;
+        }
+
+        auto download = std::make_unique<HttpFileDownload>(
+            url,
+            destination,
+            HttpFileDownload::Overwrite::Yes
+        );
+        HttpFileDownload* dl = download.get();
+
+        downloads.push_back(std::move(download));
+
+        ++nDownloads;
+        sizeData[url] = SizeData();
+
+        dl->onProgress(
+            [this, url, &sizeData, &fileSizeMutex](int64_t downloadedBytes,
+                                                std::optional<int64_t> totalBytes)
+            {
+                if (!totalBytes.has_value()) {
+                    return !_shouldCancel;
+                }
+
+                std::lock_guard guard(fileSizeMutex);
+                sizeData[url] = { downloadedBytes, totalBytes };
+
+                _nTotalBytesKnown = true;
+                _nTotalBytes = 0;
+                _nSynchronizedBytes = 0;
+                for (const std::pair<const std::string, SizeData>& sd : sizeData) {
+                    _nTotalBytesKnown = _nTotalBytesKnown &&
+                                        sd.second.totalBytes.has_value();
+                    _nTotalBytes += sd.second.totalBytes.value_or(0);
+                    _nSynchronizedBytes += sd.second.downloadedBytes;
+                }
+
+                return !_shouldCancel;
+            });
+
+        dl->start();
+    }
+
+    startedAllDownloads = true;
+
+    bool failed = false;
+    for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
+        d->wait();
+        if (!d->hasSucceeded()) {
+            failed = true;
+            LERROR(fmt::format("Error downloading file from URL {}", d->url()));
+            continue;
+        }
+
+        // If we are forcing the override, we download to a temporary file first, so
+        // when we are done here, we need to rename the file to the original name
+
+        std::filesystem::path tempName = d->destination();
+        std::filesystem::path originalName = tempName;
+        // Remove the .tmp extension
+        originalName.replace_extension("");
+
+        if (std::filesystem::is_regular_file(originalName)) {
+            std::filesystem::remove(originalName);
+        }
+
+        std::error_code ec;
+        std::filesystem::rename(tempName, originalName, ec);
+        if (ec) {
+            LERRORC(
+                "URLSynchronization",
+                fmt::format("Error renaming file {} to {}", tempName, originalName)
+            );
+
+            failed = true;
+        }
+    }
+
+    return !failed;
 }
 
 } // namespace openspace

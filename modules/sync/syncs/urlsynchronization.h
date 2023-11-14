@@ -83,9 +83,14 @@ protected:
     bool isEachFileValid();
 
 private:
+    static constexpr double MaxDateAsJ2000 = 252424036869.18289;
+
     /// Creates a file next to the directory that indicates that this
     /// ResourceSynchronization has successfully synchronized its contents
     void createSyncFile(bool isFullySynchronized = true) const override;
+
+    /// Tries to get a reply from the asset URLs and returns that success to the caller
+    bool trySyncUrls(); 
 
     /// The list of URLs that will be downloaded
     std::vector<std::string> _urls;
@@ -102,8 +107,6 @@ private:
 
     // The thread that will be doing the synchronization
     std::thread _syncThread;
-
-    const double MaxDateAsJ2000 = 252424036869.18289;
 
     /// Determines how long the file is valid before it should be downloaded again
     double _secondsUntilResync = MaxDateAsJ2000;
