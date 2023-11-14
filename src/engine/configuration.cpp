@@ -297,9 +297,9 @@ namespace {
             // initialized)
             std::optional<bool> showNodeNames;
 
-            // If this value is set to 'true', the loading screen will contain a progress
-            // bar that gives an estimate of the loading progression
-            std::optional<bool> showProgressbar;
+            // If this value is set to 'true', the loading screen will display a list of
+            // warning and error messages
+            std::optional<bool> showLogMessages;
         };
         // Values in this table describe the behavior of the loading screen that is
         // displayed while the scene graph is created and initialized
@@ -413,10 +413,10 @@ void parseLuaState(Configuration& configuration) {
         const Parameters::LoadingScreen& l = *p.loadingScreen;
         c.loadingScreen.isShowingMessages =
             l.showMessage.value_or(c.loadingScreen.isShowingMessages);
-        c.loadingScreen.isShowingProgressbar =
-            l.showProgressbar.value_or(c.loadingScreen.isShowingProgressbar);
         c.loadingScreen.isShowingNodeNames =
             l.showNodeNames.value_or(c.loadingScreen.isShowingNodeNames);
+        c.loadingScreen.isShowingLogMessages =
+            l.showLogMessages.value_or(c.loadingScreen.isShowingLogMessages);
     }
 
     c.moduleConfigurations = p.moduleConfigurations.value_or(c.moduleConfigurations);

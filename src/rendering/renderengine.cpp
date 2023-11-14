@@ -1395,20 +1395,8 @@ void RenderEngine::renderScreenLog() {
         }
 
         {
-            const glm::vec4 color = [alpha, white](ScreenLog::LogLevel level) {
-                switch (level) {
-                    case ghoul::logging::LogLevel::Debug:
-                        return glm::vec4(0.f, 1.f, 0.f, alpha);
-                    case ghoul::logging::LogLevel::Warning:
-                        return glm::vec4(1.f, 1.f, 0.f, alpha);
-                    case ghoul::logging::LogLevel::Error:
-                        return glm::vec4(1.f, 0.f, 0.f, alpha);
-                    case ghoul::logging::LogLevel::Fatal:
-                        return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
-                    default:
-                        return white;
-                }
-            }(it.level);
+            glm::vec4 color = ghoul::toColor(it.level);
+            color.a = alpha;
 
             const std::string_view lvl = ghoul::to_string(it.level);
             std::fill(buf.begin(), buf.end(), char(0));

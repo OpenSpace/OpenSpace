@@ -88,7 +88,7 @@ struct Configuration {
     struct LoadingScreen {
         bool isShowingMessages = true;
         bool isShowingNodeNames = true;
-        bool isShowingProgressbar = true;
+        bool isShowingLogMessages = true;
     };
     LoadingScreen loadingScreen;
 
