@@ -34,9 +34,9 @@
 #include <string>
 #include <vector>
 
-namespace openspace::documentation { struct Documentation; }
+namespace openspace {
 
-namespace openspace::configuration {
+namespace documentation { struct Documentation; }
 
 struct Configuration {
     Configuration() = default;
@@ -147,9 +147,10 @@ struct Configuration {
 
 std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
-Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
-    const glm::ivec2& primaryMonitorResolution, std::string_view overrideScript);
+Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
+    const std::filesystem::path& settingsFile,
+    const glm::ivec2& primaryMonitorResolution);
 
-} // namespace openspace::configuration
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___CONFIGURATION___H__
