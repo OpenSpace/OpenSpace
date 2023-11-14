@@ -62,6 +62,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
+#include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
@@ -321,7 +322,7 @@ void OpenSpaceEngine::initialize() {
             DocEng.addDocumentation(doc);
         }
     }
-    DocEng.addDocumentation(configuration::Configuration::Documentation);
+    DocEng.addDocumentation(Configuration::Documentation);
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
@@ -477,16 +478,12 @@ void OpenSpaceEngine::initializeGL() {
         LoadingScreen::ShowNodeNames(
             global::configuration->loadingScreen.isShowingNodeNames
         ),
-        LoadingScreen::ShowProgressbar(
-            global::configuration->loadingScreen.isShowingProgressbar
+        LoadingScreen::ShowLogMessages(
+            global::configuration->loadingScreen.isShowingLogMessages
         )
-        );
+    );
 
     _loadingScreen->render();
-
-
-
-
 
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
     try {
@@ -519,7 +516,7 @@ void OpenSpaceEngine::initializeGL() {
         bool synchronous = global::configuration->openGLDebugContext.isSynchronous;
         setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
 
-        for (const configuration::Configuration::OpenGLDebugContext::IdentifierFilter& f :
+        for (const Configuration::OpenGLDebugContext::IdentifierFilter& f :
             global::configuration->openGLDebugContext.identifierFilters)
         {
             setDebugMessageControl(
@@ -743,6 +740,8 @@ void OpenSpaceEngine::loadAssets() {
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
 
+    std::unordered_set<const ResourceSynchronization*> finishedSynchronizations;
+
     while (true) {
         _loadingScreen->render();
         _assetManager->update();
@@ -752,59 +751,20 @@ void OpenSpaceEngine::loadAssets() {
         std::vector<const ResourceSynchronization*> allSyncs =
             _assetManager->allSynchronizations();
 
-        for (const ResourceSynchronization* sync : allSyncs) {
-            ZoneScopedN("Update resource synchronization");
-
-            if (sync->isSyncing()) {
-                LoadingScreen::ProgressInfo progressInfo;
-
-                progressInfo.progress = [](const ResourceSynchronization* s) {
-                    if (!s->nTotalBytesIsKnown()) {
-                        return 0.f;
-                    }
-                    if (s->nTotalBytes() == 0) {
-                        return 1.f;
-                    }
-                    return
-                        static_cast<float>(s->nSynchronizedBytes()) /
-                        static_cast<float>(s->nTotalBytes());
-                }(sync);
-
-                _loadingScreen->updateItem(
-                    sync->identifier(),
-                    sync->name(),
-                    LoadingScreen::ItemStatus::Started,
-                    progressInfo
-                );
+        // Filter already synchronized assets so we don't check them anymore
+        auto syncIt = std::remove_if(
+            allSyncs.begin(),
+            allSyncs.end(),
+            [&finishedSynchronizations](const ResourceSynchronization* sync) {
+                return finishedSynchronizations.contains(sync);
             }
-
-            if (sync->isRejected()) {
-                _loadingScreen->updateItem(
-                    sync->identifier(), sync->name(), LoadingScreen::ItemStatus::Failed,
-                    LoadingScreen::ProgressInfo()
-                );
-            }
-        }
-
-        _loadingScreen->setItemNumber(static_cast<int>(allSyncs.size()));
-
-        if (_shouldAbortLoading) {
-            global::windowDelegate->terminate();
-            break;
-        }
-
-        bool finishedLoading = std::all_of(
-            allAssets.begin(),
-            allAssets.end(),
-            [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
         );
-
-        if (finishedLoading) {
-            break;
-        }
+        allSyncs.erase(syncIt, allSyncs.end());
 
         auto it = allSyncs.begin();
         while (it != allSyncs.end()) {
+            ZoneScopedN("Update resource synchronization");
+
             if ((*it)->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
 
@@ -835,7 +795,9 @@ void OpenSpaceEngine::loadAssets() {
             }
             else if ((*it)->isRejected()) {
                 _loadingScreen->updateItem(
-                    (*it)->identifier(), (*it)->name(), LoadingScreen::ItemStatus::Failed,
+                    (*it)->identifier(),
+                    (*it)->name(),
+                    LoadingScreen::ItemStatus::Failed,
                     LoadingScreen::ProgressInfo()
                 );
                 ++it;
@@ -844,17 +806,33 @@ void OpenSpaceEngine::loadAssets() {
                 LoadingScreen::ProgressInfo progressInfo;
                 progressInfo.progress = 1.f;
 
-                _loadingScreen->tickItem();
                 _loadingScreen->updateItem(
                     (*it)->identifier(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Finished,
                     progressInfo
                 );
+                finishedSynchronizations.insert(*it);
                 it = allSyncs.erase(it);
             }
         }
-    }
+       
+        if (_shouldAbortLoading) {
+            global::windowDelegate->terminate();
+            break;
+        }
+
+        bool finishedLoading = std::all_of(
+            allAssets.begin(),
+            allAssets.end(),
+            [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
+        );
+
+        if (finishedLoading) {
+            break;
+        }        
+    } // while(true)
+
     if (_shouldAbortLoading) {
         _loadingScreen = nullptr;
         return;

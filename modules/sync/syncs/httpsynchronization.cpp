@@ -348,12 +348,18 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
         for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
             d->wait();
+
+            // If the user exits the program we don't want to start new downloads
+            if (_shouldCancel) {
+                break;
+            }
+
             if (d->hasFailed()) {
                 d->start();
                 downloadSucceeded = false;
             }
         }
-        if (downloadSucceeded) {
+        if (downloadSucceeded || _shouldCancel) {
             break;
         }
         else {
