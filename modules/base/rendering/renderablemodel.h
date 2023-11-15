@@ -156,6 +156,7 @@ private:
     GLuint _depthMapFBO = 0;
     GLuint _depthMap = 0;
     glm::ivec2 _depthMapResolution;
+    mutable glm::dmat4 _lightVP;
     ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
 };
 

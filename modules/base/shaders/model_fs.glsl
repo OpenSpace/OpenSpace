@@ -61,6 +61,13 @@ uniform sampler2D gBufferDepthTexture;
 
 uniform vec2 resolution;
 
+// Should & can be extended to be an array covering all lightsources
+// See renderableglobe and renderer_fs.glsl
+uniform bool has_shadow_depth_map;
+uniform sampler2D shadow_depth_map;
+in vec4 lightspace_position;
+
+
 Fragment getFragment() {
   Fragment frag;
   frag.depth = vs_screenSpaceDepth;
@@ -168,6 +175,24 @@ Fragment getFragment() {
       totalLightColor += lightIntensities[i] * (diffuseColor + specularColor);
     }
     frag.color.rgb = totalLightColor;
+
+    if (has_shadow_depth_map) {
+      const float bias = 0.0005;
+      vec3 coords = 0.5 + 0.5 * lightspace_position.xyz / lightspace_position.w;
+      vec2 ssz = 1.f / textureSize(shadow_depth_map, 0);
+      const int sz = 3;
+      const float norm = pow(2.f * sz + 1, 2.f);
+      float accum = 0.f;
+
+      for (int x = -sz; x <= sz; ++x) {
+        for (int y = -sz; y <= sz; ++y) {
+          float depth = texture(shadow_depth_map, coords.xy + vec2(x * ssz.x, y * ssz.y)).r;
+          accum += float(coords.z < 1.f && depth > coords.z - bias);
+        }
+      }
+
+      frag.color.rgb *= ambientIntensity + (1.f - ambientIntensity) * accum / norm;
+    }
   }
   else {
     frag.color.rgb = diffuseAlbedo.rgb;

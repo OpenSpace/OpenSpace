@@ -755,7 +755,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         glBindTexture(GL_TEXTURE_2D, _debugTextureRender);
 
         glBindVertexArray(vao);
-        //glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
         glBindTexture(GL_TEXTURE_2D, 0);

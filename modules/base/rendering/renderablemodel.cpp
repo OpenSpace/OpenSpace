@@ -826,7 +826,7 @@ void RenderableModel::initializeGL() {
         );
 
         // Twice the res
-        _depthMapResolution = global::renderEngine->renderingResolution() * 2;
+        _depthMapResolution = global::renderEngine->renderingResolution();
 
         glGenFramebuffers(1, &_depthMapFBO);
 
@@ -848,13 +848,12 @@ void RenderableModel::initializeGL() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _depthMap, 0);
         glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 }
@@ -1020,6 +1019,21 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
+    // does only really need to be set when _castShadow changes
+    _program->setUniform("has_shadow_depth_map", _castShadow);
+
+    if (_castShadow) {
+        _program->setUniform("model", modelTransform);
+        _program->setUniform("light_vp", _lightVP);
+        _program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
+
+        _program->setUniform("shadow_depth_map", 13);
+        glActiveTexture(GL_TEXTURE13);
+        glBindTexture(
+            GL_TEXTURE_2D,
+            _depthMap
+        );
+    }
 
     if (!_shouldRenderTwice) {
         // Reset manual depth test
@@ -1286,7 +1300,7 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
     _depthMapProgram->activate();
 
     const double frustumSize = static_cast<double>(_frustumSize);
-    const double distance = frustumSize * 10000.;
+    const double distance = frustumSize * 500.;
 
     // Model
     glm::dmat4 transform = glm::translate(glm::dmat4(1), glm::dvec3(_pivot.value()));
@@ -1294,10 +1308,17 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
     glm::dmat4 model = this->parent()->modelTransform() * transform;
 
     // View
-    glm::dvec3 center = model * glm::dvec4(_geometry->center(), 1.);
+    glm::dvec3 center;
+    if (_modelHasAnimation) {
+        center = model * glm::dvec4(_geometry->center(), 1.);
+    }
+    else {
+        center = dynamic_cast<SceneGraphNode*>(this->owner())->worldPosition();
+    }
+
     glm::dvec3 light_dir = glm::normalize(center - light->positionWorldSpace());
-    glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), -light_dir));
-    glm::dvec3 eye = center + light_dir * distance;
+    glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), light_dir));
+    glm::dvec3 eye = center - light_dir * distance;
     glm::dvec3 up = glm::cross(right, light_dir);
     glm::dmat4 view = glm::lookAt(eye, center, up);
 
@@ -1307,27 +1328,29 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
         frustumSize,
         -frustumSize,
         frustumSize,
-        distance * 0.1,
-        distance * 1.1
+        distance - frustumSize,
+        distance + frustumSize
     );
 
-    glm::dmat4 viewProjection = projection * view;
+    _lightVP = projection * view;
     _depthMapProgram->setUniform("model", model);
-    _depthMapProgram->setUniform("light_vp", viewProjection);
+    _depthMapProgram->setUniform("light_vp", _lightVP);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
     glViewport(0, 0, _depthMapResolution.x, _depthMapResolution.y);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
+    glCullFace(GL_FRONT);
     if (isEnabled()) {
         _geometry->render(*_depthMapProgram, false, true);
     }
+    glCullFace(GL_BACK);
 
     glUseProgram(prevProg);
     glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
     glViewport(prevVp[0], prevVp[1], prevVp[2], prevVp[3]);
 
-    return { viewProjection, _depthMap };
+    return { _lightVP, _depthMap };
 }
 
 }  // namespace openspace

@@ -45,6 +45,10 @@ uniform mat4 normalTransform;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 
+out vec4 lightspace_position;
+uniform dmat4 model;
+uniform dmat4 light_vp;
+uniform dmat4 inv_vp;
 
 void main() {
   vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
@@ -70,4 +74,6 @@ void main() {
   vec3 B = normalize(cross(N, T));
 
   vs_TBN = mat3(T, B, N);
+
+  lightspace_position = vec4(light_vp * model * meshTransform * in_position);
 }
