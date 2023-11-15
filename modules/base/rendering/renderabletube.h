@@ -80,7 +80,7 @@ private:
     GLuint _vboId = 0;
     GLuint _iboId = 0;
     std::vector<float> _vertexArray;
-    std::vector<uint8_t> _indexArray;
+    std::vector<uint16_t> _indexArray;
 
     bool _tubeIsDirty = false;
 };

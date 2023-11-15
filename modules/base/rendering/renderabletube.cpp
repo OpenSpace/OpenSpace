@@ -106,6 +106,7 @@ bool RenderableTube::isReady() const {
 }
 
 void RenderableTube::initialize() {
+    readDataFile();
     updateTubeData();
 }
 
@@ -250,6 +251,11 @@ void RenderableTube::readDataFile() {
 
 
 void RenderableTube::updateTubeData() {
+    if (_data.size() < 2) {
+        LWARNING("Tube is empty");
+        return;
+    }
+
     _vertexArray.clear();
     _indexArray.clear();
 
@@ -265,53 +271,31 @@ void RenderableTube::updateTubeData() {
     std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(nLines, 1.f);
 
     // Put base vertices into array
-    for (int j = 0; j < nShapeSegments; ++j) {
-        float ux = unitVertices[j].xyz[0];
-        float uy = unitVertices[j].xyz[1];
-
-        _vertexArray.push_back(ux * baseRadius); // x
-        _vertexArray.push_back(uy * baseRadius); // y
-        _vertexArray.push_back(0.f);              // z
+    for (const glm::dvec3& coord : _data.front().points) {
+        _vertexArray.push_back(coord.x);
+        _vertexArray.push_back(coord.y);
+        _vertexArray.push_back(coord.z);
     }
 
     // Put top shape vertices into array
-    for (int j = 0; j < nShapeSegments; ++j) {
-        float ux = unitVertices[j].xyz[0];
-        float uy = unitVertices[j].xyz[1];
-
-        _vertexArray.push_back(ux * radius); // x
-        _vertexArray.push_back(uy * radius); // y
-        _vertexArray.push_back(length);      // z
+    for (const glm::dvec3& coord : _data.back().points) {
+        _vertexArray.push_back(coord.x);
+        _vertexArray.push_back(coord.y);
+        _vertexArray.push_back(coord.z);
     }
 
     // Put the vertices for the connecting lines into array
-    if (nLines == 1) {
-        // In the case of just one line then connect the center points instead
-        // Center for base shape
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(0.f);
+    // NOTE: assumes all polygons have the same number of points
+    for (int j = 0; j < _data.front().points.size(); ++j) {
+        // Base
+        _vertexArray.push_back(_data.front().points[j].x);
+        _vertexArray.push_back(_data.front().points[j].y);
+        _vertexArray.push_back(_data.front().points[j].z);
 
-        // Center for top shape
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(length);
-    }
-    else {
-        for (int j = 0; j < nLines; ++j) {
-            float ux = unitVerticesLines[j].xyz[0];
-            float uy = unitVerticesLines[j].xyz[1];
-
-            // Base
-            _vertexArray.push_back(ux * baseRadius); // x
-            _vertexArray.push_back(uy * baseRadius); // y
-            _vertexArray.push_back(0.f);              // z
-
-            // Top
-            _vertexArray.push_back(ux * radius); // x
-            _vertexArray.push_back(uy * radius); // y
-            _vertexArray.push_back(length);      // z
-        }
+        // Top
+        _vertexArray.push_back(_data.back().points[j].x);
+        _vertexArray.push_back(_data.back().points[j].y);
+        _vertexArray.push_back(_data.back().points[j].z);
     }
 
     // Indices for Base shape
@@ -382,7 +366,7 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     glDrawElements(
         GL_LINE_LOOP,
         static_cast<GLsizei>(_indexArray.size()),
-        GL_UNSIGNED_BYTE,
+        GL_UNSIGNED_SHORT,
         nullptr
     );
 
