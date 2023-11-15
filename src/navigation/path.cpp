@@ -120,7 +120,7 @@ Path::Path(Waypoint start, Waypoint end, Type type, std::optional<double> durati
     // computing how much faster/slower it should be
     _speedFactorFromDuration = 1.0;
     if (duration.has_value()) {
-        if (*duration > 0) {
+        if (*duration > 0.0) {
             constexpr double dt = 0.05; // 20 fps
             while (!hasReachedEnd()) {
                 traversePath(dt);
