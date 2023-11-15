@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/json.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -56,19 +57,12 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    struct Coordinate {
-        double x;
-        double y;
-        double z;
-    };
-
     struct TimePolygon {
         double timestamp;
-        std::vector<Coordinate> points;
+        std::vector<glm::dvec3> points;
     };
 
     void readDataFile();
-    TimePolygon readDataLine(std::ifstream& file);
 
     void updateTubeData();
     void updateBufferData();
@@ -88,7 +82,7 @@ private:
     std::vector<float> _vertexArray;
     std::vector<uint8_t> _indexArray;
 
-    bool _prismIsDirty = false;
+    bool _tubeIsDirty = false;
 };
 
 } // namespace openspace

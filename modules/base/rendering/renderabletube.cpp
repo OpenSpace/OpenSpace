@@ -37,9 +37,12 @@
 #include <ghoul/opengl/programobject.h>
 #include <optional>
 
+using json = nlohmann::json;
+
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTube";
-    constexpr int8_t DataFileVersion = 0;
+    constexpr int8_t CurrentMajorVersion = 0;
+    constexpr int8_t CurrentMinorVersion = 1;
     constexpr std::array<const char*, 2> UniformNames = {
         "modelViewProjectionTransform", "vs_color"
     };
@@ -108,9 +111,9 @@ void RenderableTube::initialize() {
 
 void RenderableTube::initializeGL() {
     _shader = global::renderEngine->buildRenderProgram(
-        "PrismProgram",
-        absPath("${MODULE_BASE}/shaders/prism_vs.glsl"),
-        absPath("${MODULE_BASE}/shaders/prism_fs.glsl")
+        "TubeProgram",
+        absPath("${MODULE_BASE}/shaders/tube_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/tube_fs.glsl")
     );
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
@@ -124,6 +127,7 @@ void RenderableTube::initializeGL() {
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+
     glBindVertexArray(0);
 }
 
@@ -155,76 +159,133 @@ void RenderableTube::readDataFile() {
         return;
     }
 
-    // Read 1 item
+    // Read the entire file into a string
+    constexpr size_t readSize = std::size_t(4096);
+    fileStream.exceptions(std::ios_base::badbit);
 
-
-    // Loop over all items until stream is not good
-
+    std::string data;
+    std::string buf = std::string(readSize, '\0');
+    while (fileStream.read(buf.data(), readSize)) {
+        data.append(buf, 0, fileStream.gcount());
+    }
+    data.append(buf, 0, fileStream.gcount());
     fileStream.close();
-}
 
-RenderableTube::TimePolygon RenderableTube::readDataLine(std::ifstream& file) {
-    RenderableTube::TimePolygon timePolygon;
-    int nPoints = 0;
-    std::string date, time;
+    // convert to a json object
+    json jsonData = json::parse(data);
 
-    file >> date >> time >> nPoints;
+    // Ceck version
+    bool foundVersion = false;
+    if (auto version = jsonData.find("version"); version != jsonData.end()) {
+        auto major = version->find("major");
+        auto minor = version->find("minor");
 
-    if (!file) {
-        return std::move(RenderableTube::TimePolygon());
-    }
-
-    // Convert to J2000 seconds
-    std::string timeString = fmt::format("{} {}", date, time);
-    timePolygon.timestamp = Time::convertTime(timeString);
-
-    for (int i = 0; i < nPoints; ++i) {
-        RenderableTube::Coordinate coord;
-        file >> coord.x >> coord.y >> coord.z;
-
-        if (file) {
-            timePolygon.points.push_back(coord);
-        }
-        else {
-            break;
+        if (major != version->end() && minor != version->end()) {
+            foundVersion = true;
+            if (*major != CurrentMajorVersion || *minor != CurrentMinorVersion) {
+                LWARNING(fmt::format(
+                    "Unknown data version '{}.{}' found. The currently supported version "
+                    "is {}.{}", major->dump(), minor->dump(), CurrentMajorVersion,
+                    CurrentMinorVersion
+                ));
+            }
         }
     }
 
-    return std::move(timePolygon);
+    if (!foundVersion) {
+        LWARNING("Could not find version information, version might not be supported");
+    }
+
+    // Find polygons
+    auto polygons = jsonData.find("polygons");
+    if (polygons == jsonData.end() || polygons->size() < 1) {
+        LERROR("Could not find any polygon in the data");
+        return;
+    }
+
+    // Loop throught json object to fill the datastructure for the polygons
+    for (auto it = polygons->begin(); it < polygons->end(); ++it) {
+        TimePolygon timePolygon;
+
+        // Timestamp
+        auto time = it->find("time");
+        if (time == it->end()) {
+            LERROR("Could not find time for polygon in data");
+            return;
+        }
+        std::string timeString = time->dump();
+        timeString.erase(
+            std::remove(timeString.begin(), timeString.end(), '\"'),
+            timeString.end()
+        );
+        timePolygon.timestamp = Time::convertTime(timeString);
+
+        // Coordinates
+        auto points = it->find("points");
+        if (points == it->end() || points->size() < 1) {
+            LERROR("Could not find points for polygon in data");
+            return;
+        }
+        for (auto pt = points->begin(); pt < points->end(); ++pt) {
+            auto px = pt->find("x");
+            auto py = pt->find("y");
+            auto pz = pt->find("z");
+
+            if (px == pt->end() || py == pt->end() || pz == pt->end()) {
+                LERROR("Could not find coordinate component for polygon in data");
+                return;
+            }
+
+            double x, y, z;
+            pt->at("x").get_to(x);
+            pt->at("y").get_to(y);
+            pt->at("z").get_to(z);
+
+            glm::dvec3 point(x, y, z);
+            timePolygon.points.push_back(point);
+        }
+        _data.push_back(timePolygon);
+    }
 }
+
 
 void RenderableTube::updateTubeData() {
-    /*_vertexArray.clear();
+    _vertexArray.clear();
     _indexArray.clear();
 
     using namespace rendering::helper;
+    int nShapeSegments = 3;
+    int nLines = 3;
+    int baseRadius = 1000000;
+    int radius = 1000000;
+    int length = 10000000;
 
     // Get unit circle vertices on the XY-plane
-    std::vector<VertexXYZ> unitVertices = createRingXYZ(_nShapeSegments.value(), 1.f);
-    std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(_nLines.value(), 1.f);
+    std::vector<VertexXYZ> unitVertices = createRingXYZ(nShapeSegments, 1.f);
+    std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(nLines, 1.f);
 
     // Put base vertices into array
-    for (int j = 0; j < _nShapeSegments; ++j) {
+    for (int j = 0; j < nShapeSegments; ++j) {
         float ux = unitVertices[j].xyz[0];
         float uy = unitVertices[j].xyz[1];
 
-        _vertexArray.push_back(ux * _baseRadius); // x
-        _vertexArray.push_back(uy * _baseRadius); // y
+        _vertexArray.push_back(ux * baseRadius); // x
+        _vertexArray.push_back(uy * baseRadius); // y
         _vertexArray.push_back(0.f);              // z
     }
 
     // Put top shape vertices into array
-    for (int j = 0; j < _nShapeSegments; ++j) {
+    for (int j = 0; j < nShapeSegments; ++j) {
         float ux = unitVertices[j].xyz[0];
         float uy = unitVertices[j].xyz[1];
 
-        _vertexArray.push_back(ux * _radius); // x
-        _vertexArray.push_back(uy * _radius); // y
-        _vertexArray.push_back(_length);      // z
+        _vertexArray.push_back(ux * radius); // x
+        _vertexArray.push_back(uy * radius); // y
+        _vertexArray.push_back(length);      // z
     }
 
     // Put the vertices for the connecting lines into array
-    if (_nLines == 1) {
+    if (nLines == 1) {
         // In the case of just one line then connect the center points instead
         // Center for base shape
         _vertexArray.push_back(0.f);
@@ -234,50 +295,50 @@ void RenderableTube::updateTubeData() {
         // Center for top shape
         _vertexArray.push_back(0.f);
         _vertexArray.push_back(0.f);
-        _vertexArray.push_back(_length);
+        _vertexArray.push_back(length);
     }
     else {
-        for (int j = 0; j < _nLines; ++j) {
+        for (int j = 0; j < nLines; ++j) {
             float ux = unitVerticesLines[j].xyz[0];
             float uy = unitVerticesLines[j].xyz[1];
 
             // Base
-            _vertexArray.push_back(ux * _baseRadius); // x
-            _vertexArray.push_back(uy * _baseRadius); // y
+            _vertexArray.push_back(ux * baseRadius); // x
+            _vertexArray.push_back(uy * baseRadius); // y
             _vertexArray.push_back(0.f);              // z
 
             // Top
-            _vertexArray.push_back(ux * _radius); // x
-            _vertexArray.push_back(uy * _radius); // y
-            _vertexArray.push_back(_length);      // z
+            _vertexArray.push_back(ux * radius); // x
+            _vertexArray.push_back(uy * radius); // y
+            _vertexArray.push_back(length);      // z
         }
     }
 
     // Indices for Base shape
     ghoul_assert(
-        _nShapeSegments.value() <= std::numeric_limits<uint8_t>::max(),
+        nShapeSegments.value() <= std::numeric_limits<uint16_t>::max(),
         "Too many shape segments"
     );
-    for (uint8_t i = 0; i < _nShapeSegments; ++i) {
+    for (uint16_t i = 0; i < nShapeSegments; ++i) {
         _indexArray.push_back(i);
     }
 
     // Reset
-    _indexArray.push_back(255);
+    _indexArray.push_back(std::numeric_limits<uint16_t>::max());
 
     // Indices for Top shape
-    for (int i = _nShapeSegments; i < 2 * _nShapeSegments; ++i) {
-        _indexArray.push_back(static_cast<uint8_t>(i));
+    for (int i = nShapeSegments; i < 2 * nShapeSegments; ++i) {
+        _indexArray.push_back(static_cast<uint16_t>(i));
     }
 
     // Indices for connecting lines
-    for (int i = 0, k = 0; i < _nLines; ++i, k += 2) {
+    for (int i = 0, k = 0; i < nLines; ++i, k += 2) {
         // Reset
-        _indexArray.push_back(255);
+        _indexArray.push_back(std::numeric_limits<uint16_t>::max());
 
-        _indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k));
-        _indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k + 1));
-    }*/
+        _indexArray.push_back(static_cast<uint16_t>(2 * nShapeSegments + k));
+        _indexArray.push_back(static_cast<uint16_t>(2 * nShapeSegments + k + 1));
+    }
 }
 
 void RenderableTube::updateBufferData() {
@@ -292,7 +353,7 @@ void RenderableTube::updateBufferData() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        _indexArray.size() * sizeof(uint8_t),
+        _indexArray.size() * sizeof(uint16_t),
         _indexArray.data(),
         GL_STREAM_DRAW
     );
@@ -314,7 +375,7 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
 
     // Render
     glEnable(GL_PRIMITIVE_RESTART);
-    glPrimitiveRestartIndex(255);
+    glPrimitiveRestartIndex(std::numeric_limits<uint16_t>::max());
     glLineWidth(_lineWidth);
     glBindVertexArray(_vaoId);
 
@@ -333,16 +394,16 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableTube::update(const UpdateData& data) {
-    /*if (_shader->isDirty()) {
+    if (_shader->isDirty()) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
-    if (_prismIsDirty) {
-        updateVertexData();
+    if (_tubeIsDirty) {
+        updateTubeData();
         updateBufferData();
-        setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));
-        _prismIsDirty = false;
-    }*/
+        //setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));
+        _tubeIsDirty = false;
+    }
 }
 
 } // namespace openspace
