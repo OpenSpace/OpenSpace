@@ -49,6 +49,8 @@ namespace {
     // It's nice to have these to interpret the dictionary when creating the path, but
     // maybe it's not really necessary
     struct [[codegen::Dictionary(PathInstruction)]] Parameters {
+        // The type of the instruction. Decides what other parameters are
+        // handled/available
         enum class TargetType {
             Node,
             NavigationState
@@ -95,6 +97,10 @@ namespace {
 } // namespace
 
 namespace openspace::interaction {
+
+documentation::Documentation Path::Documentation() {
+    return codegen::doc<Parameters>("core_path_instruction");
+}
 
 Path::Path(Waypoint start, Waypoint end, Type type, std::optional<double> duration)
     : _start(start)
