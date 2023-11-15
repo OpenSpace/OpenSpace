@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___LOADINGSCREEN___H__
 #define __OPENSPACE_CORE___LOADINGSCREEN___H__
 
+#include <openspace/util/screenlog.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -49,11 +50,11 @@ class LoadingScreen {
 public:
     BooleanType(ShowMessage);
     BooleanType(ShowNodeNames);
-    BooleanType(ShowProgressbar);
+    BooleanType(ShowLogMessages);
     BooleanType(CatastrophicError);
 
     LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
-        ShowProgressbar showProgressbar);
+        ShowLogMessages showLogMessages);
     ~LoadingScreen();
 
     void render();
@@ -62,10 +63,6 @@ public:
     void setCatastrophicError(CatastrophicError catastrophicError);
 
     void finalize();
-
-    void setItemNumber(int nItems);
-    int itemNumber();
-    void tickItem();
 
     enum class Phase {
         PreStart,
@@ -94,19 +91,21 @@ public:
         ItemStatus newStatus, ProgressInfo progressInfo);
 
 private:
-    bool _showMessage;
-    bool _showNodeNames;
-    bool _showProgressbar;
+
+    void renderLogMessages() const;
+
+    bool _showMessage = true;
+    bool _showNodeNames = true;
+    bool _showLog = true;
 
     Phase _phase = Phase::PreStart;
-    std::atomic_int _iProgress = 0;
-    std::atomic_int _nItems = 0;
 
     std::unique_ptr<ghoul::opengl::Texture> _logoTexture;
 
     std::shared_ptr<ghoul::fontrendering::Font> _loadingFont;
     std::shared_ptr<ghoul::fontrendering::Font> _messageFont;
     std::shared_ptr<ghoul::fontrendering::Font> _itemFont;
+    std::shared_ptr<ghoul::fontrendering::Font> _logFont;
 
     bool _hasCatastrophicErrorOccurred = false;
     std::string _message;
@@ -130,6 +129,9 @@ private:
 
     std::random_device _randomDevice;
     std::default_random_engine _randomEngine;
+
+    // Non owning but we remove the log from LogManager on destruction
+    ScreenLog* _log = nullptr;
 };
 
 } // namespace openspace

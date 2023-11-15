@@ -38,6 +38,7 @@ add_executable(
   test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
+  test_settings.cpp
   test_sgctedit.cpp
   test_spicemanager.cpp
   test_timeconversion.cpp
