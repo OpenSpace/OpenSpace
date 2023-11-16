@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/json.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -70,6 +71,7 @@ private:
     // Properties
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _lineColor;
+    properties::BoolProperty _enableFaceCulling;
 
     UniformCache(modelViewProjection, color) _uniformCache;
 
@@ -80,7 +82,7 @@ private:
     GLuint _vboId = 0;
     GLuint _iboId = 0;
     std::vector<float> _vertexArray;
-    std::vector<uint16_t> _indexArray;
+    std::vector<unsigned int> _indexArray;
 
     bool _tubeIsDirty = false;
 };

@@ -63,6 +63,13 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {
+        "EnableFaceCulling",
+        "Enable Face Culling",
+        "Enable OpenGL automatic face culling optimization",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableTube)]] Parameters {
         // The input file with data for the tube
         std::string file;
@@ -72,6 +79,9 @@ namespace {
 
         // [[codegen::verbatim(LineColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
+
+        // [[codegen::verbatim(EnableFaceCullingInfo.description)]]
+        std::optional<bool> enableFaceCulling;
     };
 #include "renderabletube_codegen.cpp"
 } // namespace
@@ -86,6 +96,7 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _enableFaceCulling(EnableFaceCullingInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -97,6 +108,9 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     _lineColor.setViewOption(properties::Property::ViewOptions::Color);
     _lineColor = p.color.value_or(_lineColor);
     addProperty(_lineColor);
+
+    _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
+    addProperty(_enableFaceCulling);
 
     addProperty(Fadeable::_opacity);
 }
@@ -251,77 +265,111 @@ void RenderableTube::readDataFile() {
 
 
 void RenderableTube::updateTubeData() {
-    if (_data.size() < 2) {
+    // Tube needs at least two polygons
+    const size_t nPolygons = _data.size();
+    if (nPolygons < 2) {
         LWARNING("Tube is empty");
+        return;
+    }
+
+    // Polygon needs at least 3 sides
+    // NOTE: assumes all polygons have the same number of points
+    const size_t nPoints = _data.front().points.size();
+    if (nPoints < 3) {
+        LWARNING("Polygons are too small");
         return;
     }
 
     _vertexArray.clear();
     _indexArray.clear();
 
-    using namespace rendering::helper;
-    int nShapeSegments = 3;
-    int nLines = 3;
-    int baseRadius = 1000000;
-    int radius = 1000000;
-    int length = 10000000;
-
-    // Get unit circle vertices on the XY-plane
-    std::vector<VertexXYZ> unitVertices = createRingXYZ(nShapeSegments, 1.f);
-    std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(nLines, 1.f);
-
-    // Put base vertices into array
+    // Verticies
+    // Add the first polygon's center point
+    glm::dvec3 firstCenter = glm::dvec3(0.0);
     for (const glm::dvec3& coord : _data.front().points) {
-        _vertexArray.push_back(coord.x);
-        _vertexArray.push_back(coord.y);
-        _vertexArray.push_back(coord.z);
+        firstCenter += coord;
+    }
+    firstCenter /= nPoints;
+
+    _vertexArray.push_back(firstCenter.x);
+    _vertexArray.push_back(firstCenter.y);
+    _vertexArray.push_back(firstCenter.z);
+
+    // Add all the polygons that will create the sides of the tube
+    for (const TimePolygon& poly : _data) {
+        for (const glm::dvec3& coord : poly.points) {
+            _vertexArray.push_back(coord.x);
+            _vertexArray.push_back(coord.y);
+            _vertexArray.push_back(coord.z);
+        }
     }
 
-    // Put top shape vertices into array
+    // Add the last polygon's center point
+    glm::dvec3 lastCenter = glm::dvec3(0.0);
     for (const glm::dvec3& coord : _data.back().points) {
-        _vertexArray.push_back(coord.x);
-        _vertexArray.push_back(coord.y);
-        _vertexArray.push_back(coord.z);
+        lastCenter += coord;
+    }
+    lastCenter /= nPoints;
+
+    _vertexArray.push_back(lastCenter.x);
+    _vertexArray.push_back(lastCenter.y);
+    _vertexArray.push_back(lastCenter.z);
+
+
+
+    // Indicies
+    unsigned int firstCenterIndex = 0;
+    unsigned int lastCenterIndex = _vertexArray.size() / 3 - 1;
+
+
+    // Indices for side triangles
+    for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+            unsigned int vIndex = 1 + pointIndex + polyIndex * nPolygons;
+            bool isLast = pointIndex == nPoints - 1;
+
+            unsigned int v0 = vIndex;
+            unsigned int v1 = v0 + nPoints;
+            unsigned int v2 = isLast ? v0 + 1 : v0 + nPoints + 1;
+            unsigned int v3 = isLast ? v0 + 1 - nPoints : v0 + 1;
+
+            // 2 triangles per sector
+            _indexArray.push_back(v0);
+            _indexArray.push_back(v1);
+            _indexArray.push_back(v2);
+
+            _indexArray.push_back(v0);
+            _indexArray.push_back(v2);
+            _indexArray.push_back(v3);
+        }
     }
 
-    // Put the vertices for the connecting lines into array
-    // NOTE: assumes all polygons have the same number of points
-    for (int j = 0; j < _data.front().points.size(); ++j) {
-        // Base
-        _vertexArray.push_back(_data.front().points[j].x);
-        _vertexArray.push_back(_data.front().points[j].y);
-        _vertexArray.push_back(_data.front().points[j].z);
+    // Indices for first polygon that will be the bottom
+    for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+        unsigned int vIndex = pointIndex + 1;
+        bool isLast = pointIndex == nPoints - 1;
 
-        // Top
-        _vertexArray.push_back(_data.back().points[j].x);
-        _vertexArray.push_back(_data.back().points[j].y);
-        _vertexArray.push_back(_data.back().points[j].z);
+        unsigned int v0 = firstCenterIndex;
+        unsigned int v1 = vIndex;
+        unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
+
+        _indexArray.push_back(v0);
+        _indexArray.push_back(v1);
+        _indexArray.push_back(v2);
     }
 
-    // Indices for Base shape
-    ghoul_assert(
-        nShapeSegments.value() <= std::numeric_limits<uint16_t>::max(),
-        "Too many shape segments"
-    );
-    for (uint16_t i = 0; i < nShapeSegments; ++i) {
-        _indexArray.push_back(i);
-    }
+    // Indices for last polygon that will be the top
+    for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+        unsigned int vIndex = lastCenterIndex - pointIndex - 1;
+        bool isLast = pointIndex == nPoints - 1;
 
-    // Reset
-    _indexArray.push_back(std::numeric_limits<uint16_t>::max());
+        unsigned int v0 = lastCenterIndex;
+        unsigned int v1 = vIndex;
+        unsigned int v2 = isLast ? v0 - 1 : vIndex - 1;
 
-    // Indices for Top shape
-    for (int i = nShapeSegments; i < 2 * nShapeSegments; ++i) {
-        _indexArray.push_back(static_cast<uint16_t>(i));
-    }
-
-    // Indices for connecting lines
-    for (int i = 0, k = 0; i < nLines; ++i, k += 2) {
-        // Reset
-        _indexArray.push_back(std::numeric_limits<uint16_t>::max());
-
-        _indexArray.push_back(static_cast<uint16_t>(2 * nShapeSegments + k));
-        _indexArray.push_back(static_cast<uint16_t>(2 * nShapeSegments + k + 1));
+        _indexArray.push_back(v0);
+        _indexArray.push_back(v1);
+        _indexArray.push_back(v2);
     }
 }
 
@@ -337,7 +385,7 @@ void RenderableTube::updateBufferData() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        _indexArray.size() * sizeof(uint16_t),
+        _indexArray.size() * sizeof(unsigned int),
         _indexArray.data(),
         GL_STREAM_DRAW
     );
@@ -357,22 +405,28 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     );
     _shader->setUniform(_uniformCache.color, glm::vec4(_lineColor.value(), opacity()));
 
+    // Settings
+    if (!_enableFaceCulling) {
+        glDisable(GL_CULL_FACE);
+    }
+
     // Render
-    glEnable(GL_PRIMITIVE_RESTART);
-    glPrimitiveRestartIndex(std::numeric_limits<uint16_t>::max());
     glLineWidth(_lineWidth);
     glBindVertexArray(_vaoId);
 
     glDrawElements(
-        GL_LINE_LOOP,
+        GL_TRIANGLES,
         static_cast<GLsizei>(_indexArray.size()),
-        GL_UNSIGNED_SHORT,
+        GL_UNSIGNED_INT,
         nullptr
     );
 
+    // Reset
+    if (!_enableFaceCulling) {
+        glEnable(GL_CULL_FACE);
+    }
     glBindVertexArray(0);
     global::renderEngine->openglStateCache().resetLineState();
-    glDisable(GL_PRIMITIVE_RESTART);
 
     _shader->deactivate();
 }
