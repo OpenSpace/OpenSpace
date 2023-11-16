@@ -1,0 +1,229 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+    branches: [ "**" ]
+
+concurrency:
+  group: ${{ github.workflow }}@${{ github.ref }}+${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}
+  cancel-in-progress: false
+
+# Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+
+  line-count:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    name: Count lines of code
+    
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Count Lines of Code (cloc)
+        uses: djdefi/cloc-action@5
+
+  build-linux:
+    needs: line-count
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04]
+        qt-ver: [apt, 6.2, 6.5]
+        compiler:
+          - { compiler: GCC 11, cc: gcc-11, cxx: g++-11 }
+          - { compiler: GCC 12, cc: gcc-12, cxx: g++-12 }
+          - { compiler: GCC 13, cc: gcc-13, cxx: g++-13 }
+          - { compiler: Clang 14, cc: clang-14, cxx: clang++-14 }
+          - { compiler: Clang 15, cc: clang-15, cxx: clang++-15 }
+          - { compiler: Clang 16, cc: clang-16, cxx: clang++-16 }
+          - { compiler: Clang 17, cc: clang-17, cxx: clang++-17 }
+        generator:
+          - { generator: Make, flag: Unix Makefiles }
+          - { generator: Ninja, flag: Ninja }
+        exclude:
+          - os: ubuntu-20.04
+            qt-ver: apt
+
+    runs-on: ${{ matrix.os }}
+    name: Build on ${{ matrix.os }} (${{ matrix.compiler.compiler }}/${{ matrix.generator.Generator }}/Qt ${{ matrix.qt-ver }})
+    env:
+      BUILD_DIR: ${{ github.workspace }}/build
+      
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gdal-bin libgdal-dev libxrandr-dev libxinerama-dev xorg-dev libxcursor-dev libxi-dev libasound2-dev libgdal-dev libboost-dev freeglut3-dev glew-utils libpng-dev libcurl4-openssl-dev libvulkan-dev zlib1g-dev libmpv-dev
+
+      # GCC 13 is not available by default, this helps with installing newer versions of GCC
+      - name: Install updated GCC and set priorities
+        if: matrix.compiler.compiler == 'GCC 13'
+        run: |
+            sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+            sudo apt-get install --install-suggests -y g++-13 gcc-13
+  
+      # Clang 15 and newer are not available by default, this helps with installing new and more recent versions of Clang, as well as versions not in the Ubuntu repositories
+      - name: Install updated LLVM/Clang
+        if: matrix.compiler.compiler == 'Clang 15' || matrix.compiler.compiler == 'Clang 16' || matrix.compiler.compiler == 'Clang 17' 
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          if [[ "${{ matrix.compiler.compiler }}" == 'Clang 15' ]]; then
+            sudo apt install --install-suggests -y clang-15 clang-format-15 clang-tidy-15 clang-tools-15 clangd-15
+          elif [[ "${{ matrix.compiler.compiler }}" == 'Clang 16' ]]; then
+            sudo ./llvm.sh 16
+          elif [[ "${{ matrix.compiler.compiler }}" == 'Clang 17' ]]; then
+            sudo ./llvm.sh 17
+          fi
+
+      # Ninja is not available by default, this helps with installing Ninja
+      - name: Install Ninja
+        if: matrix.generator.generator == 'Ninja'
+        run: sudo apt-get install ninja-build
+
+      # Qt is not friendly to install manually, nor any runner has Qt installed by default, this action resolves this issue
+      - name: Install Qt6 from aqtinstall
+        uses: jurplel/install-qt-action@v3.0.0
+        if: matrix.qt-ver != 'apt'
+        with:
+          version: ${{ matrix.qt-ver }}
+          cache: true
+
+      # Qt is available on Ubuntu APT repositories, abiet older versions
+      - name: Install Qt6 from APT
+        if: matrix.qt-ver == 'apt'
+        run: sudo apt-get install -y qt6-base-dev
+        
+      # Helps with disk space issues, OpenSpace builds are large and can cause the runner to fail with a low disk or full disk error
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: true
+
+      # Increase swapfile size to help with low memory issues during builds
+      - name: Increase swapfile
+        run: |
+          sudo swapoff -a
+          sudo fallocate -l 15G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          sudo swapon --show
+
+      - name: Configure CMake
+        run: cmake -G "${{ matrix.generator.flag }}" -DCMAKE_C_COMPILER=/usr/bin/${{ matrix.compiler.cc }} -DCMAKE_CXX_COMPILER=/usr/bin/${{ matrix.compiler.cxx }} -B ${{ env.BUILD_DIR }} -DOPENSPACE_ENABLE_ALL_MODULES=ON -DCMAKE_CXX_FLAGS:STRING=-DGLM_ENABLE_EXPERIMENTAL -DOpenGL_GL_PREFERENCE:STRING=GLVND -DASSIMP_BUILD_MINIZIP=1
+
+      - name: Build
+        run: |
+          cmake --build ${{ github.workspace }}/build --target OpenSpace --config ${{env.BUILD_TYPE}}
+
+  build-win:
+    needs: line-count
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, windows-2022, windows-2019]
+        qt-ver: [6.2, 6.5]
+    runs-on: ${{ matrix.os }}
+    name: Build on ${{ matrix.os }} (Qt ${{ matrix.qt-ver }})
+    env:
+      BUILD_DIR: C:\OpenSpace\build
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      # Qt is not friendly to install manually, nor any runner has Qt installed by default, this action resolves this issue
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v3.0.0
+        with:
+          version: ${{ matrix.qt-ver }}
+          host: "windows"
+          target: "desktop"
+          arch: "win64_msvc2019_64"
+          cache: true
+
+      # Boost is not available on Windows by default, this action resolves this issue
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.4
+        id: install-boost
+        with:
+          boost_version: 1.81.0
+          platform_version: 2022
+          toolset: msvc
+
+      # Due to a limitation on free Windows-based GitHub runners, we need a larger build drive, the C:\ drive on the runner will suffice
+      - name: Hack - Move repository to larger drive
+        run: |
+          cp ${{github.workspace}} C:\OpenSpace
+          ls C:\
+
+      - name: Configure CMake
+        run: cmake -B ${{ env.BUILD_DIR }} -DOPENSPACE_ENABLE_ALL_MODULES=ON
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+
+      - name: Build
+        run: |
+          cmake --build ${{ env.BUILD_DIR }} --target OpenSpace --config ${{env.BUILD_TYPE}}
+
+  build-macos:
+    needs: line-count
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, macos-13, macos-12]
+        qt-ver: [6.2, 6.5]
+        xcode-ver: ['latest-stable', 'latest', 'default']
+    runs-on: ${{ matrix.os }}
+    name: Build on ${{ matrix.os }} (Xcode ${{matrix.xcode-ver}}/Qt ${{ matrix.qt-ver }})
+    env:
+      BUILD_DIR: ${{ github.workspace }}/build
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      # This specifies the Xcode version to use, the default is the latest stable version
+      - name: Setup Xcode version
+        if: matrix.xcode-ver != 'default'
+        uses: maxim-lobanov/setup-xcode@v1.5.1
+        with:
+          xcode-version: ${{ matrix.xcode-ver }}
+
+      # Qt is not friendly to install manually, nor any runner has Qt installed by default, this action resolves this issue
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v3.0.0
+        with:
+          version: ${{ matrix.qt-ver }}
+          cache: true
+
+      - name: Install dependencies
+        run: brew install boost glew freeimage mpv vulkan-headers vulkan-loader brotli gdal
+
+      # The project will fail to compile unless you run CMake twice, very strange issue
+      - name: Configure CMake
+        run: |
+          cmake -B ${{ env.BUILD_DIR }} -G "Xcode"
+          cmake -B ${{ env.BUILD_DIR }} -G "Xcode" -DOPENSPACE_ENABLE_ALL_MODULES=ON
+
+      - name: Build
+        run: |
+          cmake --build ${{ github.workspace }}/build --target OpenSpace --config ${{env.BUILD_TYPE}} -- -quiet

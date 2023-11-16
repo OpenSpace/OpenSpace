@@ -1,0 +1,117 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [ "**" ]
+
+concurrency:
+  group: "${{ github.workflow }} @${{ github.run_number }}+${{ github.run_attempt }}-${{ github.run_id}}"
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ${{ matrix.os }}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    # Self-hosted runners are required for the C++ CodeQL checks due to the GitHub provided runners will time out and hit resource limits.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-latest', 'self-hosted' ]
+        language: [ 'cpp', 'javascript', 'python' ]
+        exclude:
+          - os: 'self-hosted'
+            language: 'javascript'
+          - os: 'self-hosted'
+            language: 'python'
+          - os: 'ubuntu-latest'
+            language: 'cpp'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    # Helps with disk space issues, OpenSpace builds are large and can cause the runner to fail with a low disk or full disk error
+    - name: Free Disk Space
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: false
+        docker-images: true
+        swap-storage: true
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gdal-bin libgdal-dev libxrandr-dev libxinerama-dev xorg-dev libxcursor-dev libxi-dev libasound2-dev libgdal-dev libboost-dev freeglut3-dev glew-utils libpng-dev libcurl4-openssl-dev libmpv-dev libvulkan-dev zlib1g-dev
+    
+    # Qt is not friendly to install manually, nor any runner has Qt installed by default, this action resolves this issue
+    - name: Install Qt6
+      uses: jurplel/install-qt-action@v3.0.0
+      with:
+        version: 6.5
+
+    # Increase swapfile size to prevent out of memory errors during builds/anaylsis
+    - name: Increase swapfile
+      run: |
+        sudo swapoff -a
+        sudo fallocate -l 15G /swapfile
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+        sudo swapon --show
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+        # queries: security-extended,security-and-quality
+
+    # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"
+        upload: False
+        output: sarif-results
+
+    # Due to submodules, the analysis results contain a lot of files that are not part of the main repository.
+    - name: Filter analysis
+      uses: advanced-security/filter-sarif@v1
+      with:
+        # filter out all test files unless they contain a sql-injection vulnerability
+        patterns: |
+          -apps/OpenSpace/ext/sgct/**
+          -apps/OpenSpace-MinVR/ext/minvr/**
+          -apps/OpenSpace-MinVR/ext/glfw/**
+          -documentation/**
+          -ext/date/**
+          -ext/ghoul/**
+          -ext/spice/**
+          -modules/kameleon/ext/kameleon/**
+          -modules/fitsfilereader/ext/CCfits/**
+          -modules/fitsfilereader/ext/cfitsio/**
+          -modules/globebrowsing/ext/geos/**
+          -modules/touch/ext/libTUIO11/**
+          -support/coding/codegen/**
+        input: sarif-results/${{ matrix.language }}.sarif
+        output: sarif-results/${{ matrix.language }}.sarif
+
+    - name: Upload filtered CodeQL analysis results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: sarif-results/${{ matrix.language }}.sarif

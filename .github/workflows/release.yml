@@ -1,0 +1,347 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - 'rc/*'
+    tags:
+      - 'releases/*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "${{ github.workflow }} @${{ github.run_number }}+${{ github.run_attempt }}-${{ github.run_id}}"
+  cancel-in-progress: false
+
+# Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+env:
+  BUILD_DIR: ${{ github.workspace }}/build
+  BUILD_DIR_WIN: C:\OpenSpace\build
+
+jobs:
+  deploy-win:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        qt-ver: [6.5]
+    runs-on: ${{ matrix.os }}
+    name: Build Windows Release binaries
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      # Qt is not friendly to install manually, nor any runner has Qt installed by default, this action resolves this issue
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v3.3.0
+        with:
+          version: ${{ matrix.qt-ver }}
+          host: "windows"
+          target: "desktop"
+          arch: "win64_msvc2019_64"
+          cache: true
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.3.1
+
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.4
+        id: install-boost
+        with:
+          boost_version: 1.81.0
+          platform_version: 2022
+          toolset: msvc
+
+      # Due to a limitation on free Windows-based GitHub runners, we need a larger build drive, the C:\ drive on the runner will suffice
+      - name: Hack - Move repository to larger drive
+        run: |
+          cp ${{github.workspace}} C:\OpenSpace
+          ls C:\
+
+      - name: Configure CMake
+        run: cmake -DSGCT_BUILD_TESTS=OFF -DGHOUL_HIGH_DEBUG_MODE=OFF -DGHOUL_HAVE_TESTS=OFF -DOPENSPACE_HAVE_TESTS=OFF -DOPENSPACE_ENABLE_ALL_MODULES=ON -B ${{ env.BUILD_DIR_WIN }}
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+
+      - name: Build in RelWithDebInfo mode
+        run: cmake --build ${{ env.BUILD_DIR_WIN }} --config RelWithDebInfo
+
+      - name: Upload PDB artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: pdbs-win
+          path: ${{ github.workspace }}\bin\RelWithDebInfo\*.pdb
+          if-no-files-found: error
+
+      - name: Cleanup files before archiving artifact
+        shell: cmd
+        continue-on-error: true
+        run: |
+          del ${{ github.workspace }}\bin\RelWithDebInfo\*.pdb
+          del ${{ github.workspace }}\bin\RelWithDebInfo\codegen.exe
+          del ${{ github.workspace }}\bin\RelWithDebInfo\Qt6Svg.dll
+          rmdir /S /Q ${{ github.workspace }}\bin\RelWithDebInfo\iconengines
+          rmdir /S /Q ${{ github.workspace }}\bin\RelWithDebInfo\imageformats
+          rmdir /S /Q ${{ github.workspace }}\bin\RelWithDebInfo\networkinformation
+          robocopy ${{ github.workspace }}\\bin\\RelWithDebInfo bin /E /MOV
+          rmdir /S /Q ${{ github.workspace }}\\bin\\RelWithDebInfo
+
+      - name: Reset Documentation
+        continue-on-error: true
+        run: |
+          copy ${{ github.workspace }}\documentation\documentationData.js ${{ github.workspace }}
+          git checkout HEAD -- documentationData.js
+
+      - name: Curl Microsoft VC++ Resistributable
+        continue-on-error: true
+        run: curl "http://aka.ms/vs/17/release/vc_redist.x64.exe" --output vc_redist.x64.exe -L
+
+      - name: Upload OpenSpace artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: OpenSpace-win
+          path: |
+            ${{ github.workspace }}/bin/*
+            config/*
+            data/*
+            documentation/*
+            scripts/*
+            shaders/*
+            ACKNOWLEDGMENTS.md
+            CITATION.cff
+            CODE_OF_CONDUCT.md
+            COMMIT.md
+            CREDITS.md
+            LICENSE.md
+            openspace.cfg
+            README.md
+            vc_redist.x64.exe
+            modules/*/shaders/*
+            modules/*/scripts/*
+            modules/globebrowsing/gdal_data/*
+            modules/webgui/ext/nodejs/node.exe
+            !documentation/.git
+          if-no-files-found: error
+
+  deploy-linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        qt-ver: [6.5]
+        compiler:
+          - { compiler: GCC, cc: gcc-11, cxx: g++-11 }
+        generator:
+          - { generator: Make, flag: Unix Makefiles }
+    runs-on: ${{ matrix.os }}
+    name: Build Linux Release binaries
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      # Qt is not friendly to install manually, nor any runner has Qt installed by default, this action resolves this issue
+      - name: Install Qt6 from aqtinstall
+        uses: jurplel/install-qt-action@v3.3.0
+        with:
+          version: ${{ matrix.qt-ver }}
+          cache: true
+
+      - name: Install dependencies
+        run: sudo apt-get install -y gdal-bin libgdal-dev libxrandr-dev libxinerama-dev xorg-dev libxcursor-dev libxi-dev libasound2-dev libgdal-dev libboost-dev freeglut3-dev glew-utils libpng-dev libcurl4-openssl-dev libmpv-dev libvulkan-dev zlib1g-dev
+
+      # Helps with disk space issues, OpenSpace builds are large and can cause the runner to fail with a low disk or full disk error
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: true
+
+      # Increase swapfile size to help with low memory issues during builds
+      - name: Increase swapfile
+        run: |
+          sudo swapoff -a
+          sudo fallocate -l 15G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          sudo swapon --show
+
+      - name: Configure CMake
+        env:
+          CC: ${{ matrix.compiler.cc }}
+          CXX: ${{ matrix.compiler.cxx }}
+        run: cmake -G "${{ matrix.generator.flag }}" -B ${{ env.BUILD_DIR }} -DSGCT_BUILD_TESTS=OFF -DGHOUL_HIGH_DEBUG_MODE=OFF -DGHOUL_HAVE_TESTS=OFF -DOPENSPACE_HAVE_TESTS=OFF -DOPENSPACE_ENABLE_ALL_MODULES=ON
+
+      - name: Build in RelWithDebInfo mode
+        env:
+          CC: ${{ matrix.compiler.cc }}
+          CXX: ${{ matrix.compiler.cxx }}
+        run: cmake --build ${{ github.workspace }}/build --config RelWithDebInfo --target OpenSpace
+
+      - name: Cleanup
+        continue-on-error: true
+        run: |
+          rm -rf ${{ github.workspace }}/bin/RelWithDebInfo/codegen
+          rm -rf ${{ github.workspace }}/bin/RelWithDebInfo/Qt6Svg
+          rm -rf ${{ github.workspace }}/bin/RelWithDebInfo/iconengines
+          rm -rf ${{ github.workspace }}/bin/RelWithDebInfo/imageformats
+          rm -rf ${{ github.workspace }}/bin/RelWithDebInfo/networkinformation
+          mv ${{ github.workspace }}/bin/RelWithDebInfo/* ${{ github.workspace }}/bin
+          rm -rf ${{ github.workspace }}/bin/RelWithDebInfo
+
+      - name: Reset Documentation
+        continue-on-error: true
+        run: |
+          cp ${{ github.workspace }}\documentation\documentationData.js ${{ github.workspace }}
+          git checkout HEAD -- documentationData.js
+
+      - name: Upload OpenSpace artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: OpenSpace-linux
+          path: |
+            ${{ github.workspace }}/bin/*
+            config/*
+            data/*
+            documentation/*
+            scripts/*
+            shaders/*
+            ACKNOWLEDGMENTS.md
+            CITATION.cff
+            CODE_OF_CONDUCT.md
+            COMMIT.md
+            CREDITS.md
+            LICENSE.md
+            openspace.cfg
+            README.md
+            modules/*/shaders/*
+            modules/*/scripts/*
+            modules/globebrowsing/gdal_data/*
+            modules/webgui/ext/nodejs/node
+            !documentation/.git
+          if-no-files-found: error
+
+  deploy-macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
+        qt-ver: [6.5]
+    runs-on: ${{ matrix.os }}
+    name: Build macOS Release Binaries
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      # Qt is not friendly to install manually, nor any runner has Qt installed by default, this action resolves this issue
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v3.3.0
+        with:
+          version: ${{ matrix.qt-ver }}
+          cache: true
+
+      - name: Install dependencies
+        run: brew install boost glew freeimage mpv vulkan-headers vulkan-loader brotli gdal
+
+      # The project will fail to compile unless you run CMake twice
+      - name: Configure CMake
+        run: |
+          cmake -B ${{ env.BUILD_DIR }} -G "Xcode"
+          cmake -B ${{ env.BUILD_DIR }} -G "Xcode" -DSGCT_BUILD_TESTS=OFF -DGHOUL_HIGH_DEBUG_MODE=OFF -DGHOUL_HAVE_TESTS=OFF -DOPENSPACE_HAVE_TESTS=OFF -DOPENSPACE_ENABLE_ALL_MODULES=ON
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config RelWithDebInfo --target OpenSpace -- -quiet
+
+      - name: Cleanup
+        continue-on-error: true
+        run: |
+          rm -rf ${{ github.workspace }}/bin/RelWithDebInfo/codegen
+          mv ${{ github.workspace }}/bin/RelWithDebInfo ${{ github.workspace }}/bin
+          rm -rf ${{ github.workspace }}/bin/RelWithDebInfo
+
+      - name: Reset Documentation
+        continue-on-error: true
+        run: |
+          cp ${{ github.workspace }}\documentation\documentationData.js ${{ github.workspace }}
+          git checkout HEAD -- documentationData.js
+
+      - name: Upload OpenSpace artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: OpenSpace-macos
+          path: |
+            ${{ github.workspace }}/bin/*
+            config/*
+            data/*
+            documentation/*
+            scripts/*
+            shaders/*
+            ACKNOWLEDGMENTS.md
+            CITATION.cff
+            CODE_OF_CONDUCT.md
+            COMMIT.md
+            CREDITS.md
+            LICENSE.md
+            openspace.cfg
+            README.md
+            modules/*/shaders/*
+            modules/*/scripts/*
+            modules/globebrowsing/gdal_data/*
+            modules/webgui/ext/nodejs/node
+            !documentation/.git
+          if-no-files-found: error
+  
+  gh-release:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    needs: [deploy-win, deploy-linux, deploy-macos]
+    name: Create GitHub Release
+    steps:
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: OpenSpace-win
+          path: ${{ github.workspace }}/OpenSpace-win
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: OpenSpace-linux
+          path: ${{ github.workspace }}/OpenSpace-linux
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: OpenSpace-macos-latest
+          path: ${{ github.workspace }}/OpenSpace-macos
+
+      - name: Zip archives
+        run: |
+          zip -r OpenSpace-win ${{ github.workspace }}/OpenSpace-win
+          zip -r OpenSpace-linux ${{ github.workspace }}/OpenSpace-linux
+          zip -r OpenSpace-macos ${{ github.workspace }}/OpenSpace-macos
+          zip -r pdbs-win ${{ github.workspace }}/pdbs-win
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ${{ github.workspace }}/OpenSpace-win.zip
+            ${{ github.workspace }}/OpenSpace-linux.zip
+            ${{ github.workspace }}/OpenSpace-macos.zip
+            ${{ github.workspace }}/pdbs-win.zip
+          draft: true
+          prerelease: false
