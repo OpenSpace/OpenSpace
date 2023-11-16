@@ -14,7 +14,6 @@ env:
   BUILD_TYPE: Debug
 
 jobs:
-
   line-count:
     strategy:
       fail-fast: false
@@ -224,6 +223,7 @@ jobs:
           cmake -B ${{ env.BUILD_DIR }} -G "Xcode"
           cmake -B ${{ env.BUILD_DIR }} -G "Xcode" -DOPENSPACE_ENABLE_ALL_MODULES=ON
 
+      # Xcode outputs a lot of noise to the log, this makes it quieter and only outputs on compiler warnings or errors
       - name: Build
         run: |
           cmake --build ${{ github.workspace }}/build --target OpenSpace --config ${{env.BUILD_TYPE}} -- -quiet
