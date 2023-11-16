@@ -43,7 +43,7 @@ void main() {
   vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
   gl_Position = positionScreenSpace;
-  
+
   // G-Buffer
   vs_gNormal = vec3(0.0);
   vs_gPosition = modelViewTransform * position; // Must be in SGCT eye space;

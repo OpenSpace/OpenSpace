@@ -49,7 +49,7 @@ Fragment getFragment() {
 
   vec4 vs_color = vec4(color.xyz, 1 * color.a);
 
-    vec4 fragColor = vs_color;
+  vec4 fragColor = vs_color;
   frag.color = fragColor;
 
   if (gl_FrontFacing) {
@@ -72,7 +72,7 @@ Fragment getFragment() {
 
   frag.depth = vs_screenSpaceDepth;
 
- frag.blend = BLEND_MODE_ADDITIVE;
+  frag.blend = BLEND_MODE_ADDITIVE;
 
   // G-Buffer
   frag.gPosition = vs_gPosition;

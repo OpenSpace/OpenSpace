@@ -65,7 +65,6 @@ uniform vec2 domainLimR;
 const int uniformColor = 0;
 const int colorByQuantity = 1;
 
-
 vec4 getTransferFunctionColor() {
   // Remap the color scalar to a [0,1] range
   float lookUpVal =

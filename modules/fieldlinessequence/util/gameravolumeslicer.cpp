@@ -29,9 +29,15 @@
 #include <highfive/H5DataSet.hpp>
 #include <highfive/H5Object.hpp>
 #include <HighFive/H5Group.hpp>
-#include "cstring";
-#include "iostream";
-#include <cmath>;
+#include <cstring>
+#include <iostream>
+#include <cmath>
+
+#include <fstream>
+#include <optional>
+#include <ostream>
+#include <algorithm>
+#include <cmath>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -47,6 +53,16 @@ void GameraVolumeSlicer::interpolator(float value, std::vector<std::vector<std::
 
     int size_1 = slicedDataADP[0].size();
     int size_2 = slicedDataADP[0][0].size();
+    
+    if (slicedDataBDP.size() != slicedDataADP.size() ||
+        slicedDataBDP[0].size() != slicedDataADP[0].size() ||
+        slicedDataBDP[0][0].size() != slicedDataADP[0][0].size()) {
+    }
+    
+    if (value < 0.0 || value > 1.0) {
+        std::cout << "VALUE utanfor range" << std::endl;
+    }
+
 
     double integerPart;
     float value_shifted = value + 0.5; // Caused by the shift 0.5 from grid to data (cell centered data)
@@ -66,7 +82,7 @@ void GameraVolumeSlicer::interpolator(float value, std::vector<std::vector<std::
                     float d1 = slicedDataBDP[q][i][j];
                     float d2 = slicedDataADP[q][i][j];
 
-                    float v = (decimalPart - 1) * d1 + decimalPart * d2;
+                    float v = abs((decimalPart - 1)) * d1 + decimalPart * d2;
 
                     temp[i][j] = v;
                 }
@@ -74,6 +90,7 @@ void GameraVolumeSlicer::interpolator(float value, std::vector<std::vector<std::
             data.push_back(temp);
         }
     }
+    
 }
 
 //************************ SLICER ***********************//
@@ -82,7 +99,7 @@ void GameraVolumeSlicer::interpolator(float value, std::vector<std::vector<std::
 // "count" decides how many values from the offset value
 // that should be included
 //******************************************************//
-std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::slicer(std::string axis, float value, HighFive::Group timeStep) {
+std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::slicer(std::string axis, float value, HighFive::Group timeStep, HighFive::File file) {
 
     std::transform(axis.begin(), axis.end(), axis.begin(),
                       [](unsigned char a) { return std::tolower(a); });
@@ -90,6 +107,15 @@ std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::slicer(std::str
     std::vector<std::vector<std::vector<float>>> slicedDataBDP; // Slice fo data BEFORE position of slice, these can be function variables
     std::vector<std::vector<std::vector<float>>> slicedDataADP; // Slice fo data AFTER position of slice, these can be function variables
     std::vector<std::vector<std::vector<float>>> data; // To store the final slices
+    
+    const HighFive::DataSet dsX = file.getDataSet("/X");
+    const HighFive::DataSet dsY = file.getDataSet("/Y");
+    const HighFive::DataSet dsZ = file.getDataSet("/Z");
+    
+    auto dataset_dimensionsX = dsX.getSpace().getDimensions();
+    auto dataset_dimensionsY = dsY.getSpace().getDimensions();
+    auto dataset_dimensionsZ = dsZ.getSpace().getDimensions();
+ 
 
     for (int q = 0; q < _dataPropertyNames.size(); q++) {
         std::string dataPropertyName = _dataPropertyNames[q];
@@ -107,17 +133,19 @@ std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::slicer(std::str
             if (value <= _volumeDimensions[0][0] || value >= _volumeDimensions[0][1]) {
                 LERROR("Invalid value, unable to slice");
             }
-            int index = abs(_volumeDimensions[0][0]) + std::round(value);
+            auto stepSizeFactor =  dataset_dimensionsX[0] / (abs(_volumeDimensions[0][0]) + abs(_volumeDimensions[0][1]));
+            int index = abs(_volumeDimensions[0][0]) * stepSizeFactor  + std::round(value);
             offsetBDP[2] = index - 1;
             offsetADP[2] = index;
             count[0] = dataset_dimensions[0];
             count[1] = dataset_dimensions[1];
         }
         else if (axis == "y") {
-            if (value <= _volumeDimensions[2][0] || value >= _volumeDimensions[2][1]) {
+            if (value <= _volumeDimensions[1][0] || value >= _volumeDimensions[1][1]) {
                 LERROR("Invalid value, unable to slice");
             }
-            int index = abs(_volumeDimensions[1][0]) + std::round(value);
+            auto stepSizeFactor =  dataset_dimensionsX[1] / (abs(_volumeDimensions[1][0]) + abs(_volumeDimensions[1][1]));
+            int index = abs(_volumeDimensions[1][0]) * stepSizeFactor + std::round(value);
             offsetBDP[1] = index - 1;
             offsetADP[1] = index;
             count[0] = dataset_dimensions[0];
@@ -127,7 +155,8 @@ std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::slicer(std::str
             if (value <= _volumeDimensions[2][0] || value >= _volumeDimensions[2][1]) {
                 LERROR("Invalid value, unable to slice");
             }
-            int index = abs(_volumeDimensions[2][0]) + std::round(value);
+            auto stepSizeFactor =  dataset_dimensionsX[2] / (abs(_volumeDimensions[2][0]) + abs(_volumeDimensions[2][1]));
+            int index = abs(_volumeDimensions[2][0]) * stepSizeFactor + std::round(value);
             offsetBDP[0] = index - 1;
             offsetADP[0] = index;
             count[1] = dataset_dimensions[1];
@@ -175,7 +204,6 @@ std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::slicer(std::str
                 tempADP.push_back(temp);
             }
         }
-
         else {
             // Flatten the 3D vector into a 2D vector
             for (const auto& innerVec : dataBDP) {
@@ -196,6 +224,7 @@ std::vector<std::vector<std::vector<float>>> GameraVolumeSlicer::slicer(std::str
         slicedDataADP.push_back(tempADP);
 
     }
+
     interpolator(value, slicedDataBDP, slicedDataADP, data);
     return data;
 }
@@ -297,12 +326,12 @@ void GameraVolumeSlicer::getSlice(std::string pathToHdf5File, std::string axis, 
     HighFive::File file(pathToHdf5File, HighFive::File::ReadOnly);
 
     // Open the group for desired timestep
-    const HighFive::Group timeStep = file.getGroup("/Step#1");
+    const HighFive::Group timeStep = file.getGroup("/Step#0");
 
     // Get all the names of datasets stored in group 'timeStep'
     _dataPropertyNames = timeStep.listObjectNames();
     _volumeDimensions = getVolumeDimensions(file);
-    _data = slicer(axis, value, timeStep);
+    _data = slicer(axis, value, timeStep, file);
  
 }
 } // namespace openspace

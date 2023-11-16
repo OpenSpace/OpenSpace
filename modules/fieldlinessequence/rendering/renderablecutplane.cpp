@@ -294,8 +294,7 @@ void RenderableCutPlane::loadDataFromSlice()
      
     // Set the index of the axis to scale on
     if (_axis.compare("x") == 0) axisIndex = 0; 
-    else if (_axis.compare("y") == 0) axisIndex = 1; 
- 
+    else if (_axis.compare("y") == 0) axisIndex = 1;
     std::vector<std::vector<float>> volumeDimensions = _slice.volumeDimensions();
 
     // The dimension of the cutplane's axes 
@@ -343,7 +342,6 @@ void RenderableCutPlane::loadDataFromSlice()
         auto pos =  std::distance(s.begin(), it);
         _dataPropertyIndex = static_cast<int>(pos);
     }
-
     //Create texture object of the slice
     _texture = createTexture(_slice.data()[_dataPropertyIndex]);
 
@@ -351,15 +349,16 @@ void RenderableCutPlane::loadDataFromSlice()
 // Function to create a floating-point texture from a double vector
 std::unique_ptr<ghoul::opengl::Texture> RenderableCutPlane::createTexture(const std::vector<std::vector<float>>& data)
 {
+    //lägg sedan in det värdet som 361, jämför med matlab
     // Insert the data of the slice into 1D vector
     std::vector<float> sliceData1D = {};
     for (size_t i = 0; i < _slice.data()[_dataPropertyIndex].size(); i++)
     {
         for (size_t j = 0; j < _slice.data()[_dataPropertyIndex][i].size(); j++) {
-
             sliceData1D.push_back(_slice.data()[_dataPropertyIndex][i][j]);
         }
     }
+
 
     // Create a floating-point texture
     GLenum type = GL_TEXTURE_2D;

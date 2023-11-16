@@ -50,7 +50,7 @@ public:
 private:
 
     std::vector<std::vector<float>> getVolumeDimensions(HighFive::File file);
-    std::vector<std::vector<std::vector<float>>> slicer(std::string axis, float value, HighFive::Group timeStep);
+    std::vector<std::vector<std::vector<float>>> slicer(std::string axis, float value, HighFive::Group timeStep, HighFive::File file);
     void interpolator(float value, std::vector<std::vector<std::vector<float>>> slicedDataBDP,
                         std::vector<std::vector<std::vector<float>>> slicedDataADP,
                         std::vector<std::vector<std::vector<float>>>& data);
