@@ -49,6 +49,8 @@ namespace {
     // It's nice to have these to interpret the dictionary when creating the path, but
     // maybe it's not really necessary
     struct [[codegen::Dictionary(PathInstruction)]] Parameters {
+        // The type of the instruction. Decides what other parameters are
+        // handled/available
         enum class TargetType {
             Node,
             NavigationState
@@ -96,6 +98,10 @@ namespace {
 
 namespace openspace::interaction {
 
+documentation::Documentation Path::Documentation() {
+    return codegen::doc<Parameters>("core_path_instruction");
+}
+
 Path::Path(Waypoint start, Waypoint end, Type type, std::optional<double> duration)
     : _start(start)
     , _end(end)
@@ -120,14 +126,20 @@ Path::Path(Waypoint start, Waypoint end, Type type, std::optional<double> durati
     // computing how much faster/slower it should be
     _speedFactorFromDuration = 1.0;
     if (duration.has_value()) {
-        constexpr double dt = 0.05; // 20 fps
-        while (!hasReachedEnd()) {
-            traversePath(dt);
-        }
+        if (*duration > 0.0) {
+            constexpr double dt = 0.05; // 20 fps
+            while (!hasReachedEnd()) {
+                traversePath(dt);
+            }
 
-        // We now know how long it took to traverse the path. Use that
-        _speedFactorFromDuration = _progressedTime / *duration;
-        resetPlaybackVariables();
+            // We now know how long it took to traverse the path. Use that
+            _speedFactorFromDuration = _progressedTime / *duration;
+            resetPlaybackVariables();
+        }
+        else {
+            // A duration of zero means infinite speed. Handle this explicity
+            _speedFactorFromDuration = std::numeric_limits<double>::infinity();
+        }
     }
 }
 
@@ -148,6 +160,13 @@ std::vector<glm::dvec3> Path::controlPoints() const {
 }
 
 CameraPose Path::traversePath(double dt, float speedScale) {
+    if (std::isinf(_speedFactorFromDuration)) {
+        _shouldQuit = true;
+        _prevPose = _start.pose();
+        _traveledDistance = pathLength();
+        return _end.pose();
+    }
+
     double speed = speedAlongPath(_traveledDistance);
     speed *= static_cast<double>(speedScale);
     double displacement = dt * speed;
