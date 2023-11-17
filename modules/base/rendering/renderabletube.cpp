@@ -29,12 +29,14 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/lightsource.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <glm/gtx/projection.hpp>
 #include <optional>
 
 using json = nlohmann::json;
@@ -43,8 +45,10 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableTube";
     constexpr int8_t CurrentMajorVersion = 0;
     constexpr int8_t CurrentMinorVersion = 1;
-    constexpr std::array<const char*, 4> UniformNames = {
-        "modelViewTransform", "projectionTransform", "color", "opacity"
+    constexpr std::array<const char*, 9> UniformNames = {
+        "modelViewTransform", "projectionTransform", "normalTransform", "color",
+        "opacity", "performShading", "nLightSources", "lightDirectionsViewSpace",
+        "lightIntensities"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -62,6 +66,41 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShadingEnabledInfo = {
+        "PerformShading",
+        "Perform Shading",
+        "This value determines whether shading should be applied to the tube",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
+        "AmbientIntensity",
+        "Ambient Intensity",
+        "A multiplier for ambient lighting for the shading of the tube",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
+        "DiffuseIntensity",
+        "Diffuse Intensity",
+        "A multiplier for diffuse lighting for the shading of the tube",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
+        "SpecularIntensity",
+        "Specular Intensity",
+        "A multiplier for specular lighting for the shading of the tube",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
+        "LightSources",
+        "Light Sources",
+        "A list of light sources that this tube should accept light from",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableTube)]] Parameters {
         // The input file with data for the tube
         std::string file;
@@ -71,6 +110,22 @@ namespace {
 
         // [[codegen::verbatim(EnableFaceCullingInfo.description)]]
         std::optional<bool> enableFaceCulling;
+
+        // [[codegen::verbatim(ShadingEnabledInfo.description)]]
+        std::optional<bool> performShading;
+
+        // [[codegen::verbatim(AmbientIntensityInfo.description)]]
+        std::optional<float> ambientIntensity [[codegen::inrange(0.f, 1.f)]];
+
+        // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
+        std::optional<float> diffuseIntensity [[codegen::inrange(0.f, 1.f)]];
+
+        // [[codegen::verbatim(SpecularIntensityInfo.description)]]
+        std::optional<float> specularIntensity [[codegen::inrange(0.f, 1.f)]];
+
+        // [[codegen::verbatim(LightSourcesInfo.description)]]
+        std::optional<std::vector<ghoul::Dictionary>> lightSources
+            [[codegen::reference("core_light_source")]];
     };
 #include "renderabletube_codegen.cpp"
 } // namespace
@@ -81,10 +136,24 @@ documentation::Documentation RenderableTube::Documentation() {
     return codegen::doc<Parameters>("base_renderable_tube");
 }
 
+RenderableTube::Shading::Shading()
+    : properties::PropertyOwner({ "Shading" })
+    , enabled(ShadingEnabledInfo, true)
+    , ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
+    , diffuseIntensity(DiffuseIntensityInfo, 0.7f, 0.f, 1.f)
+    , specularIntensity(SpecularIntensityInfo, 0.f, 0.f, 1.f)
+{
+    addProperty(enabled);
+    addProperty(ambientIntensity);
+    addProperty(diffuseIntensity);
+    addProperty(specularIntensity);
+}
+
 RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _enableFaceCulling(EnableFaceCullingInfo, true)
+    , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -97,6 +166,23 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
     addProperty(_enableFaceCulling);
 
+    _shading.enabled = p.performShading.value_or(_shading.enabled);
+    _shading.ambientIntensity = p.ambientIntensity.value_or(_shading.ambientIntensity);
+    _shading.diffuseIntensity = p.diffuseIntensity.value_or(_shading.diffuseIntensity);
+    _shading.specularIntensity = p.specularIntensity.value_or(_shading.specularIntensity);
+    addPropertySubOwner(_shading);
+
+    if (p.lightSources.has_value()) {
+        std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
+
+        for (const ghoul::Dictionary& lsDictionary : lightsources) {
+            std::unique_ptr<LightSource> lightSource =
+                LightSource::createFromDictionary(lsDictionary);
+            _lightSourcePropertyOwner.addPropertySubOwner(lightSource.get());
+            _lightSources.push_back(std::move(lightSource));
+        }
+    }
+
     addProperty(Fadeable::_opacity);
 }
 
@@ -107,6 +193,10 @@ bool RenderableTube::isReady() const {
 void RenderableTube::initialize() {
     readDataFile();
     updateTubeData();
+
+    for (const std::unique_ptr<LightSource>& ls : _lightSources) {
+        ls->initialize();
+    }
 }
 
 void RenderableTube::initializeGL() {
@@ -126,7 +216,10 @@ void RenderableTube::initializeGL() {
     updateBufferData();
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(sizeof(float) * 3));
 
     glBindVertexArray(0);
 }
@@ -252,7 +345,7 @@ void RenderableTube::updateTubeData() {
     // Tube needs at least two polygons
     const size_t nPolygons = _data.size();
     if (nPolygons < 2) {
-        LWARNING("Tube is empty");
+        LERROR("Tube is empty");
         return;
     }
 
@@ -260,7 +353,7 @@ void RenderableTube::updateTubeData() {
     // NOTE: assumes all polygons have the same number of points
     const size_t nPoints = _data.front().points.size();
     if (nPoints < 3) {
-        LWARNING("Polygons are too small");
+        LERROR("Polygons need at least 3 edges");
         return;
     }
 
@@ -268,16 +361,31 @@ void RenderableTube::updateTubeData() {
     _indexArray.clear();
 
     // Verticies
-    // Add the first polygon's center point
+    // Calculate the center points for the first and last polygon
     glm::dvec3 firstCenter = glm::dvec3(0.0);
     for (const glm::dvec3& coord : _data.front().points) {
         firstCenter += coord;
     }
     firstCenter /= nPoints;
 
+    glm::dvec3 lastCenter = glm::dvec3(0.0);
+    for (const glm::dvec3& coord : _data.back().points) {
+        lastCenter += coord;
+    }
+    lastCenter /= nPoints;
+
+    // Calciulate the normals of the first and last poylgon
+    glm::dvec3 firstNormal = firstCenter - lastCenter;
+    glm::dvec3 lastNormal = lastCenter - firstCenter;
+
+    // Add the first polygon's center point
     _vertexArray.push_back(firstCenter.x);
     _vertexArray.push_back(firstCenter.y);
     _vertexArray.push_back(firstCenter.z);
+
+    _vertexArray.push_back(firstNormal.x);
+    _vertexArray.push_back(firstNormal.y);
+    _vertexArray.push_back(firstNormal.z);
 
     // Add all the polygons that will create the sides of the tube
     for (const TimePolygon& poly : _data) {
@@ -285,23 +393,27 @@ void RenderableTube::updateTubeData() {
             _vertexArray.push_back(coord.x);
             _vertexArray.push_back(coord.y);
             _vertexArray.push_back(coord.z);
+
+            // Calculate normal
+            glm::dvec3 normal = coord - glm::proj(coord, firstNormal) - firstNormal;
+            _vertexArray.push_back(normal.x);
+            _vertexArray.push_back(normal.y);
+            _vertexArray.push_back(normal.z);
         }
     }
 
     // Add the last polygon's center point
-    glm::dvec3 lastCenter = glm::dvec3(0.0);
-    for (const glm::dvec3& coord : _data.back().points) {
-        lastCenter += coord;
-    }
-    lastCenter /= nPoints;
-
     _vertexArray.push_back(lastCenter.x);
     _vertexArray.push_back(lastCenter.y);
     _vertexArray.push_back(lastCenter.z);
 
+    _vertexArray.push_back(lastNormal.x);
+    _vertexArray.push_back(lastNormal.y);
+    _vertexArray.push_back(lastNormal.z);
+
     // Indicies
     unsigned int firstCenterIndex = 0;
-    unsigned int lastCenterIndex = _vertexArray.size() / 3 - 1;
+    unsigned int lastCenterIndex = _vertexArray.size() / 6 - 1;
 
     // Indices for side triangles
     for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
@@ -377,6 +489,7 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 modelViewTransform = calcModelViewTransform(data);
+    glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 
     // Uniforms
     _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
@@ -384,6 +497,7 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
         _uniformCache.projectionTransform,
         data.camera.projectionMatrix()
     );
+    _shader->setUniform(_uniformCache.normalTransform, glm::mat3(normalTransform));
 
     _shader->setUniform(_uniformCache.color, _color.value());
     _shader->setUniform(_uniformCache.opacity, opacity());
@@ -391,6 +505,33 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     // Settings
     if (!_enableFaceCulling) {
         glDisable(GL_CULL_FACE);
+    }
+
+    int nLightSources = 0;
+    _lightIntensitiesBuffer.resize(_lightSources.size());
+    _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
+    for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
+        if (!lightSource->isEnabled()) {
+            continue;
+        }
+        _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
+        _lightDirectionsViewSpaceBuffer[nLightSources] =
+            lightSource->directionViewSpace(data);
+
+        ++nLightSources;
+    }
+
+    if (_uniformCache.performShading != -1) {
+        _shader->setUniform(_uniformCache.performShading, _shading.enabled);
+    }
+
+    if (_shading.enabled) {
+        _shader->setUniform(_uniformCache.nLightSources, nLightSources);
+        _shader->setUniform(_uniformCache.lightIntensities, _lightIntensitiesBuffer);
+        _shader->setUniform(
+            _uniformCache.lightDirectionsViewSpace,
+            _lightDirectionsViewSpaceBuffer
+        );
     }
 
     // Render

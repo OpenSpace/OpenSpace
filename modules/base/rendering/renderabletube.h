@@ -40,6 +40,8 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
+class LightSource;
+
 namespace documentation { struct Documentation; }
 
 class RenderableTube : public Renderable {
@@ -58,6 +60,14 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    struct Shading : properties::PropertyOwner {
+        Shading();
+        properties::BoolProperty enabled;
+        properties::FloatProperty ambientIntensity;
+        properties::FloatProperty diffuseIntensity;
+        properties::FloatProperty specularIntensity;
+    };
+
     struct TimePolygon {
         double timestamp;
         std::vector<glm::dvec3> points;
@@ -71,18 +81,26 @@ private:
     // Properties
     properties::Vec3Property _color;
     properties::BoolProperty _enableFaceCulling;
+    properties::PropertyOwner _lightSourcePropertyOwner;
 
-    UniformCache(modelViewTransform, projectionTransform, color, opacity) _uniformCache;
+    UniformCache(modelViewTransform, projectionTransform, normalTransform, color,
+        opacity, performShading, nLightSources, lightDirectionsViewSpace,
+        lightIntensities) _uniformCache;
+
+    // Buffers for uniform uploading
+    std::vector<float> _lightIntensitiesBuffer;
+    std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
 
     std::filesystem::path _dataFile;
     std::vector<TimePolygon> _data;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    Shading _shading;
+    std::vector<std::unique_ptr<LightSource>> _lightSources;
     GLuint _vaoId = 0;
     GLuint _vboId = 0;
     GLuint _iboId = 0;
     std::vector<float> _vertexArray;
     std::vector<unsigned int> _indexArray;
-
     bool _tubeIsDirty = false;
 };
 

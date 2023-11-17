@@ -25,17 +25,57 @@
 #include "fragment.glsl"
 
 in float vs_depth;
+in vec3 vs_normal;
 in vec4 vs_positionViewSpace;
 
 uniform vec3 color;
 uniform float opacity;
 
+uniform bool performShading = true;
+uniform float ambientIntensity = 0.2;
+uniform float diffuseIntensity = 1.0;
+uniform float specularIntensity = 1.0;
+
+uniform int nLightSources;
+uniform vec3 lightDirectionsViewSpace[8];
+uniform float lightIntensities[8];
+
+// Could be seperated into ambinet, diffuse and specular and passed in as uniforms
+const vec3 LightColor = vec3(1.0);
+const float SpecularPower = 100.0;
 
 Fragment getFragment() {
   Fragment frag;
 
+  if (opacity == 0.0) {
+    discard;
+  }
+
   frag.color = vec4(color, opacity);
+
+  // Ambient light
+  vec3 totalLightColor = ambientIntensity * LightColor * color;
+
+  vec3 viewDirection = normalize(vs_positionViewSpace.xyz);
+
+  for (int i = 0; i < nLightSources; ++i) {
+    // Diffuse light
+    vec3 lightDirection = lightDirectionsViewSpace[i];
+    float diffuseFactor =  max(dot(vs_normal, lightDirection), 0.0);
+    vec3 diffuseColor = diffuseIntensity * LightColor * diffuseFactor * color;
+
+    // Specular light
+    vec3 reflectDirection = reflect(lightDirection, vs_normal);
+    float specularFactor =
+      pow(max(dot(viewDirection, reflectDirection), 0.0), SpecularPower);
+    vec3 specularColor = specularIntensity * LightColor * specularFactor * LightColor;
+
+    totalLightColor += lightIntensities[i] * (diffuseColor + specularColor);
+  }
+  frag.color.rgb = totalLightColor;
+
   frag.depth = vs_depth;
   frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(vs_normal, 1.0);
   return frag;
 }
