@@ -630,12 +630,12 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled;
     _program->setUniform(_uniformCache.useColormap, useColorMap);
-    if (useColorMap && _colorSettings.colorMapping->texture()) {
-        ghoul::opengl::TextureUnit colorMapTextureUnit;
-        colorMapTextureUnit.activate();
-        _colorSettings.colorMapping->texture()->bind();
+    ghoul::opengl::TextureUnit colorMapTextureUnit;
+    colorMapTextureUnit.activate();
+    _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
 
-        _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
+    if (useColorMap && _colorSettings.colorMapping->texture()) {
+        _colorSettings.colorMapping->texture()->bind();
 
         const glm::vec2 range = _colorSettings.colorMapping->valueRange;
         _program->setUniform(_uniformCache.cmapRangeMin, range.x);
