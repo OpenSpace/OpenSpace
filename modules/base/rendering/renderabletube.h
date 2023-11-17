@@ -69,11 +69,10 @@ private:
     void updateBufferData();
 
     // Properties
-    properties::FloatProperty _lineWidth;
-    properties::Vec3Property _lineColor;
+    properties::Vec3Property _color;
     properties::BoolProperty _enableFaceCulling;
 
-    UniformCache(modelViewProjection, color) _uniformCache;
+    UniformCache(modelViewTransform, projectionTransform, color, opacity) _uniformCache;
 
     std::filesystem::path _dataFile;
     std::vector<TimePolygon> _data;

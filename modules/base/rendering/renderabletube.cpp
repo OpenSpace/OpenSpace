@@ -43,22 +43,14 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableTube";
     constexpr int8_t CurrentMajorVersion = 0;
     constexpr int8_t CurrentMinorVersion = 1;
-    constexpr std::array<const char*, 2> UniformNames = {
-        "modelViewProjectionTransform", "vs_color"
+    constexpr std::array<const char*, 4> UniformNames = {
+        "modelViewTransform", "projectionTransform", "color", "opacity"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width",
-        // @VISIBILITY(2.0)
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line",
+        "This value determines the RGB color for the tube",
         // @VISIBILITY(1.2)
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -74,10 +66,7 @@ namespace {
         // The input file with data for the tube
         std::string file;
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
-
-        // [[codegen::verbatim(LineColorInfo.description)]]
+        // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(EnableFaceCullingInfo.description)]]
@@ -94,20 +83,16 @@ documentation::Documentation RenderableTube::Documentation() {
 
 RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _enableFaceCulling(EnableFaceCullingInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _dataFile = p.file;
 
-    _lineWidth = p.lineWidth.value_or(_lineWidth);
-    addProperty(_lineWidth);
-
-    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
-    _lineColor = p.color.value_or(_lineColor);
-    addProperty(_lineColor);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color = p.color.value_or(_color);
+    addProperty(_color);
 
     _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
     addProperty(_enableFaceCulling);
@@ -263,7 +248,6 @@ void RenderableTube::readDataFile() {
     }
 }
 
-
 void RenderableTube::updateTubeData() {
     // Tube needs at least two polygons
     const size_t nPolygons = _data.size();
@@ -315,12 +299,9 @@ void RenderableTube::updateTubeData() {
     _vertexArray.push_back(lastCenter.y);
     _vertexArray.push_back(lastCenter.z);
 
-
-
     // Indicies
     unsigned int firstCenterIndex = 0;
     unsigned int lastCenterIndex = _vertexArray.size() / 3 - 1;
-
 
     // Indices for side triangles
     for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
@@ -395,15 +376,17 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
     // Model transform and view transform needs to be in double precision
-    const glm::dmat4 modelViewProjectionTransform =
-        calcModelViewProjectionTransform(data);
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data);
 
     // Uniforms
+    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
     _shader->setUniform(
-        _uniformCache.modelViewProjection,
-        glm::mat4(modelViewProjectionTransform)
+        _uniformCache.projectionTransform,
+        data.camera.projectionMatrix()
     );
-    _shader->setUniform(_uniformCache.color, glm::vec4(_lineColor.value(), opacity()));
+
+    _shader->setUniform(_uniformCache.color, _color.value());
+    _shader->setUniform(_uniformCache.opacity, opacity());
 
     // Settings
     if (!_enableFaceCulling) {
@@ -411,7 +394,6 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     }
 
     // Render
-    glLineWidth(_lineWidth);
     glBindVertexArray(_vaoId);
 
     glDrawElements(

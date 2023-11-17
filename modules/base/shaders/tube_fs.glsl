@@ -25,13 +25,17 @@
 #include "fragment.glsl"
 
 in float vs_depth;
+in vec4 vs_positionViewSpace;
 
-uniform vec4 vs_color;
+uniform vec3 color;
+uniform float opacity;
 
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vs_color;
+
+  frag.color = vec4(color, opacity);
   frag.depth = vs_depth;
+  frag.gPosition = vs_positionViewSpace;
   return frag;
 }
