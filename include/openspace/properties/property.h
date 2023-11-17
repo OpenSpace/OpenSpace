@@ -360,6 +360,21 @@ public:
     Visibility visibility() const;
 
     /**
+     * TODO
+     */
+    void setIsDisableable(bool state);
+
+    /**
+     * TODO
+     */
+    void setIsEnabled(bool state);
+
+    /**
+     * TODO
+     */
+    bool isEnabled() const;
+
+    /**
      * This method determines if this Property should be read-only in external
      * applications. This setting is only a hint and does not need to be followed by GUI
      * applications and does not have any effect on the Property::set or
@@ -512,6 +527,10 @@ protected:
 
     /// Flag indicating that this property value has been changed after initialization
     bool _isValueDirty = false;
+
+    /// Flags to handle wheter a property can be disabled or not
+    bool _isCheckable = false;
+    bool _isEnabled = true;
 
 private:
     void notifyDeleteListeners();

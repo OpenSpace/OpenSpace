@@ -36,6 +36,8 @@ namespace {
     constexpr std::string_view MetaDataKeyReadOnly = "isReadOnly";
     constexpr std::string_view MetaDataKeyViewOptions = "ViewOptions";
     constexpr std::string_view MetaDataKeyVisibility = "Visibility";
+    constexpr std::string_view MetaDataKeyIsDisableable = "isDisableable";
+    constexpr std::string_view MetaDataKeyIsEnabled = "isEnabled";
 
     constexpr std::string_view IdentifierKey = "Identifier";
     constexpr std::string_view NameKey = "Name";
@@ -148,6 +150,25 @@ Property::Visibility Property::visibility() const {
 
 void Property::setReadOnly(bool state) {
     _metaData.setValue(std::string(MetaDataKeyReadOnly), state);
+}
+
+void Property::setIsDisableable(bool state) {
+    _isCheckable = state;
+    _metaData.setValue(std::string(MetaDataKeyIsDisableable), state);
+    // TODO: ?? Notify listeners? No?
+}
+
+void Property::setIsEnabled(bool state) {
+    // TODO: guard for is checkable?
+    _isEnabled = state;
+    _metaData.setValue(std::string(MetaDataKeyIsEnabled), state);
+    // This essentially means that the value of the property changed, so notify the
+    // listeners
+    notifyChangeListeners();
+}
+
+bool Property::isEnabled() const {
+    return !_isCheckable || (_isCheckable && _isEnabled);
 }
 
 void Property::setViewOption(std::string option, bool value) {
@@ -294,6 +315,8 @@ std::string Property::generateMetaDataJsonDescription() const {
         isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
     }
     std::string isReadOnlyString = (isReadOnly ? "true" : "false");
+    std::string isDisableableString = (_isCheckable ? "true" : "false");
+    std::string isEnabledString = (isEnabled() ? "true" : "false");
 
     std::string groupId = groupIdentifier();
     std::string sanitizedGroupId = escapedJson(groupId);
@@ -306,10 +329,12 @@ std::string Property::generateMetaDataJsonDescription() const {
     }
 
     std::string result = fmt::format(
-        R"({{"{}":"{}","{}":"{}","{}":{},"{}":{}}})",
+        R"({{"{}":"{}","{}":"{}","{}":{},"{}":{},"{}":{},"{}":{}}})",
         MetaDataKeyGroup, sanitizedGroupId,
         MetaDataKeyVisibility, vis,
         MetaDataKeyReadOnly, isReadOnlyString,
+        MetaDataKeyIsDisableable, isDisableableString,
+        MetaDataKeyIsEnabled, isEnabledString,
         MetaDataKeyViewOptions, viewOptions
     );
     return result;
