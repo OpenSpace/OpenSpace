@@ -1236,6 +1236,26 @@ enum class [[codegen::enum]] CustomPropertyType {
 }
 
 /**
+ * Sets whether a property that can be toggled on or off is enabled or not.
+ *
+ * Not that not all properties can be toggled like this.
+ *
+ * \param identifier The identifier that is going to be used for the new property
+ * \param value The value to set. True if enabled and false iss disabled
+ */
+[[codegen::luawrap]] void setPropertyEnabled(std::string identifier, bool value) {
+    openspace::properties::Property* p = openspace::property(identifier);
+    if (p) {
+        p->setIsEnabled(value);
+    }
+    else {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Could not find property '{}'", identifier
+        ));
+    }
+}
+
+/**
  * Create a valid identifier from the provided input string. Will replace invalid
  * characters like whitespaces and some punctuation marks with valid alternatives
  */
