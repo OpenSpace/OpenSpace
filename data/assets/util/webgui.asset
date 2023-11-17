@@ -4,7 +4,7 @@ local guiCustomization = asset.require("customization/gui")
 
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "ab3222e9b281ba9964205426a134d6ce5b404d43"
+local frontendHash = "d7bac0d84b0a17de7f822fa776a7298b3d4ef372"
 
 local frontend = asset.resource({
   Identifier = "WebGuiFrontend",
