@@ -529,7 +529,7 @@ protected:
     bool _isValueDirty = false;
 
     /// Flags to handle wheter a property can be disabled or not
-    bool _isCheckable = false;
+    bool _isDisableable = false;
     bool _isEnabled = true;
 
 private:

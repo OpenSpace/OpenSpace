@@ -153,7 +153,7 @@ void Property::setReadOnly(bool state) {
 }
 
 void Property::setIsDisableable(bool state) {
-    _isCheckable = state;
+    _isDisableable = state;
     _metaData.setValue(std::string(MetaDataKeyIsDisableable), state);
     // TODO: ?? Notify listeners? No?
 }
@@ -168,7 +168,7 @@ void Property::setIsEnabled(bool state) {
 }
 
 bool Property::isEnabled() const {
-    return !_isCheckable || (_isCheckable && _isEnabled);
+    return !_isDisableable || (_isDisableable && _isEnabled);
 }
 
 void Property::setViewOption(std::string option, bool value) {
@@ -315,7 +315,7 @@ std::string Property::generateMetaDataJsonDescription() const {
         isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
     }
     std::string isReadOnlyString = (isReadOnly ? "true" : "false");
-    std::string isDisableableString = (_isCheckable ? "true" : "false");
+    std::string isDisableableString = (_isDisableable ? "true" : "false");
     std::string isEnabledString = (isEnabled() ? "true" : "false");
 
     std::string groupId = groupIdentifier();
