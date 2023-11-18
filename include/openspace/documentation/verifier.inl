@@ -1073,21 +1073,4 @@ std::string AnnotationVerifier<T>::documentation() const {
     return annotation;
 }
 
-template <typename T>
-TestResult DeprecatedVerifier<T>::operator()(const ghoul::Dictionary& dict,
-                                             const std::string& key) const
-{
-    TestResult res = T::operator()(dict, key);
-    TestResult::Warning w;
-    w.offender = key;
-    w.reason = TestResult::Warning::Reason::Deprecated;
-    res.warnings.push_back(w);
-    return res;
-}
-
-template <typename T>
-std::string DeprecatedVerifier<T>::documentation() const {
-    return T::documentation() + " (deprecated)";
-}
-
 } // namespace openspace::documentation

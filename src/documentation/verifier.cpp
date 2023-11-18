@@ -119,21 +119,6 @@ template struct AnnotationVerifier<DoubleVector3Verifier>;
 template struct AnnotationVerifier<IntVector4Verifier>;
 template struct AnnotationVerifier<DoubleVector4Verifier>;
 
-template struct DeprecatedVerifier<BoolVerifier>;
-template struct DeprecatedVerifier<IntVerifier>;
-template struct DeprecatedVerifier<DoubleVerifier>;
-template struct DeprecatedVerifier<StringVerifier>;
-template struct DeprecatedVerifier<TableVerifier>;
-//template struct DeprecatedVerifier<BoolVector2Verifier>;
-template struct DeprecatedVerifier<IntVector2Verifier>;
-template struct DeprecatedVerifier<DoubleVector2Verifier>;
-//template struct DeprecatedVerifier<BoolVector3Verifier>;
-template struct DeprecatedVerifier<IntVector3Verifier>;
-template struct DeprecatedVerifier<DoubleVector3Verifier>;
-//template struct DeprecatedVerifier<BoolVector4Verifier>;
-template struct DeprecatedVerifier<IntVector4Verifier>;
-template struct DeprecatedVerifier<DoubleVector4Verifier>;
-
 std::string BoolVerifier::type() const {
     return "Boolean";
 }

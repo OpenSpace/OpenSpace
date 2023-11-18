@@ -2985,63 +2985,6 @@ TEST_CASE("Documentation: DoubleMatrix4x4Verifier", "[documentation]") {
     CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
-TEST_CASE("Documentation: DeprecatedVerifier", "[documentation]") {
-    using namespace openspace::documentation;
-    using namespace std::string_literals;
-
-    Documentation doc = {
-        .entries =  {
-            { "bool", new BoolDeprecatedVerifier, Optional::No },
-            { "int" , new IntDeprecatedVerifier, Optional::No },
-            { "double", new DoubleDeprecatedVerifier, Optional::No },
-            { "string" , new StringDeprecatedVerifier, Optional::No },
-            { "intvec2", new DeprecatedVerifier<IntVector2Verifier>, Optional::No },
-            { "doublevec2", new DeprecatedVerifier<DoubleVector2Verifier>, Optional::No },
-            { "intvec3", new DeprecatedVerifier<IntVector3Verifier>, Optional::No },
-            { "doublevec3", new DeprecatedVerifier<DoubleVector3Verifier>, Optional::No },
-            { "intvec4", new DeprecatedVerifier<IntVector4Verifier>, Optional::No },
-            { "doublevec4", new DeprecatedVerifier<DoubleVector4Verifier>, Optional::No }
-        }
-    };
-
-    ghoul::Dictionary positive;
-    positive.setValue("bool", true);
-    positive.setValue("int", 1);
-    positive.setValue("double", 2.0);
-    positive.setValue("string", ""s);
-    positive.setValue("intvec2", glm::ivec2(0));
-    positive.setValue("doublevec2", glm::dvec2(0.0));
-    positive.setValue("intvec3", glm::ivec3(0));
-    positive.setValue("doublevec3", glm::dvec3(0.0));
-    positive.setValue("intvec4", glm::ivec4(0));
-    positive.setValue("doublevec4", glm::dvec4(0.0));
-    TestResult positiveRes = testSpecification(doc, positive);
-    CHECK(positiveRes.success);
-    CHECK(positiveRes.offenses.empty());
-    REQUIRE(positiveRes.warnings.size() == 10);
-
-    CHECK(positiveRes.warnings[0].offender == "bool");
-    CHECK(positiveRes.warnings[0].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[1].offender == "double");
-    CHECK(positiveRes.warnings[1].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[2].offender == "doublevec2");
-    CHECK(positiveRes.warnings[2].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[3].offender == "doublevec3");
-    CHECK(positiveRes.warnings[3].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[4].offender == "doublevec4");
-    CHECK(positiveRes.warnings[4].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[5].offender == "int");
-    CHECK(positiveRes.warnings[5].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[6].offender == "intvec2");
-    CHECK(positiveRes.warnings[6].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[7].offender == "intvec3");
-    CHECK(positiveRes.warnings[7].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[8].offender == "intvec4");
-    CHECK(positiveRes.warnings[8].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[9].offender == "string");
-    CHECK(positiveRes.warnings[9].reason == TestResult::Warning::Reason::Deprecated);
-}
-
 TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
@@ -3102,18 +3045,6 @@ TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
     CHECK(AnnotationVerifier<DoubleVector3Verifier>("A"s).type() != "");
     CHECK(AnnotationVerifier<IntVector4Verifier>("A"s).type() != "");
     CHECK(AnnotationVerifier<DoubleVector4Verifier>("A"s).type() != "");
-
-    CHECK(BoolDeprecatedVerifier().type() != "");
-    CHECK(IntDeprecatedVerifier().type() != "");
-    CHECK(DoubleDeprecatedVerifier().type() != "");
-    CHECK(StringDeprecatedVerifier().type() != "");
-    CHECK(TableDeprecatedVerifier().type() != "");
-    CHECK(DeprecatedVerifier<IntVector2Verifier>().type() != "");
-    CHECK(DeprecatedVerifier<DoubleVector2Verifier>().type() != "");
-    CHECK(DeprecatedVerifier<IntVector3Verifier>().type() != "");
-    CHECK(DeprecatedVerifier<DoubleVector3Verifier>().type() != "");
-    CHECK(DeprecatedVerifier<IntVector4Verifier>().type() != "");
-    CHECK(DeprecatedVerifier<DoubleVector4Verifier>().type() != "");
 
     CHECK(ReferencingVerifier("identifier"s).type() != "");
 }
@@ -3178,18 +3109,6 @@ TEST_CASE("Documentation: Verifier Documentation Post Conditions", "[documentati
     CHECK(AnnotationVerifier<DoubleVector3Verifier>("A"s).documentation() != "");
     CHECK(AnnotationVerifier<IntVector4Verifier>("A"s).documentation() != "");
     CHECK(AnnotationVerifier<DoubleVector4Verifier>("A"s).documentation() != "");
-
-    CHECK(BoolDeprecatedVerifier().documentation() != "");
-    CHECK(IntDeprecatedVerifier().documentation() != "");
-    CHECK(DoubleDeprecatedVerifier().documentation() != "");
-    CHECK(StringDeprecatedVerifier().documentation() != "");
-    CHECK(TableDeprecatedVerifier().documentation() != "");
-    CHECK(DeprecatedVerifier<IntVector2Verifier>().documentation() != "");
-    CHECK(DeprecatedVerifier<DoubleVector2Verifier>().documentation() != "");
-    CHECK(DeprecatedVerifier<IntVector3Verifier>().documentation() != "");
-    CHECK(DeprecatedVerifier<DoubleVector3Verifier>().documentation() != "");
-    CHECK(DeprecatedVerifier<IntVector4Verifier>().documentation() != "");
-    CHECK(DeprecatedVerifier<DoubleVector4Verifier>().documentation() != "");
 
     CHECK(ReferencingVerifier("identifier"s).documentation() != "");
 }
