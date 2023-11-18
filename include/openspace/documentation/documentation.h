@@ -232,43 +232,14 @@ Documentation doc = {
  * both the wildcard and the specialized entry will be evaluated.
  */
 struct Documentation {
-    using DocumentationEntries = std::vector<documentation::DocumentationEntry>;
-
-    /**
-     * Creates a Documentation with a human-readable name \p n and a list of entries
-     * \p ents.
-     *
-     * \param n The human-readable name of this Documentation
-     * \param i A unique identifier which can be used by applications (or other
-     *        Documentation%s to reference this entry
-     * \param ents A list of DocumentationEntry%s that describe the individual keys for
-     *        this entrie Documentation
-     */
-    Documentation(std::string n, std::string i, DocumentationEntries ents = {});
-
-    /**
-    * Creates a Documentation with a human-readable name \p n.
-    *
-    * \param n The human-readable name of this Documentation
-    * \param ents A list of DocumentationEntry%s that describe the individual keys for
-    *        this entrie Documentation
-    */
-    Documentation(std::string n, DocumentationEntries ents = {});
-
-    /**
-    * Creates a Documentation.
-    *
-    * \param entries A list of DocumentationEntry%s that describe the individual keys for
-    *        this entrie Documentation
-    */
-    Documentation(DocumentationEntries ents = {});
-
     /// The human-readable name of the Documentation
     std::string name;
     /// A unique identifier which can be used to reference this Documentation
     std::string id;
+    /// A general description for the entire documented entity
+    std::string description;
     /// A list of specifications that are describing this Documentation
-    DocumentationEntries entries;
+    std::vector<documentation::DocumentationEntry> entries;
 };
 
 /**

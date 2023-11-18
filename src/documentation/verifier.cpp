@@ -612,7 +612,8 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
 {
     if (dictionary.hasValue<Type>(key)) {
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
-        TestResult res = testSpecification({documentations}, d);
+        Documentation doc = { .entries = documentations };
+        TestResult res = testSpecification(doc, d);
 
         // Add the 'key' as a prefix to make the new offender a fully qualified identifer
         for (TestResult::Offense& s : res.offenses) {
