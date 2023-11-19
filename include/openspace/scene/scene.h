@@ -67,8 +67,8 @@ public:
 
     struct InvalidSceneError : ghoul::RuntimeError {
         /**
-         * \param message The reason that caused this exception to be thrown
-         * \param component The optional compoment that caused this exception to be thrown
+         * \param msg The reason that caused this exception to be thrown
+         * \param comp The optional compoment that caused this exception to be thrown
          * \pre message may not be empty
          */
         explicit InvalidSceneError(std::string msg, std::string comp = "");
@@ -195,7 +195,7 @@ public:
      *
      * \param prop The Property that should not longer be updated
      *
-     * \pre \prop must not be nullptr
+     * \pre \p prop must not be nullptr
      * \post No interpolation record exists for \p prop
      */
     void removePropertyInterpolation(properties::Property* prop);
@@ -203,11 +203,11 @@ public:
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
      * using the Property::interpolateValue method, passing a parameter `t` which is `0`
-     * if no time has passed between the #addInterpolation method and `1` if an amount of
-     * time equal to the requested interpolation time has passed. The parameter `t` is
-     * updated with a resolution of 1 microsecond, which means that if this function is
-     * called twice within 1 microsecond, the passed parameter `t` might be the same for
-     * both calls
+     * if no time has passed between the #addPropertyInterpolation method and `1` if an
+     * amount of time equal to the requested interpolation time has passed. The parameter
+     * `t` is updated with a resolution of 1 microsecond, which means that if this
+     * function is called twice within 1 microsecond, the passed parameter `t` might be
+     * the same for both calls.
      */
     void updateInterpolations();
 
@@ -281,9 +281,6 @@ private:
      *
      * \param L the lua state to (eventually) push to
      * \param value string representation of the value with which to set property
-     * \param didPushToLua Bool reference that represents the lua push state at the end
-     *        of this function call. This will be set to true if the value (e.g. table)
-     *        has already been pushed to the lua stack
      * \return The ProfilePropertyLua variant type translated from string representation
      */
     ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,

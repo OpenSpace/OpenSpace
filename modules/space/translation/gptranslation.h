@@ -40,7 +40,8 @@ public:
      * the file that contains the general pertubation information as well as the file
      * format that is to be used.
      *
-     * \param The ghoul::Dictionary that contains the information for this TLETranslation
+     * \param dictionary The ghoul::Dictionary that contains the information for this
+     *        TLETranslation
      */
     explicit GPTranslation(const ghoul::Dictionary& dictionary);
 

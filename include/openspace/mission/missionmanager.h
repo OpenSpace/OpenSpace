@@ -48,15 +48,11 @@ public:
     MissionManager();
 
     /**
-    * Reads a mission from file and maps the mission name to the Mission object. If
-    * this is the first mission to be loaded, the mission will also be set as the
-    * current active mission.
+    * Loads the provided mission. If this is the first mission to be loaded, the mission
+    * will also be set as the current active mission.
     *
-    * \param filename The file that contains the mission that is to be loaded
+    * \param mission The file that contains the mission that is to be loaded
     * \return The name of the mission that was loaded
-    * \pre \p filename must not be empty
-    * \pre \p filename must not contain tokens
-    * \pre \p filename must exist
     */
     std::string loadMission(Mission mission);
 
@@ -64,7 +60,7 @@ public:
      * Unloads a previously loaded mission identified by the provided \p missionName.
      *
      * \param missionName The name of the mission that should be unloded
-     * \pre \p filename must not be empty
+     *
      * \pre \p missionName must be a valid mission that has previously been loaded
      */
     void unloadMission(const std::string& missionName);

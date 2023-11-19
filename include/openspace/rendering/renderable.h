@@ -44,14 +44,13 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
+class Camera;
 struct RenderData;
-struct UpdateData;
 struct RendererTasks;
 struct SurfacePositionHandle;
+struct UpdateData;
 
 namespace documentation { struct Documentation; }
-
-class Camera;
 
 // Unfortunately we can't move this struct into the Renderable until
 // https://bugs.llvm.org/show_bug.cgi?id=36684 is fixed
@@ -102,7 +101,7 @@ public:
     // representation is, the 'surface' is always the sphere around which interaction is
     // handled
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                                const glm::dvec3& targetModelSpace) const;
+        const glm::dvec3& targetModelSpace) const;
 
     virtual bool renderedWithDesiredData() const;
 
@@ -211,14 +210,14 @@ protected:
         }) const;
 
 private:
+    void registerUpdateRenderBinFromOpacity();
+
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;
     SceneGraphNode* _parent = nullptr;
     const bool _shouldUpdateIfDisabled = false;
     bool _automaticallyUpdateRenderBin = true;
     bool _hasOverrideRenderBin = false;
-
-    void registerUpdateRenderBinFromOpacity();
 
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
     // to provide a set method for this. Otherwise, anyone might mess around with our

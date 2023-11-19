@@ -101,8 +101,10 @@ struct Appearance : properties::PropertyOwner {
     /**
      * The render method will set up the shader information and then render first the
      * information contained in the the `_primaryRenderInformation`, then the optional
-     * `_floatingRenderInformation` using the provided \p data
+     * `_floatingRenderInformation` using the provided \p data.
+     *
      * \param data The data that is necessary to render this Renderable
+     * \param rendererTask A place to store render tasks from this Renderable
      */
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
