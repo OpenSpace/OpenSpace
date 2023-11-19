@@ -205,9 +205,9 @@ public:
 };
 
 /**
-* A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
-* refers to an existing directory on disk.
-*/
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
+ * refers to an existing directory on disk.
+ */
 class DirectoryVerifier : public StringVerifier {
 public:
     DirectoryVerifier();

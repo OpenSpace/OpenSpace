@@ -54,9 +54,7 @@ struct TestResult {
      * offense.
      */
     struct Offense {
-        /**
-         * The Reason for the offense
-         */
+        /// The Reason for the offense
         enum class Reason {
             Unknown,          ///< Unknown reason
             MissingKey,       ///< The offending key that was requested was not found
@@ -80,9 +78,7 @@ struct TestResult {
      * might be removed in a latter version.
      */
     struct Warning {
-        /**
-         * The reason for the warning
-         */
+        /// The reason for the warning
         enum class Reason {
             Deprecated ///< The value is marked as deprecated and should not used
         };
@@ -172,28 +168,28 @@ struct DocumentationEntry {
         Optional opt, std::string doc = "");
 
     /**
-    * The constructor for a DocumentationEntry describing a key \p k in a Documentation.
-    * The value for the key (or each value in the case of the
-    * DocumentationEntry::Wildcard) is tested using the verifier \p v, that specifies the
-    * conditions that the \p k%'s value has to fulfill. The textual documentation
-    * \p doc shall describe the usage of the key-value pair and will be printed for human
-    * consumption for example in the DocumentationEngine. Each DocumentationEntry can
-    * further be \p opt.
-    *
-    * \param k The key for which this DocumentationEntry is valid. If this valid is
-    *        equal to DocumentationEntry::Wildcard, each entry in the Documentation that
-    *        contains this DocumentationEntry will be matched
-    * \param v The Verifier that is used to test the \p key%'s value to determine if it is
-    *        a valid value. The DocumentationEntry will take ownership of the passed
-    *        object
-    * \param doc The textual documentation that describes the DocumentationEntry in a
-    *        human readable format
-    * \param opt Determines whether the Documentation containing this DocumentationEntry
-    *        must have a key \p key, or whether it is optional
-    *
-    * \pre \p k must not be empty
-    * \pre \p v must not be nullptr
-    */
+     * The constructor for a DocumentationEntry describing a key \p k in a Documentation.
+     * The value for the key (or each value in the case of the
+     * DocumentationEntry::Wildcard) is tested using the verifier \p v, that specifies the
+     * conditions that the \p k%'s value has to fulfill. The textual documentation
+     * \p doc shall describe the usage of the key-value pair and will be printed for human
+     * consumption for example in the DocumentationEngine. Each DocumentationEntry can
+     * further be \p opt.
+     *
+     * \param k The key for which this DocumentationEntry is valid. If this valid is
+     *        equal to DocumentationEntry::Wildcard, each entry in the Documentation that
+     *        contains this DocumentationEntry will be matched
+     * \param v The Verifier that is used to test the \p key%'s value to determine if it
+     *        is a valid value. The DocumentationEntry will take ownership of the passed
+     *        object
+     * \param doc The textual documentation that describes the DocumentationEntry in a
+     *        human readable format
+     * \param opt Determines whether the Documentation containing this DocumentationEntry
+     *        must have a key \p key, or whether it is optional
+     *
+     * \pre \p k must not be empty
+     * \pre \p v must not be nullptr
+     */
     DocumentationEntry(std::string k, Verifier* v, Optional opt,
         std::string doc = "");
 
@@ -258,20 +254,21 @@ TestResult testSpecification(const Documentation& documentation,
     const ghoul::Dictionary& dictionary);
 
 /**
-* This method tests whether a provided ghoul::Dictionary \p dictionary adheres to the
-* specification \p documentation. If the \p dictionary does not adhere to the
-* specification a SpecificationError is thrown, and the exception contains the TestResult
-* that contains more information about the offending keys. If the \p dictionary adheres to
-* the \p documentation, the method returns normally.
-*
-* \param documentation The Documentation that the \p dictionary is tested against
-* \param dictionary The ghoul::Dictionary that is to be tested against the
-*        \p documentation
-* \param component The component that is using this method; this argument is passed to the
-*        SpecificationError that is thrown in case of not adhering to the \p documentation
-*
-* \throw SpecificationError If the \p dictionary does not adhere to the \p documentation
-*/
+ * This method tests whether a provided ghoul::Dictionary \p dictionary adheres to the
+ * specification \p documentation. If the \p dictionary does not adhere to the
+ * specification a SpecificationError is thrown, and the exception contains the TestResult
+ * that contains more information about the offending keys. If the \p dictionary adheres
+ * to the \p documentation, the method returns normally.
+ *
+ * \param documentation The Documentation that the \p dictionary is tested against
+ * \param dictionary The ghoul::Dictionary that is to be tested against the
+ *        \p documentation
+ * \param component The component that is using this method; this argument is passed to
+ *        the SpecificationError that is thrown in case of not adhering to the
+ *        \p documentation
+ *
+ * \throw SpecificationError If the \p dictionary does not adhere to the \p documentation
+ */
 void testSpecificationAndThrow(const Documentation& documentation,
     const ghoul::Dictionary& dictionary, std::string component);
 
