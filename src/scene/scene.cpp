@@ -116,6 +116,12 @@ Scene::~Scene() {
         if (node->identifier() == "Root") {
             continue;
         }
+
+        LWARNING(fmt::format(
+            "SceneGraphNode '{}' was not removed before shutdown",
+            node->identifier()
+        ));
+
         // There might still be scene graph nodes around that weren't removed by the asset
         // manager as they would have been added manually by the user. This also serves as
         // a backstop for assets that forgot to implement the onDeinitialize functions
@@ -542,9 +548,13 @@ void Scene::updateInterpolations() {
 
         if (i.isExpired) {
             if (!i.postScript.empty()) {
+                // No sync or send because this is already inside a Lua script that was triggered
+                // when the interpolation of the property was triggered, therefor it has already been
+                // synced and sent to the connected nodes and peers
                 global::scriptEngine->queueScript(
                     std::move(i.postScript),
-                    scripting::ScriptEngine::RemoteScripting::No
+                    scripting::ScriptEngine::ShouldBeSynchronized::No,
+                    scripting::ScriptEngine::ShouldSendToRemote::No
                 );
             }
 
@@ -835,20 +845,34 @@ scripting::LuaLibrary Scene::luaLibrary() {
             },
             {
                 "getPropertyValue",
+                &luascriptfunctions::propertyGetValueDeprecated,
+                {},
+                "",
+                "Returns the value the property, identified by the provided URI. "
+                "Deprecated in favor of the 'propertyValue' function",
+                {}
+            },
+            {
+                "propertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
-                "Returns the value the property, identified by the provided URI",
+                "Returns the value the property, identified by the provided URI. "
+                "Deprecated in favor of the 'propertyValue' function",
                 {}
             },
             codegen::lua::HasProperty,
-            codegen::lua::GetProperty,
+            codegen::lua::PropertyDeprecated,
+            codegen::lua::Property,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,
             codegen::lua::RemoveSceneGraphNode,
             codegen::lua::RemoveSceneGraphNodesFromRegex,
             codegen::lua::HasSceneGraphNode,
+            codegen::lua::SceneGraphNodes,
+            codegen::lua::NodeByRenderableType,
+            codegen::lua::ScreenSpaceRenderables,
             codegen::lua::AddInterestingTime,
             codegen::lua::WorldPosition,
             codegen::lua::WorldRotation,
@@ -868,7 +892,7 @@ std::string makeIdentifier(std::string s) {
     std::replace_if(
         s.begin(),
         s.end(),
-        [](char c) { return std::ispunct(c) != 0; },
+        [](unsigned char c) { return std::ispunct(c) != 0; },
         '-'
     );
     std::replace(s.begin(), s.end(), ' ', '_');

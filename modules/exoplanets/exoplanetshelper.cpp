@@ -161,4 +161,23 @@ void sanitizeNameString(std::string& s) {
     s.erase(remove(s.begin(), s.end(), '\''), s.end());
 }
 
+void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p) {
+    const glm::vec3 pos = glm::vec3(p.positionX, p.positionY, p.positionZ);
+    if (starData.position != pos && isValidPosition(pos)) {
+        starData.position = pos;
+    }
+    if (starData.radius != p.rStar && !std::isnan(p.rStar)) {
+        starData.radius = p.rStar;
+    }
+    if (starData.bv != p.bmv && !std::isnan(p.bmv)) {
+        starData.bv = p.bmv;
+    }
+    if (starData.teff != p.teff && !std::isnan(p.teff)) {
+        starData.teff = p.teff;
+    }
+    if (starData.luminosity != p.luminosity && !std::isnan(p.luminosity)) {
+        starData.luminosity = p.luminosity;
+    }
+}
+
 } // namespace openspace::exoplanets

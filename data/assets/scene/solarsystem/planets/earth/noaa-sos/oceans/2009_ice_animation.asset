@@ -18,7 +18,7 @@ Microwave/Imager. The resolution is 2 km]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-ice-animation-2009/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -31,7 +31,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "4096",
   Description = Description
 }

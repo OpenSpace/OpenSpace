@@ -369,7 +369,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         else {
             LERROR(fmt::format(
                 "Provided texture file does not exist: '{}'",
-                _defaultProperties.pointTexture
+                _defaultProperties.pointTexture.value()
             ));
         }
     });
@@ -593,7 +593,7 @@ void GeoJsonComponent::readFile() {
     std::ifstream file(_geoJsonFile);
 
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open GeoJSON file: {}", _geoJsonFile));
+        LERROR(fmt::format("Failed to open GeoJSON file: {}", _geoJsonFile.value()));
         return;
     }
 
@@ -611,8 +611,10 @@ void GeoJsonComponent::readFile() {
     try {
         GeoJSONFeatureCollection fc = reader.readFeatures(content);
 
+        int count = 1;
         for (const GeoJSONFeature& feature : fc.getFeatures()) {
-            parseSingleFeature(feature);
+            parseSingleFeature(feature, count);
+            count++;
         }
 
         if (_geometryFeatures.empty()) {
@@ -626,23 +628,32 @@ void GeoJsonComponent::readFile() {
     catch (const geos::util::GEOSException& e) {
         LERROR(fmt::format(
             "Error creating GeoJson layer with identifier '{}'. Problem reading "
-            "GeoJson file '{}'. Error: '{}'", identifier(), _geoJsonFile, e.what()
+            "GeoJson file '{}'. Error: '{}'", identifier(), _geoJsonFile.value(), e.what()
         ));
     }
 
     computeMainFeatureMetaPropeties();
 }
 
-void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& feature) {
+void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& feature,
+                                          int indexInFile
+) {
     // Read the geometry
     const geos::geom::Geometry* geom = feature.getGeometry();
-    ghoul_assert(geom, "No geometry found");
 
     // Read the properties
     GeoJsonOverrideProperties propsFromFile = propsFromGeoJson(feature);
 
     std::vector<const geos::geom::Geometry*> geomsToAdd;
-    if (geom->isPuntal()) {
+    if (!geom) {
+        // Null geometry => no geometries to add
+        LWARNING(fmt::format(
+            "Feature {} in GeoJson file '{}' is a null geometry and will not be loaded",
+            indexInFile, _geoJsonFile.value()
+        ));
+        // @TODO (emmbr26) We should eventually support features with null geometry
+    }
+    else if (geom->isPuntal()) {
         // If points, handle all point features as one feature, even multi-points
         geomsToAdd = { geom };
     }
@@ -650,7 +661,10 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         size_t nGeom = geom->getNumGeometries();
         geomsToAdd.reserve(nGeom);
         for (size_t i = 0; i < nGeom; ++i) {
-            geomsToAdd.push_back(geom->getGeometryN(i));
+            const geos::geom::Geometry* subGeometry = geom->getGeometryN(i);
+            if (subGeometry) {
+                geomsToAdd.push_back(subGeometry);
+            }
         }
     }
 
@@ -684,11 +698,13 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
 
             _featuresPropertyOwner.addPropertySubOwner(_features.back().get());
         }
-        catch (const ghoul::MissingCaseException&) {
+        catch (const ghoul::RuntimeError& error) {
             LERROR(fmt::format(
                 "Error creating GeoJson layer with identifier '{}'. Problem reading "
-                "feature {} in GeoJson file '{}'.", identifier(), index, _geoJsonFile
+                "feature {} in GeoJson file '{}'.",
+                identifier(), indexInFile, _geoJsonFile.value()
             ));
+            LERRORC(error.component, error.message);
             // Do nothing
         }
     }
@@ -824,7 +840,8 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
             "openspace.globebrowsing.flyToGeo(\"{}\", {}, {}, {})",
             _globeNode.owner()->identifier(), lat, lon, d
         ),
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -834,7 +851,8 @@ void GeoJsonComponent::triggerDeletion() const {
             "openspace.globebrowsing.deleteGeoJson(\"{}\", \"{}\")",
             _globeNode.owner()->identifier(), _identifier
         ),
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

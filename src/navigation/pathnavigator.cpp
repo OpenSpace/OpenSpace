@@ -101,7 +101,7 @@ namespace {
         "Rotation Speed Factor (Linear Path)",
         "Affects how fast the camera rotates to the target rotation during a linear "
         "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
-        "seconds. A value of 2 means twice that fast, and so on",
+        "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
@@ -137,7 +137,7 @@ PathNavigator::PathNavigator()
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
     , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
-    , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 1.f, 0.1f, 2.f)
+    , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 2.f, 0.1f, 3.f)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
@@ -290,7 +290,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
         // Do nothing
     }
     catch (const ghoul::RuntimeError& e) {
-        LERROR(fmt::format("Could not create path. Reason: ", e.message));
+        LERROR(fmt::format("Could not create path. Reason: {}", e.message));
         return;
     }
 
@@ -322,7 +322,8 @@ void PathNavigator::startPath() {
     if (!global::timeManager->isPaused()) {
         openspace::global::scriptEngine->queueScript(
             "openspace.time.setPause(true)",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
 
         _startSimulationTimeOnFinish = true;
@@ -413,7 +414,7 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
         LDEBUG(fmt::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
             "minimal value of {}. This might lead to unexpected results",
-            node->identifier(), _minValidBoundingSphere
+            node->identifier(), _minValidBoundingSphere.value()
         ));
         result = _minValidBoundingSphere;
     }
@@ -437,7 +438,8 @@ void PathNavigator::handlePathEnd() {
     if (_startSimulationTimeOnFinish) {
         openspace::global::scriptEngine->queueScript(
             "openspace.time.setPause(false)",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
         _startSimulationTimeOnFinish = false;
     }
@@ -448,7 +450,8 @@ void PathNavigator::handlePathEnd() {
                 "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
                 "true"
             ");",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 

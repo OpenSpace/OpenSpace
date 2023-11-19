@@ -146,7 +146,7 @@ openspace.rebindKey = function(oldKey, newKey)
 end
 
 openspace.appendToListProperty = function(propertyIdentifier, newItem)
-    local list = openspace.getPropertyValue(propertyIdentifier)
+    local list = openspace.propertyValue(propertyIdentifier)
     if type(list) ~= 'table' then
         openspace.printError(
             "Error when calling script 'openspace.appendToListProperty': " ..
@@ -159,7 +159,7 @@ openspace.appendToListProperty = function(propertyIdentifier, newItem)
 end
 
 openspace.addToPropertyValue = function(propertyIdentifier, valueToAdd)
-    local value = openspace.getPropertyValue(propertyIdentifier)
+    local value = openspace.propertyValue(propertyIdentifier)
     if type(value) == 'string' then
         value = value .. valueToAdd;
     else
@@ -169,7 +169,7 @@ openspace.addToPropertyValue = function(propertyIdentifier, valueToAdd)
 end
 
 openspace.invertBooleanProperty = function(propertyIdentifier)
-    local value = openspace.getPropertyValue(propertyIdentifier)
+    local value = openspace.propertyValue(propertyIdentifier)
     if type(value) ~= 'boolean' then
         openspace.printError(
             "Error when calling script 'openspace.invertBooleanProperty': " ..
@@ -183,7 +183,7 @@ end
 openspace.fadeIn = function(identifier, fadeTime, endScript)
     -- Set default values for optional arguments
     endScript = endScript or ""
-    fadeTime = fadeTime or openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
+    fadeTime = fadeTime or openspace.propertyValue("OpenSpaceEngine.FadeDuration")
 
     local enabledProperty = identifier .. ".Enabled"
     local fadeProperty = identifier .. ".Fade"
@@ -197,7 +197,7 @@ openspace.fadeIn = function(identifier, fadeTime, endScript)
 
     if hasTag ~= nil or hasWild ~= nil then
         -- Regex, several nodes
-        local enabledPropertyList = openspace.getProperty(enabledProperty)
+        local enabledPropertyList = openspace.property(enabledProperty)
         if next(enabledPropertyList) == nil then
             -- List is empty, no matches found
             openspace.printError(
@@ -207,7 +207,7 @@ openspace.fadeIn = function(identifier, fadeTime, endScript)
             return
         end
 
-        local fadePropertyList = openspace.getProperty(fadeProperty)
+        local fadePropertyList = openspace.property(fadeProperty)
         if next(fadePropertyList) == nil then
             -- List is empty, no matches found
             openspace.printError(
@@ -234,7 +234,7 @@ openspace.fadeIn = function(identifier, fadeTime, endScript)
             )
             return
         else
-            isEnabled = openspace.getPropertyValue(enabledProperty)
+            isEnabled = openspace.propertyValue(enabledProperty)
         end
     end
 
@@ -250,7 +250,7 @@ end
 openspace.fadeOut = function(identifier, fadeTime, endScript)
     -- Set default values for optional arguments
     endScript = endScript or ""
-    fadeTime = fadeTime or openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
+    fadeTime = fadeTime or openspace.propertyValue("OpenSpaceEngine.FadeDuration")
 
     local enabledProperty = identifier .. ".Enabled"
     local fadeProperty = identifier .. ".Fade"
@@ -264,7 +264,7 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
 
     if hasTag ~= nil or hasWild ~= nil then
         -- Regex, several nodes
-        local enabledPropertyList = openspace.getProperty(enabledProperty)
+        local enabledPropertyList = openspace.property(enabledProperty)
         if next(enabledPropertyList) == nil then
             -- List is empty, no matches found
             openspace.printError(
@@ -274,7 +274,7 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
             return
         end
 
-        local fadePropertyList = openspace.getProperty(fadeProperty)
+        local fadePropertyList = openspace.property(fadeProperty)
         if next(fadePropertyList) == nil then
             -- List is empty, no matches found
             openspace.printError(
@@ -301,7 +301,7 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
             )
             return
         else
-            isEnabled = openspace.getPropertyValue(enabledProperty)
+            isEnabled = openspace.propertyValue(enabledProperty)
         end
     end
 
@@ -319,10 +319,10 @@ end
 
 openspace.toggleFade = function(renderable, fadeTime, endScript)
   if (fadeTime == nil) then
-    fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
+    fadeTime = openspace.propertyValue("OpenSpaceEngine.FadeDuration")
   end
-  local enabled = openspace.getPropertyValue(renderable .. ".Enabled")
-  local fadeState = openspace.getPropertyValue(renderable .. ".Fade")
+  local enabled = openspace.propertyValue(renderable .. ".Enabled")
+  local fadeState = openspace.propertyValue(renderable .. ".Fade")
   if (enabled) then
     if (fadeState < 0.5) then
       openspace.fadeIn(renderable, fadeTime-(fadeTime*fadeState), endScript)

@@ -90,7 +90,7 @@ void TransferFunctionHandler::initialize() {
     addProperty(_maxValue);
     addProperty(_saveTransferFunction);
 
-    this->addTag("TF");
+    addTag("TF");
     _texture = std::make_shared<ghoul::opengl::Texture>(
         glm::uvec3(1024, 1, 1),
         GL_TEXTURE_1D,

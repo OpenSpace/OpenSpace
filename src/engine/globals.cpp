@@ -90,7 +90,7 @@ namespace {
         sizeof(TimeManager) +
         sizeof(VersionChecker) +
         sizeof(WindowDelegate) +
-        sizeof(configuration::Configuration) +
+        sizeof(Configuration) +
         sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionMonitor) +
         sizeof(interaction::WebsocketInputStates) +
@@ -268,11 +268,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    configuration = new (currentPos) configuration::Configuration;
+    configuration = new (currentPos) Configuration;
     ghoul_assert(configuration, "No configuration");
-    currentPos += sizeof(configuration::Configuration);
+    currentPos += sizeof(Configuration);
 #else // ^^^ WIN32 / !WIN32 vvv
-    configuration = new configuration::Configuration;
+    configuration = new Configuration;
 #endif // WIN32
 
 #ifdef WIN32

@@ -15,7 +15,7 @@ in some of the deeper imagery]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ocean-temperature-at-depth-seasonal/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -31,7 +31,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = imagesDestination,
   Description = Description
 }
@@ -40,7 +40,7 @@ local LayerByDepth = {
   Identifier = Identifier .. "-bydepth",
   Name = Name .. " (by Depth)",
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = imagesByDepthDestination,
   Description = Description
 }

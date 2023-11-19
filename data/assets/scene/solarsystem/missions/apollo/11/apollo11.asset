@@ -9,14 +9,14 @@ local kernels = asset.require("./kernels")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Apollo Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_11_models",
   Version = 1
 })
 
-local lemModel = asset.syncedResource({
+local lemModel = asset.resource({
   Name = "Apollo Lem Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_lem_model",

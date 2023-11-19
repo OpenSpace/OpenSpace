@@ -2,14 +2,14 @@ local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
 
 
-local transferFunctions = asset.syncedResource({
+local transferFunctions = asset.resource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-fieldlines_transferfunctions",
   Version = 1
 })
 
-local fieldlineData = asset.syncedResource({
+local fieldlineData = asset.resource({
   Name = "Fieldlines Data PFSS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-pfss",
@@ -23,7 +23,7 @@ local DarkSun = {
   Name = "Dark sun",
   Command = [[
     local property = "Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier"
-    local textureMultiplier = openspace.getPropertyValue(property)
+    local textureMultiplier = openspace.propertyValue(property)
     if (textureMultiplier < 0.01) then
       openspace.setPropertyValueSingle(property, 1.0, 1)
     else

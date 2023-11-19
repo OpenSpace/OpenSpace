@@ -604,7 +604,7 @@ asset.onInitialize(function()
       end
 
       -- Update the dashboard text
-      local text = openspace.getPropertyValue("Dashboard.JWSTStateText.Text")
+      local text = openspace.propertyValue("Dashboard.JWSTStateText.Text")
       if string.len(text) > 14 then
         local newText = ""
         if text:sub(13, 13) == "-" then

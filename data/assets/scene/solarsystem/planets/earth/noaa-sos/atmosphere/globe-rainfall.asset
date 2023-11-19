@@ -14,7 +14,7 @@ atmosphere. This heating is a major part of Earth's energy budget and climate]]
 local URL = "https://sos.noaa.gov/catalog/datasets/rainfall-monthly-nasa/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -27,7 +27,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "1440",

@@ -2,21 +2,21 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "67P Textures",
   Type = "HttpSynchronization",
   Identifier = "67p_textures",
   Version = 2
 })
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "67P Models",
   Type = "HttpSynchronization",
   Identifier = "67p_models",
   Version = 1
 })
 
-local images = asset.syncedResource({
+local images = asset.resource({
   Name = "Rosetta Images",
   Type = "HttpSynchronization",
   Identifier = "rosettaimages",
@@ -141,7 +141,7 @@ local Focus67p = {
   ]],
   Documentation = "Sets the focus of the camera on 67P",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 local ClearImageProjections = {
@@ -152,7 +152,7 @@ local ClearImageProjections = {
   ]],
   Documentation = "Removes all image projections from 67P",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 local Toggle67pProjection = {
@@ -161,12 +161,12 @@ local Toggle67pProjection = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.67P.Renderable.ProjectionComponent.PerformProjection",
-      not openspace.getPropertyValue("Scene.67P.Renderable.ProjectionComponent.PerformProjection")
+      not openspace.propertyValue("Scene.67P.Renderable.ProjectionComponent.PerformProjection")
     )
   ]],
   Documentation = "Enables or disables the image projection on 67P",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 

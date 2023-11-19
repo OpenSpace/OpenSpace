@@ -43,8 +43,9 @@
 #include <variant>
 
 namespace {
-    constexpr std::array<const char*, 6> UniformNames = {
-        "color", "opacity", "mvpMatrix", "tex", "backgroundColor", "gamma"
+    constexpr std::array<const char*, 9> UniformNames = {
+        "color", "opacity", "blackoutFactor", "mvpMatrix", "tex", "backgroundColor",
+        "gamma", "borderColor", "borderWidth"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -52,6 +53,16 @@ namespace {
         "Enabled",
         "This setting determines whether this sceen space plane will be visible or not",
         openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderDuringBlackoutInfo = {
+        "RenderDuringBlackout",
+        "Render during Blackout",
+        "If this value is 'true', this screenspace renderable is going to ignore the "
+        "global blackout factor from the Render Engine and will always render at full "
+        "opacity. If it is 'false', it will adhere to the factor and fade out like the "
+        "rest of the 3D rendering",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -153,6 +164,20 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BorderWidthInfo = {
+        "BorderWidth",
+        "Border Width",
+        "The width of the border",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BorderColorInfo = {
+        "BorderColor",
+        "Border Color",
+        "Sets the color of the border",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
     float wrap(float value, float min, float max) {
         return glm::mod(value - min, max - min) + min;
     }
@@ -176,6 +201,9 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
+        // [[codegen::verbatim(RenderDuringBlackoutInfo.description)]]
+        std::optional<bool> renderDuringBlackout;
+
         // [[codegen::verbatim(UseRadiusAzimuthElevationInfo.description)]]
         std::optional<bool> useRadiusAzimuthElevation;
 
@@ -187,6 +215,12 @@ namespace {
 
         // [[codegen::verbatim(GammaInfo.description)]]
         std::optional<glm::vec3> radiusAzimuthElevation;
+
+        // [[codegen::verbatim(BorderWidthInfo.description)]]
+        std::optional<float> borderWidth [[codegen::greater(0.0)]];
+
+        // [[codegen::verbatim(BorderColorInfo.description)]]
+        std::optional<glm::vec3> borderColor [[codegen::color()]];
 
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
@@ -261,6 +295,7 @@ std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" })
     , _enabled(EnabledInfo, true)
+    , _renderDuringBlackout(RenderDuringBlackoutInfo, false)
     , _usePerspectiveProjection(UsePerspectiveProjectionInfo, false)
     , _useRadiusAzimuthElevation(UseRadiusAzimuthElevationInfo, false)
     , _faceCamera(FaceCameraInfo, true)
@@ -292,6 +327,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec4(1.f)
     )
     , _delete(DeleteInfo)
+    , _borderWidth(BorderWidthInfo, 0.f, 0.f, 1000.f)
+    , _borderColor(BorderColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -304,6 +341,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     }
 
     addProperty(_enabled);
+    _renderDuringBlackout = p.renderDuringBlackout.value_or(_renderDuringBlackout);
+    addProperty(_renderDuringBlackout);
     addProperty(_useRadiusAzimuthElevation);
     addProperty(_usePerspectiveProjection);
     addProperty(_faceCamera);
@@ -328,6 +367,13 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(Fadeable::_fade);
     addProperty(_localRotation);
 
+    addProperty(_borderColor);
+    addProperty(_borderWidth);
+
+    _borderWidth = p.borderWidth.value_or(_borderWidth);
+
+    _borderColor = p.borderColor.value_or(_borderColor);
+    _borderColor.setViewOption(properties::Property::ViewOptions::Color);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -374,9 +420,13 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _delete.onChange([this](){
         std::string script =
             "openspace.removeScreenSpaceRenderable('" + identifier() + "');";
+        // No sync or send because this is already inside a Lua script that was triggered
+        // when this triggerProperty was pressed in the gui, therefor it has already been
+        // synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::No
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     });
     addProperty(_delete);
@@ -406,15 +456,15 @@ bool ScreenSpaceRenderable::deinitializeGL() {
     return true;
 }
 
-void ScreenSpaceRenderable::render() {
+void ScreenSpaceRenderable::render(float blackoutFactor) {
     ZoneScoped;
 
-    draw(
+    glm::mat4 mat =
         globalRotationMatrix() *
         translationMatrix() *
         localRotationMatrix() *
-        scaleMatrix()
-    );
+        scaleMatrix();
+    draw(mat, blackoutFactor);
 }
 
 bool ScreenSpaceRenderable::isReady() const {
@@ -498,7 +548,7 @@ glm::vec2 ScreenSpaceRenderable::screenSpacePosition() {
     return glm::vec2(_cartesianPosition.value());
 }
 
-glm::vec2  ScreenSpaceRenderable::screenSpaceDimensions() {
+glm::vec2 ScreenSpaceRenderable::screenSpaceDimensions() {
     float ratio = static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y);
     return glm::vec2(2.f * _scale * ratio, 2.f * _scale);
 }
@@ -592,15 +642,26 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix() {
     return glm::translate(glm::mat4(1.f), translation);
 }
 
-void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
+void ScreenSpaceRenderable::draw(glm::mat4 modelTransform, float blackoutFactor) {
     glDisable(GL_CULL_FACE);
 
     _shader->activate();
+    // Calculate the border from pixels to UV coordinates
+    glm::vec2 borderUV = glm::vec2(
+        _borderWidth / static_cast<float>(_objectSize.x),
+        _borderWidth / static_cast<float>(_objectSize.y)
+    );
 
     _shader->setUniform(_uniformCache.color, _multiplyColor);
     _shader->setUniform(_uniformCache.opacity, opacity());
+    _shader->setUniform(
+        _uniformCache.blackoutFactor,
+        _renderDuringBlackout ? 1.f : blackoutFactor
+    );
     _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
     _shader->setUniform(_uniformCache.gamma, _gamma);
+    _shader->setUniform(_uniformCache.borderWidth, borderUV);
+    _shader->setUniform(_uniformCache.borderColor, _borderColor);
     _shader->setUniform(
         _uniformCache.mvp,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform

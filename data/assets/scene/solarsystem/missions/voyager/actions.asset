@@ -6,7 +6,7 @@ local SetupJupiterApproach = {
   ]],
   Documentation = "Sets the time for Voyager's approach to Jupiter",
   GuiPath = "/Missions/Voyager",
-  isLocal = false
+  IsLocal = false
 }
 
 local SetupSaturnApproach = {
@@ -17,7 +17,7 @@ local SetupSaturnApproach = {
   ]],
   Documentation = "Sets the time for Voyager's approach to Saturn",
   GuiPath = "/Missions/Voyager",
-  isLocal = false
+  IsLocal = false
 }
 
 local JupiterFocus = {
@@ -30,7 +30,7 @@ local JupiterFocus = {
   ]],
   Documentation = "Set the camera focus to Jupiter",
   GuiPath = "/Missions/Voyager",
-  isLocal = false
+  IsLocal = false
 }
 
 local SaturnFocus = {
@@ -43,21 +43,21 @@ local SaturnFocus = {
   ]],
   Documentation = "Sets the camera focus on Saturn",
   GuiPath = "/Missions/Voyager",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleMinorMoonTrails = {
   Identifier = "os.voyager.ToggleMinorMoonTrails",
   Name = "Toggle minor trails",
   Command = [[
-    local list = openspace.getProperty("{moonTrail_minor}.Renderable.Enabled")
+    local list = openspace.property("{moonTrail_minor}.Renderable.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggles the trails of the minor moons",
   GuiPath = "/Trails",
-  isLocal = false
+  IsLocal = false
 }
 
 

@@ -17,7 +17,7 @@ local Description = [[After a long lull in major hurricanes striking the U.S.
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-season-water-vapor-and-sst-2017/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -30,7 +30,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "2048",

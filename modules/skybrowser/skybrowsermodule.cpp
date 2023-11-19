@@ -356,7 +356,8 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
         );
         global::scriptEngine->queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
     else {
@@ -379,7 +380,8 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
     );
     global::scriptEngine->queueScript(
         script,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -392,7 +394,8 @@ void SkyBrowserModule::disableHoverCircle(bool useScript) {
             );
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
         else {
@@ -529,7 +532,8 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::StartSetup,
             codegen::lua::InitializeBrowser,
             codegen::lua::SendOutIdsToBrowsers,
-            codegen::lua::GetListOfImages,
+            codegen::lua::ListOfImages,
+            codegen::lua::ListOfImagesDeprecated,
             codegen::lua::SetHoverCircle,
             codegen::lua::MoveCircleToHoverImage,
             codegen::lua::DisableHoverCircle,
@@ -538,7 +542,8 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::RemoveSelectedImageInBrowser,
             codegen::lua::AdjustCamera,
             codegen::lua::SetSelectedBrowser,
-            codegen::lua::GetTargetData,
+            codegen::lua::TargetData,
+            codegen::lua::TargetDataDeprecated,
             codegen::lua::CreateTargetBrowserPair,
             codegen::lua::RemoveTargetBrowserPair,
             codegen::lua::SetOpacityOfImageLayer,
@@ -557,7 +562,8 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::ScrollOverBrowser,
             codegen::lua::LoadingImageCollectionComplete,
             codegen::lua::ShowAllTargetsAndBrowsers,
-            codegen::lua::GetWwtImageCollectionUrl,
+            codegen::lua::WwtImageCollectionUrl,
+            codegen::lua::WwtImageCollectionUrlDeprecated,
             codegen::lua::StopAnimations,
             codegen::lua::SetBorderRadius,
             codegen::lua::ReloadDisplayCopyOnNode

@@ -66,7 +66,8 @@ private:
     void addToCommand(std::string c);
 
     properties::BoolProperty _isVisible;
-    properties::BoolProperty _remoteScripting;
+    properties::BoolProperty _shouldBeSynchronized;
+    properties::BoolProperty _shouldSendToRemote;
 
     properties::Vec4Property _backgroundColor;
     properties::Vec4Property _entryTextColor;

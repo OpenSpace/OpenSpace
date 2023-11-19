@@ -14,7 +14,7 @@ can be seen on this visualization]]
 local URL = "https://sos.noaa.gov/catalog/datasets/buoy-and-float-locations/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

@@ -228,7 +228,7 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
- * Starts the setup process of the sky browers. This function calls the lua function
+ * Starts the setup process of the sky browers. This function calls the Lua function
  * 'sendOutIdsToBrowsers' in all nodes in the cluster.
  */
 [[codegen::luawrap]] void startSetup() {
@@ -246,17 +246,23 @@ std::string prunedIdentifier(std::string identifier) {
                 "openspace.skybrowser.setBorderColor('{}', {}, {}, {})",
                 id, color.r, color.g, color.b
             );
+
+            // No sync or send because this is already inside a Lua script, therefor it
+            // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::No,
+                scripting::ScriptEngine::ShouldSendToRemote::No
             );
         }
     }
     // To ensure each node in a cluster calls its own instance of the wwt application
-    // Do not send this script to the other nodes
+    // Do not send this script to the other nodes. (Note malej 2023-AUG-23: Due to this
+    // already being inside a Lua function that have already been synced out)
     global::scriptEngine->queueScript(
         "openspace.skybrowser.sendOutIdsToBrowsers()",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 }
 
@@ -317,7 +323,7 @@ std::string prunedIdentifier(std::string identifier) {
 /**
  * Returns the AAS WorldWide Telescope image collection url.
  */
-[[codegen::luawrap]] ghoul::Dictionary getWwtImageCollectionUrl() {
+[[codegen::luawrap]] ghoul::Dictionary wwtImageCollectionUrl() {
     using namespace openspace;
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     ghoul::Dictionary url;
@@ -326,12 +332,26 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
+ * Deprecated in favor of 'wwtImageCollectionUrl'
+ */
+[[codegen::luawrap("getWwtImageCollectionUrl")]]
+ghoul::Dictionary wwtImageCollectionUrlDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getWwtImageCollectionUrl' function is deprecated and should be replaced with "
+        "'wwtImageCollectionUrl'"
+    );
+    return wwtImageCollectionUrl();
+}
+
+/**
  * Returns a list of all the loaded AAS WorldWide Telescope images that have been loaded.
  * Each image has a name, thumbnail url, equatorial spherical coordinates RA and Dec,
  * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
  * credits url and the identifier of the image which is a unique number.
  */
-[[codegen::luawrap]] ghoul::Dictionary getListOfImages() {
+[[codegen::luawrap]] ghoul::Dictionary listOfImages() {
     using namespace openspace;
 
     // Send image list to GUI
@@ -368,10 +388,23 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
+ * Deprecated in favor of 'listOfExoplanets'
+ */
+[[codegen::luawrap("getListOfImages")]] ghoul::Dictionary listOfImagesDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getListOfImages' function is deprecated and should be replaced with "
+        "'listOfImages'"
+    );
+    return listOfImages();
+}
+
+/**
  * Returns a table of data regarding the current view and the sky browsers and targets.
  * returns a table of data regarding the current targets.
  */
-[[codegen::luawrap]] ghoul::Dictionary getTargetData() {
+[[codegen::luawrap]] ghoul::Dictionary targetData() {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -435,6 +468,17 @@ std::string prunedIdentifier(std::string identifier) {
     }
 
     return data;
+}
+
+/**
+ * Deprecated in favor of 'targetData'
+ */
+[[codegen::luawrap("getTargetData")]] ghoul::Dictionary targetDataDeprecated() {
+    LWARNINGC(
+        "Deprecation",
+        "'getTargetData' function is deprecated and should be replaced with 'targetData'"
+    );
+    return targetData();
 }
 
 /**
@@ -561,25 +605,31 @@ std::string prunedIdentifier(std::string identifier) {
         "}"
     "}";
 
+    // No sync or send because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + browser + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + target + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     global::scriptEngine->queueScript(
         "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
         + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
     global::scriptEngine->queueScript(
         "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
     );
 }
 
@@ -597,15 +647,19 @@ std::string prunedIdentifier(std::string identifier) {
 
         module->removeTargetBrowserPair(identifier);
 
-        // Remove from engine
+        // Remove from engine.
+        // No sync or send because this is already inside a Lua script, therefor it has
+        // already been synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.removeScreenSpaceRenderable('" + browser + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         global::scriptEngine->queueScript(
             "openspace.removeSceneGraphNode('" + target + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
 }

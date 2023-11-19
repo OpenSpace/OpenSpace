@@ -181,7 +181,7 @@ protected:
 
     /// Creates a file next to the directory that indicates that this
     /// ResourceSynchronization has successfully synchronized its contents
-    void createSyncFile() const;
+    virtual void createSyncFile(bool isFullySynchronized = true) const;
 
     /// Returns whether the synchronization file create in #createSyncFile exists
     bool hasSyncFile() const;

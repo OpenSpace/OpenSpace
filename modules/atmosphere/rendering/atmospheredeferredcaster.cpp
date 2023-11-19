@@ -70,14 +70,14 @@
 namespace {
     constexpr std::string_view _loggerCat = "AtmosphereDeferredcaster";
 
-    constexpr std::array<const char*, 28> UniformNames = {
+    constexpr std::array<const char*, 29> UniformNames = {
         "cullAtmosphere", "opacity", "Rg", "Rt", "groundRadianceEmission", "HR",
         "betaRayleigh", "HM", "betaMieExtinction", "mieG", "sunRadiance",
         "ozoneLayerEnabled", "HO", "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU",
         "SAMPLES_MU_S", "SAMPLES_NU", "inverseModelTransformMatrix",
         "modelTransformMatrix", "projectionToModelTransformMatrix", "viewToWorldMatrix",
         "camPosObj", "sunDirectionObj", "hardShadows", "transmittanceTexture",
-        "irradianceTexture", "inscatterTexture"
+        "irradianceTexture", "inscatterTexture", "sunAngularSize"
     };
 
     constexpr float ATM_EPS = 2000.f;
@@ -271,16 +271,17 @@ void AtmosphereDeferredcaster::deinitialize() {
 void AtmosphereDeferredcaster::update(const UpdateData&) {}
 
 float AtmosphereDeferredcaster::eclipseShadow(glm::dvec3 position) {
-    // This code is copied from the atmosphere deferred fragment shader 
+    // This code is copied from the atmosphere deferred fragment shader
     // It is used to calculate the eclipse shadow
-    const ShadowRenderingStruct& shadow = _shadowDataArrayCache.front();
-    if (_shadowDataArrayCache.empty() || !shadow.isShadowing) {
+    if (_shadowDataArrayCache.empty() || !_shadowDataArrayCache.front().isShadowing) {
         return 1.f;
     }
 
+    const ShadowRenderingStruct& shadow = _shadowDataArrayCache.front();
     const glm::dvec3 positionToCaster = shadow.casterPositionVec - position;
     const glm::dvec3 sourceToCaster = shadow.sourceCasterVec; // Normalized
-    const glm::dvec3 casterShadow = dot(positionToCaster, sourceToCaster) * sourceToCaster;
+    const glm::dvec3 casterShadow =
+        dot(positionToCaster, sourceToCaster) * sourceToCaster;
     const glm::dvec3 positionToShadow = positionToCaster - casterShadow;
 
     float distanceToShadow = static_cast<float>(length(positionToShadow));
@@ -352,6 +353,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         prg.setUniform(_uniformCache.SAMPLES_MU, _muSamples);
         prg.setUniform(_uniformCache.SAMPLES_MU_S, _muSSamples);
         prg.setUniform(_uniformCache.SAMPLES_NU, _nuSamples);
+        // We expose the value as degrees, but the shader wants radians
+        prg.setUniform(_uniformCache.sunAngularSize, glm::radians(_sunAngularSize));
 
         // Object Space
         glm::dmat4 invModelMatrix = glm::inverse(_modelTransform);
@@ -467,7 +470,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
                 shadow.radiusCaster = actualCasterRadius;
                 shadow.sourceCasterVec = glm::normalize(sourceCasterVec);
                 shadow.penumbra = xpTest;
-                shadow.umbra = shadow.radiusCaster * scLength / (shadow.radiusSource - shadow.radiusCaster);
+                shadow.umbra =
+                    shadow.radiusCaster * scLength /
+                    (shadow.radiusSource - shadow.radiusCaster);
                 shadow.casterPositionVec = casterPos;
             }
             _shadowDataArrayCache.push_back(shadow);
@@ -558,7 +563,7 @@ void AtmosphereDeferredcaster::setParameters(float atmosphereRadius, float plane
                                              glm::vec3 ozoneExtinctionCoefficients,
                                              glm::vec3 mieScatteringCoefficients,
                                              glm::vec3 mieExtinctionCoefficients,
-                                             bool sunFollowing)
+                                             bool sunFollowing, float sunAngularSize)
 {
     _atmosphereRadius = atmosphereRadius;
     _atmospherePlanetRadius = planetRadius;
@@ -575,6 +580,7 @@ void AtmosphereDeferredcaster::setParameters(float atmosphereRadius, float plane
     _mieScatteringCoeff = std::move(mieScatteringCoefficients);
     _mieExtinctionCoeff = std::move(mieExtinctionCoefficients);
     _sunFollowingCameraEnabled = sunFollowing;
+    _sunAngularSize = sunAngularSize;
 }
 
 void AtmosphereDeferredcaster::setHardShadows(bool enabled) {

@@ -1,13 +1,13 @@
 asset.require("./layers/colorlayers/europa_texture", false)
-asset.require("./layers/colorlayers/voyager_global_mosaic_local", false)
+asset.require("./layers/colorlayers/voyager_global_mosaic_local", true)
 asset.require("./layers/colorlayers/voyager_global_mosaic_sweden", false)
-asset.require("./layers/colorlayers/voyager_global_mosaic_newyork", true)
+asset.require("./layers/colorlayers/voyager_global_mosaic_newyork", false)
 
 
 
 asset.meta = {
   Name = "Default Europa Layers",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Default Europa layers are: Europa Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

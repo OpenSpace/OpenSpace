@@ -9,7 +9,7 @@ that shows the ratio of land and sea at different latitudes]]
 local URL = "https://sos.noaa.gov/catalog/datasets/land-to-sea-ratio/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -22,7 +22,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "4096",
   Description = Description
 }

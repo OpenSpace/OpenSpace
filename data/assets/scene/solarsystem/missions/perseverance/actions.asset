@@ -20,7 +20,7 @@ local Setup = {
   ]],
   Documentation = "Sets time and layers for Perseverance landing",
   GuiPath = "/Missions/Perseverance",
-  isLocal = false
+  IsLocal = false
 }
 
 

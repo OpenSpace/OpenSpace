@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "Milkyway Volume Data",
   Type = "HttpSynchronization",
   Identifier = "milkyway_volume_data",

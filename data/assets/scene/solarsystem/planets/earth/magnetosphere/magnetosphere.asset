@@ -2,9 +2,9 @@ local transforms = asset.require("./transforms_magnetosphere")
 
 
 
-local transferFunction = asset.localResource("CMR-illuminance2.txt")
+local transferFunction = asset.resource("CMR-illuminance2.txt")
 
-local fieldlinesDirectory = asset.syncedResource({
+local fieldlinesDirectory = asset.resource({
   Name = "Magnetosphere 2012 event",
   Type = "HttpSynchronization",
   Identifier = "magnetosphere_2012_event",

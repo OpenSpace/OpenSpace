@@ -4,7 +4,7 @@ local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/trans
 local kernels = asset.require("./kernels")
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Messenger Models",
   Type = "HttpSynchronization",
   Identifier = "messenger_model",

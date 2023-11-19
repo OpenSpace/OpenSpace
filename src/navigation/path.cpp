@@ -49,6 +49,8 @@ namespace {
     // It's nice to have these to interpret the dictionary when creating the path, but
     // maybe it's not really necessary
     struct [[codegen::Dictionary(PathInstruction)]] Parameters {
+        // The type of the instruction. Decides what other parameters are
+        // handled/available
         enum class TargetType {
             Node,
             NavigationState
@@ -96,9 +98,14 @@ namespace {
 
 namespace openspace::interaction {
 
-Path::Path(Waypoint start, Waypoint end, Type type,
-           std::optional<double> duration)
-    : _start(start), _end(end), _type(type)
+documentation::Documentation Path::Documentation() {
+    return codegen::doc<Parameters>("core_path_instruction");
+}
+
+Path::Path(Waypoint start, Waypoint end, Type type, std::optional<double> duration)
+    : _start(start)
+    , _end(end)
+    , _type(type)
 {
     switch (_type) {
         case Type::AvoidCollision:
@@ -111,9 +118,6 @@ Path::Path(Waypoint start, Waypoint end, Type type,
         case Type::ZoomOutOverview:
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
-        default:
-            LERROR("Could not create curve. Type does not exist");
-            throw ghoul::MissingCaseException();
     }
 
     _prevPose = _start.pose();
@@ -122,28 +126,47 @@ Path::Path(Waypoint start, Waypoint end, Type type,
     // computing how much faster/slower it should be
     _speedFactorFromDuration = 1.0;
     if (duration.has_value()) {
-        constexpr double dt = 0.05; // 20 fps
-        while (!hasReachedEnd()) {
-            traversePath(dt);
-        }
+        if (*duration > 0.0) {
+            constexpr double dt = 0.05; // 20 fps
+            while (!hasReachedEnd()) {
+                traversePath(dt);
+            }
 
-        // We now know how long it took to traverse the path. Use that
-        _speedFactorFromDuration = _progressedTime / *duration;
-        resetPlaybackVariables();
+            // We now know how long it took to traverse the path. Use that
+            _speedFactorFromDuration = _progressedTime / *duration;
+            resetPlaybackVariables();
+        }
+        else {
+            // A duration of zero means infinite speed. Handle this explicity
+            _speedFactorFromDuration = std::numeric_limits<double>::infinity();
+        }
     }
 }
 
-Waypoint Path::startPoint() const { return _start; }
+Waypoint Path::startPoint() const {
+    return _start;
+}
 
-Waypoint Path::endPoint() const { return _end; }
+Waypoint Path::endPoint() const {
+    return _end;
+}
 
-double Path::pathLength() const { return _curve->length(); }
+double Path::pathLength() const {
+    return _curve->length();
+}
 
 std::vector<glm::dvec3> Path::controlPoints() const {
     return _curve->points();
 }
 
 CameraPose Path::traversePath(double dt, float speedScale) {
+    if (std::isinf(_speedFactorFromDuration)) {
+        _shouldQuit = true;
+        _prevPose = _start.pose();
+        _traveledDistance = pathLength();
+        return _end.pose();
+    }
+
     double speed = speedAlongPath(_traveledDistance);
     speed *= static_cast<double>(speedScale);
     double displacement = dt * speed;
@@ -517,6 +540,14 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             const NavigationState navigationState =
                 NavigationState(p.navigationState.value());
 
+            const SceneGraphNode* targetNode = sceneGraphNode(navigationState.anchor);
+            if (!targetNode) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Could not find anchor node '{}' in provided navigation state",
+                    navigationState.anchor
+                ));
+            }
+
             waypoints = { Waypoint(navigationState) };
             break;
         }
@@ -562,8 +593,6 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             waypoints = { computeWaypointFromNodeInfo(info, startPoint, isLinear) };
             break;
         }
-        default:
-            throw ghoul::MissingCaseException();
     }
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints

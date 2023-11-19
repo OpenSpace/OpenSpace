@@ -1,4 +1,4 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "ESO Milky Way Textures",
   Type = "HttpSynchronization",
   Identifier = "milkyway-eso_textures",
@@ -15,7 +15,7 @@ local Object = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Size = 9.2E20,
     Segments = 40,
     Opacity = 0.4,

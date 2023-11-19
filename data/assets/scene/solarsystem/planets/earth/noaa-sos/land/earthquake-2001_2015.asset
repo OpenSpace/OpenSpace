@@ -18,7 +18,7 @@ when they are shallow within the earth (less than 100 km or 60 mi. deep)]]
 local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-2001-2015/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

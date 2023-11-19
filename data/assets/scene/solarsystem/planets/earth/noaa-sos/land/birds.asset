@@ -13,7 +13,7 @@ and National Audubon Society, that allows birdwatchers to enter their observatio
 local URL = "https://sos.noaa.gov/catalog/datasets/bird-migration-patterns-western-hemisphere/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -26,7 +26,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "birds",
   Description = Description
 }

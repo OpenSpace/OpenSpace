@@ -1,11 +1,11 @@
-asset.syncedResource({
+asset.resource({
   Name = "Example Single",
   Type = "UrlSynchronization",
   Identifier = "example_single",
   Url = "http://celestrak.com/NORAD/elements/geo.txt"
 })
 
-asset.syncedResource({
+asset.resource({
   Name = "Example Multiple",
   Type = "UrlSynchronization",
   Identifier = "example_multiple",
@@ -15,26 +15,66 @@ asset.syncedResource({
   }
 })
 
-asset.syncedResource({
+asset.resource({
   Name = "Example Large",
   Type = "UrlSynchronization",
   Identifier = "example_large",
-  Url = "http://ipv4.download.thinkbroadband.com/100MB.zip",
-  Override = true
+  Url = {
+    "http://speedtest.tele2.net/1000GB.zip",
+    "https://speedtest.tele2.net/100GB.zip",
+    "https://speedtest.tele2.net/50GB.zip",
+    "http://speedtest.tele2.net/10GB.zip",
+    "http://speedtest.tele2.net/1GB.zip",
+    "http://speedtest.tele2.net/100MB.zip",
+
+    "https://proof.ovh.net/files/10Gb.dat",
+    "https://proof.ovh.net/files/1Gb.dat",
+    "https://proof.ovh.net/files/100Mb.dat",
+
+    "https://speed.hetzner.de/10GB.bin",
+    "https://speed.hetzner.de/1GB.bin",
+    "https://speed.hetzner.de/100MB.bin",
+
+    "http://ipv4.download.thinkbroadband.com/1GB.zip",
+    "http://ipv4.download.thinkbroadband.com/512MB.zip",
+    "http://ipv4.download.thinkbroadband.com/200MB.zip",
+    "http://ipv4.download.thinkbroadband.com/100MB.zip",
+    "http://ipv4.download.thinkbroadband.com/50MB.zip",
+    "http://ipv4.download.thinkbroadband.com/20MB.zip",
+    "http://ipv4.download.thinkbroadband.com/10MB.zip",
+    "http://ipv4.download.thinkbroadband.com/5MB.zip",
+  },
+  SecondsUntilResync = 0
 })
 
-asset.syncedResource({
+asset.resource({
   Name = "Example Medium",
   Type = "UrlSynchronization",
   Identifier = "example_medium",
   Url = "http://ipv4.download.thinkbroadband.com/5MB.zip",
-  Override = true
+  SecondsUntilResync = 0
 })
 
-asset.syncedResource({
+-- Load a resource without hashing, meaning that the bare directory name will be
+-- used for the downloaded file. If UseHash is true, the hash of the URL is appended
+-- to the directory name to produce a unique directory under all circumstances
+asset.resource({
   Name = "Example No Hash",
   Type = "UrlSynchronization",
   Identifier = "no_hash",
   Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
   UseHash = false
 })
+
+
+asset.meta = {
+  Name = "UrlSynchronization",
+  Version = "1.0",
+  Description = [[Example showing how to load resources (any type of data file) from
+    online sources, using the UrlSynchronization resource type. These can then be used
+    in other assets. See more information on resources on the OpenSpace wiki page.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

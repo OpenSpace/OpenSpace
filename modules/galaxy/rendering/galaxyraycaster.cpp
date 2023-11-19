@@ -43,10 +43,12 @@ namespace {
 
 namespace openspace {
 
-GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture)
+GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture,
+                                 std::optional<std::filesystem::path> raycastingShader)
     : _boundingBox(glm::vec3(1.f))
     , _texture(texture)
     , _textureUnit(nullptr)
+    , _raycastingShader(raycastingShader.value_or(GlslRaycastPath))
 {}
 
 void GalaxyRaycaster::initialize() {
@@ -149,7 +151,7 @@ std::string GalaxyRaycaster::boundsFragmentShaderPath() const {
 }
 
 std::string GalaxyRaycaster::raycasterPath() const {
-    return std::string(GlslRaycastPath);
+    return _raycastingShader.string();
 }
 
 std::string GalaxyRaycaster::helperPath() const {

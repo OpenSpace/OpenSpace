@@ -16,7 +16,7 @@ local Description = [[This dataset leads viewers on a narrated global tour of fi
 local URL = "https://sos.noaa.gov/catalog/datasets/fire-observations-and-vegetation-2002-2011/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -29,7 +29,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "2048",
   Description = Description
 }

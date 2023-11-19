@@ -19,7 +19,7 @@ biomass]]
 local URL = "https://sos.noaa.gov/catalog/datasets/phytoplankton-model/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -33,7 +33,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "images",
   Description = Description
 }

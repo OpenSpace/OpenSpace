@@ -1,8 +1,10 @@
 <!DOCTYPE RCC><RCC version="1.0">
   <qresource>
     <file>qss/launcher.qss</file>
-    <file>images/openspace-horiz-logo-small.png</file>
+    <file>images/cogwheel.png</file>
+    <file>images/cogwheel-highlight.png</file>
     <file>images/launcher-background.png</file>
+    <file>images/openspace-horiz-logo-small.png</file>
     <file>images/outline_locked.png</file>
     <file>images/outline_unlocked.png</file>
   </qresource>

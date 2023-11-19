@@ -25,6 +25,7 @@
 #include "launcherwindow.h"
 
 #include "profile/profileedit.h"
+#include "settingsdialog.h"
 
 #include <openspace/engine/configuration.h>
 #include <openspace/openspace.h>
@@ -60,6 +61,8 @@ namespace {
     constexpr int SmallItemWidth = 100;
     constexpr int SmallItemHeight = SmallItemWidth / 4;
 
+    constexpr int SettingsIconSize = 35;
+
     namespace geometry {
         constexpr QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
         constexpr QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
@@ -84,6 +87,12 @@ namespace {
         );
         constexpr QRect VersionString(
             5, ScreenHeight - SmallItemHeight, ItemWidth, SmallItemHeight
+        );
+        constexpr QRect SettingsButton(
+            ScreenWidth - SettingsIconSize - 5,
+            ScreenHeight - SettingsIconSize - 5,
+            SettingsIconSize,
+            SettingsIconSize
         );
     } // geometry
 
@@ -204,7 +213,7 @@ namespace {
 using namespace openspace;
 
 LauncherWindow::LauncherWindow(bool profileEnabled,
-                               const configuration::Configuration& globalConfig,
+                               const Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
@@ -375,6 +384,31 @@ QWidget* LauncherWindow::createCentralWidget() {
     );
     versionLabel->setObjectName("version-info");
     versionLabel->setGeometry(geometry::VersionString);
+
+    QPushButton* settingsButton = new QPushButton(centralWidget);
+    settingsButton->setObjectName("settings");
+    settingsButton->setGeometry(geometry::SettingsButton);
+    settingsButton->setIconSize(QSize(SettingsIconSize, SettingsIconSize));
+    connect(
+        settingsButton,
+        &QPushButton::released,
+        [this]() {
+            using namespace openspace;
+
+            Settings settings = loadSettings();
+
+            SettingsDialog dialog(std::move(settings), this);
+            connect(
+                &dialog,
+                &SettingsDialog::saveSettings,
+                [](Settings settings) {
+                    saveSettings(settings, findSettings());
+                }
+            );
+
+            dialog.exec();
+        }
+    );
 
     return centralWidget;
 }
@@ -552,6 +586,17 @@ bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_en
     }
     box.addItem(QString::fromStdString(p.path().filename().string()));
 
+    // Add tooltip
+    if (isJson) {
+        sgct::config::Meta meta = sgct::readMeta(p.path().string(), true);
+        if (!meta.description.empty()) {
+            QString toolTip = QString::fromStdString(
+                fmt::format("<p>{}</p>", meta.description)
+            );
+            box.setItemData(box.count() - 1, toolTip, Qt::ToolTipRole);
+        }
+    }
+
     // For now, mark the XML configuration files to show that they are deprecated
     if (isXml) {
         box.setItemData(box.count() - 1, QBrush(Qt::darkYellow), Qt::ForegroundRole);
@@ -643,6 +688,13 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     _windowConfigBox->insertItem(
         _windowConfigBoxIndexSgctCfgDefault,
         QString::fromStdString(_sgctConfigName)
+    );
+    QString defaultTip = 
+        "<p>The basic default configuration specified in the .cfg file</p>";
+    _windowConfigBox->setItemData(
+        _windowConfigBoxIndexSgctCfgDefault,
+        defaultTip,
+        Qt::ToolTipRole
     );
     // Try to find the requested configuration file and set it as the current one. As we
     // have support for function-generated configuration files that will not be in the

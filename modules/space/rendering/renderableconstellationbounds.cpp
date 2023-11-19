@@ -186,11 +186,7 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     _program->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
     _program->setUniform("scaling", glm::vec2(1.f, 0.f));
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
+    const glm::dmat4 modelTransform = calcModelTransform(data);
 
     _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("ModelTransform", glm::mat4(modelTransform));

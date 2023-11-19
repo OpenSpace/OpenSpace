@@ -169,7 +169,8 @@ void JoystickCameraStates::updateStateFromInput(
 
                     global::scriptEngine->queueScript(
                         script,
-                        scripting::ScriptEngine::RemoteScripting(t.isRemote)
+                        scripting::ScriptEngine::ShouldBeSynchronized(t.isRemote),
+                        scripting::ScriptEngine::ShouldSendToRemote(t.isRemote)
                     );
                     break;
             }
@@ -188,7 +189,10 @@ void JoystickCameraStates::updateStateFromInput(
                 if (active) {
                     global::scriptEngine->queueScript(
                         it->second.command,
-                        scripting::ScriptEngine::RemoteScripting(
+                        scripting::ScriptEngine::ShouldBeSynchronized(
+                            it->second.synchronization
+                        ),
+                        scripting::ScriptEngine::ShouldSendToRemote(
                             it->second.synchronization
                         )
                     );

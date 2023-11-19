@@ -136,7 +136,7 @@ local PointJwst = {
     sky coordinate as arguments.
   ]],
   GuiPath = "/JWST/Events",
-  IsLocal = true
+  IsLocal = false
 }
 
 

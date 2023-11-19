@@ -3,7 +3,7 @@ local earthTransforms = asset.require("scene/solarsystem/planets/earth/transform
 
 
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Grids Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_grids_speck",
@@ -669,6 +669,7 @@ asset.onDeinitialize(function()
     openspace.removeSceneGraphNode(EquatorialSphere)
     openspace.removeSceneGraphNode(EclipticSphereLabels)
     openspace.removeSceneGraphNode(EclipticSphere)
+    openspace.removeSceneGraphNode(OortSphere)
     openspace.removeSceneGraphNode(RadioSphere)
 end)
 

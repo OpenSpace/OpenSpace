@@ -27,16 +27,10 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -61,33 +55,27 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture();
+    virtual void bindTexture() = 0;
     virtual void unbindTexture();
-
-private:
-    void loadTexture();
-
-    properties::StringProperty _texturePath;
-    properties::OptionProperty _orientation;
 
     properties::FloatProperty _size;
     properties::IntProperty _segments;
 
+    properties::OptionProperty _orientation;
     properties::BoolProperty _mirrorTexture;
-    properties::BoolProperty _disableFadeInDistance;
 
+    properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _fadeInThreshold;
     properties::FloatProperty _fadeOutThreshold;
 
+private:
     ghoul::opengl::ProgramObject* _shader = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     std::unique_ptr<Sphere> _sphere;
+    bool _sphereIsDirty = false;
 
     UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
         colorTexture, mirrorTexture) _uniformCache;
-
-    bool _sphereIsDirty = false;
 };
 
 } // namespace openspace

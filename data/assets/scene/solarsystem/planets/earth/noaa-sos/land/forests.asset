@@ -13,7 +13,7 @@ replanting after loss has occurred]]
 local URL = "https://sos.noaa.gov/catalog/datasets/forest-change-extent-gain-and-loss-2000-2014/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

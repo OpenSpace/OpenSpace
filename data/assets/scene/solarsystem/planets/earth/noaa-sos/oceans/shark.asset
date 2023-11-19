@@ -16,7 +16,7 @@ the coast of California also were tracked traveling great distances from Califor
 local URL = "https://sos.noaa.gov/catalog/datasets/great-white-shark-track/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -29,7 +29,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "2048",

@@ -37,6 +37,7 @@
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/path.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/renderable.h>
@@ -61,8 +62,9 @@ namespace openspace {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(LogFactoryDocumentation());
+
+    engine.addDocumentation(LightSource::Documentation());
     engine.addDocumentation(Mission::Documentation());
-    engine.addDocumentation(interaction::NavigationState::Documentation());
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());
     engine.addDocumentation(Scale::Documentation());
@@ -71,7 +73,9 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(TimeRange::Documentation());
     engine.addDocumentation(Translation::Documentation());
     engine.addDocumentation(TimeFrame::Documentation());
-    engine.addDocumentation(LightSource::Documentation());
+
+    engine.addDocumentation(interaction::NavigationState::Documentation());
+    engine.addDocumentation(interaction::Path::Documentation());
 }
 
 // NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just

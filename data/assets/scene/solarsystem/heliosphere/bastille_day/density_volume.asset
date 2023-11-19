@@ -4,7 +4,7 @@ local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local densityDirectory = asset.syncedResource({
+local densityDirectory = asset.resource({
   Name = "Bastille Day MAS Density",
   Type = "HttpSynchronization",
   Identifier = "bastille_day_mas_density",
@@ -36,7 +36,7 @@ local DensityVolume = {
     Type = "RenderableTimeVaryingVolume",
     StepSize = 0.004,
     Brightness = 0.3,
-    TransferFunction = asset.localResource("transferfunctions/mas-mhd-r-squared-old.txt"),
+    TransferFunction = asset.resource("transferfunctions/mas-mhd-r-squared-old.txt"),
     SourceDirectory = densityDirectory,
     GridType = "Spherical",
     SecondsBefore = 24 * 60 * 60,
@@ -56,11 +56,11 @@ local ToggleVolume = {
   Identifier = "os.bastilleday.densityvolume.ToggleVolume",
   Name = "Toggle volume",
   Command = [[
-    if openspace.getPropertyValue("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled") then
+    if openspace.propertyValue("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled") then
       openspace.setPropertyValueSingle(
         "Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Fade",
         0.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear",
         'openspace.setPropertyValueSingle("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled", false)'
       )
@@ -69,7 +69,7 @@ local ToggleVolume = {
       openspace.setPropertyValueSingle(
         "Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Fade",
         1.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear"
       )
     end

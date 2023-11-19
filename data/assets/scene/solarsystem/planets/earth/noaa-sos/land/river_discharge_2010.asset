@@ -12,7 +12,7 @@ cells]]
 local URL = "https://sos.noaa.gov/catalog/datasets/rivers-daily-discharge-2010/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -25,7 +25,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "4096",
   Description = Description
 }

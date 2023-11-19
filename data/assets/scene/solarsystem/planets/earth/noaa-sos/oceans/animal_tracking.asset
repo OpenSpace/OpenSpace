@@ -15,7 +15,7 @@ local Description = [["TOPP, Tagging of the Pacific Predators, began in 2000 as 
 local URL = "https://sos.noaa.gov/catalog/datasets/seal-and-seabird-tracks-pacific-ocean/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -28,7 +28,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "4096",

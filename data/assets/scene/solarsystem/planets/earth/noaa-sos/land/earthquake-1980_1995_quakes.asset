@@ -21,7 +21,7 @@ some shaking of indoor items and significant damage unlikely]]
 local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-cumulative-1980-1995/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -34,7 +34,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "1024",
   Description = Description
 }

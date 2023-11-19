@@ -14,7 +14,7 @@ animal tracking dataset. For a more extensive dataset using data from TOPP, go h
 local URL = "https://sos.noaa.gov/catalog/datasets/marine-life-tracks-pacific-ocean/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

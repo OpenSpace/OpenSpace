@@ -2,7 +2,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local labelsPath = asset.syncedResource({
+local labelsPath = asset.resource({
   Name = "Earth Labels",
   Type = "HttpSynchronization",
   Identifier = "earth_labels",
@@ -86,21 +86,21 @@ local FocusEarth = {
   ]],
   Documentation = "Set camera focus on the Earth",
   GuiPath = "/Solar System/Earth",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleSatelliteTrails = {
   Identifier = "os.solarsystem.ToggleSatelliteTrails",
   Name = "Toggle satellite trails",
   Command = [[
-    local list = openspace.getProperty("{earth_satellites}.Renderable.Enabled")
+    local list = openspace.property("{earth_satellites}.Renderable.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggle trails on or off for satellites around Earth",
   GuiPath = "/Solar System/Earth",
-  isLocal = false
+  IsLocal = false
 }
 
 

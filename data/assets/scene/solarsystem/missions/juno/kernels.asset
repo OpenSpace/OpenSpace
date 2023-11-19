@@ -1,5 +1,5 @@
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Juno Kernels",
   Type = "HttpSynchronization",
   Identifier = "juno_kernels",

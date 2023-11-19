@@ -17,7 +17,7 @@ of the satellites are currently in orbit, and the sixth satellite is scheduled t
 launched in 2008]]
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-nasa-a-train-satellites/"
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -30,7 +30,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "2048",
   Description = Description
 }

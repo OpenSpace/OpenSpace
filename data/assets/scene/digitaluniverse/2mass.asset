@@ -1,11 +1,11 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "2MASS Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_2mass_textures",
   Version = 2
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "2MASS Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_2mass_speck",

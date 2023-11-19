@@ -15,7 +15,7 @@ dataset starts in 1861 and runs through 2100]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ocean-acidification-surface-ph/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -28,7 +28,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "images",

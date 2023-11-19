@@ -92,9 +92,6 @@ public:
     void renderEndscreen();
     void postDraw();
 
-    float globalBlackOutFactor() const;
-    void setGlobalBlackOutFactor(float opacity);
-
     float hdrExposure() const;
     bool isHdrDisabled() const;
 
@@ -168,6 +165,7 @@ private:
     void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
     void renderDashboard();
+    float combinedBlackoutFactor() const;
 
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
@@ -193,6 +191,7 @@ private:
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
+    properties::BoolProperty _applyBlackoutToMaster;
 
     properties::BoolProperty _enableFXAA;
 

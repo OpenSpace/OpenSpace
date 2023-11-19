@@ -2,7 +2,7 @@ local globe = asset.require("../../enceladus")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Enceladus textures",
   Type = "HttpSynchronization",
   Identifier = "enceladus_textures",

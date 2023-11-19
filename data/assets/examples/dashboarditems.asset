@@ -1,7 +1,6 @@
 local Angle = {
   Type = "DashboardItemAngle",
   Identifier = "Angle",
-  GuiName = "Angle",
   ReferenceType = "Node",
   ReferenceNodeName = "Earth",
   DestinationType = "Node",
@@ -10,8 +9,7 @@ local Angle = {
 
 local Date = {
   Type = "DashboardItemDate",
-  Identifier = "Date",
-  GuiName = "Date"
+  Identifier = "Date"
 }
 
 local SimulationIncrement = {
@@ -22,14 +20,12 @@ local SimulationIncrement = {
 
 local Distance = {
   Type = "DashboardItemDistance",
-  Identifier = "Distance",
-  GuiName = "Distance"
+  Identifier = "Distance"
 }
 
 local Framerate = {
   Type = "DashboardItemFramerate",
-  Identifier = "Framerate",
-  GuiName = "Framerate"
+  Identifier = "Framerate"
 }
 
 local ParallelConnection = {
@@ -40,16 +36,77 @@ local ParallelConnection = {
 
 local Mission = {
   Type = "DashboardItemMission",
-  Identifier = "Mission",
-  GuiName = "Mission"
+  Identifier = "Mission"
 }
 
 local PropertyValue = {
   Type = "DashboardItemPropertyValue",
-  Identifier = "asd",
-  GuiName = "adasd",
+  Identifier = "DashbaordItemPropertyValue",
   URI = "Scene.Earth.Renderable.Enabled",
   DisplayString = "Earth is enabled: {}"
+}
+
+local PropertyValueFloat = {
+  Type = "DashboardItemPropertyValue",
+  Identifier = "DashbaordItemPropertyValue_Float",
+  URI = "Scene.Earth.Renderable.TargetLodScaleFactor",
+  DisplayString = "Earth LOD is {:.5f}"
+}
+
+local PropertyValueDouble = {
+  Type = "DashboardItemPropertyValue",
+  Identifier = "DashbaordItemPropertyValue_Double",
+  URI = "NavigationHandler.PathNavigator.ArrivalDistanceFactor",
+  DisplayString = "Arrival Distance Factor is {:.8f}"
+}
+
+local PropertyValueInt = {
+  Type = "DashboardItemPropertyValue",
+  Identifier = "DashbaordItemPropertyValue_Int",
+  URI = "LuaConsole.HistoryLength",
+  DisplayString = "History length is {}"
+}
+
+local PropertyValueUInt = {
+  Type = "DashboardItemPropertyValue",
+  Identifier = "DashboardItemPropertyValue_UInt",
+  URI = "Modules.Globebrowsing.TileCacheSize",
+  DisplayString = "Tile Cache Size is {}"
+}
+
+local PropertyValueDVec3 = {
+  Type = "DashboardItemPropertyValue",
+  Identifier = "DashboardItemPropertyValue_DVec3",
+  URI = "Scene.SolarSystemBarycenter.Transform.Transform",
+  DisplayString = "SSB Transform is: ({}, {}, {})"
+}
+
+local PropertyValueIVec2 = {
+  Type = "DashboardItemPropertyValue",
+  Identifier = "DashboardItemPropertyValue_IVec2",
+  URI = "Scene.SolarSystemBarycenter.Renderable.ScreenSpacePosition",
+  DisplayString = "Random ScreenSpace Position: ({}, {})"
+}
+
+local PropertyValueVec2 = {
+  Type = "DashboardItemPropertyValue",
+  Identifier = "DashboardItemPropertyValue_Vec2",
+  URI = "Scene.EarthAtmosphere.Renderable.AtmosphereDimmingSunsetAngle",
+  DisplayString = "Sunset Angle is ({}, {})"
+}
+
+local PropertyValueVec3 = {
+  Type = "DashboardItemPropertyValue",
+  Identifier = "DashboardItemPropertyValue_Vec3",
+  URI = "RenderEngine.GlobalRotation",
+  DisplayString = "Global Rotation is ({}, {}, {})"
+}
+
+local PropertyValueVec4 = {
+  Type = "DashboardItemPropertyValue",
+  Identifier = "DashboardItemPropertyValue_Vec4",
+  URI = "LuaConsole.BackgroundColor",
+  DisplayString = "Background Coolor is ({}, {}, {}, {})"
 }
 
 local ElapsedTime = {
@@ -73,6 +130,15 @@ asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(ParallelConnection)
   openspace.dashboard.addDashboardItem(Mission)
   openspace.dashboard.addDashboardItem(PropertyValue)
+  openspace.dashboard.addDashboardItem(PropertyValueFloat)
+  openspace.dashboard.addDashboardItem(PropertyValueDouble)
+  openspace.dashboard.addDashboardItem(PropertyValueInt)
+  openspace.dashboard.addDashboardItem(PropertyValueUInt)
+  openspace.dashboard.addDashboardItem(PropertyValueDVec3)
+  openspace.dashboard.addDashboardItem(PropertyValueIVec2)
+  openspace.dashboard.addDashboardItem(PropertyValueVec2)
+  openspace.dashboard.addDashboardItem(PropertyValueVec3)
+  openspace.dashboard.addDashboardItem(PropertyValueVec4)
   openspace.dashboard.addDashboardItem(ElapsedTime)
   openspace.dashboard.addDashboardItem(InputState)
 end)
@@ -80,6 +146,15 @@ end)
 asset.onDeinitialize(function()
   openspace.dashboard.removeDashboardItem(InputState)
   openspace.dashboard.removeDashboardItem(ElapsedTime)
+  openspace.dashboard.removeDashboardItem(PropertyValueVec4)
+  openspace.dashboard.removeDashboardItem(PropertyValueVec3)
+  openspace.dashboard.removeDashboardItem(PropertyValueVec2)
+  openspace.dashboard.removeDashboardItem(PropertyValueIVec2)
+  openspace.dashboard.removeDashboardItem(PropertyValueDVec3)
+  openspace.dashboard.removeDashboardItem(PropertyValueUInt)
+  openspace.dashboard.removeDashboardItem(PropertyValueInt)
+  openspace.dashboard.removeDashboardItem(PropertyValueDouble)
+  openspace.dashboard.removeDashboardItem(PropertyValueFloat)
   openspace.dashboard.removeDashboardItem(PropertyValue)
   openspace.dashboard.removeDashboardItem(Mission)
   openspace.dashboard.removeDashboardItem(ParallelConnection)
@@ -98,5 +173,26 @@ asset.export(Framerate)
 asset.export(ParallelConnection)
 asset.export(Mission)
 asset.export(PropertyValue)
+asset.export(PropertyValueFloat)
+asset.export(PropertyValueDouble)
+asset.export(PropertyValueInt)
+asset.export(PropertyValueUInt)
+asset.export(PropertyValueDVec3)
+asset.export(PropertyValueIVec2)
+asset.export(PropertyValueVec2)
+asset.export(PropertyValueVec3)
+asset.export(PropertyValueVec4)
 asset.export(ElapsedTime)
 asset.export(InputState)
+
+
+asset.meta = {
+  Name = "Dashboard Items Example",
+  Version = "1.0",
+  Description = [[Examples of different types of dashboard items. These are dynamic
+    information texts that will be shown over the rendering (per default in the top
+    left corner, on flat screens).]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

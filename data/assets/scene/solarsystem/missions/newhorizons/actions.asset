@@ -8,7 +8,7 @@ local FocusNewHorizons = {
   ]],
   Documentation = "Sets the focus of the camera on 'NewHorizons'",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local AimPluto = {
@@ -21,7 +21,7 @@ local AimPluto = {
   ]],
   Documentation = "Anchor at New Horizons, Aim at Pluto",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local FocusPluto = {
@@ -34,7 +34,7 @@ local FocusPluto = {
   ]],
   Documentation = "Sets the focus of the camera on 'Pluto'",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local FocusCharon = {
@@ -47,20 +47,20 @@ local FocusCharon = {
   ]],
   Documentation = "Sets the focus of the camera on 'Charon'",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleImageProjection = {
   Identifier = "os.newhorizons.ToggleImageProjection",
   Name = "Toggle NH image projection",
   Command = [[
-    local enabled = openspace.getPropertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection")
+    local enabled = openspace.propertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection")
     openspace.setPropertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection", not enabled)
     openspace.setPropertyValue("Scene.CharonProjection.Renderable.ProjectionComponent.PerformProjection", not enabled)
   ]],
   Documentation = "Toggles New Horizons image projection",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local ClearImageProjections = {
@@ -72,7 +72,7 @@ local ClearImageProjections = {
   ]],
   Documentation = "Removes all image projections from Pluto and Charon",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local Approach = {
@@ -85,7 +85,7 @@ local Approach = {
   ]],
   Documentation = "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local IncreaseHeightmapPluto = {
@@ -94,12 +94,12 @@ local IncreaseHeightmapPluto = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PlutoProjection.Renderable.HeightExaggeration",
-      openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") + 5000
+      openspace.propertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") + 5000
     )
   ]],
   Documentation = "Increases the height map exaggeration on Pluto",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local DecreaseHeightmapPluto = {
@@ -108,12 +108,12 @@ local DecreaseHeightmapPluto = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PlutoProjection.Renderable.HeightExaggeration",
-      openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") - 5000
+      openspace.propertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") - 5000
     )
   ]],
   Documentation = "Decreases the height map exaggeration on Pluto",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local IncreaseHeightmapCharon = {
@@ -122,12 +122,12 @@ local IncreaseHeightmapCharon = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.CharonProjection.Renderable.HeightExaggeration",
-      openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") + 5000
+      openspace.propertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") + 5000
     )
   ]],
   Documentation = "Increases the height map exaggeration on Charon",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local DecreaseHeightmapCharon = {
@@ -136,12 +136,12 @@ local DecreaseHeightmapCharon = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.CharonProjection.Renderable.HeightExaggeration",
-      openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") - 5000
+      openspace.propertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") - 5000
     )
   ]],
   Documentation = "Decreases the height map exaggeration on Charon",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local TogglePlutoTrail = {
@@ -150,12 +150,12 @@ local TogglePlutoTrail = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PlutoBarycentricTrail.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.PlutoBarycentricTrail.Renderable.Enabled")
+      not openspace.propertyValue("Scene.PlutoBarycentricTrail.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of the trail behind Pluto",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local TogglePlutoLabels = {
@@ -164,39 +164,39 @@ local TogglePlutoLabels = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PlutoText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.PlutoText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.PlutoText.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.CharonText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.CharonText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.CharonText.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.HydraText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.HydraText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.HydraText.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.NixText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.NixText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.NixText.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.KerberosText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.KerberosText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.KerberosText.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.StyxText.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.StyxText.Renderable.Enabled")
+      not openspace.propertyValue("Scene.StyxText.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleNewHorizonsLabels = {
   Identifier = "os.newhorizons.ToggleNewHorizonsLabels",
   Name = "Toggle New Horizons labels",
   Command = [[
-    local v = openspace.getPropertyValue("Scene.Labels.Renderable.Opacity")
+    local v = openspace.propertyValue("Scene.Labels.Renderable.Opacity")
     if v <= 0.5 then
       openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity", 1.0, 2.0)
     else
@@ -205,7 +205,7 @@ local ToggleNewHorizonsLabels = {
   ]],
   Documentation = "Toggles the visibility of the labels for the New Horizons instruments",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleShadows = {
@@ -214,16 +214,16 @@ local ToggleShadows = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PlutoShadow.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.PlutoShadow.Renderable.Enabled")
+      not openspace.propertyValue("Scene.PlutoShadow.Renderable.Enabled")
     )
     openspace.setPropertyValueSingle(
       "Scene.CharonShadow.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.CharonShadow.Renderable.Enabled")
+      not openspace.propertyValue("Scene.CharonShadow.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of the shadow visualization of Pluto and Charon",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleNewHorizonsTrail = {
@@ -232,12 +232,12 @@ local ToggleNewHorizonsTrail = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.NewHorizonsTrailPluto.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.NewHorizonsTrailPluto.Renderable.Enabled")
+      not openspace.propertyValue("Scene.NewHorizonsTrailPluto.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the trail of New Horizons",
   GuiPath = "/Missions/New Horizons",
-  isLocal = false
+  IsLocal = false
 }
 
 
