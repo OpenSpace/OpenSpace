@@ -73,6 +73,8 @@ private:
      * sent to CEF.
      *
      * \param key the pressed key
+     * \param mods the key modifier that was pressed
+     * \param action the action that was performed that triggered this event
      * \return true if event found, false otherwise
      */
     bool specialKeyEvent(Key key, KeyModifier mods, KeyAction action);

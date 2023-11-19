@@ -72,7 +72,6 @@ std::string formatJson(T value);
  *
  * \param json The json to sort
  * \param key The key the json should be sorted by
- * \return The sorted JSON
  */
 void sortJson(nlohmann::json& json, const std::string& key);
 

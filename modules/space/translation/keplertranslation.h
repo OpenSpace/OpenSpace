@@ -66,7 +66,7 @@ public:
     /**
     * Method returning the translation vector at a given time.
     *
-    * \param time The time to use when doing the position lookup
+    * \param data provides information from the engine about, for example, the time
     */
     glm::dvec3 position(const UpdateData& data) const override;
 

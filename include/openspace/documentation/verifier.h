@@ -497,7 +497,7 @@ public:
  * takes two template parameters. The first is the Verifier that one would use to only
  * check for the type of the object, for example IntVerifier. The second argument is a
  * function object that has its `operator()` function overloaded and returns a boolean
- * value. In these cases, the `std` function objects `std::less`, `std::equal_to, etc are
+ * value. In these cases, the `std` function objects `std::less`, `std::equal_to`, etc are
  * used.
  *
  * This verifier will apply the `Operator` to the stored value and the incoming value

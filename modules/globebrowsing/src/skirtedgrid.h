@@ -41,12 +41,6 @@ public:
     /**
      * \param xSegments is the number of grid cells in the x direction.
      * \param ySegments is the number of grid cells in the y direction.
-     * \param usePositions determines whether or not to upload any vertex position data
-     * to the GPU.
-     * \param useTextureCoordinates determines whether or not to upload any vertex texture
-     * coordinate data to the GPU.
-     * \param useNormals determines whether or not to upload any vertex normal data
-     * to the GPU.
      */
     SkirtedGrid(unsigned int xSegments, unsigned int ySegments);
     ~SkirtedGrid() = default;

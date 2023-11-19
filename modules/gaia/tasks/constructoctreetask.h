@@ -74,10 +74,11 @@ private:
     bool checkAllFilters(const std::vector<float>& filterValues);
 
     /**
-     * \returns true if star should be filtered away and false if all filters passed.
-     * \param range contains ]min, max[ and \param filterValue corresponding value in
+     * \p range contains ]min, max[ and \p filterValue corresponding value in
      * star. Star is filtered either if min = max = filterValue or if filterValue < min
      * (when min != 0.0) or filterValue > max (when max != 0.0).
+     *
+     * \return true if star should be filtered away and false if all filters passed.
      */
     bool filterStar(const glm::vec2& range, float filterValue, float normValue = 0.f);
 
