@@ -36,6 +36,8 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace::documentation {
 
+class Verifier;
+
 BooleanType(Optional);
 
 /**
@@ -123,8 +125,6 @@ struct SpecificationError : public ghoul::RuntimeError {
 };
 
 void logError(const SpecificationError& error, std::string component = "");
-
-struct Verifier;
 
 /**
  * A DocumentationEntry provides the specification for a single key, which is tested using

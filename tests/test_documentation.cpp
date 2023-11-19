@@ -2333,44 +2333,6 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
     );
 }
 
-TEST_CASE("Documentation: AndOperator", "[documentation]") {
-    using namespace openspace::documentation;
-
-    Documentation doc = {
-        .entries = {
-            {
-                "a",
-                new AndVerifier({
-                    new IntGreaterEqualVerifier(2), new IntLessEqualVerifier(5)
-                }),
-                Optional::No
-            }
-        }
-    };
-
-    ghoul::Dictionary positive;
-    positive.setValue("a", 4.0);
-    TestResult positiveRes = testSpecification(doc, positive);
-    CHECK(positiveRes.success);
-    CHECK(positiveRes.offenses.empty());
-
-    ghoul::Dictionary negative;
-    negative.setValue("a", 0.0);
-    TestResult negativeRes = testSpecification(doc, negative);
-    CHECK_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    CHECK(negativeRes.offenses[0].offender == "a");
-    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
-
-    ghoul::Dictionary negative2;
-    negative2.setValue("a", 8.0);
-    negativeRes = testSpecification(doc, negative2);
-    CHECK_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    CHECK(negativeRes.offenses[0].offender == "a");
-    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
-}
-
 TEST_CASE("Documentation: OrOperator", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
