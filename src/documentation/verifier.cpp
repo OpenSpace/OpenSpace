@@ -119,21 +119,6 @@ template struct AnnotationVerifier<DoubleVector3Verifier>;
 template struct AnnotationVerifier<IntVector4Verifier>;
 template struct AnnotationVerifier<DoubleVector4Verifier>;
 
-template struct DeprecatedVerifier<BoolVerifier>;
-template struct DeprecatedVerifier<IntVerifier>;
-template struct DeprecatedVerifier<DoubleVerifier>;
-template struct DeprecatedVerifier<StringVerifier>;
-template struct DeprecatedVerifier<TableVerifier>;
-//template struct DeprecatedVerifier<BoolVector2Verifier>;
-template struct DeprecatedVerifier<IntVector2Verifier>;
-template struct DeprecatedVerifier<DoubleVector2Verifier>;
-//template struct DeprecatedVerifier<BoolVector3Verifier>;
-template struct DeprecatedVerifier<IntVector3Verifier>;
-template struct DeprecatedVerifier<DoubleVector3Verifier>;
-//template struct DeprecatedVerifier<BoolVector4Verifier>;
-template struct DeprecatedVerifier<IntVector4Verifier>;
-template struct DeprecatedVerifier<DoubleVector4Verifier>;
-
 std::string BoolVerifier::type() const {
     return "Boolean";
 }
@@ -143,7 +128,7 @@ std::string DoubleVerifier::type() const {
 }
 
 TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
-                                   const std::string & key) const
+                                   const std::string& key) const
 {
     if (dict.hasValue<int>(key)) {
         // We have a key and the value is int, we are done
@@ -201,8 +186,7 @@ std::string IntVerifier::type() const {
 }
 
 StringVerifier::StringVerifier(bool mustBeNotEmpty)
-    : TemplateVerifier<std::string>()
-    , _mustBeNotEmpty(mustBeNotEmpty)
+    : _mustBeNotEmpty(mustBeNotEmpty)
 {}
 
 TestResult StringVerifier::operator()(const ghoul::Dictionary& dictionary,
@@ -612,16 +596,17 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
 {
     if (dictionary.hasValue<Type>(key)) {
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
-        TestResult res = testSpecification({documentations}, d);
+        Documentation doc = { .entries = documentations };
+        TestResult res = testSpecification(doc, d);
 
         // Add the 'key' as a prefix to make the new offender a fully qualified identifer
         for (TestResult::Offense& s : res.offenses) {
-            s.offender = key + "." + s.offender;
+            s.offender = fmt::format("{}.{}", key, s.offender);
         }
 
         // Add the 'key' as a prefix to make the new warning a fully qualified identifer
         for (TestResult::Warning& w : res.warnings) {
-            w.offender = key + "." + w.offender;
+            w.offender = fmt::format("{}.{}", key, w.offender);
         }
 
         return res;
@@ -700,22 +685,17 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
             return res;
         }
 
-        //ghoul_assert(
-        //    it != docs.end(),
-        //    "Did not find referencing identifier '" + identifier + "'"
-        //);
-
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
         TestResult r = testSpecification(*it, d);
 
         // Add the 'key' as a prefix to make the offender a fully qualified identifer
         for (TestResult::Offense& s : r.offenses) {
-            s.offender = key + "." + s.offender;
+            s.offender = fmt::format("{}.{}", key, s.offender);
         }
 
         // Add the 'key' as a prefix to make the warning a fully qualified identifer
         for (TestResult::Warning& w : r.warnings) {
-            w.offender = key + "." + w.offender;
+            w.offender = fmt::format("{}.{}", key, w.offender);
         }
 
         return r;
@@ -729,86 +709,16 @@ std::string ReferencingVerifier::documentation() const {
     return "Referencing Documentation: '" + identifier + "'";
 }
 
-AndVerifier::AndVerifier(const std::vector<Verifier*> values_) {
-    ghoul_assert(!values_.empty(), "values must not be empty");
-    for (Verifier* v : values_) {
-        this->values.push_back(std::shared_ptr<Verifier>(v));
-    }
-}
-
-TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
-                                   const std::string& key) const
-{
-    std::vector<TestResult> res(values.size());
-    std::transform(
-        values.cbegin(),
-        values.cend(),
-        res.begin(),
-        [dictionary, key](const std::shared_ptr<Verifier>& v) {
-            return v->operator()(dictionary, key);
-        }
-    );
-
-    const bool success = std::all_of(
-        res.cbegin(),
-        res.cend(),
-        std::mem_fn(&TestResult::success)
-    );
-
-    if (success) {
-        TestResult r;
-        r.success = true;
-        return r;
-    }
-    else {
-        TestResult r;
-        r.success = false;
-        TestResult::Offense o;
-        o.offender = key;
-        o.reason = TestResult::Offense::Reason::Verification;
-        r.offenses.push_back(o);
-        return r;
-    }
-}
-
-std::string AndVerifier::type() const {
-    // Dirty hack to get an "and " inserted before the last element
-    std::vector<std::string> types(values.size() - 1);
-    std::transform(
-        values.cbegin(),
-        values.cend() - 1,
-        types.begin(),
-        std::mem_fn(&Verifier::type)
-    );
-    types.push_back(std::string("and ") + values.back()->type());
-
-    return ghoul::join(types, ", ");
-}
-
-std::string AndVerifier::documentation() const {
-    // Dirty hack to get an "and " inserted before the last element
-    std::vector<std::string> documentations(values.size() - 1);
-    std::transform(
-        values.cbegin(),
-        values.cend() - 1,
-        documentations.begin(),
-        std::mem_fn(&Verifier::documentation)
-    );
-    documentations.push_back(std::string("and ") + values.back()->documentation());
-
-    return ghoul::join(documentations, ", ");
-}
-
 OrVerifier::OrVerifier(
             const std::vector<std::variant<Verifier*, std::shared_ptr<Verifier>>> values_)
 {
     ghoul_assert(!values_.empty(), "values must not be empty");
     for (const std::variant<Verifier*, std::shared_ptr<Verifier>>& v : values_) {
         if (std::holds_alternative<Verifier*>(v)) {
-            this->values.push_back(std::shared_ptr<Verifier>(std::get<Verifier*>(v)));
+            values.push_back(std::shared_ptr<Verifier>(std::get<Verifier*>(v)));
         }
         else {
-            this->values.push_back(std::get<std::shared_ptr<Verifier>>(v));
+            values.push_back(std::get<std::shared_ptr<Verifier>>(v));
         }
     }
 }
@@ -857,7 +767,7 @@ std::string OrVerifier::type() const {
         types.begin(),
         std::mem_fn(&Verifier::type)
     );
-    types.push_back(std::string("or ") + values.back()->type());
+    types.push_back(fmt::format("or {}", values.back()->type()));
 
     return ghoul::join(types, ", ");
 }
@@ -871,7 +781,7 @@ std::string OrVerifier::documentation() const {
         documentations.begin(),
         std::mem_fn(&Verifier::documentation)
     );
-    documentations.push_back(std::string("or ") + values.back()->documentation());
+    documentations.push_back(fmt::format("or {}", values.back()->documentation()));
 
     return ghoul::join(documentations, ", ");
 }
