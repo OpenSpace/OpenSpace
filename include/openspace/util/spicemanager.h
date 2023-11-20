@@ -72,19 +72,29 @@ public:
 
     /**
      * Specifies the aberration correction method for the #targetPosition function.
+     *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
      */
     struct AberrationCorrection {
     public:
-        /// The type of the aberration correction
+        /**
+         * The type of the aberration correction.
+         */
         enum class Type {
-            None = 0, ///< No correction (`NONE`)
-            LightTime, ///< One-way light time (`LT`)
-            LightTimeStellar, ///< One-way light time and stellar (`LT+S`)
-            ConvergedNewtonian, ///< Converged newtonian light time (`CN`)
-            ConvergedNewtonianStellar ///< Converged newtonian+stellar (`CN+S`)
+            /// No correction (`NONE`)
+            None = 0,
+            /// One-way light time (`LT`)
+            LightTime,
+            /// One-way light time and stellar (`LT+S`)
+            LightTimeStellar,
+            /// Converged newtonian light time (`CN`)
+            ConvergedNewtonian,
+            /// Converged newtonian+stellar (`CN+S`)
+            ConvergedNewtonianStellar
         };
-        /// The direction of the aberration correct
+        /**
+         * The direction of the aberration correct.
+         */
         enum class Direction {
             Reception = 0,
             Transmission
@@ -92,13 +102,13 @@ public:
 
         /**
          * Default constructor initializing the AberrationCorrection to Type::None with a
-         * Direction::Reception
+         * Direction::Reception.
          */
         AberrationCorrection() = default;
 
         /**
          * Constructor initializing the AberrationCorrection to the provided \p type and
-         * \p direction
+         * \p direction.
          *
          * \param t The type of the aberration correction (AberrationCorrection::Type)
          * \param d The used direction (AberrationCorrection::Direction)
@@ -108,16 +118,15 @@ public:
         /**
          * Converts one of the valid aberration correction strings into its enumeration
          * format. The valid strings are:
-         *
-         *  - `NONE`
-         *  - `LT`
-         *  - `LT+S`
-         *  - `CN`
-         *  - `CN+S`
-         *  - `XLT`
-         *  - `XLT+S`
-         *  - `XCN`
-         *  - XCN+S.
+         *   - `NONE`
+         *   - `LT`
+         *   - `LT+S`
+         *   - `CN`
+         *   - `CN+S`
+         *   - `XLT`
+         *   - `XLT+S`
+         *   - `XCN`
+         *   - XCN+S
          *
          * \param identifier The identifier that should be converted into the enumeration
          *        Type and Direction
@@ -139,7 +148,9 @@ public:
         Direction direction = Direction::Reception;
     };
 
-    /// The possible values for the method parameter of the targetInFieldOfView method
+    /**
+     * The possible values for the method parameter of the targetInFieldOfView method.
+     */
     enum class FieldOfViewMethod {
         Ellipsoid = 0,
         Point
@@ -157,7 +168,9 @@ public:
      */
     static FieldOfViewMethod fieldOfViewMethodFromString(const std::string& method);
 
-    /// The possible values for terminator type method of the terminatorEllipse method
+    /**
+     * The possible values for terminator type method of the terminatorEllipse method.
+     */
     enum class TerminatorType {
         Umbral = 0,
         Penumbral
@@ -187,12 +200,12 @@ public:
      * safely be loaded multiple times and are reference counted.
      *
      * \param filePath The path to the kernel that should be loaded. This path will be
-     *        passed to `absPath` to convert a relative path to an absolute
-     *        path before usage
+     *        passed to `absPath` to convert a relative path to an absolute path before
+     *        usage
      * \return The loaded kernel's unique identifier that can be used to unload the kernel
      *
-     * \throw SpiceException If the loading of the kernel \p filePath failed if,
-     *        for example, \p filePath is not a valid SPICE kernel
+     * \throw SpiceException If the loading of the kernel \p filePath failed if, for
+     *        example, \p filePath is not a valid SPICE kernel
      * \pre \p filePath must not be empty.
      * \pre \p filePath must be an absolute or relative path pointing to an existing file.
      * \post The kernel is loaded or has its reference counter incremented and the handle
@@ -205,11 +218,12 @@ public:
 
     /**
      * Unloads a SPICE kernel identified by the \p kernelId which was returned by the
-     * loading call to #loadKernel. The unloading is done by calling the
-     * `unload_c` function.
+     * loading call to #loadKernel. The unloading is done by calling the `unload_c`
+     * function.
      *
      * \param kernelId The unique identifier that was returned from the call to
      *        #loadKernel which loaded the kernel
+     *
      * \pre \p kernelId must be a valid handle.
      * \pre \p kernelId cannot be equal to `KernelHandle(0)`.
      * \post The kernel identified by \p kernelId is unloaded.
@@ -220,10 +234,10 @@ public:
 
     /**
      * Unloads a SPICE kernel identified by the \p filePath which was used in the
-     * loading call to #loadKernel. The unloading is done by calling the
-     * `unload_c` function.
+     * loading call to #loadKernel. The unloading is done by calling the `unload_c`
+     * function.
      *
-     * \param filePath The path of the kernel that should be unloaded.
+     * \param filePath The path of the kernel that should be unloaded
      *
      * \throw SpiceException If the \p filePath has not been previously used to
      *        successfully load a kernel.
@@ -242,19 +256,19 @@ public:
      *        with respect to the kernels that have been loaded
      * \param et The time for which the coverage should be checked
      * \return `true` if SPK kernels have been loaded to cover \p target at the
-     *         time \p et, `false` otherwise.
+     *         time \p et, `false` otherwise
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
-     * \pre \p target must not be empty.
+     * \pre \p target must not be empty
      */
     bool hasSpkCoverage(const std::string& target, double et) const;
 
     /**
-     * Returns a list of loaded SPK coverage intervals for \p target
+     * Returns a list of loaded SPK coverage intervals for \p target.
      *
      * \param target The body to be examined. The target has to name a valid SPICE object
      *        with respect to the kernels that have been loaded
-     * \return `list` of SPK kernels for \p target , `empty` list if none loaded.
+     * \return `list` of SPK kernels for \p target , `empty` list if none loaded
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
      * \pre \p target must not be empty.
@@ -269,33 +283,33 @@ public:
      *        respect to the kernels that have been loaded
      * \param et The time for which the coverage should be checked
      * \return `true` if SPK kernels have been loaded to cover \p target at the
-     *         time \p et, false otherwise.
+     *         time \p et, false otherwise
      *
      * \throw SpiceException If \p target does not name a valid SPICE object or \p frame
      *        is not a valid frame
-     * \pre \p target must not be empty.
+     * \pre \p target must not be empty
      */
     bool hasCkCoverage(const std::string& frame, double et) const;
 
     /**
-    * Returns a list of loaded CK coverage intervals for \p target
-    *
-    * \param target The body to be examined. The target has to name a valid SPICE object
-    *        with respect to the kernels that have been loaded
-    * \return `list` of CK kernels for \p target , `empty` list if none loaded.
-    *
-    * \throw SpiceException If \p target does not name a valid SPICE object
-    * \pre \p target must not be empty.
-    */
+     * Returns a list of loaded CK coverage intervals for \p target.
+     *
+     * \param target The body to be examined. The target has to name a valid SPICE object
+     *        with respect to the kernels that have been loaded
+     * \return `list` of CK kernels for \p target , `empty` list if none loaded
+     *
+     * \throw SpiceException If \p target does not name a valid SPICE object
+     * \pre \p target must not be empty.
+     */
     std::vector<std::pair<double, double>> ckCoverage(const std::string& target) const;
 
     /**
-   * Returns a list of loaded spice frames,
-   *
-   * \param builtInFrames Boolean representing if builtIn or LoadedFrames should be used
-   * \return `list` of Spice frames with ID(int) and Name(string).
-   *
-   */
+     * Returns a list of loaded spice frames.
+     *
+     * \param builtInFrames Boolean representing if builtIn or LoadedFrames should be used
+     * \return `list` of Spice frames with ID(int) and Name(string)
+     *
+     */
     std::vector<std::pair<int, std::string>> spiceBodies(bool builtInFrames) const;
 
     /**
@@ -319,9 +333,9 @@ public:
      * \param item The item to find in the \p body
      * \return `true` if the function succeeded, `false` otherwise
      *
-     * \throw SpiceException If \p body does not name a valid SPICE object.
-     * \pre \p body must not be empty.
-     * \pre \p item must not be empty.
+     * \throw SpiceException If \p body does not name a valid SPICE object
+     * \pre \p body must not be empty
+     * \pre \p item must not be empty
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
      */
@@ -331,11 +345,11 @@ public:
      * Returns the NAIF ID for a specific \p body using the `bods2c_c` function.
      *
      * \param body The body name that should be retrieved
-     * \return The ID of the `body` will be stored in this variable. The
-     *         value will only be changed if the retrieval was successful
+     * \return The ID of the `body` will be stored in this variable. The value will only
+     *         be changed if the retrieval was successful
      *
-     * \throw SpiceException If \p body does not name a valid SPICE object.
-     * \pre \p body must not be empty.
+     * \throw SpiceException If \p body does not name a valid SPICE object
+     * \pre \p body must not be empty
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bods2c_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
@@ -359,8 +373,8 @@ public:
      * \param frame The frame name that should be retrieved
      * \return The NAIF ID of the \p frame
      *
-     * \throw SpiceException If \p frame is not a valid frame.
-     * \pre \p frame must not be empty.
+     * \throw SpiceException If \p frame is not a valid frame
+     * \pre \p frame must not be empty
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/namfrm_c.html
      */
@@ -373,7 +387,7 @@ public:
      * \param frame The frame for which the presence of a valid ID should be checked
      * \return `true` if the \p frame has a NAIF ID, `false` otherwise
      *
-     * \pre \p frame must not be empty.
+     * \pre \p frame must not be empty
      */
     bool hasFrameId(const std::string& frame) const;
 
@@ -390,9 +404,9 @@ public:
      *
      * \throw SpiceException If the \p body does not name a valid body, \p value
      *        is not a valid item for the \p body or the retrieved value is not a single
-     *        value.
-     * \pre \p body must not be empty.
-     * \pre \p value must not be empty.
+     *        value
+     * \pre \p body must not be empty
+     * \pre \p value must not be empty
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
@@ -412,9 +426,9 @@ public:
      *
      * \throw SpiceException If the \p body does not name a valid body, \p value
      *        is not a valid item for the \p body or the retrieved value is not a
-     *        two-component value.
-     * \pre \p body must not be empty.
-     * \pre \p value must not be empty.
+     *        two-component value
+     * \pre \p body must not be empty
+     * \pre \p value must not be empty
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
@@ -432,11 +446,11 @@ public:
      * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
      *
-     * \throw SpiceException If the \p body does not name a valid body, \p value
-     *        is not a valid item for the \p body or the retrieved value is not a
-     *        three-component value.
-     * \pre \p body must not be empty.
-     * \pre \p value must not be empty.
+     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
+     *        valid item for the \p body or the retrieved value is not a three-component
+     *        value
+     * \pre \p body must not be empty
+     * \pre \p value must not be empty
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html

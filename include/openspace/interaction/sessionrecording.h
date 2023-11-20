@@ -141,8 +141,7 @@ public:
      * rather than the actual clock value (as in normal operation).
      *
      * \return Number of microseconds elapsed since playback started in terms of the
-     *         number of rendered frames multiplied by the fixed time increment per
-     *         frame
+     *         number of rendered frames multiplied by the fixed time increment per frame
      */
     std::chrono::steady_clock::time_point currentPlaybackInterpolationTime() const;
 
@@ -160,9 +159,9 @@ public:
     double currentApplicationInterpolationTime() const;
 
     /**
-     * Starts a recording session, which will save data to the provided filename
-     * according to the data format specified, and will continue until recording is
-     * stopped using stopRecording() method.
+     * Starts a recording session, which will save data to the provided filename according
+     * to the data format specified, and will continue until recording is stopped using
+     * stopRecording() method.
      *
      * \param filename File saved with recorded keyframes
      * \return `true` if recording to file starts without errors
@@ -170,8 +169,8 @@ public:
     bool startRecording(const std::string& filename);
 
     /**
-     * Starts a recording session, which will save data to the provided filename
-     * in ASCII data format until recording is stopped using stopRecording() method.
+     * Starts a recording session, which will save data to the provided filename in ASCII
+     * data format until recording is stopped using stopRecording() method.
      *
      * \param dataMode The format in which the session recording is stored
      */
@@ -193,15 +192,15 @@ public:
     /**
      * Starts a playback session, which can run in one of three different time modes.
      *
-     * \param filename File containing recorded keyframes to play back. The file path
-     *                 is relative to the base recordings directory specified in the
-     *                 config file by the RECORDINGS variable
+     * \param filename File containing recorded keyframes to play back. The file path is
+     *                 relative to the base recordings directory specified in the config
+     *                 file by the RECORDINGS variable
      * \param timeMode Which of the 3 time modes to use for time reference during
      * \param forceSimTimeAtStart If true simulation time is forced to that of playback
      *        playback: recorded time, application time, or simulation time. See the
      *        LuaLibrary entry for SessionRecording for details on these time modes
-     * \param loop If true then the file will playback in loop mode, continuously
-     *             looping back to the beginning until it is manually stopped
+     * \param loop If true then the file will playback in loop mode, continuously looping
+     *        back to the beginning until it is manually stopped
      * \param shouldWaitForFinishedTiles If true, the playback will wait for tiles to be
      *        finished before progressing to the next frame. This value is only used when
      *        `enableTakeScreenShotDuringPlayback` was called before. Otherwise this value
@@ -213,8 +212,8 @@ public:
         bool forceSimTimeAtStart, bool loop, bool shouldWaitForFinishedTiles);
 
     /**
-     * Used to stop a playback in progress. If open, the playback file will be closed,
-     * and all keyframes deleted from memory.
+     * Used to stop a playback in progress. If open, the playback file will be closed, and
+     * all keyframes deleted from memory.
      */
     void stopPlayback();
 
@@ -374,8 +373,8 @@ public:
      * references with the parameters of the keyframe.
      *
      * \param times Reference to a timestamps structure which contains recorded times
-     * \param kf Reference to a script keyframe which contains the size of the script
-     *        (in chars) and the text itself
+     * \param kf Reference to a script keyframe which contains the size of the script (in
+     *        chars) and the text itself
      * \param file An ifstream reference to the playback file being read
      * \param lineN Keyframe number in playback file where this keyframe resides
      * \return `true` if data read has no errors
@@ -388,8 +387,8 @@ public:
      * references with the parameters of the keyframe.
      *
      * \param times Reference to a timestamps structure which contains recorded times
-     * \param kf Reference to a script keyframe which contains the size of the script
-     *        (in chars) and the text itself
+     * \param kf Reference to a script keyframe which contains the size of the script (in
+     *        chars) and the text itself
      * \param currentParsingLine String containing the most current line that was read
      * \param lineN Line number in playback file where this keyframe resides
      * \return `true` if data read has no errors
@@ -423,113 +422,111 @@ public:
     /**
      * Writes a time keyframe to a binary format recording file using a TimeKeyframe
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param kf reference to a time keyframe which contains the time details
-     * \param kfBuffer a buffer temporarily used for preparing data to be written
-     * \param file an ofstream reference to the recording file being written-to
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param kf Reference to a time keyframe which contains the time details
+     * \param kfBuffer A buffer temporarily used for preparing data to be written
+     * \param file An ofstream reference to the recording file being written-to
      */
     void saveTimeKeyframeBinary(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, unsigned char* kfBuffer,
         std::ofstream& file);
 
     /**
-     * Writes a time keyframe to an ascii format recording file using a TimeKeyframe
+     * Writes a time keyframe to an ascii format recording file using a TimeKeyframe.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param kf reference to a time keyframe which contains the time details
-     * \param file an ofstream reference to the recording file being written-to
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param kf Reference to a time keyframe which contains the time details
+     * \param file An ofstream reference to the recording file being written-to
      */
     void saveTimeKeyframeAscii(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::ofstream& file);
 
     /**
-     * Writes a script keyframe to a binary format recording file using a ScriptMessage
+     * Writes a script keyframe to a binary format recording file using a ScriptMessage.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param sm reference to a ScriptMessage object which contains the script details
-     * \param smBuffer a buffer temporarily used for preparing data to be written
-     * \param file an ofstream reference to the recording file being written-to
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param sm Reference to a ScriptMessage object which contains the script details
+     * \param smBuffer A buffer temporarily used for preparing data to be written
+     * \param file An ofstream reference to the recording file being written-to
      */
     void saveScriptKeyframeBinary(Timestamps& times,
         datamessagestructures::ScriptMessage& sm, unsigned char* smBuffer,
         std::ofstream& file);
 
     /**
-     * Writes a script keyframe to an ascii format recording file using a ScriptMessage
+     * Writes a script keyframe to an ascii format recording file using a ScriptMessage.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param sm reference to a ScriptMessage which contains the script details
-     * \param file an ofstream reference to the recording file being written-to
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param sm Reference to a ScriptMessage which contains the script details
+     * \param file An ofstream reference to the recording file being written-to
      */
     void saveScriptKeyframeAscii(Timestamps& times,
         datamessagestructures::ScriptMessage& sm, std::ofstream& file);
 
     /**
      * Since session recordings only record changes, the initial conditions aren't
-     * preserved when a playback starts. This function is called whenever a property
-     * value is set and a recording is in progress. Before the set happens, this
-     * function will read the current value of the property and store it so that when
-     * the recording is finished, the initial state will be added as a set property
-     * command at the beginning of the recording file, to be applied when playback
-     * starts.
+     * preserved when a playback starts. This function is called whenever a property value
+     * is set and a recording is in progress. Before the set happens, this function will
+     * read the current value of the property and store it so that when the recording is
+     * finished, the initial state will be added as a set property command at the
+     * beginning of the recording file, to be applied when playback starts.
      *
      * \param prop The property being set
      */
     void savePropertyBaseline(properties::Property& prop);
 
     /**
-     * Reads header information from a session recording file
+     * Reads header information from a session recording file.
      *
-     * \param stream reference to ifstream that contains the session recording file data
-     * \param readLen_chars number of characters to be read, which may be the expected
+     * \param stream Reference to ifstream that contains the session recording file data
+     * \param readLen_chars Number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
      */
     static std::string readHeaderElement(std::ifstream& stream, size_t readLen_chars);
 
     /**
-     * Reads header information from a session recording file
+     * Reads header information from a session recording file.
      *
-     * \param stream reference to ifstream that contains the session recording file
-     *        data
-     * \param readLen_chars number of characters to be read, which may be the expected
+     * \param stream Reference to ifstream that contains the session recording file data
+     * \param readLen_chars Number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
      */
     static std::string readHeaderElement(std::stringstream& stream, size_t readLen_chars);
 
     /**
-     * Writes a header to a binary recording file buffer
+     * Writes a header to a binary recording file buffer.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param type single character signifying the keyframe type
-     * \param kfBuffer the char buffer holding the recording info to be written
-     * \param idx index into write buffer (this is updated with the num of chars written)
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param type Single character signifying the keyframe type
+     * \param kfBuffer The char buffer holding the recording info to be written
+     * \param idx Index into write buffer (this is updated with the num of chars written)
      */
     static void saveHeaderBinary(Timestamps& times, char type, unsigned char* kfBuffer,
         size_t& idx);
 
     /**
-     * Writes a header to an ascii recording file buffer
+     * Writes a header to an ASCII recording file buffer.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param type string signifying the keyframe type
-     * \param line the stringstream buffer being written to
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param type String signifying the keyframe type
+     * \param line The stringstream buffer being written to
      */
     static void saveHeaderAscii(Timestamps& times, const std::string& type,
         std::stringstream& line);
 
     /**
-     * Saves a keyframe to an ascii recording file
+     * Saves a keyframe to an ASCII recording file.
      *
-     * \param entry the ascii string version of the keyframe (any type)
-     * \param file ofstream object to write to
+     * \param entry The ASCII string version of the keyframe (any type)
+     * \param file `std::ofstream` object to write to
      */
     static void saveKeyframeToFile(std::string entry, std::ofstream& file);
 
     /**
-     * Checks if a specified recording file ends with a particular file extension
+     * Checks if a specified recording file ends with a particular file extension.
      *
-     * \param filename the name of the file to record to
-     * \param extension the file extension to check for
+     * \param filename The name of the file to record to
+     * \param extension The file extension to check for
      */
     static bool hasFileExtension(std::string filename, std::string extension);
 
@@ -538,10 +535,9 @@ public:
      * (will determine the file format conversion to convert from based on the file's
      * header version number).
      *
-     * \param filename name of the file to convert
+     * \param filename Name of the file to convert
      * \param depth iteration number to prevent runaway recursion (init call with zero)
-     *
-     * \return string containing the filename of the previous conversion step. This is
+     * \return String containing the filename of the previous conversion step. This is
      *         used if there are multiple conversion steps where each step has to use
      *         the output of the previous.
      */
@@ -551,43 +547,42 @@ public:
      * Converts file format of a session recording file to the current format version
      * (will determine the file format conversion to convert from based on the file's
      * header version number). Accepts a relative path (currently from task runner dir)
-     * rather than a path assumed to be relative to ${RECORDINGS}.
+     * rather than a path assumed to be relative to `${RECORDINGS}`.
      *
      * \param filenameRelative name of the file to convert
      */
     void convertFileRelativePath(std::string filenameRelative);
 
     /**
-     * Goes to legacy session recording inherited class, and calls its convertFile()
+     * Goes to legacy session recording inherited class, and calls its #convertFile
      * method, and then returns the resulting conversion filename.
      *
-     * \param filename name of the file to convert
-     * \param depth iteration number to prevent runaway recursion (init call with zero)
-     *
+     * \param filename Name of the file to convert
+     * \param depth Iteration number to prevent runaway recursion (init call with zero)
      * \return string containing the filename of the conversion
      */
     virtual std::string getLegacyConversionResult(std::string filename, int depth);
 
-    /*
-     * Version string for file format version currently supported by this class
+    /**
+     * Version string for file format version currently supported by this class.
      *
      * \return string of the file format version this class supports
      */
     virtual std::string fileFormatVersion();
 
-    /*
-     * Version string for file format version that a conversion operation will convert
-     * to (e.g. upgrades to this version). This is only relevant for inherited classes
-     * that support conversion from legacy versions (if called in the base class, it
-     * will return its own current version).
+    /**
+     * Version string for file format version that a conversion operation will convert to
+     * (e.g. upgrades to this version). This is only relevant for inherited classes that
+     * support conversion from legacy versions (if called in the base class, it will
+     * return its own current version).
      *
      * \return string of the file format version this class supports
      */
     virtual std::string targetFileFormatVersion();
 
-    /*
-     * Determines a filename for the conversion result based on the original filename
-     * and the file format version number.
+    /**
+     * Determines a filename for the conversion result based on the original filename and
+     the file format version number.
      *
      * \param filename source filename to be converted
      *
@@ -769,6 +764,7 @@ protected:
         "NavigationHandler.OrbitalNavigator.RetargetAnchor",
         "NavigationHandler.OrbitalNavigator.RetargetAim"
     };
+
     //A script that begins with an exact match of any of the strings contained in
     // _scriptRejects will not be recorded
     const std::vector<std::string> _scriptRejects = {
@@ -784,12 +780,14 @@ protected:
         "Anchor",
         "Aim"
     };
+
     //Any script snippet included in this vector will be trimmed from any script
     // from the script manager, before it is recorded in the session recording file.
     // The remainder of the script will be retained.
     const std::vector<std::string> _scriptsToBeTrimmed = {
         "openspace.sessionRecording.togglePlaybackPause"
     };
+
     //Any script snippet included in this vector will be trimmed from any script
     // from the script manager, before it is recorded in the session recording file.
     // The remainder of the script will be retained.
