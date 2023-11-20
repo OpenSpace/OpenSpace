@@ -77,6 +77,7 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
 
     json["name"] = d.name;
     json["id"] = d.id;
+    json["description"] = d.description;
     json["properties"] = nlohmann::json::array();
 
     for (const DocumentationEntry& p : d.entries) {
@@ -110,7 +111,8 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
             }
         }
         else if (tv) {
-            nlohmann::json restrictions = generateJsonDocumentation(tv->documentations);
+            Documentation doc = { .entries = tv->documentations };
+            nlohmann::json restrictions = generateJsonDocumentation(doc);
             // We have a TableVerifier, so we need to recurse
             entry["restrictions"] = restrictions;
         }

@@ -61,10 +61,14 @@ private:
     void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
 
     /**
-     * Writes \param data to octant [\param index] file.
+     * Writes data to an octant file.
+     *
+     * \param data the data that should be be written to file
+     * \param index the index of the octant that should be written
      * \param isFirstWrite defines if this is the first write to specified octant, if so
-     * the file is created, otherwise the accumulated data is appended to the end of the
-     * file.
+     *        the file is created, otherwise the accumulated data is appended to the end
+     *        of the file
+     * \param nValuesPerStar the number of values that should be stored per star
      */
     int writeOctantToFile(const std::vector<float>& data, int index,
         std::vector<bool>& isFirstWrite, int nValuesPerStar);

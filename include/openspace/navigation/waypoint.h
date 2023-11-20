@@ -81,8 +81,8 @@ struct NodeCameraStateSpec {
  *             above the bounding sphere may also be given.
  * \param startPoint an optional previous waypoint. If not specified, the current camera
  *                   position will be used.
- * \param userLinear if true, the new waypoint will be computed along a straight line
- *                   from the start waypoint to the scene graph node or position.
+ * \param useLinear if true, the new waypoint will be computed along a straight line
+ *                  from the start waypoint to the scene graph node or position.
  * \return the computed WayPoint
  */
 Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,

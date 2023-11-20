@@ -57,7 +57,7 @@ struct ProviderTileHasher {
      * Creates a hash which can be used as key in hash maps.
      * First set the bits to be unique for all tiles.
      * +-------+------------+-------+------------+
-     * | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
+     * | USAGE | BIT RANGE  |  BITS | MAX VALUE  |
      * +-------+------------+-------+------------+
      * | level |   0 -  5   |   5   |         31 |
      * |     x |   5 - 35   |  30   | 1073741824 |

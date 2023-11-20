@@ -158,7 +158,8 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
             case properties::Property::Visibility::Developer:
                 json["visibility"] = "Developer";
                 break;
-
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
     if (settings.bypassLauncher.has_value()) {
