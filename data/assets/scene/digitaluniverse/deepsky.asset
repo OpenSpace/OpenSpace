@@ -26,6 +26,9 @@ local DeepSkyObjects = {
       Unit = "pc"
     },
     Opacity = 0.99,
+    Coloring = {
+      FixedColor = { 1.0, 1.0, 0.0 }
+    },
     File = speck .. "dso.speck",
     Texture = textures .. "point3.png",
     Unit = "pc",
