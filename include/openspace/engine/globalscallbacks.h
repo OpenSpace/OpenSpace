@@ -66,11 +66,10 @@ inline std::vector<std::function<void(TouchInput)>>* touchExit;
 /**
  * If the framerate becomes slow, Chromium Embedded Framework (used in Web Browser Module)
  * needs to perform its message loop work more frequently than once per frame. If this
- * method is not called frequently enough, the GUI will become much less responsive.
- * A future more long-term may decouple the browser's message work loop from the main
- * render loop altogehter using a separate thread.
- * Currently, this method is called from within the RenderEngine,
- * between calls to individual renderables.
+ * method is not called frequently enough, the GUI will become much less responsive. A
+ * future more long-term may decouple the browser's message work loop from the main render
+ * loop altogehter using a separate thread. Currently, this method is called from within
+ * the RenderEngine, between calls to individual renderables.
  */
 extern void (*webBrowserPerformanceHotfix)();
 

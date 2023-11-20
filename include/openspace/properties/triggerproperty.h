@@ -36,11 +36,11 @@ namespace openspace::properties {
 class TriggerProperty : public Property {
 public:
     /**
-     * Initializes the TriggerProperty by delegating the `identifier` and
-     * `guiName` to the Property constructor.
+     * Initializes the TriggerProperty by delegating the `identifier` and `guiName` to the
+     * Property constructor.
      *
      * \param info The PropertyInfo structure that contains all the required static
-     *        information for initializing this Property.
+     *        information for initializing this Property
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
@@ -54,8 +54,8 @@ public:
     std::string_view className() const override;
 
     /**
-     * Accepts only the `LUA_TNIL` type and will notify all the listeners
-     * that the event has been triggered.
+     * Accepts only the `LUA_TNIL` type and will notify all the listeners that the event
+     * has been triggered.
      *
      * \param state The unused Lua state
      */

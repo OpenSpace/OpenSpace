@@ -60,21 +60,20 @@ std::vector<Geodetic2> geodetic2FromVertexList(const RenderableGlobe& globe,
 std::vector<float> heightMapHeightsFromGeodetic2List(const RenderableGlobe& globe,
     const std::vector<Geodetic2>& list);
 
-
 /**
- * Create triangle geometry for the extruded edge, given the provided edge vertices
+ * Create triangle geometry for the extruded edge, given the provided edge vertices.
  */
 std::vector<rendering::helper::VertexXYZNormal> createExtrudedGeometryVertices(
     const std::vector<std::vector<glm::vec3>>& edgeVertices);
 
 /**
- * Get height contribution from reference surface of the globe, based on the height map
+ * Get height contribution from reference surface of the globe, based on the height map.
  */
 double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& globe);
 
 /**
  * Compute model space cordinate from geodetic coordinate, and account for lat, long
- * offsets
+ * offsets.
  */
 glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
     const RenderableGlobe& globe, float latOffset, float lonOffset);
@@ -86,11 +85,11 @@ struct PosHeightPair {
 };
 
 /**
- * Subdivide line between position v0 and v1 so that it fullfils the maxDistance
- * criteria. Interpolate the height value from * h0 to h1, as well as add the
- * given offset and account for the height map if that should be done.
+ * Subdivide line between position v0 and v1 so that it fullfils the maxDistance criteria.
+ * Interpolate the height value from * h0 to h1, as well as add the given offset and
+ * account for the height map if that should be done.
  *
- * Returns pairs of position and height values
+ * \return Pairs of position and height values
  */
 std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
     double h0, double h1, double maxDistance);
@@ -98,7 +97,7 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
 /**
  * Subdivide triangle consisting of vertex positions v0, v1 and v2, with height values
  * h0, h1 and h2 into smaller triangles. maxDistance specifies tha maximum distance
- * between two vertices in the subdivided mesh
+ * between two vertices in the subdivided mesh.
  */
 std::vector<rendering::helper::VertexXYZNormal> subdivideTriangle(
     const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,

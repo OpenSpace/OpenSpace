@@ -70,49 +70,48 @@ public:
     /**
      * Initializes a stack. Can be used to trigger a rebuild of buffer(s).
      *
-     * \param maxNodes the maximum number of nodes in the buffer
-     * \param useVBO defines if VBO or SSBO is used as buffer(s)
-     * \param datasetFitInMemory defines if streaming of nodes during runtime is used
+     * \param maxNodes The maximum number of nodes in the buffer
+     * \param useVBO Defines if VBO or SSBO is used as buffer(s)
+     * \param datasetFitInMemory Defines if streaming of nodes during runtime is used
      */
     void initBufferIndexStack(long long maxNodes, bool useVBO, bool datasetFitInMemory);
 
     /**
      * Inserts star values in correct position in Octree. Makes use of a recursive
-     * traversal strategy. Internally calls `insertInNode()`
+     * traversal strategy. Internally calls #insertInNode.
      */
     void insert(const std::vector<float>& starValues);
 
     /**
      * Slices LOD data so only the MAX_STARS_PER_NODE brightest stars are stored in inner
-     * nodes. If \p branchIndex is defined then only that branch will be sliced.
-     * Calls `sliceNodeLodCache()` internally.
+     * nodes. If \p branchIndex is defined then only that branch will be sliced. Calls
+     * #sliceNodeLodCache internally.
      */
     void sliceLodData(size_t branchIndex = 8);
 
     /**
      * Prints the whole tree structure, including number of stars per node, number of
-     * nodes, tree depth and if node is a leaf.
-     * Calls `printStarsPerNode(node, prefix)` internally.
+     * nodes, tree depth and if node is a leaf. Calls #printStarsPerNode(node, prefix)
+     * internally.
      */
     void printStarsPerNode() const;
 
     /**
      * Used while streaming nodes from files. Checks if any nodes need to be loaded or
      * unloaded. If entire dataset fits in RAM then the whole dataset will be loaded
-     * asynchronously. Otherwise only nodes close to the camera will be fetched.
-     * When RAM stars to fill up least-recently used nodes will start to unload.
-     * Calls `findAndFetchNeighborNode()` and `removeNodesFromRam()` internally.
+     * asynchronously. Otherwise only nodes close to the camera will be fetched. When RAM
+     * stars to fill up least-recently used nodes will start to unload. Calls
+     * #findAndFetchNeighborNode and #removeNodesFromRam internally.
      */
     void fetchSurroundingNodes(const glm::dvec3& cameraPos, size_t chunkSizeInBytes,
         const glm::ivec2& additionalNodes);
 
     /**
      * Builds render data structure by traversing the Octree and checking for intersection
-     * with view frustum. Every vector in map contains data for one node.
-     * The corresponding integer key is the index where chunk should be inserted into
-     * streaming buffer. Calls #checkNodeIntersection for every branch.
-     * \p deltaStars keeps track of how many stars that were added/removed this render
-     * call.
+     * with view frustum. Every vector in map contains data for one node. The
+     * corresponding integer key is the index where chunk should be inserted into
+     * streaming buffer. Calls #checkNodeIntersection for every branch. \p deltaStars
+     * keeps track of how many stars that were added/removed this render call.
      */
     std::map<int, std::vector<float>> traverseData(const glm::dmat4& mvp,
         const glm::vec2& screenSize, int& deltaStars, gaia::RenderMode mode,
@@ -125,7 +124,8 @@ public:
 
     /**
      * Removes all data from Octree, or only from a specific branch if specified.
-     * \param branchIndex defined which branch to clear if defined.
+     *
+     * \param branchIndex Defined which branch to clear if defined
      */
     void clearAllData(int branchIndex = -1);
 
@@ -202,7 +202,7 @@ private:
     const std::string BINARY_SUFFIX = ".bin";
 
     /**
-     * \returns the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
+     * \return the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
      */
     size_t getChildIndex(float posX, float posY, float posZ, float origX = 0.f,
         float origY = 0.f, float origZ = 0.f);
@@ -298,7 +298,7 @@ private:
      * \param node the node that should be inserted
      * \param mode the render mode that should be used
      * \param deltaStars keeps track of how many stars that were added.
-     * \returns the data to be inserted
+     * \return the data to be inserted
      */
     std::vector<float> constructInsertData(const OctreeNode& node,
         gaia::RenderMode mode, int& deltaStars);

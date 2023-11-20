@@ -107,8 +107,8 @@ private:
     class TextureContainer {
     public:
         /**
-         * \param initData is the description of the texture type.
-         * \param numTextures is the number of textures to allocate.
+         * \param initData is the description of the texture type
+         * \param numTextures is the number of textures to allocate
          */
         TextureContainer(TileTextureInitData initData, size_t numTextures);
 

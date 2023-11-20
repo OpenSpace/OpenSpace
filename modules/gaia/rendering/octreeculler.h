@@ -35,28 +35,27 @@ namespace openspace {
 /**
  * Culls all octree nodes that are completely outside the view frustum.
  *
- * The frustum culling uses a 2D axis aligned bounding box for the OctreeNode in
- * screen space.
+ * The frustum culling uses a 2D axis aligned bounding box for the OctreeNode in screen
+ * space.
  */
-
 class OctreeCuller {
 public:
 
     /**
-     * \param viewFrustum is the view space in normalized device coordinates space.
-     *                    Hence it is an axis aligned bounding box and not a real frustum.
+     * \param viewFrustum This is the view space in normalized device coordinates space.
+     *        Hence it is an axis aligned bounding box and not a real frustum
      */
     OctreeCuller(globebrowsing::AABB3 viewFrustum);
 
     ~OctreeCuller() = default;
 
     /**
-     * \return true if any part of the node is visible in the current view.
+     * \return `true` if any part of the node is visible in the current view
      */
     bool isVisible(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
 
     /**
-     * \return the size [in pixels] of the node in clipping space.
+     * \return The size [in pixels] of the node in clipping space
      */
     glm::vec2 getNodeSizeInPixels(const std::vector<glm::dvec4>& corners,
         const glm::dmat4& mvp, const glm::vec2& screenSize);

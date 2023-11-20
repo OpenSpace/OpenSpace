@@ -947,6 +947,7 @@ INPUT = src \
         include \
         modules \
         apps \
+        ext/ghoul \
         support/doxygen/README.md
 
 # This tag can be used to specify the character encoding of the source files
@@ -987,9 +988,7 @@ INPUT_FILE_ENCODING =
 # provided as doxygen C comment), *.py, *.pyw, *.f90, *.f95, *.f03, *.f08,
 # *.f18, *.f, *.for, *.vhd, *.vhdl, *.ucf, *.qsf and *.ice.
 
-FILE_PATTERNS = *.cpp \
-                *.h \
-                *.inl
+FILE_PATTERNS = *.cpp *.h *.inl
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -1020,16 +1019,16 @@ EXCLUDE_SYMLINKS = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS = ext/* \
-                   bin/* \
-                   build/* \
-                   config/* \
-                   gui/* \
-                   kernels/* \
-                   data/* \
-                   scripts/* \
-                   shaders/* \
-                   **/ext/**
+EXCLUDE_PATTERNS = */ext/curl \
+                   */ext/date \
+                   */ext/json \
+                   */ext/spice \
+                   */ext/vld \
+                   */ext/tinythread \
+                   */ext/ghoul/ext/* \
+                   */modules/*/ext/* \
+                   */apps/OpenSpace-MinVR/ext/* \
+                   */apps/OpenSpace/ext/sgct/ext/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the

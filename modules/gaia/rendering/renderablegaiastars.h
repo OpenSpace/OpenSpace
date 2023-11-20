@@ -69,35 +69,35 @@ private:
     /**
      * Reads data file in format defined by FileReaderOption.
      *
-     * \return true if data was successfully read.
+     * \return `true` if data was successfully read
      */
     bool readDataFile();
 
     /**
      * Reads a FITS file by using FitsFileReader.readFitsFile() and constructs an octree.
      *
-     * \return the number of stars read.
+     * \return The number of stars read
      */
     int readFitsFile(const std::filesystem::path& filePath);
 
     /**
      * Read a SPECK file by using FitsFileReader.readSpeckFile() and constructs an octree.
      *
-     * \return the number of stars read.
+     * \return The number of stars read
      */
     int readSpeckFile(const std::filesystem::path& filePath);
 
     /**
      * Reads a preprocessed binary file and constructs an octree.
      *
-     * \return the number of stars read.
+     * \return The number of stars read
      */
     int readBinaryRawFile(const std::filesystem::path& filePath);
 
     /**
      * Reads a pre-constructed octree, with all data, from a binary file.
      *
-     * \return the number of stars read.
+     * \return The number of stars read
      */
     int readBinaryOctreeFile(const std::filesystem::path& filePath);
 
@@ -105,7 +105,7 @@ private:
      * Reads the structure of a pre-constructed octree from a binary file, without any
      * data.
      *
-     * \return the number of stars read.
+     * \return The number of stars read
      */
     int readBinaryOctreeStructureFile(const std::filesystem::path& folderPath);
 

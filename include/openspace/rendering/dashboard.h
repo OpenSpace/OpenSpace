@@ -54,9 +54,9 @@ public:
     glm::vec2 getStartPositionOffset();
 
     /**
-    * Returns the Lua library that contains all Lua functions available to affect the
-    * rendering.
-    */
+     * Returns the Lua library that contains all Lua functions available to affect the
+     * rendering.
+     */
     static scripting::LuaLibrary luaLibrary();
 
 private:

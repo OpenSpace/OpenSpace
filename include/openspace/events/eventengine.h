@@ -48,7 +48,7 @@ public:
      * This function returns the first event stored in the EventEngine, or `nullptr` if
      * no event exists. To navigate the full list of events, you can access the returned
      * Event's next function. If the end of the list is reached, the next pointer will be
-     * a nullptr
+     * a `nullptr`.
      *
      * \return The first event stored in the EventEngine or nullptr if no event exists
      */
@@ -57,11 +57,11 @@ public:
     /**
      * Publish a new event of type T by providing optional arguments Args to the Event's
      * constructor. An example of usage is
-     * `engine.publishEvent<MyEvent>("a", 2.0);` which would call the
-     * constructor of `MyEvent` with a `const char*` and `double` parameter.
+     * `engine.publishEvent<MyEvent>("a", 2.0);` which would call the constructor of
+     * `MyEvent` with a `const char*` and `double` parameter.
      *
-     * \param args The arguments that are passed to the constructor of T
      * \tparam T The subclass of Event that is to be published
+     * \param args The arguments that are passed to the constructor of T
      */
     template <typename T, typename... Args>
     void publishEvent(Args&&... args);
@@ -101,7 +101,7 @@ public:
     /**
      * Removing registration for a specific event identified by the \p identifier.
      *
-     * \param identifier The unique identifier of the event that should be removed.
+     * \param identifier The unique identifier of the event that should be removed
      */
     void unregisterEventAction(uint32_t identifier);
 
@@ -130,7 +130,7 @@ public:
 
     /**
      * Triggers all actions that are registered for events that are in the current event
-     * queue
+     * queue.
      */
     void triggerActions() const;
 
@@ -144,10 +144,9 @@ private:
     /// The last event in the chain of events stored in the memory pool
     events::Event* _lastEvent = nullptr;
 
-
-    // The type is duplicated in the ActionInfo as well, but we want it in the ActionInfo
-    // to be able to return them to a caller and we want it in this unordered_map to make
-    // the lookup really fast. So having this extra wasted memory is probably worth it
+    /// The type is duplicated in the ActionInfo as well, but we want it in the ActionInfo
+    /// to be able to return them to a caller and we want it in this unordered_map to make
+    /// the lookup really fast. So having this extra wasted memory is probably worth it
     std::unordered_map<events::Event::Type, std::vector<ActionInfo>> _eventActions;
 
     static uint32_t nextRegisteredEventId;

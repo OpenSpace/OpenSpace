@@ -30,9 +30,7 @@ namespace openspace {
 class SyncBuffer;
 
 /**
- * Interface for synchronizable data
- *
- * Used by `SyncEngine`
+ * Interface for synchronizable data. Used by #SyncEngine.
  */
 class Syncable {
 public:

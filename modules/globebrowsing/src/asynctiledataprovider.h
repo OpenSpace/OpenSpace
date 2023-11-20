@@ -45,8 +45,8 @@ class AsyncTileDataProvider {
 public:
     /**
      * \param name is the name for this provider
-     * \param rawTileDataReader is the reader that will be used for the asynchronous
-     *        tile loading
+     * \param rawTileDataReader is the reader that will be used for the asynchronous tile
+     *        loading
      */
     AsyncTileDataProvider(std::string name,
         std::unique_ptr<RawTileDataReader> rawTileDataReader);
@@ -81,7 +81,7 @@ protected:
     };
 
     /**
-     * \returns true if tile of index `tileIndex` is not already enqueued.
+     * \return `true` if tile of index \p tileIndex is not already enqueued
      */
     bool satisfiesEnqueueCriteria(const TileIndex& tileIndex);
 

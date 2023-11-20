@@ -326,7 +326,6 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderable.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/texturecomponent.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/transferfunction.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/volume.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/volumeraycaster.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/asset.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/assetmanager.h
