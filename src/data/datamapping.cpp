@@ -22,22 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SPECKLOADER___H__
-#define __OPENSPACE_CORE___SPECKLOADER___H__
+#include <openspace/data/datamapping.h>
 
-#include <openspace/data/dataloader.h>
-#include <filesystem>
-#include <optional>
+#include <ghoul/misc/misc.h>
+#include <string_view>
 
-namespace openspace::dataloader::speck {
+namespace {
+    constexpr std::string_view DefaultX = "x";
+    constexpr std::string_view DefaultY = "y";
+    constexpr std::string_view DefaultZ = "z";
 
-Dataset loadSpeckFile(std::filesystem::path path,
-    std::optional<DataMapping> specs = std::nullopt);
+    enum class PositionColumn {
+        X,
+        Y,
+        Z
+    };
 
-Labelset loadLabelFile(std::filesystem::path path);
+    bool checkColumnInternal(PositionColumn columnCase, const std::string& c,
+                         const std::optional<openspace::dataloader::DataMapping>& mapping,
+                             const std::string_view defaultValue)
+    {
+        std::string testColumn = c;
+        std::string column = std::string(defaultValue);
+        if (mapping.has_value()) {
+            switch (columnCase) {
+                case PositionColumn::X:
+                    column = (*mapping).xColumnName.value_or(column);
+                    break;
+                case PositionColumn::Y:
+                    column = (*mapping).yColumnName.value_or(column);
+                    break;
+                case PositionColumn::Z:
+                    column = (*mapping).zColumnName.value_or(column);
+                    break;
+            }
+        }
 
-ColorMap loadCmapFile(std::filesystem::path path);
+        // Per default, allow both lower case and upper case versions of column names
+        if (!mapping.has_value() || !(*mapping).isCaseSensitive) {
+            ghoul::toLowerCase(column);
+            ghoul::toLowerCase(testColumn);
+        }
 
-} // namespace openspace::dataloader::speck
+        return testColumn == column;
+    }
+}
 
-#endif // __OPENSPACE_CORE___SPECKLOADER___H__
+namespace openspace::dataloader {
+
+bool isColumnX(const std::string& c, const std::optional<DataMapping>& mapping) {
+    return checkColumnInternal(PositionColumn::X, c, mapping, DefaultX);
+}
+
+bool isColumnY(const std::string& c, const std::optional<DataMapping>& mapping) {
+    return checkColumnInternal(PositionColumn::Y, c, mapping, DefaultY);
+}
+
+bool isColumnZ(const std::string& c, const std::optional<DataMapping>& mapping) {
+    return checkColumnInternal(PositionColumn::Z, c, mapping, DefaultZ);
+}
+
+
+} // namespace openspace::dataloader

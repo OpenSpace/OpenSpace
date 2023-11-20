@@ -487,7 +487,7 @@ void RenderablePointCloud::initialize() {
     ZoneScoped;
 
     if (_hasSpeckFile) {
-        dataloader::DataLoadSpecs specs = {
+        dataloader::DataMapping specs = {
             .missingDataValue = _missingDataValue
         };
         _dataset = dataloader::data::loadFileWithCache(_speckFile, specs);

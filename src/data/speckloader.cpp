@@ -70,7 +70,7 @@ namespace {
 
 namespace openspace::dataloader::speck {
 
-Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataLoadSpecs> specs) {
+Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
@@ -265,6 +265,8 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataLoadSpecs> s
 
         bool allZero = true;
 
+        // For SPECK we know that the first 3 values are the position, so no need to
+        // check agains data mapping
         std::stringstream str(line);
         Dataset::Entry entry;
         str >> entry.position.x >> entry.position.y >> entry.position.z;

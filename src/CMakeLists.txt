@@ -27,7 +27,9 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake
 set(OPENSPACE_SOURCE
   openspace.cpp
   camera/camera.cpp
+  data/csvloader.cpp
   data/dataloader.cpp
+  data/datamapping.cpp
   data/speckloader.cpp
   documentation/core_registration.cpp
   documentation/documentation.cpp
@@ -213,7 +215,9 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/json.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camera.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camerapose.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/data/csvloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/dataloader.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/data/datamapping.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/speckloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/core_registration.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentation.h

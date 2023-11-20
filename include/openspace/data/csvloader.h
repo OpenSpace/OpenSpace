@@ -22,22 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SPECKLOADER___H__
-#define __OPENSPACE_CORE___SPECKLOADER___H__
+#ifndef __OPENSPACE_CORE___CSVLOADER___H__
+#define __OPENSPACE_CORE___CSVLOADER___H__
 
 #include <openspace/data/dataloader.h>
 #include <filesystem>
 #include <optional>
 
-namespace openspace::dataloader::speck {
+namespace openspace::dataloader::csv {
 
-Dataset loadSpeckFile(std::filesystem::path path,
+Dataset loadCsvFile(std::filesystem::path path,
     std::optional<DataMapping> specs = std::nullopt);
 
-Labelset loadLabelFile(std::filesystem::path path);
+} // namespace openspace::dataloader
 
-ColorMap loadCmapFile(std::filesystem::path path);
-
-} // namespace openspace::dataloader::speck
-
-#endif // __OPENSPACE_CORE___SPECKLOADER___H__
+#endif // __OPENSPACE_CORE___CSVLOADER___H__

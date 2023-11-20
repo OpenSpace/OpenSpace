@@ -22,22 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SPECKLOADER___H__
-#define __OPENSPACE_CORE___SPECKLOADER___H__
+#ifndef __OPENSPACE_CORE___DATAMAPPING___H__
+#define __OPENSPACE_CORE___DATAMAPPING___H__
 
-#include <openspace/data/dataloader.h>
-#include <filesystem>
 #include <optional>
+#include <string>
 
-namespace openspace::dataloader::speck {
+namespace openspace::dataloader {
 
-Dataset loadSpeckFile(std::filesystem::path path,
-    std::optional<DataMapping> specs = std::nullopt);
+// @TODO: Make sure the cached file is updated when these values changes.
+// E.g. by making a has out of all the values and add that to the filename
+// when caching.
+// @TODO: Also make sure to update cache data versions!
+struct DataMapping {
+    std::optional<std::string> xColumnName;
+    std::optional<std::string> yColumnName;
+    std::optional<std::string> zColumnName;
 
-Labelset loadLabelFile(std::filesystem::path path);
+    std::optional<float> missingDataValue;
 
-ColorMap loadCmapFile(std::filesystem::path path);
+    // TODO: RA DEC DISTANCE
+    // TODO: point index column
 
-} // namespace openspace::dataloader::speck
+    bool isCaseSensitive = false;
+};
 
-#endif // __OPENSPACE_CORE___SPECKLOADER___H__
+bool isColumnX(const std::string& c, const std::optional<DataMapping>& mapping);
+
+bool isColumnY(const std::string& c, const std::optional<DataMapping>& mapping);
+
+bool isColumnZ(const std::string& c, const std::optional<DataMapping>& mapping);
+
+} // namespace openspace::dataloader
+
+#endif // __OPENSPACE_CORE___DATAMAPPING___H__

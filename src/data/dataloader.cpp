@@ -24,6 +24,7 @@
 
 #include <openspace/data/dataloader.h>
 
+#include <openspace/data/csvloader.h>
 #include <openspace/data/speckloader.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -42,6 +43,10 @@ namespace {
     constexpr int8_t LabelCacheFileVersion = 11;
     constexpr int8_t ColorCacheFileVersion = 11;
 
+    constexpr std::string_view DefaultXColumn = "x";
+    constexpr std::string_view DefaultYColumn = "y";
+    constexpr std::string_view DefaultZColumn = "z";
+
     template <typename T, typename U>
     void checkSize(U value, std::string_view message) {
         if (value > std::numeric_limits<U>::max()) {
@@ -57,12 +62,12 @@ namespace {
 
     template <typename T>
     using LoadDataFunc = std::function<T(
-        std::filesystem::path, std::optional<openspace::dataloader::DataLoadSpecs> specs
+        std::filesystem::path, std::optional<openspace::dataloader::DataMapping> specs
     )>;
 
     template <typename T>
     T internalLoadFileWithCache(std::filesystem::path filePath,
-                                std::optional<openspace::dataloader::DataLoadSpecs> specs,
+                                std::optional<openspace::dataloader::DataMapping> specs,
                                 LoadDataFunc<T> loadFunction,
                                 LoadCacheFunc<T> loadCacheFunction,
                                 SaveCacheFunc<T> saveCacheFunction)
@@ -105,7 +110,7 @@ namespace openspace::dataloader {
 
 namespace data {
 
-Dataset loadFile(std::filesystem::path path, std::optional<DataLoadSpecs> specs) {
+Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
@@ -120,7 +125,7 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataLoadSpecs> specs)
 
     Dataset res;
     if (extension == ".csv") {
-        res = loadCsvFile(path.string(), specs);
+        res = csv::loadCsvFile(path.string(), specs);
     }
     else if (extension == ".speck") {
         res = speck::loadSpeckFile(path.string(), specs);
@@ -310,7 +315,7 @@ void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
     }
 }
 
-Dataset loadFileWithCache(std::filesystem::path filePath, std::optional<DataLoadSpecs> specs)
+Dataset loadFileWithCache(std::filesystem::path filePath, std::optional<DataMapping> specs)
 {
     return internalLoadFileWithCache<Dataset>(
         filePath,
@@ -321,122 +326,11 @@ Dataset loadFileWithCache(std::filesystem::path filePath, std::optional<DataLoad
     );
 }
 
-Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataLoadSpecs> specs) {
-    ghoul_assert(std::filesystem::exists(filePath), "File must exist");
-
-    // @TODO: This is the same that is used by the exoplanetdataprep task. Maybe more to a
-    // datahelper file?
-    auto readFloatData = [](const std::string& str) -> float {
-#ifdef WIN32
-        float result;
-        auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
-        if (ec == std::errc()) {
-            return result;
-        }
-        return std::numeric_limits<float>::quiet_NaN();
-#else
-        // clang is missing float support for std::from_chars
-        return !str.empty() ? std::stof(str.c_str(), nullptr) : NAN;
-#endif
-    };
-
-    std::vector<std::vector<std::string>> rows = ghoul::loadCSVFile(
-        filePath.string(),
-        true
-    );
-
-    if (rows.size() < 2) {
-        LWARNINGC("DataLoader: CSV", fmt::format(
-            "Error loading data file {}. No data items read", filePath
-        ));
-        return Dataset();
-    }
-
-    Dataset res;
-    res.entries.reserve(rows.size() - 1);
-
-    // First row is the column names
-    const std::vector<std::string>& columns = rows.front();
-
-    int xColumn = -1;
-    int yColumn = -1;
-    int zColumn = -1;
-
-    int nDataColumns = 0;
-    for (size_t i = 0; i < columns.size(); ++i) {
-        const std::string& col = columns[i];
-
-        std::string c = col;
-        for (size_t i = 0; i < c.size(); i++) {
-            c[i] = static_cast<char>(tolower(c[i]));
-        }
-
-        // TODO: Avoud hardcoded column names
-        if (c == "x") {
-            xColumn = static_cast<int>(i);
-        }
-        else if (c == "y") {
-            yColumn = static_cast<int>(i);
-        }
-        else if (c == "z") {
-            zColumn = static_cast<int>(i);
-        }
-        else {
-            res.variables.push_back({
-                .index = nDataColumns,
-                .name = col
-            });
-            nDataColumns++;
-        }
-    }
-
-    if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
-        // One or more position columns weren't read
-        LERRORC("DataLoader: CSV", fmt::format(
-            "Error loading data file {}. Missing X, Y or Z position column", filePath
-        ));
-    }
-
-    // Skip first row (column names)
-    for (size_t rowIdx = 1; rowIdx < rows.size(); ++rowIdx) {
-        const std::vector<std::string>& row = rows[rowIdx];
-
-        Dataset::Entry entry;
-        entry.data.reserve(nDataColumns);
-
-        for (size_t i = 0; i < row.size(); ++i) {
-            const std::string& strValue = row[i];
-
-            // For now, all values are converted to float
-            float value = readFloatData(strValue);
-
-            if (i == xColumn) {
-                entry.position.x = value;
-            }
-            else if (i == yColumn) {
-                entry.position.y = value;
-            }
-            else if (i == zColumn) {
-                entry.position.z = value;
-            }
-            else {
-                entry.data.push_back(value);
-            }
-
-            // @TODO: comment mapping
-        }
-
-        res.entries.push_back(entry);
-    }
-
-    return res;
-}
-
 } // namespace data
 
 namespace label {
 
-Labelset loadFile(std::filesystem::path path, std::optional<DataLoadSpecs>) {
+Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
@@ -558,7 +452,7 @@ Labelset loadFileWithCache(std::filesystem::path filePath)
 
 namespace color {
 
-ColorMap loadFile(std::filesystem::path path, std::optional<DataLoadSpecs>) {
+ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);

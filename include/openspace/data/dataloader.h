@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___DATALOADER___H__
 #define __OPENSPACE_CORE___DATALOADER___H__
 
+#include <openspace/data/datamapping.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/csvreader.h>
@@ -91,35 +92,23 @@ struct ColorMap {
     std::vector<glm::vec4> entries;
 };
 
-// @TODO: Make sure the cashed file is updated when these values changes.
-// E.g. by making a has out of all the values and add that to the filename
-// when caching.
-// @TODO: Also make sure to update cache data versions!
-struct DataLoadSpecs {
-    std::optional<float> missingDataValue;
-    // @TODO: can add column names for positional data in CSV, for example
-};
-
 namespace data {
 
     Dataset loadFile(std::filesystem::path path,
-        std::optional<DataLoadSpecs> specs = std::nullopt);
+        std::optional<DataMapping> specs = std::nullopt);
 
     std::optional<Dataset> loadCachedFile(std::filesystem::path path);
     void saveCachedFile(const Dataset& dataset, std::filesystem::path path);
 
     Dataset loadFileWithCache(std::filesystem::path path,
-        std::optional<DataLoadSpecs> specs = std::nullopt);
-
-    Dataset loadCsvFile(std::filesystem::path path,
-        std::optional<DataLoadSpecs> specs = std::nullopt);
+        std::optional<DataMapping> specs = std::nullopt);
 
 } // namespace data
 
 namespace label {
 
     Labelset loadFile(std::filesystem::path path,
-        std::optional<DataLoadSpecs> specs = std::nullopt);
+        std::optional<DataMapping> specs = std::nullopt);
 
     std::optional<Labelset> loadCachedFile(std::filesystem::path path);
     void saveCachedFile(const Labelset& labelset, std::filesystem::path path);
@@ -131,7 +120,7 @@ namespace label {
 namespace color {
 
     ColorMap loadFile(std::filesystem::path path,
-        std::optional<DataLoadSpecs> specs = std::nullopt);
+        std::optional<DataMapping> specs = std::nullopt);
 
     std::optional<ColorMap> loadCachedFile(std::filesystem::path path);
     void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path);
