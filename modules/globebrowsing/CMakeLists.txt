@@ -73,6 +73,7 @@ set(HEADER_FILES
   src/tileprovider/temporaltileprovider.h
   src/tileprovider/texttileprovider.h
   src/tileprovider/planetarytrailtileprovider.h
+  src/tileprovider/forcehighresolutiontileprovider.h
   src/tileprovider/tileindextileprovider.h
   src/tileprovider/tileprovider.h
   src/tileprovider/tileproviderbydate.h
@@ -121,6 +122,7 @@ set(SOURCE_FILES
   src/tileprovider/temporaltileprovider.cpp
   src/tileprovider/texttileprovider.cpp
   src/tileprovider/planetarytrailtileprovider.cpp
+  src/tileprovider/forcehighresolutiontileprovider.cpp
   src/tileprovider/tileindextileprovider.cpp
   src/tileprovider/tileprovider.cpp
   src/tileprovider/tileproviderbydate.cpp
