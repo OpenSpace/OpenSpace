@@ -6,6 +6,7 @@ asset.require("./jupiter/europa/layers/sweden_layers")
 asset.require("./mars/layers/sweden_layers")
 asset.require("./mercury/layers/sweden_layers")
 asset.require("./saturn/enceladus/layers/sweden_layers")
+
 -- The Sweden server does not have these layers, use the New York server for now
 asset.require("./venus/layers/newyork_layers")
 
