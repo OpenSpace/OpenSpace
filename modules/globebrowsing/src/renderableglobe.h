@@ -187,7 +187,7 @@ private:
      * \param `position` is the position of a point that gets geodetically
      * projected on the reference ellipsoid. `position` must be in
      * cartesian model space.
-     * \returns the height from the reference ellipsoid to the globe surface.
+     * \return the height from the reference ellipsoid to the globe surface.
      */
     float getHeight(const glm::dvec3& position) const;
 

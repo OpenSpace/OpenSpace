@@ -81,7 +81,7 @@ protected:
     };
 
     /**
-     * \returns true if tile of index `tileIndex` is not already enqueued.
+     * \return true if tile of index `tileIndex` is not already enqueued.
      */
     bool satisfiesEnqueueCriteria(const TileIndex& tileIndex);
 

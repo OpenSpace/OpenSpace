@@ -32,14 +32,16 @@ namespace openspace::datamessagestructures {
 /**
  * Method that creates a CameraKeyframe object and populates
  * it with the current properties of the camera from the navigation handler.
- * \returns CameraKeyframe with current state from NavigationHandler
+ *
+ * \return CameraKeyframe with current state from NavigationHandler
 */
 CameraKeyframe generateCameraKeyframe();
 
 /**
  * Method that creates a TimeKeyframe object and populates
  * it with the current time values from the application time manager.
- * \returns TimeKeyframe The time keyframe
+ *
+ * \return TimeKeyframe The time keyframe
  */
 TimeKeyframe generateTimeKeyframe();
 
@@ -47,8 +49,9 @@ TimeKeyframe generateTimeKeyframe();
  * Method that creates a ScriptMessage object from a given script
  * string, and populates the ScriptMessage with the script and timestamp
  * of the current application time.
+ *
  * \param script The script to execute in std::string form
- * \returns ScriptMessage The ScriptMessage data structure with script
+ * \return ScriptMessage The ScriptMessage data structure with script
  */
 ScriptMessage generateScriptMessage(std::string script);
 

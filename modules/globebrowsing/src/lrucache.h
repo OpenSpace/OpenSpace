@@ -53,7 +53,8 @@ public:
 
     /**
      * If value exists, the value is bumped to the front of the queue.
-     * \returns true if value of this key exists.
+     *
+     * \return true if value of this key exists.
      */
     bool touch(const KeyType& key);
     bool isEmpty() const;

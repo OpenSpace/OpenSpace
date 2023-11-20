@@ -96,8 +96,7 @@ public:
     *
     * \param newTime A j2000 time value specifying the new time stamp that
     * the script scheduler should progress to.
-    *
-    * \returns vector with the scheduled scripts that should be run from begining to end.
+    * \return vector with the scheduled scripts that should be run from begining to end.
     */
     std::vector<std::string> progressTo(double newTime);
 
@@ -116,8 +115,7 @@ public:
     *
     * \param group An int specifying which group to return, if empty all scripts
     *              will be returned
-    *
-    * \returns a vector of all scripts that has been loaded
+    * \return a vector of all scripts that has been loaded
     */
     std::vector<ScheduledScript> allScripts(
         std::optional<int> group = std::nullopt) const;

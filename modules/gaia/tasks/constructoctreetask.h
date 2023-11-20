@@ -64,12 +64,12 @@ private:
     void constructOctreeFromFolder(const Task::ProgressCallback& progressCallback);
 
     /**
-     * Checks all defined filter ranges and \returns true if any of the corresponding
+     * Checks all defined filter ranges and returns true if any of the corresponding
      * `filterValues` are outside of the defined range.
      *
      * \param filterValues are all read filter values in binary file.
      *
-     * \returns false if value should be inserted into Octree.
+     * \return false if value should be inserted into Octree.
      */
     bool checkAllFilters(const std::vector<float>& filterValues);
 

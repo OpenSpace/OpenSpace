@@ -305,20 +305,23 @@ private:
 
     /*
      * Perform a camera roll on the local camera rotation
-     * \returns a local camera rotation modified with a roll.
+     *
+     * \return a local camera rotation modified with a roll.
      */
     glm::dquat roll(double deltaTime, const glm::dquat& localCameraRotation) const;
 
     /**
      * Performs rotation around the cameras x and y axes.
-     * \returns a local camera rotation modified with two degrees of freedom.
+     *
+     * \return a local camera rotation modified with two degrees of freedom.
      */
     glm::dquat rotateLocally(double deltaTime,
         const glm::dquat& localCameraRotation) const;
 
     /**
      * Interpolates the camera rotation based on active interpolators.
-     * \returns a new rotation quaternion
+     *
+     * \return a new rotation quaternion
      */
     glm::dquat interpolateLocalRotation(double deltaTime,
         const glm::dquat& localCameraRotation);
@@ -371,7 +374,8 @@ private:
 
     /**
      * Translates the camera position towards or away from the anchor node.
-     * \returns a position vector adjusted in the vertical direction.
+     *
+     * \return a position vector adjusted in the vertical direction.
      */
     glm::dvec3 translateVertically(double deltaTime, const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition,

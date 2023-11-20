@@ -72,9 +72,9 @@ public:
         double timeSim;
     };
 
-    /*
-     * Struct for storing a script substring that, if found in a saved script,
-     * will be replaced by its substringReplacement counterpart.
+    /**
+     * Struct for storing a script substring that, if found in a saved script, will be
+     * replaced by its substringReplacement counterpart.
      */
     struct ScriptSubstringReplace {
         std::string substringFound;
@@ -110,9 +110,9 @@ public:
     void deinitialize();
 
     /**
-     * This is called with every rendered frame. If in recording state, the camera
-     * state will be saved to the recording file (if its state has changed since last).
-     * If in playback state, the next keyframe will be used (if it is time to do so).
+     * This is called with every rendered frame. If in recording state, the camera state
+     * will be saved to the recording file (if its state has changed since last). If in
+     * playback state, the next keyframe will be used (if it is time to do so).
      */
     void preSynchronization();
 
@@ -123,12 +123,12 @@ public:
     void render();
 
     /**
-     * Current time based on playback mode
+     * Current time based on playback mode.
      */
     double currentTime() const;
 
     /**
-     * Fixed delta time set by user for use during saving of frame during playback mode
+     * Fixed delta time set by user for use during saving of frame during playback mode.
      */
     double fixedDeltaTimeDuringFrameOutput() const;
 
@@ -140,9 +140,9 @@ public:
      * However, during playback it is incremented by the fixed framerate of the playback
      * rather than the actual clock value (as in normal operation).
      *
-     * \returns number of microseconds elapsed since playback started in terms of the
-     *          number of rendered frames multiplied by the fixed time increment per
-     *          frame
+     * \return Number of microseconds elapsed since playback started in terms of the
+     *         number of rendered frames multiplied by the fixed time increment per
+     *         frame
      */
     std::chrono::steady_clock::time_point currentPlaybackInterpolationTime() const;
 
@@ -151,11 +151,11 @@ public:
      * used when playback is set to be in the mode where a screenshot is captured with
      * every rendered frame (enableTakeScreenShotDuringPlayback() is used to enable this
      * mode). At the start of playback, this timer is set to the value of the current
-     * applicationTime function provided by the window delegate (used during normal
-     * mode or playback). However, during playback it is incremented by the fixed
-     * framerate of the playback rather than the actual clock value.
+     * applicationTime function provided by the window delegate (used during normal mode
+     * or playback). However, during playback it is incremented by the fixed framerate of
+     * the playback rather than the actual clock value.
      *
-     * \returns application time in seconds, for use in playback-with-frames mode
+     * \return Application time in seconds, for use in playback-with-frames mode
      */
     double currentApplicationInterpolationTime() const;
 
@@ -164,9 +164,8 @@ public:
      * according to the data format specified, and will continue until recording is
      * stopped using stopRecording() method.
      *
-     * \param filename file saved with recorded keyframes.
-     *
-     * \returns true if recording to file starts without errors.
+     * \param filename File saved with recorded keyframes
+     * \return `true` if recording to file starts without errors
      */
     bool startRecording(const std::string& filename);
 
@@ -187,23 +186,23 @@ public:
     /**
      * Used to check if a session recording is in progress.
      *
-     * \return true if recording is in progress
+     * \return `true` if recording is in progress
      */
     bool isRecording() const;
 
     /**
      * Starts a playback session, which can run in one of three different time modes.
      *
-     * \param filename file containing recorded keyframes to play back. The file path
+     * \param filename File containing recorded keyframes to play back. The file path
      *                 is relative to the base recordings directory specified in the
      *                 config file by the RECORDINGS variable
-     * \param timeMode which of the 3 time modes to use for time reference during
-     * \param forceSimTimeAtStart if true simulation time is forced to that of playback
+     * \param timeMode Which of the 3 time modes to use for time reference during
+     * \param forceSimTimeAtStart If true simulation time is forced to that of playback
      *        playback: recorded time, application time, or simulation time. See the
      *        LuaLibrary entry for SessionRecording for details on these time modes
-     * \param loop if true then the file will playback in loop mode, continuously
+     * \param loop If true then the file will playback in loop mode, continuously
      *             looping back to the beginning until it is manually stopped
-     * \param shouldWaitForFinishedTiles if true, the playback will wait for tiles to be
+     * \param shouldWaitForFinishedTiles If true, the playback will wait for tiles to be
      *        finished before progressing to the next frame. This value is only used when
      *        `enableTakeScreenShotDuringPlayback` was called before. Otherwise this value
      *        will be ignored
@@ -227,33 +226,34 @@ public:
     bool isPlaybackPaused();
 
     /**
-     * Pauses a playback session. This does both the normal pause functionality of
-     * setting simulation delta time to zero, and pausing the progression through the
-     * timeline.
+     * Pauses a playback session. This does both the normal pause functionality of setting
+     * simulation delta time to zero, and pausing the progression through the timeline.
      *
-     * \param pause if true, then will set playback timeline progression to zero
+     * \param pause If `true`, then will set playback timeline progression to zero
      */
     void setPlaybackPause(bool pause);
 
     /**
-     * Enables that rendered frames should be saved during playback
+     * Enables that rendered frames should be saved during playback.
+     *
      * \param fps Number of frames per second.
      */
     void enableTakeScreenShotDuringPlayback(int fps);
 
     /**
-     * Used to disable that renderings are saved during playback
+     * Used to disable that renderings are saved during playback.
      */
     void disableTakeScreenShotDuringPlayback();
 
     /**
      * Used to check if a session playback is in progress.
-     * \returns true if playback is in progress.
+     *
+     * \return `true` if playback is in progress
      */
     bool isPlayingBack() const;
 
     /**
-     * Is saving frames during playback
+     * Is saving frames during playback.
      */
     bool isSavingFramesDuringPlayback() const;
 
@@ -289,15 +289,14 @@ public:
 
     /**
      * \return The Lua library that contains all Lua functions available to affect the
-     * interaction
+     *         interaction
      */
     static openspace::scripting::LuaLibrary luaLibrary();
 
     /**
      * Used to request a callback for notification of playback state change.
      *
-     * \param cb function handle for callback
-     *
+     * \param cb Function handle for callback
      * \return CallbackHandle value of callback number
      */
     CallbackHandle addStateChangeCallback(StateChangeCallback cb);
@@ -305,14 +304,14 @@ public:
     /**
      * Removes the callback for notification of playback state change.
      *
-     * \param callback function handle for the callback
+     * \param callback Function handle for the callback
      */
     void removeStateChangeCallback(CallbackHandle callback);
 
     /**
      * Provides list of available playback files.
      *
-     * \return vector of filenames in recordings dir
+     * \return Vector of filenames in recordings dir
      */
     std::vector<std::string> playbackList() const;
 
@@ -320,12 +319,11 @@ public:
      * Reads a camera keyframe from a binary format playback file, and populates input
      * references with the parameters of the keyframe.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param kf reference to a camera keyframe which contains camera details
-     * \param file an ifstream reference to the playback file being read
-     * \param lineN keyframe number in playback file where this keyframe resides
-     *
-     * \return true if data read has no errors
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param kf Reference to a camera keyframe which contains camera details
+     * \param file An ifstream reference to the playback file being read
+     * \param lineN Keyframe number in playback file where this keyframe resides
+     * \return `true` if data read has no errors
      */
     bool readCameraKeyframeBinary(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, std::ifstream& file, int lineN);
@@ -334,12 +332,11 @@ public:
      * Reads a camera keyframe from an ascii format playback file, and populates input
      * references with the parameters of the keyframe.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param kf reference to a camera keyframe which contains camera details
-     * \param currentParsingLine string containing the most current line that was read
-     * \param lineN line number in playback file where this keyframe resides
-     *
-     * \return true if data read has no errors
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param kf Reference to a camera keyframe which contains camera details
+     * \param currentParsingLine String containing the most current line that was read
+     * \param lineN Line number in playback file where this keyframe resides
+     * \return `true` if data read has no errors
      */
     bool readCameraKeyframeAscii(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, std::string currentParsingLine,
@@ -349,12 +346,11 @@ public:
      * Reads a time keyframe from a binary format playback file, and populates input
      * references with the parameters of the keyframe.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param kf reference to a time keyframe which contains time details
-     * \param file an ifstream reference to the playback file being read
-     * \param lineN keyframe number in playback file where this keyframe resides
-     *
-     * \return true if data read has no errors
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param kf Reference to a time keyframe which contains time details
+     * \param file An ifstream reference to the playback file being read
+     * \param lineN Keyframe number in playback file where this keyframe resides
+     * \return `true` if data read has no errors
      */
     bool readTimeKeyframeBinary(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::ifstream& file, int lineN);
@@ -363,12 +359,11 @@ public:
      * Reads a time keyframe from an ascii format playback file, and populates input
      * references with the parameters of the keyframe.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param kf reference to a time keyframe which contains time details
-     * \param currentParsingLine string containing the most current line that was read
-     * \param lineN line number in playback file where this keyframe resides
-     *
-     * \return true if data read has no errors
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param kf Reference to a time keyframe which contains time details
+     * \param currentParsingLine String containing the most current line that was read
+     * \param lineN Line number in playback file where this keyframe resides
+     * \return `true` if data read has no errors
      */
     bool readTimeKeyframeAscii(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::string currentParsingLine,
@@ -378,13 +373,12 @@ public:
      * Reads a script keyframe from a binary format playback file, and populates input
      * references with the parameters of the keyframe.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param kf reference to a script keyframe which contains the size of the script
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param kf Reference to a script keyframe which contains the size of the script
      *        (in chars) and the text itself
-     * \param file an ifstream reference to the playback file being read
-     * \param lineN keyframe number in playback file where this keyframe resides
-     *
-     * \return true if data read has no errors
+     * \param file An ifstream reference to the playback file being read
+     * \param lineN Keyframe number in playback file where this keyframe resides
+     * \return `true` if data read has no errors
      */
     bool readScriptKeyframeBinary(Timestamps& times,
         datamessagestructures::ScriptMessage& kf, std::ifstream& file, int lineN);
@@ -393,36 +387,35 @@ public:
      * Reads a script keyframe from an ascii format playback file, and populates input
      * references with the parameters of the keyframe.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param kf reference to a script keyframe which contains the size of the script
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param kf Reference to a script keyframe which contains the size of the script
      *        (in chars) and the text itself
-     * \param currentParsingLine string containing the most current line that was read
-     * \param lineN line number in playback file where this keyframe resides
-     *
-     * \return true if data read has no errors
+     * \param currentParsingLine String containing the most current line that was read
+     * \param lineN Line number in playback file where this keyframe resides
+     * \return `true` if data read has no errors
      */
     bool readScriptKeyframeAscii(Timestamps& times,
         datamessagestructures::ScriptMessage& kf, std::string currentParsingLine,
         int lineN);
 
     /**
-     * Writes a camera keyframe to a binary format recording file using a CameraKeyframe
+     * Writes a camera keyframe to a binary format recording file using a CameraKeyframe.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param kf reference to a camera keyframe which contains the camera details
-     * \param kfBuffer a buffer temporarily used for preparing data to be written
-     * \param file an ofstream reference to the recording file being written-to
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param kf Reference to a camera keyframe which contains the camera details
+     * \param kfBuffer A buffer temporarily used for preparing data to be written
+     * \param file An ofstream reference to the recording file being written-to
      */
     void saveCameraKeyframeBinary(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, unsigned char* kfBuffer,
         std::ofstream& file);
 
     /**
-     * Writes a camera keyframe to an ascii format recording file using a CameraKeyframe
+     * Writes a camera keyframe to an ascii format recording file using a CameraKeyframe.
      *
-     * \param times reference to a timestamps structure which contains recorded times
-     * \param kf reference to a camera keyframe which contains the camera details
-     * \param file an ofstream reference to the recording file being written-to
+     * \param times Reference to a timestamps structure which contains recorded times
+     * \param kf Reference to a camera keyframe which contains the camera details
+     * \param file An ofstream reference to the recording file being written-to
      */
     void saveCameraKeyframeAscii(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, std::ofstream& file);

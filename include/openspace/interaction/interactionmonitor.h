@@ -52,7 +52,7 @@ public:
 
     /*
      * Called from all places we want to mark activity from. Updates the last registered
-     * interaction time
+     * interaction time.
      */
     void markInteraction();
 

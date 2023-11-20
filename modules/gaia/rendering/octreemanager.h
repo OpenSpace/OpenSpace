@@ -202,7 +202,7 @@ private:
     const std::string BINARY_SUFFIX = ".bin";
 
     /**
-     * \returns the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
+     * \return the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
      */
     size_t getChildIndex(float posX, float posY, float posZ, float origX = 0.f,
         float origY = 0.f, float origZ = 0.f);
@@ -298,7 +298,7 @@ private:
      * \param node the node that should be inserted
      * \param mode the render mode that should be used
      * \param deltaStars keeps track of how many stars that were added.
-     * \returns the data to be inserted
+     * \return the data to be inserted
      */
     std::vector<float> constructInsertData(const OctreeNode& node,
         gaia::RenderMode mode, int& deltaStars);
