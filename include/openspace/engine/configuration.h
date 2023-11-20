@@ -112,6 +112,14 @@ struct Configuration {
     bool isConsoleDisabled = false;
     bool bypassLauncher = false;
 
+    enum PreferedLayerServer {
+        All = 0,
+        NewYork,
+        Sweden,
+        Utah
+    };
+    PreferedLayerServer preferedLayerServer = PreferedLayerServer::All;
+
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
     struct OpenGLDebugContext {
