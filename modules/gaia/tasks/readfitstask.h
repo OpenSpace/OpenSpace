@@ -50,7 +50,7 @@ private:
     //const size_t MAX_SIZE_BEFORE_WRITE = 9000000; // ~34MB -> 0,5 stars with 18 values
 
     /**
-     *  Reads a single FITS file and stores ordered star data in one binary file.
+     * Reads a single FITS file and stores ordered star data in one binary file.
      */
     void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
 
@@ -63,12 +63,12 @@ private:
     /**
      * Writes data to an octant file.
      *
-     * \param data the data that should be be written to file
-     * \param index the index of the octant that should be written
-     * \param isFirstWrite defines if this is the first write to specified octant, if so
+     * \param data The data that should be be written to file
+     * \param index The index of the octant that should be written
+     * \param isFirstWrite Defines if this is the first write to specified octant, if so
      *        the file is created, otherwise the accumulated data is appended to the end
      *        of the file
-     * \param nValuesPerStar the number of values that should be stored per star
+     * \param nValuesPerStar The number of values that should be stored per star
      */
     int writeOctantToFile(const std::vector<float>& data, int index,
         std::vector<bool>& isFirstWrite, int nValuesPerStar);

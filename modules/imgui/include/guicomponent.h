@@ -37,7 +37,9 @@ class GUI;
  */
 class GuiComponent : public properties::PropertyOwner {
 public:
-    /// Constructor that initializes this components member variables
+    /**
+     * Constructor that initializes this components member variables.
+     */
     GuiComponent(std::string identifier, std::string guiName = "");
 
     /**
@@ -56,19 +58,29 @@ public:
      */
     void setEnabled(bool enabled);
 
-    /// Initializes the component with everything that does not require an OpenGL context
+    /**
+     * Initializes the component with everything that does not require an OpenGL context.
+     */
     virtual void initialize();
 
-    /// Initializes the component with everything that requires an OpenGL context
+    /**
+     * Initializes the component with everything that requires an OpenGL context.
+     */
     virtual void initializeGL();
 
-    /// Deinitializes the component with things that do not require an OpenGL context
+    /**
+     * Deinitializes the component with things that do not require an OpenGL context.
+     */
     virtual void deinitialize();
 
-    /// Deinitializes the component with things that require an OpenGL context
+    /**
+     * Deinitializes the component with things that require an OpenGL context.
+     */
     virtual void deinitializeGL();
 
-    /// Renders the individual subcomponents to the screen
+    /**
+     * Renders the individual subcomponents to the screen.
+     */
     virtual void render() = 0;
 
     void setShowHelpTooltip(bool showHelpTooltip);

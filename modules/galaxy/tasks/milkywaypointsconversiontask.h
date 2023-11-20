@@ -34,9 +34,11 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * Converts ascii based point data
+ * Converts ASCII based point data
+ * ```
  * int64_t n
  * (float x, float y, float z, float r, float g, float b) * n
+ * ```
  * to a binary (floating point) representation with the same layout.
  */
 class MilkywayPointsConversionTask : public Task {

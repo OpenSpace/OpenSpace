@@ -177,8 +177,8 @@ public:
     };
 
     /**
-     * Returns the TerminatorType for the passed string. The allowed strings are
-     * `UMBRAL` and `PENUMBRAL`. All other values will result in an exception.
+     * Returns the TerminatorType for the passed string. The allowed strings are `UMBRAL`
+     * and `PENUMBRAL`. All other values will result in an exception.
      *
      * \param type The terminator type
      * \return The terminator type enum
@@ -249,14 +249,14 @@ public:
     void unloadKernel(std::string filePath);
 
     /**
-     * Returns whether a given \p target has an Spk kernel covering it at the designated
+     * Returns whether a given \p target has an SPK kernel covering it at the designated
      * \p et ephemeris time.
      *
      * \param target The body to be examined. The target has to name a valid SPICE object
      *        with respect to the kernels that have been loaded
      * \param et The time for which the coverage should be checked
-     * \return `true` if SPK kernels have been loaded to cover \p target at the
-     *         time \p et, `false` otherwise
+     * \return `true` if SPK kernels have been loaded to cover \p target at the time
+     *         \p et, `false` otherwise
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
      * \pre \p target must not be empty
@@ -268,7 +268,7 @@ public:
      *
      * \param target The body to be examined. The target has to name a valid SPICE object
      *        with respect to the kernels that have been loaded
-     * \return `list` of SPK kernels for \p target , `empty` list if none loaded
+     * \return `list` of SPK kernels for \p target, `empty` list if none loaded
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
      * \pre \p target must not be empty.
@@ -282,8 +282,8 @@ public:
      * \param frame The frame to be examined. The \p frame has to name a valid frame with
      *        respect to the kernels that have been loaded
      * \param et The time for which the coverage should be checked
-     * \return `true` if SPK kernels have been loaded to cover \p target at the
-     *         time \p et, false otherwise
+     * \return `true` if SPK kernels have been loaded to cover \p target at the time
+     *         \p et, false otherwise
      *
      * \throw SpiceException If \p target does not name a valid SPICE object or \p frame
      *        is not a valid frame
@@ -296,7 +296,7 @@ public:
      *
      * \param target The body to be examined. The target has to name a valid SPICE object
      *        with respect to the kernels that have been loaded
-     * \return `list` of CK kernels for \p target , `empty` list if none loaded
+     * \return `list` of CK kernels for \p target, `empty` list if none loaded
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
      * \pre \p target must not be empty.
@@ -308,7 +308,6 @@ public:
      *
      * \param builtInFrames Boolean representing if builtIn or LoadedFrames should be used
      * \return `list` of Spice frames with ID(int) and Name(string)
-     *
      */
     std::vector<std::pair<int, std::string>> spiceBodies(bool builtInFrames) const;
 
@@ -402,9 +401,8 @@ public:
      * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
      *
-     * \throw SpiceException If the \p body does not name a valid body, \p value
-     *        is not a valid item for the \p body or the retrieved value is not a single
-     *        value
+     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
+     *        valid item for the \p body or the retrieved value is not a single value
      * \pre \p body must not be empty
      * \pre \p value must not be empty
      *
@@ -424,9 +422,9 @@ public:
      * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
      *
-     * \throw SpiceException If the \p body does not name a valid body, \p value
-     *        is not a valid item for the \p body or the retrieved value is not a
-     *        two-component value
+     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
+     *        valid item for the \p body or the retrieved value is not a two-component
+     *        value
      * \pre \p body must not be empty
      * \pre \p value must not be empty
      *
@@ -468,9 +466,9 @@ public:
      * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
      *
-     * \throw SpiceException If the \p body does not name a valid body, \p value
-     *        is not a valid item for the \p body or the retrieved value is not a
-     *        four-component value.
+     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
+     *        valid item for the \p body or the retrieved value is not a four-component
+     *        value
      * \pre \p body must not be empty.
      * \pre \p value must not be empty.
      *
@@ -482,9 +480,9 @@ public:
     /**
      * Retrieves a \p value with an arbitrary number of components for a certain \p body.
      * This method succeeds iff \p body is the name of a valid body, \p value is a value
-     * associated with the body, and the value consists of the correct number of
-     * `double` values. If all conditions are true, the value is retrieved using the
-     * method `bodvrd_c` and stored in \p v.
+     * associated with the body, and the value consists of the correct number of `double`
+     * values. If all conditions are true, the value is retrieved using the method
+     * `bodvrd_c` and stored in \p v.
      *
      * \param body The name of the body whose value should be retrieved or the NAIF ID of
      *        this body
@@ -492,9 +490,9 @@ public:
      * \param v The destination for the retrieved value. The `vector` must be
      *          preallocated to the correct size of components that should be retrieved
      *
-     * \throw SpiceException If the \p body does not name a valid body, \p value
-     *        is not a valid item for the \p body or the retrieved value does not contain
-     *        the correct number of components
+     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
+     *        valid item for the \p body or the retrieved value does not contain the
+     *        correct number of components
      * \pre \p body must not be empty.
      * \pre \p value must not be empty.
      *
@@ -512,26 +510,25 @@ public:
      * \param craftTicks The internal clock ticks for the specified craft
      * \return The converted ephemeris time
      *
-     * \throw SpiceException If the name \p craft is not a valid name
-     *        available through all loaded kernels, if the craft is not supported by any
-     *        of the loaded kernel, or if the provided \p craftTicks is not a valid tick
-     *        time for the specific spacecraft
+     * \throw SpiceException If the name \p craft is not a valid name available through
+     *        all loaded kernels, if the craft is not supported by any of the loaded
+     *        kernel, or if the provided \p craftTicks is not a valid tick time for the
+     *        specific spacecraft
      * \pre \p craft must not be empty
      */
     double spacecraftClockToET(const std::string& craft, double craftTicks);
 
     /**
-     * Converts the \p timeString representing a date to a double precision
-     * value representing the ephemeris time; that is the number of TDB
-     * seconds past the J2000 epoch.
+     * Converts the \p timeString representing a date to a double precision value
+     * representing the ephemeris time; that is the number of TDB seconds past the J2000
+     * epoch.
      *
      * \param timeString A string representing the time to be converted
      * \return The converted time; the number of TDB seconds past the J2000 epoch,
      *         representing the passed \p timeString
      *
-     * \throw SpiceException If \p timeString is not a valid timestring according
-     *        to the `str2et_c` function (see the Particulars section of the linked
-     *        webpage).
+     * \throw SpiceException If \p timeString is not a valid timestring according to the
+     *        `str2et_c` function (see the Particulars section of the linked webpage)
      * \pre \p timeString must not be empty
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html
@@ -546,7 +543,7 @@ public:
      * \param ephemerisTime The ephemeris time, that is the number of TDB seconds past the
      *        J2000 epoch
      * \param format The format string describing the output format
-     * \return The destination for the converted date.
+     * \return The destination for the converted date
      *
      * \pre \p format must not be empty
      *
@@ -601,18 +598,18 @@ public:
      * \param ephemerisTime The time at which the position is to be queried
      * \param lightTime If the \p aberrationCorrection is different from
      *        AbberationCorrection::Type::None, this variable will contain the light time
-     *        between the observer and the target.
+     *        between the observer and the target
      * \return The position of the \p target relative to the \p observer in the specified
      *         \p referenceFrame
      *
-     * \throw SpiceException If the \p target or \p observer do not name a valid
-     *        NAIF object, \p referenceFrame does not name a valid reference frame or if
-     *        there is not sufficient data available to compute the position or neither
-     *        the target nor the observer have coverage.
-     * \pre \p target must not be empty.
-     * \pre \p observer must not be empty.
-     * \pre \p referenceFrame must not be empty.
-     * \post If an exception is thrown, \p lightTime will not be modified.
+     * \throw SpiceException If the \p target or \p observer do not name a valid NAIF
+     *        object, \p referenceFrame does not name a valid reference frame or if there
+     *        is not sufficient data available to compute the position or neither the
+     *        target nor the observer have coverage.
+     * \pre \p target must not be empty
+     * \pre \p observer must not be empty
+     * \pre \p referenceFrame must not be empty
+     * \post If an exception is thrown, \p lightTime will not be modified
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
@@ -635,14 +632,14 @@ public:
      * \return The position of the \p target relative to the \p observer in the specified
      *         \p referenceFrame
      *
-     * \throw SpiceException If the \p target or \p observer do not name a valid
-     *        NAIF object, \p referenceFrame does not name a valid reference frame or if
-     *        there is not sufficient data available to compute the position or neither
-     *        the target nor the observer have coverage.
-     * \pre \p target must not be empty.
-     * \pre \p observer must not be empty.
-     * \pre \p referenceFrame must not be empty.
-     * \post If an exception is thrown, \p lightTime will not be modified.
+     * \throw SpiceException If the \p target or \p observer do not name a valid NAIF
+     *        object, \p referenceFrame does not name a valid reference frame or if there
+     *        is not sufficient data available to compute the position or neither the
+     *        target nor the observer have coverage
+     * \pre \p target must not be empty
+     * \pre \p observer must not be empty
+     * \pre \p referenceFrame must not be empty
+     * \post If an exception is thrown, \p lightTime will not be modified
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
@@ -662,32 +659,28 @@ public:
      * \return The transformation matrix
      *
      * \throw SpiceException If the transformation matrix between \p from and \p to
-     *        cannot be determined.
-     * \pre \p from must not be empty.
-     * \pre \p to must not be empty.
+     *        cannot be determined
+     * \pre \p from must not be empty
+     * \pre \p to must not be empty
      */
     glm::dmat3 frameTransformationMatrix(const std::string& from,
         const std::string& to, double ephemerisTime) const;
 
-    /// Struct that is used as the return value from the #surfaceIntercept method
+    /**
+     * Struct that is used as the return value from the #surfaceIntercept method.
+     */
     struct SurfaceInterceptResult {
-        /**
-         * The closest surface intercept point on the target body in Cartesian Coordinates
-         * relative to the reference frame.
-         */
+        /// The closest surface intercept point on the target body in Cartesian Coordinates
+        /// relative to the reference frame
         glm::dvec3 surfaceIntercept = glm::dvec3(0.0);
 
-        /**
-         * If the aberration correction is not AberrationCorrection::Type::None, this
-         * value contains the time for which the intercept was computed. Otherwise it is
-         * the same as the ephemerisTime.
-         */
+        /// If the aberration correction is not AberrationCorrection::Type::None, this
+        /// value contains the time for which the intercept was computed. Otherwise it is
+        /// the same as the ephemerisTime
         double interceptEpoch = 0.0;
 
-        /**
-         * The vector from the observer's position to the \p surfaceIntercept position in
-         * the provided reference frame.
-         */
+        /// The vector from the observer's position to the \p surfaceIntercept position in
+        /// the provided reference frame
         glm::dvec3 surfaceVector = glm::dvec3(0.0);
 
         /// `true` if the ray intersects the body, `false` otherwise
@@ -711,17 +704,17 @@ public:
      * \return A SurfaceInterceptResult structure that contains all information about the
      *         intercept, including whether an intercept was found
      *
-     * \throw SpiceException If the \p target or \p observer do not name the same
-     *        NAIF object, the \p target or \p observer name the same NAIF object or are
-     *        in the same location, the \p referenceFrame or \p fovFrame are not
-     *        recognized, insufficient kernel information has been loaded.
-     * \pre \p target must not be empty.
-     * \pre \p observer must not be empty.
+     * \throw SpiceException If the \p target or \p observer do not name the same NAIF
+     *        object, the \p target or \p observer name the same NAIF object or are in the
+     *        same location, the \p referenceFrame or \p fovFrame are not recognized,
+     *        insufficient kernel information has been loaded.
+     * \pre \p target must not be empty
+     * \pre \p observer must not be empty
      * \pre \p The \p target and \p observer must be different strings
-     * \pre \p fovFrame must not be empty.
-     * \pre \p referenceFrame must not be empty.
+     * \pre \p fovFrame must not be empty
+     * \pre \p referenceFrame must not be empty
      * \pre \p directionVector must not be the null vector
-     * \post The SurfaceInterceptResult does not contain any uninitialized values.
+     * \post The SurfaceInterceptResult does not contain any uninitialized values
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
      */
@@ -744,15 +737,15 @@ public:
      * \param ephemerisTime Time of the observation (seconds past J2000)
      * \return `true` if the target is visible, `false` otherwise
      *
-     * \throw SpiceException If the \p target or \p observer do not name valid
-     *        NAIF objects, the \p target or \p observer name the same NAIF object, the
+     * \throw SpiceException If the \p target or \p observer do not name valid NAIF
+     *        objects, the \p target or \p observer name the same NAIF object, the
      *        \p instrument does not name a valid NAIF object, or insufficient kernel
-     *        information has been loaded.
-     * \pre \p target must not be empty.
-     * \pre \p observer must not be empty.
+     *        information has been loaded
+     * \pre \p target must not be empty
+     * \pre \p observer must not be empty
      * \pre \p target and \p observer must not be different strings
-     * \pre \p referenceFrame must not be empty.
-     * \pre \p instrument must not be empty.
+     * \pre \p referenceFrame must not be empty
+     * \pre \p instrument must not be empty
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
      */
@@ -761,7 +754,9 @@ public:
         FieldOfViewMethod method, AberrationCorrection aberrationCorrection,
         double& ephemerisTime) const;
 
-    /// Struct that is used as the return value from the #targetState method
+    /**
+     * Struct that is used as the return value from the #targetState method.
+     */
     struct TargetStateResult {
         /// The target position
         glm::dvec3 position = glm::dvec3(0.0);
@@ -769,8 +764,8 @@ public:
         /// The target velocity
         glm::dvec3 velocity = glm::dvec3(0.0);
 
-        /// One-way light time between `target` and `observer` if
-        /// the aberration correction is enabled
+        /// One-way light time between `target` and `observer` if the aberration
+        /// correction is enabled
         double lightTime = 0.0;
     };
 
@@ -791,15 +786,15 @@ public:
      *         \p aberrationCorrection is set to a valid different from
      *         AberrationCorrection::None
      *
-     * \throw SpiceException If the \p target or \p observer do not name a valid
-     *        NAIF object, the \p referenceFrame is not a valid frame, or if there is
-     *        insufficient kernel information.
-     * \pre \p target must not be empty.
-     * \pre \p observer must not be empty.
-     * \pre \p referenceFrame must not be empty.
-     * \post The resulting TargetStateResult is set to valid values; the
-     *       `lightTime` is only set to a valid different from `0.0` if the
-     *       \p aberrationCorrection is not AberrationCorrection::None.
+     * \throw SpiceException If the \p target or \p observer do not name a valid NAIF
+     *        object, the \p referenceFrame is not a valid frame, or if there is
+     *        insufficient kernel information
+     * \pre \p target must not be empty
+     * \pre \p observer must not be empty
+     * \pre \p referenceFrame must not be empty
+     * \post The resulting TargetStateResult is set to valid values; the `lightTime` is
+     *       only set to a valid different from `0.0` if the \p aberrationCorrection is
+     *       not AberrationCorrection::None
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkezr_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
@@ -821,8 +816,8 @@ public:
      *
      * \throw SpiceException If the \p sourceFrame or the \p destinationFrame is
      *        not a valid frame
-     * \pre \p sourceFrame must not be empty.
-     * \pre \p destinatoinFrame must not be empty.
+     * \pre \p sourceFrame must not be empty
+     * \pre \p destinatoinFrame must not be empty
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sxform_c.html
      */
@@ -861,12 +856,12 @@ public:
      * \param ephemerisTimeTo The time for the destination reference frame
      * \return The transformation matrix that maps between the \p sourceFrame at time
      *         \p ephemerisTimeFrom to the \p destinationFrame at the time
-     *         \p ephemerisTimeTo.
+     *         \p ephemerisTimeTo
      *
      * \throw SpiceException If there is no coverage available for the specified
-     *         \p sourceFrame and \p destinationFrame
-     * \pre \p sourceFrame must not be empty.
-     * \pre \p destinationFrame must not be empty.
+     *        \p sourceFrame and \p destinationFrame
+     * \pre \p sourceFrame must not be empty
+     * \pre \p destinationFrame must not be empty
      */
     glm::dmat3 positionTransformMatrix(const std::string& sourceFrame,
         const std::string& destinationFrame, double ephemerisTimeFrom,
@@ -874,12 +869,18 @@ public:
 
     /// The structure returned by the #fieldOfView methods
     struct FieldOfViewResult {
-        /// The rough shape of the returned field of view
+        /**
+         * The rough shape of the returned field of view.
+         */
         enum class Shape {
-            Polygon = 0, ///< The shape is a pyramedal polyhedron
-            Rectangle, ///< The shape is a rectangular pyramid
-            Circle, ///< The shape is circular
-            Ellipse ///< The shape is an ellipse
+            /// The shape is a pyramedal polyhedron
+            Polygon = 0,
+            /// The shape is a rectangular pyramid
+            Rectangle,
+            /// The shape is circular
+            Circle,
+            /// The shape is an ellipse
+            Ellipse
         };
 
         /// The shape of the returned field of view
@@ -901,7 +902,7 @@ public:
      *
      * \param instrument The name of the instrument for which the FOV is to be retrieved
      * \return The FieldOfViewResult structure that contains information about the field
-     *         of view.
+     *         of view
      *
      * \throw SpiceException If \p instrument does not name a valid NAIF object
      * \pre \p instrument must not be empty
@@ -918,7 +919,7 @@ public:
      *
      * \param instrument The name of the instrument for which the FOV is to be retrieved
      * \return The FieldOfViewResult structure that contains information about the field
-     *         of view.
+     *         of view
      *
      * \throw SpiceException If \p instrument does not name a valid NAIF object
      * \post The returned structure has all its values initialized
@@ -927,7 +928,9 @@ public:
      */
     FieldOfViewResult fieldOfView(int instrument) const;
 
-    /// The structure retuned by the #terminatorEllipse method
+    /**
+     * The structure retuned by the #terminatorEllipse method.
+     */
     struct TerminatorEllipseResult {
         /// The vector from the target body at #targetEphemerisTime to the observer at
         /// the original time
@@ -955,16 +958,16 @@ public:
      *        surface in total shadow. TerminatorType::Penumbral is the boundary of the
      *        portion of the surface that is completely illuminated. Note that in
      *        astronomy references, the unqualified word "terminator" refers to the umbral
-     *        terminator.
+     *        terminator
      * \param aberrationCorrection The aberration correction method that is used
      * \param ephemerisTime The time at which the terminator ellipse shall be computed
      * \param numberOfTerminatorPoints The number of points along terminator that should
      *        be computed by this method
      * \return A TerminatorEllipseResult structure that contains all outputs of this
-     * function
+     *         function
      *
-     * \throw SpiceException If the \p target, \p observer, or \p lightSource are
-     *        not valid NAIF names, the \p frame is not a valid NAIF frame or there is
+     * \throw SpiceException If the \p target, \p observer, or \p lightSource are not
+     *        valid NAIF names, the \p frame is not a valid NAIF frame or there is
      *        insufficient kernel data loaded
      * \pre \p target must not be empty
      * \pre \p observer must not be empty
@@ -1001,20 +1004,29 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    /// Struct storing the information about all loaded kernels
+    /**
+     * Struct storing the information about all loaded kernels.
+     */
     struct KernelInformation {
-        std::string path; /// The path from which the kernel was loaded
-        KernelHandle id; /// A unique identifier for each kernel
-        int refCount; /// How many parts loaded this kernel and are interested in it
+        /// The path from which the kernel was loaded
+        std::string path;
+        /// A unique identifier for each kernel
+        KernelHandle id;
+        /// How many parts loaded this kernel and are interested in it
+        int refCount;
     };
 
-    /// Default constructor setting values for SPICE to not terminate on error
+    /**
+     * Default constructor setting values for SPICE to not terminate on error.
+     */
     SpiceManager();
     SpiceManager(const SpiceManager& c) = delete;
     SpiceManager& operator=(const SpiceManager& r) = delete;
     SpiceManager(SpiceManager&& r) = delete;
 
-    /// Default destructor that resets the SPICE settings
+    /**
+     * Default destructor that resets the SPICE settings.
+     */
     ~SpiceManager();
 
     /**
@@ -1080,8 +1092,8 @@ private:
      * If a transform matrix is requested for an uncovered time in the CK kernels, this
      * function will an estimated matrix. If the coverage has not yet started, the first
      * transform matrix will be retrieved. If the coverage has ended, the last transform
-     * matrix will be retrieved. If \p time is in a coverage gap, the transform
-     * matrix will be interpolated.
+     * matrix will be retrieved. If \p time is in a coverage gap, the transform matrix
+     * will be interpolated.
      *
      * \param fromFrame The transform matrix will be retrieved in relation to this frame
      * \param toFrame The reference frame into which the resulting matrix will transformed
@@ -1097,7 +1109,9 @@ private:
     glm::dmat3 getEstimatedTransformMatrix(const std::string& fromFrame,
         const std::string& toFrame, double time) const;
 
-    /// Loads pre defined leap seconds time kernel (naif00012.tls).
+    /**
+     * Loads pre defined leap seconds time kernel (naif00012.tls).
+     */
     void loadLeapSecondsSpiceKernel();
 
     /// A list of all loaded kernels

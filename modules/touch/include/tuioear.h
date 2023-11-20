@@ -58,8 +58,8 @@ public:
     ~TuioEar();
 
     /**
-    * Callback functions, listens to the TUIO server
-    */
+     * Callback functions, listens to the TUIO server.
+     */
     void addTuioObject(TUIO::TuioObject *tobj);
     void updateTuioObject(TUIO::TuioObject *tobj);
     void removeTuioObject(TUIO::TuioObject *tobj);
@@ -75,8 +75,8 @@ public:
     void refresh(TUIO::TuioTime frameTime);
 
     /**
-        * Lock-swap the containers of this listener
-        */
+     * Lock-swap the containers of this listener.
+     */
     std::vector<TouchInput> takeInput();
     std::vector<TouchInput> takeRemovals();
 
