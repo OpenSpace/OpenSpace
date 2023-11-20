@@ -1,13 +1,13 @@
 asset.require("./base_layers")
 
-asset.require("./../earth/layers/sweden_layers")
-asset.require("./../earth/moon/layers/sweden_layers")
-asset.require("./../jupiter/europa/layers/sweden_layers")
-asset.require("./../mars/layers/sweden_layers")
-asset.require("./../mercury/layers/sweden_layers")
-asset.require("./../saturn/enceladus/layers/sweden_layers")
+asset.require("./earth/layers/sweden_layers")
+asset.require("./earth/moon/layers/sweden_layers")
+asset.require("./jupiter/europa/layers/sweden_layers")
+asset.require("./mars/layers/sweden_layers")
+asset.require("./mercury/layers/sweden_layers")
+asset.require("./saturn/enceladus/layers/sweden_layers")
 -- The Sweden server does not have these layers, use the New York server for now
-asset.require("./../venus/layers/newyork_layers")
+asset.require("./venus/layers/newyork_layers")
 
 
 

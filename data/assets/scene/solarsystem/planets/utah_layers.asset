@@ -1,14 +1,14 @@
 asset.require("./base_layers")
 
-asset.require("./../earth/layers/utah_layers")
-asset.require("./../earth/moon/layers/utah_layers")
+asset.require("./earth/layers/utah_layers")
+asset.require("./earth/moon/layers/utah_layers")
 -- The Utah server does not have these layers, use the New York server for now
-asset.require("./../jupiter/europa/layers/newyork_layers")
-asset.require("./../mars/layers/utah_layers")
-asset.require("./../mercury/layers/utah_layers")
+asset.require("./jupiter/europa/layers/newyork_layers")
+asset.require("./mars/layers/utah_layers")
+asset.require("./mercury/layers/utah_layers")
 -- The Utah server does not have these layers, use the New York server for now
-asset.require("./../saturn/enceladus/layers/newyork_layers")
-asset.require("./../venus/layers/utah_layers")
+asset.require("./saturn/enceladus/layers/newyork_layers")
+asset.require("./venus/layers/utah_layers")
 
 
 

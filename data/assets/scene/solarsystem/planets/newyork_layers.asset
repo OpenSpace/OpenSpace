@@ -1,12 +1,12 @@
 asset.require("./base_layers")
 
-asset.require("./../earth/layers/newyork_layers")
-asset.require("./../earth/moon/layers/newyork_layers")
-asset.require("./../jupiter/europa/layers/newyork_layers")
-asset.require("./../mars/layers/newyork_layers")
-asset.require("./../mercury/layers/newyork_layers")
-asset.require("./../saturn/enceladus/layers/newyork_layers")
-asset.require("./../venus/layers/newyork_layers")
+asset.require("./earth/layers/newyork_layers")
+asset.require("./earth/moon/layers/newyork_layers")
+asset.require("./jupiter/europa/layers/newyork_layers")
+asset.require("./mars/layers/newyork_layers")
+asset.require("./mercury/layers/newyork_layers")
+asset.require("./saturn/enceladus/layers/newyork_layers")
+asset.require("./venus/layers/newyork_layers")
 
 
 
