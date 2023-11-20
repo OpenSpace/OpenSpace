@@ -69,7 +69,8 @@ enum class Type {
     ByLevelTileProvider,
     InterpolateTileProvider,
     FfmpegTileProvider,
-    PlanetaryTrailTileProvider
+    PlanetaryTrailTileProvider,
+    ForceHighResolutionTileProvider
 };
 
 struct TileProvider : public properties::PropertyOwner {
