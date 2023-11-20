@@ -756,8 +756,6 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
         case Format::SBDB:
             res = readSbdbFile(file);
             break;
-        default:
-            throw ghoul::MissingCaseException();
     }
 
     LINFO(fmt::format("Saving cache {} for Kepler file {}", cachedFile, file));

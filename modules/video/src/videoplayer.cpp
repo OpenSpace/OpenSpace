@@ -266,15 +266,12 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     if (p.playbackMode.has_value()) {
         switch (*p.playbackMode) {
-        case Parameters::PlaybackMode::RealTimeLoop:
-            _playbackMode = PlaybackMode::RealTimeLoop;
-            break;
-        case Parameters::PlaybackMode::MapToSimulationTime:
-            _playbackMode = PlaybackMode::MapToSimulationTime;
-            break;
-        default:
-            LERROR("Missing playback mode in VideoTileProvider");
-            throw ghoul::MissingCaseException();
+            case Parameters::PlaybackMode::RealTimeLoop:
+                _playbackMode = PlaybackMode::RealTimeLoop;
+                break;
+            case Parameters::PlaybackMode::MapToSimulationTime:
+                _playbackMode = PlaybackMode::MapToSimulationTime;
+                break;
         }
     }
 

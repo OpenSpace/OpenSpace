@@ -278,6 +278,14 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ApplyBlackoutToMasterInfo = {
+        "ApplyBlackoutToMaster",
+        "Apply Blackout to Master",
+        "If this value is 'true', the blackout factor is applied to the master node. "
+        "Regardless of this value, the clients will always adhere to the factor",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo FXAAInfo = {
         "FXAA",
         "Enable FXAA",
@@ -317,6 +325,7 @@ RenderEngine::RenderEngine()
     , _showFrameInformation(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
+    , _applyBlackoutToMaster(ApplyBlackoutToMasterInfo, true)
     , _enableFXAA(FXAAInfo, true)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
     , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.f)
@@ -377,6 +386,7 @@ RenderEngine::RenderEngine()
     addProperty(_value);
 
     addProperty(_globalBlackOutFactor);
+    addProperty(_applyBlackoutToMaster);
     addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
 
@@ -513,7 +523,7 @@ void RenderEngine::initializeGL() {
     // initialized window
     _horizFieldOfView = static_cast<float>(global::windowDelegate->getHorizFieldOfView());
 
-    configuration::Configuration::FontSizes fontSize = global::configuration->fontSize;
+    Configuration::FontSizes fontSize = global::configuration->fontSize;
     {
         ZoneScopedN("Fonts");
         TracyGpuZone("Fonts");
@@ -686,8 +696,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     const bool renderingEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
-    if (renderingEnabled && _globalBlackOutFactor > 0.f) {
-        _renderer.render(_scene, _camera, _globalBlackOutFactor);
+    if (renderingEnabled && combinedBlackoutFactor() > 0.f) {
+        _renderer.render(_scene, _camera, combinedBlackoutFactor());
     }
 
     // The CEF webbrowser fix has to be called at least once per frame and we are doing
@@ -755,7 +765,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         for (ScreenSpaceRenderable* ssr : ssrs) {
-            ssr->render(_globalBlackOutFactor);
+            ssr->render(combinedBlackoutFactor());
         }
         glDisable(GL_BLEND);
     }
@@ -905,6 +915,15 @@ void RenderEngine::renderDashboard() {
     global::dashboard->render(penPosition);
 }
 
+float RenderEngine::combinedBlackoutFactor() const {
+    if (global::windowDelegate->isMaster()) {
+        return _applyBlackoutToMaster ? _globalBlackOutFactor : 1.f;
+    }
+    else {
+        return _globalBlackOutFactor;
+    }
+}
+
 void RenderEngine::postDraw() {
     ZoneScoped;
 
@@ -928,14 +947,6 @@ ghoul::opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
         _openglStateCache = ghoul::opengl::OpenGLStateCache::instance();
     }
     return *_openglStateCache;
-}
-
-float RenderEngine::globalBlackOutFactor() const {
-    return _globalBlackOutFactor;
-}
-
-void RenderEngine::setGlobalBlackOutFactor(float opacity) {
-    _globalBlackOutFactor = opacity;
 }
 
 float RenderEngine::hdrExposure() const {
@@ -1384,20 +1395,8 @@ void RenderEngine::renderScreenLog() {
         }
 
         {
-            const glm::vec4 color = [alpha, white](ScreenLog::LogLevel level) {
-                switch (level) {
-                    case ghoul::logging::LogLevel::Debug:
-                        return glm::vec4(0.f, 1.f, 0.f, alpha);
-                    case ghoul::logging::LogLevel::Warning:
-                        return glm::vec4(1.f, 1.f, 0.f, alpha);
-                    case ghoul::logging::LogLevel::Error:
-                        return glm::vec4(1.f, 0.f, 0.f, alpha);
-                    case ghoul::logging::LogLevel::Fatal:
-                        return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
-                    default:
-                        return white;
-                }
-            }(it.level);
+            glm::vec4 color = ghoul::toColor(it.level);
+            color.a = alpha;
 
             const std::string_view lvl = ghoul::to_string(it.level);
             std::fill(buf.begin(), buf.end(), char(0));

@@ -6,21 +6,21 @@ end
 
 -- Download a preprocessed binary octree of Radial Velocity subset values per star
 -- (preprocessed into 8 binary files).
-local starsFolder = asset.syncedResource({
+local starsFolder = asset.resource({
   Name = "Gaia Stars RV",
   Type = "HttpSynchronization",
   Identifier = "gaia_stars_rv_octree",
   Version = 1
 })
 
-local colormaps = asset.syncedResource({
+local colormaps = asset.resource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",
   Version = 3
 })
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Stars Textures",
   Type = "HttpSynchronization",
   Identifier = "stars_textures",

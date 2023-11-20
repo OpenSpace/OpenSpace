@@ -52,4 +52,4 @@ The contents of this repository provided under an [MIT license](https://github.c
 # Support
 OpenSpace is supported by the following institutions:
 
-![Image](https://github.com/OpenSpace/openspace.github.io/raw/master/assets/logos/sponsors.png)
+![Image](https://docs.openspaceproject.com/en/latest/_static/logos/sponsors.png)

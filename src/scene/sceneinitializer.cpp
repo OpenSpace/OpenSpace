@@ -90,7 +90,6 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
 
     LoadingScreen* loadingScreen = global::openSpaceEngine->loadingScreen();
     if (loadingScreen) {
-        loadingScreen->setItemNumber(loadingScreen->itemNumber() + 1);
         loadingScreen->updateItem(
             node->identifier(),
             node->guiName(),

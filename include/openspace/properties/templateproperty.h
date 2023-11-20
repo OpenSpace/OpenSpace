@@ -113,7 +113,6 @@ public:
      * decoding is successful, the new value is set, otherwise it remains unchanged.
      *
      * \param state The Lua state from which the value will be decoded
-     * \return `true` if the decoding succeeded; `false` otherwise
      */
     virtual void setLuaValue(lua_State* state) override;
 

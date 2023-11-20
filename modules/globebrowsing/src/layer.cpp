@@ -209,16 +209,10 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
 {
     const Parameters p = codegen::bake<Parameters>(layerDict);
 
-    layers::Layer::ID typeID;
-    if (p.type.has_value()) {
-        typeID = ghoul::from_string<layers::Layer::ID>(*p.type);
-        if (typeID == layers::Layer::ID::Unknown) {
-            throw ghoul::RuntimeError("Unknown layer type");
-        }
-    }
-    else {
-        typeID = layers::Layer::ID::DefaultTileProvider;
-    }
+    layers::Layer::ID typeID =
+        p.type.has_value() ?
+        ghoul::from_string<layers::Layer::ID>(*p.type) :
+        layers::Layer::ID::DefaultTileProvider;
 
     initializeBasedOnType(typeID, layerDict);
 
@@ -330,8 +324,6 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             case layers::Layer::ID::SolidColor:
                 removeProperty(_solidColor);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
 
         _typeId = static_cast<layers::Layer::ID>(_typeOption.value());
@@ -502,8 +494,6 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
                 _solidColor = initDict.value<glm::dvec3>(ColorInfo.identifier);
             }
             break;
-        default:
-            throw ghoul::MissingCaseException();
     }
 }
 
@@ -527,8 +517,6 @@ void Layer::addVisibleProperties() {
         case layers::Layer::ID::SolidColor:
             addProperty(_solidColor);
             break;
-        default:
-            throw ghoul::MissingCaseException();
     }
 }
 

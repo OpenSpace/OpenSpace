@@ -88,8 +88,7 @@ struct Layer {
         TileProviderByLevel,
         SolidColor,
         SpoutImageProvider,
-        VideoTileProvider,
-        Unknown
+        VideoTileProvider
     };
 
     ID id;
@@ -206,9 +205,15 @@ constexpr openspace::globebrowsing::layers::Layer::ID from_string(std::string_vi
             return li.identifier == string;
         }
     );
-    return it != openspace::globebrowsing::layers::Layers.end() ?
-        it->id :
-        openspace::globebrowsing::layers::Layer::ID::Unknown;
+
+    if (it != openspace::globebrowsing::layers::Layers.end()) {
+        return it->id;
+    }
+    else {
+        throw ghoul::RuntimeError(fmt::format(
+            "Could not find Layer of type '{}'", string
+        ));
+    }
 }
 
 template <>
@@ -221,9 +226,15 @@ constexpr openspace::globebrowsing::layers::Group::ID from_string(std::string_vi
             return gi.identifier == string;
         }
     );
-    return it != openspace::globebrowsing::layers::Groups.end() ?
-        it->id :
-        openspace::globebrowsing::layers::Group::ID::Unknown;
+
+    if (it != openspace::globebrowsing::layers::Groups.end()) {
+        return it->id;
+    }
+    else {
+        throw ghoul::RuntimeError(fmt::format(
+            "Could not find Group of type '{}'", string
+        ));
+    }
 }
 
 template <>

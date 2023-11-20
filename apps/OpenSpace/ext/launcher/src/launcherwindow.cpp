@@ -25,6 +25,7 @@
 #include "launcherwindow.h"
 
 #include "profile/profileedit.h"
+#include "settingsdialog.h"
 
 #include <openspace/engine/configuration.h>
 #include <openspace/openspace.h>
@@ -60,6 +61,8 @@ namespace {
     constexpr int SmallItemWidth = 100;
     constexpr int SmallItemHeight = SmallItemWidth / 4;
 
+    constexpr int SettingsIconSize = 35;
+
     namespace geometry {
         constexpr QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
         constexpr QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
@@ -84,6 +87,12 @@ namespace {
         );
         constexpr QRect VersionString(
             5, ScreenHeight - SmallItemHeight, ItemWidth, SmallItemHeight
+        );
+        constexpr QRect SettingsButton(
+            ScreenWidth - SettingsIconSize - 5,
+            ScreenHeight - SettingsIconSize - 5,
+            SettingsIconSize,
+            SettingsIconSize
         );
     } // geometry
 
@@ -204,7 +213,7 @@ namespace {
 using namespace openspace;
 
 LauncherWindow::LauncherWindow(bool profileEnabled,
-                               const configuration::Configuration& globalConfig,
+                               const Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
@@ -375,6 +384,31 @@ QWidget* LauncherWindow::createCentralWidget() {
     );
     versionLabel->setObjectName("version-info");
     versionLabel->setGeometry(geometry::VersionString);
+
+    QPushButton* settingsButton = new QPushButton(centralWidget);
+    settingsButton->setObjectName("settings");
+    settingsButton->setGeometry(geometry::SettingsButton);
+    settingsButton->setIconSize(QSize(SettingsIconSize, SettingsIconSize));
+    connect(
+        settingsButton,
+        &QPushButton::released,
+        [this]() {
+            using namespace openspace;
+
+            Settings settings = loadSettings();
+
+            SettingsDialog dialog(std::move(settings), this);
+            connect(
+                &dialog,
+                &SettingsDialog::saveSettings,
+                [](Settings settings) {
+                    saveSettings(settings, findSettings());
+                }
+            );
+
+            dialog.exec();
+        }
+    );
 
     return centralWidget;
 }

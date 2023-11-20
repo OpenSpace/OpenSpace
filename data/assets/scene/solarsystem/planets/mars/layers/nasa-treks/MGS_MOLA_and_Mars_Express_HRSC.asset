@@ -9,7 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Ma
 local treks_Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw = {
   Identifier = "Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw",
   Name = [[MGS MOLA and Mars Express HRSC, Color Hillshade Blend]],
-  FilePath = asset.localResource("MGS_MOLA_and_Mars_Express_HRSC/Color_Hillshade_Blend.vrt"),
+  FilePath = asset.resource("MGS_MOLA_and_Mars_Express_HRSC/Color_Hillshade_Blend.vrt"),
   Description = [[This data product is a blend of digital terrain model (DTM) data derived from the Mars Orbiter Laser Altimeter (MOLA) instrument aboard NASA's Mars Global Surveyor spacecraft (MGS), and the High-Resolution Stereo Camera (HRSC) aboard the European Space Agency's Mars Express spacecraft.
 
 MOLA fired infrared laser pulses downward 10 times per second, and measured the time it took for the reflected pulses to return from the surface. The image used for the MOLA base of this map represents more than 600 million measurements gathered between 1999 and 2001. The average accuracy of each point is originally ~100 meters in horizontal position and the total elevation uncertainty is at least ±3 m. MOLA produced global topographic coverage with a spatial resolution of about 300 x 1000 m at the equator, and better near the poles.
@@ -22,7 +22,7 @@ R. Jaumann, et al. (2007), The high-resolution stereo camera (HRSC) experiment o
 local treks_Mars_MOLA_blend200ppx_HRSC_Shade_clon0dd_200mpp_lzw = {
   Identifier = "Mars_MOLA_blend200ppx_HRSC_Shade_clon0dd_200mpp_lzw",
   Name = [[MGS MOLA and Mars Express HRSC, Hillshade Blend]],
-  FilePath = asset.localResource("MGS_MOLA_and_Mars_Express_HRSC/Hillshade_Blend.vrt"),
+  FilePath = asset.resource("MGS_MOLA_and_Mars_Express_HRSC/Hillshade_Blend.vrt"),
   Description = [[This data product is a blend of digital terrain model (DTM) data derived from the Mars Orbiter Laser Altimeter (MOLA) instrument aboard NASA's Mars Global Surveyor spacecraft (MGS), and the High-Resolution Stereo Camera (HRSC) aboard the European Space Agency's Mars Express spacecraft.
 
 MOLA fired infrared laser pulses downward 10 times per second, and measured the time it took for the reflected pulses to return from the surface. The image used for the MOLA base of this map represents more than 600 million measurements gathered between 1999 and 2001. The average accuracy of each point is originally ~100 meters in horizontal position and the total elevation uncertainty is at least ±3 m. MOLA produced global topographic coverage with a spatial resolution of about 300 x 1000 m at the equator, and better near the poles.

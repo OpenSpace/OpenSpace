@@ -2,7 +2,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local sync = asset.syncedResource({
+local sync = asset.resource({
   Name = "Swift Tuttle Orbit",
   Type = "HttpSynchronization",
   Identifier = "swift_tuttle_horizons",

@@ -10,7 +10,7 @@ local Layer = {
   Identifier = "GlobeVideoLoopExample",
   Enabled = true,
   Type = "VideoTileProvider",
-  Video = asset.localResource("examplevideo.mp4"),
+  Video = asset.resource("examplevideo.mp4"),
 }
 
 

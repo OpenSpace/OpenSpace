@@ -58,15 +58,15 @@ int main(int argc, char** argv) {
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
-    std::filesystem::path configFile = configuration::findConfiguration();
+    std::filesystem::path configFile = findConfiguration();
     // Register the base path as the directory where 'filename' lives
     std::filesystem::path base = configFile.parent_path();
     FileSys.registerPathToken("${BASE}", base);
 
-    *global::configuration = configuration::loadConfigurationFromFile(
+    *global::configuration = loadConfigurationFromFile(
         configFile.string(),
-        glm::ivec2(0),
-        ""
+        "",
+        glm::ivec2(0)
     );
     global::openSpaceEngine->registerPathTokens();
     global::openSpaceEngine->initialize();

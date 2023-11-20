@@ -2,7 +2,7 @@ local globe = asset.require("../../io")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Io Textures",
   Type = "HttpSynchronization",
   Identifier = "io_textures",

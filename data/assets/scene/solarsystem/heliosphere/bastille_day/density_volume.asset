@@ -4,7 +4,7 @@ local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local densityDirectory = asset.syncedResource({
+local densityDirectory = asset.resource({
   Name = "Bastille Day MAS Density",
   Type = "HttpSynchronization",
   Identifier = "bastille_day_mas_density",
@@ -36,7 +36,7 @@ local DensityVolume = {
     Type = "RenderableTimeVaryingVolume",
     StepSize = 0.004,
     Brightness = 0.3,
-    TransferFunction = asset.localResource("transferfunctions/mas-mhd-r-squared-old.txt"),
+    TransferFunction = asset.resource("transferfunctions/mas-mhd-r-squared-old.txt"),
     SourceDirectory = densityDirectory,
     GridType = "Spherical",
     SecondsBefore = 24 * 60 * 60,

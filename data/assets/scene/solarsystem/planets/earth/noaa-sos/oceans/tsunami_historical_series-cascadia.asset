@@ -26,7 +26,7 @@ occurred around 9:00 at night in Cascadia on January 26, 1700 (05:00 January 27 
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-cascadia-1700/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

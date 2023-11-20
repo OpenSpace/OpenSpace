@@ -1,4 +1,4 @@
-local image = asset.syncedResource({
+local image = asset.resource({
   Name = "Trifid Nebula Image",
   Type = "HttpSynchronization",
   Identifier = "trifid_image",

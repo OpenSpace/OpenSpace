@@ -1,4 +1,4 @@
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "Constellation Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_constellations_data",

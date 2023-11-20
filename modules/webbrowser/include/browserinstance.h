@@ -75,7 +75,7 @@ public:
     /**
      * Call when the window has been reshaped.
      *
-     * \param wrapper the windowWrapper capable of
+     * \param windowSize the size of the window in pixels
      */
     void reshape(const glm::ivec2& windowSize);
 

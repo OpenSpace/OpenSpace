@@ -38,6 +38,7 @@ documentation::Documentation RenderableSphereSpout::Documentation() {
     return {
         "Renderable Sphere Spout",
         "spout_sphere_spout",
+        "",
         {
             {
                 "Name",

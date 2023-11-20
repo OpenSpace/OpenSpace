@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "HiRISE-LS",
   Name = "HiRISE Local Set",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("hirisels.vrt"),
+  FilePath = asset.resource("hirisels.vrt"),
   BlendMode = "Color",
   Description = [[HiRISE (High Resolution Imaging Science Experiment) is the most
     powerful camera ever sent to another planet, one of six instruments onboard the

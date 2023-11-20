@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___PATH___H__
 #define __OPENSPACE_CORE___PATH___H__
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/navigation/pathcurve.h>
 #include <openspace/navigation/waypoint.h>
 #include <ghoul/misc/dictionary.h>
@@ -109,6 +110,8 @@ public:
      * Reset variables used to play back path
      */
     void resetPlaybackVariables();
+
+    static documentation::Documentation Documentation();
 
 private:
     /**

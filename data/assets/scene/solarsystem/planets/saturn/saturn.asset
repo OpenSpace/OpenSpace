@@ -4,7 +4,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Type = "HttpSynchronization",
   Name = "Saturn textures",
   Identifier = "saturn_textures",
