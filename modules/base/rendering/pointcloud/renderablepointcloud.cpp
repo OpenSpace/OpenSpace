@@ -197,11 +197,9 @@ namespace {
         // object being rendered
         std::optional<std::string> file;
 
-        // If the data file has a numeric value that corresponds to missing data points,
-        // this setting can be used to interpret point with this value as having no data.
-        // Note that this does however have its limitations, as the same value will be
-        // used across all columns in the dataset.
-        std::optional<float> missingDataValue;
+        // A dictionary specifying details on how to load the dataset
+        std::optional<ghoul::Dictionary> dataMapping
+            [[codegen::reference("dataloader_datamapping")]];
 
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
         std::optional<std::string> texture;
@@ -388,8 +386,8 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _speckFile = absPath(*p.file).string();
     }
 
-    if (p.missingDataValue.has_value()) {
-        _missingDataValue = p.missingDataValue;
+    if (p.dataMapping.has_value()) {
+        _dataMapping = dataloader::DataMapping::createFromDictionary(*p.dataMapping);
     }
 
     _drawElements = p.drawElements.value_or(_drawElements);
@@ -487,10 +485,7 @@ void RenderablePointCloud::initialize() {
     ZoneScoped;
 
     if (_hasSpeckFile) {
-        dataloader::DataMapping specs = {
-            .missingDataValue = _missingDataValue
-        };
-        _dataset = dataloader::data::loadFileWithCache(_speckFile, specs);
+        _dataset = dataloader::data::loadFileWithCache(_speckFile, _dataMapping);
 
         if (_hasColorMapFile) {
             _colorSettings.colorMapping->initialize(_dataset);

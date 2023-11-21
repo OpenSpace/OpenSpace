@@ -28,6 +28,9 @@
 #include <optional>
 #include <string>
 
+namespace openspace::documentation { struct Documentation; }
+namespace ghoul { class Dictionary; }
+
 namespace openspace::dataloader {
 
 // @TODO: Make sure the cached file is updated when these values changes.
@@ -35,6 +38,9 @@ namespace openspace::dataloader {
 // when caching.
 // @TODO: Also make sure to update cache data versions!
 struct DataMapping {
+    static DataMapping createFromDictionary(const ghoul::Dictionary& dictionary);
+    static documentation::Documentation Documentation();
+
     std::optional<std::string> xColumnName;
     std::optional<std::string> yColumnName;
     std::optional<std::string> zColumnName;

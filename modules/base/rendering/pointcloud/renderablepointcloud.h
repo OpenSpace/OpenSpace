@@ -149,7 +149,7 @@ protected:
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     dataloader::Dataset _dataset;
-    std::optional<float> _missingDataValue;
+    dataloader::DataMapping _dataMapping;
 
     std::unique_ptr<LabelsComponent> _labels;
 

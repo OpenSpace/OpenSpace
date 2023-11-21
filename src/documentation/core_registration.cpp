@@ -24,6 +24,7 @@
 
 #include <openspace/documentation/core_registration.h>
 
+#include <openspace/data/datamapping.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
@@ -76,6 +77,8 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(TimeRange::Documentation());
     engine.addDocumentation(Translation::Documentation());
     engine.addDocumentation(TimeFrame::Documentation());
+
+    engine.addDocumentation(dataloader::DataMapping::Documentation());
 
     engine.addDocumentation(interaction::NavigationState::Documentation());
     engine.addDocumentation(interaction::Path::Documentation());
