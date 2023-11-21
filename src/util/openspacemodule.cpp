@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <filesystem>
@@ -50,12 +51,7 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
     ZoneName(identifier().c_str(), identifier().size());
 
     std::string upperIdentifier = identifier();
-    std::transform(
-        upperIdentifier.begin(),
-        upperIdentifier.end(),
-        upperIdentifier.begin(),
-        [](char v) { return static_cast<char>(toupper(v)); }
-    );
+    ghoul::toUpperCase(upperIdentifier);
 
     std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
 
@@ -111,12 +107,7 @@ std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {
 
 std::filesystem::path OpenSpaceModule::modulePath() const {
     std::string moduleIdentifier = identifier();
-    std::transform(
-        moduleIdentifier.begin(),
-        moduleIdentifier.end(),
-        moduleIdentifier.begin(),
-        [](char v) { return static_cast<char>(tolower(v)); }
-    );
+    ghoul::toLowerCase(moduleIdentifier);
 
     // First try the internal module directory
     std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);

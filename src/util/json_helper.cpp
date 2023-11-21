@@ -24,6 +24,8 @@
 
 #include <openspace/util/json_helper.h>
 
+#include <ghoul/misc/misc.h>
+
 namespace openspace {
 
 std::string escapedJson(const std::string& text) {
@@ -91,18 +93,8 @@ void sortJson(nlohmann::json& json, const std::string& key) {
         [&key](const nlohmann::json& lhs, const nlohmann::json& rhs) {
             std::string lhsString = lhs[key];
             std::string rhsString = rhs[key];
-            std::transform(
-                lhsString.begin(),
-                lhsString.end(),
-                lhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); }
-            );
-            std::transform(
-                rhsString.begin(),
-                rhsString.end(),
-                rhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); }
-            );
+            ghoul::toLowerCase(lhsString);
+            ghoul::toLowerCase(rhsString);
 
             return rhsString > lhsString;
         }

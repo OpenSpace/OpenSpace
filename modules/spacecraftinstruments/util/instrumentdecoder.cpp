@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <optional>
@@ -47,11 +48,7 @@ namespace openspace {
 InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _type = p.detectorType;
-    std::for_each(
-        _type.begin(),
-        _type.end(),
-        [](char& in) { in = static_cast<char>(toupper(in)); }
-    );
+    ghoul::toUpperCase(_type);
 
     if (p.stopCommand.has_value() && _type == "SCANNER") {
         _stopCommand = *p.stopCommand;

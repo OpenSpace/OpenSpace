@@ -74,6 +74,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
@@ -816,7 +817,7 @@ void OpenSpaceEngine::loadAssets() {
                 it = allSyncs.erase(it);
             }
         }
-       
+
         if (_shouldAbortLoading) {
             global::windowDelegate->terminate();
             break;
@@ -830,7 +831,7 @@ void OpenSpaceEngine::loadAssets() {
 
         if (finishedLoading) {
             break;
-        }        
+        }
     } // while(true)
 
     if (_shouldAbortLoading) {
@@ -1533,11 +1534,8 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     lua_setglobal(s, "basename");
 
     std::string extension = file.extension().string();
-    std::transform(
-        extension.begin(), extension.end(),
-        extension.begin(),
-        [](char c) { return static_cast<char>(::tolower(c)); }
-    );
+    ghoul::toLowerCase(extension);
+
     ghoul::lua::push(s, extension);
     lua_setglobal(s, "extension");
 
