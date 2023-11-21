@@ -78,18 +78,18 @@ public:
     * Sets the mission with the name \p missionName as the current mission. The current
     * mission is what is return by `currentMission()`.
     *
-    * \pre missionName must not be empty
+    * \pre \p missionName must not be empty
     */
     void setCurrentMission(const std::string& missionName);
 
     /**
-     * Returns true if a current mission exists
+     * Returns true if a current mission exists.
      */
     bool hasCurrentMission() const;
 
     /**
-     * Returns the latest mission specified to `setCurrentMission()`. If no mission has
-     * been specified, the first mission loaded will be returned. If no mission has been
+     * Returns the latest mission specified to #setCurrentMission. If no mission has been
+     * specified, the first mission loaded will be returned. If no mission has been
      * loaded, a warning will be printed and a dummy mission will be returned.
      */
     const Mission& currentMission();
@@ -98,7 +98,6 @@ public:
      * Returns the mission map.
      */
     const std::map<std::string, Mission>& missionMap();
-
 
     static scripting::LuaLibrary luaLibrary();
 

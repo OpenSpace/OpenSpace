@@ -36,18 +36,18 @@ struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
      * Constructs a Job that will read a single FITS file in a concurrent thread and
      * divide the star data into 8 octants depending on position.
      *
-     * \param filePath the file from which to load the data
-     * \param allColumns define which columns that will be read, it should correspond
-     *        to the pre-defined order in the job. If additional columns are defined they
+     * \param filePath The file from which to load the data
+     * \param allColumns Define which columns that will be read, it should correspond to
+     *        the pre-defined order in the job. If additional columns are defined they
      *        will be read but slow down the process. Proper conversions of positions and
      *        velocities will take place and all values will be checked for NaNs. If
      *        \p firstRow is < 1 then reading will begin at first row in table. If
      *        \p lastRow < firstRow then entire table will be read
-     * \param firstRow the index of the first row to be read
-     * \param lastRow the index of the last row to be read
-     * \param nDefaultCols defines how many columns that will be read per star
-     * \param nValuesPerStar defines how many values that will be stored per star
-     * \param fitsReader the reader that should be used in this job
+     * \param firstRow The index of the first row to be read
+     * \param lastRow The index of the last row to be read
+     * \param nDefaultCols Defines how many columns that will be read per star
+     * \param nValuesPerStar Defines how many values that will be stored per star
+     * \param fitsReader The reader that should be used in this job
      */
     ReadFileJob(std::string filePath, std::vector<std::string> allColumns, int firstRow,
         int lastRow, size_t nDefaultCols, int nValuesPerStar,

@@ -42,87 +42,85 @@ struct RaycastData;
 class VolumeRaycaster {
 public:
     /**
-     * Destructor
+     * Destructor.
      */
     virtual ~VolumeRaycaster() = default;
 
     /**
-     * Render the volume's entry points (front face of the bounding geometry)
+     * Render the volume's entry points (front face of the bounding geometry).
      */
     virtual void renderEntryPoints(const RenderData& /*data*/,
         ghoul::opengl::ProgramObject& /*program*/) = 0;
 
     /**
-     * Render the volume's exit points (back face of the bounding geometry)
+     * Render the volume's exit points (back face of the bounding geometry).
      */
     virtual void renderExitPoints(const RenderData& /*data*/,
         ghoul::opengl::ProgramObject& /*program*/) = 0;
 
     /**
-     * Prepare the volume for the ABuffer's resolve step.
-     * Make sure textures are up to date, bind them to texture units, set program uniforms
-     * etc.
+     * Prepare the volume for the ABuffer's resolve step. Make sure textures are up to
+     * date, bind them to texture units, set program uniforms etc.
      */
     virtual void preRaycast(const RaycastData& data,
         ghoul::opengl::ProgramObject& program);
 
     /**
-     * Clean up for the volume after the ABuffer's resolve step.
-     * Make sure texture units are deinitialized, etc.
+     * Clean up for the volume after the ABuffer's resolve step. Make sure texture units
+     * are deinitialized, etc.
      */
     virtual void postRaycast(const RaycastData& data,
         ghoul::opengl::ProgramObject& program);
 
     /**
-    * Return true if the camera is inside the volume.
-    * Also set localPosition to the camera position in the volume's local coordinate
-    * system.
-    */
+     * Return true if the camera is inside the volume. Also set localPosition to the
+     * camera position in the volume's local coordinate system.
+     */
     virtual bool isCameraInside(const RenderData& data, glm::vec3& localPosition);
 
     /**
-     * Return a path the file to use as vertex shader
+     * Return a path the file to use as vertex shader.
      *
-     * The shader preprocessor will have acceess to
-     *   A #{namespace} variable (unique per helper file)
+     * The shader preprocessor will have access to:
+     *   - A `#{namespace}` variable (unique per helper file)
      */
     virtual std::string boundsVertexShaderPath() const = 0;
 
-    /*
+    /**
      * Return a path to a file with the functions, uniforms and fragment shader in
      * variables required to generate the fragment color and depth.
      *
-     * Should define the function:
-     * Fragment getFragment()
+     * Should define the function: `Fragment getFragment()`
      *
-     * The shader preprocessor will have acceess to
-     *   A #{namespace} variable (unique per helper file)
+     * The shader preprocessor will have access to:
+     *   - A `#{namespace}` variable (unique per helper file)
      */
     virtual std::string boundsFragmentShaderPath() const = 0;
 
     /**
-     * Return a path to a file with all the uniforms, functions etc
-     * required to perform ray casting through this volume.
+     * Return a path to a file with all the uniforms, functions, etc. Required to perform
+     * ray casting through this volume.
      *
      * The header should define the following two functions:
+     * ```
      *   vec4 sample#{id}(vec3 samplePos, vec3 dir, float occludingAlpha,
      *                    inout float maxStepSize)
      *      (return color of sample)
      *   float stepSize#{id}(vec3 samplePos, vec3 dir)
      *      (return the preferred step size at this sample position)
+     * ```
      *
-     * The shader preprocessor will have acceess to
-     *   An #{id} variable (unique per volume)
-     *   A #{namespace} variable (unique per helper file)
+     * The shader preprocessor will have access to:
+     *   - An #{id} variable (unique per volume)
+     *   - A #{namespace} variable (unique per helper file)
      */
     virtual std::string raycasterPath() const = 0;
 
     /**
-     * Return a path to a glsl file with helper functions required for the
-     * transformation and raycast steps.
-     * This file will be included once per shader program generated,
-     * regardless of how many volumes say they require the file.
-     * Ideal to avoid redefinitions of helper functions.
+     * Return a path to a glsl file with helper functions required for the transformation
+     * and raycast steps. This file will be included once per shader program generated,
+     * regardless of how many volumes say they require the file. Ideal to avoid
+     * redefinitions of helper functions.
      *
      * The shader preprocessor will have access to the #{namespace} variable (unique per
      * helper file) which should be a prefix to all symbols defined by the helper

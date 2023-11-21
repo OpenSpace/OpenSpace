@@ -56,7 +56,7 @@ public:
 
     /**
      * Save the state machine to a file given by the name and optional directory.
-     * If no directory is given, the TEMP folder is used
+     * If no directory is given, the TEMP folder is used.
      */
     void saveToFile(const std::string& fileName,
         std::string directory = "${TEMPORARY}/") const;

@@ -127,7 +127,9 @@ protected:
 
     void setRenderBinFromOpacity();
 
-    /// Returns the full opacity constructed from the _opacity and _fade property values
+    /**
+     * Returns the full opacity constructed from the _opacity and _fade property values.
+     */
     float opacity() const noexcept override;
 
     SceneGraphNode* parent() const noexcept;
@@ -148,15 +150,15 @@ protected:
     };
 
     /**
-     * Calculates the model transformation matrix with the given data and returns it
+     * Calculates the model transformation matrix with the given data and returns it.
      *
-     * \param data the RenderData for the object that the model transformation matrix
+     * \param data The RenderData for the object that the model transformation matrix
      *        should be calculated for
-     * \param altTransform an object containing alternative transformations to use instead
+     * \param altTransform An object containing alternative transformations to use instead
      *        of those given in data. The transforms can be translation, rotation and
      *        scale.
      *
-     * \return the resulting model transformation matrix in double precision
+     * \return The resulting model transformation matrix in double precision
      */
     glm::dmat4 calcModelTransform(const RenderData& data,
         const AlternativeTransform& altTransform = {
@@ -164,28 +166,26 @@ protected:
         }) const;
 
     /**
-     * Calculates the model view transformation matrix with the given data and returns it
+     * Calculates the model view transformation matrix with the given data and returns it.
      *
-     * \param data the RenderData for the object that the model view transformation matrix
+     * \param data The RenderData for the object that the model view transformation matrix
      *        should be calculated for
-     * \param modelTransform an alternative model transformation matrix to use. If not
+     * \param modelTransform An alternative model transformation matrix to use. If not
      *        provided the function will calculate a new one.
-     *
-     * \return the resulting model view transformation matrix in double precision
+     * \return The resulting model view transformation matrix in double precision
      */
     glm::dmat4 calcModelViewTransform(const RenderData& data,
         std::optional<glm::dmat4> modelTransform = std::nullopt) const;
 
     /**
      * Calculates the model view projection transformation matrix with the given data and
-     * returns it
+     * returns it.
      *
-     * \param data the RenderData for the object that the model view projection
+     * \param data The RenderData for the object that the model view projection
      *        transformation matrix should be calculated for
-     * \param modelTransform an alternative model transformation matrix to use. If not
+     * \param modelTransform An alternative model transformation matrix to use. If not
      *        provided the function will calculate a new one.
-     *
-     * \return the resulting model view projection transformation matrix in double
+     * \return The resulting model view projection transformation matrix in double
      *         precision
      */
     glm::dmat4 calcModelViewProjectionTransform(const RenderData& data,
@@ -193,15 +193,14 @@ protected:
 
     /**
      * Calculates the model, model view, and the model view projection transformation
-     * matricies with the given data and returns them in a tuple object
+     * matricies with the given data and returns them in a tuple object.
      *
-     * \param data the RenderData for the object that the transforms should be
+     * \param data The RenderData for the object that the transforms should be
      *        calculated for
-     * \param altModelTransform an object containing alternative transformations to use
+     * \param altModelTransform An object containing alternative transformations to use
      *        instead of those given in data. The transforms can be translation, rotation
      *        and scale.
-     *
-     * \return a tuple object containing the resulting model, model view, and the
+     * \return A tuple object containing the resulting model, model view, and the
      *         model view projection transformation matrices
      */
     std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> calcAllTransforms(

@@ -70,12 +70,12 @@ public:
     void setDeltaTimeSteps(const std::vector<double> deltaTimes);
 
     /**
-     * Returns the delta time, unaffected by pause
+     * Returns the delta time, unaffected by pause.
      */
     double targetDeltaTime() const;
 
     /*
-     * Returns the current delta time, as affected by pause
+     * Returns the current delta time, as affected by pause.
      */
     double deltaTime() const;
 
@@ -83,7 +83,7 @@ public:
      * Sets the simulation time using the time contents of a profile. The function will
      * set either a relative or absolute time.
      *
-     * \param p The Profile to be read.
+     * \param p The Profile to be read
      */
     void setTimeFromProfile(const Profile& p);
 

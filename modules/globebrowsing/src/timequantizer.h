@@ -35,8 +35,8 @@ namespace openspace::globebrowsing {
 
 /**
  * RangedTime class is used to define an acceptable time range. Functionality includes
- * checking if a given date/time is within that range, or clamping a date to enforce
- * this range.
+ * checking if a given date/time is within that range, or clamping a date to enforce this
+ * range.
  */
 class RangedTime {
 public:
@@ -46,8 +46,8 @@ public:
      * Constructor that accepts an ISO8601 date/time string (`YYYY-MM-DDTHH:mm:ss`) for an
      * allowable time range defined by start and end values.
      *
-     * \param start The date/time start of the time range.
-     * \param end   The date/time ending of the time range.
+     * \param start The date/time start of the time range
+     * \param end The date/time ending of the time range
      */
     RangedTime(std::string start, std::string end);
 
@@ -56,18 +56,18 @@ public:
      * instance of the class.
      *
      * \param checkTime The time to test if it falls within the range
-     * \return true if the input date/time falls between the start and end date/times
-    */
+     * \return `true` if the input date/time falls between the start and end date/times
+     */
     bool includes(const Time& checkTime) const;
 
     /**
-     * Enforces the start/end range on a given date/time string by clamping the value
+     * Enforces the start/end range on a given date/time string by clamping the value.
      *
      * \param checkTime An ISO8601 date/time string to clamp if falls outside of range
-     * \return clamped value of input parameter, will be equal to the start value if
-     *         less than start, equal to end if greater than end, or equal to input
-     *         parameter if falls in-between
-    */
+     * \return Clamped value of input parameter, will be equal to the start value if less
+     *         than start, equal to end if greater than end, or equal to input parameter
+     *         if falls in-between
+     */
     const char* clamp(const char* checkTime);
 
     /**
@@ -78,21 +78,21 @@ public:
     std::string_view start() const;
 
     /**
-     * Get the end date/time of the time range
+     * Get the end date/time of the time range.
      *
      * \return The ISO8601 date/time string that defines the end of the range
      */
     std::string_view end() const;
 
     /**
-     * Set the start date/time of the time range
+     * Set the start date/time of the time range.
      *
      * \param start The ISO8601 date/time string that defines the start of the range
      */
     void setStart(const std::string start);
 
     /**
-     * Set the end date/time of the time range
+     * Set the end date/time of the time range.
      *
      * \param start The ISO8601 date/time string that defines the end of the range
      */
@@ -109,6 +109,7 @@ private:
  * DateTime class is used to manage a date/time value and provide methods for increment/
  * decrementing the value, which gets complicated because of the varying days of the
  * different months, leap years, etc.
+ *
  * This class exists to handle date/time values within a "people-friendly" calendar
  * schedule. For example, a temporal data set that's updated on the 10th of every month
  * will sometimes be updated in 28 days, other times in 31 days. The intent of the class
@@ -120,27 +121,27 @@ public:
     /**
      * Constructor that initializes with date/time string.
      *
-     * \param initDateTime the ISO8601 date/time string (`YYYY-MM-DDTHH:mm:ss`)
+     * \param initDateTime The ISO8601 date/time string (`YYYY-MM-DDTHH:mm:ss`)
      */
     DateTime(std::string_view initDateTime);
 
     /**
      * Set the date/time value.
      *
-     * \param input the ISO8601 date/time string (`YYYY-MM-DDTHH:mm:ss`) to set
+     * \param input The ISO8601 date/time string (`YYYY-MM-DDTHH:mm:ss`) to set
      */
     void setTime(std::string_view input);
 
     /**
      * Get the date/time value in ISO8601 format.
      *
-     * \return the date/time value string
+     * \return The date/time value string
      */
     std::string ISO8601() const;
 
     /**
-     * Get the J2000 seconds equivalent of the object's date/time, using
-     * the loaded SPICE kernel.
+     * Get the J2000 seconds equivalent of the object's date/time, using the loaded
+     * SPICE kernel.
      *
      * \return J2000 seconds of date/time
      */
@@ -149,110 +150,110 @@ public:
     /**
      * Get the year of the object's date/time (YYYY format).
      *
-     * \return integer value of the year
+     * \return Integer value of the year
      */
     int year() const;
 
     /**
      * Get the month of the object's date/time (1 - 12).
      *
-     * \return integer value of the month
+     * \return Integer value of the month
      */
     int month() const;
 
     /**
      * Get the day-of-month of the object's date/time (1 - 31).
      *
-     * \return integer value of the day
+     * \return Integer value of the day
      */
     int day() const;
 
     /**
-     * Get the hour of the object's date/time
+     * Get the hour of the object's date/time.
      *
-     * \return integer value of the hour (0 - 23)
+     * \return Integer value of the hour (0 - 23)
      */
     int hour() const;
 
     /**
-     * Get the minute of the object's date/time
+     * Get the minute of the object's date/time.
      *
-     * \return integer value of the minutes
+     * \return Integer value of the minutes
      */
     int minute() const;
 
     /**
-     * Get the seconds of the object's date/time
+     * Get the seconds of the object's date/time.
      *
-     * \return integer value of the seconds
+     * \return Integer value of the seconds
      */
     int second() const;
 
     /**
-     * Set the year of the object's date/time
+     * Set the year of the object's date/time.
      *
-     * \param y integer value of the year
+     * \param y Integer value of the year
      */
     void setYear(int y);
 
     /**
-     * Set the month of the object's date/time (1 - 12)
+     * Set the month of the object's date/time (1 - 12).
      *
-     * \param m integer value of the year
+     * \param m Integer value of the year
      */
     void setMonth(int m);
 
     /**
-     * Set the day-of-month of the object's date/time (1 - 31)
+     * Set the day-of-month of the object's date/time (1 - 31).
      *
-     * \param d integer value of the day
+     * \param d Integer value of the day
      */
     void setDay(int d);
 
     /**
-     * Set the hour of the object's date/time (0 - 23)
+     * Set the hour of the object's date/time (0 - 23).
      *
-     * \param h integer value of the hour
+     * \param h Integer value of the hour
      */
     void setHour(int h);
 
     /**
-     * Set the minute of the object's date/time
+     * Set the minute of the object's date/time.
      *
-     * \param m integer value of the minute
+     * \param m Integer value of the minute
      */
     void setMinute(int m);
 
     /**
-     * Set the seconds of the object's date/time
+     * Set the seconds of the object's date/time.
      *
-     * \param s integer value of the seconds
+     * \param s Integer value of the seconds
      */
     void setSecond(int s);
 
     /**
-     * Increment operation for the date/time
+     * Increment operation for the date/time.
      *
      * \param value integer value for number of units in an operation
      * \param unit single char that specifies the unit of increment. Allowable units are:
-     *             (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
-     * \param error The difference in J2000 seconds from current date/time to target
-     *              (a positive value means target is in the future)
+     *        (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
+     * \param error The difference in J2000 seconds from current date/time to target (a
+     *        positive value means target is in the future)
      * \param resolution The J2000 seconds of the interval defined by the value & unit
      * \return The number of increments that were performed in order to get as close as
-     *         possible to the target, where each increment is defined by the value &
-     *         unit (and approximated but not fixed by the resolution param)
+     *         possible to the target, where each increment is defined by the value & unit
+     *         (and approximated but not fixed by the resolution param)
      */
     int increment(int value, char unit, double error, double resolution);
 
     /**
-     * Decrement operation for the date/time
+     * Decrement operation for the date/time.
      *
      * \param value integer value for number of units in an operation
      * \param unit single char that specifies the unit of decrement. Allowable units are:
-     *             (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
-     * \param error The difference in J2000 seconds from current date/time to target
-     *              (a positive value means target is in the future)
+     *        (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
+     * \param error The difference in J2000 seconds from current date/time to target (a
+     *        positive value means target is in the future)
      * \param resolution The J2000 seconds of the interval defined by the value & unit
      * \return The number of decrements that were performed in order to get as close as
      *         possible to the target, where each decrement is defined by the value &
@@ -261,20 +262,20 @@ public:
     int decrement(int value, char unit, double error, double resolution);
 
     /**
-     * Single increment operation for the date/time
+     * Single increment operation for the date/time.
      *
      * \param value integer value for number of units in an operation
      * \param unit single char that specifies the unit of increment. Allowable units are:
-     *             (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
+     *        (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
      */
     void incrementOnce(int value, char unit);
 
     /**
-     * Single decrement operation for the date/time
+     * Single decrement operation for the date/time.
      *
      * \param value integer value for number of units in an operation
      * \param unit single char that specifies the unit of decrement. Allowable units are:
-     *             (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
+     *        (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
      */
     void decrementOnce(int value, char unit);
 
@@ -296,7 +297,7 @@ public:
 
     /**
      * Constructor that initializes with formatted strings for start & ends date/times,
-     * and a time resolution within that range
+     * and a time resolution within that range.
      *
      * \param start the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for start
      * \param end the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for end
@@ -314,27 +315,27 @@ public:
      * Set the time range start & end date/time range.
      *
      * \param start The ISO8601 date/time string for start of the time range
-     * \param end The ISO8601 date/time string for end of the time range.
+     * \param end The ISO8601 date/time string for end of the time range
      */
     void setStartEndRange(const std::string& start, const std::string& end);
 
     /**
-     * Set the time resolution
+     * Set the time resolution.
      *
-     * \param resolutionString String that defines the resolution within the time range.
-     *        see comment header for constructor for the allowable values and ranges.
+     * \param resolutionString String that defines the resolution within the time range
+     *        see comment header for constructor for the allowable values and ranges
      */
     void setResolution(const std::string& resolutionString);
 
     /**
-     * Takes a time resulition string and parses it into a double
-     * value representing the time resolution as seconds.
+     * Takes a time resulition string and parses it into a double value representing the
+     * time resolution as seconds.
      *
      * Example: parseTimeResolutionStr("1d");
      *
-     * \param resolutionStr with the format {number}{unit} where supported units are:
-     *        (s)econds, (m)inutes, (h)ours, (d)ays, (y)ears
-     * \return the time resolution in seconds
+     * \param resolutionStr String with the format {number}{unit} where supported units
+     *        are: (s)econds, (m)inutes, (h)ours, (d)ays, (y)ears
+     * \return The time resolution in seconds
      */
     double parseTimeResolutionStr(const std::string& resolutionStr);
 
@@ -344,7 +345,7 @@ public:
      *
      * \param t Time instance, which will be quantized
      * \param clamp Whether or not time should be clamped if not t is in the time range
-     * \return wether or not time was quantized
+     * \return Whether or not time was quantized
      */
     bool quantize(Time& t, bool clamp);
 

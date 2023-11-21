@@ -32,9 +32,11 @@
 
 namespace openspace {
 
-// The TouchInput represents a single finger/device-input at a specific point in time.
-// the fingerId and touchDeviceId coupled with the timestamp allows this to be compared
-// with other TouchInputs in order to calculate gesture-like behaviour.
+/**
+ * The TouchInput represents a single finger/device-input at a specific point in time. The
+ * fingerId and touchDeviceId coupled with the timestamp allows this to be compared with
+ * other TouchInputs in order to calculate gesture-like behavior.
+ */
 struct TouchInput {
     TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y, double timestamp);
     glm::vec2 screenCoordinates(glm::vec2 resolution) const;
@@ -47,27 +49,32 @@ struct TouchInput {
     size_t fingerId;
     float x;
     float y;
-    float dx = 0.f;         // movement in x direction since last touch input
-    float dy = 0.f;         // movement in y direction since last touch input
-    double timestamp;       // timestamp in seconds from global touch initialization
+    float dx = 0.f; // movement in x direction since last touch input
+    float dy = 0.f; // movement in y direction since last touch input
+    double timestamp; // timestamp in seconds from global touch initialization
 };
 
-// The TouchInputHolder holds one or many TouchInputs, in order to track the history of
-// the finger/input device
+/**
+ * The TouchInputHolder holds one or many TouchInputs, in order to track the history of
+ * the finger/input device.
+ */
 class TouchInputHolder {
 public:
     TouchInputHolder(TouchInput input);
 
-    // Succeeds upon a different input than last.
-    // Fails upon a too similar input as last.
-    // Updates time for the last input if same position.
+    /**
+     * Succeeds upon a different input than last. Fails upon a too similar input as last.
+     * Updates time for the last input if same position.
+     */
     bool tryAddInput(TouchInput input);
 
     void clearInputs();
 
-    // Checks whether or not this Holder actually holds a specific input (based on IDs)
-    // Succeeds when `input` is held by this Holder
-    // Fails if `input` is not held by this Holder
+    /**
+     * Checks whether or not this Holder actually holds a specific input (based on IDs).
+     * Succeeds when `input` is held by this Holder. Fails if `input` is not held by this
+     * Holder.
+     */
     bool holdsInput(const TouchInput &input) const;
 
     size_t touchDeviceId() const;
@@ -86,7 +93,7 @@ public:
     const std::deque<TouchInput>& peekInputs() const;
 
 private:
-    //A deque of recorded inputs. Adding newer points to the front of the queue
+    /// A deque of recorded inputs. Adding newer points to the front of the queue
     std::deque<TouchInput> _inputs;
     TouchInput _firstInput;
 

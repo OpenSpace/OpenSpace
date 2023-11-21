@@ -45,7 +45,7 @@ public:
 
 protected:
     /**
-     * Creates a sphere geometry
+     * Creates a sphere geometry.
      */
     bool createGeometry() override;
     bool destroyGeometry() override;

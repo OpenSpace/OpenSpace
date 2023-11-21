@@ -29,11 +29,11 @@
 
 namespace openspace::collision {
 
-/*
- * Calculate the intersection of a line segment and a sphere.
- * The line segment is defined from \p p1 to \p p2.
- * The sphere is defined by the radius \p r and center point \p center.
- * The resulting intersection point is stored in the \p intersectionPoint parameter.
+/**
+ * Calculate the intersection of a line segment and a sphere. The line segment is defined
+ * from \p p1 to \p p2. The sphere is defined by the radius \p r and center point
+ * \p center. The resulting intersection point is stored in the \p intersectionPoint
+ * parameter.
  *
  * In the case of two intersection points, only care about the first one.
  *
@@ -48,7 +48,7 @@ namespace openspace::collision {
 bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 center,
     double r, glm::dvec3& intersectionPoint);
 
-/*
+/**
  * Check if the point \p p is inside of the sphere defined by radius \p r and center
  * point \p c
  */

@@ -42,7 +42,7 @@ namespace openspace::globebrowsing {
 class RenderableGlobe;
 
 /**
- * Manages multiple GeoJSON objects of a globe
+ * Manages multiple GeoJSON objects of a globe.
  */
 class GeoJsonManager : public properties::PropertyOwner {
 public:
