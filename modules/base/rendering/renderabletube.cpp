@@ -387,6 +387,18 @@ void RenderableTube::updateTubeData() {
     _vertexArray.push_back(firstNormal.y);
     _vertexArray.push_back(firstNormal.z);
 
+    // Add the first polygon's sides with proper normals
+    // This will ensure a hard shadow on the tube edge
+    for (const glm::dvec3& coord : _data.front().points) {
+        _vertexArray.push_back(coord.x);
+        _vertexArray.push_back(coord.y);
+        _vertexArray.push_back(coord.z);
+
+        _vertexArray.push_back(firstNormal.x);
+        _vertexArray.push_back(firstNormal.y);
+        _vertexArray.push_back(firstNormal.z);
+    }
+
     // Add all the polygons that will create the sides of the tube
     for (const TimePolygon& poly : _data) {
         for (const glm::dvec3& coord : poly.points) {
@@ -411,14 +423,27 @@ void RenderableTube::updateTubeData() {
     _vertexArray.push_back(lastNormal.y);
     _vertexArray.push_back(lastNormal.z);
 
+    // Add the last polygon's sides with proper normals
+    // This will ensure a hard shadow on the tube edge
+    for (const glm::dvec3& coord : _data.back().points) {
+        _vertexArray.push_back(coord.x);
+        _vertexArray.push_back(coord.y);
+        _vertexArray.push_back(coord.z);
+
+        _vertexArray.push_back(lastNormal.x);
+        _vertexArray.push_back(lastNormal.y);
+        _vertexArray.push_back(lastNormal.z);
+    }
+
     // Indicies
     unsigned int firstCenterIndex = 0;
+    unsigned int firstSideIndex = 4;
     unsigned int lastCenterIndex = _vertexArray.size() / 6 - 1;
 
     // Indices for side triangles
     for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
         for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-            unsigned int vIndex = 1 + pointIndex + polyIndex * nPolygons;
+            unsigned int vIndex = firstSideIndex + pointIndex + polyIndex * nPolygons;
             bool isLast = pointIndex == nPoints - 1;
 
             unsigned int v0 = vIndex;

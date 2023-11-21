@@ -68,7 +68,7 @@ Fragment getFragment() {
     vec3 reflectDirection = reflect(lightDirection, vs_normal);
     float specularFactor =
       pow(max(dot(viewDirection, reflectDirection), 0.0), SpecularPower);
-    vec3 specularColor = specularIntensity * LightColor * specularFactor * LightColor;
+    vec3 specularColor = specularIntensity * LightColor * specularFactor;
 
     totalLightColor += lightIntensities[i] * (diffuseColor + specularColor);
   }
