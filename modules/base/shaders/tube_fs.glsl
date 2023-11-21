@@ -45,37 +45,42 @@ const vec3 LightColor = vec3(1.0);
 const float SpecularPower = 100.0;
 
 Fragment getFragment() {
-  Fragment frag;
-
   if (opacity == 0.0) {
     discard;
   }
 
-  frag.color = vec4(color, opacity);
-
-  // Ambient light
-  vec3 totalLightColor = ambientIntensity * LightColor * color;
-
-  vec3 viewDirection = normalize(vs_positionViewSpace.xyz);
-
-  for (int i = 0; i < nLightSources; ++i) {
-    // Diffuse light
-    vec3 lightDirection = lightDirectionsViewSpace[i];
-    float diffuseFactor =  max(dot(vs_normal, lightDirection), 0.0);
-    vec3 diffuseColor = diffuseIntensity * LightColor * diffuseFactor * color;
-
-    // Specular light
-    vec3 reflectDirection = reflect(lightDirection, vs_normal);
-    float specularFactor =
-      pow(max(dot(viewDirection, reflectDirection), 0.0), SpecularPower);
-    vec3 specularColor = specularIntensity * LightColor * specularFactor;
-
-    totalLightColor += lightIntensities[i] * (diffuseColor + specularColor);
-  }
-  frag.color.rgb = totalLightColor;
-
+  Fragment frag;
   frag.depth = vs_depth;
   frag.gPosition = vs_positionViewSpace;
-  frag.gNormal = vec4(vs_normal, 1.0);
+  frag.gNormal = vec4(vs_normal, 0.0);
+  frag.disableLDR2HDR = true;
+  frag.color.a = opacity;
+
+  if (performShading) {
+    // Ambient light
+    vec3 totalLightColor = ambientIntensity * LightColor * color;
+    vec3 viewDirection = normalize(vs_positionViewSpace.xyz);
+
+    for (int i = 0; i < nLightSources; ++i) {
+      // Diffuse light
+      vec3 lightDirection = lightDirectionsViewSpace[i];
+      float diffuseFactor =  max(dot(vs_normal, lightDirection), 0.0);
+      vec3 diffuseColor = diffuseIntensity * LightColor * diffuseFactor * color;
+
+      // Specular light
+      vec3 reflectDirection = reflect(lightDirection, vs_normal);
+      float specularFactor =
+        pow(max(dot(viewDirection, reflectDirection), 0.0), SpecularPower);
+      vec3 specularColor = specularIntensity * LightColor * specularFactor;
+
+      totalLightColor += lightIntensities[i] * (diffuseColor + specularColor);
+    }
+    frag.color.rgb = totalLightColor;
+  }
+  else {
+    frag.color.rgb = color.rgb;
+  }
+
+
   return frag;
 }

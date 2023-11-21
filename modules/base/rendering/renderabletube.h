@@ -82,26 +82,27 @@ private:
     properties::Vec3Property _color;
     properties::BoolProperty _enableFaceCulling;
     properties::PropertyOwner _lightSourcePropertyOwner;
+    Shading _shading;
 
     UniformCache(modelViewTransform, projectionTransform, normalTransform, color,
         opacity, performShading, nLightSources, lightDirectionsViewSpace,
         lightIntensities) _uniformCache;
 
-    // Buffers for uniform uploading
     std::vector<float> _lightIntensitiesBuffer;
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
+    std::vector<std::unique_ptr<LightSource>> _lightSources;
 
     std::filesystem::path _dataFile;
     std::vector<TimePolygon> _data;
+    bool _tubeIsDirty = false;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    Shading _shading;
-    std::vector<std::unique_ptr<LightSource>> _lightSources;
     GLuint _vaoId = 0;
     GLuint _vboId = 0;
     GLuint _iboId = 0;
-    std::vector<float> _vertexArray;
-    std::vector<unsigned int> _indexArray;
-    bool _tubeIsDirty = false;
+
+    std::vector<float> _verticies;
+    std::vector<unsigned int> _indicies;
 };
 
 } // namespace openspace
