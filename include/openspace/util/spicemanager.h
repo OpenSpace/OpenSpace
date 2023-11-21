@@ -73,7 +73,7 @@ public:
     /**
      * Specifies the aberration correction method for the #targetPosition function.
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
      */
     struct AberrationCorrection {
     public:
@@ -212,7 +212,7 @@ public:
      *       to the kernel is returned. The returned value is never equal to
      *       `KernelHandle(0)`.
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
      */
     KernelHandle loadKernel(std::string filePath);
 
@@ -228,7 +228,7 @@ public:
      * \pre \p kernelId cannot be equal to `KernelHandle(0)`.
      * \post The kernel identified by \p kernelId is unloaded.
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
     void unloadKernel(KernelHandle kernelId);
 
@@ -244,7 +244,7 @@ public:
      * \pre \p filePath must not be empty.
      * \post The kernel identified by \p filePath is unloaded.
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
     void unloadKernel(std::string filePath);
 
@@ -319,8 +319,8 @@ public:
      * \param item The item to find
      * \return `true` if the function succeeded, `false` otherwise
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     bool hasValue(int naifId, const std::string& item) const;
 
@@ -336,7 +336,7 @@ public:
      * \pre \p body must not be empty
      * \pre \p item must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
      */
     bool hasValue(const std::string& body, const std::string& item) const;
 
@@ -350,8 +350,8 @@ public:
      * \throw SpiceException If \p body does not name a valid SPICE object
      * \pre \p body must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bods2c_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bods2c_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     int naifId(const std::string& body) const;
 
@@ -375,7 +375,7 @@ public:
      * \throw SpiceException If \p frame is not a valid frame
      * \pre \p frame must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/namfrm_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/namfrm_c.html
      */
     int frameId(const std::string& frame) const;
 
@@ -406,8 +406,8 @@ public:
      * \pre \p body must not be empty
      * \pre \p value must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     void getValue(const std::string& body, const std::string& value, double& v) const;
 
@@ -428,8 +428,8 @@ public:
      * \pre \p body must not be empty
      * \pre \p value must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     void getValue(const std::string& body, const std::string& value, glm::dvec2& v) const;
 
@@ -450,8 +450,8 @@ public:
      * \pre \p body must not be empty
      * \pre \p value must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     void getValue(const std::string& body, const std::string& value, glm::dvec3& v) const;
 
@@ -472,8 +472,8 @@ public:
      * \pre \p body must not be empty.
      * \pre \p value must not be empty.
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     void getValue(const std::string& body, const std::string& value, glm::dvec4& v) const;
 
@@ -496,8 +496,8 @@ public:
      * \pre \p body must not be empty.
      * \pre \p value must not be empty.
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     void getValue(const std::string& body, const std::string& value,
         std::vector<double>& v) const;
@@ -531,7 +531,7 @@ public:
      *        `str2et_c` function (see the Particulars section of the linked webpage)
      * \pre \p timeString must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html
      */
     double ephemerisTimeFromDate(const std::string& timeString) const;
     double ephemerisTimeFromDate(const char* timeString) const;
@@ -547,7 +547,7 @@ public:
      *
      * \pre \p format must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html
      */
     template <int N = 31>
     std::string dateFromEphemerisTime(double ephemerisTime,
@@ -611,8 +611,8 @@ public:
      * \pre \p referenceFrame must not be empty
      * \post If an exception is thrown, \p lightTime will not be modified
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     glm::dvec3 targetPosition(const std::string& target, const std::string& observer,
         const std::string& referenceFrame, AberrationCorrection aberrationCorrection,
@@ -641,8 +641,8 @@ public:
      * \pre \p referenceFrame must not be empty
      * \post If an exception is thrown, \p lightTime will not be modified
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     glm::dvec3 targetPosition(const std::string& target,
         const std::string& observer, const std::string& referenceFrame,
@@ -716,7 +716,7 @@ public:
      * \pre \p directionVector must not be the null vector
      * \post The SurfaceInterceptResult does not contain any uninitialized values
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
      */
     SurfaceInterceptResult surfaceIntercept(const std::string& target,
         const std::string& observer, const std::string& fovFrame,
@@ -747,7 +747,7 @@ public:
      * \pre \p referenceFrame must not be empty
      * \pre \p instrument must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
      */
     bool isTargetInFieldOfView(const std::string& target, const std::string& observer,
         const std::string& referenceFrame, const std::string& instrument,
@@ -796,8 +796,8 @@ public:
      *       only set to a valid different from `0.0` if the \p aberrationCorrection is
      *       not AberrationCorrection::None
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkezr_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkezr_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     TargetStateResult targetState(const std::string& target,
         const std::string& observer, const std::string& referenceFrame,
@@ -819,7 +819,7 @@ public:
      * \pre \p sourceFrame must not be empty
      * \pre \p destinatoinFrame must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sxform_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sxform_c.html
      */
     TransformMatrix stateTransformMatrix(const std::string& sourceFrame,
         const std::string& destinationFrame, double ephemerisTime) const;
@@ -840,7 +840,7 @@ public:
      * \pre \p sourceFrame must not be empty
      * \pre \p destinationFrame must not be empty
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/pxform_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/pxform_c.html
      */
     glm::dmat3 positionTransformMatrix(const std::string& sourceFrame,
         const std::string& destinationFrame, double ephemerisTime) const;
@@ -908,7 +908,7 @@ public:
      * \pre \p instrument must not be empty
      * \post The returned structure has all its values initialized
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html
      */
     FieldOfViewResult fieldOfView(const std::string& instrument) const;
 
@@ -924,7 +924,7 @@ public:
      * \throw SpiceException If \p instrument does not name a valid NAIF object
      * \post The returned structure has all its values initialized
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html
      */
     FieldOfViewResult fieldOfView(int instrument) const;
 
@@ -976,7 +976,7 @@ public:
      * \pre \p numberOfTerminatorPoints must be bigger or equal to 1
      * \post The returned structure has all its values initialized
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/edterm_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/edterm_c.html
      */
     TerminatorEllipseResult terminatorEllipse(const std::string& target,
         const std::string& observer, const std::string& frame,
@@ -1038,8 +1038,8 @@ private:
      * \pre \p path must be nonempty and be an existing file
      * \post Coverage times are stored only if loading was successful
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckobj_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckcov_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckobj_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckcov_c.html
      */
     void findCkCoverage(const std::string& path);
 
@@ -1052,8 +1052,8 @@ private:
      * \pre \p path must be nonempty and be an existing file
      * \post Coverage times are stored only if loading was successful
      *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkobj_c.html
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkcov_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkobj_c.html
+     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkcov_c.html
      */
     void findSpkCoverage(const std::string& path);
 

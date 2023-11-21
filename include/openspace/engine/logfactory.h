@@ -49,8 +49,8 @@ namespace documentation { struct Documentation; }
  * \post The return value will not be `nullptr`
  * \throw ghoul::RuntimeError If there was an error creating the ghoul::logging::Log
  *
- * \sa ghoul::logging::TextLog
- * \sa ghoul::logging::HTMLLog
+ * \see ghoul::logging::TextLog
+ * \see ghoul::logging::HTMLLog
  */
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary);
 
