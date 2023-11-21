@@ -1,9 +1,10 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local kernels = asset.require("./kernels").kernels
+local kernels = asset.require("./kernels")
 
-local apolloSpiceId = -908
 
+
+local ApolloSpiceId = -908
 
 local LaunchTrail = {
   Identifier = "Apollo8LaunchTrail",
@@ -12,10 +13,9 @@ local LaunchTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
+      Target = ApolloSpiceId,
       Observer = "EARTH",
-      Frame = "IAU_EARTH",
-      Kernels = kernels
+      Frame = "IAU_EARTH"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 21 12:51:00",
@@ -36,16 +36,15 @@ local MoonTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
+      Target = ApolloSpiceId,
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels
+      Frame = "IAU_MOON"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 23",
     EndTime = "1968 DEC 26",
     SampleInterval = 30,
-    Enabled = false,
+    Enabled = false
   },
   GUI = {
     Name = "Apollo 8 Moon Trail",
@@ -60,16 +59,15 @@ local EarthBarycenterTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
+      Target = ApolloSpiceId,
       Observer = "EARTH",
-      Frame = "GALACTIC",
-      Kernels = kernels
+      Frame = "GALACTIC"
     },
     Color = { 0.8, 0.2, 0.2 },
     StartTime = "1968 DEC 21",
     EndTime = "1968 DEC 28",
     SampleInterval = 30,
-    Enabled = false,
+    Enabled = false
   },
   GUI = {
     Name = "Apollo 8 Earth Barycenter Trail",
@@ -77,7 +75,10 @@ local EarthBarycenterTrail = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.kernels)
+
   openspace.addSceneGraphNode(LaunchTrail)
   openspace.addSceneGraphNode(MoonTrail)
   openspace.addSceneGraphNode(EarthBarycenterTrail)
@@ -87,6 +88,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthBarycenterTrail)
   openspace.removeSceneGraphNode(MoonTrail)
   openspace.removeSceneGraphNode(LaunchTrail)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(LaunchTrail)

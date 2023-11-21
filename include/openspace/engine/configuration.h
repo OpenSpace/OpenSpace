@@ -34,9 +34,9 @@
 #include <string>
 #include <vector>
 
-namespace openspace::documentation { struct Documentation; }
+namespace openspace {
 
-namespace openspace::configuration {
+namespace documentation { struct Documentation; }
 
 struct Configuration {
     Configuration() = default;
@@ -52,8 +52,6 @@ struct Configuration {
     properties::Property::Visibility propertyVisibility =
         properties::Property::Visibility::User;
 
-    std::vector<std::string> readOnlyWindowConfigs;
-    std::vector<std::string> readOnlyProfiles;
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }
@@ -90,7 +88,7 @@ struct Configuration {
     struct LoadingScreen {
         bool isShowingMessages = true;
         bool isShowingNodeNames = true;
-        bool isShowingProgressbar = true;
+        bool isShowingLogMessages = true;
     };
     LoadingScreen loadingScreen;
 
@@ -149,9 +147,10 @@ struct Configuration {
 
 std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
-Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
-    const glm::ivec2& primaryMonitorResolution, std::string_view overrideScript);
+Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
+    const std::filesystem::path& settingsFile,
+    const glm::ivec2& primaryMonitorResolution);
 
-} // namespace openspace::configuration
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___CONFIGURATION___H__

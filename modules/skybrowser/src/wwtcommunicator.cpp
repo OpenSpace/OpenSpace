@@ -32,8 +32,6 @@
 #include <deque>
 
 namespace {
-    constexpr std::string_view _loggerCat = "WwtCommunicator";
-
     // WWT messages
     ghoul::Dictionary moveCameraMessage(const glm::dvec2& celestCoords, double fov,
                                         double roll)
@@ -244,7 +242,7 @@ void WwtCommunicator::setEquatorialAim(glm::dvec2 equatorial) {
 }
 
 void WwtCommunicator::setBorderColor(glm::ivec3 color) {
-    _borderColor = std::move(color);
+    _wwtBorderColor = std::move(color);
     _borderColorIsDirty = true;
 }
 
@@ -257,7 +255,7 @@ void WwtCommunicator::setBorderRadius(double radius) {
 void WwtCommunicator::updateBorderColor() const {
     std::string script = fmt::format(
         "setBackgroundColor('rgb({},{},{})');",
-        _borderColor.x, _borderColor.y, _borderColor.z
+        _wwtBorderColor.x, _wwtBorderColor.y, _wwtBorderColor.z
     );
     executeJavascript(script);
 }
@@ -357,7 +355,7 @@ void WwtCommunicator::setIdInBrowser(const std::string& id) const {
 }
 
 glm::ivec3 WwtCommunicator::borderColor() const {
-    return _borderColor;
+    return _wwtBorderColor;
 }
 
 double WwtCommunicator::verticalFov() const {

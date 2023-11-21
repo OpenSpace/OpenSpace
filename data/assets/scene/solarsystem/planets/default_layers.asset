@@ -7,7 +7,7 @@ asset.require("./jupiter/europa/default_layers")
 asset.require("./jupiter/ganymede/default_layers")
 asset.require("./jupiter/io/default_layers")
 
-asset.require('./mars/default_layers')
+asset.require("./mars/default_layers")
 
 asset.require("./mercury/default_layers")
 
@@ -26,6 +26,7 @@ asset.require("./saturn/titan/default_layers")
 asset.require("./uranus/default_layers")
 
 asset.require("./venus/default_layers")
+
 
 
 asset.meta = {

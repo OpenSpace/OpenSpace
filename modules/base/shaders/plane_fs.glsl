@@ -29,8 +29,7 @@ in vec3 vs_gNormal;
 in float vs_screenSpaceDepth;
 in vec2 vs_st;
 
-uniform sampler2D texture1;
-uniform bool additiveBlending;
+uniform sampler2D colorTexture;
 uniform float opacity = 1.0;
 uniform bool mirrorBackside = true;
 uniform vec3 multiplyColor;
@@ -39,14 +38,14 @@ uniform vec3 multiplyColor;
 Fragment getFragment() {
   Fragment frag;
   if (gl_FrontFacing) {
-    frag.color = texture(texture1, vs_st);
+    frag.color = texture(colorTexture, vs_st);
   }
   else {
     if (mirrorBackside) {
-      frag.color = texture(texture1, vec2(1.0 - vs_st.s, vs_st.t));
+      frag.color = texture(colorTexture, vec2(1.0 - vs_st.s, vs_st.t));
     }
     else {
-      frag.color = texture(texture1, vs_st);
+      frag.color = texture(colorTexture, vs_st);
     }
   }
 
@@ -58,10 +57,6 @@ Fragment getFragment() {
   }
 
   frag.depth = vs_screenSpaceDepth;
-
-  if (additiveBlending) {
-    frag.blend = BLEND_MODE_ADDITIVE;
-  }
 
   // G-Buffer
   frag.gPosition = vs_gPosition;

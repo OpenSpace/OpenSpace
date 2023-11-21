@@ -82,10 +82,6 @@ namespace {
         // [[codegen::verbatim(TilePixelSizeInfo.description)]]
         std::optional<int> tilePixelSize;
 
-        // Determines whether the tiles should have a padding zone around it, making the
-        // interpolation between tiles more pleasant
-        std::optional<bool> padTiles;
-
         // Determines if the tiles should be preprocessed before uploading to the GPU
         std::optional<bool> performPreProcessing;
 
@@ -144,7 +140,6 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
     int pixelSize = p.tilePixelSize.value_or(0);
-    _padTiles = p.padTiles.value_or(_padTiles);
 
     // Only preprocess height layers by default
     _performPreProcessing = _layerGroupID == layers::Group::ID::HeightLayers;
@@ -158,7 +153,11 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
             return gi.id == id;
         }
     );
-    auto layerGroup = it != layers::Groups.end() ? it->name : std::to_string(static_cast<int>(_layerGroupID));
+
+    std::string layerGroup =
+        it != layers::Groups.end() ?
+        std::string(it->name) :
+        std::to_string(static_cast<int>(_layerGroupID));
 
     std::string identifier = p.identifier.value_or("unspecified");
     std::string enclosing = p.globeName.value_or("unspecified");
@@ -168,7 +167,9 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
     bool enabled = module.isMRFCachingEnabled();
     Compression compression =
-        _layerGroupID == layers::Group::ID::HeightLayers ? Compression::LERC : Compression::JPEG;
+        _layerGroupID == layers::Group::ID::HeightLayers ?
+        Compression::LERC :
+        Compression::JPEG;
     int quality = 75;
     int blockSize = 1024;
     if (p.cacheSettings.has_value()) {
@@ -187,7 +188,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     _cacheProperties.compression = codegen::toString(compression);
 
     TileTextureInitData initData(
-        tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
+        tileTextureInitData(_layerGroupID, pixelSize)
     );
     _tilePixelSize = initData.dimensions.x;
     initAsyncTileDataReader(initData, _cacheProperties);
@@ -196,7 +197,9 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(_tilePixelSize);
 }
 
-void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties) {
+void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData,
+                                                  TileCacheProperties cacheProperties)
+{
     ZoneScoped;
 
     _asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
@@ -271,7 +274,7 @@ void DefaultTileProvider::update() {
 
     if (_asyncTextureDataProvider->shouldBeDeleted()) {
         initAsyncTileDataReader(
-            tileTextureInitData(_layerGroupID, _padTiles, _tilePixelSize),
+            tileTextureInitData(_layerGroupID, _tilePixelSize),
             _cacheProperties
         );
     }

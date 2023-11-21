@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/configuration.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/openspace.h>
@@ -97,6 +98,7 @@ const BaseViewport* currentViewport = nullptr;
 Frustum::Mode currentFrustumMode;
 glm::mat4 currentModelViewProjectionMatrix;
 glm::mat4 currentModelMatrix;
+glm::ivec2 currentDrawResolution;
 
 #ifdef OPENVR_SUPPORT
 Window* FirstOpenVRWindow = nullptr;
@@ -264,12 +266,12 @@ void checkJoystickStatus() {
 }
 
 bool isGuiWindow(sgct::Window* window) {
-    if (Engine::instance().windows().size() == 1) {
-        // If we only have one window, assume it's also the GUI window.
-        // It might not have been given the 'GUI' tag
-        return true;
+    if (global::windowDelegate->hasGuiWindow()) {
+        return window->hasTag("GUI");
     }
-    return window->hasTag("GUI");
+
+    const sgct::Window* first = Engine::instance().windows().front().get();
+    return window->id() == first->id();
 }
 
 //
@@ -287,7 +289,7 @@ void mainInitFunc(GLFWwindow*) {
     // to them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", screenshotPath);
-    Settings::instance().setCapturePath(screenshotPath.string());
+    sgct::Settings::instance().setCapturePath(screenshotPath.string());
 
     LDEBUG("Initializing OpenSpace Engine started");
     global::openSpaceEngine->initialize();
@@ -449,6 +451,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
     currentWindow = &data.window;
     currentViewport = &data.viewport;
     currentFrustumMode = data.frustumMode;
+    currentDrawResolution = glm::ivec2(data.bufferSize.x, data.bufferSize.y);
 
     glm::vec3 pos;
     std::memcpy(
@@ -533,6 +536,7 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
     currentWindow = &data.window;
     currentViewport = &data.viewport;
     currentFrustumMode = data.frustumMode;
+    currentDrawResolution = glm::ivec2(data.bufferSize.x, data.bufferSize.y);
 
     try {
         global::openSpaceEngine->drawOverlays();
@@ -742,13 +746,6 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentSubwindowSize = []() {
         ZoneScoped;
 
-        if (currentWindow->viewports().size() > 1) {
-            const Viewport& viewport = *currentWindow->viewports().front();
-            return glm::ivec2(
-                currentWindow->resolution().x * viewport.size().x,
-                currentWindow->resolution().y * viewport.size().y
-            );
-        }
         switch (currentWindow->stereoMode()) {
             case Window::StereoMode::SideBySide:
             case Window::StereoMode::SideBySideInverted:
@@ -764,32 +761,28 @@ void setSgctDelegateFunctions() {
                 );
             default:
                 return glm::ivec2(
-                    currentWindow->resolution().x,
-                    currentWindow->resolution().y
+                    currentWindow->resolution().x * currentViewport->size().x,
+                    currentWindow->resolution().y * currentViewport->size().y
                 );
         }
     };
     sgctDelegate.currentDrawBufferResolution = []() {
         ZoneScoped;
 
-        Viewport* viewport = currentWindow->viewports().front().get();
-        if (viewport != nullptr) {
+        const Viewport* viewport = dynamic_cast<const Viewport*>(currentViewport);
+        if (viewport) {
             if (viewport->hasSubViewports() && viewport->nonLinearProjection()) {
                 ivec2 dim = viewport->nonLinearProjection()->cubemapResolution();
                 return glm::ivec2(dim.x, dim.y);
-            }
-            else if (currentWindow->viewports().size() > 1) {
-                // @TODO (abock, 2020-04-09) This should probably be based on the current
-                // viewport?
-                ivec2 dim = currentWindow->finalFBODimensions();
-                return glm::ivec2(dim.x * viewport->size().x, dim.y * viewport->size().y);
             }
             else {
                 ivec2 dim = currentWindow->finalFBODimensions();
                 return glm::ivec2(dim.x, dim.y);
             }
         }
-        return glm::ivec2(-1, -1);
+        else {
+            return currentDrawResolution;
+        }
     };
     sgctDelegate.currentViewportSize = []() {
         ZoneScoped;
@@ -800,11 +793,42 @@ void setSgctDelegateFunctions() {
         }
         return glm::ivec2(-1, -1);
     };
+    sgctDelegate.currentViewportResolution = []() {
+        ZoneScoped;
+
+        if (currentViewport != nullptr) {
+            ivec2 res = currentWindow->resolution();
+            vec2 size = currentViewport->size();
+            return glm::ivec2(size.x * res.x, size.y * res.y);
+        }
+        return glm::ivec2(-1, -1);
+    };
     sgctDelegate.dpiScaling = []() {
         ZoneScoped;
 
         vec2 scale = currentWindow->scale();
         return glm::vec2(scale.x, scale.y);
+    };
+    sgctDelegate.firstWindowResolution = []() {
+        ZoneScoped;
+        sgct::Window* window = Engine::instance().windows().front().get();
+        return glm::ivec2(window->resolution().x, window->resolution().y);
+    };
+    sgctDelegate.guiWindowResolution = []() {
+        ZoneScoped;
+        const Window* guiWindow = nullptr;
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->hasTag("GUI")) {
+                guiWindow = window.get();
+                break;
+            }
+        }
+
+        if (!guiWindow) {
+            guiWindow = Engine::instance().windows().front().get();
+        }
+
+        return glm::ivec2(guiWindow->resolution().x, guiWindow->resolution().y);
     };
     sgctDelegate.osDpiScaling = []() {
         ZoneScoped;
@@ -876,7 +900,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.takeScreenshot = [](bool applyWarping, std::vector<int> windowIds) {
         ZoneScoped;
 
-        Settings::instance().setCaptureFromBackBuffer(applyWarping);
+        sgct::Settings::instance().setCaptureFromBackBuffer(applyWarping);
         Engine::instance().takeScreenshot(std::move(windowIds));
         return Engine::instance().screenShotNumber();
     };
@@ -900,6 +924,11 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         return currentWindow->id();
+    };
+    sgctDelegate.firstWindowId = []() {
+        ZoneScoped;
+
+        return Engine::instance().windows().front()->id();
     };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         ZoneScoped;
@@ -948,7 +977,7 @@ void setSgctDelegateFunctions() {
         return currentWindow->swapGroupFrameNumber();
     };
     sgctDelegate.setScreenshotFolder = [](std::string path) {
-        Settings::instance().setCapturePath(std::move(path));
+        sgct::Settings::instance().setCapturePath(std::move(path));
     };
     sgctDelegate.showStatistics = [](bool enabled) {
         Engine::instance().setStatsGraphVisibility(enabled);
@@ -958,6 +987,35 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.currentNode = []() {
         return ClusterManager::instance().thisNodeId();
+    };
+    sgctDelegate.mousePositionViewportRelative = [](glm::vec2 mousePosition) {
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (isGuiWindow(window.get())) {
+                sgct::ivec2 res = window->resolution();
+                for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
+                    sgct::vec2 pos = viewport->position();
+                    sgct::vec2 size = viewport->size();
+                    glm::vec4 bounds = glm::vec4(
+                        pos.x * res.x,
+                        (1.0 - pos.y - size.y) * res.y,
+                        (pos.x + size.x) * res.x,
+                        (1.0 - pos.y) * res.y
+                    );
+
+                    if (
+                        (mousePosition.x >= bounds.x && mousePosition.x <= bounds.z) &&
+                        (mousePosition.y >= bounds.y && mousePosition.y <= bounds.w)
+                        ) {
+                        return glm::vec2(
+                            res.x * (mousePosition.x - bounds.x) / (bounds.z - bounds.x),
+                            res.y * (mousePosition.y - bounds.y) / (bounds.w - bounds.y)
+                        );
+                    }
+                }
+            }
+        }
+
+        return mousePosition;
     };
 }
 
@@ -990,16 +1048,14 @@ void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& ha
 }
 
 std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
-                                        bool haveCliSGCTConfig,
-                                        const std::string& sgctFunctionName)
+                                        bool haveCliSGCTConfig)
 {
-    configuration::Configuration& config = *global::configuration;
+    openspace::Configuration& config = *global::configuration;
 
     std::string preset;
     bool sgctConfigFileSpecifiedByLuaFunction = !config.sgctConfigNameInitialized.empty();
     if (haveCliSGCTConfig) {
-        preset = sgctFunctionName.empty() ? config.windowConfiguration : sgctFunctionName;
-        preset += " (from CLI)";
+        preset = fmt::format("{} (from CLI)", config.windowConfiguration);
     }
     else if (sgctConfigFileSpecifiedByLuaFunction) {
         preset = config.sgctConfigNameInitialized + labelFromCfgFile;
@@ -1105,23 +1161,35 @@ int main(int argc, char* argv[]) {
 
     CommandlineArguments commandlineArguments;
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.configurationName, "--file", "-f",
+        commandlineArguments.configuration, "--file", "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
         "current working directory"
     ));
-
-    parser.addCommand(std::make_unique<ghoul::cmdparser::MultipleCommand<std::string>>(
-        commandlineArguments.configurationOverride, "--config", "-c",
-        "Provides the ability to pass arbitrary Lua code to the application that will be "
-        "evaluated after the configuration file has been loaded but before the other "
-        "commandline arguments are triggered. This can be used to manipulate the "
-        "configuration file without editing the file on disk, for example in a "
-        "planetarium environment. Please not that the Lua script must not contain any - "
-        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
-        "evaluated before it is passed to OpenSpace. Windows does not approve of using \""
-        "either, so it is recommended to deliniate strings with [[ ]] instead. For "
-        "example:  OpenSpace --config Profile=[[jwst]]"
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.windowConfig, "--config", "-c",
+        "Specifies the window configuration file that should be used to start OpenSpace "
+        "and that will override whatever is specified in the `openspace.cfg` or the "
+        "settings. This value can include path tokens, so for example "
+        "`${CONFIG}/single.json` is a valid value."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.profile, "--profile", "-p",
+        "Specifies the profile that should be used to start OpenSpace and that overrides "
+        "the profile specified in the `openspace.cfg` and the settings."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.propertyVisibility, "--propertyVisibility", "",
+        "Specifies UI visibility settings for properties that this OpenSpace is using. "
+        "This value overrides the values specified in the `openspace.cfg` and the "
+        "settings and also the environment variable, if that value is provided. Allowed "
+        "values for this parameter are: `Developer`, `AdvancedUser`, `User`, and "
+        "`NoviceUser`."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommandZeroArguments>(
+        commandlineArguments.bypassLauncher, "--bypassLauncher", "-b",
+        "Specifies whether the Launcher should be shown at startup or not. This value "
+        "overrides the value specified in the `openspace.cfg` and the settings."
     ));
 
     // setCommandLine returns a reference to the vector that will be filled later
@@ -1153,12 +1221,12 @@ int main(int argc, char* argv[]) {
     try {
         // Find configuration
         std::filesystem::path configurationFilePath;
-        if (!commandlineArguments.configurationName.empty()) {
-            configurationFilePath = absPath(commandlineArguments.configurationName);
+        if (commandlineArguments.configuration.has_value()) {
+            configurationFilePath = absPath(*commandlineArguments.configuration);
         }
         else {
             LDEBUG("Finding configuration");
-            configurationFilePath = configuration::findConfiguration();
+            configurationFilePath = findConfiguration();
         }
 
         if (!std::filesystem::is_regular_file(configurationFilePath)) {
@@ -1192,15 +1260,47 @@ int main(int argc, char* argv[]) {
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
-        std::string override;
-        for (const std::string& arg : commandlineArguments.configurationOverride) {
-            override += arg + ";";
-        }
-        *global::configuration = configuration::loadConfigurationFromFile(
+        *global::configuration = loadConfigurationFromFile(
             configurationFilePath.string(),
-            size,
-            override
+            findSettings(),
+            size
         );
+
+        // Override configuration with commandline arguments
+        if (commandlineArguments.windowConfig.has_value()) {
+            global::configuration->windowConfiguration =
+                *commandlineArguments.windowConfig;
+        }
+        if (commandlineArguments.profile.has_value()) {
+            global::configuration->profile = *commandlineArguments.profile;
+        }
+        if (commandlineArguments.propertyVisibility.has_value()) {
+            if (commandlineArguments.propertyVisibility == "NoviceUser") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::NoviceUser;
+            }
+            else if (commandlineArguments.propertyVisibility == "User") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::User;
+            }
+            else if (commandlineArguments.propertyVisibility == "AdvancedUser") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::AdvancedUser;
+            }
+            else if (commandlineArguments.propertyVisibility == "Developer") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::Developer;
+            }
+            else {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Unknown property visibility value '{}'",
+                    *commandlineArguments.propertyVisibility
+                ));
+            }
+        }
+        if (commandlineArguments.bypassLauncher.has_value()) {
+            global::configuration->bypassLauncher = *commandlineArguments.bypassLauncher;
+        }
 
         // Determining SGCT configuration file
         LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);
@@ -1225,17 +1325,11 @@ int main(int argc, char* argv[]) {
 
     global::openSpaceEngine->registerPathTokens();
 
-    bool hasSGCTConfig = false;
-    bool hasProfile = false;
-    std::string sgctFunctionName;
-    checkCommandLineForSettings(argc, argv, hasSGCTConfig, hasProfile, sgctFunctionName);
-
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
     std::string windowCfgPreset = setWindowConfigPresetForGui(
         labelFromCfgFile,
-        hasSGCTConfig,
-        sgctFunctionName
+        commandlineArguments.windowConfig.has_value()
     );
 
     //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
@@ -1251,9 +1345,7 @@ int main(int argc, char* argv[]) {
     QApplication app(qac, nullptr);
 #endif // __APPLE__
 
-    bool skipLauncher =
-        (hasProfile && hasSGCTConfig) || global::configuration->bypassLauncher;
-    if (!skipLauncher) {
+    if (!global::configuration->bypassLauncher) {
 #ifndef __APPLE__
         int qac = 0;
         QApplication app(qac, nullptr);
@@ -1273,9 +1365,9 @@ int main(int argc, char* argv[]) {
         }
 
         LauncherWindow win(
-            !hasProfile,
+            !commandlineArguments.profile.has_value(),
             *global::configuration,
-            !hasSGCTConfig,
+            !commandlineArguments.windowConfig.has_value(),
             windowCfgPreset,
             nullptr
         );
@@ -1290,7 +1382,7 @@ int main(int argc, char* argv[]) {
         global::configuration->profile = win.selectedProfile();
         windowConfiguration = selectedSgctProfileFromLauncher(
             win,
-            hasSGCTConfig,
+            commandlineArguments.windowConfig.has_value(),
             windowConfiguration,
             labelFromCfgFile
         );
@@ -1323,7 +1415,7 @@ int main(int argc, char* argv[]) {
 
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
-    Configuration config = parseArguments(arg);
+    sgct::Configuration config = parseArguments(arg);
     config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
 
     Engine::Callbacks callbacks;
@@ -1388,6 +1480,27 @@ int main(int argc, char* argv[]) {
     // Do not print message if clients are waiting for the master
     // Only timeout after 15 minutes
     Engine::instance().setSyncParameters(false, 15.f * 60.f);
+
+    {
+        openspace::Settings settings = loadSettings();
+        settings.hasStartedBefore = true;
+
+        if (settings.rememberLastProfile) {
+            std::filesystem::path p = global::configuration->profile;
+            std::filesystem::path reducedName = p.filename().replace_extension();
+            settings.profile = reducedName.string();
+        }
+
+        if (settings.rememberLastConfiguration &&
+            !global::configuration->sgctConfigNameInitialized.empty())
+        {
+            // We only want to store the window configuration if it was not a dynamically
+            // created one
+            settings.configuration = global::configuration->windowConfiguration;
+        }
+
+        saveSettings(settings, findSettings());
+    }
 
     LINFO("Starting rendering loop");
     Engine::instance().exec();

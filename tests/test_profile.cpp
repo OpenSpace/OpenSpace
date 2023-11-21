@@ -93,6 +93,12 @@ namespace openspace {
         return lhs.type == rhs.type && lhs.value == rhs.value;
     }
 
+    bool operator==(const openspace::Profile::CameraGoToNode& lhs,
+        const openspace::Profile::CameraGoToNode& rhs) noexcept
+    {
+        return lhs.anchor == rhs.anchor && lhs.height == rhs.height;
+    }
+
     bool operator==(const openspace::Profile::CameraNavState& lhs,
                     const openspace::Profile::CameraNavState& rhs) noexcept
     {
@@ -166,8 +172,8 @@ TEST_CASE("Minimal", "[profile]") {
     Profile profile = loadProfile(absPath(File));
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 2;
+    ref.version = Profile::CurrentVersion;
+
     CHECK(profile == ref);
 }
 
@@ -647,6 +653,37 @@ TEST_CASE("Basic Camera GoToGeo (with altitude)", "[profile]") {
     camera.latitude = 1.0;
     camera.longitude = 2.0;
     camera.altitude = 4.0;
+    ref.camera = camera;
+
+    CHECK(profile == ref);
+}
+
+TEST_CASE("Basic Camera GoToNode", "[profile]") {
+    constexpr std::string_view File =
+        "${TESTDIR}/profile/basic/camera_gotonode.profile";
+    Profile profile = loadProfile(absPath(File));
+
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
+
+    Profile::CameraGoToNode camera;
+    camera.anchor = "anchor";
+    ref.camera = camera;
+
+    CHECK(profile == ref);
+}
+
+TEST_CASE("Basic Camera GoToNode (with height)", "[profile]") {
+    constexpr std::string_view File =
+        "${TESTDIR}/profile/basic/camera_gotonode_height.profile";
+    Profile profile = loadProfile(absPath(File));
+
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
+
+    Profile::CameraGoToNode camera;
+    camera.anchor = "anchor";
+    camera.height = 100.0;
     ref.camera = camera;
 
     CHECK(profile == ref);
@@ -1604,3 +1641,52 @@ TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'altitude'", "[profile]") {
         Catch::Matchers::Equals("(profile) 'camera.altitude' must be a number")
     );
 }
+
+TEST_CASE("(Error) Camera (GoToNode): Wrong type 'anchor'", "[profile]") {
+    constexpr std::string_view TestFile =
+        "${TESTDIR}/profile/error/camera/gotonode_wrongtype_anchor.profile";
+    CHECK_THROWS_WITH(
+        loadProfile(absPath(TestFile)),
+        Catch::Matchers::Equals("(profile) 'camera.anchor' must be a string")
+    );
+}
+
+TEST_CASE("(Error) Camera (GoToNode): Wrong type 'height'", "[profile]") {
+    constexpr std::string_view TestFile =
+        "${TESTDIR}/profile/error/camera/gotonode_wrongtype_height.profile";
+    CHECK_THROWS_WITH(
+        loadProfile(absPath(TestFile)),
+        Catch::Matchers::Equals("(profile) 'camera.height' must be a number")
+    );
+}
+
+TEST_CASE("(Error) Camera (GoToNode): Missing value 'anchor'", "[profile]") {
+    constexpr std::string_view TestFile =
+        "${TESTDIR}/profile/error/camera/gotonode_missing_anchor.profile";
+    CHECK_THROWS_WITH(
+        loadProfile(absPath(TestFile)),
+        Catch::Matchers::Equals("(profile) 'camera.anchor' field is missing")
+    );
+}
+
+// @TODO (2023-05-17, emmbr) Seems like the profile loading actually do not validate
+// profile values to a larger degree than type and whether the value is missing, currently.
+// So this is left as future work
+//
+//TEST_CASE("(Error) Camera (GoToNode): Invalid value for 'height' - negative", "[profile]") {
+//    constexpr std::string_view TestFile =
+//        "${TESTDIR}/profile/error/camera/gotonode_invalidvalue_negative_height.profile";
+//    CHECK_THROWS_WITH(
+//        loadProfile(absPath(TestFile)),
+//        Catch::Matchers::Equals("(profile) 'camera.height' must be a larger than zero")
+//    );
+//}
+//
+//TEST_CASE("(Error) Camera (GoToNode): Invalid value for 'height' - zero", "[profile]") {
+//    constexpr std::string_view TestFile =
+//        "${TESTDIR}/profile/error/camera/gotonode_invalidvalue_zero_height.profile";
+//    CHECK_THROWS_WITH(
+//        loadProfile(absPath(TestFile)),
+//        Catch::Matchers::Equals("(profile) 'camera.height' must be a larger than zero")
+//    );
+//}

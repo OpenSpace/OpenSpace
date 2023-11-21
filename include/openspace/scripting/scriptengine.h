@@ -44,18 +44,20 @@ namespace openspace::scripting {
  * The ScriptEngine is responsible for handling the execution of custom Lua functions and
  * executing scripts (#runScript and #runScriptFile). Before usage, it has to be
  * #initialize%d and #deinitialize%d. New ScriptEngine::Library%s consisting of
- * ScriptEngine::Library::Function%s have to be added which can then be called using the
- * `openspace` namespace prefix in Lua. The same functions can be exposed to
- * other Lua states by passing them to the #initializeLuaState method.
+ * Library::Function%s have to be added which can then be called using the
+ * `openspace` namespace prefix in Lua. The same functions can be exposed to other Lua
+ * states by passing them to the #initializeLuaState method.
  */
 class ScriptEngine : public Syncable {
 public:
     using ScriptCallback = std::function<void(ghoul::Dictionary)>;
-    BooleanType(RemoteScripting);
+    BooleanType(ShouldBeSynchronized);
+    BooleanType(ShouldSendToRemote);
 
     struct QueueItem {
         std::string script;
-        RemoteScripting remoteScripting;
+        ShouldBeSynchronized shouldBeSynchronized;
+        ShouldSendToRemote shouldSendToRemote;
         ScriptCallback callback;
     };
 
@@ -64,7 +66,8 @@ public:
     ScriptEngine();
 
     /**
-     * Initializes the internal Lua state and registers a common set of library functions
+     * Initializes the internal Lua state and registers a common set of library functions.
+     *
      * \throw LuaRuntimeException If the creation of the new Lua state fails
      */
     void initialize();
@@ -89,8 +92,8 @@ public:
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    void queueScript(std::string script, RemoteScripting remoteScripting,
-        ScriptCallback cb = ScriptCallback());
+    void queueScript(std::string script, ShouldBeSynchronized shouldBeSynchronized,
+        ShouldSendToRemote shouldSendToRemote, ScriptCallback cb = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
 

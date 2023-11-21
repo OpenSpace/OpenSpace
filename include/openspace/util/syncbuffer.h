@@ -59,9 +59,6 @@ public:
 
     void reset();
 
-    //void write();
-    //void read();
-
     void setData(std::vector<std::byte> data);
     std::vector<std::byte> data();
 

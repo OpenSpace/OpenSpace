@@ -28,13 +28,13 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
 #include <geos/io/GeoJSON.h>
+#include <scn/scn.h>
 #include <algorithm>
 #include <cstdio>
 
 // Keys used to read properties from GeoJson files
 namespace geojson::propertykeys {
     constexpr std::string_view Name = "name";
-    constexpr std::string_view Description = "description";
 
     constexpr std::string_view Opacity = "opacity";
 
@@ -44,15 +44,17 @@ namespace geojson::propertykeys {
     constexpr std::string_view LineWidth = "stroke-width";
 
     constexpr std::string_view PointSize = "point-size";
-    constexpr std::array<std::string_view, 3> Texture = { "texture", "sprite", "point-texture" };
+    constexpr std::array<std::string_view, 3> Texture = {
+        "texture", "sprite", "point-texture"
+    };
 
-    constexpr std::array<std::string_view, 2> PointTextureAnchor = { "point-anchor", "anchor" };
+    constexpr std::array<std::string_view, 2> PointTextureAnchor = {
+        "point-anchor", "anchor"
+    };
     constexpr std::string_view PointTextureAnchorBottom = "bottom";
     constexpr std::string_view PointTextureAnchorCenter = "center";
 
     constexpr std::string_view Extrude = "extrude";
-
-    constexpr std::string_view PerformShading = "performShading";
 
     constexpr std::string_view Tessellate = "tessellate";
     constexpr std::string_view TessellationLevel = "tessellationLevel";
@@ -62,6 +64,8 @@ namespace geojson::propertykeys {
     constexpr std::string_view AltitudeModeClamp = "clampToGround";
     constexpr std::string_view AltitudeModeAbsolute = "absolute";
     constexpr std::string_view AltitudeModeRelative = "relativeToGround";
+
+    constexpr std::string_view PerformShading = "performShading";
 } // namespace geojson::propertykeys
 
 namespace {
@@ -72,7 +76,11 @@ namespace {
                     const std::array<std::string_view, SIZE>& keyAlternativesArray,
                     std::optional<const PropertyInfo> propInfo = std::nullopt)
     {
-        auto it = std::find(keyAlternativesArray.begin(), keyAlternativesArray.end(), key);
+        auto it = std::find(
+            keyAlternativesArray.begin(),
+            keyAlternativesArray.end(),
+            key
+        );
         if (it != keyAlternativesArray.end()) {
             return true;
         }
@@ -91,23 +99,32 @@ namespace {
         return keyMatches(key, array, propInfo);
     }
 
-    glm::vec3 hexToRbg(std::string_view hexColor) {
-        int r, g, b;
-        // @TODO: Consider using scn::scan instead of sscanf
-        int ret = std::sscanf(hexColor.data(), "#%02x%02x%02x", &r, &g, &b);
-        // @TODO: Handle return value to validate color
-        return (1.f / 255.f) * glm::vec3(r, g, b);
+    std::optional<glm::vec3> hexToRgb(std::string_view hexColor) {
+        glm::ivec3 rgb;
+        auto ret = scn::scan(hexColor, "#{:2x}{:2x}{:2x}", rgb.r, rgb.g, rgb.b);
+        if (ret) {
+            return (1.f / 255.f) * glm::vec3(rgb);
+        }
+        else {
+            return std::nullopt;
+        }
     }
 
     glm::vec3 getColorValue(const geos::io::GeoJSONValue& value) {
-        glm::vec3 color;
+        // Default garish color used for when the color loading fails
+        glm::vec3 color = glm::vec3(1.f, 0.f, 1.f);
         if (value.isArray()) {
             const std::vector<geos::io::GeoJSONValue>& val = value.getArray();
             if (val.size() != 3) {
-                // @TODO: Should add some more information on which file the reading failed for
-                LERRORC("GeoJson", fmt::format(
-                    "Failed reading color property. Expected 3 values, got {}", val.size()
-                ));
+                // @TODO:
+                // Should add some more information on which file the reading failed for
+                LERRORC(
+                    "GeoJson",
+                    fmt::format(
+                        "Failed reading color property. Expected 3 values, got {}",
+                        val.size()
+                    )
+                );
             }
             // @TODO Use verifiers to verify color values
             // @TODO Parse values given in RGB in ranges 0-255?
@@ -119,8 +136,19 @@ namespace {
         }
         else if (value.isString()) {
             const std::string hex = value.getString();
-            // @TODO Verify color
-            color = hexToRbg(hex);
+            std::optional<glm::vec3> c = hexToRgb(hex);
+            if (!c) {
+                LERRORC(
+                    "GeoJson",
+                    fmt::format(
+                        "Failed reading color property. Did not find a hex color, got {}",
+                        hex
+                    )
+                );
+            }
+            else {
+                color = *c;
+            }
         }
         return color;
     };
@@ -184,7 +212,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ExtrudeInfo = {
         "Extrude",
         "Extrude",
-        "If true, extrude the mesh or line to intersect the globe",
+        "If true, extrude the geometry to intersect the globe.Lines/polygons will be"
+        "extruded with polygons,and points with lines ",
         openspace::properties::Property::Visibility::User
     };
 
@@ -229,9 +258,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseTessellationLevelInfo = {
         "UseTessellationLevel",
         "Use Tessellation Level",
-        "If true, use the 'Tesselation Level' to control the level of detail for the "
-        "tessellation. The distance used will be the 'Tesselation Distance' divided by "
-        "the 'Tesselation Level', so the higher the level value, the smaller each "
+        "If true, use the 'Tessellation Level' to control the level of detail for the "
+        "tessellation. The distance used will be the 'Tessellation Distance' divided by "
+        "the 'Tessellation Level', so the higher the level value, the smaller each "
         "segment in the geomoetry will be",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -285,14 +314,20 @@ namespace {
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
 
-        enum class [[codegen::map(openspace::globebrowsing::GeoJsonProperties::AltitudeMode)]] AltitudeMode {
+        enum class
+        [[codegen::map(openspace::globebrowsing::GeoJsonProperties::AltitudeMode)]]
+        AltitudeMode
+        {
             Absolute,
             RelativeToGround
         };
         // [[codegen::verbatim(AltitudeModeInfo.description)]]
         std::optional<AltitudeMode> altitudeMode;
 
-        enum class [[codegen::map(openspace::globebrowsing::GeoJsonProperties::PointTextureAnchor)]] PointTextureAnchor {
+        enum class
+        [[codegen::map(openspace::globebrowsing::GeoJsonProperties::PointTextureAnchor)]]
+        PointTextureAnchor
+        {
             Bottom,
             Center
         };
@@ -345,14 +380,14 @@ GeoJsonProperties::GeoJsonProperties()
     , lineWidth(LineWidthInfo, 2.f, 0.01f, 10.f)
     , pointSize(PointSizeInfo, 10.f, 0.01f, 100.f)
     , pointTexture(PointTextureInfo)
+    , pointAnchorOption(
+        PointAnchorOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , extrude(ExtrudeInfo, false)
     , performShading(PerformShadingInfo, false)
     , altitudeModeOption(
         AltitudeModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , pointAnchorOption(
-        PointAnchorOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
 {
@@ -372,16 +407,16 @@ GeoJsonProperties::GeoJsonProperties()
     addProperty(performShading);
 
     altitudeModeOption.addOptions({
-        { static_cast<int>(AltitudeMode::Absolute), "Absolute"},
+        { static_cast<int>(AltitudeMode::Absolute), "Absolute" },
         { static_cast<int>(AltitudeMode::RelativeToGround), "Relative to Ground" }
         //{ static_cast<int>(AltitudeMode::ClampToGround), "Clamp to Ground" } / TODO: add ClampToGround
-        });
+    });
     addProperty(altitudeModeOption);
 
     pointAnchorOption.addOptions({
-        { static_cast<int>(PointTextureAnchor::Bottom), "Bottom"},
+        { static_cast<int>(PointTextureAnchor::Bottom), "Bottom" },
         { static_cast<int>(PointTextureAnchor::Center), "Center" }
-        });
+    });
     addProperty(pointAnchorOption);
 
     addPropertySubOwner(tessellation);
@@ -415,7 +450,9 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     performShading = p.performShading.value_or(performShading);
 
     if (p.altitudeMode.has_value()) {
-        altitudeModeOption = static_cast<int>(codegen::map<AltitudeMode>(*p.altitudeMode));
+        altitudeModeOption = static_cast<int>(
+            codegen::map<AltitudeMode>(*p.altitudeMode)
+        );
     }
 
     // Set up default value and max value for tessellation distance based on globe size.
@@ -521,14 +558,24 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
                 ));
             }
         }
+        else if (keyMatches(key, propertykeys::PerformShading, PerformShadingInfo)) {
+            result.performShading = value.getBoolean();
+        }
         else if (keyMatches(key, propertykeys::Tessellate, TessellationEnabledInfo)) {
             result.tessellationEnabled = value.getBoolean();
         }
-        else if (keyMatches(key, propertykeys::TessellationLevel, TessellationLevelInfo)) {
+        else if (keyMatches(key, propertykeys::TessellationLevel, TessellationLevelInfo))
+        {
             result.useTessellationLevel = true;
-            result.tessellationLevel = static_cast<float>(value.getNumber());
+            result.tessellationLevel = static_cast<int>(value.getNumber());
         }
-        else if (keyMatches(key, propertykeys::TessellationMaxDistance, TessellationDistanceInfo)) {
+        else if (
+            keyMatches(
+                key,
+                propertykeys::TessellationMaxDistance,
+                TessellationDistanceInfo
+            ))
+        {
             result.tessellationDistance = static_cast<float>(value.getNumber());
         }
     };
@@ -538,7 +585,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             parseProperty(key, value);
         }
         catch (const geos::io::GeoJSONValue::GeoJSONTypeError&) {
-            // @TODO: Should add some more information on which file the reading failed for
+            // @TODO: Should add some more information on which file the reading failed
             LERRORC("GeoJson", fmt::format(
                 "Error reading GeoJson property '{}'. Value has wrong type", key
             ));

@@ -28,24 +28,43 @@ namespace {
  * Loads the provided SPICE kernel by name. The name can contain path tokens, which are
  * automatically resolved.
  */
-[[codegen::luawrap]] int loadKernel(std::string kernel) {
-    if (!std::filesystem::is_regular_file(kernel)) {
-        throw ghoul::lua::LuaError(fmt::format("Kernel file '{}' did not exist", kernel));
+[[codegen::luawrap]] void loadKernel(
+                               std::variant<std::string, std::vector<std::string>> kernel)
+{
+    if (std::holds_alternative<std::string>(kernel)) {
+        std::string k = std::get<std::string>(kernel);
+        if (!std::filesystem::is_regular_file(k)) {
+            throw ghoul::lua::LuaError(fmt::format("Kernel file '{}' did not exist", k));
+        }
+        openspace::SpiceManager::ref().loadKernel(k);
     }
-    unsigned int result = openspace::SpiceManager::ref().loadKernel(kernel);
-    return static_cast<int>(result);
+    else {
+        std::vector<std::string> ks = std::get<std::vector<std::string>>(kernel);
+        for (const std::string& k : ks) {
+            if (!std::filesystem::is_regular_file(k)) {
+                throw ghoul::lua::LuaError(fmt::format(
+                    "Kernel file '{}' did not exist", k
+                ));
+            }
+            openspace::SpiceManager::ref().loadKernel(k);
+        }
+    }
 }
 
 /**
  * Unloads the provided SPICE kernel. The name can contain path tokens, which are
  * automatically resolved.
  */
-[[codegen::luawrap]] void unloadKernel(std::variant<std::string, int> kernel) {
+[[codegen::luawrap]] void unloadKernel(
+                               std::variant<std::string, std::vector<std::string>> kernel)
+{
     if (std::holds_alternative<std::string>(kernel)) {
         openspace::SpiceManager::ref().unloadKernel(std::get<std::string>(kernel));
     }
     else {
-        openspace::SpiceManager::ref().unloadKernel(std::get<int>(kernel));
+        for (const std::string& k : std::get<std::vector<std::string>>(kernel)) {
+            openspace::SpiceManager::ref().unloadKernel(k);
+        }
     }
 }
 

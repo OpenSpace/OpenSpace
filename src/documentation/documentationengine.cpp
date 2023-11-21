@@ -35,14 +35,6 @@
 
 #include <fstream>
 
-namespace {
-    constexpr std::string_view HandlebarsFilename =
-        "${WEB}/documentation/handlebars-v4.0.5.js";
-    constexpr std::string_view BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    constexpr std::string_view CssFilename = "${WEB}/documentation/style.css";
-    constexpr std::string_view JsFilename = "${WEB}/documentation/script.js";
-} // namespace
-
 namespace openspace::documentation {
 
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
@@ -85,6 +77,7 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
 
     json["name"] = d.name;
     json["id"] = d.id;
+    json["description"] = d.description;
     json["properties"] = nlohmann::json::array();
 
     for (const DocumentationEntry& p : d.entries) {
@@ -118,9 +111,10 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
             }
         }
         else if (tv) {
-            nlohmann::json json = generateJsonDocumentation(tv->documentations);
+            Documentation doc = { .entries = tv->documentations };
+            nlohmann::json restrictions = generateJsonDocumentation(doc);
             // We have a TableVerifier, so we need to recurse
-            entry["restrictions"] = json;
+            entry["restrictions"] = restrictions;
         }
         else {
             entry["description"] = p.verifier->documentation();

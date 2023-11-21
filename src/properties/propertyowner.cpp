@@ -42,7 +42,7 @@ namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
 
     nlohmann::json createJson(openspace::properties::PropertyOwner* owner) {
-        ZoneScoped
+        ZoneScoped;
 
         using namespace openspace;
         nlohmann::json json;
@@ -66,7 +66,7 @@ namespace {
 
             json["properties"].push_back(propertyJson);
         }
-        sortJson(json["properties"], "name"); 
+        sortJson(json["properties"], "name");
 
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {
@@ -387,7 +387,7 @@ void PropertyOwner::removeTag(const std::string& tag) {
 }
 
 nlohmann::json PropertyOwner::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     nlohmann::json json;
     std::vector<PropertyOwner*> subOwners = propertySubOwners();

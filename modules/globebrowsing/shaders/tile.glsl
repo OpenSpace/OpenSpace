@@ -40,11 +40,6 @@ struct ChunkTile {
   TileUvTransform uvTransform;
 };
 
-struct PixelPadding {
-  ivec2 startOffset;
-  ivec2 sizeDifference;
-};
-
 struct ChunkTilePile {
   ChunkTile chunkTile0;
   ChunkTile chunkTile1;
@@ -69,7 +64,6 @@ struct Layer {
   TileDepthTransform depthTransform;
   LayerSettings settings;
   LayerAdjustment adjustment;
-  PixelPadding padding;
 
   // Other layer type properties stuff
   vec3 color;

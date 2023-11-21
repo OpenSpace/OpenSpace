@@ -1,0 +1,35 @@
+local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local data = asset.require('../annular_data')
+
+
+
+local Layer = {
+  Identifier = "Annular-2006-09-22",
+  Enabled = false,
+  File = data.path .. "2006-09-22.geojson",
+  HeightOffset = 2000.0,
+  DefaultProperties = {
+    LineWidth = 2.0,
+    Extrude = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Layer)
+end)
+
+
+
+asset.meta = {
+  Name = "Annular 2006-09-22",
+  Version = "1.0",
+  Description = "Annular eclipse map for 2006-09-22",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

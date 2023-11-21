@@ -42,8 +42,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "RenderableSkyTarget";
-
     enum BlendMode {
         Normal = 0,
         Additive
@@ -121,8 +119,8 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
     , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
     , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
-    , _borderColor(220, 220, 220)
     , _applyRoll(ApplyRollInfo, true)
+    , _borderColor(220, 220, 220)
 {
     // Handle target dimension property
     _autoScale = false;
@@ -175,12 +173,14 @@ glm::ivec3 RenderableSkyTarget::borderColor() const {
 }
 
 glm::dvec3 RenderableSkyTarget::rightVector() const {
-    double scaling = (_verticalFov / 70)* static_cast<double>(glm::compMax(_size.value()));
+    double scaling =
+        (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
     return scaling * _rightVector;
 }
 
 glm::dvec3 RenderableSkyTarget::upVector() const {
-    double scaling = (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
+    double scaling =
+        (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
     return scaling * _upVector;
 }
 
@@ -241,23 +241,15 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
         cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        rotationTransform *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-        glm::dmat4(1.0);
-    const glm::dmat4 modelViewTransform =
-        data.camera.combinedViewMatrix() * modelTransform;
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data, { .rotation = rotationTransform });
 
     _shader->setUniform(
         "modelViewProjectionTransform",
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+        glm::mat4(modelViewProjectionTransform)
     );
 
-    _shader->setUniform(
-        "modelViewTransform",
-        glm::mat4(data.camera.combinedViewMatrix() * glm::dmat4(modelViewTransform))
-    );
+    _shader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 
     _shader->setUniform("multiplyColor", _multiplyColor);
 

@@ -101,9 +101,16 @@ public:
             Relative
         };
 
-        Type type;
+        Type type = Type::Relative;
         std::string value;
         bool startPaused = false;
+    };
+
+    struct CameraGoToNode {
+        static constexpr std::string_view Type = "goToNode";
+
+        std::string anchor;
+        std::optional<double> height;
     };
 
     struct CameraNavState {
@@ -122,12 +129,12 @@ public:
         static constexpr std::string_view Type = "goToGeo";
 
         std::string anchor;
-        double latitude;
-        double longitude;
+        double latitude = 0.0;
+        double longitude = 0.0;
         std::optional<double> altitude;
     };
 
-    using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
+    using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
 
     Profile() = default;
     explicit Profile(const std::string& content);
@@ -140,14 +147,16 @@ public:
     void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
         std::string currentTime, interaction::NavigationState navState);
 
-    /// Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
-    /// set to `true`
+    /**
+     * Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
+     * set to `true`.
+     */
     void addAsset(const std::string& path);
 
     /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
-    static constexpr Version CurrentVersion = Version{ 1, 2 };
+    static constexpr Version CurrentVersion = Version{ 1, 3 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;
@@ -167,6 +176,7 @@ public:
     /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
+     *
      * \return The Lua library that contains all Lua functions available for profiles
      */
     static scripting::LuaLibrary luaLibrary();

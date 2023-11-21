@@ -1,18 +1,19 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Globular Clusters Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_globularclusters_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Globular Clusters Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_globularclusters_speck",
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "GlobularClusters",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -49,19 +50,20 @@ local object = {
       center may be invisible to us. The clusters orbit the Milky Way in random
       orientations, as comets orbit the Sun.(Description from URL) <br><br> Data
       Reference: Properties of Galactic Globular Clusters, C. Francis+
-      (U Cambridge)]],
+      (U Cambridge)]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

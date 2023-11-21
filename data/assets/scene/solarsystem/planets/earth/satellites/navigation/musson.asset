@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Russian LEO Navigation)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_musson",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=musson&FORMAT=kvn",
   Filename = "musson.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
 
-local satellites = {
-  Identifier = "musson",
+
+local MussonSatellites = {
+  Identifier = "MussonSatellites",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -28,15 +31,16 @@ local satellites = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(MussonSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(MussonSatellites)
 end)
 
-asset.export(satellites)
+asset.export(MussonSatellites)
 
 
 

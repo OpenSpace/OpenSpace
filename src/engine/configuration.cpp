@@ -25,12 +25,14 @@
 #include <openspace/engine/configuration.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/settings.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
+#include <json/json.hpp>
 #include <optional>
 
 namespace {
@@ -295,19 +297,13 @@ namespace {
             // initialized)
             std::optional<bool> showNodeNames;
 
-            // If this value is set to 'true', the loading screen will contain a progress
-            // bar that gives an estimate of the loading progression
-            std::optional<bool> showProgressbar;
+            // If this value is set to 'true', the loading screen will display a list of
+            // warning and error messages
+            std::optional<bool> showLogMessages;
         };
         // Values in this table describe the behavior of the loading screen that is
         // displayed while the scene graph is created and initialized
         std::optional<LoadingScreen> loadingScreen;
-
-        // List of window configurations that cannot be overwritten by user
-        std::optional<std::vector<std::string>> readOnlyWindowConfigs;
-
-        // List of profiles that cannot be overwritten by user
-        std::optional<std::vector<std::string>> readOnlyProfiles;
 
         // Configurations for each module
         std::optional<std::map<std::string, ghoul::Dictionary>> moduleConfigurations;
@@ -315,7 +311,7 @@ namespace {
 #include "configuration_codegen.cpp"
 } // namespace
 
-namespace openspace::configuration {
+namespace openspace {
 
 void parseLuaState(Configuration& configuration) {
     using namespace ghoul::lua;
@@ -417,10 +413,10 @@ void parseLuaState(Configuration& configuration) {
         const Parameters::LoadingScreen& l = *p.loadingScreen;
         c.loadingScreen.isShowingMessages =
             l.showMessage.value_or(c.loadingScreen.isShowingMessages);
-        c.loadingScreen.isShowingProgressbar =
-            l.showProgressbar.value_or(c.loadingScreen.isShowingProgressbar);
         c.loadingScreen.isShowingNodeNames =
             l.showNodeNames.value_or(c.loadingScreen.isShowingNodeNames);
+        c.loadingScreen.isShowingLogMessages =
+            l.showLogMessages.value_or(c.loadingScreen.isShowingLogMessages);
     }
 
     c.moduleConfigurations = p.moduleConfigurations.value_or(c.moduleConfigurations);
@@ -459,9 +455,39 @@ void parseLuaState(Configuration& configuration) {
         c.httpProxy.password = p.httpProxy->password.value_or(c.httpProxy.password);
     }
 
-    c.readOnlyWindowConfigs = p.readOnlyWindowConfigs.value_or(c.readOnlyWindowConfigs);
-    c.readOnlyProfiles = p.readOnlyProfiles.value_or(c.readOnlyProfiles);
     c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
+}
+
+void patchConfiguration(Configuration& configuration, const Settings& settings) {
+    if (settings.configuration.has_value()) {
+        configuration.windowConfiguration = *settings.configuration;
+        configuration.sgctConfigNameInitialized.clear();
+    }
+    if (settings.profile.has_value()) {
+        configuration.profile = *settings.profile;
+    }
+    if (settings.visibility.has_value()) {
+        configuration.propertyVisibility = *settings.visibility;
+    }
+    if (settings.bypassLauncher.has_value()) {
+        configuration.bypassLauncher = *settings.bypassLauncher;
+    }
+    auto it = configuration.moduleConfigurations.find("GlobeBrowsing");
+    // Just in case we have a configuration file that does not specify anything
+    // about the globebrowsing module
+    if (it == configuration.moduleConfigurations.end()) {
+        configuration.moduleConfigurations["GlobeBrowsing"] = ghoul::Dictionary();
+    }
+    if (settings.mrf.isEnabled.has_value()) {
+        configuration.moduleConfigurations["GlobeBrowsing"].setValue(
+            "MRFCacheEnabled", *settings.mrf.isEnabled
+        );
+    }
+    if (settings.mrf.location.has_value()) {
+        configuration.moduleConfigurations["GlobeBrowsing"].setValue(
+            "MRFCacheLocation", *settings.mrf.location
+        );
+    }
 }
 
 documentation::Documentation Configuration::Documentation =
@@ -491,11 +517,11 @@ std::filesystem::path findConfiguration(const std::string& filename) {
     }
 }
 
-Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
-                                        const glm::ivec2& primaryMonitorResolution,
-                                        std::string_view overrideScript)
+Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
+                                        const std::filesystem::path& settingsFile,
+                                        const glm::ivec2& primaryMonitorResolution)
 {
-    ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
+    ghoul_assert(std::filesystem::is_regular_file(configurationFile), "File must exist");
 
     Configuration result;
 
@@ -512,17 +538,17 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
     }
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(result.state, filename.string());
-
-    if (!overrideScript.empty()) {
-        LDEBUGC("Configuration", "Executing Lua script passed through the commandline:");
-        LDEBUGC("Configuration", overrideScript);
-        ghoul::lua::runScript(result.state, overrideScript);
-    }
+    ghoul::lua::runScriptFile(result.state, configurationFile.string());
 
     parseLuaState(result);
+
+    if (std::filesystem::is_regular_file(settingsFile)) {
+        Settings settings = loadSettings(settingsFile);
+
+        patchConfiguration(result, settings);
+    }
 
     return result;
 }
 
-} // namespace openspace::configuration
+} // namespace openspace

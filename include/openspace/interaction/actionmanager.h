@@ -35,14 +35,16 @@ namespace openspace::interaction {
 
 class ActionManager {
 public:
+    BooleanType(ShouldBeSynchronized);
+
     bool hasAction(const std::string& identifier) const;
     void registerAction(Action action);
     void removeAction(const std::string& identifier);
     const Action& action(const std::string& identifier) const;
     std::vector<Action> actions() const;
 
-    void triggerAction(const std::string& identifier,
-        const ghoul::Dictionary& arguments) const;
+    void triggerAction(const std::string& identifier, const ghoul::Dictionary& arguments,
+        ShouldBeSynchronized shouldBeSynchronized) const;
     static scripting::LuaLibrary luaLibrary();
 
 private:

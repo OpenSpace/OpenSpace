@@ -1,10 +1,9 @@
-local transforms = asset.require("./earth")
 asset.require("scene/solarsystem/sun/sun")
 asset.require("./moon/moon")
+local transforms = asset.require("./earth")
 
 
--- local earthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
-local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
+
 local Atmosphere = {
   Identifier = "EarthAtmosphere",
   Parent = transforms.Earth.Identifier,
@@ -21,7 +20,7 @@ local Atmosphere = {
         -- Wavelengths are given in 10^-9m
         Wavelengths = { 680, 550, 440 },
         -- Reflection coefficients are given in km^-1
-        Scattering = { 5.8E-3, 13.5E-3, 33.1E-3 },
+        Scattering = { 0.0058, 0.0135, 0.0331 },
         -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
       },
       -- Thickness of atmosphere if its density were uniform, in Km
@@ -40,9 +39,9 @@ local Atmosphere = {
     Mie = {
       Coefficients = {
         -- Reflection coefficients are given in km^-1
-        Scattering = { 4.0e-3, 4.0e-3, 4.0e-3 },
+        Scattering = { 0.004, 0.004, 0.004 },
         -- Extinction coefficients are a fraction of the Mie coefficients
-        Extinction = { 4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9 }
+        Extinction = { 0.004 / 0.9, 0.004 / 0.9, 0.004 / 0.9 }
       },
       -- Height scale (atmosphere thickness for constant density) in Km
       H_M = 1.2,
@@ -73,12 +72,10 @@ local Atmosphere = {
     },
     ShadowGroup = {
       Sources = {
-        { Name = "Sun", Radius = 696.3E6 },
-        -- { Name = "Monolith", Radius = 0.01E6 }
+        { Name = "Sun", Radius = 696300000 }
       },
       Casters = {
-        { Name = "Moon", Radius = 1.737E6 },
-        -- { Name = "Independence Day Ship", Radius = 0.0 }
+        { Name = "Moon", Radius = 1737000 }
       }
     }
   },
@@ -88,6 +85,7 @@ local Atmosphere = {
     Description = "Atmosphere of Earth"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Atmosphere)

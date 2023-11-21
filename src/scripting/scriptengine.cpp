@@ -81,8 +81,8 @@ namespace {
         return result;
     }
 
-    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f, 
-                          bool includeSourceLocation) 
+    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f,
+                          bool includeSourceLocation)
     {
         using namespace openspace;
         using namespace openspace::scripting;
@@ -350,11 +350,11 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         lua_pop(state, 1);
     }
 
+    library.documentations.clear();
     for (const std::filesystem::path& script : library.scripts) {
         // First we run the script to set its values in the current state
         ghoul::lua::runScriptFile(state, script.string());
 
-        library.documentations.clear();
 
         // Then, we extract the documentation information from the file
         ghoul::lua::push(state, "documentation");
@@ -449,7 +449,7 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
 }
 
 nlohmann::json ScriptEngine::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     nlohmann::json json;
 
@@ -533,17 +533,23 @@ void ScriptEngine::preSync(bool isMaster) {
             QueueItem item = std::move(_incomingScripts.front());
             _incomingScripts.pop();
 
-            _scriptsToSync.push_back(item.script);
-            const bool remoteScripting = item.remoteScripting;
-
             // Not really a received script but the master also needs to run the script...
             _masterScriptQueue.push(item);
 
-            if (global::parallelPeer->isHost() && remoteScripting) {
-                global::parallelPeer->sendScript(item.script);
-            }
             if (global::sessionRecording->isRecording()) {
                 global::sessionRecording->saveScriptKeyframeToTimeline(item.script);
+            }
+
+            // Sync out to other nodes (cluster)
+            if (!item.shouldBeSynchronized) {
+                continue;
+            }
+            _scriptsToSync.push_back(item.script);
+
+            // Send to other peers (parallel connection)
+            const bool shouldSendToRemote = item.shouldSendToRemote;
+            if (global::parallelPeer->isHost() && shouldSendToRemote) {
+                global::parallelPeer->sendScript(item.script);
             }
         }
     }
@@ -613,7 +619,8 @@ void ScriptEngine::postSync(bool isMaster) {
 }
 
 void ScriptEngine::queueScript(std::string script,
-                               ScriptEngine::RemoteScripting remoteScripting,
+                               ScriptEngine::ShouldBeSynchronized shouldBeSynchronized,
+                               ScriptEngine::ShouldSendToRemote shouldSendToRemote,
                                ScriptCallback callback)
 {
     ZoneScoped;
@@ -621,7 +628,12 @@ void ScriptEngine::queueScript(std::string script,
     if (script.empty()) {
         return;
     }
-    _incomingScripts.push({ std::move(script), remoteScripting, std::move(callback) });
+    _incomingScripts.push({
+        std::move(script),
+        shouldBeSynchronized,
+        shouldSendToRemote,
+        std::move(callback)
+    });
 }
 
 
@@ -638,7 +650,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Trace'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             {
                 "printDebug",
@@ -647,7 +660,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Debug'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             {
                 "printInfo",
@@ -656,7 +670,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Info'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             {
                 "printWarning",
@@ -665,7 +680,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Warning'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             {
                 "printError",
@@ -674,7 +690,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Error'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             {
                 "printFatal",
@@ -683,7 +700,8 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Fatal'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead"
+                "printed, for all other types, the type is printed instead",
+                {}
             },
             codegen::lua::AbsolutePath,
             codegen::lua::SetPathToken,

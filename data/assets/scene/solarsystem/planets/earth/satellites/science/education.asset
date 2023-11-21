@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Education)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_education",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=education&FORMAT=kvn",
   Filename = "education.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
 
-local satellites = {
-  Identifier = "education",
+
+local EducationSatellites = {
+  Identifier = "EducationSatellites",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -28,15 +31,16 @@ local satellites = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(EducationSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(EducationSatellites)
 end)
 
-asset.export(satellites)
+asset.export(EducationSatellites)
 
 
 

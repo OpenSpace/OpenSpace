@@ -1,25 +1,26 @@
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Galah Speck Files",
   Type = "HttpSynchronization",
   Identifier = "gaia_galah",
   Version = 1
 })
 
-local colormaps = asset.syncedResource({
+local colormaps = asset.resource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",
   Version = 3
 })
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Stars Textures",
   Type = "HttpSynchronization",
   Identifier = "stars_textures",
   Version = 1
 })
 
-local gaia_abundance_galah = {
+
+local GaiaAbundanceGalah = {
   Identifier = "GaiaAbundanceGalah",
   Renderable = {
     Type = "RenderableStars",
@@ -55,15 +56,16 @@ local gaia_abundance_galah = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(gaia_abundance_galah)
+  openspace.addSceneGraphNode(GaiaAbundanceGalah)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(gaia_abundance_galah)
+  openspace.removeSceneGraphNode(GaiaAbundanceGalah)
 end)
 
-asset.export(gaia_abundance_galah)
+asset.export(GaiaAbundanceGalah)
 
 
 

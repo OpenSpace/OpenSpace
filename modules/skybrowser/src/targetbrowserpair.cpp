@@ -51,7 +51,8 @@ namespace {
         );
         openspace::global::scriptEngine->queueScript(
             script,
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 } // namespace
@@ -91,7 +92,10 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
 }
 
 void TargetBrowserPair::synchronizeAim() {
-    if (!_targetAnimation.isAnimating() && _browser->isInitialized()) {
+    bool shouldUpdate =
+        _browser->shouldUpdateWhileTargetAnimates() ||
+        !_targetAnimation.isAnimating();
+    if (shouldUpdate && _browser->isInitialized()) {
         _browser->setEquatorialAim(targetDirectionEquatorial());
         _browser->setTargetRoll(targetRoll());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
@@ -324,7 +328,8 @@ void TargetBrowserPair::startFading(float goal, float fadeTime) {
 
     global::scriptEngine->queueScript(
         script,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

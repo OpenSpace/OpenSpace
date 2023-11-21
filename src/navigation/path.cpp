@@ -45,12 +45,12 @@ namespace {
     constexpr std::string_view _loggerCat = "Path";
     constexpr float LengthEpsilon = 1e-5f;
 
-    constexpr const char* SunIdentifier = "Sun";
-
     // TODO: where should this documentation be?
     // It's nice to have these to interpret the dictionary when creating the path, but
     // maybe it's not really necessary
     struct [[codegen::Dictionary(PathInstruction)]] Parameters {
+        // The type of the instruction. Decides what other parameters are
+        // handled/available
         enum class TargetType {
             Node,
             NavigationState
@@ -98,9 +98,14 @@ namespace {
 
 namespace openspace::interaction {
 
-Path::Path(Waypoint start, Waypoint end, Type type,
-           std::optional<double> duration)
-    : _start(start), _end(end), _type(type)
+documentation::Documentation Path::Documentation() {
+    return codegen::doc<Parameters>("core_path_instruction");
+}
+
+Path::Path(Waypoint start, Waypoint end, Type type, std::optional<double> duration)
+    : _start(start)
+    , _end(end)
+    , _type(type)
 {
     switch (_type) {
         case Type::AvoidCollision:
@@ -113,9 +118,6 @@ Path::Path(Waypoint start, Waypoint end, Type type,
         case Type::ZoomOutOverview:
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
-        default:
-            LERROR("Could not create curve. Type does not exist");
-            throw ghoul::MissingCaseException();
     }
 
     _prevPose = _start.pose();
@@ -124,28 +126,47 @@ Path::Path(Waypoint start, Waypoint end, Type type,
     // computing how much faster/slower it should be
     _speedFactorFromDuration = 1.0;
     if (duration.has_value()) {
-        constexpr double dt = 0.05; // 20 fps
-        while (!hasReachedEnd()) {
-            traversePath(dt);
-        }
+        if (*duration > 0.0) {
+            constexpr double dt = 0.05; // 20 fps
+            while (!hasReachedEnd()) {
+                traversePath(dt);
+            }
 
-        // We now know how long it took to traverse the path. Use that
-        _speedFactorFromDuration = _progressedTime / *duration;
-        resetPlaybackVariables();
+            // We now know how long it took to traverse the path. Use that
+            _speedFactorFromDuration = _progressedTime / *duration;
+            resetPlaybackVariables();
+        }
+        else {
+            // A duration of zero means infinite speed. Handle this explicity
+            _speedFactorFromDuration = std::numeric_limits<double>::infinity();
+        }
     }
 }
 
-Waypoint Path::startPoint() const { return _start; }
+Waypoint Path::startPoint() const {
+    return _start;
+}
 
-Waypoint Path::endPoint() const { return _end; }
+Waypoint Path::endPoint() const {
+    return _end;
+}
 
-double Path::pathLength() const { return _curve->length(); }
+double Path::pathLength() const {
+    return _curve->length();
+}
 
 std::vector<glm::dvec3> Path::controlPoints() const {
     return _curve->points();
 }
 
 CameraPose Path::traversePath(double dt, float speedScale) {
+    if (std::isinf(_speedFactorFromDuration)) {
+        _shouldQuit = true;
+        _prevPose = _start.pose();
+        _traveledDistance = pathLength();
+        return _end.pose();
+    }
+
     double speed = speedAlongPath(_traveledDistance);
     speed *= static_cast<double>(speedScale);
     double displacement = dt * speed;
@@ -458,138 +479,6 @@ double Path::speedAlongPath(double traveledDistance) const {
     return _speedFactorFromDuration * speed * dampeningFactor;
 }
 
-Waypoint waypointFromCamera() {
-    Camera* camera = global::navigationHandler->camera();
-    const glm::dvec3 pos = camera->positionVec3();
-    const glm::dquat rot = camera->rotationQuaternion();
-    const std::string node = global::navigationHandler->anchorNode()->identifier();
-    return Waypoint{ pos, rot, node };
-}
-
-// Compute a target position close to the specified target node, using knowledge of
-// the start point and a desired distance from the node's center
-glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
-                                    const Waypoint& startPoint)
-{
-    const glm::dvec3 nodePos = targetNode->worldPosition();
-    const SceneGraphNode* sun = sceneGraphNode(SunIdentifier);
-    const SceneGraphNode* closeNode = PathNavigator::findNodeNearTarget(targetNode);
-
-    // @TODO (2021-07-09, emmbr): Not nice to depend on a specific scene graph node,
-    // as it might not exist. Ideally, each SGN could know about their preferred
-    // direction to be viewed from (their "good side"), and then that could be queried
-    // and used instead.
-    if (closeNode) {
-        // If the node is close to another node in the scene, set the direction in a way
-        // that minimizes risk of collision
-        return glm::normalize(nodePos - closeNode->worldPosition());
-    }
-    else if (!sun) {
-        // Can't compute position from Sun position, so just use any direction. Z will do
-        return glm::dvec3(0.0, 0.0, 1.0);
-    }
-    else if (targetNode->identifier() == SunIdentifier) {
-        // Special case for when the target is the Sun, in which we want to avoid a zero
-        // vector. The Z axis is chosen to provide an overview of the solar system, and
-        // not stay in the orbital plane
-        return glm::dvec3(0.0, 0.0, 1.0);
-    }
-    else {
-        // Go to a point that is lit up by the sun, slightly offsetted from sun direction
-        const glm::dvec3 sunPos = sun->worldPosition();
-
-        const glm::dvec3 prevPos = startPoint.position();
-        const glm::dvec3 targetToPrev = prevPos - nodePos;
-        const glm::dvec3 targetToSun = sunPos - nodePos;
-
-        // Check against zero vectors, as this will lead to nan-values from cross product
-        if (glm::length(targetToSun) < LengthEpsilon ||
-            glm::length(targetToPrev) < LengthEpsilon)
-        {
-            // Same situation as if sun does not exist. Any direction will do
-            return glm::dvec3(0.0, 0.0, 1.0);
-        }
-
-        constexpr float defaultPositionOffsetAngle = -30.f; // degrees
-        constexpr float angle = glm::radians(defaultPositionOffsetAngle);
-        const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
-        const glm::dquat offsetRotation = angleAxis(static_cast<double>(angle), axis);
-
-        return glm::normalize(offsetRotation * targetToSun);
-    }
-}
-
-struct NodeInfo {
-    std::string identifier;
-    std::optional<glm::dvec3> position;
-    std::optional<double> height;
-    bool useTargetUpDirection;
-};
-
-Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& startPoint,
-                                     Path::Type type)
-{
-    const SceneGraphNode* targetNode = sceneGraphNode(info.identifier);
-    if (!targetNode) {
-        LERROR(fmt::format("Could not find target node '{}'", info.identifier));
-        return Waypoint();
-    }
-
-    glm::dvec3 stepDir;
-    glm::dvec3 targetPos;
-    if (info.position.has_value()) {
-        // The position in instruction is given in the targetNode's local coordinates.
-        // Convert to world coordinates
-        targetPos = glm::dvec3(
-            targetNode->modelTransform() * glm::dvec4(*info.position, 1.0)
-        );
-    }
-    else {
-        const PathNavigator& navigator = global::navigationHandler->pathNavigator();
-
-        const double radius = navigator.findValidBoundingSphere(targetNode);
-        const double defaultHeight = radius * navigator.arrivalDistanceFactor();
-        const double height = info.height.value_or(defaultHeight);
-        const double distanceFromNodeCenter = radius + height;
-
-        if (type == Path::Type::Linear) {
-            // If linear path, compute position along line form start to end point
-            glm::dvec3 endNodePos = targetNode->worldPosition();
-            stepDir = glm::normalize(startPoint.position() - endNodePos);
-        }
-        else {
-            stepDir = computeGoodStepDirection(targetNode, startPoint);
-        }
-
-        targetPos = targetNode->worldPosition() + stepDir * distanceFromNodeCenter;
-    }
-
-    glm::dvec3 up = global::navigationHandler->camera()->lookUpVectorWorldSpace();
-    if (info.useTargetUpDirection) {
-        // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth,
-        // which is where it matters the most. A better solution would be to make each
-        // sgn aware of its own 'up' and query
-        up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
-    }
-
-    // Compute rotation so the camera is looking at the targetted node
-    glm::dvec3 lookAtPos = targetNode->worldPosition();
-
-    // Check if we can distinguish between targetpos and lookAt pos. Otherwise, move it further away
-    const glm::dvec3 diff = targetPos - lookAtPos;
-    double distSquared = glm::dot(diff, diff);
-    if (std::isnan(distSquared) || distSquared < LengthEpsilon) {
-        double startToEndDist = glm::length(
-            startPoint.position() - targetNode->worldPosition()
-        );
-        lookAtPos = targetPos - stepDir * 0.1 * startToEndDist;
-    }
-
-    const glm::dquat targetRot = ghoul::lookAtQuaternion(targetPos, lookAtPos, up);
-
-    return Waypoint(targetPos, targetRot, info.identifier);
-}
-
 void checkVisibilityAndShowMessage(const SceneGraphNode* node) {
     auto isEnabled = [](const Renderable* r) {
         std::any propertyValueAny = r->property("Enabled")->get();
@@ -639,7 +528,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     bool hasStart = p.startState.has_value();
     const Waypoint startPoint = hasStart ?
         Waypoint(NavigationState(p.startState.value())) :
-        waypointFromCamera();
+        interaction::waypointFromCamera();
 
     std::vector<Waypoint> waypoints;
     switch (p.targetType) {
@@ -650,6 +539,14 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
             const NavigationState navigationState =
                 NavigationState(p.navigationState.value());
+
+            const SceneGraphNode* targetNode = sceneGraphNode(navigationState.anchor);
+            if (!targetNode) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Could not find anchor node '{}' in provided navigation state",
+                    navigationState.anchor
+                ));
+            }
 
             waypoints = { Waypoint(navigationState) };
             break;
@@ -668,7 +565,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 ));
             }
 
-            NodeInfo info {
+            interaction::NodeCameraStateSpec info {
                 nodeIdentifier,
                 p.position,
                 p.height,
@@ -692,11 +589,10 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 type = Path::Type::Linear;
             }
 
-            waypoints = { computeWaypointFromNodeInfo(info, startPoint, type) };
+            bool isLinear = type == Path::Type::Linear;
+            waypoints = { computeWaypointFromNodeInfo(info, startPoint, isLinear) };
             break;
         }
-        default:
-            throw ghoul::MissingCaseException();
     }
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints

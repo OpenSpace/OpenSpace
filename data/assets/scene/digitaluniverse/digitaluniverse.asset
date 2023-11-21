@@ -11,11 +11,11 @@ asset.require("./constellations")
 asset.require("./deepsky")
 asset.require("./dwarfs")
 asset.require("./exoplanets")
+asset.require("./exoplanets_candidates")
 asset.require("./globularclusters")
 asset.require("./grids")
 asset.require("./groups")
 asset.require("./h2regions")
-asset.require("./kepler")
 asset.require("./localdwarfs")
 asset.require("./milkyway")
 asset.require("./milkyway_arm_labels")
@@ -34,6 +34,7 @@ asset.require("./superclusters")
 asset.require("./supernovaremnants")
 asset.require("./tully")
 asset.require("./voids")
+
 
 
 asset.meta = {

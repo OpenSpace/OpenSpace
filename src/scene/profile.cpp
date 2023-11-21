@@ -346,6 +346,34 @@ void from_json(const nlohmann::json& j, Profile::Time& v) {
     j["is_paused"].get_to(v.startPaused);
 }
 
+void to_json(nlohmann::json& j, const Profile::CameraGoToNode& v) {
+    j["type"] = Profile::CameraGoToNode::Type;
+    j["anchor"] = v.anchor;
+    if (v.height.has_value()) {
+        j["height"] = *v.height;
+    }
+}
+
+void from_json(const nlohmann::json& j, Profile::CameraGoToNode& v) {
+    ghoul_assert(
+        j.at("type").get<std::string>() == Profile::CameraGoToNode::Type,
+        "Wrong type for Camera"
+    );
+
+    checkValue(j, "anchor", &nlohmann::json::is_string, "camera", false);
+    checkValue(j, "height", &nlohmann::json::is_number, "camera", true);
+    checkExtraKeys(
+        j,
+        "camera",
+        { "type", "anchor", "height"}
+    );
+
+    j["anchor"].get_to(v.anchor);
+    if (j.find("height") != j.end()) {
+        v.height = j["height"].get<double>();
+    }
+}
+
 void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     j["type"] = Profile::CameraNavState::Type;
     j["anchor"] = v.anchor;
@@ -586,6 +614,14 @@ void convertVersion11to12(nlohmann::json& profile) {
 
 } // namespace version11
 
+namespace version12 {
+
+void convertVersion12to13(nlohmann::json& profile) {
+    // Version 1.3 introduced to GoToNode camera initial position
+    profile["version"] = Profile::Version{ 1, 3 };
+}
+
+} // namespace version12
 
 Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
     : ghoul::RuntimeError(std::move(msg), "profile")
@@ -687,8 +723,9 @@ std::string Profile::serialize() const {
     if (camera.has_value()) {
         r["camera"] = std::visit(
             overloaded {
+                [](const CameraGoToNode& c) { return nlohmann::json(c); },
                 [](const CameraNavState& c) { return nlohmann::json(c); },
-                [](const Profile::CameraGoToGeo& c) { return nlohmann::json(c); }
+                [](const CameraGoToGeo& c) { return nlohmann::json(c); }
             },
             *camera
         );
@@ -717,6 +754,11 @@ Profile::Profile(const std::string& content) {
 
         if (version.major == 1 && version.minor == 1) {
             version11::convertVersion11to12(profile);
+            profile["version"].get_to(version);
+        }
+
+        if (version.major == 1 && version.minor == 2) {
+            version12::convertVersion12to13(profile);
             profile["version"].get_to(version);
         }
 
@@ -749,7 +791,10 @@ Profile::Profile(const std::string& content) {
         }
         if (profile.find("camera") != profile.end()) {
             nlohmann::json c = profile.at("camera");
-            if (c["type"].get<std::string>() == CameraNavState::Type) {
+            if (c["type"].get<std::string>() == CameraGoToNode::Type) {
+                camera = c.get<CameraGoToNode>();
+            }
+            else if (c["type"].get<std::string>() == CameraNavState::Type) {
                 camera = c.get<CameraNavState>();
             }
             else if (c["type"].get<std::string>() == CameraGoToGeo::Type) {

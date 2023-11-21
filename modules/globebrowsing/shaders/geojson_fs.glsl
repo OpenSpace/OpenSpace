@@ -35,7 +35,7 @@ uniform float ambientIntensity = 0.2;
 uniform float diffuseIntensity = 0.8;
 uniform bool performShading = true;
 
-uniform unsigned int nLightSources;
+uniform uint nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];
 uniform float lightIntensities[8];
 

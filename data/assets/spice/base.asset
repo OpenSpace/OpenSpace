@@ -1,41 +1,34 @@
-local lsk = asset.syncedResource({
-  Name = "General LSK Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "general_lsk",
-  Version = 1
-})
-
-local pck = asset.syncedResource({
+local pck = asset.resource({
   Name = "General PCK Kernels",
   Type = "HttpSynchronization",
   Identifier = "general_pck",
   Version = 1
 })
 
-local spk = asset.syncedResource({
+local spk = asset.resource({
   Name = "General SPK Kernels",
   Type = "HttpSynchronization",
   Identifier = "general_spk",
   Version = 2
 })
 
+
 local kernels = {
-  lsk .. "naif0012.tls",
   pck .. "pck00011.tpc",
   spk .. "de430.bsp"
 }
 
+
 asset.onInitialize(function()
-  for _, kernel in ipairs(kernels) do
-    openspace.spice.loadKernel(kernel)
-  end
+  openspace.spice.loadKernel(pck .. "pck00011.tpc")
+  openspace.spice.loadKernel(spk .. "de430.bsp")
 end)
 
 asset.onDeinitialize(function()
-  for i = #kernels, 1, -1 do
-    openspace.spice.unloadKernel(kernels[i])
-  end
+  openspace.spice.unloadKernel(spk .. "de430.bsp")
+  openspace.spice.unloadKernel(pck .. "pck00011.tpc")
 end)
+
 
 
 asset.meta = {

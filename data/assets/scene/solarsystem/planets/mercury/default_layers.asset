@@ -1,40 +1,39 @@
---mdis
 asset.require("./layers/colorlayers/messenger_mdis_utah", false)
 asset.require("./layers/colorlayers/messenger_mdis_sweden", false)
 asset.require("./layers/colorlayers/messenger_mdis_newyork", false)
---mossaic
+
 asset.require("./layers/colorlayers/messenger_mosaic_utah", false)
 asset.require("./layers/colorlayers/messenger_mosaic_sweden", false)
 asset.require("./layers/colorlayers/messenger_mosaic_newyork", false)
---mosaic2 aka 8 color
+
 asset.require("./layers/colorlayers/messenger_mosaic2_utah", false)
 asset.require("./layers/colorlayers/messenger_mosaic2_sweden", false)
 asset.require("./layers/colorlayers/messenger_mosaic2_newyork", false)
---bdr
+
 asset.require("./layers/colorlayers/messenger_bdr_utah", true)
 asset.require("./layers/colorlayers/messenger_bdr_sweden", false)
 asset.require("./layers/colorlayers/messenger_bdr_newyork", false)
---mdr
+
 asset.require("./layers/colorlayers/messenger_mdr_utah", false)
---mp3
+
 asset.require("./layers/colorlayers/messenger_mp3_utah", false)
---hie
+
 asset.require("./layers/colorlayers/messenger_hie_utah", false)
 asset.require("./layers/colorlayers/messenger_hie_sweden", false)
 asset.require("./layers/colorlayers/messenger_hie_newyork", false)
---hiw
+
 asset.require("./layers/colorlayers/messenger_hiw_utah", false)
 asset.require("./layers/colorlayers/messenger_hiw_sweden", false)
 asset.require("./layers/colorlayers/messenger_hiw_newyork", false)
---loi
+
 asset.require("./layers/colorlayers/messenger_loi_utah", false)
 asset.require("./layers/colorlayers/messenger_loi_sweden", false)
 asset.require("./layers/colorlayers/messenger_loi_newyork", false)
---shade
+
 asset.require("./layers/colorlayers/messenger_shade_utah", false)
 asset.require("./layers/colorlayers/messenger_shade_sweden", false)
 asset.require("./layers/colorlayers/messenger_shade_newyork", false)
---local textures, these are mineral abundance maps
+
 asset.require("./layers/colorlayers/alsimap_02122015", false)
 asset.require("./layers/colorlayers/casimap_02122015", false)
 asset.require("./layers/colorlayers/fesimap_02122015", false)
@@ -42,6 +41,7 @@ asset.require("./layers/colorlayers/mgsimap_02122015", false)
 asset.require("./layers/colorlayers/ssimap_02122015", false)
 
 asset.require("./layers/heightlayers/messenger_dem_utah", true)
+
 
 
 asset.meta = {

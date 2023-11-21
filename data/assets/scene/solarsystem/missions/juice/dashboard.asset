@@ -1,31 +1,37 @@
-local distance_juice_jupiter = {
+local juice = asset.require("./transforms")
+local jupiter = asset.require("scene/solarsystem/planets/jupiter/jupiter")
+local ganymede = asset.require("scene/solarsystem/planets/jupiter/ganymede/ganymede")
+
+
+local DistanceJuiceJupiter = {
   Type = "DashboardItemDistance",
   Identifier = "JuiceJupiterDistance",
-  GuiName = "Juice - Jupiter Distance",
+  Enabled = asset.enabled,
   SourceType = "Node",
-  SourceNodeName = "Juice",
+  SourceNodeName = juice.Juice.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = "Jupiter",
-  Enabled = asset.enabled
+  DestinationNodeName = jupiter.Jupiter.Identifier,
+  GuiName = "Juice - Jupiter Distance"
 }
 
-local distance_juice_ganymede = {
+local DistanceJuiceGanymede = {
   Type = "DashboardItemDistance",
   Identifier = "JuiceGanymedeDistance",
-  GuiName = "Juice - Ganymede Distance",
+  Enabled = asset.enabled,
   SourceType = "Node",
-  SourceNodeName = "Juice",
+  SourceNodeName = juice.Juice.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = "Ganymede",
-  Enabled = asset.enabled
+  DestinationNodeName = ganymede.Ganymede.Identifier,
+  GuiName = "Juice - Ganymede Distance"
 }
 
+
 asset.onInitialize(function()
-  openspace.dashboard.addDashboardItem(distance_juice_jupiter)
-  openspace.dashboard.addDashboardItem(distance_juice_ganymede)
+  openspace.dashboard.addDashboardItem(DistanceJuiceJupiter)
+  openspace.dashboard.addDashboardItem(DistanceJuiceGanymede)
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(distance_juice_ganymede)
-  openspace.dashboard.removeDashboardItem(distance_juice_jupiter)
+  openspace.dashboard.removeDashboardItem(DistanceJuiceGanymede)
+  openspace.dashboard.removeDashboardItem(DistanceJuiceJupiter)
 end)

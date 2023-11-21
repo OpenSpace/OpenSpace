@@ -91,7 +91,7 @@ void LayerGroup::update() {
     _activeLayers.clear();
 
     for (const std::unique_ptr<Layer>& layer : _layers) {
-        if (layer->enabled()) {
+        if (layer->enabled() && layer->isInitialized()) {
             layer->update();
             _activeLayers.push_back(layer.get());
         }

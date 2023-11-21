@@ -676,21 +676,24 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->activate();
 
     // Calculate Model View MatrixProjection
-    const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
-    const glm::dmat4 modelMat =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        rotMat * glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
-    const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
+    const glm::dmat4 rotationTransform = glm::dmat4(data.modelTransform.rotation);
+    const glm::dmat4 modelTransform = calcModelTransform(
+        data,
+        { .rotation = rotationTransform }
+    );
 
-    _shaderProgram->setUniform("modelViewProjection",
-        data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat)
+    _shaderProgram->setUniform(
+        "modelViewProjection",
+        glm::mat4(calcModelViewProjectionTransform(data, modelTransform))
     );
 
     SceneGraphNode* earthNode = sceneGraphNode("Earth");
     if (!earthNode) {
         LWARNING("Could not find scene graph node 'Earth'");
     }
-    glm::vec3 earthPos = earthNode->worldPosition() * data.modelTransform.rotation;
+    glm::vec3 earthPos = glm::vec3(
+        earthNode->worldPosition() * data.modelTransform.rotation
+    );
 
     _shaderProgram->setUniform(_uniformCache.streamColor, _streamColor);
     _shaderProgram->setUniform(_uniformCache.nodeSize, _nodeSize);

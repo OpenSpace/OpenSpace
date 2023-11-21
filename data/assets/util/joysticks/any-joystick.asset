@@ -1,5 +1,8 @@
 local propertyHelper = asset.require("../property_helper")
 local joystickHelper = asset.require("./joystick_helper")
+
+
+
 local initializeAll = false
 
 -- Add the asset cooresponding to the joystick name
@@ -20,6 +23,7 @@ local function addJoystickAsset(joystick)
     openspace.printWarning("Could not find a matching asset for joystick: " .. joystick)
   end
 end
+
 
 asset.onInitialize(function()
   local rawJoysticks = openspace.navigation.listAllJoysticks()

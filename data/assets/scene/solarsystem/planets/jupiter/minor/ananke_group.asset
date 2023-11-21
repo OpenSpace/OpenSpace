@@ -1,442 +1,1907 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
-local kernel346 = asset.require("../kernels").jup346
+local kernel = asset.require("../kernels")
 
 
 
-local parentIdentifier = transforms.JupiterBarycenter.Identifier
-local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_ananke", "moon_minor", "moon_minor_jupiter" }
-local trailColor = { 0.4, 0.3, 0.01 }
-local trailTags = {
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_jupiter",
-  "moonTrail_minor",
-  "moonTrail_minor_jupiter"
-}
-
-local anankeGroup = {
-  {
-    Identifier = "S2010J2",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "552",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2010 J 2",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 588.36,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Thelxinoe",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "THELXINOE",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 597.61,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Euanthe",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "EUANTHE",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 598.09,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Iocaste",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "IOCASTE",
-    Radii = { 5000, 5000, 5000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 609.43,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J16",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55506",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 16",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 610.36,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Praxidike",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PRAXIDIKE",
-    Radii = { 7000, 7000, 7000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 613.90,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Harpalyke",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "HARPALYKE",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 624.54,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Mneme",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "MNEME",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 627.48,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Hermippe",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "HERMIPPE",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 629.81,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Thyone",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "THYONE",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 639.80,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Ananke",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "ANANKE",
-    Radii = { 28000, 28000, 28000 },
-    TrailTags = trailTags,
-    Tags = tags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 640.38,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2021J1",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55512",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2021 J 1",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 606.99,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2021J2",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55513",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2021 J 2",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 627.96,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2021J3",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55514",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2021 J 3",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 643.85,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2022J3",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55523",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2022 J 3",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 617.82,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2017J3",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "564",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2017 J 3",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 606.3,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2017J7",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "568",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2017 J 7",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 602.6,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2017J9",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "570",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2017 J 9",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 639.2,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J2",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55501",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 2",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 602.02,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J12",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55505",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 12",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 646.64,
-    Kernels = kernel
-  }
-}
-
--- Generate all moon labels
-local moon_labels = {}
-
-for i, moon in ipairs(anankeGroup) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 7.1,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Gm",
-      FadeDistances = { 1.5, 90.0 },
-      FadeWidths = { 0.5, 90.0 }
-    },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/" .. moon.Identifier,
-      Description = "Label for Jupiter's moon " .. moonName .. " (Ananke group)"
+local S2010J2 = {
+  Identifier = "S2010J2",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "552",
+      Observer = "JUPITER BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2010 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2"
   }
-end
+}
 
+local S2010J2Trail = {
+  Identifier = "S2010J2Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "552",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 588.36,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2010 J 2 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2"
+  }
+}
 
-local nodes = proceduralGlobes.createGlobes(anankeGroup)
+local S2010J2Label = {
+  Identifier = "S2010J2Label",
+  Parent = S2010J2.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2010 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2010 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2",
+    Description = "Label for Jupiter's moon S/2010 J 2 (Ananke group)"
+  }
+}
+
+local Thelxinoe = {
+  Identifier = "Thelxinoe",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "THELXINOE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Thelxinoe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe"
+  }
+}
+
+local ThelxinoeTrail = {
+  Identifier = "ThelxinoeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "THELXINOE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 597.61,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Thelxinoe Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe"
+  }
+}
+
+local ThelxinoeLabel = {
+  Identifier = "ThelxinoeLabel",
+  Parent = Thelxinoe.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Thelxinoe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Thelxinoe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe",
+    Description = "Label for Jupiter's moon Thelxinoe (Ananke group)"
+  }
+}
+
+local Euanthe = {
+  Identifier = "Euanthe",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EUANTHE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Euanthe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe"
+  }
+}
+
+local EuantheTrail = {
+  Identifier = "EuantheTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EUANTHE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 598.09,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Euanthe Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe"
+  }
+}
+
+local EuantheLabel = {
+  Identifier = "EuantheLabel",
+  Parent = Euanthe.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Euanthe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Euanthe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe",
+    Description = "Label for Jupiter's moon Euanthe (Ananke group)"
+  }
+}
+
+local Iocaste = {
+  Identifier = "Iocaste",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "IOCASTE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Iocaste",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste"
+  }
+}
+
+local IocasteTrail = {
+  Identifier = "IocasteTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "IOCASTE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 609.43,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Iocaste Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste"
+  }
+}
+
+local IocasteLabel = {
+  Identifier = "IocasteLabel",
+  Parent = Iocaste.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Iocaste",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Iocaste Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste",
+    Description = "Label for Jupiter's moon Iocaste (Ananke group)"
+  }
+}
+
+local S2003J16 = {
+  Identifier = "S2003J16",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55506",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 16",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16"
+  }
+}
+
+local S2003J16Trail = {
+  Identifier = "S2003J16Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55506",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 610.36,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 16 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16"
+  }
+}
+
+local S2003J16Label = {
+  Identifier = "S2003J16Label",
+  Parent = S2003J16.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2003 J 16",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2003 J 16 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16",
+    Description = "Label for Jupiter's moon S/2003 J 16 (Ananke group)"
+  }
+}
+
+local Praxidike = {
+  Identifier = "Praxidike",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PRAXIDIKE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Praxidike",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike"
+  }
+}
+
+local PraxidikeTrail = {
+  Identifier = "PraxidikeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PRAXIDIKE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 613.90,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Praxidike Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike"
+  }
+}
+
+local PraxidikeLabel = {
+  Identifier = "PraxidikeLabel",
+  Parent = Praxidike.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Praxidike",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Praxidike Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike",
+    Description = "Label for Jupiter's moon Praxidike (Ananke group)"
+  }
+}
+
+local Harpalyke = {
+  Identifier = "Harpalyke",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HARPALYKE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Harpalyke",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke"
+  }
+}
+
+local HarpalykeTrail = {
+  Identifier = "HarpalykeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HARPALYKE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 624.54,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Harpalyke Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke"
+  }
+}
+
+local HarpalykeLabel = {
+  Identifier = "HarpalykeLabel",
+  Parent = Harpalyke.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Harpalyke",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Harpalyke Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke",
+    Description = "Label for Jupiter's moon Harpalyke (Ananke group)"
+  }
+}
+
+local Mneme = {
+  Identifier = "Mneme",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MNEME",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Mneme",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme"
+  }
+}
+
+local MnemeTrail = {
+  Identifier = "MnemeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MNEME",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 627.48,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Mneme Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme"
+  }
+}
+
+local MnemeLabel = {
+  Identifier = "MnemeLabel",
+  Parent = Mneme.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Mneme",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Mneme Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme",
+    Description = "Label for Jupiter's moon Mneme (Ananke group)"
+  }
+}
+
+local Hermippe = {
+  Identifier = "Hermippe",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HERMIPPE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Hermippe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe"
+  }
+}
+
+local HermippeTrail = {
+  Identifier = "HermippeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HERMIPPE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 629.81,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Hermippe Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe"
+  }
+}
+
+local HermippeLabel = {
+  Identifier = "HermippeLabel",
+  Parent = Hermippe.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Hermippe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Hermippe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe",
+    Description = "Label for Jupiter's moon Hermippe (Ananke group)"
+  }
+}
+
+local Thyone = {
+  Identifier = "Thyone",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "THYONE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Thyone",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone"
+  }
+}
+
+local ThyoneTrail = {
+  Identifier = "ThyoneTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "THYONE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 639.80,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Thyone Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone"
+  }
+}
+
+local ThyoneLabel = {
+  Identifier = "ThyoneLabel",
+  Parent = Thyone.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Thyone",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Thyone Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone",
+    Description = "Label for Jupiter's moon Thyone (Ananke group)"
+  }
+}
+
+local Ananke = {
+  Identifier = "Ananke",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ANANKE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 28000, 28000, 28000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Ananke",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke"
+  }
+}
+
+local AnankeTrail = {
+  Identifier = "AnankeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ANANKE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 640.38,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Ananke Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke"
+  }
+}
+
+local AnankeLabel = {
+  Identifier = "AnankeLabel",
+  Parent = Ananke.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Ananke",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Ananke Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke",
+    Description = "Label for Jupiter's moon Ananke (Ananke group)"
+  }
+}
+
+local S2021J1 = {
+  Identifier = "S2021J1",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55512",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 1",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1"
+  }
+}
+
+local S2021J1Trail = {
+  Identifier = "S2021J1Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55512",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 606.99,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 1 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1"
+  }
+}
+
+local S2021J1Label = {
+  Identifier = "S2021J1Label",
+  Parent = S2021J1.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2021 J 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2021 J 1 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1",
+    Description = "Label for Jupiter's moon S/2021 J 1 (Ananke group)"
+  }
+}
+
+local S2021J2 = {
+  Identifier = "S2021J2",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55513",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2"
+  }
+}
+
+local S2021J2Trail = {
+  Identifier = "S2021J2Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55513",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 627.96,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 2 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2"
+  }
+}
+
+local S2021J2Label = {
+  Identifier = "S2021J2Label",
+  Parent = S2021J2.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2021 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2021 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2",
+    Description = "Label for Jupiter's moon S/2021 J 2 (Ananke group)"
+  }
+}
+
+local S2021J3 = {
+  Identifier = "S2021J3",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55514",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3"
+  }
+}
+
+local S2021J3Trail = {
+  Identifier = "S2021J3Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55514",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 643.85,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 3 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3"
+  }
+}
+
+local S2021J3Label = {
+  Identifier = "S2021J3Label",
+  Parent = S2021J3.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2021 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2021 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3",
+    Description = "Label for Jupiter's moon S/2021 J 3 (Ananke group)"
+  }
+}
+
+local S2022J3 = {
+  Identifier = "S2022J3",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55523",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2022 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3"
+  }
+}
+
+local S2022J3Trail = {
+  Identifier = "S2022J3Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55523",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 617.82,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2022 J 3 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3"
+  }
+}
+
+local S2022J3Label = {
+  Identifier = "S2022J3Label",
+  Parent = S2022J3.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2022 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2022 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3",
+    Description = "Label for Jupiter's moon S/2022 J 3 (Ananke group)"
+  }
+}
+
+local S2017J3 = {
+  Identifier = "S2017J3",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "564",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3"
+  }
+}
+
+local S2017J3Trail = {
+  Identifier = "S2017J3Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "564",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 606.3,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 3 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3"
+  }
+}
+
+local S2017J3Label = {
+  Identifier = "S2017J3Label",
+  Parent = S2017J3.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2017 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2017 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3",
+    Description = "Label for Jupiter's moon S/2017 J 3 (Ananke group)"
+  }
+}
+
+local S2017J7 = {
+  Identifier = "S2017J7",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "568",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 7",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7"
+  }
+}
+
+local S2017J7Trail = {
+  Identifier = "S2017J7Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "568",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 602.6,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 7 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7"
+  }
+}
+
+local S2017J7Label = {
+  Identifier = "S2017J7Label",
+  Parent = S2017J7.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2017 J 7",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2017 J 7 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7",
+    Description = "Label for Jupiter's moon S/2017 J 7 (Ananke group)"
+  }
+}
+
+local S2017J9 = {
+  Identifier = "S2017J9",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "570",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 9",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9"
+  }
+}
+
+local S2017J9Trail = {
+  Identifier = "S2017J9Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "570",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 639.2,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 9 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9"
+  }
+}
+
+local S2017J9Label = {
+  Identifier = "S2017J9Label",
+  Parent = S2017J9.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2017 J 9",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2017 J 9 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9",
+    Description = "Label for Jupiter's moon S/2017 J 9 (Ananke group)"
+  }
+}
+
+local S2003J2 = {
+  Identifier = "S2003J2",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55501",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2"
+  }
+}
+
+local S2003J2Trail = {
+  Identifier = "S2003J2Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55501",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 602.02,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 2 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2"
+  }
+}
+
+local S2003J2Label = {
+  Identifier = "S2003J2Label",
+  Parent = S2003J2.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2003 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2003 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2",
+    Description = "Label for Jupiter's moon S/2003 J 2 (Ananke group)"
+  }
+}
+
+local S2003J12 = {
+  Identifier = "S2003J12",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55505",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 12",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12"
+  }
+}
+
+local S2003J12Trail = {
+  Identifier = "S2003J12Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55505",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 646.64,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 12 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12"
+  }
+}
+
+local S2003J12Label = {
+  Identifier = "S2003J12Label",
+  Parent = S2003J12.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2003 J 12",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2003 J 12 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12",
+    Description = "Label for Jupiter's moon S/2003 J 12 (Ananke group)"
+  }
+}
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernel.jup344)
+  openspace.spice.loadKernel(kernel.jup346)
 
-  for _, moonlabel in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moonlabel)
-  end
+
+  openspace.addSceneGraphNode(S2010J2)
+  openspace.addSceneGraphNode(S2010J2Trail)
+  openspace.addSceneGraphNode(S2010J2Label)
+
+  openspace.addSceneGraphNode(Thelxinoe)
+  openspace.addSceneGraphNode(ThelxinoeTrail)
+  openspace.addSceneGraphNode(ThelxinoeLabel)
+
+  openspace.addSceneGraphNode(Euanthe)
+  openspace.addSceneGraphNode(EuantheTrail)
+  openspace.addSceneGraphNode(EuantheLabel)
+
+  openspace.addSceneGraphNode(Iocaste)
+  openspace.addSceneGraphNode(IocasteTrail)
+  openspace.addSceneGraphNode(IocasteLabel)
+
+  openspace.addSceneGraphNode(S2003J16)
+  openspace.addSceneGraphNode(S2003J16Trail)
+  openspace.addSceneGraphNode(S2003J16Label)
+
+  openspace.addSceneGraphNode(Praxidike)
+  openspace.addSceneGraphNode(PraxidikeTrail)
+  openspace.addSceneGraphNode(PraxidikeLabel)
+
+  openspace.addSceneGraphNode(Harpalyke)
+  openspace.addSceneGraphNode(HarpalykeTrail)
+  openspace.addSceneGraphNode(HarpalykeLabel)
+
+  openspace.addSceneGraphNode(Mneme)
+  openspace.addSceneGraphNode(MnemeTrail)
+  openspace.addSceneGraphNode(MnemeLabel)
+
+  openspace.addSceneGraphNode(Hermippe)
+  openspace.addSceneGraphNode(HermippeTrail)
+  openspace.addSceneGraphNode(HermippeLabel)
+
+  openspace.addSceneGraphNode(Thyone)
+  openspace.addSceneGraphNode(ThyoneTrail)
+  openspace.addSceneGraphNode(ThyoneLabel)
+
+  openspace.addSceneGraphNode(Ananke)
+  openspace.addSceneGraphNode(AnankeTrail)
+  openspace.addSceneGraphNode(AnankeLabel)
+
+  openspace.addSceneGraphNode(S2021J1)
+  openspace.addSceneGraphNode(S2021J1Trail)
+  openspace.addSceneGraphNode(S2021J1Label)
+
+  openspace.addSceneGraphNode(S2021J2)
+  openspace.addSceneGraphNode(S2021J2Trail)
+  openspace.addSceneGraphNode(S2021J2Label)
+
+  openspace.addSceneGraphNode(S2021J3)
+  openspace.addSceneGraphNode(S2021J3Trail)
+  openspace.addSceneGraphNode(S2021J3Label)
+
+  openspace.addSceneGraphNode(S2022J3)
+  openspace.addSceneGraphNode(S2022J3Trail)
+  openspace.addSceneGraphNode(S2022J3Label)
+
+  openspace.addSceneGraphNode(S2017J3)
+  openspace.addSceneGraphNode(S2017J3Trail)
+  openspace.addSceneGraphNode(S2017J3Label)
+
+  openspace.addSceneGraphNode(S2017J7)
+  openspace.addSceneGraphNode(S2017J7Trail)
+  openspace.addSceneGraphNode(S2017J7Label)
+
+  openspace.addSceneGraphNode(S2017J9)
+  openspace.addSceneGraphNode(S2017J9Trail)
+  openspace.addSceneGraphNode(S2017J9Label)
+
+  openspace.addSceneGraphNode(S2003J2)
+  openspace.addSceneGraphNode(S2003J2Trail)
+  openspace.addSceneGraphNode(S2003J2Label)
+
+  openspace.addSceneGraphNode(S2003J12)
+  openspace.addSceneGraphNode(S2003J12Trail)
+  openspace.addSceneGraphNode(S2003J12Label)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(S2003J12Label)
+  openspace.removeSceneGraphNode(S2003J12Trail)
+  openspace.removeSceneGraphNode(S2003J12)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(S2003J2Label)
+  openspace.removeSceneGraphNode(S2003J2Trail)
+  openspace.removeSceneGraphNode(S2003J2)
+
+  openspace.removeSceneGraphNode(S2017J9Label)
+  openspace.removeSceneGraphNode(S2017J9Trail)
+  openspace.removeSceneGraphNode(S2017J9)
+
+  openspace.removeSceneGraphNode(S2017J7Label)
+  openspace.removeSceneGraphNode(S2017J7Trail)
+  openspace.removeSceneGraphNode(S2017J7)
+
+  openspace.removeSceneGraphNode(S2017J3Label)
+  openspace.removeSceneGraphNode(S2017J3Trail)
+  openspace.removeSceneGraphNode(S2017J3)
+
+  openspace.removeSceneGraphNode(S2022J3Label)
+  openspace.removeSceneGraphNode(S2022J3Trail)
+  openspace.removeSceneGraphNode(S2022J3)
+
+  openspace.removeSceneGraphNode(S2021J3Label)
+  openspace.removeSceneGraphNode(S2021J3Trail)
+  openspace.removeSceneGraphNode(S2021J3)
+
+  openspace.removeSceneGraphNode(S2021J2Label)
+  openspace.removeSceneGraphNode(S2021J2Trail)
+  openspace.removeSceneGraphNode(S2021J2)
+
+  openspace.removeSceneGraphNode(S2021J1Label)
+  openspace.removeSceneGraphNode(S2021J1Trail)
+  openspace.removeSceneGraphNode(S2021J1)
+
+  openspace.removeSceneGraphNode(AnankeLabel)
+  openspace.removeSceneGraphNode(AnankeTrail)
+  openspace.removeSceneGraphNode(Ananke)
+
+  openspace.removeSceneGraphNode(ThyoneLabel)
+  openspace.removeSceneGraphNode(ThyoneTrail)
+  openspace.removeSceneGraphNode(Thyone)
+
+  openspace.removeSceneGraphNode(HermippeLabel)
+  openspace.removeSceneGraphNode(HermippeTrail)
+  openspace.removeSceneGraphNode(Hermippe)
+
+  openspace.removeSceneGraphNode(MnemeLabel)
+  openspace.removeSceneGraphNode(MnemeTrail)
+  openspace.removeSceneGraphNode(Mneme)
+
+  openspace.removeSceneGraphNode(HarpalykeLabel)
+  openspace.removeSceneGraphNode(HarpalykeTrail)
+  openspace.removeSceneGraphNode(Harpalyke)
+
+  openspace.removeSceneGraphNode(PraxidikeLabel)
+  openspace.removeSceneGraphNode(PraxidikeTrail)
+  openspace.removeSceneGraphNode(Praxidike)
+
+  openspace.removeSceneGraphNode(S2003J16Label)
+  openspace.removeSceneGraphNode(S2003J16Trail)
+  openspace.removeSceneGraphNode(S2003J16)
+
+  openspace.removeSceneGraphNode(IocasteLabel)
+  openspace.removeSceneGraphNode(IocasteTrail)
+  openspace.removeSceneGraphNode(Iocaste)
+
+  openspace.removeSceneGraphNode(EuantheLabel)
+  openspace.removeSceneGraphNode(EuantheTrail)
+  openspace.removeSceneGraphNode(Euanthe)
+
+  openspace.removeSceneGraphNode(ThelxinoeLabel)
+  openspace.removeSceneGraphNode(ThelxinoeTrail)
+  openspace.removeSceneGraphNode(Thelxinoe)
+
+  openspace.removeSceneGraphNode(S2010J2Label)
+  openspace.removeSceneGraphNode(S2010J2Trail)
+  openspace.removeSceneGraphNode(S2010J2)
+
+
+  openspace.spice.unloadKernel(kernel.jup346)
+  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(S2010J2)
+asset.export(S2010J2Trail)
+asset.export(S2010J2Label)
+
+asset.export(Thelxinoe)
+asset.export(ThelxinoeTrail)
+asset.export(ThelxinoeLabel)
+
+asset.export(Euanthe)
+asset.export(EuantheTrail)
+asset.export(EuantheLabel)
+
+asset.export(Iocaste)
+asset.export(IocasteTrail)
+asset.export(IocasteLabel)
+
+asset.export(S2003J16)
+asset.export(S2003J16Trail)
+asset.export(S2003J16Label)
+
+asset.export(Praxidike)
+asset.export(PraxidikeTrail)
+asset.export(PraxidikeLabel)
+
+asset.export(Harpalyke)
+asset.export(HarpalykeTrail)
+asset.export(HarpalykeLabel)
+
+asset.export(Mneme)
+asset.export(MnemeTrail)
+asset.export(MnemeLabel)
+
+asset.export(Hermippe)
+asset.export(HermippeTrail)
+asset.export(HermippeLabel)
+
+asset.export(Thyone)
+asset.export(ThyoneTrail)
+asset.export(ThyoneLabel)
+
+asset.export(Ananke)
+asset.export(AnankeTrail)
+asset.export(AnankeLabel)
+
+asset.export(S2021J1)
+asset.export(S2021J1Trail)
+asset.export(S2021J1Label)
+
+asset.export(S2021J2)
+asset.export(S2021J2Trail)
+asset.export(S2021J2Label)
+
+asset.export(S2021J3)
+asset.export(S2021J3Trail)
+asset.export(S2021J3Label)
+
+asset.export(S2022J3)
+asset.export(S2022J3Trail)
+asset.export(S2022J3Label)
+
+asset.export(S2017J3)
+asset.export(S2017J3Trail)
+asset.export(S2017J3Label)
+
+asset.export(S2017J7)
+asset.export(S2017J7Trail)
+asset.export(S2017J7Label)
+
+asset.export(S2017J9)
+asset.export(S2017J9Trail)
+asset.export(S2017J9Label)
+
+asset.export(S2003J2)
+asset.export(S2003J2Trail)
+asset.export(S2003J2Label)
+
+asset.export(S2003J12)
+asset.export(S2003J12Trail)
+asset.export(S2003J12Label)
 
 
 
 asset.meta = {
   Name = "Jupiter Ananke Group Moons",
   Version = "1.0",
-  Description = [[Procedural Globe asset containing Jupiter's Ananke Group moons: S2010J2,
-    Thelxinoe, Euanthe, Iocaste, S2003J16, Praxidike, Harpalyke, Mneme, Hermippe, Thyone,
-    and Ananke. Blank globes and SPICE trails are generated for each moon]],
+  Description = [[Asset containing Jupiter's Ananke Group moons. Blank globes, SPICE
+    trails, and labels are generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

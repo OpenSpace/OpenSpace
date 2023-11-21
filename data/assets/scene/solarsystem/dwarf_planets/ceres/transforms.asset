@@ -1,22 +1,20 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
 asset.require("spice/base")
-local kernels = asset.require("./kernels").CeresKernels
 
 local CeresPosition = {
   Identifier = "CeresPosition",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_CERES",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels
-    },
     Translation = {
       Type = "SpiceTranslation",
       Target = "CERES",
-      Observer = "SSB",
-      Kernels = kernels
+      Observer = "SSB"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_CERES",
+      DestinationFrame = "GALACTIC"
     }
   },
   GUI = {
@@ -26,15 +24,22 @@ local CeresPosition = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.CeresKernels)
+
   openspace.addSceneGraphNode(CeresPosition)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CeresPosition)
+
+  openspace.spice.unloadKernel(kernels.CeresKernels)
 end)
 
 asset.export(CeresPosition)
+
+
 
 asset.meta = {
   Name = "Ceres Transforms",

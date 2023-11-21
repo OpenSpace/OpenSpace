@@ -72,10 +72,9 @@ class Translation;
  */
 class RenderableTrail : public Renderable {
 public:
+    const double DISTANCE_CULLING_RADII = 800.0;
 
-const double DISTANCE_CULLING_RADII = 800.0;
-
-struct Appearance : properties::PropertyOwner {
+    struct Appearance : properties::PropertyOwner {
         Appearance();
         /// Specifies the base color of the line before fading
         properties::Vec3Property lineColor;
@@ -101,18 +100,21 @@ struct Appearance : properties::PropertyOwner {
     /**
      * The render method will set up the shader information and then render first the
      * information contained in the the `_primaryRenderInformation`, then the optional
-     * `_floatingRenderInformation` using the provided \p data
+     * `_floatingRenderInformation` using the provided \p data.
+     *
      * \param data The data that is necessary to render this Renderable
+     * \param rendererTask A place to store render tasks from this Renderable
      */
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
 protected:
     explicit RenderableTrail(const ghoul::Dictionary& dictionary);
 
-    /// Returns the documentation entries that the con
     static documentation::Documentation Documentation();
 
-    /// The layout of the VBOs
+    /**
+     * The layout of the VBOs.
+     */
     struct TrailVBOLayout {
         float x, y, z;
     };
@@ -128,13 +130,18 @@ protected:
     /// The Translation object that provides the position of the individual trail points
     ghoul::mm_unique_ptr<Translation> _translation;
 
-    /// The RenderInformation contains information filled in by the concrete subclasses to
-    /// be used by this class.
+    /**
+     * The RenderInformation contains information filled in by the concrete subclasses to
+     * be used by this class.
+     */
     struct RenderInformation {
         enum class VertexSorting {
-            NewestFirst = 0,    ///< Newer vertices have a lower index than older ones
-            OldestFirst,        ///< Older vertices have a lower index than newer ones
-            NoSorting           ///< No ordering in the vertices; no fading applied
+            /// Newer vertices have a lower index than older ones
+            NewestFirst = 0,
+            /// Older vertices have a lower index than newer ones
+            OldestFirst,
+            /// No ordering in the vertices; no fading applied
+            NoSorting
         };
         /// The first element in the vertex buffer to be rendered
         GLint first = 0;

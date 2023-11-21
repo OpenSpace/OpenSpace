@@ -37,7 +37,7 @@ namespace openspace::interaction {
 
 /**
  * Actions that any button of a websocket can have. Each button must be in one of these
- * states
+ * states.
  */
 enum class WebsocketAction : uint8_t {
     /// Idle state if the button is unpressed and has been unpressed since last frame

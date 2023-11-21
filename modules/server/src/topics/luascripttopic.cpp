@@ -37,6 +37,7 @@ namespace {
     constexpr std::string_view KeyFunction = "function";
     constexpr std::string_view KeyArguments = "arguments";
     constexpr std::string_view KeyReturn = "return";
+    constexpr std::string_view KeyShouldBeSynchronized = "shouldBeSynchronized";
     constexpr std::string_view _loggerCat = "LuaScriptTopic";
 
     std::string formatLua(const nlohmann::json::const_iterator& it);
@@ -146,7 +147,13 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
                                  ret->is_boolean() &&
                                  ret->get<bool>();
 
-            runScript(luaScript, shouldReturn);
+            nlohmann::json::const_iterator sync = json.find(KeyShouldBeSynchronized);
+            bool shouldBeSynchronized = true;
+            if (sync != json.end() && sync->is_boolean()) {
+                shouldBeSynchronized = sync->get<bool>();
+            }
+
+            runScript(luaScript, shouldReturn, shouldBeSynchronized);
         }
         else if (function != json.end() && function->is_string()) {
             std::string luaFunction = function->get<std::string>();
@@ -154,6 +161,12 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
             bool shouldReturn = (ret != json.end()) &&
                                  ret->is_boolean() &&
                                  ret->get<bool>();
+
+            nlohmann::json::const_iterator sync = json.find(KeyShouldBeSynchronized);
+            bool shouldBeSynchronized = true;
+            if (sync != json.end() && sync->is_boolean()) {
+                shouldBeSynchronized = sync->get<bool>();
+            }
 
             nlohmann::json::const_iterator args = json.find(KeyArguments);
             if (!args->is_array()) {
@@ -167,7 +180,7 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
             }
 
             std::string luaScript = generateScript(luaFunction, formattedArgs);
-            runScript(luaScript, shouldReturn);
+            runScript(luaScript, shouldReturn, shouldBeSynchronized);
         }
     }
     catch (const std::out_of_range& e) {
@@ -176,7 +189,9 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     }
 }
 
-void LuaScriptTopic::runScript(std::string script, bool shouldReturn) {
+void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
+                               bool shouldBeSynchronized)
+{
     scripting::ScriptEngine::ScriptCallback callback;
     if (shouldReturn) {
         callback = [this](ghoul::Dictionary data) {
@@ -195,7 +210,8 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn) {
 
     global::scriptEngine->queueScript(
         std::move(script),
-        scripting::ScriptEngine::RemoteScripting::No,
+        scripting::ScriptEngine::ShouldBeSynchronized(shouldBeSynchronized),
+        scripting::ScriptEngine::ShouldSendToRemote(shouldBeSynchronized),
         callback
     );
 }

@@ -32,7 +32,7 @@
 namespace openspace {
 
 /**
- * Templated thread-safe queue based on std::thread and std::queue
+ * Templated thread-safe queue based on std::thread and std::queue.
  */
 template <typename T>
 class ConcurrentQueue {

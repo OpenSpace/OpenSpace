@@ -1,18 +1,19 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "HII Regions Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_h2regions_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "HII Regions Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_h2regions_speck",
   Version = 3
 })
 
-local object = {
+
+local Object = {
   Identifier = "HIIRegions",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -30,7 +31,7 @@ local object = {
     Texture = textures .. "point4.png",
     PolygonSides = 6,
     Unit = "pc",
-    ScaleFactor = 420,
+    ScaleFactor = 420.0,
     BillboardMinMaxSize = { 0.0, 300.0 },
     EnablePixelSizeControl = false
   },
@@ -51,15 +52,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

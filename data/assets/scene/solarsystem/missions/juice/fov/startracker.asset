@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local StarOh1 = {
@@ -105,6 +106,7 @@ end)
 asset.export(StarOh1)
 asset.export(StarOh2)
 asset.export(StarOh3)
+
 
 
 asset.meta = {

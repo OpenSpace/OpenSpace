@@ -1,13 +1,15 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
+local transforms = asset.require("./transforms")
 
 
-local textures = asset.syncedResource({
+
+local textures = asset.resource({
   Type = "HttpSynchronization",
   Name = "Sun textures",
   Identifier = "sun_textures",
   Version = 4
 })
+
 
 local SunMarker = {
   Identifier = "SunMarker",
@@ -27,6 +29,7 @@ local SunMarker = {
     Description = "Sun marker with name, sized for Solar System view"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SunMarker)

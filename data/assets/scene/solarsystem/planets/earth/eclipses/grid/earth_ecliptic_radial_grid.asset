@@ -1,0 +1,59 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local EclipticRotationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,
+  -0.9938214,  -0.1109906, -0.0003515167,
+  -0.09647644,  0.8622859,  0.4971472
+}
+
+
+local eclipticGrid = {
+  Identifier = "EarthEclipticRadialGrid",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 430000000
+    },
+  },
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    Color = { 0.086, 0.106, 0.431 },
+    LineWidth = 2.0,
+    GridSegments = { 8, 8 },
+    CircleSegments = 64,
+    Radii = { 0.0, 1.0 }
+  },
+  GUI = {
+    Name = "Earth Ecliptic Grid",
+    Path = "/Solar System/Planets/Earth",
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(eclipticGrid)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(eclipticGrid)
+end)
+
+asset.export(eclipticGrid)
+
+
+
+asset.meta = {
+  Name = "Earth Ecliptic Grid",
+  Version = "1.0",
+  Description = "A grid that shows the ecliptic of the Earth a radial grid",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

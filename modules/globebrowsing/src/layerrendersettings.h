@@ -42,11 +42,14 @@ struct LayerRenderSettings : public properties::PropertyOwner {
 
     void onChange(std::function<void()> callback);
 
-    /// This function matches the function with the same name in the
-    /// shader code
+    /**
+     * This function matches the function with the same name in the shader code.
+     */
     float performLayerSettings(float value) const;
-    /// This function matches the function with the same name in the
-    /// shader code
+
+    /**
+     * This function matches the function with the same name in the shader code.
+     */
     glm::vec4 performLayerSettings(const glm::vec4& currentValue) const;
 };
 

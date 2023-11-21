@@ -49,35 +49,35 @@ private:
 
     /**
      * Reads a single binary file with preprocessed star data and insert the render values
-     * into an octree structure (if star data passed all defined filters).
-     * Stores the entire octree in one binary file.
+     * into an octree structure (if star data passed all defined filters). Stores the
+     * entire octree in one binary file.
      */
     void constructOctreeFromSingleFile(const Task::ProgressCallback& progressCallback);
 
     /**
-     *  Reads binary star data from 8 preprocessed files (one per branch) in specified
-     * folder, prepared by ReadFitsTask, and inserts star render data into an octree
-     * (if star data passed all defined filters).
-     * Stores octree structure in a binary index file and stores all render data
-     * separate files, one file per node in the octree.
+     * Reads binary star data from 8 preprocessed files (one per branch) in specified
+     * folder, prepared by ReadFitsTask, and inserts star render data into an octree (if
+     * star data passed all defined filters). Stores octree structure in a binary index
+     * file and stores all render data separate files, one file per node in the octree.
      */
     void constructOctreeFromFolder(const Task::ProgressCallback& progressCallback);
 
     /**
-     * Checks all defined filter ranges and \returns true if any of the corresponding
-     * `filterValues` are outside of the defined range.
+     * Checks all defined filter ranges and returns true if any of the corresponding
+     * \p filterValues are outside of the defined range.
      *
-     * \param filterValues are all read filter values in binary file.
+     * \param filterValues Are all read filter values in binary file
      *
-     * \returns false if value should be inserted into Octree.
+     * \return `false` if value should be inserted into Octree
      */
     bool checkAllFilters(const std::vector<float>& filterValues);
 
     /**
-     * \returns true if star should be filtered away and false if all filters passed.
-     * \param range contains ]min, max[ and \param filterValue corresponding value in
-     * star. Star is filtered either if min = max = filterValue or if filterValue < min
-     * (when min != 0.0) or filterValue > max (when max != 0.0).
+     * \p range contains ]min, max[ and \p filterValue corresponding value in star. Star
+     * is filtered either if `min = max = filterValue` or if `filterValue < min` (when
+     * `min != 0.0`) or `filterValue > max` (when `max != 0.0`).
+     *
+     * \return `true` if star should be filtered away and `false` if all filters passed
      */
     bool filterStar(const glm::vec2& range, float filterValue, float normValue = 0.f);
 

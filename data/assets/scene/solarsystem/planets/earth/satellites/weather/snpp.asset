@@ -1,13 +1,16 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (SNPP)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_snpp",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=37849&FORMAT=kvn",
   Filename = "SNPP.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
+
 
 local SNPP = {
   Identifier = "SNPP",
@@ -80,7 +83,8 @@ local SNPPLabel = {
   }
 }
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   local s = openspace.space.readKeplerFile(omm .. "SNPP.txt", "OMM")
   SNPPTrail.Renderable.Period = s[1].Period / (60 * 60 * 24)
 
@@ -89,7 +93,7 @@ asset.onInitialize(function ()
   openspace.addSceneGraphNode(SNPPLabel)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SNPPLabel)
   openspace.removeSceneGraphNode(SNPPTrail)
   openspace.removeSceneGraphNode(SNPP)
@@ -98,6 +102,7 @@ end)
 asset.export(SNPP)
 asset.export(SNPPTrail)
 asset.export(SNPPLabel)
+
 
 
 asset.meta = {

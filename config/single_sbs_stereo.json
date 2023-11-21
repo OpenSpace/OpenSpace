@@ -42,5 +42,12 @@
       "eyeseparation": 0.065,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
-  ]
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "A single 1280x720 window containing side-by-side stereo planar projection rendering views.",
+    "license": "MIT License",
+    "name": "Side-by-Side Stereo",
+    "version": "1.0"
+  }
 }

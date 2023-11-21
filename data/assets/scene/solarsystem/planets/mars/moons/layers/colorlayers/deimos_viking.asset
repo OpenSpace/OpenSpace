@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("./../../deimos_globe").Deimos_Globe.Identifier
+local globe = asset.require("../../deimos_globe")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Deimos_Global_Mosaic_USGS",
   Name = "Deimos Global Mosaic [USGS]",
   Enabled = asset.enabled,
@@ -11,15 +13,16 @@ local layer = {
     released 26 October 2001. (Description from URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Deimos_Globe.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Deimos_Globe.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

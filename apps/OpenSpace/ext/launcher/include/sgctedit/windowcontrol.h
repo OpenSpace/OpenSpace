@@ -165,6 +165,22 @@ public:
      */
     void setProjectionEquirectangular(int quality, bool spoutOutput);
 
+    /**
+     * Controls the visibility of all projection controls, including those
+     * that are only shown when the projection type is set to certain values.
+     *
+     * \param enable bool true if the projections controls should be visible
+     */
+    void setVisibilityOfProjectionGui(bool enable);
+
+    /**
+     * Returns an sgct::config::Projections struct containing the projection
+     * information for this window.
+     *
+     * \return sgct::config::Projections object containing the projection information
+     */
+    sgct::config::Projections generateProjectionInformation() const;
+
 signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
 
@@ -185,7 +201,6 @@ private:
     void onAspectRatioLockClicked();
     void onFovLockClicked();
 
-    sgct::config::Projections generateProjectionInformation() const;
     void updatePlanarLockedFov();
     void setQualityComboBoxFromLinesResolution(int lines, QComboBox* combo);
 
@@ -208,33 +223,47 @@ private:
     QSpinBox* _offsetY = nullptr;
     QCheckBox* _windowDecoration = nullptr;
     QComboBox* _projectionType = nullptr;
+    QLabel* _projectionLabel = nullptr;
 
     struct {
         QWidget* widget = nullptr;
+        QLabel* labelInfo = nullptr;
         QDoubleSpinBox* fovH = nullptr;
         QDoubleSpinBox* fovV = nullptr;
+        QLabel* labelFovH = nullptr;
+        QLabel* labelFovV = nullptr;
+        QPushButton* buttonLockFov = nullptr;
     } _planar;
 
     struct {
         QWidget* widget = nullptr;
+        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
+        QLabel* labelQuality = nullptr;
         QCheckBox* spoutOutput = nullptr;
     } _fisheye;
 
     struct {
         QWidget* widget = nullptr;
+        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
+        QLabel* labelQuality = nullptr;
     } _sphericalMirror;
 
     struct {
         QWidget* widget = nullptr;
+        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
+        QLabel* labelQuality = nullptr;
         QDoubleSpinBox* heightOffset = nullptr;
+        QLabel* labelHeightOffset = nullptr;
     } _cylindrical;
 
     struct {
         QWidget* widget = nullptr;
+        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
+        QLabel* labelQuality = nullptr;
         QCheckBox* spoutOutput = nullptr;
     } _equirectangular;
 

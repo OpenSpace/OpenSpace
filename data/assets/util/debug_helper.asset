@@ -1,4 +1,4 @@
-local identifierGeneratorFunction = function (suffix)
+local function identifierGeneratorFunction(suffix)
   local nextIndex = 0
   return function (specification)
     nextIndex = nextIndex + 1
@@ -9,7 +9,7 @@ end
 
 local generateGridIdentifier = identifierGeneratorFunction("Grid")
 
-local addGrid = function (specification)
+local function addGrid(specification)
   local identifier = specification.Identifier or generateGridIdentifier(specification)
 
   local name = specification.Name
@@ -23,10 +23,6 @@ local addGrid = function (specification)
     Identifier = identifier,
     Parent = parent,
     Transform = {
-      Scale = {
-        Type = "StaticScale",
-        Scale = scale
-      },
       Translation = {
         Type = "StaticTranslation",
         Position = position
@@ -34,6 +30,10 @@ local addGrid = function (specification)
       Rotation = {
         Type = "StaticRotation",
         Rotation = rotation
+      },
+      Scale = {
+        Type = "StaticScale",
+        Scale = scale
       }
     },
     Renderable = {
@@ -48,12 +48,12 @@ local addGrid = function (specification)
     }
   }
   openspace.addSceneGraphNode(grid)
-  return identifier;
+  return identifier
 end
 
 local generateAxesIdentifier = identifierGeneratorFunction("Axes")
 
-local addCartesianAxes = function (specification)
+local function addCartesianAxes(specification)
   local identifier = specification.Identifier or generateAxesIdentifier(specification)
 
   local name = specification.Name or specification.Identifier
@@ -97,28 +97,29 @@ local addCartesianAxes = function (specification)
     }
   }
   openspace.addSceneGraphNode(axes)
-  return identifier;
+  return identifier
 end
 
 
-local registerNode = function(containerAsset, nodeCreationFunction, identifierGeneratorFunction, specification)
+local function registerNode(containerAsset, nodeCreationFunction,
+                            identifierGeneratorFunction, specification)
   local identifier = specification.Identifier or identifierGeneratorFunction(specification)
 
   specification.Identifier = identifier
 
-  containerAsset.onInitialize(function ()
+  containerAsset.onInitialize(function()
     nodeCreationFunction(specification)
   end)
-  containerAsset.onDeinitialize(function ()
+  containerAsset.onDeinitialize(function()
     openspace.removeSceneGraphNode(identifier)
   end)
 end
 
-local registerGrid = function(gridAsset, specification)
+local function registerGrid(gridAsset, specification)
   registerNode(gridAsset, addGrid, generateGridIdentifier, specification)
 end
 
-local registerCartesianAxes = function(axesAsset, specification)
+local function registerCartesianAxes(axesAsset, specification)
   registerNode(axesAsset, addCartesianAxes, generateAxesIdentifier, specification)
 end
 
