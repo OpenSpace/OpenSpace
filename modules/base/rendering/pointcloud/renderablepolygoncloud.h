@@ -22,85 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTS___H__
-#define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTS___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPOLYGONCLOUD___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPOLYGONCLOUD___H__
 
-#include <openspace/rendering/renderable.h>
+#include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 
-#include <modules/space/speckloader.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <filesystem>
 
-namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderablePoints : public Renderable {
+/**
+ * A billboarded point cloud, but with dynamically created polygon shapes instead of a
+ * custom texture. Overwrites the sprite set in
+ */
+class RenderablePolygonCloud : public RenderablePointCloud {
 public:
-    explicit RenderablePoints(const ghoul::Dictionary& dictionary);
-    ~RenderablePoints() override = default;
+    explicit RenderablePolygonCloud(const ghoul::Dictionary& dictionary);
+    ~RenderablePolygonCloud() override = default;
 
-    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<double> createDataSlice();
+    void createPolygonTexture();
+    void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
+        GLuint textureHeight);
+    void loadPolygonGeometryForRendering();
+    void renderPolygonGeometry(GLuint vao);
 
-    void readColorMapFile();
+    void bindTextureForRendering() const override;
 
-    bool _dataIsDirty = true;
-    bool _hasSpriteTexture = false;
-    bool _spriteTextureIsDirty = true;
-    bool _hasColorMapFile = false;
+    int _polygonSides = 3;
 
-    properties::FloatProperty _scaleFactor;
-    properties::Vec3Property _pointColor;
-    properties::StringProperty _spriteTexturePath;
+    GLuint _pTexture = 0;
 
-    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
-    std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
-    ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(
-        modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
-        spriteTexture, hasColorMap
-    ) _uniformCache;
-
-    std::filesystem::path _speckFile;
-    std::filesystem::path _colorMapFile;
-
-    DistanceUnit _unit = DistanceUnit::Parsec;
-
-    speck::Dataset _dataset;
-    std::vector<glm::vec4> _colorMapData;
-
-    //int _nValuesPerAstronomicalObject = 0;
-
-    GLuint _vao = 0;
-    GLuint _vbo = 0;
+    GLuint _polygonVao = 0;
+    GLuint _polygonVbo = 0;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTS___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPOLYGONCLOUD___H__

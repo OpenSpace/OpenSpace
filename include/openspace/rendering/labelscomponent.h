@@ -22,53 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#ifndef __OPENSPACE_CORE___LABELSCOMPONENT___H__
+#define __OPENSPACE_CORE___LABELSCOMPONENT___H__
 
-flat in vec4 gs_colorMap;
-flat in float vs_screenSpaceDepth;
-in vec2 texCoord;
-in float ta;
+#include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
-uniform float alphaValue;
-uniform vec3 color;
-uniform sampler2D spriteTexture;
-uniform bool hasColorMap;
-uniform bool useColorMap;
-uniform float fadeInValue;
+#include <openspace/data/dataloader.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
+#include <ghoul/glm.h>
+#include <filesystem>
 
+namespace ghoul::fontrendering { class Font; }
 
-Fragment getFragment() {
-  if (gs_colorMap.a == 0.0 || ta == 0.0 || fadeInValue == 0.0 || alphaValue == 0.0) {
-    discard;
-  }
+namespace openspace {
+struct RenderData;
 
-  vec4 textureColor = texture(spriteTexture, texCoord);
-  if (textureColor.a == 0.0) {
-    discard;
-  }
+namespace documentation { struct Documentation; }
 
-  vec4 fullColor = textureColor;
+class LabelsComponent : public properties::PropertyOwner, public Fadeable {
+public:
+    explicit LabelsComponent(const ghoul::Dictionary& dictionary);
+    ~LabelsComponent() override = default;
 
-  if (hasColorMap && useColorMap) {
-    fullColor *= gs_colorMap;
-  }
-  else {
-    fullColor.rgb *= color;
-  }
+    dataloader::Labelset& labelSet();
+    const dataloader::Labelset& labelSet() const;
 
-  float textureOpacity = dot(fullColor.rgb, vec3(1.0));
-  if (textureOpacity == 0.0) {
-    discard;
-  }
+    void initialize();
 
-  fullColor.a *= alphaValue * fadeInValue * ta;
+    void loadLabels();
 
-  Fragment frag;
-  frag.color = fullColor;
-  frag.depth = vs_screenSpaceDepth;
-  // Setting the position of the billboards to not interact with the ATM
-  frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
-  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+    bool isReady() const;
+    bool enabled() const;
 
-  return frag;
-}
+    void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+        float fadeInVariable = 1.f);
+
+    static documentation::Documentation Documentation();
+
+private:
+    std::filesystem::path _labelFile;
+    DistanceUnit _unit = DistanceUnit::Parsec;
+    dataloader::Labelset _labelset;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
+
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+
+    // Properties
+    properties::BoolProperty _enabled;
+    properties::Vec3Property _color;
+    properties::FloatProperty _size;
+    properties::FloatProperty _fontSize;
+    properties::IVec2Property _minMaxSize;
+    properties::BoolProperty _faceCamera;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___LABELSCOMPONENT___H__

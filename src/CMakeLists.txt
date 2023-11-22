@@ -27,6 +27,8 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake
 set(OPENSPACE_SOURCE
   openspace.cpp
   camera/camera.cpp
+  data/dataloader.cpp
+  data/speckloader.cpp
   documentation/core_registration.cpp
   documentation/documentation.cpp
   documentation/documentationengine.cpp
@@ -120,6 +122,7 @@ set(OPENSPACE_SOURCE
   properties/vector/vec3property.cpp
   properties/vector/vec4property.cpp
   query/query.cpp
+  rendering/colormappingcomponent.cpp
   rendering/dashboard.cpp
   rendering/dashboard_lua.inl
   rendering/dashboarditem.cpp
@@ -128,6 +131,7 @@ set(OPENSPACE_SOURCE
   rendering/deferredcastermanager.cpp
   rendering/fadeable.cpp
   rendering/helper.cpp
+  rendering/labelscomponent.cpp
   rendering/loadingscreen.cpp
   rendering/luaconsole.cpp
   rendering/raycastermanager.cpp
@@ -209,6 +213,8 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/json.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camera.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camerapose.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/data/dataloader.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/data/speckloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/core_registration.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentation.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentationengine.h
@@ -308,6 +314,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/vector/vec3property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/vector/vec4property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/query/query.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/colormappingcomponent.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/dashboard.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/dashboarditem.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/dashboardtextitem.h
@@ -319,6 +326,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/loadingscreen.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/luaconsole.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/helper.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/labelscomponent.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/raycasterlistener.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/raycastermanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/renderable.h

@@ -9,7 +9,7 @@ local speck = asset.resource({
 local Object = {
   Identifier = "Voids",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
     Labels = {
       Enabled = true,
@@ -20,7 +20,6 @@ local Object = {
       Unit = "Mpc"
     },
     DrawElements = false,
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "Mpc"
   },
@@ -55,7 +54,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Voids",
-  Version = "2.1",
+  Version = "3.0",
   Author = "Brian Abbott (AMNH)",
   Description = "Digital Universe asset for Cosmic voids",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

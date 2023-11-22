@@ -16,7 +16,7 @@ local TransformMatrix = {
 local HomeLabel = {
   Identifier = "HomeLabel",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
     Labels = {
       Enabled = true,
@@ -27,14 +27,18 @@ local HomeLabel = {
       Unit = "Mpc",
       TransformationMatrix = TransformMatrix
     },
-    Color = { 1.0, 0.4, 0.2 },
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 }
+    },
     Opacity = 0.99,
-    ScaleFactor = 500.0,
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
     FadeInDistances = { 0.05, 1.0 },
-    BillboardMinMaxSize = { 0.0, 8.22 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 50.0,
+      BillboardMaxPixelSize = 8.22,
+      EnablePixelSizeControl = true
+    }
   },
   GUI = {
     Name = "Home Label",
@@ -58,7 +62,7 @@ asset.export(HomeLabel)
 
 asset.meta = {
   Name = "Home Label",
-  Version = "1.1",
+  Version = "2.0",
   Description = "Label for the Milky Way titled 'Home', sided for the galactic level",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

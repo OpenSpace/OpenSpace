@@ -22,67 +22,94 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
-#define __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+#include "fragment.glsl"
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/rendering/fadeable.h>
+flat in float gs_colorParameter;
+flat in float vs_screenSpaceDepth;
+in vec2 texCoord;
 
-#include <modules/space/speckloader.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/ivec2property.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/distanceconversion.h>
-#include <ghoul/glm.h>
-#include <filesystem>
+uniform float alphaValue;
+uniform vec3 color;
 
-namespace ghoul::fontrendering { class Font; }
+uniform vec4 nanColor = vec4(0.5);
+uniform bool useNanColor = true;
 
-namespace openspace {
-struct RenderData;
+uniform vec4 aboveRangeColor;
+uniform bool useAboveRangeColor;
 
-namespace documentation { struct Documentation; }
+uniform vec4 belowRangeColor;
+uniform bool useBelowRangeColor;
 
-class LabelsComponent : public properties::PropertyOwner, public Fadeable {
-public:
-    explicit LabelsComponent(const ghoul::Dictionary& dictionary);
-    ~LabelsComponent() override = default;
+uniform bool hasSpriteTexture;
+uniform sampler2D spriteTexture;
 
-    speck::Labelset& labelSet();
-    const speck::Labelset& labelSet() const;
+uniform bool useColorMap;
+uniform sampler1D colorMapTexture;
+uniform float cmapRangeMin;
+uniform float cmapRangeMax;
+uniform bool hideOutsideRange;
 
-    void initialize();
+uniform float fadeInValue;
 
-    void loadLabels();
+vec4 sampleColorMap(float dataValue) {
+    if (useNanColor && isnan(dataValue)) {
+        return nanColor;
+    }
 
-    bool isReady() const;
-    bool enabled() const;
+    bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
+    if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
+        discard;
+    }
 
-    void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-        const glm::vec3& orthoRight, const glm::vec3& orthoUp,
-        float fadeInVariable = 1.f);
+    if (useBelowRangeColor && dataValue < cmapRangeMin) {
+        return belowRangeColor;
+    }
 
-    static documentation::Documentation Documentation();
+    if (useAboveRangeColor && dataValue > cmapRangeMax) {
+        return aboveRangeColor;
+    }
 
-private:
-    std::filesystem::path _labelFile;
-    DistanceUnit _unit = DistanceUnit::Parsec;
-    speck::Labelset _labelset;
+    float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
+    t = clamp(t, 0.0, 1.0);
+    return texture(colorMapTexture, t);
+}
 
-    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
+Fragment getFragment() {
+  if (fadeInValue == 0.0 || alphaValue == 0.0) {
+    discard;
+  }
 
-    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+   if (!hasSpriteTexture) {
+    // Moving the origin to the center
+    vec2 st = (texCoord - vec2(0.5)) * 2.0;
+    if (length(st) > 1.0) {
+      discard;
+    }
+  }
 
-    // Properties
-    properties::BoolProperty _enabled;
-    properties::Vec3Property _color;
-    properties::FloatProperty _size;
-    properties::FloatProperty _fontSize;
-    properties::IVec2Property _minMaxSize;
-    properties::BoolProperty _faceCamera;
-};
+  vec4 fullColor = vec4(1.0);
+  if (hasSpriteTexture) {
+    fullColor = texture(spriteTexture, texCoord);
+  }
 
-} // namespace openspace
+  if (useColorMap) {
+    fullColor *= sampleColorMap(gs_colorParameter);
+  }
+  else {
+    fullColor.rgb *= color;
+  }
 
-#endif // __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+  fullColor.a *= alphaValue * fadeInValue;
+  if (fullColor.a < 0.01) {
+    discard;
+  }
+
+  Fragment frag;
+  frag.color = fullColor;
+  frag.depth = vs_screenSpaceDepth;
+  // Setting the position of the billboards to not interact with the ATM
+  frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+
+  return frag;
+}

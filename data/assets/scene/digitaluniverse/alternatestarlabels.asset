@@ -9,7 +9,7 @@ local speck = asset.resource({
 local Object = {
   Identifier = "StarLabelsAlternate",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
     Labels = {
       Enabled = true,
@@ -19,7 +19,6 @@ local Object = {
       MinMaxSize = { 6, 20 },
       Unit = "pc"
     },
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc"
   },
@@ -51,7 +50,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Stars Labels - Alternate",
-  Version = "1.1",
+  Version = "2.0",
   Description = "Digital Universe asset for alternate start labels",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

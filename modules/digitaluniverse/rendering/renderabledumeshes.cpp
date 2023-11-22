@@ -385,7 +385,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
 
     glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
 
-    for (const speck::Labelset::Entry& e : _labelset.entries) {
+    for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         glm::vec3 scaledPos(e.position);
         scaledPos *= scale;
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
@@ -457,7 +457,7 @@ bool RenderableDUMeshes::loadData() {
 
     std::string labelFile = _labelFile;
     if (!labelFile.empty()) {
-        _labelset = speck::label::loadFileWithCache(_labelFile);
+        _labelset = dataloader::label::loadFileWithCache(_labelFile);
     }
 
     return success;

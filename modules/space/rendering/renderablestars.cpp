@@ -1355,14 +1355,14 @@ void RenderableStars::loadData() {
         return;
     }
 
-    _dataset = speck::data::loadFileWithCache(file);
+    _dataset = dataloader::data::loadFileWithCache(file);
     if (_dataset.entries.empty()) {
         return;
     }
 
     std::vector<std::string> variableNames;
     variableNames.reserve(_dataset.variables.size());
-    for (const speck::Dataset::Variable& v : _dataset.variables) {
+    for (const dataloader::Dataset::Variable& v : _dataset.variables) {
         variableNames.push_back(v.name);
     }
     _otherDataOption.addOptions(variableNames);
@@ -1399,7 +1399,7 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
     std::vector<float> result;
     // 7 for the default Color option of 3 positions + bv + lum + abs + app magnitude
     result.reserve(_dataset.entries.size() * 7);
-    for (const speck::Dataset::Entry& e : _dataset.entries) {
+    for (const dataloader::Dataset::Entry& e : _dataset.entries) {
         glm::dvec3 position = glm::dvec3(e.position) * distanceconstants::Parsec;
         maxRadius = std::max(maxRadius, glm::length(position));
 

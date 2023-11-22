@@ -27,11 +27,11 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/labelscomponent.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/ivec2property.h>
+#include <openspace/rendering/labelscomponent.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/ghoul_gl.h>

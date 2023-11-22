@@ -22,29 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_CORE___SPECKLOADER___H__
+#define __OPENSPACE_CORE___SPECKLOADER___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <openspace/data/dataloader.h>
+#include <filesystem>
+#include <optional>
 
-in dvec4 in_position;
-in dvec4 in_colormap;
+namespace openspace::dataloader::speck {
 
-out float vs_screenSpaceDepth;
-out float vs_scaleFactor;
-out vec4 colorMap;
+Dataset loadSpeckFile(std::filesystem::path path,
+    std::optional<DataLoadSpecs> specs = std::nullopt);
 
-uniform dmat4 modelViewProjectionTransform;
-uniform float scaleFactor;
+Labelset loadLabelFile(std::filesystem::path path);
 
+ColorMap loadCmapFile(std::filesystem::path path);
 
-void main() {
-  vec4 positionClipSpace = vec4(modelViewProjectionTransform * in_position);
-  vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
+} // namespace openspace::dataloader::speck
 
-  vs_screenSpaceDepth = positionScreenSpace.w;
-  vs_scaleFactor = scaleFactor;
-  colorMap = vec4(in_colormap);
-
-  gl_PointSize = scaleFactor;
-  gl_Position = positionScreenSpace;
-}
+#endif // __OPENSPACE_CORE___SPECKLOADER___H__
