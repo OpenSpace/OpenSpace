@@ -40,27 +40,6 @@ namespace {
     constexpr std::string_view InitialConfigHelper =
         "${BASE}/scripts/configuration_helper.lua";
 
-    openspace::Configuration::PreferedLayerServer stringToLayerServer(
-                                                                  std::string_view server)
-    {
-        using Server = openspace::Configuration::PreferedLayerServer;
-        if (server == "All") { return Server::All; }
-        else if (server == "NewYork") { return Server::NewYork; }
-        else if (server == "Sweden") { return Server::Sweden; }
-        else if (server == "Utah") { return Server::Utah; }
-    }
-
-    std::string LayerServerToString(openspace::Configuration::PreferedLayerServer server)
-    {
-        using Server = openspace::Configuration::PreferedLayerServer;
-        switch (server) {
-            case Server::All: return "All";
-            case Server::NewYork: return "NewYork";
-            case Server::Sweden: return "Sweden";
-            case Server::Utah: return "Utah";
-        }
-    }
-
     struct [[codegen::Dictionary(Configuration)]] Parameters {
         // The SGCT configuration file that determines the window and view frustum
         // settings that are being used when OpenSpace is started
@@ -306,7 +285,7 @@ namespace {
 
         // Set which layer server should be preferd to be used, the options are
         // \"All\", \"NewYork\", \"Sweden\" and \"Utah\".
-        std::optional<std::string> preferedLayerServer [[codegen::inlist("All", "NewYork",
+        std::optional<std::string> layerServer [[codegen::inlist("All", "NewYork",
             "Sweden", "Utah")]];
 
         // The URL that is pinged to check which version of OpenSpace is the most current
@@ -483,8 +462,8 @@ void parseLuaState(Configuration& configuration) {
 
     c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
 
-    if (p.preferedLayerServer.has_value()) {
-        c.preferedLayerServer = stringToLayerServer(*p.preferedLayerServer);
+    if (p.layerServer.has_value()) {
+        c.layerServer = stringToLayerServer(*p.layerServer);
     }
 }
 
@@ -579,6 +558,24 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     }
 
     return result;
+}
+
+openspace::Configuration::LayerServer stringToLayerServer(std::string_view server) {
+    using Server = openspace::Configuration::LayerServer;
+    if (server == "All") { return Server::All; }
+    else if (server == "NewYork") { return Server::NewYork; }
+    else if (server == "Sweden") { return Server::Sweden; }
+    else if (server == "Utah") { return Server::Utah; }
+}
+
+std::string layerServerToString(openspace::Configuration::LayerServer server) {
+    using Server = openspace::Configuration::LayerServer;
+    switch (server) {
+        case Server::All: return "All";
+        case Server::NewYork: return "NewYork";
+        case Server::Sweden: return "Sweden";
+        case Server::Utah: return "Utah";
+    }
 }
 
 } // namespace openspace

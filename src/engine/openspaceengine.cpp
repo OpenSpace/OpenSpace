@@ -816,7 +816,7 @@ void OpenSpaceEngine::loadAssets() {
                 it = allSyncs.erase(it);
             }
         }
-       
+
         if (_shouldAbortLoading) {
             global::windowDelegate->terminate();
             break;
@@ -830,7 +830,7 @@ void OpenSpaceEngine::loadAssets() {
 
         if (finishedLoading) {
             break;
-        }        
+        }
     } // while(true)
 
     if (_shouldAbortLoading) {
@@ -1671,7 +1671,9 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::IsMaster,
             codegen::lua::Version,
             codegen::lua::ReadCSVFile,
-            codegen::lua::ResetCamera
+            codegen::lua::ResetCamera,
+            codegen::lua::Configuration,
+            codegen::lua::LayerServer
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")

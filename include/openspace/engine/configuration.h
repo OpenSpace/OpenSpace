@@ -112,13 +112,13 @@ struct Configuration {
     bool isConsoleDisabled = false;
     bool bypassLauncher = false;
 
-    enum PreferedLayerServer {
+    enum LayerServer {
         All = 0,
         NewYork,
         Sweden,
         Utah
     };
-    PreferedLayerServer preferedLayerServer = PreferedLayerServer::All;
+    LayerServer layerServer = LayerServer::All;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
@@ -158,6 +158,9 @@ std::filesystem::path findConfiguration(const std::string& filename = "openspace
 Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
     const std::filesystem::path& settingsFile,
     const glm::ivec2& primaryMonitorResolution);
+
+Configuration::LayerServer stringToLayerServer(std::string_view server);
+std::string layerServerToString(Configuration::LayerServer server);
 
 } // namespace openspace
 
