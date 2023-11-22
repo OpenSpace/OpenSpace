@@ -698,6 +698,7 @@ openspace::Configuration::LayerServer stringToLayerServer(std::string_view serve
     else if (server == "NewYork") { return Server::NewYork; }
     else if (server == "Sweden") { return Server::Sweden; }
     else if (server == "Utah") { return Server::Utah; }
+    else { throw ghoul::MissingCaseException(); }
 }
 
 std::string layerServerToString(openspace::Configuration::LayerServer server) {
@@ -707,6 +708,7 @@ std::string layerServerToString(openspace::Configuration::LayerServer server) {
         case Server::NewYork: return "NewYork";
         case Server::Sweden: return "Sweden";
         case Server::Utah: return "Utah";
+        default: throw ghoul::MissingCaseException();
     }
 }
 
