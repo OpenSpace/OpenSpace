@@ -45,6 +45,8 @@ struct Configuration {
     Configuration& operator=(const Configuration&) = delete;
     Configuration& operator=(Configuration&&) = default;
 
+    ghoul::Dictionary createDictionary();
+
     std::string windowConfiguration = "${CONFIG}/single.xml";
     std::string asset;
     std::string profile;

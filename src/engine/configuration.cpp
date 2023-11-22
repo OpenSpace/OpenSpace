@@ -318,6 +318,138 @@ namespace {
 
 namespace openspace {
 
+ghoul::Dictionary Configuration::createDictionary() {
+    ghoul::Dictionary res;
+
+    res.setValue("WindowConfiguration", windowConfiguration);
+    res.setValue("Asset", asset);
+    res.setValue("Profile", profile);
+    res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
+
+    ghoul::Dictionary globalCustomizationScriptsDict;
+    for (size_t i = 0; i < globalCustomizationScripts.size(); ++i) {
+        globalCustomizationScriptsDict.setValue(
+            std::to_string(i),
+            globalCustomizationScripts[i]
+        );
+    }
+    res.setValue("GlobalCustomizationScripts", globalCustomizationScriptsDict);
+
+    ghoul::Dictionary fontsDict;
+    for (auto it = fonts.begin(); it != fonts.end(); ++it) {
+        fontsDict.setValue(it->first, it->second);
+    }
+    res.setValue("Fonts", fontsDict);
+
+    ghoul::Dictionary fontSizeDict; {
+        fontSizeDict.setValue("FrameInfo", static_cast<double>(fontSize.frameInfo));
+        fontSizeDict.setValue("Shutdown", static_cast<double>(fontSize.shutdown));
+        fontSizeDict.setValue("Log", static_cast<double>(fontSize.log));
+        fontSizeDict.setValue("CameraInfo", static_cast<double>(fontSize.cameraInfo));
+        fontSizeDict.setValue("VersionInfo", static_cast<double>(fontSize.versionInfo));
+    }
+    res.setValue("FontSize", fontSizeDict);
+
+    ghoul::Dictionary loggingDict; {
+        loggingDict.setValue("Level", logging.level);
+        loggingDict.setValue("ForceImmediateFlush", logging.forceImmediateFlush);
+        loggingDict.setValue("CapabilitiesVerbosity", logging.capabilitiesVerbosity);
+
+        ghoul::Dictionary logsDict;
+        for (size_t i = 0; i < logging.logs.size(); ++i) {
+            logsDict.setValue(std::to_string(i), logging.logs[i]);
+        }
+        loggingDict.setValue("Logs", logsDict);
+    }
+    res.setValue("Logging", loggingDict);
+
+    res.setValue("ScriptLog", scriptLog);
+
+    ghoul::Dictionary documentationDict; {
+        documentationDict.setValue("Path", documentation.path);
+    }
+    res.setValue("Documentation", documentationDict);
+
+    res.setValue("VersionCheckUrl", versionCheckUrl);
+    res.setValue("UseMultithreadedInitialization", useMultithreadedInitialization);
+
+    ghoul::Dictionary loadingScreenDict; {
+        loadingScreenDict.setValue("IsShowingMessages", loadingScreen.isShowingMessages);
+        loadingScreenDict.setValue("IsShowingNodeNames", loadingScreen.isShowingNodeNames);
+        loadingScreenDict.setValue(
+            "IsShowingLogMessages",
+            loadingScreen.isShowingLogMessages
+        );
+    }
+    res.setValue("LoadingScreen", loadingScreenDict);
+
+    res.setValue("IsCheckingOpenGLState", isCheckingOpenGLState);
+    res.setValue("IsLoggingOpenGLCalls", isLoggingOpenGLCalls);
+    res.setValue("IsPrintingEvents", isPrintingEvents);
+    res.setValue("consoleKey", ghoul::to_string(consoleKey));
+    res.setValue("ShutdownCountdown", static_cast<double>(shutdownCountdown));
+    res.setValue("shouldUseScreenshotDate", shouldUseScreenshotDate);
+    res.setValue("OnScreenTextScaling", onScreenTextScaling);
+    res.setValue("UsePerProfileCache", usePerProfileCache);
+    res.setValue("IsRenderingOnMasterDisabled", isRenderingOnMasterDisabled);
+    res.setValue("GlobalRotation", static_cast<glm::dvec3>(globalRotation));
+    res.setValue("ScreenSpaceRotation", static_cast<glm::dvec3>(screenSpaceRotation));
+    res.setValue("MasterRotation", static_cast<glm::dvec3>(masterRotation));
+    res.setValue("IsConsoleDisabled", isConsoleDisabled);
+    res.setValue("BypassLauncher", bypassLauncher);
+    res.setValue("LayerServer", layerServerToString(layerServer));
+
+    ghoul::Dictionary moduleConfigurationsDict;
+    for (auto it = moduleConfigurations.begin(); it != moduleConfigurations.end(); ++it) {
+        moduleConfigurationsDict.setValue(it->first, it->second);
+    }
+    res.setValue("ModuleConfigurations", moduleConfigurationsDict);
+
+    ghoul::Dictionary openGLDebugContextDict; {
+        openGLDebugContextDict.setValue("IsActive", openGLDebugContext.isActive);
+        openGLDebugContextDict.setValue("PrintStacktrace", openGLDebugContext.printStacktrace);
+        openGLDebugContextDict.setValue("IsSynchronous", openGLDebugContext.isSynchronous);
+
+        ghoul::Dictionary identifierFiltersDict;
+        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); ++i) {
+            ghoul::Dictionary identifierFilterDict; {
+                identifierFilterDict.setValue("Type", openGLDebugContext.identifierFilters[i].type);
+                identifierFilterDict.setValue("Source", openGLDebugContext.identifierFilters[i].source);
+                identifierFilterDict.setValue(
+                    "Identifier",
+                    static_cast<int>(openGLDebugContext.identifierFilters[i].identifier)
+                );
+            }
+            openGLDebugContextDict.setValue(std::to_string(i), identifierFilterDict);
+        }
+        openGLDebugContextDict.setValue("IdentifierFilters", identifierFiltersDict);
+    }
+
+    ghoul::Dictionary severityFiltersDict;
+    for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); ++i) {
+        severityFiltersDict.setValue(
+            std::to_string(i),
+            openGLDebugContext.severityFilters[i]
+        );
+    }
+    openGLDebugContextDict.setValue("SeverityFilters", severityFiltersDict);
+    res.setValue("OpenGLDebugContext", severityFiltersDict);
+
+    ghoul::Dictionary httpProxyDict; {
+        httpProxyDict.setValue("UsingHttpProxy", httpProxy.usingHttpProxy);
+        httpProxyDict.setValue("Address", httpProxy.address);
+        httpProxyDict.setValue("Port", static_cast<int>(httpProxy.port));
+        httpProxyDict.setValue("Authentication", httpProxy.authentication);
+        httpProxyDict.setValue("User", httpProxy.user);
+        httpProxyDict.setValue("Password", httpProxy.password);
+    }
+    res.setValue("HttpProxy", httpProxyDict);
+
+    res.setValue("SgctConfigNameInitialized", sgctConfigNameInitialized);
+
+    return res;
+}
+
 void parseLuaState(Configuration& configuration) {
     using namespace ghoul::lua;
 
