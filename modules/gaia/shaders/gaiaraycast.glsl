@@ -70,8 +70,8 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
   if (clipAlpha > 0) {
     vec2 st = texture(volumeTexture_#{id}, transformedPos).rg;
     
-    //no idea what this is for, added st.x to avoid compile warning
     if (rNormalization_#{id} > 0 && gridType_#{id} == 1) {
+      //no idea what this is for, added st.x to avoid compile warning
       st.x *= pow(transformedPos.x, rNormalization_#{id});
     }
 

@@ -120,23 +120,26 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
     for (const auto& s : headers) {
         _fileHeaders[s] = idx++;
     }
-    //Create 3D Gaussian Kernel
+    // Create 3D Gaussian Kernel
     const float sigma{ 0.54f };
     const int size{ 5 / 2 };
     float kernel[5][5][5];
     float sum = 0.0;
-    for (int i{ -size }; i <= size; i++) {
-        float x = computeGaussianValue(sigma, i);
 
-        for (int j{ -size }; j <= size; j++) {
-            float y = computeGaussianValue(sigma, j);
-        
-            for (int k{ -size }; k <= size; k++) {
-                float z = computeGaussianValue(sigma, k);
-                float weight = x * y * z;
-                kernel[i + size][j + size][k + size] = weight;
+    if (_applyFilter) {
+        for (int i{ -size }; i <= size; i++) {
+            float x = computeGaussianValue(sigma, i);
 
-                sum += weight;
+            for (int j{ -size }; j <= size; j++) {
+                float y = computeGaussianValue(sigma, j);
+
+                for (int k{ -size }; k <= size; k++) {
+                    float z = computeGaussianValue(sigma, k);
+                    float weight = x * y * z;
+                    kernel[i + size][j + size][k + size] = weight;
+
+                    sum += weight;
+                }
             }
         }
     }
@@ -383,7 +386,7 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
     }
     onProgress(0.8f);
 
-    //Compute the average of each star, and find the minimum and maximum limits for each column
+    //Compute the average of each star, and find the global minimum and maximum limits for each column
     rawVolume.forEachVoxel([&](glm::uvec3 const& cell, GaiaVolumeDataLayout const& cellData) {
         if (!cellData.containData())
             return; 
