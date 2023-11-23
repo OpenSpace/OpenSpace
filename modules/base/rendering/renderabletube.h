@@ -91,7 +91,8 @@ private:
 
     UniformCache(modelViewTransform, projectionTransform, normalTransform, color,
         opacity, performShading, nLightSources, lightDirectionsViewSpace,
-        lightIntensities) _uniformCache;
+        lightIntensities, ambientIntensity, diffuseIntensity,
+        specularIntensity) _uniformCache;
 
     std::vector<float> _lightIntensitiesBuffer;
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;

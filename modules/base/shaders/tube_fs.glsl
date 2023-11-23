@@ -32,9 +32,9 @@ uniform vec3 color;
 uniform float opacity;
 
 uniform bool performShading = true;
-uniform float ambientIntensity = 0.2;
-uniform float diffuseIntensity = 1.0;
-uniform float specularIntensity = 1.0;
+uniform float ambientIntensity;
+uniform float diffuseIntensity;
+uniform float specularIntensity;
 
 uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];

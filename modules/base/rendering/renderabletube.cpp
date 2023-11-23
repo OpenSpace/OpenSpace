@@ -45,10 +45,11 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableTube";
     constexpr int8_t CurrentMajorVersion = 0;
     constexpr int8_t CurrentMinorVersion = 1;
-    constexpr std::array<const char*, 9> UniformNames = {
+    constexpr std::array<const char*, 12> UniformNames = {
         "modelViewTransform", "projectionTransform", "normalTransform", "color",
         "opacity", "performShading", "nLightSources", "lightDirectionsViewSpace",
-        "lightIntensities"
+        "lightIntensities", "ambientIntensity", "diffuseIntensity",
+        "specularIntensity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -140,8 +141,8 @@ RenderableTube::Shading::Shading()
     : properties::PropertyOwner({ "Shading" })
     , enabled(ShadingEnabledInfo, true)
     , ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
-    , diffuseIntensity(DiffuseIntensityInfo, 0.7f, 0.f, 1.f)
-    , specularIntensity(SpecularIntensityInfo, 0.f, 0.f, 1.f)
+    , diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
+    , specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
 {
     addProperty(enabled);
     addProperty(ambientIntensity);
@@ -574,6 +575,10 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
             _uniformCache.lightDirectionsViewSpace,
             _lightDirectionsViewSpaceBuffer
         );
+
+        _shader->setUniform(_uniformCache.ambientIntensity, _shading.ambientIntensity);
+        _shader->setUniform(_uniformCache.diffuseIntensity, _shading.diffuseIntensity);
+        _shader->setUniform(_uniformCache.specularIntensity, _shading.specularIntensity);
     }
 
     // Render
