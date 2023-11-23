@@ -16,7 +16,7 @@ local Layer = {
     TemporalResolution = "1d",
     TimeFormat = "YYYY-MM-DD",
     Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
-      "MODIS_Terra_Chlorophyll_A",
+      "MODIS_Terra_L2_Chlorophyll_A",
       "1km",
       "png"
     )

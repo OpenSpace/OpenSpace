@@ -42,13 +42,14 @@ namespace documentation { struct Documentation; }
  * function, whose dictionary must contain at least a `Type` value that specifies which
  * type of ResourceSynchronization should be create. Any type that is registered to the
  * global factory is a valid type here.
+ *
  * A ResourceSynchronization state can be in one of four states that can be queried
  * through the #isSyncing, #isResolved, and #isRejected functions. The available states
  * are:
- *  - `Unsynchronized` (#isSyncing = false, #isResolved = false, #isRejected = false)
- *  - `Syncing` (#isSyncing = true, #isResolved = false, #isRejected = false)
- *  - `Resolved` (#isSyncing = false, #isResolved = true, #isRejected = false)
- *  - `Rejected` (#isSyncing = false, #isResolved = false, #isRejected = true)
+ *   - `Unsynchronized` (#isSyncing = false, #isResolved = false, #isRejected = false)
+ *   - `Syncing` (#isSyncing = true, #isResolved = false, #isRejected = false)
+ *   - `Resolved` (#isSyncing = false, #isResolved = true, #isRejected = false)
+ *   - `Rejected` (#isSyncing = false, #isResolved = false, #isRejected = true)
  */
 class ResourceSynchronization {
 public:
@@ -74,7 +75,9 @@ public:
      */
     virtual std::string generateUid() = 0;
 
-    /// Defaulted virtual constructor
+    /**
+     * Defaulted virtual constructor.
+     */
     virtual ~ResourceSynchronization() = default;
 
     /**
@@ -85,10 +88,14 @@ public:
      */
     virtual std::filesystem::path directory() const = 0;
 
-    /// Starts the synchronization for this ResourceSynchronization
+    /**
+     * Starts the synchronization for this ResourceSynchronization.
+     */
     virtual void start() = 0;
 
-    /// Cancels any ongoing synchronization of this ResourceSynchronization
+    /**
+     * Cancels any ongoing synchronization of this ResourceSynchronization.
+     */
     virtual void cancel() = 0;
 
     /**
@@ -168,10 +175,14 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    /// Empty constructor that just sets the synchronization root
+    /**
+     * Empty constructor that just sets the synchronization root.
+     */
     ResourceSynchronization(std::filesystem::path synchronizationRoot);
 
-    /// Representation of the state that this object can be in
+    /**
+     * Representation of the state that this object can be in.
+     */
     enum class State {
         Unsynced,
         Syncing,
@@ -179,11 +190,15 @@ protected:
         Rejected
     };
 
-    /// Creates a file next to the directory that indicates that this
-    /// ResourceSynchronization has successfully synchronized its contents
-    void createSyncFile() const;
+    /**
+     * Creates a file next to the directory that indicates that this.
+     * ResourceSynchronization has successfully synchronized its contents.
+     */
+    virtual void createSyncFile(bool isFullySynchronized = true) const;
 
-    /// Returns whether the synchronization file create in #createSyncFile exists
+    /**
+     * Returns whether the synchronization file create in #createSyncFile exists.
+     */
     bool hasSyncFile() const;
 
     /// The internal identifier for this ResourceSynchronization. It is not enforced but

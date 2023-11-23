@@ -36,10 +36,9 @@ namespace openspace {
 
 /**
  * The ScreenLog is an implementation of the ghoul::logging::Log abstract interface that
- * can be used to present log messages in an on-screen GUI. For this, every incoming
- * log message (#log) is tagged with the current time and all stored log messages can
- * expire based on the time-to-live as specified in the constructor
- * (#removeExpiredEntries).
+ * can be used to present log messages in an on-screen GUI. For this, every incoming log
+ * message (#log) is tagged with the current time and all stored log messages can expire
+ * based on the time-to-live as specified in the constructor (#removeExpiredEntries).
  */
 class ScreenLog : public ghoul::logging::Log {
 public:
@@ -99,9 +98,9 @@ public:
      * This method removes all the stored LogEntry%s that have expired, calculated by
      * their `timeStamp` and the #_timeToLive value.
      *
-     * \post All entries retrieved by the #entries function have a `timeStamp`
-     *       that is lower than the current time + #_timeToLive. The current time used is
-     *       the time when this method was last called
+     * \post All entries retrieved by the #entries function have a `timeStamp` that is
+     *       lower than the current time + #_timeToLive. The current time used is the time
+     *       when this method was last called
      */
     void removeExpiredEntries();
 
@@ -117,7 +116,7 @@ private:
     std::vector<LogEntry> _entries;
 
     /// The time-to-live for the LogEntry%s in this ScreenLog. Is used by the
-    /// #removeExpiredEntries method to remove expired entries.
+    /// #removeExpiredEntries method to remove expired entries
     std::chrono::seconds _timeToLive;
 
     /// The minimum LogLevel of messages

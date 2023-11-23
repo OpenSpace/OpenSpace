@@ -28,7 +28,6 @@ add_executable(
   test_assetloader.cpp
   test_concurrentqueue.cpp
   test_distanceconversion.cpp
-  test_configuration.cpp
   test_documentation.cpp
   test_horizons.cpp
   test_iswamanager.cpp
@@ -39,6 +38,7 @@ add_executable(
   test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
+  test_settings.cpp
   test_sgctedit.cpp
   test_spicemanager.cpp
   test_timeconversion.cpp

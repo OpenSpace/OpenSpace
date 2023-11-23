@@ -51,8 +51,8 @@ struct Milestone {
  * phases within phases. Designed for WORM usage (Write Once, Read Multiple), and,
  * therefore, has only accessors.
  *
- * Each MissionPhase is characterized by its MissionPhase::name, a TimeRange, an
- * optional MissionPhase::description, and optional subphases.
+ * Each MissionPhase is characterized by its MissionPhase::name, a TimeRange, an optional
+ * MissionPhase::description, and optional subphases.
  */
 class MissionPhase {
 public:
@@ -147,6 +147,7 @@ public:
     /**
      * Returns the Documentation that describes the ghoul::Dictionarty that this
      * MissionPhase can be constructed from.
+     *
      * \return The Documentation that describes the required structure for a Dictionary
      */
     static documentation::Documentation Documentation();
@@ -161,7 +162,7 @@ protected:
      * \param trace The list of MissionPhase%s that are active during the time \p time
      * \param maxDepth The maximum depth of levels that will be considered
      *
-     * \pre maxDepth must not be negative
+     * \pre \p maxDepth must not be negative
      */
     void phaseTrace(double time, Trace& trace, int maxDepth) const;
 

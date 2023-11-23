@@ -29,8 +29,10 @@
 
 namespace openspace {
 
-// Templated abstract base class representing a job to be done.
-// Client code derive from this class and implement the virtual execute() method
+/**
+ * Templated abstract base class representing a job to be done. Client code derive from
+ * this class and implement the virtual execute() method.
+ */
 template <typename P>
 struct Job {
     Job() = default;

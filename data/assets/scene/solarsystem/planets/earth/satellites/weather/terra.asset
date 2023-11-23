@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_terra",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25994&FORMAT=kvn",
   Filename = "Terra.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
 
 

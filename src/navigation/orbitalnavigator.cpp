@@ -1634,14 +1634,10 @@ void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
 {
     const glm::dvec3 axis = [](UpDirectionChoice upAxis) {
         switch (upAxis) {
-            case UpDirectionChoice::XAxis:
-                return glm::dvec3(1.0, 0.0, 0.0);
-            case UpDirectionChoice::YAxis:
-                return glm::dvec3(0.0, 1.0, 0.0);
-            case UpDirectionChoice::ZAxis:
-                return glm::dvec3(0.0, 0.0, 1.0);
-            default:
-                throw ghoul::MissingCaseException();
+            case UpDirectionChoice::XAxis: return glm::dvec3(1.0, 0.0, 0.0);
+            case UpDirectionChoice::YAxis: return glm::dvec3(0.0, 1.0, 0.0);
+            case UpDirectionChoice::ZAxis: return glm::dvec3(0.0, 0.0, 1.0);
+            default:                       throw ghoul::MissingCaseException();
         }
     }(UpDirectionChoice(_upToUseForRotation.value()));
 

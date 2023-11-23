@@ -31,8 +31,8 @@
 namespace openspace {
 
 /**
- * This function takes a \p text and escapes all necessary characters () that JSON
- * does not want in its strings.
+ * This function takes a \p text and escapes all necessary characters that JSON does not
+ * want in its strings.
  *
  * \param text The text that is to be escaped
  * \return The same text with all required characteres escaped
@@ -40,8 +40,8 @@ namespace openspace {
 std::string escapedJson(const std::string& text);
 
 /**
- * This function takes a \p list of text and escapes all necessary characters () that
- * JSON does not want in its strings.
+ * This function takes a \p list of text and escapes all necessary characters that JSON
+ * does not want in its strings.
  *
  * \param list The list of text that is to be escaped
  * \return The same text with all required characteres escaped
@@ -49,8 +49,8 @@ std::string escapedJson(const std::string& text);
 std::string escapedJson(const std::vector<std::string>& list);
 
 /**
- * Convert the input value to a valid JSON formatted string. Nan and Inf values
- * are not vald JSON and will be represented by 'null'.
+ * Convert the input value to a valid JSON formatted string. Nan and Inf values are not
+ * valid JSON and will be represented by `null`.
  *
  * \param d The value to format
  * \return The resulting JSON formatted string
@@ -68,11 +68,10 @@ std::string formatJson(T value);
 
 /**
  * Sort a json object that is an array of objects with the structure
- * [ key = {}, key = {} ...]. Sorts it by the provided key
+ * `[ key = {}, key = {} ...]`. Sorts it by the provided key.
  *
- * \param json The json to sort
- * \param key The key the json should be sorted by
- * \return The sorted JSON
+ * \param json The JSON object to sort
+ * \param key The key the JSON should be sorted by
  */
 void sortJson(nlohmann::json& json, const std::string& key);
 
