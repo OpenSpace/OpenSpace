@@ -95,7 +95,7 @@ protected:
     bool _spriteTextureIsDirty = true;
 
     bool _hasSpriteTexture = false;
-    bool _hasSpeckFile = false;
+    bool _hasDataFile = false;
     bool _hasColorMapFile = false;
     bool _hasDatavarSize = false;
     bool _hasLabels = false;
@@ -144,7 +144,7 @@ protected:
         belowRangeColor, useBelowRangeColor, hasDvarScaling
     ) _uniformCache;
 
-    std::string _speckFile;
+    std::string _dataFile;
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 

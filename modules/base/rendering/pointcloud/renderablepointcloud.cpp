@@ -382,8 +382,8 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 
     if (p.file.has_value()) {
-        _hasSpeckFile = true;
-        _speckFile = absPath(*p.file).string();
+        _hasDataFile = true;
+        _dataFile = absPath(*p.file).string();
     }
 
     if (p.dataMapping.has_value()) {
@@ -469,6 +469,10 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             );
         });
     }
+
+    if (_hasDataFile) {
+        _dataset = dataloader::data::loadFileWithCache(_dataFile, _dataMapping);
+    }
 }
 
 bool RenderablePointCloud::isReady() const {
@@ -484,12 +488,8 @@ bool RenderablePointCloud::isReady() const {
 void RenderablePointCloud::initialize() {
     ZoneScoped;
 
-    if (_hasSpeckFile) {
-        _dataset = dataloader::data::loadFileWithCache(_speckFile, _dataMapping);
-
-        if (_hasColorMapFile) {
-            _colorSettings.colorMapping->initialize(_dataset);
-        }
+    if (_hasDataFile && _hasColorMapFile) {
+        _colorSettings.colorMapping->initialize(_dataset);
     }
 
     if (_hasLabels) {
@@ -703,7 +703,7 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     }
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
-    if (_hasSpeckFile && _drawElements) {
+    if (_hasDataFile && _drawElements) {
         renderBillboards(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
     }
 
@@ -732,7 +732,7 @@ int RenderablePointCloud::nAttributesPerPoint() const {
 }
 
 void RenderablePointCloud::updateBufferData() {
-    if (!_hasSpeckFile) {
+    if (!_hasDataFile) {
         return;
     }
 
