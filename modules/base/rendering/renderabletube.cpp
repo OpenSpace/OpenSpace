@@ -216,7 +216,7 @@ void RenderableTube::initializeGL() {
     updateBufferData();
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(PolygonVertex), nullptr);
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
@@ -224,8 +224,8 @@ void RenderableTube::initializeGL() {
         3,
         GL_FLOAT,
         GL_FALSE,
-        6 * sizeof(float),
-        (void*)(sizeof(float) * 3)
+        sizeof(PolygonVertex),
+        reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, normal))
     );
 
     glBindVertexArray(0);
@@ -386,66 +386,76 @@ void RenderableTube::updateTubeData() {
     glm::dvec3 lastNormal = lastCenter - firstCenter;
 
     // Add the first polygon's center point
-    _verticies.push_back(firstCenter.x);
-    _verticies.push_back(firstCenter.y);
-    _verticies.push_back(firstCenter.z);
+    PolygonVertex firstCenterPoint;
+    firstCenterPoint.position[0] = firstCenter.x;
+    firstCenterPoint.position[1] = firstCenter.y;
+    firstCenterPoint.position[2] = firstCenter.z;
 
-    _verticies.push_back(firstNormal.x);
-    _verticies.push_back(firstNormal.y);
-    _verticies.push_back(firstNormal.z);
+    firstCenterPoint.normal[0] = firstNormal.x;
+    firstCenterPoint.normal[1] = firstNormal.y;
+    firstCenterPoint.normal[2] = firstNormal.z;
+    _verticies.push_back(firstCenterPoint);
 
     // Add the first polygon's sides with proper normals
     // This will ensure a hard shadow on the tube edge
     for (const glm::dvec3& coord : _data.front().points) {
-        _verticies.push_back(coord.x);
-        _verticies.push_back(coord.y);
-        _verticies.push_back(coord.z);
+        PolygonVertex firstsSidePoint;
+        firstsSidePoint.position[0] = coord.x;
+        firstsSidePoint.position[1] = coord.y;
+        firstsSidePoint.position[2] = coord.z;
 
-        _verticies.push_back(firstNormal.x);
-        _verticies.push_back(firstNormal.y);
-        _verticies.push_back(firstNormal.z);
+        firstsSidePoint.normal[0] = firstNormal.x;
+        firstsSidePoint.normal[1] = firstNormal.y;
+        firstsSidePoint.normal[2] = firstNormal.z;
+        _verticies.push_back(firstsSidePoint);
     }
 
     // Add all the polygons that will create the sides of the tube
     for (const TimePolygon& poly : _data) {
         for (const glm::dvec3& coord : poly.points) {
-            _verticies.push_back(coord.x);
-            _verticies.push_back(coord.y);
-            _verticies.push_back(coord.z);
+            PolygonVertex sidePoint;
+            sidePoint.position[0] = coord.x;
+            sidePoint.position[1] = coord.y;
+            sidePoint.position[2] = coord.z;
 
             // Calculate normal
             glm::dvec3 normal = coord - glm::proj(coord, firstNormal) - firstNormal;
-            _verticies.push_back(normal.x);
-            _verticies.push_back(normal.y);
-            _verticies.push_back(normal.z);
+            sidePoint.normal[0] = normal.x;
+            sidePoint.normal[1] = normal.y;
+            sidePoint.normal[2] = normal.z;
+            _verticies.push_back(sidePoint);
         }
     }
 
     // Add the last polygon's center point
-    _verticies.push_back(lastCenter.x);
-    _verticies.push_back(lastCenter.y);
-    _verticies.push_back(lastCenter.z);
+    PolygonVertex lastCenterPoint;
+    lastCenterPoint.position[0] = lastCenter.x;
+    lastCenterPoint.position[1] = lastCenter.y;
+    lastCenterPoint.position[2] = lastCenter.z;
 
-    _verticies.push_back(lastNormal.x);
-    _verticies.push_back(lastNormal.y);
-    _verticies.push_back(lastNormal.z);
+    lastCenterPoint.normal[0] = lastNormal.x;
+    lastCenterPoint.normal[1] = lastNormal.y;
+    lastCenterPoint.normal[2] = lastNormal.z;
+    _verticies.push_back(lastCenterPoint);
 
     // Add the last polygon's sides with proper normals
     // This will ensure a hard shadow on the tube edge
     for (const glm::dvec3& coord : _data.back().points) {
-        _verticies.push_back(coord.x);
-        _verticies.push_back(coord.y);
-        _verticies.push_back(coord.z);
+        PolygonVertex lastsSidePoint;
+        lastsSidePoint.position[0] = coord.x;
+        lastsSidePoint.position[1] = coord.y;
+        lastsSidePoint.position[2] = coord.z;
 
-        _verticies.push_back(lastNormal.x);
-        _verticies.push_back(lastNormal.y);
-        _verticies.push_back(lastNormal.z);
+        lastsSidePoint.normal[0] = lastNormal.x;
+        lastsSidePoint.normal[1] = lastNormal.y;
+        lastsSidePoint.normal[2] = lastNormal.z;
+        _verticies.push_back(lastsSidePoint);
     }
 
     // Indicies
     unsigned int firstCenterIndex = 0;
     unsigned int firstSideIndex = 4;
-    unsigned int lastCenterIndex = _verticies.size() / 6 - 1;
+    unsigned int lastCenterIndex = _verticies.size() - 1;
 
     // Indices for side triangles
     for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
@@ -502,7 +512,7 @@ void RenderableTube::updateBufferData() {
     glBindBuffer(GL_ARRAY_BUFFER, _vboId);
     glBufferData(
         GL_ARRAY_BUFFER,
-        _verticies.size() * sizeof(float),
+        _verticies.size() * sizeof(PolygonVertex),
         _verticies.data(),
         GL_STREAM_DRAW
     );

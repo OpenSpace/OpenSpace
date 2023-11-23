@@ -68,6 +68,11 @@ private:
         properties::FloatProperty specularIntensity;
     };
 
+    struct PolygonVertex {
+        GLfloat position[3];
+        GLfloat normal[3];
+    };
+
     struct TimePolygon {
         double timestamp;
         std::vector<glm::dvec3> points;
@@ -101,7 +106,7 @@ private:
     GLuint _vboId = 0;
     GLuint _iboId = 0;
 
-    std::vector<float> _verticies;
+    std::vector<PolygonVertex> _verticies;
     std::vector<unsigned int> _indicies;
 };
 
