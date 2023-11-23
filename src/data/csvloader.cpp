@@ -32,6 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
+#include <cmath>
 #include <cctype>
 #include <fstream>
 #include <functional>
@@ -48,13 +49,14 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 #ifdef WIN32
         float result;
         auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
-        if (ec == std::errc()) {
+        if (ec == std::errc() && std::isfinite(result)) {
             return result;
         }
         return std::numeric_limits<float>::quiet_NaN();
 #else
         // clang is missing float support for std::from_chars
         return !str.empty() ? std::stof(str.c_str(), nullptr) : NAN;
+        // @TODO: This won't work with non-finite or any type of invalid argument..
 #endif
     };
 
