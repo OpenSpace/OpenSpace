@@ -129,6 +129,17 @@ DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionar
     return result;
 }
 
+std::string generateHashString(const DataMapping& dm) {
+    return fmt::format(
+        "DMx{}y{}z{}{}{}",
+        dm.xColumnName.value_or(""),
+        dm.yColumnName.value_or(""),
+        dm.zColumnName.value_or(""),
+        dm.missingDataValue.has_value() ? ghoul::to_string(*dm.missingDataValue) : "",
+        dm.isCaseSensitive ? "1" : "0"
+    );
+}
+
 bool isColumnX(const std::string& c, const std::optional<DataMapping>& mapping) {
     return checkColumnInternal(PositionColumn::X, c, mapping, DefaultX);
 }

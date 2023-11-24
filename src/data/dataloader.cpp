@@ -39,7 +39,7 @@
 #include <string_view>
 
 namespace {
-    constexpr int8_t DataCacheFileVersion = 10;
+    constexpr int8_t DataCacheFileVersion = 11;
     constexpr int8_t LabelCacheFileVersion = 11;
     constexpr int8_t ColorCacheFileVersion = 11;
 
@@ -78,7 +78,11 @@ namespace {
             std::is_same_v<T, openspace::dataloader::ColorMap>
         );
 
-        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(filePath);
+        std::string info;
+        if (specs.has_value()) {
+            info = openspace::dataloader::generateHashString(*specs);
+        }
+        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(filePath, info);
 
         if (std::filesystem::exists(cached)) {
             LINFOC(

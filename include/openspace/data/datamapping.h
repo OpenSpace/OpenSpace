@@ -33,10 +33,6 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace::dataloader {
 
-// @TODO: Make sure the cached file is updated when these values changes.
-// E.g. by making a has out of all the values and add that to the filename
-// when caching.
-// @TODO: Also make sure to update cache data versions!
 struct DataMapping {
     static DataMapping createFromDictionary(const ghoul::Dictionary& dictionary);
     static documentation::Documentation Documentation();
@@ -51,7 +47,16 @@ struct DataMapping {
     // TODO: point index column
 
     bool isCaseSensitive = false;
+
+    // OBS! When new parameters are added they should be included in the generateHash
+    // function
 };
+
+/**
+ * Generate a string based on the data mapping, that can be used to uniquely
+ * identify the dataset.
+ */
+std::string generateHashString(const DataMapping& dm);
 
 bool isColumnX(const std::string& c, const std::optional<DataMapping>& mapping);
 
