@@ -46,7 +46,7 @@ public:
 
 private:
     /**
-     * Creates a plane geometry
+     * Creates a plane geometry.
      */
     bool createGeometry() override;
     bool destroyGeometry() override;

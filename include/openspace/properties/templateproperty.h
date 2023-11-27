@@ -30,20 +30,21 @@
 namespace openspace::properties {
 
 /**
- * This subclass of Property handles a single parameter value that is of type
- * `T`. It provides all the necessary methods to automatically access the
- * value. One notable instantiation of this class is StringProperty, using
- * `T = std::string` while NumericalProperty is a templated subclass dealing
- * with numerical parameter types.
+ * This subclass of Property handles a single parameter value that is of type `T`. It
+ * provides all the necessary methods to automatically access the value. One notable
+ * instantiation of this class is StringProperty, using `T = std::string` while
+ * NumericalProperty is a templated subclass dealing with numerical parameter types.
+ *
  * The accessor operator and assignment operators are overloaded, so that the
  * TemplateProperty can be used just in the same way as a regular member variable. In the
  * case that these cannot not be used inline, the Property::get method will work.
  *
  * Each instantiation of this class should provide a constructor that deals with the
- * default value for that specific type `T`, so that a property can be
- * created from just a Property::PropertyInfo object.
+ * default value for that specific type `T`, so that a property can be created from just a
+ * Property::PropertyInfo object.
  *
  * \tparam T The type of value that is stored in this TemplateProperty
+ *
  * \see Property
  * \see NumericalProperty
  */
@@ -66,33 +67,31 @@ public:
     TemplateProperty(Property::PropertyInfo info, T value);
 
     /**
-     * Returns the class name for this TemplateProperty. This method has to be
-     * specialized for each new type.
+     * Returns the class name for this TemplateProperty. This method has to be specialized
+     * for each new type.
      *
      * \return The class name for the TemplateProperty
      */
     virtual std::string_view className() const override = 0;
 
     /**
-     * Returns the stored value packed into a ghoul::any object.
+     * Returns the stored value packed into a `std::any` object.
      *
-     * \return The stored value packed into a ghoul::any object
+     * \return The stored value packed into a `std::any` object
      */
     virtual std::any get() const override;
 
     /**
-     * Sets the value from the provided ghoul::any object. If the types between
-     * `T` and `value` disagree, an error is logged and the stored
-     * value remains unchanged.
+     * Sets the value from the provided ghoul::any object. If the types between `T` and
+     * `value` disagree, an error is logged and the stored value remains unchanged.
      *
      * \param value The value that is used to set this Property
      */
     virtual void set(std::any value) final;
 
     /**
-     * Returns the `std::type_info` describing the template parameter
-     * `T`. It can be used to test against a ghoul::any value before trying to
-     * assign it.
+     * Returns the `std::type_info` describing the template parameter `T`. It can be used
+     * to test against a ghoul::any value before trying to assign it.
      *
      * \return The type info object describing the template parameter `T`
      */
@@ -113,7 +112,6 @@ public:
      * decoding is successful, the new value is set, otherwise it remains unchanged.
      *
      * \param state The Lua state from which the value will be decoded
-     * \return `true` if the decoding succeeded; `false` otherwise
      */
     virtual void setLuaValue(lua_State* state) override;
 
@@ -129,18 +127,10 @@ public:
     virtual std::string stringValue() const override;
 
     /**
-     * Returns the description for this TemplateProperty as a Lua script that returns a
-     * table on execution.
-     *
-     * \return The description for this TemplateProperty
-     */
-    //virtual std::string description() override;
-
-    /**
      * This operator allows the TemplateProperty to be used almost transparently as if it
-     * was of the type `T`. It makes assignments such as
-     * `T v = property;` possible by allowing implicit casts (even though,
-     * internally, not casts are performed. This method is next to zero overhead).
+     * was of the type `T`. It makes assignments such as `T v = property;` possible by
+     * allowing implicit casts (even though, internally, not casts are performed. This
+     * method is next to zero overhead).
      *
      * \return The internal representation of the Property
      */
@@ -148,9 +138,9 @@ public:
 
     /**
      * This operator allows the TemplateProperty to be used almost transparently as if it
-     * was of the type `T`. It makes assignments such as
-     * `T v = property;` possible by allowing implicit casts (even though,
-     * internally, not casts are performed. This method is next to zero overhead).
+     * was of the type `T`. It makes assignments such as `T v = property;` possible by
+     * allowing implicit casts (even though, internally, not casts are performed. This
+     * method is next to zero overhead).
      *
      * \return The internal representation of the Property
      */
@@ -166,10 +156,10 @@ public:
     TemplateProperty<T>& operator=(T val);
 
     /**
-     * This method sets the stored value to the provided value `val`,
-     * moving it into place. The move only happens if the provided value `val`
-     * is different from the stored value, which needs an operator== to exist for the type
-     * `T`. If the value is different, the listeners are notified.
+     * This method sets the stored value to the provided value `val`, moving it into
+     * place. The move only happens if the provided value `val` is different from the
+     * stored value, which needs an operator== to exist for the type `T`. If the value is
+     * different, the listeners are notified.
      *
      * \param val The new value for this TemplateProperty
      */
@@ -184,17 +174,17 @@ public:
 
 protected:
     /**
-     * Decodes the object at the top of the stack to a value of the type `T`
-     * and returns it. This method has to be specialized for each new type.
+     * Decodes the object at the top of the stack to a value of the type `T` and returns
+     * it. This method has to be specialized for each new type.
      *
      * \param state The Lua state from which the value will be decoded
-     * \return the decoded value
+     * \return The decoded value
      */
     virtual T fromLuaConversion(lua_State* state) const = 0;
 
     /**
-     * Encodes the stored value into a Lua object and pushes that object onto
-     * the stack. This method has to be specialized for each new type.
+     * Encodes the stored value into a Lua object and pushes that object onto the stack.
+     * This method has to be specialized for each new type.
      *
      * \param state The Lua state onto which the encoded object will be pushed
      */
@@ -202,8 +192,8 @@ protected:
 
     /**
      * Encodes the stored value into a std::string object, in a format that is a valid
-     * JSON representation of the property. This method has to be specialized for each
-     * new type.
+     * JSON representation of the property. This method has to be specialized for each new
+     * type.
      *
      * \return The resulting encoding
      */

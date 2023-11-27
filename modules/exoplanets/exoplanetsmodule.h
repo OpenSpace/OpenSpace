@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
 
@@ -44,13 +45,16 @@ public:
     bool hasDataFiles() const;
     std::string exoplanetsDataPath() const;
     std::string lookUpTablePath() const;
+    std::string teffToBvConversionFilePath() const;
     std::string bvColormapPath() const;
     std::string starTexturePath() const;
     std::string starGlareTexturePath() const;
     std::string noDataTexturePath() const;
     std::string orbitDiscTexturePath() const;
     std::string habitableZoneTexturePath() const;
+    glm::vec3 comparisonCircleColor() const;
     bool showComparisonCircle() const;
+    bool showOrbitUncertainty() const;
     bool showHabitableZone() const;
     bool useOptimisticZone() const;
     float habitableZoneOpacity() const;
@@ -70,7 +74,9 @@ protected:
     properties::StringProperty _orbitDiscTexturePath;
     properties::StringProperty _habitableZoneTexturePath;
 
+    properties::Vec3Property _comparisonCircleColor;
     properties::BoolProperty _showComparisonCircle;
+    properties::BoolProperty _showOrbitUncertainty;
     properties::BoolProperty _showHabitableZone;
     properties::BoolProperty _useOptimisticZone;
 

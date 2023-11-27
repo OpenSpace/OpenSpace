@@ -13,7 +13,7 @@ a wave model called 'WAVEWATCH III'. The movie shows 3 hourly model output over 
 local URL = "https://sos.noaa.gov/catalog/datasets/wave-heights-hurricane-sandy-2012/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -26,7 +26,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "4096",
   Description = Description
 }

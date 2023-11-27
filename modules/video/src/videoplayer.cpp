@@ -60,13 +60,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
         "GoToStart",
         "Go To Start",
-        "Go to start in video"
+        "Sets the time to the beginning of the video and pauses it."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
-        "Reset",
-        "Reset",
-        "Reset video"
+    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+        "Reload",
+        "Reload",
+        "Reloads the video and creates a new texture. This might be useful in case there "
+        "was an error loading the video."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
@@ -249,7 +250,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     , _play(PlayInfo)
     , _pause(PauseInfo)
     , _goToStart(GoToStartInfo)
-    , _reset(ResetInfo)
+    , _reload(ReloadInfo)
     , _playAudio(AudioInfo, false)
     , _loopVideo(LoopVideoInfo, true)
 {
@@ -260,20 +261,17 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     _videoFile = p.video;
     _loopVideo = p.loopVideo.value_or(_loopVideo);
 
-    _reset.onChange([this]() { reset(); });
-    addProperty(_reset);
+    _reload.onChange([this]() { reload(); });
+    addProperty(_reload);
 
     if (p.playbackMode.has_value()) {
         switch (*p.playbackMode) {
-        case Parameters::PlaybackMode::RealTimeLoop:
-            _playbackMode = PlaybackMode::RealTimeLoop;
-            break;
-        case Parameters::PlaybackMode::MapToSimulationTime:
-            _playbackMode = PlaybackMode::MapToSimulationTime;
-            break;
-        default:
-            LERROR("Missing playback mode in VideoTileProvider");
-            throw ghoul::MissingCaseException();
+            case Parameters::PlaybackMode::RealTimeLoop:
+                _playbackMode = PlaybackMode::RealTimeLoop;
+                break;
+            case Parameters::PlaybackMode::MapToSimulationTime:
+                _playbackMode = PlaybackMode::MapToSimulationTime;
+                break;
         }
     }
 
@@ -407,6 +405,9 @@ void VideoPlayer::initializeMpv() {
 
     // Starting MPV in a paused state seems to reduce problems with initialization
     setPropertyStringMpv("pause", "");
+
+    // Allow alpha channels
+    setPropertyStringMpv("alpha", "yes");
 
     // Verbose mode for debug purposes
     // setPropertyStringMpv("msg-level", "all=v");
@@ -560,7 +561,8 @@ void VideoPlayer::handleMpvEvents() {
         }
         if (!checkMpvError(event->error)) {
             LWARNING(fmt::format(
-                "Error at mpv event : {} {}", event->event_id, event->reply_userdata
+                "Error at mpv event: {} {}",
+                static_cast<int>(event->event_id), event->reply_userdata
             ));
             break;
         }
@@ -735,9 +737,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             break;
         }
-        default: {
+        default:
             throw ghoul::MissingCaseException();
-        }
     }
 }
 
@@ -781,7 +782,7 @@ const std::unique_ptr<ghoul::opengl::Texture>& VideoPlayer::frameTexture() const
     return _frameTexture;
 }
 
-void VideoPlayer::reset() {
+void VideoPlayer::reload() {
     if (_videoFile.empty()) {
         return;
     }

@@ -34,7 +34,7 @@
 #include <filesystem>
 #include <fstream>
 
-using namespace openspace::configuration;
+using namespace openspace;
 
 namespace {
     std::string stringify(const std::string filename) {

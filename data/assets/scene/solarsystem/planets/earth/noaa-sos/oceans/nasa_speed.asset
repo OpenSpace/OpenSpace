@@ -15,7 +15,7 @@ green areas are moving faster than the blue areas]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-surface-currents/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -28,7 +28,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "4000",
   Description = Description
 }

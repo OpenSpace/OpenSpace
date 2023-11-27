@@ -57,7 +57,6 @@ private:
     std::unique_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
     layers::Group::ID _layerGroupID = layers::Group::ID::Unknown;
     bool _performPreProcessing = false;
-    bool _padTiles = true;
     TileCacheProperties _cacheProperties;
 };
 

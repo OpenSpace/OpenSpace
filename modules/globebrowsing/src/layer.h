@@ -68,8 +68,6 @@ public:
 
     void update();
 
-    glm::ivec2 tilePixelStartOffset() const;
-    glm::ivec2 tilePixelSizeDifference() const;
     glm::vec2 tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
         const glm::vec2& tileUV, const glm::uvec2& resolution);
 
@@ -93,9 +91,6 @@ private:
     properties::Vec3Property _solidColor;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
-
-    glm::ivec2 _padTilePixelStartOffset = glm::ivec2(0);
-    glm::ivec2 _padTilePixelSizeDifference = glm::ivec2(0);
 
     const layers::Group::ID _layerGroupId;
 

@@ -10,7 +10,7 @@ local Description = [[Hurricane Sandy was a memorable and disastrous storm that 
 local URL = "https://sos.noaa.gov/catalog/datasets/precipitable-water-galveston-hurricane-1900/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -23,7 +23,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "4096",

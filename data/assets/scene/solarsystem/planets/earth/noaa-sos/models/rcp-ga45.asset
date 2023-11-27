@@ -9,7 +9,7 @@ of dynamics of the weather and climate system to projections of future climate]]
 local URL = "https://sos.noaa.gov/catalog/datasets/climate-model-temperature-change-rcp-45-2006-2100/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -22,7 +22,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "4096",

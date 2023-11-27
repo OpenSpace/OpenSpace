@@ -46,13 +46,13 @@ struct TimeRange {
     TimeRange(double startTime, double endTime);
 
     /**
-     * Throws exception if unable to parse the provided \class ghoul::Dictionary
+     * Throws exception if unable to parse the provided \class ghoul::Dictionary.
      */
     TimeRange(const ghoul::Dictionary& dict);
 
     /**
-     * \return `true` if timeRange could be initialized from the dictionary, `false`
-     *         otherwise.
+     * \return `true` if \p timeRange could be initialized from the dictionary, `false`
+     *         otherwise
      */
     static bool initializeFromDictionary(const ghoul::Dictionary& dict,
         TimeRange& timeRange);

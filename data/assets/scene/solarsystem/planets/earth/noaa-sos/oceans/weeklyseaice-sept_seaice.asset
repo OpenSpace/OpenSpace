@@ -25,7 +25,7 @@ Arctic is shrinking, while the Antarctic sea ice is not trending downward]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-ice-extent-september-only/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -38,7 +38,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "4096",

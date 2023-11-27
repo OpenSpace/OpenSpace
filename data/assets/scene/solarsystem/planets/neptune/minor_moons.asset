@@ -7,11 +7,11 @@ local NeptuneMinorMoonsOn = {
   Identifier = "os.solarsystem.NeptuneMinorMoonsOn",
   Name = "Turn on minor moons and trails",
   Command = [[
-    local trails = openspace.getProperty("{moonTrail_minor_neptune}.Renderable.Enabled")
-    local trails_fade = openspace.getProperty("{moonTrail_minor_neptune}.Renderable.Fade")
+    local trails = openspace.property("{moonTrail_minor_neptune}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_minor_neptune}.Renderable.Fade")
 
-    local moons = openspace.getProperty("{moon_minor_neptune}.Renderable.Enabled")
-    local moons_fade = openspace.getProperty("{moon_minor_neptune}.Renderable.Fade")
+    local moons = openspace.property("{moon_minor_neptune}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_minor_neptune}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(trails[i], true)
@@ -25,18 +25,18 @@ local NeptuneMinorMoonsOn = {
   ]],
   Documentation = "Turn ON Neptune's minor moons and their trails",
   GuiPath = "/Solar System/Neptune",
-  IsLocal = true
+  IsLocal = false
 }
 
 local NeptuneMinorMoonsOff = {
   Identifier = "os.solarsystem.NeptuneMinorMoonsOff",
   Name = "Turn off minors moon and trails",
   Command = [[
-    local trails = openspace.getProperty("{moonTrail_minor_neptune}.Renderable.Enabled")
-    local trails_fade = openspace.getProperty("{moonTrail_minor_neptune}.Renderable.Fade")
+    local trails = openspace.property("{moonTrail_minor_neptune}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_minor_neptune}.Renderable.Fade")
 
-    local moons = openspace.getProperty("{moon_minor_neptune}.Renderable.Enabled")
-    local moons_fade = openspace.getProperty("{moon_minor_neptune}.Renderable.Fade")
+    local moons = openspace.property("{moon_minor_neptune}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_minor_neptune}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(
@@ -60,7 +60,7 @@ local NeptuneMinorMoonsOff = {
   ]],
   Documentation = "Turn OFF Neptune's minor moons and their trails",
   GuiPath = "/Solar System/Neptune",
-  IsLocal = true
+  IsLocal = false
 }
 
 

@@ -250,7 +250,9 @@ namespace {
  * bool.
  */
 [[codegen::luawrap]]
-std::tuple<std::string, bool, std::string, bool, bool, double, std::string, float, float, bool>
+std::tuple<
+    std::string, bool, std::string, bool, bool, double, std::string, float, float, bool
+>
 joystickAxis(std::string joystickName, int axis)
 {
     using namespace openspace;

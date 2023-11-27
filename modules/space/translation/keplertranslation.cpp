@@ -121,16 +121,16 @@ namespace {
         double semiMajorAxis;
 
         // [[codegen::verbatim(InclinationInfo.description)]]
-        double inclination [[codegen::inrange(0.0, 360.0)]];
+        double inclination [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(AscendingNodeInfo.description)]]
-        double ascendingNode [[codegen::inrange(0.0, 360.0)]];
+        double ascendingNode [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(ArgumentOfPeriapsisInfo.description)]]
-        double argumentOfPeriapsis [[codegen::inrange(0.0, 360.0)]];
+        double argumentOfPeriapsis [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(MeanAnomalyAtEpochInfo.description)]]
-        double meanAnomaly [[codegen::inrange(0.0, 360.0)]];
+        double meanAnomaly [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(EpochInfo.description)]]
         std::string epoch;
@@ -198,10 +198,12 @@ KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
     setKeplerElements(
         p.eccentricity,
         p.semiMajorAxis,
-        p.inclination,
-        p.ascendingNode,
-        p.argumentOfPeriapsis,
-        p.meanAnomaly,
+        p.inclination < 0.0 ? p.inclination + 360.0 : p.inclination,
+        p.ascendingNode < 0.0 ? p.ascendingNode + 360.0 : p.ascendingNode,
+        p.argumentOfPeriapsis < 0.0 ?
+            p.argumentOfPeriapsis + 360.0 :
+            p.argumentOfPeriapsis,
+        p.meanAnomaly < 0.0 ? p.meanAnomaly + 360.0 : p.meanAnomaly,
         p.period,
         p.epoch
     );
@@ -329,7 +331,6 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     auto isInRange = [](double val, double min, double max) -> bool {
         return val >= min && val <= max;
     };
-
     if (isInRange(eccentricity, 0.0, 1.0)) {
         _eccentricity = eccentricity;
     }

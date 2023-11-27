@@ -14,7 +14,7 @@ local Description = [[Hurricane Harvey was an extremely destructive Atlantic hur
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-harvey-clouds-with-precipitation-2017/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -27,7 +27,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "4096",

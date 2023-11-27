@@ -4,28 +4,28 @@ local kernels = asset.require("./kernels")
 
 
 
-local assets = asset.syncedResource({
+local assets = asset.resource({
   Name = "Pluto Assets",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_plutoencounter_pluto_assets",
   Version = 1
 })
 
-local encounterTextures = asset.syncedResource({
+local encounterTextures = asset.resource({
   Name = "Pluto Encounter Textures",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_plutoencounter_pluto_textures",
   Version = 4
 })
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Pluto Textures",
   Type = "HttpSynchronization",
   Identifier = "pluto_textures",
   Version = 5
 })
 
-local images = asset.syncedResource({
+local images = asset.resource({
   Name = "Pluto Images",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_plutoencounter_pluto_images",

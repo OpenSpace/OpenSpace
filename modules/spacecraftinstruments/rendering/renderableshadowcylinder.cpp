@@ -115,7 +115,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
-        std::optional<int> numberOfPoints [[codegen::key("AmountOfPoints")]];
+        std::optional<int> numberOfPoints;
 
         // [[codegen::verbatim(ShadowLengthInfo.description)]]
         std::optional<float> shadowLength;
@@ -250,7 +250,7 @@ void RenderableShadowCylinder::deinitializeGL() {
 }
 
 bool RenderableShadowCylinder::isReady() const {
-    return true;
+    return _shader;
 }
 
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
@@ -260,15 +260,9 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
     // Model transform and view transform needs to be in double precision
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-
     _shader->setUniform(
         _uniformCache.modelViewProjectionTransform,
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+        glm::mat4(calcModelViewProjectionTransform(data))
     );
 
     _shader->setUniform(_uniformCache.shadowColor, _shadowColor);

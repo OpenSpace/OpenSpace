@@ -12,7 +12,7 @@
     { "type": "navigationstate", 
       "value": "{Anchor='Apollo11LemPosition',Pitch=-0.275880E-1,Position={6.249130E0,2.576497E1,-1.435499E1},ReferenceFrame='Root',Up={-0.860897E0,-0.718231E-1,-0.503684E0},Yaw=-0.141143E-3}"},
     { "type": "wait", 
-      "value": "20"}, 
+      "value": "45"}, 
     { "type": "screenshot", 
       "value": "11landingsite"}
 ] 

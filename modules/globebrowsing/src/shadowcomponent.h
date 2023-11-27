@@ -63,7 +63,6 @@ public:
     void initialize();
     void initializeGL();
     void deinitializeGL();
-    //bool deinitialize();
 
     bool isReady() const;
 

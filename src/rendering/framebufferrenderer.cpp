@@ -517,10 +517,10 @@ void FramebufferRenderer::updateDownscaleTextures() {
         0,
         GL_RGBA32F,
         static_cast<GLsizei>(
-            _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor
+            glm::max(_resolution.x * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
         ),
         static_cast<GLsizei>(
-            _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor
+            glm::max(_resolution.y * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
         ),
         0,
         GL_RGBA,
@@ -538,10 +538,10 @@ void FramebufferRenderer::updateDownscaleTextures() {
         0,
         GL_DEPTH_COMPONENT32F,
         static_cast<GLsizei>(
-            _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor
+            glm::max(_resolution.x * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
         ),
         static_cast<GLsizei>(
-            _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor
+            glm::max(_resolution.y * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
         ),
         0,
         GL_DEPTH_COMPONENT,
@@ -846,10 +846,10 @@ void FramebufferRenderer::updateResolution() {
         0,
         GL_RGBA32F,
         static_cast<GLsizei>(
-            _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor
+            glm::max(_resolution.x * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
         ),
         static_cast<GLsizei>(
-            _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor
+            glm::max(_resolution.y * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
         ),
         0,
         GL_RGBA,
@@ -878,10 +878,10 @@ void FramebufferRenderer::updateResolution() {
         0,
         GL_DEPTH_COMPONENT32F,
         static_cast<GLsizei>(
-            _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor
+            glm::max(_resolution.x * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
         ),
         static_cast<GLsizei>(
-            _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor
+            glm::max(_resolution.y * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
         ),
         0,
         GL_DEPTH_COMPONENT,

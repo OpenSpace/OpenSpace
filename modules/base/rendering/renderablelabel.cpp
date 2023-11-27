@@ -292,8 +292,6 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
             case BlendMode::Additive:
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
     });
 
@@ -412,10 +410,8 @@ void RenderableLabel::render(const RenderData& data, RendererTasks&) {
     }
 
     glm::dmat4 modelMatrix(1.0);
-    glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
-
-    glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
+    const glm::dmat4 modelViewProjectionTransform =
+        calcModelViewProjectionTransform(data, modelMatrix);
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -432,7 +428,7 @@ void RenderableLabel::render(const RenderData& data, RendererTasks&) {
     }
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
-    renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
+    renderLabels(data, modelViewProjectionTransform, orthoRight, orthoUp, fadeInVariable);
 
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
@@ -507,37 +503,37 @@ float RenderableLabel::computeFadeFactor(float distanceNodeToCamera) const {
 
 float RenderableLabel::unit(int unit) const {
     switch (static_cast<Unit>(unit)) {
-        case Meter: return 1.f;
-        case Kilometer: return 1e3f;
-        case Megameter: return  1e6f;
-        case Gigameter: return 1e9f;
+        case Meter:           return 1.f;
+        case Kilometer:        return 1e3f;
+        case Megameter:        return  1e6f;
+        case Gigameter:        return 1e9f;
         case AstronomicalUnit: return 149597870700.f;
-        case Terameter: return 1e12f;
-        case Petameter: return 1e15f;
-        case Parsec: return static_cast<float>(PARSEC);
-        case KiloParsec: return static_cast<float>(1e3 * PARSEC);
-        case MegaParsec: return static_cast<float>(1e6 * PARSEC);
-        case GigaParsec: return static_cast<float>(1e9 * PARSEC);
-        case GigaLightyear: return static_cast<float>(306391534.73091 * PARSEC);
-        default: throw std::logic_error("Missing case label");
+        case Terameter:        return 1e12f;
+        case Petameter:        return 1e15f;
+        case Parsec:           return static_cast<float>(PARSEC);
+        case KiloParsec:       return static_cast<float>(1e3 * PARSEC);
+        case MegaParsec:       return static_cast<float>(1e6 * PARSEC);
+        case GigaParsec:       return static_cast<float>(1e9 * PARSEC);
+        case GigaLightyear:    return static_cast<float>(306391534.73091 * PARSEC);
+        default:               throw ghoul::MissingCaseException();
     }
 }
 
 std::string_view RenderableLabel::toString(int unit) const {
     switch (static_cast<Unit>(unit)) {
-        case Meter: return MeterUnit;
-        case Kilometer: return KilometerUnit;
-        case Megameter: return  MegameterUnit;
-        case Gigameter: return GigameterUnit;
+        case Meter:            return MeterUnit;
+        case Kilometer:        return KilometerUnit;
+        case Megameter:        return MegameterUnit;
+        case Gigameter:        return GigameterUnit;
         case AstronomicalUnit: return AstronomicalUnitUnit;
-        case Terameter: return TerameterUnit;
-        case Petameter: return PetameterUnit;
-        case Parsec: return ParsecUnit;
-        case KiloParsec: return KiloparsecUnit;
-        case MegaParsec: return MegaparsecUnit;
-        case GigaParsec: return GigaparsecUnit;
-        case GigaLightyear: return GigalightyearUnit;
-        default: throw std::logic_error("Missing case label");
+        case Terameter:        return TerameterUnit;
+        case Petameter:        return PetameterUnit;
+        case Parsec:           return ParsecUnit;
+        case KiloParsec:       return KiloparsecUnit;
+        case MegaParsec:       return MegaparsecUnit;
+        case GigaParsec:       return GigaparsecUnit;
+        case GigaLightyear:    return GigalightyearUnit;
+        default:               throw ghoul::MissingCaseException();
     }
 }
 

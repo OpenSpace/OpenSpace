@@ -2,7 +2,7 @@ local globe = asset.require("../../ceres")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Ceres Textures",
   Type = "HttpSynchronization",
   Identifier = "ceres_textures",
@@ -14,7 +14,8 @@ local Layer = {
   Identifier = "LAMO_Local",
   Name = "LAMO [Local]",
   Enabled = asset.enabled,
-  FilePath = textures .. "ceres_lamo_4096x2048.png"
+  FilePath = textures .. "ceres_lamo_4096x2048.png",
+  CacheSettings = { Enabled = false }
 }
 
 

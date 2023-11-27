@@ -92,9 +92,6 @@ public:
     void renderEndscreen();
     void postDraw();
 
-    float globalBlackOutFactor() const;
-    void setGlobalBlackOutFactor(float opacity);
-
     float hdrExposure() const;
     bool isHdrDisabled() const;
 
@@ -116,7 +113,7 @@ public:
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
     /**
-     * Set the camera to use for rendering
+     * Set the camera to use for rendering.
      */
     void setCamera(Camera* camera);
 
@@ -133,17 +130,17 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
-     * Take a screenshot and store in the ${SCREENSHOTS} directory
+     * Take a screenshot and store in the ${SCREENSHOTS} directory.
      */
     void takeScreenshot();
 
     /**
-     * Resets the screenshot index to 0
+     * Resets the screenshot index to 0.
      */
     void resetScreenshotNumber();
 
     /**
-     * Get the filename of the latest screenshot
+     * Get the filename of the latest screenshot.
      */
     unsigned int latestScreenshotNumber() const;
 
@@ -168,6 +165,7 @@ private:
     void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
     void renderDashboard();
+    float combinedBlackoutFactor() const;
 
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
@@ -193,6 +191,7 @@ private:
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
+    properties::BoolProperty _applyBlackoutToMaster;
 
     properties::BoolProperty _enableFXAA;
 

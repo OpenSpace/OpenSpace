@@ -498,7 +498,7 @@ void SgctEdit::generateConfigUsers() {
     if (!_didImportValues) {
         sgct::config::User user;
         user.eyeSeparation = 0.065f;
-        user.position = { 0.f, 0.f, 4.f };
+        user.position = { 0.f, 0.f, 0.f };
         _cluster.users = { user };
     }
 }

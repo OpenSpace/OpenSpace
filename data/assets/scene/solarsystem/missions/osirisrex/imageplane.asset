@@ -2,7 +2,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Bennu Textures",
   Type = "HttpSynchronization",
   Identifier = "bennu_textures",

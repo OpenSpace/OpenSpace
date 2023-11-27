@@ -302,15 +302,15 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
 
 
-    fTileProvider->registerClass<DefaultTileProvider>("DefaultTileLayer");
-    fTileProvider->registerClass<SingleImageProvider>("SingleImageTileLayer");
-    fTileProvider->registerClass<ImageSequenceTileProvider>("ImageSequenceTileLayer");
-    fTileProvider->registerClass<SpoutImageProvider>("SpoutImageTileLayer");
-    fTileProvider->registerClass<TemporalTileProvider>("TemporalTileLayer");
-    fTileProvider->registerClass<TileIndexTileProvider>("TileIndexTileLayer");
-    fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileLayer");
-    fTileProvider->registerClass<TileProviderByLevel>("ByLevelTileLayer");
-    fTileProvider->registerClass<TileProviderByIndex>("ByIndexTileLayer");
+    fTileProvider->registerClass<DefaultTileProvider>("DefaultTileProvider");
+    fTileProvider->registerClass<SingleImageProvider>("SingleImageProvider");
+    fTileProvider->registerClass<ImageSequenceTileProvider>("ImageSequenceTileProvider");
+    fTileProvider->registerClass<SpoutImageProvider>("SpoutImageProvider");
+    fTileProvider->registerClass<TemporalTileProvider>("TemporalTileProvider");
+    fTileProvider->registerClass<TileIndexTileProvider>("TileIndexTileProvider");
+    fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileProvider");
+    fTileProvider->registerClass<TileProviderByLevel>("TileProviderByLevel");
+    fTileProvider->registerClass<TileProviderByIndex>("TileProviderByIndex");
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
@@ -692,15 +692,18 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         .functions = {
             codegen::lua::AddLayer,
             codegen::lua::DeleteLayer,
-            codegen::lua::GetLayers,
+            codegen::lua::Layers,
+            codegen::lua::LayersDeprecated,
             codegen::lua::MoveLayer,
             codegen::lua::GoToChunk,
             codegen::lua::GoToGeo,
             // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
             // paths work really well close to surfaces
             codegen::lua::FlyToGeo,
-            codegen::lua::GetLocalPositionFromGeo,
-            codegen::lua::GetGeoPositionForCamera,
+            codegen::lua::LocalPositionFromGeo,
+            codegen::lua::LocalPositionFromGeoDeprecated,
+            codegen::lua::GeoPositionForCamera,
+            codegen::lua::GeoPositionForCameraDeprecated,
             codegen::lua::LoadWMSCapabilities,
             codegen::lua::RemoveWMSServer,
             codegen::lua::CapabilitiesWMS,

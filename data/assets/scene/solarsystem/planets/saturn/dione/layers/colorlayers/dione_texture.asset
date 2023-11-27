@@ -2,7 +2,7 @@ local globe = asset.require("../../dione")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Dione textures",
   Type = "HttpSynchronization",
   Identifier = "dione_textures",
@@ -13,7 +13,8 @@ local texturesPath = asset.syncedResource({
 local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "dione.jpg",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  CacheSettings = { Enabled = false }
 }
 
 

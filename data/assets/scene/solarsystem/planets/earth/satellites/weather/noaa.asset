@@ -2,13 +2,13 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local omm = asset.syncedResource({
+local omm = asset.resource({
   Name = "Satellite OMM Data (NOAA)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_noaa",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=noaa&FORMAT=kvn",
   Filename = "noaa.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
 
 

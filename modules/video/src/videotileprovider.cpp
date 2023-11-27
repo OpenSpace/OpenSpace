@@ -106,7 +106,7 @@ void VideoTileProvider::update() {
 }
 
 void VideoTileProvider::reset() {
-    _videoPlayer.reset();
+    _videoPlayer.reload();
 }
 
 ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {

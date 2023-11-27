@@ -58,7 +58,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    // Computes the size of the plane quad using the relevant properties
+    /**
+     * Computes the size of the plane quad using the relevant properties.
+     */
     float planeSize() const;
 
     properties::StringProperty _texturePath;

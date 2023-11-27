@@ -19,7 +19,7 @@ emissions from heavy traffic can produce CO concentrations of 200 - 5000 ppb]]
 local URL = "https://sos.noaa.gov/catalog/datasets/carbon-monoxide-2008-2011/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -33,7 +33,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "images",

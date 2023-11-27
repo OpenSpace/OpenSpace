@@ -55,7 +55,8 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _delete.onChange([this]() {
         global::scriptEngine->queueScript(
             "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     });
 }

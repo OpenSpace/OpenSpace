@@ -3,7 +3,7 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Bennu Models",
   Type = "HttpSynchronization",
   Identifier = "bennu_models",

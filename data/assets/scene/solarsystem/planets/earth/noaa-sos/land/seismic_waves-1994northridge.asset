@@ -15,7 +15,7 @@ displaced from their homes by the effects of the quake]]
 local URL = "https://sos.noaa.gov/catalog/datasets/seismic-waves-northridge-earthquake-1994/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -44,7 +44,7 @@ local LayerStations = {
 local LayerImages = {
   Identifier = Identifier .. "-images",
   Name = Name .. " (Images)",
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = imagesDestination,
   Description = Description
 }

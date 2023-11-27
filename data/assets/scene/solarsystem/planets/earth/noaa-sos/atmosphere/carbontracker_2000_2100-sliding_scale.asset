@@ -18,7 +18,7 @@ performed by the NOAA Global Monitoring Division and international partners]]
 local URL = "https://sos.noaa.gov/catalog/datasets/carbon-tracker-sliding-scale/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -33,7 +33,7 @@ local colorbarDestination = syncedDirectory .. "colorbar"
 local LayerField = {
   Identifier = Identifier .. "-field",
   Name = Name .. " (Field)",
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = fieldDestination,
@@ -47,7 +47,7 @@ local LayerField = {
 local LayerObs = {
   Identifier = Identifier .. "-obs",
   Name = Name .. " (Observed)",
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = obsDestination,

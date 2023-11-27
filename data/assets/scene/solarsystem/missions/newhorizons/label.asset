@@ -2,7 +2,7 @@ local NewHorizonsModel = asset.require("./model")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "New Horizons Model",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_model",

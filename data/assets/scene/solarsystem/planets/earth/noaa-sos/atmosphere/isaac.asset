@@ -15,7 +15,7 @@ brought significant amounts of rain to the southeastern United States]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-isaac-2012/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -30,7 +30,7 @@ local satDestination = syncedDirectory .. "sat"
 local LayerRadar = {
   Identifier = Identifier .. "-radar",
   Name = Name .. " (Radar)",
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = radarDestination,
@@ -44,7 +44,7 @@ local LayerRadar = {
 local LayerSat = {
   Identifier = Identifier .. "-sat",
   Name = Name .. " (Sat)",
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = satDestination,

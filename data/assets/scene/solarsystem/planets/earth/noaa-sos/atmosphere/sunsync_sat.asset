@@ -15,7 +15,7 @@ orbit the Earth 14.1 times per day]]
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-noaa-17-and-noaa-18/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -28,7 +28,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "2048",

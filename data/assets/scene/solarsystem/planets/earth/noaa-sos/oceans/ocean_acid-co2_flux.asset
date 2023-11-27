@@ -12,7 +12,7 @@ water than in atmosphere above, CO2 is released to the atmosphere]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ocean-atmosphere-co2-exchange/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -25,7 +25,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "images",

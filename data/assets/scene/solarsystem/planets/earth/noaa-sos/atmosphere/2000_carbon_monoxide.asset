@@ -16,7 +16,7 @@ volcanoes and brush burning. Between the anthropogenic and natural sources, scie
 estimate that the annual production of carbon monoxide is 2-5 gigatons]]
 local URL = "https://sos.noaa.gov/catalog/datasets/carbon-monoxide-2000/"
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -29,7 +29,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "1024",
   Description = Description
 }

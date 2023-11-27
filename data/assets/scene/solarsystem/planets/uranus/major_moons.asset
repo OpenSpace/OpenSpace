@@ -353,11 +353,11 @@ local UranusMajorMoonsOn = {
   Identifier = "os.solarsystem.UranusMajorMoonsOn",
   Name = "Turn ON major moons and trails",
   Command = [[
-    local trails = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Enabled")
-    local trails_fade = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Fade")
+    local trails = openspace.property("{moonTrail_major_uranus}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_major_uranus}.Renderable.Fade")
 
-    local moons = openspace.getProperty("{moon_major_uranus}.Renderable.Enabled")
-    local moons_fade = openspace.getProperty("{moon_major_uranus}.Renderable.Fade")
+    local moons = openspace.property("{moon_major_uranus}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_major_uranus}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(trails[i], true)
@@ -371,18 +371,18 @@ local UranusMajorMoonsOn = {
   ]],
   Documentation = "Turn ON Uranus's major moons and their trails",
   GuiPath = "/Solar System/Uranus",
-  IsLocal = true
+  IsLocal = false
 }
 
 local UranusMajorMoonsOff = {
   Identifier = "os.solarsystem.UranusMajorMoonsOff",
   Name = "Turn OFF majors moon and trails",
   Command = [[
-    local trails = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Enabled")
-    local trails_fade = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Fade")
+    local trails = openspace.property("{moonTrail_major_uranus}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_major_uranus}.Renderable.Fade")
 
-    local moons = openspace.getProperty("{moon_major_uranus}.Renderable.Enabled")
-    local moons_fade = openspace.getProperty("{moon_major_uranus}.Renderable.Fade")
+    local moons = openspace.property("{moon_major_uranus}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_major_uranus}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(
@@ -406,7 +406,7 @@ local UranusMajorMoonsOff = {
   ]],
   Documentation = "Turn OFF Uranus's major moons and their trails",
   GuiPath = "/Solar System/Uranus",
-  IsLocal = true
+  IsLocal = false
 }
 
 

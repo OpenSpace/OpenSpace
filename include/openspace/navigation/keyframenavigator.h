@@ -60,13 +60,14 @@ public:
     };
 
     /**
-    * Update camera position using the next camera pose keyframe from the timeline.
-    * Returns true if camera was set to a pose from the next keyframe.
-    * Returns false if no keyframes are available after the current time.
-    * \param camera A reference to the camera object to have its pose updated.
-    * \param ignoreFutureKeyframes true if only past keyframes are to be used.
-    * \returns true only if a new future keyframe is available to set camera pose.
-    */
+     * Update camera position using the next camera pose keyframe from the timeline.
+     * Returns true if camera was set to a pose from the next keyframe. Returns false if
+     * no keyframes are available after the current time.
+     *
+     * \param camera A reference to the camera object to have its pose updated
+     * \param ignoreFutureKeyframes `true` if only past keyframes are to be used
+     * \return true only if a new future keyframe is available to set camera pose
+     */
     bool updateCamera(Camera& camera, bool ignoreFutureKeyframes);
     static bool updateCamera(Camera* camera, const CameraPose prevPose,
         const CameraPose nextPose, double t, bool ignoreFutureKeyframes);

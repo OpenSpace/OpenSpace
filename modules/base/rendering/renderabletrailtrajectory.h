@@ -61,7 +61,9 @@ public:
 
 private:
 
-    /// Reset some variables to default state
+    /**
+     * Reset some variables to default state.
+     */
     void reset();
 
     /// The number of vertices that we calculate during each frame of the full sweep pass

@@ -4,14 +4,14 @@ local transforms = asset.require("./67p")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Rosetta Models",
   Type = "HttpSynchronization",
   Identifier = "rosetta_model",
   Version = 5
 })
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Rosetta Kernels",
   Type = "HttpSynchronization",
   Identifier = "rosetta_kernels",
@@ -278,7 +278,7 @@ local FocusRosetta = {
   ]],
   Documentation = "Sets the focus of the camera on Rosetta",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 local SetupLanderRelease = {
@@ -289,7 +289,7 @@ local SetupLanderRelease = {
   ]],
   Documentation = "Jumps to the time when the Philae lander is released",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleImagePlane = {
@@ -298,12 +298,12 @@ local ToggleImagePlane = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.ImagePlaneRosetta.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.ImagePlaneRosetta.Renderable.Enabled")
+      not openspace.propertyValue("Scene.ImagePlaneRosetta.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of the free floating image plane",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 local TogglePhilaeTrail = {
@@ -312,12 +312,12 @@ local TogglePhilaeTrail = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.PhilaeTrail.Renderable.Enabled",
-      not openspace.getPropertyValue("Scene.PhilaeTrail.Renderable.Enabled")
+      not openspace.propertyValue("Scene.PhilaeTrail.Renderable.Enabled")
     )
   ]],
   Documentation = "Toggles the visibility of Philae's trail",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
 

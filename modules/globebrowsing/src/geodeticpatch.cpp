@@ -106,10 +106,10 @@ Geodetic2 GeodeticPatch::size() const {
 
 Geodetic2 GeodeticPatch::corner(Quad q) const {
     switch (q) {
-        case NORTH_WEST:  return Geodetic2{ maxLat(), minLon() };// northWestCorner();
-        case NORTH_EAST:  return Geodetic2{ maxLat(), maxLon() };// northEastCorner();
-        case SOUTH_WEST:  return Geodetic2{ minLat(), minLon() };// southWestCorner();
-        case SOUTH_EAST:  return Geodetic2{ minLat(), maxLon() };// southEastCorner();
+        case NORTH_WEST:  return Geodetic2{ maxLat(), minLon() }; // northWestCorner();
+        case NORTH_EAST:  return Geodetic2{ maxLat(), maxLon() }; // northEastCorner();
+        case SOUTH_WEST:  return Geodetic2{ minLat(), minLon() }; // southWestCorner();
+        case SOUTH_EAST:  return Geodetic2{ minLat(), maxLon() }; // southEastCorner();
         default:          throw ghoul::MissingCaseException();
     }
 }

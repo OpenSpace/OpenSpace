@@ -1,4 +1,4 @@
-local image = asset.syncedResource({
+local image = asset.resource({
   Name = "Orion Image",
   Type = "HttpSynchronization",
   Identifier = "orion_image",

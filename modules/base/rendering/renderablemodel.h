@@ -97,6 +97,7 @@ private:
     properties::BoolProperty _performShading;
     properties::BoolProperty _enableFaceCulling;
     properties::DMat4Property _modelTransform;
+    properties::Vec3Property _pivot;
     properties::Vec3Property _rotationVec;
 
     properties::BoolProperty _enableDepthTest;

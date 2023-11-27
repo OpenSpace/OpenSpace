@@ -25,29 +25,15 @@
 #ifndef __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOSPHERE___H__
 #define __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOSPHERE___H__
 
-#include <openspace/rendering/renderable.h>
+#include <modules/base/rendering/renderablesphere.h>
 
 #include <modules/video/include/videoplayer.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace openspace {
 
-class Sphere;
-struct RenderData;
-struct UpdateData;
-
 namespace documentation { struct Documentation; }
 
-class RenderableVideoSphere : public Renderable {
+class RenderableVideoSphere : public RenderableSphere {
 public:
     RenderableVideoSphere(const ghoul::Dictionary& dictionary);
 
@@ -56,37 +42,16 @@ public:
 
     bool isReady() const override;
 
-    virtual void render(const RenderData& data, RendererTasks& rendererTask) override;
-    virtual void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 protected:
-    void bindTexture();
-    void unbindTexture();
+    void bindTexture() override;
 
 private:
     VideoPlayer _videoPlayer;
-
-    properties::OptionProperty _orientation;
-
-    properties::FloatProperty _size;
-    properties::IntProperty _segments;
-
-    properties::BoolProperty _mirrorTexture;
-    properties::BoolProperty _disableFadeInDistance;
-
-    properties::FloatProperty _fadeInThreshold;
-    properties::FloatProperty _fadeOutThreshold;
-
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-
-    std::unique_ptr<Sphere> _sphere;
-
-    UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
-        colorTexture, mirrorTexture) _uniformCache;
-
-    bool _sphereIsDirty = false;
 };
 
 } // namespace openspace

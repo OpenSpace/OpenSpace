@@ -4,7 +4,7 @@ local rot = asset.require("./carrington_to_heeq_rotation")
 
 
 
-local fluxNodesBinaries = asset.syncedResource({
+local fluxNodesBinaries = asset.resource({
   Name = "Bastille day Flux nodes binaries",
   Type = "HttpSynchronization",
   Identifier = "bastille_day_streamnodes_binaries",
@@ -25,7 +25,7 @@ local Fluxnodes = {
   Renderable = {
     Type = "RenderableFluxNodes",
     SourceFolder = fluxNodesBinaries,
-    ColorTablePath = asset.localResource("transferfunctions/CMR.txt"),
+    ColorTablePath = asset.resource("transferfunctions/CMR.txt"),
     ColorTableRange = { -2.0, 4.0 }
   },
   GUI = {
@@ -40,11 +40,11 @@ local ToggleFluxnodes = {
   Identifier = "os.bastilleday.fluxnodes.ToggleFluxnodes",
   Name = "Toggle flux nodes",
   Command = [[
-    if openspace.getPropertyValue("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled") then
+    if openspace.propertyValue("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled") then
       openspace.setPropertyValueSingle(
         "Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Fade",
         0.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear",
         'openspace.setPropertyValueSingle("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled", false)'
       )
@@ -53,7 +53,7 @@ local ToggleFluxnodes = {
       openspace.setPropertyValueSingle(
         "Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Fade",
         1.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear"
       )
     end

@@ -231,12 +231,19 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
 
                 _type = GeometryType::Polygon;
             }
-            catch (geos::util::IllegalStateException&) {
-                LERROR("Non-simple (e.g. self-intersecting) polygons not supported yet");
-                throw ghoul::MissingCaseException();
+            catch (geos::util::IllegalStateException& e) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Non-simple (e.g. self-intersecting) polygons not supported yet. "
+                    "GEOS error: '{}'", e.what()
+                ));
 
                 // TODO: handle self-intersections points
                 // https://www.sciencedirect.com/science/article/pii/S0304397520304199
+            }
+            catch (geos::util::GEOSException& e) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Unknown geos error: {}", e.what()
+                ));
             }
             break;
         }

@@ -50,8 +50,8 @@ class KameleonWrapper {
 public:
     enum class Model {
         OpenGGCM,
-        BATSRUS,        // Magnetosphere
-        ENLIL,          // Heliosphere
+        BATSRUS, // Magnetosphere
+        ENLIL, // Heliosphere
         MAS,
         Adapt3D,
         SWMF,

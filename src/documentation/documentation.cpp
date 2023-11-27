@@ -105,6 +105,8 @@ template <>
 std::string to_string(const openspace::documentation::TestResult::Offense::Reason& value)
 {
     switch (value) {
+        case openspace::documentation::TestResult::Offense::Reason::Unknown:
+            return "Unknown";
         case openspace::documentation::TestResult::Offense::Reason::MissingKey:
             return "Missing key";
         case openspace::documentation::TestResult::Offense::Reason::UnknownIdentifier:
@@ -185,20 +187,6 @@ DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
                                        std::string doc)
     : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt,
                          std::move(doc))
-{}
-
-Documentation::Documentation(std::string n, std::string i, DocumentationEntries ents)
-    : name(std::move(n))
-    , id(std::move(i))
-    , entries(std::move(ents))
-{}
-
-Documentation::Documentation(std::string n, DocumentationEntries ents)
-    : Documentation(std::move(n), "", std::move(ents))
-{}
-
-Documentation::Documentation(DocumentationEntries ents)
-    : Documentation("", "", std::move(ents))
 {}
 
 TestResult testSpecification(const Documentation& documentation,
