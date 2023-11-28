@@ -36,6 +36,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/texture.h>
 #include <glm/gtx/projection.hpp>
 #include <optional>
 
@@ -45,11 +47,18 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableTube";
     constexpr int8_t CurrentMajorVersion = 0;
     constexpr int8_t CurrentMinorVersion = 1;
-    constexpr std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 14> UniformNames = {
         "modelViewTransform", "projectionTransform", "normalTransform", "color",
-        "opacity", "performShading", "nLightSources", "lightDirectionsViewSpace",
-        "lightIntensities", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity"
+        "opacity", "hasTransferFunction", "transferFunction", "performShading",
+        "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
+        "ambientIntensity", "diffuseIntensity", "specularIntensity"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+        "TransferFunctionPath",
+        "Transfer Function Path",
+        "Specifies the transfer function file path",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -106,6 +115,9 @@ namespace {
         // The input file with data for the tube
         std::string file;
 
+        // [[codegen::verbatim(TransferFunctionInfo.description)]]
+        std::optional<std::string> transferFunction;
+
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
@@ -152,6 +164,7 @@ RenderableTube::Shading::Shading()
 
 RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _transferFunctionPath(TransferFunctionInfo)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
@@ -159,6 +172,16 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _dataFile = p.file;
+
+    if (p.transferFunction.has_value()) {
+        _hasTransferFunction = true;
+        _transferFunctionPath = absPath(*p.transferFunction).string();
+        _transferFunction = std::make_shared<openspace::TransferFunction>(
+            _transferFunctionPath,
+            [](const openspace::TransferFunction&) {}
+        );
+    }
+    addProperty(_transferFunctionPath);
 
     _color.setViewOption(properties::Property::ViewOptions::Color);
     _color = p.color.value_or(_color);
@@ -227,6 +250,16 @@ void RenderableTube::initializeGL() {
         GL_FALSE,
         sizeof(PolygonVertex),
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, normal))
+    );
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(
+        2,
+        1,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(PolygonVertex),
+        reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, value))
     );
 
     glBindVertexArray(0);
@@ -385,16 +418,22 @@ void RenderableTube::updateTubeData() {
     // Verticies
     // Calculate the center points for the first and last polygon
     glm::dvec3 firstCenter = glm::dvec3(0.0);
+    float firstValue = 0.f;
     for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
         firstCenter += timePolygonPoint.coordinate;
+        firstValue += timePolygonPoint.value;
     }
     firstCenter /= nPoints;
+    firstValue /= nPoints;
 
     glm::dvec3 lastCenter = glm::dvec3(0.0);
+    float lastValue = 0.f;
     for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
         lastCenter += timePolygonPoint.coordinate;
+        lastValue += timePolygonPoint.value;
     }
     lastCenter /= nPoints;
+    lastValue /= nPoints;
 
     // Calciulate the normals of the first and last poylgon
     glm::dvec3 firstNormal = firstCenter - lastCenter;
@@ -409,6 +448,8 @@ void RenderableTube::updateTubeData() {
     firstCenterPoint.normal[0] = firstNormal.x;
     firstCenterPoint.normal[1] = firstNormal.y;
     firstCenterPoint.normal[2] = firstNormal.z;
+
+    firstCenterPoint.value = firstValue;
     _verticies.push_back(firstCenterPoint);
 
     // Add the first polygon's sides with proper normals
@@ -422,6 +463,8 @@ void RenderableTube::updateTubeData() {
         firstsSidePoint.normal[0] = firstNormal.x;
         firstsSidePoint.normal[1] = firstNormal.y;
         firstsSidePoint.normal[2] = firstNormal.z;
+
+        firstsSidePoint.value = timePolygonPoint.value;
         _verticies.push_back(firstsSidePoint);
     }
 
@@ -439,6 +482,8 @@ void RenderableTube::updateTubeData() {
             sidePoint.normal[0] = normal.x;
             sidePoint.normal[1] = normal.y;
             sidePoint.normal[2] = normal.z;
+
+            sidePoint.value = timePolygonPoint.value;
             _verticies.push_back(sidePoint);
         }
     }
@@ -452,6 +497,8 @@ void RenderableTube::updateTubeData() {
     lastCenterPoint.normal[0] = lastNormal.x;
     lastCenterPoint.normal[1] = lastNormal.y;
     lastCenterPoint.normal[2] = lastNormal.z;
+
+    lastCenterPoint.value = lastValue;
     _verticies.push_back(lastCenterPoint);
 
     // Add the last polygon's sides with proper normals
@@ -465,6 +512,8 @@ void RenderableTube::updateTubeData() {
         lastsSidePoint.normal[0] = lastNormal.x;
         lastsSidePoint.normal[1] = lastNormal.y;
         lastsSidePoint.normal[2] = lastNormal.z;
+
+        lastsSidePoint.value = timePolygonPoint.value;
         _verticies.push_back(lastsSidePoint);
     }
 
@@ -565,6 +614,14 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
+    _shader->setUniform(_uniformCache.hasTransferFunction, _hasTransferFunction);
+    if (_hasTransferFunction) {
+        ghoul::opengl::TextureUnit transferFunctionUnit;
+        transferFunctionUnit.activate();
+        _transferFunction->texture().bind();
+        _shader->setUniform(_uniformCache.transferFunction, transferFunctionUnit);
+    }
+
     int nLightSources = 0;
     _lightIntensitiesBuffer.resize(_lightSources.size());
     _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
@@ -617,6 +674,10 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableTube::update(const UpdateData& data) {
+    if (_hasTransferFunction) {
+        _transferFunction->update();
+    }
+
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);

@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/rendering/transferfunction.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <ghoul/glm.h>
@@ -71,6 +72,7 @@ private:
     struct PolygonVertex {
         GLfloat position[3];
         GLfloat normal[3];
+        GLfloat value;
     };
 
     struct TimePolygonPoint {
@@ -89,14 +91,15 @@ private:
     void updateBufferData();
 
     // Properties
+    properties::StringProperty _transferFunctionPath;
     properties::Vec3Property _color;
     properties::BoolProperty _enableFaceCulling;
     properties::PropertyOwner _lightSourcePropertyOwner;
     Shading _shading;
 
     UniformCache(modelViewTransform, projectionTransform, normalTransform, color,
-        opacity, performShading, nLightSources, lightDirectionsViewSpace,
-        lightIntensities, ambientIntensity, diffuseIntensity,
+        opacity, hasTransferFunction, transferFunction, performShading, nLightSources,
+        lightDirectionsViewSpace, lightIntensities, ambientIntensity, diffuseIntensity,
         specularIntensity) _uniformCache;
 
     std::vector<float> _lightIntensitiesBuffer;
@@ -106,6 +109,7 @@ private:
     std::filesystem::path _dataFile;
     std::vector<TimePolygon> _data;
     bool _tubeIsDirty = false;
+    bool _hasTransferFunction = false;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     GLuint _vaoId = 0;
@@ -114,6 +118,7 @@ private:
 
     std::vector<PolygonVertex> _verticies;
     std::vector<unsigned int> _indicies;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };
 
 } // namespace openspace

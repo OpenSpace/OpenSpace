@@ -27,9 +27,12 @@
 in float vs_depth;
 in vec3 vs_normal;
 in vec4 vs_positionViewSpace;
+in float vs_value;
 
 uniform vec3 color;
 uniform float opacity;
+uniform bool hasTransferFunction;
+uniform sampler1D transferFunction;
 
 uniform bool performShading = true;
 uniform float ambientIntensity;
@@ -56,16 +59,27 @@ Fragment getFragment() {
   frag.disableLDR2HDR = true;
   frag.color.a = opacity;
 
+  vec3 objectColor;
+  if (hasTransferFunction) {
+    vec4 tfColor = texture(transferFunction, vs_value);
+    objectColor = tfColor.rgb;
+    frag.color.a = opacity * tfColor.a;
+  }
+  else {
+    objectColor = color;
+  }
+  //objectColor = color;
+
   if (performShading) {
     // Ambient light
-    vec3 totalLightColor = ambientIntensity * LightColor * color;
+    vec3 totalLightColor = ambientIntensity * LightColor * objectColor;
     vec3 viewDirection = normalize(vs_positionViewSpace.xyz);
 
     for (int i = 0; i < nLightSources; ++i) {
       // Diffuse light
       vec3 lightDirection = lightDirectionsViewSpace[i];
       float diffuseFactor =  max(dot(vs_normal, lightDirection), 0.0);
-      vec3 diffuseColor = diffuseIntensity * LightColor * diffuseFactor * color;
+      vec3 diffuseColor = diffuseIntensity * LightColor * diffuseFactor * objectColor;
 
       // Specular light
       vec3 reflectDirection = reflect(lightDirection, vs_normal);
@@ -78,7 +92,7 @@ Fragment getFragment() {
     frag.color.rgb = totalLightColor;
   }
   else {
-    frag.color.rgb = color.rgb;
+    frag.color.rgb = objectColor.rgb;
   }
 
 

@@ -27,17 +27,20 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 layout (location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_normal;
+layout (location = 1) in vec3 in_normal;
+layout (location = 2) in float in_value;
 
 out float vs_depth;
 out vec3 vs_normal;
 out vec4 vs_positionViewSpace;
+out float vs_value;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform mat3 normalTransform;
 
 void main() {
+  vs_value = in_value;
   vec4 position = vec4(in_position, 1.0);
   vs_positionViewSpace = vec4(modelViewTransform * position);
   vec4 positionClipSpace = projectionTransform * vs_positionViewSpace;
