@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/util/collisionhelper.h>
+#include <ghoul/misc/stringhelper.h>
 
 namespace {
 
@@ -673,8 +674,7 @@ geoPositionForCameraDeprecated(bool useEyePosition = false)
     }
 
     std::string extension = path.extension().string();
-    std::transform(extension.begin(), extension.end(), extension.begin(),
-        [](unsigned char c) { return std::tolower(c); });
+    extension = ghoul::toLowerCase(extension);
 
     if (extension != ".geojson" && extension != ".json") {
         throw ghoul::lua::LuaError(fmt::format(

@@ -30,7 +30,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 
 #ifdef WIN32
@@ -83,24 +83,9 @@ std::array<std::string, 3> gridVariables(ccmc::Model* model) {
     std::string y = std::move(tokens.at(1));
     std::string z = std::move(tokens.at(2));
 
-    std::transform(
-        x.cbegin(),
-        x.cend(),
-        x.begin(),
-        [](char c) { return static_cast<char>(tolower(c)); }
-    );
-    std::transform(
-        y.cbegin(),
-        y.cend(),
-        y.begin(),
-        [](char c) { return static_cast<char>(tolower(c)); }
-    );
-    std::transform(
-        z.cbegin(),
-        z.cend(),
-        z.begin(),
-        [](char c) { return static_cast<char>(tolower(c)); }
-    );
+    x = ghoul::toLowerCase(x);
+    y = ghoul::toLowerCase(y);
+    z = ghoul::toLowerCase(z);
 
     return { x, y, z };
 }
