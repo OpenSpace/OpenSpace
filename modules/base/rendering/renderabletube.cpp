@@ -321,13 +321,16 @@ void RenderableTube::readDataFile() {
         );
         timePolygon.timestamp = Time::convertTime(timeString);
 
-        // Coordinates
+        // Points
         auto points = it->find("points");
         if (points == it->end() || points->size() < 1) {
             LERROR("Could not find points for polygon in data");
             return;
         }
         for (auto pt = points->begin(); pt < points->end(); ++pt) {
+            TimePolygonPoint timePolygonPoint;
+
+            // Coordinates
             auto px = pt->find("x");
             auto py = pt->find("y");
             auto pz = pt->find("z");
@@ -341,9 +344,20 @@ void RenderableTube::readDataFile() {
             pt->at("x").get_to(x);
             pt->at("y").get_to(y);
             pt->at("z").get_to(z);
+            timePolygonPoint.coordinate = glm::dvec3(x, y, z);
 
-            glm::dvec3 point(x, y, z);
-            timePolygon.points.push_back(point);
+            // Value
+            auto v = pt->find("value");
+            if (v == pt->end()) {
+                LERROR("Could not find coordinate value component for polygon in data");
+                return;
+            }
+
+            float value;
+            pt->at("value").get_to(value);
+            timePolygonPoint.value = value;
+
+            timePolygon.points.push_back(timePolygonPoint);
         }
         _data.push_back(timePolygon);
     }
@@ -371,14 +385,14 @@ void RenderableTube::updateTubeData() {
     // Verticies
     // Calculate the center points for the first and last polygon
     glm::dvec3 firstCenter = glm::dvec3(0.0);
-    for (const glm::dvec3& coord : _data.front().points) {
-        firstCenter += coord;
+    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
+        firstCenter += timePolygonPoint.coordinate;
     }
     firstCenter /= nPoints;
 
     glm::dvec3 lastCenter = glm::dvec3(0.0);
-    for (const glm::dvec3& coord : _data.back().points) {
-        lastCenter += coord;
+    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
+        lastCenter += timePolygonPoint.coordinate;
     }
     lastCenter /= nPoints;
 
@@ -399,11 +413,11 @@ void RenderableTube::updateTubeData() {
 
     // Add the first polygon's sides with proper normals
     // This will ensure a hard shadow on the tube edge
-    for (const glm::dvec3& coord : _data.front().points) {
+    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
         PolygonVertex firstsSidePoint;
-        firstsSidePoint.position[0] = coord.x;
-        firstsSidePoint.position[1] = coord.y;
-        firstsSidePoint.position[2] = coord.z;
+        firstsSidePoint.position[0] = timePolygonPoint.coordinate.x;
+        firstsSidePoint.position[1] = timePolygonPoint.coordinate.y;
+        firstsSidePoint.position[2] = timePolygonPoint.coordinate.z;
 
         firstsSidePoint.normal[0] = firstNormal.x;
         firstsSidePoint.normal[1] = firstNormal.y;
@@ -413,14 +427,15 @@ void RenderableTube::updateTubeData() {
 
     // Add all the polygons that will create the sides of the tube
     for (const TimePolygon& poly : _data) {
-        for (const glm::dvec3& coord : poly.points) {
+        for (const TimePolygonPoint& timePolygonPoint : poly.points) {
             PolygonVertex sidePoint;
-            sidePoint.position[0] = coord.x;
-            sidePoint.position[1] = coord.y;
-            sidePoint.position[2] = coord.z;
+            sidePoint.position[0] = timePolygonPoint.coordinate.x;
+            sidePoint.position[1] = timePolygonPoint.coordinate.y;
+            sidePoint.position[2] = timePolygonPoint.coordinate.z;
 
             // Calculate normal
-            glm::dvec3 normal = coord - glm::proj(coord, firstNormal) - firstNormal;
+            glm::dvec3 normal = timePolygonPoint.coordinate -
+                glm::proj(timePolygonPoint.coordinate, firstNormal) - firstNormal;
             sidePoint.normal[0] = normal.x;
             sidePoint.normal[1] = normal.y;
             sidePoint.normal[2] = normal.z;
@@ -441,11 +456,11 @@ void RenderableTube::updateTubeData() {
 
     // Add the last polygon's sides with proper normals
     // This will ensure a hard shadow on the tube edge
-    for (const glm::dvec3& coord : _data.back().points) {
+    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
         PolygonVertex lastsSidePoint;
-        lastsSidePoint.position[0] = coord.x;
-        lastsSidePoint.position[1] = coord.y;
-        lastsSidePoint.position[2] = coord.z;
+        lastsSidePoint.position[0] = timePolygonPoint.coordinate.x;
+        lastsSidePoint.position[1] = timePolygonPoint.coordinate.y;
+        lastsSidePoint.position[2] = timePolygonPoint.coordinate.z;
 
         lastsSidePoint.normal[0] = lastNormal.x;
         lastsSidePoint.normal[1] = lastNormal.y;

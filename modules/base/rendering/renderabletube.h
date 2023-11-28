@@ -73,9 +73,14 @@ private:
         GLfloat normal[3];
     };
 
+    struct TimePolygonPoint {
+        glm::dvec3 coordinate = glm::dvec3(0.0);
+        float value = 0.f;
+    };
+
     struct TimePolygon {
-        double timestamp;
-        std::vector<glm::dvec3> points;
+        double timestamp = 0.0;
+        std::vector<TimePolygonPoint> points;
     };
 
     void readDataFile();
