@@ -11,7 +11,8 @@ asset.meta = {
   Version = "1.0",
   Description = [[Default Venus layers are: Venus Texture, Magellan Mosaic,
     Clouds Magellan Combo, and Magellan Elevation (3D).
-    <br>
+
+
     Layers only loaded from the Utah server
   ]],
   Author = "OpenSpace Team",

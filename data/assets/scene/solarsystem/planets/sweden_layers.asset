@@ -17,7 +17,8 @@ asset.meta = {
   Version = "1.0",
   Description = [[Adds default layers for all planets. Remove this asset and include
     individual layers for planets to customize planet layers
-    <br>
+
+
     Layers only loaded from the Sweden server
   ]],
   Author = "OpenSpace Team",

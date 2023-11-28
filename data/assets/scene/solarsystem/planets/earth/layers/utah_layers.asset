@@ -15,7 +15,8 @@ asset.meta = {
     World Elevation (3D), Earth at Night 2012, Earth at Night Texture,
     Earth at Night (Temporal), Coastlines, Reference Features, Reference Labels,
     Tile Indicies, Size Reference, Gebco and Modis Water Mask.
-    <br>
+
+
     Layers only loaded from the Utah server
   ]],
   Author = "OpenSpace Team",

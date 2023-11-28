@@ -14,7 +14,8 @@ asset.meta = {
   Version = "1.0",
   Description = [[Default Moon layers are: WAC, Clem Uvvis, Uvvis Hybrid, Kaguya,
     LRO LOLA Color Shaded Relief 388m v4, Lola Shade, and Lola DEM (3D).
-    <br>
+
+
     Layers only loaded from the New York server
   ]],
   Author = "OpenSpace Team",

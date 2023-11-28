@@ -12,7 +12,8 @@ asset.meta = {
     HiRISE Local Set, MOC WA Color, Viking MDIM, MOLA Pseudo Color, MOLA HRSC,
     Themis IR Day, Themis IR Night, CTX Mosaic, MDEM200M (3D), HiRISE Local Set DEM (3D),
     Mola Elevation (3D), Tile Indicies, and Size Reference.
-    <br>
+
+
     Layers loaded from all servers
   ]],
   Author = "OpenSpace Team",

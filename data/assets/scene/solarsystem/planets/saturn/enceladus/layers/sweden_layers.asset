@@ -8,7 +8,8 @@ asset.meta = {
   Version = "1.0",
   Description = [[Default Enceladus layers are: Enceladus Texture,
     and Cassini Global Mosaic 100m HPF.
-    <br>
+
+
     Layers only loaded from the Sweden server
   ]],
   Author = "OpenSpace Team",
