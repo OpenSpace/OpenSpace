@@ -30,7 +30,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 
 #ifdef WIN32

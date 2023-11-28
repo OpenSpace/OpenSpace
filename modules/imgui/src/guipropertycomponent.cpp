@@ -29,7 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 
 //#define Debugging_ImGui_TreeNode_Indices

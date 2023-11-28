@@ -50,7 +50,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 
 namespace openspace {
 

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/util/collisionhelper.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 
 namespace {
 

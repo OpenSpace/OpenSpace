@@ -30,8 +30,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <filesystem>
 

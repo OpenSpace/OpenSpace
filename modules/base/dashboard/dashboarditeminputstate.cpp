@@ -31,7 +31,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowWhenEnabledInfo = {
