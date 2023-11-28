@@ -392,9 +392,8 @@ namespace {
     instruction.setValue("PathType", std::string("ZoomOutOverview"));
 
     if (duration.has_value()) {
-        constexpr double Epsilon = 1e-5;
-        if (*duration <= Epsilon) {
-            throw ghoul::lua::LuaError("Duration must be larger than zero");
+        if (*duration < 0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
         }
         instruction.setValue("Duration", *duration);
     }
