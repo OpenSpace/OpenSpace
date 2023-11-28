@@ -136,7 +136,7 @@ void GdalWrapper::setGdalProxyConfiguration() {
         const std::string user = global::configuration->httpProxy.user;
         const std::string password = global::configuration->httpProxy.password;
         std::string auth = global::configuration->httpProxy.authentication;
-        ghoul::toUpperCase(auth);
+        auth = ghoul::toUpperCase(auth);
 
         const std::string proxy = address + ":" + std::to_string(port);
         CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());

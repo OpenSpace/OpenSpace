@@ -50,8 +50,7 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    std::string upperIdentifier = identifier();
-    ghoul::toUpperCase(upperIdentifier);
+    std::string upperIdentifier = ghoul::toUpperCase(identifier());
 
     std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
 
@@ -106,8 +105,7 @@ std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {
 }
 
 std::filesystem::path OpenSpaceModule::modulePath() const {
-    std::string moduleIdentifier = identifier();
-    ghoul::toLowerCase(moduleIdentifier);
+    std::string moduleIdentifier = ghoul::toLowerCase(identifier());
 
     // First try the internal module directory
     std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);

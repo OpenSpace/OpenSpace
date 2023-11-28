@@ -43,7 +43,7 @@ KeyWithModifier stringToKey(std::string str) {
 
     std::vector<std::string> originalTokens = tokens;
     for (std::string& t : tokens) {
-        ghoul::toUpperCase(t);
+        t = ghoul::toUpperCase(t);
     }
 
     // default is unknown

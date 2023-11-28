@@ -83,9 +83,9 @@ std::array<std::string, 3> gridVariables(ccmc::Model* model) {
     std::string y = std::move(tokens.at(1));
     std::string z = std::move(tokens.at(2));
 
-    ghoul::toLowerCase(x);
-    ghoul::toLowerCase(y);
-    ghoul::toLowerCase(z);
+    x = ghoul::toLowerCase(x);
+    y = ghoul::toLowerCase(y);
+    z = ghoul::toLowerCase(z);
 
     return { x, y, z };
 }

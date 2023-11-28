@@ -675,7 +675,7 @@ geoPositionForCameraDeprecated(bool useEyePosition = false)
     }
 
     std::string extension = path.extension().string();
-    ghoul::toLowerCase(extension);
+    extension = ghoul::toLowerCase(extension);
 
     if (extension != ".geojson" && extension != ".json") {
         throw ghoul::lua::LuaError(fmt::format(

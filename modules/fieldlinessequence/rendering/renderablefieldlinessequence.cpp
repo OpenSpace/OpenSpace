@@ -412,7 +412,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             [&fileTypeString](const std::string& str) {
                 const size_t extLength = fileTypeString.length();
                 std::string sub = str.substr(str.length() - extLength, extLength);
-                ghoul::toLowerCase(sub);
+                sub = ghoul::toLowerCase(sub);
                 return sub != fileTypeString;
             }
         ),
@@ -566,7 +566,7 @@ void RenderableFieldlinesSequence::initializeGL() {
 
 // Returns fls::Model::Invalid if it fails to extract mandatory information
 fls::Model stringToModel(std::string str) {
-    ghoul::toLowerCase(str);
+    str = ghoul::toLowerCase(str);
     return fls::stringToModel(str);
 }
 

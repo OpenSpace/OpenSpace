@@ -508,11 +508,10 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             const size_t fullLength = _autoCompleteInfo.initialValue.length();
             const bool correctLength = command.length() >= fullLength;
 
-            std::string commandLowerCase = command;
-            ghoul::toLowerCase(commandLowerCase);
+            std::string commandLowerCase = ghoul::toLowerCase(command);
 
-            std::string initialValueLowerCase = _autoCompleteInfo.initialValue;
-            ghoul::toLowerCase(initialValueLowerCase);
+            std::string initialValueLowerCase =
+                ghoul::toLowerCase(_autoCompleteInfo.initialValue);
 
             const bool correctCommand =
                 commandLowerCase.substr(0, fullLength) == initialValueLowerCase;

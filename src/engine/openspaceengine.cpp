@@ -1534,7 +1534,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     lua_setglobal(s, "basename");
 
     std::string extension = file.extension().string();
-    ghoul::toLowerCase(extension);
+    extension = ghoul::toLowerCase(extension);
 
     ghoul::lua::push(s, extension);
     lua_setglobal(s, "extension");

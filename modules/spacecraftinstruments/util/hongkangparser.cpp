@@ -110,7 +110,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
 
 std::string HongKangParser::findPlaybookSpecifiedTarget(std::string line) {
     //remembto add this lua later...
-    ghoul::toUpperCase(line);
+    line = ghoul::toUpperCase(line);
     const std::vector<std::string>& ptarg = _potentialTargets;
     std::string target;
     for (const std::string& p : ptarg) {
