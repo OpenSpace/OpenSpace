@@ -63,7 +63,7 @@ void main() {
 
     if(useSplitRenderMode) {
         // Calculates id for when using split render mode (renderableTrailTrajectory)
-        id = float((floatingOffset + modId + 1)) / float(numberOfUniqueVertices);
+        id = float(floatingOffset + modId) / float(numberOfUniqueVertices - 1);
     }
     else {
         // Account for a potential rolling buffer

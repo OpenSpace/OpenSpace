@@ -333,11 +333,6 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
     // This has to be done every update step;
     const double  j2k = data.time.j2000Seconds();
 
-    // Counts number of vertices in the trail
-    _numberOfUniqueVertices = static_cast<GLsizei>(
-        std::distance(_timeVector.begin(), _timeVector.end())
-    );
-
     if (j2k >= _start && j2k < _end) {
         _replacementPoints.clear();
 
@@ -348,19 +343,26 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 std::lower_bound(_timeVector.begin(), _timeVector.end(), j2k)
             )
         );
-
         
-            // Calculates number of vertices for the second segment (object to end point)
         if (_renderFullTrail) {
+            // Calculates number of vertices for the second segment (object to end point)
             _secondaryRenderInformation.first = _primaryRenderInformation.count;
             _secondaryRenderInformation.count = static_cast<GLsizei>(
                 _vertexArray.size() - (_primaryRenderInformation.count)
+            );
+
+            // Calculate number of vertices in the trail
+            _numberOfUniqueVertices = static_cast<GLsizei>(
+                std::distance(_timeVector.begin(), _timeVector.end())
             );
         }
         else {
             // If we don't render full trail there's no trail after the object
             _secondaryRenderInformation.first = 0;
             _secondaryRenderInformation.count = 0;
+
+            // Set number of vertices in the trail
+            _numberOfUniqueVertices = _primaryRenderInformation.count;
         }
 
         // Determine the number of points to be recalculated
@@ -504,6 +506,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // Renders the whole trail if time has passed the end time
         _primaryRenderInformation.first = 0;
         _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
+        _numberOfUniqueVertices = _primaryRenderInformation.count;
         _secondaryRenderInformation.first = 0;
         _secondaryRenderInformation.count = 0;
         _floatingRenderInformation.first = 0;
