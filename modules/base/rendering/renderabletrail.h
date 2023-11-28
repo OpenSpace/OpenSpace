@@ -170,18 +170,21 @@ protected:
     /// Optional render information that contains information about the last, floating
     /// part of the trail
     RenderInformation _floatingRenderInformation;
+    /// Render information that contains information about trail segments after the
+    /// object point (renderableTrailTrajectory)
+    RenderInformation _secondaryRenderInformation;
 
-    // Optional for accurate rendering of trail when using Render Full Trail Mode
+    /// Flag used to determine if we use a split trail or not during rendering
     bool _splitTrailRenderMode = false;
-    RenderInformation _firstSegRenderInformation;
-    RenderInformation _secondSegRenderInformation;
-    RenderInformation _replacementPointsRenderInformation;
+    /// Number of unique vertices used when rendering segmented trails
+    int _numberOfUniqueVertices = 0;
 
 private:
     void internalRender(bool renderLines, bool renderPoints,
         const RenderData& data,
         const glm::dmat4& modelTransform,
-        RenderInformation& info, int nVertices, int offset);
+        RenderInformation& info, int nVertices, int ringOffset,
+        bool useSplitRenderMode = false, int numberOfUniqueVertices = 0, int floatingOffset = 0);
 
    Appearance _appearance;
 
@@ -194,7 +197,7 @@ private:
 #else
     UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
         vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase, viewport,
-        lineWidth) _uniformCache;
+        lineWidth, useSplitRenderMode, numberOfUniqueVertices, floatingOffset) _uniformCache;
 #endif
 };
 

@@ -110,14 +110,13 @@ private:
     glm::dvec3 _maxVertex;
     glm::dvec3 _minVertex;
 
-
-
-    // Contains all timestamps corresponding to the positions in _vertexArray
+    /// Contains all timestamps corresponding to the positions in _vertexArray
     std::vector<double> _timeVector;
-
+    
+    /// Keeps track of all double precision vertices of trails
     std::vector<TrailVBOLayout<double>> _dVertexArray;
 
-    // Contains all the points that we will render in model-space
+    /// Contains all the points that we will render in model-space
     std::vector<TrailVBOLayout<float>> _replacementPoints;
 };
 

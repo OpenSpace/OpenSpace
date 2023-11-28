@@ -40,16 +40,16 @@
 
 namespace {
 #ifdef __APPLE__
-    constexpr std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 15> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase"
+        "renderPhase", "useSplitRenderMode", "numberOfUniqueVertices", "floatingOffset"
     };
 #else
-    constexpr std::array<const char*, 14> UniformNames = {
+    constexpr std::array<const char*, 17> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase", "viewport", "lineWidth"
+        "renderPhase", "viewport", "lineWidth", "useSplitRenderMode", "numberOfUniqueVertices", "floatingOffset"
     };
 #endif
 
@@ -88,10 +88,13 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineFadeInfo = {
         "LineFade",
-        "Line fade",
-        "The fading factor that is applied to the trail if the 'EnableFade' value is "
-        "'true'. If it is 'false', this setting has no effect. The higher the number, "
-        "the less fading is applied",
+        "Line fade break point",
+        "The fading offset that is applied to the trail if the 'EnableFade' value is "
+        "'true'. If it is 'false', this setting has no effect. "
+        "Value of 1 means that fading will be applied from first to last point "
+        "of the trail while a value of 0.5 means that fading will be applied from "
+        "the first point to the mid point and everything after that "
+        "will be fully opaque.",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
@@ -173,7 +176,7 @@ RenderableTrail::Appearance::Appearance()
     })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
-    , lineFade(LineFadeInfo, 1.f, 0.f, 30.f)
+    , lineFade(LineFadeInfo, 1.f, 0.f, 1.f)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
@@ -284,7 +287,8 @@ bool RenderableTrail::isReady() const {
 void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
                                      const RenderData& data,
                                      const glm::dmat4& modelTransform,
-                                     RenderInformation& info, int nVertices, int offset)
+                                     RenderInformation& info, int nVertices, int ringOffset,
+                                     bool useSplitRenderMode, int numberOfUniqueVertices, int floatingOffset)
 {
     ZoneScoped;
 
@@ -312,9 +316,12 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     // This value is subtracted from the vertex id in the case of a potential ring
     // buffer (as used in RenderableTrailOrbit) to keep the first vertex at its
     // brightest
-    _programObject->setUniform(_uniformCache.idOffset, offset);
+    _programObject->setUniform(_uniformCache.idOffset, ringOffset);
 
     _programObject->setUniform(_uniformCache.nVertices, nVertices);
+    _programObject->setUniform(_uniformCache.useSplitRenderMode, useSplitRenderMode);
+    _programObject->setUniform(_uniformCache.numberOfUniqueVertices, numberOfUniqueVertices);
+    _programObject->setUniform(_uniformCache.floatingOffset, floatingOffset);
 
 #if !defined(__APPLE__)
     GLint viewport[4];
@@ -449,36 +456,48 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     //    return;
     //}
     
-    // Splits the trail up into three parts for more accurate rendering
     if (_splitTrailRenderMode) {
-        internalRender(
-            renderLines,
-            renderPoints,
-            data,
-            modelTransform,
-            _firstSegRenderInformation,
-            _firstSegRenderInformation.count,
-            _firstSegRenderInformation.first
-        );
+        // Splits the trail up into three parts for more accurate rendering
+        // of renderableTrailTrajectory trails
 
         internalRender(
             renderLines,
             renderPoints,
             data,
             modelTransform,
-            _replacementPointsRenderInformation,
-            _replacementPointsRenderInformation.count,
-            _replacementPointsRenderInformation.first
+            _primaryRenderInformation,
+            _primaryRenderInformation.count,
+            _primaryRenderInformation.first,
+            _splitTrailRenderMode,
+            _numberOfUniqueVertices
         );
 
+        int floatingOffset = _primaryRenderInformation.count - 1;
         internalRender(
             renderLines,
             renderPoints,
             data,
             modelTransform,
-            _secondSegRenderInformation,
-            _secondSegRenderInformation.count,
-            _secondSegRenderInformation.first
+            _floatingRenderInformation,
+            _floatingRenderInformation.count,
+            _floatingRenderInformation.first,
+            _splitTrailRenderMode,
+            _numberOfUniqueVertices,
+            floatingOffset
+        );
+
+        int offset = (_floatingRenderInformation.count > 0) ? 1 : 0;
+        internalRender(
+            renderLines,
+            renderPoints,
+            data,
+            modelTransform,
+            _secondaryRenderInformation,
+            _secondaryRenderInformation.count,
+            _secondaryRenderInformation.first,
+            _splitTrailRenderMode,
+            _numberOfUniqueVertices,
+            offset
         );
     }
     else {
@@ -507,6 +526,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             );
         }
     }
+    
 
     
 
