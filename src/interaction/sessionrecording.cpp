@@ -2599,6 +2599,120 @@ std::string SessionRecording::determineConversionOutFilename(const std::string& 
     return filenameSansExtension + fileExtension;
 }
 
+void SessionRecording::binary2ascii(const std::string& filename) {
+    std::string path = absPath("${RECORDINGS}/" + filename).string();
+    std::ifstream infile;
+    std::stringstream instream;
+
+    try {
+        readFileIntoStringStream(path, infile, instream);
+        DataMode mode;
+        std::string fileVersion;
+        readPlaybackHeader_stream(
+            instream,
+            fileVersion,
+            mode
+        );
+
+        if (mode == DataMode::Unknown) {
+            LERROR("Unknown data mode for infile.");
+        }
+        else if (mode == DataMode::Ascii) {
+            LWARNING(fmt::format("{} is already in ascii format...", filename));
+            return;
+        }
+
+        std::string out = filename.substr(0, filename.find_last_of(".")) + FileExtensionAscii;
+        path = absPath("${RECORDINGS}/" + out).string();
+        std::ofstream outfile(path);
+        if (!outfile.is_open() || !outfile.good()) {
+            LERROR(fmt::format("Failed to open {} for writing.", path));
+        }
+
+        outfile << FileHeaderTitle << FileHeaderVersion << DataFormatAsciiTag << "\n";
+
+        bool ok = true;
+        while (ok) {
+            unsigned char frame = readFromPlayback<unsigned char>(instream);
+            if (!instream) {
+                break;
+            }
+
+            std::string line;
+            Timestamps ts;
+            if (frame == HeaderCameraBinary) {
+                datamessagestructures::CameraKeyframe ckf;
+                ok = readSingleKeyframeCamera(
+                    ckf,
+                    ts,
+                    DataMode::Binary,
+                    reinterpret_cast<std::ifstream&>(instream),
+                    line,
+                    -1
+                );
+                if (ok) {
+                    saveSingleKeyframeCamera(
+                        ckf,
+                        ts,
+                        DataMode::Ascii,
+                        outfile,
+                        _keyframeBuffer
+                    );
+                }
+            }
+            else if (frame == HeaderTimeBinary) {
+                datamessagestructures::TimeKeyframe tkf;
+                ok = readSingleKeyframeTime(
+                    tkf,
+                    ts,
+                    DataMode::Binary,
+                    reinterpret_cast<std::ifstream&>(instream),
+                    line,
+                    -1
+                );
+                if (ok) {
+                    saveSingleKeyframeTime(
+                        tkf,
+                        ts,
+                        DataMode::Ascii,
+                        outfile,
+                        _keyframeBuffer
+                    );
+                }
+            }
+            else if (frame == HeaderScriptBinary) {
+                datamessagestructures::ScriptMessage skf;
+                ok = readSingleKeyframeScript(
+                    skf,
+                    ts,
+                    DataMode::Binary,
+                    reinterpret_cast<std::ifstream&>(instream),
+                    line,
+                    -1
+                );
+                if (ok) {
+                    saveSingleKeyframeScript(
+                        skf,
+                        ts,
+                        DataMode::Ascii,
+                        outfile,
+                        _keyframeBuffer
+                    );
+                }
+            }
+            else {
+                LERROR(fmt::format("Unknown frame type {}", frame));
+                ok = false;
+            }
+        }
+
+        LINFO(fmt::format("{} converted to ascii format and saved to {}", filename, out));
+    }
+    catch (std::exception& ex) {
+        LERROR(ex.what());
+    }
+}
+
 bool SessionRecording_legacy_0085::convertScript(std::stringstream& inStream,
                                                  DataMode mode, int lineNum,
                                                  std::string& inputLine,
@@ -2641,6 +2755,7 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             codegen::lua::TogglePlaybackPause,
             codegen::lua::IsPlayingBack,
             codegen::lua::IsRecording
+            codegen::lua::Binary2ascii
         }
     };
 }

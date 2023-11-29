@@ -207,6 +207,13 @@ namespace {
     return openspace::global::sessionRecording->isRecording();
 }
 
+[[codegen::luawrap]] void binary2ascii(std::string fp) {
+    if (fp.empty()) {
+        throw ghoul::lua::LuaError("Path string must not be empty");
+    }
+    openspace::global::sessionRecording->binary2ascii(fp);
+}
+
 #include "sessionrecording_lua_codegen.cpp"
 
 } // namespace

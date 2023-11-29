@@ -593,6 +593,8 @@ public:
     std::string determineConversionOutFilename(const std::string& filename,
         DataMode mode);
 
+    void binary2ascii(const std::string& filename);
+
 protected:
     properties::BoolProperty _renderPlaybackInformation;
     properties::BoolProperty _ignoreRecordedScale;
