@@ -163,7 +163,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
                 for (std::string_view k : dict.keys()) {
                     v.push_back(dict.value<std::string>(k));
                 }
-                list.set(v);
+                list = v;
             }
         };
 

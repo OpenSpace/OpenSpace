@@ -32,7 +32,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 
 namespace {

@@ -28,7 +28,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <vector>
 
@@ -43,12 +43,7 @@ KeyWithModifier stringToKey(std::string str) {
 
     std::vector<std::string> originalTokens = tokens;
     for (std::string& t : tokens) {
-        std::transform(
-            t.begin(), t.end(),
-            t.begin(),
-            [](char v) { return static_cast<char>(toupper(v)); }
-        );
-
+        t = ghoul::toUpperCase(t);
     }
 
     // default is unknown

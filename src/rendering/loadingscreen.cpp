@@ -523,10 +523,11 @@ void LoadingScreen::renderLogMessages() const {
     size_t row = 0;
     for (auto& [level, amount] : numberOfErrorsPerLevel) {
         const std::string text = fmt::format("{}: {}", ghoul::to_string(level), amount);
+        glm::vec2 bbox = _logFont->boundingBox(text);
         renderer.render(
             *_logFont,
             glm::vec2(
-                res.x - 0.07 * res.x,
+                res.x - bbox.x - 10,
                 10 + _logFont->pointSize() * row * 2
             ),
             text,

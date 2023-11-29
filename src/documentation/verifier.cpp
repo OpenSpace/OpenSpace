@@ -25,7 +25,7 @@
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/documentation/documentationengine.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <filesystem>
 #include <iomanip>

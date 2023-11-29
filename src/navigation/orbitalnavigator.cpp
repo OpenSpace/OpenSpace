@@ -1089,8 +1089,8 @@ void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode,
 }
 
 void OrbitalNavigator::setFocusNode(const std::string& focusNode, bool) {
-    _anchor.set(focusNode);
-    _aim.set(std::string(""));
+    _anchor = focusNode;
+    _aim = std::string("");
 }
 
 void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
@@ -1128,11 +1128,11 @@ void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {
 }
 
 void OrbitalNavigator::setAnchorNode(const std::string& anchorNode) {
-    _anchor.set(anchorNode);
+    _anchor = anchorNode;
 }
 
 void OrbitalNavigator::setAimNode(const std::string& aimNode) {
-    _aim.set(aimNode);
+    _aim = aimNode;
 }
 
 void OrbitalNavigator::updatePreviousAnchorState() {
