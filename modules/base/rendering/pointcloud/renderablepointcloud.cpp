@@ -134,8 +134,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeMappingOptionInfo = {
         "Parameter",
         "Parameter Option",
-        "This value determines which paramenter (datavar) is used for scaling of the "
-        "point", // @TODO: Clarify how it's applied
+        "This value determines which parameter is used for scaling of the point. The "
+        "parameter value will be used as a miltiplicative factor to scale the size of "
+        "the points. Not that they may however still be scaled by pixel size adjustment "
+        "effects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -192,9 +194,17 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // A RenderablePointCloud can be used to render point-based datasets in 3D space,
+    // optionally including color mapping, a sprite texture and labels.
+    //
+    // There are a lot of properties that affect the visuals of the points, such as
+    // a scale,.... @TODO: Elaborate
+    //
+    // See example files in data/assets/examples/pointcloud for some concrete examples of
+    // point clouds with different settings.
     struct [[codegen::Dictionary(RenderablePointCloud)]] Parameters {
-        // The path to the SPECK file that contains information about the astronomical
-        // object being rendered
+        // The path to the data file that contains information about the point to be
+        // rendered. Can be either a CSV or SPECK file
         std::optional<std::string> file;
 
         // A dictionary specifying details on how to load the dataset
@@ -229,7 +239,7 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
-        // The unit used for all distances. Must match the unit of any
+        // The unit used for all distances. Should match the unit of any
         // distances/positions in the data files
         std::optional<Unit> unit;
 
@@ -262,7 +272,7 @@ namespace {
             // [[codegen::verbatim(PointColorInfo.description)]]
             std::optional<glm::vec3> fixedColor [[codegen::color()]];
 
-            // Settings related to the choice of color map, parameters, et. cetera
+            // Settings related to the choice of color map, parameters, etc
             std::optional<ghoul::Dictionary> colorMapping
                 [[codegen::reference("colormappingcomponent")]];
         };
@@ -270,7 +280,7 @@ namespace {
         // color map, etc.
         std::optional<ColorSettings> coloring;
 
-        // Transformation matrix to be applied to each astronomical object
+        // Transformation matrix to be applied to each object
         std::optional<glm::dmat4x4> transformationMatrix;
 
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]
