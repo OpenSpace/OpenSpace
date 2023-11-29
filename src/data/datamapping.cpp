@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <string_view>
 
 namespace {
@@ -60,8 +60,8 @@ namespace {
 
         // Per default, allow both lower case and upper case versions of column names
         if (!mapping.has_value() || !(*mapping).isCaseSensitive) {
-            ghoul::toLowerCase(column);
-            ghoul::toLowerCase(testColumn);
+            column = ghoul::toLowerCase(column);
+            testColumn = ghoul::toLowerCase(testColumn);
         }
 
         return testColumn == column;
