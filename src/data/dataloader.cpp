@@ -106,6 +106,11 @@ namespace {
             LINFOC("DataLoader", "Saving cache");
             saveCacheFunction(dataset, cached);
         }
+
+        if (specs.has_value() && !(*specs).excludeColumns.empty()) {
+            // Drop the columns that should be excluded
+        }
+
         return dataset;
     }
 } // namespace

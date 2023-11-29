@@ -32,6 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
+#include <algorithm>
 #include <cmath>
 #include <cctype>
 #include <fstream>
@@ -83,6 +84,12 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     int zColumn = -1;
 
     int nDataColumns = 0;
+    bool hasExcludeColumns = specs.has_value() && (*specs).hasExcludeColumns();
+    std::vector<size_t> skipColumns;
+    if (hasExcludeColumns) {
+        skipColumns.reserve((*specs).excludeColumns.size());
+    }
+
     for (size_t i = 0; i < columns.size(); ++i) {
         const std::string& col = columns[i];
 
@@ -94,6 +101,10 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         }
         else if (isColumnZ(col, specs)) {
             zColumn = static_cast<int>(i);
+        }
+        else if (hasExcludeColumns && (*specs).isExcludeColumn(col)) {
+            skipColumns.push_back(i);
+            continue;
         }
         else {
             res.variables.push_back({
@@ -119,6 +130,14 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         entry.data.reserve(nDataColumns);
 
         for (size_t i = 0; i < row.size(); ++i) {
+            if (hasExcludeColumns) {
+                // Check if column should be exluded. Note that list of indices is sorted
+                // so we can do a binary search
+                if (std::binary_search(skipColumns.begin(), skipColumns.end(), i)) {
+                    continue;
+                }
+            }
+
             const std::string& strValue = row[i];
 
             // For now, all values are converted to float

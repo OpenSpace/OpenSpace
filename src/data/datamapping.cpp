@@ -25,6 +25,7 @@
 #include <openspace/data/datamapping.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/misc/crc32.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
 #include <string_view>
@@ -67,8 +68,6 @@ namespace {
         return testColumn == column;
     }
 
-    // @TODO (2023-11-21, emmbr) Line breaks are not reflected in generated documentation
-
     // This is a data mapping structure that can be used when creating point cloud
     // datasets, e.g. from a CSV or Speck file.
     //
@@ -94,6 +93,10 @@ namespace {
         // value', i.e. a missing data value. Note that the same value is used across all
         // data columns
         std::optional<float> missingDataValue;
+
+        // A list of column names, of columns that will not be loaded into the dataset.
+        // Note that not all data formats support this. E.g. SPECK files do not.
+        std::optional<std::vector<std::string>> excludeColumns;
     };
 #include "datamapping_codegen.cpp"
 }
@@ -126,17 +129,37 @@ DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionar
         result.isCaseSensitive = *p.caseSensitive;
     }
 
+    if (p.excludeColumns.has_value()) {
+        result.excludeColumns = *p.excludeColumns;
+    }
+
     return result;
 }
 
+bool DataMapping::hasExcludeColumns() const {
+    return !excludeColumns.empty();
+}
+
+bool DataMapping::isExcludeColumn(std::string_view c) const {
+    auto found = std::find(excludeColumns.begin(), excludeColumns.end(), c);
+    return (found != excludeColumns.end());
+}
+
 std::string generateHashString(const DataMapping& dm) {
+    std::string a;
+    for (std::string_view c : dm.excludeColumns) {
+        a += c;
+    }
+    unsigned int excludeColumnsHash = ghoul::hashCRC32(a);
+
     return fmt::format(
-        "DMx{}y{}z{}{}{}",
+        "DM|x{}|y{}|z{}|m{}|{}|{}",
         dm.xColumnName.value_or(""),
         dm.yColumnName.value_or(""),
         dm.zColumnName.value_or(""),
         dm.missingDataValue.has_value() ? ghoul::to_string(*dm.missingDataValue) : "",
-        dm.isCaseSensitive ? "1" : "0"
+        dm.isCaseSensitive ? "1" : "0",
+        excludeColumnsHash
     );
 }
 

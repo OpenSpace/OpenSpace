@@ -27,6 +27,7 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace openspace::documentation { struct Documentation; }
 namespace ghoul { class Dictionary; }
@@ -37,16 +38,18 @@ struct DataMapping {
     static DataMapping createFromDictionary(const ghoul::Dictionary& dictionary);
     static documentation::Documentation Documentation();
 
+    bool hasExcludeColumns() const;
+    bool isExcludeColumn(std::string_view x) const;
+
     std::optional<std::string> xColumnName;
     std::optional<std::string> yColumnName;
     std::optional<std::string> zColumnName;
 
     std::optional<float> missingDataValue;
 
-    // TODO: RA DEC DISTANCE
-    // TODO: point index column
-
     bool isCaseSensitive = false;
+
+    std::vector<std::string> excludeColumns;
 
     // OBS! When new parameters are added they should be included in the generateHash
     // function
