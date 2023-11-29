@@ -32,7 +32,7 @@
 
 namespace {
 
-    // The base class of all tasks. Specify the Type property to create on of the
+    // The base class of all tasks. Specify the Type property to create one of the
     // available task types. This property should be included in the same table object
     // as the properties of the specific task.
     //

@@ -62,7 +62,7 @@ namespace {
     // For 'Node' paths it is also possible to specify whether the target camera state
     // at the end of the flight should take the up direction of the target node into
     // account. Note that for this to give an effect on the path, rolling motions have
-    // to be enabled
+    // to be enabled.
     struct [[codegen::Dictionary(PathInstruction)]] Parameters {
         // The type of the instruction. Decides what other parameters are
         // handled/available
