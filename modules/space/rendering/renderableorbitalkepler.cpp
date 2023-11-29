@@ -174,8 +174,9 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addProperty(_segmentQuality);
 
     _appearance.lineColor = p.color;
-    _appearance.lineFade = p.trailFade.value_or(20.f);
+    _appearance.lineFade = p.trailFade.value_or(1.f);
     _appearance.lineWidth = p.lineWidth.value_or(2.f);
+    _appearance.useLineFade = true;
     addPropertySubOwner(_appearance);
 
     _path = p.path.string();
@@ -230,6 +231,7 @@ void RenderableOrbitalKepler::initializeGL() {
 
     _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
     _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
+    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
     _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     _uniformCache.inGameTime = _programObject->uniformLocation("inGameTime");
     _uniformCache.color = _programObject->uniformLocation("color");
@@ -273,12 +275,10 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.modelView, calcModelViewTransform(data));
 
-    // Because we want the property to work similar to the planet trails
-    const float fade = pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.f);
-
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.lineFade, fade);
+    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
 
     glLineWidth(_appearance.lineWidth);
 

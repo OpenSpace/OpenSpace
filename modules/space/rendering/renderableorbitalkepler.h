@@ -86,8 +86,8 @@ private:
     kepler::Format _format;
     RenderableTrail::Appearance _appearance;
 
-    UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
-        numberOfSegments) _uniformCache;
+    UniformCache(modelView, projection, useLineFade, lineFade, inGameTime, color,
+        opacity) _uniformCache;
 };
 
 } // namespace openspace
