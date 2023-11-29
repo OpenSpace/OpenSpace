@@ -194,6 +194,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo NumShownDataPointsInfo = {
+        "NumberOfDataPoints",
+        "Number of Shown Data Points (Read Only)",
+        "This read only property includes information about how many points are being "
+        "rendered.",
+        openspace::properties::Property::Visibility::User
+    };
+
     // A RenderablePointCloud can be used to render point-based datasets in 3D space,
     // optionally including color mapping, a sprite texture and labels.
     //
@@ -384,6 +392,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _fadeInDistanceEnabled(EnableDistanceFadeInfo, false)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _nDataPoints(NumShownDataPointsInfo, 0)
     , _sizeSettings(dictionary)
     , _colorSettings(dictionary)
 {
@@ -482,7 +491,11 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     if (_hasDataFile) {
         _dataset = dataloader::data::loadFileWithCache(_dataFile, _dataMapping);
+        _nDataPoints = _dataset.entries.size();
     }
+
+    _nDataPoints.setReadOnly(true);
+    addProperty(_nDataPoints);
 }
 
 bool RenderablePointCloud::isReady() const {

@@ -32,6 +32,7 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -131,6 +132,8 @@ protected:
     properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _fadeInDistanceEnabled;
     properties::OptionProperty _renderOption;
+
+    properties::UIntProperty _nDataPoints;
 
     ghoul::opengl::Texture* _spriteTexture = nullptr;
     ghoul::opengl::ProgramObject* _program = nullptr;
