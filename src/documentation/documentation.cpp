@@ -189,20 +189,6 @@ DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
                          std::move(doc))
 {}
 
-Documentation::Documentation(std::string n, std::string i, DocumentationEntries ents)
-    : name(std::move(n))
-    , id(std::move(i))
-    , entries(std::move(ents))
-{}
-
-Documentation::Documentation(std::string n, DocumentationEntries ents)
-    : Documentation(std::move(n), "", std::move(ents))
-{}
-
-Documentation::Documentation(DocumentationEntries ents)
-    : Documentation("", "", std::move(ents))
-{}
-
 TestResult testSpecification(const Documentation& documentation,
                              const ghoul::Dictionary& dictionary)
 {

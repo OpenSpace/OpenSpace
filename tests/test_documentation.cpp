@@ -277,8 +277,8 @@ TEST_CASE("Documentation: Constructor", "[documentation]") {
 TEST_CASE("Documentation: Initializer Constructor", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {
+    Documentation doc = {
+        .entries = {
             // Basic Verifiers
             {"BoolVerifier", new BoolVerifier, Optional::No },
             {"DoubleVerifier", new DoubleVerifier, Optional::No },
@@ -344,8 +344,10 @@ TEST_CASE("Documentation: Initializer Constructor", "[documentation]") {
 TEST_CASE("Documentation: BoolVerifier", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Bool", new BoolVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Bool", new BoolVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -376,8 +378,10 @@ TEST_CASE("Documentation: BoolVerifier", "[documentation]") {
 TEST_CASE("Documentation: DoubleVerifier", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double", new DoubleVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Double", new DoubleVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -407,8 +411,10 @@ TEST_CASE("Documentation: DoubleVerifier", "[documentation]") {
 TEST_CASE("Documentation: IntVerifier", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new IntVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Int", new IntVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -444,8 +450,10 @@ TEST_CASE("Documentation: StringVerifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        {{ "String", new StringVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "String", new StringVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -475,8 +483,10 @@ TEST_CASE("Documentation: IdentifierVerifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc{
-        {{ "Identifier", new IdentifierVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Identifier", new IdentifierVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -538,8 +548,10 @@ TEST_CASE("Documentation: FileVerifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        {{ "File", new FileVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "File", new FileVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -577,8 +589,10 @@ TEST_CASE("Documentation: DirectoryVerifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc{
-        {{ "Dir", new DirectoryVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Dir", new DirectoryVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -616,8 +630,10 @@ TEST_CASE("Documentation: DateTimeVerifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc{
-        {{ "DateTime", new DateTimeVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "DateTime", new DateTimeVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -654,8 +670,10 @@ TEST_CASE("Documentation: DateTimeVerifier", "[documentation]") {
 TEST_CASE("Documentation: TableVerifierType", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Table", new TableVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Table", new TableVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -685,8 +703,10 @@ TEST_CASE("Documentation: StringListVerifierType", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "StringList", new StringListVerifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "StringList", new StringListVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -737,8 +757,10 @@ TEST_CASE("Documentation: IntListVerifierType", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "IntList", new IntListVerifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "IntList", new IntListVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -788,8 +810,8 @@ TEST_CASE("Documentation: MixedVerifiers", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        {
+    Documentation doc = {
+        .entries = {
             { "Bool", new BoolVerifier, Optional::No },
             { "Double", new DoubleVerifier, Optional::No },
             { "Int", new IntVerifier, Optional::No },
@@ -839,8 +861,8 @@ TEST_CASE("Documentation: NestedTables", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        {
+    Documentation doc = {
+        .entries = {
             { "Outer_Int", new IntVerifier, Optional::No },
             { "Outer_Table", new TableVerifier({
                 { "Inner_Double", new DoubleVerifier, Optional::No },
@@ -1018,8 +1040,8 @@ TEST_CASE("Documentation: NestedTables", "[documentation]") {
 TEST_CASE("Documentation: Optional", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {
+    Documentation doc = {
+        .entries = {
             { "Bool_Force", new BoolVerifier, Optional::No },
             { "Bool_Optional", new BoolVerifier, Optional::Yes }
         }
@@ -1066,23 +1088,25 @@ TEST_CASE("Documentation: Optional", "[documentation]") {
 TEST_CASE("Documentation: Required In Optional", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{
-            "a",
-            new TableVerifier({
-                {
-                    "b",
-                    new IntVerifier,
-                    Optional::No
-                },
-                {
-                    "c",
-                    new IntVerifier,
-                    Optional::Yes
-                }
-            }),
-            Optional::Yes
-        }}
+    Documentation doc = {
+        .entries = {
+            {
+                "a",
+                new TableVerifier({
+                    {
+                        "b",
+                        new IntVerifier,
+                        Optional::No
+                    },
+                    {
+                        "c",
+                        new IntVerifier,
+                        Optional::Yes
+                    }
+                }),
+                Optional::Yes
+            }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -1127,8 +1151,10 @@ TEST_CASE("Documentation: Required In Optional", "[documentation]") {
 TEST_CASE("Documentation: Exhaustive", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new IntVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Int", new IntVerifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -1157,11 +1183,14 @@ TEST_CASE("Documentation: Exhaustive", "[documentation]") {
 TEST_CASE("Documentation: Nested Exhaustive", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Table", new TableVerifier(
-            { { "a", new IntVerifier, Optional::No } }
-        ), Optional::No
-        }}
+    Documentation doc = {
+        .entries = {
+            {
+                "Table",
+                new TableVerifier({ { "a", new IntVerifier, Optional::No } }),
+                Optional::No
+            }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -1207,12 +1236,10 @@ TEST_CASE("Documentation: Empty Entries Non Exhaustive", "[documentation]") {
 TEST_CASE("Documentation: Empty Nested Exhaustive", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{
-            "Table",
-            new TableVerifier(),
-            Optional::No,
-        }}
+    Documentation doc = {
+        .entries = {
+            { "Table", new TableVerifier(), Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -1235,8 +1262,10 @@ TEST_CASE("Documentation: Empty Nested Exhaustive", "[documentation]") {
 TEST_CASE("Documentation: Less Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new IntLessVerifier(5), Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Int", new IntLessVerifier(5), Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -1257,8 +1286,8 @@ TEST_CASE("Documentation: Less Int", "[documentation]") {
 TEST_CASE("Documentation: Less Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double", new DoubleLessVerifier(5.0), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Double", new DoubleLessVerifier(5.0), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1279,8 +1308,8 @@ TEST_CASE("Documentation: Less Double", "[documentation]") {
 TEST_CASE("Documentation: LessEqual Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new IntLessEqualVerifier(5), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Int", new IntLessEqualVerifier(5), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1307,8 +1336,8 @@ TEST_CASE("Documentation: LessEqual Int", "[documentation]") {
 TEST_CASE("Documentation: LessEqual Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double", new DoubleLessEqualVerifier(5.0), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Double", new DoubleLessEqualVerifier(5.0), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1335,8 +1364,8 @@ TEST_CASE("Documentation: LessEqual Double", "[documentation]") {
 TEST_CASE("Documentation: Greater Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new IntGreaterVerifier(5), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Int", new IntGreaterVerifier(5), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1357,8 +1386,8 @@ TEST_CASE("Documentation: Greater Int", "[documentation]") {
 TEST_CASE("Documentation: Greater Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double", new DoubleGreaterVerifier(5.0), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Double", new DoubleGreaterVerifier(5.0), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1379,8 +1408,8 @@ TEST_CASE("Documentation: Greater Double", "[documentation]") {
 TEST_CASE("Documentation: GreaterEqual Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new IntGreaterEqualVerifier(5), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Int", new IntGreaterEqualVerifier(5), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1407,8 +1436,8 @@ TEST_CASE("Documentation: GreaterEqual Int", "[documentation]") {
 TEST_CASE("Documentation: GreaterEqual Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double", new DoubleGreaterEqualVerifier(5.0), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Double", new DoubleGreaterEqualVerifier(5.0), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1435,8 +1464,8 @@ TEST_CASE("Documentation: GreaterEqual Double", "[documentation]") {
 TEST_CASE("Documentation: Equal Bool", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Bool", new BoolEqualVerifier(true), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Bool", new BoolEqualVerifier(true), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1457,8 +1486,8 @@ TEST_CASE("Documentation: Equal Bool", "[documentation]") {
 TEST_CASE("Documentation: Equal Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new IntEqualVerifier(1), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Int", new IntEqualVerifier(1), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1479,8 +1508,8 @@ TEST_CASE("Documentation: Equal Int", "[documentation]") {
 TEST_CASE("Documentation: Equal Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double", new DoubleEqualVerifier(1.0), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Double", new DoubleEqualVerifier(1.0), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1502,8 +1531,8 @@ TEST_CASE("Documentation: Equal String", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        {{ "String", new StringEqualVerifier("string"s), Optional::No }}
+    Documentation doc = {
+        .entries = { { "String", new StringEqualVerifier("string"s), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1524,8 +1553,8 @@ TEST_CASE("Documentation: Equal String", "[documentation]") {
 TEST_CASE("Documentation: Unequal Bool", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Bool", new BoolUnequalVerifier(true), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Bool", new BoolUnequalVerifier(true), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1546,8 +1575,8 @@ TEST_CASE("Documentation: Unequal Bool", "[documentation]") {
 TEST_CASE("Documentation: Unequal Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new IntUnequalVerifier(1), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Int", new IntUnequalVerifier(1), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1568,8 +1597,8 @@ TEST_CASE("Documentation: Unequal Int", "[documentation]") {
 TEST_CASE("Documentation: Unequal Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double", new DoubleUnequalVerifier(1.0), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Double", new DoubleUnequalVerifier(1.0), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1591,8 +1620,8 @@ TEST_CASE("Documentation: Unequal String", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        {{ "String", new StringUnequalVerifier("string"s), Optional::No }}
+    Documentation doc = {
+        .entries = { { "String", new StringUnequalVerifier("string"s), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1613,8 +1642,8 @@ TEST_CASE("Documentation: Unequal String", "[documentation]") {
 TEST_CASE("Documentation: List Bool", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Bool" , new BoolInListVerifier({ true }), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Bool" , new BoolInListVerifier({ true }), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1635,8 +1664,8 @@ TEST_CASE("Documentation: List Bool", "[documentation]") {
 TEST_CASE("Documentation: List Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int" , new IntInListVerifier({ 0, 1, 2 }), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Int" , new IntInListVerifier({ 0, 1, 2 }), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1663,8 +1692,10 @@ TEST_CASE("Documentation: List Int", "[documentation]") {
 TEST_CASE("Documentation: List Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double" , new DoubleInListVerifier({ 0.0, 1.0, 2.0 }), Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Double" , new DoubleInListVerifier({ 0.0, 1.0, 2.0 }), Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -1692,8 +1723,10 @@ TEST_CASE("Documentation: List String", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        {{ "String" , new StringInListVerifier({ "0"s, "1"s, "2"s }), Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "String" , new StringInListVerifier({ "0"s, "1"s, "2"s }), Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -1720,8 +1753,8 @@ TEST_CASE("Documentation: List String", "[documentation]") {
 TEST_CASE("Documentation: NotList Bool", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Bool" , new BoolNotInListVerifier({ true }), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Bool" , new BoolNotInListVerifier({ true }), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1742,8 +1775,8 @@ TEST_CASE("Documentation: NotList Bool", "[documentation]") {
 TEST_CASE("Documentation: NotList Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int" , new IntNotInListVerifier({ 0, 1, 2 }), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Int" , new IntNotInListVerifier({ 0, 1, 2 }), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1770,8 +1803,10 @@ TEST_CASE("Documentation: NotList Int", "[documentation]") {
 TEST_CASE("Documentation: NotList Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double" , new DoubleNotInListVerifier({ 0.0, 1.0, 2.0 }), Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Double" , new DoubleNotInListVerifier({ 0.0, 1.0, 2.0 }), Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -1799,8 +1834,10 @@ TEST_CASE("Documentation: NotList String", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        {{ "String" , new StringNotInListVerifier({ "0"s, "1"s, "2"s }), Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "String" , new StringNotInListVerifier({ "0"s, "1"s, "2"s }), Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -1827,8 +1864,8 @@ TEST_CASE("Documentation: NotList String", "[documentation]") {
 TEST_CASE("Documentation: Annotation Bool", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Bool", new BoolAnnotationVerifier("Bool"), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Bool", new BoolAnnotationVerifier("Bool"), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1849,8 +1886,8 @@ TEST_CASE("Documentation: Annotation Bool", "[documentation]") {
 TEST_CASE("Documentation: Annotation Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new IntAnnotationVerifier("Int"), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Int", new IntAnnotationVerifier("Int"), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1871,8 +1908,8 @@ TEST_CASE("Documentation: Annotation Int", "[documentation]") {
 TEST_CASE("Documentation: Annotation Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double", new DoubleAnnotationVerifier("Double"), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Double", new DoubleAnnotationVerifier("Double"), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1894,8 +1931,8 @@ TEST_CASE("Documentation: Annotation String", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        {{ "String", new StringAnnotationVerifier("String"), Optional::No }}
+    Documentation doc = {
+        .entries = { { "String", new StringAnnotationVerifier("String"), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1916,8 +1953,8 @@ TEST_CASE("Documentation: Annotation String", "[documentation]") {
 TEST_CASE("Documentation: Annotation Table", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Table", new TableAnnotationVerifier("Table"), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Table", new TableAnnotationVerifier("Table"), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1938,8 +1975,8 @@ TEST_CASE("Documentation: Annotation Table", "[documentation]") {
 TEST_CASE("Documentation: InRange Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new InRangeVerifier<IntVerifier>(0, 5), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Int", new InRangeVerifier<IntVerifier>(0, 5), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -1972,8 +2009,10 @@ TEST_CASE("Documentation: InRange Int", "[documentation]") {
 TEST_CASE("Documentation: InRange Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double", new InRangeVerifier<DoubleVerifier>(0.0, 5.0), Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Double", new InRangeVerifier<DoubleVerifier>(0.0, 5.0), Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2012,8 +2051,8 @@ TEST_CASE("Documentation: InRange Double", "[documentation]") {
 TEST_CASE("Documentation: NotInRange Int", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Int", new NotInRangeVerifier<IntVerifier>(0, 5), Optional::No }}
+    Documentation doc = {
+        .entries = { { "Int", new NotInRangeVerifier<IntVerifier>(0, 5), Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -2056,8 +2095,10 @@ TEST_CASE("Documentation: NotInRange Int", "[documentation]") {
 TEST_CASE("Documentation: NotInRange Double", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ "Double", new NotInRangeVerifier<DoubleVerifier>(0.0, 5.0), Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "Double", new NotInRangeVerifier<DoubleVerifier>(0.0, 5.0), Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2100,8 +2141,8 @@ TEST_CASE("Documentation: NotInRange Double", "[documentation]") {
 TEST_CASE("Documentation: Wildcard", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {{ DocumentationEntry::Wildcard, new IntVerifier, Optional::No }}
+    Documentation doc = {
+        .entries = { { DocumentationEntry::Wildcard, new IntVerifier, Optional::No } }
     };
 
     ghoul::Dictionary positive;
@@ -2152,9 +2193,9 @@ TEST_CASE("Documentation: Wildcard", "[documentation]") {
 TEST_CASE("Documentation: Wildcard Mixed", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        {
-            { DocumentationEntry::Wildcard, new IntVerifier, Optional::No},
+    Documentation doc = {
+        .entries = {
+            { DocumentationEntry::Wildcard, new IntVerifier, Optional::No },
             { "b", new IntGreaterVerifier(5), Optional::No }
         }
     };
@@ -2221,9 +2262,10 @@ TEST_CASE("Documentation: Wildcard Mixed", "[documentation]") {
 TEST_CASE("Documentation: Referencing", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation referenced {
+    Documentation referenced = {
         "Referenced Name",
         "referenced_id",
+        "",
         {
             { "a", new IntVerifier, Optional::No },
             { "b", new DoubleVerifier, Optional::No }
@@ -2231,9 +2273,11 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
     };
     DocEng.addDocumentation(referenced);
 
-    Documentation doc {{
-        { "Table", new ReferencingVerifier("referenced_id"), Optional::No }
-    }};
+    Documentation doc = {
+        .entries = {
+            { "Table", new ReferencingVerifier("referenced_id"), Optional::No }
+        }
+    };
 
     ghoul::Dictionary positive;
     {
@@ -2268,9 +2312,11 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
     CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
 
-    Documentation wrongDoc {{
-        { "Table", new ReferencingVerifier("WRONG"), Optional::No }
-    } };
+    Documentation wrongDoc = {
+        .entries = {
+            { "Table", new ReferencingVerifier("WRONG"), Optional::No }
+        }
+    };
     ghoul::Dictionary wrongNegative;
     {
         ghoul::Dictionary inner;
@@ -2287,50 +2333,14 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
     );
 }
 
-TEST_CASE("Documentation: AndOperator", "[documentation]") {
-    using namespace openspace::documentation;
-
-    Documentation doc {
-        {
-            {
-                "a",
-                new AndVerifier({
-                    new IntGreaterEqualVerifier(2), new IntLessEqualVerifier(5)
-                }),
-                Optional::No
-            }
-        }
-    };
-
-    ghoul::Dictionary positive;
-    positive.setValue("a", 4.0);
-    TestResult positiveRes = testSpecification(doc, positive);
-    CHECK(positiveRes.success);
-    CHECK(positiveRes.offenses.empty());
-
-    ghoul::Dictionary negative;
-    negative.setValue("a", 0.0);
-    TestResult negativeRes = testSpecification(doc, negative);
-    CHECK_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    CHECK(negativeRes.offenses[0].offender == "a");
-    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
-
-    ghoul::Dictionary negative2;
-    negative2.setValue("a", 8.0);
-    negativeRes = testSpecification(doc, negative2);
-    CHECK_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    CHECK(negativeRes.offenses[0].offender == "a");
-    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
-}
-
 TEST_CASE("Documentation: OrOperator", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        {{ "a", new OrVerifier({ new StringVerifier, new IntVerifier }), Optional::No }}
+    Documentation doc = {
+        .entries = {
+            { "a", new OrVerifier({ new StringVerifier, new IntVerifier }), Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2357,8 +2367,10 @@ TEST_CASE("Documentation: OrOperator", "[documentation]") {
 TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        { { "a", new IntVector2Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new IntVector2Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2392,8 +2404,10 @@ TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {
 TEST_CASE("Documentation: DoubleVector2Verifier", "[documentation]") {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        { { "a", new DoubleVector2Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleVector2Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2428,8 +2442,10 @@ TEST_CASE("Documentation: IntVector3Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new IntVector3Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new IntVector3Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2465,8 +2481,10 @@ TEST_CASE("Documentation: DoubleVector3Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleVector3Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleVector3Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2502,8 +2520,10 @@ TEST_CASE("Documentation: IntVector4Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new IntVector4Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new IntVector4Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2540,8 +2560,10 @@ TEST_CASE("Documentation: DoubleVector4Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleVector4Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleVector4Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2578,8 +2600,10 @@ TEST_CASE("Documentation: DoubleMatrix2x2Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleMatrix2x2Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleMatrix2x2Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2615,8 +2639,10 @@ TEST_CASE("Documentation: DoubleMatrix2x3Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleMatrix2x3Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleMatrix2x3Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2652,8 +2678,10 @@ TEST_CASE("Documentation: DoubleMatrix2x4Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleMatrix2x4Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleMatrix2x4Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2689,8 +2717,10 @@ TEST_CASE("Documentation: DoubleMatrix3x2Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleMatrix3x2Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleMatrix3x2Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2726,8 +2756,10 @@ TEST_CASE("Documentation: DoubleMatrix3x3Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleMatrix3x3Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleMatrix3x3Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2763,8 +2795,10 @@ TEST_CASE("Documentation: DoubleMatrix3x4Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleMatrix3x4Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleMatrix3x4Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2800,8 +2834,10 @@ TEST_CASE("Documentation: DoubleMatrix4x2Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleMatrix4x2Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleMatrix4x2Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2837,8 +2873,10 @@ TEST_CASE("Documentation: DoubleMatrix4x3Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleMatrix4x3Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleMatrix4x3Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2874,8 +2912,10 @@ TEST_CASE("Documentation: DoubleMatrix4x4Verifier", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc {
-        { { "a", new DoubleMatrix4x4Verifier, Optional::No } }
+    Documentation doc = {
+        .entries = {
+            { "a", new DoubleMatrix4x4Verifier, Optional::No }
+        }
     };
 
     ghoul::Dictionary positive;
@@ -2905,61 +2945,6 @@ TEST_CASE("Documentation: DoubleMatrix4x4Verifier", "[documentation]") {
     REQUIRE(negativeRes.offenses.size() == 1);
     CHECK(negativeRes.offenses[0].offender == "a");
     CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-}
-
-TEST_CASE("Documentation: DeprecatedVerifier", "[documentation]") {
-    using namespace openspace::documentation;
-    using namespace std::string_literals;
-
-    Documentation doc { {
-        { "bool", new BoolDeprecatedVerifier, Optional::No },
-        { "int" , new IntDeprecatedVerifier, Optional::No },
-        { "double", new DoubleDeprecatedVerifier, Optional::No },
-        { "string" , new StringDeprecatedVerifier, Optional::No },
-        { "intvec2", new DeprecatedVerifier<IntVector2Verifier>, Optional::No },
-        { "doublevec2", new DeprecatedVerifier<DoubleVector2Verifier>, Optional::No },
-        { "intvec3", new DeprecatedVerifier<IntVector3Verifier>, Optional::No },
-        { "doublevec3", new DeprecatedVerifier<DoubleVector3Verifier>, Optional::No },
-        { "intvec4", new DeprecatedVerifier<IntVector4Verifier>, Optional::No },
-        { "doublevec4", new DeprecatedVerifier<DoubleVector4Verifier>, Optional::No }
-    }};
-
-    ghoul::Dictionary positive;
-    positive.setValue("bool", true);
-    positive.setValue("int", 1);
-    positive.setValue("double", 2.0);
-    positive.setValue("string", ""s);
-    positive.setValue("intvec2", glm::ivec2(0));
-    positive.setValue("doublevec2", glm::dvec2(0.0));
-    positive.setValue("intvec3", glm::ivec3(0));
-    positive.setValue("doublevec3", glm::dvec3(0.0));
-    positive.setValue("intvec4", glm::ivec4(0));
-    positive.setValue("doublevec4", glm::dvec4(0.0));
-    TestResult positiveRes = testSpecification(doc, positive);
-    CHECK(positiveRes.success);
-    CHECK(positiveRes.offenses.empty());
-    REQUIRE(positiveRes.warnings.size() == 10);
-
-    CHECK(positiveRes.warnings[0].offender == "bool");
-    CHECK(positiveRes.warnings[0].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[1].offender == "double");
-    CHECK(positiveRes.warnings[1].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[2].offender == "doublevec2");
-    CHECK(positiveRes.warnings[2].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[3].offender == "doublevec3");
-    CHECK(positiveRes.warnings[3].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[4].offender == "doublevec4");
-    CHECK(positiveRes.warnings[4].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[5].offender == "int");
-    CHECK(positiveRes.warnings[5].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[6].offender == "intvec2");
-    CHECK(positiveRes.warnings[6].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[7].offender == "intvec3");
-    CHECK(positiveRes.warnings[7].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[8].offender == "intvec4");
-    CHECK(positiveRes.warnings[8].reason == TestResult::Warning::Reason::Deprecated);
-    CHECK(positiveRes.warnings[9].offender == "string");
-    CHECK(positiveRes.warnings[9].reason == TestResult::Warning::Reason::Deprecated);
 }
 
 TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
@@ -3022,18 +3007,6 @@ TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
     CHECK(AnnotationVerifier<DoubleVector3Verifier>("A"s).type() != "");
     CHECK(AnnotationVerifier<IntVector4Verifier>("A"s).type() != "");
     CHECK(AnnotationVerifier<DoubleVector4Verifier>("A"s).type() != "");
-
-    CHECK(BoolDeprecatedVerifier().type() != "");
-    CHECK(IntDeprecatedVerifier().type() != "");
-    CHECK(DoubleDeprecatedVerifier().type() != "");
-    CHECK(StringDeprecatedVerifier().type() != "");
-    CHECK(TableDeprecatedVerifier().type() != "");
-    CHECK(DeprecatedVerifier<IntVector2Verifier>().type() != "");
-    CHECK(DeprecatedVerifier<DoubleVector2Verifier>().type() != "");
-    CHECK(DeprecatedVerifier<IntVector3Verifier>().type() != "");
-    CHECK(DeprecatedVerifier<DoubleVector3Verifier>().type() != "");
-    CHECK(DeprecatedVerifier<IntVector4Verifier>().type() != "");
-    CHECK(DeprecatedVerifier<DoubleVector4Verifier>().type() != "");
 
     CHECK(ReferencingVerifier("identifier"s).type() != "");
 }
@@ -3098,18 +3071,6 @@ TEST_CASE("Documentation: Verifier Documentation Post Conditions", "[documentati
     CHECK(AnnotationVerifier<DoubleVector3Verifier>("A"s).documentation() != "");
     CHECK(AnnotationVerifier<IntVector4Verifier>("A"s).documentation() != "");
     CHECK(AnnotationVerifier<DoubleVector4Verifier>("A"s).documentation() != "");
-
-    CHECK(BoolDeprecatedVerifier().documentation() != "");
-    CHECK(IntDeprecatedVerifier().documentation() != "");
-    CHECK(DoubleDeprecatedVerifier().documentation() != "");
-    CHECK(StringDeprecatedVerifier().documentation() != "");
-    CHECK(TableDeprecatedVerifier().documentation() != "");
-    CHECK(DeprecatedVerifier<IntVector2Verifier>().documentation() != "");
-    CHECK(DeprecatedVerifier<DoubleVector2Verifier>().documentation() != "");
-    CHECK(DeprecatedVerifier<IntVector3Verifier>().documentation() != "");
-    CHECK(DeprecatedVerifier<DoubleVector3Verifier>().documentation() != "");
-    CHECK(DeprecatedVerifier<IntVector4Verifier>().documentation() != "");
-    CHECK(DeprecatedVerifier<DoubleVector4Verifier>().documentation() != "");
 
     CHECK(ReferencingVerifier("identifier"s).documentation() != "");
 }

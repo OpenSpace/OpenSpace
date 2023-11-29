@@ -387,7 +387,7 @@ SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner
     });
     owner.addProperty(_updateSelection);
 
-    _updateSelection.set(0);
+    _updateSelection.trigger();
 }
 
 SpoutReceiverPropertyProxy::~SpoutReceiverPropertyProxy() {}

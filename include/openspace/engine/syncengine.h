@@ -36,72 +36,71 @@ namespace openspace {
 class Syncable;
 
 /**
- * Manages a collection of `Syncable`s and ensures they are synchronized
- * over SGCT nodes. Encoding/Decoding order is handles internally.
+ * Manages a collection of `Syncable`s and ensures they are synchronized over SGCT nodes.
+ * Encoding/Decoding order is handles internally.
  */
 class SyncEngine {
 public:
     BooleanType(IsMaster);
 
     /**
-     * Creates a new SyncEngine which a buffer size of \p syncBufferSize
+     * Creates a new SyncEngine which a buffer size of \p syncBufferSize.
+     *
      * \pre syncBufferSize must be bigger than 0
      */
     SyncEngine(unsigned int syncBufferSize);
 
     /**
-     * Encodes all added Syncables in the injected `SyncBuffer`.
-     * This method is only called on the SGCT master node
+     * Encodes all added Syncables in the injected `SyncBuffer`. This method is only
+     * called on the SGCT master node.
      */
     std::vector<std::byte> encodeSyncables();
 
     /**
-     * Decodes the `SyncBuffer` into the added Syncables.
-     * This method is only called on the SGCT client nodes
+     * Decodes the `SyncBuffer` into the added Syncables. This method is only called on
+     * the SGCT client nodes.
      */
     void decodeSyncables(std::vector<std::byte> data);
 
     /**
-     * Invokes the presync method of all added Syncables
+     * Invokes the presync method of all added Syncables.
      */
     void preSynchronization(IsMaster isMaster);
 
     /**
-     * Invokes the postsync method of all added Syncables
+     * Invokes the postsync method of all added Syncables.
      */
     void postSynchronization(IsMaster isMaster);
 
     /**
      * Add a Syncable to be synchronized over the SGCT cluster.
-     * \pre syncable must not be nullptr
+     *
+     * \pre syncable must not be `nullptr`
      */
     void addSyncable(Syncable* syncable);
 
     /**
-     * Add multiple Syncables to be synchronized over the SGCT cluster
+     * Add multiple Syncables to be synchronized over the SGCT cluster.
+     *
      * \pre syncables must not contain any nullptr
      */
     void addSyncables(const std::vector<Syncable*>& syncables);
 
     /**
-     * Remove a Syncable from being synchronized over the SGCT cluster
+     * Remove a Syncable from being synchronized over the SGCT cluster.
      */
     void removeSyncable(Syncable* syncable);
 
     /**
-    * Remove multiple Syncables from being synchronized over the SGCT cluster
+    * Remove multiple Syncables from being synchronized over the SGCT cluster.
     */
     void removeSyncables(const std::vector<Syncable*>& syncables);
 
 private:
-    /**
-     * Vector of Syncables. The vectors ensures consistent encode/decode order
-     */
+    /// Vector of Syncables. The vectors ensures consistent encode/decode order.
     std::vector<Syncable*> _syncables;
 
-    /**
-     * Databuffer used in encoding/decoding
-     */
+    /// Databuffer used in encoding/decoding
     SyncBuffer _syncBuffer;
 };
 

@@ -44,9 +44,9 @@ namespace openspace::scripting {
  * The ScriptEngine is responsible for handling the execution of custom Lua functions and
  * executing scripts (#runScript and #runScriptFile). Before usage, it has to be
  * #initialize%d and #deinitialize%d. New ScriptEngine::Library%s consisting of
- * ScriptEngine::Library::Function%s have to be added which can then be called using the
- * `openspace` namespace prefix in Lua. The same functions can be exposed to
- * other Lua states by passing them to the #initializeLuaState method.
+ * Library::Function%s have to be added which can then be called using the
+ * `openspace` namespace prefix in Lua. The same functions can be exposed to other Lua
+ * states by passing them to the #initializeLuaState method.
  */
 class ScriptEngine : public Syncable {
 public:
@@ -66,7 +66,8 @@ public:
     ScriptEngine();
 
     /**
-     * Initializes the internal Lua state and registers a common set of library functions
+     * Initializes the internal Lua state and registers a common set of library functions.
+     *
      * \throw LuaRuntimeException If the creation of the new Lua state fails
      */
     void initialize();

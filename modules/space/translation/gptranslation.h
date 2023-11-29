@@ -31,7 +31,7 @@ namespace openspace {
 
 /**
  * A specialization of the KeplerTranslation that utilizes general pertubation file
- * formats to extracts the Keplerian elements
+ * formats to extracts the Keplerian elements.
  */
 class GPTranslation : public KeplerTranslation {
 public:
@@ -40,7 +40,8 @@ public:
      * the file that contains the general pertubation information as well as the file
      * format that is to be used.
      *
-     * \param The ghoul::Dictionary that contains the information for this TLETranslation
+     * \param dictionary The ghoul::Dictionary that contains the information for this
+     *        TLETranslation
      */
     explicit GPTranslation(const ghoul::Dictionary& dictionary);
 
@@ -49,7 +50,7 @@ public:
      * that can be passed to the constructor.
      *
      * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
-     * be passed to the constructor
+     *         be passed to the constructor
      */
     static documentation::Documentation Documentation();
 };

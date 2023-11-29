@@ -1089,8 +1089,8 @@ void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode,
 }
 
 void OrbitalNavigator::setFocusNode(const std::string& focusNode, bool) {
-    _anchor.set(focusNode);
-    _aim.set(std::string(""));
+    _anchor = focusNode;
+    _aim = std::string("");
 }
 
 void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
@@ -1128,11 +1128,11 @@ void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {
 }
 
 void OrbitalNavigator::setAnchorNode(const std::string& anchorNode) {
-    _anchor.set(anchorNode);
+    _anchor = anchorNode;
 }
 
 void OrbitalNavigator::setAimNode(const std::string& aimNode) {
-    _aim.set(aimNode);
+    _aim = aimNode;
 }
 
 void OrbitalNavigator::updatePreviousAnchorState() {
@@ -1634,14 +1634,10 @@ void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
 {
     const glm::dvec3 axis = [](UpDirectionChoice upAxis) {
         switch (upAxis) {
-            case UpDirectionChoice::XAxis:
-                return glm::dvec3(1.0, 0.0, 0.0);
-            case UpDirectionChoice::YAxis:
-                return glm::dvec3(0.0, 1.0, 0.0);
-            case UpDirectionChoice::ZAxis:
-                return glm::dvec3(0.0, 0.0, 1.0);
-            default:
-                throw ghoul::MissingCaseException();
+            case UpDirectionChoice::XAxis: return glm::dvec3(1.0, 0.0, 0.0);
+            case UpDirectionChoice::YAxis: return glm::dvec3(0.0, 1.0, 0.0);
+            case UpDirectionChoice::ZAxis: return glm::dvec3(0.0, 0.0, 1.0);
+            default:                       throw ghoul::MissingCaseException();
         }
     }(UpDirectionChoice(_upToUseForRotation.value()));
 

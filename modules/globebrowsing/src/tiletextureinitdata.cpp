@@ -39,7 +39,6 @@ size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
         case ghoul::opengl::Texture::Format::BGRA:
             return 4;
         default:
-            ghoul_assert(false, "Unknown format");
             throw ghoul::MissingCaseException();
     }
 }
@@ -56,7 +55,6 @@ size_t numberOfBytes(GLenum glType) {
         case GL_FLOAT:          return sizeof(GLfloat);
         case GL_DOUBLE:         return sizeof(GLdouble);
         default:
-            ghoul_assert(false, "Unknown data type");
             throw ghoul::MissingCaseException();
     }
 }
@@ -151,9 +149,8 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id,
                 ghoul::opengl::Texture::Format::BGRA
             );
         }
-        default: {
+        default:
             throw ghoul::MissingCaseException();
-        }
     }
 }
 

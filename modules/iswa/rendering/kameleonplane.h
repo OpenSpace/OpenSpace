@@ -49,7 +49,7 @@ public:
 
 private:
     /**
-     * Creates a plane geometry
+     * Creates a plane geometry.
      */
     bool createGeometry() override;
     bool destroyGeometry() override;
@@ -62,7 +62,7 @@ private:
 
     /**
      * Given a path to the json index of seedpoints file, this method reads, parses and
-     * adds them as checkbox options in the _fieldlines SelectionProperty
+     * adds them as checkbox options in the _fieldlines SelectionProperty.
      *
      * \param indexFile Path to json index file
      */
@@ -94,9 +94,8 @@ private:
     /**
      * _fieldlineState maps the checkbox value of each fieldline seedpoint file to a tuple
      * containing information that is needed to either add or remove a fieldline from the
-     * scenegraph.
-     * This is the name, path to seedpoints file and a boolean to determine if it is
-     * active or inactive.
+     * scenegraph. This is the name, path to seedpoints file and a boolean to determine if
+     * it is active or inactive.
      */
     std::map<int, std::tuple<std::string, std::string, bool>> _fieldlineState;
     std::string _fieldlineIndexFile;

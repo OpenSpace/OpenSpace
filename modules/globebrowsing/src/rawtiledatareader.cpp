@@ -109,9 +109,12 @@ GDALDataType toGDALDataType(GLenum glType) {
         case GL_DOUBLE:
             return GDT_Float64;
         default:
-            LERRORC("GDALRawTileDataReader", fmt::format(
-                "OpenGL data type unknown to GDAL: {}", static_cast<int>(glType)
-            ));
+            LERRORC(
+                "GDALRawTileDataReader",
+                fmt::format(
+                    "OpenGL data type unknown to GDAL: {}", static_cast<int>(glType)
+                )
+            );
             throw ghoul::MissingCaseException();
     }
 }

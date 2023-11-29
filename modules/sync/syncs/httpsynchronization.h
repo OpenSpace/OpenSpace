@@ -41,6 +41,7 @@ namespace openspace {
  * of this synchronization. That list of files can have empty lines and commented out
  * lines (starting with a #) that will be ignored. Every other line is URL that will be
  * downloaded into the #directory.
+ *
  * Each requested set of files is identified by a triplet of (identifier, file version,
  * application version). The identifier is denoting the group of files that is requested,
  * the file version is the specific version of this set of files, and the application
@@ -67,7 +68,9 @@ public:
         std::filesystem::path synchronizationRoot,
         std::vector<std::string> synchronizationRepositories);
 
-    /// Destructor that will close the asynchronous file transfer, if it is still ongoing
+    /**
+     * Destructor that will close the asynchronous file transfer, if it is still ongoing.
+     */
     ~HttpSynchronization() override;
 
     /**
@@ -85,16 +88,41 @@ public:
      */
     void start() override;
 
-    /// Cancels any ongoing synchronization of this ResourceSynchronization
+    /**
+     * Cancels any ongoing synchronization of this ResourceSynchronization.
+     */
     void cancel() override;
 
     std::string generateUid() override;
 
     static documentation::Documentation Documentation();
 
+protected:
+    /** Creates a file next to the directory that indicates that this
+     * ResourceSynchronization has successfully synchronized its contents.
+     */
+    void createSyncFile(bool isFullySynchronized = true) const override;
+
+    /**
+     * Check ossync file and returns true if all files are downloaded or false if
+     * partially synched or if there is an ossync file error (rejected).
+     */
+    bool isEachFileDownloaded();
+
+    /**
+     * Representation of 'global' synchronization state that encodes where a fail happen.
+     */
+    enum class SynchronizationState {
+        Success,
+        ListDownloadFail,
+        FileDownloadFail
+    };
+
 private:
-    /// Tries to get a reply from the provided URL and returns that success to the caller
-    bool trySyncFromUrl(std::string url);
+    /**
+     * Tries to get a reply from the provided URL and returns that success to the caller.
+     */
+    SynchronizationState trySyncFromUrl(std::string url);
 
     /// Contains a flag whether the current transfer should be cancelled
     std::atomic_bool _shouldCancel = false;
@@ -110,6 +138,12 @@ private:
 
     // The thread that will be doing the synchronization
     std::thread _syncThread;
+
+    // The files that have already been synchronized
+    std::vector<std::string> _existingSyncedFiles;
+
+    // The files that have been synchronized this time
+    std::vector<std::string> _newSyncedFiles;
 };
 
 } // namespace openspace

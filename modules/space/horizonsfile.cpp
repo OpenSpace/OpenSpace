@@ -30,7 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 
@@ -92,8 +92,8 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
         case HorizonsType::Observer:
             url = ObserverUrl;
             break;
-        default:
-            throw ghoul::MissingCaseException();
+        case HorizonsType::Invalid:
+            break;
     }
 
     url += fmt::format(

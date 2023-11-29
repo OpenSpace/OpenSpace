@@ -238,7 +238,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.addOption(2, "Screen center Position Normal");
     addProperty(_renderOption);
-    //_renderOption.set(1);
+    //_renderOption = 1;
 
     if (p.unit.has_value()) {
         _unit = codegen::map<DistanceUnit>(*p.unit);
@@ -266,15 +266,14 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         { BlendModeAdditive, "Additive" }
     });
     _blendMode.onChange([this]() {
-        switch (_blendMode) {
+        BlendMode m = static_cast<BlendMode>(_blendMode.value());
+        switch (m) {
             case BlendModeNormal:
                 setRenderBin(Renderable::RenderBin::Opaque);
                 break;
             case BlendModeAdditive:
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
     });
 

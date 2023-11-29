@@ -25,7 +25,7 @@
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/documentation/documentationengine.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <filesystem>
 #include <iomanip>
@@ -35,104 +35,87 @@ namespace openspace::documentation {
 
 // The explicit template instantiations for many of the commonly used template values
 // This cuts down on the compilation time by only compiling these once
-template struct Vector2Verifier<int>;
-template struct Vector2Verifier<double>;
-template struct Vector3Verifier<int>;
-template struct Vector3Verifier<double>;
-template struct Vector4Verifier<int>;
-template struct Vector4Verifier<double>;
+template class Vector2Verifier<int>;
+template class Vector2Verifier<double>;
+template class Vector3Verifier<int>;
+template class Vector3Verifier<double>;
+template class Vector4Verifier<int>;
+template class Vector4Verifier<double>;
 
-template struct Vector2ListVerifier<int>;
-template struct Vector2ListVerifier<double>;
-template struct Vector3ListVerifier<int>;
-template struct Vector3ListVerifier<double>;
-template struct Vector4ListVerifier<int>;
-template struct Vector4ListVerifier<double>;
+template class Vector2ListVerifier<int>;
+template class Vector2ListVerifier<double>;
+template class Vector3ListVerifier<int>;
+template class Vector3ListVerifier<double>;
+template class Vector4ListVerifier<int>;
+template class Vector4ListVerifier<double>;
 
+template class Matrix2x2Verifier<double>;
+template class Matrix2x3Verifier<double>;
+template class Matrix2x4Verifier<double>;
+template class Matrix3x2Verifier<double>;
+template class Matrix3x3Verifier<double>;
+template class Matrix3x4Verifier<double>;
+template class Matrix4x2Verifier<double>;
+template class Matrix4x3Verifier<double>;
+template class Matrix4x4Verifier<double>;
 
-template struct Matrix2x2Verifier<double>;
-template struct Matrix2x3Verifier<double>;
-template struct Matrix2x4Verifier<double>;
-template struct Matrix3x2Verifier<double>;
-template struct Matrix3x3Verifier<double>;
-template struct Matrix3x4Verifier<double>;
-template struct Matrix4x2Verifier<double>;
-template struct Matrix4x3Verifier<double>;
-template struct Matrix4x4Verifier<double>;
+template class LessVerifier<IntVerifier>;
+template class LessVerifier<DoubleVerifier>;
+template class LessEqualVerifier<IntVerifier>;
+template class LessEqualVerifier<DoubleVerifier>;
+template class GreaterVerifier<IntVerifier>;
+template class GreaterVerifier<DoubleVerifier>;
+template class GreaterEqualVerifier<IntVerifier>;
+template class GreaterEqualVerifier<DoubleVerifier>;
+template class EqualVerifier<BoolVerifier>;
+template class EqualVerifier<IntVerifier>;
+template class EqualVerifier<DoubleVerifier>;
+template class EqualVerifier<StringVerifier>;
+template class UnequalVerifier<BoolVerifier>;
+template class UnequalVerifier<IntVerifier>;
+template class UnequalVerifier<DoubleVerifier>;
+template class UnequalVerifier<StringVerifier>;
 
-template struct LessVerifier<IntVerifier>;
-template struct LessVerifier<DoubleVerifier>;
-template struct LessEqualVerifier<IntVerifier>;
-template struct LessEqualVerifier<DoubleVerifier>;
-template struct GreaterVerifier<IntVerifier>;
-template struct GreaterVerifier<DoubleVerifier>;
-template struct GreaterEqualVerifier<IntVerifier>;
-template struct GreaterEqualVerifier<DoubleVerifier>;
-template struct EqualVerifier<BoolVerifier>;
-template struct EqualVerifier<IntVerifier>;
-template struct EqualVerifier<DoubleVerifier>;
-template struct EqualVerifier<StringVerifier>;
-template struct UnequalVerifier<BoolVerifier>;
-template struct UnequalVerifier<IntVerifier>;
-template struct UnequalVerifier<DoubleVerifier>;
-template struct UnequalVerifier<StringVerifier>;
+template class InListVerifier<BoolVerifier>;
+template class InListVerifier<IntVerifier>;
+template class InListVerifier<DoubleVerifier>;
+template class InListVerifier<StringVerifier>;
+template class NotInListVerifier<BoolVerifier>;
+template class NotInListVerifier<IntVerifier>;
+template class NotInListVerifier<DoubleVerifier>;
+template class NotInListVerifier<StringVerifier>;
 
-template struct InListVerifier<BoolVerifier>;
-template struct InListVerifier<IntVerifier>;
-template struct InListVerifier<DoubleVerifier>;
-template struct InListVerifier<StringVerifier>;
-template struct NotInListVerifier<BoolVerifier>;
-template struct NotInListVerifier<IntVerifier>;
-template struct NotInListVerifier<DoubleVerifier>;
-template struct NotInListVerifier<StringVerifier>;
+template class InRangeVerifier<IntVerifier>;
+template class InRangeVerifier<DoubleVerifier>;
+template class InRangeVerifier<DoubleVector2Verifier>;
+template class InRangeVerifier<DoubleVector3Verifier>;
+template class InRangeVerifier<DoubleVector4Verifier>;
+template class InRangeVerifier<IntVector2Verifier>;
+template class InRangeVerifier<IntVector3Verifier>;
+template class InRangeVerifier<IntVector4Verifier>;
+template class NotInRangeVerifier<IntVerifier>;
+template class NotInRangeVerifier<DoubleVerifier>;
+template class NotInRangeVerifier<DoubleVector2Verifier>;
+template class NotInRangeVerifier<DoubleVector3Verifier>;
+template class NotInRangeVerifier<DoubleVector4Verifier>;
+template class NotInRangeVerifier<IntVector2Verifier>;
+template class NotInRangeVerifier<IntVector3Verifier>;
+template class NotInRangeVerifier<IntVector4Verifier>;
 
-template struct InRangeVerifier<IntVerifier>;
-template struct InRangeVerifier<DoubleVerifier>;
-template struct InRangeVerifier<DoubleVector2Verifier>;
-template struct InRangeVerifier<DoubleVector3Verifier>;
-template struct InRangeVerifier<DoubleVector4Verifier>;
-template struct InRangeVerifier<IntVector2Verifier>;
-template struct InRangeVerifier<IntVector3Verifier>;
-template struct InRangeVerifier<IntVector4Verifier>;
-template struct NotInRangeVerifier<IntVerifier>;
-template struct NotInRangeVerifier<DoubleVerifier>;
-template struct NotInRangeVerifier<DoubleVector2Verifier>;
-template struct NotInRangeVerifier<DoubleVector3Verifier>;
-template struct NotInRangeVerifier<DoubleVector4Verifier>;
-template struct NotInRangeVerifier<IntVector2Verifier>;
-template struct NotInRangeVerifier<IntVector3Verifier>;
-template struct NotInRangeVerifier<IntVector4Verifier>;
-
-
-template struct AnnotationVerifier<BoolVerifier>;
-template struct AnnotationVerifier<IntVerifier>;
-template struct AnnotationVerifier<DoubleVerifier>;
-template struct AnnotationVerifier<StringVerifier>;
-template struct AnnotationVerifier<TableVerifier>;
-//template struct AnnotationVerifier<BoolVector2Verifier>;
-template struct AnnotationVerifier<IntVector2Verifier>;
-template struct AnnotationVerifier<DoubleVector2Verifier>;
-//template struct AnnotationVerifier<BoolVector3Verifier>;
-template struct AnnotationVerifier<IntVector3Verifier>;
-template struct AnnotationVerifier<DoubleVector3Verifier>;
-//template struct AnnotationVerifier<BoolVector4Verifier>;
-template struct AnnotationVerifier<IntVector4Verifier>;
-template struct AnnotationVerifier<DoubleVector4Verifier>;
-
-template struct DeprecatedVerifier<BoolVerifier>;
-template struct DeprecatedVerifier<IntVerifier>;
-template struct DeprecatedVerifier<DoubleVerifier>;
-template struct DeprecatedVerifier<StringVerifier>;
-template struct DeprecatedVerifier<TableVerifier>;
-//template struct DeprecatedVerifier<BoolVector2Verifier>;
-template struct DeprecatedVerifier<IntVector2Verifier>;
-template struct DeprecatedVerifier<DoubleVector2Verifier>;
-//template struct DeprecatedVerifier<BoolVector3Verifier>;
-template struct DeprecatedVerifier<IntVector3Verifier>;
-template struct DeprecatedVerifier<DoubleVector3Verifier>;
-//template struct DeprecatedVerifier<BoolVector4Verifier>;
-template struct DeprecatedVerifier<IntVector4Verifier>;
-template struct DeprecatedVerifier<DoubleVector4Verifier>;
+template class AnnotationVerifier<BoolVerifier>;
+template class AnnotationVerifier<IntVerifier>;
+template class AnnotationVerifier<DoubleVerifier>;
+template class AnnotationVerifier<StringVerifier>;
+template class AnnotationVerifier<TableVerifier>;
+//template class AnnotationVerifier<BoolVector2Verifier>;
+template class AnnotationVerifier<IntVector2Verifier>;
+template class AnnotationVerifier<DoubleVector2Verifier>;
+//template class AnnotationVerifier<BoolVector3Verifier>;
+template class AnnotationVerifier<IntVector3Verifier>;
+template class AnnotationVerifier<DoubleVector3Verifier>;
+//template class AnnotationVerifier<BoolVector4Verifier>;
+template class AnnotationVerifier<IntVector4Verifier>;
+template class AnnotationVerifier<DoubleVector4Verifier>;
 
 std::string BoolVerifier::type() const {
     return "Boolean";
@@ -143,7 +126,7 @@ std::string DoubleVerifier::type() const {
 }
 
 TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
-                                   const std::string & key) const
+                                   const std::string& key) const
 {
     if (dict.hasValue<int>(key)) {
         // We have a key and the value is int, we are done
@@ -201,8 +184,7 @@ std::string IntVerifier::type() const {
 }
 
 StringVerifier::StringVerifier(bool mustBeNotEmpty)
-    : TemplateVerifier<std::string>()
-    , _mustBeNotEmpty(mustBeNotEmpty)
+    : _mustBeNotEmpty(mustBeNotEmpty)
 {}
 
 TestResult StringVerifier::operator()(const ghoul::Dictionary& dictionary,
@@ -612,16 +594,17 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
 {
     if (dictionary.hasValue<Type>(key)) {
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
-        TestResult res = testSpecification({documentations}, d);
+        Documentation doc = { .entries = documentations };
+        TestResult res = testSpecification(doc, d);
 
         // Add the 'key' as a prefix to make the new offender a fully qualified identifer
         for (TestResult::Offense& s : res.offenses) {
-            s.offender = key + "." + s.offender;
+            s.offender = fmt::format("{}.{}", key, s.offender);
         }
 
         // Add the 'key' as a prefix to make the new warning a fully qualified identifer
         for (TestResult::Warning& w : res.warnings) {
-            w.offender = key + "." + w.offender;
+            w.offender = fmt::format("{}.{}", key, w.offender);
         }
 
         return res;
@@ -700,22 +683,17 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
             return res;
         }
 
-        //ghoul_assert(
-        //    it != docs.end(),
-        //    "Did not find referencing identifier '" + identifier + "'"
-        //);
-
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
         TestResult r = testSpecification(*it, d);
 
         // Add the 'key' as a prefix to make the offender a fully qualified identifer
         for (TestResult::Offense& s : r.offenses) {
-            s.offender = key + "." + s.offender;
+            s.offender = fmt::format("{}.{}", key, s.offender);
         }
 
         // Add the 'key' as a prefix to make the warning a fully qualified identifer
         for (TestResult::Warning& w : r.warnings) {
-            w.offender = key + "." + w.offender;
+            w.offender = fmt::format("{}.{}", key, w.offender);
         }
 
         return r;
@@ -729,86 +707,16 @@ std::string ReferencingVerifier::documentation() const {
     return "Referencing Documentation: '" + identifier + "'";
 }
 
-AndVerifier::AndVerifier(const std::vector<Verifier*> values_) {
-    ghoul_assert(!values_.empty(), "values must not be empty");
-    for (Verifier* v : values_) {
-        this->values.push_back(std::shared_ptr<Verifier>(v));
-    }
-}
-
-TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
-                                   const std::string& key) const
-{
-    std::vector<TestResult> res(values.size());
-    std::transform(
-        values.cbegin(),
-        values.cend(),
-        res.begin(),
-        [dictionary, key](const std::shared_ptr<Verifier>& v) {
-            return v->operator()(dictionary, key);
-        }
-    );
-
-    const bool success = std::all_of(
-        res.cbegin(),
-        res.cend(),
-        std::mem_fn(&TestResult::success)
-    );
-
-    if (success) {
-        TestResult r;
-        r.success = true;
-        return r;
-    }
-    else {
-        TestResult r;
-        r.success = false;
-        TestResult::Offense o;
-        o.offender = key;
-        o.reason = TestResult::Offense::Reason::Verification;
-        r.offenses.push_back(o);
-        return r;
-    }
-}
-
-std::string AndVerifier::type() const {
-    // Dirty hack to get an "and " inserted before the last element
-    std::vector<std::string> types(values.size() - 1);
-    std::transform(
-        values.cbegin(),
-        values.cend() - 1,
-        types.begin(),
-        std::mem_fn(&Verifier::type)
-    );
-    types.push_back(std::string("and ") + values.back()->type());
-
-    return ghoul::join(types, ", ");
-}
-
-std::string AndVerifier::documentation() const {
-    // Dirty hack to get an "and " inserted before the last element
-    std::vector<std::string> documentations(values.size() - 1);
-    std::transform(
-        values.cbegin(),
-        values.cend() - 1,
-        documentations.begin(),
-        std::mem_fn(&Verifier::documentation)
-    );
-    documentations.push_back(std::string("and ") + values.back()->documentation());
-
-    return ghoul::join(documentations, ", ");
-}
-
 OrVerifier::OrVerifier(
             const std::vector<std::variant<Verifier*, std::shared_ptr<Verifier>>> values_)
 {
     ghoul_assert(!values_.empty(), "values must not be empty");
     for (const std::variant<Verifier*, std::shared_ptr<Verifier>>& v : values_) {
         if (std::holds_alternative<Verifier*>(v)) {
-            this->values.push_back(std::shared_ptr<Verifier>(std::get<Verifier*>(v)));
+            values.push_back(std::shared_ptr<Verifier>(std::get<Verifier*>(v)));
         }
         else {
-            this->values.push_back(std::get<std::shared_ptr<Verifier>>(v));
+            values.push_back(std::get<std::shared_ptr<Verifier>>(v));
         }
     }
 }
@@ -857,7 +765,7 @@ std::string OrVerifier::type() const {
         types.begin(),
         std::mem_fn(&Verifier::type)
     );
-    types.push_back(std::string("or ") + values.back()->type());
+    types.push_back(fmt::format("or {}", values.back()->type()));
 
     return ghoul::join(types, ", ");
 }
@@ -871,7 +779,7 @@ std::string OrVerifier::documentation() const {
         documentations.begin(),
         std::mem_fn(&Verifier::documentation)
     );
-    documentations.push_back(std::string("or ") + values.back()->documentation());
+    documentations.push_back(fmt::format("or {}", values.back()->documentation()));
 
     return ghoul::join(documentations, ", ");
 }

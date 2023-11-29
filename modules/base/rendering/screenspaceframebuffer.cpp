@@ -82,7 +82,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
 
     glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
     addProperty(_size);
-    _size.set(glm::vec4(0.f, 0.f, resolution.x, resolution.y));
+    _size = glm::vec4(0.f, 0.f, resolution.x, resolution.y);
 }
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}

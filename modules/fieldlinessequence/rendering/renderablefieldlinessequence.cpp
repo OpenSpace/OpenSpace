@@ -26,15 +26,14 @@
 
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
-
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/timemanager.h>
-#include <openspace/rendering/renderengine.h>
-
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -377,6 +376,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     else {
         _model = fls::Model::Invalid;
     }
+
     //maybe this should be called even if model is invalid
     setModelDependentConstants();
 

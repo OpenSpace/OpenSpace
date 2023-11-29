@@ -29,7 +29,7 @@
 
 namespace openspace::interaction {
 
-/*
+/**
  * Interpolates a typename T using a transfer function.
  */
 template <typename T>
