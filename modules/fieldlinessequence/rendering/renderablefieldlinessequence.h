@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,11 +34,8 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
-
 #include <openspace/rendering/transferfunction.h>
-
 #include <vector>
-
 
 namespace openspace {
 
@@ -57,7 +54,7 @@ public:
         Json,
         Osfls
     };
-    // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
+    // Used to determine if lines should be colored uniformly or by a some data variable
     enum class ColorMethod {
         Uniform = 0,
         ByQuantity = 1
@@ -135,7 +132,7 @@ private:
     LoadingType _loadingType;
     // path to directory with seed point files
     std::filesystem::path _seedPointDirectory;
-    // which tracing vaiable to trace. 'b' for fieldline is default
+    // which tracing vaiable to trace. 'b' for magnetic field is default
     std::string _tracingVariable = "b";
     // Extra variables such as rho, p or t
     std::vector<std::string> _extraVars;
@@ -165,7 +162,6 @@ private:
     bool _shouldUpdateColorBuffer;
     bool _shouldUpdatePositionBuffer;
     int _activeIndex = -1;
-    //File& _activeFile;
     bool _atLeastOneFileLoaded = false;
 
     bool _isLoadingStateFromDisk = false;
@@ -184,11 +180,6 @@ private:
     GLuint _vertexMaskingBuffer = 0;
     // OpenGL Vertex Buffer Object containing the vertex positions
     GLuint _vertexPositionBuffer = 0;
-
-
-    ///////////////////////////////////////////////
-    //                PROPERTIES                 //
-    ///////////////////////////////////////////////
 
     // Group to hold the color properties
     properties::PropertyOwner _colorGroup;
