@@ -485,6 +485,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _enableDepthTest = p.enableDepthTest.value_or(_enableDepthTest);
     _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
     _renderWireframe = p.renderWireframe.value_or(_renderWireframe);
+    _frustumSize = p.frustumSize.value_or(_frustumSize);
 
     if (p.vertexShader.has_value()) {
         _vertexShaderPath = p.vertexShader->string();
