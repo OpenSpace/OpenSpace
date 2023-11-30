@@ -115,7 +115,7 @@ namespace {
         "This read-only property contains the evaluated value for the bounding sphere. "
         "This is the actual value that is used internally within the software. If the "
         "BoundingSphere property is set to -1, it is the computed value, otherwise it "
-        "should match the one set in the property",
+        "matches the one set in the property",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -125,7 +125,7 @@ namespace {
         "This read-only property contains the evaluated value for the interaction sphere. "
         "This is the actual value that is used internally within the software. If the "
         "InteractionSphere property is set to -1, it is the computed value, otherwise it "
-        "should match the one set in the property",
+        "matches the one set in the property",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
