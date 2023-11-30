@@ -22,7 +22,7 @@ local Example = {
     -- @TODO The labels are not correctly oriented towards the camera!
   },
   GUI = {
-    Name = "PointCloud - Units & Labels",
+    Name = "Units & Labels",
     Path = "/Example/Point Clouds",
     Description = [[Example of a point cloud where a spcific unit is used when
       interpreting the position values, and text labels are placed at the points]]
