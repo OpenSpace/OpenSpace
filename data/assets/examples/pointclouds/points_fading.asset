@@ -11,11 +11,13 @@ local Example = {
     Coloring = {
       FixedColor = { 0.0, 0.3, 1.0 }
     },
-    -- Control at what distance the points fade in. The points will be invisible
-    -- when the camera is closer than the first value, and fully visible when the
-    -- camera is further away then the last value. In-between they will linearly
-    -- fade in or out
-    FadeInDistances = { 15.0 * EarthRadius, 35.0 * EarthRadius },
+    Fading = {
+      -- Control at what distance the points fade in. The points will be invisible
+      -- when the camera is closer than the first value, and fully visible when the
+      -- camera is further away then the last value. In-between they will linearly
+      -- fade in or out
+      FadeInDistances = { 15.0 * EarthRadius, 35.0 * EarthRadius }
+    }
   },
   GUI = {
     Name = "PointCloud - Fading",
@@ -42,11 +44,13 @@ local Example_Invert = {
     Coloring = {
       FixedColor = { 1.0, 0.3, 0.0 }
     },
-    -- Use the same fade distances, but invert the fading so that the points are
-    -- visible men the camera is closer to the origin that the first value, and
-    -- invisible when further away than the last value
-    FadeInDistances = { 15.0 * EarthRadius, 35.0 * EarthRadius },
-    InvertFade = true
+    Fading = {
+      -- Use the same fade distances, but invert the fading so that the points are
+      -- visible men the camera is closer to the origin that the first value, and
+      -- invisible when further away than the last value
+      FadeInDistances = { 15.0 * EarthRadius, 35.0 * EarthRadius },
+      Invert = true
+    }
   },
   GUI = {
     Name = "PointCloud - Fading (Inverted)",

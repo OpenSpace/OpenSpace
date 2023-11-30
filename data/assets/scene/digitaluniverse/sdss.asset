@@ -32,7 +32,9 @@ local Object = {
     },
     Texture = textures .. "point3A.png",
     Unit = "Mpc",
-    FadeInDistances = { 220.0, 650.0 }, -- Fade in value in the same unit as "Unit"
+    Fading = {
+      FadeInDistances = { 220.0, 650.0 } -- Fade in value in the same unit as "Unit"
+    },
     SizeSettings = {
       ScaleExponent = 52.0,
       BillboardMaxPixelSize = 5.5,

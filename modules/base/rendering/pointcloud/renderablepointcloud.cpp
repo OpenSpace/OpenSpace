@@ -130,7 +130,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
         "Enabled",
         "Size Mapping Enabled",
-        "If this value is set to 'true' ....", // @ TODO
+        "If this value is set to 'true' and at least on column was loaded as an option "
+        "for size mapping, the chosen data column will be used to scale the size of the "
+        "points",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -166,16 +168,16 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableDistanceFadeInfo = {
-        "EnableDistanceFading",
+        "Enabled",
         "Enable Distance-based Fading",
-        "Enables/Disables the Fade-in effect based on camera distance. Automatically set "
-        "to true if FadeInDistances are specified in the asset.",
+        "Enables/disables the Fade-in effect based on camera distance. Automatically set "
+        "to true if FadeInDistances are specified in the asset",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertFadeInfo = {
-        "InvertFade",
-        "Invert Fading",
+        "Invert",
+        "Invert",
         "This property can be used the invert the fading so that the points are "
         "invisible when the camera is further away than the max fade distance "
         "and fully visible when it is closer than the min distance",
@@ -212,7 +214,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NumShownDataPointsInfo = {
         "NumberOfDataPoints",
-        "Number of Shown Data Points (Read Only)",
+        "Number of Shown Data Points",
         "This read only property includes information about how many points are being "
         "rendered.",
         openspace::properties::Property::Visibility::User
@@ -296,14 +298,14 @@ namespace {
             std::optional<float> billboardMaxPixelSize;
         };
         // Settings related to the scale of the points, whether they should limit to
-        // a certain pixel size, et. cetera
+        // a certain pixel size, etc.
         std::optional<SizeSettings> sizeSettings;
 
         struct ColorSettings {
             // [[codegen::verbatim(PointColorInfo.description)]]
             std::optional<glm::vec3> fixedColor [[codegen::color()]];
 
-            // Settings related to the choice of color map, parameters, etc
+            // Settings related to the choice of color map, parameters, etc.
             std::optional<ghoul::Dictionary> colorMapping
                 [[codegen::reference("colormappingcomponent")]];
         };
@@ -311,17 +313,23 @@ namespace {
         // color map, etc.
         std::optional<ColorSettings> coloring;
 
+        struct Fading {
+            // [[codegen::verbatim(EnableDistanceFadeInfo.description)]]
+            std::optional<bool> enabled;
+
+            // [[codegen::verbatim(FadeInDistancesInfo.description)]]
+            std::optional<glm::dvec2> fadeInDistances;
+
+            // [[codegen::verbatim(InvertFadeInfo.description)]]
+            std::optional<bool> invert;
+        };
+        // Settings related to fading based on camera distance. Can be used to either
+        // fade away or fade int the points when reaching a certain distance from the
+        // origin of the dataset
+        std::optional<Fading> fading;
+
         // Transformation matrix to be applied to each object
         std::optional<glm::dmat4x4> transformationMatrix;
-
-        // [[codegen::verbatim(FadeInDistancesInfo.description)]]
-        std::optional<glm::dvec2> fadeInDistances;
-
-        // [[codegen::verbatim(EnableDistanceFadeInfo.description)]]
-        std::optional<bool> enableFadeIn;
-
-        // [[codegen::verbatim(InvertFadeInfo.description)]]
-        std::optional<bool> invertFade;
     };
 
 #include "renderablepointcloud_codegen.cpp"
@@ -404,24 +412,50 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     addProperty(pointColor);
 }
 
-RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-    , _spriteTexturePath(SpriteTextureInfo)
-    , _useSpriteTexture(UseSpriteTextureInfo, true)
-    , _drawElements(DrawElementsInfo, true)
-    , _fadeInDistances(
+RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "Fading", "Fading", "" })
+    , enabled(EnableDistanceFadeInfo, false)
+    , fadeInDistances(
         FadeInDistancesInfo,
         glm::vec2(0.f),
         glm::vec2(0.f),
         glm::vec2(100.f)
     )
-    , _invertFade(InvertFadeInfo, false)
-    , _fadeInDistanceEnabled(EnableDistanceFadeInfo, false)
+    , invert(InvertFadeInfo, false)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.fading.has_value()) {
+        const Parameters::Fading f = *p.fading;
+
+        if (f.fadeInDistances.has_value()) {
+            fadeInDistances = *f.fadeInDistances;
+            // Set the allowed max value based of that which was entered. Just to give
+            // useful values for the slider
+            fadeInDistances.setMaxValue(10.f * glm::vec2(fadeInDistances.value().y));
+        }
+
+        enabled = f.enabled.value_or(f.fadeInDistances.has_value());
+        invert = f.invert.value_or(invert);
+    }
+
+    addProperty(enabled);
+    fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    addProperty(fadeInDistances);
+    addProperty(invert);
+}
+
+RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+    , _spriteTexturePath(SpriteTextureInfo)
+    , _useSpriteTexture(UseSpriteTextureInfo, true)
+    , _drawElements(DrawElementsInfo, true)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _nDataPoints(NumShownDataPointsInfo, 0)
-    , _sizeSettings(dictionary)
+    , _fading(dictionary)
     , _colorSettings(dictionary)
+    , _sizeSettings(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -482,23 +516,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
-    // TODO: Make a propertyowner
-    if (p.fadeInDistances.has_value()) {
-        _fadeInDistances = *p.fadeInDistances;
-        _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-        // Set the allowed max value based of that which was entered. Just to give
-        // useful values for the slider
-        _fadeInDistances.setMaxValue(10.f * glm::vec2(_fadeInDistances.value().y));
-
-        addProperty(_fadeInDistances);
-
-        _invertFade = p.invertFade.value_or(_invertFade);
-        addProperty(_invertFade);
-
-        _fadeInDistanceEnabled = true;
-        addProperty(_fadeInDistanceEnabled);
-    }
-
     if (p.sizeSettings.has_value() && (*p.sizeSettings).sizeMapping.has_value()) {
         _sizeSettings.sizeMapping.parameterOption.onChange(
             [this]() { _dataIsDirty = true; }
@@ -508,6 +525,10 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     addPropertySubOwner(_sizeSettings);
     addPropertySubOwner(_colorSettings);
+
+    if (p.fading.has_value()) {
+        addPropertySubOwner(_fading);
+    }
 
     if (p.coloring.has_value() && (*p.coloring).colorMapping.has_value()) {
         _hasColorMapFile = true;
@@ -532,7 +553,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         else {
             _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
         }
-        _nDataPoints = _dataset.entries.size();
+        _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
     }
 
     // If no scale exponent was specified, compute one that will at least show the points
@@ -622,7 +643,7 @@ void RenderablePointCloud::bindTextureForRendering() const {
 
 float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) const {
     float fadeValue = 1.f;
-    if (_fadeInDistanceEnabled) {
+    if (_fading.enabled) {
         glm::dmat4 invModelMatrix = glm::inverse(calcModelTransform(data));
 
         glm::dvec3 cameraPosModelSpace = glm::dvec3(
@@ -633,12 +654,12 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
             glm::length(cameraPosModelSpace) / toMeter(_unit)
         );
 
-        const glm::vec2 fadeRange = _fadeInDistances;
+        const glm::vec2 fadeRange = _fading.fadeInDistances;
         const float fadeRangeWidth = (fadeRange.y - fadeRange.x);
         float funcValue = (distCamera - fadeRange.x) / fadeRangeWidth;
         funcValue = glm::clamp(funcValue, 0.f, 1.f);
 
-        if (_invertFade) {
+        if (_fading.invert) {
             funcValue = 1.f - funcValue;
         }
 
@@ -993,7 +1014,6 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         }
     }
     setBoundingSphere(maxRadius);
-    _fadeInDistances.setMaxValue(glm::vec2(static_cast<float>(10.0 * biggestCoord)));
     return result;
 }
 

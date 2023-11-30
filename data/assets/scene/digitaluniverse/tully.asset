@@ -47,7 +47,9 @@ local TullyGalaxies = {
     },
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
-    FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"
+    Fading = {
+      FadeInDistances = { 0.001, 1.0 } -- Fade in value in the same unit as "Unit"
+    },
     SizeSettings = {
       ScaleExponent = 50.4,
       BillboardMaxPixelSize = 7.0,

@@ -33,7 +33,9 @@ local HomeLabel = {
     Opacity = 0.99,
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
-    FadeInDistances = { 0.05, 1.0 },
+    Fading = {
+      FadeInDistances = { 0.05, 1.0 }
+    },
     SizeSettings = {
       ScaleExponent = 50.0,
       BillboardMaxPixelSize = 8.22,

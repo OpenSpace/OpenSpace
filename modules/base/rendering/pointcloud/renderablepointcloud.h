@@ -123,15 +123,19 @@ protected:
         std::unique_ptr<ColorMappingComponent> colorMapping;
     } _colorSettings;
 
+    struct Fading : properties::PropertyOwner {
+        Fading(const ghoul::Dictionary& dictionary);
+        properties::Vec2Property fadeInDistances;
+        properties::BoolProperty enabled;
+        properties::BoolProperty invert;
+    } _fading;
+
     properties::BoolProperty _useSpriteTexture;
     properties::StringProperty _spriteTexturePath;
 
     properties::BoolProperty _useAdditiveBlending;
 
     properties::BoolProperty _drawElements;
-    properties::Vec2Property _fadeInDistances;
-    properties::BoolProperty _fadeInDistanceEnabled;
-    properties::BoolProperty _invertFade;
     properties::OptionProperty _renderOption;
 
     properties::UIntProperty _nDataPoints;
