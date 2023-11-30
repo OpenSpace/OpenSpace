@@ -155,8 +155,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-In Start and End Distances",
-        "These values determine the initial and final distances from the center of "
-        "our galaxy from which the object will start and end fading-in",
+        "These values determine the initial and final distances from the origin of "
+        "the dataset at which the points will start and end fading-in. The points "
+        "will be fully visible once the camera is outside this range and fully "
+        "invisible when inside of this range",
         // @VISIBILITY(3.25)
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -598,7 +600,13 @@ void RenderablePointCloud::bindTextureForRendering() const {
 float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) const {
     float fadeValue = 1.f;
     if (_fadeInDistanceEnabled) {
-        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        glm::dmat4 invModelMatrix = glm::inverse(calcModelTransform(data));
+
+        glm::dvec3 cameraPosModelSpace = glm::dvec3(
+            invModelMatrix * glm::dvec4(data.camera.positionVec3(), 1.0)
+        );
+
+        float distCamera = static_cast<float>(glm::length(cameraPosModelSpace));
         const glm::vec2 fadeRange = _fadeInDistances;
         const float a = static_cast<float>(
             1.f / ((fadeRange.y - fadeRange.x) * toMeter(_unit))
