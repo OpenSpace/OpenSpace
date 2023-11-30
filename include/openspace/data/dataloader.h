@@ -67,6 +67,10 @@ struct Dataset {
     };
     std::vector<Entry> entries;
 
+    /// This variable can be used to get an understanding of the world scale size of
+    /// the dataset
+    float maxPositionComponent = 0.f;
+
     int index(std::string_view variableName) const;
     bool normalizeVariable(std::string_view variableName);
     glm::vec2 findValueRange(int variableIndex) const;

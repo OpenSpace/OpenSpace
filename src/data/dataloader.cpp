@@ -242,6 +242,12 @@ std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
         result.entries.push_back(std::move(e));
     }
 
+    //
+    // Read max data point variable
+    float max;
+    file.read(reinterpret_cast<char*>(&max), sizeof(float));
+    result.maxPositionComponent = max;
+
     return result;
 }
 
@@ -322,6 +328,10 @@ void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
             file.write(e.comment->data(), e.comment->size());
         }
     }
+
+    //
+    // Store max data point variable
+    file.write(reinterpret_cast<const char*>(&dataset.maxPositionComponent), sizeof(float));
 }
 
 Dataset loadFileWithCache(std::filesystem::path filePath, std::optional<DataMapping> specs)

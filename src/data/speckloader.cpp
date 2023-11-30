@@ -272,6 +272,12 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         str >> entry.position.x >> entry.position.y >> entry.position.z;
         allZero &= (entry.position == glm::vec3(0.0));
 
+        glm::vec3 positive = glm::abs(entry.position);
+        float max = glm::compMax(positive);
+        if (max > res.maxPositionComponent) {
+            res.maxPositionComponent = max;
+        }
+
         if (!str.good()) {
             // Need to subtract one of the line number here as we increase the current
             // line count in the beginning of the while loop we are currently in

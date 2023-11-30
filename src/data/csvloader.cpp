@@ -159,6 +159,12 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             // @TODO: comment mapping
         }
 
+        glm::vec3 positive = glm::abs(entry.position);
+        float max = glm::compMax(positive);
+        if (max > res.maxPositionComponent) {
+            res.maxPositionComponent = max;
+        }
+
         res.entries.push_back(entry);
     }
 

@@ -89,7 +89,10 @@ namespace {
         "Scale Exponent",
         "This value is used as in exponential scaling to set the absolute size of the "
         "point. In general, the larger distance the dataset covers, the larger this "
-        "value should be.",
+        "value should be. If not included, it is computed based on the maximum "
+        "positional component of the data points. This is useful for showing the "
+        "dataset at all, but you will likely want to change it to something that looks "
+        "good",
         openspace::properties::Property::Visibility::User
     };
 
@@ -505,6 +508,16 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
         }
         _nDataPoints = _dataset.entries.size();
+    }
+
+    // If no scale exponent was specified, compute one that will at least show the points
+    // based on the scale of the positions in the dataset
+    if (!p.sizeSettings.has_value() || !(*p.sizeSettings).scaleExponent.has_value()) {
+        double dist = _dataset.maxPositionComponent * toMeter(_unit);
+        float exponent = static_cast<float>(glm::log(dist));
+        // Reduce the actually used exponent a little bit, as just using the logarithm
+        // as is leads to very large points
+        _sizeSettings.scaleExponent = 0.9f * exponent;
     }
 
     _nDataPoints.setReadOnly(true);
