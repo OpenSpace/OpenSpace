@@ -100,8 +100,8 @@ local Textured = {
     Texture = openspace.absPath("${DATA}/test3.jpg"),
     UseAdditiveBlending = false, -- Disable additive blending
     Coloring = {
-      Enabled = false, -- @TODO This setting is currently ignored. It shouldn't be
       ColorMapping = {
+        Enabled = false,
         File = asset.resource("viridis.cmap")
       }
     },
@@ -149,7 +149,7 @@ local ColorMapped_FixedSize = {
 -- Point cloud with more advanced color mapping and fixed point sizing.
 -- Here we have predefined a couple of parameters to use for the color mapping.
 -- Also, missing/NaN values are mapped to a specific color.
--- Finally, no daditive blending is used for the color, meaning that the color of
+-- Finally, no additive blending is used for the color, meaning that the color of
 -- overlapping points will not be mixed/addded
 local ColorMappedAdvanced_NoBlend = {
   Identifier = "ExamplePoints_ColorMappedNoBlend",
