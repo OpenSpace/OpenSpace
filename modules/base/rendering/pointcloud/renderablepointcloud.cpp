@@ -188,9 +188,9 @@ namespace {
         "EnablePixelSizeControl",
         "Enable Pixel Size Control",
         "If true, the Max Size in Pixels property will be used as an upper limit for the "
-        "size of the point. Limits the maximum size of the points when navigating closely"
-        "to them. Currenlty computed base don rectangular displays and might look weird "
-        "in other projections",
+        "size of the point. Reduces the size of the points when approaching them, so that "
+        "they stick to a maximum screen space size. Currently, the scaling is computed "
+        "based on rectangular displays and might look weird in other projections",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
