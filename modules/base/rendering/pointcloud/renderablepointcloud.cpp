@@ -215,6 +215,13 @@ namespace {
         // rendered. Can be either a CSV or SPECK file
         std::optional<std::string> file;
 
+        // If true (default), the loaded dataset will be cached so that it can be loaded
+        // faster at a later time. This does however mean that any updates to the values
+        // in the dataset will not lead to changes in the rendering without first removing
+        // the cached file. Set it to false to disable caching. This can be useful for
+        // example when working on importing a new dataset
+        std::optional<bool> useCaching;
+
         // A dictionary specifying details on how to load the dataset
         std::optional<ghoul::Dictionary> dataMapping
             [[codegen::reference("dataloader_datamapping")]];
@@ -490,7 +497,13 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     }
 
     if (_hasDataFile) {
-        _dataset = dataloader::data::loadFileWithCache(_dataFile, _dataMapping);
+        bool useCaching = p.useCaching.value_or(true);
+        if (useCaching) {
+            _dataset = dataloader::data::loadFileWithCache(_dataFile, _dataMapping);
+        }
+        else {
+            _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
+        }
         _nDataPoints = _dataset.entries.size();
     }
 
