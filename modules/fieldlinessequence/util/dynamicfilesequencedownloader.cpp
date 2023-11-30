@@ -71,7 +71,7 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
 
     std::string name = fieldlineOption.optionName(dataID);
     _syncDir = absPath(
-        "${SYNC}/dynamic_downloaded/" + std::to_string(dataID)
+        "${SYNC}/dynamically_downloaded/" + std::to_string(dataID)
     );
 
     _dataID = { dataID, name };
