@@ -70,6 +70,8 @@ private:
     DistanceUnit _unit = DistanceUnit::Parsec;
     dataloader::Labelset _labelset;
 
+    bool _useCache = true;
+
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);

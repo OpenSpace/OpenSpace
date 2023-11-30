@@ -107,6 +107,12 @@ namespace {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
 
+        // If true (default), the loaded labels file will be cached so that it can be
+        // loaded faster at a later time. Note that this also means that changes in the
+        // file will not be registered until the cached file is deleted. Set to false
+        // to disable chaching and always do a fresh load of the label file
+        std::optional<bool> useCaching;
+
         // The opacity of the labels
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
@@ -165,6 +171,7 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _labelFile = absPath(p.file);
+    _useCache = p.useCaching.value_or(true);
 
     if (p.unit.has_value()) {
         _unit = codegen::map<DistanceUnit>(*p.unit);
@@ -235,7 +242,12 @@ void LabelsComponent::initialize() {
 
 void LabelsComponent::loadLabels() {
     LINFO(fmt::format("Loading label file {}", _labelFile));
-    _labelset = dataloader::label::loadFileWithCache(_labelFile);
+    if (_useCache) {
+        _labelset = dataloader::label::loadFileWithCache(_labelFile);
+    }
+    else {
+        _labelset = dataloader::label::loadFile(_labelFile);
+    }
 }
 
 bool LabelsComponent::isReady() const {
