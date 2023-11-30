@@ -131,6 +131,7 @@ protected:
     properties::BoolProperty _drawElements;
     properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _fadeInDistanceEnabled;
+    properties::BoolProperty _invertFade;
     properties::OptionProperty _renderOption;
 
     properties::UIntProperty _nDataPoints;

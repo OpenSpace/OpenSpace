@@ -156,9 +156,11 @@ namespace {
         "FadeInDistances",
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the origin of "
-        "the dataset at which the points will start and end fading-in. The points "
-        "will be fully visible once the camera is outside this range and fully "
-        "invisible when inside of this range",
+        "the dataset at which the points will start and end fading-in. With normal "
+        "fading the points are fully visible once the camera is outside this range and "
+        "fully invisible when inside the range. With inverted fading the situation is "
+        "the opposite: the points are visible inside when closer than the min value "
+        "of the range and invisible when further away",
         // @VISIBILITY(3.25)
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -169,6 +171,15 @@ namespace {
         "Enables/Disables the Fade-in effect based on camera distance. Automatically set "
         "to true if FadeInDistances are specified in the asset.",
         openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InvertFadeInfo = {
+        "InvertFade",
+        "Invert Fading",
+        "This property can be used the invert the fading so that the points are "
+        "invisible when the camera is further away than the max fade distance "
+        "and fully visible when it is closer than the min distance",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
@@ -308,6 +319,9 @@ namespace {
 
         // [[codegen::verbatim(EnableDistanceFadeInfo.description)]]
         std::optional<bool> enableFadeIn;
+
+        // [[codegen::verbatim(InvertFadeInfo.description)]]
+        std::optional<bool> invertFade;
     };
 
 #include "renderablepointcloud_codegen.cpp"
@@ -401,6 +415,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         glm::vec2(0.f),
         glm::vec2(100.f)
     )
+    , _invertFade(InvertFadeInfo, false)
     , _fadeInDistanceEnabled(EnableDistanceFadeInfo, false)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -467,10 +482,18 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
+    // TODO: Make a propertyowner
     if (p.fadeInDistances.has_value()) {
         _fadeInDistances = *p.fadeInDistances;
         _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        // Set the allowed max value based of that which was entered. Just to give
+        // useful values for the slider
+        _fadeInDistances.setMaxValue(10.f * glm::vec2(_fadeInDistances.value().y));
+
         addProperty(_fadeInDistances);
+
+        _invertFade = p.invertFade.value_or(_invertFade);
+        addProperty(_invertFade);
 
         _fadeInDistanceEnabled = true;
         addProperty(_fadeInDistanceEnabled);
@@ -606,14 +629,20 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
             invModelMatrix * glm::dvec4(data.camera.positionVec3(), 1.0)
         );
 
-        float distCamera = static_cast<float>(glm::length(cameraPosModelSpace));
-        const glm::vec2 fadeRange = _fadeInDistances;
-        const float a = static_cast<float>(
-            1.f / ((fadeRange.y - fadeRange.x) * toMeter(_unit))
+        float distCamera = static_cast<float>(
+            glm::length(cameraPosModelSpace) / toMeter(_unit)
         );
-        const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        const float funcValue = a * distCamera + b;
-        fadeValue *= std::min(1.f, funcValue);
+
+        const glm::vec2 fadeRange = _fadeInDistances;
+        const float fadeRangeWidth = (fadeRange.y - fadeRange.x);
+        float funcValue = (distCamera - fadeRange.x) / fadeRangeWidth;
+        funcValue = glm::clamp(funcValue, 0.f, 1.f);
+
+        if (_invertFade) {
+            funcValue = 1.f - funcValue;
+        }
+
+        fadeValue *= funcValue;
     }
 
     return fadeValue;
