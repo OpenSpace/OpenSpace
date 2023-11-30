@@ -1,9 +1,9 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 -- Color mapped points close to Earth, with some different settings for color and
--- sizing, and a rotation that makes them not overlap
+-- sizing, and a StaticRotation that makes them not overlap
 
--- Point cloud with fixed color and world-scale size
+-- Point cloud with fixed color and default size (fixed)
 local FixedColor_FixedSize = {
   Identifier = "ExamplePoints_FixedSize",
   Parent = earthAsset.Earth.Identifier,
@@ -12,14 +12,11 @@ local FixedColor_FixedSize = {
     File = asset.resource("data/dummydata.csv"),
     Coloring = {
       FixedColor = { 0.0, 0.5, 0.0 }
-    },
-    SizeSettings = {
-      ScaleExponent = 14.0
     }
   },
   GUI = {
-    Name = "Point Cloud - Fixed Color / Fixed Size",
-    Path = "/Example",
+    Name = "Fixed Color / Fixed Size",
+    Path = "/Example/Point Clouds",
     Description = "Point cloud with a fixed color and fixed sizing"
   }
 }
@@ -42,77 +39,14 @@ local FixedColor_MaxPixelSize = {
       FixedColor = { 0.0, 1.0, 1.0 }
     },
     SizeSettings = {
-      ScaleExponent = 14.0,
       BillboardMaxPixelSize = 4.7,
       EnablePixelSizeControl = true
     }
   },
   GUI = {
-    Name = "Point Cloud - Fixed Color / Max Pixel Size",
-    Path = "/Example",
+    Name = "Fixed Color / Max Pixel Size",
+    Path = "/Example/Point Clouds",
     Description = "Point cloud with a fixed color and sizing with a given max pixel size"
-  }
-}
-
--- Point cloud with fixed color and size scaling from a selected data column
-local FixedColor_ScaleBasedOnData = {
-  Identifier = "ExamplePoints_ScaleFromData",
-  Parent = earthAsset.Earth.Identifier,
-  Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = { 0, 0.5 * math.pi, 0 }
-    }
-  },
-  Renderable = {
-    Type = "RenderablePointCloud",
-    File = asset.resource("data/dummydata.csv"),
-    Coloring = {
-      FixedColor = { 0.5, 0.5, 0.0 }
-    },
-    SizeSettings = {
-      ScaleExponent = 11.5,
-      SizeMapping = { "number_withNan", "a" }
-    }
-  },
-  GUI = {
-    Name = "Point Cloud - Fixed Color / Size From Data",
-    Path = "/Example",
-    Description = [[Point cloud with a fixed color and sizing that can be set based on a
-    column in the dataset]]
-  }
-}
-
--- Point cloud with textures. Textured points can also be color mapped, but here it
--- is disabled per default
-local Textured = {
-  Identifier = "ExamplePoints_Textured",
-  Parent = earthAsset.Earth.Identifier,
-  Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = { 0, math.pi, 0 }
-    }
-  },
-  Renderable = {
-    Type = "RenderablePointCloud",
-    File = asset.resource("data/dummydata.csv"),
-    Texture = openspace.absPath("${DATA}/test3.jpg"),
-    UseAdditiveBlending = false, -- Disable additive blending
-    Coloring = {
-      ColorMapping = {
-        Enabled = false,
-        File = asset.resource("viridis.cmap")
-      }
-    },
-    SizeSettings = {
-      ScaleExponent = 15.0
-    }
-  },
-  GUI = {
-    Name = "Point Cloud - Textured",
-    Path = "/Example",
-    Description = "Point cloud with a texture per point"
   }
 }
 
@@ -135,13 +69,84 @@ local ColorMapped_FixedSize = {
       }
     },
     SizeSettings = {
+      -- Here we set the exponent for the scale explicitly, to a value that
+      -- gives the point a suitable size based on their world-space coordinates
       ScaleExponent = 15.0
     }
   },
   GUI = {
-    Name = "Point Cloud - Color Mapped",
-    Path = "/Example",
+    Name = "Color Mapped",
+    Path = "/Example/Point Clouds",
     Description = "Color mapped point cloud with fixed sizing"
+  }
+}
+
+-- Point cloud with fixed color and size scaling from a selected data column
+local FixedColor_ScaleBasedOnData = {
+  Identifier = "ExamplePoints_ScaleFromData",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0.5 * math.pi, 0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.5, 0.5, 0.0 }
+    },
+    SizeSettings = {
+      -- The options for the columns that the points can be scaled by. The first
+      -- alternative is chosen per default
+      SizeMapping = { "number_withNan", "a" },
+      -- Use a slightly smaller scale than above for the base size of the points
+      -- (will decide the size of the smallest point). That way, the points don't
+      -- become too big when scaled by the data parameter
+      ScaleExponent = 11.5,
+    }
+  },
+  GUI = {
+    Name = "Fixed Color / Size From Data",
+    Path = "/Example/Point Clouds",
+    Description = [[Point cloud with a fixed color and sizing that can be set based on a
+    column in the dataset]]
+  }
+}
+
+-- Point cloud with textures. Textured points can also be color mapped, but here it
+-- is disabled per default
+local Textured = {
+  Identifier = "ExamplePoints_Textured",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, math.pi, 0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Texture = openspace.absPath("${DATA}/test3.jpg"),
+    -- Disable additive blending, so that points will be rendered with their actual color
+    -- and overlapping points will be sorted by depth. This works best when the points
+    -- have an opacity of one
+    UseAdditiveBlending = false,
+    Coloring = {
+      ColorMapping = {
+        -- Disable color map per default. When enabled, the texture color will be
+        -- multiplied with the color form the color map
+        Enabled = false,
+        File = asset.resource("viridis.cmap")
+      }
+    }
+  },
+  GUI = {
+    Name = "Textured",
+    Path = "/Example/Point Clouds",
+    Description = "Point cloud with a texture per point"
   }
 }
 
@@ -180,8 +185,8 @@ local ColorMappedAdvanced_NoBlend = {
     }
   },
   GUI = {
-    Name = "Point Cloud - Color Mapped (Advanced) - No blending",
-    Path = "/Example",
+    Name = "Color Mapped (Advanced) - No blending",
+    Path = "/Example/Point Clouds",
     Description = [[Color mapped point cloud without additive blending, with missing
       values shown in grey, and a limited choice of parameter options to use for
       the color mapping.]]
