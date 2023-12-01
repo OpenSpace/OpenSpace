@@ -394,7 +394,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("IsCheckingOpenGLState", isCheckingOpenGLState);
     res.setValue("IsLoggingOpenGLCalls", isLoggingOpenGLCalls);
     res.setValue("IsPrintingEvents", isPrintingEvents);
-    res.setValue("consoleKey", ghoul::to_string(consoleKey));
+    res.setValue("ConsoleKey", ghoul::to_string(consoleKey));
     res.setValue("ShutdownCountdown", static_cast<double>(shutdownCountdown));
     res.setValue("shouldUseScreenshotDate", shouldUseScreenshotDate);
     res.setValue("OnScreenTextScaling", onScreenTextScaling);
