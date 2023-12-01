@@ -28,9 +28,9 @@ elseif (server == "Sweden") then
 elseif (server == "Utah") then
   asset.require("scene/solarsystem/planets/utah_layers")
 elseif (server == "None") then
-  -- Do nothing
+  asset.require("scene/solarsystem/planets/base_layers")
 else
-  openspace.printWarning("Did not recognise the specified Layer server, defaults to all")
+  openspace.printWarning("Did not recognise the specified Layer server, use all instead")
   asset.require("scene/solarsystem/planets/default_layers")
 end
 

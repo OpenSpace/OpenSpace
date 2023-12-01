@@ -1,9 +1,15 @@
+asset.require("./mercury/layers/base_layers")
+
+asset.require("./venus/layers/base_layers")
+
+asset.require("./earth/layers/base_layers")
+
+asset.require("./mars/layers/base_layers")
+
 asset.require("./jupiter/default_layers")
 asset.require("./jupiter/callisto/default_layers")
 asset.require("./jupiter/ganymede/default_layers")
 asset.require("./jupiter/io/default_layers")
-
-asset.require("./neptune/default_layers")
 
 asset.require("./saturn/default_layers")
 asset.require("./saturn/dione/default_layers")
@@ -16,6 +22,7 @@ asset.require("./saturn/titan/default_layers")
 
 asset.require("./uranus/default_layers")
 
+asset.require("./neptune/default_layers")
 
 
 asset.meta = {
