@@ -302,7 +302,8 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             codegen::lua::SetModeApplicationTime,
             codegen::lua::SetModeRecordedTime,
             codegen::lua::SetModeSimulationTime,
-            codegen::lua::Clear
+            codegen::lua::Clear,
+            codegen::lua::ScheduledScripts
         }
     };
 }
