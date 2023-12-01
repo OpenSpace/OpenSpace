@@ -221,10 +221,28 @@ namespace {
     };
 
     // A RenderablePointCloud can be used to render point-based datasets in 3D space,
-    // optionally including color mapping, a sprite texture and labels.
+    // optionally including color mapping, a sprite texture and labels. There are several
+    // properties that affect the visuals of the points, such as settings for scaling,
+    // fading, sprite texture, color mapping and whether the colors of overlapping points
+    // should be blended additively or not.
     //
-    // There are a lot of properties that affect the visuals of the points, such as
-    // a scale,.... @TODO: Elaborate
+    // The point size depends on a few different things:
+    //
+    // - At the core, scaling is done based on an exponential value, the 'ScaleExponent'.
+    //   A relatively small change to this value will lead to a large change in size.
+    //   When no exponent is set, one will be created based on the coordinates in the
+    //   dataset. The points will be visible, but may be appeared as too large or small.
+    //   One option is to not specify the exponent when loading the dataset for the the,
+    //   first time, to make sure the points are visual, and then adapt the value
+    //   interactively when OpenSpace is running until you find a value that you find
+    //   suitable.
+    //
+    // - There is also an option to limit the size of the points based on a given pixel
+    //   size. For now, this only works on flat proejction displays.
+    //
+    // - To easily change the visual size of the points, the multiplicative 'ScaleFactor'
+    //   may be used. A value of 2 makes the points twice as large, visually, compared
+    //   to 1.
     //
     // See example files in data/assets/examples/pointcloud for some concrete examples of
     // point clouds with different settings.
@@ -240,7 +258,8 @@ namespace {
         // example when working on importing a new dataset
         std::optional<bool> useCaching;
 
-        // A dictionary specifying details on how to load the dataset
+        // A dictionary specifying details on how to load the dataset. Updating the data
+        // mapping will lead to a new cached version of the dataset
         std::optional<ghoul::Dictionary> dataMapping
             [[codegen::reference("dataloader_datamapping")]];
 

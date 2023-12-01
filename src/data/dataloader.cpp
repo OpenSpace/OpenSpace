@@ -107,10 +107,6 @@ namespace {
             saveCacheFunction(dataset, cached);
         }
 
-        if (specs.has_value() && !(*specs).excludeColumns.empty()) {
-            // Drop the columns that should be excluded
-        }
-
         return dataset;
     }
 } // namespace
@@ -456,8 +452,7 @@ void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
     }
 }
 
-Labelset loadFileWithCache(std::filesystem::path filePath)
-{
+Labelset loadFileWithCache(std::filesystem::path filePath) {
     return internalLoadFileWithCache<Labelset>(
         filePath,
         std::nullopt,
