@@ -37,7 +37,7 @@ namespace {
 
     // A RenderablePolygonCloud is a RenderablePointCloud where the shape of the points
     // is a uniform polygon with a given number of sides instead of a texture. For
-    // instance, PolygonSides = 5 results in the poitns being rendered as pentagons.
+    // instance, PolygonSides = 5 results in the points being rendered as pentagons.
     // Note that while this renderable inherits the texture property from
     // RenderablePointCloudany, any added texture value will be ignored in favor of the
     // polygon shape.
@@ -154,7 +154,7 @@ void RenderablePolygonCloud::loadPolygonGeometryForRendering() {
     glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
 
     constexpr std::array<GLfloat, 4> VertexData = {
-        //      x      y     z     w
+        // x  y  z  w
         0.f, 0.f, 0.f, 1.f,
     };
 

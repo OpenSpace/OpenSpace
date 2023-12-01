@@ -977,10 +977,10 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     std::vector<float> result;
     result.reserve(nAttributesPerPoint() * _dataset.entries.size());
 
-    // what datavar in use for the index color
+    // What datavar is in use for the index color
     int colorParamIndex = currentColorParameterIndex();
 
-    // what datavar in use for the size scaling (if present)z
+    // What datavar is in use for the size scaling (if present)
     int sizeParamIndex = currentSizeParameterIndex();
 
     double maxRadius = 0.0;

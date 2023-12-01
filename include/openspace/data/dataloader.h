@@ -37,7 +37,7 @@
 namespace openspace::dataloader {
 
 /**
- * A dataset representing object with positions and various other data columns.
+ * A dataset representing objects with positions and various other data columns.
  * Based on the SPECK format originally used for the digital universe datasets.
  * Mostly used for point-data.
  *

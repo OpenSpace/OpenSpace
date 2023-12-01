@@ -70,7 +70,7 @@ local ColorMapped_FixedSize = {
     },
     SizeSettings = {
       -- Here we set the exponent for the scale explicitly, to a value that
-      -- gives the point a suitable size based on their world-space coordinates
+      -- gives the points a suitable size based on their world-space coordinates
       ScaleExponent = 15.0
     }
   },

@@ -31,7 +31,7 @@ local Example = {
 local Example_Invert = {
   Identifier = "ExamplePoints_FadingInverted",
   Parent = earthAsset.Earth.Identifier,
-  -- Rotate so that the points don't overlap
+  -- Rotate so that the points don't overlap with the previous ones
   Transform = {
     Rotation = {
       Type = "StaticRotation",
