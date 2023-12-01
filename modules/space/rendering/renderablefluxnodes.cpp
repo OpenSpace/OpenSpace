@@ -723,7 +723,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform(_uniformCache.proximityNodesSize, _proximityNodesSize);
     _shaderProgram->setUniform(
         _uniformCache.time,
-        global::windowDelegate->applicationTime()
+        static_cast<float>(global::windowDelegate->applicationTime())
     );
     _shaderProgram->setUniform(
         _uniformCache.maxNodeDistanceSize,

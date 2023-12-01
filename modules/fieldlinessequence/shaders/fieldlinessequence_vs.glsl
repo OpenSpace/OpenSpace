@@ -47,7 +47,7 @@ uniform vec4 flowColor;
 uniform int particleSize;
 uniform int particleSpeed;
 uniform int particleSpacing;
-uniform double time;
+uniform float time;
 uniform bool usingParticles;
 
 // Masking Uniforms
@@ -73,10 +73,10 @@ vec4 getTransferFunctionColor() {
   return texture(colorTable, lookUpVal);
 }
 
-bool isPartOfParticle(double time, int vertexId, int particleSize, int particleSpeed,
+bool isPartOfParticle(float time, int vertexId, int particleSize, int particleSpeed,
                       int particleSpacing)
 {
-  int modulusResult = int(double(particleSpeed) * time + vertexId) % particleSpacing;
+  int modulusResult = int(float(particleSpeed) * time + vertexId) % particleSpacing;
   return modulusResult > 0 && modulusResult <= particleSize;
 }
 

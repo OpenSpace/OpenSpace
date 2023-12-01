@@ -1030,7 +1030,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     _shaderProgram->setUniform("particleSpeed", _flowSpeed);
     _shaderProgram->setUniform(
         "time",
-        global::windowDelegate->applicationTime() * (_flowReversed ? -1 : 1)
+        static_cast<float>(global::windowDelegate->applicationTime()) *
+        (_flowReversed ? -1 : 1)
     );
 
     _shaderProgram->setUniform("opacity", opacity());
