@@ -111,7 +111,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EvalBoundingSphereInfo = {
         "EvaluatedBoundingSphere",
-        "Evaluated Bounding Sphere (Read Only)",
+        "Evaluated Bounding Sphere",
         "This read-only property contains the evaluated value for the bounding sphere. "
         "This is the actual value that is used internally within the software. If the "
         "BoundingSphere property is set to -1, it is the computed value, otherwise it "
@@ -121,7 +121,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EvalInteractionSphereInfo = {
         "EvaluatedInteractionSphere",
-        "Evaluated Interaction Sphere (Read Only)",
+        "Evaluated Interaction Sphere",
         "This read-only property contains the evaluated value for the interaction sphere. "
         "This is the actual value that is used internally within the software. If the "
         "InteractionSphere property is set to -1, it is the computed value, otherwise it "
