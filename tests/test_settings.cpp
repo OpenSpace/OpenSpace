@@ -517,6 +517,221 @@ TEST_CASE("Settings Save: Bypass Launcher", "[settings]") {
     CHECK(srcSettings == cmpSettings);
 }
 
+TEST_CASE("Settings Load: LayerServer/All", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "All"
+}
+)";
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_load_layerserver_all.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.hasStartedBefore.has_value());
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::All);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+}
+
+TEST_CASE("Settings Save: LayerServer/All", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_save_layerserver_all.json";
+
+    Settings srcSettings = {
+        .layerServer = openspace::Configuration::LayerServer::All
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: LayerServer/NewYork", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "NewYork"
+}
+)";
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_load_layerserver_newyork.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.hasStartedBefore.has_value());
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::NewYork);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+}
+
+TEST_CASE("Settings Save: LayerServer/NewYork", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_save_layerserver_newyork.json";
+
+    Settings srcSettings = {
+        .layerServer = openspace::Configuration::LayerServer::NewYork
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: LayerServer/Sweden", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "Sweden"
+}
+)";
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_load_layerserver_sweden.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.hasStartedBefore.has_value());
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::Sweden);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+}
+
+TEST_CASE("Settings Save: LayerServer/Sweden", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_save_layerserver_sweden.json";
+
+    Settings srcSettings = {
+        .layerServer = openspace::Configuration::LayerServer::Sweden
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: LayerServer/Utah", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "Utah"
+}
+)";
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_load_layerserver_utah.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.hasStartedBefore.has_value());
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::Utah);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+}
+
+TEST_CASE("Settings Save: LayerServer/Utah", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_save_layerserver_utah.json";
+
+    Settings srcSettings = {
+        .layerServer = openspace::Configuration::LayerServer::Utah
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: LayerServer/None", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "None"
+}
+)";
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_load_layerserver_none.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    Settings settings = loadSettings(file);
+
+    CHECK(!settings.hasStartedBefore.has_value());
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::None);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+}
+
+TEST_CASE("Settings Save: LayerServer/None", "[settings]") {
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_save_layerserver_none.json";
+
+    Settings srcSettings = {
+        .layerServer = openspace::Configuration::LayerServer::None
+    };
+    saveSettings(srcSettings, file);
+
+    Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
 TEST_CASE("Settings Load: MRF IsEnabled", "[settings]") {
     constexpr std::string_view Source = R"(
 {
@@ -620,6 +835,7 @@ TEST_CASE("Settings Load: Full", "[settings]") {
     "profile-remember": false,
     "visibility": "NoviceUser",
     "bypass": false,
+    "layerserver": "All",
     "mrf": {
         "enabled": true,
         "location": "ghi"
@@ -650,6 +866,8 @@ TEST_CASE("Settings Load: Full", "[settings]") {
     CHECK(*settings.visibility == properties::Property::Visibility::NoviceUser);
     REQUIRE(settings.bypassLauncher.has_value());
     CHECK(*settings.bypassLauncher == false);
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::All);
     REQUIRE(settings.mrf.isEnabled.has_value());
     CHECK(*settings.mrf.isEnabled == true);
     REQUIRE(settings.mrf.location.has_value());
@@ -668,6 +886,7 @@ TEST_CASE("Settings Save: Full", "[settings]") {
         .rememberLastProfile = false,
         .visibility = openspace::properties::Property::Visibility::NoviceUser,
         .bypassLauncher = false,
+        .layerServer = openspace::Configuration::LayerServer::All,
         .mrf = Settings::MRF {
             .isEnabled = true,
             .location = "ghi"
@@ -796,6 +1015,42 @@ TEST_CASE("Settings Load Fail: Bypass Launcher", "[settings]") {
 
     std::filesystem::path path = std::filesystem::temp_directory_path();
     std::filesystem::path file = path / "test_settings_load_fail_bypass.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: LayerServer type", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": 1
+}
+)";
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_load_fail_layerserver_type.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: LayerServer value", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "abc"
+}
+)";
+
+    std::filesystem::path path = std::filesystem::temp_directory_path();
+    std::filesystem::path file = path / "test_settings_load_fail_layerserver_value.json";
     {
         std::ofstream f(file);
         f << Source;
