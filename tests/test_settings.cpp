@@ -56,6 +56,7 @@ TEST_CASE("Settings Load: Empty", "[settings]") {
     CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -82,6 +83,7 @@ TEST_CASE("Settings Load: Really Empty", "[settings]") {
     CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -122,6 +124,7 @@ TEST_CASE("Settings Load: Started Before", "[settings]") {
     CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -164,6 +167,7 @@ TEST_CASE("Settings Load: Configuration", "[settings]") {
     CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -206,6 +210,7 @@ TEST_CASE("Settings Load: Configuration Remember", "[settings]") {
     CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -248,6 +253,7 @@ TEST_CASE("Settings Load: Profile", "[settings]") {
     CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -290,6 +296,7 @@ TEST_CASE("Settings Load: Profile Remember", "[settings]") {
     CHECK(*settings.rememberLastProfile == false);
     CHECK(!settings.visibility.has_value());
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -332,6 +339,7 @@ TEST_CASE("Settings Load: Visibility/NoviceUser", "[settings]") {
     REQUIRE(settings.visibility.has_value());
     CHECK(*settings.visibility == properties::Property::Visibility::NoviceUser);
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -374,6 +382,7 @@ TEST_CASE("Settings Load: Visibility/User", "[settings]") {
     REQUIRE(settings.visibility.has_value());
     CHECK(*settings.visibility == properties::Property::Visibility::User);
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -416,6 +425,7 @@ TEST_CASE("Settings Load: Visibility/AdvancedUser", "[settings]") {
     REQUIRE(settings.visibility.has_value());
     CHECK(*settings.visibility == properties::Property::Visibility::AdvancedUser);
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -458,6 +468,7 @@ TEST_CASE("Settings Load: Visibility/Developer", "[settings]") {
     REQUIRE(settings.visibility.has_value());
     CHECK(*settings.visibility == properties::Property::Visibility::Developer);
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -500,6 +511,7 @@ TEST_CASE("Settings Load: Bypass Launcher", "[settings]") {
     CHECK(!settings.visibility.has_value());
     REQUIRE(settings.bypassLauncher.has_value());
     CHECK(*settings.bypassLauncher == false);
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     CHECK(!settings.mrf.location.has_value());
 }
@@ -758,6 +770,7 @@ TEST_CASE("Settings Load: MRF IsEnabled", "[settings]") {
     CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     REQUIRE(settings.mrf.isEnabled.has_value());
     CHECK(*settings.mrf.isEnabled == true);
     CHECK(!settings.mrf.location.has_value());
@@ -804,6 +817,7 @@ TEST_CASE("Settings Load: MRF Location", "[settings]") {
     CHECK(!settings.rememberLastProfile.has_value());
     CHECK(!settings.visibility.has_value());
     CHECK(!settings.bypassLauncher.has_value());
+    CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
     REQUIRE(settings.mrf.location.has_value());
     CHECK(*settings.mrf.location == "ghi");
