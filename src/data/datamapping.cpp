@@ -75,7 +75,7 @@ namespace {
     // column names hsould be case sensitive, data value that represents missing
     // values in the dataset, and more. See details for each field / class member.
     //
-    // Note that things related to reading the point the position will not be hadled for
+    // Note that things related to reading the point position will not be handled for
     // SPECK files, as for those we always expect the first three values per row to
     // specify the XYZ position
     struct [[codegen::Dictionary(DataMapping)]] Parameters {
@@ -99,7 +99,7 @@ namespace {
         std::optional<float> missingDataValue;
 
         // A list of column names, of columns that will not be loaded into the dataset.
-        // Note that not all data formats support this. E.g. SPECK files do not.
+        // Note that not all data formats support this. E.g. SPECK files do not
         std::optional<std::vector<std::string>> excludeColumns;
     };
 #include "datamapping_codegen.cpp"
