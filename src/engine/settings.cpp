@@ -74,7 +74,7 @@ namespace version1 {
         }
         settings.bypassLauncher = get_to<bool>(json, "bypass");
 
-        std::optional<std::string> layerServer = get_to<std::string>(json, "layerServer");
+        std::optional<std::string> layerServer = get_to<std::string>(json, "layerserver");
         if (layerServer.has_value()) {
             settings.layerServer = stringToLayerServer(*layerServer);
         }
@@ -171,7 +171,7 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
         json["bypass"] = *settings.bypassLauncher;
     }
     if (settings.layerServer.has_value()) {
-        json["layerServer"] = layerServerToString(*settings.layerServer);
+        json["layerserver"] = layerServerToString(*settings.layerServer);
     }
     nlohmann::json mrf = nlohmann::json::object();
     if (settings.mrf.isEnabled.has_value()) {

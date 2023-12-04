@@ -276,7 +276,8 @@ void SettingsDialog::createWidgets() {
 
         QLabel* conf = new QLabel("Layer Server");
         conf->setToolTip(
-            "This setting sets the default server to be used for the layers"
+            "This setting sets the default server to be used for the layers that "
+            "are hosted by the OpenSpace team"
         );
         layout->addWidget(conf, 14, 0);
 
@@ -294,7 +295,8 @@ void SettingsDialog::createWidgets() {
             _layerServer,
             &QComboBox::textActivated,
             [this](const QString& value) {
-                _currentEdit.layerServer = openspace::stringToLayerServer(value.toStdString());
+                _currentEdit.layerServer =
+                    openspace::stringToLayerServer(value.toStdString());
                 updateSaveButton();
             }
         );
