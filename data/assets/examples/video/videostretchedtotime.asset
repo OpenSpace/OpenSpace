@@ -1,4 +1,4 @@
--- To learn how you can include your own video, see the wiki 
+-- To learn how you can include your own video, see the wiki
 -- http://wiki.openspaceproject.com/docs/builders/assets/resources.html
 
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
@@ -8,7 +8,7 @@ local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local Layer = {
   Name = "Stretched Video Example",
   Identifier = "StretchedVideoExample",
-  Type = "VideoTileLayer",
+  Type = "VideoTileProvider",
   Video = asset.resource("examplevideo.mp4"),
   StartTime = "2023 01 29 20:00:00",
   EndTime = "2023 01 29 21:00:00",
