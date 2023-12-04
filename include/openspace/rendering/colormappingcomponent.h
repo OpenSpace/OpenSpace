@@ -91,12 +91,20 @@ public:
     properties::Vec4Property belowRangeColor;
 
 private:
+    /**
+     * Fill parameter options list and range data based on the dataset and provided
+     * information
+     */
+    void initializeParameterData(const dataloader::Dataset& dataset);
+
     // One item per color parameter option
     std::vector<glm::vec2> _colorRangeData;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     dataloader::ColorMap _colorMap;
+
+    std::optional<std::string> _providedParameter;
 
     bool _nanColorInAsset = false;
     bool _belowRangeColorInAsset = false;

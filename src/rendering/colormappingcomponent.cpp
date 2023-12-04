@@ -30,6 +30,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
+    constexpr std::string_view _loggerCat = "ColorMapping";
+
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Color Map Enabled",
@@ -52,7 +54,8 @@ namespace {
         "This value determines which paramenter is used for coloring the points based "
         "on the color map. The property is set based on predefined options specified in "
         "the asset file. When changing the parameter, the value range to used for the"
-        "mapping will also be changed",
+        "mapping will also be changed. Per default, it is set ot the last parameter in "
+        "the list of options",
         openspace::properties::Property::Visibility::User
     };
 
@@ -158,6 +161,9 @@ namespace {
         };
         std::optional<std::vector<ColorMapParameter>> parameterOptions;
 
+        // [[codegen::verbatim(ColorParameterInfo.description)]]
+        std::optional<std::string> parameter;
+
         // [[codegen::verbatim(HideOutsideInfo.description)]]
         std::optional<bool> hideValuesOutsideRange;
 
@@ -245,6 +251,7 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
         for (size_t i = 0; i < opts.size(); ++i) {
             dataColumn.addOption(static_cast<int>(i), opts[i].key);
             _colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
+
         }
 
         // Following DU behavior here. The last colormap variable
@@ -256,6 +263,10 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
     dataColumn.onChange([this]() {
         valueRange = _colorRangeData[dataColumn.value()];
     });
+
+    if (p.parameter.has_value()) {
+        _providedParameter = *(p.parameter);
+    }
 
     // @TODO: read valueRange from asset if specified. How to avoid overriding it
     // in initialize?
@@ -295,52 +306,7 @@ ghoul::opengl::Texture* ColorMappingComponent::texture() const {
 void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
     _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
 
-    // Initialize empty colormap ranges based on dataset
-    for (const properties::OptionProperty::Option& option : dataColumn.options()) {
-        int optionIndex = option.value;
-        int colorParameterIndex = dataset.index(option.description);
-
-        glm::vec2& range = _colorRangeData[optionIndex];
-        if (glm::length(range) < glm::epsilon<float>()) {
-            range = dataset.findValueRange(colorParameterIndex);
-        }
-    }
-
-    // If no options were added, add each dataset parameter and its range as options
-    if (dataColumn.options().empty() && !dataset.entries.empty()) {
-        int i = 0;
-        _colorRangeData.reserve(dataset.variables.size());
-        for (const dataloader::Dataset::Variable& v : dataset.variables) {
-            dataColumn.addOption(i, v.name);
-            _colorRangeData.push_back(dataset.findValueRange(v.index));
-            i++;
-        }
-
-        if (_colorRangeData.size() > 1) {
-            dataColumn = static_cast<int>(_colorRangeData.size() - 1);
-        }
-    }
-    else {
-        // Otherwise, check if the selected columns exist
-        for (int i = 0; i < dataColumn.options().size(); ++i) {
-            std::string o = dataColumn.options()[i].description;
-            const std::vector<dataloader::Dataset::Variable>& vars = dataset.variables;
-
-            bool found = false;
-            for (const dataloader::Dataset::Variable& v : dataset.variables) {
-                if (v.name == o) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                LWARNINGC("ColorMapping", fmt::format(
-                    "Dataset does not contain specified parameter '{}'", o
-                ));
-            }
-        }
-    }
+    initializeParameterData(dataset);
 
     if (_colorMap.nanColor.has_value() && !_nanColorInAsset) {
         nanColor = *_colorMap.nanColor;
@@ -426,6 +392,80 @@ glm::vec4 ColorMappingComponent::colorFromColorMap(float valueToColorFrom) const
     colorIndex = std::min(colorIndex, static_cast<int>(nColors) - 1);
 
     return _colorMap.entries[colorIndex];
+}
+
+void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& dataset) {
+    // Initialize empty ranges based on values in the dataset
+    for (const properties::OptionProperty::Option& option : dataColumn.options()) {
+        int optionIndex = option.value;
+        int colorParameterIndex = dataset.index(option.description);
+
+        glm::vec2& range = _colorRangeData[optionIndex];
+        if (glm::length(range) < glm::epsilon<float>()) {
+            range = dataset.findValueRange(colorParameterIndex);
+        }
+    }
+
+    // Index to keep track of the potentially provided default option for the parameter
+    int indexOfProvidedOption = -1;
+
+    // If no options were added, add each dataset parameter and its range as options
+    if (dataColumn.options().empty() && !dataset.entries.empty()) {
+        int i = 0;
+        _colorRangeData.reserve(dataset.variables.size());
+        for (const dataloader::Dataset::Variable& v : dataset.variables) {
+            dataColumn.addOption(i, v.name);
+            _colorRangeData.push_back(dataset.findValueRange(v.index));
+
+            // While iterating over options, try to find the one provided, if any
+            if (_providedParameter.has_value() && *_providedParameter == v.name) {
+                indexOfProvidedOption = i;
+            }
+
+            i++;
+        }
+
+        if (_colorRangeData.size() > 1) {
+            dataColumn = static_cast<int>(_colorRangeData.size() - 1);
+        }
+    }
+    else {
+        // Otherwise, check if the selected columns exist
+        for (int i = 0; i < dataColumn.options().size(); ++i) {
+            std::string o = dataColumn.options()[i].description;
+            const std::vector<dataloader::Dataset::Variable>& vars = dataset.variables;
+
+            bool found = false;
+            for (const dataloader::Dataset::Variable& v : dataset.variables) {
+                if (v.name == o) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                LWARNING(fmt::format(
+                    "Dataset does not contain specified parameter '{}'", o
+                ));
+            }
+            // While iterating over options, try to find the one provided, if any
+            else if (_providedParameter.has_value() && *_providedParameter == o) {
+                indexOfProvidedOption = i;
+            }
+        }
+    }
+
+    if (_providedParameter.has_value()) {
+        if (indexOfProvidedOption == -1) {
+            LERROR(fmt::format(
+                "Error when reading Parameter. Could not find provided parameter '{}' in "
+                "list of parameter options", *_providedParameter
+            ));
+        }
+        else {
+            dataColumn = indexOfProvidedOption;
+        }
+    }
 }
 
 } // namespace openspace
