@@ -1,5 +1,5 @@
 local jupiterTransforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
-local kernels = asset.require("./kernels")
+local kernels = asset.require("./spice")
 
 
 

@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels")
+local spice = asset.require("../spice")
 
 
 
@@ -10,7 +10,7 @@ local Hydra = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "HYDRA",
-      Observer = "PLUTO BARYCENTER"
+      Observer = spice.PlutoBarycenter.ID
     }
   },
   Renderable = {
@@ -79,8 +79,6 @@ local HydraLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.PlutoKernels)
-
   openspace.addSceneGraphNode(Hydra)
   openspace.addSceneGraphNode(HydraTrail)
   openspace.addSceneGraphNode(HydraLabel)
@@ -90,8 +88,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HydraLabel)
   openspace.removeSceneGraphNode(HydraTrail)
   openspace.removeSceneGraphNode(Hydra)
-
-  openspace.spice.unloadKernel(kernels.PlutoKernels)
 end)
 
 asset.export(Hydra)

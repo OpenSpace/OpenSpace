@@ -2,7 +2,7 @@ asset.require("spice/base")
 asset.require("../actions")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local kernels = asset.require("scene/solarsystem/missions/apollo/15/kernels")
+local kernels = asset.require("scene/solarsystem/missions/apollo/15/spice")
 
 
 

@@ -1,6 +1,6 @@
 asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local kernel = asset.require("./kernels")
+local kernel = asset.require("./spice")
 
 
 

@@ -1,5 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local kernels = asset.require("./kernels")
+local spice = asset.require("./spice")
 asset.require("spice/base")
 
 local CeresPosition = {
@@ -8,12 +8,12 @@ local CeresPosition = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CERES",
+      Target = spice.Ceres.ID,
       Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_CERES",
+      SourceFrame = spice.Ceres.Frame,
       DestinationFrame = "GALACTIC"
     }
   },
@@ -26,15 +26,11 @@ local CeresPosition = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.CeresKernels)
-
   openspace.addSceneGraphNode(CeresPosition)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CeresPosition)
-
-  openspace.spice.unloadKernel(kernels.CeresKernels)
 end)
 
 asset.export(CeresPosition)
