@@ -68,8 +68,6 @@ local Apollo8LaunchModel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(Apollo8Launch)
   openspace.addSceneGraphNode(Apollo8LaunchModel)
 end)
@@ -77,8 +75,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo8LaunchModel)
   openspace.removeSceneGraphNode(Apollo8Launch)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo8Launch)

@@ -415,9 +415,6 @@ local NesoLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep102)
-
-
   openspace.addSceneGraphNode(Halimede)
   openspace.addSceneGraphNode(HalimedeTrail)
   openspace.addSceneGraphNode(HalimedeLabel)
@@ -459,9 +456,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NesoLabel)
   openspace.removeSceneGraphNode(NesoTrail)
   openspace.removeSceneGraphNode(Neso)
-
-
-  openspace.spice.unloadKernel(kernel.nep102)
 end)
 
 asset.export(Halimede)

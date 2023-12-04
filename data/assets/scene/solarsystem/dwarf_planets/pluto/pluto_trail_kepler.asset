@@ -1,5 +1,4 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local kernels = asset.require("./spice").PlutoKernels
 asset.require("spice/base")
 
 

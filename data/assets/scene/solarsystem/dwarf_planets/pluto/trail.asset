@@ -29,15 +29,11 @@ local PlutoBarycenterTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.PlutoKernels)
-
   openspace.addSceneGraphNode(PlutoBarycenterTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoBarycenterTrail)
-
-  openspace.spice.unloadKernel(kernels.PlutoKernels)
 end)
 
 asset.export(PlutoBarycenterTrail)

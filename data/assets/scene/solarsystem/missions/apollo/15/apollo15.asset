@@ -2,7 +2,7 @@ asset.require("spice/base")
 asset.require("../actions")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local kernels = asset.require("scene/solarsystem/missions/apollo/15/spice")
+local kernels = asset.require("./spice")
 
 
 
@@ -73,8 +73,6 @@ local Apollo15Trail = {
 }
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(Apollo15)
   openspace.addSceneGraphNode(Apollo15Trail)
 end)
@@ -82,8 +80,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo15Trail)
   openspace.removeSceneGraphNode(Apollo15)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo15)

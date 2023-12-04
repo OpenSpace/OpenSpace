@@ -6,7 +6,19 @@ local kernels = asset.resource({
 })
 
 
-asset.export("nep095", kernels .. "nep095.bsp")
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "nep097.bsp")
+  openspace.spice.loadKernel(kernels .. "nep101xl-802.bsp")
+  openspace.spice.loadKernel(kernels .. "nep102.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "nep102.bsp")
+  openspace.spice.unloadKernel(kernels .. "nep101xl-802.bsp")
+  openspace.spice.unloadKernel(kernels .. "nep097.bsp")
+end)
+
+
 asset.export("nep097", kernels .. "nep097.bsp")
 asset.export("nep101xl_802", kernels .. "nep101xl-802.bsp")
 asset.export("nep102", kernels .. "nep102.bsp")

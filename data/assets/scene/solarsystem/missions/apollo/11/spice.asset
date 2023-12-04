@@ -14,4 +14,12 @@ local kernels = {
   kernelsFolder .. "apollo11_orbits_lm9km.bsp"
 }
 
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels.kernels)
+end)
+
 asset.export("kernels", kernels)

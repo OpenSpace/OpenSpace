@@ -130,8 +130,6 @@ local Body = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(spice.Kernels)
-
   openspace.addSceneGraphNode(PerseveranceNode)
   openspace.addSceneGraphNode(Perseverance)
   openspace.addSceneGraphNode(PerseveranceModel)
@@ -143,8 +141,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PerseveranceModel)
   openspace.removeSceneGraphNode(Perseverance)
   openspace.removeSceneGraphNode(PerseveranceNode)
-
-  openspace.spice.unloadKernel(spice.Kernels)
 end)
 
 asset.export(PerseveranceNode)

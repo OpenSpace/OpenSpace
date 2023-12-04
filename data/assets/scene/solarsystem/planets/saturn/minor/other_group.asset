@@ -743,11 +743,6 @@ local S2004S24Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.sat415)
-  openspace.spice.loadKernel(kernels.sat441)
-  openspace.spice.loadKernel(kernels.sat452)
-
-
   openspace.addSceneGraphNode(Aegaeon)
   openspace.addSceneGraphNode(AegaeonTrail)
   openspace.addSceneGraphNode(AegaeonLabel)
@@ -821,12 +816,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(S2004S24Label)
   openspace.removeSceneGraphNode(S2004S24Trail)
   openspace.removeSceneGraphNode(S2004S24)
-
-
-  openspace.spice.unloadKernel(kernels.sat452)
-  openspace.spice.unloadKernel(kernels.sat441)
-  openspace.spice.unloadKernel(kernels.sat415)
-
 end)
 
 asset.export(Aegaeon)

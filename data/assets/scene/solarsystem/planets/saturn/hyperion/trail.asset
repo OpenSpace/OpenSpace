@@ -26,15 +26,11 @@ local HyperionTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(HyperionTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HyperionTrail)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(HyperionTrail)

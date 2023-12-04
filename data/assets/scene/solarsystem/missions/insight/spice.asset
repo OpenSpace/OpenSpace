@@ -1,0 +1,23 @@
+local kernels = asset.resource({
+  Name = "Insight Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "insight_kernels",
+  Version = 1
+})
+
+
+local Kernels = {
+  kernels .. "nsyt_spk_cruise_od063_v1_approach2surface_SC_Lander.tsc",
+  kernels .. "insight_v02.tfr",
+  kernels .. "mar085s.bsp",
+  kernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bsp",
+  kernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bck"
+}
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(Kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(Kernels)
+end)

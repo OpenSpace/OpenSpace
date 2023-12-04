@@ -24,15 +24,11 @@ local NeptuneBarycenter = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep097)
-
   openspace.addSceneGraphNode(NeptuneBarycenter)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneBarycenter)
-
-  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(NeptuneBarycenter)

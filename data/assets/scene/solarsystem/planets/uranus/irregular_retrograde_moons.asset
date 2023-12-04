@@ -661,9 +661,6 @@ local FerdinandLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.ura116)
-
-
   openspace.addSceneGraphNode(Francisco)
   openspace.addSceneGraphNode(FranciscoTrail)
   openspace.addSceneGraphNode(FranciscoLabel)
@@ -729,9 +726,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(FranciscoLabel)
   openspace.removeSceneGraphNode(FranciscoTrail)
   openspace.removeSceneGraphNode(Francisco)
-
-
-  openspace.spice.unloadKernel(kernel.ura116)
 end)
 
 asset.export(Francisco)

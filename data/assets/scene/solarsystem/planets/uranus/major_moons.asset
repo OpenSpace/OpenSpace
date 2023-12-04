@@ -411,9 +411,6 @@ local UranusMajorMoonsOff = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.ura111)
-
-
   openspace.addSceneGraphNode(Miranda)
   openspace.addSceneGraphNode(MirandaTrail)
   openspace.addSceneGraphNode(MirandaLabel)
@@ -461,9 +458,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(OberonLabel)
   openspace.removeSceneGraphNode(OberonTrail)
   openspace.removeSceneGraphNode(Oberon)
-
-
-  openspace.spice.unloadKernel(kernel.ura111)
 end)
 
 asset.export(Miranda)

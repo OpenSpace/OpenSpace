@@ -80,8 +80,6 @@ local EnceladusLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Enceladus)
   openspace.addSceneGraphNode(EnceladusLabel)
 end)
@@ -89,8 +87,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EnceladusLabel)
   openspace.removeSceneGraphNode(Enceladus)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Enceladus)

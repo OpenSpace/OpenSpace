@@ -579,10 +579,6 @@ local ProteusLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep095)
-  openspace.spice.loadKernel(kernel.nep097)
-
-
   openspace.addSceneGraphNode(Naiad)
   openspace.addSceneGraphNode(NaiadTrail)
   openspace.addSceneGraphNode(NaiadLabel)
@@ -640,10 +636,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ProteusLabel)
   openspace.removeSceneGraphNode(ProteusTrail)
   openspace.removeSceneGraphNode(Proteus)
-
-
-  openspace.spice.unloadKernel(kernel.nep097)
-  openspace.spice.unloadKernel(kernel.nep095)
 end)
 
 asset.export(Naiad)

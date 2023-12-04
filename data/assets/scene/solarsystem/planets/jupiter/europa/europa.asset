@@ -79,8 +79,6 @@ local EuropaLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
   openspace.addSceneGraphNode(Europa)
   openspace.addSceneGraphNode(EuropaLabel)
 end)
@@ -88,8 +86,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EuropaLabel)
   openspace.removeSceneGraphNode(Europa)
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Europa)

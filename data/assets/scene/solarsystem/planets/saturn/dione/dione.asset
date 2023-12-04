@@ -79,8 +79,6 @@ local DioneLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Dione)
   openspace.addSceneGraphNode(DioneLabel)
 end)
@@ -88,8 +86,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DioneLabel)
   openspace.removeSceneGraphNode(Dione)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Dione)

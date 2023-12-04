@@ -3859,10 +3859,6 @@ local S2004S39Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.sat441)
-  openspace.spice.loadKernel(kernels.sat452)
-
-
   openspace.addSceneGraphNode(Phoebe)
   openspace.addSceneGraphNode(PhoebeTrail)
   openspace.addSceneGraphNode(PhoebeLabel)
@@ -4240,9 +4236,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PhoebeLabel)
   openspace.removeSceneGraphNode(PhoebeTrail)
   openspace.removeSceneGraphNode(Phoebe)
-
-  openspace.spice.unloadKernel(kernels.sat452)
-  openspace.spice.unloadKernel(kernels.sat441)
 end)
 
 asset.export(Phoebe)

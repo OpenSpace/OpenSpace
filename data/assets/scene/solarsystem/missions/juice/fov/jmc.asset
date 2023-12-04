@@ -62,7 +62,6 @@ local JMC2 = {
 }
 
 
-
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JMC1)
   openspace.addSceneGraphNode(JMC2)

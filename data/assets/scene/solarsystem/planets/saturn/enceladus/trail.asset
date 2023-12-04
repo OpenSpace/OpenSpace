@@ -27,15 +27,11 @@ local EnceladusTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(EnceladusTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EnceladusTrail)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(EnceladusTrail)

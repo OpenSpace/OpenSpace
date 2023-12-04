@@ -1,6 +1,7 @@
 local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
+asset.require("./spice")
 
 
 
@@ -8,13 +9,6 @@ local model = asset.resource({
   Name = "Deimos Model",
   Type = "HttpSynchronization",
   Identifier = "deimos_model",
-  Version = 1
-})
-
-local kernels = asset.resource({
-  Name = "Mars Spice Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "mars_kernels",
   Version = 1
 })
 
@@ -104,8 +98,6 @@ local DeimosLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "mar097.bsp")
-
   openspace.addSceneGraphNode(Deimos)
   openspace.addSceneGraphNode(DeimosTrail)
   openspace.addSceneGraphNode(DeimosLabel)
@@ -115,8 +107,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DeimosLabel)
   openspace.removeSceneGraphNode(DeimosTrail)
   openspace.removeSceneGraphNode(Deimos)
-
-  openspace.spice.unloadKernel(kernels .. "mar097.bsp")
 end)
 
 asset.export(Deimos)

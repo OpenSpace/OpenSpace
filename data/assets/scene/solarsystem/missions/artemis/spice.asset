@@ -1,0 +1,15 @@
+local kernels = asset.resource({
+  Name = "Artemis Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "artemis_1_kernels",
+  Version = 1
+})
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "artemis.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "artemis.bsp")
+end)

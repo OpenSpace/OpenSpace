@@ -743,10 +743,6 @@ local ErsaLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-  openspace.spice.loadKernel(kernel.jup346)
-
-
   openspace.addSceneGraphNode(Leda)
   openspace.addSceneGraphNode(LedaTrail)
   openspace.addSceneGraphNode(LedaLabel)
@@ -820,10 +816,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(LedaLabel)
   openspace.removeSceneGraphNode(LedaTrail)
   openspace.removeSceneGraphNode(Leda)
-
-
-  openspace.spice.unloadKernel(kernel.jup346)
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Leda)

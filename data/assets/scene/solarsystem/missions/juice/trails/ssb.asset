@@ -27,15 +27,11 @@ local JuiceTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.Kernels)
-
   openspace.addSceneGraphNode(JuiceTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JuiceTrail)
-
-  openspace.spice.unloadKernel(kernels.Kernels)
 end)
 
 asset.export(JuiceTrail)

@@ -80,8 +80,6 @@ local TitanLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Titan)
   openspace.addSceneGraphNode(TitanLabel)
 end)
@@ -89,8 +87,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TitanLabel)
   openspace.removeSceneGraphNode(Titan)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Titan)

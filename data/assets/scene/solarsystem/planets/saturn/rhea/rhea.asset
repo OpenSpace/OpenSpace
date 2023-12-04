@@ -80,8 +80,6 @@ local RheaLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Rhea)
   openspace.addSceneGraphNode(RheaLabel)
 end)
@@ -89,8 +87,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(RheaLabel)
   openspace.removeSceneGraphNode(Rhea)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Rhea)

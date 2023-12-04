@@ -1891,10 +1891,6 @@ local S2003J23Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-  openspace.spice.loadKernel(kernel.jup346)
-
-
   openspace.addSceneGraphNode(Euporie)
   openspace.addSceneGraphNode(EuporieTrail)
   openspace.addSceneGraphNode(EuporieLabel)
@@ -2080,10 +2076,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EuporieLabel)
   openspace.removeSceneGraphNode(EuporieTrail)
   openspace.removeSceneGraphNode(Euporie)
-
-
-  openspace.spice.unloadKernel(kernel.jup346)
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Euporie)

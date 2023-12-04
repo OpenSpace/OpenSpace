@@ -26,17 +26,11 @@ local Trail = {
 }
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep097)
-
-
   openspace.addSceneGraphNode(Trail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Trail)
-
-
-  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(Trail)

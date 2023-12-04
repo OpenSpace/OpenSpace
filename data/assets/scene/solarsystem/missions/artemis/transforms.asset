@@ -1,5 +1,6 @@
 asset.require("spice/base")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+asset.require("./spice")
 
 
 
@@ -34,15 +35,11 @@ local ArtemisPosition = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "artemis.bsp")
-
   openspace.addSceneGraphNode(ArtemisPosition)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ArtemisPosition)
-
-  openspace.spice.unloadKernel(kernels .. "artemis.bsp")
 end)
 
 asset.export(ArtemisPosition)

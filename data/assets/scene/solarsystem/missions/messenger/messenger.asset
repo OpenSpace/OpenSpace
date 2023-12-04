@@ -153,8 +153,6 @@ local MessengerTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.Kernels)
-
   openspace.addSceneGraphNode(Messenger)
   openspace.addSceneGraphNode(MessengerProbeBlack)
   openspace.addSceneGraphNode(MessengerProbeFoil)
@@ -172,8 +170,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MessengerProbeFoil)
   openspace.removeSceneGraphNode(MessengerProbeBlack)
   openspace.removeSceneGraphNode(Messenger)
-
-  openspace.spice.unloadKernel(kernels.Kernels)
 end)
 
 asset.export(Messenger)

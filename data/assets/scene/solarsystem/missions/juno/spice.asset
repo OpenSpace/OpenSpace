@@ -116,4 +116,14 @@ local JunoKernels = {
   kernels .. "juno_sc_prl_230228_230407_jm0490rp_v01.bc"
 }
 
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(JunoKernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(JunoKernels)
+end)
+
+
 asset.export("kernels", JunoKernels)

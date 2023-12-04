@@ -27,15 +27,11 @@ local IoTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
   openspace.addSceneGraphNode(IoTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(IoTrail)
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(IoTrail)

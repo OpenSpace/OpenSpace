@@ -47,9 +47,6 @@ local NewHorizonsPosition = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.PlutoKernels)
-  openspace.spice.loadKernel(kernels.NewHorizonsKernels)
-
   openspace.addSceneGraphNode(PlutoBarycenterAccurate)
   openspace.addSceneGraphNode(NewHorizonsPosition)
 end)
@@ -57,9 +54,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NewHorizonsPosition)
   openspace.removeSceneGraphNode(PlutoBarycenterAccurate)
-
-  openspace.spice.unloadKernel(kernels.NewHorizonsKernels)
-  openspace.spice.unloadKernel(kernels.PlutoKernels)
 end)
 
 asset.export(PlutoBarycenterAccurate)

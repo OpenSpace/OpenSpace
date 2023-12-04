@@ -69,8 +69,6 @@ local GPHIO = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.Kernels)
-
   openspace.addSceneGraphNode(Juice)
   openspace.addSceneGraphNode(GanymedePosition)
   openspace.addSceneGraphNode(GPHIO)
@@ -80,8 +78,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GPHIO)
   openspace.removeSceneGraphNode(GanymedePosition)
   openspace.removeSceneGraphNode(Juice)
-
-  openspace.spice.unloadKernel(kernels.Kernels)
 end)
 
 asset.export(Juice)

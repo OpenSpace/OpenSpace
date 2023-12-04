@@ -164,8 +164,6 @@ local PolyCamFov = {
 -- }
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(OsirisRex)
   openspace.addSceneGraphNode(PolyCam)
   openspace.addSceneGraphNode(Rexis)
@@ -179,8 +177,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Rexis)
   openspace.removeSceneGraphNode(PolyCam)
   openspace.removeSceneGraphNode(OsirisRex)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(OsirisRex)

@@ -2,15 +2,8 @@ asset.require("spice/base")
 asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("./spice")
 
-
-
-local kernels = asset.resource({
-  Name = "JWST Kernel",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_kernels",
-  Version = 2
-})
 
 
 local LaunchTime = "2021 DEC 25 12:20:00"
@@ -82,8 +75,6 @@ local JWSTRotation = {
 
 -- Reparent the JWSTPosition node when the data changes
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "webb.bsp")
-
   openspace.addSceneGraphNode(JWSTPosition)
   openspace.addSceneGraphNode(JWSTRotation)
 
@@ -118,8 +109,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTRotation)
   openspace.removeSceneGraphNode(JWSTPosition)
   openspace.scriptScheduler.clear(1)
-
-  openspace.spice.unloadKernel(kernels .. "webb.bsp")
 end)
 
 asset.export(JWSTPosition)

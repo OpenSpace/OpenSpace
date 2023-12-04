@@ -78,8 +78,6 @@ local HyperionLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Hyperion)
   openspace.addSceneGraphNode(HyperionLabel)
 end)
@@ -87,8 +85,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HyperionLabel)
   openspace.removeSceneGraphNode(Hyperion)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Hyperion)

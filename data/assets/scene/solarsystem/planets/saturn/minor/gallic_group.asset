@@ -333,9 +333,6 @@ local TarvosLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat452)
-
-
   openspace.addSceneGraphNode(Albiorix)
   openspace.addSceneGraphNode(AlbiorixTrail)
   openspace.addSceneGraphNode(AlbiorixLabel)
@@ -369,9 +366,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(AlbiorixLabel)
   openspace.removeSceneGraphNode(AlbiorixTrail)
   openspace.removeSceneGraphNode(Albiorix)
-
-
-  openspace.spice.unloadKernel(kernel.sat452)
 end)
 
 asset.export(Albiorix)

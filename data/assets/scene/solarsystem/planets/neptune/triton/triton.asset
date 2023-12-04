@@ -79,9 +79,6 @@ local TritonLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep097)
-
-
   openspace.addSceneGraphNode(Triton)
   openspace.addSceneGraphNode(TritonTrail)
   openspace.addSceneGraphNode(TritonLabel)
@@ -91,9 +88,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TritonLabel)
   openspace.removeSceneGraphNode(TritonTrail)
   openspace.removeSceneGraphNode(Triton)
-
-
-  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(Triton)

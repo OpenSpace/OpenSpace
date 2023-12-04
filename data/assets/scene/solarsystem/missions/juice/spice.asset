@@ -54,6 +54,15 @@ local Kernels = {
   kernels .. "juice_roi_v02.bsp"
 }
 
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(Kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(Kernels)
+end)
+
 asset.export("Kernels", Kernels)
 
 

@@ -54,8 +54,6 @@ local PerseveranceTrailMars = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(spice.Kernels)
-
   openspace.addSceneGraphNode(PerseveranceTrailSun)
   openspace.addSceneGraphNode(PerseveranceTrailMars)
 end)
@@ -63,8 +61,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PerseveranceTrailMars)
   openspace.removeSceneGraphNode(PerseveranceTrailSun)
-
-  openspace.spice.unloadKernel(spice.Kernels)
 end)
 
 asset.export(PerseveranceTrailSun)

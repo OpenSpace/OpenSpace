@@ -27,15 +27,11 @@ local MimasTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(MimasTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MimasTrail)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(MimasTrail)

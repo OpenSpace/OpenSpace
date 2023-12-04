@@ -1,13 +1,6 @@
 local transforms = asset.require("../transforms")
+asset.require("./spice")
 
-
-
-local kernels = asset.resource({
-  Name = "Mars Spice Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "mars_kernels",
-  Version = 1
-})
 
 
 local PhobosGlobe = {
@@ -43,15 +36,11 @@ local PhobosGlobe = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "mar097.bsp")
-
   openspace.addSceneGraphNode(PhobosGlobe)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PhobosGlobe)
-
-  openspace.spice.unloadKernel(kernels .. "mar097.bsp")
 end)
 
 asset.export(PhobosGlobe)

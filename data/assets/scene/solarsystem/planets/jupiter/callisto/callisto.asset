@@ -80,8 +80,6 @@ local CallistoLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
   openspace.addSceneGraphNode(Callisto)
   openspace.addSceneGraphNode(CallistoLabel)
 end)
@@ -89,8 +87,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CallistoLabel)
   openspace.removeSceneGraphNode(Callisto)
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Callisto)

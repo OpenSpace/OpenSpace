@@ -30,15 +30,11 @@ local NeptuneTrailEarth = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep097)
-
   openspace.addSceneGraphNode(NeptuneTrailEarth)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneTrailEarth)
-
-  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(NeptuneTrailEarth)

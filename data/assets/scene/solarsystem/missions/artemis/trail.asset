@@ -1,17 +1,11 @@
 asset.require("spice/base")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+asset.require("./spice")
 
 
 
 local ArtemisSpiceId = "-1023"
-
-local kernels = asset.resource({
-  Name = "Artemis Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "artemis_1_kernels",
-  Version = 1
-})
 
 local ArtemisEarthTrail = {
   Identifier = "ArtemisEarthTrail",
@@ -63,8 +57,6 @@ local ArtemisMoonTrail= {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "artemis.bsp")
-
   openspace.addSceneGraphNode(ArtemisEarthTrail)
   openspace.addSceneGraphNode(ArtemisMoonTrail)
 end)
@@ -72,8 +64,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ArtemisMoonTrail)
   openspace.removeSceneGraphNode(ArtemisEarthTrail)
-
-  openspace.spice.unloadKernel(kernels .. "artemis.bsp")
 end)
 
 asset.export(ArtemisEarthTrail)

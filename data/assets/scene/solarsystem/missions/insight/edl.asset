@@ -3,7 +3,7 @@ asset.require("./actions")
 asset.require("scene/solarsystem/planets/mars/default_layers")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
-
+asset.require("./spice")
 
 
 local models = asset.resource({
@@ -12,22 +12,6 @@ local models = asset.resource({
   Identifier = "insight_models",
   Version = 2
 })
-
-local ikernels = asset.resource({
-  Name = "Insight Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "insight_kernels",
-  Version = 1
-})
-
-
-local iKernels = {
-  ikernels .. "nsyt_spk_cruise_od063_v1_approach2surface_SC_Lander.tsc",
-  ikernels .. "insight_v02.tfr",
-  ikernels .. "mar085s.bsp",
-  ikernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bsp",
-  ikernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bck"
-}
 
 local RotationMatrix = {
   -1,  0,  0, 0,
@@ -786,8 +770,6 @@ local Insight_Trail = {
 }
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(iKernels)
-
   openspace.addSceneGraphNode(InsightParent)
   openspace.addSceneGraphNode(Insight)
   openspace.addSceneGraphNode(Insight_Entry_CapsuleA)
@@ -859,8 +841,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Insight_Entry_CapsuleA)
   openspace.removeSceneGraphNode(Insight)
   openspace.removeSceneGraphNode(InsightParent)
-
-  openspace.spice.unloadKernel(iKernels)
 end)
 
 asset.export(InsightParent)

@@ -15,4 +15,13 @@ local kernels = {
   kernelsFolder .. "apollo8_earthrise.bc"
 }
 
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels)
+end)
+
+
 asset.export("kernels", kernels)

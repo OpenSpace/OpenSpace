@@ -239,8 +239,6 @@ local PlutoShadow = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.NewHorizonsKernels)
-
   openspace.addSceneGraphNode(PlutoProjection)
   openspace.addSceneGraphNode(PlutoBarycenterLabel)
   openspace.addSceneGraphNode(PlutoText)
@@ -252,8 +250,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoText)
   openspace.removeSceneGraphNode(PlutoBarycenterLabel)
   openspace.removeSceneGraphNode(PlutoProjection)
-
-  openspace.spice.unloadKernel(kernels.NewHorizonsKernels)
 end)
 
 asset.export(PlutoProjection)

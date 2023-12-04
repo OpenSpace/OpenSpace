@@ -79,8 +79,6 @@ local IoLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
   openspace.addSceneGraphNode(Io)
   openspace.addSceneGraphNode(IoLabel)
 end)
@@ -88,8 +86,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(IoLabel)
   openspace.removeSceneGraphNode(Io)
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Io)

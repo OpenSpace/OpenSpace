@@ -661,9 +661,6 @@ local S2019S01Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat452)
-
-
   openspace.addSceneGraphNode(Kiviuq)
   openspace.addSceneGraphNode(KiviuqTrail)
   openspace.addSceneGraphNode(KiviuqLabel)
@@ -729,9 +726,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(KiviuqLabel)
   openspace.removeSceneGraphNode(KiviuqTrail)
   openspace.removeSceneGraphNode(Kiviuq)
-
-
-  openspace.spice.unloadKernel(kernel.sat452)
 end)
 
 asset.export(Kiviuq)

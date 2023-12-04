@@ -38,4 +38,12 @@ local Kernels = {
   kernels .. "msgr_1106_v02.bc"
 }
 
+asset.onInitialize(function()
+  openspace.spice.loadKernel(Kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(Kernels)
+end)
+
 asset.export("Kernels", Kernels)

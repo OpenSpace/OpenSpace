@@ -87,9 +87,6 @@ local MargaretLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.ura116)
-
-
   openspace.addSceneGraphNode(Margaret)
   openspace.addSceneGraphNode(MargaretTrail)
   openspace.addSceneGraphNode(MargaretLabel)
@@ -99,9 +96,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MargaretLabel)
   openspace.removeSceneGraphNode(MargaretTrail)
   openspace.removeSceneGraphNode(Margaret)
-
-
-  openspace.spice.unloadKernel(kernel.ura116)
 end)
 
 asset.export(Margaret)

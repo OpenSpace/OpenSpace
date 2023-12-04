@@ -27,15 +27,11 @@ local CallistoTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
   openspace.addSceneGraphNode(CallistoTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CallistoTrail)
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(CallistoTrail)

@@ -219,9 +219,6 @@ local S2018J4LabelNear = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-
-
   openspace.addSceneGraphNode(Carpo)
   openspace.addSceneGraphNode(CarpoTrail)
   openspace.addSceneGraphNode(CarpoLabel)
@@ -239,8 +236,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CarpoLabel)
   openspace.removeSceneGraphNode(CarpoTrail)
   openspace.removeSceneGraphNode(Carpo)
-
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Carpo)

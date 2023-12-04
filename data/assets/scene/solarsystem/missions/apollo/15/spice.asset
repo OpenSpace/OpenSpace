@@ -90,4 +90,12 @@ local kernels = {
 -- folder .. "AS15_M_REV72_v2.bc",
 -- }
 
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels)
+end)
+
 asset.export("kernels", kernels)

@@ -113,4 +113,13 @@ local OsirisRexKernels = {
   kernels .. "orx_210509_231025_210119_od298-R-ADM1-P-DB1_v1.bsp"
 }
 
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(OsirisRexKernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(OsirisRexKernels)
+end)
+
 asset.export("kernels", OsirisRexKernels)

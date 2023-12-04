@@ -6,6 +6,18 @@ local kernels = asset.resource({
 })
 
 
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "sat415.bsp")
+  openspace.spice.loadKernel(kernels .. "sat441.bsp")
+  openspace.spice.loadKernel(kernels .. "sat452.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "sat452.bsp")
+  openspace.spice.unloadKernel(kernels .. "sat441.bsp")
+  openspace.spice.unloadKernel(kernels .. "sat415.bsp")
+end)
+
 asset.export("sat415", kernels .. "sat415.bsp")
 asset.export("sat441", kernels .. "sat441.bsp")
 asset.export("sat452", kernels .. "sat452.bsp")

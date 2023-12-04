@@ -1644,10 +1644,6 @@ local S2003J12Label = {
 }
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-  openspace.spice.loadKernel(kernel.jup346)
-
-
   openspace.addSceneGraphNode(S2010J2)
   openspace.addSceneGraphNode(S2010J2Trail)
   openspace.addSceneGraphNode(S2010J2Label)
@@ -1809,10 +1805,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(S2010J2Label)
   openspace.removeSceneGraphNode(S2010J2Trail)
   openspace.removeSceneGraphNode(S2010J2)
-
-
-  openspace.spice.unloadKernel(kernel.jup346)
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(S2010J2)

@@ -2301,10 +2301,6 @@ local S2003J10Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-  openspace.spice.loadKernel(kernel.jup346)
-
-
   openspace.addSceneGraphNode(Herse)
   openspace.addSceneGraphNode(HerseTrail)
   openspace.addSceneGraphNode(HerseLabel)
@@ -2530,10 +2526,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HerseLabel)
   openspace.removeSceneGraphNode(HerseTrail)
   openspace.removeSceneGraphNode(Herse)
-
-
-  openspace.spice.loadKernel(kernel.jup346)
-  openspace.spice.loadKernel(kernel.jup344)
 end)
 
 asset.export(Herse)

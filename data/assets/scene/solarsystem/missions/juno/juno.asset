@@ -81,8 +81,6 @@ local JunoTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(Juno)
   openspace.addSceneGraphNode(JunoTrail)
 end)
@@ -90,8 +88,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JunoTrail)
   openspace.removeSceneGraphNode(Juno)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Juno)

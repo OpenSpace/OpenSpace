@@ -61,8 +61,6 @@ local NeptuneLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep097)
-
   openspace.addSceneGraphNode(Neptune)
   openspace.addSceneGraphNode(NeptuneLabel)
 end)
@@ -70,8 +68,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneLabel)
   openspace.removeSceneGraphNode(Neptune)
-
-  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(Neptune)

@@ -240,8 +240,6 @@ local Apollo11LemLandedModel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(Apollo11Position)
   openspace.addSceneGraphNode(Apollo11LemPosition)
   openspace.addSceneGraphNode(Apollo11Model)
@@ -259,8 +257,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo11Model)
   openspace.removeSceneGraphNode(Apollo11LemPosition)
   openspace.removeSceneGraphNode(Apollo11Position)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo11Position)

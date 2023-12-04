@@ -80,8 +80,6 @@ local MimasLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Mimas)
   openspace.addSceneGraphNode(MimasLabel)
 end)
@@ -89,8 +87,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MimasLabel)
   openspace.removeSceneGraphNode(Mimas)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Mimas)

@@ -333,9 +333,6 @@ local ThebeLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
-
   openspace.addSceneGraphNode(Metis)
   openspace.addSceneGraphNode(MetisTrail)
   openspace.addSceneGraphNode(MetisLabel)
@@ -370,9 +367,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ThebeLabel)
   openspace.removeSceneGraphNode(ThebeTrail)
   openspace.removeSceneGraphNode(Thebe)
-
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 

@@ -42,6 +42,17 @@ local PlutoKernels = {
   Kernels .. "NavSE_plu047_od122.bsp"
 }
 
-asset.export("Kernels", Kernels)
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(NewHorizonsKernels)
+  openspace.spice.loadKernel(PlutoKernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(PlutoKernels)
+  openspace.spice.unloadKernel(NewHorizonsKernels)
+end)
+
+
 asset.export("NewHorizonsKernels", NewHorizonsKernels)
 asset.export("PlutoKernels", PlutoKernels)

@@ -1070,9 +1070,6 @@ local MabLabel = {
 }
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.ura115)
-
-
   openspace.addSceneGraphNode(Cordelia)
   openspace.addSceneGraphNode(CordeliaTrail)
   openspace.addSceneGraphNode(CordeliaLabel)
@@ -1178,9 +1175,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MabLabel)
   openspace.removeSceneGraphNode(MabTrail)
   openspace.removeSceneGraphNode(Mab)
-
-
-  openspace.spice.unloadKernel(kernel.ura115)
 end)
 
 asset.export(Cordelia)

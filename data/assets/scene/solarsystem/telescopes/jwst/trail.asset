@@ -2,15 +2,7 @@ asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-
-
-
-local kernels = asset.resource({
-  Name = "JWST Kernel",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_kernels",
-  Version = 2
-})
+asset.require("./spice")
 
 
 local LaunchTime = "2021 DEC 25 12:20:00"
@@ -176,8 +168,6 @@ local JWSTSunTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "webb.bsp")
-
   openspace.addSceneGraphNode(JWSTTrailLaunch)
   openspace.addSceneGraphNode(JWSTTrailCruise)
   openspace.addSceneGraphNode(JWSTTrailOrbit)
@@ -191,8 +181,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTTrailOrbit)
   openspace.removeSceneGraphNode(JWSTTrailCruise)
   openspace.removeSceneGraphNode(JWSTTrailLaunch)
-
-  openspace.spice.unloadKernel(kernels .. "webb.bsp")
 end)
 
 asset.export(JWSTTrailLaunch)

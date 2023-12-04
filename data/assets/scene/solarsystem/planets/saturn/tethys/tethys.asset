@@ -78,8 +78,6 @@ local TethysLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Tethys)
   openspace.addSceneGraphNode(TethysLabel)
 end)
@@ -87,8 +85,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TethysLabel)
   openspace.removeSceneGraphNode(Tethys)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Tethys)

@@ -1,13 +1,6 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("./spice")
 
-
-
-local kernels = asset.resource({
-  Name = "Vesta Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "vesta_kernels",
-  Version = 1
-})
 
 local textures = asset.resource({
   Name = "Vesta Textures",
@@ -138,8 +131,6 @@ local VestaTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "sb_vesta_071107.bsp")
-
   openspace.addSceneGraphNode(Vesta)
   openspace.addSceneGraphNode(VestaTrail)
 end)
@@ -147,8 +138,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VestaTrail)
   openspace.removeSceneGraphNode(Vesta)
-
-  openspace.spice.unloadKernel(kernels .. "sb_vesta_071107.bsp")
 end)
 
 asset.export(Vesta)

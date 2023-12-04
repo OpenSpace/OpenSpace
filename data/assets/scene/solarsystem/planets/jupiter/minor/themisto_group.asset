@@ -87,9 +87,6 @@ local ThemistoLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-
-
   openspace.addSceneGraphNode(Themisto)
   openspace.addSceneGraphNode(ThemistoTrail)
   openspace.addSceneGraphNode(ThemistoLabel)
@@ -99,9 +96,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ThemistoLabel)
   openspace.removeSceneGraphNode(ThemistoTrail)
   openspace.removeSceneGraphNode(Themisto)
-
-
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Themisto)

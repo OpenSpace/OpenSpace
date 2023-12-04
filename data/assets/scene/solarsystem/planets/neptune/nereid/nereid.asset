@@ -74,9 +74,6 @@ local NereidLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep101xl_802)
-
-
   openspace.addSceneGraphNode(Nereid)
   openspace.addSceneGraphNode(NereidTrail)
   openspace.addSceneGraphNode(NereidLabel)
@@ -86,9 +83,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NereidLabel)
   openspace.removeSceneGraphNode(NereidTrail)
   openspace.removeSceneGraphNode(Nereid)
-
-
-  openspace.spice.unloadKernel(kernel.nep101xl_802)
 end)
 
 asset.export(Nereid)
