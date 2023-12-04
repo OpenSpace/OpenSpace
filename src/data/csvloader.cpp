@@ -93,14 +93,16 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     for (size_t i = 0; i < columns.size(); ++i) {
         const std::string& col = columns[i];
 
-        if (isColumnX(col, specs)) {
-            xColumn = static_cast<int>(i);
-        }
-        else if (isColumnY(col, specs)) {
-            yColumn = static_cast<int>(i);
-        }
-        else if (isColumnZ(col, specs)) {
-            zColumn = static_cast<int>(i);
+        if (isPositionColumn(col, specs)) {
+            if (isColumnX(col, specs)) {
+                xColumn = static_cast<int>(i);
+            }
+            if (isColumnY(col, specs)) {
+                yColumn = static_cast<int>(i);
+            }
+            if (isColumnZ(col, specs)) {
+                zColumn = static_cast<int>(i);
+            }
         }
         else if (hasExcludeColumns && (*specs).isExcludeColumn(col)) {
             skipColumns.push_back(i);
@@ -143,14 +145,16 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             // For now, all values are converted to float
             float value = readFloatData(strValue);
 
-            if (i == xColumn) {
-                entry.position.x = value;
-            }
-            else if (i == yColumn) {
-                entry.position.y = value;
-            }
-            else if (i == zColumn) {
-                entry.position.z = value;
+            if (i == xColumn || i == yColumn || i == zColumn) {
+                if (i == xColumn) {
+                    entry.position.x = value;
+                }
+                if (i == yColumn) {
+                    entry.position.y = value;
+                }
+                if (i == zColumn) {
+                    entry.position.z = value;
+                }
             }
             else {
                 entry.data.push_back(value);

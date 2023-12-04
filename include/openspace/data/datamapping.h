@@ -61,6 +61,8 @@ struct DataMapping {
  */
 std::string generateHashString(const DataMapping& dm);
 
+bool isPositionColumn(const std::string& c, const std::optional<DataMapping>& mapping);
+
 bool isColumnX(const std::string& c, const std::optional<DataMapping>& mapping);
 
 bool isColumnY(const std::string& c, const std::optional<DataMapping>& mapping);

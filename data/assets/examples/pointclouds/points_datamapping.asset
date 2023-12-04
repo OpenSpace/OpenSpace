@@ -12,7 +12,7 @@ local Example = {
       -- used for the rendering
       X = "a",
       Y = "b",
-      Z = "normaldist_withMissing",
+      Z = "a",
       -- It is also possible to specify a numeric value that corresponds to missing
       -- values in the dataset. These will be interpreted as NaN values
       MissingDataValue = 29,

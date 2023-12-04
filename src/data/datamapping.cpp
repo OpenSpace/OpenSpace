@@ -74,6 +74,10 @@ namespace {
     // It allows specifying things like column names, whether the reading of those
     // column names hsould be case sensitive, data value that represents missing
     // values in the dataset, and more. See details for each field / class member.
+    //
+    // Note that things related to reading the point the position will not be hadled for
+    // SPECK files, as for those we always expect the first three values per row to
+    // specify the XYZ position
     struct [[codegen::Dictionary(DataMapping)]] Parameters {
         // Specifies the column name for the x coordinate
         std::optional<std::string> x;
@@ -161,6 +165,10 @@ std::string generateHashString(const DataMapping& dm) {
         dm.isCaseSensitive ? "1" : "0",
         excludeColumnsHash
     );
+}
+
+bool isPositionColumn(const std::string& c, const std::optional<DataMapping>& mapping) {
+    return isColumnX(c, mapping) || isColumnY(c, mapping) || isColumnZ(c, mapping);
 }
 
 bool isColumnX(const std::string& c, const std::optional<DataMapping>& mapping) {
