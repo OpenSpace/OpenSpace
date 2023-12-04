@@ -105,6 +105,7 @@ private:
     dataloader::ColorMap _colorMap;
 
     std::optional<std::string> _providedParameter;
+    std::optional<glm::vec2> _providedRange;
 
     bool _nanColorInAsset = false;
     bool _belowRangeColorInAsset = false;

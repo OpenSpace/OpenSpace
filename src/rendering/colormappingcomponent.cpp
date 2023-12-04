@@ -48,7 +48,7 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorParameterInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ParameterInfo = {
         "Parameter",
         "Parameter",
         "This value determines which paramenter is used for coloring the points based "
@@ -59,7 +59,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorRangeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RangeInfo = {
         "ValueRange",
         "Value Range",
         "This value changes the range of values to be mapped with the current color map",
@@ -161,8 +161,11 @@ namespace {
         };
         std::optional<std::vector<ColorMapParameter>> parameterOptions;
 
-        // [[codegen::verbatim(ColorParameterInfo.description)]]
+        // [[codegen::verbatim(ParameterInfo.description)]]
         std::optional<std::string> parameter;
+
+        // [[codegen::verbatim(RangeInfo.description)]]
+        std::optional<glm::vec2> valueRange;
 
         // [[codegen::verbatim(HideOutsideInfo.description)]]
         std::optional<bool> hideValuesOutsideRange;
@@ -197,9 +200,9 @@ documentation::Documentation ColorMappingComponent::Documentation() {
 ColorMappingComponent::ColorMappingComponent()
     : properties::PropertyOwner({ "ColorMapping", "Color Mapping", "" })
     , enabled(EnabledInfo, true)
-    , dataColumn(ColorParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , dataColumn(ParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
     , colorMapFile(FileInfo)
-    , valueRange(ColorRangeInfo, glm::vec2(0.f))
+    , valueRange(RangeInfo, glm::vec2(0.f))
     , setRangeFromData(SetRangeFromDataInfo)
     , hideOutsideRange(HideOutsideInfo, false)
     , useNanColor(UseNoDataColorInfo, false)
@@ -251,7 +254,6 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
         for (size_t i = 0; i < opts.size(); ++i) {
             dataColumn.addOption(static_cast<int>(i), opts[i].key);
             _colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
-
         }
 
         // Following DU behavior here. The last colormap variable
@@ -268,8 +270,9 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
         _providedParameter = *(p.parameter);
     }
 
-    // @TODO: read valueRange from asset if specified. How to avoid overriding it
-    // in initialize?
+    if (p.valueRange.has_value()) {
+        _providedRange = *(p.valueRange);
+    }
 
     hideOutsideRange = p.hideValuesOutsideRange.value_or(hideOutsideRange);
 
@@ -321,11 +324,6 @@ void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
     if (_colorMap.aboveRangeColor.has_value() && !_aboveRangeColorInAsset) {
         aboveRangeColor = *_colorMap.aboveRangeColor;
         useAboveRangeColor = true;
-    }
-
-    // Set the value range and selected option again, to make sure that it's updated
-    if (!_colorRangeData.empty()) {
-        valueRange = _colorRangeData.back();
     }
 }
 
@@ -425,7 +423,8 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
             i++;
         }
 
-        if (_colorRangeData.size() > 1) {
+        // Per default, set to the last column
+        if (!_colorRangeData.empty()) {
             dataColumn = static_cast<int>(_colorRangeData.size() - 1);
         }
     }
@@ -465,6 +464,11 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
         else {
             dataColumn = indexOfProvidedOption;
         }
+    }
+
+    // Do this last, as to override any other values set above
+    if (_providedRange.has_value()) {
+        valueRange = *_providedRange;
     }
 }
 
