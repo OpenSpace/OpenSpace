@@ -145,8 +145,8 @@ namespace openspace {
 LuaConsole::LuaConsole()
     : properties::PropertyOwner({ "LuaConsole", "Lua Console" })
     , _isVisible(VisibleInfo, false)
-    , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
     , _shouldBeSynchronized(ShouldBeSynchronizedInfo, true)
+    , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
     , _backgroundColor(
         BackgroundColorInfo,
         glm::vec4(21.f / 255.f, 23.f / 255.f, 28.f / 255.f, 0.8f),

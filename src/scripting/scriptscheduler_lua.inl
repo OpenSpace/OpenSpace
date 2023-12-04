@@ -107,6 +107,36 @@ namespace {
     openspace::global::scriptScheduler->clearSchedule(group);
 }
 
+// Returns the list of all scheduled scripts
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> scheduledScripts() {
+    using namespace openspace;
+
+    std::vector<scripting::ScriptScheduler::ScheduledScript> scripts =
+        global::scriptScheduler->allScripts();
+
+    std::vector<ghoul::Dictionary> result;
+    result.reserve(scripts.size());
+
+    for (const scripting::ScriptScheduler::ScheduledScript& script : scripts) {
+        ghoul::Dictionary d;
+        d.setValue("Time", script.time);
+        if (!script.forwardScript.empty()) {
+            d.setValue("ForwardScript", script.forwardScript);
+        }
+        if (!script.backwardScript.empty()) {
+            d.setValue("BackwardScript", script.backwardScript);
+        }
+        if (!script.universalScript.empty()) {
+            d.setValue("UniversalScript", script.universalScript);
+        }
+        d.setValue("Group", script.group);
+
+        result.push_back(d);
+    }
+
+    return result;
+}
+
 #include "scriptscheduler_lua_codegen.cpp"
 
 } // namespace

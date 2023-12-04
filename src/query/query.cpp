@@ -56,14 +56,7 @@ properties::Property* property(const std::string& uri) {
 }
 
 std::vector<properties::Property*> allProperties() {
-    std::vector<properties::Property*> properties;
-
-    std::vector<properties::Property*> p =
-        global::rootPropertyOwner->propertiesRecursive();
-
-    properties.insert(properties.end(), p.begin(), p.end());
-
-    return properties;
+    return global::rootPropertyOwner->propertiesRecursive();
 }
 
 }  // namespace

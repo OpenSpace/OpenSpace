@@ -43,6 +43,7 @@
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
+#include <memory>
 
 namespace openspace::documentation { struct Documentation; }
 
@@ -298,10 +299,8 @@ private:
     Layer* _lastChangedLayer = nullptr;
 
     // Components
-    RingsComponent _ringsComponent;
-    ShadowComponent _shadowComponent;
-    bool _hasRings = false;
-    bool _hasShadows = false;
+    std::unique_ptr<RingsComponent> _ringsComponent;
+    std::unique_ptr<ShadowComponent> _shadowComponent;
 
     // Labels
     GlobeLabelsComponent _globeLabelsComponent;

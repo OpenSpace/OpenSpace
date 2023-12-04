@@ -574,8 +574,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
-    , _ringsComponent(dictionary)
-    , _shadowComponent(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -691,17 +689,17 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_geoJsonManager);
 
     // Components
-    _hasRings = p.rings.has_value();
-    if (_hasRings) {
-        _ringsComponent.setParentFadeable(this);
-        _ringsComponent.initialize();
-        addPropertySubOwner(_ringsComponent);
+    if (p.rings.has_value()) {
+        _ringsComponent = std::make_unique<RingsComponent>(dictionary);
+        _ringsComponent->setParentFadeable(this);
+        _ringsComponent->initialize();
+        addPropertySubOwner(_ringsComponent.get());
     }
 
-    _hasShadows = p.shadows.has_value();
-    if (_hasShadows) {
-        _shadowComponent.initialize();
-        addPropertySubOwner(_shadowComponent);
+    if (p.shadows.has_value()) {
+        _shadowComponent = std::make_unique<ShadowComponent>(dictionary);
+        _shadowComponent->initialize();
+        addPropertySubOwner(_shadowComponent.get());
         _generalProperties.shadowMapping = true;
     }
     _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
@@ -724,12 +722,12 @@ void RenderableGlobe::initializeGL() {
 
     _grid.initializeGL();
 
-    if (_hasRings) {
-        _ringsComponent.initializeGL();
+    if (_ringsComponent) {
+        _ringsComponent->initializeGL();
     }
 
-    if (_hasShadows) {
-        _shadowComponent.initializeGL();
+    if (_shadowComponent) {
+        _shadowComponent->initializeGL();
     }
 
     // Recompile the shaders directly so that it is not done the first time the render
@@ -756,12 +754,12 @@ void RenderableGlobe::deinitializeGL() {
 
     _grid.deinitializeGL();
 
-    if (_hasRings) {
-        _ringsComponent.deinitializeGL();
+    if (_ringsComponent) {
+        _ringsComponent->deinitializeGL();
     }
 
-    if (_hasShadows) {
-        _shadowComponent.deinitializeGL();
+    if (_shadowComponent) {
+        _shadowComponent->deinitializeGL();
     }
 }
 
@@ -785,18 +783,18 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
     if ((distanceToCamera < distance) || (_generalProperties.renderAtDistance)) {
         try {
-            if (_hasShadows && _shadowComponent.isEnabled()) {
+            if (_shadowComponent && _shadowComponent->isEnabled()) {
                 // Set matrices and other GL states
-                RenderData lightRenderData(_shadowComponent.begin(data));
+                RenderData lightRenderData(_shadowComponent->begin(data));
 
                 glDisable(GL_BLEND);
 
                 // Render from light source point of view
                 renderChunks(lightRenderData, rendererTask, {}, true);
-                if (_hasRings && _ringsComponent.isEnabled() &&
-                    _ringsComponent.isVisible())
+                if (_ringsComponent && _ringsComponent->isEnabled() &&
+                    _ringsComponent->isVisible())
                 {
-                    _ringsComponent.draw(
+                    _ringsComponent->draw(
                         lightRenderData,
                         RingsComponent::RenderPass::GeometryOnly
                     );
@@ -804,26 +802,26 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
                 glEnable(GL_BLEND);
 
-                _shadowComponent.end();
+                _shadowComponent->end();
 
                 // Render again from original point of view
-                renderChunks(data, rendererTask, _shadowComponent.shadowMapData());
-                if (_hasRings && _ringsComponent.isEnabled() &&
-                    _ringsComponent.isVisible())
+                renderChunks(data, rendererTask, _shadowComponent->shadowMapData());
+                if (_ringsComponent && _ringsComponent->isEnabled() &&
+                    _ringsComponent->isVisible())
                 {
-                    _ringsComponent.draw(
+                    _ringsComponent->draw(
                         data,
                         RingsComponent::RenderPass::GeometryAndShading,
-                        _shadowComponent.shadowMapData()
+                        _shadowComponent->shadowMapData()
                     );
                 }
             }
             else {
                 renderChunks(data, rendererTask);
-                if (_hasRings && _ringsComponent.isEnabled() &&
-                    _ringsComponent.isVisible())
+                if (_ringsComponent && _ringsComponent->isEnabled() &&
+                    _ringsComponent->isVisible())
                 {
-                    _ringsComponent.draw(
+                    _ringsComponent->draw(
                         data,
                         RingsComponent::RenderPass::GeometryAndShading
                     );
@@ -910,8 +908,8 @@ void RenderableGlobe::update(const UpdateData& data) {
     }
 
     double bs = _ellipsoid.maximumRadius() * glm::compMax(data.modelTransform.scale);
-    if (_hasRings) {
-        const double ringSize = _ringsComponent.size();
+    if (_ringsComponent) {
+        const double ringSize = _ringsComponent->size();
         if (ringSize > bs) {
             bs = ringSize;
         }
@@ -932,12 +930,12 @@ void RenderableGlobe::update(const UpdateData& data) {
         _debugProperties.resetTileProviders = false;
     }
 
-    if (_hasRings) {
-        _ringsComponent.update(data);
+    if (_ringsComponent) {
+        _ringsComponent->update(data);
     }
 
-    if (_hasShadows) {
-        _shadowComponent.update(data);
+    if (_shadowComponent) {
+        _shadowComponent->update(data);
     }
 
     // abock (2020-08-21)
@@ -1390,7 +1388,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         shadowMapUnit.activate();
         // JCC: Avoiding a to recompiling the shaders or having more than one
         // set of shaders for this step.
-        glBindTexture(GL_TEXTURE_2D, _shadowComponent.dDepthTexture());
+        glBindTexture(GL_TEXTURE_2D, _shadowComponent->dDepthTexture());
         program.setUniform("shadowMapTexture", shadowMapUnit);
     }
 
@@ -1529,7 +1527,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         shadowMapUnit.activate();
         // JCC: Avoiding a to recompiling the shaders or having more than one
         // set of shaders for this step.
-        glBindTexture(GL_TEXTURE_2D, _shadowComponent.dDepthTexture());
+        glBindTexture(GL_TEXTURE_2D, _shadowComponent->dDepthTexture());
         program.setUniform("shadowMapTexture", shadowMapUnit);
     }
 
