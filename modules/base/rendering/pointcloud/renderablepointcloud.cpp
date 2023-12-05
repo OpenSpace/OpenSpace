@@ -104,7 +104,10 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the points"
+        "The labels for the points. If no label file is provided, the labels will be "
+        "created to match the points in the data file. For a CSV file, you should then "
+        "specify which column is the 'Name' column in the data mapping. For SPECK files "
+        "the labels are created from the comment at the end of each line"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
