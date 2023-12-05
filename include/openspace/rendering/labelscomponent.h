@@ -47,6 +47,21 @@ namespace documentation { struct Documentation; }
 class LabelsComponent : public properties::PropertyOwner, public Fadeable {
 public:
     explicit LabelsComponent(const ghoul::Dictionary& dictionary);
+
+    /**
+     * Create a labels component from an already loaded dataset. That dataset should have
+     * a comment per point to be used for the labels.
+     *
+     * \param dataset The dataset to create the labelset from, including xyz position and
+     * a string to be used for the text.
+     * \param unit The unit to use when interpreting the point information in the dataset
+     * \param dictionary A dictionary with the other information used for constructing
+     * the dataset
+     * \return The created \code LabelsComponent
+     */
+    explicit LabelsComponent(const ghoul::Dictionary& dictionary,
+        const dataloader::Dataset& dataset, DistanceUnit unit);
+
     ~LabelsComponent() override = default;
 
     dataloader::Labelset& labelSet();
@@ -75,6 +90,8 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+
+    bool _createdFromDataset = false;
 
     // Properties
     properties::BoolProperty _enabled;

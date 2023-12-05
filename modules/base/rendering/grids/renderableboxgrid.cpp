@@ -124,7 +124,6 @@ bool RenderableBoxGrid::isReady() const {
 void RenderableBoxGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 

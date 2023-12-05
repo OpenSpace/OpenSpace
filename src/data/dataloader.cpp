@@ -458,6 +458,24 @@ Labelset loadFileWithCache(std::filesystem::path filePath) {
     );
 }
 
+Labelset loadFromDataset(const Dataset& dataset) {
+    Labelset res;
+    res.entries.reserve(dataset.entries.size());
+
+    int count = 0;
+    for (const Dataset::Entry& entry : dataset.entries) {
+        Labelset::Entry label;
+        label.position = entry.position;
+        label.text = entry.comment.value_or("MISSING LABEL");
+        label.identifier = fmt::format("Point-{}", count); // @TODO: make it possible to configure ID, based on point ID (when it exists)
+        res.entries.push_back(std::move(label));
+    }
+
+    // @TODO Perhaps it's more efficient to cache this information into a file?  DISCUSS!
+
+    return res;
+}
+
 } // namespace label
 
 namespace color {

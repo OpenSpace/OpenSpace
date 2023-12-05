@@ -39,7 +39,7 @@ namespace {
         X, Y, Z
     };
 
-    bool checkColumnInternal(PositionColumn columnCase, const std::string& c,
+    bool checkPosColumnInternal(PositionColumn columnCase, const std::string& c,
                          const std::optional<openspace::dataloader::DataMapping>& mapping,
                              const std::string_view defaultValue)
     {
@@ -75,7 +75,7 @@ namespace {
     // column names should be case sensitive, data value that represents missing
     // values in the dataset, and more. See details for each field / class member.
     //
-    // Note that things related to reading the point position will not be handled for
+    // Note that things related to reading the point position will not be hadled for
     // SPECK files, as for those we always expect the first three values per row to
     // specify the XYZ position
     struct [[codegen::Dictionary(DataMapping)]] Parameters {
@@ -88,6 +88,10 @@ namespace {
         // Specifies the column name for the z coordinate
         std::optional<std::string> z;
 
+        // Specifies the column name for the optional name column. Not valid for SPECK
+        // files, where the name is given by the comment at the end of each line.
+        std::optional<std::string> name;
+
         // Specifies whether to do case sensitive checks when reading column names.
         // Default is not to, so that 'X' and 'x' are both valid column names for the
         // x position column, for example
@@ -99,7 +103,7 @@ namespace {
         std::optional<float> missingDataValue;
 
         // A list of column names, of columns that will not be loaded into the dataset.
-        // Note that not all data formats support this. E.g. SPECK files do not
+        // Note that not all data formats support this. E.g. SPECK files do not.
         std::optional<std::vector<std::string>> excludeColumns;
     };
 #include "datamapping_codegen.cpp"
@@ -119,6 +123,7 @@ DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionar
     result.xColumnName = p.x;
     result.yColumnName = p.y;
     result.zColumnName = p.z;
+    result.nameColumn = p.name;
 
     result.missingDataValue = p.missingDataValue;
 
@@ -145,10 +150,11 @@ std::string generateHashString(const DataMapping& dm) {
     unsigned int excludeColumnsHash = ghoul::hashCRC32(a);
 
     return fmt::format(
-        "DM|x{}|y{}|z{}|m{}|{}|{}",
+        "DM|x{}|y{}|z{}|name{}|m{}|{}|{}",
         dm.xColumnName.value_or(""),
         dm.yColumnName.value_or(""),
         dm.zColumnName.value_or(""),
+        dm.nameColumn.value_or(""),
         dm.missingDataValue.has_value() ? ghoul::to_string(*dm.missingDataValue) : "",
         dm.isCaseSensitive ? "1" : "0",
         excludeColumnsHash
@@ -160,15 +166,29 @@ bool isPositionColumn(const std::string& c, const std::optional<DataMapping>& ma
 }
 
 bool isColumnX(const std::string& c, const std::optional<DataMapping>& mapping) {
-    return checkColumnInternal(PositionColumn::X, c, mapping, DefaultX);
+    return checkPosColumnInternal(PositionColumn::X, c, mapping, DefaultX);
 }
 
 bool isColumnY(const std::string& c, const std::optional<DataMapping>& mapping) {
-    return checkColumnInternal(PositionColumn::Y, c, mapping, DefaultY);
+    return checkPosColumnInternal(PositionColumn::Y, c, mapping, DefaultY);
 }
 
 bool isColumnZ(const std::string& c, const std::optional<DataMapping>& mapping) {
-    return checkColumnInternal(PositionColumn::Z, c, mapping, DefaultZ);
+    return checkPosColumnInternal(PositionColumn::Z, c, mapping, DefaultZ);
+}
+
+bool isNameColumn(const std::string& c, const std::optional<DataMapping>& mapping) {
+    if (!mapping.has_value() || !(*mapping).nameColumn.has_value()) {
+        return false;
+    }
+
+    std::string testColumn = c;
+    std::string mappedColumn = (*mapping).nameColumn.value();
+    if (!(*mapping).isCaseSensitive) {
+        testColumn = ghoul::toLowerCase(testColumn);
+        mappedColumn = ghoul::toLowerCase(mappedColumn);
+    }
+    return testColumn == mappedColumn;
 }
 
 } // namespace openspace::dataloader

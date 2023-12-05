@@ -119,6 +119,8 @@ namespace label {
 
     Labelset loadFileWithCache(std::filesystem::path path);
 
+    Labelset loadFromDataset(const dataloader::Dataset& dataset);
+
 } // namespace label
 
 namespace color {

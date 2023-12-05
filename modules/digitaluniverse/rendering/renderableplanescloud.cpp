@@ -330,7 +330,6 @@ void RenderablePlanesCloud::initialize() {
 
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 

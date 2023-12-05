@@ -136,7 +136,6 @@ bool RenderableSphericalGrid::isReady() const {
 void RenderableSphericalGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 

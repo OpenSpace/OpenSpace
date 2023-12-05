@@ -169,7 +169,6 @@ bool RenderableRadialGrid::isReady() const {
 void RenderableRadialGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
