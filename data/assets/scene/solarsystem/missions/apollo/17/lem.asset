@@ -30,9 +30,9 @@ local Apollo17Lem = {
     }
   },
   GUI = {
-    Hidden = true,
     Name = "Apollo 17 Lem Position",
-    Path = "/Solar System/Missions/Apollo/17"
+    Path = "/Solar System/Missions/Apollo/17",
+    Hidden = true
   }
 }
 

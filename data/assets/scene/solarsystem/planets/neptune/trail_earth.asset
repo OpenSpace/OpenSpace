@@ -10,6 +10,7 @@ local NeptuneTrailEarth = {
   Parent = earthTransforms.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
       Target = "NEPTUNE",
@@ -17,8 +18,7 @@ local NeptuneTrailEarth = {
     },
     Color = { 1.0, 0.5, 0.2 },
     Period = 224.695,
-    Resolution = 1000,
-    Enabled = false
+    Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
   GUI = {

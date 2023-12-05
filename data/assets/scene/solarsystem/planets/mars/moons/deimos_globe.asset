@@ -14,15 +14,15 @@ local DeimosGlobe = {
   Identifier = "Deimos_Globe",
   Parent = transforms.MarsBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_DEIMOS",
-      DestinationFrame = "GALACTIC"
-    },
     Translation = {
       Type = "SpiceTranslation",
       Target = "DEIMOS",
       Observer = "MARS BARYCENTER"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_DEIMOS",
+      DestinationFrame = "GALACTIC"
     }
   },
   Renderable = {

@@ -9,13 +9,13 @@ local Planet = {
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
-      RotationAxis = {0.0, 0.0, 1.0},
+      RotationAxis = { 0.0, 0.0, 1.0 },
       RotationRate = 1.0 / (22.4 * 60.0 * 60.0)
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 615.0E3, 615.0E3, 615.0E3 },
+    Radii = { 615000, 615000, 615000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },

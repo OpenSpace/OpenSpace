@@ -14,16 +14,16 @@ local PhobosGlobe = {
   Identifier = "Phobos_Globe",
   Parent = transforms.MarsBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PHOBOS",
+      Observer = "MARS BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_PHOBOS",
       DestinationFrame = "GALACTIC"
     },
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "PHOBOS",
-      Observer = "MARS BARYCENTER"
-    }
   },
   Renderable = {
     Type = "RenderableGlobe",

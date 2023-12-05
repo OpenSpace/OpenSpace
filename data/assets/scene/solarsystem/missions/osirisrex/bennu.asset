@@ -24,9 +24,8 @@ local Bennu = {
     }
   },
   Renderable = {
-    Enabled = false,
     Type = "RenderableModel",
-    Body = BennuBodyId,
+    Enabled = false,
     GeometryFile = models .. "Bennu_v20_200k_an.obj",
     LightSources = {
       sun.LightSource

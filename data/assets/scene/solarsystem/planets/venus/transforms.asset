@@ -16,8 +16,7 @@ local VenusBarycenter = {
   GUI = {
     Name = "Venus Barycenter",
     Path = "/Solar System/Planets/Venus",
-    Hidden = true,
-    Description = "Position for Venus Barycenter"
+    Hidden = true
   }
 }
 

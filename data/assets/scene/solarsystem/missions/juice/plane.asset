@@ -21,9 +21,9 @@ local xy_n = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-n.png",
-    Enabled = false
+    Texture = data .. "XY-n.png"
   },
   GUI = {
     Name = "Ganymede XY Plane N",
@@ -37,9 +37,9 @@ local xy_t = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-T.png",
-    Enabled = false
+    Texture = data .. "XY-T.png"
   },
   GUI = {
     Name = "Ganymede XY Plane T",
@@ -53,9 +53,9 @@ local xy_u = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-U.png",
-    Enabled = false
+    Texture = data .. "XY-U.png"
   },
   GUI = {
     Name = "Ganymede XY Plane U",
@@ -70,9 +70,9 @@ local xy_utot = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Utot.png",
-    Enabled = false
+    Texture = data .. "XY-Utot.png"
   },
   GUI = {
     Name = "Ganymede XY Plane U_tot",
@@ -87,9 +87,9 @@ local xy_ux = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Ux.png",
-    Enabled = false
+    Texture = data .. "XY-Ux.png"
   },
   GUI = {
     Name = "Ganymede XY Plane Ux",
@@ -104,9 +104,9 @@ local xy_uy = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Uy.png",
-    Enabled = false
+    Texture = data .. "XY-Uy.png"
   },
   GUI = {
     Name = "Ganymede XY Plane Uy",
@@ -121,9 +121,9 @@ local xy_uz = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Uz.png",
-    Enabled = false
+    Texture = data .. "XY-Uz.png"
   },
   GUI = {
     Name = "Ganymede XY Plane Uz",
@@ -144,9 +144,9 @@ local xz_n = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-n.png",
-    Enabled = false
+    Texture = data .. "XZ-n.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane N",
@@ -166,9 +166,9 @@ local xz_t = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-T.png",
-    Enabled = false
+    Texture = data .. "XZ-T.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane T",
@@ -188,9 +188,9 @@ local xz_u = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-U.png",
-    Enabled = false
+    Texture = data .. "XZ-U.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane U",
@@ -211,9 +211,9 @@ local xz_utot = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Utot.png",
-    Enabled = false
+    Texture = data .. "XZ-Utot.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane U_tot",
@@ -234,9 +234,9 @@ local xz_ux = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Ux.png",
-    Enabled = false
+    Texture = data .. "XZ-Ux.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane Ux",
@@ -257,9 +257,9 @@ local xz_uy = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Uy.png",
-    Enabled = false
+    Texture = data .. "XZ-Uy.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane Uy",
@@ -280,9 +280,9 @@ local xz_uz = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Uz.png",
-    Enabled = false
+    Texture = data .. "XZ-Uz.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane Uz",

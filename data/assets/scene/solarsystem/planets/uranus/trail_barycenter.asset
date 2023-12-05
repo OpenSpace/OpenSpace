@@ -7,6 +7,7 @@ local UranusBarycenterTrail = {
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
       Target = "URANUS BARYCENTER",
@@ -14,8 +15,7 @@ local UranusBarycenterTrail = {
     },
     Color = { 0.60, 0.95, 1.00 },
     Period = 30588.740,
-    Resolution = 1000,
-    Enabled = false
+    Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
   GUI = {

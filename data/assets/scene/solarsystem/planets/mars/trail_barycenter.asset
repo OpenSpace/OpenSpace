@@ -8,6 +8,7 @@ local MarsBarycenterTrail = {
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
       Target = "MARS BARYCENTER",
@@ -15,8 +16,7 @@ local MarsBarycenterTrail = {
     },
     Color = { 0.814, 0.305, 0.220 },
     Period = 686.973,
-    Resolution = 1000,
-    Enabled = false
+    Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
   GUI = {

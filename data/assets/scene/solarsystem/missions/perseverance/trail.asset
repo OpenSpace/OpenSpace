@@ -35,6 +35,7 @@ local PerseveranceTrailMars = {
   Parent = marsTransforms.MarsBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
       Target = spice.ID,
@@ -43,8 +44,7 @@ local PerseveranceTrailMars = {
     Color = { 0.7, 0.9, 0.6 },
     StartTime = ApproachMars,
     EndTime = "2021 FEB 18 20:43:48",
-    SampleInterval = 100,
-    Enabled = false
+    SampleInterval = 100
   },
   GUI = {
     Name = "Perseverance Trail (Mars)",

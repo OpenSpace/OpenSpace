@@ -27,7 +27,6 @@ local JuiceModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    Body = "JUICE",
     GeometryFile = model .. "juice.fbx",
     ModelScale = "Centimeter",
     LightSources = {
