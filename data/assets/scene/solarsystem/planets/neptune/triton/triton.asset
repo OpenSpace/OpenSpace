@@ -15,15 +15,15 @@ local Triton = {
   Identifier = "Triton",
   Parent = transforms.NeptuneBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_TRITON",
-      DestinationFrame = "GALACTIC",
-    },
     Translation = {
       Type = "SpiceTranslation",
       Target = "TRITON",
       Observer = "NEPTUNE BARYCENTER"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_TRITON",
+      DestinationFrame = "GALACTIC",
     }
   },
   Renderable = {
@@ -64,8 +64,8 @@ local TritonLabel = {
   Identifier = "TritonLabel",
   Parent = Triton.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Triton",
     FontSize = 50.0,
     Size = 7.0,

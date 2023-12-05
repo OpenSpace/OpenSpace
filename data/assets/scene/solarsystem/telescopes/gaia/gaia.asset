@@ -31,7 +31,6 @@ local Gaia = {
   -- X Orthogonal
   Renderable = {
     Type = "RenderableModel",
-    Body = "GAIA",
     GeometryFile = model .. "gaia.obj",
     LightSources = {
       sun.LightSource,

@@ -8,10 +8,10 @@ local Trail = {
   Parent = sunTransforms.SunECLIPJ2000.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = asset.enabled,
     Color = { 0.2, 0.8, 0.3 },
     Period = 201582.9642396014,
     Resolution = 10000,
-    Enabled = asset.enabled,
     Fade = 1.24,
     Translation = transforms.Translation
   },

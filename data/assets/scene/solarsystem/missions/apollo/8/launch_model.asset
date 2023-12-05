@@ -60,9 +60,9 @@ local Apollo8LaunchModel = {
     PerformShading = true
   },
   GUI = {
-    Hidden = true,
     Name = "Apollo 8 Launch Model",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Hidden = true
   }
 }
 

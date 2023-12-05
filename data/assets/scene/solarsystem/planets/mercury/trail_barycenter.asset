@@ -8,6 +8,7 @@ local MercuryBarycenterTrail = {
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
       Target = "MERCURY BARYCENTER",
@@ -15,8 +16,7 @@ local MercuryBarycenterTrail = {
     },
     Color = { 0.6, 0.5, 0.5 },
     Period = 87.968,
-    Resolution = 1000,
-    Enabled = false
+    Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
   GUI = {
