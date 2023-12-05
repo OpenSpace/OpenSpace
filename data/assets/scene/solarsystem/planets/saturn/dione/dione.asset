@@ -23,7 +23,7 @@ local Dione = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_ENCELADUS",
+      SourceFrame = "IAU_DIONE",
       DestinationFrame = "GALACTIC"
     }
   },

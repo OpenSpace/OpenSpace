@@ -6,22 +6,31 @@ local kernels = asset.resource({
 })
 
 
+local ID = {
+  Despina = "DESPINA",
+  Galatea = "GALATEA",
+  Halimede = "HALIMEDE",
+  Hippocamp = 814,
+  Laomedeia = "LAOMEDEIA",
+  Larissa = "LARISSA",
+  Naiad = "NAIAD",
+  Neso = "NESO",
+  Proteus = "PROTEUS",
+  Psamathe = "PSAMATHE",
+  Sao = "SAO",
+  Thalassa = "THALASSA"
+}
+
+
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "nep097.bsp")
-  openspace.spice.loadKernel(kernels .. "nep101xl-802.bsp")
   openspace.spice.loadKernel(kernels .. "nep102.bsp")
 end)
 
 asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels .. "nep102.bsp")
-  openspace.spice.unloadKernel(kernels .. "nep101xl-802.bsp")
-  openspace.spice.unloadKernel(kernels .. "nep097.bsp")
 end)
 
-
-asset.export("nep097", kernels .. "nep097.bsp")
-asset.export("nep101xl_802", kernels .. "nep101xl-802.bsp")
-asset.export("nep102", kernels .. "nep102.bsp")
+asset.export("ID", ID)
 
 
 

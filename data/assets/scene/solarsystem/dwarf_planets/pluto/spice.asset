@@ -12,8 +12,14 @@ local kernels = {
   data .. "ssd_jpl_nasa_gov_plu043.bsp"
 }
 
-local Hydra = {
-  ID = "HYDRA"
+local ID = {
+  PlutoBarycenter = "PLUTO BARYCENTER",
+  Charon = "CHARON",
+  Hydra = "HYDRA",
+  Styx = "STYX",
+  Nix = "NIX",
+  Kerberos = "KERBEROS",
+  Pluto = "PLUTO"
 }
 
 
@@ -25,8 +31,7 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels)
 end)
 
-asset.export("Hydra", Hydra)
-asset.export("PlutoBarycenter", { ID = "PLUTO_BARYCENTER" })
+asset.export("ID", ID)
 
 
 

@@ -6,22 +6,42 @@ local kernels = asset.resource({
 })
 
 
+local ID = {
+  Calypso = "CALYPSO",
+  Dione = "DIONE",
+  Enceladus = "ENCELADUS",
+  Helene = "HELENE",
+  Hyperion = "HYPERION",
+  Iapetus = "IAPETUS",
+  Mimas = "MIMAS",
+  Polydeuces = "POLYDEUCES",
+  Rhea = "RHEA",
+  Tethys = "TETHYS",
+  Titan = "TITAN"
+}
+
+local Frame = {
+  Dione = "IAU_DIONE",
+  Enceladus = "IAU_ENCELADUS",
+  Iapetus = "IAU_IAPETUS",
+  Mimas = "IAU_MIMAS",
+  Phoebe = "PHOEBE",
+  Rhea = "IAU_RHEA",
+  Tethys = "IAU_TETHYS",
+  Titan = "IAU_TITAN"
+}
+
+
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "sat415.bsp")
   openspace.spice.loadKernel(kernels .. "sat441.bsp")
-  openspace.spice.loadKernel(kernels .. "sat452.bsp")
 end)
 
 asset.onDeinitialize(function()
-  openspace.spice.unloadKernel(kernels .. "sat452.bsp")
   openspace.spice.unloadKernel(kernels .. "sat441.bsp")
-  openspace.spice.unloadKernel(kernels .. "sat415.bsp")
 end)
 
-asset.export("sat415", kernels .. "sat415.bsp")
-asset.export("sat441", kernels .. "sat441.bsp")
-asset.export("sat452", kernels .. "sat452.bsp")
-
+asset.export("ID", ID)
+asset.export("Frame", Frame)
 
 
 asset.meta = {

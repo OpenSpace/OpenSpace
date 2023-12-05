@@ -3,6 +3,14 @@ local kernel = asset.require("../spice")
 
 
 
+local kernels = asset.resource({
+  Name = "Neptune Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "neptune_kernels",
+  Version = 2
+})
+
+
 local Nereid = {
   Identifier = "Nereid",
   Parent = transforms.NeptuneBarycenter.Identifier,
@@ -74,6 +82,8 @@ local NereidLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "nep101xl-802.bsp")
+
   openspace.addSceneGraphNode(Nereid)
   openspace.addSceneGraphNode(NereidTrail)
   openspace.addSceneGraphNode(NereidLabel)
@@ -83,6 +93,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NereidLabel)
   openspace.removeSceneGraphNode(NereidTrail)
   openspace.removeSceneGraphNode(Nereid)
+
+  openspace.spice.unloadKernel(kernels .. "nep101xl-802.bsp")
 end)
 
 asset.export(Nereid)

@@ -1,6 +1,7 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./67p")
+asset.require("./spice")
 
 
 
@@ -10,63 +11,6 @@ local models = asset.resource({
   Identifier = "rosetta_model",
   Version = 5
 })
-
-local kernels = asset.resource({
-  Name = "Rosetta Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "rosetta_kernels",
-  Version = 1
-})
-
-
-local RosettaKernels = {
-  kernels .. "ROS_160718_STEP.TSC",
-  kernels .. "ros_triv.tsc",
-
-  kernels .. "CORB_DV_243_01___T19_00325.BSP",
-  kernels .. "CORB_DV_223_01___T19_00302.BSP",
-  kernels .. "CORB_DV_145_01___T19_00216.BSP",
-
-  kernels .. "LORB_DV_236_01___T19_00318.BSP",
-  kernels .. "LORB_DV_223_01___T19_00302.BSP",
-  kernels .. "LORB_DV_145_01___T19_00216.BSP",
-
-  kernels .. "RORB_DV_243_01___T19_00325.BSP",
-  kernels .. "RORB_DV_223_01___T19_00302.BSP",
-  kernels .. "RORB_DV_145_01___T19_00216.BSP",
-
-  kernels .. "ATNR_P040302093352_00127.BC",
-
-  kernels .. "ROS_STRUCT_V5.BSP",
-
-  kernels .. "ROS_NAVCAM_V01.TI",
-
-  kernels .. "ROS_CHURYUMOV_V01.TF",
-  kernels .. "ROS_V26.TF",
-
-  -- CK
-  -- Rosetta attitude
-  kernels .. "RATT_DV_243_01_01____00325.BC",
-  kernels .. "RATT_DV_223_01_01____00302.BC",
-  kernels .. "RATT_DV_145_01_01____00216.BC",
-
-  -- Comet attitude
-  kernels .. "CATT_DV_243_01_______00325.BC",
-  kernels .. "CATT_DV_223_01_______00302.BC",
-  kernels .. "CATT_DV_145_01_______00216.BC",
-
-  -- High gain antenna
-  kernels .. "ROS_HGA_2016_V0035.BC",
-  kernels .. "ROS_HGA_2015_V0053.BC",
-  kernels .. "ROS_HGA_2014_V0044.BC",
-
-  -- Solar arrays
-  kernels .. "ROS_SA_2016_V0034.BC",
-  kernels .. "ROS_SA_2015_V0042.BC",
-  kernels .. "ROS_SA_2014_V0047.BC",
-
-  kernels .. "ROS_CGS_RSOC_V03.TPC"
-}
 
 local RotationMatrix = {
   0, 1, 0, 0,
@@ -322,8 +266,6 @@ local TogglePhilaeTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(RosettaKernels)
-
   openspace.addSceneGraphNode(RosettaPosition)
   openspace.addSceneGraphNode(Rosetta)
   openspace.addSceneGraphNode(PhilaePosition)
@@ -355,8 +297,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PhilaePosition)
   openspace.removeSceneGraphNode(Rosetta)
   openspace.removeSceneGraphNode(RosettaPosition)
-
-  openspace.spice.unloadKernel(RosettaKernels)
 end)
 
 asset.export(RosettaPosition)

@@ -12,6 +12,9 @@ local kernels = {
   data .. "sb_ceres_110211.bsp"
 }
 
+local ID = { Ceres = "CERES" }
+
+
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels)
 end)
@@ -20,8 +23,7 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels)
 end)
 
-asset.export("Ceres", { ID = "CERES", Frame = "IAU_CERES" })
-
+asset.export("ID", ID)
 
 
 asset.meta = {

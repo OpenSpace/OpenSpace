@@ -3,6 +3,14 @@ local kernel = asset.require("../spice")
 
 
 
+local kernels = asset.resource({
+  Name = "Neptune Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "neptune_kernels",
+  Version = 2
+})
+
+
 local Triton = {
   Identifier = "Triton",
   Parent = transforms.NeptuneBarycenter.Identifier,
@@ -79,6 +87,8 @@ local TritonLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "nep097.bsp")
+
   openspace.addSceneGraphNode(Triton)
   openspace.addSceneGraphNode(TritonTrail)
   openspace.addSceneGraphNode(TritonLabel)
@@ -88,6 +98,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TritonLabel)
   openspace.removeSceneGraphNode(TritonTrail)
   openspace.removeSceneGraphNode(Triton)
+
+  openspace.spice.unloadKernel(kernels .. "nep097.bsp")
 end)
 
 asset.export(Triton)

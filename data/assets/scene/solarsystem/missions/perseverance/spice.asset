@@ -1,4 +1,4 @@
-local kernels = asset.resource({
+local data = asset.resource({
   Name = "Mars 2020 Kernels",
   Type = "HttpSynchronization",
   Identifier = "perseverance_kernels",
@@ -6,30 +6,33 @@ local kernels = asset.resource({
 })
 
 
-local m2020_kernels = {
-  kernels .. "m2020.tf",
-  kernels .. "m2020.tsc",
-  kernels .. "m2020_v04.tf",
+local Kernels = {
+  data .. "m2020.tf",
+  data .. "m2020.tsc",
+  data .. "m2020_v04.tf",
 
-  kernels .. "m2020_cruise_recon_nospin_v1.bc",
-  kernels .. "m2020_cruise_recon_rawrt_v1.bc",
-  kernels .. "m2020_cruise_recon_raweng_v1.bc",
-  kernels .. "m2020_edl_v01.bc",
+  data .. "m2020_cruise_recon_nospin_v1.bc",
+  data .. "m2020_cruise_recon_rawrt_v1.bc",
+  data .. "m2020_cruise_recon_raweng_v1.bc",
+  data .. "m2020_edl_v01.bc",
 
-  kernels .. "m2020_cruise_od138_v1.bsp",
-  kernels .. "m2020_edl_v01.bsp",
-  kernels .. "m2020_surf_rover_loc_0000_0089_v1.bsp"
+  data .. "m2020_cruise_od138_v1.bsp",
+  data .. "m2020_edl_v01.bsp",
+  data .. "m2020_surf_rover_loc_0000_0089_v1.bsp"
+}
+
+local ID = {
+  Perseverance = -168
 }
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(m2020_kernels)
+  openspace.spice.loadKernel(Kernels)
 end)
 
 asset.onDeinitialize(function()
-  openspace.spice.unloadKernel(m2020_kernels)
+  openspace.spice.unloadKernel(Kernels)
 end)
 
-asset.export("Kernels", m2020_kernels)
-asset.export("ID", -168)
+asset.export("ID", ID)
 

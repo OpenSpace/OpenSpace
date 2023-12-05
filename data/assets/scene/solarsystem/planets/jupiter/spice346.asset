@@ -6,30 +6,35 @@ local kernels = asset.resource({
 })
 
 local ID = {
-  Callisto = "CALLISTO",
-  Europa = "EUROPA",
-  Ganymede = "GANYMEDE",
-  Io = "IO"
-}
+  S2011J3 = 55509,
+  S2018J2 = 55510,
+  S2018J3 = 55511,
+  S2021J1 = 55512,
+  S2021J2 = 55513,
+  S2021J3 = 55514,
+  S2021J4 = 55515,
+  S2021J5 = 55516,
+  S2021J6 = 55517,
+  S2016J3 = 55518,
+  S2016J4 = 55519,
+  S2018J4 = 55520,
+  S2022J1 = 55521,
+  S2022J2 = 55522,
+  S2022J3 = 55523,
 
-local Frame = {
-  Callisto = "IAU_CALLISTO",
-  Europa = "IAU_EUROPA",
-  Ganymede = "IAU_GANYMEDE",
-  Io = "IAU_IO"
 }
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "jup365.bsp")
+  openspace.spice.loadKernel(kernels .. "jup346.bsp")
 end)
 
 asset.onDeinitialize(function()
-  openspace.spice.unloadKernel(kernels .. "jup365.bsp")
+  openspace.spice.unloadKernel(kernels .. "jup346.bsp")
 end)
 
 asset.export("ID", ID)
-asset.export("Frame", Frame)
+
 
 
 asset.meta = {

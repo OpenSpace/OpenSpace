@@ -6,6 +6,16 @@ local kernels = asset.resource({
 })
 
 
+local ID = {
+  Deimos = "DEIMOS",
+  Phobos = "PHOBOS"
+}
+
+local Frame = {
+  Deimos = "IAU_DEIMOS",
+  Phobos = "IAU_PHOBOS"
+}
+
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "mar097.bsp")
 end)
@@ -13,3 +23,6 @@ end)
 asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels .. "mar097.bsp")
 end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
