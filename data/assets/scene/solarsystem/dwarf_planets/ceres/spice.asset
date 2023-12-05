@@ -1,3 +1,5 @@
+local spice = asset.require("spice/base")
+
 local data = asset.resource({
   Name = "Ceres Kernels",
   Type = "HttpSynchronization",
@@ -12,7 +14,13 @@ local kernels = {
   data .. "sb_ceres_110211.bsp"
 }
 
-local ID = { Ceres = "CERES" }
+local ID = {
+  Ceres = "CERES"
+}
+
+local Frame = {
+  Ceres = spice.Frame.Ceres
+}
 
 
 asset.onInitialize(function()
@@ -24,6 +32,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("ID", ID)
+asset.export("Frame", Frame)
 
 
 asset.meta = {

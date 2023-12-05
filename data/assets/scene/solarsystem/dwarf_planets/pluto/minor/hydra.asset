@@ -10,7 +10,7 @@ local Hydra = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "HYDRA",
-      Observer = spice.PlutoBarycenter.ID
+      Observer = spice.ID.PlutoBarycenter
     }
   },
   Renderable = {

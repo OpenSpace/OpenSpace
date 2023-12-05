@@ -152,6 +152,10 @@ local L2SunLine = {
   }
 }
 
+local ID = {
+  L2 = L2
+}
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "L2_de431.bsp")
@@ -179,6 +183,7 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels .. "L2_de431.bsp")
 end)
 
+asset.export("ID", ID)
 asset.export(L2Position)
 asset.export(L2CoRevFrame)
 asset.export(L2Small)

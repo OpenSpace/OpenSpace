@@ -1,6 +1,6 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local spice = asset.require("./spice")
-asset.require("spice/base")
+local base = asset.require("spice/base")
 
 local CeresPosition = {
   Identifier = "CeresPosition",
@@ -8,13 +8,13 @@ local CeresPosition = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.Ceres.ID,
-      Observer = "SSB"
+      Target = spice.ID.Ceres,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Ceres.Frame,
-      DestinationFrame = "GALACTIC"
+      SourceFrame = spice.Frame.Ceres,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   GUI = {

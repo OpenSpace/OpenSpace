@@ -76,6 +76,10 @@ local L1Label = {
   }
 }
 
+local ID = {
+  L1 = L1
+}
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "L1_de431.bsp")
@@ -93,6 +97,7 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels .. "L1_de431.bsp")
 end)
 
+asset.export("ID", ID)
 asset.export(L1Position)
 asset.export(L1)
 asset.export(L1Label)

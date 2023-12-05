@@ -16,39 +16,39 @@ local models = asset.resource({
 local TranslationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
+    Target = spice.ID.Perseverance,
     Observer = "MARS",
     Frame = "IAU_MARS",
     FixedDate = "2020 JUL 17 13:56:43"
   },
   ["2020 JUL 17 13:56:42"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
+    Target = spice.ID.Perseverance,
     Observer = "MARS",
     Frame = "IAU_MARS",
     FixedDate = "2020 JUL 17 13:56:43"
   },
   ["2020 JUL 17 13:56:43"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
+    Target = spice.ID.Perseverance,
     Observer = "MARS",
     Frame = "IAU_MARS"
   },
   ["2020 JUL 17 13:56:44"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
+    Target = spice.ID.Perseverance,
     Observer = "MARS",
     Frame = "IAU_MARS"
   },
   ["2021 FEB 18 20:43:48"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
+    Target = spice.ID.Perseverance,
     Observer = "MARS",
     Frame = "IAU_MARS"
   },
   ["2021 FEB 18 20:43:49"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
+    Target = spice.ID.Perseverance,
     Observer = "MARS",
     Frame = "IAU_MARS",
     FixedDate = "2021 FEB 18 20:43:48"
@@ -110,7 +110,6 @@ local Body = {
   Parent = PerseveranceModel.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    Body = "MARS SCIENCE LABORATORY",
     GeometryFile = models .. "Perseverance.obj",
     LightSources = {
       sun.LightSource,

@@ -15,7 +15,7 @@ local PerseveranceTrailSun = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID,
+      Target = spice.ID.Perseverance,
       Observer = "SSB"
     },
     Color = { 0.2, 0.7, 0.1 },
@@ -37,7 +37,7 @@ local PerseveranceTrailMars = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID,
+      Target = spice.ID.Perseverance,
       Observer = "MARS BARYCENTER"
     },
     Color = { 0.7, 0.9, 0.6 },
