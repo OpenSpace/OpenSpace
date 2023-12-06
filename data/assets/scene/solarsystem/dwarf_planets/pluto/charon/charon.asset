@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-asset.require("spice/base")
+local spice = asset.require("./spice")
 asset.require("../trail")
 
 
@@ -17,8 +17,8 @@ local Charon = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CHARON",
-      Observer = "PLUTO BARYCENTER"
+      Target = spice.ID.Charon,
+      Observer = spice.ID.PlutoBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",

@@ -19,6 +19,10 @@ local ID = {
   Apollo11LEM = -911500
 }
 
+local Frame = {
+  MoonME = "MOON_ME"
+}
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels)
@@ -29,3 +33,4 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("ID", ID)
+asset.export("Frame", Frame)

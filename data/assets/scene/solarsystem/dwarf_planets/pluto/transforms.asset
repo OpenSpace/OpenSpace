@@ -1,6 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local kernels = asset.require("./spice")
-asset.require("spice/base")
+local spice = asset.require("spice/base")
 
 
 
@@ -10,8 +9,8 @@ local PlutoBarycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PLUTO BARYCENTER",
-      Observer = "SSB"
+      Target = spice.ID.PlutoBarycenter,
+      Observer = spice.ID.SolarSystemBarycenter
     }
   },
   GUI = {

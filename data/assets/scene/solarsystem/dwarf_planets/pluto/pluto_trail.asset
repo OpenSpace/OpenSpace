@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-asset.require("spice/base")
+local spice = asset.require("spice/base")
 
 
 
@@ -10,8 +10,8 @@ local PlutoTrailBarycentric = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PLUTO",
-      Observer = "PLUTO BARYCENTER"
+      Target = spice.ID.Pluto,
+      Observer = spice.ID.PlutoBarycenter
     },
     Color = { 0.00, 0.62, 1.00 },
     Period = 6.38723,

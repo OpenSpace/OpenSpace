@@ -1,3 +1,7 @@
+local base = asset.require("spice/base")
+
+
+
 local data = asset.resource({
   Name = "Pluto Kernels",
   Type = "HttpSynchronization",
@@ -13,13 +17,13 @@ local kernels = {
 }
 
 local ID = {
-  PlutoBarycenter = "PLUTO BARYCENTER",
+  PlutoBarycenter = base.ID.PlutoBarycenter,
   Charon = "CHARON",
   Hydra = "HYDRA",
   Styx = "STYX",
   Nix = "NIX",
   Kerberos = "KERBEROS",
-  Pluto = "PLUTO"
+  Pluto = base.ID.Pluto
 }
 
 

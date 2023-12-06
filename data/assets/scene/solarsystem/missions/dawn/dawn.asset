@@ -1,7 +1,8 @@
 asset.require("scene/solarsystem/missions/dawn/mission")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-asset.require("./spice")
+local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 local textures = asset.resource({
@@ -34,8 +35,8 @@ local DawnPosition = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DAWN",
-      Observer = "SSB"
+      Target = spice.ID.Dawn,
+      Observer = base.ID.SolarSystemBarycenter
     },
     -- Rotation for model version 2
     Rotation = {
@@ -56,8 +57,8 @@ local Dawn = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "DAWN_SPACECRAFT",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = spice.Frame.Dawn,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   Renderable = {
@@ -78,8 +79,8 @@ local DawnTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DAWN",
-      Observer = "SSB"
+      Target = spice.ID.Dawn,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Color = { 1.0, 0.8, 0.4 },
     ShowFullTrail = false,
@@ -103,8 +104,8 @@ local DawnFramingCamera1 = {
   Parent = Dawn.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = "DAWN",
-    Frame = "DAWN_SPACECRAFT",
+    Body = spice.ID.Dawn,
+    Frame = spice.Frame.Dawn,
     Color = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "DAWN_FC1",
@@ -124,8 +125,8 @@ local DawnFramingCamera2 = {
   Parent = Dawn.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = "DAWN",
-    Frame = "DAWN_SPACECRAFT",
+    Body = spice.ID.Dawn,
+    Frame = spice.Frame.Dawn,
     Color = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "DAWN_FC2",

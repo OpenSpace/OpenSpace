@@ -59,12 +59,12 @@ local VestaKernels = {
 }
 
 local ID = {
-  Dawn = -203,
+  Dawn = "DAWN",
   Vesta = "VESTA"
 }
 
 local Frame = {
-  Dawn = -203000,
+  Dawn = "DAWN_SPACECRAFT",
   DawnSolarArray1 = -203010,
   DawnSolarArray2 = -203020
 }

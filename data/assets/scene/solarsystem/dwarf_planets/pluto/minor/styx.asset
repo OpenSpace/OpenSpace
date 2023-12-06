@@ -1,4 +1,5 @@
 local transforms = asset.require("../transforms")
+local spice = asset.require("../spice")
 
 
 local Styx = {
@@ -7,8 +8,8 @@ local Styx = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "STYX",
-      Observer = "PLUTO BARYCENTER"
+      Target = spice.ID.Styx,
+      Observer = spice.ID.PlutoBarycenter
     }
   },
   Renderable = {
@@ -30,8 +31,8 @@ local StyxTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "STYX",
-      Observer = "PLUTO BARYCENTER",
+      Target = spice.ID.Styx,
+      Observer = spice.ID.PlutoBarycenter
     },
     Color = { 0.00, 0.62, 1.00 },
     Period = 20.16155,

@@ -1,6 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local kernels = asset.require("./spice")
-asset.require("spice/base")
+local spice = asset.require("spice/base")
 
 
 
@@ -11,8 +10,8 @@ local PlutoBarycenterTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PLUTO BARYCENTER",
-      Observer = "SSB"
+      Target = spice.ID.PlutoBarycenter,
+      Observer = spice.iD.SolarSystemBarycenter
     },
     Color = { 0.3, 0.7, 0.3 },
     Period = 365.25,

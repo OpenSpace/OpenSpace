@@ -1,6 +1,6 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local kernels = asset.require("./spice")
+local spice = asset.require("./spice")
 
 
 
@@ -25,7 +25,7 @@ local Apollo8Launch = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = ApolloSpiceId,
+      Target = spice.ID.Apollo8,
       Observer = "EARTH",
       Frame = "IAU_EARTH"
     }
