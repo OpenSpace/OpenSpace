@@ -1,18 +1,18 @@
-asset.require("./layers/colorlayers/magellan_mosaic_utah", false)
-asset.require("./layers/colorlayers/magellan_mosaic_newyork", false)
-asset.require("./layers/colorlayers/venus_texture", false)
-asset.require("./layers/colorlayers/clouds_magellan_combo", true)
-asset.require("./layers/colorlayers/clouds_magellan_combo_newyork", false)
-
-asset.require("./layers/heightlayers/magellan_utah", true)
-asset.require("./layers/heightlayers/magellan_newyork", false)
+asset.require("./layers/base_layers", false)
+asset.require("./layers/newyork_layers", false)
+asset.require("./layers/utah_layers", true)
 
 
 
 asset.meta = {
   Name = "Default Venus Layers",
-  Version = "1.1",
-  Description = "Default Venus layers are: Venus Magellan Mosaic and Venus Magellan DEM",
+  Version = "1.2",
+  Description = [[Default Venus layers are: Venus Texture, Magellan Mosaic,
+    Clouds Magellan Combo, and Magellan Elevation (3D).
+
+
+    Layers loaded from all available servers
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

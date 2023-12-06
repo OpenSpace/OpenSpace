@@ -10,13 +10,29 @@ asset.require("scene/solarsystem/sun/glare")
 asset.require("scene/solarsystem/sun/habitablezone")
 asset.require("scene/solarsystem/sun/default_layers")
 asset.require("scene/solarsystem/planets/planets")
-asset.require("scene/solarsystem/planets/default_layers")
 asset.require("scene/solarsystem/dwarf_planets/pluto/system")
 asset.require("scene/solarsystem/dwarf_planets/pluto/default_layers")
 asset.require("scene/solarsystem/dwarf_planets/pluto/charon/default_layers")
 asset.require("scene/milkyway/milkyway/volume")
 asset.require("scene/milkyway/constellations/constellation_art")
 asset.require("scene/milkyway/constellations/constellation_keybinds")
+
+-- Planet layers
+local server = openspace.layerServer();
+if (server == "All") then
+  asset.require("scene/solarsystem/planets/default_layers")
+elseif (server == "NewYork") then
+  asset.require("scene/solarsystem/planets/newyork_layers")
+elseif (server == "Sweden") then
+  asset.require("scene/solarsystem/planets/sweden_layers")
+elseif (server == "Utah") then
+  asset.require("scene/solarsystem/planets/utah_layers")
+elseif (server == "None") then
+  asset.require("scene/solarsystem/planets/base_layers")
+else
+  openspace.printWarning("Did not recognize the specified Layer server, defaults to 'All'")
+  asset.require("scene/solarsystem/planets/default_layers")
+end
 
 asset.require("scene/digitaluniverse/2dF")
 asset.require("scene/digitaluniverse/2mass")

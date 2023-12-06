@@ -59,6 +59,7 @@ private:
     QComboBox* _propertyVisibility = nullptr;
     QCheckBox* _bypassLauncher = nullptr;
     QLabel* _bypassInformation = nullptr;
+    QComboBox* _layerServer = nullptr;
 
     struct {
         QCheckBox* isEnabled = nullptr;
