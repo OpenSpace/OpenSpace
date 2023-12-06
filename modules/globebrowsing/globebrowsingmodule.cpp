@@ -532,22 +532,16 @@ glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
 {
     using namespace globebrowsing;
 
-    // Lookup vector
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianSurfacePosition(
         geo2
     );
-    const glm::dvec3 slightlyNorth = globe.ellipsoid().cartesianSurfacePosition(
-        Geodetic2{ geo2.lat + 0.001, geo2.lon }
-    );
-    const glm::dvec3 lookUpModelSpace = glm::normalize(
-        slightlyNorth - positionModelSpace
-    );
-
-    // Matrix
+    // For globes, we know that the up-direction will always be positive Z.
+    // @TODO (2023-12-06 emmbr) Eventually, we want each scene graph node to be aware of
+    // its own preferred up-direction. At that time, this should no longer be hardcoded
+    const glm::dvec3 lookUpModelSpace = glm::dvec3(0.0, 0.0, 1.0);
     const glm::dmat4 lookAtMatrix =
         glm::lookAt(cameraModelSpace, positionModelSpace, lookUpModelSpace);
 
-    // Set rotation
     const glm::dquat rotation = glm::quat_cast(inverse(lookAtMatrix));
     return rotation;
 }
