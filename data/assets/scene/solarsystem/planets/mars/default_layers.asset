@@ -1,45 +1,21 @@
-asset.require("./layers/colorlayers/mars_texture", false)
-asset.require("./layers/colorlayers/moc_wa_color_utah", true)
-asset.require("./layers/colorlayers/moc_wa_color_sweden", false)
-asset.require("./layers/colorlayers/moc_wa_color_newyork", false)
-asset.require("./layers/colorlayers/viking_mdim_utah", false)
-asset.require("./layers/colorlayers/viking_mdim_sweden", false)
-asset.require("./layers/colorlayers/viking_mdim_newyork", false)
-asset.require("./layers/colorlayers/mola_pseudo_color_utah", false)
-asset.require("./layers/colorlayers/mola_pseudo_color_sweden", false)
-asset.require("./layers/colorlayers/mola_pseudo_color_newyork", false)
-asset.require("./layers/colorlayers/mola_hrsc_utah", false)
-asset.require("./layers/colorlayers/mola_hrsc_sweden", false)
-asset.require("./layers/colorlayers/mola_hrsc_newyork", false)
-asset.require("./layers/colorlayers/themis_ir_day_utah", false)
-asset.require("./layers/colorlayers/themis_ir_day_sweden", false)
-asset.require("./layers/colorlayers/themis_ir_day_newyork", false)
-asset.require("./layers/colorlayers/themis_ir_night_utah", false)
-asset.require("./layers/colorlayers/themis_ir_night_sweden", false)
-asset.require("./layers/colorlayers/themis_ir_night_newyork", false)
-asset.require("./layers/colorlayers/ctx_mosaic_utah", false)
-asset.require("./layers/colorlayers/ctx_mosaic_sweden", false)
-asset.require("./layers/colorlayers/ctx_mosaic_newyork", false)
-asset.require("./layers/colorlayers/ctx_blended", false)
-asset.require("./layers/colorlayers/hirise", false)
-asset.require("./layers/colorlayers/hirisels", false)
-
-asset.require("./layers/heightlayers/mola_utah", false)
-asset.require("./layers/heightlayers/mola_sweden", false)
-asset.require("./layers/heightlayers/mdem200m", true)
-asset.require("./layers/heightlayers/hirisels", false)
-
-asset.require("./layers/overlays/indices", false)
-asset.require("./layers/overlays/size_reference", false)
+asset.require("./layers/base_layers", true)
+asset.require("./layers/utah_layers", true)
+asset.require("./layers/sweden_layers", false)
+asset.require("./layers/newyork_layers", false)
 
 
 
 asset.meta = {
   Name = "Default Mars Layers",
-  Version = "1.1",
-  Description = [[Default Mars layers are: MOC WA Color, Viking MDIM, MOLA Pseudo Color,
-    MOLA HRSC, Themis IR Day, Themis IR Night, CTX Mosaic, CTX Blended beta01, HiRISE, and
-    HiRISE Local Set]],
+  Version = "1.2",
+  Description = [[Default Mars layers are: Mars texture, CTX Blended, HiRISE,
+    HiRISE Local Set, MOC WA Color, Viking MDIM, MOLA Pseudo Color, MOLA HRSC,
+    Themis IR Day, Themis IR Night, CTX Mosaic, MDEM200M (3D), HiRISE Local Set DEM (3D),
+    Mola Elevation (3D), Tile Indicies, and Size Reference.
+
+
+    Layers loaded from all servers
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

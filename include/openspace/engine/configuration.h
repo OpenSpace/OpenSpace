@@ -45,6 +45,8 @@ struct Configuration {
     Configuration& operator=(const Configuration&) = delete;
     Configuration& operator=(Configuration&&) = default;
 
+    ghoul::Dictionary createDictionary();
+
     std::string windowConfiguration = "${CONFIG}/single.xml";
     std::string asset;
     std::string profile;
@@ -112,6 +114,15 @@ struct Configuration {
     bool isConsoleDisabled = false;
     bool bypassLauncher = false;
 
+    enum LayerServer {
+        All = 0,
+        NewYork,
+        Sweden,
+        Utah,
+        None
+    };
+    LayerServer layerServer = LayerServer::All;
+
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
     struct OpenGLDebugContext {
@@ -150,6 +161,9 @@ std::filesystem::path findConfiguration(const std::string& filename = "openspace
 Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
     const std::filesystem::path& settingsFile,
     const glm::ivec2& primaryMonitorResolution);
+
+Configuration::LayerServer stringToLayerServer(std::string_view server);
+std::string layerServerToString(Configuration::LayerServer server);
 
 } // namespace openspace
 

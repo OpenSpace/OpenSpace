@@ -317,6 +317,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
+    , _borderWidth(BorderWidthInfo, 0.f, 0.f, 1000.f)
+    , _borderColor(BorderColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
     , _gamma(GammaInfo, 1.f, 0.000001f, 10.f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -327,8 +329,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec4(1.f)
     )
     , _delete(DeleteInfo)
-    , _borderWidth(BorderWidthInfo, 0.f, 0.f, 1000.f)
-    , _borderColor(BorderColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

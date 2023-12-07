@@ -1,5 +1,5 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local data = asset.require('../hybrid_data')
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local data = asset.require("../hybrid_data")
 
 
 

@@ -77,6 +77,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
@@ -816,7 +817,7 @@ void OpenSpaceEngine::loadAssets() {
                 it = allSyncs.erase(it);
             }
         }
-       
+
         if (_shouldAbortLoading) {
             global::windowDelegate->terminate();
             break;
@@ -830,7 +831,7 @@ void OpenSpaceEngine::loadAssets() {
 
         if (finishedLoading) {
             break;
-        }        
+        }
     } // while(true)
 
     if (_shouldAbortLoading) {
@@ -1533,11 +1534,8 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     lua_setglobal(s, "basename");
 
     std::string extension = file.extension().string();
-    std::transform(
-        extension.begin(), extension.end(),
-        extension.begin(),
-        [](char c) { return static_cast<char>(::tolower(c)); }
-    );
+    extension = ghoul::toLowerCase(extension);
+
     ghoul::lua::push(s, extension);
     lua_setglobal(s, "extension");
 
@@ -1671,7 +1669,9 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::IsMaster,
             codegen::lua::Version,
             codegen::lua::ReadCSVFile,
-            codegen::lua::ResetCamera
+            codegen::lua::ResetCamera,
+            codegen::lua::Configuration,
+            codegen::lua::LayerServer
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
