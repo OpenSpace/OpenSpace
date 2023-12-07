@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringhelper.h>
 #include <cctype>
 #include <fstream>
 #include <functional>
@@ -37,9 +38,7 @@
 
 namespace {
     bool startsWith(std::string lhs, std::string_view rhs) noexcept {
-        for (size_t i = 0; i < lhs.size(); i++) {
-            lhs[i] = static_cast<char>(tolower(lhs[i]));
-        }
+        lhs = ghoul::toLowerCase(lhs);
         return (rhs.size() <= lhs.size()) && (lhs.substr(0, rhs.size()) == rhs);
     }
 
