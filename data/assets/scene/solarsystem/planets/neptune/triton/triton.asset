@@ -15,7 +15,7 @@ local Triton = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_TRITON",
-      DestinationFrame = "GALACTIC",
+      DestinationFrame = "GALACTIC"
     }
   },
   Renderable = {

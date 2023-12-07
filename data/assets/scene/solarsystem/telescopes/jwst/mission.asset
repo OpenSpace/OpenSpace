@@ -20,7 +20,7 @@ local Mission = {
       Date = "2022 JAN 24 00:00:00",
       Description = "When you ask an astronomer about the James Webb Space Telescope's orbit, they'll tell you something that sounds like it came from a science-fiction novel. The Webb won't be orbiting the Earth - instead we will send it almost a million miles out into space to a place called 'L2'. L2 is short-hand for the second Lagrange Point, a wonderful accident of gravity and orbital mechanics, and the perfect place to park the Webb telescope in space. There are five so-called 'Lagrange Points' - areas where gravity from the sun and Earth balance the orbital motion of a satellite. Putting a spacecraft at any of these points allows it to stay in a fixed position relative to the Earth and sun with a minimal amount of energy needed for course correction.",
       Image = "https://www.nasa.gov/images/content/463480main_lagrange_point_lg_1.jpg",
-      Link = "https://www.nasa.gov/topics/universe/features/webb-l2.html",
+      Link = "https://www.nasa.gov/topics/universe/features/webb-l2.html"
     },
     {
       Name = "NIRCam detected the first photons",
@@ -50,7 +50,7 @@ local Mission = {
   Phases = {
     {
       Name = "Launch",
-      TimeRange = { Start = "2021 DEC 25 12:20:00", End = "2021 DEC 25 12:47:00" },
+      TimeRange = { Start = "2021 DEC 25 12:20:00", End = "2021 DEC 25 12:47:00" }
     },
     {
       Name = "Preparation for science operations",

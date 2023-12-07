@@ -80,10 +80,10 @@ local BoxGrid = {
   },
   Renderable = {
     Type = "RenderableBoxGrid",
+    Enabled = false,
     Color = { 0.5, 0.0, 1.0 },
     LineWidth = 2.0,
     Size = { 2, 2, 2 },
-    Enabled = false
   },
   GUI = {
     Name = "Example Box Grid",
