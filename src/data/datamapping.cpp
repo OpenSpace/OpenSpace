@@ -115,27 +115,15 @@ DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionar
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     DataMapping result;
-    if (p.x.has_value()) {
-        result.xColumnName = *p.x;
-    }
-    if (p.y.has_value()) {
-        result.yColumnName = *p.y;
-    }
-    if (p.z.has_value()) {
-        result.zColumnName = *p.z;
-    }
 
-    if (p.missingDataValue.has_value()) {
-        result.missingDataValue = *p.missingDataValue;
-    }
+    result.xColumnName = p.x;
+    result.yColumnName = p.y;
+    result.zColumnName = p.z;
 
-    if (p.caseSensitive.has_value()) {
-        result.isCaseSensitive = *p.caseSensitive;
-    }
+    result.missingDataValue = p.missingDataValue;
 
-    if (p.excludeColumns.has_value()) {
-        result.excludeColumns = *p.excludeColumns;
-    }
+    result.isCaseSensitive = p.caseSensitive.value_or(result.isCaseSensitive);
+    result.excludeColumns = p.excludeColumns.value_or(result.excludeColumns);
 
     return result;
 }

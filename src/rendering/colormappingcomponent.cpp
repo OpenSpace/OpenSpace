@@ -266,8 +266,8 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
         valueRange = _colorRangeData[dataColumn.value()];
     });
 
-    _providedParameter = p.parameter.value_or(_providedParameter);
-    _providedRange = p.valueRange.value_or(_providedRange);
+    _providedParameter = p.parameter;
+    _providedRange = p.valueRange;
 
     hideOutsideRange = p.hideValuesOutsideRange.value_or(hideOutsideRange);
 
