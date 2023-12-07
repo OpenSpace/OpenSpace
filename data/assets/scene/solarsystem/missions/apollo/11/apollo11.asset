@@ -87,6 +87,7 @@ local Apollo11MoonTrail = {
   Parent = moonTransforms.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
       Target = spice.ID.Apollo11,
@@ -97,8 +98,7 @@ local Apollo11MoonTrail = {
     StartTime = "1969 JUL 19 19:38:29.183",
     EndTime = "1969 JUL 22 04:55:35.183",
     SampleInterval = 60,
-    EnableFade = false,
-    Enabled = false
+    EnableFade = false
   },
   GUI = {
     Name = "Apollo 11 Moon Orbits",

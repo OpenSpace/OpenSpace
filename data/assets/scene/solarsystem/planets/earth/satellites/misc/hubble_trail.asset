@@ -25,7 +25,7 @@ local HubblePosition = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "GALACTIC",
-      DestinationFrame = "J2000",
+      DestinationFrame = "J2000"
     }
   },
   Tag = { "earth_satellite", "hubble" },

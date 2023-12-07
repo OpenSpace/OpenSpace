@@ -46,7 +46,7 @@ local ConstellationsExtragalactic = {
       Color = { 0.8, 0.8, 0.8 },
       Size = 20.0,
       MinMaxSize = { 20, 30 },
-      Unit = "Mpc",
+      Unit = "Mpc"
     },
     Opacity = 0.4,
     File = speck .. "constellationsEXGAL.speck",
@@ -72,7 +72,7 @@ local Constellations = {
       Color = { 0.8, 0.8, 0.8 },
       Size = 14.5,
       MinMaxSize = { 8, 170 },
-      Unit = "pc",
+      Unit = "pc"
     },
     Opacity = 0.3,
     File = speck .. "constellations.speck",

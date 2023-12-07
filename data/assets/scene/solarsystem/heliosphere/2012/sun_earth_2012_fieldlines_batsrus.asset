@@ -120,8 +120,8 @@ local BatsrusAsherStaticSeedsFlowLines = {
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    SourceFolder = unzippedDataDestination.asherStatic,
     Enabled = false,
+    SourceFolder = unzippedDataDestination.asherStatic,
     InputFileType = "Osfls",
     ColorTablePaths = {
       batsrusTemperatureColorTable,

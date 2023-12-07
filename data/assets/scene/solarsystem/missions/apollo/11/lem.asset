@@ -27,7 +27,7 @@ local Apollo11Lem = {
       Type = "GlobeRotation",
       Globe = moon_asset.Moon.Identifier,
       Longitude = -360 + 23.47306,
-      Latitude = 0.67402,
+      Latitude = 0.67402
     }
   },
   GUI = {

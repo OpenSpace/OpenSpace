@@ -32,7 +32,7 @@ local Atmosphere = {
         -- Extinction coefficients
         Extinction = {3.426, 8.298, 0.356}
       },
-      H_O = 8.0,
+      H_O = 8.0
     },
     ]]
     -- Default
