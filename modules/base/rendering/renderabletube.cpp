@@ -111,6 +111,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AddEdgesInfo = {
+        "AddEdges",
+        "Add Edges",
+        "This value determines whether a bottom and top should b eadded to the tube",
+        openspace::properties::Property::Visibility::User
+    };
+
     struct [[codegen::Dictionary(RenderableTube)]] Parameters {
         // The input file with data for the tube
         std::string file;
@@ -139,6 +146,9 @@ namespace {
         // [[codegen::verbatim(LightSourcesInfo.description)]]
         std::optional<std::vector<ghoul::Dictionary>> lightSources
             [[codegen::reference("core_light_source")]];
+
+        // [[codegen::verbatim(AddEdgesInfo.description)]]
+        std::optional<bool> addEdges;
     };
 #include "renderabletube_codegen.cpp"
 } // namespace
@@ -168,6 +178,7 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
+    , _addEdges(AddEdgesInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -206,6 +217,10 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
             _lightSources.push_back(std::move(lightSource));
         }
     }
+
+    _addEdges.onChange([this]() { _tubeIsDirty = true; });
+    _addEdges = p.addEdges.value_or(_addEdges);
+    addProperty(_addEdges);
 
     addProperty(Fadeable::_opacity);
 }
@@ -440,32 +455,34 @@ void RenderableTube::updateTubeData() {
     glm::dvec3 lastNormal = lastCenter - firstCenter;
 
     // Add the first polygon's center point
-    PolygonVertex firstCenterPoint;
-    firstCenterPoint.position[0] = firstCenter.x;
-    firstCenterPoint.position[1] = firstCenter.y;
-    firstCenterPoint.position[2] = firstCenter.z;
+    if (_addEdges) {
+        PolygonVertex firstCenterPoint;
+        firstCenterPoint.position[0] = firstCenter.x;
+        firstCenterPoint.position[1] = firstCenter.y;
+        firstCenterPoint.position[2] = firstCenter.z;
 
-    firstCenterPoint.normal[0] = firstNormal.x;
-    firstCenterPoint.normal[1] = firstNormal.y;
-    firstCenterPoint.normal[2] = firstNormal.z;
+        firstCenterPoint.normal[0] = firstNormal.x;
+        firstCenterPoint.normal[1] = firstNormal.y;
+        firstCenterPoint.normal[2] = firstNormal.z;
 
-    firstCenterPoint.value = firstValue;
-    _verticies.push_back(firstCenterPoint);
+        firstCenterPoint.value = firstValue;
+        _verticies.push_back(firstCenterPoint);
 
-    // Add the first polygon's sides with proper normals
-    // This will ensure a hard shadow on the tube edge
-    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
-        PolygonVertex firstsSidePoint;
-        firstsSidePoint.position[0] = timePolygonPoint.coordinate.x;
-        firstsSidePoint.position[1] = timePolygonPoint.coordinate.y;
-        firstsSidePoint.position[2] = timePolygonPoint.coordinate.z;
+        // Add the first polygon's sides with proper normals
+        // This will ensure a hard shadow on the tube edge
+        for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
+            PolygonVertex firstsSidePoint;
+            firstsSidePoint.position[0] = timePolygonPoint.coordinate.x;
+            firstsSidePoint.position[1] = timePolygonPoint.coordinate.y;
+            firstsSidePoint.position[2] = timePolygonPoint.coordinate.z;
 
-        firstsSidePoint.normal[0] = firstNormal.x;
-        firstsSidePoint.normal[1] = firstNormal.y;
-        firstsSidePoint.normal[2] = firstNormal.z;
+            firstsSidePoint.normal[0] = firstNormal.x;
+            firstsSidePoint.normal[1] = firstNormal.y;
+            firstsSidePoint.normal[2] = firstNormal.z;
 
-        firstsSidePoint.value = timePolygonPoint.value;
-        _verticies.push_back(firstsSidePoint);
+            firstsSidePoint.value = timePolygonPoint.value;
+            _verticies.push_back(firstsSidePoint);
+        }
     }
 
     // Add all the polygons that will create the sides of the tube
@@ -488,39 +505,40 @@ void RenderableTube::updateTubeData() {
         }
     }
 
-    // Add the last polygon's center point
-    PolygonVertex lastCenterPoint;
-    lastCenterPoint.position[0] = lastCenter.x;
-    lastCenterPoint.position[1] = lastCenter.y;
-    lastCenterPoint.position[2] = lastCenter.z;
+    // Add the top
+    if (_addEdges) {
+        // Add the last polygon's center point
+        PolygonVertex lastCenterPoint;
+        lastCenterPoint.position[0] = lastCenter.x;
+        lastCenterPoint.position[1] = lastCenter.y;
+        lastCenterPoint.position[2] = lastCenter.z;
 
-    lastCenterPoint.normal[0] = lastNormal.x;
-    lastCenterPoint.normal[1] = lastNormal.y;
-    lastCenterPoint.normal[2] = lastNormal.z;
+        lastCenterPoint.normal[0] = lastNormal.x;
+        lastCenterPoint.normal[1] = lastNormal.y;
+        lastCenterPoint.normal[2] = lastNormal.z;
 
-    lastCenterPoint.value = lastValue;
-    _verticies.push_back(lastCenterPoint);
+        lastCenterPoint.value = lastValue;
+        _verticies.push_back(lastCenterPoint);
 
-    // Add the last polygon's sides with proper normals
-    // This will ensure a hard shadow on the tube edge
-    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
-        PolygonVertex lastsSidePoint;
-        lastsSidePoint.position[0] = timePolygonPoint.coordinate.x;
-        lastsSidePoint.position[1] = timePolygonPoint.coordinate.y;
-        lastsSidePoint.position[2] = timePolygonPoint.coordinate.z;
+        // Add the last polygon's sides with proper normals
+        // This will ensure a hard shadow on the tube edge
+        for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
+            PolygonVertex lastsSidePoint;
+            lastsSidePoint.position[0] = timePolygonPoint.coordinate.x;
+            lastsSidePoint.position[1] = timePolygonPoint.coordinate.y;
+            lastsSidePoint.position[2] = timePolygonPoint.coordinate.z;
 
-        lastsSidePoint.normal[0] = lastNormal.x;
-        lastsSidePoint.normal[1] = lastNormal.y;
-        lastsSidePoint.normal[2] = lastNormal.z;
+            lastsSidePoint.normal[0] = lastNormal.x;
+            lastsSidePoint.normal[1] = lastNormal.y;
+            lastsSidePoint.normal[2] = lastNormal.z;
 
-        lastsSidePoint.value = timePolygonPoint.value;
-        _verticies.push_back(lastsSidePoint);
+            lastsSidePoint.value = timePolygonPoint.value;
+            _verticies.push_back(lastsSidePoint);
+        }
     }
 
     // Indicies
-    unsigned int firstCenterIndex = 0;
-    unsigned int firstSideIndex = 4;
-    unsigned int lastCenterIndex = _verticies.size() - 1;
+    unsigned int firstSideIndex = _addEdges ? nPoints + 1 : 0;
 
     // Indices for side triangles
     for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
@@ -544,32 +562,37 @@ void RenderableTube::updateTubeData() {
         }
     }
 
-    // Indices for first polygon that will be the bottom
-    for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-        unsigned int vIndex = pointIndex + 1;
-        bool isLast = pointIndex == nPoints - 1;
+    if (_addEdges) {
+        unsigned int firstCenterIndex = 0;
+        unsigned int lastCenterIndex = _verticies.size() - 1;
 
-        unsigned int v0 = firstCenterIndex;
-        unsigned int v1 = vIndex;
-        unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
+        // Indices for first polygon that will be the bottom
+        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+            unsigned int vIndex = pointIndex + 1;
+            bool isLast = pointIndex == nPoints - 1;
 
-        _indicies.push_back(v0);
-        _indicies.push_back(v1);
-        _indicies.push_back(v2);
-    }
+            unsigned int v0 = firstCenterIndex;
+            unsigned int v1 = vIndex;
+            unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
 
-    // Indices for last polygon that will be the top
-    for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-        unsigned int vIndex = lastCenterIndex - pointIndex - 1;
-        bool isLast = pointIndex == nPoints - 1;
+            _indicies.push_back(v0);
+            _indicies.push_back(v1);
+            _indicies.push_back(v2);
+        }
 
-        unsigned int v0 = lastCenterIndex;
-        unsigned int v1 = vIndex;
-        unsigned int v2 = isLast ? v0 - 1 : vIndex - 1;
+        // Indices for last polygon that will be the top
+        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+            unsigned int vIndex = lastCenterIndex - pointIndex - 1;
+            bool isLast = pointIndex == nPoints - 1;
 
-        _indicies.push_back(v0);
-        _indicies.push_back(v1);
-        _indicies.push_back(v2);
+            unsigned int v0 = lastCenterIndex;
+            unsigned int v1 = vIndex;
+            unsigned int v2 = isLast ? v0 - 1 : vIndex - 1;
+
+            _indicies.push_back(v0);
+            _indicies.push_back(v1);
+            _indicies.push_back(v2);
+        }
     }
 }
 

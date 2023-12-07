@@ -97,6 +97,8 @@ private:
     properties::PropertyOwner _lightSourcePropertyOwner;
     Shading _shading;
 
+    properties::BoolProperty _addEdges;
+
     UniformCache(modelViewTransform, projectionTransform, normalTransform, color,
         opacity, hasTransferFunction, transferFunction, performShading, nLightSources,
         lightDirectionsViewSpace, lightIntensities, ambientIntensity, diffuseIntensity,
