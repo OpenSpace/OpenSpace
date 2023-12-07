@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Sloan Digital Sky Survey Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_sloandss_speck",
-  Version = 2
+  Version = 3
 })
 
 

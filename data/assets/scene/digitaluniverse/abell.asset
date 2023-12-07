@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Abell Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_abell_speck",
-  Version = 2
+  Version = 3
 })
 
 

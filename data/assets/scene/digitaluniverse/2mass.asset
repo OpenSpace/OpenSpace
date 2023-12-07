@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "2MASS Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_2mass_speck",
-  Version = 1
+  Version = 2
 })
 
 
