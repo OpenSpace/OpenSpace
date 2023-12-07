@@ -89,7 +89,7 @@ namespace {
         std::optional<std::string> z;
 
         // Specifies whether to do case sensitive checks when reading column names.
-        // Deafault is not to, so that 'X' nad 'x' are both valid column names for the
+        // Default is not to, so that 'X' and 'x' are both valid column names for the
         // x position column, for example
         std::optional<bool> caseSensitive;
 
