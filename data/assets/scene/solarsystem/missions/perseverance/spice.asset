@@ -1,3 +1,7 @@
+local base = asset.require("spice/base")
+
+
+
 local data = asset.resource({
   Name = "Mars 2020 Kernels",
   Type = "HttpSynchronization",
@@ -22,7 +26,14 @@ local Kernels = {
 }
 
 local ID = {
-  Perseverance = -168
+  Perseverance = -168,
+
+  Mars = base.ID.Mars,
+  MarsBarycenter = base.ID.MarsBarycenter
+}
+
+local Frame = {
+  Mars = base.Frame.Mars
 }
 
 
@@ -35,4 +46,5 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("ID", ID)
+asset.export("Frame", Frame)
 

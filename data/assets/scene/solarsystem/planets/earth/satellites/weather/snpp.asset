@@ -1,4 +1,5 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local base = asset.require("spice/base")
 
 
 
@@ -25,8 +26,8 @@ local SNPP = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "GALACTIC",
-      DestinationFrame = "J2000"
+      SourceFrame = base.Frame.Galactic,
+      DestinationFrame = base.Frame.J2000
     }
   },
   Tag = { "earth_satellite", "SNPP" },

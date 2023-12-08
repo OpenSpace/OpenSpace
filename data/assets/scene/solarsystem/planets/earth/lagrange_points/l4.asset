@@ -1,4 +1,4 @@
-asset.require("spice/base")
+local base = asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -18,7 +18,9 @@ local kernels = asset.resource({
 })
 
 
-local L4 = 394
+local ID = {
+  L4 = 394
+}
 
 local L4Position = {
   Identifier = "L4Position",
@@ -26,8 +28,8 @@ local L4Position = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = L4,
-      Observer = "SSB"
+      Target = ID.L4,
+      Observer = base.ID.SolarSystemBarycenter
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l4" },
@@ -76,9 +78,6 @@ local L4Label = {
   }
 }
 
-local ID = {
-  L4 = L4
-}
 
 
 asset.onInitialize(function()

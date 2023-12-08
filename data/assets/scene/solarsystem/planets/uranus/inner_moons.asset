@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./spice115")
+local spice = asset.require("./spice115")
+local base = asset.require("spice/base")
 
 
 
@@ -9,8 +10,8 @@ local Cordelia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CORDELIA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Cordelia,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -40,8 +41,8 @@ local CordeliaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CORDELIA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Cordelia,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.335034,
@@ -91,8 +92,8 @@ local Ophelia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OPHELIA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Ophelia,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -122,8 +123,8 @@ local OpheliaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OPHELIA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Ophelia,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.3764,
@@ -173,8 +174,8 @@ local Bianca = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BIANCA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Bianca,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -204,8 +205,8 @@ local BiancaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BIANCA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Bianca,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.434579,
@@ -255,8 +256,8 @@ local Cressida = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CRESSIDA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Cressida,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -286,8 +287,8 @@ local CressidaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CRESSIDA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Cressida,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.463570,
@@ -337,8 +338,8 @@ local Desdemona = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DESDEMONA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Desdemona,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -368,8 +369,8 @@ local DesdemonaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DESDEMONA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Desdemona,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.473650,
@@ -419,8 +420,8 @@ local Juliet = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JULIET",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Juliet,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -450,8 +451,8 @@ local JulietTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JULIET",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Juliet,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.493065,
@@ -501,8 +502,8 @@ local Portia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PORTIA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Portia,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -532,8 +533,8 @@ local PortiaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PORTIA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Portia,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.513196,
@@ -583,8 +584,8 @@ local Rosalind = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ROSALIND",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Rosalind,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -614,8 +615,8 @@ local RosalindTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ROSALIND",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Rosalind,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.55846,
@@ -665,8 +666,8 @@ local Cupid = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CUPID",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Cupid,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -696,8 +697,8 @@ local CupidTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CUPID",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Cupid,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.618,
@@ -747,8 +748,8 @@ local Belinda = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BELINDA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Belinda,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -778,8 +779,8 @@ local BelindaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BELINDA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Belinda,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.623527,
@@ -829,8 +830,8 @@ local Perdita = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PERDITA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Perdita,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -860,8 +861,8 @@ local PerditaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PERDITA",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Perdita,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.638,
@@ -911,8 +912,8 @@ local Puck = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PUCK",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Puck,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -942,8 +943,8 @@ local PuckTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PUCK",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Puck,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.761833,
@@ -993,8 +994,8 @@ local Mab = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MAB",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Mab,
+      Observer = base.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -1024,8 +1025,8 @@ local MabTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MAB",
-      Observer = "URANUS BARYCENTER"
+      Target = spice.ID.Mab,
+      Observer = base.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.923,

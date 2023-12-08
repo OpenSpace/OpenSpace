@@ -1,5 +1,6 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../spice")
+local spice344 = asset.require("../spice344")
+local base = asset.require("spice/base")
 
 
 
@@ -9,8 +10,8 @@ local Themisto = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "THEMISTO",
-      Observer = "JUPITER BARYCENTER"
+      Target = spice344.ID.Themisto,
+      Observer = base.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -40,8 +41,8 @@ local ThemistoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "THEMISTO",
-      Observer = "JUPITER BARYCENTER"
+      Target = spice344.ID.Themisto,
+      Observer = base.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 129.87,

@@ -19,7 +19,8 @@ local ID = {
 }
 
 local Frame = {
-  Insight = -189000
+  Insight = -189000,
+  InsightCruise = "INSIGHT_LANDER_CRUISE"
 }
 
 

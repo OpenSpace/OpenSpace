@@ -2,6 +2,8 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 local spice = asset.require("./spice")
 local base = asset.require("spice/base")
 
+
+
 local CeresPosition = {
   Identifier = "CeresPosition",
   Parent = transforms.SolarSystemBarycenter.Identifier,

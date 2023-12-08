@@ -1,6 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local kernel = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 
@@ -11,8 +10,8 @@ local NeptuneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEPTUNE",
-      Observer = "SSB"
+      Target = base.ID.Neptune,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Color = { 0.2, 0.5, 1.0 },
     -- Period = 60200,

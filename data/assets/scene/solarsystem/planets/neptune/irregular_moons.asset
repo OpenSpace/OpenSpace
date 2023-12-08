@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./spice")
+local spice = asset.require("./spice102")
+local base = asset.require("spice/base")
 
 
 
@@ -9,8 +10,8 @@ local Halimede = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HALIMEDE",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = spice.ID.Halimede,
+      Observer = base.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -40,8 +41,8 @@ local HalimedeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HALIMEDE",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = spice.ID.Halimede,
+      Observer = base.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 1879.08,
@@ -91,8 +92,8 @@ local Psamathe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PSAMATHE",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = spice.ID.Psamathe,
+      Observer = base.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -122,8 +123,8 @@ local PsamatheTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PSAMATHE",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = spice.ID.Psamathe,
+      Observer = base.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 9074.3,
@@ -173,8 +174,8 @@ local Sao = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SAO",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = spice.ID.Sao,
+      Observer = base.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -204,8 +205,8 @@ local SaoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SAO",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = spice.ID.Sao,
+      Observer = base.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 2912.72,
@@ -255,8 +256,8 @@ local Laomedeia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LAOMEDEIA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = spice.ID.Laomedeia,
+      Observer = base.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -286,8 +287,8 @@ local LaomedeiaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LAOMEDEIA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = spice.ID.Laomedeia,
+      Observer = base.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 3171.33,
@@ -337,8 +338,8 @@ local Neso = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NESO",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = spice.ID.Neso,
+      Observer = base.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -368,8 +369,8 @@ local NesoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NESO",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = spice.ID.Neso,
+      Observer = base.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 9740.73,

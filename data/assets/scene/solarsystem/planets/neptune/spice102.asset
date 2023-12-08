@@ -7,18 +7,11 @@ local kernels = asset.resource({
 
 
 local ID = {
-  Despina = "DESPINA",
-  Galatea = "GALATEA",
   Halimede = "HALIMEDE",
-  Hippocamp = 814,
   Laomedeia = "LAOMEDEIA",
-  Larissa = "LARISSA",
-  Naiad = "NAIAD",
-  Neso = "NESO",
-  Proteus = "PROTEUS",
   Psamathe = "PSAMATHE",
   Sao = "SAO",
-  Thalassa = "THALASSA"
+  Neso = "NESO"
 }
 
 

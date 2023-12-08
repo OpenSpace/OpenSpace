@@ -1,4 +1,7 @@
 local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
+local base = asset.require("spice/base")
+
+
 
 local localFolder = asset.resource({
   Name = "Mercury Magnetosphere",
@@ -17,13 +20,13 @@ local Magnetosphere = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY",
-      Observer = "MERCURY BARYCENTER"
+      Target = base.ID.Mercury,
+      Observer = base.ID.MercuryBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "MERCURYSE",
-      DestinationFrame = "GALACTIC"
+      DestinationFrame = base.Frame.Galactic
     },
     Scale = {
       Type = "StaticScale",

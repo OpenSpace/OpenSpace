@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("../transforms")
+local base = asset.require("spice/base")
 
 
 
@@ -10,8 +10,8 @@ local MoonTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MOON",
-      Observer = "EARTH BARYCENTER"
+      Target = base.ID.Moon,
+      Observer = base.ID.EarthBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 27,

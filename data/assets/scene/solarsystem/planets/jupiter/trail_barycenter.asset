@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local base = asset.require("spice/base")
 
 
 
@@ -11,8 +11,8 @@ local JupiterBarycenterTrail = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JUPITER BARYCENTER",
-      Observer = "SSB"
+      Target = base.ID.JupiterBarycenter,
+      Observer = base.Frame.SolarSystemBarycenter
     },
     Color = { 0.8, 0.7, 0.7 },
     Period = 4330.595,

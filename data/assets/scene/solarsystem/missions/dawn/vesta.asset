@@ -1,5 +1,6 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-asset.require("./spice")
+local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 local textures = asset.resource({
@@ -30,13 +31,13 @@ local Vesta = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "VESTA",
-      Observer = "SSB"
+      Target = spice.ID.Vesta,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_VESTA",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = spice.Frame.Vesta,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   BoundingSphere = 262000,
@@ -47,8 +48,8 @@ local Vesta = {
     Projection = {
       Sequence = images,
       SequenceType = "image-sequence",
-      Observer = "DAWN",
-      Target = "VESTA",
+      Observer = spice.ID.Dawn,
+      Target = spice.ID.Vesta,
       Aberration = "NONE",
 
       DataInputTranslation = {
@@ -114,8 +115,8 @@ local VestaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "VESTA",
-      Observer = "SSB"
+      Target = spice.ID.Vesta,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Color = { 0.7, 0.8, 0.7 },
     StartTime = "2007 JUL 20 12:00:00",

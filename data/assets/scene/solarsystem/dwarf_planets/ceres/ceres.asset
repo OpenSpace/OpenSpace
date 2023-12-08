@@ -7,7 +7,7 @@ local Ceres = {
   Parent = transforms.CeresPosition.Identifier,
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 487.3E3, 487.3E3, 454.7E3 },
+    Radii = { 487300, 487300, 454700 },
     SegmentsPerPatch = 64,
     Layers = {}
   },

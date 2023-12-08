@@ -26,10 +26,7 @@ local HUDFPosition = {
   GUI = {
     Name = "Hubble Ultra Deep Field Position",
     Path = "/Solar System/Telescopes/JWST/HUDF",
-    Hidden = true,
-    Description = [[
-      Galactic cartesian position for the Hubble Ultra Deep Field
-    ]]
+    Hidden = true
   }
 }
 

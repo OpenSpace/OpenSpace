@@ -3,7 +3,8 @@ asset.require("./actions")
 asset.require("scene/solarsystem/planets/mars/default_layers")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
-asset.require("./spice")
+local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 local models = asset.resource({
@@ -52,41 +53,41 @@ local SpiceRotationEndTime = "2018 NOV 26 19:51:39"
 local TranslationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
       Type = "SpiceTranslation",
-      Target = "INSIGHT",
-      Observer = "MARS",
-      Frame = "IAU_MARS",
+      Target = spice.ID.Insight,
+      Observer = base.ID.Mars,
+      Frame = base.Frame.Mars,
       FixedDate = "2018 NOV 26 19:39:03"
   },
   ["2018 NOV 26 19:39:02"] = {
       Type = "SpiceTranslation",
-      Target = "INSIGHT",
-      Observer = "MARS",
-      Frame = "IAU_MARS",
+      Target = spice.ID.Insight,
+      Observer = base.ID.Mars,
+      Frame = base.Frame.Mars,
       FixedDate = "2018 NOV 26 19:39:03"
   },
   ["2018 NOV 26 19:39:03"] = {
     Type = "SpiceTranslation",
-    Target = "INSIGHT",
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Target = spice.ID.Insight,
+    Observer = base.ID.Mars,
+    Frame = base.Frame.Mars
   },
   ["2018 NOV 26 19:39:04"] = {
     Type = "SpiceTranslation",
-    Target = "INSIGHT",
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Target = spice.ID.Insight,
+    Observer = base.ID.Mars,
+    Frame = base.Frame.Mars
   },
  ["2018 NOV 26 19:45:34"] = {
     Type = "SpiceTranslation",
-    Target = "INSIGHT",
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Target = spice.ID.Insight,
+    Observer = base.ID.Mars,
+    Frame = base.Frame.Mars
   },
   ["2018 NOV 26 19:45:35"] = {
       Type = "SpiceTranslation",
-      Target = "INSIGHT",
-      Observer = "MARS",
-      Frame = "IAU_MARS",
+      Target = spice.ID.Insight,
+      Observer = base.ID.Mars,
+      Frame = base.Frame.Mars,
       FixedDate = "2018 NOV 26 19:45:34"
   }
 }
@@ -94,35 +95,35 @@ local TranslationKeyframes = {
 local RotationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS",
+    SourceFrame = spice.Frame.InsightCruise,
+    DestinationFrame = base.Frame.Mars,
     FixedDate = "2018 NOV 26 19:39:02"
   },
   ["2018 NOV 26 19:39:02"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS",
+    SourceFrame = spice.Frame.InsightCruise,
+    DestinationFrame = base.Frame.Mars,
     FixedDate = "2018 NOV 26 19:39:02"
   },
   ["2018 NOV 26 19:39:03"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS"
+    SourceFrame = spice.Frame.InsightCruise,
+    DestinationFrame = base.Frame.Mars
   },
   ["2018 NOV 26 19:39:04"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS"
+    SourceFrame = spice.Frame.InsightCruise,
+    DestinationFrame = base.Frame.Mars
   },
  ["2018 NOV 26 19:45:34"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS"
+    SourceFrame = spice.Frame.InsightCruise,
+    DestinationFrame = base.Frame.Mars
   },
   ["2018 NOV 26 19:45:35"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS",
+    SourceFrame = spice.Frame.InsightCruise,
+    DestinationFrame = base.Frame.Mars,
     FixedDate = "2018 NOV 26 19:45:34"
   }
 }
@@ -134,11 +135,11 @@ local InsightParent = {
   Transform = {
     Translation = {
       Type = "TimelineTranslation",
-      Keyframes = TranslationKeyframes,
+      Keyframes = TranslationKeyframes
     },
     Rotation = {
       Type = "TimelineRotation",
-      Keyframes = RotationKeyframes,
+      Keyframes = RotationKeyframes
     }
   },
   -- TimeFrame = {

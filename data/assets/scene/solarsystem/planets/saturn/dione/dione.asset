@@ -1,6 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../spice")
+local spice = asset.require("../spice")
+local base = asset.require("spice/base")
 
 
 
@@ -18,13 +19,13 @@ local Dione = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DIONE",
-      Observer = "SATURN BARYCENTER"
+      Target = spice.ID.Dione,
+      Observer = base.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_DIONE",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = base.Frame.Dione,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   Renderable = {

@@ -1,3 +1,7 @@
+local base = asset.require("spice/base")
+
+
+
 local kernels = asset.resource({
   Name = "Jupiter Spice Kernels",
   Type = "HttpSynchronization",
@@ -83,6 +87,32 @@ local ID = {
   Valetudo = 562
 }
 
+local Frame = {
+  Adrastea = base.Frame.Adrastea,
+  Amalthea = base.Frame.Amalthea,
+  Ananke = base.Frame.Ananke,
+  Callirrhoe = base.Frame.Callirrhoe,
+  Carme = base.Frame.Carme,
+  Chaldene = base.Frame.Chaldene,
+  Elara = base.Frame.Elara,
+  Erinome = base.Frame.Erinome,
+  Harpalyke = base.Frame.Harpalyke,
+  Himalia = base.Frame.Himalia,
+  Iocaste = base.Frame.Iocaste,
+  Isonoe = base.Frame.Isonoe,
+  Kalyke = base.Frame.Kalyke,
+  Leda = base.Frame.Leda,
+  Lysithea = base.Frame.Lysithea,
+  Megaclite = base.Frame.Magaclite,
+  Metis = base.Frame.Metis,
+  Pasiphae = base.Frame.Pasiphae,
+  Praxidike = base.Frame.Praxidike,
+  Sinope = base.Frame.Sinope,
+  Taygete = base.Frame.Taygete,
+  Thebe = base.Frame.Thebe,
+  Themisto = base.Frame.Themisto
+}
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "jup344.bsp")
@@ -93,6 +123,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("ID", ID)
+asset.export("Frame", Frame)
 
 
 

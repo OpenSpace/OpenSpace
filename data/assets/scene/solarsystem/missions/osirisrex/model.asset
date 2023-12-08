@@ -2,7 +2,8 @@ local transforms = asset.require("./transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local kernels = asset.require("./spice")
+local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 
@@ -22,13 +23,13 @@ local OsirisRex = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OSIRIS-REX",
-      Observer = "SSB"
+      Target = spice.ID.OsirisRex,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "ORX_SPACECRAFT",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = spice.Frame.OsirisRex,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   Renderable = {
@@ -59,8 +60,8 @@ local PolyCam = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "ORX_OCAMS_POLYCAM",
-      DestinationFrame = "ORX_SPACECRAFT"
+      SourceFrame = spice.Frame.Polycam,
+      DestinationFrame = spice.Frame.OsirisRex
     }
   },
   Renderable = {
@@ -84,6 +85,17 @@ local PolyCam = {
 local Rexis = {
   Identifier = "ORX_REXIS",
   Parent = OsirisRex.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0, 0.3371, 0.2712 }
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = spice.Frame.Rexis,
+      DestinationFrame = spice.Frame.OsirisRex
+    }
+  },
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "orx_rexis_resized_12_sep_2016.obj",
@@ -94,17 +106,6 @@ local Rexis = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
-  },
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0, 0.3371, 0.2712 }
-    },
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "ORX_REXIS",
-      DestinationFrame = "ORX_SPACECRAFT"
     }
   },
   GUI = {
@@ -119,14 +120,14 @@ local PolyCamFov = {
   Renderable = {
     Type = "RenderableFov",
     Body = "OSIRIS-REX",
-    Frame = "ORX_OCAMS_POLYCAM",
+    Frame = spice.Frame.Polycam,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "ORX_OCAMS_POLYCAM",
+      Name = spice.Frame.Polycam,
       Method = "ELLIPSOID",
       Aberration = "NONE"
     },
-    PotentialTargets = { BennuBodyId }
+    PotentialTargets = { spice.ID.Bennu }
   },
   GUI = {
     Name = "POLYCAM FOV",
@@ -141,17 +142,17 @@ local PolyCamFov = {
 --   Parent = Rexis.Identifier,
 --   Renderable = {
 --     Type = "RenderableFov",
---     Body = "OSIRIS-REX",
---     Frame = "ORX_REXIS",
+--     Body = spice.Frame.OsirisRex,
+--     Frame = spice.Frame.Rexis,
 --     RGB = { 0.8, 0.7, 0.7 },
 --     Instrument = {
 --       Name = "ORX_REXIS",
 --       Method = "ELLIPSOID",
 --       Aberration = "NONE"
 --     },
---     PotentialTargets = { BennuBodyId },
+--     PotentialTargets = { spice.ID.Bennu },
 --     FrameConversions = {
---       [BennuBodyId] = "IAU_BENNU"
+--       [spice.ID.Bennu] = spice.Frame.Bennu
 --     }
 --   },
 --   GUI = {

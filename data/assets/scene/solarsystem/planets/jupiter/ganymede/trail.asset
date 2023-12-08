@@ -1,6 +1,7 @@
 asset.require("spice/base")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../spice")
+local spice = asset.require("../spice")
+local base = asset.require("spice/base")
 
 
 
@@ -11,8 +12,8 @@ local GanymedeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "GANYMEDE",
-      Observer = "JUPITER BARYCENTER"
+      Target = spice.ID.Ganymede,
+      Observer = base.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.3 },
     Period = 172.0 / 24.0,

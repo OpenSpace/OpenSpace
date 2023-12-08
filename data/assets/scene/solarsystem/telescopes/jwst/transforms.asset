@@ -1,8 +1,8 @@
-asset.require("spice/base")
-asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-asset.require("./spice")
+local l2 = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
+local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 
@@ -20,21 +20,21 @@ local JWSTPosition = {
       Keyframes = {
         [LaunchTime] = {
           Type = "SpiceTranslation",
-          Target = 170, -- JWST
-          Observer = "EARTH",
-          Frame = "IAU_EARTH"
+          Target = spice.ID.JWST,
+          Observer = base.ID.Earth,
+          Frame = base.Frame.Earth
         },
         [DetachTime] = {
           Type = "SpiceTranslation",
-          Target = 170, -- JWST
-          Observer = "EARTH",
-          Frame = "GALACTIC"
+          Target = spice.ID.JWST,
+          Observer = base.ID.Earth,
+          Frame = base.Frame.Galactic
         },
         [L2orbitInsertionTime] = {
           Type = "SpiceTranslation",
-          Target = 170, -- JWST
-          Observer = 392, -- L2
-          Frame = "GALACTIC"
+          Target = spice.ID.JWST,
+          Observer = l2.ID.L2,
+          Frame = base.Frame.Galactic
         }
       }
     }

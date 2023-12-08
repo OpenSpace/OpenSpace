@@ -1,4 +1,4 @@
-asset.require("spice/base")
+local base = asset.require("spice/base")
 
 
 
@@ -24,12 +24,12 @@ local SunCenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SUN",
-      Observer = "SSB"
+      Target = base.ID.Sun,
+      Observer = base.ID.SolarSystemBarycenter
     }
   },
   GUI = {
-    Name = "SUN Center",
+    Name = "Sun Center",
     Path = "/Solar System/Sun",
     Description = "Spice frame for the Sun",
     Hidden = true
@@ -43,39 +43,39 @@ local SunIAU = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SUN",
-      Observer = "SSB"
+      Target = base.ID.Sun,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_SUN",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = base.Frame.Sun,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   GUI = {
-    Name = "SUN IAU",
+    Name = "Sun IAU",
     Path = "/Solar System/Sun",
     Hidden = true
   }
 }
 
-local SunECLIPJ2000 = {
-  Identifier = "SunECLIPJ2000",
+local SunEclipJ2000 = {
+  Identifier = "SunEclipJ2000",
   Parent = SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SUN",
-      Observer = "SSB"
+      Target = base.ID.Sun,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "ECLIPJ2000",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = base.Frame.EclipJ2000,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   GUI = {
-    Name = "SUN J2000",
+    Name = "Sun J2000",
     Path = "/Solar System/Sun",
     Hidden = true
   }
@@ -86,11 +86,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(SolarSystemBarycenter)
   openspace.addSceneGraphNode(SunCenter)
   openspace.addSceneGraphNode(SunIAU)
-  openspace.addSceneGraphNode(SunECLIPJ2000)
+  openspace.addSceneGraphNode(SunEclipJ2000)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SunECLIPJ2000)
+  openspace.removeSceneGraphNode(SunEclipJ2000)
   openspace.removeSceneGraphNode(SunIAU)
   openspace.removeSceneGraphNode(SunCenter)
   openspace.removeSceneGraphNode(SolarSystemBarycenter)
@@ -99,7 +99,7 @@ end)
 asset.export(SolarSystemBarycenter)
 asset.export(SunCenter)
 asset.export(SunIAU)
-asset.export(SunECLIPJ2000)
+asset.export(SunEclipJ2000)
 
 
 

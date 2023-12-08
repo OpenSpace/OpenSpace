@@ -1,3 +1,7 @@
+local base = asset.require("spice/base")
+
+
+
 local kernels = asset.resource({
   Name = "Jupiter Spice Kernels",
   Type = "HttpSynchronization",
@@ -13,10 +17,10 @@ local ID = {
 }
 
 local Frame = {
-  Callisto = "IAU_CALLISTO",
-  Europa = "IAU_EUROPA",
-  Ganymede = "IAU_GANYMEDE",
-  Io = "IAU_IO"
+  Callisto = base.Frame.Callisto,
+  Europa = base.Frame.Europa,
+  Ganymede = base.Frame.Ganymede,
+  Io = base.Frame.Io
 }
 
 

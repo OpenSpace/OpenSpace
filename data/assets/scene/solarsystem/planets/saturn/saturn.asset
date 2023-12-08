@@ -1,6 +1,6 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local base = asset.require("spice/base")
 
 
 
@@ -18,13 +18,13 @@ local Saturn = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SATURN",
-      Observer = "SATURN BARYCENTER"
+      Target = base.ID.Saturn,
+      Observer = base.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_SATURN",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = base.Frame.Saturn,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   Renderable = {

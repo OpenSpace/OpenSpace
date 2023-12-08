@@ -1,6 +1,7 @@
 local transforms = asset.require("../transforms")
-local spice = asset.require("./spice")
 asset.require("../trail")
+local spice = asset.require("../spice")
+local base = asset.require("spice/base")
 
 
 
@@ -22,8 +23,8 @@ local Charon = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_CHARON",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = spice.Frame.Charon,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   Renderable = {

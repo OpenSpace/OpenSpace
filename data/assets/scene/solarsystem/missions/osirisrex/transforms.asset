@@ -1,8 +1,8 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
-
-local BennuBodyId = 2101955
 
 local BennuBarycenter = {
   Identifier = "BennuBarycenter",
@@ -10,8 +10,8 @@ local BennuBarycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = BennuBodyId,
-      Observer = "SSB"
+      Target = spice.ID.Bennu,
+      Observer = base.ID.SolarSystemBarycenter
     }
   },
   GUI = {

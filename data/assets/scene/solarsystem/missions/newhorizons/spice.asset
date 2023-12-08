@@ -1,3 +1,7 @@
+local base = asset.require("spice/base")
+
+
+
 local data = asset.resource({
   Name = "New Horizons Kernels",
   Type = "HttpSynchronization",
@@ -44,9 +48,14 @@ local PlutoKernels = {
 
 local ID = {
   NewHorizons = "NEW HORIZONS",
-  PlutoBarycenter = "PLUTO BARYCENTER",
-  Pluto = "PLUTO",
+  Rex = "NH_REX",
+  PlutoBarycenter = base.ID.PlutoBarycenter,
+  Pluto = base.ID.Pluto,
   Charon = "CHARON",
+  Nix = "NIX",
+  Hydra = "HYDRA",
+  Kerberos = "KERBEROS",
+  Styx = "SYNX"
 }
 
 local Frame = {
@@ -56,15 +65,20 @@ local Frame = {
   RalphMvicPan1 = "NH_RALPH_MVIC_PAN1",
   RalphMvicPan2 = "NH_RALPH_MVIC_PAN2",
   RalphMvicRed = "NH_RALPH_MVIC_RED",
-  RalphMvicBLUE = "NH_RALPH_MVIC_BLUE",
+  RalphMvicBlue = "NH_RALPH_MVIC_BLUE",
   RalphMvicFT = "NH_RALPH_MVIC_FT",
   RalphMvicMethane = "NH_RALPH_MVIC_METHANE",
   RalphMvicNIR = "NH_RALPH_MVIC_NIR",
   AliceAirglow = "NH_ALICE_AIRGLOW",
   AliceSOC = "NH_ALICE_SOC",
   Rex = "NH_REX",
-  Pluto = "IAU_PLUTO",
-  Charon = "IAU_CHARON"
+
+  Pluto = base.Frame.Pluto,
+  Charon = base.Frame.Charon,
+  Hydra = base.Frame.Hydra,
+  Styx = base.Frame.Styx,
+  Nix = base.Frame.Nix,
+  Kerberos = base.Frame.Kerberos
 }
 
 
@@ -78,6 +92,7 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(NewHorizonsKernels)
 end)
 
-
+asset.export("ID", ID)
+asset.export("Frame", Frame)
 asset.export("NewHorizonsKernels", NewHorizonsKernels)
 asset.export("PlutoKernels", PlutoKernels)

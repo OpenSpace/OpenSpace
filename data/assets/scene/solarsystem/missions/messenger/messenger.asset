@@ -1,7 +1,8 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
-local kernels = asset.require("./spice")
+local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 local models = asset.resource({
@@ -30,13 +31,13 @@ local Messenger = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MESSENGER",
-      Observer = "SSB"
+      Target = spice.ID.Messenger,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "MSGR_SPACECRAFT",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = spice.Frame.Messenger,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   GUI = {

@@ -1,3 +1,7 @@
+local base = asset.require("spice/base")
+
+
+
 local data = asset.resource({
   Name = "Osiris Rex Kernels",
   Type = "HttpSynchronization",
@@ -115,12 +119,14 @@ local Kernels = {
 
 local ID = {
   OsirisRex = "OSIRIS-REX",
-  Bennu = 2101955
+  Bennu = "2101955"
 }
 
 local Frame = {
   OsirisRex = "ORX_SPACECRAFT",
-  Bennu = "IAU_BENNU"
+  Polycam = "ORX_OCAMS_POLYCAM",
+  Rexis = "ORX_REXIS",
+  Bennu = base.Frame.Bennu
 }
 
 
@@ -132,3 +138,5 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(Kernels)
 end)
 
+asset.export("ID", ID)
+asset.export("Frame", Frame)

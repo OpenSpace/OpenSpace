@@ -1,7 +1,7 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../spice")
+local spice = asset.require("../spice")
+local base = asset.require("spice/base")
 
 
 
@@ -19,13 +19,13 @@ local Io = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "IO",
-      Observer = "JUPITER BARYCENTER"
+      Target = spice.ID.Io,
+      Observer = base.ID.JupiterBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_IO",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = spice.Frame.Io,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   Renderable = {

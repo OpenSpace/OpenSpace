@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local spice = asset.require("./spice")
+local spice = asset.require("../spice")
 
 
 local CharonBarycentricTrail = {

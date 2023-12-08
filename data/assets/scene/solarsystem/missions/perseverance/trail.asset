@@ -1,6 +1,7 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 
@@ -13,16 +14,16 @@ local PerseveranceTrailSun = {
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
       Target = spice.ID.Perseverance,
-      Observer = "SSB"
+      Observer = base.ID.SolarSystemBarycenter
     },
     Color = { 0.2, 0.7, 0.1 },
     StartTime = StartTime,
     EndTime = EndTime,
-    SampleInterval = 100,
-    Enabled = false
+    SampleInterval = 100
   },
   GUI = {
     Name = "Perseverance Trail (Sun)",
@@ -39,7 +40,7 @@ local PerseveranceTrailMars = {
     Translation = {
       Type = "SpiceTranslation",
       Target = spice.ID.Perseverance,
-      Observer = "MARS BARYCENTER"
+      Observer = spice.ID.MarsBarycenter
     },
     Color = { 0.7, 0.9, 0.6 },
     StartTime = ApproachMars,

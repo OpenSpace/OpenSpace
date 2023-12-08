@@ -1,3 +1,7 @@
+local base = asset.require("spice/base")
+
+
+
 local kernels = asset.resource({
   Name = "Uranus Spice Kernels",
   Type = "HttpSynchronization",
@@ -14,6 +18,14 @@ local ID = {
   Umbriel = "UMBRIEL"
 }
 
+local Frame = {
+  Ariel = base.Frame.Ariel,
+  Miranda = base.Frame.Miranda,
+  Oberon = base.Frame.Oberon,
+  Titania = base.Frame.Titania,
+  Umbriel = base.Frame.Umbriel
+}
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "ura111.bsp")
@@ -24,6 +36,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("ID", ID)
+asset.export("Frame", Frame)
 
 
 asset.meta = {

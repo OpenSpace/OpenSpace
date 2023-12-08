@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local base = asset.require("spice/base")
 
 
 
@@ -10,8 +10,8 @@ local MercuryTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY",
-      Observer = "SSB"
+      Target = base.ID.Mercury,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Color = { 0.6, 0.5, 0.5 },
     Period = 87.968,

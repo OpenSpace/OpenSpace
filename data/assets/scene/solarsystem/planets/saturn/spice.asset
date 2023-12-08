@@ -1,3 +1,7 @@
+local base = asset.require("spice/base")
+
+
+
 local kernels = asset.resource({
   Name = "Saturn Spice Kernels",
   Type = "HttpSynchronization",
@@ -14,6 +18,7 @@ local ID = {
   Hyperion = "HYPERION",
   Iapetus = "IAPETUS",
   Mimas = "MIMAS",
+  Phoebe = "PHOEBE",
   Polydeuces = "POLYDEUCES",
   Rhea = "RHEA",
   Tethys = "TETHYS",
@@ -21,14 +26,14 @@ local ID = {
 }
 
 local Frame = {
-  Dione = "IAU_DIONE",
-  Enceladus = "IAU_ENCELADUS",
-  Iapetus = "IAU_IAPETUS",
-  Mimas = "IAU_MIMAS",
-  Phoebe = "PHOEBE",
-  Rhea = "IAU_RHEA",
-  Tethys = "IAU_TETHYS",
-  Titan = "IAU_TITAN"
+  Calypso = base.Frame.Calypso,
+  Dione = base.Frame.Dione,
+  Enceladus = base.Frame.Enceladus,
+  Iapetus = base.Frame.Iapetus,
+  Mimas = base.Frame.Mimas,
+  Rhea = base.Frame.Rhea,
+  Tethys = base.Frame.Tethys,
+  Titan = base.Frame.Titan
 }
 
 

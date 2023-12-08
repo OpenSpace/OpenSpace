@@ -1,7 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-asset.require("./spice")
+local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 
@@ -20,13 +21,13 @@ local Phobos = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PHOBOS",
-      Observer = "MARS BARYCENTER"
+      Target = spice.ID.Phobos,
+      Observer = base.ID.MarsBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_PHOBOS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = spice.Frame.Phobos,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   Renderable = {
@@ -56,8 +57,8 @@ local PhobosTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PHOBOS",
-      Observer = "MARS BARYCENTER"
+      Target = spice.ID.Phobos,
+      Observer = base.ID.MarsBarycenter
     },
     Color = { 1.0, 0.605, 0.420 },
     Period = 0.31891023,

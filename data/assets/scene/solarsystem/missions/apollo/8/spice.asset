@@ -20,7 +20,7 @@ local ID = {
 }
 
 local Frame = {
-  Apollo8 = -908000
+  Apollo8 = -908000,
   Apollo8Earthrise = "A8_EARTHRISE"
 }
 

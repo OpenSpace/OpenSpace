@@ -1,4 +1,5 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local base = asset.require("spice/base")
 
 local EarthMoonShadow = {
   Identifier = "EarthMoonShadow",
@@ -9,11 +10,11 @@ local EarthMoonShadow = {
     ShadowLength = 1.0,
     UmbralShadowColor = { 0.85, 1.0, 1.0, 0.20 },
     PenumbralShadowColor = { 0.35, 0.35, 0.35, 0.29 },
-    LightSource = "SUN",
-    LightSourceFrame = "IAU_SUN",
-    Shadower = "MOON",
-    ShadowerFrame = "IAU_MOON",
-    Shadowee = "EARTH"
+    LightSource = base.ID.Sun,
+    LightSourceFrame = base.Frame.Sun,
+    Shadower = base.ID.Moon,
+    ShadowerFrame = base.Frame.Moon,
+    Shadowee = base.ID.Earth
   },
   GUI = {
     Name = "Earth/Moon Shadow",

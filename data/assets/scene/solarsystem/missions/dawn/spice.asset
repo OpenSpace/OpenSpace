@@ -1,3 +1,5 @@
+local base = asset.require("spice/base")
+
 local dawn = asset.resource({
   Name = "Dawn Kernels",
   Type = "HttpSynchronization",
@@ -66,7 +68,8 @@ local ID = {
 local Frame = {
   Dawn = "DAWN_SPACECRAFT",
   DawnSolarArray1 = -203010,
-  DawnSolarArray2 = -203020
+  DawnSolarArray2 = -203020,
+  Vesta = base.Frame.Vesta
 }
 
 

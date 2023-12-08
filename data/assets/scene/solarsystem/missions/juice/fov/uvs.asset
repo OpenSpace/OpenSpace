@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../spice")
+local spice = asset.require("../spice")
 
 
 
@@ -13,8 +13,8 @@ local UVS = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_UVS",
+    Body = spice.ID.Juice,
+    Frame = spice.Frame.UVS,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_UVS",

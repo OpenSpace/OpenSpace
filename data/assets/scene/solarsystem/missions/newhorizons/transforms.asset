@@ -1,5 +1,6 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local kernels = asset.require("./spice")
+local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 
@@ -14,8 +15,8 @@ local PlutoBarycenterAccurate = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PLUTO BARYCENTER",
-      Observer = "SSB"
+      Target = spice.ID.PlutoBarycenter,
+      Observer = base.ID.SolarSystemBarycenter
     }
   },
   GUI = {
@@ -30,13 +31,13 @@ local NewHorizonsPosition = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEW HORIZONS",
-      Observer = "PLUTO BARYCENTER"
+      Target = spice.ID.NewHorizons,
+      Observer = spice.ID.PlutoBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "NH_SPACECRAFT",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = spice.Frame.NewHorizons,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   GUI = {

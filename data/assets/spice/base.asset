@@ -20,6 +20,7 @@ local ID = {
   MarsBarycenter = "MARS BARYCENTER",
   Mercury = "MERCURY",
   MercuryBarycenter = "MERCURY BARYCENTER",
+  Moon = "MOON",
   Neptune = "NEPTUNE",
   NeptuneBarycenter = "NEPTUNE BARYCENTER",
   Jupiter = "JUPITER",
@@ -38,6 +39,7 @@ local ID = {
 
 local Frame = {
   J2000 = "J2000",
+  EclipJ2000 = "ECLIPJ2000",
   Galactic = "GALACTIC",
 
   ["52Europa"] = "IAU_52_EUROPA",

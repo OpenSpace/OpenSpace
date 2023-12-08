@@ -1,4 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local base = asset.require("spice/base")
 
 
 
@@ -9,8 +10,8 @@ local UranusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "URANUS",
-      Observer = "SSB"
+      Target = base.ID.Uranus,
+      Observer = base.ID.SolarSystemBarycenter
     },
     Color = { 0.60, 0.95, 1.00 },
     Period = 30588.740,

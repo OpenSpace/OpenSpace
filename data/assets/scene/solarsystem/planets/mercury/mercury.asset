@@ -1,6 +1,6 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local base = asset.require("spice/base")
 
 
 
@@ -18,20 +18,18 @@ local Mercury = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY",
-      Observer = "MERCURY BARYCENTER"
+      Target = base.ID.Mercury,
+      Observer = base.ID.MercuryBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MERCURY",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = base.Frame.Mercury,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 2439700,
-    Frame = "IAU_MERCURY",
-    Body = "MERCURY",
     CameraMinHeight = 300,
     SegmentsPerPatch = 64,
     Layers = {},

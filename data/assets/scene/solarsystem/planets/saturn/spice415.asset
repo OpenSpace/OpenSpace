@@ -1,3 +1,7 @@
+local base = asset.require("spice/base")
+
+
+
 local kernels = asset.resource({
   Name = "Saturn Spice Kernels",
   Type = "HttpSynchronization",
@@ -21,6 +25,16 @@ local ID = {
   Telesto = "TELESTO",
 }
 
+local Frame = {
+  Atlas = base.Frame.Atlas,
+  Epimetheus = base.Frame.Epimetheus,
+  Janus = base.Frame.Janus,
+  Pan = base.Frame.Pan,
+  Pandora = base.Frame.Pandora,
+  Prometheus = base.Frame.Prometheus,
+  Telesto = base.Frame.Telesto
+}
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "sat415.bsp")
@@ -31,6 +45,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("ID", ID)
+asset.export("Frame", Frame)
 
 
 asset.meta = {

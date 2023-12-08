@@ -11,7 +11,7 @@ local PlutoBarycenterTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = spice.ID.PlutoBarycenter,
-      Observer = spice.iD.SolarSystemBarycenter
+      Observer = spice.ID.SolarSystemBarycenter
     },
     Color = { 0.3, 0.7, 0.3 },
     Period = 365.25,

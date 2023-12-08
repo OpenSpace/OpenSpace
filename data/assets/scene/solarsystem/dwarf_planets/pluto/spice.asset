@@ -26,6 +26,15 @@ local ID = {
   Pluto = base.ID.Pluto
 }
 
+local Frame = {
+  Pluto = base.Frame.Pluto,
+  Charon = base.Frame.Charon,
+  Hydra = base.Frame.Hydra,
+  Styx = base.Frame.Styx,
+  Nix = base.Frame.Nix,
+  Kerberos = base.Frame.Kerberos
+}
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels)
@@ -36,6 +45,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("ID", ID)
+asset.export("Frame", Frame)
 
 
 

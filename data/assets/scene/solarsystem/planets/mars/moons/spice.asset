@@ -1,3 +1,7 @@
+local base = asset.require("spice/base")
+
+
+
 local kernels = asset.resource({
   Name = "Mars Spice Kernels",
   Type = "HttpSynchronization",
@@ -12,9 +16,10 @@ local ID = {
 }
 
 local Frame = {
-  Deimos = "IAU_DEIMOS",
-  Phobos = "IAU_PHOBOS"
+  Deimos = base.Frame.Deimos,
+  Phobos = base.Frame.Phobos
 }
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "mar097.bsp")

@@ -2,6 +2,7 @@ local trail = asset.require("./trail")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local spice = asset.require("./spice")
+local base = asset.require("spice/base")
 
 
 
@@ -17,40 +18,40 @@ local TranslationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
     Type = "SpiceTranslation",
     Target = spice.ID.Perseverance,
-    Observer = "MARS",
-    Frame = "IAU_MARS",
+    Observer = spice.ID.Mars,
+    Frame = spice.Frame.Mars,
     FixedDate = "2020 JUL 17 13:56:43"
   },
   ["2020 JUL 17 13:56:42"] = {
     Type = "SpiceTranslation",
     Target = spice.ID.Perseverance,
-    Observer = "MARS",
-    Frame = "IAU_MARS",
+    Observer = spice.ID.Mars,
+    Frame = spice.Frame.Mars,
     FixedDate = "2020 JUL 17 13:56:43"
   },
   ["2020 JUL 17 13:56:43"] = {
     Type = "SpiceTranslation",
     Target = spice.ID.Perseverance,
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Observer = spice.ID.Mars,
+    Frame = spice.Frame.Mars
   },
   ["2020 JUL 17 13:56:44"] = {
     Type = "SpiceTranslation",
     Target = spice.ID.Perseverance,
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Observer = spice.ID.Mars,
+    Frame = spice.Frame.Mars
   },
   ["2021 FEB 18 20:43:48"] = {
     Type = "SpiceTranslation",
     Target = spice.ID.Perseverance,
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Observer = spice.ID.Mars,
+    Frame = spice.Frame.Mars
   },
   ["2021 FEB 18 20:43:49"] = {
     Type = "SpiceTranslation",
     Target = spice.ID.Perseverance,
-    Observer = "MARS",
-    Frame = "IAU_MARS",
+    Observer = spice.ID.Mars,
+    Frame = spice.Frame.Mars,
     FixedDate = "2021 FEB 18 20:43:48"
   }
 }
@@ -61,13 +62,13 @@ local PerseveranceNode = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS",
-      Observer = "MARS BARYCENTER"
+      Target = spice.ID.Mars,
+      Observer = spice.ID.MarsBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MARS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = spice.Frame.Mars,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   GUI = {

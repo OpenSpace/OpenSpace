@@ -1,6 +1,6 @@
-asset.require("spice/base")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../spice")
+local spice = asset.require("../spice")
+local base = asset.require("spice/base")
 
 
 
@@ -11,8 +11,8 @@ local CallistoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALLISTO",
-      Observer = "JUPITER BARYCENTER"
+      Target = spice.ID.Callisto,
+      Observer = base.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 17.0,

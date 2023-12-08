@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local base = asset.require("spice/base")
 
 
 
@@ -9,8 +9,8 @@ local EarthBarycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EARTH BARYCENTER",
-      Observer = "SSB"
+      Target = base.ID.EarthBarycenter,
+      Observer = base.ID.SolarSystemBarycenter
     }
   },
   GUI = {
@@ -26,8 +26,8 @@ local EarthCenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EARTH",
-      Observer = "EARTH BARYCENTER"
+      Target = base.ID.Earth,
+      Observer = base.ID.EarthBarycenter
     }
   },
   GUI = {
@@ -44,8 +44,8 @@ local EarthInertial = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "J2000",
-      DestinationFrame = "GALACTIC",
+      SourceFrame = base.Frame.J2000,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   GUI = {
@@ -61,8 +61,8 @@ local EarthIAU = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_EARTH",
-      DestinationFrame = "GALACTIC",
+      SourceFrame = base.Frame.Earth,
+      DestinationFrame = base.Frame.Galactic
     }
   },
   GUI = {

@@ -77,6 +77,8 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels .. "sat452.bsp")
 end)
 
+asset.export("ID", ID)
+
 
 
 asset.meta = {
