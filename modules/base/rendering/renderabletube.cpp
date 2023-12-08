@@ -118,6 +118,20 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DrawWireframeInfo = {
+        "DrawWireframe",
+        "Wireframe",
+        "If true, draw the wire frame of the tube",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo WireLineWidthInfo = {
+        "WireLineWidth",
+        "Wire Line Width",
+        "The line width to use when the tube is rendered as a wireframe",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableTube)]] Parameters {
         // The input file with data for the tube
         std::string file;
@@ -149,6 +163,12 @@ namespace {
 
         // [[codegen::verbatim(AddEdgesInfo.description)]]
         std::optional<bool> addEdges;
+
+        // [[codegen::verbatim(DrawWireframeInfo.description)]]
+        std::optional<bool> drawWireframe;
+
+        // [[codegen::verbatim(WireLineWidthInfo.description)]]
+        std::optional<float> wireLineWidth;
     };
 #include "renderabletube_codegen.cpp"
 } // namespace
@@ -179,6 +199,8 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _addEdges(AddEdgesInfo, true)
+    , _drawWireframe(DrawWireframeInfo, false)
+    , _wireLineWidth(WireLineWidthInfo, 1.f, 1.f, 10.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -221,6 +243,12 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     _addEdges.onChange([this]() { _tubeIsDirty = true; });
     _addEdges = p.addEdges.value_or(_addEdges);
     addProperty(_addEdges);
+
+    _drawWireframe = p.drawWireframe.value_or(_drawWireframe);
+    addProperty(_drawWireframe);
+
+    _wireLineWidth = p.wireLineWidth.value_or(_wireLineWidth);
+    addProperty(_wireLineWidth);
 
     addProperty(Fadeable::_opacity);
 }
@@ -637,6 +665,16 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
+    if (_drawWireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+#ifndef __APPLE__
+        glLineWidth(_wireLineWidth);
+#else
+        glLineWidth(1.f);
+#endif
+    }
+
     _shader->setUniform(_uniformCache.hasTransferFunction, _hasTransferFunction);
     if (_hasTransferFunction) {
         ghoul::opengl::TextureUnit transferFunctionUnit;
@@ -690,6 +728,12 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     if (!_enableFaceCulling) {
         glEnable(GL_CULL_FACE);
     }
+
+    if (_drawWireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        global::renderEngine->openglStateCache().resetLineState();
+    }
+
     glBindVertexArray(0);
     global::renderEngine->openglStateCache().resetLineState();
 

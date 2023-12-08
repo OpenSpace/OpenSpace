@@ -98,6 +98,8 @@ private:
     Shading _shading;
 
     properties::BoolProperty _addEdges;
+    properties::BoolProperty _drawWireframe;
+    properties::FloatProperty _wireLineWidth;
 
     UniformCache(modelViewTransform, projectionTransform, normalTransform, color,
         opacity, hasTransferFunction, transferFunction, performShading, nLightSources,
