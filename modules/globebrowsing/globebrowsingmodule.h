@@ -111,9 +111,6 @@ private:
     void goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
         globebrowsing::Geodetic3 geo3, bool doResetCameraDirection);
 
-    glm::dquat lookDownCameraRotation(const globebrowsing::RenderableGlobe& globe,
-        glm::dvec3 cameraPositionModelSpace, globebrowsing::Geodetic2 geo2);
-
     properties::UIntProperty _tileCacheSizeMB;
 
     properties::StringProperty _defaultGeoPointTexturePath;

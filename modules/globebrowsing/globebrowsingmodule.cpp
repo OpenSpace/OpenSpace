@@ -525,27 +525,6 @@ void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& gl
     global::navigationHandler->setNavigationStateNextFrame(state);
 }
 
-glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
-                                              const globebrowsing::RenderableGlobe& globe,
-                                                              glm::dvec3 cameraModelSpace,
-                                                            globebrowsing::Geodetic2 geo2)
-{
-    using namespace globebrowsing;
-
-    const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianSurfacePosition(
-        geo2
-    );
-    // For globes, we know that the up-direction will always be positive Z.
-    // @TODO (2023-12-06 emmbr) Eventually, we want each scene graph node to be aware of
-    // its own preferred up-direction. At that time, this should no longer be hardcoded
-    const glm::dvec3 lookUpModelSpace = glm::dvec3(0.0, 0.0, 1.0);
-    const glm::dmat4 lookAtMatrix =
-        glm::lookAt(cameraModelSpace, positionModelSpace, lookUpModelSpace);
-
-    const glm::dquat rotation = glm::quat_cast(inverse(lookAtMatrix));
-    return rotation;
-}
-
 const globebrowsing::RenderableGlobe*
 GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
 {
