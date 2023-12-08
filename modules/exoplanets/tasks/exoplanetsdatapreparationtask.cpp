@@ -58,9 +58,9 @@ namespace {
     // done by star name, as given by the comment in the SPECK file and the host star
     // column in the exoplanet dataset.
     //
-    // Note that the CSV (1) has to include a certain set of columns from the for the
-    // rendering to be correct. Use the accompanying python script to download the
-    // datafile, or make sure to include all columns in your download.
+    // Note that the CSV (1) has to include a certain set of columns for the rendering to
+    // be correct. Use the accompanying python script to download the datafile, or make
+    // sure to include all columns in your download.
     struct [[codegen::Dictionary(ExoplanetsDataPreparationTask)]] Parameters {
         // The csv file to extract data from
         std::string inputDataFile;
