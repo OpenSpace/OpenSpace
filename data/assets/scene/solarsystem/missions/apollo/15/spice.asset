@@ -20,7 +20,7 @@ local ID = {
 }
 
 local Frame = {
-  Apollo15Nadir = -915240
+  Apollo15Nadir = -915240,
   Apollo15Metric = "A15_METRIC"
 }
 
