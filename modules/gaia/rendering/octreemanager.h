@@ -91,8 +91,8 @@ public:
 
     /**
      * Prints the whole tree structure, including number of stars per node, number of
-     * nodes, tree depth and if node is a leaf. Calls #printStarsPerNode(node, prefix)
-     * internally.
+     * nodes, tree depth and if node is a leaf. Calls
+     * #printStarsPerNode(const OctreeNode&, const std::string&) const internally.
      */
     void printStarsPerNode() const;
 
