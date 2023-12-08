@@ -25,6 +25,7 @@
 #include <openspace/data/csvloader.h>
 
 #include <openspace/data/datamapping.h>
+#include <openspace/util/progressbar.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
@@ -38,6 +39,10 @@
 #include <fstream>
 #include <functional>
 #include <string_view>
+
+namespace {
+    constexpr std::string_view _loggerCat = "DataLoader: CSV";
+}
 
 namespace openspace::dataloader::csv {
 
@@ -61,13 +66,15 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 #endif
     };
 
+    LDEBUG("Parsing CSV file");
+
     std::vector<std::vector<std::string>> rows = ghoul::loadCSVFile(
         filePath.string(),
         true
     );
 
     if (rows.size() < 2) {
-        LWARNINGC("DataLoader: CSV", fmt::format(
+        LWARNING(fmt::format(
             "Error loading data file {}. No data items read", filePath
         ));
         return Dataset();
@@ -119,10 +126,15 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 
     if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
         // One or more position columns weren't read
-        LERRORC("DataLoader: CSV", fmt::format(
+        LERROR(fmt::format(
             "Error loading data file {}. Missing X, Y or Z position column", filePath
         ));
     }
+
+    LINFO(fmt::format(
+        "Loading {} rows with {} columns", rows.size(), columns.size()
+    ));
+    ProgressBar progress(rows.size());
 
     // Skip first row (column names)
     for (size_t rowIdx = 1; rowIdx < rows.size(); ++rowIdx) {
@@ -170,6 +182,8 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         }
 
         res.entries.push_back(entry);
+
+        progress.print(rowIdx + 1);
     }
 
     return res;
