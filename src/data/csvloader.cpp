@@ -49,11 +49,9 @@ namespace openspace::dataloader::csv {
 Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> specs) {
     ghoul_assert(std::filesystem::exists(filePath), "File must exist");
 
-    // @TODO: This is the same that is used by the exoplanetdataprep task. Maybe more to a
-    // datahelper file?
     auto readFloatData = [](const std::string& str) -> float {
-#ifdef WIN32
         float result;
+#ifdef WIN32
         auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
         if (ec == std::errc() && std::isfinite(result)) {
             return result;
@@ -61,8 +59,14 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         return std::numeric_limits<float>::quiet_NaN();
 #else
         // clang is missing float support for std::from_chars
-        return !str.empty() ? std::stof(str.c_str(), nullptr) : NAN;
-        // @TODO: This won't work with non-finite or any type of invalid argument..
+        try {
+            result = std::stof(str.c_str(), nullptr);
+            if (std::isfinite(result)) {
+                return result;
+            }
+        }
+        catch (std::invalid_argument const& e) {}
+        return NAN;
 #endif
     };
 
