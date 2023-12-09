@@ -1,5 +1,7 @@
 local spice = asset.require("spice/base")
 
+
+
 local data = asset.resource({
   Name = "Ceres Kernels",
   Type = "HttpSynchronization",
@@ -33,6 +35,7 @@ end)
 
 asset.export("ID", ID)
 asset.export("Frame", Frame)
+
 
 
 asset.meta = {

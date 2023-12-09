@@ -5,6 +5,7 @@ local spice = asset.require("./spice")
 local base = asset.require("spice/base")
 
 
+
 local ArtemisEarthTrail = {
   Identifier = "ArtemisEarthTrail",
   Parent = earthTransforms.EarthCenter.Identifier,

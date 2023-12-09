@@ -3,6 +3,7 @@ local earthTransforms = asset.require("scene/solarsystem/planets/earth/transform
 local spice = asset.require("spice/base")
 
 
+
 local TravelSpeedIndicator = {
   Identifier = "TravelSpeedIndicator-2000",
   --SunIAU adds an extra rotation. Using barycenter, then offsetting to SunIAU
