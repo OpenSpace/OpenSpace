@@ -5,7 +5,7 @@ local transforms = asset.require("./transforms")
 
 local Trail = {
   Identifier = "VestaTrail",
-  Parent = sunTransforms.SunECLIPJ2000.Identifier,
+  Parent = sunTransforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Enabled = asset.enabled,

@@ -150,11 +150,11 @@ local InsightParent = {
   Transform = {
     Translation = {
       Type = "TimelineTranslation",
-      Keyframes = TranslationKeyframes,
+      Keyframes = TranslationKeyframes
     },
     Rotation = {
       Type = "TimelineRotation",
-      Keyframes = RotationKeyframes,
+      Keyframes = RotationKeyframes
     }
   },
   -- TimeFrame = {

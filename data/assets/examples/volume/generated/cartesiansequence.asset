@@ -9,7 +9,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 local SunRadius = 695508000
 
 local Volume = {
-  Identifier = "GeneratedVolume",
+  Identifier = "GeneratedVolumeCartesianSequence",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTimeVaryingVolume",

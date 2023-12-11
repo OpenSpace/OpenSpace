@@ -16,8 +16,7 @@ local MercuryBarycenter = {
   GUI = {
     Name = "Mercury Barycenter",
     Path = "/Solar System/Planets/Mercury",
-    Hidden = true,
-    Description = "Mercury Barycenter position"
+    Hidden = true
   }
 }
 

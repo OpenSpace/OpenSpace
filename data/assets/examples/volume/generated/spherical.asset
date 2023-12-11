@@ -9,7 +9,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 local AstronomicalUnit = 149597870700
 
 local Volume = {
-  Identifier = "GeneratedVolume",
+  Identifier = "GeneratedVolumeSpherical",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Scale = {

@@ -5,7 +5,7 @@ local textures = asset.require("scene/milkyway/habitable_zones/habitable_zone_te
 
 local HabitableZone = {
   Identifier = "SunHabitableZone",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableHabitableZone",
     Enabled = false,

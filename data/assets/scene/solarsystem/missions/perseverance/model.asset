@@ -110,7 +110,6 @@ local Body = {
   Parent = PerseveranceModel.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    Body = "MARS SCIENCE LABORATORY",
     GeometryFile = models .. "Perseverance.obj",
     LightSources = {
       sun.LightSource,
