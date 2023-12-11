@@ -1,0 +1,24 @@
+asset.require("./colorlayers/mars_texture", false)
+asset.require("./colorlayers/ctx_blended", false)
+asset.require("./colorlayers/hirise", false)
+asset.require("./colorlayers/hirisels", false)
+
+asset.require("./heightlayers/mdem200m", asset.enabled)
+asset.require("./heightlayers/hirisels", false)
+
+asset.require("./overlays/indices", false)
+asset.require("./overlays/size_reference", false)
+
+
+
+asset.meta = {
+  Name = "Base Mars Layers",
+  Version = "1.0",
+  Description = [[Base Mars layers are: Mars texture, CTX Blended, HiRISE,
+    HiRISE Local Set, MDEM200M (3D), HiRISE Local Set DEM (3D), Tile Indicies,
+    and Size Reference.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

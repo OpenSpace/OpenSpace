@@ -11,8 +11,8 @@ local texturesPath = asset.resource({
 
 
 local Layer = {
-  Identifier = "Clouds_Magellan_Combo",
-  Name = "Clouds Magellan Combo",
+  Identifier = "Clouds_Magellan_Combo_Utah",
+  Name = "Clouds Magellan Combo [Utah]",
   Enabled = asset.enabled,
   Type = "TileProviderByLevel",
   LevelTileProviders = {

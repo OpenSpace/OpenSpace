@@ -74,6 +74,11 @@ namespace version1 {
         }
         settings.bypassLauncher = get_to<bool>(json, "bypass");
 
+        std::optional<std::string> layerServer = get_to<std::string>(json, "layerserver");
+        if (layerServer.has_value()) {
+            settings.layerServer = stringToLayerServer(*layerServer);
+        }
+
         if (auto it = json.find("mrf");  it != json.end()) {
             if (!it->is_object()) {
                 throw ghoul::RuntimeError("'mrf' is not an object");
@@ -164,6 +169,9 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
     }
     if (settings.bypassLauncher.has_value()) {
         json["bypass"] = *settings.bypassLauncher;
+    }
+    if (settings.layerServer.has_value()) {
+        json["layerserver"] = layerServerToString(*settings.layerServer);
     }
     nlohmann::json mrf = nlohmann::json::object();
     if (settings.mrf.isEnabled.has_value()) {

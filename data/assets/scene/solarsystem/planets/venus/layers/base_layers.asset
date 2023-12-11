@@ -1,0 +1,12 @@
+asset.require("./colorlayers/venus_texture", false)
+
+
+
+asset.meta = {
+  Name = "Base Venus Layers",
+  Version = "1.0",
+  Description = "Base Venus layers are: Venus Texture",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

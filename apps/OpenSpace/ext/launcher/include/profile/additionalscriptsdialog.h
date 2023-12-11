@@ -33,11 +33,11 @@ class AdditionalScriptsDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for addedScripts class
+     * Constructor for addedScripts class.
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
+     * \param scripts The list of scripts containing all data of the new or imported
+     *        profile
      */
     AdditionalScriptsDialog(QWidget* parent, std::vector<std::string>* scripts);
 
@@ -48,9 +48,9 @@ private:
     void chooseScripts();
 
     /**
-     * Adds scripts to the _scriptEdit from outside dialogs
+     * Adds scripts to the _scriptEdit from outside dialogs.
      *
-     * \param scripts #std::string scripts to be appended
+     * \param scripts The scripts to be appended
      */
     void appendScriptsToTextfield(std::vector<std::string> scripts);
 

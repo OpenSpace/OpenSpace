@@ -1,0 +1,27 @@
+asset.require("./base_layers")
+
+asset.require("./earth/layers/sweden_layers")
+asset.require("./earth/moon/layers/sweden_layers")
+asset.require("./jupiter/europa/layers/sweden_layers")
+asset.require("./mars/layers/sweden_layers")
+asset.require("./mercury/layers/sweden_layers")
+asset.require("./saturn/enceladus/layers/sweden_layers")
+
+-- The Sweden server does not have these layers, use the New York server for now
+asset.require("./venus/layers/newyork_layers")
+
+
+
+asset.meta = {
+  Name = "Default Solar System Layers (Sweden)",
+  Version = "1.0",
+  Description = [[Adds default layers for all planets. Remove this asset and include
+    individual layers for planets to customize planet layers
+
+
+    Layers only loaded from the Sweden server
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

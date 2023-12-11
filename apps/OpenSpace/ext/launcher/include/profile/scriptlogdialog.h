@@ -41,10 +41,10 @@ signals:
 
 private:
     void createWidgets();
-    
+
     void loadScriptFile();
     void saveChosenScripts();
-    
+
     void updateScriptList();
 
     QListWidget* _scriptlogList = nullptr;

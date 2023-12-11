@@ -38,15 +38,12 @@ namespace scripting { struct LuaLibrary; }
  * the J2000 epoch or a `string` that denotes a valid date string in accordance to the
  * SPICE library (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html).
  * The time can be retrieved as the number of seconds since the J2000 epoch with
- * #currentTime or as a UTC string following ISO 8601 with the method #UTC.
+ * #j2000Seconds or as a UTC string following ISO 8601 with the method #UTC.
  *
- * In addition to the time itself, it also stores a delta time value. This value denotes
- * the number of seconds that pass for each real-time second. This value is set with
- * #setDeltaTime(double), retrieved with deltaTime() and solely used in the
- * #advanceTime(double), which takes a `tickTime` parameter. The value of the parameter is
- * dependent on the usage of the class and must be equal to the real-world time that has
- * passed since the last call to the method. For example, if the #advanceTime(double)
- * method is called each frame, the `tickTime` has to be equal to the frame time.
+ * The value of the parameter is dependent on the usage of the class and must be equal to
+ * the real-world time that has passed since the last call to the method. For example, if
+ * the #advanceTime(double) method is called each frame, the `tickTime` has to be equal to
+ * the frame time.
  */
 class Time {
 public:
@@ -153,17 +150,14 @@ public:
     void ISO8601(char* buffer) const;
 
     /**
-     * Advances the simulation time using the #deltaTime and the `tickTime`. The
-     * #deltaTime is the number of simulation seconds that pass for each real-time second.
-     * `tickTime` is the number of real-time seconds that passed since the last call to
-     * this method. If this method is called in the render loop, the \p tickTime should be
-     * equivalent to the frame time.
+     * Advances the simulation time using the \p deltaTime. The \p deltaTime is the number
+     * of seconds that the time should be advanced by. If this method is called in the
+     * render loop, the \p deltaTime should be equivalent to the frame time.
      *
-     * \param tickTime The number of real-time seconds that passed since the last call to
-     *        this method
+     * \param deltaTime The number of seconds that this time should be advanced by
      * \return The new time value after advancing the time
      */
-    double advanceTime(double tickTime);
+    double advanceTime(double deltaTime);
 
     /**
      * Modifies the passed time (first argument) by the delta time (second argument). The

@@ -235,4 +235,20 @@ namespace {
     openspace::setCameraFromProfile(*openspace::global::profile);
 }
 
+/**
+ * Returns the whole configuration object as a Dictionary
+ */
+[[codegen::luawrap]] ghoul::Dictionary configuration() {
+    openspace::Configuration& config = *openspace::global::configuration;
+    return config.createDictionary();
+}
+
+/**
+ * Returns the current layer server from the configuration
+ */
+[[codegen::luawrap]] std::string layerServer() {
+    openspace::Configuration& config = *openspace::global::configuration;
+    return layerServerToString(config.layerServer);
+}
+
 #include "openspaceengine_lua_codegen.cpp"

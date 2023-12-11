@@ -43,49 +43,47 @@ class LauncherWindow final : public QMainWindow {
 Q_OBJECT
 public:
     /**
-     * Constructor for LauncherWindow class
+     * Constructor for LauncherWindow class.
      *
-     * \param profileEnabled true if profile selection combo box will be enabled
-     * \param globalConfig reference to global configuration for OpenSpace settings
-     * \param sgctConfigEnabled true if window selection combo box will be enabled
-     * \param sgctConfigName the name of the sgct configuration function used to
-     *                       generate window config (blank if file is used)
+     * \param profileEnabled `true` if profile selection combo box will be enabled
+     * \param globalConfig Reference to global configuration for OpenSpace settings
+     * \param sgctConfigEnabled `true` if window selection combo box will be enabled
+     * \param sgctConfigName The name of the sgct configuration function used to generate
+     *        window config (blank if file is used)
      * \param parentItem The parent that contains this (and possibly other) children
      *                   in the tree structure.
      */
-    LauncherWindow(bool profileEnabled,
-        const openspace::Configuration& globalConfig, bool sgctConfigEnabled,
-        std::string sgctConfigName, QWidget* parent);
+    LauncherWindow(bool profileEnabled, const openspace::Configuration& globalConfig,
+        bool sgctConfigEnabled, std::string sgctConfigName, QWidget* parent);
 
     /**
-      * Returns bool for whether "start OpenSpace" was chosen when this window closed.
-      * OpenSpace will not start if false
+      * Returns whether "Start OpenSpace" was chosen when this window closed.
       *
-      * \return true if the "start OpenSpace" button was clicked
+      * \return `true` if the "Start OpenSpace" button was clicked
       */
     bool wasLaunchSelected() const;
 
     /**
-      * Returns the selected profile name when launcher window closed
+      * Returns the selected profile name when launcher window closed.
       *
-      * \return name of selected profile (this is only the name without file extension
+      * \return The name of selected profile (this is only the name without file extension
       *         and without path)
       */
     std::string selectedProfile() const;
 
     /**
-      * Returns the selected sgct window configuration when launcher window closed
+      * Returns the selected sgct window configuration when launcher window closed.
       *
-      * \return name of selected profile (this is only the name without file extension
+      * \return The name of selected profile (this is only the name without file extension
       *         and without path)
       */
     std::string selectedWindowConfig() const;
 
     /**
-      * Returns true if the window configuration filename selected in the combo box
-      * is a file in the user configurations section
+      * Returns `true` if the window configuration filename selected in the combo box
+      * is a file in the user configurations section.
       *
-      * \return true if window configuration is a user configuration file
+      * \return `true` if window configuration is a user configuration file
       */
     bool isUserConfigSelected() const;
 
