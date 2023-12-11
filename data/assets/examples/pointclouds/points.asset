@@ -129,6 +129,10 @@ local Textured = {
   Renderable = {
     Type = "RenderablePointCloud",
     File = asset.resource("data/dummydata.csv"),
+    -- The path to the texture file. Here we use openspace.absPath so that we cna use
+    -- the ${DATA} token to get the path to a texture in the "OpenSpace/data" folder,
+    -- but for a file at a relative locatoin it would also work to use asset.resource,
+    -- like for the data file above
     Texture = openspace.absPath("${DATA}/test3.jpg"),
     -- Disable additive blending, so that points will be rendered with their actual color
     -- and overlapping points will be sorted by depth. This works best when the points
