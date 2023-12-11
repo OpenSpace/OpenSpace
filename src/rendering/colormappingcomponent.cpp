@@ -54,7 +54,7 @@ namespace {
         "This value determines which paramenter is used for coloring the points based "
         "on the color map. The property is set based on predefined options specified in "
         "the asset file. When changing the parameter, the value range to used for the"
-        "mapping will also be changed. Per default, it is set ot the last parameter in "
+        "mapping will also be changed. Per default, it is set to the last parameter in "
         "the list of options",
         openspace::properties::Property::Visibility::User
     };
