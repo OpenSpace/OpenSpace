@@ -272,13 +272,11 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, opacity());
     _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
-
     _programObject->setUniform(_uniformCache.modelView, calcModelViewTransform(data));
-
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
     _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
 
     glLineWidth(_appearance.lineWidth);
 

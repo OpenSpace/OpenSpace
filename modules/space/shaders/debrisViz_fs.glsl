@@ -55,18 +55,19 @@ Fragment getFragment() {
     }
 
     // Somewhat temporary fix until fading for trails are overhauled
-    float invert = pow(1.0 - vertexDistance,lineFade*100.0);
+    float emulatedOldValue = pow(30.0 - lineFade*20.0, 2.0);
+    float invert = pow((1.0 - vertexDistance), emulatedOldValue);
     fade = clamp(invert, 0.0, 1.0);
 
     // Currently even fully transparent lines can occlude other lines, thus we discard these
     // fragments since debris and satellites are rendered so close to each other
     if (fade < 0.05) {
-    discard;
+      discard;
     }
     
-    if (fade < 0.15) {
     // Use additive blending for some values to make the discarding less abrupt
-    frag.blend = BLEND_MODE_ADDITIVE;
+    if (fade < 0.15) {
+      frag.blend = BLEND_MODE_ADDITIVE;
     }
   }
   
