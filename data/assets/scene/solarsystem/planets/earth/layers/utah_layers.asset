@@ -1,4 +1,4 @@
-asset.require("./base_layers", true)
+asset.require("./base_layers")
 asset.require("./colorlayers/bmng_utah", false)
 asset.require("./watermasks/gebco_utah", false)
 

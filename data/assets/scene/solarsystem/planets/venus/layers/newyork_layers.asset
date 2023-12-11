@@ -1,4 +1,4 @@
-asset.require("./base_layers", false)
+asset.require("./base_layers")
 asset.require("./colorlayers/magellan_mosaic_newyork", false)
 asset.require("./colorlayers/clouds_magellan_combo_newyork", asset.enabled)
 
