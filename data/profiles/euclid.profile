@@ -3,7 +3,7 @@
     "base",
     "base_keybindings",
     "events/toggle_sun",
-    "scene/solarsystem/missions/euclid/euclid",
+    "scene/solarsystem/telescopes/euclid/euclid",
     "scene/solarsystem/planets/earth/earth"
   ],
   "camera": {

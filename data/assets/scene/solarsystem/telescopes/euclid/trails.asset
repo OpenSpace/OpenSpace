@@ -24,7 +24,7 @@ local EuclidTrailSun = {
   },
   GUI = {
     Name = "Euclid Trail (Sun)",
-    Path = "/Solar System/Missions/Euclid"
+    Path = "/Solar System/Telescopes/Euclid"
   }
 }
 
@@ -45,7 +45,7 @@ local EuclidTrailEarth = {
   },
   GUI = {
     Name = "Euclid Trail (Earth)",
-    Path = "/Solar System/Missions/Euclid"
+    Path = "/Solar System/Telescopes/Euclid"
   }
 }
 

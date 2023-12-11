@@ -46,7 +46,7 @@ local Euclid = {
   },
   GUI = {
     Name = "Euclid",
-    Path = "/Solar System/Missions/Euclid"
+    Path = "/Solar System/Telescopes/Euclid"
   }
 }
 
