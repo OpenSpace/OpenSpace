@@ -210,7 +210,7 @@ bool UrlSynchronization::isEachFileValid() {
         file.close();
         createSyncFile();
         // File is valid until some date
-        return true; 
+        return true;
     }
     // Otherwise first line is the version number.
     std::string ossyncVersion = line;
@@ -243,6 +243,10 @@ bool UrlSynchronization::isEachFileValid() {
         // Returns true if date in ossync file is 'larger' than todays date,
         // i.e. no sync needed.
         return fileValidAsJ2000 > todaysDateAsJ2000;
+    }
+    else if (ossyncVersion.empty()) {
+        // For some reason we ended up with an empty synchronization file
+        return false;
     }
     else {
         LERROR(fmt::format(
