@@ -1,7 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local spice = asset.require("../spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -19,13 +19,13 @@ local Ganymede = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Ganymede,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels.ID.Ganymede,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Ganymede,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Ganymede,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {

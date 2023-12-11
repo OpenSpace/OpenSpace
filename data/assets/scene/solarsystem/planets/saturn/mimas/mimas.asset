@@ -1,7 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local spice = asset.require("../spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -19,13 +19,13 @@ local Mimas = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Mimas,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels.ID.Mimas,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Mimas,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Mimas,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {

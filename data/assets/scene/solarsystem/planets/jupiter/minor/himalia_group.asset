@@ -1,7 +1,7 @@
 local transforms = asset.require("../transforms")
-local spice344 = asset.require("../spice344")
-local spice346 = asset.require("../spice346")
-local base = asset.require("spice/base")
+local kernels344 = asset.require("../kernels344")
+local kernels346 = asset.require("../kernels346")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +11,8 @@ local Leda = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Leda,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Leda,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -42,8 +42,8 @@ local LedaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Leda,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Leda,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 240.82,
@@ -93,8 +93,8 @@ local Himalia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Himalia,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Himalia,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -124,8 +124,8 @@ local HimaliaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Himalia,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Himalia,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 250.23,
@@ -175,8 +175,8 @@ local Lysithea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Lysithea,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Lysithea,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -206,8 +206,8 @@ local LysitheaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Lysithea,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Lysithea,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 259.89,
@@ -257,8 +257,8 @@ local Elara = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Elara,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Elara,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -288,8 +288,8 @@ local ElaraTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Elara,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Elara,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 257.62,
@@ -339,8 +339,8 @@ local Dia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Dia,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Dia,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -370,8 +370,8 @@ local DiaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Dia,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Dia,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 287.93,
@@ -421,8 +421,8 @@ local S2011J3 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice346.ID.S2011J3,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels346.ID.S2011J3,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -452,8 +452,8 @@ local S2011J3Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice346.ID.S2011J3,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels346.ID.S2011J3,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 261.77,
@@ -503,8 +503,8 @@ local S2018J2 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice346.ID.S2018J2,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels346.ID.S2018J2,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -534,8 +534,8 @@ local S2018J2Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice346.ID.S2018J2,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels346.ID.S2018J2,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 250.88,
@@ -585,8 +585,8 @@ local Pandia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Pandia,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Pandia,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -616,8 +616,8 @@ local PandiaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Pandia,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Pandia,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 251.911,
@@ -667,8 +667,8 @@ local Ersa = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Ersa,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Ersa,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -698,8 +698,8 @@ local ErsaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Ersa,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Ersa,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 249.229,

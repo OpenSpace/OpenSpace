@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,12 +18,12 @@ local Triton = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "TRITON",
-      Observer = base.ID.NeptuneBarycenter
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_TRITON",
-      DestinationFrame = base.Frame.Galactic
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -47,7 +47,7 @@ local TritonTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "TRITON",
-      Observer = base.ID.NeptuneBarycenter
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 5.875,

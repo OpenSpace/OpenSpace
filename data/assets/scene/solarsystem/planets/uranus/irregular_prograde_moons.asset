@@ -1,6 +1,6 @@
 local transforms = asset.require("./transforms")
-local spice = asset.require("./spice116")
-local base = asset.require("spice/base")
+local kernel = asset.require("./kernels116")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local Margaret = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Margaret,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Margaret,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -41,8 +41,8 @@ local MargaretTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Margaret,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Margaret,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1694.8,

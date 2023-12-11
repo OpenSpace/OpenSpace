@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -21,12 +21,12 @@ local ID = {
 }
 
 local Frame = {
-  Despina = base.Frame.Despina,
-  Galatea = base.Frame.Galatea,
-  Larissa = base.Frame.Larissa,
-  Naiad = base.Frame.Naiad,
-  Proteus = base.Frame.Proteus,
-  Thalassa = base.Frame.Thalassa
+  Despina = coreKernels.Frame.Despina,
+  Galatea = coreKernels.Frame.Galatea,
+  Larissa = coreKernels.Frame.Larissa,
+  Naiad = coreKernels.Frame.Naiad,
+  Proteus = coreKernels.Frame.Proteus,
+  Thalassa = coreKernels.Frame.Thalassa
 }
 
 

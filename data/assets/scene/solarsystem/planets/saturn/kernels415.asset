@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -26,13 +26,13 @@ local ID = {
 }
 
 local Frame = {
-  Atlas = base.Frame.Atlas,
-  Epimetheus = base.Frame.Epimetheus,
-  Janus = base.Frame.Janus,
-  Pan = base.Frame.Pan,
-  Pandora = base.Frame.Pandora,
-  Prometheus = base.Frame.Prometheus,
-  Telesto = base.Frame.Telesto
+  Atlas = coreKernels.Frame.Atlas,
+  Epimetheus = coreKernels.Frame.Epimetheus,
+  Janus = coreKernels.Frame.Janus,
+  Pan = coreKernels.Frame.Pan,
+  Pandora = coreKernels.Frame.Pandora,
+  Prometheus = coreKernels.Frame.Prometheus,
+  Telesto = coreKernels.Frame.Telesto
 }
 
 

@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -28,12 +28,12 @@ local Kernels = {
 local ID = {
   Perseverance = -168,
 
-  Mars = base.ID.Mars,
-  MarsBarycenter = base.ID.MarsBarycenter
+  Mars = coreKernels.ID.Mars,
+  MarsBarycenter = coreKernels.ID.MarsBarycenter
 }
 
 local Frame = {
-  Mars = base.Frame.Mars
+  Mars = coreKernels.Frame.Mars
 }
 
 

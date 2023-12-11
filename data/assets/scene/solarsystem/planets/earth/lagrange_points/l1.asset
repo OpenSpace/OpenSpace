@@ -1,5 +1,5 @@
-local base = asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -29,7 +29,7 @@ local L1Position = {
     Translation = {
       Type = "SpiceTranslation",
       Target = ID.L1,
-      Observer = base.ID.SolarSystemBarycenter
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   Tag = { "lagrange_points_earth" , "lagrange_points_earth_l1" },

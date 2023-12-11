@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -126,7 +126,7 @@ local Frame = {
   OsirisRex = "ORX_SPACECRAFT",
   Polycam = "ORX_OCAMS_POLYCAM",
   Rexis = "ORX_REXIS",
-  Bennu = base.Frame.Bennu
+  Bennu = coreKernels.Frame.Bennu
 }
 
 

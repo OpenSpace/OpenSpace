@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -24,8 +24,8 @@ local SunCenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = base.ID.Sun,
-      Observer = base.ID.SolarSystemBarycenter
+      Target = coreKernels.ID.Sun,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
@@ -43,13 +43,13 @@ local SunIAU = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = base.ID.Sun,
-      Observer = base.ID.SolarSystemBarycenter
+      Target = coreKernels.ID.Sun,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = base.Frame.Sun,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = coreKernels.Frame.Sun,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -65,13 +65,13 @@ local SunEclipJ2000 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = base.ID.Sun,
-      Observer = base.ID.SolarSystemBarycenter
+      Target = coreKernels.ID.Sun,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = base.Frame.EclipJ2000,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = coreKernels.Frame.EclipJ2000,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {

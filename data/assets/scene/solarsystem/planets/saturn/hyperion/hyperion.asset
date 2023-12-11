@@ -1,7 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local spice = asset.require("../spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -19,8 +19,8 @@ local Hyperion = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Hyperion,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels.ID.Hyperion,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
     -- The IAU report does not give an orientation model for Hyperion.
     -- Hyperion's rotation is chaotic and not predictable for long periods.

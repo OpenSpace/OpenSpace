@@ -1,7 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local spice = asset.require("../spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -19,13 +19,13 @@ local Callisto = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Callisto,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels.ID.Callisto,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = base.Frame.Callisto,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = coreKernels.Frame.Callisto,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {

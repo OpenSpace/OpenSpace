@@ -1,8 +1,8 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./67p")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -26,13 +26,13 @@ local RosettaPosition = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Rosetta,
-      Observer = base.ID.SolarSystemBarycenter
+      Target = kernels.ID.Rosetta,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Rosetta,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Rosetta,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -77,13 +77,13 @@ local PhilaePosition = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Philae,
-      Observer = spice.ID.ChurymovGerasimenko
+      Target = kernels.ID.Philae,
+      Observer = kernels.ID.ChurymovGerasimenko
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Rosetta,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Rosetta,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -134,11 +134,11 @@ local NavCamFov = {
   Parent = NavCam.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.Rosetta,
-    Frame = spice.Frame.NavCam,
+    Body = kernels.ID.Rosetta,
+    Frame = kernels.Frame.NavCam,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.NavCam,
+      Name = kernels.Frame.NavCam,
       Method = "ELLIPSOID",
       Aberration = "NONE"
     },
@@ -158,10 +158,10 @@ local ImagePlane = {
   Parent = transforms.Comet67P.Identifier,
   Renderable = {
     Type = "RenderablePlaneProjection",
-    Frame = spice.Frame.ChurymovGerasimenko,
+    Frame = kernels.Frame.ChurymovGerasimenko,
     DefaultTarget = "CHURYUMOV-GERASIMENKO",
-    Spacecraft = spice.ID.Rosetta,
-    Instrument = spice.Frame.NavCam,
+    Spacecraft = kernels.ID.Rosetta,
+    Instrument = kernels.Frame.NavCam,
     Moving = false,
     Texture = models .. "defaultProj.png"
   },
@@ -178,8 +178,8 @@ local RosettaCometTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Rosetta,
-      Observer = spice.ID.ChurymovGerasimenko
+      Target = kernels.ID.Rosetta,
+      Observer = kernels.ID.ChurymovGerasimenko
     },
     Color = { 0.288, 0.375, 0.934 },
     StartTime = "2014 AUG 01 12:00:00",
@@ -199,8 +199,8 @@ local PhilaeTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Philae,
-      Observer = spice.ID.ChurymovGerasimenko
+      Target = kernels.ID.Philae,
+      Observer = kernels.ID.ChurymovGerasimenko
     },
     Color = { 0.8, 0.5, 1.0 },
     StartTime = "2014 NOV 12 08:35:00",

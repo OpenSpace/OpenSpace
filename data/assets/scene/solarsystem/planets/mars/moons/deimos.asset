@@ -1,8 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -21,13 +21,13 @@ local Deimos = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Deimos,
-      Observer = base.ID.MarsBarycenter
+      Target = kernels.ID.Deimos,
+      Observer = coreKernels.ID.MarsBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Deimos,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Deimos,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -57,8 +57,8 @@ local DeimosTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Deimos,
-      Observer = base.ID.MarsBarycenter
+      Target = kernels.ID.Deimos,
+      Observer = coreKernels.ID.MarsBarycenter
     },
     Color = { 1.0, 0.605, 0.420 },
     Period = 1.263,

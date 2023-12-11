@@ -1,16 +1,7 @@
-asset.require("spice/base")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-
-
-local kernels = asset.resource({
-  Name = "Artemis Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "artemis_1_kernels",
-  Version = 1
-})
 
 
 local ArtemisPosition = {
@@ -19,9 +10,9 @@ local ArtemisPosition = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Artemis,
-      Observer = base.ID.Earth,
-      Frame = base.Frame.Galactic
+      Target = kernels.ID.Artemis,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Galactic
     }
   },
   GUI = {

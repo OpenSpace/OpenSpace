@@ -1,4 +1,4 @@
-local spice = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -21,7 +21,7 @@ local ID = {
 }
 
 local Frame = {
-  Ceres = spice.Frame.Ceres
+  Ceres = coreKernels.Frame.Ceres
 }
 
 

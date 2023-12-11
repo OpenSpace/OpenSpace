@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -71,7 +71,7 @@ local Frame = {
   Dawn = "DAWN_SPACECRAFT",
   DawnSolarArray1 = -203010,
   DawnSolarArray2 = -203020,
-  Vesta = base.Frame.Vesta
+  Vesta = coreKernels.Frame.Vesta
 }
 
 

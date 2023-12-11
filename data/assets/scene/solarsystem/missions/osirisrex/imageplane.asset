@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local spice = asset.require("./spice")
+local kernels = asset.require("./kernels")
 
 
 
@@ -18,10 +18,10 @@ local ImagePlane = {
   Parent = transforms.BennuBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePlaneProjection",
-    Frame = spice.Frame.Bennu,
+    Frame = kernels.Frame.Bennu,
     DefaultTarget = BennuBodyId,
-    Spacecraft = spice.ID.OsirisRex,
-    Instrument = spice.Frame.Polycam,
+    Spacecraft = kernels.ID.OsirisRex,
+    Instrument = kernels.Frame.Polycam,
     Moving = false,
     Texture = textures .. "defaultProj.png"
   },

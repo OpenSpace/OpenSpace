@@ -1,7 +1,7 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -24,14 +24,14 @@ local Apollo8 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Apollo8,
-      Observer = base.ID.EarthBarycenter,
-      Frame = base.Frame.Galactic
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.EarthBarycenter,
+      Frame = coreKernels.Frame.Galactic
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Apollo8Earthrise,
-      DestinationFrame = base.Frame.Galactic,
+      SourceFrame = kernels.Frame.Apollo8Earthrise,
+      DestinationFrame = coreKernels.Frame.Galactic,
       TimeFrame = {
         -- The orientation of Apollo 8 is only available during the few minutes
         -- when the Earthrise picture was taken.

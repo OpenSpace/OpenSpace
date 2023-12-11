@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
-local spice344 = asset.require("../spice344")
-local base = asset.require("spice/base")
+local kernels344 = asset.require("../kernels344")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local Eupheme = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Eupheme,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Eupheme,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -41,8 +41,8 @@ local EuphemeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Eupheme,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Eupheme,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 628.06,
@@ -92,8 +92,8 @@ local S2003J19 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.S2003J19,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.S2003J19,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -123,8 +123,8 @@ local S2003J19Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.S2003J19,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.S2003J19,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 699.12,
@@ -174,8 +174,8 @@ local Valetudo = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Valetudo,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Valetudo,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -205,8 +205,8 @@ local ValetudoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Valetudo,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Valetudo,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 527.41,

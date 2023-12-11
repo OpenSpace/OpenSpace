@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -88,29 +88,29 @@ local ID = {
 }
 
 local Frame = {
-  Adrastea = base.Frame.Adrastea,
-  Amalthea = base.Frame.Amalthea,
-  Ananke = base.Frame.Ananke,
-  Callirrhoe = base.Frame.Callirrhoe,
-  Carme = base.Frame.Carme,
-  Chaldene = base.Frame.Chaldene,
-  Elara = base.Frame.Elara,
-  Erinome = base.Frame.Erinome,
-  Harpalyke = base.Frame.Harpalyke,
-  Himalia = base.Frame.Himalia,
-  Iocaste = base.Frame.Iocaste,
-  Isonoe = base.Frame.Isonoe,
-  Kalyke = base.Frame.Kalyke,
-  Leda = base.Frame.Leda,
-  Lysithea = base.Frame.Lysithea,
-  Megaclite = base.Frame.Magaclite,
-  Metis = base.Frame.Metis,
-  Pasiphae = base.Frame.Pasiphae,
-  Praxidike = base.Frame.Praxidike,
-  Sinope = base.Frame.Sinope,
-  Taygete = base.Frame.Taygete,
-  Thebe = base.Frame.Thebe,
-  Themisto = base.Frame.Themisto
+  Adrastea = coreKernels.Frame.Adrastea,
+  Amalthea = coreKernels.Frame.Amalthea,
+  Ananke = coreKernels.Frame.Ananke,
+  Callirrhoe = coreKernels.Frame.Callirrhoe,
+  Carme = coreKernels.Frame.Carme,
+  Chaldene = coreKernels.Frame.Chaldene,
+  Elara = coreKernels.Frame.Elara,
+  Erinome = coreKernels.Frame.Erinome,
+  Harpalyke = coreKernels.Frame.Harpalyke,
+  Himalia = coreKernels.Frame.Himalia,
+  Iocaste = coreKernels.Frame.Iocaste,
+  Isonoe = coreKernels.Frame.Isonoe,
+  Kalyke = coreKernels.Frame.Kalyke,
+  Leda = coreKernels.Frame.Leda,
+  Lysithea = coreKernels.Frame.Lysithea,
+  Megaclite = coreKernels.Frame.Magaclite,
+  Metis = coreKernels.Frame.Metis,
+  Pasiphae = coreKernels.Frame.Pasiphae,
+  Praxidike = coreKernels.Frame.Praxidike,
+  Sinope = coreKernels.Frame.Sinope,
+  Taygete = coreKernels.Frame.Taygete,
+  Thebe = coreKernels.Frame.Thebe,
+  Themisto = coreKernels.Frame.Themisto
 }
 
 

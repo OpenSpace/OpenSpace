@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -16,8 +16,8 @@ local ID = {
 }
 
 local Frame = {
-  Deimos = base.Frame.Deimos,
-  Phobos = base.Frame.Phobos
+  Deimos = coreKernels.Frame.Deimos,
+  Phobos = coreKernels.Frame.Phobos
 }
 
 

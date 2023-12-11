@@ -1,6 +1,6 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
-local base = asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -34,7 +34,7 @@ local L2Position = {
     Translation = {
       Type = "SpiceTranslation",
       Target = ID.L2,
-      Observer = base.ID.SolarSystemBarycenter
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
@@ -54,7 +54,7 @@ local L2CoRevFrame = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = Frame.L2Corevolving,
-      DestinationFrame = base.Frame.Galactic
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },

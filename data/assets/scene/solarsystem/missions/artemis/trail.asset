@@ -1,8 +1,7 @@
-asset.require("spice/base")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -13,9 +12,9 @@ local ArtemisEarthTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Artemis,
-      Observer = base.ID.Earth,
-      Frame = base.ID.Galactic
+      Target = kernels.ID.Artemis,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.ID.Galactic
     },
     Color = { 0.2, 0.78, 0.635 },
     Fade = 7.0,
@@ -37,9 +36,9 @@ local ArtemisMoonTrail= {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Artemis,
-      Observer = base.ID.Moon,
-      Frame = base.Frame.Moon
+      Target = kernels.ID.Artemis,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Color = { 0.78, 0.43, 0.20 },
     Fade = 7.0,

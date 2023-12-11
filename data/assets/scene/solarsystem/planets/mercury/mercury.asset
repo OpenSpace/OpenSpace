@@ -1,6 +1,6 @@
 asset.require("./trail")
 local transforms = asset.require("./transforms")
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,13 +18,13 @@ local Mercury = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = base.ID.Mercury,
-      Observer = base.ID.MercuryBarycenter
+      Target = coreKernels.ID.Mercury,
+      Observer = coreKernels.ID.MercuryBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = base.Frame.Mercury,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = coreKernels.Frame.Mercury,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {

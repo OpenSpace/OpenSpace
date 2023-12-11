@@ -2,8 +2,8 @@ local transforms = asset.require("./transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -23,13 +23,13 @@ local OsirisRex = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.OsirisRex,
-      Observer = base.ID.SolarSystemBarycenter
+      Target = kernels.ID.OsirisRex,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.OsirisRex,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.OsirisRex,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -60,8 +60,8 @@ local PolyCam = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Polycam,
-      DestinationFrame = spice.Frame.OsirisRex
+      SourceFrame = kernels.Frame.Polycam,
+      DestinationFrame = kernels.Frame.OsirisRex
     }
   },
   Renderable = {
@@ -92,8 +92,8 @@ local Rexis = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Rexis,
-      DestinationFrame = spice.Frame.OsirisRex
+      SourceFrame = kernels.Frame.Rexis,
+      DestinationFrame = kernels.Frame.OsirisRex
     }
   },
   Renderable = {
@@ -120,14 +120,14 @@ local PolyCamFov = {
   Renderable = {
     Type = "RenderableFov",
     Body = "OSIRIS-REX",
-    Frame = spice.Frame.Polycam,
+    Frame = kernels.Frame.Polycam,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.Polycam,
+      Name = kernels.Frame.Polycam,
       Method = "ELLIPSOID",
       Aberration = "NONE"
     },
-    PotentialTargets = { spice.ID.Bennu }
+    PotentialTargets = { kernels.ID.Bennu }
   },
   GUI = {
     Name = "POLYCAM FOV",
@@ -142,17 +142,17 @@ local PolyCamFov = {
 --   Parent = Rexis.Identifier,
 --   Renderable = {
 --     Type = "RenderableFov",
---     Body = spice.Frame.OsirisRex,
---     Frame = spice.Frame.Rexis,
+--     Body = kernels.Frame.OsirisRex,
+--     Frame = kernels.Frame.Rexis,
 --     RGB = { 0.8, 0.7, 0.7 },
 --     Instrument = {
 --       Name = "ORX_REXIS",
 --       Method = "ELLIPSOID",
 --       Aberration = "NONE"
 --     },
---     PotentialTargets = { spice.ID.Bennu },
+--     PotentialTargets = { kernels.ID.Bennu },
 --     FrameConversions = {
---       [spice.ID.Bennu] = spice.Frame.Bennu
+--       [kernels.ID.Bennu] = kernels.Frame.Bennu
 --     }
 --   },
 --   GUI = {

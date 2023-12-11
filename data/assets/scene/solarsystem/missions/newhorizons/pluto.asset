@@ -1,7 +1,7 @@
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -42,13 +42,13 @@ local PlutoProjection = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Pluto,
-      Observer = spice.ID.PlutoBarycenter
+      Target = kernels.ID.Pluto,
+      Observer = kernels.ID.PlutoBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Pluto,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Pluto,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -72,70 +72,70 @@ local PlutoProjection = {
       EventFile = assets .. "core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
       -- SequenceType = "hybrid",
       SequenceType = "image-sequence",
-      Observer = spice.ID.NewHorizons,
-      Target = spice.ID.Pluto,
+      Observer = kernels.ID.NewHorizons,
+      Target = kernels.ID.Pluto,
       Aberration = "NONE",
       AspectRatio = 2,
       DataInputTranslation = {
         Instrument = {
           LORRI = {
             DetectorType = "Camera",
-            Spice = { spice.Frame.Lorri }
+            Spice = { kernels.Frame.Lorri }
           },
           RALPH_MVIC_PAN_FRAME = {
             DetectorType = "Scanner",
             StopCommand = "RALPH_ABORT",
-            Spice = { spice.Frame.RalphMvicFT }
+            Spice = { kernels.Frame.RalphMvicFT }
           },
           RALPH_MVIC_COLOR = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
             Spice = {
-              spice.Frame.RalphMvicNIR,
-              spice.Frame.RalphMvicMethane,
-              spice.Frame.RalphMvicRed,
-              spice.Frame.RalphMvicBlue
+              kernels.Frame.RalphMvicNIR,
+              kernels.Frame.RalphMvicMethane,
+              kernels.Frame.RalphMvicRed,
+              kernels.Frame.RalphMvicBlue
             }
           },
           RALPH_LEISA = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
-            Spice = { spice.Frame.RalphLeisa }
+            Spice = { kernels.Frame.RalphLeisa }
           },
           RALPH_MVIC_PAN1 = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
-            Spice = { spice.Frame.RalphMvicPan1 }
+            Spice = { kernels.Frame.RalphMvicPan1 }
           },
           RALPH_MVIC_PAN2 = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
-            Spice = { spice.Frame.RalphMvicPan2 }
+            Spice = { kernels.Frame.RalphMvicPan2 }
           },
           ALICE_Use_AIRGLOW = {
             DetectorType = "Scanner",
             StopCommand = "ALICE_END_PIXELLIST",
-            Spice = { spice.Frame.AliceAirglow }
+            Spice = { kernels.Frame.AliceAirglow }
           },
           ALICE_Use_AIRGLOW = {
             DetectorType = "Scanner",
             StopCommand = "ALICE_END_HISTOGRAM",
-            Spice = { spice.Frame.AliceAirglow }
+            Spice = { kernels.Frame.AliceAirglow }
           },
           ALICE_Use_SOCC = {
             DetectorType = "Scanner",
             StopCommand = "ALICE_END_PIXELLIST",
-            Spice = { spice.Frame.AliceSOC }
+            Spice = { kernels.Frame.AliceSOC }
           },
           ALICE_Use_SOCC = {
             DetectorType = "Scanner",
             StopCommand = "ALICE_END_HISTOGRAM",
-            Spice = { spice.Frame.AliceSOC }
+            Spice = { kernels.Frame.AliceSOC }
           },
           REX_START = {
             DetectorType = "Scanner",
             StopCommand = "REX_MODE_OFF",
-            Spice = { spice.Frame.Rex }
+            Spice = { kernels.Frame.Rex }
           }
         },
         Target = {
@@ -156,7 +156,7 @@ local PlutoProjection = {
         }
       },
       Instrument = {
-        Name = spice.Frame.Lorri,
+        Name = kernels.Frame.Lorri,
         Method = "ELLIPSOID",
         Aberration = "NONE",
         Fovy = 0.2907,
@@ -165,12 +165,12 @@ local PlutoProjection = {
         Far = 10000
       },
       PotentialTargets = {
-        spice.ID.Pluto,
-        spice.ID.Charon,
-        spice.ID.Nix,
-        spice.ID.Hydra,
-        spice.ID.Styx,
-        spice.ID.Kerberos
+        kernels.ID.Pluto,
+        kernels.ID.Charon,
+        kernels.ID.Nix,
+        kernels.ID.Hydra,
+        kernels.ID.Styx,
+        kernels.ID.Kerberos
       }
     }
   },
@@ -226,10 +226,10 @@ local PlutoShadow = {
     Type = "RenderableShadowCylinder",
     Opacity = 0.25,
     TerminatorType = "PENUMBRAL",
-    LightSource = base.ID.Sun,
-    Observer = spice.ID.NewHorizons,
-    Body = spice.ID.Pluto,
-    BodyFrame = spice.Frame.Pluto,
+    LightSource = coreKernels.ID.Sun,
+    Observer = kernels.ID.NewHorizons,
+    Body = kernels.ID.Pluto,
+    BodyFrame = kernels.Frame.Pluto,
     Aberration = "NONE"
   },
   GUI = {

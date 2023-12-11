@@ -1,7 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local spice = asset.require("../spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -19,13 +19,13 @@ local Tethys = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Tethys,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels.ID.Tethys,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Tethys,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Tethys,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {

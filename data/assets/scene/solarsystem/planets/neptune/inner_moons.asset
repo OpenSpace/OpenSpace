@@ -1,6 +1,6 @@
 local transforms = asset.require("./transforms")
-local spice = asset.require("./spice095")
-local base = asset.require("spice/base")
+local kernel = asset.require("./kernels095")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local Naiad = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Naiad,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Naiad,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -41,8 +41,8 @@ local NaiadTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Naiad,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Naiad,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.294,
@@ -92,8 +92,8 @@ local Thalassa = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Thalassa,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Thalassa,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -123,8 +123,8 @@ local ThalassaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Thalassa,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Thalassa,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.311,
@@ -174,8 +174,8 @@ local Despina = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Despina,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Despina,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -205,8 +205,8 @@ local DespinaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Despina,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Despina,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.335,
@@ -256,8 +256,8 @@ local Galatea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Galatea,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Galatea,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -287,8 +287,8 @@ local GalateaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Galatea,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Galatea,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.429,
@@ -338,8 +338,8 @@ local Larissa = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Larissa,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Larissa,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -369,8 +369,8 @@ local LarissaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Larissa,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Larissa,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.555,
@@ -420,8 +420,8 @@ local Hippocamp = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Hippocamp,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Hippocamp,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -451,8 +451,8 @@ local HippocampTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Hippocamp,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Hippocamp,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.936,
@@ -502,8 +502,8 @@ local Proteus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Proteus,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Proteus,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -533,8 +533,8 @@ local ProteusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Proteus,
-      Observer = base.ID.NeptuneBarycenter
+      Target = kernel.ID.Proteus,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 1.122,

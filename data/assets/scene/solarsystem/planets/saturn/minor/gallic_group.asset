@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
-local spice452 = asset.require("../spice452")
-local base = asset.require("spice/base")
+local kernels452 = asset.require("../kernels452")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local Albiorix = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice452.ID.Albiorix,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels452.ID.Albiorix,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -41,8 +41,8 @@ local AlbiorixTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice452.ID.Albiorix,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels452.ID.Albiorix,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 774.58,
@@ -92,8 +92,8 @@ local Bebhionn = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice452.ID.Bebhionn,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels452.ID.Bebhionn,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -123,8 +123,8 @@ local BebhionnTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice452.ID.Bebhionn,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels452.ID.Bebhionn,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 838.77,
@@ -174,8 +174,8 @@ local Erriapus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice452.ID.Erriapus,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels452.ID.Erriapus,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -205,8 +205,8 @@ local ErriapusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice452.ID.Erriapus,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels452.ID.Erriapus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 844.89,
@@ -256,8 +256,8 @@ local Tarvos = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice452.ID.Tarvos,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels452.ID.Tarvos,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -287,8 +287,8 @@ local TarvosTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice452.ID.Tarvos,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels452.ID.Tarvos,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 944.23,

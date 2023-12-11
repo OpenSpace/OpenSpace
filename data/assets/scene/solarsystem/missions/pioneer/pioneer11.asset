@@ -1,6 +1,6 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -26,7 +26,7 @@ local Pioneer11 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = Pioneer11ID,
-      Observer = base.ID.SolarSystemBarycenter
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   Renderable = model.PioneerModel,
@@ -45,7 +45,7 @@ local Pioneer11Trail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = Pioneer11ID,
-      Observer = base.ID.SolarSystemBarycenter
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1973 APR 06 02:25:00.000",

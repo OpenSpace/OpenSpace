@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
-local spice415 = asset.require("../spice415")
-local base = asset.require("spice/base")
+local kernels415 = asset.require("../kernels415")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -24,8 +24,8 @@ local Prometheus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Prometheus,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Prometheus,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -55,8 +55,8 @@ local PrometheusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Prometheus,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Prometheus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.612990038,
@@ -106,8 +106,8 @@ local Pandora = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Pandora,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Pandora,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -137,8 +137,8 @@ local PandoraTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Pandora,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Pandora,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.628504213,
@@ -188,8 +188,8 @@ local Atlas = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Atlas,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Atlas,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -219,8 +219,8 @@ local AtlasTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Atlas,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Atlas,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.6016947883,
@@ -270,8 +270,8 @@ local Janus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Janus,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Janus,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -301,8 +301,8 @@ local JanusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Janus,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Janus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.694660342,
@@ -352,8 +352,8 @@ local Epimetheus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Epimetheus,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Epimetheus,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -383,8 +383,8 @@ local EpimetheusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Epimetheus,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Epimetheus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.694333517,
@@ -434,8 +434,8 @@ local Daphnis = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Daphnis,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Daphnis,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -465,8 +465,8 @@ local DaphnisTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Daphnis,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Daphnis,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.5940798,
@@ -516,8 +516,8 @@ local Pan = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Pan,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Pan,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -547,8 +547,8 @@ local PanTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice415.ID.Pan,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels415.ID.Pan,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.575050718,

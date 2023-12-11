@@ -1,8 +1,8 @@
 local trail = asset.require("./trail")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -17,41 +17,41 @@ local models = asset.resource({
 local TranslationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID.Perseverance,
-    Observer = spice.ID.Mars,
-    Frame = spice.Frame.Mars,
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars,
     FixedDate = "2020 JUL 17 13:56:43"
   },
   ["2020 JUL 17 13:56:42"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID.Perseverance,
-    Observer = spice.ID.Mars,
-    Frame = spice.Frame.Mars,
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars,
     FixedDate = "2020 JUL 17 13:56:43"
   },
   ["2020 JUL 17 13:56:43"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID.Perseverance,
-    Observer = spice.ID.Mars,
-    Frame = spice.Frame.Mars
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars
   },
   ["2020 JUL 17 13:56:44"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID.Perseverance,
-    Observer = spice.ID.Mars,
-    Frame = spice.Frame.Mars
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars
   },
   ["2021 FEB 18 20:43:48"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID.Perseverance,
-    Observer = spice.ID.Mars,
-    Frame = spice.Frame.Mars
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars
   },
   ["2021 FEB 18 20:43:49"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID.Perseverance,
-    Observer = spice.ID.Mars,
-    Frame = spice.Frame.Mars,
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars,
     FixedDate = "2021 FEB 18 20:43:48"
   }
 }
@@ -62,13 +62,13 @@ local PerseveranceNode = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Mars,
-      Observer = spice.ID.MarsBarycenter
+      Target = kernels.ID.Mars,
+      Observer = kernels.ID.MarsBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Mars,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Mars,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {

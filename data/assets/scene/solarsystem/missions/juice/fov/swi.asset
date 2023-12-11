@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local spice = asset.require("../spice")
+local kernels = asset.require("../kernels")
 
 
 
@@ -14,8 +14,8 @@ local SwiCh2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.Juice,
-    Frame = spice.Frame.SwiCH2,
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiCH2,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_CH2",
@@ -49,8 +49,8 @@ local SwiFull = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.Juice,
-    Frame = spice.Frame.SwiFull,
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiFull,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_FULL",
@@ -87,8 +87,8 @@ local SwiFullGCO500 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.Juice,
-    Frame = spice.Frame.SwiFullGCO500,
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiFullGCO500,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_FULL_GCO500",

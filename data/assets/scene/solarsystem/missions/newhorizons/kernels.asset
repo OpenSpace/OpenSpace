@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -49,8 +49,8 @@ local PlutoKernels = {
 local ID = {
   NewHorizons = "NEW HORIZONS",
   Rex = "NH_REX",
-  PlutoBarycenter = base.ID.PlutoBarycenter,
-  Pluto = base.ID.Pluto,
+  PlutoBarycenter = coreKernels.ID.PlutoBarycenter,
+  Pluto = coreKernels.ID.Pluto,
   Charon = "CHARON",
   Nix = "NIX",
   Hydra = "HYDRA",
@@ -73,12 +73,12 @@ local Frame = {
   AliceSOC = "NH_ALICE_SOC",
   Rex = "NH_REX",
 
-  Pluto = base.Frame.Pluto,
-  Charon = base.Frame.Charon,
-  Hydra = base.Frame.Hydra,
-  Styx = base.Frame.Styx,
-  Nix = base.Frame.Nix,
-  Kerberos = base.Frame.Kerberos
+  Pluto = coreKernels.Frame.Pluto,
+  Charon = coreKernels.Frame.Charon,
+  Hydra = coreKernels.Frame.Hydra,
+  Styx = coreKernels.Frame.Styx,
+  Nix = coreKernels.Frame.Nix,
+  Kerberos = coreKernels.Frame.Kerberos
 }
 
 

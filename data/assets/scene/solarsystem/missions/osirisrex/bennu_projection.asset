@@ -1,7 +1,7 @@
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -33,27 +33,27 @@ local BennuProjection = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Bennu,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Bennu,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Enabled = true,
     Type = "RenderableModelProjection",
-    Body = spice.ID.Bennu,
+    Body = kernels.ID.Bennu,
     GeometryFile = models .. "Bennu_v20_200k_an.obj",
     Projection = {
       Sequence = { images, imagesA },
       SequenceType = "image-sequence",
-      Observer = spice.ID.OsirisRex,
-      Target = spice.ID.Bennu,
+      Observer = kernels.ID.OsirisRex,
+      Target = kernels.ID.Bennu,
       Aberration = "NONE",
       TextureMap = true,
       DataInputTranslation = {
         Instruments = {
           ORX_OCAMS_POLYCAM = {
             DetectorType = "Camera",
-            Spice = { spice.Frame.Polycam },
+            Spice = { kernels.Frame.Polycam },
           },
         },
         Target = {
@@ -72,7 +72,7 @@ local BennuProjection = {
         }
       },
       Instrument = { -- INVALID DATA - JUST FOR TESTING
-        Name = spice.Frame.Polycam,
+        Name = kernels.Frame.Polycam,
         Method = "ELLIPSOID",
         Aberration = "NONE",
         Fovy = 0.792,
@@ -95,8 +95,8 @@ local BennuTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Bennu,
-      Observer = base.ID.SolarSystemBarycenter
+      Target = kernels.ID.Bennu,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.4, 0.0, 0.7 },
     StartTime = "2015 JAN 01 00:00:00.000",

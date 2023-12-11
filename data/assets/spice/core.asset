@@ -44,7 +44,6 @@ local ID = {
 -- Appendix: "Built in" PCK-Based IAU Body-Fixed Reference Frames
 -- Appendix: High Precision Earth Fixed Frames
 -- for more information
-for more information
 local Frame = {
   J2000 = "J2000",
   EclipJ2000 = "ECLIPJ2000",

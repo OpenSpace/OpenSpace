@@ -1,9 +1,8 @@
-asset.require("spice/base")
 asset.require("../actions")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -21,14 +20,14 @@ local Apollo15 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Apollo15,
-      Observer = base.ID.Moon,
-      Frame = base.Frame.Moon
+      Target = kernels.ID.Apollo15,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.ID.Apollo15Metric,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.ID.Apollo15Metric,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -58,9 +57,9 @@ local Apollo15Trail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Apollo15,
-      Observer = base.ID.Moon,
-      Frame = base.Frame.Moon
+      Target = kernels.ID.Apollo15,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1971 JUL 26",

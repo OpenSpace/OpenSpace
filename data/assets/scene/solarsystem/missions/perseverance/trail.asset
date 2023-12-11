@@ -1,7 +1,7 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -17,8 +17,8 @@ local PerseveranceTrailSun = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Perseverance,
-      Observer = base.ID.SolarSystemBarycenter
+      Target = kernels.ID.Perseverance,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.2, 0.7, 0.1 },
     StartTime = StartTime,
@@ -39,8 +39,8 @@ local PerseveranceTrailMars = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Perseverance,
-      Observer = spice.ID.MarsBarycenter
+      Target = kernels.ID.Perseverance,
+      Observer = kernels.ID.MarsBarycenter
     },
     Color = { 0.7, 0.9, 0.6 },
     StartTime = ApproachMars,

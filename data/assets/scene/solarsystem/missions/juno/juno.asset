@@ -2,8 +2,8 @@ asset.require("scene/solarsystem/missions/juno/mission")
 asset.require("scene/solarsystem/planets/jupiter/layers/colorlayers/jupiter_video")
 local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -32,13 +32,13 @@ local Juno = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Juno,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels.ID.Juno,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Juno,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Juno,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -66,8 +66,8 @@ local JunoTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Juno,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels.ID.Juno,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "2016 JUL 01",

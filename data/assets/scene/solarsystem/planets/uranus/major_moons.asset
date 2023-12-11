@@ -1,6 +1,6 @@
 local transforms = asset.require("./transforms")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local Miranda = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Miranda,
-      Observer = base.ID.UranusBarycenter
+      Target = kernels.ID.Miranda,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -34,8 +34,8 @@ local MirandaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Miranda,
-      Observer = base.ID.UranusBarycenter
+      Target = kernels.ID.Miranda,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1.413479,
@@ -79,8 +79,8 @@ local Ariel = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Ariel,
-      Observer = base.ID.UranusBarycenter
+      Target = kernels.ID.Ariel,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -103,8 +103,8 @@ local ArielTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Ariel,
-      Observer = base.ID.UranusBarycenter
+      Target = kernels.ID.Ariel,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 2.520379,
@@ -148,8 +148,8 @@ local Umbriel = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Umbriel,
-      Observer = base.ID.UranusBarycenter
+      Target = kernels.ID.Umbriel,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -172,8 +172,8 @@ local UmbrielTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Umbriel,
-      Observer = base.ID.UranusBarycenter
+      Target = kernels.ID.Umbriel,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 4.144177,
@@ -217,8 +217,8 @@ local Titania = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Titania,
-      Observer = base.ID.UranusBarycenter
+      Target = kernels.ID.Titania,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -241,8 +241,8 @@ local TitaniaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Titania,
-      Observer = base.ID.UranusBarycenter
+      Target = kernels.ID.Titania,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 8.705872,
@@ -286,8 +286,8 @@ local Oberon = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Oberon,
-      Observer = base.ID.UranusBarycenter
+      Target = kernels.ID.Oberon,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -310,8 +310,8 @@ local OberonTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Oberon,
-      Observer = base.ID.UranusBarycenter
+      Target = kernels.ID.Oberon,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 13.463239,

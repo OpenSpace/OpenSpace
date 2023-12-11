@@ -1,8 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 local LaunchTime = "2021 DEC 25 12:20:00"
@@ -25,8 +25,8 @@ local JWSTTrailLaunch = {
     Translation = {
       Type = "SpiceTranslation",
       Target = 170, -- JWST
-      Observer = base.ID.Earth,
-      Frame = base.Frame.Earth
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Earth
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = LaunchTime,
@@ -56,9 +56,9 @@ local JWSTTrailCruise = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.JWST,
-      Observer = base.ID.Earth,
-      Frame = base.Frame.Galactic
+      Target = kernels.ID.JWST,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = DetachTime,
@@ -89,7 +89,7 @@ local JWSTTrailOrbit = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.JWST,
+      Target = kernels.ID.JWST,
       Observer = transforms.ID.L2,
       Frame = "GALACTIC"
     },
@@ -120,7 +120,7 @@ local JWSTTrailCoRevOrbit = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.JWST,
+      Target = kernels.ID.JWST,
       Observer = transforms.ID.L2,
       Frame = "L2_COREV"
     },
@@ -149,9 +149,9 @@ local JWSTSunTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.JWST,
-      Observer = base.ID.SolarSystemBarycenter,
-      Frame = base.Frame.Galactic
+      Target = kernels.ID.JWST,
+      Observer = coreKernels.ID.SolarSystemBarycenter,
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.0, 0.9, 0.9 },
     Period = 365.242,

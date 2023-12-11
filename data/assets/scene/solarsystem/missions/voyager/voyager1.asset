@@ -1,6 +1,6 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -50,7 +50,7 @@ local Voyager1 = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "VG1_SC_BUS",
-      DestinationFrame = base.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.Galactic,
       TimeFrame = {
         Type = "TimeFrameInterval",
         Start = "1977-SEP-05 14:10:11.786",
@@ -125,7 +125,7 @@ local VoyagerTrailCruiseEarthJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = base.ID.SolarSystemBarycenter
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977 SEP 05",
@@ -149,7 +149,7 @@ local VoyagerTrailEncounterJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = base.ID.SolarSystemBarycenter
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.70, 0.50, 0.20 },
     EnableFade = false,
@@ -174,7 +174,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = base.ID.SolarSystemBarycenter
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -199,7 +199,7 @@ local VoyagerTrailEncounterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = base.ID.SolarSystemBarycenter
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -224,7 +224,7 @@ local VoyagerTrailCruiseSaturnInf = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = base.ID.SolarSystemBarycenter
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },

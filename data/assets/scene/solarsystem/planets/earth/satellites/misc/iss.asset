@@ -1,6 +1,6 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -34,8 +34,8 @@ local IssPosition = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = base.Frame.Galactic,
-      DestinationFrame = base.Frame.J2000
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
     }
   },
   Tag = { "earth_satellite", "ISS" },

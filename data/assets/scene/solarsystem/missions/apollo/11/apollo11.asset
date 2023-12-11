@@ -1,12 +1,11 @@
-asset.require("spice/base")
 asset.require("../actions")
 asset.require("./actions")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local descentKeyframes = asset.require("./lem_descent")
 local descentRotationKeyframes = asset.require("./lem_descent_rotation")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -38,9 +37,9 @@ local Apollo11Position = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Apollo11,
-      Observer = base.ID.Moon,
-      Frame = spice.ID.MoonME
+      Target = kernels.ID.Apollo11,
+      Observer = coreKernels.ID.Moon,
+      Frame = kernels.ID.MoonME
     }
   },
   GUI = {
@@ -90,9 +89,9 @@ local Apollo11MoonTrail = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Apollo11,
-      Observer = base.ID.Moon,
-      Frame = base.Frame.Moon
+      Target = kernels.ID.Apollo11,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Color = { 0.180000,0.510000,0.750000 },
     StartTime = "1969 JUL 19 19:38:29.183",
@@ -115,9 +114,9 @@ local lemTranslation = {
     -- a 10s linear transition to the location where the descentKeyframes start.
     ["1969 JUL 20 20:14:30"] = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Apollo11LEM,
-      Observer = base.ID.Moon,
-      Frame = base.Frame.Moon
+      Target = kernels.ID.Apollo11LEM,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     ["1969 JUL 20 20:14:40"] = {
       Type = "TimelineTranslation",

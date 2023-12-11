@@ -1,6 +1,6 @@
 local transforms = asset.require("./transforms")
-local spice = asset.require("./spice116")
-local base = asset.require("spice/base")
+local kernel = asset.require("./kernels116")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local Francisco = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Francisco,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Francisco,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -41,8 +41,8 @@ local FranciscoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Francisco,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Francisco,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 266.56,
@@ -92,8 +92,8 @@ local Caliban = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Caliban,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Caliban,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -123,8 +123,8 @@ local CalibanTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Caliban,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Caliban,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 579.50,
@@ -174,8 +174,8 @@ local Stephano = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Stephano,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Stephano,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -205,8 +205,8 @@ local StephanoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Stephano,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Stephano,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 676.50,
@@ -256,8 +256,8 @@ local Trinculo = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Trinculo,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Trinculo,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -287,8 +287,8 @@ local TrinculoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Trinculo,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Trinculo,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 758.10,
@@ -338,8 +338,8 @@ local Sycorax = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Sycorax,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Sycorax,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -369,8 +369,8 @@ local SycoraxTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Sycorax,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Sycorax,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1283.4,
@@ -420,8 +420,8 @@ local Prospero = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Prospero,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Prospero,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -451,8 +451,8 @@ local ProsperoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Prospero,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Prospero,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1992.8,
@@ -502,8 +502,8 @@ local Setebos = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Setebos,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Setebos,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -533,8 +533,8 @@ local SetebosTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Setebos,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Setebos,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 2202.3,
@@ -584,8 +584,8 @@ local Ferdinand = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Ferdinand,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Ferdinand,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -615,8 +615,8 @@ local FerdinandTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Ferdinand,
-      Observer = base.ID.UranusBarycenter
+      Target = kernel.ID.Ferdinand,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 2823.4,

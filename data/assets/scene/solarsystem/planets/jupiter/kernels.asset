@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -17,10 +17,10 @@ local ID = {
 }
 
 local Frame = {
-  Callisto = base.Frame.Callisto,
-  Europa = base.Frame.Europa,
-  Ganymede = base.Frame.Ganymede,
-  Io = base.Frame.Io
+  Callisto = coreKernels.Frame.Callisto,
+  Europa = coreKernels.Frame.Europa,
+  Ganymede = coreKernels.Frame.Ganymede,
+  Io = coreKernels.Frame.Io
 }
 
 

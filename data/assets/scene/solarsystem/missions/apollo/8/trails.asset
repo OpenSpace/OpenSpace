@@ -1,7 +1,7 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -12,9 +12,9 @@ local LaunchTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Apollo8,
-      Observer = base.ID.Earth,
-      Frame = base.Frame.Earth
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Earth
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 21 12:51:00",
@@ -36,9 +36,9 @@ local MoonTrail = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Apollo8,
-      Observer = base.ID.Moon,
-      Frame = base.Frame.Moon
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 23",
@@ -59,9 +59,9 @@ local EarthBarycenterTrail = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Apollo8,
-      Observer = base.ID.Earth,
-      Frame = base.Frame.Galactic
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.8, 0.2, 0.2 },
     StartTime = "1968 DEC 21",

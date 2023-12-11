@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local spice = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 asset.require("./trail")
 
 
@@ -18,13 +18,13 @@ local Pluto = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Pluto,
-      Observer = spice.ID.PlutoBarycenter
+      Target = coreKernels.ID.Pluto,
+      Observer = coreKernels.ID.PlutoBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Pluto,
-      DestinationFrame = spice.Frame.Galactic
+      SourceFrame = coreKernels.Frame.Pluto,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {

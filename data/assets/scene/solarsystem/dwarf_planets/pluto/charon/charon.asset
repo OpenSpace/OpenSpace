@@ -1,7 +1,7 @@
 local transforms = asset.require("../transforms")
 asset.require("../trail")
-local spice = asset.require("../spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,13 +18,13 @@ local Charon = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Charon,
-      Observer = spice.ID.PlutoBarycenter
+      Target = kernels.ID.Charon,
+      Observer = kernels.ID.PlutoBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = spice.Frame.Charon,
-      DestinationFrame = base.Frame.Galactic
+      SourceFrame = kernels.Frame.Charon,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {

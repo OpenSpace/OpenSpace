@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
-local spice = asset.require("../spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +11,8 @@ local EnceladusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Enceladus,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels.ID.Enceladus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 33.0 / 24.0,
@@ -42,7 +42,7 @@ asset.export(EnceladusTrail)
 asset.meta = {
   Name = "Enceladus Trail",
   Version = "1.1",
-  Description = "Trail for Enceladus. Data from NASA Spice (see base spice asset)",
+  Description = "Trail for Enceladus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

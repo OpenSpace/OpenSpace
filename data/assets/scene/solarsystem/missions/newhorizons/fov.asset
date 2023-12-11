@@ -1,6 +1,6 @@
 local transforms = asset.require("./transforms")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -20,16 +20,16 @@ local Lorri = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     Color = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.Lorri,
+      Name = kernels.Frame.Lorri,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -49,16 +49,16 @@ local RalphLeisa = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.RalphLeisa,
+      Name = kernels.Frame.RalphLeisa,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -78,16 +78,16 @@ local RalphMvicPan1 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.RalphMvicPan1,
+      Name = kernels.Frame.RalphMvicPan1,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -107,16 +107,16 @@ local RalphMvicPan2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.RalphMvicPan2,
+      Name = kernels.Frame.RalphMvicPan2,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -136,16 +136,16 @@ local RalphMvicRed = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.RalphMvicRed,
+      Name = kernels.Frame.RalphMvicRed,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -165,16 +165,16 @@ local RalphMvicBlue = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.RalphMvicBlue,
+      Name = kernels.Frame.RalphMvicBlue,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -194,16 +194,16 @@ local RalphMvicFt = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.RalphMvicFT,
+      Name = kernels.Frame.RalphMvicFT,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -223,16 +223,16 @@ local RalphMvicMethane = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.RalphMvicMethane,
+      Name = kernels.Frame.RalphMvicMethane,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -252,16 +252,16 @@ local RalphMvicNir = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.RalphMvicNIR,
+      Name = kernels.Frame.RalphMvicNIR,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -281,16 +281,16 @@ local AliceAirglow = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.AliceAirglow,
+      Name = kernels.Frame.AliceAirglow,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     },
     SimplifyBounds = true
   },
@@ -311,16 +311,16 @@ local AliceSoc = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.NewHorizons,
-    Frame = spice.Frame.NewHorizons,
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = spice.Frame.AliceSOC,
+      Name = kernels.Frame.AliceSOC,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      spice.ID.Pluto,
-      spice.ID.Charon
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -344,9 +344,9 @@ local Rex = {
   },
   Renderable = {
     Type = "RenderableCrawlingLine",
-    Source = spice.ID.Rex,
-    Target = base.ID.Earth,
-    Instrument = spice.Frame.Rex,
+    Source = kernels.ID.Rex,
+    Target = coreKernels.ID.Earth,
+    Instrument = kernels.Frame.Rex,
     Color = {
       Start = { 1.0, 0.7, 0.0, 1.0 },
       End = { 0.0, 0.0, 0.0, 0.0 }

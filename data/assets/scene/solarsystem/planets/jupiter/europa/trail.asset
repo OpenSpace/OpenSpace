@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
-local spice = asset.require("../spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +11,8 @@ local EuropaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Europa,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels.ID.Europa,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 85.0 / 24.0,
@@ -41,8 +41,7 @@ asset.export(EuropaTrail)
 asset.meta = {
   Name = "Europa Trail",
   Version = "1.1",
-  Description = [[Trail of Europa as observed by the Jupiter. Data from NASA Spice (see
-    base spice asset)]],
+  Description = "Trail of Europa as observed by the Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -1,5 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local NeptuneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = base.ID.Neptune,
-      Observer = base.ID.SolarSystemBarycenter
+      Target = coreKernels.ID.Neptune,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.2, 0.5, 1.0 },
     -- Period = 60200,
@@ -52,7 +52,7 @@ asset.export(NeptuneTrail)
 asset.meta = {
   Name = "Neptune Trail",
   Version = "1.1",
-  Description = "Main trail of Neptune. Data from NASA Spice (see base spice asset)",
+  Description = "Main trail of Neptune",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

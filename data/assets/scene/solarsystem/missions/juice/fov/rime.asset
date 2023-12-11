@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local spice = asset.require("../spice")
+local kernels = asset.require("../kernels")
 
 
 
@@ -14,8 +14,8 @@ local RimeBase = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.Juice,
-    Frame = spice.Frame.RimeBase,
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.RimeBase,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_RIME_BASE",
@@ -44,8 +44,8 @@ local Rime = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.Juice,
-    Frame = spice.Frame.Rime,
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.Rime,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_RIME",

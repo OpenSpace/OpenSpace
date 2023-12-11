@@ -1,5 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +11,8 @@ local UranusBarycenterTrail = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = base.ID.UranusBarycenter,
-      Observer = base.ID.SolarSystemBarycenter
+      Target = coreKernels.ID.UranusBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.60, 0.95, 1.00 },
     Period = 30588.740,
@@ -42,8 +42,7 @@ asset.export(UranusBarycenterTrail)
 asset.meta = {
   Name = "Uranus Trail",
   Version = "1.1",
-  Description = [[Trail of Uranus' Barycenter. Data from NASA Spice (see base spice
-    asset)]],
+  Description = "Trail of Uranus' Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

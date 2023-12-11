@@ -1,5 +1,5 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -16,7 +16,7 @@ local GSMReferenceFrame = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = Frame.GSM,
-      DestinationFrame = base.Frame.Galactic
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {

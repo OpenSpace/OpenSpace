@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -19,11 +19,11 @@ local ID = {
 }
 
 local Frame = {
-  Ariel = base.Frame.Ariel,
-  Miranda = base.Frame.Miranda,
-  Oberon = base.Frame.Oberon,
-  Titania = base.Frame.Titania,
-  Umbriel = base.Frame.Umbriel
+  Ariel = coreKernels.Frame.Ariel,
+  Miranda = coreKernels.Frame.Miranda,
+  Oberon = coreKernels.Frame.Oberon,
+  Titania = coreKernels.Frame.Titania,
+  Umbriel = coreKernels.Frame.Umbriel
 }
 
 

@@ -1,6 +1,6 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local spice = asset.require("./spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +11,8 @@ local CeresTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Ceres,
-      Observer = base.ID.SolarSystemBarycenter
+      Target = kernels.ID.Ceres,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.2, 0.8, 0.3 },
     Period = 1680,

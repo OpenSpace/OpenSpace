@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
-local spice344 = asset.require("../spice344")
-local base = asset.require("spice/base")
+local kernels344 = asset.require("../kernels344")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local Metis = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Metis,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Metis,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -41,8 +41,8 @@ local MetisTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Metis,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Metis,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.117912037,
@@ -92,8 +92,8 @@ local Adrastea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Adrastea,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Adrastea,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -123,8 +123,8 @@ local AdrasteaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Adrastea,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Adrastea,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.2982638889,
@@ -174,8 +174,8 @@ local Amalthea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Amalthea,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Amalthea,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -205,8 +205,8 @@ local AmaltheaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Amalthea,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Amalthea,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.4981828704,
@@ -256,8 +256,8 @@ local Thebe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Thebe,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Thebe,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -287,8 +287,8 @@ local ThebeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice344.ID.Thebe,
-      Observer = base.ID.JupiterBarycenter
+      Target = kernels344.ID.Thebe,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.6745023148,

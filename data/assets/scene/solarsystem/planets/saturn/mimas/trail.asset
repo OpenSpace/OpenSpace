@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
-local spice = asset.require("../spice")
-local base = asset.require("spice/base")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +11,8 @@ local MimasTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Mimas,
-      Observer = base.ID.SaturnBarycenter
+      Target = kernels.ID.Mimas,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 23.0 / 24.0,
@@ -42,7 +42,7 @@ asset.export(MimasTrail)
 asset.meta = {
   Name = "Mimas Trail",
   Version = "1.1",
-  Description = "Main trail for Mimas. Data from NASA Spice (see base spice asset)",
+  Description = "Main trail for Mimas",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

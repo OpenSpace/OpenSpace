@@ -1,4 +1,4 @@
-local base = asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -26,16 +26,16 @@ local ID = {
 }
 
 local Frame = {
-  Belinda = base.Frame.Belinda,
-  Bianca = base.Frame.Bianca,
-  Cordelia = base.Frame.Cordelia,
-  Cressida = base.Frame.Cressida,
-  Desdemona = base.Frame.Desdemona,
-  Juliet = base.Frame.Juliet,
-  Ophelia = base.Frame.Ophelia,
-  Portia = base.Frame.Portia,
-  Puck = base.Frame.Puck,
-  Rosalind = base.Frame.Rosalind
+  Belinda = coreKernels.Frame.Belinda,
+  Bianca = coreKernels.Frame.Bianca,
+  Cordelia = coreKernels.Frame.Cordelia,
+  Cressida = coreKernels.Frame.Cressida,
+  Desdemona = coreKernels.Frame.Desdemona,
+  Juliet = coreKernels.Frame.Juliet,
+  Ophelia = coreKernels.Frame.Ophelia,
+  Portia = coreKernels.Frame.Portia,
+  Puck = coreKernels.Frame.Puck,
+  Rosalind = coreKernels.Frame.Rosalind
 }
 
 
