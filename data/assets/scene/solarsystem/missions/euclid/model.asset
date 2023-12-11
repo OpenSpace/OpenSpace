@@ -1,6 +1,6 @@
-local spice = asset.require("./spice")
+local transform = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local earth = asset.require("scene/solarsystem/planets/earth/transforms")
+local spice = asset.require("./spice")
 
 
 
@@ -14,7 +14,7 @@ local modelFolder = asset.resource({
 
 local Euclid = {
   Identifier = "Euclid",
-  Parent = earth.EarthBarycenter.Identifier,
+  Parent = transform.EarthBarycenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2023 JUL 01 15:53:08.239",
@@ -23,7 +23,7 @@ local Euclid = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.Euclid,
+      Target = spice.ID.Euclid,
       Observer = "EARTH BARYCENTER"
     },
     Rotation = {
@@ -66,7 +66,7 @@ asset.export(Euclid)
 asset.meta = {
   Name = "Euclid Model",
   Version = "1.0",
-  Description = "This asset contains the model of ESA's Euclid spacecraft.",
+  Description = "This asset contains the model of ESA's Euclid spacecraft. The model is retrieved from https://scifleet.esa.int",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -11,7 +11,7 @@ local EuclidTrailSun = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.Euclid,
+      Target = spice.ID.Euclid,
       Observer = "SSB"
     },
     Color = { 0.70, 0.50, 0.20 },
@@ -32,7 +32,7 @@ local EuclidTrailEarth = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.Euclid,
+      Target = spice.ID.Euclid,
       Observer = "EARTH BARYCENTER"
     },
     Color = { 0.325, 0.65, 0.55 },
