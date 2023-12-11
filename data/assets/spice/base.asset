@@ -13,6 +13,7 @@ local spk = asset.resource({
 })
 
 
+-- The following IDs are defined in the de430 kernel provided by the `generic_spk` package
 local ID = {
   Earth = "EARTH",
   EarthBarycenter = "EARTH BARYCENTER",
@@ -37,10 +38,31 @@ local ID = {
   VenusBarycenter = "VENUS BARYCENTER",
 }
 
+-- The following frames are provided as built-in reference frames by SPICE itself. See
+-- https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html
+-- Appendix: "Built in" Inertial Reference Frames
+-- Appendix: "Built in" PCK-Based IAU Body-Fixed Reference Frames
+-- Appendix: High Precision Earth Fixed Frames
+-- for more information
+for more information
 local Frame = {
   J2000 = "J2000",
   EclipJ2000 = "ECLIPJ2000",
   Galactic = "GALACTIC",
+
+  Earth = "IAU_EARTH",
+  ITRF93 = "ITRF93",
+  EarthFixed = "EARTH_FIXED",
+  Mars = "IAU_MARS",
+  Mercury = "IAU_MERCURY",
+  Moon = "IAU_MOON",
+  Neptune = "IAU_NEPTUNE",
+  Jupiter = "IAU_JUPITER",
+  Pluto = "IAU_PLUTO",
+  Saturn = "IAU_SATURN",
+  Sun = "IAU_SUN",
+  Uranus = "IAU_URANUS",
+  Venus = "IAU_VENUS",
 
   ["52Europa"] = "IAU_52_EUROPA",
   Adrastea = "IAU_ADRASTEA",
@@ -70,7 +92,6 @@ local Frame = {
   Dimorphos = "IAU_DIMORPHOS",
   Dione = "IAU_DIONE",
   DonaldJohanson = "IAU_DONALDJOHANSON",
-  Earth = "IAU_EARTH",
   Elara = "IAU_ELARA",
   Enceladus = "IAU_ENCELADUS",
   Epimetheus = "IAU_EPIMETHEUS",
@@ -94,7 +115,6 @@ local Frame = {
   Itokawa = "IAU_ITOKAWA",
   Janus = "IAU_JANUS",
   Juliet = "IAU_JULIET",
-  Jupiter = "IAU_JUPITER",
   Kalyke = "IAU_KALYKE",
   Larissa = "IAU_LARISSA",
   Leda = "IAU_LEDA",
@@ -102,15 +122,11 @@ local Frame = {
   Lutetia = "IAU_LUTETIA",
   Lysithea = "IAU_LYSITHEA",
   Magaclite = "IAU_MAGACLITE",
-  Mars = "IAU_MARS",
   Menoetius = "IAU_MENOETIUS",
-  Mercury = "IAU_MERCURY",
   Metis = "IAU_METIS",
   Mimas = "IAU_MIMAS",
   Miranda = "IAU_MIRANDA",
-  Moon = "IAU_MOON",
   Naiad = "IAU_NAIAD",
-  Neptune = "IAU_NEPTUNE",
   Nereid = "IAU_NEREID",
   Nix = "IAU_NIX",
   Oberon = "IAU_OBERON",
@@ -123,7 +139,6 @@ local Frame = {
   Patroclus = "IAU_PATROCLUS",
   Phobos = "IAU_PHOBOS",
   Phoebe = "IAU_PHOEBE",
-  Pluto = "IAU_PLUTO",
   Polymele = "IAU_POLYMELE",
   Portia = "IAU_PORTIA",
   Praxidike = "IAU_PRAXIDIKE",
@@ -134,10 +149,8 @@ local Frame = {
   Rhea = "IAU_RHEA",
   Rosalind = "IAU_ROSALIND",
   Ryugu = "IAU_RYUGU",
-  Saturn = "IAU_SATURN",
   Sinope = "IAU_SINOPE",
   Steins = "IAU_STEINS",
-  Sun = "IAU_SUN",
   Taygete = "IAU_TAYGETE",
   Telesto = "IAU_TELESTO",
   Tempel1 = "IAU_TEMPEL_1",
@@ -149,8 +162,6 @@ local Frame = {
   Titania = "IAU_TITANIA",
   Triton = "IAU_TRITON",
   Umbriel = "IAU_UMBRIEL",
-  Uranus = "IAU_URANUS",
-  Venus = "IAU_VENUS",
   Vesta = "IAU_VESTA"
 }
 
