@@ -45,6 +45,38 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "properties": [
+    {
+      "name": "Scene.L2.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L2Label.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L2SmallLabel.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.EuclidTrailSun.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.EuclidTrailEarth.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.EuclidTrailOrbit.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    }
+  ],
   "time": {
     "is_paused": false,
     "type": "relative",
