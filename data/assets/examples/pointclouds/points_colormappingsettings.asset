@@ -13,7 +13,7 @@ local Example = {
         -- outside this range will be given special colors
         Parameter = "normaldist_withMissing",
         ValueRange = { -0.25, 0.25},
-        -- Show missing data values, so we can sow these in a specific colors
+        -- Show missing data values, so we can show these in a specific color
         ShowMissingData = true,
         -- Color for missing data points
         NoDataColor = { 1.0, 0.0, 0.0, 1.0 },

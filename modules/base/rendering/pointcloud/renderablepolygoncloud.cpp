@@ -39,10 +39,10 @@ namespace {
     // is a uniform polygon with a given number of sides instead of a texture. For
     // instance, PolygonSides = 5 results in the points being rendered as pentagons.
     // Note that while this renderable inherits the texture property from
-    // RenderablePointCloudany, any added texture value will be ignored in favor of the
+    // RenderablePointCloud, any added texture value will be ignored in favor of the
     // polygon shape.
     //
-    // Se documentation of RenderablePointCloud for details on the other parts of the
+    // See documentation of RenderablePointCloud for details on the other parts of the
     // point cloud rendering.
     struct [[codegen::Dictionary(RenderablePolygonCloud)]] Parameters {
         // The number of sides for the polygon used to represent each point. Default is

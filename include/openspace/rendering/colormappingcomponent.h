@@ -43,7 +43,7 @@ namespace documentation { struct Documentation; }
 /**
  * This is a component that can be used to consistently hold parameters and properties
  * for controlling color mapping in different types of renderables. This includes things
- * like the the color map file itself, converted to a texture, colors to use for missing
+ * like the color map file itself (converted to a texture), colors to use for missing
  * values and the available data columns and value ranges.
  *
  * @TODO Also provide a small shader snippet that can be included in fragment shaders

@@ -130,7 +130,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
         "Enabled",
         "Size Mapping Enabled",
-        "If this value is set to 'true' and at least on column was loaded as an option "
+        "If this value is set to 'true' and at least one column was loaded as an option "
         "for size mapping, the chosen data column will be used to scale the size of the "
         "points",
         openspace::properties::Property::Visibility::NoviceUser
@@ -238,7 +238,7 @@ namespace {
     //   suitable.
     //
     // - There is also an option to limit the size of the points based on a given pixel
-    //   size. For now, this only works on flat proejction displays.
+    //   size. For now, this only works for flat projection displays.
     //
     // - To easily change the visual size of the points, the multiplicative 'ScaleFactor'
     //   may be used. A value of 2 makes the points twice as large, visually, compared
@@ -300,7 +300,7 @@ namespace {
             [[codegen::reference("labelscomponent")]];
 
         struct SizeSettings {
-            // A list specifying all parameters that may be use for size mapping, i.e.
+            // A list specifying all parameters that may be used for size mapping, i.e.
             // scaling the points based on the provided data columns
             std::optional<std::vector<std::string>> sizeMapping;
 
@@ -343,7 +343,7 @@ namespace {
             std::optional<bool> invert;
         };
         // Settings related to fading based on camera distance. Can be used to either
-        // fade away or fade int the points when reaching a certain distance from the
+        // fade away or fade in the points when reaching a certain distance from the
         // origin of the dataset
         std::optional<Fading> fading;
 

@@ -141,7 +141,7 @@ local Textured = {
     Coloring = {
       ColorMapping = {
         -- Disable color map per default. When enabled, the texture color will be
-        -- multiplied with the color form the color map
+        -- multiplied with the color from the color map
         Enabled = false,
         File = asset.resource("viridis.cmap")
       }
