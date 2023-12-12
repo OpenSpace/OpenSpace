@@ -72,7 +72,7 @@ void main() {
 
   dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
 
-  float scaleMultiply = exp(scaleExponent);
+  float scaleMultiply = pow(10.0, scaleExponent);
   if (hasDvarScaling) {
     scaleMultiply *= scalingParameter[0];
   }

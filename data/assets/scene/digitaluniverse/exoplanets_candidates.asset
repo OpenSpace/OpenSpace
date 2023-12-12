@@ -26,7 +26,7 @@ local Object = {
       FixedColor = { 1.0, 1.0, 0.0 }
     },
     SizeSettings = {
-      ScaleExponent = 41.0,
+      ScaleExponent = 17.8,
       MaxPixelSize = 30.0,
       EnablePixelSizeControl = true
     }

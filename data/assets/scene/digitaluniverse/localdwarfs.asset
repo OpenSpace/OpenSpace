@@ -41,7 +41,7 @@ local Object = {
     PolygonSides = 12,
     Unit = "Mpc",
     SizeSettings = {
-      ScaleExponent = 46.5,
+      ScaleExponent = 20.2,
       MaxPixelSize = 20.0,
       EnablePixelSizeControl = true
     }

@@ -40,7 +40,7 @@ local Object = {
     PolygonSides = 7,
     SizeSettings = {
       SizeMapping = { "diameter" },
-      ScaleExponent = 39.0,
+      ScaleExponent = 16.9,
       MaxPixelSize = 450.0,
       EnablePixelSizeControl = true
     }

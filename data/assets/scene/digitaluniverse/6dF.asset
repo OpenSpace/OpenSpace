@@ -33,7 +33,7 @@ local Object = {
       }
     },
     SizeSettings = {
-      ScaleExponent = 53.4,
+      ScaleExponent = 23.2,
       MaxPixelSize = 9.0,
       EnablePixelSizeControl = true
     }

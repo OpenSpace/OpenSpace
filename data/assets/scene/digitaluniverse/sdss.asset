@@ -36,7 +36,7 @@ local Object = {
       FadeInDistances = { 220.0, 650.0 } -- Fade in value in the same unit as "Unit"
     },
     SizeSettings = {
-      ScaleExponent = 52.0,
+      ScaleExponent = 22.6,
       MaxPixelSize = 5.5,
       EnablePixelSizeControl = true
     }

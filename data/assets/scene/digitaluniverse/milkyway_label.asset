@@ -30,6 +30,7 @@ local HomeLabel = {
     Coloring = {
       FixedColor = { 1.0, 0.4, 0.2 }
     },
+    -- Remove? There is no point...
     Opacity = 0.99,
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
@@ -37,7 +38,7 @@ local HomeLabel = {
       FadeInDistances = { 0.05, 1.0 }
     },
     SizeSettings = {
-      ScaleExponent = 50.0,
+      ScaleExponent = 21.7,
       MaxPixelSize = 8.22,
       EnablePixelSizeControl = true
     }

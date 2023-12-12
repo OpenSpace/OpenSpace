@@ -44,7 +44,7 @@ local Object = {
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
     SizeSettings = {
-      ScaleExponent = 52.0,
+      ScaleExponent = 22.6,
       MaxPixelSize = 7.0,
       EnablePixelSizeControl = true
     }

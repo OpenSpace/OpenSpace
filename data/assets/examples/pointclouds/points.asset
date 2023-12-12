@@ -71,7 +71,7 @@ local ColorMapped_FixedSize = {
     SizeSettings = {
       -- Here we set the exponent for the scale explicitly, to a value that
       -- gives the points a suitable size based on their world-space coordinates
-      ScaleExponent = 15.0
+      ScaleExponent = 6.5
     }
   },
   GUI = {
@@ -104,7 +104,7 @@ local FixedColor_ScaleBasedOnData = {
       -- Use a slightly smaller scale than above for the base size of the points
       -- (will decide the size of the smallest point). That way, the points don't
       -- become too big when scaled by the data parameter
-      ScaleExponent = 11.5,
+      ScaleExponent = 5,
     }
   },
   GUI = {
@@ -185,7 +185,7 @@ local ColorMappedAdvanced_NoBlend = {
       }
     },
     SizeSettings = {
-      ScaleExponent = 15.0
+      ScaleExponent = 6.5
     }
   },
   GUI = {

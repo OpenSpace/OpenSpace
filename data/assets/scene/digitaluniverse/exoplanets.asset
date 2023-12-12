@@ -30,7 +30,7 @@ local Object = {
     File = speck .. "expl.speck",
     Unit = "pc",
     SizeSettings = {
-      ScaleExponent = 38.867923,
+      ScaleExponent = 16.9,
       MaxPixelSize = 75.0,
       EnablePixelSizeControl = true
     }

@@ -32,7 +32,7 @@ local Object = {
     Texture = textures .. "point3A.png",
     Unit = "Mpc",
     SizeSettings = {
-      ScaleExponent = 53.1,
+      ScaleExponent = 23.1,
       MaxPixelSize = 7.2,
       EnablePixelSizeControl = true
     }

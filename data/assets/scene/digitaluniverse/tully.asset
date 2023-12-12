@@ -51,7 +51,7 @@ local TullyGalaxies = {
       FadeInDistances = { 0.001, 1.0 } -- Fade in value in the same unit as "Unit"
     },
     SizeSettings = {
-      ScaleExponent = 50.4,
+      ScaleExponent = 21.9,
       MaxPixelSize = 7.0,
       EnablePixelSizeControl = true
     }

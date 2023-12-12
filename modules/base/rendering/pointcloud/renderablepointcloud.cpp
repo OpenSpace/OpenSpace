@@ -44,6 +44,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/string_cast.hpp>
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -363,7 +364,7 @@ documentation::Documentation RenderablePointCloud::Documentation() {
 
 RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Sizing", "Sizing", ""})
-    , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 60.f)
+    , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 25.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
     , pixelSizeControl(PixelSizeControlInfo, false)
     , maxPixelSize(MaxPixelSizeInfo, 400.f, 0.f, 1000.f)
@@ -391,10 +392,7 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
     }
 
     addProperty(scaleFactor);
-
-    scaleExponent.setExponent(2.f);
     addProperty(scaleExponent);
-
     addProperty(pixelSizeControl);
     addProperty(maxPixelSize);
 }
@@ -580,7 +578,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     // based on the scale of the positions in the dataset
     if (!p.sizeSettings.has_value() || !(*p.sizeSettings).scaleExponent.has_value()) {
         double dist = _dataset.maxPositionComponent * toMeter(_unit);
-        float exponent = static_cast<float>(glm::log(dist));
+        float exponent = static_cast<float>(std::log10(dist));
         // Reduce the actually used exponent a little bit, as just using the logarithm
         // as is leads to very large points
         _sizeSettings.scaleExponent = 0.9f * exponent;

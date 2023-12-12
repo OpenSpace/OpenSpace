@@ -39,7 +39,7 @@ local Object = {
     },
     Unit = "Mpc",
     SizeSettings = {
-      ScaleExponent = 50.5,
+      ScaleExponent = 21.9,
       MaxPixelSize = 4.7,
       EnablePixelSizeControl = true
     }
