@@ -360,7 +360,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         _segmentSize.push_back(
             static_cast<size_t>(scale + (scale / pow(1 - p.eccentricity, 1.2)))
         );
-        _startIndex.push_back(_startIndex[i] + static_cast<GLint>(_segmentSize[i]) + 1);
+        _startIndex.push_back(_startIndex[i] + static_cast<GLint>(_segmentSize[i]));
     }
     _startIndex.pop_back();
 
@@ -368,7 +368,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     int numOrbits = static_cast<int>(parameters.size());
     for (int i = 0; i < numOrbits; ++i) {
-        nVerticesTotal += _segmentSize[i] + 1;
+        nVerticesTotal += _segmentSize[i];
     }
     _vertexBufferData.resize(nVerticesTotal);
 
@@ -388,9 +388,9 @@ void RenderableOrbitalKepler::updateBuffers() {
             orbit.epoch
         );
 
-        for (size_t j = 0 ; j < (_segmentSize[orbitIdx] + 1); ++j) {
+        for (size_t j = 0 ; j < (_segmentSize[orbitIdx]); ++j) {
             double timeOffset = orbit.period *
-                static_cast<double>(j) / static_cast<double>(_segmentSize[orbitIdx]);
+                static_cast<double>(j) / static_cast<double>(_segmentSize[orbitIdx] - 1);
 
             glm::dvec3 position = keplerTranslator.position({
                 {},
