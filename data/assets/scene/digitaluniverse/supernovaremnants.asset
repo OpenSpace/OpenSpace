@@ -34,7 +34,7 @@ local Object = {
     Unit = "pc",
     SizeSettings = {
       ScaleExponent = 42.4,
-      BillboardMaxPixelSize = 500.0,
+      MaxPixelSize = 500.0,
       EnablePixelSizeControl = true
     }
   },

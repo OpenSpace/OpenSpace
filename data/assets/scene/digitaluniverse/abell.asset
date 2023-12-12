@@ -45,7 +45,7 @@ local Object = {
     TransformationMatrix = TransformMatrix,
     SizeSettings = {
       ScaleExponent = 52.0,
-      BillboardMaxPixelSize = 7.0,
+      MaxPixelSize = 7.0,
       EnablePixelSizeControl = true
     }
   },

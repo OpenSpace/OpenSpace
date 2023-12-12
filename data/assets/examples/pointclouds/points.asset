@@ -39,7 +39,7 @@ local FixedColor_MaxPixelSize = {
       FixedColor = { 0.0, 1.0, 1.0 }
     },
     SizeSettings = {
-      BillboardMaxPixelSize = 4.7,
+      MaxPixelSize = 4.7,
       EnablePixelSizeControl = true
     }
   },

@@ -114,7 +114,7 @@ protected:
         properties::FloatProperty scaleFactor;
 
         properties::BoolProperty pixelSizeControl;
-        properties::FloatProperty billboardMaxPixelSize;
+        properties::FloatProperty maxPixelSize;
     } _sizeSettings;
 
     struct ColorSettings : properties::PropertyOwner {

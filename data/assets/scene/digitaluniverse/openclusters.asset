@@ -34,7 +34,7 @@ local Object = {
     PolygonSides = 12,
     SizeSettings = {
       ScaleExponent = 40.575,
-      BillboardMaxPixelSize = 604.0,
+      MaxPixelSize = 604.0,
       EnablePixelSizeControl = true
     }
   },

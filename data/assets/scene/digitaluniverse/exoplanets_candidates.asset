@@ -27,7 +27,7 @@ local Object = {
     },
     SizeSettings = {
       ScaleExponent = 41.0,
-      BillboardMaxPixelSize = 30.0,
+      MaxPixelSize = 30.0,
       EnablePixelSizeControl = true
     }
   },

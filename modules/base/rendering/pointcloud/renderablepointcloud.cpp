@@ -195,9 +195,9 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BillboardMaxPixelSizeInfo = {
-        "BillboardMaxPixelSize",
-        "Billboard Max Size in Pixels",
+    constexpr openspace::properties::Property::PropertyInfo MaxPixelSizeInfo = {
+        "MaxPixelSize",
+        "Max Size in Pixels",
         "The maximum size (in pixels) for the billboard representing the point.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -314,8 +314,8 @@ namespace {
             // [[codegen::verbatim(PixelSizeControlInfo.description)]]
             std::optional<bool> enablePixelSizeControl;
 
-            // [[codegen::verbatim(BillboardMaxPixelSizeInfo.description)]]
-            std::optional<float> billboardMaxPixelSize;
+            // [[codegen::verbatim(MaxPixelSizeInfo.description)]]
+            std::optional<float> maxPixelSize;
         };
         // Settings related to the scale of the points, whether they should limit to
         // a certain pixel size, etc.
@@ -366,7 +366,7 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 60.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
     , pixelSizeControl(PixelSizeControlInfo, false)
-    , billboardMaxPixelSize(BillboardMaxPixelSizeInfo, 400.f, 0.f, 1000.f)
+    , maxPixelSize(MaxPixelSizeInfo, 400.f, 0.f, 1000.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -376,7 +376,7 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
         scaleFactor = settings.scaleFactor.value_or(scaleFactor);
         scaleExponent = settings.scaleExponent.value_or(scaleExponent);
         pixelSizeControl = settings.enablePixelSizeControl.value_or(pixelSizeControl);
-        billboardMaxPixelSize = settings.billboardMaxPixelSize.value_or(billboardMaxPixelSize);
+        maxPixelSize = settings.maxPixelSize.value_or(maxPixelSize);
 
         if (settings.sizeMapping.has_value()) {
             std::vector<std::string> opts = *settings.sizeMapping;
@@ -396,7 +396,7 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
     addProperty(scaleExponent);
 
     addProperty(pixelSizeControl);
-    addProperty(billboardMaxPixelSize);
+    addProperty(maxPixelSize);
 }
 
 RenderablePointCloud::SizeSettings::SizeMapping::SizeMapping()
@@ -732,7 +732,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
     _program->setUniform(_uniformCache.enablePixelSizeControl, _sizeSettings.pixelSizeControl);
-    _program->setUniform(_uniformCache.maxBillboardSize, _sizeSettings.billboardMaxPixelSize);
+    _program->setUniform(_uniformCache.maxBillboardSize, _sizeSettings.maxPixelSize);
     _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
 
     GLint viewport[4];

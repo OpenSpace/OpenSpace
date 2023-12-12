@@ -41,7 +41,7 @@ local Object = {
     SizeSettings = {
       SizeMapping = { "diameter" },
       ScaleExponent = 39.0,
-      BillboardMaxPixelSize = 450.0,
+      MaxPixelSize = 450.0,
       EnablePixelSizeControl = true
     }
   },

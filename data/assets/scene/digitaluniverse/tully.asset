@@ -52,7 +52,7 @@ local TullyGalaxies = {
     },
     SizeSettings = {
       ScaleExponent = 50.4,
-      BillboardMaxPixelSize = 7.0,
+      MaxPixelSize = 7.0,
       EnablePixelSizeControl = true
     }
   },
