@@ -78,7 +78,7 @@ namespace {
         "HideValuesOutsideRange",
         "Hide Values Outside Range",
         "If true, points with values outside the provided range for the coloring will be "
-        "rendered as transparent, i.e. not shown",
+        "hidden, i.e. not rendered at all",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
