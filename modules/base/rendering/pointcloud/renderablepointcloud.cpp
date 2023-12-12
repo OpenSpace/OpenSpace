@@ -84,27 +84,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleExponentInfo = {
-        "ScaleExponent",
-        "Scale Exponent",
-        "This value is used as in exponential scaling to set the absolute size of the "
-        "point. In general, the larger distance the dataset covers, the larger this "
-        "value should be. If not included, it is computed based on the maximum "
-        "positional component of the data points. This is useful for showing the "
-        "dataset at all, but you will likely want to change it to something that looks "
-        "good",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
-        "ScaleFactor",
-        "Scale Factor",
-        "This value is used as a multiplicative factor to adjust the size of the points, "
-        "after the exponential scaling and any pixel-size control effects. Simply just "
-        "increases or decreases the visual size of the points",
-        openspace::properties::Property::Visibility::User
-    };
-
     constexpr openspace::properties::Property::PropertyInfo PointColorInfo = {
         "FixedColor",
         "Fixed Color",
@@ -125,25 +104,6 @@ namespace {
         "Labels",
         "Labels",
         "The labels for the points"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
-        "Enabled",
-        "Size Mapping Enabled",
-        "If this value is set to 'true' and at least one column was loaded as an option "
-        "for size mapping, the chosen data column will be used to scale the size of the "
-        "points. The first option in the list is selected per default.",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SizeMappingOptionInfo = {
-        "Parameter",
-        "Parameter Option",
-        "This value determines which parameter is used for scaling of the point. The "
-        "parameter value will be used as a miltiplicative factor to scale the size of "
-        "the points. Not that they may however still be scaled by pixel size adjustment "
-        "effects.",
-        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
@@ -185,16 +145,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
-        "EnablePixelSizeControl",
-        "Enable Pixel Size Control",
-        "If true, the Max Size in Pixels property will be used as an upper limit for the "
-        "size of the point. Reduces the size of the points when approaching them, so that "
-        "they stick to a maximum screen space size. Currently, the scaling is computed "
-        "based on rectangular displays and might look weird in other projections",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo UseAdditiveBlendingInfo = {
         "UseAdditiveBlending",
         "Use Additive Blending",
@@ -206,6 +156,45 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo NumShownDataPointsInfo = {
+        "NumberOfDataPoints",
+        "Number of Shown Data Points",
+        "This read only property includes information about how many points are being "
+        "rendered.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScaleExponentInfo = {
+        "ScaleExponent",
+        "Scale Exponent",
+        "This value is used as in exponential scaling to set the absolute size of the "
+        "point. In general, the larger distance the dataset covers, the larger this "
+        "value should be. If not included, it is computed based on the maximum "
+        "positional component of the data points. This is useful for showing the "
+        "dataset at all, but you will likely want to change it to something that looks "
+        "good",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+        "ScaleFactor",
+        "Scale Factor",
+        "This value is used as a multiplicative factor to adjust the size of the points, "
+        "after the exponential scaling and any pixel-size control effects. Simply just "
+        "increases or decreases the visual size of the points",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
+        "EnablePixelSizeControl",
+        "Enable Pixel Size Control",
+        "If true, the Max Size in Pixels property will be used as an upper limit for the "
+        "size of the point. Reduces the size of the points when approaching them, so that "
+        "they stick to a maximum screen space size. Currently, the scaling is computed "
+        "based on rectangular displays and might look weird in other projections",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BillboardMaxPixelSizeInfo = {
         "BillboardMaxPixelSize",
         "Billboard Max Size in Pixels",
@@ -213,12 +202,23 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NumShownDataPointsInfo = {
-        "NumberOfDataPoints",
-        "Number of Shown Data Points",
-        "This read only property includes information about how many points are being "
-        "rendered.",
-        openspace::properties::Property::Visibility::User
+    constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
+        "Enabled",
+        "Size Mapping Enabled",
+        "If this value is set to 'true' and at least one column was loaded as an option "
+        "for size mapping, the chosen data column will be used to scale the size of the "
+        "points. The first option in the list is selected per default.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SizeMappingOptionInfo = {
+        "Parameter",
+        "Parameter Option",
+        "This value determines which parameter is used for scaling of the point. The "
+        "parameter value will be used as a miltiplicative factor to scale the size of "
+        "the points. Not that they may however still be scaled by pixel size adjustment "
+        "effects.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     // A RenderablePointCloud can be used to render point-based datasets in 3D space,
