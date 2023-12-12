@@ -611,8 +611,6 @@ void RenderablePointCloud::initialize() {
         _labels->initialize();
         _labels->loadLabels();
     }
-
-    setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
 }
 
 void RenderablePointCloud::initializeGL() {
