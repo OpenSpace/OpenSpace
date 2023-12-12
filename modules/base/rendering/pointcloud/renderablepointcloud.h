@@ -145,7 +145,7 @@ protected:
 
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
-        maxBillboardSize, color, alphaValue, scaleExponent, scaleFactor, up, right,
+        maxBillboardSize, color, opacity, scaleExponent, scaleFactor, up, right,
         fadeInValue, screenSize, hasSpriteTexture, spriteTexture, useColormap,
         colorMapTexture, cmapRangeMin, cmapRangeMax, nanColor, useNanColor,
         hideOutsideRange, enablePixelSizeControl, aboveRangeColor, useAboveRangeColor,

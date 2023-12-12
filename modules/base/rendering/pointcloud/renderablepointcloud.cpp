@@ -56,7 +56,7 @@ namespace {
 
     constexpr std::array<const char*, 29> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
-        "renderOption", "maxBillboardSize", "color", "alphaValue", "scaleExponent",
+        "renderOption", "maxBillboardSize", "color", "opacity", "scaleExponent",
         "scaleFactor", "up", "right", "fadeInValue", "screenSize", "hasSpriteTexture",
         "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
         "nanColor", "useNanColor", "hideOutsideRange", "enablePixelSizeControl",
@@ -727,7 +727,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
-    _program->setUniform(_uniformCache.alphaValue, opacity());
+    _program->setUniform(_uniformCache.opacity, opacity());
 
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);

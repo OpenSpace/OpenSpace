@@ -28,7 +28,7 @@ flat in float gs_colorParameter;
 flat in float vs_screenSpaceDepth;
 in vec2 texCoord;
 
-uniform float alphaValue;
+uniform float opacity;
 uniform vec3 color;
 
 uniform vec4 nanColor = vec4(0.5);
@@ -75,7 +75,7 @@ vec4 sampleColorMap(float dataValue) {
 }
 
 Fragment getFragment() {
-  if (fadeInValue == 0.0 || alphaValue == 0.0) {
+  if (fadeInValue == 0.0 || opacity == 0.0) {
     discard;
   }
 
@@ -99,7 +99,7 @@ Fragment getFragment() {
     fullColor.rgb *= color;
   }
 
-  fullColor.a *= alphaValue * fadeInValue;
+  fullColor.a *= opacity * fadeInValue;
   if (fullColor.a < 0.01) {
     discard;
   }
