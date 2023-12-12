@@ -741,20 +741,26 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     bool useTexture = _hasSpriteTexture && _useSpriteTexture;
     _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
+
     ghoul::opengl::TextureUnit spriteTextureUnit;
-    spriteTextureUnit.activate();
-    bindTextureForRendering();
     _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
+    if (useTexture) {
+        spriteTextureUnit.activate();
+        bindTextureForRendering();
+    }
 
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
 
-    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled;
+    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
+        _colorSettings.colorMapping->texture();
+
     _program->setUniform(_uniformCache.useColormap, useColorMap);
+
     ghoul::opengl::TextureUnit colorMapTextureUnit;
-    colorMapTextureUnit.activate();
     _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
 
-    if (useColorMap && _colorSettings.colorMapping->texture()) {
+    if (useColorMap) {
+        colorMapTextureUnit.activate();
         _colorSettings.colorMapping->texture()->bind();
 
         const glm::vec2 range = _colorSettings.colorMapping->valueRange;
