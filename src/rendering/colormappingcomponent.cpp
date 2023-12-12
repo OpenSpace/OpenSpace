@@ -159,6 +159,11 @@ namespace {
             // dataset
             std::optional<glm::vec2> range;
         };
+        // A list of options for color parameters to use for color mapping, that will
+        // appear as options in the drop-down menu in the user interface. Per default,
+        // the first option in the list is selected. Each option is a table in the form
+        // { Key = \"theKey\", Range = {min, max} }, where the value range is optional.
+        // If added, this range will automatically be set when the option is selected
         std::optional<std::vector<ColorMapParameter>> parameterOptions;
 
         // [[codegen::verbatim(ParameterInfo.description)]]
@@ -253,13 +258,10 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
         _colorRangeData.reserve(opts.size());
         for (size_t i = 0; i < opts.size(); ++i) {
             dataColumn.addOption(static_cast<int>(i), opts[i].key);
+            // Add the provided range or an empty range. We will fill it later on,
+            // when the dataset is loaded, if it is empty
             _colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
         }
-
-        // Following DU behavior here. The last colormap variable
-        // entry is the one selected by default.
-        dataColumn.setValue(static_cast<int>(_colorRangeData.size() - 1));
-        valueRange = _colorRangeData.back();
     }
 
     dataColumn.onChange([this]() {
@@ -417,17 +419,11 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
 
             i++;
         }
-
-        // Per default, set to the last column
-        if (!_colorRangeData.empty()) {
-            dataColumn = static_cast<int>(_colorRangeData.size() - 1);
-        }
     }
     else {
         // Otherwise, check if the selected columns exist
         for (int i = 0; i < dataColumn.options().size(); ++i) {
             std::string o = dataColumn.options()[i].description;
-            const std::vector<dataloader::Dataset::Variable>& vars = dataset.variables;
 
             bool found = false;
             for (const dataloader::Dataset::Variable& v : dataset.variables) {
@@ -461,9 +457,13 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
         }
     }
 
-    // Do this last, as to override any other values set above
+    // Set the value range to correspond to the selected data column, or the one set by
+    // the user
     if (_providedRange.has_value()) {
         valueRange = *_providedRange;
+    }
+    else {
+        valueRange = _colorRangeData[dataColumn.value()];
     }
 }
 

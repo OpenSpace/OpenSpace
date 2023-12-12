@@ -27,8 +27,8 @@ local Object = {
       ColorMapping = {
         File = speck .. "6dF.cmap",
         ParameterOptions = {
-          { Key = "redshift", Range = { 0.0, 0.075 } },
-          { Key = "proximity", Range = { 1.0, 10.0 } }
+          { Key = "proximity", Range = { 1.0, 10.0 } },
+          { Key = "redshift", Range = { 0.0, 0.075 } }
         }
       }
     },
