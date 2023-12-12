@@ -72,7 +72,7 @@ namespace {
     // datasets, e.g. from a CSV or Speck file.
     //
     // It allows specifying things like column names, whether the reading of those
-    // column names hsould be case sensitive, data value that represents missing
+    // column names should be case sensitive, data value that represents missing
     // values in the dataset, and more. See details for each field / class member.
     //
     // Note that things related to reading the point position will not be handled for
