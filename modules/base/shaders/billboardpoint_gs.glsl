@@ -94,7 +94,7 @@ void main() {
   }
 
   // @TODO: Come up with some better solution for this scaling, that
-  // also work wiht non planar projections and multiple viewport resolutions.
+  // also work with non planar projections and multiple viewport resolutions.
   if (enablePixelSizeControl) {
     vec4 initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
       dvec4(dpos.xyz - dvec3(scaledRight - scaledUp), dpos.w)));
