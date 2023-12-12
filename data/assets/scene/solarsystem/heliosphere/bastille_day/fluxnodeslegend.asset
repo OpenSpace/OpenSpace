@@ -1,7 +1,3 @@
-asset.require("spice/base")
-
-
-
 local TexturesPath = asset.resource({
   Type = "HttpSynchronization",
   Name = "Streamnodes textures",

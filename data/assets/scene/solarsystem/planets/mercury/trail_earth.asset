@@ -1,6 +1,6 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -12,8 +12,8 @@ local MercuryTrailEarth = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY",
-      Observer = "EARTH"
+      Target = coreKernels.ID.Mercury,
+      Observer = coreKernels.ID.Earth
     },
     Color = { 1.0, 0.5, 0.2 },
     Period = 224.695,

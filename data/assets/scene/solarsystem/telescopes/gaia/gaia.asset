@@ -20,7 +20,7 @@ local Gaia = {
       Attached = "Gaia",
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
-      YAxis = "Sun",
+      YAxis = sun.Sun.Identifier,
       YAxisInvert = true
     },
     Scale = {

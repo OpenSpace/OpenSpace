@@ -1,5 +1,7 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels344 = asset.require("../kernels344")
+local kernels346 = asset.require("../kernels346")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +11,8 @@ local Euporie = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EUPORIE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Euporie,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -40,8 +42,8 @@ local EuporieTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EUPORIE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Euporie,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 538.78,
@@ -91,8 +93,8 @@ local S2003J18 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "555",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J18,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -122,8 +124,8 @@ local S2003J18Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "555",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J18,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 587.38,
@@ -173,8 +175,8 @@ local Helike = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HELIKE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Helike,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -204,8 +206,8 @@ local HelikeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HELIKE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Helike,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 601.40,
@@ -255,8 +257,8 @@ local Orthosie = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ORTHOSIE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Orthosie,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -286,8 +288,8 @@ local OrthosieTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ORTHOSIE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Orthosie,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 602.62,
@@ -337,8 +339,8 @@ local S2016J1 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "554",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2016J1,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -368,8 +370,8 @@ local S2016J1Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "554",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2016J1,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 603.83,
@@ -419,8 +421,8 @@ local S2003J15 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "558",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J15,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -450,8 +452,8 @@ local S2003J15Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "558",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J15,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 699.68,
@@ -501,8 +503,8 @@ local Aoede = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AOEDE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Aoede,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -532,8 +534,8 @@ local AoedeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AOEDE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Aoede,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 714.66,
@@ -583,8 +585,8 @@ local Callirrhoe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALLIRRHOE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Callirrhoe,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -614,8 +616,8 @@ local CallirrhoeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALLIRRHOE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Callirrhoe,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 727.11,
@@ -665,8 +667,8 @@ local Eurydome = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EURYDOME",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Eurydome,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -696,8 +698,8 @@ local EurydomeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EURYDOME",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Eurydome,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 723.36,
@@ -747,8 +749,8 @@ local Kore = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "KORE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Kore,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -778,8 +780,8 @@ local KoreTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "KORE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Kore,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 776.02,
@@ -829,8 +831,8 @@ local Cyllene = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CYLLENE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Cyllene,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -860,8 +862,8 @@ local CylleneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CYLLENE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Cyllene,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 731.10,
@@ -911,8 +913,8 @@ local S2011J2 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "556",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2011J2,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -942,8 +944,8 @@ local S2011J2Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "556",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2011J2,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 731.32,
@@ -993,8 +995,8 @@ local S2017J1 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "559",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2017J1,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1024,8 +1026,8 @@ local S2017J1Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "559",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2017J1,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 734.15,
@@ -1075,8 +1077,8 @@ local S2003J4 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55502",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J4,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1106,8 +1108,8 @@ local S2003J4Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55502",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J4,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 739.29,
@@ -1157,8 +1159,8 @@ local Pasiphae = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PASIPHAE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Pasiphae,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1188,8 +1190,8 @@ local PasiphaeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PASIPHAE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Pasiphae,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 731.10,
@@ -1239,8 +1241,8 @@ local Hegemone = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HEGEMONE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Hegemone,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1270,8 +1272,8 @@ local HegemoneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HEGEMONE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Hegemone,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 745.50,
@@ -1321,8 +1323,8 @@ local Sinope = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SINOPE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Sinope,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1352,8 +1354,8 @@ local SinopeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SINOPE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Sinope,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 739.33,
@@ -1403,8 +1405,8 @@ local Sponde = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SPONDE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Sponde,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1434,8 +1436,8 @@ local SpondeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SPONDE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Sponde,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 771.60,
@@ -1485,8 +1487,8 @@ local Autonoe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AUTONOE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Autonoe,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1516,8 +1518,8 @@ local AutonoeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AUTONOE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Autonoe,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 772.17,
@@ -1567,8 +1569,8 @@ local Megaclite = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MEGACLITE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Megaclite,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1598,8 +1600,8 @@ local MegacliteTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MEGACLITE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Megaclite,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 792.44,
@@ -1649,8 +1651,8 @@ local S2016J4 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55519",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels346.ID.S2016J4,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1680,8 +1682,8 @@ local S2016J4Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55519",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels346.ID.S2016J4,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 743.69,
@@ -1731,8 +1733,8 @@ local S2017J6 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "567",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2017J6,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1762,8 +1764,8 @@ local S2017J6Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "567",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2017J6,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 683.0,
@@ -1813,8 +1815,8 @@ local S2003J23 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55507",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J23,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -1844,8 +1846,8 @@ local S2003J23Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55507",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J23,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 792.00,
@@ -1891,10 +1893,6 @@ local S2003J23Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-  openspace.spice.loadKernel(kernel.jup346)
-
-
   openspace.addSceneGraphNode(Euporie)
   openspace.addSceneGraphNode(EuporieTrail)
   openspace.addSceneGraphNode(EuporieLabel)
@@ -2080,10 +2078,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EuporieLabel)
   openspace.removeSceneGraphNode(EuporieTrail)
   openspace.removeSceneGraphNode(Euporie)
-
-
-  openspace.spice.unloadKernel(kernel.jup346)
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Euporie)

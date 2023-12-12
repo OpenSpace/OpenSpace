@@ -1,5 +1,7 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels344 = asset.require("../kernels344")
+local kernels346 = asset.require("../kernels346")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +11,8 @@ local Carpo = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CARPO",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Carpo,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -40,8 +42,8 @@ local CarpoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CARPO",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Carpo,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 458.62,
@@ -116,8 +118,8 @@ local S2018J4 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55520",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels346.ID.S2018J4,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -147,8 +149,8 @@ local S2018J4Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55520",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels346.ID.S2018J4,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 458.62,
@@ -219,9 +221,6 @@ local S2018J4LabelNear = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-
-
   openspace.addSceneGraphNode(Carpo)
   openspace.addSceneGraphNode(CarpoTrail)
   openspace.addSceneGraphNode(CarpoLabel)
@@ -239,8 +238,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CarpoLabel)
   openspace.removeSceneGraphNode(CarpoTrail)
   openspace.removeSceneGraphNode(Carpo)
-
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Carpo)

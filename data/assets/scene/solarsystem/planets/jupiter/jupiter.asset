@@ -1,6 +1,6 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,13 +10,13 @@ local Jupiter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JUPITER",
-      Observer = "JUPITER BARYCENTER"
+      Target = coreKernels.ID.Jupiter,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_JUPITER",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Jupiter,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {

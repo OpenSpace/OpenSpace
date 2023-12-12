@@ -1,8 +1,9 @@
-asset.require("spice/base")
 asset.require("./actions")
 asset.require("scene/solarsystem/planets/mars/default_layers")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -13,21 +14,6 @@ local models = asset.resource({
   Version = 2
 })
 
-local ikernels = asset.resource({
-  Name = "Insight Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "insight_kernels",
-  Version = 1
-})
-
-
-local iKernels = {
-  ikernels .. "nsyt_spk_cruise_od063_v1_approach2surface_SC_Lander.tsc",
-  ikernels .. "insight_v02.tfr",
-  ikernels .. "mar085s.bsp",
-  ikernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bsp",
-  ikernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bck"
-}
 
 local RotationMatrix = {
   -1,  0,  0, 0,
@@ -68,41 +54,41 @@ local SpiceRotationEndTime = "2018 NOV 26 19:51:39"
 local TranslationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
       Type = "SpiceTranslation",
-      Target = "INSIGHT",
-      Observer = "MARS",
-      Frame = "IAU_MARS",
+      Target = kernels.ID.Insight,
+      Observer = coreKernels.ID.Mars,
+      Frame = coreKernels.Frame.Mars,
       FixedDate = "2018 NOV 26 19:39:03"
   },
   ["2018 NOV 26 19:39:02"] = {
       Type = "SpiceTranslation",
-      Target = "INSIGHT",
-      Observer = "MARS",
-      Frame = "IAU_MARS",
+      Target = kernels.ID.Insight,
+      Observer = coreKernels.ID.Mars,
+      Frame = coreKernels.Frame.Mars,
       FixedDate = "2018 NOV 26 19:39:03"
   },
   ["2018 NOV 26 19:39:03"] = {
     Type = "SpiceTranslation",
-    Target = "INSIGHT",
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Target = kernels.ID.Insight,
+    Observer = coreKernels.ID.Mars,
+    Frame = coreKernels.Frame.Mars
   },
   ["2018 NOV 26 19:39:04"] = {
     Type = "SpiceTranslation",
-    Target = "INSIGHT",
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Target = kernels.ID.Insight,
+    Observer = coreKernels.ID.Mars,
+    Frame = coreKernels.Frame.Mars
   },
  ["2018 NOV 26 19:45:34"] = {
     Type = "SpiceTranslation",
-    Target = "INSIGHT",
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Target = kernels.ID.Insight,
+    Observer = coreKernels.ID.Mars,
+    Frame = coreKernels.Frame.Mars
   },
   ["2018 NOV 26 19:45:35"] = {
       Type = "SpiceTranslation",
-      Target = "INSIGHT",
-      Observer = "MARS",
-      Frame = "IAU_MARS",
+      Target = kernels.ID.Insight,
+      Observer = coreKernels.ID.Mars,
+      Frame = coreKernels.Frame.Mars,
       FixedDate = "2018 NOV 26 19:45:34"
   }
 }
@@ -110,35 +96,35 @@ local TranslationKeyframes = {
 local RotationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS",
+    SourceFrame = kernels.Frame.InsightCruise,
+    DestinationFrame = coreKernels.Frame.Mars,
     FixedDate = "2018 NOV 26 19:39:02"
   },
   ["2018 NOV 26 19:39:02"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS",
+    SourceFrame = kernels.Frame.InsightCruise,
+    DestinationFrame = coreKernels.Frame.Mars,
     FixedDate = "2018 NOV 26 19:39:02"
   },
   ["2018 NOV 26 19:39:03"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS"
+    SourceFrame = kernels.Frame.InsightCruise,
+    DestinationFrame = coreKernels.Frame.Mars
   },
   ["2018 NOV 26 19:39:04"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS"
+    SourceFrame = kernels.Frame.InsightCruise,
+    DestinationFrame = coreKernels.Frame.Mars
   },
  ["2018 NOV 26 19:45:34"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS"
+    SourceFrame = kernels.Frame.InsightCruise,
+    DestinationFrame = coreKernels.Frame.Mars
   },
   ["2018 NOV 26 19:45:35"] = {
     Type = "SpiceRotation",
-    SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS",
+    SourceFrame = kernels.Frame.InsightCruise,
+    DestinationFrame = coreKernels.Frame.Mars,
     FixedDate = "2018 NOV 26 19:45:34"
   }
 }
@@ -785,8 +771,6 @@ local Insight_Trail = {
 }
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(iKernels)
-
   openspace.addSceneGraphNode(InsightParent)
   openspace.addSceneGraphNode(Insight)
   openspace.addSceneGraphNode(Insight_Entry_CapsuleA)
@@ -858,8 +842,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Insight_Entry_CapsuleA)
   openspace.removeSceneGraphNode(Insight)
   openspace.removeSceneGraphNode(InsightParent)
-
-  openspace.spice.unloadKernel(iKernels)
 end)
 
 asset.export(InsightParent)

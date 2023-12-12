@@ -1,10 +1,9 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
-
-local ApolloSpiceId = -908
 
 local LaunchTrail = {
   Identifier = "Apollo8LaunchTrail",
@@ -13,9 +12,9 @@ local LaunchTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = ApolloSpiceId,
-      Observer = "EARTH",
-      Frame = "IAU_EARTH"
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Earth
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 21 12:51:00",
@@ -37,9 +36,9 @@ local MoonTrail = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = ApolloSpiceId,
-      Observer = "MOON",
-      Frame = "IAU_MOON"
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 23",
@@ -60,9 +59,9 @@ local EarthBarycenterTrail = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = ApolloSpiceId,
-      Observer = "EARTH",
-      Frame = "GALACTIC"
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.8, 0.2, 0.2 },
     StartTime = "1968 DEC 21",
@@ -77,8 +76,6 @@ local EarthBarycenterTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(LaunchTrail)
   openspace.addSceneGraphNode(MoonTrail)
   openspace.addSceneGraphNode(EarthBarycenterTrail)
@@ -88,8 +85,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthBarycenterTrail)
   openspace.removeSceneGraphNode(MoonTrail)
   openspace.removeSceneGraphNode(LaunchTrail)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(LaunchTrail)

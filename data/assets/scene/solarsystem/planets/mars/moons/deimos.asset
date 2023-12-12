@@ -1,6 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -8,13 +10,6 @@ local model = asset.resource({
   Name = "Deimos Model",
   Type = "HttpSynchronization",
   Identifier = "deimos_model",
-  Version = 1
-})
-
-local kernels = asset.resource({
-  Name = "Mars Spice Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "mars_kernels",
   Version = 1
 })
 
@@ -26,13 +21,13 @@ local Deimos = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DEIMOS",
-      Observer = "MARS BARYCENTER"
+      Target = kernels.ID.Deimos,
+      Observer = coreKernels.ID.MarsBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_DEIMOS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Deimos,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -62,8 +57,8 @@ local DeimosTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DEIMOS",
-      Observer = "MARS BARYCENTER"
+      Target = kernels.ID.Deimos,
+      Observer = coreKernels.ID.MarsBarycenter
     },
     Color = { 1.0, 0.605, 0.420 },
     Period = 1.263,
@@ -104,8 +99,6 @@ local DeimosLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "mar097.bsp")
-
   openspace.addSceneGraphNode(Deimos)
   openspace.addSceneGraphNode(DeimosTrail)
   openspace.addSceneGraphNode(DeimosLabel)
@@ -115,8 +108,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DeimosLabel)
   openspace.removeSceneGraphNode(DeimosTrail)
   openspace.removeSceneGraphNode(Deimos)
-
-  openspace.spice.unloadKernel(kernels .. "mar097.bsp")
 end)
 
 asset.export(Deimos)

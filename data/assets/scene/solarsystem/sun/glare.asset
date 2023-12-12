@@ -1,4 +1,3 @@
-asset.require("spice/base")
 local transforms = asset.require("./transforms")
 
 

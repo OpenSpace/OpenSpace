@@ -1,6 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local kernels = asset.require("./kernels")
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +10,8 @@ local PlutoBarycenterTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PLUTO BARYCENTER",
-      Observer = "SSB"
+      Target = coreKernels.ID.PlutoBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.3, 0.7, 0.3 },
     Period = 365.25,
@@ -29,15 +28,11 @@ local PlutoBarycenterTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.PlutoKernels)
-
   openspace.addSceneGraphNode(PlutoBarycenterTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoBarycenterTrail)
-
-  openspace.spice.unloadKernel(kernels.PlutoKernels)
 end)
 
 asset.export(PlutoBarycenterTrail)
@@ -47,8 +42,7 @@ asset.export(PlutoBarycenterTrail)
 asset.meta = {
   Name = "Pluto Barycenter Trail",
   Version = "1.0",
-  Description = [[Trail of Pluto Barycenter as observed by the Sun. Data from NASA Spice
-    (see base spice asset)]],
+  Description = "Trail of Pluto Barycenter as observed by the Sun",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

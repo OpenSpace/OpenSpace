@@ -1,0 +1,137 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local kernels = asset.resource({
+  Name = "Jupiter Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "jupiter_kernels",
+  Version = 2
+})
+
+local ID = {
+  Adrastea = "ADRASTEA",
+  Aitne = "AITNE",
+  Amalthea = "AMALTHEA",
+  Ananke = "ANANKE",
+  Aoede = "AOEDE",
+  Arche = "ARCHE",
+  Autonoe = "AUTONOE",
+  Callirrhoe = "CALLIRRHOE",
+  Carme = "CARME",
+  Carpo = "CARPO",
+  Chaldene = "CHALDENE",
+  Cyllene = "CYLLENE",
+  Dia = "DIA",
+  Elara = "ELARA",
+  Erinome = "ERINOME",
+  Ersa = 571,
+  Euanthe = "EUANTHE",
+  Eukelade = "EUKELADE",
+  Eupheme = 560,
+  Euporie = "EUPORIE",
+  Eurydome = "EURYDOME",
+  Harpalyke = "HARPALYKE",
+  Hegemone = "HEGEMONE",
+  Helike = "HELIKE",
+  Hermippe = "HERMIPPE",
+  Herse = "HERSE",
+  Himalia = "HIMALIA",
+  Iocaste = "IOCASTE",
+  Isonoe = "ISONOE",
+  Kale = "KALE",
+  Kallichore = "KALLICHORE",
+  Kalyke = "KALYKE",
+  Kore = "KORE",
+  Leda = "LEDA",
+  Lysithea = "LYSITHEA",
+  Megaclite = "MEGACLITE",
+  Metis = "METIS",
+  Mneme = "MNEME",
+  Orthosie = "ORTHOSIE",
+  Pandia = 565,
+  Pasiphae = "PASIPHAE",
+  Pasithee = "PASITHEE",
+  Praxidike = "PRAXIDIKE",
+  S2003J2 = 55501,
+  S2003J4 = 55502,
+  S2003J5 = 557,
+  S2003J9 = 55503,
+  S2003J10 = 55504,
+  S2003J12 = 55505,
+  S2003J15 = 558,
+  S2003J16 = 55506,
+  S2003J18 = 555,
+  S2003J19 = 561,
+  S2003J23 = 55507,
+  S2010J1 = 551,
+  S2010J2 = 552,
+  S2011J1 = 572,
+  S2011J2 = 556,
+  S2016J1 = 554,
+  S2017J1 = 559,
+  S2017J2 = 563,
+  S2017J3 = 564,
+  S2017J5 = 566,
+  S2017J6 = 567,
+  S2017J7 = 568,
+  S2017J8 = 569,
+  S2017J9 = 570,
+  Sinope = "SINOPE",
+  Sponde = "SPONDE",
+  Taygete = "TAYGETE",
+  Thebe = "THEBE",
+  Thelxinoe = "THELXINOE",
+  Themisto = "THEMISTO",
+  Thyone = "THYONE",
+  Valetudo = 562
+}
+
+local Frame = {
+  Adrastea = coreKernels.Frame.Adrastea,
+  Amalthea = coreKernels.Frame.Amalthea,
+  Ananke = coreKernels.Frame.Ananke,
+  Callirrhoe = coreKernels.Frame.Callirrhoe,
+  Carme = coreKernels.Frame.Carme,
+  Chaldene = coreKernels.Frame.Chaldene,
+  Elara = coreKernels.Frame.Elara,
+  Erinome = coreKernels.Frame.Erinome,
+  Harpalyke = coreKernels.Frame.Harpalyke,
+  Himalia = coreKernels.Frame.Himalia,
+  Iocaste = coreKernels.Frame.Iocaste,
+  Isonoe = coreKernels.Frame.Isonoe,
+  Kalyke = coreKernels.Frame.Kalyke,
+  Leda = coreKernels.Frame.Leda,
+  Lysithea = coreKernels.Frame.Lysithea,
+  Megaclite = coreKernels.Frame.Magaclite,
+  Metis = coreKernels.Frame.Metis,
+  Pasiphae = coreKernels.Frame.Pasiphae,
+  Praxidike = coreKernels.Frame.Praxidike,
+  Sinope = coreKernels.Frame.Sinope,
+  Taygete = coreKernels.Frame.Taygete,
+  Thebe = coreKernels.Frame.Thebe,
+  Themisto = coreKernels.Frame.Themisto
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "jup344.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "jup344.bsp")
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
+
+
+
+asset.meta = {
+  Name = "Jupiter Spice Kernels",
+  Version = "1.0",
+  Description = "Generic SPICE kernels for Jupiter",
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
+  License = "NASA"
+}
