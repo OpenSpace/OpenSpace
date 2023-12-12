@@ -47,7 +47,7 @@ namespace {
     struct [[codegen::Dictionary(RenderablePolygonCloud)]] Parameters {
         // The number of sides for the polygon used to represent each point. Default is
         // 3, i.e. to use triangles
-        std::optional<int> polygonSides;
+        std::optional<int> polygonSides [[codegen::greaterequal(3)]];
     };
 
 #include "renderablepolygoncloud_codegen.cpp"
@@ -68,6 +68,10 @@ RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictiona
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _polygonSides = p.polygonSides.value_or(_polygonSides);
+
+    // The texture to use for the rendering will be generated in initializeGl. Make sure
+    // we use it in the rnedering
+    _hasSpriteTexture = true;
 }
 
 void RenderablePolygonCloud::initializeGL() {
