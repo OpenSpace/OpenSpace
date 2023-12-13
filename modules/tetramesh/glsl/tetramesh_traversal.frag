@@ -31,11 +31,73 @@
 #include "utils/shading.glsl"
 #include "utils/classification.glsl"
 
+//#include "utils/structs.glsl"
+//#include "utils/shading.glsl"
+//#include "utils/classification.glsl"
+#version 460
+
 #if !defined(REF_SAMPLING_INTERVAL)
 #define REF_SAMPLING_INTERVAL 150.0
 #endif
 
 #define ERT_THRESHOLD 0.99  // threshold for early ray termination
+
+
+//struct GeometryParameters {
+//    mat4 dataToModel;
+//    mat4 modelToData;
+uniform mat4 dataToWorld;
+uniform mat4 worldToData;
+//    mat4 modelToWorld;
+//    mat4 worldToModel;
+//    mat3 modelToWorldNormalMatrix; // Equivalent to normalMatrix
+//};
+uniform mat3 dataToWorldNormalMatrix;  // Equivalent to normalMatrix
+//struct CameraParameters {
+//   mat4 worldToView; // Equivalent to view
+//   mat4 viewToWorld; // Equivalent to viewInverse
+//   mat4 viewToClip; // Equivalent to projection
+//   mat4 clipToView; // Equivalent to projectionInverse
+uniform dmat4 worldToClip; // Equivalent to viewProjection
+uniform vec3 position;
+//   float nearPlane;  // zNear
+//   float farPlane;   // zFar
+//};
+
+uniform mat4 clipToWorld; // Equivalent to viewProjectionInverse
+
+struct LightParameters {
+    vec3 position; 
+    vec3 ambientColor;
+    vec3 diffuseColor; 
+    vec3 specularColor;
+    float specularExponent;
+};
+struct ImageParameters {
+    mat3 dataToModel;
+    mat3 modelToData;
+    mat3 dataToWorld;
+    mat3 worldToData;
+    mat3 modelToWorld;
+    mat3 worldToModel;
+    mat3 worldToTexture;
+    mat3 textureToWorld;
+    mat3 textureToIndex;  // Transform from [0 1] to [-0.5 dim-0.5]
+    mat3 indexToTexture; // Transform from [-0.5 dim-0.5] to [0 1]
+    vec2 dimensions;
+    vec2 reciprocalDimensions;
+};
+
+vec4 applyTF(sampler2D transferFunction, vec4 voxel) {
+    return texture(transferFunction, vec2(voxel.r, 0.5));
+}
+vec4 applyTF(sampler2D transferFunction, vec4 voxel, int channel) {
+    return texture(transferFunction, vec2(voxel[channel], 0.5));
+}
+
+vec4 applyTF(sampler2D transferFunction, float intensity) {
+    return texture(transferFunction, vec2(intensity, 0.5));
+}
 
 /**
  * Data structures for tetrahedra indexing and face enumeration based on
@@ -45,8 +107,8 @@
  *    (SIBGRAPI'05), pp. 349-356, 2005, doi: 10.1109/SIBGRAPI.2005.18
  */
 
-uniform GeometryParameters geometry;
-uniform CameraParameters camera;
+//uniform GeometryParameters geometry;
+//uniform CameraParameters camera;
 uniform LightParameters lighting;
 
 uniform sampler2D transferFunction;
@@ -96,6 +158,7 @@ in Fragment {
     flat vec3 camPosData;
 } in_frag;
 
+out vec4 outColor;
 
 const ivec3 triIndices[4] = ivec3[4](ivec3(1, 2, 3), ivec3(2, 0, 3), 
                                      ivec3(3, 0, 1), ivec3(0, 2, 1));
@@ -251,7 +314,7 @@ float normalizeScalar(float scalar) {
 
 // Convert normalized screen coordinates [0,1] to data coords of the tetramesh geometry
 float convertScreenPosToDataDepth(vec3 screenPos) {
-    vec4 posData = geometry.worldToData * camera.clipToWorld 
+    vec4 posData = worldToData * clipToWorld 
         * vec4(screenPos * 2.0 - 1.0, 1.0);
     posData /= posData.w;
     return length(posData.xyz - in_frag.camPosData);
@@ -271,7 +334,7 @@ float normalizedDeviceDepth(in vec3 posData, in mat4 dataToClip) {
 void main() {
     // all computations except illumination (World space) take place in Data space
     const vec3 rayDirection = normalize(in_frag.position - in_frag.camPosData);
-    const vec3 rayDirWorld = normalize(in_frag.worldPosition.xyz - camera.position);
+    const vec3 rayDirWorld = normalize(in_frag.worldPosition.xyz - position);
     const float tEntry = length(in_frag.position - in_frag.camPosData);
 
     const float tetraSamplingDelta = 1.0 / float(numTetraSamples);
@@ -326,7 +389,7 @@ void main() {
 
         const float scalar = normalizeScalar(barycentricInterpolation(endPos, tetra));
         const vec3 gradient = getTetraGradient(tetra);
-        const vec3 gradientWorld = geometry.dataToWorldNormalMatrix * gradient;
+        const vec3 gradientWorld = dataToWorldNormalMatrix * gradient;
         
         float tDelta = exitFace.segmentLength * tetraSamplingDelta;
         for (int i = 1; i <= numTetraSamples; ++i) {
@@ -388,9 +451,9 @@ void main() {
 
     float depth = tFirstHit == invalidDepth ? 1.0 : 
         normalizedDeviceDepth(in_frag.camPosData + rayDirection * tFirstHit, 
-                              camera.worldToClip * geometry.dataToWorld);
+                              mat4(worldToClip) * dataToWorld);
 
     gl_FragDepth = min(depth, bgDepthScreen);
-
-    FragData0 = dvrColor;
+    outColor = dvrColor;
+//    FragData0 = dvrColor;
 }

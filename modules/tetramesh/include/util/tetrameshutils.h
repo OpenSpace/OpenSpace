@@ -28,20 +28,53 @@
  *********************************************************************************/
 #pragma once
 
-#include <inviwo/tetramesh/tetrameshmoduledefine.h>
+#ifndef __OPENSPACE_MODULE_TETRAMESH___TETRAMESHUTILS___H__
+#define __OPENSPACE_MODULE_TETRAMESH___TETRAMESHUTILS___H__
 
-#include <inviwo/core/util/glmvec.h>
-#include <inviwo/core/util/glmmat.h>
+//#include <inviwo/core/util/glmvec.h>
+//#include <inviwo/core/util/glmmat.h>
 
+#include <glm/glm.hpp>
 #include <vector>
 #include <memory>
 
 namespace openspace {
 
-class Mesh;
-class TetraMesh;
+class VolumeTetraMesh;
 
 namespace utiltetra {
+
+struct Mesh {
+    Mesh(std::vector<glm::vec3> _vertices,
+        std::vector<int> _faceIds,
+        std::vector<uint32_t> _indices) : vertices{ std::move(_vertices) },
+                                          faceIds{ std::move(_faceIds) },
+                                          indices{ std::move(_indices) } {}
+
+    std::vector<glm::vec3> vertices;
+    std::vector<int> faceIds;
+    std::vector<std::uint32_t> indices;
+};
+
+struct TetraBufferIds {
+    GLuint nodesBuffer = 0;
+    GLuint nodeIdsBuffer = 0;
+    GLuint opposingFaceIdsBuffer = 0;
+    GLuint boundaryMeshVAO = 0;
+    GLuint indicesEBO = 0;
+    GLuint vertsVBO = 0;
+    GLuint faceIdVBO = 0;
+
+    void deinitialize() {
+        nodesBuffer = 0;
+        nodeIdsBuffer = 0;
+        opposingFaceIdsBuffer = 0;
+        boundaryMeshVAO = 0;
+        indicesEBO = 0;
+        vertsVBO = 0;
+        faceIdVBO = 0;
+    }
+};
 
 /**
  * Determine the opposing faces of each tetradhedron by identifying faces with shared nodes.
@@ -52,7 +85,7 @@ namespace utiltetra {
  * @return opposing faces where a negative index indicates a boundary face, that is no neighboring
  *         tetrahedron
  */
-IVW_MODULE_TETRAMESH_API std::vector<ivec4> getOpposingFaces(const std::vector<ivec4>& nodeIds);
+std::vector<glm::ivec4> getOpposingFaces(const std::vector<glm::ivec4>& nodeIds);
 
 /**
  * Derive boundary faces from the \p opposingFaces where negative IDs indicate a boundary face.
@@ -60,7 +93,7 @@ IVW_MODULE_TETRAMESH_API std::vector<ivec4> getOpposingFaces(const std::vector<i
  * @param opposingFaces  list of opposing face IDs
  * @return list of boundary face IDs
  */
-IVW_MODULE_TETRAMESH_API std::vector<int> getBoundaryFaces(const std::vector<ivec4>& opposingFaces);
+std::vector<int> getBoundaryFaces(const std::vector<glm::ivec4>& opposingFaces);
 
 /**
  * Create a triangular mesh from a tetrahedral mesh that consists only of the boundary faces and no
@@ -74,8 +107,8 @@ IVW_MODULE_TETRAMESH_API std::vector<int> getBoundaryFaces(const std::vector<ive
  *
  * \see getOpposingFaces
  */
-IVW_MODULE_TETRAMESH_API std::shared_ptr<Mesh> createBoundaryMesh(
-    const TetraMesh& mesh, const std::vector<vec4>& nodes, const std::vector<ivec4>& nodeIds,
+std::shared_ptr<Mesh> createBoundaryMesh(
+    const std::vector<glm::vec4>& nodes, const std::vector<glm::ivec4>& nodeIds,
     const std::vector<int>& boundaryFaces);
 
 /**
@@ -89,7 +122,7 @@ IVW_MODULE_TETRAMESH_API std::shared_ptr<Mesh> createBoundaryMesh(
  * \see createBoundaryMesh(const TetraMesh&, const std::vector<vec4>&, const std::vector<ivec4>&,
  * const std::vector<int>&)
  */
-IVW_MODULE_TETRAMESH_API std::shared_ptr<Mesh> createBoundaryMesh(const TetraMesh& mesh);
+std::shared_ptr<Mesh> createBoundaryMesh(const VolumeTetraMesh& mesh);
 
 /**
  * Check and fix the face orientations of the tetrahedral mesh. Afterward, the faces of each
@@ -99,9 +132,11 @@ IVW_MODULE_TETRAMESH_API std::shared_ptr<Mesh> createBoundaryMesh(const TetraMes
  * @param nodes     vertex positions of the tetrahedra
  * @param nodeIds   contains four node IDs for each tetrahedron which might get reordered in-place
  */
-IVW_MODULE_TETRAMESH_API void fixFaceOrientation(const std::vector<vec4>& nodes,
-                                                 std::vector<ivec4>& nodeIds);
+void fixFaceOrientation(const std::vector<glm::vec4>& nodes,
+                                                 std::vector<glm::ivec4>& nodeIds);
 
 }  // namespace utiltetra
 
 }  // namespace openspace
+
+#endif // !__OPENSPACE_MODULE_TETRAMESH___TETRAMESHUTILS___H__

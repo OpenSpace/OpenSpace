@@ -977,6 +977,8 @@ void FramebufferRenderer::updateRaycastData() {
         }
         dict.setValue("helperPaths", std::move(helpersDict));
         dict.setValue("raycastPath", raycaster->raycasterPath());
+        dict.setValue("setupRayCaster", raycaster->foo());
+        dict.setValue("mainRayCaster", raycaster->foo2());
 
         _raycastData[raycaster] = data;
 
@@ -1294,19 +1296,10 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
                 raycastProgram->activate();
                 raycastProgram->setUniform("cameraPosInRaycaster", cameraPosition);
             }
-            else {
-                raycastProgram = _insideRaycastPrograms[raycaster].get();
-                raycastProgram->activate();
-                raycastProgram->setUniform("cameraPosInRaycaster", cameraPosition);
-            }
         }
         else {
             raycastProgram = _raycastPrograms[raycaster].get();
             if (raycastProgram) {
-                raycastProgram->activate();
-            }
-            else {
-                raycastProgram = _raycastPrograms[raycaster].get();
                 raycastProgram->activate();
             }
         }

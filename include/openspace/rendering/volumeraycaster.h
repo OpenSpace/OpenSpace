@@ -135,6 +135,9 @@ public:
 
     float downscaleRender() const;
 
+    virtual std::string foo() { return ""; }
+    virtual std::string foo2() { return ""; }
+
 private:
     /**
      * Maximum number of integration steps to be executed by the volume integrator.

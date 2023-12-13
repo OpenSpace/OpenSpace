@@ -28,6 +28,8 @@
  *********************************************************************************/
 #ifndef __OPENSPACE_MODULE_TETRAMESH___TETRAMESHMODULE___H_
 #define __OPENSPACE_MODULE_TETRAMESH___TETRAMESHMODULE___H_
+#ifndef __OPENSPACE_MODULE_TETRAMESH___TETRAMESHMODULE___H__
+#define __OPENSPACE_MODULE_TETRAMESH___TETRAMESHMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -47,4 +49,4 @@ protected:
 
 }  // namespace openspace
 
-#endif // __OPENSPACE_MODULE_TETRAMESH___TETRAMESHMODULE___H_
+#endif // __OPENSPACE_MODULE_TETRAMESH___TETRAMESHMODULE___H__

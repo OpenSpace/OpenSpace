@@ -22,10 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_TETRAMESH___RENDERABLETETRAMESH___H__
+#define __OPENSPACE_MODULE_TETRAMESH___RENDERABLETETRAMESH___H__
+
 #include <openspace/rendering/renderable.h>
 
-#ifndef __OPENSPACE_MODULE_TETRAMESH___RENDERABLETETRAMESH___H_
-#define __OPENSPACE_MODULE_TETRAMESH___RENDERABLETETRAMESH___H_
+#include <modules/tetramesh/include/datastructures/volumetetramesh.h>
+#include <modules/tetramesh/include/processors/tetrameshvolumeraycaster.h>
+#include <modules/tetramesh/include/util/tetrameshutils.h>
+#include <modules/volume/rawvolumemetadata.h>
+#include <openspace/rendering/transferfunction.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/bufferbinding.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -33,7 +41,7 @@ namespace ghoul::opengl {
     class Texture;
 } // namespace ghoul::opengl
 
-namespace openspace {
+namespace openspace{
 
 namespace documentation { struct Documentation; }
 
@@ -41,6 +49,8 @@ class RenderableTetraMeshVolume : public Renderable {
 public:
     explicit RenderableTetraMeshVolume(const ghoul::Dictionary& dictionary);
     ~RenderableTetraMeshVolume() override = default;
+
+    void initialize() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -52,7 +62,42 @@ public:
 
     static documentation::Documentation Documentation();
 
+private:
+    void loadVolumeMetadata(const std::string& path);
+
+    std::unique_ptr<TetraMeshVolumeRaycaster> _raycaster;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
+
+    VolumeTetraMesh _tetraMesh;
+    volume::RawVolumeMetadata _metadata;
+    std::shared_ptr<utiltetra::Mesh> _boundaryMesh;
+
+    // TODO: use raw OpenGL commands for buffer storages since these buffers objs are not 100% tested
+    //std::unique_ptr<ghoul::opengl::BufferBinding<
+    //    ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _nodesBuffer;
+    //std::unique_ptr<ghoul::opengl::BufferBinding<
+    //    ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _nodeIdsBuffer;
+    //std::unique_ptr<ghoul::opengl::BufferBinding<
+    //    ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _opposingFaceIdsBuffer;
+
+    // TODO: depending on above solution, these might be redundant
+    utiltetra::TetraBufferIds _buffers;
+
+    //GLuint _nodesBuffer = 0;
+    //GLuint _nodeIdsBuffer = 0;
+    //GLuint _opposingFaceIdsBuffer = 0;
+    //GLuint _boundaryMeshVAO = 0;
+
+    //GLuint _indicesEBO = 0;
+    //GLuint _vertsVBO = 0;
+    //GLuint _faceIdVBO = 0;
+
+    std::filesystem::path _srcDirectory;
+    //std::filesystem::path _transferFunctionPath;
 };
+
 } // namespace OpenSpace
 
-#endif // !__OPENSPACE_MODULE_TETRAMESH___RENDERABLETETRAMESH___H_
+#endif // !__OPENSPACE_MODULE_TETRAMESH___RENDERABLETETRAMESH___H__

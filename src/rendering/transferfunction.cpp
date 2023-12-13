@@ -192,11 +192,22 @@ void TransferFunction::setTextureFromTxt() {
     }
 
     // no need to deallocate transferFunction. Ownership is transferred to the Texture.
+    GLenum type = [](int d) {
+        switch (d) {
+        case 1: return GL_TEXTURE_1D;
+        case 2: return GL_TEXTURE_2D;
+        case 3: return GL_TEXTURE_3D;
+        default:
+            throw ghoul::RuntimeError(fmt::format(
+                "Unsupported dimensionality {}", d
+            ));
+        }
+        }(_textureDimension);
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
         transferFunction,
         glm::size3_t(width, 1, 1),
-        GL_TEXTURE_1D,
+        type,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,
         GL_FLOAT,

@@ -43,159 +43,219 @@
 #include <modules/opengl/openglcapabilities.h>
 #include <modules/opengl/sharedopenglresources.h>
 
+
+#include <modules/tetramesh/include/processors/tetrameshvolumeraycaster.h>
+#include <openspace/rendering/transferfunction.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
+
+namespace {
+    // TODO rewrite these so that the VS shader fit with the new glsl frag shader
+    // bounding frag must also accomodate changes in bounds_vs
+    constexpr std::string_view GlslBoundsVs = "${MODULE_TETRAMESH}/glsl/bounds_vs.glsl";
+    constexpr std::string_view GlslBoundsFs = "${MODULE_TETRAMESH}/glsl/bounds_fs.glsl";
+}
 namespace openspace {
-
-namespace detail {
-
-std::function<std::optional<mat4>()> boundingBox(const TetraMeshInport& tetra) {
-    return [port = &tetra]() -> std::optional<mat4> {
-        if (port->hasData()) {
-            auto data = port->getData();
-            return data->getBoundingBox();
-        } else {
-            return std::nullopt;
-        }
-    };
+TetraMeshVolumeRaycaster::TetraMeshVolumeRaycaster(
+    std::shared_ptr<openspace::TransferFunction> transferFunction,
+    const std::string& fragmentShaderRaycastPath)
+    : _transferFunction(transferFunction)
+    , _glslRaycast{ fragmentShaderRaycastPath }
+{
 }
 
-}  // namespace detail
-
-// The Class Identifier has to be globally unique. Use a reverse DNS naming scheme
-const ProcessorInfo TetraMeshVolumeRaycaster::processorInfo_{
-    "org.inviwo.TetraMeshVolumeRaycaster",  // Class identifier
-    "TetraMesh Volume Raycaster",           // Display name
-    "Unstructured Grids",                   // Category
-    CodeState::Stable,                      // Code state
-    Tag::GL | Tag{"Unstructured"},          // Tags
-    R"(
-Creates an OpenGL representation of a tetrahedral grid and renders it using volume rendering. This 
-processor requires OpenGL 4.3 since it relies on Shader Storage Buffer Objects.)"_unindentHelp};
-
-const ProcessorInfo TetraMeshVolumeRaycaster::getProcessorInfo() const { return processorInfo_; }
-
-TetraMeshVolumeRaycaster::TetraMeshVolumeRaycaster()
-    : Processor{}
-    , inport_{"inport", "Tetra mesh data used for volume rendering"_help}
-    , imageInport_{"background", "Optional background image"_help}
-    , outport_{"outport", "Rendered output image"_help}
-    , camera_{"camera", "Camera", detail::boundingBox(inport_)}
-    , trackball_{&camera_}
-    , lighting_{"lighting", "Lighting", &camera_}
-    , tf_{"transferFunction", "Transfer Function"}
-    , opacityScaling_{"opacityScaling", "Opacity Scaling",
-                      util::ordinalScale(1.0f, 10.0f)
-                          .setInc(0.01f)
-                          .set("Scaling factor for the opacity in the transfer function."_help)}
-    , maxSteps_{"maxSteps", "Max Steps",
-                util::ordinalCount(10000).set(
-                    "Upper limit of tetrahedras a ray can traverse."_help)}
-    , shader_{"tetramesh_traversal.vert", "tetramesh_traversal.frag", Shader::Build::No} {
-
-    addPorts(inport_, imageInport_, outport_);
-
-    imageInport_.setOptional(true);
-    imageInport_.onConnect([&]() { invalidate(InvalidationLevel::InvalidResources); });
-    imageInport_.onDisconnect([&]() { invalidate(InvalidationLevel::InvalidResources); });
-
-    addProperties(tf_, opacityScaling_, maxSteps_, camera_, lighting_, trackball_);
-
-    lighting_.shadingMode_.setSelectedValue(ShadingMode::None);
-    lighting_.shadingMode_.setCurrentStateAsDefault();
-
-    shader_.onReload([this]() { invalidate(InvalidationLevel::InvalidResources); });
-
-    if (OpenGLCapabilities::getOpenGLVersion() < 430 &&
-        !OpenGLCapabilities::isExtensionSupported("ARB_shader_storage_buffer_object")) {
-        LogError(
-            "OpenGL v4.3 or Shader Storage Buffer Objects (ARB_shader_storage_buffer_object) "
-            "required by this processor");
-
-        isReady_.setUpdate([]() { return false; });
-    }
+TetraMeshVolumeRaycaster::~TetraMeshVolumeRaycaster()
+{
 }
 
-void TetraMeshVolumeRaycaster::initializeResources() {
-    utilgl::addDefines(shader_, camera_, lighting_);
-    utilgl::addShaderDefinesBGPort(shader_, imageInport_);
-    shader_.build();
+void TetraMeshVolumeRaycaster::renderEntryPoints(const RenderData& data,
+    ghoul::opengl::ProgramObject& program)
+{
+    // TODO: figure out modelviewTransform
+    // TODO: check if we need dmat precision here or if should cast to mat4
+    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
+
+    // Cull back face
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    // Render bounding geometry
+    glBindVertexArray(_buffers.boundaryMeshVAO);
+    glDrawElements(
+        GL_TRIANGLES,
+        static_cast<GLsizei>(_numIndices),
+        GL_UNSIGNED_INT,
+        nullptr
+    );
+    glBindVertexArray(0);
 }
 
-void TetraMeshVolumeRaycaster::process() {
-    if (inport_.isChanged() || !mesh_) {
-        const auto& tetraMesh = *inport_.getData();
+void TetraMeshVolumeRaycaster::renderExitPoints(const RenderData& data,
+    ghoul::opengl::ProgramObject& program)
+{
+    // TODO: figure out modelviewTransform matrix
+    // renderablegaiavolume and timevarying for that creates a modeltransform that is
+    // based on the metadata domain -- Don't think this should be necessary as
+    // we already scale the data to [0,1] in the tetramesh.get function.
+    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    // TODO change to renderable  calcModelViewProjection transform?
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
-        tetraMesh.get(tetraNodes_, tetraNodeIds_);
-        auto opposingFaces = utiltetra::getOpposingFaces(tetraNodeIds_);
+    // Cull front face
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
 
-        buffers_.upload(tetraNodes_, tetraNodeIds_, opposingFaces);
-        mesh_ = utiltetra::createBoundaryMesh(tetraMesh, tetraNodes_, tetraNodeIds_,
-                                              utiltetra::getBoundaryFaces(opposingFaces));
-    }
+    // Render bounding geometry
+    glBindVertexArray(_buffers.boundaryMeshVAO);
+    glDrawElements(
+        GL_TRIANGLES,
+        static_cast<GLsizei>(_numIndices),
+        GL_UNSIGNED_INT,
+        nullptr
+    );
+    glBindVertexArray(0);
 
-    {
-        // pre-multiply the background image while copying it to the current target since the
-        // raycasting also blends pre-multiplied background colors.
-        utilgl::BlendModeState blendmode{GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ZERO};
-        utilgl::activateTargetAndClearOrCopySource(outport_, imageInport_, ImageType::ColorDepth);
-    }
-
-    if (imageInport_.hasData()) {
-        // clear depth buffer since copy-source always copies all layers otherwise the background
-        // depth might interfere with the raycasting
-        glClear(GL_DEPTH_BUFFER_BIT);
-    }
-
-    shader_.activate();
-    buffers_.bind();
-
-    TextureUnitContainer texContainer;
-    utilgl::setUniforms(shader_, camera_, lighting_, opacityScaling_, maxSteps_);
-    utilgl::setShaderUniforms(shader_, *mesh_, "geometry");
-    utilgl::bindAndSetUniforms(shader_, texContainer, tf_);
-    if (imageInport_.hasData()) {
-        utilgl::bindAndSetUniforms(shader_, texContainer, imageInport_, ImageType::ColorDepth);
-    }
-
-    const dvec2 dataRange{inport_.getData()->getDataRange()};
-    const double scalingFactor = 1.0 / (dataRange.y - dataRange.x);
-    const double offset = -dataRange.x;
-    shader_.setUniform("tfValueScaling", static_cast<float>(scalingFactor));
-    shader_.setUniform("tfValueOffset", static_cast<float>(offset));
-
-    {
-        utilgl::CullFaceState cf(GL_BACK);
-        utilgl::GlBoolState cull(GL_CULL_FACE, true);
-        utilgl::GlBoolState blend(GL_BLEND, false);
-
-        auto drawer = MeshDrawerGL::getDrawObject(mesh_.get());
-        drawer.draw();
-    }
-
-    buffers_.unbind();
-    shader_.deactivate();
-
-    if (imageInport_.hasData()) {
-        // update depth buffer with the depth of the background image
-        utilgl::DepthMaskState depthmask{true};
-        utilgl::GlBoolState depthtest{GL_DEPTH_TEST, true};
-        utilgl::DepthFuncState depthfunc{GL_LESS};
-        utilgl::ColorMaskState colormask{bvec4{false}};
-        TextureUnit depthUnit;
-        auto depthLayer = imageInport_.getData()->getDepthLayer()->getRepresentation<LayerGL>();
-
-        auto copyShader = SharedOpenGLResources::getPtr()->getImageCopyShader(1);
-        copyShader->activate();
-        depthLayer->bindTexture(depthUnit);
-        copyShader->setUniform("depth_", depthUnit);
-
-        auto rect = SharedOpenGLResources::getPtr()->imagePlaneRect();
-        utilgl::Enable<MeshGL> enable(rect);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-        copyShader->deactivate();
-    }
-
-    utilgl::deactivateCurrentTarget();
+    // Restore defaults
+    glCullFace(GL_BACK);
 }
 
-}  // namespace openspace
+void TetraMeshVolumeRaycaster::preRaycast(const RaycastData& data,
+    ghoul::opengl::ProgramObject& program)
+{
+    if (program.isDirty()) {
+        program.rebuildFromFile();
+    }
+    const std::string id = std::to_string(data.id); //std::string_view?
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _buffers.nodesBuffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, _buffers.nodeIdsBuffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, _buffers.opposingFaceIdsBuffer);
+
+    //program.setUniform(
+    //    program.uniformLocation("dataToWorld"),
+    //    modelTransform
+    //);
+    //// TODO: make sure we have correct matrice (inviwo does inverse(world * model) -> what is our world?
+    //program.setUniform(
+    //    program.uniformLocation("worldToData"),
+    //    glm::inverse(modelTransform)
+    //);
+    ////_program->setUniform(
+    ////    _program->uniformLocation("dataToWorldNormalMatrix"),
+    ////    glm::mat3(glm::transpose(glm::inverse(modelTransform)))
+    ////);
+    //program.setUniform(
+    //    program.uniformLocation("worldToClip"), // Check
+    //    cameraVP
+    //);
+    //// TODO make sure this is correct way to inverse viewprojection matrix
+    ////_program->setUniform(
+    ////    _program->uniformLocation("clipToWorld"),
+    ////    glm::inverse(cameraVP)
+    ////);
+    //program.setUniform(
+    //    program.uniformLocation("position"),
+    //    cameraPosition
+    //);
+
+    //const glm::vec2 dataRange = glm::vec2{ _metadata.minValue, _metadata.maxValue };
+    const float scalingFactor = 1.f / (_dataRange.y - _dataRange.x);
+    const float offset = -_dataRange.x;
+    program.setUniform(program.uniformLocation("tfValueScaling_" + id), scalingFactor);
+    program.setUniform(program.uniformLocation("tfValueOffset_" + id), offset);
+
+    _transferFunction->update();
+    _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+    _tfUnit->activate();
+    _transferFunction->bind();
+    program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
+}
+
+void TetraMeshVolumeRaycaster::postRaycast(const RaycastData&,
+    ghoul::opengl::ProgramObject& program)
+{
+    _tfUnit = nullptr;
+}
+
+bool TetraMeshVolumeRaycaster::isCameraInside(const RenderData& data,
+    glm::vec3& localPosition)
+{
+    return false;
+}
+
+std::string TetraMeshVolumeRaycaster::boundsVertexShaderPath() const
+{
+    return absPath(GlslBoundsVs).string(); // TODO check if this shader will work
+}
+
+std::string TetraMeshVolumeRaycaster::boundsFragmentShaderPath() const
+{
+    return absPath(GlslBoundsFs).string(); // TODO check if this shader will work
+}
+
+std::string TetraMeshVolumeRaycaster::raycasterPath() const
+{
+    return absPath(_glslRaycast).string();
+}
+
+std::string TetraMeshVolumeRaycaster::helperPath() const
+{
+    return std::string();
+}
+
+void TetraMeshVolumeRaycaster::setBuffers(utiltetra::TetraBufferIds buffers)
+{
+    _buffers = buffers;
+}
+
+void TetraMeshVolumeRaycaster::setBoundaryDrawCalls(unsigned amount)
+{
+    _numIndices = amount;
+}
+
+void TetraMeshVolumeRaycaster::setDataRange(float min, float max)
+{
+    _dataRange = glm::vec2(min, max);
+}
+
+std::string TetraMeshVolumeRaycaster::foo()
+{
+    return R"(in int in_tetraFaceId;
+
+    out Fragment_tetra {
+        smooth vec4 worldPosition;
+        smooth vec3 position; //seems to be equivalent to Fragment.color in bounds_fs.glsl
+        flat vec4 color;
+        flat int tetraFaceId;
+
+        flat vec3 camPosData;
+    } out_vert;)";
+}
+std::string TetraMeshVolumeRaycaster::foo2() {
+    return R"(  out_vert.tetraFaceId = in_tetraFaceId;)";
+}
+
+//void openspace::TetraMeshVolumeRaycaster::setModelTransform(glm::dmat4 transform)
+//{
+//    _modelTransform = std::move(transform);
+//}
+
+glm::dmat4 TetraMeshVolumeRaycaster::modelViewTransform(const RenderData& data)
+{
+    glm::dvec3 translation = glm::dvec3(-0.5) + data.modelTransform.translation;
+    glm::dmat3 rotation = data.modelTransform.rotation;
+    glm::dvec3 scale = data.modelTransform.scale;
+
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), translation) *
+        glm::dmat4(rotation) *
+        glm::scale(glm::dmat4(1.0), scale);
+
+    return data.camera.combinedViewMatrix() * modelTransform;
+}
+
+} // namespace OpenSpace

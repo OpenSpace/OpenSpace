@@ -27,54 +27,67 @@
  *
  *********************************************************************************/
 
-#pragma once
+#ifndef __OPENSPACE_MODULE_TETRAMESH___TETRAMESHVOLUMERAYCASTER___H__
+#define __OPENSPACE_MODULE_TETRAMESH___TETRAMESHVOLUMERAYCASTER___H__
 
-#include <inviwo/tetramesh/tetrameshmoduledefine.h>
-#include <inviwo/tetramesh/ports/tetrameshport.h>
-#include <inviwo/tetramesh/datastructures/tetrameshbuffers.h>
-#include <inviwo/core/processors/processor.h>
-#include <inviwo/core/properties/cameraproperty.h>
-#include <inviwo/core/properties/ordinalproperty.h>
-#include <inviwo/core/properties/transferfunctionproperty.h>
-#include <inviwo/core/properties/simplelightingproperty.h>
-#include <inviwo/core/ports/imageport.h>
-#include <inviwo/core/interaction/cameratrackball.h>
+#include <openspace/rendering/volumeraycaster.h>
+#include <modules/tetramesh/include/util/tetrameshutils.h>
 
-#include <modules/opengl/shader/shader.h>
-#include <modules/opengl/buffer/bufferobject.h>
+//#include <openspace/util/updatestructures.h>
+namespace ghoul::opengl {
+    class TextureUnit;
+}
+
+namespace openspace {
+    //struct RenderData;
+    class TransferFunction;
+}
 
 namespace openspace {
 
-class Mesh;
-
-class IVW_MODULE_TETRAMESH_API TetraMeshVolumeRaycaster : public Processor {
+class TetraMeshVolumeRaycaster : public VolumeRaycaster {
 public:
-    TetraMeshVolumeRaycaster();
+    TetraMeshVolumeRaycaster(
+        std::shared_ptr<openspace::TransferFunction> transferFunction,
+        const std::string& fragmentShaderRaycastPath);
+    ~TetraMeshVolumeRaycaster() override;
 
-    virtual void initializeResources() override;
-    virtual void process() override;
+    void renderEntryPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void renderExitPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    bool isCameraInside(const RenderData& data, glm::vec3& localPosition) override;
 
-    virtual const ProcessorInfo getProcessorInfo() const override;
-    static const ProcessorInfo processorInfo_;
+    std::string boundsVertexShaderPath() const override;
+    std::string boundsFragmentShaderPath() const override;
+    std::string raycasterPath() const override;
+    std::string helperPath() const override;
 
+    void setBuffers(utiltetra::TetraBufferIds buffers);
+    void setBoundaryDrawCalls(unsigned amount);
+    //void setModelTransform(glm::dmat4 transform);
+    void setDataRange(float min, float max);
+
+    std::string foo() override;
+    std::string foo2() override;
 private:
-    TetraMeshInport inport_;
-    ImageInport imageInport_;
-    ImageOutport outport_;
+    glm::dmat4 modelViewTransform(const RenderData& data);
 
-    CameraProperty camera_;
-    CameraTrackball trackball_;
-    SimpleLightingProperty lighting_;
-    TransferFunctionProperty tf_;
-    FloatProperty opacityScaling_;
-    IntProperty maxSteps_;
+    std::string _glslRaycast;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
+    std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
+    // Same as renderable buffer ids to make drawcalls
+    utiltetra::TetraBufferIds _buffers;
+    unsigned _numIndices = 0;
 
-    Shader shader_;
-    TetraMeshBuffers buffers_;
-    std::shared_ptr<Mesh> mesh_;
-
-    std::vector<vec4> tetraNodes_;
-    std::vector<ivec4> tetraNodeIds_;
+    glm::vec2 _dataRange;
+    
+    //glm::dmat4 _modelTransform;
 };
+}
 
-}  // namespace openspace
+#endif // !__OPENSPACE_MODULE_TETRAMESH___TETRAMESHVOLUMERAYCASTER___H__

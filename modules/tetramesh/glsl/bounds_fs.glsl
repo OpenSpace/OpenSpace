@@ -22,14 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-in vec4 position;
+in vec4 positionLocalSpace;
+in vec4 positionCameraSpace;
 
-#{setupRayCaster}
+// in Fragment_tetra {
+//     smooth vec4 worldPosition;
+//     smooth vec3 position; //seems to be equivalent to Fragment.color in bounds_fs.glsl
+//     flat vec4 color;
+//     flat int tetraFaceId;
 
-void main() {
-  gl_Position = position;
+//     flat vec3 camPosData;
+// } in_frag_unused;
 
-  #{mainRayCaster}
+
+Fragment getFragment() {
+  vec4 position = positionCameraSpace;
+
+  Fragment frag;
+  frag.color = vec4(positionLocalSpace.xyz, 1.0);
+  frag.depth = -position.z;
+  return frag;
 }

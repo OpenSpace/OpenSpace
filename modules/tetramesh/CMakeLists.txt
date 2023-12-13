@@ -27,16 +27,25 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 set(HEADER_FILES
   tetrameshmodule.h
   include/renderabletetrameshvolume.h
+  include/datastructures/volumetetramesh.h
+  include/processors/tetrameshvolumeraycaster.h
+  include/util/tetrameshutils.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   tetrameshmodule.cpp
   src/renderabletetrameshvolume.cpp
+  src/datastructures/volumetetramesh.cpp
+  src/processors/tetrameshvolumeraycaster.cpp
+  src/util/tetrameshutils.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+  glsl/bounds_fs.glsl
+  glsl/bounds_vs.glsl
+  glsl/tetramesh_raycast.glsl
   glsl/tetramesh_traversal.frag
   glsl/tetramesh_traversal.vert
 )

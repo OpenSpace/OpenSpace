@@ -28,29 +28,37 @@
  *********************************************************************************/
 #pragma once
 
-#include <inviwo/tetramesh/tetrameshmoduledefine.h>
-#include <inviwo/tetramesh/datastructures/tetramesh.h>
+#ifndef __OPENSPACE_MODULE_TETRAMESH___VOLUMETETRAMESH___H__
+#define __OPENSPACE_MODULE_TETRAMESH___VOLUMETETRAMESH___H__
+
+#include <modules/volume/rawvolume.h>
+#include <modules/gaia/tasks/generateGaiaVolumeTask.h>
+#include <glm/glm.hpp>
+#include <vector>
 
 namespace openspace {
 
-class Volume;
-
-/**
- * \ingroup datastructures
- * \brief Data required for rendering an Inviwo Volume as tetrahedral mesh
- *
- * Provides an interface between a Volume and the data structures required for rendering a
- * tetrahedral mesh. Six tetrahedra are created in between each four voxels of the volume to convert
- * the cell-centered data of the uniform grid of the Volume to node-centered values.
- *
- * The extent of the TetraMesh will be smaller than the extent of the Volume by half a voxel in each
- * dimension.
- */
-class IVW_MODULE_TETRAMESH_API VolumeTetraMesh : public TetraMesh {
+// \ingroup datastructures
+// \brief Data required for rendering an Inviwo Volume as tetrahedral mesh
+//
+// Provides an interface between a Volume and the data structures required for rendering a
+// tetrahedral mesh. Six tetrahedra are created in between each four voxels of the volume to convert
+// the cell-centered data of the uniform grid of the Volume to node-centered values.
+//
+// The extent of the TetraMesh will be smaller than the extent of the Volume by half a voxel in each
+// dimension.
+//
+// Data structures for tetrahedra indexing and face enumeration based on
+// M. Lage, T. Lewiner, H. Lopes, and L. Velho.
+// CHF: A scalable topological data structure for tetrahedral meshes.
+// In Brazilian Symposium on Computer Graphics and Image Processing
+// (SIBGRAPI'05), pp. 349-356, 2005, doi: 10.1109/SIBGRAPI.2005.18
+//
+// 
+class VolumeTetraMesh {
 public:
-    VolumeTetraMesh(const std::shared_ptr<const Volume>& volume, int channel = 0);
-    VolumeTetraMesh* clone() const override;
-    virtual ~VolumeTetraMesh() = default;
+    VolumeTetraMesh() = default;
+    VolumeTetraMesh(const std::shared_ptr<const volume::RawVolume<gaiavolume::GaiaVolumeDataLayout>>& volume, int channel = 0);
 
     /**
      * Use \p volume as source for the tetrahedralization into a TetraMesh.
@@ -59,29 +67,39 @@ public:
      * @param channel   volume channel used as scalar values
      * @throws Exception if one of the \p volume dimensions is less than 2
      */
-    void setData(const std::shared_ptr<const Volume>& volume, int channel = 0);
+    void setData(const std::shared_ptr<const volume::RawVolume<gaiavolume::GaiaVolumeDataLayout>>& volume, int channel = 0);
 
-    virtual int getNumberOfCells() const override;
-    virtual int getNumberOfPoints() const override;
+    int getNumberOfCells() const;
+    int getNumberOfPoints() const;
 
-    /**
-     * @copydoc TetraMesh::get
-     */
-    virtual void get(std::vector<vec4>& nodes, std::vector<ivec4>& nodeIds) const override;
+    // Fill the \p nodes vector with the 3D coordinates of each node along with its scalar value
+    // (vec4). The scalar is stored in the w component. The \p nodeIds vector is filled with the
+    // node/vertex IDs for each tetrahedron (ivec4). The faces opposite of each node are implicitly
+    // encoded.
+    // The coordinates are given in Data space and can be transformed to Model space using the
+    // Model matrixSpatialCoordinateTransformer::getDataToModelMatrix(). or 
+    void get(std::vector<glm::vec4>& nodes, std::vector<glm::ivec4>& nodeIds) const;
 
-    /**
-     * @copydoc TetraMesh::getBoundingBox
-     */
-    virtual mat4 getBoundingBox() const override;
+     // Return the bounding box of all nodes of the tetrahedral mesh in world space. The bounding
+     // box is represented using a mat4, where all positions are between `bbox * (x,y,z,1)` where x,
+     // y, and z are between 0 and 1.
+    glm::mat4 getBoundingBox() const;
 
-    /**
-     * @copydoc TetraMesh::getDataRange
-     */
-    virtual dvec2 getDataRange() const override;
+    // Return the data range of the scalar values
+    // @return scalar value range
+    glm::vec2 getDataRange() const;
+
+
+    glm::mat4 tetraBoundingBox() const;
 
 private:
-    std::shared_ptr<const Volume> volume_;
-    int channel_;
+    std::shared_ptr<const volume::RawVolume<gaiavolume::GaiaVolumeDataLayout>> _volume;
+    int _channel = 0;
+
+    //glm::mat4 _modelMatrix;
+    //glm::mat4 _worldMatrix;
 };
 
 }  // namespace openspace
+
+#endif // __OPENSPACE_MODULE_TETRAMESH___VOLUMETETRAMESH___H__
