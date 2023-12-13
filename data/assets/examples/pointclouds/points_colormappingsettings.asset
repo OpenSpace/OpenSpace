@@ -1,5 +1,7 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
+
+
 local Example = {
   Identifier = "ExamplePoints_ColorMapping",
   Parent = earthAsset.Earth.Identifier,
@@ -12,7 +14,7 @@ local Example = {
         -- Set the default choice of parameter and value range explicitly. Values
         -- outside this range will be given special colors
         Parameter = "normaldist_withMissing",
-        ValueRange = { -0.25, 0.25},
+        ValueRange = { -0.25, 0.25 },
         -- Show missing data values, so we can show these in a specific color
         ShowMissingData = true,
         -- Color for missing data points

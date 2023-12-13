@@ -59,20 +59,20 @@ public:
     ghoul::opengl::Texture* texture() const;
 
     /**
-     * Initialize the color map information (ranges, etc.) based on the input dataset
+     * Initialize the color map information (ranges, etc.) based on the input dataset.
      *
-     * \param dataset the *loaded* input dataset
+     * \param dataset The *loaded* input dataset
      */
     void initialize(const dataloader::Dataset& dataset);
 
     /**
-     * Initialize a 1D texture based on the entries in the color map file
+     * Initialize a 1D texture based on the entries in the color map file.
      */
     void initializeTexture();
 
     static documentation::Documentation Documentation();
 
-    glm::vec4 colorFromColorMap(float valueToColorFrom) const;
+    glm::vec4 colorFromColorMap(float value) const;
 
     properties::BoolProperty enabled;
     properties::OptionProperty dataColumn;
@@ -93,7 +93,7 @@ public:
 private:
     /**
      * Fill parameter options list and range data based on the dataset and provided
-     * information
+     * information.
      */
     void initializeParameterData(const dataloader::Dataset& dataset);
 

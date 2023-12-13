@@ -1,5 +1,7 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
+
+
 local EarthRadius = 6371000
 
 local Example = {
@@ -23,7 +25,7 @@ local Example = {
     Name = "PointCloud - Fading",
     Path = "/Example/Point Clouds",
     Description = [[Example of a point cloud with distance-based fading (the points
-    are visible when the camera reaches a certain distance away from the origin)]]
+      are visible when the camera reaches a certain distance away from the origin)]]
   }
 }
 
@@ -46,7 +48,7 @@ local Example_Invert = {
     },
     Fading = {
       -- Use the same fade distances, but invert the fading so that the points are
-      -- visible men the camera is closer to the origin that the first value, and
+      -- visible when the camera is closer to the origin that the first value, and
       -- invisible when further away than the last value
       FadeInDistances = { 15.0 * EarthRadius, 35.0 * EarthRadius },
       Invert = true
@@ -60,6 +62,7 @@ local Example_Invert = {
       when further away)]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Example)

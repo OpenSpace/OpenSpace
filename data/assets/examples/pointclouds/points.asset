@@ -1,5 +1,7 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
+
+
 -- Color mapped points close to Earth, with some different settings for color and
 -- sizing, and a StaticRotation that makes them not overlap
 
@@ -104,14 +106,14 @@ local FixedColor_ScaleBasedOnData = {
       -- Use a slightly smaller scale than above for the base size of the points
       -- (will decide the size of the smallest point). That way, the points don't
       -- become too big when scaled by the data parameter
-      ScaleExponent = 5,
+      ScaleExponent = 5
     }
   },
   GUI = {
     Name = "Fixed Color / Size From Data",
     Path = "/Example/Point Clouds",
     Description = [[Point cloud with a fixed color and sizing that can be set based on a
-    column in the dataset]]
+      column in the dataset]]
   }
 }
 
@@ -129,14 +131,14 @@ local Textured = {
   Renderable = {
     Type = "RenderablePointCloud",
     File = asset.resource("data/dummydata.csv"),
-    -- The path to the texture file. Here we use openspace.absPath so that we cna use
+    -- The path to the texture file. Here we use openspace.absPath so that we can use
     -- the ${DATA} token to get the path to a texture in the "OpenSpace/data" folder,
-    -- but for a file at a relative locatoin it would also work to use asset.resource,
+    -- but for a file at a relative location it would also work to use asset.resource,
     -- like for the data file above
     Texture = openspace.absPath("${DATA}/test3.jpg"),
     -- Disable additive blending, so that points will be rendered with their actual color
     -- and overlapping points will be sorted by depth. This works best when the points
-    -- have an opacity of one
+    -- have an opacity of 1
     UseAdditiveBlending = false,
     Coloring = {
       ColorMapping = {
@@ -154,12 +156,11 @@ local Textured = {
   }
 }
 
-
 -- Point cloud with more advanced color mapping and fixed point sizing.
 -- Here we have predefined a couple of parameters to use for the color mapping.
 -- Also, missing/NaN values are mapped to a specific color.
 -- Finally, no additive blending is used for the color, meaning that the color of
--- overlapping points will not be mixed/addded
+-- overlapping points will not be mixed/added
 local ColorMappedAdvanced_NoBlend = {
   Identifier = "ExamplePoints_ColorMappedNoBlend",
   Parent = earthAsset.Earth.Identifier,

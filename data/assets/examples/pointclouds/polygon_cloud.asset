@@ -7,7 +7,7 @@ local Example = {
       FixedColor = { 0.8, 0.0, 0.0 }
     },
     -- Specify the number of sides for the polygon. 3 = triangle, 4 = square,
-    -- 5 = pentagon, and so on
+    -- 5 = pentagon, 6 = hexagon, and so on
     PolygonSides = 6,
     -- Scale up the dataset, so that it is interpreted in Kilometers instead of meters,
     -- for increased visiblity

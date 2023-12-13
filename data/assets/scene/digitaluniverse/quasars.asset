@@ -35,13 +35,13 @@ local Object = {
     Coloring = {
       FixedColor = { 1.0, 0.4, 0.2 },
       ColorMapping = {
+        Enabled = false,
         File = colormaps .. "viridis.cmap",
         ParameterOptions = {
           { Key = "distMpc", Range = { 440.5, 8852.099609 } },
           { Key = "redshift", Range = { 0.102, 7.085 } },
           { Key = "Tlookback", Range = { 1.4, 13.0 } }
-        },
-        Enabled = false
+        }
       }
     },
     SizeSettings = {

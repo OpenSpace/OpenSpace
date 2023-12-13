@@ -658,31 +658,31 @@ void RenderablePointCloud::bindTextureForRendering() const {
 }
 
 float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) const {
-    float fadeValue = 1.f;
-    if (_fading.enabled) {
-        glm::dmat4 invModelMatrix = glm::inverse(calcModelTransform(data));
-
-        glm::dvec3 cameraPosModelSpace = glm::dvec3(
-            invModelMatrix * glm::dvec4(data.camera.positionVec3(), 1.0)
-        );
-
-        float distCamera = static_cast<float>(
-            glm::length(cameraPosModelSpace) / toMeter(_unit)
-        );
-
-        const glm::vec2 fadeRange = _fading.fadeInDistances;
-        const float fadeRangeWidth = (fadeRange.y - fadeRange.x);
-        float funcValue = (distCamera - fadeRange.x) / fadeRangeWidth;
-        funcValue = glm::clamp(funcValue, 0.f, 1.f);
-
-        if (_fading.invert) {
-            funcValue = 1.f - funcValue;
-        }
-
-        fadeValue *= funcValue;
+    if (!_fading.enabled) {
+        return 1.f;
     }
 
-    return fadeValue;
+    float fadeValue = 1.f;
+    glm::dmat4 invModelMatrix = glm::inverse(calcModelTransform(data));
+
+    glm::dvec3 cameraPosModelSpace = glm::dvec3(
+        invModelMatrix * glm::dvec4(data.camera.positionVec3(), 1.0)
+    );
+
+    float distCamera = static_cast<float>(
+        glm::length(cameraPosModelSpace) / toMeter(_unit)
+    );
+
+    const glm::vec2 fadeRange = _fading.fadeInDistances;
+    const float fadeRangeWidth = (fadeRange.y - fadeRange.x);
+    float funcValue = (distCamera - fadeRange.x) / fadeRangeWidth;
+    funcValue = glm::clamp(funcValue, 0.f, 1.f);
+
+    if (_fading.invert) {
+        funcValue = 1.f - funcValue;
+    }
+
+    return fadeValue * funcValue;;
 }
 
 void RenderablePointCloud::renderBillboards(const RenderData& data,
