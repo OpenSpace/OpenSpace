@@ -65,12 +65,14 @@ private:
     std::filesystem::path  _dictionaryOutputPath;
     std::string _time;
 
+
     glm::uvec3 _dimensions = glm::uvec3(0);
     glm::vec3 _lowerDomainBound = glm::vec3(0.f);
     glm::vec3 _upperDomainBound = glm::vec3(0.f);
 
     std::map<std::string, int> _fileHeaders;
 
+    bool _normalize;
     bool _applyFilter;
     FilterOption _filterOption; //TODO: Create a enum for this with option Gaussian
 };

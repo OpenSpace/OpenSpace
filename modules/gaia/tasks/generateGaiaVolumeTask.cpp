@@ -54,6 +54,8 @@ namespace {
         //Apply filtering
         std::optional<bool> applyFilter;
 
+        std::optional<bool> normalizeData;
+
         enum class [[codegen::map(openspace::gaiavolume::FilterOption)]] FilterType {
             None,
             Gaussian,
@@ -83,6 +85,8 @@ GenerateGaiaVolumeTask::GenerateGaiaVolumeTask(const ghoul::Dictionary& dictiona
     _lowerDomainBound = glm::vec3(std::numeric_limits<float>::max());
     _upperDomainBound = glm::vec3(std::numeric_limits<float>::min());
     _applyFilter = p.applyFilter.value_or(false);
+    _normalize = p.normalizeData.value_or(true);
+
     if (p.filterOption.has_value())
         _filterOption = codegen::map<gaiavolume::FilterOption>(*p.filterOption);
 
@@ -191,7 +195,7 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
     //    }
     //}
     onProgress(0.6f);
-
+    int maxStarsInACell = 0;
     //For every star find the nearest voxel i,j,k that should contain that stars values
     for (std::vector<float> const& star : data) {
         glm::vec3 pos{ star[0], star[1], star[2] };
@@ -374,6 +378,7 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
                     parameter.maxData = std::max(parameter.maxData, value); //Store the largest value of all stars
                     parameter.isNaNData = false;
                     parameter.nStars += 1;
+                    maxStarsInACell = std::max(parameter.nStars, maxStarsInACell);
                 }
                 ++counter;
 
@@ -395,7 +400,6 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
         int index{ 0 };
         for (VoxelDataLayout& parameter : avgData.data) {
             if (!parameter.isNaNData) {
-
                 parameter.avgData = cellData.data[index].avgData / static_cast<double>(parameter.nStars);
 
                 //Update the minimum and maximum limits for each parameter. 
@@ -415,26 +419,41 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
         rawVolume.set(cell, avgData);
     });
 
+    //for (const Limits& limit : parameterLimits) {
+    //    std::cout << "avg min: " << limit.avg.first << " max : " << limit.avg.second << '\n'
+    //        <<
+    //}
+    int ctr = 0;
+    std::vector<std::pair<float, float>> comparison;
     //Normalize the data to [0,1]
-    rawVolume.forEachVoxel([&](glm::uvec3 const& cell, GaiaVolumeDataLayout const& cellData) {
-        if (!cellData.containData())
-            return;
+    if (_normalize) {
+        rawVolume.forEachVoxel([&](glm::uvec3 const& cell, GaiaVolumeDataLayout const& cellData) {
+            if (!cellData.containData())
+                return;
 
-        //This is just plain stupid but cellData is const and we need to modify it x.x 
-        GaiaVolumeDataLayout voxel = rawVolume.get(cell);
+            //This is just plain stupid but cellData is const and we need to modify it
+            GaiaVolumeDataLayout voxel = rawVolume.get(cell);
 
-        int index{ 0 };
-        //(value - min) / (max - min) for each parameter column
-        for (VoxelDataLayout& parameter : voxel.data) {
-            if (!parameter.isNaNData) {
-                parameter.avgData = ((parameter.avgData - parameterLimits[index].avg.first) / (parameterLimits[index].avg.second - parameterLimits[index].avg.first));
-                parameter.minData = ((parameter.minData - parameterLimits[index].min.first) / (parameterLimits[index].min.second - parameterLimits[index].min.first));
-                parameter.avgData = ((parameter.maxData - parameterLimits[index].max.first) / (parameterLimits[index].max.second - parameterLimits[index].max.first));
+            int index{ 0 };
+            //(value - min) / (max - min) for each parameter column
+            for (VoxelDataLayout& parameter : voxel.data) {
+                if (!parameter.isNaNData) {
+                    float avg = parameter.avgData;
+                    parameter.avgData = ((parameter.avgData - parameterLimits[index].avg.first) / (parameterLimits[index].avg.second - parameterLimits[index].avg.first));
+                    parameter.minData = ((parameter.minData - parameterLimits[index].min.first) / (parameterLimits[index].min.second - parameterLimits[index].min.first));
+                    parameter.avgData = ((parameter.maxData - parameterLimits[index].max.first) / (parameterLimits[index].max.second - parameterLimits[index].max.first));
+
+                    if (index == 3 && ctr < 10) {
+                        comparison.push_back({ avg, parameter.avgData });
+                        ++ctr;
+                        //LDEBUG("Voxel: {}: nel before: {}, after {}", ctr, avg, parameter.avgData);
+                    }
+                }
+                ++index;
             }
-            ++index;
-        }
-        rawVolume.set(cell, voxel);
-    });
+            rawVolume.set(cell, voxel);
+        });
+    }
 
     //Write data to file
     std::filesystem::path const directory = _rawVolumeOutputPath.parent_path();
@@ -473,8 +492,18 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
     for (int i = 0; i < headers.size(); i++)
     {
         Limits const& limit = parameterLimits[i];
-        LDEBUG(fmt::format("Header {}: avg min/max {},{}, min min/max {},{}, max min/max {},{}",
-            headers[i], limit.avg.first, limit.avg.second, limit.min.first, limit.min.second, limit.max.first, limit.max.second));
+        LDEBUG(fmt::format("Header {}: avg: min/max {},{}, min: min/max {},{}, max: min/max {},{}",
+            headers[i], limit.avg.first, limit.avg.second, limit.min.first,
+            limit.min.second, limit.max.first, limit.max.second)
+        );
+    }
+    LDEBUG(fmt::format("Max stars in one cell: {}", maxStarsInACell));
+
+    LDEBUG(fmt::format("number of data points read {}", dataTable.size()));
+    ctr = 0;
+    for (auto c : comparison) {
+        LDEBUG(fmt::format("Voxel: {}: nel before: {} after: {}", ctr, c.first, c.second));
+        ++ctr;
     }
 
     //LERROR("Nstars read: " + std::to_string(nStarsRead));
