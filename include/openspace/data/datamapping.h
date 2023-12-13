@@ -39,7 +39,7 @@ struct DataMapping {
     static documentation::Documentation Documentation();
 
     bool hasExcludeColumns() const;
-    bool isExcludeColumn(std::string_view x) const;
+    bool isExcludeColumn(std::string_view column) const;
 
     std::optional<std::string> xColumnName;
     std::optional<std::string> yColumnName;

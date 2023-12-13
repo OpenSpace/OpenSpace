@@ -107,9 +107,9 @@ private:
     std::optional<std::string> _providedParameter;
     std::optional<glm::vec2> _providedRange;
 
-    bool _nanColorInAsset = false;
-    bool _belowRangeColorInAsset = false;
-    bool _aboveRangeColorInAsset = false;
+    bool _hasNanColorInAsset = false;
+    bool _hasBelowRangeColorInAsset = false;
+    bool _hasAboveRangeColorInAsset = false;
 };
 
 } // namespace openspace

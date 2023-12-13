@@ -132,8 +132,8 @@ bool DataMapping::hasExcludeColumns() const {
     return !excludeColumns.empty();
 }
 
-bool DataMapping::isExcludeColumn(std::string_view c) const {
-    auto found = std::find(excludeColumns.begin(), excludeColumns.end(), c);
+bool DataMapping::isExcludeColumn(std::string_view column) const {
+    auto found = std::find(excludeColumns.begin(), excludeColumns.end(), column);
     return (found != excludeColumns.end());
 }
 

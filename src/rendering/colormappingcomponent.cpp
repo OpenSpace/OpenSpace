@@ -277,21 +277,21 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
     if (p.noDataColor.has_value()) {
         useNanColor = p.showMissingData.value_or(true);
         nanColor = *p.noDataColor;
-        _nanColorInAsset = true;
+        _hasNanColorInAsset = true;
     }
 
     useAboveRangeColor = p.useAboveRangeColor.value_or(useAboveRangeColor);
     if (p.aboveRangeColor.has_value()) {
         useAboveRangeColor = p.useAboveRangeColor.value_or(true);
         aboveRangeColor = *p.aboveRangeColor;
-        _aboveRangeColorInAsset = true;
+        _hasAboveRangeColorInAsset = true;
     }
 
     useBelowRangeColor = p.useBelowRangeColor.value_or(useBelowRangeColor);
     if (p.belowRangeColor.has_value()) {
         useBelowRangeColor = p.useBelowRangeColor.value_or(true);
         belowRangeColor = *p.belowRangeColor;
-        _belowRangeColorInAsset = true;
+        _hasBelowRangeColorInAsset = true;
     }
 
     if (p.file.has_value()) {
@@ -308,17 +308,17 @@ void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
 
     initializeParameterData(dataset);
 
-    if (_colorMap.nanColor.has_value() && !_nanColorInAsset) {
+    if (_colorMap.nanColor.has_value() && !_hasNanColorInAsset) {
         nanColor = *_colorMap.nanColor;
         useNanColor = true; // @ TODO: Avoid overriding value set in asset? (also for useBelow and useAbove)
     }
 
-    if (_colorMap.belowRangeColor.has_value() && !_belowRangeColorInAsset) {
+    if (_colorMap.belowRangeColor.has_value() && !_hasBelowRangeColorInAsset) {
         belowRangeColor = *_colorMap.belowRangeColor;
         useBelowRangeColor = true;
     }
 
-    if (_colorMap.aboveRangeColor.has_value() && !_aboveRangeColorInAsset) {
+    if (_colorMap.aboveRangeColor.has_value() && !_hasAboveRangeColorInAsset) {
         aboveRangeColor = *_colorMap.aboveRangeColor;
         useAboveRangeColor = true;
     }

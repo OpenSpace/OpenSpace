@@ -534,7 +534,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
-    if (p.sizeSettings.has_value() && (*p.sizeSettings).sizeMapping.has_value()) {
+    if (p.sizeSettings.has_value() && p.sizeSettings->sizeMapping.has_value()) {
         _sizeSettings.sizeMapping.parameterOption.onChange(
             [this]() { _dataIsDirty = true; }
         );
@@ -576,7 +576,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     // If no scale exponent was specified, compute one that will at least show the points
     // based on the scale of the positions in the dataset
-    if (!p.sizeSettings.has_value() || !(*p.sizeSettings).scaleExponent.has_value()) {
+    if (!p.sizeSettings.has_value() || !p.sizeSettings->scaleExponent.has_value()) {
         double dist = _dataset.maxPositionComponent * toMeter(_unit);
         float exponent = static_cast<float>(std::log10(dist));
         // Reduce the actually used exponent a little bit, as just using the logarithm
