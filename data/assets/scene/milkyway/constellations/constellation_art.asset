@@ -71,8 +71,8 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
         },
         Renderable = {
           Type = "RenderablePlaneImageLocal",
-          Size = tonumber(baseScale * scale * distanceMultiplier / 10),
           Enabled = false,
+          Size = tonumber(baseScale * scale * distanceMultiplier / 10),
           Origin = "Center",
           Billboard = false,
           LazyLoading = true,

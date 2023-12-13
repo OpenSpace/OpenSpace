@@ -9,8 +9,8 @@ local Hydra = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HYDRA",
-      Observer = "PLUTO BARYCENTER"
+      Target = kernels.ID.Hydra,
+      Observer = kernels.ID.PlutoBarycenter
     }
   },
   Renderable = {
@@ -32,8 +32,8 @@ local HydraTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HYDRA",
-      Observer = "PLUTO BARYCENTER",
+      Target = kernels.ID.Hydra,
+      Observer = kernels.ID.PlutoBarycenter
     },
     Color = { 0.00, 0.62, 1.00 },
     Period = 38.20177,
@@ -56,8 +56,8 @@ local HydraLabel = {
   Identifier = "HydraLabel",
   Parent = Hydra.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Hydra",
     FontSize = 70.0,
     Size = 6.0,
@@ -79,8 +79,6 @@ local HydraLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.PlutoKernels)
-
   openspace.addSceneGraphNode(Hydra)
   openspace.addSceneGraphNode(HydraTrail)
   openspace.addSceneGraphNode(HydraLabel)
@@ -90,8 +88,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HydraLabel)
   openspace.removeSceneGraphNode(HydraTrail)
   openspace.removeSceneGraphNode(Hydra)
-
-  openspace.spice.unloadKernel(kernels.PlutoKernels)
 end)
 
 asset.export(Hydra)
@@ -102,8 +98,7 @@ asset.export(HydraTrail)
 asset.meta = {
   Name = "Hydra",
   Version = "1.0",
-  Description = [[Globe and trail for Pluto's moon Hydra. Data from NASA Spice (see base
-    spice asset)]],
+  Description = "Globe and trail for Pluto's moon Hydra",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

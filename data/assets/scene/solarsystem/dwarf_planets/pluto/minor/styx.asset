@@ -1,4 +1,6 @@
 local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local Styx = {
@@ -7,8 +9,8 @@ local Styx = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "STYX",
-      Observer = "PLUTO BARYCENTER"
+      Target = kernels.ID.Styx,
+      Observer = kernels.ID.PlutoBarycenter
     }
   },
   Renderable = {
@@ -30,8 +32,8 @@ local StyxTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "STYX",
-      Observer = "PLUTO BARYCENTER",
+      Target = kernels.ID.Styx,
+      Observer = kernels.ID.PlutoBarycenter
     },
     Color = { 0.00, 0.62, 1.00 },
     Period = 20.16155,
@@ -54,8 +56,8 @@ local StyxLabel = {
   Identifier = "StyxLabel",
   Parent = Styx.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Styx",
     FontSize = 70.0,
     Size = 6.0,
@@ -97,8 +99,7 @@ asset.export(StyxLabel)
 asset.meta = {
   Name = "Styx",
   Version = "1.0",
-  Description = [[Globe and trail for Pluto's moon Styx. Data from NASA Spice (see base
-    spice asset)]],
+  Description = "Globe and trail for Pluto's moon Styx",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

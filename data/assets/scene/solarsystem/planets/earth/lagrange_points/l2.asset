@@ -1,6 +1,6 @@
-asset.require("scene/solarsystem/sun/sun")
-asset.require("spice/base")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -19,7 +19,13 @@ local kernels = asset.resource({
 })
 
 
-local L2 = 392
+local ID = {
+  L2 = 392
+}
+
+local Frame = {
+  L2Corevolving = "L2_COREV"
+}
 
 local L2Position = {
   Identifier = "L2Position",
@@ -27,8 +33,8 @@ local L2Position = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = L2,
-      Observer = "SSB"
+      Target = ID.L2,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
@@ -47,8 +53,8 @@ local L2CoRevFrame = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "L2_COREV",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = Frame.L2Corevolving,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
@@ -140,8 +146,8 @@ local L2SunLine = {
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableNodeLine",
-    StartNode = "Sun",
-    EndNode = "L2Small",
+    StartNode = sun.Sun.Identifier,
+    EndNode = L2Small.Identifier,
     Color = { 0.5, 0.5, 0.5 },
     LineWidth = 2
   },
@@ -179,6 +185,8 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels .. "L2_de431.bsp")
 end)
 
+asset.export("ID", ID)
+asset.export("Frame", Frame)
 asset.export(L2Position)
 asset.export(L2CoRevFrame)
 asset.export(L2Small)

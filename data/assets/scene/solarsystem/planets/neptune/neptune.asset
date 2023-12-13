@@ -1,7 +1,6 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,13 +10,13 @@ local Neptune = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEPTUNE",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = coreKernels.ID.Neptune,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_NEPTUNE",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Neptune,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -38,8 +37,8 @@ local NeptuneLabel = {
   Identifier = "NeptuneLabel",
   Parent = Neptune.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Neptune",
     FontSize = 70.0,
     Size = 9.0,
@@ -61,8 +60,6 @@ local NeptuneLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep097)
-
   openspace.addSceneGraphNode(Neptune)
   openspace.addSceneGraphNode(NeptuneLabel)
 end)
@@ -70,8 +67,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneLabel)
   openspace.removeSceneGraphNode(Neptune)
-
-  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(Neptune)

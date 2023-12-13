@@ -1,3 +1,7 @@
+local coreKernels = asset.require("spice/core")
+
+
+
 local kernels = asset.resource({
   Name = "Jupiter Spice Kernels",
   Type = "HttpSynchronization",
@@ -5,11 +9,31 @@ local kernels = asset.resource({
   Version = 2
 })
 
+local ID = {
+  Callisto = "CALLISTO",
+  Europa = "EUROPA",
+  Ganymede = "GANYMEDE",
+  Io = "IO"
+}
 
-asset.export("jup344", kernels .. "jup344.bsp")
-asset.export("jup346", kernels .. "jup346.bsp")
-asset.export("jup365", kernels .. "jup365.bsp")
+local Frame = {
+  Callisto = coreKernels.Frame.Callisto,
+  Europa = coreKernels.Frame.Europa,
+  Ganymede = coreKernels.Frame.Ganymede,
+  Io = coreKernels.Frame.Io
+}
 
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "jup365.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "jup365.bsp")
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
 
 
 asset.meta = {

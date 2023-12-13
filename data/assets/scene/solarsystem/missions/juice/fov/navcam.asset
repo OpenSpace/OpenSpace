@@ -13,8 +13,8 @@ local NavCam = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_NAVCAM-1",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.NavCam,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_NAVCAM-1",

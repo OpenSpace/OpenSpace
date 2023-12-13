@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 asset.require("./trail")
 
 
@@ -18,13 +18,13 @@ local Pluto = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PLUTO",
-      Observer = "PLUTO BARYCENTER"
+      Target = coreKernels.ID.Pluto,
+      Observer = coreKernels.ID.PlutoBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_PLUTO",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Pluto,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -55,8 +55,8 @@ local PlutoLabel = {
   Identifier = "PlutoLabel",
   Parent = Pluto.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Pluto",
     FontSize = 70.0,
     Size = 9.10,

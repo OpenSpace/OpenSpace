@@ -5,15 +5,15 @@ local transforms = asset.require("./transforms")
 
 local Trail = {
   Identifier = "QuaoarTrail",
-  Parent = sunTransforms.SunECLIPJ2000.Identifier,
+  Parent = sunTransforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = asset.enabled,
+    Translation = transforms.Translation,
     Color = { 0.2, 0.8, 0.3 },
     Period = 104691.8599963541,
     Resolution = 10000,
-    Enabled = asset.enabled,
-    Fade = 1.24,
-    Translation = transforms.Translation
+    Fade = 1.24
   },
   Tag = { "planetTrail_dwarf" },
   GUI = {

@@ -39,11 +39,11 @@ class TimeDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for ostime class
+     * Constructor for ostime class.
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
+     * \param time The #openspace::Profile::Time object containing all data of the new or
+     *        imported profile.
      */
     TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>* time);
 

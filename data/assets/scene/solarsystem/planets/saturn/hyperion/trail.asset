@@ -1,5 +1,6 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +11,8 @@ local HyperionTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HYPERION",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Hyperion,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 21.276,
@@ -26,15 +27,11 @@ local HyperionTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(HyperionTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HyperionTrail)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(HyperionTrail)
@@ -44,8 +41,7 @@ asset.export(HyperionTrail)
 asset.meta = {
   Name = "Hyperion Trail",
   Version = "1.1",
-  Description = [[Trail of Saturn's moon Hyperion as observed by Saturn. Data from NASA
-    Spice (see base spice asset)]],
+  Description = "Trail of Saturn's moon Hyperion as observed by Saturn",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

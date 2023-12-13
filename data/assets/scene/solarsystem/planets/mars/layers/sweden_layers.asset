@@ -1,4 +1,4 @@
-asset.require("./base_layers", true)
+asset.require("./base_layers")
 asset.require("./colorlayers/moc_wa_color_sweden", asset.enabled)
 asset.require("./colorlayers/viking_mdim_sweden", false)
 asset.require("./colorlayers/mola_pseudo_color_sweden", false)

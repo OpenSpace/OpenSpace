@@ -1,6 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,20 +19,20 @@ local Mimas = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MIMAS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Mimas,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MIMAS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Mimas,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 207000, 197000, 191000 },
     SegmentsPerPatch = 64,
-    Layers = { },
+    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "mimas.labels",
@@ -57,8 +58,8 @@ local MimasLabel = {
   Identifier = "MimasLabel",
   Parent = Mimas.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Mimas",
     FontSize = 70.0,
     Size = 6.0,
@@ -80,8 +81,6 @@ local MimasLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Mimas)
   openspace.addSceneGraphNode(MimasLabel)
 end)
@@ -89,8 +88,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MimasLabel)
   openspace.removeSceneGraphNode(Mimas)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Mimas)

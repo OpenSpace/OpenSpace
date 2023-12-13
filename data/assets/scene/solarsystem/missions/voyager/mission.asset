@@ -56,11 +56,11 @@ local Mission = {
     },
     {
       Name = "Reached 100 astronomical units",
-      Date = "2006 AUG 16 00:00:00",
+      Date = "2006 AUG 16 00:00:00"
     },
     {
       Name = "Voyager 1 enters interstellar space",
-      Date = "2012 AUG 01 00:00:00",
+      Date = "2012 AUG 01 00:00:00"
     }
   },
   Phases = {

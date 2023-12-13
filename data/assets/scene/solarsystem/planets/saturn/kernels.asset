@@ -1,3 +1,7 @@
+local coreKernels = asset.require("spice/core")
+
+
+
 local kernels = asset.resource({
   Name = "Saturn Spice Kernels",
   Type = "HttpSynchronization",
@@ -6,10 +10,43 @@ local kernels = asset.resource({
 })
 
 
-asset.export("sat415", kernels .. "sat415.bsp")
-asset.export("sat441", kernels .. "sat441.bsp")
-asset.export("sat452", kernels .. "sat452.bsp")
+local ID = {
+  Calypso = "CALYPSO",
+  Dione = "DIONE",
+  Enceladus = "ENCELADUS",
+  Helene = "HELENE",
+  Hyperion = "HYPERION",
+  Iapetus = "IAPETUS",
+  Mimas = "MIMAS",
+  Phoebe = "PHOEBE",
+  Polydeuces = "POLYDEUCES",
+  Rhea = "RHEA",
+  Tethys = "TETHYS",
+  Titan = "TITAN"
+}
 
+local Frame = {
+  Calypso = coreKernels.Frame.Calypso,
+  Dione = coreKernels.Frame.Dione,
+  Enceladus = coreKernels.Frame.Enceladus,
+  Iapetus = coreKernels.Frame.Iapetus,
+  Mimas = coreKernels.Frame.Mimas,
+  Rhea = coreKernels.Frame.Rhea,
+  Tethys = coreKernels.Frame.Tethys,
+  Titan = coreKernels.Frame.Titan
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "sat441.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "sat441.bsp")
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
 
 
 asset.meta = {

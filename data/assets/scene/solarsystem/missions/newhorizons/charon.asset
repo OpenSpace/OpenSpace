@@ -1,5 +1,7 @@
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -19,13 +21,13 @@ local CharonProjection = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CHARON",
-      Observer = "PLUTO BARYCENTER"
+      Target = kernels.ID.Charon,
+      Observer = kernels.ID.PlutoBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_CHARON",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Charon,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -42,12 +44,12 @@ local CharonProjection = {
     },
     MeridianShift = true,
     Projection = {
-      Observer = "NEW HORIZONS",
-      Target = "CHARON",
+      Observer = kernels.ID.NewHorizons,
+      Target = kernels.ID.Charon,
       Aberration = "NONE",
       AspectRatio = 2,
       Instrument = {
-        Name = "NH_LORRI",
+        Name = kernels.Frame.Lorri,
         Method = "ELLIPSOID",
         Aberration = "NONE",
         Fovy = 0.2907,
@@ -56,8 +58,8 @@ local CharonProjection = {
         Far = 10000
       },
       PotentialTargets = {
-        "PLUTO",
-        "CHARON"
+        kernels.ID.Pluto,
+        kernels.ID.Charon
       }
     }
   },
@@ -97,10 +99,10 @@ local CharonShadow = {
     Type = "RenderableShadowCylinder",
     Opacity = 0.25,
     TerminatorType = "PENUMBRAL",
-    LightSource = "SUN",
-    Observer = "NEW HORIZONS",
-    Body = "CHARON",
-    BodyFrame = "IAU_CHARON",
+    LightSource = coreKernels.ID.Sun,
+    Observer = kernels.ID.NewHorizons,
+    Body = kernels.ID.Charon,
+    BodyFrame = kernels.Frame.Charon,
     Aberration = "NONE"
   },
   GUI = {

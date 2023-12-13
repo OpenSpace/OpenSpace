@@ -1,4 +1,4 @@
-asset.require("./base_layers", true)
+asset.require("./base_layers")
 asset.require("./colorlayers/moc_wa_color_newyork", asset.enabled)
 asset.require("./colorlayers/viking_mdim_newyork", false)
 asset.require("./colorlayers/mola_pseudo_color_newyork", false)

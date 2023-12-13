@@ -6,10 +6,24 @@ local kernels = asset.resource({
 })
 
 
-asset.export("nep095", kernels .. "nep095.bsp")
-asset.export("nep097", kernels .. "nep097.bsp")
-asset.export("nep101xl_802", kernels .. "nep101xl-802.bsp")
-asset.export("nep102", kernels .. "nep102.bsp")
+local ID = {
+  Halimede = "HALIMEDE",
+  Laomedeia = "LAOMEDEIA",
+  Psamathe = "PSAMATHE",
+  Sao = "SAO",
+  Neso = "NESO"
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "nep102.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "nep102.bsp")
+end)
+
+asset.export("ID", ID)
 
 
 

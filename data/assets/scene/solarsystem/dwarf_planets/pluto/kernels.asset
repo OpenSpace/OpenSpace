@@ -1,17 +1,51 @@
-local kernels = asset.resource({
+local coreKernels = asset.require("spice/core")
+
+
+
+local data = asset.resource({
   Name = "Pluto Kernels",
   Type = "HttpSynchronization",
   Identifier = "pluto_kernels",
   Version = 1
 })
 
-local PlutoKernels = {
-  kernels .. "NavPE_de433_od122.bsp",
-  kernels .. "NavSE_plu047_od122.bsp",
-  kernels .. "ssd_jpl_nasa_gov_plu043.bsp"
+
+local kernels = {
+  data .. "NavPE_de433_od122.bsp",
+  data .. "NavSE_plu047_od122.bsp",
+  data .. "ssd_jpl_nasa_gov_plu043.bsp"
 }
 
-asset.export("PlutoKernels", PlutoKernels)
+local ID = {
+  PlutoBarycenter = coreKernels.ID.PlutoBarycenter,
+  Charon = "CHARON",
+  Hydra = "HYDRA",
+  Styx = "STYX",
+  Nix = "NIX",
+  Kerberos = "KERBEROS",
+  Pluto = coreKernels.ID.Pluto
+}
+
+local Frame = {
+  Pluto = coreKernels.Frame.Pluto,
+  Charon = coreKernels.Frame.Charon,
+  Hydra = coreKernels.Frame.Hydra,
+  Styx = coreKernels.Frame.Styx,
+  Nix = coreKernels.Frame.Nix,
+  Kerberos = coreKernels.Frame.Kerberos
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
 
 
 

@@ -1,6 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,13 +19,13 @@ local Rhea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "RHEA",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Rhea,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_RHEA",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Rhea,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -57,8 +58,8 @@ local RheaLabel = {
   Identifier = "RheaLabel",
   Parent = Rhea.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Rhea",
     FontSize = 70.0,
     Size = 6.0,
@@ -80,8 +81,6 @@ local RheaLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Rhea)
   openspace.addSceneGraphNode(RheaLabel)
 end)
@@ -89,8 +88,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(RheaLabel)
   openspace.removeSceneGraphNode(Rhea)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Rhea)

@@ -7,7 +7,7 @@ local bookmarksCSV = asset.resource({
   Name = "OpenSpace Bookmarks",
   Type = "UrlSynchronization",
   UseHash = false,
-  SecondsUntilResync = 0
+  SecondsUntilResync = 0,
   Url = dataProvider
 })
 
