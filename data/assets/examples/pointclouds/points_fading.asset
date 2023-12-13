@@ -29,7 +29,6 @@ local Example = {
   }
 }
 
-
 local Example_Invert = {
   Identifier = "ExamplePoints_FadingInverted",
   Parent = earthAsset.Earth.Identifier,
