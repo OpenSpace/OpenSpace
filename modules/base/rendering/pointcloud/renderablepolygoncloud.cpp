@@ -67,7 +67,7 @@ RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictiona
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _polygonSides = p.polygonSides.value_or(_polygonSides);
+    _nPolygonSides = p.polygonSides.value_or(_nPolygonSides);
 
     // The texture to use for the rendering will be generated in initializeGl. Make sure
     // we use it in the rnedering
@@ -136,19 +136,6 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
 
     glViewport(viewport[0], viewport[1], textureWidth, textureHeight);
 
-    loadPolygonGeometryForRendering();
-    renderPolygonGeometry(_polygonVao);
-
-    // Restores Applications' OpenGL State
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
-    glDeleteBuffers(1, &_polygonVbo);
-    glDeleteVertexArrays(1, &_polygonVao);
-    glDeleteFramebuffers(1, &textureFBO);
-}
-
-void RenderablePolygonCloud::loadPolygonGeometryForRendering() {
     if (_polygonVao == 0) {
         glGenVertexArrays(1, &_polygonVao);
     }
@@ -168,6 +155,16 @@ void RenderablePolygonCloud::loadPolygonGeometryForRendering() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
+
+    renderPolygonGeometry(_polygonVao);
+
+    // Restores Applications' OpenGL State
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+    glDeleteBuffers(1, &_polygonVbo);
+    glDeleteVertexArrays(1, &_polygonVao);
+    glDeleteFramebuffers(1, &textureFBO);
 }
 
 void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) {
@@ -183,7 +180,7 @@ void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) {
     constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
 
-    program->setUniform("sides", _polygonSides);
+    program->setUniform("sides", _nPolygonSides);
     program->setUniform("polygonColor", _colorSettings.pointColor);
 
     glBindVertexArray(vao);

@@ -33,6 +33,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
 #include <cctype>
 #include <fstream>
 #include <functional>
@@ -123,17 +124,14 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
         throw ghoul::RuntimeError(fmt::format("Failed to open data file {}", path));
     }
 
-    std::string extension = path.extension().string();
-    for (size_t i = 0; i < extension.size(); i++) {
-        extension[i] = static_cast<char>(tolower(extension[i]));
-    }
+    std::string extension = ghoul::toLowerCase(path.extension().string());
 
     Dataset res;
     if (extension == ".csv") {
-        res = csv::loadCsvFile(path.string(), specs);
+        res = csv::loadCsvFile(path, specs);
     }
     else if (extension == ".speck") {
-        res = speck::loadSpeckFile(path.string(), specs);
+        res = speck::loadSpeckFile(path, specs);
     }
     else {
         LERRORC("DataLoader", fmt::format(
@@ -353,13 +351,11 @@ Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
         throw ghoul::RuntimeError(fmt::format("Failed to open dataset file {}", path));
     }
 
-    std::string extension = path.extension().string();
-    std::transform(extension.begin(), extension.end(), extension.begin(),
-        [](unsigned char c) { return std::tolower(c); });
+    std::string extension = ghoul::toLowerCase(path.extension().string());
 
     Labelset res;
     if (extension == ".label") {
-        res = speck::loadLabelFile(path.string());
+        res = speck::loadLabelFile(path);
     }
     else {
         LERRORC("DataLoader", fmt::format(
@@ -474,13 +470,11 @@ ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
         throw ghoul::RuntimeError(fmt::format("Failed to open colormap file {}", path));
     }
 
-    std::string extension = path.extension().string();
-    std::transform(extension.begin(), extension.end(), extension.begin(),
-        [](unsigned char c) { return std::tolower(c); });
+    std::string extension = ghoul::toLowerCase(path.extension().string());
 
     ColorMap res;
     if (extension == ".cmap") {
-        res = speck::loadCmapFile(path.string());
+        res = speck::loadCmapFile(path);
     }
     else {
         LERRORC("DataLoader", fmt::format(

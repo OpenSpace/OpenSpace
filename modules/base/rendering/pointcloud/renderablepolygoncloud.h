@@ -53,12 +53,11 @@ private:
     void createPolygonTexture();
     void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
         GLuint textureHeight);
-    void loadPolygonGeometryForRendering();
     void renderPolygonGeometry(GLuint vao);
 
     void bindTextureForRendering() const override;
 
-    int _polygonSides = 3;
+    int _nPolygonSides = 3;
 
     GLuint _pTexture = 0;
 
