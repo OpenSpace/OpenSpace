@@ -188,6 +188,8 @@ namespace {
         std::optional<std::string> xAxis;
 
         std::optional<std::string> yAxis;
+
+        std::optional<int> textureDimension;
     };
 #include "renderablegaiavolume_codegen.cpp"
 
@@ -222,11 +224,11 @@ RenderableGaiaVolume::RenderableGaiaVolume(
     
     _sourceDirectory = absPath(p.sourceDirectory).string();
     _transferFunctionPath = absPath(p.transferFunction).string();
-    unsigned int const textureDimension{ 2 };
+    const unsigned textureDim = static_cast<unsigned>(p.textureDimension.value_or(1));
     _transferFunction = std::make_shared<openspace::TransferFunction>(
         _transferFunctionPath,
         [](const openspace::TransferFunction&) {},
-        textureDimension
+        textureDim
     );
 
     _invertDataAtZ = p.invertDataAtZ.value_or(_invertDataAtZ);
@@ -333,12 +335,24 @@ void RenderableGaiaVolume::initializeGL() {
 
     _clipPlanes->initialize();
 
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
-        nullptr,
-        _transferFunction,
-        _clipPlanes,
-        "${MODULE_GAIA}/shaders/gaiaraycast.glsl"
-    );
+
+    // Temporary to make the 1D texture volumes work while doing the InfraViz project
+    bool useCustomRayCaster = false;
+    if (useCustomRayCaster) {
+        _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+            nullptr,
+            _transferFunction,
+            _clipPlanes,
+            "${MODULE_GAIA}/shaders/gaiaraycast.glsl"
+        );
+    }
+    else {
+        _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+            nullptr,
+            _transferFunction,
+            _clipPlanes
+        );
+    }
 
     _raycaster->initialize();
     global::raycasterManager->attachRaycaster(*_raycaster.get());
