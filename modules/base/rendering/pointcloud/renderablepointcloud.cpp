@@ -593,7 +593,7 @@ bool RenderablePointCloud::isReady() const {
 
     // If we have labels, they also need to be loaded
     if (_hasLabels) {
-        isReady = isReady || _labels->isReady();
+        isReady = isReady && _labels->isReady();
     }
     return isReady;
 }
