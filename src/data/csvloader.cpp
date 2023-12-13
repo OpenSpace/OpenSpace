@@ -148,12 +148,12 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         entry.data.reserve(nDataColumns);
 
         for (size_t i = 0; i < row.size(); ++i) {
-            if (hasExcludeColumns) {
-                // Check if column should be exluded. Note that list of indices is sorted
-                // so we can do a binary search
-                if (std::binary_search(skipColumns.begin(), skipColumns.end(), i)) {
-                    continue;
-                }
+            // Check if column should be exluded. Note that list of indices is sorted
+            // so we can do a binary search
+            if (hasExcludeColumns &&
+                std::binary_search(skipColumns.begin(), skipColumns.end(), i))
+            {
+                continue;
             }
 
             const std::string& strValue = row[i];
