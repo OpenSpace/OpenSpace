@@ -9,7 +9,7 @@ local Example = {
     Type = "RenderablePointCloud",
     File = asset.resource("data/dummydata.csv"),
     Coloring = {
-      FixedColor = { 0.0, 0.3, 1.0 }
+      FixedColor = { 0.3, 0.8, 0.3 }
     },
     DataMapping = {
       -- When loading a CSV file, we need to provide information about which column
@@ -19,7 +19,7 @@ local Example = {
     },
     -- Add a unit to interpret the points to be in kilometers rather than meters
     Unit = "Km",
-    -- Add some labels. We also need to enable them for them ot be visible.
+    -- Add some labels. We also need to enable them for them to be visible.
     -- Since we do not specify a label file (see below), the positions and text of
     -- of the labels will be set based on the information in the CSV file
     Labels = {
@@ -39,6 +39,13 @@ local Example = {
 local Example_LabelFromFile = {
   Identifier = "ExamplePoints_UnitsAndLabels_File",
   Parent = earthAsset.Earth.Identifier,
+  -- Rotate to not overlap with the other dataset
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, -0.5 * math.pi }
+    }
+  },
   Renderable = {
     Type = "RenderablePointCloud",
     File = asset.resource("data/dummydata.csv"),
