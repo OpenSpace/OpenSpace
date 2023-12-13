@@ -88,6 +88,8 @@ void RenderablePolygonCloud::deinitializeGL() {
     _polygonVao = 0;
 
     glDeleteTextures(1, &_pTexture);
+
+    RenderablePointCloud::deinitializeGL();
 }
 
 void RenderablePolygonCloud::bindTextureForRendering() const {

@@ -301,8 +301,8 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
                 valueStream >> entry.data[i];
 
                 // Check if value corresponds to a missing value
-                if (specs.has_value() && (*specs).missingDataValue.has_value()) {
-                    float missingDataValue = (*specs).missingDataValue.value();
+                if (specs.has_value() && specs->missingDataValue.has_value()) {
+                    float missingDataValue = specs->missingDataValue.value();
                     float diff = std::abs(entry.data[i] - missingDataValue);
                     if (diff < std::numeric_limits<float>::epsilon()) {
                         entry.data[i] = std::numeric_limits<float>::quiet_NaN();

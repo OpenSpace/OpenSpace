@@ -662,7 +662,7 @@ glm::vec2 Dataset::findValueRange(int variableIndex) const {
     float minValue = std::numeric_limits<float>::max();
     float maxValue = -std::numeric_limits<float>::max();
     for (const Dataset::Entry& e : entries) {
-        if (e.data.size() > 0) {
+        if (!e.data.empty()) {
             float value = e.data[variableIndex];
             if (std::isnan(value)) {
                 continue;
@@ -676,7 +676,7 @@ glm::vec2 Dataset::findValueRange(int variableIndex) const {
         }
     }
 
-    return { minValue, maxValue };
+    return glm::vec2(minValue, maxValue);
 }
 
 glm::vec2 Dataset::findValueRange(std::string_view variableName) const {

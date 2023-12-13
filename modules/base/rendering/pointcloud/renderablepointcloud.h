@@ -102,33 +102,37 @@ protected:
     bool _hasLabels = false;
 
     struct SizeSettings : properties::PropertyOwner {
-        SizeSettings(const ghoul::Dictionary& dictionary);
+        explicit SizeSettings(const ghoul::Dictionary& dictionary);
 
         struct SizeMapping : properties::PropertyOwner {
             SizeMapping();
             properties::BoolProperty enabled;
             properties::OptionProperty parameterOption;
-        } sizeMapping;
+        };
+        SizeMapping sizeMapping;
 
         properties::FloatProperty scaleExponent;
         properties::FloatProperty scaleFactor;
 
         properties::BoolProperty pixelSizeControl;
         properties::FloatProperty maxPixelSize;
-    } _sizeSettings;
+    };
+    SizeSettings _sizeSettings;
 
     struct ColorSettings : properties::PropertyOwner {
-        ColorSettings(const ghoul::Dictionary& dictionary);
+        explicit ColorSettings(const ghoul::Dictionary& dictionary);
         properties::Vec3Property pointColor;
         std::unique_ptr<ColorMappingComponent> colorMapping;
-    } _colorSettings;
+    };
+    ColorSettings _colorSettings;
 
     struct Fading : properties::PropertyOwner {
-        Fading(const ghoul::Dictionary& dictionary);
+        explicit Fading(const ghoul::Dictionary& dictionary);
         properties::Vec2Property fadeInDistances;
         properties::BoolProperty enabled;
         properties::BoolProperty invert;
-    } _fading;
+    };
+    Fading _fading;
 
     properties::BoolProperty _useSpriteTexture;
     properties::StringProperty _spriteTexturePath;

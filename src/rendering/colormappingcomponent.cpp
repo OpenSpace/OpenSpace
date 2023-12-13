@@ -151,7 +151,7 @@ namespace {
         std::optional<std::string> file;
 
         struct ColorMapParameter {
-            // The key for the datavar to use for color
+            // The key for the data variable to use for color
             std::string key;
 
             // An optional value range to use for coloring when this option is selected.
@@ -422,7 +422,7 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
     }
     else {
         // Otherwise, check if the selected columns exist
-        for (int i = 0; i < dataColumn.options().size(); ++i) {
+        for (size_t i = 0; i < dataColumn.options().size(); ++i) {
             std::string o = dataColumn.options()[i].description;
 
             bool found = false;

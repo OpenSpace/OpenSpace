@@ -42,7 +42,7 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "DataLoader: CSV";
-}
+} // namespace
 
 namespace openspace::dataloader::csv {
 
@@ -161,16 +161,14 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             // For now, all values are converted to float
             float value = readFloatData(strValue);
 
-            if (i == xColumn || i == yColumn || i == zColumn) {
-                if (i == xColumn) {
-                    entry.position.x = value;
-                }
-                if (i == yColumn) {
-                    entry.position.y = value;
-                }
-                if (i == zColumn) {
-                    entry.position.z = value;
-                }
+            if (i == xColumn) {
+                entry.position.x = value;
+            }
+            else if (i == yColumn) {
+                entry.position.y = value;
+            }
+            else if (i == zColumn) {
+                entry.position.z = value;
             }
             else {
                 entry.data.push_back(value);

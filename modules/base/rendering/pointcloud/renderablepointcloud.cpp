@@ -682,7 +682,7 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
         funcValue = 1.f - funcValue;
     }
 
-    return fadeValue * funcValue;;
+    return fadeValue * funcValue;
 }
 
 void RenderablePointCloud::renderBillboards(const RenderData& data,
@@ -855,8 +855,8 @@ void RenderablePointCloud::update(const UpdateData&) {
 
 int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 4; // position
-    n += _hasColorMapFile ? 1: 0;
-    n += _hasDatavarSize ? 1: 0;
+    n += _hasColorMapFile ? 1 : 0;
+    n += _hasDatavarSize ? 1 : 0;
     return n;
 }
 
@@ -887,7 +887,7 @@ void RenderablePointCloud::updateBufferData() {
     glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
 
     const int attibutesPerPoint = nAttributesPerPoint();
-    int attributeOffset= 0;
+    int attributeOffset = 0;
 
     GLint positionAttrib = _program->attributeLocation("in_position");
     glEnableVertexAttribArray(positionAttrib);
