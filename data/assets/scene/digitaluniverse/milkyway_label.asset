@@ -26,21 +26,6 @@ local HomeLabel = {
       MinMaxSize = { 16, 20 },
       Unit = "Mpc",
       TransformationMatrix = TransformMatrix
-    },
-    Coloring = {
-      FixedColor = { 1.0, 0.4, 0.2 }
-    },
-    -- Remove? There is no point...
-    Opacity = 0.99,
-    Unit = "Mpc",
-    TransformationMatrix = TransformMatrix,
-    Fading = {
-      FadeInDistances = { 0.05, 1.0 }
-    },
-    SizeSettings = {
-      ScaleExponent = 21.7,
-      MaxPixelSize = 8.22,
-      EnablePixelSizeControl = true
     }
   },
   GUI = {
