@@ -132,6 +132,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseSmoothNormalsInfo = {
+        "UseSmoothNormals",
+        "Use Smooth Normals",
+        "If ture, the tube is shaded using smooth normals. If false, every triangle "
+        "get its own normal, which can lead to harder shadows",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableTube)]] Parameters {
         // The input file with data for the tube
         std::string file;
@@ -169,6 +177,9 @@ namespace {
 
         // [[codegen::verbatim(WireLineWidthInfo.description)]]
         std::optional<float> wireLineWidth;
+
+        // [[codegen::verbatim(UseSmoothNormalsInfo.description)]]
+        std::optional<bool> useSmoothNormals;
     };
 #include "renderabletube_codegen.cpp"
 } // namespace
@@ -201,6 +212,7 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _addEdges(AddEdgesInfo, true)
     , _drawWireframe(DrawWireframeInfo, false)
     , _wireLineWidth(WireLineWidthInfo, 1.f, 1.f, 10.f)
+    , _useSmoothNormals(UseSmoothNormalsInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -249,6 +261,10 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
 
     _wireLineWidth = p.wireLineWidth.value_or(_wireLineWidth);
     addProperty(_wireLineWidth);
+
+    _useSmoothNormals.onChange([this]() { _tubeIsDirty = true; });
+    _useSmoothNormals = p.useSmoothNormals.value_or(_useSmoothNormals);
+    addProperty(_useSmoothNormals);
 
     addProperty(Fadeable::_opacity);
 }
@@ -458,6 +474,15 @@ void RenderableTube::updateTubeData() {
     _verticies.clear();
     _indicies.clear();
 
+    if (_useSmoothNormals) {
+        createSmoothTube(nPolygons, nPoints);
+    }
+    else {
+        createLowPolyTube(nPolygons, nPoints);
+    }
+}
+
+void RenderableTube::createSmoothTube(const size_t nPolygons, const size_t nPoints) {
     // Verticies
     // Calculate the center points for the first and last polygon
     glm::dvec3 firstCenter = glm::dvec3(0.0);
@@ -535,19 +560,6 @@ void RenderableTube::updateTubeData() {
 
     // Add the top
     if (_addEdges) {
-        // Add the last polygon's center point
-        PolygonVertex lastCenterPoint;
-        lastCenterPoint.position[0] = lastCenter.x;
-        lastCenterPoint.position[1] = lastCenter.y;
-        lastCenterPoint.position[2] = lastCenter.z;
-
-        lastCenterPoint.normal[0] = lastNormal.x;
-        lastCenterPoint.normal[1] = lastNormal.y;
-        lastCenterPoint.normal[2] = lastNormal.z;
-
-        lastCenterPoint.value = lastValue;
-        _verticies.push_back(lastCenterPoint);
-
         // Add the last polygon's sides with proper normals
         // This will ensure a hard shadow on the tube edge
         for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
@@ -563,6 +575,19 @@ void RenderableTube::updateTubeData() {
             lastsSidePoint.value = timePolygonPoint.value;
             _verticies.push_back(lastsSidePoint);
         }
+
+        // Add the last polygon's center point
+        PolygonVertex lastCenterPoint;
+        lastCenterPoint.position[0] = lastCenter.x;
+        lastCenterPoint.position[1] = lastCenter.y;
+        lastCenterPoint.position[2] = lastCenter.z;
+
+        lastCenterPoint.normal[0] = lastNormal.x;
+        lastCenterPoint.normal[1] = lastNormal.y;
+        lastCenterPoint.normal[2] = lastNormal.z;
+
+        lastCenterPoint.value = lastValue;
+        _verticies.push_back(lastCenterPoint);
     }
 
     // Indicies
@@ -587,6 +612,227 @@ void RenderableTube::updateTubeData() {
             _indicies.push_back(v0);
             _indicies.push_back(v2);
             _indicies.push_back(v3);
+        }
+    }
+
+    if (_addEdges) {
+        unsigned int firstCenterIndex = 0;
+        unsigned int lastCenterIndex = _verticies.size() - 1;
+
+        // Indices for first polygon that will be the bottom
+        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+            unsigned int vIndex = pointIndex + 1;
+            bool isLast = pointIndex == nPoints - 1;
+
+            unsigned int v0 = firstCenterIndex;
+            unsigned int v1 = vIndex;
+            unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
+
+            _indicies.push_back(v0);
+            _indicies.push_back(v1);
+            _indicies.push_back(v2);
+        }
+
+        // Indices for last polygon that will be the top
+        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+            unsigned int vIndex = lastCenterIndex - pointIndex - 1;
+            bool isLast = pointIndex == nPoints - 1;
+
+            unsigned int v0 = lastCenterIndex;
+            unsigned int v1 = vIndex;
+            unsigned int v2 = isLast ? v0 - 1 : vIndex - 1;
+
+            _indicies.push_back(v0);
+            _indicies.push_back(v1);
+            _indicies.push_back(v2);
+        }
+    }
+}
+
+void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoints) {
+    // Verticies
+    // Calculate the center points for the first and last polygon
+    glm::dvec3 firstCenter = glm::dvec3(0.0);
+    float firstValue = 0.f;
+    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
+        firstCenter += timePolygonPoint.coordinate;
+        firstValue += timePolygonPoint.value;
+    }
+    firstCenter /= nPoints;
+    firstValue /= nPoints;
+
+    glm::dvec3 lastCenter = glm::dvec3(0.0);
+    float lastValue = 0.f;
+    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
+        lastCenter += timePolygonPoint.coordinate;
+        lastValue += timePolygonPoint.value;
+    }
+    lastCenter /= nPoints;
+    lastValue /= nPoints;
+
+    // Calciulate the normals of the first and last poylgon
+    glm::dvec3 firstNormal = firstCenter - lastCenter;
+    glm::dvec3 lastNormal = lastCenter - firstCenter;
+
+    // Add the first polygon's center point
+    if (_addEdges) {
+        PolygonVertex firstCenterPoint;
+        firstCenterPoint.position[0] = firstCenter.x;
+        firstCenterPoint.position[1] = firstCenter.y;
+        firstCenterPoint.position[2] = firstCenter.z;
+
+        firstCenterPoint.normal[0] = firstNormal.x;
+        firstCenterPoint.normal[1] = firstNormal.y;
+        firstCenterPoint.normal[2] = firstNormal.z;
+
+        firstCenterPoint.value = firstValue;
+        _verticies.push_back(firstCenterPoint);
+
+        // Add the first polygon's sides
+        for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
+            PolygonVertex firstsSidePoint;
+            firstsSidePoint.position[0] = timePolygonPoint.coordinate.x;
+            firstsSidePoint.position[1] = timePolygonPoint.coordinate.y;
+            firstsSidePoint.position[2] = timePolygonPoint.coordinate.z;
+
+            firstsSidePoint.normal[0] = firstNormal.x;
+            firstsSidePoint.normal[1] = firstNormal.y;
+            firstsSidePoint.normal[2] = firstNormal.z;
+
+            firstsSidePoint.value = timePolygonPoint.value;
+            _verticies.push_back(firstsSidePoint);
+        }
+    }
+
+    // Add all the polygons that will create the sides of the tube
+    for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+            TimePolygon currentTimePolygon = _data[polyIndex];
+            TimePolygon nextTimePolygon = _data[polyIndex + 1];
+            bool isLast = pointIndex == nPoints - 1;
+
+            // Identify all the points that are included in this section
+            TimePolygonPoint v0 = currentTimePolygon.points[pointIndex];
+            TimePolygonPoint v1 = nextTimePolygon.points[pointIndex];
+            TimePolygonPoint v2 = isLast ?
+                nextTimePolygon.points[pointIndex + 1 - nPoints] :
+                nextTimePolygon.points[pointIndex + 1];
+            TimePolygonPoint v3 = isLast ?
+                currentTimePolygon.points[pointIndex + 1 - nPoints] :
+                currentTimePolygon.points[pointIndex + 1];
+
+            // Calculate normal of this section of the tube
+            glm::dvec3 toNextPoly = v1.coordinate - v0.coordinate;
+            glm::dvec3 toNextPoint = v3.coordinate - v0.coordinate;
+            glm::dvec3 normal = glm::cross(toNextPoly, toNextPoint);
+
+            // Create the Verticies for all points in this section
+            PolygonVertex sidePointTriangleV0, sidePointTriangleV1, sidePointTriangleV2,
+                sidePointTriangleV3;
+
+            // Position
+            sidePointTriangleV0.position[0] = v0.coordinate.x;
+            sidePointTriangleV0.position[1] = v0.coordinate.y;
+            sidePointTriangleV0.position[2] = v0.coordinate.z;
+
+            sidePointTriangleV1.position[0] = v1.coordinate.x;
+            sidePointTriangleV1.position[1] = v1.coordinate.y;
+            sidePointTriangleV1.position[2] = v1.coordinate.z;
+
+            sidePointTriangleV2.position[0] = v2.coordinate.x;
+            sidePointTriangleV2.position[1] = v2.coordinate.y;
+            sidePointTriangleV2.position[2] = v2.coordinate.z;
+
+            sidePointTriangleV3.position[0] = v3.coordinate.x;
+            sidePointTriangleV3.position[1] = v3.coordinate.y;
+            sidePointTriangleV3.position[2] = v3.coordinate.z;
+
+            // Value
+            sidePointTriangleV0.value = v0.value;
+            sidePointTriangleV1.value = v1.value;
+            sidePointTriangleV2.value = v2.value;
+            sidePointTriangleV3.value = v3.value;
+
+            // Normal
+            sidePointTriangleV0.normal[0] = normal.x;
+            sidePointTriangleV0.normal[1] = normal.y;
+            sidePointTriangleV0.normal[2] = normal.z;
+
+            sidePointTriangleV1.normal[0] = normal.x;
+            sidePointTriangleV1.normal[1] = normal.y;
+            sidePointTriangleV1.normal[2] = normal.z;
+
+            sidePointTriangleV2.normal[0] = normal.x;
+            sidePointTriangleV2.normal[1] = normal.y;
+            sidePointTriangleV2.normal[2] = normal.z;
+
+            sidePointTriangleV3.normal[0] = normal.x;
+            sidePointTriangleV3.normal[1] = normal.y;
+            sidePointTriangleV3.normal[2] = normal.z;
+
+            // Add all points to the list
+            _verticies.push_back(sidePointTriangleV0);
+            _verticies.push_back(sidePointTriangleV1);
+            _verticies.push_back(sidePointTriangleV2);
+            _verticies.push_back(sidePointTriangleV3);
+        }
+    }
+
+    // Add the top
+    if (_addEdges) {
+        // Add the last polygon's sides
+        for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
+            PolygonVertex lastsSidePoint;
+            lastsSidePoint.position[0] = timePolygonPoint.coordinate.x;
+            lastsSidePoint.position[1] = timePolygonPoint.coordinate.y;
+            lastsSidePoint.position[2] = timePolygonPoint.coordinate.z;
+
+            lastsSidePoint.normal[0] = lastNormal.x;
+            lastsSidePoint.normal[1] = lastNormal.y;
+            lastsSidePoint.normal[2] = lastNormal.z;
+
+            lastsSidePoint.value = timePolygonPoint.value;
+            _verticies.push_back(lastsSidePoint);
+        }
+
+        // Add the last polygon's center point
+        PolygonVertex lastCenterPoint;
+        lastCenterPoint.position[0] = lastCenter.x;
+        lastCenterPoint.position[1] = lastCenter.y;
+        lastCenterPoint.position[2] = lastCenter.z;
+
+        lastCenterPoint.normal[0] = lastNormal.x;
+        lastCenterPoint.normal[1] = lastNormal.y;
+        lastCenterPoint.normal[2] = lastNormal.z;
+
+        lastCenterPoint.value = lastValue;
+        _verticies.push_back(lastCenterPoint);
+    }
+
+    // Indicies
+    unsigned int nPointsPerSection = 4;
+    unsigned int vIndex = _addEdges ? nPoints + 1 : 0;
+
+    // Indices for side triangles
+    for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+            bool isLast = pointIndex == nPoints - 1;
+
+            unsigned int v0 = vIndex;
+            unsigned int v1 = v0 + 1;
+            unsigned int v2 = v1 + 1;
+            unsigned int v3 = v2 + 1;
+
+            // 2 triangles per sector
+            _indicies.push_back(v0);
+            _indicies.push_back(v1);
+            _indicies.push_back(v2);
+
+            _indicies.push_back(v0);
+            _indicies.push_back(v2);
+            _indicies.push_back(v3);
+
+            vIndex += nPointsPerSection;
         }
     }
 

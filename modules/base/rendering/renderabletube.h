@@ -88,6 +88,8 @@ private:
     void readDataFile();
 
     void updateTubeData();
+    void createSmoothTube(const size_t nPolygons, const size_t nPoints);
+    void createLowPolyTube(const size_t nPolygons, const size_t nPoints);
     void updateBufferData();
 
     // Properties
@@ -100,6 +102,7 @@ private:
     properties::BoolProperty _addEdges;
     properties::BoolProperty _drawWireframe;
     properties::FloatProperty _wireLineWidth;
+    properties::BoolProperty _useSmoothNormals;
 
     UniformCache(modelViewTransform, projectionTransform, normalTransform, color,
         opacity, hasTransferFunction, transferFunction, performShading, nLightSources,
