@@ -69,11 +69,14 @@ public:
     double remainingDistance() const;
 
     /**
-     * Return the remaining time to reach the target, based on the currently progressed
-     * time and the estimation for how long the path will take to traverse. Note that the
-     * computation is not exact.
+     * Estimate a value for the remaining time to reach the target, based on the
+     * currently progressed time and the estimation for how long the path will
+     * take to traverse. Note that the computation is not exact.
+     *
+     * \param speedScale The speed scale factor that may affect how fast the camera moves
+     * \return The estimated remaining time
      */
-    float estimatedRemainingTime() const;
+    float estimatedRemainingTime(float speedScale) const;
 
     /**
      * Return a vector of positions corresponding to the control points of the path's

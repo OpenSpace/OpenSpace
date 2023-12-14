@@ -163,8 +163,8 @@ double Path::remainingDistance() const {
     return pathLength() - _traveledDistance;
 }
 
-float Path::estimatedRemainingTime() const {
-    return _expectedDuration - _progressedTime;
+float Path::estimatedRemainingTime(float speedScale) const {
+    return _expectedDuration / speedScale - _progressedTime;
 }
 
 std::vector<glm::dvec3> Path::controlPoints() const {
@@ -185,7 +185,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
 
     const double prevDistance = _traveledDistance;
 
-    _progressedTime += dt;
+    _progressedTime += static_cast<float>(dt);
     _traveledDistance += displacement;
 
     CameraPose newPose;

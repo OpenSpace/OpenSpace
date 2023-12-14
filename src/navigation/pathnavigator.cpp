@@ -212,6 +212,13 @@ bool PathNavigator::isPaused() const {
     return hasCurrentPath() && !_isPlaying;
 }
 
+float PathNavigator::estimatedRemainingTimeInPath() const {
+    if (!hasCurrentPath()) {
+        return 0.f;
+    }
+    return _currentPath->estimatedRemainingTime(_speedScale);
+}
+
 void PathNavigator::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
