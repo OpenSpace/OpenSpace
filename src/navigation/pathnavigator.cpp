@@ -228,11 +228,19 @@ void PathNavigator::updateCamera(double deltaTime) {
     if (_setCameraToEndNextFrame) {
         LDEBUG("Skipped to end of camera path");
         _currentPath->quitPath();
-        camera()->setPose(_currentPath->endPoint().pose());
+
+        const interaction::Waypoint endPoint = _currentPath->endPoint();
+        camera()->setPose(endPoint.pose());
         global::navigationHandler->orbitalNavigator().setFocusNode(
-            _currentPath->endPoint().nodeIdentifier(),
+            endPoint.nodeIdentifier(),
             false
         );
+        if (endPoint.aimIdentifier().has_value()) {
+            global::navigationHandler->orbitalNavigator().setAimNode(
+                *endPoint.aimIdentifier()
+            );
+        }
+
         handlePathEnd();
         _setCameraToEndNextFrame = false;
         return;
@@ -264,6 +272,14 @@ void PathNavigator::updateCamera(double deltaTime) {
 
     if (_currentPath->hasReachedEnd()) {
         LINFO("Reached target");
+
+        // Also set the aim once the path is finished, if one should be set
+        if (_currentPath->endPoint().aimIdentifier().has_value()) {
+            global::navigationHandler->orbitalNavigator().setAimNode(
+                *_currentPath->endPoint().aimIdentifier()
+            );
+        }
+
         handlePathEnd();
         return;
     }

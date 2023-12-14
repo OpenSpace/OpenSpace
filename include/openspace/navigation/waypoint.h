@@ -47,6 +47,7 @@ public:
     glm::dquat rotation() const;
     SceneGraphNode* node() const;
     std::string nodeIdentifier() const;
+    std::optional<std::string> aimIdentifier() const;
     double validBoundingSphere() const;
 
 private:
@@ -54,6 +55,11 @@ private:
     std::string _nodeIdentifier;
     // To be able to handle nodes with faulty bounding spheres
     double _validBoundingSphere = 0.0;
+
+    // Keep track of if there was an aim node, specified in for example the
+    // navigation state used to create this waypoint. It may be required in
+    // certain situations
+    std::optional<std::string> _aimNodeIdentifier;
 };
 
 /**
