@@ -53,7 +53,7 @@ public:
     };
 
     Path(Waypoint start, Waypoint end, Type type,
-        std::optional<double> duration = std::nullopt);
+        std::optional<float> duration = std::nullopt);
 
     Waypoint startPoint() const;
     Waypoint endPoint() const;
@@ -62,6 +62,18 @@ public:
      * Return the total length of the the curve for the path, in meters.
      */
     double pathLength() const;
+
+    /**
+     * Return the remaining distance to traverse, in meters.
+     */
+    double remainingDistance() const;
+
+    /**
+     * Return the remaining time to reach the target, based on the currently progressed
+     * time and the estimation for how long the path will take to traverse. Note that the
+     * computation is not exact.
+     */
+    float estimatedRemainingTime() const;
 
     /**
      * Return a vector of positions corresponding to the control points of the path's
@@ -170,11 +182,12 @@ private:
 
     std::unique_ptr<PathCurve> _curve;
 
-    double _speedFactorFromDuration = 1.0;
+    float _speedFactorFromDuration = 1.f;
+    float _expectedDuration = 0.f;
 
     // Playback variables
     double _traveledDistance = 0.0; // Meters
-    double _progressedTime = 0.0; // Time since playback started (seconds)
+    float _progressedTime = 0.f; // Time since playback started (seconds)
     bool _shouldQuit = false;
     CameraPose _prevPose;
 };

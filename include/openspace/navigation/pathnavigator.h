@@ -64,6 +64,7 @@ public:
     bool hasCurrentPath() const;
     bool hasFinished() const;
     bool isPlayingPath() const;
+    bool isPaused() const;
 
     void updateCamera(double deltaTime);
     void createPath(const ghoul::Dictionary& dictionary);

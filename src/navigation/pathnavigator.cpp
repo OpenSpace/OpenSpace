@@ -208,6 +208,10 @@ bool PathNavigator::isPlayingPath() const {
     return hasCurrentPath() && _isPlaying;
 }
 
+bool PathNavigator::isPaused() const {
+    return hasCurrentPath() && !_isPlaying;
+}
+
 void PathNavigator::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
