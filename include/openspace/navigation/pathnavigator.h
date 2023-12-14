@@ -103,7 +103,7 @@ private:
      */
     void findRelevantNodes();
 
-    void removeRollRotation(CameraPose& pose, double deltaTime);
+    void removeRollRotation(CameraPose& pose);
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;
