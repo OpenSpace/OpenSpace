@@ -270,7 +270,7 @@ void NavigationHandler::updateCameraTransitions() {
 
     using namespace std::string_literals;
     if (_inAnchorApproachSphere) {
-        if (currDistance > d * (af + InteractionHystersis)) {
+        if (currDistance > d * (af + InteractionHysteresis)) {
             // We left the approach sphere outwards
             _inAnchorApproachSphere = false;
 
@@ -295,7 +295,7 @@ void NavigationHandler::updateCameraTransitions() {
                 events::EventCameraFocusTransition::Transition::Exiting
             );
         }
-        else if (currDistance < d * (rf - InteractionHystersis)) {
+        else if (currDistance < d * (rf - InteractionHysteresis)) {
             // We transitioned from the approach sphere into the reach sphere
             _inAnchorApproachSphere = false;
             _inAnchorReachSphere = true;
@@ -322,7 +322,7 @@ void NavigationHandler::updateCameraTransitions() {
             );
         }
     }
-    else if (_inAnchorReachSphere && currDistance > d * (rf + InteractionHystersis)) {
+    else if (_inAnchorReachSphere && currDistance > d * (rf + InteractionHysteresis)) {
         // We transitioned from the reach sphere to the approach sphere
         _inAnchorReachSphere = false;
         _inAnchorApproachSphere = true;
@@ -349,7 +349,7 @@ void NavigationHandler::updateCameraTransitions() {
         );
     }
     else if (!_inAnchorApproachSphere && !_inAnchorReachSphere &&
-             currDistance < d * (af - InteractionHystersis))
+             currDistance < d * (af - InteractionHysteresis))
     {
         // We moved into the approach sphere
         _inAnchorApproachSphere = true;
