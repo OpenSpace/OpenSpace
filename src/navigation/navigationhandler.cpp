@@ -183,6 +183,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
     // If there is a state to set, do so immediately and then return
     if (_pendingState.has_value()) {
         applyPendingState();
+        updateCameraTransitions();
         return;
     }
 
@@ -268,97 +269,31 @@ void NavigationHandler::updateCameraTransitions() {
     const double af = anchorNode()->approachFactor();
     const double rf = anchorNode()->reachFactor();
 
-    using namespace std::string_literals;
-    if (_inAnchorApproachSphere) {
-        if (currDistance > d * (af + InteractionHysteresis)) {
-            // We left the approach sphere outwards
-            _inAnchorApproachSphere = false;
+    // @TODO: keep track of what was the last anchor node! Depending on it it changed, we
+    // may want to update shit
+    bool anchorWasChanged = anchorNode() != _lastAnchor;
+    _lastAnchor = anchorNode();
+    // TODO: handle
 
-            if (!anchorNode()->onExitAction().empty()) {
-                ghoul::Dictionary dict;
-                dict.setValue("Node", anchorNode()->identifier());
-                dict.setValue("Transition", "Exiting"s);
-                for (const std::string& action : anchorNode()->onExitAction()) {
-                    // No sync because events are always synced and sent to the connected
-                    // nodes and peers
-                    global::actionManager->triggerAction(
-                        action,
-                        dict,
-                        interaction::ActionManager::ShouldBeSynchronized::No
-                    );
-                }
-            }
+    // Updated checks compared to last time, so we can check if we are still in the
+    // approach or anchor sphere
+    bool isInApproachSphere = currDistance < d * af;
+    bool isInReachSphere = currDistance < d * rf;
 
-            global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
-                _camera,
-                anchorNode(),
-                events::EventCameraFocusTransition::Transition::Exiting
-            );
-        }
-        else if (currDistance < d * (rf - InteractionHysteresis)) {
-            // We transitioned from the approach sphere into the reach sphere
-            _inAnchorApproachSphere = false;
-            _inAnchorReachSphere = true;
+    // Compare these to the values from last frame, to trigger the correct transition
+    // events
+    bool wasInApproachSphere = _inAnchorApproachSphere;
+    bool wasInReachSphere = _inAnchorReachSphere;
+    _inAnchorApproachSphere = isInApproachSphere;
+    _inAnchorReachSphere = isInReachSphere;
 
-            if (!anchorNode()->onReachAction().empty()) {
-                ghoul::Dictionary dict;
-                dict.setValue("Node", anchorNode()->identifier());
-                dict.setValue("Transition", "Reaching"s);
-                for (const std::string& action : anchorNode()->onReachAction()) {
-                    // No sync because events are always synced and sent to the connected
-                    // nodes and peers
-                    global::actionManager->triggerAction(
-                        action,
-                        dict,
-                        interaction::ActionManager::ShouldBeSynchronized::No
-                    );
-                }
-            }
-
-            global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
-                _camera,
-                anchorNode(),
-                events::EventCameraFocusTransition::Transition::Reaching
-            );
-        }
-    }
-    else if (_inAnchorReachSphere && currDistance > d * (rf + InteractionHysteresis)) {
-        // We transitioned from the reach sphere to the approach sphere
-        _inAnchorReachSphere = false;
-        _inAnchorApproachSphere = true;
-
-        if (!anchorNode()->onRecedeAction().empty()) {
+    auto triggerApproachEvent = [this](const SceneGraphNode* node) {
+        using namespace std::string_literals;
+        if (!node->onApproachAction().empty()) {
             ghoul::Dictionary dict;
-            dict.setValue("Node", anchorNode()->identifier());
-            dict.setValue("Transition", "Receding"s);
-            for (const std::string& action : anchorNode()->onRecedeAction()) {
-                // No sync because events are always synced and sent to the connected
-                // nodes and peers
-                global::actionManager->triggerAction(
-                    action,
-                    dict,
-                    interaction::ActionManager::ShouldBeSynchronized::No
-                );
-            }
-        }
-
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
-            _camera,
-            anchorNode(),
-            events::EventCameraFocusTransition::Transition::Receding
-        );
-    }
-    else if (!_inAnchorApproachSphere && !_inAnchorReachSphere &&
-             currDistance < d * (af - InteractionHysteresis))
-    {
-        // We moved into the approach sphere
-        _inAnchorApproachSphere = true;
-
-        if (!anchorNode()->onApproachAction().empty()) {
-            ghoul::Dictionary dict;
-            dict.setValue("Node", anchorNode()->identifier());
+            dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Approaching"s);
-            for (const std::string& action : anchorNode()->onApproachAction()) {
+            for (const std::string& action : node->onApproachAction()) {
                 // No sync because events are always synced and sent to the connected
                 // nodes and peers
                 global::actionManager->triggerAction(
@@ -371,10 +306,110 @@ void NavigationHandler::updateCameraTransitions() {
 
         global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
             _camera,
-            anchorNode(),
+            node,
             events::EventCameraFocusTransition::Transition::Approaching
         );
+        LINFO(fmt::format("Approach {}", node->identifier()));
+    };
+
+    auto triggerReachEvent = [this](const SceneGraphNode* node) {
+        using namespace std::string_literals;
+        if (!node->onReachAction().empty()) {
+            ghoul::Dictionary dict;
+            dict.setValue("Node", node->identifier());
+            dict.setValue("Transition", "Reaching"s);
+            for (const std::string& action : node->onReachAction()) {
+                // No sync because events are always synced and sent to the connected
+                // nodes and peers
+                global::actionManager->triggerAction(
+                    action,
+                    dict,
+                    interaction::ActionManager::ShouldBeSynchronized::No
+                );
+            }
+        }
+
+        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+            _camera,
+            node,
+            events::EventCameraFocusTransition::Transition::Reaching
+        );
+        LINFO(fmt::format("`Reaching {}", node->identifier()));
+     };
+
+    auto triggerRecedeEvent = [this](const SceneGraphNode* node) {
+        using namespace std::string_literals;
+        if (!node->onRecedeAction().empty()) {
+            ghoul::Dictionary dict;
+            dict.setValue("Node", node->identifier());
+            dict.setValue("Transition", "Receding"s);
+            for (const std::string& action : node->onRecedeAction()) {
+                // No sync because events are always synced and sent to the connected
+                // nodes and peers
+                global::actionManager->triggerAction(
+                    action,
+                    dict,
+                    interaction::ActionManager::ShouldBeSynchronized::No
+                );
+            }
+        }
+
+        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+            _camera,
+            node,
+            events::EventCameraFocusTransition::Transition::Receding
+        );
+        LINFO(fmt::format("Recede from {}", node->identifier()));
+
+    };
+
+    auto triggerExitEvent = [this](const SceneGraphNode* node) {
+        using namespace std::string_literals;
+        if (!node->onExitAction().empty()) {
+            ghoul::Dictionary dict;
+            dict.setValue("Node", node->identifier());
+            dict.setValue("Transition", "Exiting"s);
+            for (const std::string& action : node->onExitAction()) {
+                // No sync because events are always synced and sent to the connected
+                // nodes and peers
+                global::actionManager->triggerAction(
+                    action,
+                    dict,
+                    interaction::ActionManager::ShouldBeSynchronized::No
+                );
+            }
+        }
+
+        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+            _camera,
+            node,
+            events::EventCameraFocusTransition::Transition::Exiting
+        );
+
+        LINFO(fmt::format("Exiting {}", node->identifier()));
+    };
+
+    if (_inAnchorApproachSphere && !wasInApproachSphere) {
+        // Transitioned into the approach sphere from somewhere further away => approach
+        triggerApproachEvent(anchorNode());
     }
+
+    if (_inAnchorReachSphere && !wasInReachSphere) {
+        // Transitioned into the reach sphere from somewhere further away => reach
+        triggerReachEvent(anchorNode());
+    }
+
+    if (!_inAnchorReachSphere && wasInReachSphere) {
+        // Transitioned out of the reach sphere => recede / move away
+        triggerRecedeEvent(anchorNode());
+    }
+
+    if (!_inAnchorApproachSphere && wasInApproachSphere) {
+        // We transitioned out of the approach sphere => on exit
+        triggerExitEvent(anchorNode());
+    }
+
+    // TODO: handle exit events and such of the anchor node that was last frame, if it changed quickly
 }
 
 void NavigationHandler::resetNavigationUpdateVariables() {
