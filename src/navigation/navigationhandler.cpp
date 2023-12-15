@@ -269,12 +269,6 @@ void NavigationHandler::updateCameraTransitions() {
     const double af = anchorNode()->approachFactor();
     const double rf = anchorNode()->reachFactor();
 
-    // @TODO: keep track of what was the last anchor node! Depending on it it changed, we
-    // may want to update shit
-    bool anchorWasChanged = anchorNode() != _lastAnchor;
-    _lastAnchor = anchorNode();
-    // TODO: handle
-
     // Updated checks compared to last time, so we can check if we are still in the
     // approach or anchor sphere
     bool isInApproachSphere = currDistance < d * af;
@@ -360,7 +354,6 @@ void NavigationHandler::updateCameraTransitions() {
             events::EventCameraFocusTransition::Transition::Receding
         );
         LINFO(fmt::format("Recede from {}", node->identifier()));
-
     };
 
     auto triggerExitEvent = [this](const SceneGraphNode* node) {
@@ -389,27 +382,50 @@ void NavigationHandler::updateCameraTransitions() {
         LINFO(fmt::format("Exiting {}", node->identifier()));
     };
 
-    if (_inAnchorApproachSphere && !wasInApproachSphere) {
-        // Transitioned into the approach sphere from somewhere further away => approach
-        triggerApproachEvent(anchorNode());
+    bool anchorWasChanged = anchorNode() != _lastAnchor;
+    if (anchorWasChanged) {
+        // The anchor was changed between frames, so the transitions we have to check
+        // are a bit different. Just directly trigger the relevant events for the
+        // repsective node
+        if (wasInReachSphere) {
+            triggerRecedeEvent(_lastAnchor);
+        }
+
+        if (wasInApproachSphere) {
+            triggerExitEvent(_lastAnchor);
+        }
+
+        if (_inAnchorApproachSphere) {
+            triggerApproachEvent(anchorNode());
+        }
+
+        if (_inAnchorReachSphere) {
+            triggerReachEvent(anchorNode());
+        }
+    }
+    else {
+        if (_inAnchorApproachSphere && !wasInApproachSphere) {
+            // Transitioned into the approach sphere from somewhere further away => approach
+            triggerApproachEvent(anchorNode());
+        }
+
+        if (_inAnchorReachSphere && !wasInReachSphere) {
+            // Transitioned into the reach sphere from somewhere further away => reach
+            triggerReachEvent(anchorNode());
+        }
+
+        if (!_inAnchorReachSphere && wasInReachSphere) {
+            // Transitioned out of the reach sphere => recede / move away
+            triggerRecedeEvent(anchorNode());
+        }
+
+        if (!_inAnchorApproachSphere && wasInApproachSphere) {
+            // We transitioned out of the approach sphere => on exit
+            triggerExitEvent(anchorNode());
+        }
     }
 
-    if (_inAnchorReachSphere && !wasInReachSphere) {
-        // Transitioned into the reach sphere from somewhere further away => reach
-        triggerReachEvent(anchorNode());
-    }
-
-    if (!_inAnchorReachSphere && wasInReachSphere) {
-        // Transitioned out of the reach sphere => recede / move away
-        triggerRecedeEvent(anchorNode());
-    }
-
-    if (!_inAnchorApproachSphere && wasInApproachSphere) {
-        // We transitioned out of the approach sphere => on exit
-        triggerExitEvent(anchorNode());
-    }
-
-    // TODO: handle exit events and such of the anchor node that was last frame, if it changed quickly
+    _lastAnchor = anchorNode();
 }
 
 void NavigationHandler::resetNavigationUpdateVariables() {
