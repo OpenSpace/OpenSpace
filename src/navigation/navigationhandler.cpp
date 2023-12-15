@@ -303,7 +303,6 @@ void NavigationHandler::updateCameraTransitions() {
             node,
             events::EventCameraFocusTransition::Transition::Approaching
         );
-        LINFO(fmt::format("Approach {}", node->identifier()));
     };
 
     auto triggerReachEvent = [this](const SceneGraphNode* node) {
@@ -328,7 +327,6 @@ void NavigationHandler::updateCameraTransitions() {
             node,
             events::EventCameraFocusTransition::Transition::Reaching
         );
-        LINFO(fmt::format("`Reaching {}", node->identifier()));
      };
 
     auto triggerRecedeEvent = [this](const SceneGraphNode* node) {
@@ -353,7 +351,6 @@ void NavigationHandler::updateCameraTransitions() {
             node,
             events::EventCameraFocusTransition::Transition::Receding
         );
-        LINFO(fmt::format("Recede from {}", node->identifier()));
     };
 
     auto triggerExitEvent = [this](const SceneGraphNode* node) {
@@ -378,8 +375,6 @@ void NavigationHandler::updateCameraTransitions() {
             node,
             events::EventCameraFocusTransition::Transition::Exiting
         );
-
-        LINFO(fmt::format("Exiting {}", node->identifier()));
     };
 
     bool anchorWasChanged = anchorNode() != _lastAnchor;

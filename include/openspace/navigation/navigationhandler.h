@@ -181,7 +181,6 @@ private:
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
-    static constexpr double InteractionHysteresis = 0.0125;
     bool _inAnchorApproachSphere = false;
     bool _inAnchorReachSphere = false;
     const SceneGraphNode* _lastAnchor = nullptr;
