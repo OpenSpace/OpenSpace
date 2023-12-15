@@ -42,6 +42,10 @@ void TriggerProperty::set(std::any) {
     notifyChangeListeners();
 }
 
+void TriggerProperty::trigger() {
+    notifyChangeListeners();
+}
+
 std::string TriggerProperty::jsonValue() const {
     return "true";
 }

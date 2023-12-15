@@ -314,6 +314,7 @@ documentation::Documentation ConvertRecFormatTask::documentation() {
     return {
         "ConvertRecFormatTask",
         "convert_format_task",
+        "",
         {
             {
                 "InputFilePath",

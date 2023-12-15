@@ -1,7 +1,7 @@
 -- This is a blank scene that that just sets up the default menus/dasboard/keys, etc.
 
 -- Specifying which other assets should be loaded in this scene
-asset.require("spice/base")
+asset.require("spice/core")
 
 asset.require("dashboard/default_dashboard")
 -- Load default key bindings applicable to most scenes

@@ -54,8 +54,8 @@ public:
 
     struct PropertyOwnerInfo {
         std::string identifier;
-        std::string guiName = "";
-        std::string description = "";
+        std::string guiName;
+        std::string description;
     };
 
     /**
@@ -63,7 +63,7 @@ public:
      *
      * \param info The PropertyOwnerInfo struct that contains the
      *             #PropertyOwnerInfo::identifier, #PropertyOwnerInfo::guiName, and
-     *             #PropertyOwnerInfo::description of this PropertyOwner.
+     *             #PropertyOwnerInfo::description of this PropertyOwner
      *
      * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any whitespaces
      * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any `.`
@@ -141,11 +141,11 @@ public:
 
     /**
      * Retrieves a Property identified by \p uri from this PropertyOwner. If \p uri does
-     * not contain a `.` the identifier must refer to a Property directly owned
-     * by this PropertyOwner. If the identifier contains one or more `.`, the
-     * first part of the name will be recursively extracted and used as a name for a
-     * sub-owner and only the last part of the identifier is referring to a Property owned
-     * by PropertyOwner named by the second-but-last name.
+     * not contain a `.` the identifier must refer to a Property directly owned by this
+     * PropertyOwner. If the identifier contains one or more `.`, the first part of the
+     * name will be recursively extracted and used as a name for a sub-owner and only the
+     * last part of the identifier is referring to a Property owned by PropertyOwner named
+     * by the second-but-last name.
      *
      * \param uri The identifier of the Property that should be extracted
      * \return If the Property cannot be found, `nullptr` is returned, otherwise the
@@ -155,19 +155,20 @@ public:
 
     /**
      * This method checks if a Property with the provided \p uri exists in this
-     * PropertyOwner (or any sub-owner). If the identifier contains one or more
-     * `.`, the first part of the name will be recursively extracted and is
-     * used as a name for a sub-owner and only the last part of the identifier is
-     * referring to a Property owned by PropertyOwner named by the second-but-last name.
+     * PropertyOwner (or any sub-owner). If the identifier contains one or more `.`, the
+     * first part of the name will be recursively extracted and is used as a name for a
+     * sub-owner and only the last part of the identifier is referring to a Property owned
+     * by PropertyOwner named by the second-but-last name.
      *
-     * \return `true` if the \p uri refers to a Property; `false` otherwise.
+     * \return `true` if the \p uri refers to a Property; `false` otherwise
      */
     bool hasProperty(const std::string& uri) const;
 
     /**
-    * This method checks if a Property exists in this PropertyOwner.
-    * \return `true` if the Property existed, `false` otherwise.
-    */
+     * This method checks if a Property exists in this PropertyOwner.
+     *
+     * \return `true` if the Property existed, `false` otherwise
+     */
     bool hasProperty(const Property* prop) const;
 
     void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
@@ -185,11 +186,11 @@ public:
     /**
      * This method returns the direct sub-owner of this PropertyOwner with the provided
      * \p identifier. This means that `identifier` cannot contain any `.` as this
-     * character is not allowed in PropertyOwner names. If the \p name does not name a
-     * valid sub-owner of this PropertyOwner, a `nullptr` will be returned.
+     * character is not allowed in PropertyOwner names. If the \p identifier does not name
+     * a valid sub-owner of this PropertyOwner, a `nullptr` will be returned.
      *
      * \param identifier The identifier of the sub-owner that should be returned
-     * \return The PropertyOwner with the given \p name, or `nullptr`
+     * \return The PropertyOwner with the given \p identifier, or `nullptr`
      */
     PropertyOwner* propertySubOwner(const std::string& identifier) const;
 
@@ -294,7 +295,9 @@ public:
      */
     void removeTag(const std::string& tag);
 
-    // Generate JSON for documentation
+    /**
+     * Generate JSON for documentation.
+     */
     nlohmann::json generateJson() const;
 
 protected:

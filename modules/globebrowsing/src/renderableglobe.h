@@ -43,6 +43,7 @@
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
+#include <memory>
 
 namespace openspace::documentation { struct Documentation; }
 
@@ -156,38 +157,35 @@ private:
     properties::PropertyOwner _shadowMappingPropertyOwner;
 
     /**
-     * Test if a specific chunk can safely be culled without affecting the rendered
-     * image.
+     * Test if a specific chunk can safely be culled without affecting the rendered image.
      *
-     * Goes through all available `ChunkCuller`s and check if any of them
-     * allows culling of the `Chunk`s in question.
+     * Goes through all available `ChunkCuller`s and check if any of them allows culling
+     * of the `Chunk`s in question.
      */
     bool testIfCullable(const Chunk& chunk, const RenderData& renderData,
         const BoundingHeights& heights, const glm::dmat4& mvp) const;
 
     /**
-     * Gets the desired level which can be used to determine if a chunk should split
-     * or merge.
+     * Gets the desired level which can be used to determine if a chunk should split or
+     * merge.
      *
-     * Using `ChunkLevelEvaluator`s, the desired level can be higher or
-     * lower than the current level of the `Chunks`s
-     * `TileIndex`. If the desired level is higher than that of the
-     * `Chunk`, it wants to split. If it is lower, it wants to merge with
-     * its siblings.
+     * Using `ChunkLevelEvaluator`s, the desired level can be higher or lower than the
+     * current level of the `Chunks`s `TileIndex`. If the desired level is higher than
+     * that of the `Chunk`, it wants to split. If it is lower, it wants to merge with its
+     * siblings.
      */
     int desiredLevel(const Chunk& chunk, const RenderData& renderData,
         const BoundingHeights& heights) const;
 
     /**
-     * Calculates the height from the surface of the reference ellipsoid to the
-     * height mapped surface.
+     * Calculates the height from the surface of the reference ellipsoid to the height
+     * mapped surface.
      *
      * The height can be negative if the height map contains negative values.
      *
-     * \param `position` is the position of a point that gets geodetically
-     * projected on the reference ellipsoid. `position` must be in
-     * cartesian model space.
-     * \returns the height from the reference ellipsoid to the globe surface.
+     * \param `position` is the position of a point that gets geodetically projected on
+     *        the reference ellipsoid. `position` must be in Cartesian model space
+     * \return The height from the reference ellipsoid to the globe surface
      */
     float getHeight(const glm::dvec3& position) const;
 
@@ -197,26 +195,26 @@ private:
 
     /**
      * Chunks can be rendered either globally or locally. Global rendering is performed
-     * in the model space of the globe. With global rendering, the vertex positions
-     * of a chunk are calculated in the vertex shader by transforming the geodetic
-     * coordinates of the chunk to model space coordinates. We can only achieve floating
-     * point precision by doing this which means that the camera too close to a global
-     * tile will lead to jagging. We only render global chunks for lower chunk levels.
+     * in the model space of the globe. With global rendering, the vertex positions of a
+     * chunk are calculated in the vertex shader by transforming the geodetic coordinates
+     * of the chunk to model space coordinates. We can only achieve floating point
+     * precision by doing this which means that the camera too close to a global tile will
+     * lead to jagging. We only render global chunks for lower chunk levels.
      */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
         const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
     );
 
     /**
-     * Local rendering of chunks are done using linear interpolation in camera space.
-     * All four corner points of the chunk are calculated in double precision on the
-     * CPU and transformed to camera space with double precision matrix transforms.
-     * These positions can then be cast to floats and uploaded to the vertex shader.
-     * The vertex shader rendering performs linear interpolation between the four
-     * corner points to get the resulting chunk. This means that there will be an error
-     * due to the curvature of the globe. The smaller the patch is (with higher chunk
-     * levels) the better the approximation becomes. This is why we only render local
-     * chunks for higher chunk levels.
+     * Local rendering of chunks are done using linear interpolation in camera space. All
+     * four corner points of the chunk are calculated in double precision on the CPU and
+     * transformed to camera space with double precision matrix transforms. These
+     * positions can then be cast to floats and uploaded to the vertex shader. The vertex
+     * shader rendering performs linear interpolation between the four corner points to
+     * get the resulting chunk. This means that there will be an error due to the
+     * curvature of the globe. The smaller the patch is (with higher chunk levels) the
+     * better the approximation becomes. This is why we only render local chunks for
+     * higher chunk levels.
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
         const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
@@ -301,10 +299,8 @@ private:
     Layer* _lastChangedLayer = nullptr;
 
     // Components
-    RingsComponent _ringsComponent;
-    ShadowComponent _shadowComponent;
-    bool _hasRings = false;
-    bool _hasShadows = false;
+    std::unique_ptr<RingsComponent> _ringsComponent;
+    std::unique_ptr<ShadowComponent> _shadowComponent;
 
     // Labels
     GlobeLabelsComponent _globeLabelsComponent;

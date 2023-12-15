@@ -1,5 +1,6 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels344 = asset.require("../kernels344")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +10,8 @@ local Metis = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "METIS",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Metis,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -40,8 +41,8 @@ local MetisTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "METIS",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Metis,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.117912037,
@@ -64,8 +65,8 @@ local MetisLabel = {
   Identifier = "MetisLabel",
   Parent = Metis.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Metis",
     FontSize = 50.0,
     Size = 5.6,
@@ -91,8 +92,8 @@ local Adrastea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ADRASTEA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Adrastea,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -122,8 +123,8 @@ local AdrasteaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ADRASTEA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Adrastea,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.2982638889,
@@ -146,8 +147,8 @@ local AdrasteaLabel = {
   Identifier = "AdrasteaLabel",
   Parent = Adrastea.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Adrastea",
     FontSize = 50.0,
     Size = 5.6,
@@ -173,8 +174,8 @@ local Amalthea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AMALTHEA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Amalthea,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -204,8 +205,8 @@ local AmaltheaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AMALTHEA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Amalthea,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.4981828704,
@@ -228,8 +229,8 @@ local AmaltheaLabel = {
   Identifier = "AmaltheaLabel",
   Parent = Amalthea.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Amalthea",
     FontSize = 50.0,
     Size = 5.6,
@@ -255,8 +256,8 @@ local Thebe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "THEBE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Thebe,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -286,8 +287,8 @@ local ThebeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "THEBE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Thebe,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.6745023148,
@@ -310,8 +311,8 @@ local ThebeLabel = {
   Identifier = "ThebeLabel",
   Parent = Thebe.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Thebe",
     FontSize = 50.0,
     Size = 5.6,
@@ -333,9 +334,6 @@ local ThebeLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
-
   openspace.addSceneGraphNode(Metis)
   openspace.addSceneGraphNode(MetisTrail)
   openspace.addSceneGraphNode(MetisLabel)
@@ -370,9 +368,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ThebeLabel)
   openspace.removeSceneGraphNode(ThebeTrail)
   openspace.removeSceneGraphNode(Thebe)
-
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 

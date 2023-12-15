@@ -163,7 +163,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
                 for (std::string_view k : dict.keys()) {
                     v.push_back(dict.value<std::string>(k));
                 }
-                list.set(v);
+                list = v;
             }
         };
 
@@ -171,9 +171,9 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     readList(DenyAddressesInfo.identifier, _denyAddresses);
     readList(RequirePasswordAddressesInfo.identifier, _requirePasswordAddresses);
 
-    this->setIdentifier(identifier);
-    this->setGuiName(identifier);
-    this->setDescription("Settings for server interface " + identifier);
+    setIdentifier(identifier);
+    setGuiName(identifier);
+    setDescription("Settings for server interface " + identifier);
 
     const std::string type = config.value<std::string>(TypeInfo.identifier);
     if (type == TcpSocketType) {

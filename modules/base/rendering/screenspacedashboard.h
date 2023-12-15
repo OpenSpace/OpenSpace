@@ -61,10 +61,6 @@ public:
 private:
     Dashboard _dashboard;
     properties::BoolProperty _useMainDashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
 };
 
 } // namespace openspace

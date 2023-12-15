@@ -40,8 +40,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <cctype>
 #include <ctime>
 #include <mutex>

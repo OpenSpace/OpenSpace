@@ -28,9 +28,9 @@
 namespace openspace::interaction {
 
 /**
- * Class that acts as a smoothing filter to a variable. The filter has a step
- * response on a form that resembles the function y = 1-e^(-t/scale). The variable
- * will be updated as soon as it is set to a value (calling the set() function).
+ * Class that acts as a smoothing filter to a variable. The filter has a step response on
+ * a form that resembles the function y = 1-e^(-t/scale). The variable will be updated as
+ * soon as it is set to a value (calling the set() function).
  */
 template <typename T, typename ScaleType>
 class DelayedVariable {

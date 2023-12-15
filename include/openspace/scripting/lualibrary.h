@@ -33,15 +33,15 @@
 namespace openspace::scripting {
 
 /**
- * This structure represents a Lua library, itself consisting of a unique #name and
- * an arbitrary number of #functions
+ * This structure represents a Lua library, itself consisting of a unique #name and an
+ * arbitrary number of #functions.
  */
 struct LuaLibrary {
     /**
-    * This structure represents a Lua function with its #name, #function pointer
-    * #arguments describe the arguments this function takes, and the #helpText describing
-    * the function.
-    */
+     * This structure represents a Lua function with its #name, #function pointer
+     * #arguments describe the arguments this function takes, and the #helpText describing
+     * the function.
+     */
     struct Function {
         /// The name of the function
         std::string name;

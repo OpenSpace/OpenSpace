@@ -204,7 +204,7 @@ namespace {
         // Collect name, image url and credits
         std::string name = attribute(node, Name);
         if (std::islower(name[0])) {
-            // convert string to upper case
+            // convert first character in string to upper case
             name[0] = static_cast<char>(std::toupper(name[0]));
         }
 

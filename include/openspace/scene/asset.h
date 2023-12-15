@@ -41,15 +41,16 @@ class AssetManager;
  * 0-* number of other Assets that this Asset requires (through the `require` function in
  * Lua. There also is a list of requiring assets that contain all assets which require
  * this asset.
+ *
  * An asset goes through three external states. Starting out as unloaded when the instance
  * is newly created but the file has not been processed. In this case the #isLoaded,
  * #isSynchronized and the #isInitialized functions all return `false`. After the asset
- * has been loaded it is in the `Loaded` state (#isLoaded = true,
- * #isSynchronized = false, #isInitialized = false). After all registered synchronizations
- * finish successfully, the Asset transitions into the Synchronized state
- * (#isLoaded = true, #isSynchronized = true, #isInitialized = false) and after the final
- * initialization step, the asset is initialized (#isLoaded = true,
- * #isSynchronized = true and #isInitialized = true)
+ * has been loaded it is in the `Loaded` state (#isLoaded = true, #isSynchronized = false,
+ * #isInitialized = false). After all registered synchronizations finish successfully, the
+ * Asset transitions into the Synchronized state (#isLoaded = true,
+ * #isSynchronized = true, #isInitialized = false) and after the final initialization
+ * step, the asset is initialized (#isLoaded = true, #isSynchronized = true and
+ * #isInitialized = true)
  */
 class Asset {
 public:
@@ -109,21 +110,22 @@ public:
     /**
      * Updates the state of this Asset based on the latest synchronization being
      * successfully resolved. Depending on the sum state of all registered
-     * synchronizations this Asset's state changes to successfully Synchronized, or Failed
+     * synchronizations this Asset's state changes to successfully Synchronized, or
+     * Failed.
      */
     void setSynchronizationStateResolved();
 
     /**
      * Updates the state of this Asset based on the latest synchronization being rejected.
      * Depending on the sum state of all registered synchronizations this Asset's state
-     * changes to successfully Synchronized, or Failed
+     * changes to successfully Synchronized, or Failed.
      */
     void setSynchronizationStateRejected();
 
 
     /**
-     * Register a SceneGraphNodeIdentifier with the asset
-     * (used to associate Nodes with asset meta)
+     * Register a SceneGraphNodeIdentifier with the asset (used to associate Nodes with
+     * asset meta).
      */
     void addIdentifier(std::string identifier);
 
@@ -213,10 +215,11 @@ public:
     void deinitialize();
 
     /**
-     * Marks the passed \p child as being required by \p this Asset. If the \p child is
+     * Marks the passed \p child as being required by this Asset. If the \p child is
      * already required by this asset, this function does nothing.
      *
      * \param child The asset that is required by this asset
+     *
      * \pre \p child must not be nullptr
      */
     void require(Asset* child);
@@ -296,12 +299,16 @@ private:
      */
     void setState(State state);
 
-    /// Returns whether the Asset is synchronizing or has successfully synchronized
+    /**
+     * Returns whether the Asset is synchronizing or has successfully synchronized.
+     */
     bool isSyncingOrResolved() const;
 
-    /// Returns whether the Asset has been successfully synchronized, meaning that both
-    /// its own resource synchronizations are finished as well as all requiered assets are
-    /// finished synchronizing
+    /**
+     * Returns whether the Asset has been successfully synchronized, meaning that both its
+     * own resource synchronizations are finished as well as all requiered assets are
+     * finished synchronizing.
+     */
     bool isSyncResolveReady() const;
 
     /// The state that this Asset is currently in

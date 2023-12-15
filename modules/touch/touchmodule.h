@@ -48,15 +48,19 @@ public:
     TouchModule();
     ~TouchModule();
 
-    // Function to check if the given renderable type is one that should
-    // use direct maniuplation
+    /**
+     * Function to check if the given renderable type is one that should use direct
+     * manipulation.
+     */
     bool isDefaultDirectTouchType(std::string_view renderableType) const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
 
 private:
-    /// Returns true if new touch input occured since the last frame
+    /**
+     * Returns true if new touch input occured since the last frame.
+     */
     bool processNewInput();
 
     void clearInputs();

@@ -66,9 +66,9 @@ public:
     double latencyStandardDeviation() const;
 
     /**
-    * Returns the Lua library that contains all Lua functions available to affect the
-    * remote OS parallel connection.
-    */
+     * Returns the Lua library that contains all Lua functions available to affect the
+     * remote OS parallel connection.
+     */
     static scripting::LuaLibrary luaLibrary();
     ParallelConnection::Status status();
     int nConnections();

@@ -47,13 +47,13 @@ class SequenceParser;
  * to function the client must provide or write a parser that fills the ImageSequencers
  * private members.
  *
- * \see SequenceParser
- * \see ImageSequencer::runSequenceParser(SequenceParser* parser)
+ * \sa SequenceParser
+ * \sa ImageSequencer::runSequenceParser(SequenceParser* parser)
  */
 class ImageSequencer {
 public:
     /**
-     * Singleton instantiation
+     * Singleton instantiation.
      */
     static ImageSequencer* _instance;
 
@@ -82,6 +82,7 @@ public:
 
     /**
      * Runs parser and recieves the datastructures filled by it.
+     *
      * \see SequenceParser
      */
     void runSequenceParser(SequenceParser& parser);
@@ -128,7 +129,7 @@ public:
     float instrumentActiveTime(double time, const std::string& instrumentID) const;
 
     /**
-     * Returns latest captured image
+     * Returns latest captured image.
      */
     Image latestImageForInstrument(const std::string& instrumentID) const;
 
@@ -141,14 +142,16 @@ private:
      * This handles any types of ambiguities between the data and SPICE calls. This map is
      * composed of a key that is a string in the data to be translated and a Decoder that
      * holds the corresponding translation provided through as asset.
-     * \see Decoder
+     *
+     * \sa Decoder
      */
     std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
 
     /**
      * This is the main container of image data. The key is the target name, the value is
      * a subset of images.
-     * \see SequenceParser
+     *
+     * \sa SequenceParser
      */
     std::map<std::string, ImageSubset> _subsetMap;
 
@@ -168,7 +171,7 @@ private:
 
     /**
      * Holds the time ranges of each instruments on and off periods. An instrument
-     * rendering class may ask the ImageSequencer whether or not it
+     * rendering class may ask the ImageSequencer whether or not it.
      */
     std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
 

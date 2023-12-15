@@ -1,5 +1,6 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels344 = asset.require("../kernels344")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +10,8 @@ local Eupheme = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "560",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Eupheme,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -40,8 +41,8 @@ local EuphemeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "560",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Eupheme,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 628.06,
@@ -64,8 +65,8 @@ local EuphemeLabel = {
   Identifier = "EuphemeLabel",
   Parent = Eupheme.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Eupheme",
     FontSize = 70.0,
     Size = 7.1,
@@ -91,8 +92,8 @@ local S2003J19 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "561",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J19,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -122,8 +123,8 @@ local S2003J19Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "561",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J19,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 699.12,
@@ -146,8 +147,8 @@ local S2003J19Label = {
   Identifier = "S2003J19Label",
   Parent = S2003J19.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2003 J 19",
     FontSize = 70.0,
     Size = 7.1,
@@ -173,8 +174,8 @@ local Valetudo = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "562",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Valetudo,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -204,8 +205,8 @@ local ValetudoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "562",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Valetudo,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 527.41,
@@ -228,8 +229,8 @@ local ValetudoLabel = {
   Identifier = "ValetudoLabel",
   Parent = Valetudo.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Valetudo",
     FontSize = 70.0,
     Size = 7.1,
@@ -251,9 +252,6 @@ local ValetudoLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-
-
   openspace.addSceneGraphNode(Eupheme)
   openspace.addSceneGraphNode(EuphemeTrail)
   openspace.addSceneGraphNode(EuphemeLabel)
@@ -279,9 +277,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EuphemeLabel)
   openspace.removeSceneGraphNode(EuphemeTrail)
   openspace.removeSceneGraphNode(Eupheme)
-
-
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Eupheme)

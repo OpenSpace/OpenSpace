@@ -1,4 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +10,8 @@ local UranusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "URANUS",
-      Observer = "SSB"
+      Target = coreKernels.ID.Uranus,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.60, 0.95, 1.00 },
     Period = 30588.740,
@@ -40,7 +41,7 @@ asset.export(UranusTrail)
 asset.meta = {
   Name = "Uranus Trail",
   Version = "1.1",
-  Description = "Main trail of Uranus. Data from NASA Spice (see base spice asset)",
+  Description = "Main trail of Uranus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

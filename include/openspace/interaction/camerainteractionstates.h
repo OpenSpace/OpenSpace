@@ -33,9 +33,9 @@ namespace openspace::interaction {
 class CameraInteractionStates {
 public:
     /**
-     * \param sensitivity
-     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
-     * interaction. Lower value will make it harder to move the camera.
+     * \param sensitivity Interaction sensitivity
+     * \param velocityScaleFactor Can be set to 60 to remove the inertia of the
+     *        interaction. Lower value will make it harder to move the camera
      */
     CameraInteractionStates(double sensitivity, double velocityScaleFactor);
     virtual ~CameraInteractionStates() = default;
@@ -54,9 +54,9 @@ public:
 
     void resetVelocities();
 
-    /*
-     * Returns true if any of the velocities are larger than zero,
-     * i.e. wether an interaction happened
+    /**
+     * Returns true if any of the velocities are larger than zero, i.e. wether an
+     * interaction happened.
      */
     bool hasNonZeroVelocities(bool checkOnlyMovement = false);
 

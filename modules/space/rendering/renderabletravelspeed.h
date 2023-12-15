@@ -84,8 +84,8 @@ private:
     double _timeSinceStart = -1.0;
 
     ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
-    // The vertex attribute location for position
-    // must correlate to layout location in vertex shader
+    // The vertex attribute location for position must correlate to layout location in
+    // vertex shader
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;
 };

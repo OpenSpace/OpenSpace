@@ -14,8 +14,8 @@ local RimeBase = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_RIME_BASE",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.RimeBase,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_RIME_BASE",
@@ -44,8 +44,8 @@ local Rime = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_RIME",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.Rime,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_RIME",

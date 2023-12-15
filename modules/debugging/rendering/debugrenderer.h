@@ -37,93 +37,91 @@ namespace ghoul::opengl { class ProgramObject; }
 namespace openspace {
 
 /**
- * A helper class for quick rendering of vertices IN clipping space.
- * The class is practically stateless. It only stores a ghoul::opengl::ProgramObject
- * which can be reused despite the fact that rendering calls are invoked from different
- * callers. Therefore a static reference is provided for convenience which is accessed
- * through ref(). Note: That constructors are still public and the class is not a strict
- * singleton.
+ * A helper class for quick rendering of vertices IN clipping space. The class is
+ * practically stateless. It only stores a ghoul::opengl::ProgramObject which can be
+ * reused despite the fact that rendering calls are invoked from different callers.
+ * Therefore a static reference is provided for convenience which is accessed through
+ * #ref. Note: That constructors are still public and the class is not a strict singleton.
  */
 class DebugRenderer {
 public:
     using Vertices = std::vector<glm::vec4>;
 
     /**
-     *  Consider using ref() before creating a new default instance!
+     * Consider using ref() before creating a new default instance.
      */
     DebugRenderer();
 
     /**
-     *  Instantiate a new DebugRenderer with a custom shader program
+     * Instantiate a new DebugRenderer with a custom shader program.
      */
     DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject);
     ~DebugRenderer() = default;
 
     /**
-     *  Access the static reference
+     * Access the static reference.
      */
     static const DebugRenderer& ref();
 
     /**
-     *  Render the vector of clipping space points in the specified mode and color.
+     * Render the vector of clipping space points in the specified mode and color.
      */
     void renderVertices(const Vertices& clippingSpacePoints, GLenum mode,
         const glm::vec4& color = glm::vec4(1.f, 0.f, 0.f, 1.f)) const;
 
     /**
-     *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
-     *  The box corners should be ordered from smaller to larger,
-     *  first by x, the, y and finally z.
+     * Takes a vector of exactly 8 vertices, i.e. corner points in a box. The box corners
+     * should be ordered from smaller to larger, first by x, the, y and finally z.
      *
-     *  6-------7
-     *  |\      |\
-     *  | 2-------3
-     *  4 | - - 5 |
-     *   \|      \|
-     *    0-------1
-     *
+     * ```
+     * 6-------7
+     * |\      |\
+     * | 2-------3
+     * 4 | - - 5 |
+     *  \|      \|
+     *   0-------1
+     * ```
      */
     void renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
         const glm::vec4& rgba = glm::vec4(1.f, 0.f, 0.f, 1.f)) const;
 
     /**
-     *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
-     *  The box corners should be ordered from smaller to larger,
-     *  first by x, the, y and finally z.
+     * Takes a vector of exactly 8 vertices, i.e. corner points in a box. The box corners
+     * should be ordered from smaller to larger, first by x, the, y and finally z.
      *
-     *  6-------7
-     *  |\      |\
-     *  | 2-------3
-     *  4 | - - 5 |
-     *   \|      \|
-     *    0-------1
-     *
+     * ```
+     * 6-------7
+     * |\      |\
+     * | 2-------3
+     * 4 | - - 5 |
+     *  \|      \|
+     *   0-------1
+     * ```
      */
     void renderBoxEdges(const Vertices& clippingSpaceBoxCorners,
         const glm::vec4& rgba = glm::vec4(1.f, 0.f, 0.f, 1.f)) const;
 
     /**
-      *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
-      *  The box corners should be ordered from smaller to larger,
-      *  first by x, the, y and finally z.
-      *
-      *  6-------7
-      *  |\      |\
-      *  | 2-------3
-      *  4 | - - 5 |
-      *   \|      \|
-      *    0-------1
-      *
-      */
+     * Takes a vector of exactly 8 vertices, i.e. corner points in a box. The box corners
+     * should be ordered from smaller to larger, first by x, the, y and finally z.
+     *
+     * ```
+     * 6-------7
+     * |\      |\
+     * | 2-------3
+     * 4 | - - 5 |
+     *  \|      \|
+     *   0-------1
+     * ```
+     */
     void renderNiceBox(const Vertices& clippingSpaceBoxCorners,
         const glm::vec4& rgba = glm::vec4(1.f, 0.f, 0.f, 0.3f)) const;
 
     /**
-     *  Input arguments:
-     *  1. const RenderData& data:     defines position and camera that we will see the
-     *                                 other cameras view frustum from
-     *  2. const Camera& otherCamera:  The camera who's view frustum is to be rendered
-     *  3. RGBA rgba                   Color to draw the view frustum with
+     * \param data Defines position and camera that we will see the other cameras view
+     *             frustum from
+     * \param otherCamera The camera who's view frustum is to be rendered
+     * \param rgba Color to draw the view frustum with
      */
     void renderCameraFrustum(const RenderData& data, const Camera& otherCamera,
         const glm::vec4& rgba = glm::vec4(1.f, 1.f, 1.f, 0.3f)) const;
@@ -131,9 +129,8 @@ public:
 protected:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-
-    // A raw pointer for the reason that it should not be deleted by the static
-    // destructor and the normal destructor. This class has ownership
+    /// A raw pointer for the reason that it should not be deleted by the static
+    /// destructor and the normal destructor. This class has ownership
     static DebugRenderer* _reference;
 };
 

@@ -54,6 +54,14 @@
 namespace {
     constexpr std::string_view _loggerCat = "ShadowComponent";
 
+    // Texture coords in [0, 1], while clip coords in [-1, 1]
+    const glm::dmat4 ToTextureCoordsMatrix = glm::dmat4(
+        glm::dvec4(0.5, 0.0, 0.0, 0.0),
+        glm::dvec4(0.0, 0.5, 0.0, 0.0),
+        glm::dvec4(0.0, 0.0, 1.0, 0.0),
+        glm::dvec4(0.5, 0.5, 0.0, 1.0)
+    );
+
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
@@ -156,7 +164,7 @@ namespace {
         std::optional<int> distanceFraction;
 
         // [[codegen::verbatim(DepthMapSizeInfo.description)]]
-        std::optional<glm::ivec2> depthMapSize;
+        std::optional<glm::ivec2> depthMapSize [[codegen::greater({ 1280, 720 })]];
     };
 #include "shadowcomponent_codegen.cpp"
 } // namespace
@@ -312,7 +320,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     // The model transformation missing in the final shadow matrix is add when rendering
     // each object (using its transformations provided by the RenderData structure)
     _shadowData.shadowMatrix =
-        _toTextureCoordsMatrix * lightProjectionMatrix *
+        ToTextureCoordsMatrix * lightProjectionMatrix *
         _lightCamera->combinedViewMatrix();
 
 

@@ -33,15 +33,15 @@ namespace openspace::properties {
 
 /**
  * The OptionProperty is a property that provides a number of predefined (using the
- * addOption method) options consisting of a `description` and a `value`. The available
+ * #addOption method) options consisting of a `description` and a `value`. The available
  * options can be queried using the options method. Only values representing valid options
- * can be used to set this property, or an error will be logged
+ * can be used to set this property, or an error will be logged.
  */
 class OptionProperty : public IntProperty {
 public:
     /**
-     * The struct storing a single option consisting of an integer `value` and a
-     * `string` description.
+     * The struct storing a single option consisting of an integer `value` and a `string`
+     * description.
      */
     struct Option {
         int value;
@@ -57,7 +57,8 @@ public:
      * The constructor delegating the `identifier` and the `guiName` to its super class.
      *
      * \param info The PropertyInfo structure that contains all the required static
-     *        information for initializing this Property.
+     *        information for initializing this Property
+     *
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
@@ -67,7 +68,7 @@ public:
     * The constructor delegating the `identifier` and the `guiName` to its super class.
     *
     * \param info The PropertyInfo structure that contains all the required static
-    *        information for initializing this Property.
+    *        information for initializing this Property
     * \param displayType Optional DisplayType for GUI (default RADIO)
     *
     * \pre \p info.identifier must not be empty
@@ -123,7 +124,7 @@ public:
     const std::vector<Option>& options() const;
 
     /**
-     * This function removes all previous options from the OptionProperty
+     * This function removes all previous options from the OptionProperty.
      */
     void clearOptions();
 
@@ -151,10 +152,10 @@ public:
     const Option& option() const;
 
     /**
-    * Get the description of the option that matches `value`.
-    *
-    * \param value The value of the option
-    */
+     * Get the description of the option that matches `value`.
+     *
+     * \param value The value of the option
+     */
     std::string getDescriptionByValue(int value);
 
 private:

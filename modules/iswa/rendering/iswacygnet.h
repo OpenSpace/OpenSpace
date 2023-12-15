@@ -74,7 +74,7 @@ protected:
 
     /**
      * Registers the properties that are equal in all IswaCygnets regardless of being part
-     * of a group or not
+     * of a group or not.
      */
     virtual void registerProperties();
     virtual void unregisterProperties();
@@ -114,7 +114,7 @@ protected:
     virtual bool readyToRender() const = 0;
 
     /**
-     * Should set all uniforms needed to render
+     * Should set all uniforms needed to render.
      */
     virtual void setUniforms() = 0;
 

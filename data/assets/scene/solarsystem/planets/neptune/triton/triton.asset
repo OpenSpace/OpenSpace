@@ -1,21 +1,29 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
+
+
+local kernels = asset.resource({
+  Name = "Neptune Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "neptune_kernels",
+  Version = 2
+})
 
 
 local Triton = {
   Identifier = "Triton",
   Parent = transforms.NeptuneBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_TRITON",
-      DestinationFrame = "GALACTIC",
-    },
     Translation = {
       Type = "SpiceTranslation",
       Target = "TRITON",
-      Observer = "NEPTUNE BARYCENTER"
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_TRITON",
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -39,7 +47,7 @@ local TritonTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "TRITON",
-      Observer = "NEPTUNE BARYCENTER"
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 5.875,
@@ -56,8 +64,8 @@ local TritonLabel = {
   Identifier = "TritonLabel",
   Parent = Triton.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Triton",
     FontSize = 50.0,
     Size = 7.0,
@@ -79,8 +87,7 @@ local TritonLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep097)
-
+  openspace.spice.loadKernel(kernels .. "nep097.bsp")
 
   openspace.addSceneGraphNode(Triton)
   openspace.addSceneGraphNode(TritonTrail)
@@ -92,8 +99,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TritonTrail)
   openspace.removeSceneGraphNode(Triton)
 
-
-  openspace.spice.unloadKernel(kernel.nep097)
+  openspace.spice.unloadKernel(kernels .. "nep097.bsp")
 end)
 
 asset.export(Triton)

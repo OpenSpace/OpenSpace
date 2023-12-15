@@ -42,8 +42,7 @@ namespace documentation { struct Documentation; }
 class Translation;
 
 /**
- * Generates an arrow shape that points from the start node to the
- * end node
+ * Generates an arrow shape that points from the start node to the end node.
  */
 class RenderableNodeArrow : public Renderable {
 public:

@@ -46,20 +46,28 @@ struct LayerGroup : public properties::PropertyOwner {
     void initialize();
     void deinitialize();
 
-    /// Updates all layers tile providers within this group
+    /**
+     * Updates all layers tile providers within this group.
+     */
     void update();
 
     Layer* addLayer(const ghoul::Dictionary& layerDict);
     void deleteLayer(const std::string& layerName);
     void moveLayer(int oldPosition, int newPosition);
 
-    /// @returns const vector of all layers
+    /**
+     * \return const vector of all layers
+     */
     std::vector<Layer*> layers() const;
 
-    /// @returns const vector of all active layers
+    /**
+     * \return const vector of all active layers
+     */
     const std::vector<Layer*>& activeLayers() const;
 
-    /// @returns the size of the pile to be used in rendering of this layer
+    /**
+     * \return the size of the pile to be used in rendering of this layer
+     */
     int pileSize() const;
 
     bool layerBlendingEnabled() const;

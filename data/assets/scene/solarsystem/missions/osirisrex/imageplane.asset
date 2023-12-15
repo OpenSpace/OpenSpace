@@ -1,4 +1,5 @@
 local transforms = asset.require("./transforms")
+local kernels = asset.require("./kernels")
 
 
 
@@ -17,10 +18,10 @@ local ImagePlane = {
   Parent = transforms.BennuBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePlaneProjection",
-    Frame = "IAU_BENNU",
+    Frame = kernels.Frame.Bennu,
     DefaultTarget = BennuBodyId,
-    Spacecraft = "OSIRIS-REX",
-    Instrument = "ORX_OCAMS_POLYCAM",
+    Spacecraft = kernels.ID.OsirisRex,
+    Instrument = kernels.Frame.Polycam,
     Moving = false,
     Texture = textures .. "defaultProj.png"
   },

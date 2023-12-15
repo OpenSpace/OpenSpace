@@ -1,5 +1,6 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -33,8 +34,8 @@ local IssPosition = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "GALACTIC",
-      DestinationFrame = "J2000",
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
     }
   },
   Tag = { "earth_satellite", "ISS" },
@@ -101,8 +102,8 @@ local IssLabel = {
   Identifier = "IssLabel",
   Parent = IssPosition.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "ISS",
     FontSize = 70.0,
     Size = 3.4,

@@ -36,6 +36,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -411,12 +412,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             [&fileTypeString](const std::string& str) {
                 const size_t extLength = fileTypeString.length();
                 std::string sub = str.substr(str.length() - extLength, extLength);
-                std::transform(
-                    sub.begin(),
-                    sub.end(),
-                    sub.begin(),
-                    [](char c) { return static_cast<char>(::tolower(c)); }
-                );
+                sub = ghoul::toLowerCase(sub);
                 return sub != fileTypeString;
             }
         ),
@@ -570,12 +566,7 @@ void RenderableFieldlinesSequence::initializeGL() {
 
 // Returns fls::Model::Invalid if it fails to extract mandatory information
 fls::Model stringToModel(std::string str) {
-    std::transform(
-        str.begin(),
-        str.end(),
-        str.begin(),
-        [](char c) { return static_cast<char>(::tolower(c)); }
-    );
+    str = ghoul::toLowerCase(str);
     return fls::stringToModel(str);
 }
 

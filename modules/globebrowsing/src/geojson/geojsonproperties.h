@@ -50,14 +50,16 @@ struct GeoJsonProperties : public properties::PropertyOwner {
 
     static documentation::Documentation Documentation();
 
-    // These are based on the KML specification
+    /**
+     * These are based on the KML specification.
+     */
     enum class AltitudeMode {
-        // Compute position as an altitude above the reference ellipsoid
+        /// Compute position as an altitude above the reference ellipsoid
         Absolute = 0,
-        // Compute position using altitude above the height map
+        /// Compute position using altitude above the height map
         RelativeToGround
-        // Stick to planet surface (TODO: use GDAL to render layer instead and use as
-        // default)
+        /// Stick to planet surface (TODO: use GDAL to render layer instead and use as
+        /// default)
         // ClampToGround
     };
 
@@ -120,9 +122,9 @@ struct GeoJsonOverrideProperties {
 GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& feature);
 
 struct PropertySet {
-    // This value set should be a reference to the main component's propertyowner
+    /// This value set should be a reference to the main component's propertyowner
     GeoJsonProperties& defaultValues;
-    // This is a unique set of properties to use for overriding the default values
+    /// This is a unique set of properties to use for overriding the default values
     GeoJsonOverrideProperties overrideValues;
 
     float opacity() const;

@@ -160,7 +160,7 @@ VertexIndexListCombo<VertexXYZNormal> createCone(unsigned int nSegments, float r
     float height);
 
 /**
- * Data structure that can be used for rendering using multiple light directions
+ * Data structure that can be used for rendering using multiple light directions.
  */
 struct LightSourceRenderData {
     unsigned int nLightSources = 0;

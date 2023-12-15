@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local MarsTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS",
-      Observer = "SSB"
+      Target = coreKernels.ID.Mars,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.814, 0.305, 0.220 },
     Period = 686.973,
@@ -21,8 +21,7 @@ local MarsTrail = {
   GUI = {
     Name = "Mars Trail",
     Path = "/Solar System/Planets/Mars",
-    Description = [[Trail of Mars as observed by the Sun. Data from NASA Spice (see
-      base spice asset)]]
+    Description = "Trail of Mars as observed by the Sun"
   }
 }
 

@@ -46,7 +46,7 @@ public:
     virtual ~PathCurve() = 0;
 
     /**
-     * Return the length of the curve, in meters
+     * Return the length of the curve, in meters.
      */
     double length() const;
 
@@ -56,7 +56,7 @@ public:
      * the full length of the path.
      *
      * Can be overridden by subclasses that want more control over the position
-     * interpolation
+     * interpolation.
      */
     virtual glm::dvec3 positionAt(double relativeDistance) const;
 
@@ -66,27 +66,26 @@ public:
      * position. Note that u does not correspond to the relatively traveled distance.
      *
      * Can be overridden by subclasses that want more control over the position
-     * interpolation
+     * interpolation.
      */
     virtual glm::dvec3 interpolate(double u) const;
 
     /**
-     * Return the positions defining the control points for the spline interpolation
+     * Return the positions defining the control points for the spline interpolation.
      */
     std::vector<glm::dvec3> points() const;
 
 protected:
     /**
-     * Precompute information related to the spline parameters that are
-     * needed for arc length reparameterization. Must be called after
-     * control point creation.
+     * Precompute information related to the spline parameters that are needed for arc
+     * length reparameterization. Must be called after control point creation.
      */
     void initializeParameterData();
 
     /**
-     * Compute curve parameter u that matches the input arc length s.
-     * Input s is a length value in meters, in the range [0, _totalLength].
-     * The returned curve parameter u is in range [0, 1].
+     * Compute curve parameter u that matches the input arc length s. Input s is a length
+     * value in meters, in the range [0, _totalLength]. The returned curve parameter u is
+     * in range [0, 1].
      */
     double curveParameter(double s) const;
 

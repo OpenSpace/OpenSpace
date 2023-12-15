@@ -113,7 +113,7 @@ public:
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
     /**
-     * Set the camera to use for rendering
+     * Set the camera to use for rendering.
      */
     void setCamera(Camera* camera);
 
@@ -130,17 +130,17 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
-     * Take a screenshot and store in the ${SCREENSHOTS} directory
+     * Take a screenshot and store in the ${SCREENSHOTS} directory.
      */
     void takeScreenshot();
 
     /**
-     * Resets the screenshot index to 0
+     * Resets the screenshot index to 0.
      */
     void resetScreenshotNumber();
 
     /**
-     * Get the filename of the latest screenshot
+     * Get the filename of the latest screenshot.
      */
     unsigned int latestScreenshotNumber() const;
 

@@ -42,7 +42,6 @@ namespace openspace {
 
 namespace openspace::volume {
 
-//class TransferFunction;
 class BasicVolumeRaycaster;
 template <typename T> class RawVolume;
 class VolumeClipPlanes;

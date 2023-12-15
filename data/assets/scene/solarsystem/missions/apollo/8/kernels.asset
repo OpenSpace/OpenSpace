@@ -1,4 +1,4 @@
-local kernelsFolder = asset.resource({
+local data = asset.resource({
   Name = "Apollo Kernels",
   Type = "HttpSynchronization",
   Identifier = "apollo_spice",
@@ -7,12 +7,31 @@ local kernelsFolder = asset.resource({
 
 
 local kernels = {
-  kernelsFolder .. "moon_080317.tf",
-  kernelsFolder .. "apollo8.tf",
-  kernelsFolder .. "moon_pa_de421_1900-2050.bpc",
-  kernelsFolder .. "apollo8.tsc",
-  kernelsFolder .. "apollo8.bsp",
-  kernelsFolder .. "apollo8_earthrise.bc"
+  data .. "moon_080317.tf",
+  data .. "apollo8.tf",
+  data .. "moon_pa_de421_1900-2050.bpc",
+  data .. "apollo8.tsc",
+  data .. "apollo8.bsp",
+  data .. "apollo8_earthrise.bc"
 }
 
-asset.export("kernels", kernels)
+local ID = {
+  Apollo8 = -908
+}
+
+local Frame = {
+  Apollo8 = -908000,
+  Apollo8Earthrise = "A8_EARTHRISE"
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)

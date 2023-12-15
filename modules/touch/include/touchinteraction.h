@@ -83,17 +83,17 @@ public:
     };
 
     /**
-     * Main function call
-     * 1 Checks if doubleTap occured
-     * 2 If the node in focus is large enough and all contact points have selected it,
-     *   calls directControl() function for direct-manipulation
-     * 3 Updates std::vector<SelectedBody> _selectedContactPoints (only if LMA
-     *   successfully converged, avoids interaction to snap on LMA fails)
-     * 4 If directControl() wasn't called this frame, interpret the incoming
-     *   list and decide what type of interaction this frame should do
-     * 5 Compute the new total velocities after interaction
-     * 6 Evaluate if directControl should be called next frame- true if all contact points
-     *   select the same node and said node is larger than _nodeRadiusThreshold
+     * Main function call:
+     *   1. Checks if doubleTap occured
+     *   2. If the node in focus is large enough and all contact points have selected it,
+     *     calls directControl() function for direct-manipulation
+     *   3. Updates std::vector<SelectedBody> _selectedContactPoints (only if LMA
+     *     successfully converged, avoids interaction to snap on LMA fails)
+     *   4. If directControl() wasn't called this frame, interpret the incoming
+     *      list and decide what type of interaction this frame should do
+     *   5. Compute the new total velocities after interaction
+     *   6. Evaluate if directControl should be called next frame- true if all contact
+     *      points select the same node and said node is larger than _nodeRadiusThreshold
      */
 
     void updateStateFromInput(const std::vector<TouchInputHolder>& list,
@@ -101,13 +101,19 @@ public:
 
     bool hasNonZeroVelocities() const;
 
-    // Calculates the new camera state with velocities and time since last frame
+    /**
+     * Calculates the new camera state with velocities and time since last frame.
+     */
     void step(double dt, bool directTouch = false);
 
-    // Called each frame we have no new input, used to reset data
+    /**
+     * Called each frame we have no new input, used to reset data.
+     */
     void resetAfterInput();
 
-    // Sets _tap to true, called if tap occured current frame (called from touchmodule)
+    /**
+     * Sets _tap to true, called if tap occured current frame (called from touchmodule).
+     */
     void tap();
 
     void setCamera(Camera* camera);
@@ -115,33 +121,39 @@ public:
 private:
     /**
      * Function that calculates the new camera state such that it minimizes the L2 error
-     * in screenspace
-     * between contact points and surface coordinates projected to clip space using LMA
+     * in screenspace between contact points and surface coordinates projected to clip
+     * space using LMA.
      */
     void directControl(const std::vector<TouchInputHolder>& list);
 
     /**
-     * Traces each contact point into the scene as a ray and find the intersection
-     * points on the surface of the current anchor node, if any. Saves the input id
-     * the node and surface coordinates the cursor hit
+     * Traces each contact point into the scene as a ray and find the intersection points
+     * on the surface of the current anchor node, if any. Saves the input id the node and
+     * surface coordinates the cursor hit.
      */
     void updateNodeSurfacePoints(const std::vector<TouchInputHolder>& list);
 
     /**
      * Returns an enum for what interaction to be used, depending on what input was
-     * received
+     * received.
      */
     InteractionType interpretInteraction(const std::vector<TouchInputHolder>& list,
         const std::vector<TouchInput>& lastProcessed);
 
-    // Compute new velocity according to the interpreted action
+    /**
+     * Compute new velocity according to the interpreted action.
+     */
     void computeVelocities(const std::vector<TouchInputHolder>& list,
         const std::vector<TouchInput>& lastProcessed);
 
-    // Compute velocity based on double-tap for zooming
+    /**
+     * Compute velocity based on double-tap for zooming.
+     */
     double computeTapZoomDistance(double zoomGain);
 
-    // Compute coefficient for velocity decay to be applied in decceleration
+    /**
+     * Compute coefficient for velocity decay to be applied in decceleration.
+     */
     double computeConstTimeDecayCoefficient(double velocity);
 
     /**
@@ -150,10 +162,14 @@ private:
      */
     void decelerate(double dt);
 
-    // Resets all properties that can be changed in the GUI to default
+    /**
+     * Resets all properties that can be changed in the GUI to default.
+     */
     void resetPropertiesToDefault();
 
-    // Set all velocities to zero
+    /**
+     * Set all velocities to zero.
+     */
     void resetVelocities();
 
     Camera* _camera = nullptr;

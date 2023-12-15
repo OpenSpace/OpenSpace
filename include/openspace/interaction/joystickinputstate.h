@@ -37,7 +37,7 @@ namespace openspace::interaction {
 
 /**
  * Actions that any button of a joystick can have. Each button must be in one of these
- * states
+ * states.
  */
 enum class JoystickAction : uint8_t {
     /// Idle state if the button is unpressed and has been unpressed since last frame
@@ -81,7 +81,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
     static constexpr int MaxNumJoysticks = 16;
 
     /**
-     * This function return the number of axes the joystick with the given name has
+     * This function return the number of axes the joystick with the given name has.
      *
      * \param joystickName The name of the joystick to check how many axes it has,
      *        if empty the max number of axes for all joysticks are returned
@@ -90,7 +90,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
     int numAxes(const std::string& joystickName = "") const;
 
     /**
-     * This function return the number of buttons the joystick with the given name has
+     * This function return the number of buttons the joystick with the given name has.
      *
      * \param joystickName The name of the joystick to check how many buttons it has,
      *        if empty the max number of buttons for all joysticks are returned

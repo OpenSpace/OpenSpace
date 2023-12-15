@@ -52,10 +52,6 @@ namespace {
     constexpr glm::vec2 LogoCenter = glm::vec2(0.f, 0.525f);  // in NDC
     constexpr glm::vec2 LogoSize = glm::vec2(0.275f, 0.275);  // in NDC
 
-    constexpr glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
-    constexpr glm::vec4 PhaseColorSynchronization = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
-    constexpr glm::vec4 PhaseColorInitialization = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
-
     constexpr glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
     constexpr glm::vec4 ItemStatusColorInitializing = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
     constexpr glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
@@ -523,10 +519,11 @@ void LoadingScreen::renderLogMessages() const {
     size_t row = 0;
     for (auto& [level, amount] : numberOfErrorsPerLevel) {
         const std::string text = fmt::format("{}: {}", ghoul::to_string(level), amount);
+        glm::vec2 bbox = _logFont->boundingBox(text);
         renderer.render(
             *_logFont,
             glm::vec2(
-                res.x - 0.07 * res.x,
+                res.x - bbox.x - 10,
                 10 + _logFont->pointSize() * row * 2
             ),
             text,

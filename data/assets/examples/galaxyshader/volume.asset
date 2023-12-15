@@ -30,13 +30,13 @@ local MilkyWayVolume = {
     AbsorptionMultiply = 200,
     EmissionMultiply = 250,
     Rotation = { math.pi, 3.1248, 4.45741 },
-    RaycastingShader = asset.resource("galaxyraycast2.glsl"),
+    RaycastingShader = asset.resource("galaxyraycast.glsl"),
     Volume = {
       Type = "Volume",
       Filename = data .. "MilkyWayRGBAVolume1024x1024x128.raw",
       Dimensions = { 1024, 1024, 128 },
       Size = { 1.2E21, 1.2E21, 0.15E21 },
-      Downscale = 0.4,
+      Downscale = 0.4
     },
     Points = {
       Type = "Points",

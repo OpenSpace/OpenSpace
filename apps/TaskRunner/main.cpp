@@ -39,6 +39,7 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
@@ -108,7 +109,7 @@ int main(int argc, char** argv) {
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
-    std::filesystem::path configFile = configuration::findConfiguration();
+    std::filesystem::path configFile = findConfiguration();
 
     // Register the base path as the directory where the configuration file lives
     std::filesystem::path base = configFile.parent_path();
@@ -127,10 +128,11 @@ int main(int argc, char** argv) {
     }
 #endif // WIN32
 
-    *global::configuration = configuration::loadConfigurationFromFile(
+    std::filesystem::path settings = findSettings();
+    *global::configuration = loadConfigurationFromFile(
         configFile.string(),
-        size,
-        ""
+        settings,
+        size
     );
     openspace::global::openSpaceEngine->registerPathTokens();
     global::openSpaceEngine->initialize();
@@ -140,7 +142,7 @@ int main(int argc, char** argv) {
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
-    std::string tasksPath;
+    std::optional<std::string> tasksPath;
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
             tasksPath,
@@ -155,8 +157,8 @@ int main(int argc, char** argv) {
 
     //FileSys.setCurrentDirectory(launchDirectory);
 
-    if (!tasksPath.empty()) {
-        performTasks(tasksPath);
+    if (tasksPath.has_value()) {
+        performTasks(*tasksPath);
         return 0;
     }
 
@@ -166,8 +168,9 @@ int main(int argc, char** argv) {
     std::filesystem::current_path(absPath("${TASKS}"));
 
     std::cout << "TASK > ";
-    while (std::cin >> tasksPath) {
-        performTasks(tasksPath);
+    std::string t;
+    while (std::cin >> t) {
+        performTasks(t);
         std::cout << "TASK > ";
     }
 

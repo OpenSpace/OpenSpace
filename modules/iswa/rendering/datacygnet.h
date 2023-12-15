@@ -39,7 +39,7 @@ class DataProcessor;
 /**
  * This class abstracts away the the loading of data and creation of textures for all data
  * cygnets. It specifies the interface that needs to be implemented for all concrete
- * subclasses
+ * subclasses.
  */
 class DataCygnet : public IswaCygnet {
 public:
@@ -69,13 +69,13 @@ protected:
     void setPropertyCallbacks();
 
     /**
-     * Subscribes to the group events that are shared by all DataCygnets
+     * Subscribes to the group events that are shared by all DataCygnets.
      */
     void subscribeToGroup();
 
     /**
      * Optional interface method. this has an implementation in datacygnet.cpp, but needs
-     * to be overriden for kameleonplane
+     * to be overriden for KameleonPlane.
      */
     virtual bool updateTextureResource() override;
 

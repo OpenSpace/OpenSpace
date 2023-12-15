@@ -49,8 +49,8 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/easing.h>
-#include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 #include <stack>

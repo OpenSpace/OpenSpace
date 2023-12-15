@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local PlutoTrailBarycentric = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PLUTO",
-      Observer = "PLUTO BARYCENTER"
+      Target = coreKernels.ID.Pluto,
+      Observer = coreKernels.ID.PlutoBarycenter
     },
     Color = { 0.00, 0.62, 1.00 },
     Period = 6.38723,
@@ -41,8 +41,7 @@ asset.export(PlutoTrailBarycentric)
 asset.meta = {
   Name = "Pluto Barycentric Trail",
   Version = "1.0",
-  Description = [[Trail of Pluto as observed by it's Barrycenter. Data from NASA Spice
-    (see base spice asset)]],
+  Description = "Trail of Pluto as observed by its Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

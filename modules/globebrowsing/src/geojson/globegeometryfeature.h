@@ -49,8 +49,8 @@ namespace openspace::globebrowsing {
 class RenderableGlobe;
 
 /**
- * This class is responsible for rendering the geomoetry features of globes,
- * created e.g. from GeoJson files
+ * This class is responsible for rendering the geomoetry features of globes, created e.g.
+ * from GeoJson files.
  */
 class GlobeGeometryFeature {
 public:
@@ -87,7 +87,9 @@ public:
         Uninitialized
     };
 
-    // Each geometry feature might translate into several render features
+    /**
+     * Each geometry feature might translate into several render features.
+     */
     struct RenderFeature {
         void initializeBuffers();
 
@@ -97,15 +99,17 @@ public:
         size_t nVertices = 0;
         bool isExtrusionFeature = false;
 
-        // Store the geodetic lat long coordinates of each vertex, so we can quickly
-        // recompute the height values for these points
+        /// Store the geodetic lat long coordinates of each vertex, so we can quickly
+        /// recompute the height values for these points
         std::vector<Geodetic2> vertices;
 
-        // Keep the heights around
+        /// Keep the heights around
         std::vector<float> heights;
     };
 
-    // Some extra data that we need for doing the rendering
+    /**
+     * Some extra data that we need for doing the rendering.
+     */
     struct ExtraRenderData {
         float pointSizeScale;
         float lineWidthScale;
@@ -149,58 +153,66 @@ private:
         int renderPass) const;
 
     /**
-     * Create the vertex information for any line parts of the feature.
-     * Returns the resulting vertex positions, so we can use them for extrusion
+     * Create the vertex information for any line parts of the feature. Returns the
+     * resulting vertex positions, so we can use them for extrusion.
      */
     std::vector<std::vector<glm::vec3>> createLineGeometry();
 
     /**
-     * Create the vertex information for any point parts of the feature. Also creates
-     * the features for extruded lines for the points
+     * Create the vertex information for any point parts of the feature. Also creates the
+     * features for extruded lines for the points.
      */
     void createPointGeometry();
 
     /**
-     * Create the triangle geometry for the extruded edges of lines/polygons
+     * Create the triangle geometry for the extruded edges of lines/polygons.
      */
     void createExtrudedGeometry(const std::vector<std::vector<glm::vec3>>& edgeVertices);
 
     /**
      * Create the triangle geometry for the polygon part of the feature (the area
-     * contained by the shape)
+     * contained by the shape).
      */
     void createPolygonGeometry();
 
     void initializeRenderFeature(RenderFeature& feature,
         const std::vector<Vertex>& vertices);
 
-    /// Get the distance that shall be used for tessellation, based on the properties
+    /**
+     * Get the distance that shall be used for tessellation, based on the properties.
+     */
     float tessellationStepSize() const;
 
-    /// Compute the heights to the surface at the reference points
+    /**
+     * Compute the heights to the surface at the reference points.
+     */
     std::vector<double> getCurrentReferencePointsHeights() const;
 
-    /// Buffer the static data for the vertices
+    /**
+     * Buffer the static data for the vertices.
+     */
     void bufferVertexData(const RenderFeature& feature,
         const std::vector<Vertex>& vertexData);
 
-    /// Buffer the dynamic height data for the vertices, based on the height map
+    /**
+     * Buffer the dynamic height data for the vertices, based on the height map.
+     */
     void bufferDynamicHeightData(const RenderFeature& feature);
 
     GeometryType _type = GeometryType::Error;
     const RenderableGlobe& _globe;
 
-    // Coordinates for geometry. For polygons, the first is always the outer ring
-    // and any following are the inner rings (holes)
+    /// Coordinates for geometry. For polygons, the first is always the outer ring and any
+    /// following are the inner rings (holes)
     std::vector<std::vector<Geodetic3>> _geoCoordinates;
 
-    // Coordinates for any triangles representing the geometry (only relevant for
-    // polygons)
+    /// Coordinates for any triangles representing the geometry (only relevant for
+    /// polygons)
     std::vector<Geodetic3> _triangleCoordinates;
 
     std::vector<RenderFeature> _renderFeatures;
 
-    // lat, long, distance (meters). Passed from parent on property change
+    /// lat, long, distance (meters). Passed from parent on property change
     glm::vec3 _offsets = glm::vec3(0.f);
 
     std::string _key;

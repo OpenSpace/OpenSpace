@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___SETTINGS___H__
 #define __OPENSPACE_CORE___SETTINGS___H__
 
+#include <openspace/engine/configuration.h>
 #include <openspace/properties/property.h>
 #include <filesystem>
 #include <optional>
@@ -42,6 +43,7 @@ struct Settings {
     std::optional<bool> rememberLastProfile;
     std::optional<properties::Property::Visibility> visibility;
     std::optional<bool> bypassLauncher;
+    std::optional<Configuration::LayerServer> layerServer;
 
     struct MRF {
         auto operator<=>(const MRF&) const = default;

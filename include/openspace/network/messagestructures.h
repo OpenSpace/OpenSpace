@@ -66,7 +66,7 @@ struct CameraKeyframe {
 
     double _timestamp = 0.0;
 
-    void serialize(std::vector<char> &buffer) const {
+    void serialize(std::vector<char>& buffer) const {
         // Add position
         buffer.insert(
             buffer.end(),

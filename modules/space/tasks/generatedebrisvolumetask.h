@@ -26,20 +26,16 @@
 #define __OPENSPACE_MODULE_SPACE___GENERATEDEBRISVOLUMETASK___H__
 
 #include <openspace/util/task.h>
-#include <openspace/util/time.h>
+
 
 #include <modules/space/rendering/renderableorbitalkepler.h>
 #include <modules/space/translation/keplertranslation.h>
-
-
+#include <openspace/util/time.h>
 #include <ghoul/glm.h>
-
 #include <string>
 #include <vector>
 
-namespace openspace {
-namespace volume {
-
+namespace openspace::volume {
 
 class GenerateDebrisVolumeTask : public Task {
 public:
@@ -65,12 +61,8 @@ private:
     std::vector<KeplerParameters> _TLEDataVector;
 
     float _maxApogee;
-
-    // not sure if it should be local function or hidden function.
-    //std::vector<KeplerParameters> readTLEFile(const std::string& filename);
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #endif // __OPENSPACE_MODULE_SPACE___GENERATEDEBRISVOLUMETASK___H__

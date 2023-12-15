@@ -1,6 +1,6 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -21,13 +21,13 @@ local Mars = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS",
-      Observer = "MARS BARYCENTER"
+      Target = coreKernels.ID.Mars,
+      Observer = coreKernels.ID.MarsBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MARS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Mars,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -60,8 +60,8 @@ local MarsLabel = {
   Identifier = "MarsLabel",
   Parent = Mars.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Mars",
     FontSize = 70.0,
     Size = 8.50,

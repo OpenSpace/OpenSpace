@@ -1,0 +1,29 @@
+asset.require("./base_layers")
+asset.require("./colorlayers/messenger_mdis_utah", false)
+asset.require("./colorlayers/messenger_mosaic_utah", false)
+asset.require("./colorlayers/messenger_mosaic2_utah", false)
+asset.require("./colorlayers/messenger_bdr_utah", asset.enabled)
+asset.require("./colorlayers/messenger_hie_utah", false)
+asset.require("./colorlayers/messenger_hiw_utah", false)
+asset.require("./colorlayers/messenger_loi_utah", false)
+asset.require("./colorlayers/messenger_shade_utah", false)
+asset.require("./colorlayers/messenger_mdr_utah", false)
+asset.require("./colorlayers/messenger_mp3_utah", false)
+
+
+
+asset.meta = {
+  Name = "Default Mercury Layers (Utah)",
+  Version = "1.0",
+  Description = [[Default Mercury layers are: Aluminium Abundance, Calcium Abundance,
+    Iron Abundance, Magnesium Abundance, Silicon Abundance, Messenger MDIS,
+    Messenger Mosaic, Messenger Mosaic2, Messenger BDR, Messenger HIE, Messenger HIW,
+    Messenger LOI, Messenger SHADE, Messenger MDR, Messenger MP3, and Messenger DEM (3D).
+
+
+    Layers only loaded from the Utah server
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

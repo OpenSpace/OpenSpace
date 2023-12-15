@@ -26,13 +26,13 @@ local Apollo17Lem = {
       Type = "GlobeRotation",
       Globe = moonAsset.Moon.Identifier,
       Longitude = -329.22833,
-      Latitude = 20.19092,
+      Latitude = 20.19092
     }
   },
   GUI = {
-    Hidden = true,
     Name = "Apollo 17 Lem Position",
-    Path = "/Solar System/Missions/Apollo/17"
+    Path = "/Solar System/Missions/Apollo/17",
+    Hidden = true
   }
 }
 

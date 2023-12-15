@@ -64,58 +64,54 @@ public:
 
     /**
      * Initializes a one layer Octree with root and 8 children that covers all stars.
-     *
-     * \param maxDist together with \param maxstarsPerNode (if defined) determines the
-     * depth of the tree as well as how many nodes will be created.
      */
     void initOctree(long long cpuRamBudget = 0, int maxDist = 0, int maxStarsPerNode = 0);
 
     /**
-     * Initializes a stack of size \param maxNodes that keeps track of all free spot in
-     * buffer stream. Can be used to trigger a rebuild of buffer(s).
+     * Initializes a stack. Can be used to trigger a rebuild of buffer(s).
      *
-     * \param useVBO defines if VBO or SSBO is used as buffer(s)
-     * \param datasetFitInMemory defines if streaming of nodes during runtime is used
+     * \param maxNodes The maximum number of nodes in the buffer
+     * \param useVBO Defines if VBO or SSBO is used as buffer(s)
+     * \param datasetFitInMemory Defines if streaming of nodes during runtime is used
      */
     void initBufferIndexStack(long long maxNodes, bool useVBO, bool datasetFitInMemory);
 
     /**
      * Inserts star values in correct position in Octree. Makes use of a recursive
-     * traversal strategy. Internally calls `insertInNode()`
+     * traversal strategy. Internally calls #insertInNode.
      */
     void insert(const std::vector<float>& starValues);
 
     /**
      * Slices LOD data so only the MAX_STARS_PER_NODE brightest stars are stored in inner
-     * nodes. If \p branchIndex is defined then only that branch will be sliced.
-     * Calls `sliceNodeLodCache()` internally.
+     * nodes. If \p branchIndex is defined then only that branch will be sliced. Calls
+     * #sliceNodeLodCache internally.
      */
     void sliceLodData(size_t branchIndex = 8);
 
     /**
      * Prints the whole tree structure, including number of stars per node, number of
-     * nodes, tree depth and if node is a leaf.
-     * Calls `printStarsPerNode(node, prefix)` internally.
+     * nodes, tree depth and if node is a leaf. Calls
+     * #printStarsPerNode(const OctreeNode&, const std::string&) const internally.
      */
     void printStarsPerNode() const;
 
     /**
      * Used while streaming nodes from files. Checks if any nodes need to be loaded or
      * unloaded. If entire dataset fits in RAM then the whole dataset will be loaded
-     * asynchronously. Otherwise only nodes close to the camera will be fetched.
-     * When RAM stars to fill up least-recently used nodes will start to unload.
-     * Calls `findAndFetchNeighborNode()` and `removeNodesFromRam()` internally.
+     * asynchronously. Otherwise only nodes close to the camera will be fetched. When RAM
+     * stars to fill up least-recently used nodes will start to unload. Calls
+     * #findAndFetchNeighborNode and #removeNodesFromRam internally.
      */
     void fetchSurroundingNodes(const glm::dvec3& cameraPos, size_t chunkSizeInBytes,
         const glm::ivec2& additionalNodes);
 
     /**
      * Builds render data structure by traversing the Octree and checking for intersection
-     * with view frustum. Every vector in map contains data for one node.
-     * The corresponding integer key is the index where chunk should be inserted into
-     * streaming buffer. Calls `checkNodeIntersection()` for every branch.
-     * \pdeltaStars keeps track of how many stars that were added/removed this render
-     * call.
+     * with view frustum. Every vector in map contains data for one node. The
+     * corresponding integer key is the index where chunk should be inserted into
+     * streaming buffer. Calls #checkNodeIntersection for every branch. \p deltaStars
+     * keeps track of how many stars that were added/removed this render call.
      */
     std::map<int, std::vector<float>> traverseData(const glm::dmat4& mvp,
         const glm::vec2& screenSize, int& deltaStars, gaia::RenderMode mode,
@@ -128,32 +124,39 @@ public:
 
     /**
      * Removes all data from Octree, or only from a specific branch if specified.
-     * \param branchIndex defined which branch to clear if defined.
+     *
+     * \param branchIndex Defined which branch to clear if defined
      */
     void clearAllData(int branchIndex = -1);
 
     /**
-     * Write entire Octree structure to a binary file. \param writeData defines if data
-     * should be included or if only structure should be written to the file.
-     * Calls `writeNodeToFile()` which recursively writes all nodes.
+     * Write entire Octree structure to a binary file.
+     *
+     * \param outFileStream the stream to which the file will be written
+     * \param writeData defines if data should be included or if only structure should be
+     *        written to the file. Calls #writeNodeToFile which recursively writes all
+     *        nodes
      */
     void writeToFile(std::ofstream& outFileStream, bool writeData);
 
     /**
-     * Read a constructed Octree from a file. \returns the total number of (distinct)
-     * stars read.
+     * Read a constructed Octree from a file.
      *
+     * \param inFileStream the stream from which the octree should be loaded
      * \param readData defines if full data or only structure should be read.
-     *        Calls `readNodeFromFile()` which recursively reads all nodes.
+     *        Calls `readNodeFromFile()` which recursively reads all nodes
+     * \param folderPath the path to the folder where the binary files are located
+     * \return the total number of (distinct) stars read
      */
     int readFromFile(std::ifstream& inFileStream, bool readData,
         const std::string& folderPath = std::string());
 
     /**
      * Write specified part of Octree to multiple files, including all data.
-     * \param branchIndex defines which branch to write.
-     * Clears specified branch after writing is done.
-     * Calls `writeNodeToMultipleFiles()` for the specified branch.
+     *
+     * \param outFolderPath The path where files should be written
+     * \param branchIndex Defines which branch to write. Clears specified branch after
+     *        writing is done. Calls `writeNodeToMultipleFiles()` for the specified branch
      */
     void writeToMultipleFiles(const std::string& outFolderPath, size_t branchIndex);
 
@@ -171,7 +174,7 @@ public:
     bool isRebuildOngoing() const;
 
     /**
-     * \returns current CPU RAM budget in bytes.
+     * \return current CPU RAM budget in bytes.
      */
     long long cpuRamBudget() const;
 
@@ -199,7 +202,7 @@ private:
     const std::string BINARY_SUFFIX = ".bin";
 
     /**
-     * \returns the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
+     * \return the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
      */
     size_t getChildIndex(float posX, float posY, float posZ, float origX = 0.f,
         float origY = 0.f, float origZ = 0.f);
@@ -230,6 +233,8 @@ private:
     /**
      * Private help function for `printStarsPerNode()`.
      *
+     * \param node the node for which the stars should be printed
+     * \param prefix the prefix that should be added to the string
      * \return an accumulated string containing all descendant nodes.
      */
     std::string printStarsPerNode(const OctreeNode& node,
@@ -239,8 +244,14 @@ private:
      * Private help function for `traverseData()`. Recursively checks which
      * nodes intersect with the view frustum (interpreted as an AABB) and decides if data
      * should be optimized away or not. Keeps track of which nodes that are visible and
-     * loaded (if streaming). \param deltaStars keeps track of how many stars that were
-     * added/removed this render call.
+     * loaded (if streaming).
+     *
+     * \param node the node that should be checked
+     * \param mvp the model-view-projection matrix used to check intersection
+     * \param screenSize the size of the screen in pixels
+     * \param deltaStars keeps track of how many stars that were added/removed this render
+     *        call
+     * \param mode the render mode that should be used
      */
     std::map<int, std::vector<float>> checkNodeIntersection(OctreeNode& node,
         const glm::dmat4& mvp, const glm::vec2& screenSize, int& deltaStars,
@@ -249,8 +260,11 @@ private:
     /**
      * Checks if specified node existed in cache, and removes it if that's the case.
      * If node is an inner node then all children will be checked recursively as well as
-     * long as \param recursive is not set to false. \param deltaStars keeps track of how
-     * many stars that were removed.
+     * long as \p recursive is not set to false.
+     *
+     * \param node the node that should be removed
+     * \param deltaStars keeps track of how many stars that were removed.
+     * \param recursive defines if decentents should be removed as well
      */
     std::map<int, std::vector<float>> removeNodeFromCache(OctreeNode& node,
         int& deltaStars, bool recursive = true);
@@ -271,40 +285,52 @@ private:
     void createNodeChildren(OctreeNode& node);
 
     /**
-     * Checks if node should be inserted into stream or not. \returns true if it should,
-     * (i.e. it doesn't already exists, there is room for it in the buffer and node data
-     * is loaded if streaming). \returns false otherwise.
+     * Checks if node should be inserted into stream or not.
+     *
+     * \return `true` if it should, (i.e. it doesn't already exists, there is room for it
+     *         in the buffer and node data is loaded if streaming), `false` otherwise
      */
     bool updateBufferIndex(OctreeNode& node);
 
     /**
-     * Node should be inserted into stream. This function \returns the data to be
-     * inserted. If VBOs are used then the chunks will be appended by zeros, otherwise
-     * only the star data corresponding to RenderOption \param option will be inserted.
+     * Node should be inserted into stream.
      *
+     * \param node the node that should be inserted
+     * \param mode the render mode that should be used
      * \param deltaStars keeps track of how many stars that were added.
+     * \return the data to be inserted
      */
     std::vector<float> constructInsertData(const OctreeNode& node,
         gaia::RenderMode mode, int& deltaStars);
 
     /**
-     * Write a node to outFileStream. \param writeData defines if data should be included
-     * or if only structure should be written.
+     * Write a node to outFileStream.
+     *
+     * \param outFileStream the stream to which the node will be written
+     * \param node the OctreeNode that should be written to file
+     * \param writeData defines if data should be included or if only structure should be
+     *        written
      */
     void writeNodeToFile(std::ofstream& outFileStream, const OctreeNode& node,
         bool writeData);
 
     /**
-     * Read a node from file and its potential children. \param readData defines if full
-     * data or only structure should be read.
-     * \returns accumulated sum of all read stars in node and its descendants.
+     * Read a node from file and its potential children.
+     *
+     * \param inFileStream the stream from which the node will be read
+     * \param node the file will be read into this node
+     * \param readData defines if full data or only structure should be read
+     * \return accumulated sum of all read stars in node and its descendants.
      */
     int readNodeFromFile(std::ifstream& inFileStream, OctreeNode& node, bool readData);
 
     /**
-     * Write node data to a file. \param outFilePrefix specifies the accumulated path
-     * and name of the file. If \param threadWrites is set to true then one new thread
-     * will be created for each child to write its descendents.
+     * Write node data to a file.
+     *
+     * \param outFilePrefix specifies the accumulated path and name of the file
+     * \param node the OctreeNode that should be written to file
+     * \param threadWrites is set to true then one new thread will be created for each
+     *        child to write its descendents
      */
     void writeNodeToMultipleFiles(const std::string& outFilePrefix, OctreeNode& node,
         bool threadWrites);
@@ -312,19 +338,27 @@ private:
     /**
      * Finds the neighboring node on the same level (or a higher level if there is no
      * corresponding level) in the specified direction. Also fetches data from found node
-     * if it's not already loaded. \param additionalLevelsToFetch determines if any
-     * descendants of the found node should be fetched as well (if they exists).
+     * if it's not already loaded.
+     *
+     * \param firstParentId the id of the first parent node that should be checked
+     * \param x the x coordinate of the node that should be found
+     * \param y the y coordinate of the node that should be found
+     * \param z the z coordinate of the node that should be found
+     * \param additionalLevelsToFetch determines if any descendants of the found node
+     *        should be fetched as well (if they exists).
      */
     void findAndFetchNeighborNode(unsigned long long firstParentId, int x, int y, int z,
         int additionalLevelsToFetch);
 
     /**
-     * Fetches data from all children of \param parentNode, as long as it's not already
+     * Fetches data from all children of the \p parentNode, as long as it's not already
      * fetched, it exists and it can fit in RAM.
+     *
+     * \param parentNode the node whose children should be fetched
      * \param additionalLevelsToFetch determines how many levels of descendants to fetch.
-     * If it is set to 0 no additional level will be fetched.
-     * If it is set to a negative value then all descendants will be fetched recursively.
-     * Calls `fetchNodeDataFromFile()` for every child that passes the tests.
+     *        If it is set to 0 no additional level will be fetched. If it is set to a
+     *        negative value then all descendants will be fetched recursively. Calls
+     *        #fetchNodeDataFromFile for every child that passes the tests
      */
     void fetchChildrenNodes(OctreeNode& parentNode, int additionalLevelsToFetch);
 
@@ -336,9 +370,11 @@ private:
     void fetchNodeDataFromFile(OctreeNode& node);
 
     /**
-    * Loops though all nodes in \param nodesToRemove and clears them from RAM.
-    * Also checks if any ancestor should change the `hasLoadedDescendant` flag
-    * by calling `propagateUnloadedNodes()` with all ancestors.
+    * Loops though all nodes in \p nodesToRemove and clears them from RAM. Also checks if
+    * any ancestor should change the `hasLoadedDescendant` flag by calling
+    * #propagateUnloadedNodes() with all ancestors.
+    *
+    * \param nodesToRemove list of the nodes that should be deleted
     */
     void removeNodesFromRam(const std::vector<unsigned long long>& nodesToRemove);
 
@@ -349,9 +385,11 @@ private:
     void removeNode(OctreeNode& node);
 
     /**
-     * Loops through \param ancestorNodes backwards and checks if parent node has any
+     * Loops through \p ancestorNodes backwards and checks if parent node has any
      * loaded descendants left. If not, then flag `hasLoadedDescendant` will be
      * set to false for that parent node and next parent in line will be checked.
+     *
+     * \param ancestorNodes the list of ancestors that should be checked
      */
     void propagateUnloadedNodes(std::vector<std::shared_ptr<OctreeNode>> ancestorNodes);
 

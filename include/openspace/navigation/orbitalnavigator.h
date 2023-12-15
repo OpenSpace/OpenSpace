@@ -43,9 +43,9 @@
 #include <optional>
 
 namespace openspace {
-    class SceneGraphNode;
     class Camera;
     struct CameraPose;
+    class SceneGraphNode;
     struct SurfacePositionHandle;
 } // namespace
 
@@ -87,10 +87,10 @@ public:
     void updateCameraScalingFromAnchor(double deltaTime);
     void resetVelocities();
 
-    /*
+    /**
      * This function should be called on every camera interaction: for example when
-     * navigating using an input device, changing the focus node or starting a path or
-     * a session recording playback
+     * navigating using an input device, changing the focus node or starting a path or a
+     * session recording playback
      */
     void updateOnCameraInteraction();
 
@@ -143,16 +143,15 @@ public:
     glm::quat anchorNodeToCameraRotation() const;
 
     /**
-     * Compute a camera position that pushed the camera position to
-     * a valid position over the anchor node, accounting for the
-     * minimal allowed distance
+     * Compute a camera position that pushed the camera position to a valid position over
+     * the anchor node, accounting for the minimal allowed distance
      */
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
     /**
-    * \return the Lua library that contains all Lua functions available to affect the
-    * OrbitalNavigator
-    */
+     * \return The Lua library that contains all Lua functions available to affect the
+     *         OrbitalNavigator
+     */
     static scripting::LuaLibrary luaLibrary();
 
 private:
@@ -184,12 +183,11 @@ private:
 
     Friction _friction;
 
-    // Anchor: Node to follow and orbit
+    /// Anchor: Node to follow and orbit
     properties::StringProperty _anchor;
 
-    // Aim: Node to look at (when camera direction is reset),
-    // Empty string means same as anchor.
-    // If these are the same node we call it the `focus` node
+    /// Aim: Node to look at (when camera direction is reset), empty string means same as
+    /// anchor. If these are the same node we call it the `focus` node
     properties::StringProperty _aim;
 
     // Reset camera direction to the anchor node.
@@ -283,6 +281,7 @@ private:
      * Decomposes the camera's rotation in to a global and a local rotation defined by
      * CameraRotationDecomposition. The global rotation defines the rotation so that the
      * camera points towards the reference position.
+     *
      * The local rotation defines the differential from the global to the current total
      * rotation so that `cameraRotation = globalRotation * localRotation`.
      */
@@ -290,39 +289,41 @@ private:
         glm::dvec3 reference);
 
     /**
-     * Composes a pair of global and local rotations into a quaternion that can be used
-     * as the world rotation for a camera.
+     * Composes a pair of global and local rotations into a quaternion that can be used as
+     * the world rotation for a camera.
      */
     glm::dquat composeCameraRotation(const CameraRotationDecomposition& composition);
 
-    /*
-     * Moves and rotates the camera around the anchor node in order to maintain the
-     * screen space position of the aim node. Also interpolates to the aim node, when
-     * retargeting the aim.
+    /**
+     * Moves and rotates the camera around the anchor node in order to maintain the screen
+     * space position of the aim node. Also interpolates to the aim node, when retargeting
+     * the aim.
      */
     CameraPose followAim(CameraPose pose, glm::dvec3 cameraToAnchor,
         Displacement anchorToAim);
 
-    /*
-     * Perform a camera roll on the local camera rotation
-     * \returns a local camera rotation modified with a roll.
+    /**
+     * Perform a camera roll on the local camera rotation.
+     *
+     * \return A local camera rotation modified with a roll
      */
     glm::dquat roll(double deltaTime, const glm::dquat& localCameraRotation) const;
 
     /**
      * Performs rotation around the cameras x and y axes.
-     * \returns a local camera rotation modified with two degrees of freedom.
+     *
+     * \return A local camera rotation modified with two degrees of freedom
      */
     glm::dquat rotateLocally(double deltaTime,
         const glm::dquat& localCameraRotation) const;
 
     /**
      * Interpolates the camera rotation based on active interpolators.
-     * \returns a new rotation quaternion
+     *
+     * \return A new rotation quaternion
      */
     glm::dquat interpolateLocalRotation(double deltaTime,
         const glm::dquat& localCameraRotation);
-
 
     Displacement interpolateRetargetAim(double deltaTime, CameraPose pose,
         glm::dvec3 cameraToAnchor, Displacement anchorToAim);
@@ -332,7 +333,7 @@ private:
 
     /**
      * Modify the camera position and global rotation to rotate around the up vector
-     * of the current anchor based on x-wise input
+     * of the current anchor based on x-wise input.
      *
      * The up-vector to rotate around is determined by the "_upToUseForRotation" property
      */
@@ -344,18 +345,18 @@ private:
      * result in an orbital rotation around the object. This function does not affect the
      * rotation but only the position.
      *
-     * \return a position vector adjusted in the horizontal direction.
+     * \return A position vector adjusted in the horizontal direction.
      */
     glm::dvec3 translateHorizontally(double deltaTime, double speedScale,
         const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
         const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
 
-    /*
+    /**
      * Adds rotation to the camera position so that it follows the rotation of the anchor
-     * node defined by the differential anchorNodeRotationDiff.
+     * node defined by the differential \p anchorNodeRotationDiff.
      *
-     * \return a position updated with the rotation defined by anchorNodeRotationDiff
+     * \return A position updated with the rotation defined by \p anchorNodeRotationDiff
      */
     glm::dvec3 followAnchorNodeRotation(const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition, const glm::dquat& anchorNodeRotationDiff) const;
@@ -363,7 +364,7 @@ private:
     /**
      * Updates the global rotation so that it points towards the anchor node.
      *
-     * \return a global rotation quaternion defining a rotation towards the anchor node
+     * \return A global rotation quaternion defining a rotation towards the anchor node
      */
     glm::dquat rotateGlobally(const glm::dquat& globalCameraRotation,
         const glm::dquat& aimNodeRotationDiff,
@@ -371,7 +372,8 @@ private:
 
     /**
      * Translates the camera position towards or away from the anchor node.
-     * \returns a position vector adjusted in the vertical direction.
+     *
+     * \return A position vector adjusted in the vertical direction.
      */
     glm::dvec3 translateVertically(double deltaTime, const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition,
@@ -380,7 +382,7 @@ private:
     /**
      * Rotates the camera around the out vector of the surface.
      *
-     * \return a quaternion adjusted to rotate around the out vector of the surface
+     * \return A quaternion adjusted to rotate around the out vector of the surface
      */
     glm::dquat rotateHorizontally(double deltaTime,
         const glm::dquat& globalCameraRotation,
@@ -389,7 +391,7 @@ private:
     /**
      * Push the camera out to the surface of the object.
      *
-     * \return a position vector adjusted to be at least _minimumAllowedDistance meters
+     * \return A position vector adjusted to be at least _minimumAllowedDistance meters
      *         above the actual surface of the object
      */
     glm::dvec3 pushToSurface(const glm::dvec3& cameraPosition,
@@ -417,7 +419,7 @@ private:
     void resetIdleBehavior();
 
     /**
-     * Apply the currently selected idle behavior to the position and rotations
+     * Apply the currently selected idle behavior to the position and rotations.
      */
     void applyIdleBehavior(double deltaTime, glm::dvec3& position,
         glm::dquat& localRotation, glm::dquat& globalRotation);
@@ -441,8 +443,8 @@ private:
      * vector coincides with the axis, and should be used with care.
      *
      * Used for:
-     * IdleBehavior::Behavior::OrbitAtConstantLat (axis = north = z-axis) and
-     * IdleBehavior::Behavior::OrbitAroundUp (axis = up = y-axis)
+     *   - IdleBehavior::Behavior::OrbitAtConstantLat (axis = north = z-axis) and
+     *   - IdleBehavior::Behavior::OrbitAroundUp (axis = up = y-axis)
      *
      * \param axis The axis to arbit around, given in model coordinates of the anchor
      * \param angle The rotation angle to use for the motion

@@ -1,4 +1,3 @@
-asset.require("spice/base")
 local transforms = asset.require("./transforms")
 
 
@@ -16,7 +15,7 @@ local SunGlare = {
   Parent = transforms.SunIAU.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 1.3*10^10.5,
+    Size = 41109609582.189,
     Origin = "Center",
     Billboard = true,
     Texture = textures .. "halo.png",

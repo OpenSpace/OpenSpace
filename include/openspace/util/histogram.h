@@ -44,14 +44,12 @@ public:
     bool isValid() const;
 
     /**
-     * Enter value into the histogram. The add method takes the given
-     * value, works out which bin this corresponds to, and increments
-     * this bin by 'repeat'.
+     * Enter value into the histogram. The add method takes the given value, works out
+     * which bin this corresponds to, and increments this bin by 'repeat'.
      *
-     * @param value The Value to insert into the histogram
-     * @param repeat How many times you want to insert it
-     *
-     * @return Returns true if succesful insertion, otherwise return false
+     * \param value The Value to insert into the histogram
+     * \param repeat How many times you want to insert it
+     * \return Returns `true` if succesful insertion, otherwise return `false`
      */
     bool add(float value, float repeat = 1.0f);
     bool add(const Histogram& histogram);

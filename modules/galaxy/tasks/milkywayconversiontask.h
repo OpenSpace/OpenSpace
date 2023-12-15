@@ -35,8 +35,8 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * Converts a set of exr image slices to a raw volume
- * with floating point RGBA data (32 bit per channel).
+ * Converts a set of exr image slices to a raw volume with floating point RGBA data (32
+ * bit per channel).
  */
 class MilkywayConversionTask : public Task {
 public:

@@ -51,29 +51,31 @@ public:
 
     /**
      * The exoplanet file includes a set of commented lines in the beginning. This
-     * funciton skips those lines, as well as any empty lines, and continues reading
-     * until it find the first valid data line (which will be the column names).
+     * function skips those lines, as well as any empty lines, and continues reading until
+     * it find the first valid data line (which will be the column names).
      *
      * \param file The input file stream used for reading the file
-     * \return The content of the first data row (i.e. the column names).
+     * \return The content of the first data row (i.e. the column names)
      */
     static std::vector<std::string> readFirstDataRow(std::ifstream& file);
 
     /**
-     * Parse a row in the CSV file of exoplanets. Assumes the same format and column
-     * names as provided by the NASA Exoplanet Archive.
-     * (https://exoplanetarchive.ipac.caltech.edu/)
+     * Parse a row in the CSV file of exoplanets. Assumes the same format and column names
+     * as provided by the NASA Exoplanet Archive.
      *
      * \param row The row to parse, given as a string
      * \param columnNames The list of column names in the file, from the CSV header
      * \param positionSourceFile A SPECK file to use for getting the position of the star.
-     *        This is used to make sure the position of the star matches those of other star
-     *        datasets. If no file is provided, the position from the CSV data file is read
-     *        and used instead
+     *        This is used to make sure the position of the star matches those of other
+     *        star datasets. If no file is provided, the position from the CSV data file
+     *        is read and used instead
      * \param bvFromTeffConversionFile A text file containing a mapping between effective
-     *        temperature (teff) values and B-V color index values. Each line should include
-     *        two values separated by a comma: first the teff value and hten the B-V value
-     * \return An object containing the parsed information.
+     *        temperature (teff) values and B-V color index values. Each line should
+     *        include two values separated by a comma: first the teff value and then the
+     *        B-V value
+     * \return An object containing the parsed information
+     *
+     * /sa https://exoplanetarchive.ipac.caltech.edu/
      */
     static PlanetData parseDataRow(std::string row,
         const std::vector<std::string>& columnNames,

@@ -58,12 +58,11 @@ public:
         GLuint shadowDepthTexture = 0;
     };
 
-    ShadowComponent(const ghoul::Dictionary& dictionary);
+    explicit ShadowComponent(const ghoul::Dictionary& dictionary);
 
     void initialize();
     void initializeGL();
     void deinitializeGL();
-    //bool deinitialize();
 
     bool isReady() const;
 
@@ -75,7 +74,7 @@ public:
 
     bool isEnabled() const;
 
-    ShadowComponent::ShadowMapData shadowMapData() const;
+    ShadowMapData shadowMapData() const;
 
     GLuint dDepthTexture() const;
 
@@ -89,14 +88,6 @@ private:
     void saveDepthBuffer();
 
     ShadowMapData _shadowData;
-
-    // Texture coords in [0, 1], while clip coords in [-1, 1]
-    const glm::dmat4 _toTextureCoordsMatrix = glm::dmat4(
-        glm::dvec4(0.5, 0.0, 0.0, 0.0),
-        glm::dvec4(0.0, 0.5, 0.0, 0.0),
-        glm::dvec4(0.0, 0.0, 1.0, 0.0),
-        glm::dvec4(0.5, 0.5, 0.0, 1.0)
-    );
 
     // DEBUG
     properties::TriggerProperty _saveDepthTexture;

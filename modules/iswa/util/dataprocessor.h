@@ -39,8 +39,6 @@ namespace properties { class SelectionProperty; }
 class Histogram;
 
 class DataProcessor {
-    //friend class IswaBaseGroup;
-
 public:
     DataProcessor() = default;
     virtual ~DataProcessor() = default;

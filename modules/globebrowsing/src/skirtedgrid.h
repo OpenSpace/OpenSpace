@@ -39,14 +39,8 @@ namespace openspace::globebrowsing {
 class SkirtedGrid {
 public:
     /**
-     * \param xSegments is the number of grid cells in the x direction.
-     * \param ySegments is the number of grid cells in the y direction.
-     * \param usePositions determines whether or not to upload any vertex position data
-     * to the GPU.
-     * \param useTextureCoordinates determines whether or not to upload any vertex texture
-     * coordinate data to the GPU.
-     * \param useNormals determines whether or not to upload any vertex normal data
-     * to the GPU.
+     * \param xSegments is the number of grid cells in the x direction
+     * \param ySegments is the number of grid cells in the y direction
      */
     SkirtedGrid(unsigned int xSegments, unsigned int ySegments);
     ~SkirtedGrid() = default;
@@ -56,11 +50,10 @@ public:
 
     /**
      * Calls OpenGL's draw function to draw the triangles defined in the vertex buffers
-     * using the current bound program object.
-     * The vertex buffer attribute input locations to the shader program comes in the
-     * order of positions (0), texture coordinates (1) and normals (2).
-     * The input locations in the shader program should be specified to match these
-     * locations.
+     * using the current bound program object. The vertex buffer attribute input locations
+     * to the shader program comes in the order of positions (0), texture coordinates (1)
+     * and normals (2). The input locations in the shader program should be specified to
+     * match these locations.
      */
     void drawUsingActiveProgram() const;
 

@@ -32,16 +32,15 @@
 namespace openspace {
 
 /**
- * A double buffered implementation of the Syncable interface.
- * Users are encouraged to used this class as a default way to synchronize different
- * C++ data types using the SyncEngine.
+ * A double buffered implementation of the Syncable interface. Users are encouraged to
+ * used this class as a default way to synchronize different C++ data types using the
+ * SyncEngine.
  *
  * This class aims to handle the synchronization parts and yet act like a regular
  * instance of T. Implicit casts are supported, however, when accessing member functions
  * or variables, user may have to do explicit casts.
  *
- * ((T&) t).method();
- *
+ * `((T&) t).method();`
  */
 template<class T>
 class SyncData : public Syncable {
@@ -51,28 +50,28 @@ public:
     SyncData(const SyncData<T>& o);
 
     /**
-     * Allowing assignment of data as if
+     * Allowing assignment of data as if.
      */
     SyncData& operator=(const T& rhs);
 
     /**
-     * Allow implicit cast to referenced T
+     * Allow implicit cast to referenced T.
      */
     operator T&();
 
     /**
-     * Allow implicit cast to const referenced T
+     * Allow implicit cast to const referenced T.
      */
     operator const T&() const;
 
     /**
-     * Explicitly access data
+     * Explicitly access data.
      */
     T& data();
 
     /**
-    * Explicitly access const data
-    */
+     * Explicitly access const data.
+     */
     const T& data() const;
 
 protected:

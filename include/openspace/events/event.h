@@ -111,7 +111,7 @@ void logAllEvents(const Event* e);
 //
 
 /**
- * This event is created whenever a new scene graph node is added to the system.  By the
+ * This event is created whenever a new scene graph node is added to the system. By the
  * time this event is signalled, the scene graph node has already been created and added
  * to the scene.
  */
@@ -130,7 +130,7 @@ struct EventSceneGraphNodeAdded : public Event {
 };
 
 /**
- * This event is created whenever a scene graph node was removed.  By the time this event
+ * This event is created whenever a scene graph node was removed. By the time this event
  * is signalled, the scene graph node has already been removed.
  */
 struct EventSceneGraphNodeRemoved : public Event {
@@ -164,7 +164,7 @@ struct EventParallelConnection : public Event {
     /**
      * Creates an instance of an EventParallelConnection event.
      *
-     * \param state_ The new state of the parallel connection system;  is one of
+     * \param state_ The new state of the parallel connection system; is one of
      *        `Established`, `Lost`, `HostshipGained`, or `HostshipLost`
      */
     explicit EventParallelConnection(State state_);
@@ -201,8 +201,8 @@ struct EventApplicationShutdown : public Event {
     /**
      * Creates an instance of an EventApplicationShutdown event.
      *
-     * \param state_ The next state of the application shutdown sequence;  is one of
-     *        `Started`, `Aborted`,  or `Finished`
+     * \param state_ The next state of the application shutdown sequence; is one of
+     *        `Started`, `Aborted`, or `Finished`
      */
     explicit EventApplicationShutdown(State state_);
     const State state;
@@ -210,7 +210,7 @@ struct EventApplicationShutdown : public Event {
 
 /**
  * This event is created when a new screenspace renderable has been created.  By the time
- * this event is craeted, the screenspace renderable is already registered and available.
+ * this event is created, the screenspace renderable is already registered and available.
  */
 struct EventScreenSpaceRenderableAdded : public Event {
     static constexpr Type Type = Event::Type::ScreenSpaceRenderableAdded;
@@ -229,7 +229,7 @@ struct EventScreenSpaceRenderableAdded : public Event {
 /**
  * This event is created when a screenspace renderable has been removed from the system.
  * When this event is created, the screenspace renderable has already been removed and is
- * no longer available
+ * no longer available.
  */
 struct EventScreenSpaceRenderableRemoved : public Event {
     static constexpr Type Type = Event::Type::ScreenSpaceRenderableRemoved;
@@ -248,18 +248,18 @@ struct EventScreenSpaceRenderableRemoved : public Event {
  * distances. Right now, only movement relative to camera's focus node is considered.
  * Each scene graph node has an interaction sphere radius that serves as the reference
  * distance for all spheres.
-```
-Diagram of events for a camera moving from right-to-left. Interaction sphere is 'O' in
-middle, and ')' are spherical boundaries. The approach factor, reach factor, and
-interaction sphere radius are all taken from the current focus node.
-
-|<------------------->|  Approach factor * Interaction sphere
-             |<------>|  Reach Factor * Interaction sphere
-
-(                       (           O          )                       )
-^                       ^                      ^                       ^
-Exiting                 Receding               Reaching                Approaching
-```
+ * ```
+ * Diagram of events for a camera moving from right-to-left. Interaction sphere is 'O' in
+ * middle, and ')' are spherical boundaries. The approach factor, reach factor, and
+ * interaction sphere radius are all taken from the current focus node.
+ *
+ * |<------------------->|  Approach factor * Interaction sphere
+ *              |<------>|  Reach Factor * Interaction sphere
+ *
+ * (                       (           O          )                       )
+ * ^                       ^                      ^                       ^
+ * Exiting                 Receding               Reaching                Approaching
+ * ```
  */
 struct EventCameraFocusTransition : public Event {
     static constexpr Type Type = Event::Type::CameraFocusTransition;
@@ -347,7 +347,7 @@ struct EventPlanetEclipsed : public Event {
 
 /**
  * This event is created when the interpolation of a property value is finished. If the
- * interpolation time of a property change is 0s, this event is not fired
+ * interpolation time of a property change is 0s, this event is not fired.
  */
 struct EventInterpolationFinished : public Event {
     static constexpr Type Type = Event::Type::InterpolationFinished;
@@ -562,7 +562,7 @@ struct EventCameraPathFinished : public Event {
 };
 
 /**
- * This event is created when the a camera moves location
+ * This event is created when the a camera moves location.
  */
 struct EventCameraMovedPosition : public Event {
     static constexpr Type Type = Event::Type::CameraMovedPosition;

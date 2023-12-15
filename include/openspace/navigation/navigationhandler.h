@@ -151,7 +151,7 @@ public:
      * Set camera state from a provided navigation state next frame. The actual position
      * will computed from the scene in the same frame as it is set.
      *
-     * \param state the navigation state to compute a camera positon from
+     * \param state The navigation state to compute a camera positon from
      */
     void setNavigationStateNextFrame(const NavigationState& state);
 
@@ -161,14 +161,14 @@ public:
      * node info. The actual position will computed from the scene in the same frame as
      * it is set.
      *
-     * \param spec the node specification from which to compute the resulting camera pose
+     * \param spec The node specification from which to compute the resulting camera pose
      */
     void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
 
     /**
-    * \return The Lua library that contains all Lua functions available to affect the
-    * interaction
-    */
+     * \return The Lua library that contains all Lua functions available to affect the
+     *         interaction
+     */
     static scripting::LuaLibrary luaLibrary();
 
 private:

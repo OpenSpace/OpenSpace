@@ -43,12 +43,14 @@ namespace documentation { struct Documentation; }
  * logfile should be created. Both logs can be customized using the `Append`,
  * `TimeStamping`, `DateStamping`, `CategoryStamping`, and `LogLevelStamping` values.
  *
- * \param  dictionary The dictionary from which the ghoul::logging::Log should be created
+ * \param dictionary The dictionary from which the ghoul::logging::Log should be created
  * \return The created ghoul::logging::Log
- * \post   The return value will not be `nullptr`
- * \throw  ghoul::RuntimeError If there was an error creating the ghoul::logging::Log
- * \sa     ghoul::logging::TextLog
- * \sa     ghoul::logging::HTMLLog
+ *
+ * \post The return value will not be `nullptr`
+ * \throw ghoul::RuntimeError If there was an error creating the ghoul::logging::Log
+ *
+ * \see ghoul::logging::TextLog
+ * \see ghoul::logging::HTMLLog
  */
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary);
 

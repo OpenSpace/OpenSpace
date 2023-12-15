@@ -1,7 +1,7 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -19,13 +19,13 @@ local Io = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "IO",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels.ID.Io,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_IO",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Io,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -56,8 +56,8 @@ local IoLabel = {
   Identifier = "IoLabel",
   Parent = Io.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Io",
     FontSize = 70.0,
     Size = 6.0,
@@ -79,8 +79,6 @@ local IoLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
   openspace.addSceneGraphNode(Io)
   openspace.addSceneGraphNode(IoLabel)
 end)
@@ -88,8 +86,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(IoLabel)
   openspace.removeSceneGraphNode(Io)
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Io)

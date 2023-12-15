@@ -44,11 +44,11 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * The base class for screen space images and screen space framebuffers.
- * This base class handles general functionality specific to planes that are rendered in
- * front of the camera. It implements protected methods and properties for converting
- * the planes from Spherical to Cartesian coordinates and back. It also specifies the
- * interface that its children need to implement.
+ * The base class for screen space images and screen space framebuffers. This base class
+ * handles general functionality specific to planes that are rendered in front of the
+ * camera. It implements protected methods and properties for converting the planes from
+ * Spherical to Cartesian coordinates and back. It also specifies the interface that its
+ * children need to implement.
  */
 class ScreenSpaceRenderable : public properties::PropertyOwner, public Fadeable {
 public:

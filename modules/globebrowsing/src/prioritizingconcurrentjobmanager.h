@@ -45,7 +45,7 @@ public:
     PrioritizingConcurrentJobManager(LRUThreadPool<KeyType> pool);
 
     /**
-     * Enqueues a job which is identified using a given key
+     * Enqueues a job which is identified using a given key.
      */
     void enqueueJob(std::shared_ptr<Job<P>> job, KeyType key);
 
@@ -60,11 +60,11 @@ public:
     std::vector<KeyType> keysToEnqueuedJobs();
 
     /**
-     * Bumps the job identified with `key` to the beginning of the queue.
-     * In case the job was not already enqueued the function simply returns false and
-     * no state is changed.
-     * \param key is the identifier of the job to bump.
-     * \returns true if the job was found, else returns false.
+     * Bumps the job identified with `key` to the beginning of the queue. In case the job
+     * was not already enqueued the function simply returns false and no state is changed.
+     *
+     * \param key this is the identifier of the job to bump
+     * \return `true` if the job was found, else returns false
      */
     bool touch(KeyType key);
 
@@ -76,7 +76,7 @@ public:
     void clearEnqueuedJobs();
 
     /**
-     * \returns one finished job.
+     * \return one finished job
      */
     std::shared_ptr<Job<P>> popFinishedJob();
 
@@ -85,7 +85,7 @@ public:
 private:
     ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
     std::mutex _finishedJobsMutex;
-    /// An LRU thread pool is used since the jobs can be bumped and hence prioritized.
+    /// An LRU thread pool is used since the jobs can be bumped and hence prioritized
     LRUThreadPool<KeyType> _threadPool;
 };
 

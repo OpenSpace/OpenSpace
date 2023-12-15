@@ -25,19 +25,6 @@
 #ifndef __OPENSPACE_CORE___SHORTPROPERTY___H__
 #define __OPENSPACE_CORE___SHORTPROPERTY___H__
 
- /**
- * \file shortproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class ShortProperty
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
 #include <limits>
 

@@ -32,10 +32,10 @@
 namespace openspace::kepler {
 
 struct Parameters {
-    // Some human-readable name for the object represented by this kepler parameter set
+    /// Some human-readable name for the object represented by this kepler parameter set
     std::string name;
 
-    // Some form of unique identifier for the object represented by this data
+    /// Some form of unique identifier for the object represented by this data
     std::string id;
 
     double inclination = 0.0;
@@ -86,7 +86,7 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file);
 std::vector<Parameters> readSbdbFile(std::filesystem::path file);
 
 /**
- * The different formats that the readFile function is capable of loading
+ * The different formats that the readFile function is capable of loading.
  */
 enum class Format {
     TLE,

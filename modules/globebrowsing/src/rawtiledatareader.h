@@ -49,9 +49,12 @@ public:
      * Opens a GDALDataset in readonly mode and calculates meta data required for
      * reading tile using a TileIndex.
      *
-     * \param filePath, a path to a specific file GDAL can read
-     * \param config, Configuration used for initialization
-     * \param baseDirectory, the base directory to use in future loading operations
+     * \param filePath the path to a specific file GDAL can read
+     * \param initData information about the textures that will be creatd by this reader
+     * \param cacheProperties contains settings about whether the reader should
+     *        utilize cache
+     * \param preprocess whether the loaded data should be calculate meta data about the
+     *        dataset
      */
     RawTileDataReader(std::string filePath, TileTextureInitData initData,
         TileCacheProperties cacheProperties,

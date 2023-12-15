@@ -1,0 +1,33 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local kernels = asset.resource({
+  Name = "Mars Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_kernels",
+  Version = 1
+})
+
+
+local ID = {
+  Deimos = "DEIMOS",
+  Phobos = "PHOBOS"
+}
+
+local Frame = {
+  Deimos = coreKernels.Frame.Deimos,
+  Phobos = coreKernels.Frame.Phobos
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "mar097.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "mar097.bsp")
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)

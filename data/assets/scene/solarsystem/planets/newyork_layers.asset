@@ -1,0 +1,25 @@
+asset.require("./base_layers")
+
+asset.require("./earth/layers/newyork_layers")
+asset.require("./earth/moon/layers/newyork_layers")
+asset.require("./jupiter/europa/layers/newyork_layers")
+asset.require("./mars/layers/newyork_layers")
+asset.require("./mercury/layers/newyork_layers")
+asset.require("./saturn/enceladus/layers/newyork_layers")
+asset.require("./venus/layers/newyork_layers")
+
+
+
+asset.meta = {
+  Name = "Default Solar System Layers (New York)",
+  Version = "1.0",
+  Description = [[Adds default layers for all planets. Remove this asset and include
+    individual layers for planets to customize planet layers
+
+
+    Layers only loaded from the New York server
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

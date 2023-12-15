@@ -41,10 +41,10 @@ public:
     int typeLua() const override;
 
     /**
-     * This method sets the stored value to the provided value `val`.
-     * If the value is different, the listeners are notified. It also removes any
-     * invalid keys in the input set. A key is invalid if it does not correspond to
-     * an existing option in the SelectionProperty
+     * This method sets the stored value to the provided value `val`. If the value is
+     * different, the listeners are notified. It also removes any invalid keys in the
+     * input set. A key is invalid if it does not correspond to an existing option in the
+     * SelectionProperty.
      *
      * \param val The new value for this SelectionProperty
      */
@@ -67,16 +67,16 @@ public:
     bool isSelected(const std::string& key) const;
 
     /**
-     * Checks if the SelectionProperty has any selected values, that is, if its
-     * value is empty.
+     * Checks if the SelectionProperty has any selected values, that is, if its value is
+     * empty.
      *
      * \return `true` if there are selected options; `false` otherwise
      */
     bool hasSelected() const;
 
     /**
-     * Returns all available options for this SelectionProperty. Should be
-     * sorted alphabetically.
+     * Returns all available options for this SelectionProperty. Should be sorted
+     * alphabetically.
      *
      * \return A list of all available options
      */
@@ -99,7 +99,7 @@ public:
     void addOption(const std::string& key);
 
     /**
-     * This method clears the selection list, that is the value of this SelectionProperty
+     * This method clears the selection list, that is the value of this SelectionProperty.
      */
     void clearSelection();
 

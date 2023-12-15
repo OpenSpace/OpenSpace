@@ -69,7 +69,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-
     std::vector<float> createDataSlice();
     void createPolygonTexture();
     void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,

@@ -58,14 +58,18 @@ public:
 private:
     /**
      * Performs a full sweep of the orbit and fills the entire vertex buffer object.
+     *
      * \param time The current time up to which the full sweep should be performed
      */
     void fullSweep(double time);
 
-    /// This structure is returned from the #updateTrails method and gives information
-    /// about which parts of the vertex array to update
+    /**
+     * This structure is returned from the #updateTrails method and gives information
+     * about which parts of the vertex array to update.
+     */
     struct UpdateReport {
-        static constexpr int All = 0; ///< The entire array was touched in the update
+        /// The entire array was touched in the update
+        static constexpr int All = 0;
 
         /// If `true` the floating point needs to be updated
         bool floatingPointNeedsUpdate;
@@ -73,8 +77,8 @@ private:
         /// If `true` at least one of their permanent point were touched
         bool permanentPointsNeedUpdate;
 
-        /// Returns the number of fixed points that were touched in the update method
-        /// If this value is negative, the newest values were replaced, if positive the
+        /// Returns the number of fixed points that were touched in the update method. If
+        /// this value is negative, the newest values were replaced, if positive the
         /// oldest
         int nUpdated;
     };
@@ -82,6 +86,7 @@ private:
      * Updates the trail based on the new incoming UpdateData information. This function
      * might update an arbitrary number of values in the vertex buffer and returns an
      * UpdateReport that will tell the #update method how many values were modified.
+     *
      * \param data The UpdateData struct that comes from the #update method
      * \return The UpdateReport containing information which array parts were touched
      */

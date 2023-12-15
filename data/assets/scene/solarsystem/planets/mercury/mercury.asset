@@ -1,6 +1,6 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,20 +18,18 @@ local Mercury = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY",
-      Observer = "MERCURY BARYCENTER"
+      Target = coreKernels.ID.Mercury,
+      Observer = coreKernels.ID.MercuryBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MERCURY",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Mercury,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 2439700,
-    Frame = "IAU_MERCURY",
-    Body = "MERCURY",
     CameraMinHeight = 300,
     SegmentsPerPatch = 64,
     Layers = {},
@@ -58,8 +56,8 @@ local MercuryLabel = {
   Identifier = "MercuryLabel",
   Parent = Mercury.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Mercury",
     FontSize = 70.0,
     Size = 8.5,

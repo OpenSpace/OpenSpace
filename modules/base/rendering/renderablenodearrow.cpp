@@ -252,7 +252,7 @@ namespace {
             prop.setMaxValue(1000.f);
         }
         // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
-    };
+    }
 } // namespace
 
 namespace openspace {

@@ -1,6 +1,6 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,13 +10,13 @@ local Uranus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "URANUS",
-      Observer = "URANUS BARYCENTER"
+      Target = coreKernels.ID.Uranus,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_URANUS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Uranus,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -37,8 +37,8 @@ local UranusLabel = {
   Identifier = "UranusLabel",
   Parent = Uranus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Uranus",
     FontSize = 70.0,
     Size = 9.0,

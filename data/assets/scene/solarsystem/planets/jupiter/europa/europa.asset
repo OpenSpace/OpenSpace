@@ -1,7 +1,7 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -17,15 +17,15 @@ local Europa = {
   Identifier = "Europa",
   Parent = transforms.JupiterBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_EUROPA",
-      DestinationFrame = "GALACTIC"
-    },
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EUROPA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels.ID.Europa,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Europa,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -56,8 +56,8 @@ local EuropaLabel = {
   Identifier = "EuropaLabel",
   Parent = Europa.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Europa",
     FontSize = 70.0,
     Size = 6.0,
@@ -79,8 +79,6 @@ local EuropaLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
   openspace.addSceneGraphNode(Europa)
   openspace.addSceneGraphNode(EuropaLabel)
 end)
@@ -88,8 +86,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EuropaLabel)
   openspace.removeSceneGraphNode(Europa)
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Europa)

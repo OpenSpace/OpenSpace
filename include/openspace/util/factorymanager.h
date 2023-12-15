@@ -39,13 +39,16 @@ namespace openspace {
  */
 class FactoryManager {
 public:
-    /// This exception is thrown if the ghoul::TemplateFactory could not be found in the
-    /// #factory method
+    /**
+     * This exception is thrown if the ghoul::TemplateFactory could not be found in the
+     * #factory method.
+     */
     struct FactoryNotFoundError : public ghoul::RuntimeError {
         /**
          * Constructor for FactoryNotFoundError, the \p type is a human-readable (-ish)
          * type descriptor for the type `T` for the TemplateFactory that could
          * not be found.
+         *
          * \param t The type `T` for the `TemplateFactory<T>` that could not be found
          * \pre \p t must not be empty
          */
@@ -60,36 +63,41 @@ public:
     /**
      * Static initializer that initializes the static member. This needs to be done before
      * the FactoryManager can be used.
+     *
      * \pre The FactoryManager must not have been initialized before
      */
     static void initialize();
 
     /**
      * Deinitializes the static member and all the registered ghoul::TemplateFactory%s.
+     *
      * \pre The FactoryManager must have been initialized before
      */
     static void deinitialize();
 
     /**
-     * Returns `true` if the static FactoryManager has already been
-     * initiailzed, `false` otherwise.
+     * Returns `true` if the static FactoryManager has already been initialized, `false`
+     * otherwise.
+     *
      * \return The initialization status of the static FactoryManager
      */
     static bool isInitialized();
 
     /**
      * This method returns a reference to the initialized FactoryManager.
+     *
      * \return An initialized reference to the singleton manager
+     *
      * \pre The FactoryManager must have been initialized before
      */
     static FactoryManager& ref();
 
     /**
      * Adds the passed \p factory to the FactoryManager. Factories may only be added once.
-     * \param name A user-readable name for the registered factory.
      *
      * \tparam Factory The type for which a factory should be created and added
-     *
+     * \param name A user-readable name for the registered factory
+     *     *
      * \pre \p name must not be empty
      */
     template <typename T>
@@ -99,10 +107,12 @@ public:
      * This method provides access to all registered ghoul::TemplateFactory%s through
      * their type. The method will always return a proper ghoul::TemplateFactory or throw
      * an error if the appropriate ghoul::TemplateFactory was not registered.
+     *
      * \tparam T The type that the requested ghoul::TemplateFactory should create
      * \return The ghoul::TemplateFactory that will create the pass type `T`
+     *
      * \throw FactoryNotFoundError If the requested ghoul::TemplateFactory could not be
-     * found
+     *        found
      */
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;

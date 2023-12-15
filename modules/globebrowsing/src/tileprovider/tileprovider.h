@@ -115,19 +115,19 @@ struct TileProvider : public properties::PropertyOwner {
     virtual void reset() = 0;
 
     /**
-     * \return The minimum level as defined by the `TileIndex` that this
-     *         TileProvider is capable of providing.
+     * \return The minimum level as defined by the `TileIndex` that this TileProvider is
+     *         capable of providing
      */
     virtual int minLevel() = 0;
 
     /**
-     * \return The maximum level as defined by `TileIndex` that this
-     *         TileProvider is able provide.
+     * \return The maximum level as defined by `TileIndex` that this TileProvider is able
+     *         to provide
      */
     virtual int maxLevel() = 0;
 
     /**
-     * \return the no data value for the dataset. Default is the minimum float value.
+     * \return The no data value for the dataset. Default is the minimum float value
      */
     virtual float noDataValueAsFloat() = 0;
 

@@ -1,0 +1,41 @@
+local kernels = asset.resource({
+  Name = "Uranus Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "uranus_kernels",
+  Version = 2
+})
+
+
+local ID = {
+  Caliban = "CALIBAN",
+  Ferdinand = "FERDINAND",
+  Francisco = "FRANCISCO",
+  Margaret = "MARGARET",
+  Prospero = "PROSPERO",
+  Setebos = "SETEBOS",
+  Stephano = "STEPHANO",
+  Sycorax = "SYCORAX",
+  Trinculo = "TRINCULO",
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "ura116.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "ura116.bsp")
+end)
+
+asset.export("ID", ID)
+
+
+
+asset.meta = {
+  Name = "Uranus Spice Kernels",
+  Version = "1.0",
+  Description = "Generic SPICE kernels for Uranus",
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
+  License = "NASA"
+}

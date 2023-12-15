@@ -40,6 +40,7 @@ documentation::Documentation LayerManager::Documentation() {
     return {
         "LayerManager",
         "globebrowsing_layermanager",
+        "",
         {
             {
                 "*",

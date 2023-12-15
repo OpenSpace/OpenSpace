@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("../transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local MoonTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MOON",
-      Observer = "EARTH BARYCENTER"
+      Target = coreKernels.ID.Moon,
+      Observer = coreKernels.ID.EarthBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 27,
@@ -40,8 +40,7 @@ asset.export(MoonTrail)
 asset.meta = {
   Name = "Moon Trail",
   Version = "1.1",
-  Description = [[Moon Trail - This asset contains the trail of the Moon. Data from NASA
-    Spice (see base spice asset)]],
+  Description = "Moon Trail - This asset contains the trail of the Moon",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

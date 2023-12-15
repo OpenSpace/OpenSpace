@@ -104,6 +104,9 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This DashboardItem shows the angle between two scenegraph nodes relative to a
+    // reference node. The angle is calculated in the plane that is defined by the
+    // 'SourceNodeName', 'DestinationNodeName', and the 'ReferenceNodeName'.
     struct [[codegen::Dictionary(DashboardItemAngle)]] Parameters {
         enum class [[codegen::map(Type)]] Type {
             Node,

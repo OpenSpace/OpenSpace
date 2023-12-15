@@ -103,6 +103,7 @@ documentation::Documentation ConvertRecFileVersionTask::documentation() {
     return {
         "ConvertRecFileVersionTask",
         "convert_file_version_task",
+        "",
         {
             {
                 "InputFilePath",

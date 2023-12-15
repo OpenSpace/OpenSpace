@@ -147,8 +147,10 @@ public:
     void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
         std::string currentTime, interaction::NavigationState navState);
 
-    /// Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
-    /// set to `true`
+    /**
+     * Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
+     * set to `true`.
+     */
     void addAsset(const std::string& path);
 
     /// Removes an asset unless the `ignoreUpdates` member is set to `true`
@@ -174,6 +176,7 @@ public:
     /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
+     *
      * \return The Lua library that contains all Lua functions available for profiles
      */
     static scripting::LuaLibrary luaLibrary();
