@@ -273,14 +273,6 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.opacity, opacity());
     _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
     _programObject->setUniform(_uniformCache.modelView, calcModelViewTransform(data));
-
-    // Because we want the property to work similar to the planet trails
-    const glm::vec2 deltaVec = _appearance.lineFade.maxValue() - glm::vec2(_appearance.lineFade);
-    const glm::vec2 fade = glm::vec2(
-        pow(deltaVec[0], 2.f),
-        pow(deltaVec[1], 2.f)
-    );
-
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
     _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
@@ -364,7 +356,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         const double scale = static_cast<double>(_segmentQuality) * 10.0;
         const kepler::Parameters& p = parameters[i];
         _segmentSize.push_back(
-            static_cast<size_t>(scale + (scale / pow(1 - p.eccentricity, 1.2)))
+            static_cast<int>(scale + (scale / pow(1 - p.eccentricity, 1.2)))
         );
         _startIndex.push_back(_startIndex[i] + static_cast<GLint>(_segmentSize[i]));
     }

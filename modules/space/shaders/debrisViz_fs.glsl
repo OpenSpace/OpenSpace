@@ -31,7 +31,7 @@ in float offsetPeriods;
 
 uniform vec3 color;
 uniform float opacity = 1.0;
-uniform float lineFade;
+uniform vec2 lineFade;
 uniform bool useLineFade;
 
 
@@ -54,10 +54,24 @@ Fragment getFragment() {
       vertexDistance += 1.0;
     }
 
-    // Somewhat temporary fix until fading for trails are overhauled
-    float emulatedOldValue = pow(30.0 - lineFade*20.0, 2.0);
-    float invert = pow((1.0 - vertexDistance), emulatedOldValue);
-    fade = clamp(invert, 0.0, 1.0);
+    float b0 = lineFade[0];
+    float b1 = lineFade[1];
+
+    float id = 1.0 - vertexDistance;
+
+    float fadeValue = 0.0;
+    if (id <= b0) {
+        fadeValue = 0.0;
+    }
+    else if (id > b0 && id < b1) {
+        float delta = b1 - b0;
+        fadeValue = (id-b0) / delta;
+    }
+    else {
+        fadeValue = 1.0;
+    }
+    
+    fade = clamp(fadeValue, 0.0, 1.0);
 
     // Currently even fully transparent lines can occlude other lines, thus we discard these
     // fragments since debris and satellites are rendered so close to each other
