@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -81,13 +82,16 @@ public:
         /// Settings that enables or disables the line fading
         properties::BoolProperty useLineFade;
         /// Specifies a multiplicative factor that fades out the line
-        properties::FloatProperty lineFade;
+        properties::Vec2Property lineFade;
         /// Line width for the line rendering part
         properties::FloatProperty lineWidth;
         /// Point size for the point rendering part
         properties::IntProperty pointSize;
         /// The option determining which rendering method to use
         properties::OptionProperty renderingModes;
+
+        /// TEMP - Option to select fading mode
+        properties::OptionProperty fadingModes;
     };
 
     virtual ~RenderableTrail() override = default;

@@ -88,13 +88,9 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineFadeInfo = {
         "LineFade",
-        "Line fade break point",
-        "The fading offset that is applied to the trail if the 'EnableFade' value is "
-        "'true'. If it is 'false', this setting has no effect. "
-        "Value of 1 means that fading will be applied from first to last point "
-        "of the trail while a value of 0.5 means that fading will be applied from "
-        "the first point to the mid point and everything after that "
-        "will be fully opaque.",
+        "Line fade",
+        "The fading factor that is applied to the trail if the 'EnableFade' value is "
+        "'true'. If it is 'false', this setting has no effect. --- IN PROGRESS ---",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
@@ -129,6 +125,17 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // TEMP GOES HERE =======================
+
+    constexpr openspace::properties::Property::PropertyInfo FadeModeInfo = {
+        "FadeMode",
+        "Fade Mode",
+        "Selects fading mode for trails",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    //=======================================
+
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
         // This object is used to compute locations along the path. Any Translation object
         // can be used here
@@ -142,7 +149,7 @@ namespace {
         std::optional<bool> enableFade;
 
         // [[codegen::verbatim(LineFadeInfo.description)]]
-        std::optional<float> lineFade;
+        std::optional<glm::vec2> lineFade;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -158,6 +165,17 @@ namespace {
         };
         // [[codegen::verbatim(RenderingModeInfo.description)]]
         std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
+
+        // TEMP GOES HERE ===================
+        enum class FadeMode {
+            TwoBreakpoints,
+            BreakpointPlusDuration [[codegen::key("Breakpoint + Duration")]],
+            BreakpointMinusDuration [[codegen::key("Breakpoint - Duration")]]
+        };
+
+        std::optional<FadeMode> fadeMode;
+
+        // ==================================
     };
 #include "renderabletrail_codegen.cpp"
 } // namespace
@@ -176,12 +194,16 @@ RenderableTrail::Appearance::Appearance()
     })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
-    , lineFade(LineFadeInfo, 1.f, 0.f, 1.f)
+    , lineFade(LineFadeInfo, glm::vec2(0.f, 1.f), glm::vec2(0.0f), glm::vec2(1.0f))
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
           RenderingModeInfo,
           properties::OptionProperty::DisplayType::Dropdown
+    )
+    , fadingModes(
+        FadeModeInfo,
+        properties::OptionProperty::DisplayType::Dropdown
     )
 {
     renderingModes.addOptions({
@@ -190,7 +212,14 @@ RenderableTrail::Appearance::Appearance()
         { RenderingModeLinesPoints, "Lines+Points" }
     });
 
+    // TEMP GOES HERE =================
+
+
+
+    //=================================
+
     lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    lineFade.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(lineColor);
     addProperty(useLineFade);
     addProperty(lineFade);

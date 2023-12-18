@@ -137,7 +137,7 @@ namespace {
         glm::dvec3 color [[codegen::color()]];
 
         // [[codegen::verbatim(TrailFadeInfo.description)]]
-        std::optional<float> trailFade;
+        std::optional<glm::vec2> trailFade;
 
         // [[codegen::verbatim(StartRenderIdxInfo.description)]]
         std::optional<int> startRenderIdx;
@@ -174,7 +174,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addProperty(_segmentQuality);
 
     _appearance.lineColor = p.color;
-    _appearance.lineFade = p.trailFade.value_or(1.f);
+    _appearance.lineFade = p.trailFade.value_or(glm::vec2(0.f, 1.f));
     _appearance.lineWidth = p.lineWidth.value_or(2.f);
     _appearance.useLineFade = true;
     addPropertySubOwner(_appearance);
@@ -273,6 +273,14 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.opacity, opacity());
     _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
     _programObject->setUniform(_uniformCache.modelView, calcModelViewTransform(data));
+
+    // Because we want the property to work similar to the planet trails
+    const glm::vec2 deltaVec = _appearance.lineFade.maxValue() - glm::vec2(_appearance.lineFade);
+    const glm::vec2 fade = glm::vec2(
+        pow(deltaVec[0], 2.f),
+        pow(deltaVec[1], 2.f)
+    );
+
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
     _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);

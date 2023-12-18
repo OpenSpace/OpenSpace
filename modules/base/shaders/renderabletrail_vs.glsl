@@ -38,7 +38,7 @@ uniform mat4 projectionTransform;
 uniform int idOffset;
 uniform int nVertices;
 uniform bool useLineFade;
-uniform float lineFade;
+uniform vec2 lineFade;
 uniform int vertexSortingMethod;
 uniform int pointSize;
 uniform int stride;
@@ -80,10 +80,16 @@ void main() {
       id = 1.0 - id;
     }
 
+    float b0 = lineFade[0];
+    float b1 = lineFade[1];
+
     float fadeValue = 0.0;
-    float scalingValue = 1.0 / lineFade;
-    if (id <= lineFade) {
-        fadeValue = id * scalingValue;
+    if (id <= b0) {
+        fadeValue = 0.0;
+    }
+    else if (id > b0 && id < b1) {
+        float delta = b1 - b0;
+        fadeValue = (id-b0) / delta;
     }
     else {
         fadeValue = 1.0;
