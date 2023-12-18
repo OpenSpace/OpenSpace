@@ -163,19 +163,19 @@ inline std::string to_string(
 {
     using T = openspace::interaction::JoystickCameraStates::AxisType;
     switch (value) {
-        case T::None:        return "None";
-        case T::OrbitX:      return "Orbit X";
-        case T::OrbitY:      return "Orbit Y";
-        case T::ZoomIn:      return "Zoom In";
-        case T::ZoomOut:     return "Zoom Out";
-        case T::Zoom:        return "Zoom In and Out";
+        case T::None:       return "None";
+        case T::OrbitX:     return "Orbit X";
+        case T::OrbitY:     return "Orbit Y";
+        case T::ZoomIn:     return "Zoom In";
+        case T::ZoomOut:    return "Zoom Out";
+        case T::Zoom:       return "Zoom In and Out";
         case T::LocalRoll:  return "LocalRoll";
         case T::GlobalRoll: return "GlobalRoll";
-        case T::PanX:        return "Pan X";
-        case T::PanY:        return "Pan Y";
-        case T::Property:    return "Property";
-        default:             return "";
-        }
+        case T::PanX:       return "Pan X";
+        case T::PanY:       return "Pan Y";
+        case T::Property:   return "Property";
+        default:            return "";
+    }
 }
 
 template <>
@@ -196,7 +196,7 @@ from_string(std::string_view string)
     if (string == "Pan Y") { return T::PanY; }
     if (string == "Property") { return T::Property; }
 
-    throw RuntimeError("Unkonwn axis type '" + std::string(string) + "'");
+    throw RuntimeError(fmt::format("Unknown axis type '{}'", string), "Joystick");
 }
 
 template <>
@@ -220,7 +220,7 @@ from_string(std::string_view string)
     if (string == "JoystickLike") { return T::JoystickLike; }
     if (string == "TriggerLike") { return T::TriggerLike; }
 
-    throw RuntimeError("Unkonwn joystick type '" + std::string(string) + "'");
+    throw RuntimeError(fmt::format("Unknown joystick type '{}'", string), "Joystick");
 }
 
 } // namespace ghoul

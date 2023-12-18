@@ -1,4 +1,5 @@
-asset.require("./rosetta")
+local rosetta = asset.require("./rosetta")
+local cg = asset.require("./67p")
 
 
 
@@ -14,9 +15,9 @@ local Distance = {
   Identifier = "Rosetta67PDistance",
   GuiName = "Rosetta 67P Distance",
   SourceType = "Node",
-  SourceNodeName = "Rosetta",
+  SourceNodeName = rosetta.Rosetta.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = "67P"
+  DestinationNodeName = cg.Comet67P.Identifier
 }
 
 local Instruments = {

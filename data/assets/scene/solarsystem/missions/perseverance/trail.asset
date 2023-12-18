@@ -1,6 +1,7 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
-local spice = asset.require("./spice")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -13,16 +14,16 @@ local PerseveranceTrailSun = {
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID,
-      Observer = "SSB"
+      Target = kernels.ID.Perseverance,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.2, 0.7, 0.1 },
     StartTime = StartTime,
     EndTime = EndTime,
-    SampleInterval = 100,
-    Enabled = false
+    SampleInterval = 100
   },
   GUI = {
     Name = "Perseverance Trail (Sun)",
@@ -35,16 +36,16 @@ local PerseveranceTrailMars = {
   Parent = marsTransforms.MarsBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID,
-      Observer = "MARS BARYCENTER"
+      Target = kernels.ID.Perseverance,
+      Observer = kernels.ID.MarsBarycenter
     },
     Color = { 0.7, 0.9, 0.6 },
     StartTime = ApproachMars,
     EndTime = "2021 FEB 18 20:43:48",
-    SampleInterval = 100,
-    Enabled = false
+    SampleInterval = 100
   },
   GUI = {
     Name = "Perseverance Trail (Mars)",
@@ -54,8 +55,6 @@ local PerseveranceTrailMars = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(spice.Kernels)
-
   openspace.addSceneGraphNode(PerseveranceTrailSun)
   openspace.addSceneGraphNode(PerseveranceTrailMars)
 end)
@@ -63,8 +62,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PerseveranceTrailMars)
   openspace.removeSceneGraphNode(PerseveranceTrailSun)
-
-  openspace.spice.unloadKernel(spice.Kernels)
 end)
 
 asset.export(PerseveranceTrailSun)

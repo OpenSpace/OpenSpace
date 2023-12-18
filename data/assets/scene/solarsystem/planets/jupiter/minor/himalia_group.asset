@@ -1,5 +1,7 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels344 = asset.require("../kernels344")
+local kernels346 = asset.require("../kernels346")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +11,8 @@ local Leda = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LEDA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Leda,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -40,8 +42,8 @@ local LedaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LEDA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Leda,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 240.82,
@@ -64,8 +66,8 @@ local LedaLabel = {
   Identifier = "LedaLabel",
   Parent = Leda.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Leda",
     FontSize = 70.0,
     Size = 7.1,
@@ -91,8 +93,8 @@ local Himalia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HIMALIA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Himalia,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -122,8 +124,8 @@ local HimaliaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HIMALIA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Himalia,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 250.23,
@@ -146,8 +148,8 @@ local HimaliaLabel = {
   Identifier = "HimaliaLabel",
   Parent = Himalia.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Himalia",
     FontSize = 70.0,
     Size = 7.1,
@@ -173,8 +175,8 @@ local Lysithea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LYSITHEA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Lysithea,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -204,8 +206,8 @@ local LysitheaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LYSITHEA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Lysithea,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 259.89,
@@ -228,8 +230,8 @@ local LysitheaLabel = {
   Identifier = "LysitheaLabel",
   Parent = Lysithea.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Lysithea",
     FontSize = 70.0,
     Size = 7.1,
@@ -255,8 +257,8 @@ local Elara = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ELARA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Elara,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -286,8 +288,8 @@ local ElaraTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ELARA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Elara,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 257.62,
@@ -310,8 +312,8 @@ local ElaraLabel = {
   Identifier = "ElaraLabel",
   Parent = Elara.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Elara",
     FontSize = 70.0,
     Size = 7.1,
@@ -337,8 +339,8 @@ local Dia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DIA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Dia,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -368,8 +370,8 @@ local DiaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DIA",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Dia,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 287.93,
@@ -392,8 +394,8 @@ local DiaLabel = {
   Identifier = "DiaLabel",
   Parent = Dia.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Dia",
     FontSize = 70.0,
     Size = 7.1,
@@ -419,8 +421,8 @@ local S2011J3 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55509",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels346.ID.S2011J3,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -450,8 +452,8 @@ local S2011J3Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55509",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels346.ID.S2011J3,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 261.77,
@@ -474,8 +476,8 @@ local S2011J3Label = {
   Identifier = "S2011J3Label",
   Parent = S2011J3.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2011 J 3",
     FontSize = 70.0,
     Size = 7.1,
@@ -501,8 +503,8 @@ local S2018J2 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55510",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels346.ID.S2018J2,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -532,8 +534,8 @@ local S2018J2Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55510",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels346.ID.S2018J2,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 250.88,
@@ -556,8 +558,8 @@ local S2018J2Label = {
   Identifier = "S2018J2Label",
   Parent = S2018J2.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2018 J 2",
     FontSize = 70.0,
     Size = 7.1,
@@ -583,8 +585,8 @@ local Pandia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "565",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Pandia,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -614,8 +616,8 @@ local PandiaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "565",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Pandia,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 251.911,
@@ -638,8 +640,8 @@ local PandiaLabel = {
   Identifier = "PandiaLabel",
   Parent = Pandia.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Pandia",
     FontSize = 70.0,
     Size = 7.1,
@@ -665,8 +667,8 @@ local Ersa = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "571",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Ersa,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
@@ -696,8 +698,8 @@ local ErsaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "571",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Ersa,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 249.229,
@@ -720,8 +722,8 @@ local ErsaLabel = {
   Identifier = "ErsaLabel",
   Parent = Ersa.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Ersa",
     FontSize = 70.0,
     Size = 7.1,
@@ -743,10 +745,6 @@ local ErsaLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-  openspace.spice.loadKernel(kernel.jup346)
-
-
   openspace.addSceneGraphNode(Leda)
   openspace.addSceneGraphNode(LedaTrail)
   openspace.addSceneGraphNode(LedaLabel)
@@ -820,10 +818,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(LedaLabel)
   openspace.removeSceneGraphNode(LedaTrail)
   openspace.removeSceneGraphNode(Leda)
-
-
-  openspace.spice.unloadKernel(kernel.jup346)
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Leda)

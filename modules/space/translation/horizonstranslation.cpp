@@ -91,7 +91,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
 
         std::vector<std::string> files;
         files.push_back(file);
-        _horizonsTextFiles.set(files);
+        _horizonsTextFiles = files;
     }
     else if (std::holds_alternative<std::vector<std::string>>(p.horizonsTextFile)) {
         std::vector<std::string> files =

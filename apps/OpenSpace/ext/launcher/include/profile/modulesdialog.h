@@ -39,18 +39,18 @@ class ModulesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for osmodules class
+     * Constructor for modules class.
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
+     * \param profile The #openspace::Profile::Module object containing all data of the
+     *        new or imported profile
      */
     ModulesDialog(QWidget* parent, std::vector<openspace::Profile::Module>* modules);
 
     /**
-     * Handles keypress while the Qt dialog window is open
+     * Handles keypress while the Qt dialog window is open.
      *
-     * \param evt #QKeyEvent object for the key press event
+     * \param evt QKeyEvent object for the key press event
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 

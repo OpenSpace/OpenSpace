@@ -1,0 +1,39 @@
+asset.require("./mercury/layers/base_layers")
+
+asset.require("./venus/layers/base_layers")
+
+asset.require("./earth/layers/base_layers")
+
+asset.require("./mars/layers/base_layers")
+
+asset.require("./jupiter/default_layers")
+asset.require("./jupiter/callisto/default_layers")
+asset.require("./jupiter/ganymede/default_layers")
+asset.require("./jupiter/io/default_layers")
+
+asset.require("./saturn/default_layers")
+asset.require("./saturn/dione/default_layers")
+asset.require("./saturn/hyperion/default_layers")
+asset.require("./saturn/iapetus/default_layers")
+asset.require("./saturn/mimas/default_layers")
+asset.require("./saturn/rhea/default_layers")
+asset.require("./saturn/tethys/default_layers")
+asset.require("./saturn/titan/default_layers")
+
+asset.require("./uranus/default_layers")
+
+asset.require("./neptune/default_layers")
+
+
+asset.meta = {
+  Name = "Base Solar System Layers",
+  Version = "1.0",
+  Description = [[Adds base layers for all planets. Remove this asset and include
+    individual layers for planets to customize planet layers.
+    The base layers do not depend on any particular OpenSpace server but are still
+    dependent on internet access.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

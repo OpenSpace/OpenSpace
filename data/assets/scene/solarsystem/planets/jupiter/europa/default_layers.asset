@@ -1,14 +1,18 @@
-asset.require("./layers/colorlayers/europa_texture", false)
-asset.require("./layers/colorlayers/voyager_global_mosaic_local", true)
-asset.require("./layers/colorlayers/voyager_global_mosaic_sweden", false)
-asset.require("./layers/colorlayers/voyager_global_mosaic_newyork", false)
+asset.require("./layers/base_layers", false)
+asset.require("./layers/local_layers", true)
+asset.require("./layers/sweden_layers", false)
+asset.require("./layers/newyork_layers", false)
 
 
 
 asset.meta = {
   Name = "Default Europa Layers",
-  Version = "1.1",
-  Description = "Default Europa layers are: Europa Texture",
+  Version = "1.2",
+  Description = [[Default Europa layers are: Europa Texture & Voyager Global Mosaic.
+
+
+    Layers loaded from all available servers
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

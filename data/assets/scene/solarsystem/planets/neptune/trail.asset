@@ -1,6 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local kernel = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +10,8 @@ local NeptuneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEPTUNE",
-      Observer = "SSB"
+      Target = coreKernels.ID.Neptune,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.2, 0.5, 1.0 },
     -- Period = 60200,
@@ -39,15 +38,11 @@ local NeptuneTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep097)
-
   openspace.addSceneGraphNode(NeptuneTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneTrail)
-
-  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(NeptuneTrail)
@@ -57,7 +52,7 @@ asset.export(NeptuneTrail)
 asset.meta = {
   Name = "Neptune Trail",
   Version = "1.1",
-  Description = "Main trail of Neptune. Data from NASA Spice (see base spice asset)",
+  Description = "Main trail of Neptune",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels")
+local kernel = asset.require("./kernels095")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +10,8 @@ local Naiad = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NAIAD",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Naiad,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -40,8 +41,8 @@ local NaiadTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NAIAD",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Naiad,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.294,
@@ -64,8 +65,8 @@ local NaiadLabel = {
   Identifier = "NaiadLabel",
   Parent = Naiad.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Naiad",
     FontSize = 70.0,
     Size = 5.2,
@@ -91,8 +92,8 @@ local Thalassa = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "THALASSA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Thalassa,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -122,8 +123,8 @@ local ThalassaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "THALASSA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Thalassa,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.311,
@@ -146,8 +147,8 @@ local ThalassaLabel = {
   Identifier = "ThalassaLabel",
   Parent = Thalassa.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Thalassa",
     FontSize = 70.0,
     Size = 5.2,
@@ -173,8 +174,8 @@ local Despina = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DESPINA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Despina,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -204,8 +205,8 @@ local DespinaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DESPINA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Despina,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.335,
@@ -228,8 +229,8 @@ local DespinaLabel = {
   Identifier = "DespinaLabel",
   Parent = Despina.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Despina",
     FontSize = 70.0,
     Size = 5.2,
@@ -255,8 +256,8 @@ local Galatea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "GALATEA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Galatea,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -286,8 +287,8 @@ local GalateaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "GALATEA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Galatea,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.429,
@@ -310,8 +311,8 @@ local GalateaLabel = {
   Identifier = "GalateaLabel",
   Parent = Galatea.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Galatea",
     FontSize = 70.0,
     Size = 5.2,
@@ -337,8 +338,8 @@ local Larissa = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LARISSA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Larissa,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -368,8 +369,8 @@ local LarissaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LARISSA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Larissa,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.555,
@@ -392,8 +393,8 @@ local LarissaLabel = {
   Identifier = "LarissaLabel",
   Parent = Larissa.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Larissa",
     FontSize = 70.0,
     Size = 5.2,
@@ -419,8 +420,8 @@ local Hippocamp = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "814",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Hippocamp,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -450,8 +451,8 @@ local HippocampTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "814",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Hippocamp,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 0.936,
@@ -474,8 +475,8 @@ local HippocampLabel = {
   Identifier = "HippocampLabel",
   Parent = Hippocamp.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Hippocamp",
     FontSize = 70.0,
     Size = 5.2,
@@ -501,8 +502,8 @@ local Proteus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PROTEUS",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Proteus,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -532,8 +533,8 @@ local ProteusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PROTEUS",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernel.ID.Proteus,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 1.122,
@@ -556,8 +557,8 @@ local ProteusLabel = {
   Identifier = "ProteusLabel",
   Parent = Proteus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Proteus",
     FontSize = 70.0,
     Size = 5.2,
@@ -579,10 +580,6 @@ local ProteusLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep095)
-  openspace.spice.loadKernel(kernel.nep097)
-
-
   openspace.addSceneGraphNode(Naiad)
   openspace.addSceneGraphNode(NaiadTrail)
   openspace.addSceneGraphNode(NaiadLabel)
@@ -640,10 +637,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ProteusLabel)
   openspace.removeSceneGraphNode(ProteusTrail)
   openspace.removeSceneGraphNode(Proteus)
-
-
-  openspace.spice.unloadKernel(kernel.nep097)
-  openspace.spice.unloadKernel(kernel.nep095)
 end)
 
 asset.export(Naiad)

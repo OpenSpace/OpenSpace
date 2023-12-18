@@ -1,6 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,13 +19,13 @@ local Titan = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TITAN",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Titan,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_TITAN",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Titan,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -57,8 +58,8 @@ local TitanLabel = {
   Identifier = "TitanLabel",
   Parent = Titan.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Titan",
     FontSize = 70.0,
     Size = 6.2,
@@ -80,8 +81,6 @@ local TitanLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Titan)
   openspace.addSceneGraphNode(TitanLabel)
 end)
@@ -89,8 +88,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TitanLabel)
   openspace.removeSceneGraphNode(Titan)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Titan)

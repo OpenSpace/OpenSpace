@@ -27,7 +27,7 @@
 #include <openspace/openspace.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <sstream>

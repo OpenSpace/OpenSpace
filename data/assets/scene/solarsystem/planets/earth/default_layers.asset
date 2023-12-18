@@ -1,47 +1,25 @@
-asset.require("./layers/colorlayers/blue_marble", false)
-asset.require("./layers/colorlayers/esri_viirs_combo", true)
-asset.require("./layers/colorlayers/esri_noaa20_combo", false)
-asset.require("./layers/colorlayers/esri_world_imagery", false)
-asset.require("./layers/colorlayers/viirs_snpp_temporal", false)
-asset.require("./layers/colorlayers/aqua_modis_temporal", false)
-asset.require("./layers/colorlayers/terra_modis_temporal", false)
-asset.require("./layers/colorlayers/bmng_utah", false)
-asset.require("./layers/colorlayers/bmng_sweden", false)
-asset.require("./layers/colorlayers/bmng_newyork", false)
-asset.require("./layers/colorlayers/amsr2_gcom_w1_sea_ice_concentration_temporal", false)
-asset.require("./layers/colorlayers/modis_terra_chlorophyll_a_temporal", false)
-asset.require("./layers/colorlayers/ghrsst_l4_mur_sea_surface_temperature_temporal", false)
-
-asset.require("./layers/heightlayers/blue_marble_height", false)
-asset.require("./layers/heightlayers/terrain_tileset", true)
-
-asset.require("./layers/nightlayers/earth_at_night_2012", true)
-asset.require("./layers/nightlayers/earth_night_texture", false)
-asset.require("./layers/nightlayers/earth_at_night_temporal", false)
-
-asset.require("./layers/overlays/coastlines", false)
-asset.require("./layers/overlays/reference_features", false)
-asset.require("./layers/overlays/reference_labels", false)
-asset.require("./layers/overlays/tile_indices", false)
-asset.require("./layers/overlays/size_reference", false)
-
-asset.require("./layers/watermasks/gebco_sweden", false)
-asset.require("./layers/watermasks/gebco_utah", false)
-asset.require("./layers/watermasks/gebco_newyork", false)
-asset.require("./layers/watermasks/modis_water_mask", true)
+asset.require("./layers/base_layers", true)
+asset.require("./layers/utah_layers", false)
+asset.require("./layers/sweden_layers", false)
+asset.require("./layers/newyork_layers", false)
 
 
 
 asset.meta = {
   Name = "Default Earth Layers",
-  Version = "1.0",
-  Description = [[Default Earth layers are: ESRI VIIRS Combo, ESRI World Imagery, VIIRS
-    SNPP (Temporal), Aqua Modis (Temporal), Terra Modis (Temporal), BMNG, AMSR2 GCOM
-    W1 Sea Ice Concentration (Temporal), MODIS Terra Chlorophyll A (Temporal), GHRSST,
-    L4 G1SST Sea Surface Temperature (Temporal), GHRSST L4 MUR Sea Surface Temperature
-    (Temporal), World Elevation (3D), Earth at Night 2012, Coastlines, Reference
-    Features, Reference Labels, Tile Indicies, Size Reference, Gebco, and Modis Water
-    Mask]],
+  Version = "1.1",
+  Description = [[Default Earth layers are: Blue Marble,
+    ESRI VIIRS Combo, ESRI NOAA20 Combo, ESRI World Imagery, VIIRS SNPP (Temporal),
+    Aqua Modis (Temporal), Terra Modis (Temporal),
+    AMSR2 GCOM W1 Sea Ice Concentration (Temporal), MODIS Terra Chlorophyll A (Temporal),
+    GHRSST L4 MUR Sea Surface Temperature (Temporal), BMNG, Blue Marble Height (3D),
+    World Elevation (3D), Earth at Night 2012, Earth at Night Texture,
+    Earth at Night (Temporal), Coastlines, Reference Features, Reference Labels,
+    Tile Indicies, Size Reference, Gebco and Modis Water Mask.
+
+
+    Layers loaded from all servers
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

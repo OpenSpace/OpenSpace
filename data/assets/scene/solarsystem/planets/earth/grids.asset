@@ -1,4 +1,5 @@
 local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -20,8 +21,8 @@ local plane1lsec = {
     },
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EARTH BARYCENTER",
-      Observer = "SSB"
+      Target = coreKernels.ID.EarthBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   Renderable = {
@@ -48,8 +49,8 @@ local plane1lmin = {
     },
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EARTH BARYCENTER",
-      Observer = "SSB"
+      Target = coreKernels.ID.EarthBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   Renderable = {

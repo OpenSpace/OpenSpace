@@ -1,6 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,13 +19,13 @@ local Enceladus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ENCELADUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Enceladus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_ENCELADUS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Enceladus,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -57,8 +58,8 @@ local EnceladusLabel = {
   Identifier = "EnceladusLabel",
   Parent = Enceladus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Enceladus",
     FontSize = 70.0,
     Size = 6.0,
@@ -80,8 +81,6 @@ local EnceladusLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Enceladus)
   openspace.addSceneGraphNode(EnceladusLabel)
 end)
@@ -89,8 +88,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EnceladusLabel)
   openspace.removeSceneGraphNode(Enceladus)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Enceladus)

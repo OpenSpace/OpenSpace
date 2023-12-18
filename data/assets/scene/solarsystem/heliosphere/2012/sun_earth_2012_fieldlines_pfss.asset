@@ -62,7 +62,7 @@ local PFSS = {
     FlowSpeed = 75,
     ColorTablePaths = {
       pfssTopologyColorTable,
-      pfssBsignColorTable,
+      pfssBsignColorTable
     },
     ColorTableRanges = {
       { 0, 2 },

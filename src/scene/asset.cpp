@@ -292,7 +292,7 @@ void Asset::initialize() {
     try {
         _manager.callOnInitialize(this);
     }
-    catch (const ghoul::lua::LuaRuntimeException& e) {
+    catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format("Failed to initialize asset {}", path()));
         LERROR(fmt::format("{}: {}", e.component, e.message));
         setState(State::InitializationFailed);

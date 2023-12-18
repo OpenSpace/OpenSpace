@@ -1,5 +1,7 @@
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
+local kernels452 = asset.require("../kernels452")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +11,8 @@ local Phoebe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PHOEBE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Phoebe,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -40,8 +42,8 @@ local PhoebeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PHOEBE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Phoebe,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 545.09,
@@ -64,8 +66,8 @@ local PhoebeLabel = {
   Identifier = "PhoebeLabel",
   Parent = Phoebe.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Phoebe",
     FontSize = 70.0,
     Size = 7.1,
@@ -91,8 +93,8 @@ local Skathi = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SKATHI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Skathi,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -122,8 +124,8 @@ local SkathiTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SKATHI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Skathi,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 732.52,
@@ -146,8 +148,8 @@ local SkathiLabel = {
   Identifier = "SkathiLabel",
   Parent = Skathi.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Skathi",
     FontSize = 70.0,
     Size = 7.1,
@@ -173,8 +175,8 @@ local S2007S2 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65091",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2007S2,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -204,8 +206,8 @@ local S2007S2Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65091",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2007S2,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 792.96,
@@ -228,8 +230,8 @@ local S2007S2Label = {
   Identifier = "S2007S2Label",
   Parent = S2007S2.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2007 S 2",
     FontSize = 70.0,
     Size = 7.1,
@@ -255,8 +257,8 @@ local Skoll = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SKOLL",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Skoll,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -286,8 +288,8 @@ local SkollTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SKOLL",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Skoll,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 862.37,
@@ -310,8 +312,8 @@ local SkollLabel = {
   Identifier = "SkollLabel",
   Parent = Skoll.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Skoll",
     FontSize = 70.0,
     Size = 7.1,
@@ -337,8 +339,8 @@ local S2004S13 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65087",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S13,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -368,8 +370,8 @@ local S2004S13Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65087",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S13,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 905.85,
@@ -392,8 +394,8 @@ local S2004S13Label = {
   Identifier = "S2004S13Label",
   Parent = S2004S13.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 13",
     FontSize = 70.0,
     Size = 7.1,
@@ -419,8 +421,8 @@ local Greip = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "GREIP",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Greip,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -450,8 +452,8 @@ local GreipTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "GREIP",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Greip,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 906.56,
@@ -474,8 +476,8 @@ local GreipLabel = {
   Identifier = "GreipLabel",
   Parent = Greip.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Greip",
     FontSize = 70.0,
     Size = 7.1,
@@ -501,8 +503,8 @@ local Hyrrokkin = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HYRROKKIN",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Hyrrokkin,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -532,8 +534,8 @@ local HyrrokkinTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HYRROKKIN",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Hyrrokkin,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 914.29,
@@ -556,8 +558,8 @@ local HyrrokkinLabel = {
   Identifier = "HyrrokkinLabel",
   Parent = Hyrrokkin.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Hyrrokkin",
     FontSize = 70.0,
     Size = 7.1,
@@ -583,8 +585,8 @@ local Jarnsaxa = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JARNSAXA",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Jarnsaxa,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -614,8 +616,8 @@ local JarnsaxaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JARNSAXA",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Jarnsaxa,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 943.78,
@@ -638,8 +640,8 @@ local JarnsaxaLabel = {
   Identifier = "JarnsaxaLabel",
   Parent = Jarnsaxa.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Jarnsaxa",
     FontSize = 70.0,
     Size = 7.1,
@@ -665,8 +667,8 @@ local Mundilfari = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MUNDILFARI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Mundilfari,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -696,8 +698,8 @@ local MundilfariTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MUNDILFARI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Mundilfari,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 956.70,
@@ -720,8 +722,8 @@ local MundilfariLabel = {
   Identifier = "MundilfariLabel",
   Parent = Mundilfari.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Mundilfari",
     FontSize = 70.0,
     Size = 7.1,
@@ -747,8 +749,8 @@ local S2006S1 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65089",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2006S1,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -778,8 +780,8 @@ local S2006S1Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65089",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2006S1,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 972.41,
@@ -802,8 +804,8 @@ local S2006S1Label = {
   Identifier = "S2006S1Label",
   Parent = S2006S1.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2006 S 1",
     FontSize = 70.0,
     Size = 7.1,
@@ -829,8 +831,8 @@ local S2004S17 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65088",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S17,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -860,8 +862,8 @@ local S2004S17Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65088",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S17,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 985.45,
@@ -884,8 +886,8 @@ local S2004S17Label = {
   Identifier = "S2004S17Label",
   Parent = S2004S17.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 17",
     FontSize = 70.0,
     Size = 7.1,
@@ -911,8 +913,8 @@ local Bergelmir = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BERGELMIR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Bergelmir,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -942,8 +944,8 @@ local BergelmirTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BERGELMIR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Bergelmir,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 985.83,
@@ -966,8 +968,8 @@ local BergelmirLabel = {
   Identifier = "BergelmirLabel",
   Parent = Bergelmir.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Bergelmir",
     FontSize = 70.0,
     Size = 7.1,
@@ -993,8 +995,8 @@ local Narvi = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NARVI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Narvi,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1024,8 +1026,8 @@ local NarviTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NARVI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Narvi,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1008.45,
@@ -1048,8 +1050,8 @@ local NarviLabel = {
   Identifier = "NarviLabel",
   Parent = Narvi.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Narvi",
     FontSize = 70.0,
     Size = 7.1,
@@ -1075,8 +1077,8 @@ local Suttungr = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SUTTUNGR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Suttungr,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1106,8 +1108,8 @@ local SuttungrTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SUTTUNGR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Suttungr,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1022.82,
@@ -1130,8 +1132,8 @@ local SuttungrLabel = {
   Identifier = "SuttungrLabel",
   Parent = Suttungr.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Suttungr",
     FontSize = 70.0,
     Size = 7.1,
@@ -1157,8 +1159,8 @@ local Hati = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HATI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Hati,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1188,8 +1190,8 @@ local HatiTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HATI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Hati,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1033.05,
@@ -1212,8 +1214,8 @@ local HatiLabel = {
   Identifier = "HatiLabel",
   Parent = Hati.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Hati",
     FontSize = 70.0,
     Size = 7.1,
@@ -1239,8 +1241,8 @@ local S2004S12 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65086",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S12,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1270,8 +1272,8 @@ local S2004S12Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65086",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S12,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1048.54,
@@ -1294,8 +1296,8 @@ local S2004S12Label = {
   Identifier = "S2004S12Label",
   Parent = S2004S12.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 12",
     FontSize = 70.0,
     Size = 7.1,
@@ -1321,8 +1323,8 @@ local Farbauti = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "FARBAUTI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Farbauti,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1352,8 +1354,8 @@ local FarbautiTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "FARBAUTI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Farbauti,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1054.78,
@@ -1376,8 +1378,8 @@ local FarbautiLabel = {
   Identifier = "FarbautiLabel",
   Parent = Farbauti.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Farbauti",
     FontSize = 70.0,
     Size = 7.1,
@@ -1403,8 +1405,8 @@ local Thrymr = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "THRYMR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Thrymr,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1434,8 +1436,8 @@ local ThrymrTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "THRYMR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Thrymr,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1078.09,
@@ -1458,8 +1460,8 @@ local ThrymrLabel = {
   Identifier = "ThrymrLabel",
   Parent = Thrymr.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Thrymr",
     FontSize = 70.0,
     Size = 7.1,
@@ -1485,8 +1487,8 @@ local Aegir = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AEGIR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Aegir,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1516,8 +1518,8 @@ local AegirTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AEGIR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Aegir,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1094.46,
@@ -1540,8 +1542,8 @@ local AegirLabel = {
   Identifier = "AegirLabel",
   Parent = Aegir.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Aegir",
     FontSize = 70.0,
     Size = 7.1,
@@ -1567,8 +1569,8 @@ local S2007S3 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65092",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2007S3,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1598,8 +1600,8 @@ local S2007S3Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65092",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2007S3,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1100.0,
@@ -1622,8 +1624,8 @@ local S2007S3Label = {
   Identifier = "S2007S3Label",
   Parent = S2007S3.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2007 S 3",
     FontSize = 70.0,
     Size = 7.1,
@@ -1649,8 +1651,8 @@ local Bestla = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BESTLA",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Bestla,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1680,8 +1682,8 @@ local BestlaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BESTLA",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Bestla,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1101.45,
@@ -1704,8 +1706,8 @@ local BestlaLabel = {
   Identifier = "BestlaLabel",
   Parent = Bestla.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Bestla",
     FontSize = 70.0,
     Size = 7.1,
@@ -1731,8 +1733,8 @@ local S2004S7 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65085",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S7,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1762,8 +1764,8 @@ local S2004S7Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65085",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S7,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1101.99,
@@ -1786,8 +1788,8 @@ local S2004S7Label = {
   Identifier = "S2004S7Label",
   Parent = S2004S7.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 7",
     FontSize = 70.0,
     Size = 7.1,
@@ -1813,8 +1815,8 @@ local S2006S3 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65090",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2006S3,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1844,8 +1846,8 @@ local S2006S3Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65090",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2006S3,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1142.37,
@@ -1868,8 +1870,8 @@ local S2006S3Label = {
   Identifier = "S2006S3Label",
   Parent = S2006S3.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2006 S 3",
     FontSize = 70.0,
     Size = 7.1,
@@ -1895,8 +1897,8 @@ local Fenrir = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "FENRIR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Fenrir,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -1926,8 +1928,8 @@ local FenrirTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "FENRIR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Fenrir,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1212.53,
@@ -1950,8 +1952,8 @@ local FenrirLabel = {
   Identifier = "FenrireLabel",
   Parent = Fenrir.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Fenrir",
     FontSize = 70.0,
     Size = 7.1,
@@ -1977,8 +1979,8 @@ local Surtur = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "648",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Surtur,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2008,8 +2010,8 @@ local SurturTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "648",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Surtur,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1297.7,
@@ -2032,8 +2034,8 @@ local SurturLabel = {
   Identifier = "SurturLabel",
   Parent = Surtur.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Surtur",
     FontSize = 70.0,
     Size = 7.1,
@@ -2059,8 +2061,8 @@ local Kari = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "KARI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Kari,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2090,8 +2092,8 @@ local KariTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "KARI",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Kari,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1245.06,
@@ -2114,8 +2116,8 @@ local KariLabel = {
   Identifier = "KariLabel",
   Parent = Kari.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Kari",
     FontSize = 70.0,
     Size = 7.1,
@@ -2141,8 +2143,8 @@ local Ymir = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "YMIR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Ymir,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2172,8 +2174,8 @@ local YmirTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "YMIR",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Ymir,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1254.15,
@@ -2196,8 +2198,8 @@ local YmirLabel = {
   Identifier = "YmirLabel",
   Parent = Ymir.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Ymir",
     FontSize = 70.0,
     Size = 7.1,
@@ -2223,8 +2225,8 @@ local Loge = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LOGE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Loge,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2254,8 +2256,8 @@ local LogeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LOGE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Loge,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1300.95,
@@ -2278,8 +2280,8 @@ local LogeLabel = {
   Identifier = "LogeLabel",
   Parent = Loge.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Cyllene",
     FontSize = 70.0,
     Size = 7.1,
@@ -2305,8 +2307,8 @@ local Fornjot = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "FORNJOT",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Fornjot,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2336,8 +2338,8 @@ local FornjotTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "FORNJOT",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Fornjot,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1432.16,
@@ -2360,8 +2362,8 @@ local FornjotLabel = {
   Identifier = "FornjotLabel",
   Parent = Fornjot.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Fornjot",
     FontSize = 70.0,
     Size = 7.1,
@@ -2387,8 +2389,8 @@ local Skadi = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "627",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Skadi,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2418,8 +2420,8 @@ local SkadiTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "627",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Skadi,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 728.2,
@@ -2442,8 +2444,8 @@ local SkadiLabel = {
   Identifier = "SkadiLabel",
   Parent = Skadi.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Skadi",
     FontSize = 70.0,
     Size = 7.1,
@@ -2469,8 +2471,8 @@ local Gridr = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "654",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Gridr,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2500,8 +2502,8 @@ local GridrTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "654",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Gridr,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 990.23,
@@ -2524,8 +2526,8 @@ local GridrLabel = {
   Identifier = "GridrLabel",
   Parent = Gridr.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Gridr",
     FontSize = 70.0,
     Size = 7.1,
@@ -2551,8 +2553,8 @@ local Angrboda = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "655",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Angrboda,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2582,8 +2584,8 @@ local AngrbodaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "655",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Angrboda,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1080.4,
@@ -2606,8 +2608,8 @@ local AngrbodaLabel = {
   Identifier = "AngrbodaLabel",
   Parent = Angrboda.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Angrboda",
     FontSize = 70.0,
     Size = 7.1,
@@ -2633,8 +2635,8 @@ local Skrymir = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "656",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Skrymir,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2664,8 +2666,8 @@ local SkrymirTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "656",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Skrymir,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1164.3,
@@ -2688,8 +2690,8 @@ local SkrymirLabel = {
   Identifier = "SkrymirLabel",
   Parent = Skrymir.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Skrymir",
     FontSize = 70.0,
     Size = 7.1,
@@ -2715,8 +2717,8 @@ local Gerd = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "657",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Gerd,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2746,8 +2748,8 @@ local GerdTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "657",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Gerd,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1095.0,
@@ -2770,8 +2772,8 @@ local GerdLabel = {
   Identifier = "GerdLabel",
   Parent = Gerd.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Gerd",
     FontSize = 70.0,
     Size = 7.1,
@@ -2797,8 +2799,8 @@ local S2004S26 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "658",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S26,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2828,8 +2830,8 @@ local S2004S26Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "658",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S26,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1624.2,
@@ -2852,8 +2854,8 @@ local S2004S26Label = {
   Identifier = "S2004S26Label",
   Parent = S2004S26.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 26",
     FontSize = 70.0,
     Size = 7.1,
@@ -2879,8 +2881,8 @@ local Eggther = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "659",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Eggther,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2910,8 +2912,8 @@ local EggtherTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "659",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Eggther,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1033.0,
@@ -2934,8 +2936,8 @@ local EggtherLabel = {
   Identifier = "EggtherLabel",
   Parent = Eggther.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Eggther",
     FontSize = 70.0,
     Size = 7.1,
@@ -2961,8 +2963,8 @@ local Beli = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "661",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Beli,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -2992,8 +2994,8 @@ local BeliTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "661",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Beli,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1084.1,
@@ -3016,8 +3018,8 @@ local BeliLabel = {
   Identifier = "BeliLabel",
   Parent = Beli.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Beli",
     FontSize = 70.0,
     Size = 7.1,
@@ -3043,8 +3045,8 @@ local Gunnlod = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "662",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Gunnlod,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -3074,8 +3076,8 @@ local GunnlodTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "662",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Gunnlod,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1175.3,
@@ -3098,8 +3100,8 @@ local GunnlodLabel = {
   Identifier = "GunnlodLabel",
   Parent = Gunnlod.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Gunnlod",
     FontSize = 70.0,
     Size = 7.1,
@@ -3125,8 +3127,8 @@ local Thiazzi = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "663",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Thiazzi,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -3156,8 +3158,8 @@ local ThiazziTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "663",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Thiazzi,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1361.5,
@@ -3180,8 +3182,8 @@ local ThiazziLabel = {
   Identifier = "ThiazziLabel",
   Parent = Thiazzi.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Thiazzi",
     FontSize = 70.0,
     Size = 7.1,
@@ -3207,8 +3209,8 @@ local S2004S34 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "664",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S34,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -3238,8 +3240,8 @@ local S2004S34Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "664",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S34,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1412.5,
@@ -3262,8 +3264,8 @@ local S2004S34Label = {
   Identifier = "S2004S34Label",
   Parent = S2004S34.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 34",
     FontSize = 70.0,
     Size = 7.1,
@@ -3289,8 +3291,8 @@ local Alvaldi = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "665",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Alvaldi,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -3320,8 +3322,8 @@ local AlvaldiTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "665",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Alvaldi,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1208.1,
@@ -3344,8 +3346,8 @@ local AlvaldiLabel = {
   Identifier = "AlvaldiLabel",
   Parent = Alvaldi.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Alvaldi",
     FontSize = 70.0,
     Size = 7.1,
@@ -3371,8 +3373,8 @@ local Geirrod = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "666",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Geirrod,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -3402,8 +3404,8 @@ local GeirrodTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "666",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Geirrod,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1295.8,
@@ -3426,8 +3428,8 @@ local GeirrodLabel = {
   Identifier = "GeirrodLabel",
   Parent = Geirrod.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Geirrod",
     FontSize = 70.0,
     Size = 7.1,
@@ -3453,8 +3455,8 @@ local S2004S28 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65077",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S28,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -3484,8 +3486,8 @@ local S2004S28Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65077",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S28,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1197.2,
@@ -3508,8 +3510,8 @@ local S2004S28Label = {
   Identifier = "S2004S28Label",
   Parent = S2004S28.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 28",
     FontSize = 70.0,
     Size = 7.1,
@@ -3535,8 +3537,8 @@ local S2004S21 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65079",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S21,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -3566,8 +3568,8 @@ local S2004S21Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65079",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S21,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1365.1,
@@ -3590,8 +3592,8 @@ local S2004S21Label = {
   Identifier = "S2004S21Label",
   Parent = S2004S21.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 21",
     FontSize = 70.0,
     Size = 7.1,
@@ -3617,8 +3619,8 @@ local S2004S36 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65081",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S36,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -3648,8 +3650,8 @@ local S2004S36Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65081",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S36,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1354.2,
@@ -3672,8 +3674,8 @@ local S2004S36Label = {
   Identifier = "S2004S36Label",
   Parent = S2004S36.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 36",
     FontSize = 70.0,
     Size = 7.1,
@@ -3699,8 +3701,8 @@ local S2004S37 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65082",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S37,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -3730,8 +3732,8 @@ local S2004S37Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65082",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S37,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 752.88,
@@ -3754,8 +3756,8 @@ local S2004S37Label = {
   Identifier = "S2004S37Label",
   Parent = S2004S37.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 37",
     FontSize = 70.0,
     Size = 7.1,
@@ -3781,8 +3783,8 @@ local S2004S39 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65084",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S39,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -3812,8 +3814,8 @@ local S2004S39Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65084",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S39,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1277.5,
@@ -3836,8 +3838,8 @@ local S2004S39Label = {
   Identifier = "S2004S39Label",
   Parent = S2004S39.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 39",
     FontSize = 70.0,
     Size = 7.1,
@@ -3859,10 +3861,6 @@ local S2004S39Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.sat441)
-  openspace.spice.loadKernel(kernels.sat452)
-
-
   openspace.addSceneGraphNode(Phoebe)
   openspace.addSceneGraphNode(PhoebeTrail)
   openspace.addSceneGraphNode(PhoebeLabel)
@@ -4240,9 +4238,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PhoebeLabel)
   openspace.removeSceneGraphNode(PhoebeTrail)
   openspace.removeSceneGraphNode(Phoebe)
-
-  openspace.spice.unloadKernel(kernels.sat452)
-  openspace.spice.unloadKernel(kernels.sat441)
 end)
 
 asset.export(Phoebe)
