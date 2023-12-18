@@ -22,21 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/server/include/topics/CameraPathTopic.h"
+#include <modules/server/include/topics/camerapathtopic.h>
 
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
-#include <openspace/properties/property.h>
-#include <openspace/query/query.h>
-#include <openspace/util/distanceconversion.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -79,7 +74,7 @@ void CameraPathTopic::handleJson(const nlohmann::json& json) {
                 == OpenSpaceEngine::Mode::CameraPath);
 
             std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-            if (isInPath && now - _lastUpdateTime > _cameraPathUpdateTime) {
+            if (isInPath && (now - _lastUpdateTime) > _cameraPathUpdateTime) {
                 sendCameraPathData();
                 _lastUpdateTime = std::chrono::system_clock::now();
             }
@@ -88,16 +83,13 @@ void CameraPathTopic::handleJson(const nlohmann::json& json) {
 }
 
 void CameraPathTopic::sendCameraPathData() {
-    using namespace openspace;
-
     const interaction::PathNavigator& pathNavigator =
         global::navigationHandler->pathNavigator();
 
     const interaction::Path* path = pathNavigator.currentPath();
 
     if (!path) {
-        // This should not happen, as we are only sending this data if the engine mode
-        // is camera path traversal. But guard against it anyways
+        ghoul_assert(path, "Path must exist");
         return;
     }
 
@@ -111,7 +103,7 @@ void CameraPathTopic::sendCameraPathData() {
     nlohmann::json jsonData = {
         { "target", path->endPoint().nodeIdentifier() },
         { "remainingTime", seconds },
-        //{ "remainingdistance", path->remainingDistance() },
+        //{ "remainingDistance", path->remainingDistance() },
         { "isPaused", pathNavigator.isPaused() }
     };
 

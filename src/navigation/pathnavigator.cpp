@@ -213,10 +213,7 @@ bool PathNavigator::isPaused() const {
 }
 
 float PathNavigator::estimatedRemainingTimeInPath() const {
-    if (!hasCurrentPath()) {
-        return 0.f;
-    }
-    return _currentPath->estimatedRemainingTime(_speedScale);
+    return hasCurrentPath() ? _currentPath->estimatedRemainingTime(_speedScale) : 0.f;
 }
 
 void PathNavigator::updateCamera(double deltaTime) {
