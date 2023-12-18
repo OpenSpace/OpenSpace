@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/tetramesh/include/datastructures/volumetetramesh.h>
+#include <modules/tetramesh/include/util/tetrameshutils.h>
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/transform.hpp>
 #include <ghoul/logging/logmanager.h>
@@ -59,12 +60,12 @@ glm::mat4 VolumeTetraMesh::tetraBoundingBox() const {
 
 //}  // namespace detail
 
-VolumeTetraMesh::VolumeTetraMesh(const std::shared_ptr<const volume::RawVolume<gaiavolume::GaiaVolumeDataLayout>>& volume, int channel)
+VolumeTetraMesh::VolumeTetraMesh(const std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>>& volume, int channel)
     : _channel{0} {
     setData(volume, channel);
 }
 
-void VolumeTetraMesh::setData(const std::shared_ptr<const volume::RawVolume<gaiavolume::GaiaVolumeDataLayout>>& volume, int channel) {
+void VolumeTetraMesh::setData(const std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>>& volume, int channel) {
     if (volume && glm::any(glm::lessThanEqual(volume->dimensions(), glm::uvec3{ 1 }))) {
         throw ghoul::RuntimeError(fmt::format("{}: Volumes with one or more dimensions "
             "equal to 1 cannot be converted to a TetraMesh ({},{},{})", _loggerCat,
@@ -107,23 +108,42 @@ void VolumeTetraMesh::get(std::vector<glm::vec4>& nodes, std::vector<glm::ivec4>
     const glm::uvec3 dims = _volume->dimensions();
 
     // transform all coordinates to [0,1]
-    const glm::mat4 indexMatrix{ glm::scale(dims - glm::uvec3{1}) };
-    glm::mat4 m = glm::inverse(indexMatrix);
+    //const glm::mat4 indexMatrix{ glm::scale(dims - glm::uvec3{1}) };
+    //glm::mat4 m = glm::inverse(indexMatrix);
+
+    glm::vec3 lowerDomainBound{ std::numeric_limits<float>::max() };
+    glm::vec3 upperDomainBound{ std::numeric_limits<float>::min() };
 
     nodes.reserve(getNumberOfPoints());
     for (size_t z = 0; z < dims.z; ++z) {
         for (size_t y = 0; y < dims.y; ++y) {
             for (size_t x = 0; x < dims.x; ++x) {
-                glm::vec3 v{ m * glm::vec4{x, y, z, 1.0f} };
-                float value = 0.f;
-                auto voxel = _volume->get(glm::uvec3{ x,y,z });
-                if (voxel.containData()) {
-                    value = voxel.data[3].avgData;
-                }
-                // TODO: temporary only!
-                nodes.emplace_back(v, value);
+                const utiltetra::VoxelData voxel = _volume->get(glm::uvec3{ x,y,z });
+
+                glm::vec3 pos = voxel.position;
+                lowerDomainBound = glm::vec3{
+                    std::min(pos.x, lowerDomainBound.x),
+                    std::min(pos.y, lowerDomainBound.y),
+                    std::min(pos.z, lowerDomainBound.z)
+                };
+
+                upperDomainBound = glm::vec3{
+                    std::max(pos.x, upperDomainBound.x),
+                    std::max(pos.y, upperDomainBound.y),
+                    std::max(pos.z, upperDomainBound.z)
+                };
+
+                nodes.emplace_back(pos, voxel.value);
             }
         }
+    }
+
+    const glm::vec3 diff = upperDomainBound - lowerDomainBound;
+    //(pos - _lowerDomainBound) / (_upperDomainBound - _lowerDomainBound)
+    for (glm::vec4& node : nodes) {
+        glm::vec3 pos = glm::vec3(node.x, node.y, node.z);
+        pos = (pos - lowerDomainBound) / diff;
+        node = glm::vec4(pos, node.w);
     }
 
     nodeIds.reserve(getNumberOfCells());

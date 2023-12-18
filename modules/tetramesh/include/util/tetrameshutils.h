@@ -38,6 +38,13 @@ class VolumeTetraMesh;
 
 namespace utiltetra {
 
+struct VoxelData {
+    VoxelData() = default;
+    VoxelData(float x, float y, float z, float v) : position{ x,y,z }, value{ v } {}
+    glm::vec3 position;
+    float value;
+};
+
 struct Mesh {
     Mesh(std::vector<glm::vec3> _vertices,
         std::vector<int> _faceIds,

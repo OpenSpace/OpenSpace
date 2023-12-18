@@ -145,6 +145,8 @@ void TetraMeshVolumeRaycaster::preRaycast(const RaycastData& data,
     const float offset = -_dataRange.x;
     program.setUniform(program.uniformLocation("tfValueScaling_" + id), scalingFactor);
     program.setUniform(program.uniformLocation("tfValueOffset_" + id), offset);
+    program.setUniform(program.uniformLocation("REF_SAMPLING_INTERVAL_" + id), _samplingInterval);
+    program.setUniform(program.uniformLocation("opacityScaling_" + id), _opacityScaling);
 
     _transferFunction->update();
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
@@ -198,6 +200,16 @@ void TetraMeshVolumeRaycaster::setBoundaryDrawCalls(unsigned amount)
 void TetraMeshVolumeRaycaster::setDataRange(float min, float max)
 {
     _dataRange = glm::vec2(min, max);
+}
+
+void TetraMeshVolumeRaycaster::setSamplingInterval(float samplingRate)
+{
+    _samplingInterval = samplingRate;
+}
+
+void TetraMeshVolumeRaycaster::setOpacityScaling(float opacity)
+{
+    _opacityScaling = opacity;
 }
 
 std::string TetraMeshVolumeRaycaster::foo()

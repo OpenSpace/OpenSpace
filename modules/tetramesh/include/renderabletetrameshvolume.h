@@ -71,7 +71,7 @@ private:
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
 
     VolumeTetraMesh _tetraMesh;
-    volume::RawVolumeMetadata _metadata;
+    //volume::RawVolumeMetadata _metadata;
     std::shared_ptr<utiltetra::Mesh> _boundaryMesh;
 
     // TODO: use raw OpenGL commands for buffer storages since these buffers objs are not 100% tested
@@ -94,8 +94,15 @@ private:
     //GLuint _vertsVBO = 0;
     //GLuint _faceIdVBO = 0;
 
-    std::filesystem::path _srcDirectory;
+    std::string _filePath;
+    std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>> _volume;
+    glm::vec2 _dataRange = glm::vec2(0.f);
+
+    //std::filesystem::path _srcDirectory;
     //std::filesystem::path _transferFunctionPath;
+    
+    properties::FloatProperty _samplingInterval;
+    properties::FloatProperty _opacityScaling;
 };
 
 } // namespace OpenSpace

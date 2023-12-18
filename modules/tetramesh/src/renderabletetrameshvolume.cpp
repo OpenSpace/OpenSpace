@@ -33,6 +33,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/csvreader.h>
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -48,24 +49,40 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
-    "StepSize",
-    "Step Size",
-    "Specifies how often to sample on the raycaster. Lower step -> higher resolution",
-    // @VISIBILITY(3.5)
-    openspace::properties::Property::Visibility::AdvancedUser
+        "StepSize",
+        "Step Size",
+        "Specifies how often to sample on the raycaster. Lower step -> higher resolution",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
-    "TransferFunctionPath",
-    "Transfer Function Path",
-    "Specifies the transfer function file path",
-    openspace::properties::Property::Visibility::AdvancedUser
+        "TransferFunctionPath",
+        "Transfer Function Path",
+        "Specifies the transfer function file path",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SamplingIntervalInfo = {
+        "SamplingInterval",
+        "Sampling Interval",
+        "Specifies the sampling interval",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OpacityScalingInfo{
+        "OpacityScaling",
+        "Opacity Scaling",
+        "Specifies the opacity scaling facotr used to scale the extinction to account for differently sized datasets",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
 
     struct [[codegen::Dictionary(RenderableTetraMeshVolume)]] Parameters {
-        // [[codegen::verbatim(SourceDirectoryInfo.description)]]
-        std::string sourceDirectory;
+        std::string filePath;
+
+        //// [[codegen::verbatim(SourceDirectoryInfo.description)]]
+        //std::string sourceDirectory;
 
         // [[codegen::verbatim(TransferFunctionInfo.description)]]
         std::string transferFunction;
@@ -86,38 +103,94 @@ documentation::Documentation RenderableTetraMeshVolume::Documentation() {
 
 RenderableTetraMeshVolume::RenderableTetraMeshVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _samplingInterval(SamplingIntervalInfo, 150, 0, 1000)
+    , _opacityScaling(OpacityScalingInfo, 1, 0, 10)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _srcDirectory = absPath(p.sourceDirectory);
+    _filePath = p.filePath;
+
+    //_srcDirectory = absPath(p.sourceDirectory);
 
     //_transferFunctionPath = absPath(p.transferFunction);
     std::string transferFunctionPath = absPath(p.transferFunction).string();
     _transferFunction = std::make_shared<openspace::TransferFunction>(
         transferFunctionPath, [](const openspace::TransferFunction&) {}, 2u
     );
+
+    _samplingInterval.onChange([this]() {
+        float value = _samplingInterval.value();
+        _raycaster->setSamplingInterval(value);
+    });
+
+    _opacityScaling.onChange([this]() {
+        float value = _opacityScaling.value();
+        _raycaster->setOpacityScaling(value);
+    });
+
+    addProperty(_samplingInterval);
+    addProperty(_opacityScaling);
 }
 
 void RenderableTetraMeshVolume::initialize() {
     namespace fs = std::filesystem;
 
     std::string baseName;
-    for (const fs::directory_entry& e : fs::recursive_directory_iterator(_srcDirectory)) {
-        if (e.is_regular_file() && e.path().extension() == ".dictionary") {
-            const std::string path = e.path().string();
-            loadVolumeMetadata(path);
-            baseName = std::filesystem::path(path).stem().string();
-            break;
-        }
-    }
-    // TODO: check that we have metafile -> report error
 
-    std::string volumePath = fmt::format("{}/{}.rawvolume", _srcDirectory, baseName);
-    volume::RawVolumeReader<gaiavolume::GaiaVolumeDataLayout> reader(
-        volumePath, _metadata.dimensions
+    std::vector<std::vector<std::string>> csvData = ghoul::loadCSVFile(_filePath, false);
+    ghoul_assert(csvData.size() > 0, "CSV file must not be empty");
+    std::vector<utiltetra::VoxelData> voxelData(csvData.size());
+
+
+    float minValue = std::numeric_limits<float>::max();
+    float maxValue = std::numeric_limits<float>::min();
+
+    int index = 0;
+    for (const std::vector<std::string> &row : csvData) {
+        float x = std::stof(row[0]);
+        float y = std::stof(row[1]);
+        float z = std::stof(row[2]);
+        float v = std::stof(row[3]);
+        utiltetra::VoxelData voxel(x, y, z, v);
+        voxelData[index] = voxel;
+
+        minValue = std::min(v, minValue);
+        maxValue = std::max(v, maxValue);
+
+        ++index;
+    }
+    _dataRange = glm::vec2(minValue, maxValue);
+    // TODO: adjust based on input!
+    glm::uvec3 dims(32, 32, 32);
+
+    volume::RawVolume<utiltetra::VoxelData> volume(dims);
+
+    ghoul_assert(volume.nCells() == csvData.size(),
+        "Volume dimensions does not match data points"
     );
 
-    _tetraMesh.setData(reader.read(false, _metadata.fileheaders.size()));
+    for (size_t i = 0; i < volume.nCells(); i++) {
+        volume.set(i, voxelData[i]);
+    }
+    _volume = std::make_shared<const volume::RawVolume<utiltetra::VoxelData>>(volume);
+
+    _tetraMesh.setData(_volume);
+    //for (const fs::directory_entry& e : fs::recursive_directory_iterator(_srcDirectory)) {
+    //    if (e.is_regular_file() && e.path().extension() == ".dictionary") {
+    //        const std::string path = e.path().string();
+    //        loadVolumeMetadata(path);
+    //        baseName = std::filesystem::path(path).stem().string();
+    //        break;
+    //    }
+    //}
+    // TODO: check that we have metafile -> report error
+
+    //std::string volumePath = fmt::format("{}/{}.rawvolume", _srcDirectory, baseName);
+    //volume::RawVolumeReader<gaiavolume::GaiaVolumeDataLayout> reader(
+    //    volumePath, _metadata.dimensions
+    //);
+    //_tetraMesh.setData(reader.read(false, _metadata.fileheaders.size()));
+    
 }
 
 void RenderableTetraMeshVolume::initializeGL()
@@ -172,7 +245,7 @@ void RenderableTetraMeshVolume::initializeGL()
     glGenBuffers(1, &_buffers.faceIdVBO);
 
     _raycaster->setBuffers(_buffers);
-    _raycaster->setDataRange(_metadata.minValue, _metadata.maxValue);
+    _raycaster->setDataRange(_dataRange.x, _dataRange.y);
     //_raycaster->setBoundaryMeshVAO(_boundaryMeshVAO);
     //_nodesBuffer = std::make_unique<ghoul::opengl::BufferBinding<
     //    ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
@@ -267,9 +340,9 @@ void RenderableTetraMeshVolume::render(const RenderData& data, RendererTasks& ta
         cameraPosition
     );
 
-    const glm::vec2 dataRange = glm::vec2{ _metadata.minValue, _metadata.maxValue };
-    const float scalingFactor = 1.f / (dataRange.y - dataRange.x);
-    const float offset = -dataRange.x;
+    //const glm::vec2 dataRange = glm::vec2{ _metadata.minValue, _metadata.maxValue };
+    const float scalingFactor = 1.f / (_dataRange.y - _dataRange.x);
+    const float offset = -_dataRange.x;
     _program->setUniform(_program->uniformLocation("tfValueScaling"), scalingFactor);
     _program->setUniform(_program->uniformLocation("tfValueOffset"), offset);
 
@@ -340,7 +413,8 @@ void RenderableTetraMeshVolume::update(const UpdateData& data)
         );
 
         _raycaster->setBoundaryDrawCalls(_boundaryMesh->indices.size());
-        _raycaster->setDataRange(_metadata.minValue, _metadata.maxValue);
+        _raycaster->setDataRange(_dataRange.x, _dataRange.y);
+        //_raycaster->setDataRange(_metadata.minValue, _metadata.maxValue);
 
 
         // Setup boundary mesh
@@ -386,14 +460,14 @@ void RenderableTetraMeshVolume::update(const UpdateData& data)
 }
 
 void RenderableTetraMeshVolume::loadVolumeMetadata(const std::string& path) {
-    try {
-        ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
-        _metadata = volume::RawVolumeMetadata::createFromDictionary(dictionary);
-    }
-    catch (const ghoul::RuntimeError& e) {
-        LERRORC(e.component, e.message);
-        return;
-    }
+    //try {
+    //    ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
+    //    _metadata = volume::RawVolumeMetadata::createFromDictionary(dictionary);
+    //}
+    //catch (const ghoul::RuntimeError& e) {
+    //    LERRORC(e.component, e.message);
+    //    return;
+    //}
 }
 
 } // namespace OpenSpace

@@ -60,7 +60,7 @@ void checkInf(float prop, inout vec3 accumulatedColor, inout vec3 accumulatedAlp
     accumulatedAlpha = vec3(1.0);
 }
 // TODO naming convention
-const float REF_SAMPLING_INTERVAL = 150.0;
+uniform float REF_SAMPLING_INTERVAL_#{id} = 150.0;
 const float ERT_THRESHOLD = 0.99;  // threshold for early ray termination
 const float invalidDepth = 1.0e8;
 
@@ -109,7 +109,7 @@ struct Tetra {
 
 mat4x3 getFaceAreas(in Tetra t);
 
-Tetra getTetra(in int tetraId, inout vec3 color, inout vec3 alpha) {
+Tetra getTetra(in int tetraId) {
     ivec4 vertices = vertexIds[tetraId];
 
     VertexPosition[4] p = VertexPosition[](vertexPositions[vertices[0]],
@@ -123,21 +123,9 @@ Tetra getTetra(in int tetraId, inout vec3 color, inout vec3 alpha) {
 
     t.fA = getFaceAreas(t);
 
-
     // the determinant of the Jacobian of the tetrahedra is det = 6 V, where V is its volume
     float s = dot(cross(t.v[2] - t.v[0], t.v[3] - t.v[2]), t.v[1] - t.v[0]);
-
-
-
     t.jacobyDetInv = 1.0 / s;
-    // checkProperty(t.jacobyDetInv, color, alpha);
-    // if(s == 0 ) {
-    //     color = vec3(1.0, 0.0, 0.0);
-    // }
-    // else {
-    //     color = vec3(0.0, 1.0, 0.0);
-    // }
-    alpha = vec3(1.0);
 
     return t;
 }
@@ -214,7 +202,7 @@ ExitFace findTetraExitFace(in Tetra tetra, in int entryFaceId,
 // Compute the absorption along distance \p tIncr according to the volume rendering equation. The 
 // \p opacityScaling_#{id} factor is used to scale the extinction to account for differently sized datasets.
 float absorption(in float opacity, in float tIncr) {
-    return 1.0 - pow(1.0 - opacity, tIncr * REF_SAMPLING_INTERVAL * opacityScaling_#{id});
+    return 1.0 - pow(1.0 - opacity, tIncr * REF_SAMPLING_INTERVAL_#{id} * opacityScaling_#{id});
 }
 
 float normalizeScalar(float scalar) {
@@ -230,7 +218,7 @@ float normalizeScalar(float scalar) {
 // 
 // see https://www.iue.tuwien.ac.at/phd/nentchev/node30.html
 // and https://www.iue.tuwien.ac.at/phd/nentchev/node31.html
-float barycentricInterpolation(in vec3 p, in Tetra tetra, inout vec3 color, inout vec3 alpha) {
+float barycentricInterpolation(in vec3 p, in Tetra tetra) {
     const vec3 v_0p = p - tetra.v[0];
     const vec3 v_1p = p - tetra.v[1];
 
@@ -239,8 +227,6 @@ float barycentricInterpolation(in vec3 p, in Tetra tetra, inout vec3 color, inou
     float vol1 = dot(tetra.fA[1], v_0p);
     float vol2 = dot(tetra.fA[2], v_0p);
     float vol3 = dot(tetra.fA[3], v_0p);
-
-    // checkProperty(tetra.jacobDetInv, color, alpha);
 
     return dot(vec4(vol0, vol1, vol2, vol3) * tetra.jacobyDetInv, tetra.s);
 }
@@ -260,9 +246,6 @@ float normalizedDeviceDepth(in vec3 posData, in mat4 dataToClip) {
 void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
                  inout vec3 accumulatedAlpha, inout float stepSize)
 {
-    // accumulatedColor = vec3(1.0, 0.0, 0.0);
-    // accumulatedAlpha = vec3(1.0);
-    // return;
     // all computations take place in Data space
     const vec3 rayDirection = dir; //normalize(in_frag.position - in_frag.camPosData);
     const float tEntry = length(dir); //length(in_frag.position - in_frag.camPosData);
@@ -279,9 +262,9 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
     ivec4 vertices = vertexIds[tetraId];
 
     // determine scalar value at entry position
-    Tetra tetra = getTetra(tetraId, accumulatedColor, accumulatedAlpha);
+    Tetra tetra = getTetra(tetraId);
 
-    float prevScalar = normalizeScalar(barycentricInterpolation(pos, tetra, accumulatedColor, accumulatedAlpha));
+    float prevScalar = normalizeScalar(barycentricInterpolation(pos, tetra));
     vec4 dvrColor = vec4(0);
 
     float tTotal = tEntry;
@@ -295,12 +278,15 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
         vertices = vertexIds[tetraId];
 
         // query data of current tetrahedron
-        tetra = getTetra(tetraId, accumulatedColor, accumulatedAlpha);
+        tetra = getTetra(tetraId);
         ExitFace exitFace = findTetraExitFace(tetra, localFaceId, pos, rayDirection);
+
+        // checkProperty(exitFace.segmentLength, accumulatedColor, accumulatedAlpha);
+        // return;
 
         vec3 endPos = pos + rayDirection * exitFace.segmentLength;
 
-        const float scalar = normalizeScalar(barycentricInterpolation(endPos, tetra, accumulatedColor, accumulatedAlpha));
+        const float scalar = normalizeScalar(barycentricInterpolation(endPos, tetra));
        
         float tDelta = exitFace.segmentLength * tetraSamplingDelta;
         for (int i = 1; i <= numTetraSamples_#{id}; ++i) {
@@ -333,9 +319,8 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
         // determine the half face opposing the half face with the found intersection
         tetraFaceId = faceIds[tetraId][exitFace.faceId];
         ++steps;
-        // break;
     }
-    // stepSize = 0.0;
+    stepSize = 0.0;
     
 }
 

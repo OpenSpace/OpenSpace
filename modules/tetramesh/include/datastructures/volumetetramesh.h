@@ -32,6 +32,9 @@
 
 namespace openspace {
 
+namespace utiltetra {
+    struct VoxelData;
+}
 // \ingroup datastructures
 // \brief Data required for rendering an Inviwo Volume as tetrahedral mesh
 //
@@ -52,7 +55,7 @@ namespace openspace {
 class VolumeTetraMesh {
 public:
     VolumeTetraMesh() = default;
-    VolumeTetraMesh(const std::shared_ptr<const volume::RawVolume<gaiavolume::GaiaVolumeDataLayout>>& volume, int channel = 0);
+    VolumeTetraMesh(const std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>>& volume, int channel = 0);
 
     /**
      * Use \p volume as source for the tetrahedralization into a TetraMesh.
@@ -61,7 +64,7 @@ public:
      * @param channel   volume channel used as scalar values
      * @throws Exception if one of the \p volume dimensions is less than 2
      */
-    void setData(const std::shared_ptr<const volume::RawVolume<gaiavolume::GaiaVolumeDataLayout>>& volume, int channel = 0);
+    void setData(const std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>>& volume, int channel = 0);
 
     int getNumberOfCells() const;
     int getNumberOfPoints() const;
@@ -87,7 +90,7 @@ public:
     glm::mat4 tetraBoundingBox() const;
 
 private:
-    std::shared_ptr<const volume::RawVolume<gaiavolume::GaiaVolumeDataLayout>> _volume;
+    std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>> _volume;
     int _channel = 0;
 
     //glm::mat4 _modelMatrix;

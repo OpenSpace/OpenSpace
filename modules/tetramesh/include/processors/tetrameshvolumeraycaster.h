@@ -66,6 +66,8 @@ public:
     void setBoundaryDrawCalls(unsigned amount);
     //void setModelTransform(glm::dmat4 transform);
     void setDataRange(float min, float max);
+    void setSamplingInterval(float samplingRate);
+    void setOpacityScaling(float opacity);
 
     std::string foo() override;
     std::string foo2() override;
@@ -78,6 +80,8 @@ private:
     // Same as renderable buffer ids to make drawcalls
     utiltetra::TetraBufferIds _buffers;
     unsigned _numIndices = 0;
+    float _samplingInterval = 150;
+    float _opacityScaling = 1.0;
 
     glm::vec2 _dataRange;
     
