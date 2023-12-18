@@ -381,7 +381,7 @@ void NavigationHandler::updateCameraTransitions() {
     if (anchorWasChanged) {
         // The anchor was changed between frames, so the transitions we have to check
         // are a bit different. Just directly trigger the relevant events for the
-        // repsective node
+        // respective node
         if (wasInReachSphere) {
             triggerRecedeEvent(_lastAnchor);
         }
