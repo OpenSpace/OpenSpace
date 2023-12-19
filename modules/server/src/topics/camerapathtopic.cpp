@@ -96,7 +96,7 @@ void CameraPathTopic::sendCameraPathData() {
     // The time is not exact, and we only care about the number of seconds. Also,
     // any negative values should be interpreted as positive
     int seconds = static_cast<int>(
-        std::ceil(pathNavigator.estimatedRemainingTimeInPath())
+        std::round(pathNavigator.estimatedRemainingTimeInPath())
     );
     seconds = std::max(seconds, 0);
 
