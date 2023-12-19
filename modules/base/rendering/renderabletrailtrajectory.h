@@ -67,7 +67,9 @@ private:
     void reset();
 
     /// The number of vertices that we calculate during each frame of the full sweep pass
-    unsigned int _sweepChunkSize = 200;
+    properties::IntProperty _sweepChunkSize;
+    /// Enables or disables iterative vertex calculations during a full sweep
+    properties::BoolProperty _enableSweepChunking;
 
     /// The start time of the trail
     properties::StringProperty _startTime;

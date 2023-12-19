@@ -96,7 +96,16 @@ namespace {
         "needs to be recalculated. "
         "A greater value will result in more calculations per frame.",
         // @VISIBILITY(?)
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableSweepChunkingInfo = {
+    "EnableSweepChunking",
+    "Use Sweep Chunking",
+    "Enable or Disable the use of iterative calculations (chunking) during "
+    "full sweep vertex calculations",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo AccurateTrailPositionsInfo = {
@@ -127,6 +136,9 @@ namespace {
         // [[codegen::verbatim(SweepChunkSizeInfo.description)]]
         std::optional<int> sweepChunkSize;
 
+        // [[codegen::verbatim(SweepChunkSizeInfo.description)]]
+        std::optional<int> enableSweepChunking;
+
         // [[codegen::verbatim(AccurateTrailPositionsInfo.description)]]
         std::optional<int> accurateTrailPositions;
     };
@@ -151,11 +163,16 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     , _renderFullTrail(RenderFullPathInfo, false)
     , _maxVertex(glm::vec3(-std::numeric_limits<float>::max()))
     , _minVertex(glm::vec3(std::numeric_limits<float>::max()))
+    , _sweepChunkSize(SweepChunkSizeInfo, 200, 50, 5000)
+    , _enableSweepChunking(EnableSweepChunkingInfo, true)
     , _numberOfReplacementPoints(AccurateTrailPositionsInfo, 100, 0, 1000)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _translation->onParameterChange([this]() { reset(); });
+
+    _renderFullTrail = p.showFullTrail.value_or(_renderFullTrail);
+    addProperty(_renderFullTrail);
 
     _startTime = p.startTime;
     _startTime.onChange([this] { reset(); });
@@ -174,15 +191,16 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _timeStampSubsamplingFactor.onChange([this] { _subsamplingIsDirty = true; });
     addProperty(_timeStampSubsamplingFactor);
 
-    _renderFullTrail = p.showFullTrail.value_or(_renderFullTrail);
-    addProperty(_renderFullTrail);
-
-    _sweepChunkSize = p.sweepChunkSize.value_or(_sweepChunkSize);
-
     _numberOfReplacementPoints = p.accurateTrailPositions.value_or(
         _numberOfReplacementPoints
     );
     addProperty(_numberOfReplacementPoints);
+
+    _enableSweepChunking = p.enableSweepChunking.value_or(_enableSweepChunking);
+    addProperty(_enableSweepChunking);
+
+    _sweepChunkSize = p.sweepChunkSize.value_or(_sweepChunkSize);
+    addProperty(_sweepChunkSize);
 
     // We store the vertices with ascending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
@@ -267,6 +285,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         unsigned int startIndex = _sweepIteration * _sweepChunkSize;
         unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
         unsigned int stopIndex = std::min(nextIndex, _numberOfVertices);
+
+        // If iterative calculations are disabled
+        if (!_enableSweepChunking) {
+            stopIndex = _numberOfVertices;
+        }
 
         // Calculate all vertex positions
         for (unsigned int i = startIndex; i < stopIndex; ++i) {
