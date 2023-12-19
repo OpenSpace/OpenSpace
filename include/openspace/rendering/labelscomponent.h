@@ -22,85 +22,69 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTS___H__
-#define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTS___H__
+#ifndef __OPENSPACE_CORE___LABELSCOMPONENT___H__
+#define __OPENSPACE_CORE___LABELSCOMPONENT___H__
 
-#include <openspace/rendering/renderable.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
-#include <modules/space/speckloader.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/data/dataloader.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <ghoul/glm.h>
 #include <filesystem>
 
-namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
+struct RenderData;
 
 namespace documentation { struct Documentation; }
 
-class RenderablePoints : public Renderable {
+class LabelsComponent : public properties::PropertyOwner, public Fadeable {
 public:
-    explicit RenderablePoints(const ghoul::Dictionary& dictionary);
-    ~RenderablePoints() override = default;
+    explicit LabelsComponent(const ghoul::Dictionary& dictionary);
+    ~LabelsComponent() override = default;
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+    dataloader::Labelset& labelSet();
+    const dataloader::Labelset& labelSet() const;
 
-    bool isReady() const override;
+    void initialize();
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    void loadLabels();
+
+    bool isReady() const;
+    bool enabled() const;
+
+    void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+        float fadeInVariable = 1.f);
 
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<double> createDataSlice();
-
-    void readColorMapFile();
-
-    bool _dataIsDirty = true;
-    bool _hasSpriteTexture = false;
-    bool _spriteTextureIsDirty = true;
-    bool _hasColorMapFile = false;
-
-    properties::FloatProperty _scaleFactor;
-    properties::Vec3Property _pointColor;
-    properties::StringProperty _spriteTexturePath;
-
-    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
-    std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
-    ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(
-        modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
-        spriteTexture, hasColorMap
-    ) _uniformCache;
-
-    std::filesystem::path _speckFile;
-    std::filesystem::path _colorMapFile;
-
+    std::filesystem::path _labelFile;
     DistanceUnit _unit = DistanceUnit::Parsec;
+    dataloader::Labelset _labelset;
 
-    speck::Dataset _dataset;
-    std::vector<glm::vec4> _colorMapData;
+    bool _useCache = true;
 
-    //int _nValuesPerAstronomicalObject = 0;
+    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
-    GLuint _vao = 0;
-    GLuint _vbo = 0;
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+
+    // Properties
+    properties::BoolProperty _enabled;
+    properties::Vec3Property _color;
+    properties::FloatProperty _size;
+    properties::FloatProperty _fontSize;
+    properties::IVec2Property _minMaxSize;
+    properties::BoolProperty _faceCamera;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTS___H__
+#endif // __OPENSPACE_CORE___LABELSCOMPONENT___H__

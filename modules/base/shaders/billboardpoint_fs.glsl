@@ -22,29 +22,94 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+flat in float gs_colorParameter;
+flat in float vs_screenSpaceDepth;
+in vec2 texCoord;
 
-in dvec4 in_position;
-in dvec4 in_colormap;
+uniform float opacity;
+uniform vec3 color;
 
-out float vs_screenSpaceDepth;
-out float vs_scaleFactor;
-out vec4 colorMap;
+uniform vec4 nanColor = vec4(0.5);
+uniform bool useNanColor = true;
 
-uniform dmat4 modelViewProjectionTransform;
-uniform float scaleFactor;
+uniform vec4 aboveRangeColor;
+uniform bool useAboveRangeColor;
 
+uniform vec4 belowRangeColor;
+uniform bool useBelowRangeColor;
 
-void main() {
-  vec4 positionClipSpace = vec4(modelViewProjectionTransform * in_position);
-  vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
+uniform bool hasSpriteTexture;
+uniform sampler2D spriteTexture;
 
-  vs_screenSpaceDepth = positionScreenSpace.w;
-  vs_scaleFactor = scaleFactor;
-  colorMap = vec4(in_colormap);
+uniform bool useColorMap;
+uniform sampler1D colorMapTexture;
+uniform float cmapRangeMin;
+uniform float cmapRangeMax;
+uniform bool hideOutsideRange;
 
-  gl_PointSize = scaleFactor;
-  gl_Position = positionScreenSpace;
+uniform float fadeInValue;
+
+vec4 sampleColorMap(float dataValue) {
+    if (useNanColor && isnan(dataValue)) {
+        return nanColor;
+    }
+
+    bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
+    if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
+        discard;
+    }
+
+    if (useBelowRangeColor && dataValue < cmapRangeMin) {
+        return belowRangeColor;
+    }
+
+    if (useAboveRangeColor && dataValue > cmapRangeMax) {
+        return aboveRangeColor;
+    }
+
+    float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
+    t = clamp(t, 0.0, 1.0);
+    return texture(colorMapTexture, t);
+}
+
+Fragment getFragment() {
+  if (fadeInValue == 0.0 || opacity == 0.0) {
+    discard;
+  }
+
+   if (!hasSpriteTexture) {
+    // Moving the origin to the center
+    vec2 st = (texCoord - vec2(0.5)) * 2.0;
+    if (length(st) > 1.0) {
+      discard;
+    }
+  }
+
+  vec4 fullColor = vec4(1.0);
+  if (hasSpriteTexture) {
+    fullColor = texture(spriteTexture, texCoord);
+  }
+
+  if (useColorMap) {
+    fullColor *= sampleColorMap(gs_colorParameter);
+  }
+  else {
+    fullColor.rgb *= color;
+  }
+
+  fullColor.a *= opacity * fadeInValue;
+  if (fullColor.a < 0.01) {
+    discard;
+  }
+
+  Fragment frag;
+  frag.color = fullColor;
+  frag.depth = vs_screenSpaceDepth;
+  // Setting the position of the billboards to not interact with the ATM
+  frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+
+  return frag;
 }

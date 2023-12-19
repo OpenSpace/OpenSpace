@@ -1,0 +1,55 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local Example = {
+  Identifier = "ExamplePoints_UnitsAndLabels",
+  Parent = earthAsset.Earth.Identifier,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.0, 0.3, 1.0 }
+    },
+    -- Add a unit to interpret the points to be in kilometers rather than meters
+    Unit = "Km",
+    -- Also load a label file with the same position information as the CSV file.
+    -- The unit should be the same as the renderable
+    Labels = {
+      Enabled = true,
+      File = asset.resource("data/dummydata.label"),
+      Size = 7.5,
+      Unit = "Km"
+    }
+    -- @TODO The labels are not correctly oriented towards the camera!
+  },
+  GUI = {
+    Name = "Units & Labels",
+    Path = "/Example/Point Clouds",
+    Description = [[Example of a point cloud where a spcific unit is used when
+      interpreting the position values, and text labels are placed at the points]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Example)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Example)
+end)
+
+asset.export(Example)
+
+
+
+asset.meta = {
+  Name = "Example - Point Cloud with Unit and Labels",
+  Version = "1.0",
+  Description = [[Example of a point cloud where a spcific unit is used when
+    interpreting the position values, and text labels are placed at the points]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

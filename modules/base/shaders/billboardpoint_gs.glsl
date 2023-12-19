@@ -27,21 +27,21 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
-flat in vec4 colorMap[];
-flat in float dvarScaling[];
+flat in float colorParameter[];
+flat in float scalingParameter[];
 
 layout(triangle_strip, max_vertices = 4) out;
-flat out vec4 gs_colorMap;
+flat out float gs_colorParameter;
 out vec2 texCoord;
 flat out float vs_screenSpaceDepth;
-out float ta;
 
 // General settings
+uniform float scaleExponent;
 uniform float scaleFactor;
 uniform int renderOption;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
-uniform bool enabledRectSizeControl;
+uniform bool enablePixelSizeControl;
 uniform bool hasDvarScaling;
 
 // RenderOption: CameraViewDirection
@@ -51,15 +51,10 @@ uniform vec3 right;
 // RenderOption: CameraPositionNormal
 uniform dvec3 cameraPosition;
 uniform vec3 cameraLookUp;
-uniform float correctionSizeFactor;
-uniform float correctionSizeEndDistance;
 
 // Pixel size control: true
 uniform vec2 screenSize;
 uniform float maxBillboardSize;
-uniform float minBillboardSize;
-
-const double PARSEC = 0.308567756e17LF;
 
 const vec2 corners[4] = vec2[4](
   vec2(0.0, 0.0),
@@ -71,30 +66,15 @@ const vec2 corners[4] = vec2[4](
 const int RenderOptionCameraViewDirection = 0;
 const int RenderOptionCameraPositionNormal = 1;
 
-
 void main() {
-  ta = 1.0;
   vec4 pos = gl_in[0].gl_Position;
-  gs_colorMap = colorMap[0];
+  gs_colorParameter = colorParameter[0];
 
-  double unit = PARSEC;
+  dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
 
-  // Must be the same as the enum in RenderableBillboardsCloud.h
-  if (pos.w == 1.0) { unit = 1E3; }
-  else if (pos.w == 2.0) { unit = PARSEC; }
-  else if (pos.w == 3.0) { unit = 1E3 * PARSEC; }
-  else if (pos.w == 4.0) { unit = 1E6 * PARSEC; }
-  else if (pos.w == 5.0) { unit = 1E9 * PARSEC; }
-  else if (pos.w == 6.0) {
-    // Conversion factor from Parsecs to GigalightYears
-    unit = 306391534.73091 * PARSEC;
-  }
-
-  dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz) * unit, 1.0);
-
-  float scaleMultiply = exp(scaleFactor * 0.10);
+  float scaleMultiply = pow(10.0, scaleExponent);
   if (hasDvarScaling) {
-    scaleMultiply *= dvarScaling[0];
+    scaleMultiply *= scalingParameter[0];
   }
 
   vec3 scaledRight = vec3(0.0);
@@ -109,18 +89,13 @@ void main() {
     vec3 newRight = normalize(cross(cameraLookUp, normal));
     vec3 newUp = cross(normal, newRight);
 
-    if (!enabledRectSizeControl) {
-      double distCamera = length(cameraPosition - dpos.xyz);
-      float expVar = float(-distCamera) / pow(10.0, correctionSizeEndDistance);
-      float factorVar = pow(10.0, correctionSizeFactor);
-      scaleMultiply *= 1.0 / (1.0 + factorVar * exp(expVar));
-    }
-
     scaledRight = scaleMultiply * newRight * 0.5;
     scaledUp = scaleMultiply * newUp * 0.5;
   }
 
-  if (enabledRectSizeControl) {
+  // @TODO: Come up with some better solution for this scaling, that
+  // also work with non planar projections and multiple viewport resolutions.
+  if (enablePixelSizeControl) {
     vec4 initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
       dvec4(dpos.xyz - dvec3(scaledRight - scaledUp), dpos.w)));
 
@@ -137,30 +112,21 @@ void main() {
     // width and height
     vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
 
-    if (enabledRectSizeControl && (length(sizes) > maxBillboardSize)) {
+    if (length(sizes) > maxBillboardSize) {
       float correctionScale = maxBillboardSize / length(sizes);
-
       scaledRight *= correctionScale;
       scaledUp *= correctionScale;
     }
-    else {
-      // linear alpha decay
-      if (sizes.x < 2.0 * minBillboardSize) {
-        float maxVar = 2.0 * minBillboardSize;
-        float minVar = minBillboardSize;
-        float var = sizes.y + sizes.x;
-        ta = (var - minVar) / (maxVar - minVar);
-        if (ta == 0.0) {
-          return;
-        }
-      }
-    }
+
+    // TODO: add checks for wether the generated plane covers too many or too few pixels
   }
 
   // Saving one matrix multiplication:
   vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
-  vec4 scaledRightClip = vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
-  vec4 scaledUpClip = vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
+  vec4 scaledRightClip = scaleFactor *
+    vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
+  vec4 scaledUpClip = scaleFactor *
+    vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
 
   vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
   vs_screenSpaceDepth = initialPosition.w;

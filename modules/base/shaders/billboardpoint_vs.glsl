@@ -27,15 +27,14 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 in vec4 in_position;
-in vec4 in_colormap;
-in float in_dvarScaling;
+in float in_colorParameter;
+in float in_scalingParameter;
 
-flat out vec4 colorMap;
-flat out float dvarScaling;
-
+flat out float colorParameter;
+flat out float scalingParameter;
 
 void main() {
-  colorMap = in_colormap;
-  dvarScaling = in_dvarScaling;
+  colorParameter = in_colorParameter;
+  scalingParameter = in_scalingParameter;
   gl_Position = in_position;
 }

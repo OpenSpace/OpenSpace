@@ -22,26 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#ifndef __OPENSPACE_CORE___CSVLOADER___H__
+#define __OPENSPACE_CORE___CSVLOADER___H__
 
-in float vs_screenSpaceDepth;
+#include <openspace/data/dataloader.h>
+#include <filesystem>
+#include <optional>
 
-uniform vec3 color;
-uniform float alphaValue;
-uniform sampler2D spriteTexture;
+namespace openspace::dataloader::csv {
 
+Dataset loadCsvFile(std::filesystem::path path,
+    std::optional<DataMapping> specs = std::nullopt);
 
-Fragment getFragment() {
-  Fragment frag;
+} // namespace openspace::dataloader
 
-  if (alphaValue == 0.0) {
-    discard;
-  }
-
-  frag.color = texture(spriteTexture, gl_PointCoord) * vec4(color, alphaValue);
-  //frag.depth = gs_screenSpaceDepth;
-  frag.depth = vs_screenSpaceDepth;
-  frag.blend = BLEND_MODE_ADDITIVE;
-
-  return frag;
-}
+#endif // __OPENSPACE_CORE___CSVLOADER___H__
