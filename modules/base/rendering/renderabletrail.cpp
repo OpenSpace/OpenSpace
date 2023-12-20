@@ -217,7 +217,7 @@ RenderableTrail::Appearance::Appearance()
     })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
-    , lineFade(LineFadeInfo, glm::vec2(0.f, 1.f), glm::vec2(0.0f), glm::vec2(1.0f))
+    , lineFade(LineFadeInfo, glm::vec2(0.f, 100.f), glm::vec2(0.0f), glm::vec2(100.0f))
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
@@ -228,8 +228,8 @@ RenderableTrail::Appearance::Appearance()
         FadeModeInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , lineFadeStarPointDuration(LineFadeStarPointDurationInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
-    , lineFadeEndPointDuration(LineFadeEndPointDurationInfo, glm::vec2(1.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
+    , lineFadeStarPointDuration(LineFadeStarPointDurationInfo, glm::vec2(0.f, 100.f), glm::vec2(0.f), glm::vec2(100.f))
+    , lineFadeEndPointDuration(LineFadeEndPointDurationInfo, glm::vec2(100.f, 100.f), glm::vec2(0.f), glm::vec2(100.f))
 {
     renderingModes.addOptions({
         { RenderingModeLines, "Lines" },
@@ -476,17 +476,17 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         }
         else if (selection == LineFadeStartPointDuration) {
             // use startpoint+duration
-            float startPoint = (_appearance.lineFadeStarPointDuration.value())[0];
-            float remainingRange = 1.0f - startPoint;
-            float delta = remainingRange * _appearance.lineFadeStarPointDuration.value()[1];
-            float endPoint = std::min(startPoint + delta, 1.f);
+            float startPoint = _appearance.lineFadeStarPointDuration.value()[0];
+            float remainingRange = 100.0f - startPoint;
+            float delta = remainingRange * _appearance.lineFadeStarPointDuration.value()[1] / 100.f;
+            float endPoint = std::min(startPoint + delta, 100.f);
             _programObject->setUniform(_uniformCache.lineFade, glm::vec2(startPoint, endPoint));
         }
         else if (selection == LineFadeEndPointDuration) {
             // use endpoint+duration
             float endPoint = (_appearance.lineFadeEndPointDuration.value())[0];
             float remainingRange = endPoint;
-            float delta = remainingRange * (_appearance.lineFadeEndPointDuration.value())[1];
+            float delta = remainingRange * (_appearance.lineFadeEndPointDuration.value())[1] / 100.f;
             float startPoint = std::max(endPoint - delta, 0.f);
             _programObject->setUniform(_uniformCache.lineFade, glm::vec2(startPoint, endPoint));
         }

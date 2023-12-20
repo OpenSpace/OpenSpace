@@ -54,8 +54,8 @@ Fragment getFragment() {
       vertexDistance += 1.0;
     }
 
-    float b0 = lineFade[0];
-    float b1 = lineFade[1];
+    float b0 = lineFade[0] / 100.0;
+    float b1 = lineFade[1] / 100.0;
 
     float id = 1.0 - vertexDistance;
 

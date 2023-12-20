@@ -79,9 +79,9 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
-        "TrailFade",
-        "Trail Fade",
+    constexpr openspace::properties::Property::PropertyInfo LineFadeInfo = {                        // THINK ABOUT NAME HERE
+        "LineFade",
+        "Name Fade",
         "This value determines how fast the trail fades and is an appearance property.",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
@@ -136,8 +136,8 @@ namespace {
         // [[codegen::verbatim(LineColorInfo.description)]]
         glm::dvec3 color [[codegen::color()]];
 
-        // [[codegen::verbatim(TrailFadeInfo.description)]]
-        std::optional<glm::vec2> trailFade;
+        // [[codegen::verbatim(LineFadeInfo.description)]]
+        std::optional<glm::vec2> lineFade;
 
         // [[codegen::verbatim(StartRenderIdxInfo.description)]]
         std::optional<int> startRenderIdx;
@@ -174,7 +174,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addProperty(_segmentQuality);
 
     _appearance.lineColor = p.color;
-    _appearance.lineFade = p.trailFade.value_or(glm::vec2(0.f, 1.f));
+    _appearance.lineFade = p.lineFade.value_or(_appearance.lineFade);
     _appearance.lineWidth = p.lineWidth.value_or(2.f);
     _appearance.useLineFade = true;
     addPropertySubOwner(_appearance);
@@ -276,7 +276,33 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
     _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+
+    // TEMP
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    if (_appearance.useLineFade) {
+        int selection = _appearance.fadingModes;
+        // Check which rendering method should be used
+        if (selection == 0) {
+            // use point+point
+            _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+        }
+        else if (selection == 1) {
+            // use startpoint+duration
+            float startPoint = _appearance.lineFadeStarPointDuration.value()[0];
+            float remainingRange = 100.0f - startPoint;
+            float delta = remainingRange * _appearance.lineFadeStarPointDuration.value()[1] / 100.f;
+            float endPoint = std::min(startPoint + delta, 100.f);
+            _programObject->setUniform(_uniformCache.lineFade, glm::vec2(startPoint, endPoint));
+        }
+        else if (selection == 2) {
+            // use endpoint+duration
+            float endPoint = (_appearance.lineFadeEndPointDuration.value())[0];
+            float remainingRange = endPoint;
+            float delta = remainingRange * (_appearance.lineFadeEndPointDuration.value())[1] / 100.0f;
+            float startPoint = std::max(endPoint - delta, 0.f);
+            _programObject->setUniform(_uniformCache.lineFade, glm::vec2(startPoint, endPoint));
+        }
+    }
 
     glLineWidth(_appearance.lineWidth);
 
