@@ -168,6 +168,8 @@ void VolumeTetraMesh::get(std::vector<glm::vec4>& nodes, std::vector<glm::ivec4>
             }
         }
     }
+
+    utiltetra::fixFaceOrientation(nodes, nodeIds);
 }
 
 glm::mat4 VolumeTetraMesh::getBoundingBox() const {

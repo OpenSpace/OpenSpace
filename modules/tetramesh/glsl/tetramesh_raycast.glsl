@@ -281,9 +281,6 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
         tetra = getTetra(tetraId);
         ExitFace exitFace = findTetraExitFace(tetra, localFaceId, pos, rayDirection);
 
-        // checkProperty(exitFace.segmentLength, accumulatedColor, accumulatedAlpha);
-        // return;
-
         vec3 endPos = pos + rayDirection * exitFace.segmentLength;
 
         const float scalar = normalizeScalar(barycentricInterpolation(endPos, tetra));
@@ -307,8 +304,8 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
         }
 
         // TODO not sure if this is correct
-        accumulatedColor += dvrColor.rgb;
-        accumulatedAlpha += dvrColor.aaa;
+        accumulatedColor = dvrColor.rgb;
+        accumulatedAlpha = dvrColor.aaa;
 
         prevScalar = scalar;
 
