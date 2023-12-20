@@ -22,15 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/cameratopic.h>
+#include <modules/server/include/topics/camerapathtopic.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
-#include <openspace/util/distanceconversion.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/path.h>
+#include <openspace/navigation/pathnavigator.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -41,11 +42,11 @@ using nlohmann::json;
 
 namespace openspace {
 
-CameraTopic::CameraTopic()
+CameraPathTopic::CameraPathTopic()
     : _lastUpdateTime(std::chrono::system_clock::now())
 {}
 
-CameraTopic::~CameraTopic() {
+CameraPathTopic::~CameraPathTopic() {
     if (_dataCallbackHandle != UnsetOnChangeHandle) {
         ServerModule* module = global::moduleEngine->module<ServerModule>();
         if (module) {
@@ -54,11 +55,11 @@ CameraTopic::~CameraTopic() {
     }
 }
 
-bool CameraTopic::isDone() const {
+bool CameraPathTopic::isDone() const {
     return _isDone;
 }
 
-void CameraTopic::handleJson(const nlohmann::json& json) {
+void CameraPathTopic::handleJson(const nlohmann::json& json) {
     std::string event = json.at("event").get<std::string>();
 
     if (event != SubscribeEvent) {
@@ -69,25 +70,41 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
     ServerModule* module = global::moduleEngine->module<ServerModule>();
     _dataCallbackHandle = module->addPreSyncCallback(
         [this]() {
+            bool isInPath = (global::openSpaceEngine->currentMode()
+                == OpenSpaceEngine::Mode::CameraPath);
+
             std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-            if (now - _lastUpdateTime > _cameraPositionUpdateTime) {
-                sendCameraData();
+            if (isInPath && (now - _lastUpdateTime) > _cameraPathUpdateTime) {
+                sendCameraPathData();
                 _lastUpdateTime = std::chrono::system_clock::now();
             }
         }
     );
 }
 
-void CameraTopic::sendCameraData() {
-    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
-    glm::dvec3 position = module->geoPosition();
-    std::pair<double, std::string_view> altSimplified = simplifyDistance(position.z);
+void CameraPathTopic::sendCameraPathData() {
+    const interaction::PathNavigator& pathNavigator =
+        global::navigationHandler->pathNavigator();
+
+    const interaction::Path* path = pathNavigator.currentPath();
+
+    if (!path) {
+        ghoul_assert(path, "Path must exist");
+        return;
+    }
+
+    // The time is not exact, and we only care about the number of seconds. Also,
+    // any negative values should be interpreted as positive
+    int seconds = static_cast<int>(
+        std::round(pathNavigator.estimatedRemainingTimeInPath())
+    );
+    seconds = std::max(seconds, 0);
 
     nlohmann::json jsonData = {
-        { "latitude", position.x },
-        { "longitude", position.y },
-        { "altitude", altSimplified.first },
-        { "altitudeUnit", altSimplified.second }
+        { "target", path->endPoint().nodeIdentifier() },
+        { "remainingTime", seconds },
+        //{ "remainingDistance", path->remainingDistance() },
+        { "isPaused", pathNavigator.isPaused() }
     };
 
     _connection->sendJson(wrappedPayload(jsonData));

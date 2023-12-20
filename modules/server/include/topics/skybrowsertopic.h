@@ -39,7 +39,7 @@ public:
     bool isDone() const override;
 
 private:
-    const int UnsetOnChangeHandle = -1;
+    static constexpr int UnsetOnChangeHandle = -1;
 
     void sendBrowserData();
 

@@ -64,6 +64,9 @@ public:
     bool hasCurrentPath() const;
     bool hasFinished() const;
     bool isPlayingPath() const;
+    bool isPaused() const;
+
+    float estimatedRemainingTimeInPath() const;
 
     void updateCamera(double deltaTime);
     void createPath(const ghoul::Dictionary& dictionary);
@@ -102,7 +105,7 @@ private:
      */
     void findRelevantNodes();
 
-    void removeRollRotation(CameraPose& pose, double deltaTime);
+    void removeRollRotation(CameraPose& pose);
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;

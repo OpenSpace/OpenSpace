@@ -208,6 +208,14 @@ bool PathNavigator::isPlayingPath() const {
     return hasCurrentPath() && _isPlaying;
 }
 
+bool PathNavigator::isPaused() const {
+    return hasCurrentPath() && !_isPlaying;
+}
+
+float PathNavigator::estimatedRemainingTimeInPath() const {
+    return hasCurrentPath() ? _currentPath->estimatedRemainingTime(_speedScale) : 0.f;
+}
+
 void PathNavigator::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
@@ -257,7 +265,7 @@ void PathNavigator::updateCamera(double deltaTime) {
     }
 
     if (!_includeRoll) {
-        removeRollRotation(newPose, deltaTime);
+        removeRollRotation(newPose);
     }
 
     camera()->setPose(newPose);
@@ -537,7 +545,7 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
     return nullptr;
 }
 
-void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {
+void PathNavigator::removeRollRotation(CameraPose& pose) {
     // The actual position for the camera does not really matter. Use the origin,
     // to avoid precision problems when we have large values for the position
     const glm::dvec3 cameraPos = glm::dvec3(0.0);

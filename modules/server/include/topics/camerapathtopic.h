@@ -22,18 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
+#ifndef __OPENSPACE_MODULE_SERVER___CAMERAPATHTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___CAMERAPATHTOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
 #include <chrono>
 
 namespace openspace {
 
-class CameraTopic : public Topic {
+class CameraPathTopic : public Topic {
 public:
-    CameraTopic();
-    ~CameraTopic() override;
+    CameraPathTopic();
+    ~CameraPathTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
@@ -41,16 +41,15 @@ public:
 private:
     static constexpr int UnsetOnChangeHandle = -1;
 
-    void sendCameraData();
+    void sendCameraPathData();
 
     int _dataCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;
     std::chrono::system_clock::time_point _lastUpdateTime;
-    glm::dvec3 _lastPosition = glm::dvec3(0);
 
-    std::chrono::milliseconds _cameraPositionUpdateTime = std::chrono::milliseconds(100);
+    std::chrono::milliseconds _cameraPathUpdateTime = std::chrono::milliseconds(100);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___CAMERAPATHTOPIC___H__
