@@ -46,8 +46,6 @@ set(SHADER_FILES
   glsl/bounds_fs.glsl
   glsl/bounds_vs.glsl
   glsl/tetramesh_raycast.glsl
-  glsl/tetramesh_traversal.frag
-  glsl/tetramesh_traversal.vert
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

@@ -30,10 +30,8 @@
 #include <modules/tetramesh/include/datastructures/volumetetramesh.h>
 #include <modules/tetramesh/include/processors/tetrameshvolumeraycaster.h>
 #include <modules/tetramesh/include/util/tetrameshutils.h>
-#include <modules/volume/rawvolumemetadata.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/bufferbinding.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -63,43 +61,20 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void loadVolumeMetadata(const std::string& path);
-
     std::unique_ptr<TetraMeshVolumeRaycaster> _raycaster;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
 
     VolumeTetraMesh _tetraMesh;
-    //volume::RawVolumeMetadata _metadata;
+
     std::shared_ptr<utiltetra::Mesh> _boundaryMesh;
 
-    // TODO: use raw OpenGL commands for buffer storages since these buffers objs are not 100% tested
-    //std::unique_ptr<ghoul::opengl::BufferBinding<
-    //    ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _nodesBuffer;
-    //std::unique_ptr<ghoul::opengl::BufferBinding<
-    //    ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _nodeIdsBuffer;
-    //std::unique_ptr<ghoul::opengl::BufferBinding<
-    //    ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _opposingFaceIdsBuffer;
-
-    // TODO: depending on above solution, these might be redundant
     utiltetra::TetraBufferIds _buffers;
-
-    //GLuint _nodesBuffer = 0;
-    //GLuint _nodeIdsBuffer = 0;
-    //GLuint _opposingFaceIdsBuffer = 0;
-    //GLuint _boundaryMeshVAO = 0;
-
-    //GLuint _indicesEBO = 0;
-    //GLuint _vertsVBO = 0;
-    //GLuint _faceIdVBO = 0;
 
     std::string _filePath;
     std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>> _volume;
     glm::vec2 _dataRange = glm::vec2(0.f);
-
-    //std::filesystem::path _srcDirectory;
-    //std::filesystem::path _transferFunctionPath;
+    glm::ivec3 _dimensions = glm::ivec3(0);
     
     properties::FloatProperty _samplingInterval;
     properties::FloatProperty _opacityScaling;

@@ -41,18 +41,10 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTetraMeshVolume";
 
-    constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
-        "SourceDirectory",
-        "Source Directory",
+    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
+        "FilePath",
+        "File Path",
         "Specifies the path to load the volume from",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
-        "StepSize",
-        "Step Size",
-        "Specifies how often to sample on the raycaster. Lower step -> higher resolution",
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -73,22 +65,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OpacityScalingInfo{
         "OpacityScaling",
         "Opacity Scaling",
-        "Specifies the opacity scaling facotr used to scale the extinction to account for differently sized datasets",
+        "Specifies the opacity scaling facotr used to scale the extinction to account for"
+        " differently sized datasets",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
 
     struct [[codegen::Dictionary(RenderableTetraMeshVolume)]] Parameters {
+        // [[codegen::verbatim(FilePathInfo.description)]]
         std::string filePath;
-
-        //// [[codegen::verbatim(SourceDirectoryInfo.description)]]
-        //std::string sourceDirectory;
 
         // [[codegen::verbatim(TransferFunctionInfo.description)]]
         std::string transferFunction;
 
-        //// [[codegen::verbatim(StepSizeInfo.description)]]
-        //std::optional<float> stepSize;
+        // Specifies the number of grid cells in each dimension
+        glm::ivec3 dimensions [[codegen::greater(glm::ivec3(0))]];
     };
 
 #include "renderabletetrameshvolume_codegen.cpp"
@@ -109,10 +100,8 @@ RenderableTetraMeshVolume::RenderableTetraMeshVolume(const ghoul::Dictionary& di
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _filePath = p.filePath;
+    _dimensions = p.dimensions;
 
-    //_srcDirectory = absPath(p.sourceDirectory);
-
-    //_transferFunctionPath = absPath(p.transferFunction);
     std::string transferFunctionPath = absPath(p.transferFunction).string();
     _transferFunction = std::make_shared<openspace::TransferFunction>(
         transferFunctionPath, [](const openspace::TransferFunction&) {}, 2u
@@ -138,15 +127,30 @@ void RenderableTetraMeshVolume::initialize() {
     std::string baseName;
 
     std::vector<std::vector<std::string>> csvData = ghoul::loadCSVFile(_filePath, false);
-    ghoul_assert(csvData.size() > 0, "CSV file must not be empty");
-    std::vector<utiltetra::VoxelData> voxelData(csvData.size());
 
+    if (csvData.empty()) {
+        throw ghoul::RuntimeError(fmt::format("{}: CSV file {} must not be empty",
+            _loggerCat, _filePath
+        ));
+    }
+
+    std::vector<utiltetra::VoxelData> voxelData(csvData.size());
+    volume::RawVolume<utiltetra::VoxelData> volume(static_cast<glm::uvec3>(_dimensions));
+
+    if (volume.nCells() != csvData.size()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "{}: Specified volume dimensions ({},{},{}) does not match data points read",
+            _loggerCat, _dimensions.x, _dimensions.y, _dimensions.z
+        ));
+    }
 
     float minValue = std::numeric_limits<float>::max();
     float maxValue = std::numeric_limits<float>::min();
 
     int index = 0;
     for (const std::vector<std::string> &row : csvData) {
+        // TODO: handle NaN values
+        // Data format of ecah voxel:  x, y, z, value
         float x = std::stof(row[0]);
         float y = std::stof(row[1]);
         float z = std::stof(row[2]);
@@ -160,37 +164,13 @@ void RenderableTetraMeshVolume::initialize() {
         ++index;
     }
     _dataRange = glm::vec2(minValue, maxValue);
-    // TODO: adjust based on input!
-    glm::uvec3 dims(32, 32, 32);
-
-    volume::RawVolume<utiltetra::VoxelData> volume(dims);
-
-    ghoul_assert(volume.nCells() == csvData.size(),
-        "Volume dimensions does not match data points"
-    );
 
     for (size_t i = 0; i < volume.nCells(); i++) {
         volume.set(i, voxelData[i]);
     }
     _volume = std::make_shared<const volume::RawVolume<utiltetra::VoxelData>>(volume);
 
-    _tetraMesh.setData(_volume);
-    //for (const fs::directory_entry& e : fs::recursive_directory_iterator(_srcDirectory)) {
-    //    if (e.is_regular_file() && e.path().extension() == ".dictionary") {
-    //        const std::string path = e.path().string();
-    //        loadVolumeMetadata(path);
-    //        baseName = std::filesystem::path(path).stem().string();
-    //        break;
-    //    }
-    //}
-    // TODO: check that we have metafile -> report error
-
-    //std::string volumePath = fmt::format("{}/{}.rawvolume", _srcDirectory, baseName);
-    //volume::RawVolumeReader<gaiavolume::GaiaVolumeDataLayout> reader(
-    //    volumePath, _metadata.dimensions
-    //);
-    //_tetraMesh.setData(reader.read(false, _metadata.fileheaders.size()));
-    
+    _tetraMesh.setData(_volume);    
 }
 
 void RenderableTetraMeshVolume::initializeGL()
@@ -211,21 +191,9 @@ void RenderableTetraMeshVolume::initializeGL()
         }
     });
 
-
-    // TODO: move this to raycaster class
-
-    // TODO remove
-    //std::unique_ptr<ghoul::opengl::ProgramObject> program =
-    //    ghoul::opengl::ProgramObject::Build(
-    //        "TetraMeshVolume",
-    //        absPath("${MODULE_TETRAMESH}/glsl/tetramesh_traversal.vert"),
-    //        absPath("${MODULE_TETRAMESH}/glsl/tetramesh_traversal.frag")
-    //    );
-
-    //_program = std::move(program);
-
-
-    // Generate and bind buffers
+    // TODO check if we need to bindbufferbase here or not. BufferBase may be overwritten
+    // During other render calls (?)
+    // Generate buffers
     glGenBuffers(1, &_buffers.nodesBuffer);
     //glBindBuffer(GL_SHADER_STORAGE_BUFFER, _nodesBuffer);
     //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _nodesBuffer);
@@ -246,21 +214,6 @@ void RenderableTetraMeshVolume::initializeGL()
 
     _raycaster->setBuffers(_buffers);
     _raycaster->setDataRange(_dataRange.x, _dataRange.y);
-    //_raycaster->setBoundaryMeshVAO(_boundaryMeshVAO);
-    //_nodesBuffer = std::make_unique<ghoul::opengl::BufferBinding<
-    //    ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
- 
-    //_program->setSsboBinding("nodeBuffer", _nodesBuffer);
-
-    //_nodeIdsBuffer = std::make_unique<ghoul::opengl::BufferBinding<
-    //    ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
-
-    //_program->setSsboBinding("NodeIdsBuffer", _nodeIdsBuffer);
-
-    //_opposingFaceIdsBuffer = std::make_unique<ghoul::opengl::BufferBinding<
-    //    ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
-
-    //_program->setSsboBinding("opposingFaceIdsBuffer", _opposingFaceIdsBuffer);
 }
 
 void RenderableTetraMeshVolume::deinitializeGL()
@@ -274,15 +227,11 @@ void RenderableTetraMeshVolume::deinitializeGL()
     glDeleteVertexArrays(1, &_buffers.boundaryMeshVAO);
 
     _buffers.deinitialize();
-
-    global::renderEngine->removeRenderProgram(_program.get());
-    _program = nullptr;
 }
 bool RenderableTetraMeshVolume::isReady() const
 {
     // TODO: make sure data is ready over just program - for now ok since we fill
     // volume on init
-    //return _program != nullptr;
     return _tetraMesh.getNumberOfCells() != 0;
 
 }
@@ -290,11 +239,10 @@ void RenderableTetraMeshVolume::render(const RenderData& data, RendererTasks& ta
 {
     if (_raycaster) {
         tasks.raycasterTasks.push_back({ _raycaster.get(), data });
-        //return;
     }
     return;
 
-    _program->activate();
+    //_program->activate();
     // Check if the buffer needs to be bound first, inviwo does not seem to bind it before 
     // calling bind buffer base
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _buffers.nodesBuffer);
@@ -313,59 +261,32 @@ void RenderableTetraMeshVolume::render(const RenderData& data, RendererTasks& ta
 
     const glm::dmat4 cameraVP = calcModelViewProjectionTransform(data, modelTransform);
 
-    _program->setUniform(
-        _program->uniformLocation("dataToWorld"),
-        modelTransform
-    );
+    //_program->setUniform(
+    //    _program->uniformLocation("dataToWorld"),
+    //    modelTransform
+    //);
     // TODO: make sure we have correct matrice (inviwo does inverse(world * model) -> what is our world?
-    _program->setUniform(
-        _program->uniformLocation("worldToData"),
-        glm::inverse(modelTransform)
-    );
+    //_program->setUniform(
+    //    _program->uniformLocation("worldToData"),
+    //    glm::inverse(modelTransform)
+    //);
     //_program->setUniform(
     //    _program->uniformLocation("dataToWorldNormalMatrix"),
     //    glm::mat3(glm::transpose(glm::inverse(modelTransform)))
     //);
-    _program->setUniform(
-        _program->uniformLocation("worldToClip"), // Check
-        cameraVP
-    );
+    //_program->setUniform(
+    //    _program->uniformLocation("worldToClip"), // Check
+    //    cameraVP
+    //);
     // TODO make sure this is correct way to inverse viewprojection matrix
     //_program->setUniform(
     //    _program->uniformLocation("clipToWorld"),
     //    glm::inverse(cameraVP)
     //);
-    _program->setUniform(
-        _program->uniformLocation("position"),
-        cameraPosition
-    );
-
-    //const glm::vec2 dataRange = glm::vec2{ _metadata.minValue, _metadata.maxValue };
-    const float scalingFactor = 1.f / (_dataRange.y - _dataRange.x);
-    const float offset = -_dataRange.x;
-    _program->setUniform(_program->uniformLocation("tfValueScaling"), scalingFactor);
-    _program->setUniform(_program->uniformLocation("tfValueOffset"), offset);
-
-    _transferFunction->update();
-    auto tfunit = std::make_unique<ghoul::opengl::TextureUnit>();
-    tfunit->activate();
-    _transferFunction->bind();
-    _program->setUniform("transferFunction", tfunit->unitNumber());
-    //// set texture uniform
-
-    glCullFace(GL_BACK);
-    glEnable(GL_CULL_FACE);
-    glDisable(GL_BLEND);
-    
-
-    glBindVertexArray(_buffers.boundaryMeshVAO);
-
-    const unsigned numIndices = static_cast<unsigned>(_boundaryMesh.get()->indices.size());
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, nullptr);
-
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-    _program->deactivate();
-    
+    //_program->setUniform(
+    //    _program->uniformLocation("position"),
+    //    cameraPosition
+    //);
 }
 void RenderableTetraMeshVolume::update(const UpdateData& data)
 {
@@ -377,32 +298,39 @@ void RenderableTetraMeshVolume::update(const UpdateData& data)
         _tetraMesh.get(nodes, nodeIds);
         std::vector<glm::ivec4> opposingFaces = utiltetra::getOpposingFaces(nodeIds);
 
-        // Upload data
-        // TODO: keep track of size and use glSubData if we can?
-        // e.g., glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, sizeof(newData), newData);
+        const GLsizeiptr nodesSizeInBytes = static_cast<GLsizeiptr>(
+            sizeof(glm::vec4) * nodes.size()
+        );
+        const GLsizeiptr nodeIdsSizeInBytes = static_cast<GLsizeiptr>(
+            sizeof(glm::ivec4) * nodeIds.size()
+        );
+        const GLsizeiptr opposingFacesSizeInBytes = static_cast<GLsizeiptr>(
+            sizeof(glm::ivec4) * opposingFaces.size()
+        );
+
+        // Upload data 
+        // TODO: keep track of size and use glSubData if we can? e.g.,
+        // glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, sizeof(newData), newData);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _buffers.nodesBuffer);
-        GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(sizeof(GL_FLOAT) * 4 * nodes.size());
         glBufferData(
             GL_SHADER_STORAGE_BUFFER,
-            sizeInBytes,
+            nodesSizeInBytes,
             nodes.data(),
             GL_DYNAMIC_DRAW
         );
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _buffers.nodeIdsBuffer);
-        sizeInBytes = static_cast<GLsizeiptr>(sizeof(GL_INT) * 4 * nodeIds.size());
         glBufferData(
             GL_SHADER_STORAGE_BUFFER,
-            sizeInBytes,
+            nodeIdsSizeInBytes,
             nodeIds.data(),
             GL_DYNAMIC_DRAW
         );
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _buffers.opposingFaceIdsBuffer);
-        sizeInBytes = static_cast<GLsizeiptr>(sizeof(GL_INT) * 4 * opposingFaces.size());
         glBufferData(
             GL_SHADER_STORAGE_BUFFER,
-            sizeInBytes,
+            opposingFacesSizeInBytes,
             opposingFaces.data(),
             GL_DYNAMIC_DRAW
         );
@@ -414,32 +342,35 @@ void RenderableTetraMeshVolume::update(const UpdateData& data)
 
         _raycaster->setBoundaryDrawCalls(_boundaryMesh->indices.size());
         _raycaster->setDataRange(_dataRange.x, _dataRange.y);
-        //_raycaster->setDataRange(_metadata.minValue, _metadata.maxValue);
 
+        const GLsizeiptr verticesSizeInBytes = static_cast<GLsizeiptr>(
+            _boundaryMesh->vertices.size() * sizeof(glm::vec3)
+        );
+        const GLsizeiptr faceIdsSizeInBytes = static_cast<GLsizeiptr>(
+            _boundaryMesh->faceIds.size() * sizeof(int)
+        );
+        const GLsizeiptr indicesSizeInBytes = static_cast<GLsizeiptr>(
+            _boundaryMesh->indices.size() * sizeof(uint32_t)
+        );
 
-        // Setup boundary mesh
+        // Upload boundary mesh data
         glBindVertexArray(_buffers.boundaryMeshVAO);
-        auto verticesSize = _boundaryMesh.get()->vertices.size() * sizeof(glm::vec3);
-        auto faceIdsSize = _boundaryMesh.get()->faceIds.size() * sizeof(int);
-        auto indicesSize = _boundaryMesh.get()->indices.size() * sizeof(uint32_t);
 
         glBindBuffer(GL_ARRAY_BUFFER, _buffers.vertsVBO);
         glBufferData(
             GL_ARRAY_BUFFER,
-            verticesSize,
+            verticesSizeInBytes,
             _boundaryMesh.get()->vertices.data(),
             GL_DYNAMIC_DRAW
         );
 
-        // TODO: get index (first parameter) by
-        //GLint attributeIndex = _program->attributeLocation("in_position");
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
         glEnableVertexAttribArray(0);
 
         glBindBuffer(GL_ARRAY_BUFFER, _buffers.faceIdVBO);
         glBufferData(
             GL_ARRAY_BUFFER,
-            faceIdsSize,
+            faceIdsSizeInBytes,
             _boundaryMesh.get()->faceIds.data(),
             GL_DYNAMIC_DRAW
         );
@@ -449,7 +380,7 @@ void RenderableTetraMeshVolume::update(const UpdateData& data)
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffers.indicesEBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-            indicesSize,
+            indicesSizeInBytes,
             _boundaryMesh.get()->indices.data(),
             GL_DYNAMIC_DRAW
         );
@@ -457,17 +388,6 @@ void RenderableTetraMeshVolume::update(const UpdateData& data)
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
-}
-
-void RenderableTetraMeshVolume::loadVolumeMetadata(const std::string& path) {
-    //try {
-    //    ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
-    //    _metadata = volume::RawVolumeMetadata::createFromDictionary(dictionary);
-    //}
-    //catch (const ghoul::RuntimeError& e) {
-    //    LERRORC(e.component, e.message);
-    //    return;
-    //}
 }
 
 } // namespace OpenSpace

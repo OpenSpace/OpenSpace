@@ -41,8 +41,8 @@ namespace utiltetra {
 struct VoxelData {
     VoxelData() = default;
     VoxelData(float x, float y, float z, float v) : position{ x,y,z }, value{ v } {}
-    glm::vec3 position;
-    float value;
+    glm::vec3 position = glm::vec3(0.f);
+    float value = 0.f;
 };
 
 struct Mesh {
