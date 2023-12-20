@@ -86,11 +86,35 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    enum FadingMode {
+        LineFade = 0,
+        LineFadeStartPointDuration,
+        LineFadeEndPointDuration
+    };
+
     constexpr openspace::properties::Property::PropertyInfo LineFadeInfo = {
         "LineFade",
-        "Line fade",
+        "Point + Point",
         "The fading factor that is applied to the trail if the 'EnableFade' value is "
         "'true'. If it is 'false', this setting has no effect. --- IN PROGRESS ---",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LineFadeStarPointDurationInfo = {
+    "LineFadeStartPointDuration",
+    "Startpoint + Range",
+    "The fading factor that is applied to the trail if the 'EnableFade' value is "
+    "'true'. If it is 'false', this setting has no effect. --- IN PROGRESS ---",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LineFadeEndPointDurationInfo = {
+    "LineFadeEndPointDuration",
+    "EndPoint + Range",
+    "The fading factor that is applied to the trail if the 'EnableFade' value is "
+    "'true'. If it is 'false', this setting has no effect. --- IN PROGRESS ---",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
@@ -168,12 +192,11 @@ namespace {
 
         // TEMP GOES HERE ===================
         enum class FadeMode {
-            TwoBreakpoints,
-            BreakpointPlusDuration [[codegen::key("Breakpoint + Duration")]],
-            BreakpointMinusDuration [[codegen::key("Breakpoint - Duration")]]
+            PointPoint [[codegen::key("Point+Point")]],
+            StartPointDuration [[codegen::key("StartPoint+Range")]],
+            DurationEndPoint [[codegen::key("EndPoint+Range")]]
         };
-
-        std::optional<FadeMode> fadeMode;
+        //std::optional<FadeMode> fadeMode [[codegen::key("FadeMode")]];
 
         // ==================================
     };
@@ -205,6 +228,8 @@ RenderableTrail::Appearance::Appearance()
         FadeModeInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , lineFadeStarPointDuration(LineFadeStarPointDurationInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
+    , lineFadeEndPointDuration(LineFadeEndPointDurationInfo, glm::vec2(1.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
 {
     renderingModes.addOptions({
         { RenderingModeLines, "Lines" },
@@ -213,19 +238,27 @@ RenderableTrail::Appearance::Appearance()
     });
 
     // TEMP GOES HERE =================
-
-
-
+    fadingModes.addOptions({
+        { LineFade, "Point+Point" },
+        { LineFadeStartPointDuration, "StartPoint+Range" },
+        { LineFadeEndPointDuration, "EndPoint+Range" }
+    });
     //=================================
 
     lineColor.setViewOption(properties::Property::ViewOptions::Color);
-    lineFade.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(lineColor);
-    addProperty(useLineFade);
-    addProperty(lineFade);
     addProperty(lineWidth);
     addProperty(pointSize);
     addProperty(renderingModes);
+    addProperty(useLineFade);
+
+    // TEMP
+    lineFade.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+
+    addProperty(fadingModes);
+    addProperty(lineFade);
+    addProperty(lineFadeStarPointDuration);
+    addProperty(lineFadeEndPointDuration);
 }
 
 RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
@@ -435,7 +468,28 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
     _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
     if (_appearance.useLineFade) {
-        _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+        int selection = _appearance.fadingModes;
+        // Check which rendering method should be used
+        if (selection == LineFade) {
+            // use point+point
+            _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+        }
+        else if (selection == LineFadeStartPointDuration) {
+            // use startpoint+duration
+            float startPoint = (_appearance.lineFadeStarPointDuration.value())[0];
+            float remainingRange = 1.0f - startPoint;
+            float delta = remainingRange * _appearance.lineFadeStarPointDuration.value()[1];
+            float endPoint = std::min(startPoint + delta, 1.f);
+            _programObject->setUniform(_uniformCache.lineFade, glm::vec2(startPoint, endPoint));
+        }
+        else if (selection == LineFadeEndPointDuration) {
+            // use endpoint+duration
+            float endPoint = (_appearance.lineFadeEndPointDuration.value())[0];
+            float remainingRange = endPoint;
+            float delta = remainingRange * (_appearance.lineFadeEndPointDuration.value())[1];
+            float startPoint = std::max(endPoint - delta, 0.f);
+            _programObject->setUniform(_uniformCache.lineFade, glm::vec2(startPoint, endPoint));
+        }
     }
 
     /*glm::ivec2 resolution = global::renderEngine.renderingResolution();

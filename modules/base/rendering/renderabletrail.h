@@ -81,8 +81,6 @@ public:
         properties::Vec3Property lineColor;
         /// Settings that enables or disables the line fading
         properties::BoolProperty useLineFade;
-        /// Specifies a multiplicative factor that fades out the line
-        properties::Vec2Property lineFade;
         /// Line width for the line rendering part
         properties::FloatProperty lineWidth;
         /// Point size for the point rendering part
@@ -90,7 +88,14 @@ public:
         /// The option determining which rendering method to use
         properties::OptionProperty renderingModes;
 
-        /// TEMP - Option to select fading mode
+        /// TEMP
+        /// Specifies a multiplicative factor that fades out the line
+        properties::Vec2Property lineFade;
+        /// Specifies a multiplicative factor that fades out the line
+        properties::Vec2Property lineFadeStarPointDuration;
+        /// Specifies a multiplicative factor that fades out the line
+        properties::Vec2Property lineFadeEndPointDuration;
+        // Option to select fademode
         properties::OptionProperty fadingModes;
     };
 
