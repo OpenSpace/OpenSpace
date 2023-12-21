@@ -570,7 +570,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     }
 
     if (p.labels.has_value()) {
-        if (!(*p.labels).hasKey("File") && _hasDataFile) {
+        if (!p.labels->hasKey("File") && _hasDataFile) {
             // Load the labelset from the dataset if no file was included
             _labels = std::make_unique<LabelsComponent>(*p.labels, _dataset, _unit);
         }
@@ -583,7 +583,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         // Fading of the labels should also depend on the fading of the renderable
         _labels->setParentFadeable(this);
     }
-
 
     // If no scale exponent was specified, compute one that will at least show the points
     // based on the scale of the positions in the dataset

@@ -52,12 +52,11 @@ public:
      * Create a labels component from an already loaded dataset. That dataset should have
      * a comment per point to be used for the labels.
      *
+     * \param dictionary A dictionary with the other information used for constructing
+     * the dataset
      * \param dataset The dataset to create the labelset from, including xyz position and
      * a string to be used for the text.
      * \param unit The unit to use when interpreting the point information in the dataset
-     * \param dictionary A dictionary with the other information used for constructing
-     * the dataset
-     * \return The created \code LabelsComponent
      */
     explicit LabelsComponent(const ghoul::Dictionary& dictionary,
         const dataloader::Dataset& dataset, DistanceUnit unit);
@@ -93,7 +92,6 @@ private:
 
     bool _createdFromDataset = false;
 
-    // Properties
     properties::BoolProperty _enabled;
     properties::Vec3Property _color;
     properties::FloatProperty _size;

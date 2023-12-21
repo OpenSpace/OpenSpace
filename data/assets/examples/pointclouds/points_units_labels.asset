@@ -12,9 +12,9 @@ local Example = {
       FixedColor = { 0.3, 0.8, 0.3 }
     },
     DataMapping = {
-      -- When loading a CSV file, we need to provide information about which column
-      -- Corresponds to the name to be used for the labels (this is not required for
-      -- SPECK files)
+      -- When loading labels from a CSV file, we need to provide information about
+      -- which column corresponds to the name to be used for the labels (this is
+      -- not required for SPECK files)
       Name = "number_withNan"
     },
     -- Add a unit to interpret the points to be in kilometers rather than meters
@@ -32,7 +32,7 @@ local Example = {
     Path = "/Example/Point Clouds",
     Description = [[Example of a point cloud with labels created by specifying a 'Name'
       column for the dataset. The positions of the labels will exactly match that of the
-      points and the data values for the positions are interpreted in Kilometers]]
+      points]]
   }
 }
 
@@ -68,8 +68,7 @@ local Example_LabelFromFile = {
   GUI = {
     Name = "Units & Labels (Explicit Label file)",
     Path = "/Example/Point Clouds",
-    Description = [[Example of a point cloud with labels, created from a label file. The
-      positions are given in Kilometers]]
+    Description = [[Example of a point cloud with labels, created from a label file]]
   }
 }
 

@@ -467,11 +467,10 @@ Labelset loadFromDataset(const Dataset& dataset) {
         Labelset::Entry label;
         label.position = entry.position;
         label.text = entry.comment.value_or("MISSING LABEL");
-        label.identifier = fmt::format("Point-{}", count); // @TODO: make it possible to configure ID, based on point ID (when it exists)
+        // @TODO: make is possible to configure this identifier?
+        label.identifier = fmt::format("Point-{}", count);
         res.entries.push_back(std::move(label));
     }
-
-    // @TODO Perhaps it's more efficient to cache this information into a file?  DISCUSS!
 
     return res;
 }
