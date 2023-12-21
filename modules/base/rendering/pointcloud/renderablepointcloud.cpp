@@ -28,7 +28,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -55,14 +54,13 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 29> UniformNames = {
+    constexpr std::array<const char*, 28> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "maxBillboardSize", "color", "opacity", "scaleExponent",
-        "scaleFactor", "up", "right", "fadeInValue", "screenSize", "hasSpriteTexture",
-        "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
-        "nanColor", "useNanColor", "hideOutsideRange", "enablePixelSizeControl",
-        "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
-        "hasDvarScaling"
+        "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture", "spriteTexture",
+        "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax", "nanColor",
+        "useNanColor", "hideOutsideRange", "enableMaxSizeControl", "aboveRangeColor",
+        "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor", "hasDvarScaling"
     };
 
     enum RenderOption {
@@ -705,11 +703,6 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     _program->activate();
 
-    _program->setUniform(
-        "screenSize",
-        glm::vec2(global::renderEngine->renderingResolution())
-    );
-
     _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
     _program->setUniform(
         _uniformCache.cameraLookup,
@@ -729,13 +722,9 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
-    _program->setUniform(_uniformCache.enablePixelSizeControl, _sizeSettings.pixelSizeControl);
+    _program->setUniform(_uniformCache.enableMaxSizeControl, _sizeSettings.pixelSizeControl);
     _program->setUniform(_uniformCache.maxBillboardSize, _sizeSettings.maxPixelSize);
     _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
-
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
     bool useTexture = _hasSpriteTexture && _useSpriteTexture;
     _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);

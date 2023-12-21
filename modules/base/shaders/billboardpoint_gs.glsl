@@ -41,7 +41,7 @@ uniform float scaleFactor;
 uniform int renderOption;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
-uniform bool enablePixelSizeControl;
+uniform bool enableMaxSizeControl;
 uniform bool hasDvarScaling;
 
 // RenderOption: CameraViewDirection
@@ -52,8 +52,7 @@ uniform vec3 right;
 uniform dvec3 cameraPosition;
 uniform vec3 cameraLookUp;
 
-// Pixel size control: true
-uniform vec2 screenSize;
+// Max size control: true
 uniform float maxBillboardSize;
 
 const vec2 corners[4] = vec2[4](
@@ -93,35 +92,25 @@ void main() {
     scaledUp = scaleMultiply * newUp * 0.5;
   }
 
-  // @TODO: Come up with some better solution for this scaling, that
-  // also work with non planar projections and multiple viewport resolutions.
-  if (enablePixelSizeControl) {
-    vec4 initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
-      dvec4(dpos.xyz - dvec3(scaledRight - scaledUp), dpos.w)));
+  if (enableMaxSizeControl) {
+    // WIP: doing this max scaling based on a visual "angular" size instead of
+    // size in pixels => needs no screen space size information
 
-    vs_screenSpaceDepth = initialPosition.w;
+    // The full angle in FOV that the point is allowed to take up
+    float desiredAngle = 1.0;//0.2;
+    float desiredAngleRadians = radians(desiredAngle * 0.5);
 
-    vec4 crossCorner = z_normalization(vec4(cameraViewProjectionMatrix *
-      dvec4(dpos.xyz + dvec3(scaledRight + scaledUp), dpos.w)));
+    double distanceToCamera = length(dpos.xyz - cameraPosition);
+    double pointSize = length(dvec3(scaledRight));
+    float angle = atan(float(pointSize / distanceToCamera));
 
-    // Testing size for rectangular viewport:
-    vec2 halfViewSize = screenSize * 0.5;
-    vec2 topRight = crossCorner.xy / crossCorner.w;
-    vec2 bottomLeft = initialPosition.xy / initialPosition.w;
-
-    // width and height
-    vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
-
-    if (length(sizes) > maxBillboardSize) {
-      float correctionScale = maxBillboardSize / length(sizes);
-      scaledRight *= correctionScale;
-      scaledUp *= correctionScale;
+    if ((angle > desiredAngleRadians) && (distanceToCamera > 0)) {
+      float correctionScaleFactor = float(distanceToCamera) * tan(desiredAngleRadians) / float(pointSize);
+      scaledRight *= correctionScaleFactor;
+      scaledUp *= correctionScaleFactor;
     }
-
-    // TODO: add checks for wether the generated plane covers too many or too few pixels
   }
 
-  // Saving one matrix multiplication:
   vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
   vec4 scaledRightClip = scaleFactor *
     vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));

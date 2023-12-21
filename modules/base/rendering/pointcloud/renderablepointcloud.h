@@ -150,10 +150,10 @@ protected:
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
         maxBillboardSize, color, opacity, scaleExponent, scaleFactor, up, right,
-        fadeInValue, screenSize, hasSpriteTexture, spriteTexture, useColormap,
-        colorMapTexture, cmapRangeMin, cmapRangeMax, nanColor, useNanColor,
-        hideOutsideRange, enablePixelSizeControl, aboveRangeColor, useAboveRangeColor,
-        belowRangeColor, useBelowRangeColor, hasDvarScaling
+        fadeInValue, hasSpriteTexture, spriteTexture, useColormap, colorMapTexture,
+        cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
+        enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
+        useBelowRangeColor, hasDvarScaling
     ) _uniformCache;
 
     std::string _dataFile;
