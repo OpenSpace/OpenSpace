@@ -114,8 +114,8 @@ protected:
         properties::FloatProperty scaleExponent;
         properties::FloatProperty scaleFactor;
 
-        properties::BoolProperty pixelSizeControl;
-        properties::FloatProperty maxPixelSize;
+        properties::BoolProperty useMaxSizeControl;
+        properties::FloatProperty maxAngularSize;
     };
     SizeSettings _sizeSettings;
 
@@ -149,7 +149,7 @@ protected:
 
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
-        maxBillboardSize, color, opacity, scaleExponent, scaleFactor, up, right,
+        maxAngularSize, color, opacity, scaleExponent, scaleFactor, up, right,
         fadeInValue, hasSpriteTexture, spriteTexture, useColormap, colorMapTexture,
         cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
         enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,

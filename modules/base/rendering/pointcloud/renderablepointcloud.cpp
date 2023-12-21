@@ -56,7 +56,7 @@ namespace {
 
     constexpr std::array<const char*, 28> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
-        "renderOption", "maxBillboardSize", "color", "opacity", "scaleExponent",
+        "renderOption", "maxAngularSize", "color", "opacity", "scaleExponent",
         "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture", "spriteTexture",
         "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax", "nanColor",
         "useNanColor", "hideOutsideRange", "enableMaxSizeControl", "aboveRangeColor",
@@ -184,9 +184,9 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
-        "EnablePixelSizeControl",
-        "Enable Pixel Size Control",
+    constexpr openspace::properties::Property::PropertyInfo UseMaxSizeControlInfo = {
+        "EnableMaxSizeControl",
+        "Enable Max Size Control",
         "If true, the Max Size in Pixels property will be used as an upper limit for the "
         "size of the point. Reduces the size of the points when approaching them, so that "
         "they stick to a maximum screen space size. Currently, the scaling is computed "
@@ -194,10 +194,10 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxPixelSizeInfo = {
-        "MaxPixelSize",
-        "Max Size in Pixels",
-        "The maximum size (in pixels) for the billboard representing the point.",
+    constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
+        "MaxAngularSize",
+        "Max Size (degrees)",
+        "The maximum size (in pixels) for the billboard representing the point.", // TODO: update description. How does one explain it in a good way?
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -310,11 +310,11 @@ namespace {
             // [[codegen::verbatim(ScaleFactorInfo.description)]]
             std::optional<float> scaleFactor;
 
-            // [[codegen::verbatim(PixelSizeControlInfo.description)]]
-            std::optional<bool> enablePixelSizeControl;
+            // [[codegen::verbatim(UseMaxSizeControlInfo.description)]]
+            std::optional<bool> enableMaxSizeControl;
 
-            // [[codegen::verbatim(MaxPixelSizeInfo.description)]]
-            std::optional<float> maxPixelSize;
+            // [[codegen::verbatim(MaxSizeInfo.description)]]
+            std::optional<float> maxAngularSize;
         };
         // Settings related to the scale of the points, whether they should limit to
         // a certain pixel size, etc.
@@ -364,8 +364,8 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
     : properties::PropertyOwner({ "Sizing", "Sizing", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 25.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
-    , pixelSizeControl(PixelSizeControlInfo, false)
-    , maxPixelSize(MaxPixelSizeInfo, 400.f, 0.f, 1000.f)
+    , useMaxSizeControl(UseMaxSizeControlInfo, false)
+    , maxAngularSize(MaxSizeInfo, 1.f, 0.f, 45.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -374,8 +374,8 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
 
         scaleFactor = settings.scaleFactor.value_or(scaleFactor);
         scaleExponent = settings.scaleExponent.value_or(scaleExponent);
-        pixelSizeControl = settings.enablePixelSizeControl.value_or(pixelSizeControl);
-        maxPixelSize = settings.maxPixelSize.value_or(maxPixelSize);
+        useMaxSizeControl = settings.enableMaxSizeControl.value_or(useMaxSizeControl);
+        maxAngularSize = settings.maxAngularSize.value_or(maxAngularSize);
 
         if (settings.sizeMapping.has_value()) {
             std::vector<std::string> opts = *settings.sizeMapping;
@@ -391,8 +391,8 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
 
     addProperty(scaleFactor);
     addProperty(scaleExponent);
-    addProperty(pixelSizeControl);
-    addProperty(maxPixelSize);
+    addProperty(useMaxSizeControl);
+    addProperty(maxAngularSize);
 }
 
 RenderablePointCloud::SizeSettings::SizeMapping::SizeMapping()
@@ -722,8 +722,8 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
-    _program->setUniform(_uniformCache.enableMaxSizeControl, _sizeSettings.pixelSizeControl);
-    _program->setUniform(_uniformCache.maxBillboardSize, _sizeSettings.maxPixelSize);
+    _program->setUniform(_uniformCache.enableMaxSizeControl, _sizeSettings.useMaxSizeControl);
+    _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
     _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
 
     bool useTexture = _hasSpriteTexture && _useSpriteTexture;

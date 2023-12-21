@@ -53,7 +53,8 @@ uniform dvec3 cameraPosition;
 uniform vec3 cameraLookUp;
 
 // Max size control: true
-uniform float maxBillboardSize;
+// The max size is an angle, in degrees, for the diameter
+uniform float maxAngularSize;
 
 const vec2 corners[4] = vec2[4](
   vec2(0.0, 0.0),
@@ -96,9 +97,9 @@ void main() {
     // WIP: doing this max scaling based on a visual "angular" size instead of
     // size in pixels => needs no screen space size information
 
-    // The full angle in FOV that the point is allowed to take up
-    float desiredAngle = 1.0;//0.2;
-    float desiredAngleRadians = radians(desiredAngle * 0.5);
+    // The full angle in FOV that the point is allowed to take up.
+    // Note that the max size is the size for the diameter, and we need the radius
+    float desiredAngleRadians = radians(maxAngularSize * 0.5);
 
     double distanceToCamera = length(dpos.xyz - cameraPosition);
     double pointSize = length(dvec3(scaledRight));
