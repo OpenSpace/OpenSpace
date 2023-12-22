@@ -594,6 +594,7 @@ public:
 protected:
     properties::BoolProperty _renderPlaybackInformation;
     properties::BoolProperty _ignoreRecordedScale;
+    properties::BoolProperty _addModelMatrixinAscii;
 
     enum class RecordedType {
         Camera = 0,
