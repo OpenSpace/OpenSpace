@@ -28,16 +28,6 @@
 in vec4 positionLocalSpace;
 in vec4 positionCameraSpace;
 
-// in Fragment_tetra {
-//     smooth vec4 worldPosition;
-//     smooth vec3 position; //seems to be equivalent to Fragment.color in bounds_fs.glsl
-//     flat vec4 color;
-//     flat int tetraFaceId;
-
-//     flat vec3 camPosData;
-// } in_frag_unused;
-
-
 Fragment getFragment() {
   vec4 position = positionCameraSpace;
 

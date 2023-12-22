@@ -36,46 +36,24 @@ namespace {
 
 namespace openspace {
 
-//namespace detail {
-
-
-glm::mat4 VolumeTetraMesh::tetraBoundingBox() const {
-    // TODO: convert to make it work 
-    glm::mat3 basis{ 1.f };
-    glm::vec3 offset{ -0.5f };
-    // adjust basis and offset by half a voxel inward since the tetramesh nodes are located in
-    // between voxels
-    glm::uvec3 dims{ _volume.get()->dimensions() };
-    glm::mat3 voxelOffset{basis[0] / static_cast<float>(dims.x), basis[1] / static_cast<float>(dims.y),
-                     basis[2] / static_cast<float>(dims.z)};
-
-    basis -= voxelOffset;
-    offset += (voxelOffset[0] + voxelOffset[1] + voxelOffset[2]) * 0.5f;
-
-    glm::mat4 bbox{basis};
-    bbox[3] = glm::vec4{offset, 1.0f};
-
-    return bbox;
+VolumeTetraMesh::VolumeTetraMesh(
+    const std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>>& volume)
+{
+    setData(volume);
 }
 
-//}  // namespace detail
-
-VolumeTetraMesh::VolumeTetraMesh(const std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>>& volume, int channel)
-    : _channel{0} {
-    setData(volume, channel);
-}
-
-void VolumeTetraMesh::setData(const std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>>& volume, int channel) {
-    if (volume && glm::any(glm::lessThanEqual(volume->dimensions(), glm::uvec3{ 1 }))) {
+void VolumeTetraMesh::setData(
+    const std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>>& volume)
+{
+    const glm::uvec3 dimensions = volume->dimensions();
+    if (volume && glm::any(glm::lessThanEqual(dimensions, glm::uvec3{ 1 }))) {
         throw ghoul::RuntimeError(fmt::format("{}: Volumes with one or more dimensions "
             "equal to 1 cannot be converted to a TetraMesh ({},{},{})", _loggerCat,
-            volume->dimensions().x, volume->dimensions().y, volume->dimensions().z)
+            dimensions.x, dimensions.y, dimensions.z)
         );
     }
 
     _volume = volume;
-    _channel = channel;
-    // TODO investigate here inviwo set model and world matricies
 }
 
 int VolumeTetraMesh::getNumberOfCells() const {
@@ -95,7 +73,9 @@ int VolumeTetraMesh::getNumberOfPoints() const {
     }
 }
 
-void VolumeTetraMesh::get(std::vector<glm::vec4>& nodes, std::vector<glm::ivec4>& nodeIds) const {
+void VolumeTetraMesh::get(std::vector<glm::vec4>& nodes,
+    std::vector<glm::ivec4>& nodeIds) const
+{
     nodes.clear();
     nodeIds.clear();
 
@@ -106,10 +86,6 @@ void VolumeTetraMesh::get(std::vector<glm::vec4>& nodes, std::vector<glm::ivec4>
     // regular tetrahedralization with six tetrahedra per four-voxel cube with
     // node positions being voxel-centered
     const glm::uvec3 dims = _volume->dimensions();
-
-    // transform all coordinates to [0,1]
-    //const glm::mat4 indexMatrix{ glm::scale(dims - glm::uvec3{1}) };
-    //glm::mat4 m = glm::inverse(indexMatrix);
 
     glm::vec3 lowerDomainBound{ std::numeric_limits<float>::max() };
     glm::vec3 upperDomainBound{ std::numeric_limits<float>::min() };
@@ -138,6 +114,10 @@ void VolumeTetraMesh::get(std::vector<glm::vec4>& nodes, std::vector<glm::ivec4>
         }
     }
 
+    // TODO: Ask Martin if we can avoid normalizing coordinates without messing
+    // up the rendering
+    
+    // transform all coordinates to [0,1]
     const glm::vec3 diff = upperDomainBound - lowerDomainBound;
     //(pos - _lowerDomainBound) / (_upperDomainBound - _lowerDomainBound)
     for (glm::vec4& node : nodes) {
@@ -172,19 +152,14 @@ void VolumeTetraMesh::get(std::vector<glm::vec4>& nodes, std::vector<glm::ivec4>
     utiltetra::fixFaceOrientation(nodes, nodeIds);
 }
 
-glm::mat4 VolumeTetraMesh::getBoundingBox() const {
-    throw "GetBoundingBox not yet implemented";
-    //return getCoordinateTransformer().getDataToWorldMatrix();
-}
-
 glm::vec2 VolumeTetraMesh::getDataRange() const {
-    throw "getDataRange not yet implemented";
+    throw ghoul::RuntimeError("getDataRange not yet implemented");
 
     //if (_volume) {
-    // TODO: This information is available in the volume metadata so should use 
-        //return _volume->dataMap_.dataRange;
+        // TODO: Could fetch the range in ´get´ function, however that means it must
+        // have been called before this function can be called -> bad?
     //} else {
-        return glm::vec2{0.0, 1.0};
+        //return glm::vec2{0.0, 1.0};
     //}
 }
 

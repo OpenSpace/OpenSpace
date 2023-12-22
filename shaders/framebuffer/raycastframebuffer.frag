@@ -114,7 +114,7 @@ void main() {
     vec3 jitteredPosition = position + direction * jitteredStepSize;
     position += direction * currentStepSize;
 
-    sample#{id}(position, direction, accumulatedColor, accumulatedAlpha, nextStepSize);
+    sample#{id}(jitteredPosition, direction, accumulatedColor, accumulatedAlpha, nextStepSize);
     float sampleDistance = jitteredStepSize + previousJitterDistance;
 
     previousJitterDistance = currentStepSize - jitteredStepSize;

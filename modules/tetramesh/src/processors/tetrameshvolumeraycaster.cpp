@@ -52,9 +52,9 @@ TetraMeshVolumeRaycaster::~TetraMeshVolumeRaycaster()
 void TetraMeshVolumeRaycaster::renderEntryPoints(const RenderData& data,
     ghoul::opengl::ProgramObject& program)
 {
-    // TODO: figure out modelviewTransform
-    // TODO: check if we need dmat precision here or if should cast to mat4
-    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    program.setUniform("modelViewTransform",
+        static_cast<glm::mat4>(modelViewTransform(data)
+    ));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull back face
@@ -75,12 +75,7 @@ void TetraMeshVolumeRaycaster::renderEntryPoints(const RenderData& data,
 void TetraMeshVolumeRaycaster::renderExitPoints(const RenderData& data,
     ghoul::opengl::ProgramObject& program)
 {
-    // TODO: figure out modelviewTransform matrix
-    // renderablegaiavolume and timevarying for that creates a modeltransform that is
-    // based on the metadata domain -- Don't think this should be necessary as
-    // we already scale the data to [0,1] in the tetramesh.get function.
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
-    // TODO change to renderable  calcModelViewProjection transform?
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull front face
@@ -107,45 +102,22 @@ void TetraMeshVolumeRaycaster::preRaycast(const RaycastData& data,
     if (program.isDirty()) {
         program.rebuildFromFile();
     }
-    const std::string id = std::to_string(data.id); //std::string_view?
+    const std::string id = std::to_string(data.id);
 
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _buffers.nodesBuffer);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _buffers.nodesBuffer);
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _buffers.nodeIdsBuffer);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, _buffers.nodeIdsBuffer);
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _buffers.opposingFaceIdsBuffer);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, _buffers.opposingFaceIdsBuffer);
 
-    //program.setUniform(
-    //    program.uniformLocation("dataToWorld"),
-    //    modelTransform
-    //);
-    //// TODO: make sure we have correct matrice (inviwo does inverse(world * model) -> what is our world?
-    //program.setUniform(
-    //    program.uniformLocation("worldToData"),
-    //    glm::inverse(modelTransform)
-    //);
-    ////_program->setUniform(
-    ////    _program->uniformLocation("dataToWorldNormalMatrix"),
-    ////    glm::mat3(glm::transpose(glm::inverse(modelTransform)))
-    ////);
-    //program.setUniform(
-    //    program.uniformLocation("worldToClip"), // Check
-    //    cameraVP
-    //);
-    //// TODO make sure this is correct way to inverse viewprojection matrix
-    ////_program->setUniform(
-    ////    _program->uniformLocation("clipToWorld"),
-    ////    glm::inverse(cameraVP)
-    ////);
-    //program.setUniform(
-    //    program.uniformLocation("position"),
-    //    cameraPosition
-    //);
-
-    //const glm::vec2 dataRange = glm::vec2{ _metadata.minValue, _metadata.maxValue };
     const float scalingFactor = 1.f / (_dataRange.y - _dataRange.x);
     const float offset = -_dataRange.x;
     program.setUniform(program.uniformLocation("tfValueScaling_" + id), scalingFactor);
     program.setUniform(program.uniformLocation("tfValueOffset_" + id), offset);
-    program.setUniform(program.uniformLocation("REF_SAMPLING_INTERVAL_" + id), _samplingInterval);
+    program.setUniform(program.uniformLocation("numTetraSamples_" + id), _numTetraSamples);
     program.setUniform(program.uniformLocation("opacityScaling_" + id), _opacityScaling);
 
     _transferFunction->update();
@@ -169,12 +141,12 @@ bool TetraMeshVolumeRaycaster::isCameraInside(const RenderData& data,
 
 std::string TetraMeshVolumeRaycaster::boundsVertexShaderPath() const
 {
-    return absPath(GlslBoundsVs).string(); // TODO check if this shader will work
+    return absPath(GlslBoundsVs).string();
 }
 
 std::string TetraMeshVolumeRaycaster::boundsFragmentShaderPath() const
 {
-    return absPath(GlslBoundsFs).string(); // TODO check if this shader will work
+    return absPath(GlslBoundsFs).string();
 }
 
 std::string TetraMeshVolumeRaycaster::raycasterPath() const
@@ -202,9 +174,9 @@ void TetraMeshVolumeRaycaster::setDataRange(float min, float max)
     _dataRange = glm::vec2(min, max);
 }
 
-void TetraMeshVolumeRaycaster::setSamplingInterval(float samplingRate)
+void TetraMeshVolumeRaycaster::setNumTetraSamples(int numSamples)
 {
-    _samplingInterval = samplingRate;
+    _numTetraSamples = numSamples;
 }
 
 void TetraMeshVolumeRaycaster::setOpacityScaling(float opacity)
@@ -212,30 +184,31 @@ void TetraMeshVolumeRaycaster::setOpacityScaling(float opacity)
     _opacityScaling = opacity;
 }
 
-std::string TetraMeshVolumeRaycaster::foo()
+std::string TetraMeshVolumeRaycaster::vertexSetupResolve()
 {
     return R"(in int in_tetraFaceId;
 
     out Fragment_tetra {
         smooth vec4 worldPosition;
-        smooth vec3 position; //seems to be equivalent to Fragment.color in bounds_fs.glsl
+        smooth vec3 position;
         flat vec4 color;
         flat int tetraFaceId;
 
         flat vec3 camPosData;
     } out_vert;)";
 }
-std::string TetraMeshVolumeRaycaster::foo2() {
+std::string TetraMeshVolumeRaycaster::vertexMainResolve() {
     return R"(  out_vert.tetraFaceId = in_tetraFaceId;)";
 }
 
-//void openspace::TetraMeshVolumeRaycaster::setModelTransform(glm::dmat4 transform)
-//{
-//    _modelTransform = std::move(transform);
-//}
-
 glm::dmat4 TetraMeshVolumeRaycaster::modelViewTransform(const RenderData& data)
 {
+    // TODO: If we use original coordinates the model matrix should
+    // be changed as well so that the camera is centered on the volume.
+    // renderablegaiavolume and timevarying creates a modeltransform that is
+    // based on the metadata domain -- This is not necessary as of now since
+    // we already scale the data to [0,1] in the tetramesh.get function. Otherwise it
+    // would be e.g., translation = (domainUpper + domainLower) * 2 + data... 
     glm::dvec3 translation = glm::dvec3(-0.5) + data.modelTransform.translation;
     glm::dmat3 rotation = data.modelTransform.rotation;
     glm::dvec3 scale = data.modelTransform.scale;

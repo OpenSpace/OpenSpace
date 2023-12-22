@@ -55,10 +55,10 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SamplingIntervalInfo = {
-        "SamplingInterval",
-        "Sampling Interval",
-        "Specifies the sampling interval",
+    constexpr openspace::properties::Property::PropertyInfo NumTetraSamplesInfo = {
+        "NumTetraSamples",
+        "Num Tetra Samples",
+        "Specifies the number of samples for each tetra",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -91,10 +91,9 @@ documentation::Documentation RenderableTetraMeshVolume::Documentation() {
     return codegen::doc<Parameters>("tetramesh_RenderableTetraMeshVolume");
 }
 
-
 RenderableTetraMeshVolume::RenderableTetraMeshVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _samplingInterval(SamplingIntervalInfo, 150, 0, 1000)
+    , _numTetraSamples(NumTetraSamplesInfo, 100, 50, 250)
     , _opacityScaling(OpacityScalingInfo, 1, 0, 10)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -107,9 +106,9 @@ RenderableTetraMeshVolume::RenderableTetraMeshVolume(const ghoul::Dictionary& di
         transferFunctionPath, [](const openspace::TransferFunction&) {}, 2u
     );
 
-    _samplingInterval.onChange([this]() {
-        float value = _samplingInterval.value();
-        _raycaster->setSamplingInterval(value);
+    _numTetraSamples.onChange([this]() {
+        float value = _numTetraSamples.value();
+        _raycaster->setNumTetraSamples(value);
     });
 
     _opacityScaling.onChange([this]() {
@@ -117,7 +116,7 @@ RenderableTetraMeshVolume::RenderableTetraMeshVolume(const ghoul::Dictionary& di
         _raycaster->setOpacityScaling(value);
     });
 
-    addProperty(_samplingInterval);
+    addProperty(_numTetraSamples);
     addProperty(_opacityScaling);
 }
 
@@ -168,9 +167,10 @@ void RenderableTetraMeshVolume::initialize() {
     for (size_t i = 0; i < volume.nCells(); i++) {
         volume.set(i, voxelData[i]);
     }
-    _volume = std::make_shared<const volume::RawVolume<utiltetra::VoxelData>>(volume);
 
-    _tetraMesh.setData(_volume);    
+    _tetraMesh.setData(
+        std::make_shared<const volume::RawVolume<utiltetra::VoxelData>>(volume)
+    );
 }
 
 void RenderableTetraMeshVolume::initializeGL()
@@ -191,22 +191,13 @@ void RenderableTetraMeshVolume::initializeGL()
         }
     });
 
-    // TODO check if we need to bindbufferbase here or not. BufferBase may be overwritten
-    // During other render calls (?)
-    // Generate buffers
-    glGenBuffers(1, &_buffers.nodesBuffer);
-    //glBindBuffer(GL_SHADER_STORAGE_BUFFER, _nodesBuffer);
-    //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _nodesBuffer);
-    // Node ids
-    glGenBuffers(1, &_buffers.nodeIdsBuffer);
-    //glBindBuffer(GL_SHADER_STORAGE_BUFFER, _nodeIdsBuffer);
-    //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, _nodeIdsBuffer);
-    // Opposing faces
-    glGenBuffers(1, &_buffers.opposingFaceIdsBuffer);
-    //glBindBuffer(GL_SHADER_STORAGE_BUFFER, _opposingFaceIdsBuffer);
-    //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, _opposingFaceIdsBuffer);
 
-    // Generate buffers for the boundary mesh
+    // Generate storage buffers
+    glGenBuffers(1, &_buffers.nodesBuffer);
+    glGenBuffers(1, &_buffers.nodeIdsBuffer);
+    glGenBuffers(1, &_buffers.opposingFaceIdsBuffer);
+    
+    // Generate boundary mesh buffers
     glGenVertexArrays(1, &_buffers.boundaryMeshVAO);
     glGenBuffers(1, &_buffers.indicesEBO);
     glGenBuffers(1, &_buffers.vertsVBO);
@@ -230,9 +221,8 @@ void RenderableTetraMeshVolume::deinitializeGL()
 }
 bool RenderableTetraMeshVolume::isReady() const
 {
-    // TODO: make sure data is ready over just program - for now ok since we fill
-    // volume on init
-    return _tetraMesh.getNumberOfCells() != 0;
+    // TODO: make sure data is ready
+    return _tetraMesh.getNumberOfCells() > 0;
 
 }
 void RenderableTetraMeshVolume::render(const RenderData& data, RendererTasks& tasks)
@@ -240,53 +230,6 @@ void RenderableTetraMeshVolume::render(const RenderData& data, RendererTasks& ta
     if (_raycaster) {
         tasks.raycasterTasks.push_back({ _raycaster.get(), data });
     }
-    return;
-
-    //_program->activate();
-    // Check if the buffer needs to be bound first, inviwo does not seem to bind it before 
-    // calling bind buffer base
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _buffers.nodesBuffer);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, _buffers.nodeIdsBuffer);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, _buffers.opposingFaceIdsBuffer);
-
-    // TODO set uniforms
-    
-    //const glm::mat4 modelTransform = _tetraMesh.tetraBoundingBox();
-    //const glm::mat4 cameraVP = data.camera.sgctInternal.viewProjectionMatrix();
-    const glm::vec3 cameraPosition = data.camera.positionVec3();
-
-    glm::dvec3 translation =  glm::dvec3(-0.5) + data.modelTransform.translation;
-    glm::dmat4 modelTransform = calcModelTransform(data, {.translation = translation});
-
-
-    const glm::dmat4 cameraVP = calcModelViewProjectionTransform(data, modelTransform);
-
-    //_program->setUniform(
-    //    _program->uniformLocation("dataToWorld"),
-    //    modelTransform
-    //);
-    // TODO: make sure we have correct matrice (inviwo does inverse(world * model) -> what is our world?
-    //_program->setUniform(
-    //    _program->uniformLocation("worldToData"),
-    //    glm::inverse(modelTransform)
-    //);
-    //_program->setUniform(
-    //    _program->uniformLocation("dataToWorldNormalMatrix"),
-    //    glm::mat3(glm::transpose(glm::inverse(modelTransform)))
-    //);
-    //_program->setUniform(
-    //    _program->uniformLocation("worldToClip"), // Check
-    //    cameraVP
-    //);
-    // TODO make sure this is correct way to inverse viewprojection matrix
-    //_program->setUniform(
-    //    _program->uniformLocation("clipToWorld"),
-    //    glm::inverse(cameraVP)
-    //);
-    //_program->setUniform(
-    //    _program->uniformLocation("position"),
-    //    cameraPosition
-    //);
 }
 void RenderableTetraMeshVolume::update(const UpdateData& data)
 {

@@ -26,10 +26,10 @@
 
 in vec4 position;
 
-#{setupRayCaster}
+#{vertexSetupRayCaster}
 
 void main() {
   gl_Position = position;
 
-  #{mainRayCaster}
+  #{vertexMainRayCaster}
 }

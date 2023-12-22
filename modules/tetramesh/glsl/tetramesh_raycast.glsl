@@ -22,47 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-void checkProperty(float prop, inout vec3 accumulatedColor, inout vec3 accumulatedAlpha) {
-    vec3 red = vec3(1.0, 0.0, 0.0);
-    vec3 green = vec3(0.0, 1.0, 0.0);
-
-    if(isnan(prop) || isinf(prop)) {
-        accumulatedColor = red;
-    }
-    else {
-        accumulatedColor = green;
-    }
-    accumulatedAlpha = vec3(1.0);
-}
-void checkNaN(float prop, inout vec3 accumulatedColor, inout vec3 accumulatedAlpha) {
-    vec3 red = vec3(1.0, 0.0, 0.0);
-    vec3 green = vec3(0.0, 1.0, 0.0);
-
-    if(isnan(prop)) {
-        accumulatedColor = red;
-    }
-    else {
-        accumulatedColor = green;
-    }
-    accumulatedAlpha = vec3(1.0);
-}
-
-void checkInf(float prop, inout vec3 accumulatedColor, inout vec3 accumulatedAlpha) {
-    vec3 red = vec3(1.0, 0.0, 0.0);
-    vec3 green = vec3(0.0, 1.0, 0.0);
-
-    if(isinf(prop)) {
-        accumulatedColor = red;
-    }
-    else {
-        accumulatedColor = green;
-    }
-    accumulatedAlpha = vec3(1.0);
-}
-// TODO naming convention
-uniform float REF_SAMPLING_INTERVAL_#{id} = 150.0;
-const float ERT_THRESHOLD = 0.99;  // threshold for early ray termination
-const float invalidDepth = 1.0e8;
+const float RefSsamplingInterval = 150.0;
+const float ErtThreshold = 0.99;  // threshold for early ray termination
+const float InvalidDepth = 1.0e8;
 
 uniform int maxSteps_#{id} = 1000;
 uniform int numTetraSamples_#{id} = 100;
@@ -91,7 +53,7 @@ layout(std430, binding=2) readonly buffer opposingFaceIdsBuffer {
 
 in Fragment_tetra {
     smooth vec4 worldPosition;
-    smooth vec3 position; //seems to be equivalent to Fragment.color in bounds_fs.glsl
+    smooth vec3 position;
     flat vec4 color;
     flat int tetraFaceId;
 
@@ -99,12 +61,15 @@ in Fragment_tetra {
 } in_frag;
 
 struct Tetra {
-    mat4x3 v; // vertices
-    vec4 s; // scalar values
-
-    mat4x3 fA; // oriented face areas (in negative normal direction) as used in barycentricWeights(), 
-               // their magnitude is equivalent to two times the face area.
-    float jacobyDetInv; // 1 over determinant of the Jacobian, where det(Jacobian) = 6 vol(tetra)
+    // vertices
+    mat4x3 v;
+    // scalar values
+    vec4 s; 
+    // oriented face areas (in negative normal direction) as used in barycentricWeights(),
+    // their magnitude is equivalent to two times the face area.
+    mat4x3 fA;
+    // 1 over determinant of the Jacobian, where det(Jacobian) = 6 vol(tetra)
+    float jacobyDetInv; 
 };
 
 mat4x3 getFaceAreas(in Tetra t);
@@ -123,7 +88,8 @@ Tetra getTetra(in int tetraId) {
 
     t.fA = getFaceAreas(t);
 
-    // the determinant of the Jacobian of the tetrahedra is det = 6 V, where V is its volume
+    // the determinant of the Jacobian of the tetrahedra is det = 6 V, where V is its
+    // volume
     float s = dot(cross(t.v[2] - t.v[0], t.v[3] - t.v[2]), t.v[1] - t.v[0]);
     t.jacobyDetInv = 1.0 / s;
 
@@ -153,7 +119,8 @@ mat4x3 getFaceAreas(in Tetra t) {
 // @param t   input tetraehdron with oriented face areas (in negative normal direction)
 // @return face normals, that is normalized(fA[0]), ..., normalized(fA[3])
 mat4x3 getFaceNormals(in Tetra t) {
-    return mat4x3(-normalize(t.fA[0]), -normalize(t.fA[1]), -normalize(t.fA[2]), -normalize(t.fA[3]));
+    return mat4x3(-normalize(t.fA[0]), -normalize(t.fA[1]), -normalize(t.fA[2]),
+                  -normalize(t.fA[3]));
 }
 
 struct ExitFace {
@@ -161,11 +128,12 @@ struct ExitFace {
     float segmentLength;
 };
 
-// Determine the closest exit face within the tetrahedron \p tetra given a ray at \p startPosition 
-// and direction \p rayDirection.
+// Determine the closest exit face within the tetrahedron \p tetra given a ray at
+// \p startPosition and direction \p rayDirection.
 //
 // @param tetra          current tetrahedron
-// @param entryFaceId    local face ID of the face [0,3] through which the ray entered the tetrahedron
+// @param entryFaceId    local face ID of the face [0,3] through which the ray entered the
+// tetrahedron
 // @param startPosition  start position of the ray
 // @param rayDirection   direction of the ray
 // @return the closest face where the ray exits the tetrahedron
@@ -182,12 +150,12 @@ ExitFace findTetraExitFace(in Tetra tetra, in int entryFaceId,
                    dot(tetra.v[3] - startPosition, faceNormal[2]),
                    dot(tetra.v[0] - startPosition, faceNormal[3])) / vdir;
 
-    // only consider intersections on the inside of the current triangle faces, that is t > 0.
-    // Also ignore intersections being parallel to a face
-    vt = mix(vt, vec4(invalidDepth), lessThan(vdir, vec4(0.0)));
+    // only consider intersections on the inside of the current triangle faces, that is 
+    // t > 0. Also ignore intersections being parallel to a face
+    vt = mix(vt, vec4(InvalidDepth), lessThan(vdir, vec4(0.0)));
 
     // ignore self-intersection with current face ID, set distance to max
-    vt[entryFaceId] = invalidDepth;
+    vt[entryFaceId] = InvalidDepth;
 
     // closest intersection
     // face ID of closest intersection
@@ -199,10 +167,14 @@ ExitFace findTetraExitFace(in Tetra tetra, in int entryFaceId,
     return ExitFace(face, tmin);
 }
 
-// Compute the absorption along distance \p tIncr according to the volume rendering equation. The 
-// \p opacityScaling_#{id} factor is used to scale the extinction to account for differently sized datasets.
+// Compute the absorption along distance \p tIncr according to the volume rendering
+// equation. The \p opacityScaling_#{id} factor is used to scale the extinction to account
+// for differently sized datasets.
 float absorption(in float opacity, in float tIncr) {
-    return 1.0 - pow(1.0 - opacity, tIncr * REF_SAMPLING_INTERVAL_#{id} * opacityScaling_#{id});
+    return 1.0 - pow(
+        1.0 - opacity,
+        tIncr * RefSsamplingInterval * opacityScaling_#{id}
+    );
 }
 
 float normalizeScalar(float scalar) {
@@ -210,8 +182,9 @@ float normalizeScalar(float scalar) {
 }
 
 
-// Interpolate scalars of tetrahedron \p tetra using barycentric coordinates for position \p p within
-//
+// Interpolate scalars of tetrahedron \p tetra using barycentric coordinates for position
+// \p p within
+// 
 // @param p      position of the barycentric coords
 // @param tetra  input tetrahedron
 // @return interpolated scalar value
@@ -230,29 +203,15 @@ float barycentricInterpolation(in vec3 p, in Tetra tetra) {
 
     return dot(vec4(vol0, vol1, vol2, vol3) * tetra.jacobyDetInv, tetra.s);
 }
-// Compute the non-linear depth of a data-space position in normalized device coordinates
-float normalizedDeviceDepth(in vec3 posData, in mat4 dataToClip) {
-    mat4 mvpTranspose = transpose(dataToClip);
-
-    vec4 pos = vec4(posData, 1.0);
-    float depth = dot(mvpTranspose[2], pos);
-    float depthW = dot(mvpTranspose[3], pos);
-
-    return ((depth / depthW) + 1.0) * 0.5;
-}
-
-
 
 void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
                  inout vec3 accumulatedAlpha, inout float stepSize)
 {
     // all computations take place in Data space
     const vec3 rayDirection = dir; //normalize(in_frag.position - in_frag.camPosData);
-    const float tEntry = length(dir); //length(in_frag.position - in_frag.camPosData);
+    // const float tEntry = length(dir); //length(in_frag.position - in_frag.camPosData);
 
     const float tetraSamplingDelta = 1.0 / float(numTetraSamples_#{id});
-
-    float bgDepthScreen = invalidDepth;
 
     int tetraFaceId = in_frag.tetraFaceId;
     vec3 pos = samplePos; //in_frag.position;
@@ -267,10 +226,8 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
     float prevScalar = normalizeScalar(barycentricInterpolation(pos, tetra));
     vec4 dvrColor = vec4(0);
 
-    float tTotal = tEntry;
-    float tFirstHit = invalidDepth;
     int steps = 0;
-    while (tetraFaceId > -1 && steps < maxSteps_#{id} && dvrColor.a < ERT_THRESHOLD) {
+    while (tetraFaceId > -1 && steps < maxSteps_#{id} && dvrColor.a < ErtThreshold) {
 
         // find next tetra
         tetraId = tetraFaceId / 4;
@@ -285,16 +242,16 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
 
         const float scalar = normalizeScalar(barycentricInterpolation(endPos, tetra));
        
-        float tDelta = exitFace.segmentLength * tetraSamplingDelta;
+       // If using original coordinates this factor must be divided by
+       // e.g., 1000 to achieve better rendering results, TODO: find
+       // a scalar value that is not randomly chosen. Issue is that the
+       // segmentLength gets scaled -> normalize it?
+        float tDelta = exitFace.segmentLength * tetraSamplingDelta; 
         for (int i = 1; i <= numTetraSamples_#{id}; ++i) {
             float s = mix(prevScalar, scalar, i * tetraSamplingDelta);
 
-            float tCurrent = tTotal + tDelta * i;
-
             vec4 color = texture(transferFunction_#{id}, vec2(s, 0.5f));
             if (color.a > 0) {
-                tFirstHit = tFirstHit == invalidDepth ? tCurrent : tFirstHit;
-
                 // volume integration along current segment
                 color.a = absorption(color.a, tDelta);
                 // front-to-back blending
@@ -303,7 +260,6 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
             }
         }
 
-        // TODO not sure if this is correct
         accumulatedColor = dvrColor.rgb;
         accumulatedAlpha = dvrColor.aaa;
 
@@ -311,28 +267,15 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
 
         // update position
         pos = endPos;
-        tTotal += exitFace.segmentLength;
-
+        
         // determine the half face opposing the half face with the found intersection
         tetraFaceId = faceIds[tetraId][exitFace.faceId];
         ++steps;
     }
+    // This is done to avoid calling sample#{id} multiple times
     stepSize = 0.0;
-    
 }
 
 float stepSize#{id}(vec3 samplePos, vec3 dir) {
     return 1.0 / float(numTetraSamples_#{id});
 }
-    // TODO: Don't think this is necessary, not sure
-
-    // float depth = tFirstHit == invalidDepth ? 1.0 : 
-    //     normalizedDeviceDepth(in_frag.camPosData + rayDirection * tFirstHit, 
-    //                           mat4(worldToClip) * dataToWorld);
-
-    // gl_FragDepth = min(depth, bgDepthScreen);
-    // outColor = dvrColor;
-
-//    FragData0 = dvrColor;
-
-  /* ---------------------------------------------------------------------------------- */

@@ -28,15 +28,8 @@
 #include <openspace/rendering/volumeraycaster.h>
 #include <modules/tetramesh/include/util/tetrameshutils.h>
 
-//#include <openspace/util/updatestructures.h>
-namespace ghoul::opengl {
-    class TextureUnit;
-}
-
-namespace openspace {
-    //struct RenderData;
-    class TransferFunction;
-}
+namespace openspace { class TransferFunction; }
+namespace ghoul::opengl { class TextureUnit; }
 
 namespace openspace {
 
@@ -66,11 +59,11 @@ public:
     void setBoundaryDrawCalls(unsigned amount);
     //void setModelTransform(glm::dmat4 transform);
     void setDataRange(float min, float max);
-    void setSamplingInterval(float samplingRate);
+    void setNumTetraSamples(int numSamples);
     void setOpacityScaling(float opacity);
 
-    std::string foo() override;
-    std::string foo2() override;
+    std::string vertexSetupResolve() override;
+    std::string vertexMainResolve() override;
 private:
     glm::dmat4 modelViewTransform(const RenderData& data);
 
@@ -80,13 +73,12 @@ private:
     // Same as renderable buffer ids to make drawcalls
     utiltetra::TetraBufferIds _buffers;
     unsigned _numIndices = 0;
-    float _samplingInterval = 150;
+    int _numTetraSamples = 100;
     float _opacityScaling = 1.0;
 
     glm::vec2 _dataRange;
-    
-    //glm::dmat4 _modelTransform;
 };
-}
+
+} // namespace OpenSpace
 
 #endif // !__OPENSPACE_MODULE_TETRAMESH___TETRAMESHVOLUMERAYCASTER___H__

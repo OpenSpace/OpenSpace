@@ -80,17 +80,23 @@ std::vector<glm::ivec4> getOpposingFaces(const std::vector<glm::ivec4>& nodeIds)
     for (int tetra = 0; tetra < std::ssize(nodeIds); ++tetra) {
         for (int face = 0; face < 4; ++face) {
             // determine indices of half face opposing the current one
-            int nextHf = (face + 1) % 4;
-            int midHf = (face + 2) % 4;
-            int prevHf = (face + 3) % 4;
+            const int nextHf = (face + 1) % 4;
+            const int midHf = (face + 2) % 4;
+            const int prevHf = (face + 3) % 4;
 
             detail::TriangleKey tri{nodeIds[tetra][nextHf], nodeIds[tetra][midHf],
                                     nodeIds[tetra][prevHf]};
 
             if (auto adjIt = adjacency.find(tri); adjIt != adjacency.end()) {
                 auto&& [opposingTetra, opposingFace] = adjIt->second;
-                opposingFaces[tetra][face] = detail::globalFaceId(opposingTetra, opposingFace);
-                opposingFaces[opposingTetra][opposingFace] = detail::globalFaceId(tetra, face);
+                opposingFaces[tetra][face] = detail::globalFaceId(
+                    opposingTetra,
+                    opposingFace
+                );
+                opposingFaces[opposingTetra][opposingFace] = detail::globalFaceId(
+                    tetra,
+                    face
+                );
                 adjacency.erase(adjIt);
             } else {
                 adjacency.insert({tri, {tetra, face}});
@@ -142,14 +148,8 @@ std::shared_ptr<Mesh> createBoundaryMesh(const std::vector<glm::vec4>& nodes,
     return mesh;
 }
 
-std::shared_ptr<Mesh> createBoundaryMesh(const VolumeTetraMesh& mesh) {
-    std::vector<glm::vec4> nodes;
-    std::vector<glm::ivec4> nodeIds;
-    mesh.get(nodes, nodeIds);
-    return createBoundaryMesh(nodes, nodeIds, getBoundaryFaces(getOpposingFaces(nodeIds)));
-}
-
-void fixFaceOrientation(const std::vector<glm::vec4>& nodes, std::vector<glm::ivec4>& nodeIds) {
+void fixFaceOrientation(const std::vector<glm::vec4>& nodes,
+                        std::vector<glm::ivec4>& nodeIds) {
     for (auto& ids : nodeIds) {
         glm::vec3 v0{ nodes[ids[0]] };
         glm::vec3 v1{ nodes[ids[1]] };

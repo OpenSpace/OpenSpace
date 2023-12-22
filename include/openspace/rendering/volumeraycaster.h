@@ -135,8 +135,8 @@ public:
 
     float downscaleRender() const;
 
-    virtual std::string foo() { return ""; }
-    virtual std::string foo2() { return ""; }
+    virtual std::string vertexSetupResolve() { return ""; }
+    virtual std::string vertexMainResolve() { return ""; }
 
 private:
     /**

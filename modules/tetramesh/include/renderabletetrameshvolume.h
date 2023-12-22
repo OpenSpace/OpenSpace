@@ -62,21 +62,18 @@ public:
 
 private:
     std::unique_ptr<TetraMeshVolumeRaycaster> _raycaster;
-
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
 
     VolumeTetraMesh _tetraMesh;
-
     std::shared_ptr<utiltetra::Mesh> _boundaryMesh;
-
     utiltetra::TetraBufferIds _buffers;
 
+
     std::string _filePath;
-    std::shared_ptr<const volume::RawVolume<utiltetra::VoxelData>> _volume;
     glm::vec2 _dataRange = glm::vec2(0.f);
     glm::ivec3 _dimensions = glm::ivec3(0);
     
-    properties::FloatProperty _samplingInterval;
+    properties::IntProperty _numTetraSamples;
     properties::FloatProperty _opacityScaling;
 };
 

@@ -75,8 +75,6 @@ void main() {
   out_vert.tetraFaceId = in_tetraFaceId;
   out_vert.color = vec4(pickingIndexToColor(in_tetraFaceId + 1), 1.0);
 
-
-
   vec4 positionClipSpace = projectionTransform * positionCameraSpace;
   vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
