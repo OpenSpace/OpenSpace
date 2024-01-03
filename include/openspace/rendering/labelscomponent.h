@@ -53,9 +53,9 @@ public:
      * a comment per point to be used for the labels.
      *
      * \param dictionary A dictionary with the other information used for constructing
-     * the dataset
+     *        the dataset
      * \param dataset The dataset to create the labelset from, including xyz position and
-     * a string to be used for the text.
+     *        a string to be used for the text.
      * \param unit The unit to use when interpreting the point information in the dataset
      */
     explicit LabelsComponent(const ghoul::Dictionary& dictionary,

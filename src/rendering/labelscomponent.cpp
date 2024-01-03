@@ -226,7 +226,7 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
 LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary,
                                  const dataloader::Dataset& dataset,
                                  DistanceUnit unit)
-    :LabelsComponent(dictionary)
+    : LabelsComponent(dictionary)
 {
     // The unit should match the one in the dataset, not the one that was included in the
     // asset (if any)
@@ -237,7 +237,6 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary,
     _labelset = dataloader::label::loadFromDataset(dataset);
     _createdFromDataset = true;
 }
-
 
 dataloader::Labelset& LabelsComponent::labelSet() {
     return _labelset;

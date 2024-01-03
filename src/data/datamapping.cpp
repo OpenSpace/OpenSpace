@@ -178,13 +178,13 @@ bool isColumnZ(const std::string& c, const std::optional<DataMapping>& mapping) 
 }
 
 bool isNameColumn(const std::string& c, const std::optional<DataMapping>& mapping) {
-    if (!mapping.has_value() || !(*mapping).nameColumn.has_value()) {
+    if (!mapping.has_value() || !mapping->nameColumn.has_value()) {
         return false;
     }
 
     std::string testColumn = c;
-    std::string mappedColumn = (*mapping).nameColumn.value();
-    if (!(*mapping).isCaseSensitive) {
+    std::string mappedColumn = *mapping->nameColumn;
+    if (!mapping->isCaseSensitive) {
         testColumn = ghoul::toLowerCase(testColumn);
         mappedColumn = ghoul::toLowerCase(mappedColumn);
     }
