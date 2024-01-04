@@ -83,7 +83,7 @@ protected:
     /// Find the index of the currently chosen size parameter in the dataset
     int currentSizeParameterIndex() const;
 
-    std::vector<float> createDataSlice();
+    virtual std::vector<float> createDataSlice();
 
     virtual void bindTextureForRendering() const;
 

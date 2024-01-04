@@ -44,6 +44,7 @@ set(HEADER_FILES
   rendering/grids/renderablegrid.h
   rendering/grids/renderableradialgrid.h
   rendering/grids/renderablesphericalgrid.h
+  rendering/pointcloud/renderableinterpolatedpoints.h
   rendering/pointcloud/renderablepointcloud.h
   rendering/pointcloud/renderablepolygoncloud.h
   rendering/renderablecartesianaxes.h
@@ -105,6 +106,7 @@ set(SOURCE_FILES
   rendering/grids/renderablegrid.cpp
   rendering/grids/renderableradialgrid.cpp
   rendering/grids/renderablesphericalgrid.cpp
+  rendering/pointcloud/renderableinterpolatedpoints.cpp
   rendering/pointcloud/renderablepointcloud.cpp
   rendering/pointcloud/renderablepolygoncloud.cpp
   rendering/renderablecartesianaxes.cpp

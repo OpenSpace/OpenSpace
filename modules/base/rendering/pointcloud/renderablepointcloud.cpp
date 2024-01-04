@@ -1006,7 +1006,6 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     int sizeParamIndex = currentSizeParameterIndex();
 
     double maxRadius = 0.0;
-    double biggestCoord = -1.0;
 
     for (const dataloader::Dataset::Entry& e : _dataset.entries) {
         const double unitMeter = toMeter(_unit);
@@ -1023,7 +1022,6 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
 
         // Colors
         if (_hasColorMapFile) {
-            biggestCoord = std::max(biggestCoord, glm::compMax(position));
             result.push_back(e.data[colorParamIndex]);
         }
 
