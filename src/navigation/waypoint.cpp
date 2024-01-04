@@ -67,6 +67,16 @@ Waypoint::Waypoint(const NavigationState& ns) {
     }
 
     _nodeIdentifier = ns.anchor;
+
+    if (!ns.aim.empty()) {
+        const SceneGraphNode* aimNode = sceneGraphNode(ns.aim);
+        if (!aimNode) {
+            LERROR(fmt::format("Could not find node '{}' to use as aim", ns.aim));
+            return;
+        }
+        _aimNodeIdentifier = ns.aim;
+    }
+
     const PathNavigator& navigator = global::navigationHandler->pathNavigator();
     _validBoundingSphere = navigator.findValidBoundingSphere(anchorNode);
     _pose = ns.cameraPose();
@@ -90,6 +100,10 @@ SceneGraphNode* Waypoint::node() const {
 
 std::string Waypoint::nodeIdentifier() const {
     return _nodeIdentifier;
+}
+
+std::optional<std::string> Waypoint::aimIdentifier() const {
+    return _aimNodeIdentifier;
 }
 
 double Waypoint::validBoundingSphere() const {

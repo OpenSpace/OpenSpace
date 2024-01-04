@@ -1,4 +1,4 @@
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -14,7 +14,6 @@ local SolarSystemBarycenter = {
   GUI = {
     Name = "Solar System Barycenter",
     Path = "/Solar System",
-    Description = "Barycenter of the solar system, expressed in the Galactic frame",
     Hidden = true
   }
 }
@@ -25,12 +24,12 @@ local SunCenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SUN",
-      Observer = "SSB"
+      Target = coreKernels.ID.Sun,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
-    Name = "SUN Center",
+    Name = "Sun Center",
     Path = "/Solar System/Sun",
     Description = "Spice frame for the Sun",
     Hidden = true
@@ -44,42 +43,40 @@ local SunIAU = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SUN",
-      Observer = "SSB"
+      Target = coreKernels.ID.Sun,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_SUN",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Sun,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
-    Name = "SUN IAU",
+    Name = "Sun IAU",
     Path = "/Solar System/Sun",
-    Description = "Spice frame for the Sun",
     Hidden = true
   }
 }
 
-local SunECLIPJ2000 = {
-  Identifier = "SunECLIPJ2000",
+local SunEclipJ2000 = {
+  Identifier = "SunEclipJ2000",
   Parent = SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SUN",
-      Observer = "SSB"
+      Target = coreKernels.ID.Sun,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "ECLIPJ2000",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.EclipJ2000,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
-    Name = "SUN J2000",
+    Name = "Sun J2000",
     Path = "/Solar System/Sun",
-    Description = "Spice rotation for Mean ecliptic and equinox of J2000",
     Hidden = true
   }
 }
@@ -89,11 +86,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(SolarSystemBarycenter)
   openspace.addSceneGraphNode(SunCenter)
   openspace.addSceneGraphNode(SunIAU)
-  openspace.addSceneGraphNode(SunECLIPJ2000)
+  openspace.addSceneGraphNode(SunEclipJ2000)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SunECLIPJ2000)
+  openspace.removeSceneGraphNode(SunEclipJ2000)
   openspace.removeSceneGraphNode(SunIAU)
   openspace.removeSceneGraphNode(SunCenter)
   openspace.removeSceneGraphNode(SolarSystemBarycenter)
@@ -102,7 +99,7 @@ end)
 asset.export(SolarSystemBarycenter)
 asset.export(SunCenter)
 asset.export(SunIAU)
-asset.export(SunECLIPJ2000)
+asset.export(SunEclipJ2000)
 
 
 

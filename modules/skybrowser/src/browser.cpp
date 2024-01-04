@@ -185,7 +185,7 @@ void Browser::updateBrowserSize() {
 }
 
 void Browser::reload() {
-    _reload.set(true);
+    _reload.trigger();
 }
 
 void Browser::setRatio(float ratio) {

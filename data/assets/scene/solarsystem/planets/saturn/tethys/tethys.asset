@@ -1,6 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,13 +19,13 @@ local Tethys = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TETHYS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Tethys,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_TETHYS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Tethys,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -55,8 +56,8 @@ local TethysLabel = {
   Identifier = "TethysLabel",
   Parent = Tethys.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Tethys",
     FontSize = 70.0,
     Size = 6.0,
@@ -78,8 +79,6 @@ local TethysLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Tethys)
   openspace.addSceneGraphNode(TethysLabel)
 end)
@@ -87,8 +86,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TethysLabel)
   openspace.removeSceneGraphNode(Tethys)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Tethys)

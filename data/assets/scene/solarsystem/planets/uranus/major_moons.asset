@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +10,8 @@ local Miranda = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MIRANDA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Miranda,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -33,8 +34,8 @@ local MirandaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MIRANDA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Miranda,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1.413479,
@@ -51,8 +52,8 @@ local MirandaLabel = {
   Identifier = "MirandaLabel",
   Parent = Miranda.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Miranda",
     FontSize = 70.0,
     Size = 7.4,
@@ -78,8 +79,8 @@ local Ariel = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ARIEL",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Ariel,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -102,8 +103,8 @@ local ArielTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ARIEL",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Ariel,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 2.520379,
@@ -120,8 +121,8 @@ local ArielLabel = {
   Identifier = "ArielLabel",
   Parent = Ariel.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Ariel",
     FontSize = 70.0,
     Size = 7.4,
@@ -147,8 +148,8 @@ local Umbriel = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "UMBRIEL",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Umbriel,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -171,8 +172,8 @@ local UmbrielTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "UMBRIEL",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Umbriel,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 4.144177,
@@ -189,8 +190,8 @@ local UmbrielLabel = {
   Identifier = "UmbrielLabel",
   Parent = Umbriel.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Umbriel",
     FontSize = 70.0,
     Size = 7.4,
@@ -216,8 +217,8 @@ local Titania = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TITANIA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Titania,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -240,8 +241,8 @@ local TitaniaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TITANIA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Titania,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 8.705872,
@@ -258,8 +259,8 @@ local TitaniaLabel = {
   Identifier = "TitaniaLabel",
   Parent = Titania.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Titania",
     FontSize = 70.0,
     Size = 7.4,
@@ -285,8 +286,8 @@ local Oberon = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OBERON",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Oberon,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -309,8 +310,8 @@ local OberonTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OBERON",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Oberon,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 13.463239,
@@ -327,8 +328,8 @@ local OberonLabel = {
   Identifier = "OberonLabel",
   Parent = Oberon.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Oberon",
     FontSize = 70.0,
     Size = 7.4,
@@ -411,9 +412,6 @@ local UranusMajorMoonsOff = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.ura111)
-
-
   openspace.addSceneGraphNode(Miranda)
   openspace.addSceneGraphNode(MirandaTrail)
   openspace.addSceneGraphNode(MirandaLabel)
@@ -461,9 +459,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(OberonLabel)
   openspace.removeSceneGraphNode(OberonTrail)
   openspace.removeSceneGraphNode(Oberon)
-
-
-  openspace.spice.unloadKernel(kernel.ura111)
 end)
 
 asset.export(Miranda)

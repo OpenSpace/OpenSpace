@@ -69,6 +69,11 @@ public:
      */
     void set(std::any value) override;
 
+    /**
+     * Triggers this TriggerProperty.
+     */
+    void trigger();
+
     std::string jsonValue() const override;
 };
 

@@ -1,4 +1,6 @@
 local transforms = asset.require("../transforms")
+local kernels415 = asset.require("../kernels415")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -22,8 +24,8 @@ local Prometheus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PROMETHEUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Prometheus,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -53,8 +55,8 @@ local PrometheusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PROMETHEUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Prometheus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.612990038,
@@ -77,8 +79,8 @@ local PrometheusLabel = {
   Identifier = "PrometheusLabel",
   Parent = Prometheus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Prometheus",
     FontSize = 70.0,
     Size = 5.5,
@@ -104,8 +106,8 @@ local Pandora = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PANDORA",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Pandora,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -135,8 +137,8 @@ local PandoraTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PANDORA",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Pandora,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.628504213,
@@ -159,8 +161,8 @@ local PandoraLabel = {
   Identifier = "PandoraLabel",
   Parent = Pandora.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Pandora",
     FontSize = 70.0,
     Size = 5.5,
@@ -186,8 +188,8 @@ local Atlas = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ATLAS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Atlas,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -217,8 +219,8 @@ local AtlasTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ATLAS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Atlas,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.6016947883,
@@ -241,8 +243,8 @@ local AtlasLabel = {
   Identifier = "AtlasLabel",
   Parent = Atlas.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Atlas",
     FontSize = 70.0,
     Size = 5.5,
@@ -268,8 +270,8 @@ local Janus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JANUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Janus,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -299,8 +301,8 @@ local JanusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JANUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Janus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.694660342,
@@ -323,8 +325,8 @@ local JanusLabel = {
   Identifier = "JanusLabel",
   Parent = Janus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Janus",
     FontSize = 70.0,
     Size = 5.5,
@@ -350,8 +352,8 @@ local Epimetheus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EPIMETHEUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Epimetheus,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -381,8 +383,8 @@ local EpimetheusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EPIMETHEUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Epimetheus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.694333517,
@@ -405,8 +407,8 @@ local EpimetheusLabel = {
   Identifier = "EpimetheusLabel",
   Parent = Epimetheus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Epimetheus",
     FontSize = 70.0,
     Size = 5.5,
@@ -432,8 +434,8 @@ local Daphnis = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DAPHNIS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Daphnis,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -463,8 +465,8 @@ local DaphnisTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DAPHNIS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Daphnis,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.5940798,
@@ -487,8 +489,8 @@ local DaphnisLabel = {
   Identifier = "DaphnisLabel",
   Parent = Daphnis.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Daphnis",
     FontSize = 70.0,
     Size = 5.5,
@@ -514,8 +516,8 @@ local Pan = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PAN",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Pan,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -545,8 +547,8 @@ local PanTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PAN",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Pan,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.575050718,
@@ -569,8 +571,8 @@ local PanLabel = {
   Identifier = "PanLabel",
   Parent = Pan.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Pan",
     FontSize = 70.0,
     Size = 5.5,

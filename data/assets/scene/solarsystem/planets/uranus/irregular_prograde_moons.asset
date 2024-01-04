@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels")
+local kernel = asset.require("./kernels116")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +10,8 @@ local Margaret = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARGARET",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Margaret,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -40,8 +41,8 @@ local MargaretTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARGARET",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Margaret,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1694.8,
@@ -64,8 +65,8 @@ local MargaretLabel = {
   Identifier = "MargaretLabel",
   Parent = Margaret.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Margaret",
     FontSize = 70.0,
     Size = 7.0,
@@ -87,9 +88,6 @@ local MargaretLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.ura116)
-
-
   openspace.addSceneGraphNode(Margaret)
   openspace.addSceneGraphNode(MargaretTrail)
   openspace.addSceneGraphNode(MargaretLabel)
@@ -99,9 +97,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MargaretLabel)
   openspace.removeSceneGraphNode(MargaretTrail)
   openspace.removeSceneGraphNode(Margaret)
-
-
-  openspace.spice.unloadKernel(kernel.ura116)
 end)
 
 asset.export(Margaret)

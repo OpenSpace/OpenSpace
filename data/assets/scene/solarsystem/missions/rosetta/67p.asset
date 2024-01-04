@@ -1,4 +1,6 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -34,8 +36,8 @@ local Barycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CHURYUMOV-GERASIMENKO",
-      Observer = "SSB"
+      Target = kernels.ID.ChurymovGerasimenko,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
@@ -50,8 +52,8 @@ local Comet67P = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "67P/C-G_CK",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.ChurymovGerasimenko,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   BoundingSphere = 5000.0,
@@ -61,8 +63,8 @@ local Comet67P = {
     Projection = {
       Sequence = { imagesDestination },
       SequenceType = "image-sequence",
-      Observer = "ROSETTA",
-      Target = "CHURYUMOV-GERASIMENKO",
+      Observer = kernels.ID.Rosetta,
+      Target = kernels.ID.ChurymovGerasimenko,
       Aberration = "NONE",
       TextureMap = true,
       ShadowMap = true,
@@ -70,7 +72,7 @@ local Comet67P = {
         Instrument = {
           NAVCAM = {
             DetectorType = "Camera",
-            Spice = { "ROS_NAVCAM-A" }
+            Spice = { kernels.Frame.NavCam }
           }
         },
         Target = {
@@ -95,7 +97,7 @@ local Comet67P = {
         }
       },
       Instrument = {
-        Name = "ROS_NAVCAM-A",
+        Name = kernels.Frame.NavCam,
         Method = "ELLIPSOID",
         Aberration = "NONE",
         Fovy = 5.00,
@@ -116,8 +118,8 @@ local Trail67P = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CHURYUMOV-GERASIMENKO",
-      Observer = "SSB"
+      Target = kernels.ID.ChurymovGerasimenko,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.1, 0.9, 0.2 },
     StartTime = "2014 JAN 01 00:00:00.000",

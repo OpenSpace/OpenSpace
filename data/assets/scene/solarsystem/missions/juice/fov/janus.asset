@@ -19,8 +19,8 @@ local Janus = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_JANUS",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.Janus,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_JANUS",

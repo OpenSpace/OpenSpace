@@ -24,6 +24,7 @@
 
 #include <openspace/documentation/core_registration.h>
 
+#include <openspace/data/datamapping.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
@@ -38,7 +39,9 @@
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/path.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/dashboard.h>
+#include <openspace/rendering/labelscomponent.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -63,6 +66,8 @@ namespace openspace {
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(LogFactoryDocumentation());
 
+    engine.addDocumentation(ColorMappingComponent::Documentation());
+    engine.addDocumentation(LabelsComponent::Documentation());
     engine.addDocumentation(LightSource::Documentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
@@ -74,6 +79,8 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(TimeRange::Documentation());
     engine.addDocumentation(Translation::Documentation());
     engine.addDocumentation(TimeFrame::Documentation());
+
+    engine.addDocumentation(dataloader::DataMapping::Documentation());
 
     engine.addDocumentation(interaction::NavigationState::Documentation());
     engine.addDocumentation(interaction::Path::Documentation());

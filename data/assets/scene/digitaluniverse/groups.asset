@@ -16,7 +16,7 @@ local TransformMatrix = {
 local Object = {
   Identifier = "NearbyGalaxyGroups",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
     Labels = {
       Enabled = true,
@@ -27,9 +27,7 @@ local Object = {
       Unit = "Mpc",
       TransformationMatrix = TransformMatrix
     },
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    --ScaleFactor = 10.0,
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix
   },
@@ -58,7 +56,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Galaxy Group Labels",
-  Version = "1.1",
+  Version = "2.0",
   Author = "Brian Abbott (AMNH)",
   Description = "Digital Universe asset for Galaxy Groups",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

@@ -117,7 +117,7 @@ documentation::Documentation Path::Documentation() {
     return codegen::doc<Parameters>("core_path_instruction");
 }
 
-Path::Path(Waypoint start, Waypoint end, Type type, std::optional<double> duration)
+Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duration)
     : _start(start)
     , _end(end)
     , _type(type)
@@ -137,25 +137,29 @@ Path::Path(Waypoint start, Waypoint end, Type type, std::optional<double> durati
 
     _prevPose = _start.pose();
 
-    // Compute speed factor to match any given duration, by traversing the path and
-    // computing how much faster/slower it should be
+    // Estimate how long time the camera path will take to traverse
+    constexpr double dt = 0.05; // 20 fps
+    while (!hasReachedEnd()) {
+        traversePath(dt);
+    }
+    float estimatedDuration = _progressedTime;
+    resetPlaybackVariables();
+
+    // We now know how long it took to traverse the path. Use that to compute the
+    // speed factor to match any given duration
     _speedFactorFromDuration = 1.0;
     if (duration.has_value()) {
         if (*duration > 0.0) {
-            constexpr double dt = 0.05; // 20 fps
-            while (!hasReachedEnd()) {
-                traversePath(dt);
-            }
-
-            // We now know how long it took to traverse the path. Use that
-            _speedFactorFromDuration = _progressedTime / *duration;
-            resetPlaybackVariables();
+            _speedFactorFromDuration = estimatedDuration / *duration;
+            estimatedDuration = *duration;
         }
         else {
             // A duration of zero means infinite speed. Handle this explicity
-            _speedFactorFromDuration = std::numeric_limits<double>::infinity();
+            _speedFactorFromDuration = std::numeric_limits<float>::infinity();
+            estimatedDuration = 0.f;
         }
     }
+    _expectedDuration = estimatedDuration;
 }
 
 Waypoint Path::startPoint() const {
@@ -168,6 +172,14 @@ Waypoint Path::endPoint() const {
 
 double Path::pathLength() const {
     return _curve->length();
+}
+
+double Path::remainingDistance() const {
+    return pathLength() - _traveledDistance;
+}
+
+float Path::estimatedRemainingTime(float speedScale) const {
+    return _expectedDuration / speedScale - _progressedTime;
 }
 
 std::vector<glm::dvec3> Path::controlPoints() const {
@@ -188,7 +200,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
 
     const double prevDistance = _traveledDistance;
 
-    _progressedTime += dt;
+    _progressedTime += static_cast<float>(dt);
     _traveledDistance += displacement;
 
     CameraPose newPose;
@@ -321,7 +333,7 @@ glm::dquat Path::easedSlerpRotation(double t) const {
     return glm::slerp(_start.rotation(), _end.rotation(), tScaled);
 }
 
-glm::dquat Path::linearPathRotation(double t) const {
+glm::dquat Path::linearPathRotation(double) const {
     const glm::dvec3 a = ghoul::viewDirection(_start.rotation());
     const glm::dvec3 b = ghoul::viewDirection(_end.rotation());
     const double angle = std::acos(glm::dot(a, b)); // assumes length 1.0 for a & b

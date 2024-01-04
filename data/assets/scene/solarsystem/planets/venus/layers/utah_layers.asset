@@ -1,0 +1,21 @@
+asset.require("./base_layers")
+asset.require("./colorlayers/magellan_mosaic_utah", false)
+asset.require("./colorlayers/clouds_magellan_combo_utah", asset.enabled)
+
+asset.require("./heightlayers/magellan_utah", asset.enabled)
+
+
+
+asset.meta = {
+  Name = "Default Venus Layers (Utah)",
+  Version = "1.0",
+  Description = [[Default Venus layers are: Venus Texture, Magellan Mosaic,
+    Clouds Magellan Combo, and Magellan Elevation (3D).
+
+
+    Layers only loaded from the Utah server
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

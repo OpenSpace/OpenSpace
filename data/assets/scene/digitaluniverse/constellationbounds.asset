@@ -1,3 +1,7 @@
+local coreKernels = asset.require("spice/core")
+
+
+
 local data = asset.resource({
   Name = "Constellation Files",
   Type = "HttpSynchronization",
@@ -22,8 +26,8 @@ local Object = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "J2000",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.J2000,
+      DestinationFrame = coreKernels.Frame.Galactic
     },
     Scale = {
       Type = "StaticScale",

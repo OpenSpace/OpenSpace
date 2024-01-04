@@ -14,8 +14,8 @@ local SwiCh2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_SWI_CH2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiCH2,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_CH2",
@@ -49,8 +49,8 @@ local SwiFull = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_SWI_FULL",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiFull,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_FULL",
@@ -87,8 +87,8 @@ local SwiFullGCO500 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_SWI_FULL_GCO500",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiFullGCO500,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_FULL_GCO500",

@@ -22,16 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/server/include/topics/cameratopic.h"
+#include <modules/server/include/topics/cameratopic.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
-#include <openspace/query/query.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -81,8 +79,6 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
 }
 
 void CameraTopic::sendCameraData() {
-    using namespace openspace;
-
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     glm::dvec3 position = module->geoPosition();
     std::pair<double, std::string_view> altSimplified = simplifyDistance(position.z);

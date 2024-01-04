@@ -1,0 +1,687 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2023                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <openspace/data/dataloader.h>
+
+#include <openspace/data/csvloader.h>
+#include <openspace/data/speckloader.h>
+#include <ghoul/fmt.h>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
+#include <cctype>
+#include <fstream>
+#include <functional>
+#include <string_view>
+
+namespace {
+    constexpr int8_t DataCacheFileVersion = 11;
+    constexpr int8_t LabelCacheFileVersion = 11;
+    constexpr int8_t ColorCacheFileVersion = 11;
+
+    constexpr std::string_view DefaultXColumn = "x";
+    constexpr std::string_view DefaultYColumn = "y";
+    constexpr std::string_view DefaultZColumn = "z";
+
+    template <typename T, typename U>
+    void checkSize(U value, std::string_view message) {
+        if (value > std::numeric_limits<U>::max()) {
+            throw ghoul::RuntimeError(fmt::format("Error saving file: {}", message));
+        }
+    }
+
+    template <typename T>
+    using LoadCacheFunc = std::function<std::optional<T>(std::filesystem::path)>;
+
+    template <typename T>
+    using SaveCacheFunc = std::function<void(const T&, std::filesystem::path)>;
+
+    template <typename T>
+    using LoadDataFunc = std::function<T(
+        std::filesystem::path, std::optional<openspace::dataloader::DataMapping> specs
+    )>;
+
+    template <typename T>
+    T internalLoadFileWithCache(std::filesystem::path filePath,
+                                std::optional<openspace::dataloader::DataMapping> specs,
+                                LoadDataFunc<T> loadFunction,
+                                LoadCacheFunc<T> loadCacheFunction,
+                                SaveCacheFunc<T> saveCacheFunction)
+    {
+        static_assert(
+            std::is_same_v<T, openspace::dataloader::Dataset> ||
+            std::is_same_v<T, openspace::dataloader::Labelset> ||
+            std::is_same_v<T, openspace::dataloader::ColorMap>
+        );
+
+        std::string info;
+        if (specs.has_value()) {
+            info = openspace::dataloader::generateHashString(*specs);
+        }
+        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(filePath, info);
+
+        if (std::filesystem::exists(cached)) {
+            LINFOC(
+                "DataLoader",
+                fmt::format("Cached file {} used for file {}", cached, filePath)
+            );
+
+            std::optional<T> dataset = loadCacheFunction(cached);
+            if (dataset.has_value()) {
+                // We could load the cache file and we are now done with this
+                return *dataset;
+            }
+            else {
+                FileSys.cacheManager()->removeCacheFile(cached);
+            }
+        }
+        LINFOC("DataLoader", fmt::format("Loading file {}", filePath));
+        T dataset = loadFunction(filePath, specs);
+
+        if (!dataset.entries.empty()) {
+            LINFOC("DataLoader", "Saving cache");
+            saveCacheFunction(dataset, cached);
+        }
+
+        return dataset;
+    }
+} // namespace
+
+namespace openspace::dataloader {
+
+namespace data {
+
+Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
+    ghoul_assert(std::filesystem::exists(path), "File must exist");
+
+    std::ifstream file(path);
+    if (!file.good()) {
+        throw ghoul::RuntimeError(fmt::format("Failed to open data file {}", path));
+    }
+
+    std::string extension = ghoul::toLowerCase(path.extension().string());
+
+    Dataset res;
+    if (extension == ".csv") {
+        res = csv::loadCsvFile(path, specs);
+    }
+    else if (extension == ".speck") {
+        res = speck::loadSpeckFile(path, specs);
+    }
+    else {
+        LERRORC("DataLoader", fmt::format(
+            "Could not read data file {}. File format {} is not supported",
+            path, path.extension()
+        ));
+    }
+
+    return res;
+}
+
+std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
+    std::ifstream file(path, std::ios::binary);
+    if (!file.good()) {
+        return std::nullopt;
+    }
+
+    Dataset result;
+
+    int8_t fileVersion;
+    file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
+    if (fileVersion != DataCacheFileVersion) {
+        // Incompatible version and we won't be able to read the file
+        return std::nullopt;
+    }
+
+    //
+    // Read variables
+    uint16_t nVariables;
+    file.read(reinterpret_cast<char*>(&nVariables), sizeof(uint16_t));
+    result.variables.resize(nVariables);
+    for (int i = 0; i < nVariables; i += 1) {
+        Dataset::Variable var;
+
+        int16_t idx;
+        file.read(reinterpret_cast<char*>(&idx), sizeof(int16_t));
+        var.index = idx;
+
+        uint16_t len;
+        file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
+        var.name.resize(len);
+        file.read(var.name.data(), len);
+
+        result.variables[i] = std::move(var);
+    }
+
+    //
+    // Read textures
+    uint16_t nTextures;
+    file.read(reinterpret_cast<char*>(&nTextures), sizeof(uint16_t));
+    result.textures.resize(nTextures);
+    for (int i = 0; i < nTextures; i += 1) {
+        Dataset::Texture tex;
+
+        int16_t idx;
+        file.read(reinterpret_cast<char*>(&idx), sizeof(int16_t));
+        tex.index = idx;
+
+        uint16_t len;
+        file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
+        tex.file.resize(len);
+        file.read(tex.file.data(), len);
+
+        result.textures[i] = std::move(tex);
+    }
+
+    //
+    // Read indices
+    int16_t texDataIdx;
+    file.read(reinterpret_cast<char*>(&texDataIdx), sizeof(int16_t));
+    result.textureDataIndex = texDataIdx;
+
+    int16_t oriDataIdx;
+    file.read(reinterpret_cast<char*>(&oriDataIdx), sizeof(int16_t));
+    result.orientationDataIndex = oriDataIdx;
+
+    //
+    // Read entries
+    uint64_t nEntries;
+    file.read(reinterpret_cast<char*>(&nEntries), sizeof(uint64_t));
+    result.entries.reserve(nEntries);
+    for (uint64_t i = 0; i < nEntries; i += 1) {
+        Dataset::Entry e;
+        file.read(reinterpret_cast<char*>(&e.position.x), sizeof(float));
+        file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
+        file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
+
+        uint16_t nValues;
+        file.read(reinterpret_cast<char*>(&nValues), sizeof(uint16_t));
+        e.data.resize(nValues);
+        file.read(reinterpret_cast<char*>(e.data.data()), nValues * sizeof(float));
+
+        uint16_t len;
+        file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
+        if (len > 0) {
+            std::string comment;
+            comment.resize(len);
+            file.read(comment.data(), len);
+            e.comment = std::move(comment);
+        }
+
+        result.entries.push_back(std::move(e));
+    }
+
+    //
+    // Read max data point variable
+    float max;
+    file.read(reinterpret_cast<char*>(&max), sizeof(float));
+    result.maxPositionComponent = max;
+
+    return result;
+}
+
+void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
+    std::ofstream file(path, std::ofstream::binary);
+
+    file.write(reinterpret_cast<const char*>(&DataCacheFileVersion), sizeof(int8_t));
+
+    //
+    // Store variables
+    checkSize<uint16_t>(dataset.variables.size(), "Too many variables");
+    uint16_t nVariables = static_cast<uint16_t>(dataset.variables.size());
+    file.write(reinterpret_cast<const char*>(&nVariables), sizeof(uint16_t));
+    for (const Dataset::Variable& var : dataset.variables) {
+        checkSize<int16_t>(var.index, "Variable index too large");
+        int16_t idx = static_cast<int16_t>(var.index);
+        file.write(reinterpret_cast<const char*>(&idx), sizeof(int16_t));
+
+        checkSize<uint16_t>(var.name.size(), "Variable name too long");
+        uint16_t len = static_cast<uint16_t>(var.name.size());
+        file.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));
+        file.write(var.name.data(), len);
+    }
+
+    //
+    // Store textures
+    checkSize<uint16_t>(dataset.textures.size(), "Too many textures");
+    uint16_t nTextures = static_cast<uint16_t>(dataset.textures.size());
+    file.write(reinterpret_cast<const char*>(&nTextures), sizeof(uint16_t));
+    for (const Dataset::Texture& tex : dataset.textures) {
+        checkSize<int16_t>(tex.index, "Texture index too large");
+        int16_t idx = static_cast<int16_t>(tex.index);
+        file.write(reinterpret_cast<const char*>(&idx), sizeof(int16_t));
+
+
+        checkSize<uint16_t>(tex.file.size(), "Texture file too long");
+        uint16_t len = static_cast<uint16_t>(tex.file.size());
+        file.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));
+        file.write(tex.file.data(), len);
+    }
+
+    //
+    // Store indices
+    checkSize<int16_t>(dataset.textureDataIndex, "Texture index too large");
+    int16_t texIdx = static_cast<int16_t>(dataset.textureDataIndex);
+    file.write(reinterpret_cast<const char*>(&texIdx), sizeof(int16_t));
+
+    checkSize<int16_t>(dataset.orientationDataIndex, "Orientation index too large");
+    int16_t orientationIdx = static_cast<int16_t>(dataset.orientationDataIndex);
+    file.write(reinterpret_cast<const char*>(&orientationIdx), sizeof(int16_t));
+
+    //
+    // Store entries
+    checkSize<uint64_t>(dataset.entries.size(), "Too many entries");
+    uint64_t nEntries = static_cast<uint64_t>(dataset.entries.size());
+    file.write(reinterpret_cast<const char*>(&nEntries), sizeof(uint64_t));
+    for (const Dataset::Entry& e : dataset.entries) {
+        file.write(reinterpret_cast<const char*>(&e.position.x), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(float));
+
+        checkSize<uint16_t>(e.data.size(), "Too many data variables");
+        uint16_t nValues = static_cast<uint16_t>(e.data.size());
+        file.write(reinterpret_cast<const char*>(&nValues), sizeof(uint16_t));
+        file.write(
+            reinterpret_cast<const char*>(e.data.data()),
+            e.data.size() * sizeof(float)
+        );
+
+        if (e.comment.has_value()) {
+            checkSize<uint16_t>(e.comment->size(), "Comment too long");
+        }
+        uint16_t commentLen = e.comment.has_value() ?
+            static_cast<uint16_t>(e.comment->size()) :
+            0;
+        file.write(reinterpret_cast<const char*>(&commentLen), sizeof(uint16_t));
+        if (e.comment.has_value()) {
+            file.write(e.comment->data(), e.comment->size());
+        }
+    }
+
+    //
+    // Store max data point variable
+    file.write(reinterpret_cast<const char*>(&dataset.maxPositionComponent), sizeof(float));
+}
+
+Dataset loadFileWithCache(std::filesystem::path filePath, std::optional<DataMapping> specs)
+{
+    return internalLoadFileWithCache<Dataset>(
+        filePath,
+        specs,
+        &loadFile,
+        &loadCachedFile,
+        &saveCachedFile
+    );
+}
+
+} // namespace data
+
+namespace label {
+
+Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
+    ghoul_assert(std::filesystem::exists(path), "File must exist");
+
+    std::ifstream file(path);
+    if (!file.good()) {
+        throw ghoul::RuntimeError(fmt::format("Failed to open dataset file {}", path));
+    }
+
+    std::string extension = ghoul::toLowerCase(path.extension().string());
+
+    Labelset res;
+    if (extension == ".label") {
+        res = speck::loadLabelFile(path);
+    }
+    else {
+        LERRORC("DataLoader", fmt::format(
+            "Could not read label data file {}. File format {} is not supported",
+            path, path.extension()
+        ));
+    }
+
+    return res;
+}
+
+std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
+    std::ifstream file(path, std::ios::binary);
+    if (!file.good()) {
+        return std::nullopt;
+    }
+
+    int8_t fileVersion;
+    file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
+    if (fileVersion != LabelCacheFileVersion) {
+        // Incompatible version and we won't be able to read the file
+        return std::nullopt;
+    }
+
+    Labelset result;
+
+    int16_t textColorIdx;
+    file.read(reinterpret_cast<char*>(&textColorIdx), sizeof(int16_t));
+    result.textColorIndex = textColorIdx;
+
+    uint32_t nEntries;
+    file.read(reinterpret_cast<char*>(&nEntries), sizeof(uint32_t));
+    result.entries.reserve(nEntries);
+    for (unsigned int i = 0; i < nEntries; i += 1) {
+        Labelset::Entry e;
+        file.read(reinterpret_cast<char*>(&e.position.x), sizeof(float));
+        file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
+        file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
+
+        // Identifier
+        uint8_t idLen;
+        file.read(reinterpret_cast<char*>(&idLen), sizeof(uint8_t));
+        e.identifier.resize(idLen);
+        file.read(e.identifier.data(), idLen);
+
+        // Text
+        uint16_t len;
+        file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
+        e.text.resize(len);
+        file.read(e.text.data(), len);
+
+        result.entries.push_back(e);
+    }
+
+    return result;
+}
+
+void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
+    std::ofstream file(path, std::ofstream::binary);
+
+    file.write(reinterpret_cast<const char*>(&LabelCacheFileVersion), sizeof(int8_t));
+
+    //
+    // Storage text color
+    checkSize<int16_t>(labelset.textColorIndex, "Too high text color");
+    int16_t textColorIdx = static_cast<int16_t>(labelset.textColorIndex);
+    file.write(reinterpret_cast<const char*>(&textColorIdx), sizeof(int16_t));
+
+    //
+    // Storage text lines
+    checkSize<uint32_t>(labelset.entries.size(), "Too many entries");
+    uint32_t nEntries = static_cast<uint32_t>(labelset.entries.size());
+    file.write(reinterpret_cast<const char*>(&nEntries), sizeof(uint32_t));
+    for (const Labelset::Entry& e : labelset.entries) {
+        file.write(reinterpret_cast<const char*>(&e.position.x), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(float));
+
+        // Identifier
+        checkSize<uint8_t>(e.identifier.size(), "Identifier too long");
+        uint8_t idLen = static_cast<uint8_t>(e.identifier.size());
+        file.write(reinterpret_cast<const char*>(&idLen), sizeof(uint8_t));
+        file.write(e.identifier.data(), idLen);
+
+        // Text
+        checkSize<uint16_t>(e.text.size(), "Text too long");
+        uint16_t len = static_cast<uint16_t>(e.text.size());
+        file.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));
+        file.write(e.text.data(), len);
+    }
+}
+
+Labelset loadFileWithCache(std::filesystem::path filePath) {
+    return internalLoadFileWithCache<Labelset>(
+        filePath,
+        std::nullopt,
+        &loadFile,
+        &loadCachedFile,
+        &saveCachedFile
+    );
+}
+
+} // namespace label
+
+namespace color {
+
+ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
+    ghoul_assert(std::filesystem::exists(path), "File must exist");
+
+    std::ifstream file(path);
+    if (!file.good()) {
+        throw ghoul::RuntimeError(fmt::format("Failed to open colormap file {}", path));
+    }
+
+    std::string extension = ghoul::toLowerCase(path.extension().string());
+
+    ColorMap res;
+    if (extension == ".cmap") {
+        res = speck::loadCmapFile(path);
+    }
+    else {
+        LERRORC("DataLoader", fmt::format(
+            "Could not read color map file {}. File format {} is not supported",
+            path, path.extension()
+        ));
+    }
+
+    return res;
+}
+
+std::optional<ColorMap> loadCachedFile(std::filesystem::path path) {
+    std::ifstream file(path, std::ios::binary);
+    if (!file.good()) {
+        return std::nullopt;
+    }
+
+    int8_t fileVersion;
+    file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
+    if (fileVersion != ColorCacheFileVersion) {
+        // Incompatible version and we won't be able to read the file
+        return std::nullopt;
+    }
+
+    ColorMap result;
+
+    uint32_t nColors;
+    file.read(reinterpret_cast<char*>(&nColors), sizeof(uint32_t));
+    result.entries.reserve(nColors);
+    for (unsigned int i = 0; i < nColors; i += 1) {
+        glm::vec4 color;
+        file.read(reinterpret_cast<char*>(&color.x), sizeof(float));
+        file.read(reinterpret_cast<char*>(&color.y), sizeof(float));
+        file.read(reinterpret_cast<char*>(&color.z), sizeof(float));
+        file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
+        result.entries.push_back(color);
+    }
+
+    glm::vec4 color;
+
+    bool hasBelowColor = false;
+    file.read(reinterpret_cast<char*>(&hasBelowColor), sizeof(bool));
+    file.read(reinterpret_cast<char*>(&color.x), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.y), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.z), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
+
+    if (hasBelowColor) {
+        result.belowRangeColor = color;
+    }
+
+    bool hasAboveColor = false;
+    file.read(reinterpret_cast<char*>(&hasAboveColor), sizeof(bool));
+    file.read(reinterpret_cast<char*>(&color.x), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.y), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.z), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
+
+    if (hasAboveColor) {
+        result.aboveRangeColor = color;
+    }
+
+    bool hasNanColor = false;
+    file.read(reinterpret_cast<char*>(&hasNanColor), sizeof(bool));
+    file.read(reinterpret_cast<char*>(&color.x), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.y), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.z), sizeof(float));
+    file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
+
+    if (hasNanColor) {
+        result.nanColor = color;
+    }
+
+    return result;
+}
+
+void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path) {
+    std::ofstream file(path, std::ofstream::binary);
+
+    file.write(reinterpret_cast<const char*>(&ColorCacheFileVersion), sizeof(int8_t));
+
+    uint32_t nColors = static_cast<uint32_t>(colorMap.entries.size());
+    file.write(reinterpret_cast<const char*>(&nColors), sizeof(uint32_t));
+    for (const glm::vec4& color : colorMap.entries) {
+        file.write(reinterpret_cast<const char*>(&color.x), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&color.y), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&color.z), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&color.w), sizeof(float));
+    }
+
+    bool hasBelowColor = colorMap.belowRangeColor.has_value();
+    const glm::vec4 belowColor = colorMap.belowRangeColor.value_or(glm::vec4(0.f));
+    file.write(reinterpret_cast<const char*>(&hasBelowColor), sizeof(bool));
+    file.write(reinterpret_cast<const char*>(&belowColor.x), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&belowColor.y), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&belowColor.z), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&belowColor.w), sizeof(float));
+
+    bool hasAboveColor = colorMap.aboveRangeColor.has_value();
+    const glm::vec4 aboveColor = colorMap.aboveRangeColor.value_or(glm::vec4(0.f));
+    file.write(reinterpret_cast<const char*>(&hasAboveColor), sizeof(bool));
+    file.write(reinterpret_cast<const char*>(&aboveColor.x), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&aboveColor.y), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&aboveColor.z), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&aboveColor.w), sizeof(float));
+
+    bool hasNanColor = colorMap.nanColor.has_value();
+    const glm::vec4 nanColor = colorMap.nanColor.value_or(glm::vec4(0.f));
+    file.write(reinterpret_cast<const char*>(&hasNanColor), sizeof(bool));
+    file.write(reinterpret_cast<const char*>(&nanColor.x), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&nanColor.y), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&nanColor.z), sizeof(float));
+    file.write(reinterpret_cast<const char*>(&nanColor.w), sizeof(float));
+}
+
+ColorMap loadFileWithCache(std::filesystem::path path)
+{
+    return internalLoadFileWithCache<ColorMap>(
+        path,
+        std::nullopt,
+        &loadFile,
+        &loadCachedFile,
+        &saveCachedFile
+    );
+}
+
+} // namespace color
+
+int Dataset::index(std::string_view variableName) const {
+    for (const Dataset::Variable& v : variables) {
+        if (v.name == variableName) {
+            return v.index;
+        }
+    }
+    return -1;
+}
+
+bool Dataset::normalizeVariable(std::string_view variableName) {
+    int idx = index(variableName);
+
+    if (idx == -1) {
+        // We didn't find the variable that was specified
+        return false;
+    }
+
+    float minValue = std::numeric_limits<float>::max();
+    float maxValue = -std::numeric_limits<float>::max();
+    for (Dataset::Entry& e : entries) {
+        float value = e.data[idx];
+        if (std::isnan(value)) {
+            continue;
+        }
+        minValue = std::min(minValue, value);
+        maxValue = std::max(maxValue, value);
+    }
+
+    for (Dataset::Entry& e : entries) {
+        float value = e.data[idx];
+        if (std::isnan(value)) {
+            continue;
+        }
+        e.data[idx] = (value - minValue) / (maxValue - minValue);
+    }
+
+    return true;
+}
+
+glm::vec2 Dataset::findValueRange(int variableIndex) const {
+    if (entries.empty()) {
+        // Can't find range if there are no entries
+        return glm::vec2(0.f);
+    }
+
+    if (variableIndex >= entries[0].data.size()) {
+        // The index is not a valid variable index
+        return glm::vec2(0.f);
+    }
+
+    float minValue = std::numeric_limits<float>::max();
+    float maxValue = -std::numeric_limits<float>::max();
+    for (const Dataset::Entry& e : entries) {
+        if (!e.data.empty()) {
+            float value = e.data[variableIndex];
+            if (std::isnan(value)) {
+                continue;
+            }
+            minValue = std::min(value, minValue);
+            maxValue = std::max(value, maxValue);
+        }
+        else {
+            minValue = 0.f;
+            maxValue = 0.f;
+        }
+    }
+
+    return glm::vec2(minValue, maxValue);
+}
+
+glm::vec2 Dataset::findValueRange(std::string_view variableName) const {
+    int idx = index(variableName);
+
+    if (idx == -1) {
+        // We didn't find the variable that was specified
+        return glm::vec2(0.f);
+    }
+
+    return findValueRange(idx);
+}
+
+} // namespace openspace::dataloader

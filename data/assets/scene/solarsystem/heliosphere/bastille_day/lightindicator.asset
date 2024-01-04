@@ -1,5 +1,6 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -13,8 +14,8 @@ local TravelSpeedIndicator = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SUN",
-      Observer = "SSB"
+      Target = coreKernels.ID.Sun,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   Renderable = {

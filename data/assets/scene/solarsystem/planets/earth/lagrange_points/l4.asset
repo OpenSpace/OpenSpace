@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,7 +18,9 @@ local kernels = asset.resource({
 })
 
 
-local L4 = 394
+local ID = {
+  L4 = 394
+}
 
 local L4Position = {
   Identifier = "L4Position",
@@ -26,8 +28,8 @@ local L4Position = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = L4,
-      Observer = "SSB"
+      Target = ID.L4,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l4" },
@@ -77,6 +79,7 @@ local L4Label = {
 }
 
 
+
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "L4_de431.bsp")
 
@@ -93,6 +96,7 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels .. "L4_de431.bsp")
 end)
 
+asset.export("ID", ID)
 asset.export(L4Position)
 asset.export(L4)
 asset.export(L4Label)

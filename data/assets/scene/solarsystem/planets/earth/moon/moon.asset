@@ -1,7 +1,7 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunAsset = asset.require("scene/solarsystem/sun/sun")
 local earthAsset = asset.require("../earth")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -19,13 +19,13 @@ local Moon = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MOON",
-      Observer = "EARTH BARYCENTER"
+      Target = coreKernels.ID.Moon,
+      Observer = coreKernels.ID.EarthBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MOON",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Moon,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {

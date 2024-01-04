@@ -1,0 +1,24 @@
+asset.require("./colorlayers/wac_sweden", asset.enabled)
+asset.require("./colorlayers/clemuvvis_sweden", false)
+asset.require("./colorlayers/uvvishybrid_sweden", false)
+asset.require("./colorlayers/kaguya_sweden", false)
+asset.require("./colorlayers/lola_clr_shade_sweden", false)
+asset.require("./colorlayers/lola_shade_sweden", false)
+
+asset.require("./heightlayers/loladem_sweden", asset.enabled)
+
+
+
+asset.meta = {
+  Name = "Default Moon layers (Sweden)",
+  Version = "1.0",
+  Description = [[Default Moon layers are: WAC, Clem Uvvis, Uvvis Hybrid, Kaguya,
+    LRO LOLA Color Shaded Relief 388m v4, Lola Shade, and Lola DEM (3D).
+
+
+    Layers only loaded from the Sweden server
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

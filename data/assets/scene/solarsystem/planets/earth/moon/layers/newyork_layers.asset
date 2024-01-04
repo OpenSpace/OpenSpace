@@ -1,0 +1,24 @@
+asset.require("./colorlayers/wac_newyork", asset.enabled)
+asset.require("./colorlayers/clemuvvis_newyork", false)
+asset.require("./colorlayers/uvvishybrid_newyork", false)
+asset.require("./colorlayers/kaguya_newyork", false)
+asset.require("./colorlayers/lola_clr_shade_newyork", false)
+asset.require("./colorlayers/lola_shade_newyork", false)
+
+asset.require("./heightlayers/loladem_newyork", asset.enabled)
+
+
+
+asset.meta = {
+  Name = "Default Moon layers (New York)",
+  Version = "1.0",
+  Description = [[Default Moon layers are: WAC, Clem Uvvis, Uvvis Hybrid, Kaguya,
+    LRO LOLA Color Shaded Relief 388m v4, Lola Shade, and Lola DEM (3D).
+
+
+    Layers only loaded from the New York server
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

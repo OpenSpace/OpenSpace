@@ -1,4 +1,5 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -25,8 +26,8 @@ local SNPP = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "GALACTIC",
-      DestinationFrame = "J2000",
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
     }
   },
   Tag = { "earth_satellite", "SNPP" },
@@ -63,8 +64,8 @@ local SNPPLabel = {
   Identifier = "SNPPLabel",
   Parent = SNPP.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "SNPP",
     FontSize = 70.0,
     Size = 4.0,

@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,15 +9,14 @@ local UranusBarycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "URANUS BARYCENTER",
-      Observer = "SSB"
+      Target = coreKernels.ID.UranusBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
     Name = "Uranus Barycenter",
     Path = "/Solar System/Planets/Uranus",
-    Hidden = true,
-    Description = "Uranus Barycenter position"
+    Hidden = true
   }
 }
 

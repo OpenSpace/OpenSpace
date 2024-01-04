@@ -1,56 +1,21 @@
-asset.require("./layers/colorlayers/messenger_mdis_utah", false)
-asset.require("./layers/colorlayers/messenger_mdis_sweden", false)
-asset.require("./layers/colorlayers/messenger_mdis_newyork", false)
-
-asset.require("./layers/colorlayers/messenger_mosaic_utah", false)
-asset.require("./layers/colorlayers/messenger_mosaic_sweden", false)
-asset.require("./layers/colorlayers/messenger_mosaic_newyork", false)
-
-asset.require("./layers/colorlayers/messenger_mosaic2_utah", false)
-asset.require("./layers/colorlayers/messenger_mosaic2_sweden", false)
-asset.require("./layers/colorlayers/messenger_mosaic2_newyork", false)
-
-asset.require("./layers/colorlayers/messenger_bdr_utah", true)
-asset.require("./layers/colorlayers/messenger_bdr_sweden", false)
-asset.require("./layers/colorlayers/messenger_bdr_newyork", false)
-
-asset.require("./layers/colorlayers/messenger_mdr_utah", false)
-
-asset.require("./layers/colorlayers/messenger_mp3_utah", false)
-
-asset.require("./layers/colorlayers/messenger_hie_utah", false)
-asset.require("./layers/colorlayers/messenger_hie_sweden", false)
-asset.require("./layers/colorlayers/messenger_hie_newyork", false)
-
-asset.require("./layers/colorlayers/messenger_hiw_utah", false)
-asset.require("./layers/colorlayers/messenger_hiw_sweden", false)
-asset.require("./layers/colorlayers/messenger_hiw_newyork", false)
-
-asset.require("./layers/colorlayers/messenger_loi_utah", false)
-asset.require("./layers/colorlayers/messenger_loi_sweden", false)
-asset.require("./layers/colorlayers/messenger_loi_newyork", false)
-
-asset.require("./layers/colorlayers/messenger_shade_utah", false)
-asset.require("./layers/colorlayers/messenger_shade_sweden", false)
-asset.require("./layers/colorlayers/messenger_shade_newyork", false)
-
-asset.require("./layers/colorlayers/alsimap_02122015", false)
-asset.require("./layers/colorlayers/casimap_02122015", false)
-asset.require("./layers/colorlayers/fesimap_02122015", false)
-asset.require("./layers/colorlayers/mgsimap_02122015", false)
-asset.require("./layers/colorlayers/ssimap_02122015", false)
-
-asset.require("./layers/heightlayers/messenger_dem_utah", true)
+asset.require("./layers/base_layers", true)
+asset.require("./layers/utah_layers", true)
+asset.require("./layers/sweden_layers", false)
+asset.require("./layers/newyork_layers", false)
 
 
 
 asset.meta = {
   Name = "Default Mercury Layers",
-  Version = "1.0",
-  Description = [[Default Mercury layers are: Messenger MDIS, Messenger Mosaic2,
-    Messenger BDR, Messenger MDR, Messenger MP3, Messenger Hie, Messenger Hiw,
-    Messenger LOI, Messenger SHADE, Aluminum Abundance, Calcium Abundance, Iron
-    Abundance, Magnesium Abundance, and Silicon Abundance]],
+  Version = "1.1",
+  Description = [[Default Mercury layers are: Aluminium Abundance, Calcium Abundance,
+    Iron Abundance, Magnesium Abundance, Silicon Abundance, Messenger MDIS,
+    Messenger Mosaic, Messenger Mosaic2, Messenger BDR, Messenger HIE, Messenger HIW,
+    Messenger LOI, Messenger SHADE, Messenger MDR, Messenger MP3, and Messenger DEM (3D).
+
+
+    Layers loaded from all servers
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

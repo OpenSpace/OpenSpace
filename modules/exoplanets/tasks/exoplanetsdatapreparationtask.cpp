@@ -206,7 +206,7 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
     }
 
     return columnNames;
-};
+}
 
 ExoplanetsDataPreparationTask::PlanetData
 ExoplanetsDataPreparationTask::parseDataRow(std::string row,

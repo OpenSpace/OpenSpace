@@ -1,14 +1,18 @@
-asset.require("./layers/colorlayers/enceladus_texture", false)
-asset.require("./layers/colorlayers/global_mosaic_100m_hpf_sweden", false)
-asset.require("./layers/colorlayers/global_mosaic_100m_hpf_newyork", true)
+asset.require("./layers/base_layers", false)
+asset.require("./layers/sweden_layers", false)
+asset.require("./layers/newyork_layers", true)
 
 
 
 asset.meta = {
   Name = "Default Enceladus Layers",
-  Version = "1.0",
-  Description = [[Default Enceladus layers are: Enceladus Texture and Cassini Global
-    Mosaic 100m HPF]],
+  Version = "1.1",
+  Description = [[Default Enceladus layers are: Enceladus Texture,
+    and Cassini Global Mosaic 100m HPF.
+
+
+    Layers loaded from all available servers
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

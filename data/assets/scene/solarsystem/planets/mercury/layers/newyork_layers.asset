@@ -1,0 +1,31 @@
+asset.require("./base_layers")
+asset.require("./colorlayers/messenger_mdis_newyork", false)
+asset.require("./colorlayers/messenger_mosaic_newyork", false)
+asset.require("./colorlayers/messenger_mosaic2_newyork", false)
+asset.require("./colorlayers/messenger_bdr_newyork", asset.enabled)
+asset.require("./colorlayers/messenger_hie_newyork", false)
+asset.require("./colorlayers/messenger_hiw_newyork", false)
+asset.require("./colorlayers/messenger_loi_newyork", false)
+asset.require("./colorlayers/messenger_shade_newyork", false)
+
+-- The New York server does not have these maps, use the Utah server for now
+asset.require("./colorlayers/messenger_mdr_utah", false)
+asset.require("./colorlayers/messenger_mp3_utah", false)
+
+
+
+asset.meta = {
+  Name = "Default Mercury Layers (New York)",
+  Version = "1.0",
+  Description = [[Default Mercury layers are: Aluminium Abundance, Calcium Abundance,
+    Iron Abundance, Magnesium Abundance, Silicon Abundance, Messenger MDIS,
+    Messenger Mosaic, Messenger Mosaic2, Messenger BDR, Messenger HIE, Messenger HIW,
+    Messenger LOI, Messenger SHADE, Messenger MDR, Messenger MP3, and Messenger DEM (3D).
+
+
+    Layers only loaded from the New York server
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

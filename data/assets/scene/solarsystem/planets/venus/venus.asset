@@ -1,6 +1,6 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,13 +18,13 @@ local Venus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "VENUS",
-      Observer = "VENUS BARYCENTER"
+      Target = coreKernels.ID.Venus,
+      Observer = coreKernels.ID.VenusBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_VENUS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Venus,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -58,8 +58,8 @@ local VenusLabel = {
   Identifier = "VenusLabel",
   Parent = Venus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Venus",
     FontSize = 70.0,
     Size = 8.5,

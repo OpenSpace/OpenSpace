@@ -1,4 +1,8 @@
-local Kernels = asset.resource({
+local coreKernels = asset.require("spice/core")
+
+
+
+local data = asset.resource({
   Name = "New Horizons Kernels",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_kernels",
@@ -7,41 +11,88 @@ local Kernels = asset.resource({
 
 
 local NewHorizonsKernels = {
-  Kernels .. "nh_pred_20141201_20190301_od122.bsp",
-  Kernels .. "NavSE_plu047_od122.bsp",
-  Kernels .. "NavPE_de433_od122.bsp",
+  data .. "nh_pred_20141201_20190301_od122.bsp",
+  data .. "NavSE_plu047_od122.bsp",
+  data .. "NavPE_de433_od122.bsp",
 
-  Kernels .. "new-horizons_1121.tsc",
+  data .. "new-horizons_1121.tsc",
 
-  Kernels .. "nh_scispi_2015_pred.bc",
-  Kernels .. "nh_scispi_2015_recon.bc",
-  Kernels .. "nh_lorri_wcs.bc",
+  data .. "nh_scispi_2015_pred.bc",
+  data .. "nh_scispi_2015_recon.bc",
+  data .. "nh_lorri_wcs.bc",
 
-  Kernels .. "PLU_LORRI_ALL_161216.bc",
+  data .. "PLU_LORRI_ALL_161216.bc",
 
-  Kernels .. "nh_targets_v001.tpc",
-  Kernels .. "nh_pcnh_005.tpc",
+  data .. "nh_targets_v001.tpc",
+  data .. "nh_pcnh_005.tpc",
 
-  Kernels .. "nh_v220.tf",
-  Kernels .. "nh_allinstruments_v002.ti",
-  Kernels .. "nh_alice_v200.ti",
-  Kernels .. "nh_lorri_v201.ti",
-  Kernels .. "nh_pepssi_v110.ti",
-  Kernels .. "nh_ralph_v100.ti",
-  Kernels .. "nh_rex_v100.ti",
-  Kernels .. "nh_sdc_v101.ti",
-  Kernels .. "nh_swap_v100.ti",
-  Kernels .. "nh_astr_v000.ti",
-  Kernels .. "nh_fss_v000.ti",
-  Kernels .. "nh_soc_misc_v001.tf",
-  Kernels .. "nh_stars.bsp"
+  data .. "nh_v220.tf",
+  data .. "nh_allinstruments_v002.ti",
+  data .. "nh_alice_v200.ti",
+  data .. "nh_lorri_v201.ti",
+  data .. "nh_pepssi_v110.ti",
+  data .. "nh_ralph_v100.ti",
+  data .. "nh_rex_v100.ti",
+  data .. "nh_sdc_v101.ti",
+  data .. "nh_swap_v100.ti",
+  data .. "nh_astr_v000.ti",
+  data .. "nh_fss_v000.ti",
+  data .. "nh_soc_misc_v001.tf",
+  data .. "nh_stars.bsp"
 }
 
 local PlutoKernels = {
-  Kernels .. "NavPE_de433_od122.bsp",
-  Kernels .. "NavSE_plu047_od122.bsp"
+  data .. "NavPE_de433_od122.bsp",
+  data .. "NavSE_plu047_od122.bsp"
 }
 
-asset.export("Kernels", Kernels)
+local ID = {
+  NewHorizons = "NEW HORIZONS",
+  Rex = "NH_REX",
+  PlutoBarycenter = coreKernels.ID.PlutoBarycenter,
+  Pluto = coreKernels.ID.Pluto,
+  Charon = "CHARON",
+  Nix = "NIX",
+  Hydra = "HYDRA",
+  Kerberos = "KERBEROS",
+  Styx = "SYNX"
+}
+
+local Frame = {
+  NewHorizons = "NH_SPACECRAFT",
+  Lorri = "NH_LORRI",
+  RalphLeisa = "NH_RALPH_LEISA",
+  RalphMvicPan1 = "NH_RALPH_MVIC_PAN1",
+  RalphMvicPan2 = "NH_RALPH_MVIC_PAN2",
+  RalphMvicRed = "NH_RALPH_MVIC_RED",
+  RalphMvicBlue = "NH_RALPH_MVIC_BLUE",
+  RalphMvicFT = "NH_RALPH_MVIC_FT",
+  RalphMvicMethane = "NH_RALPH_MVIC_METHANE",
+  RalphMvicNIR = "NH_RALPH_MVIC_NIR",
+  AliceAirglow = "NH_ALICE_AIRGLOW",
+  AliceSOC = "NH_ALICE_SOC",
+  Rex = "NH_REX",
+
+  Pluto = coreKernels.Frame.Pluto,
+  Charon = coreKernels.Frame.Charon,
+  Hydra = coreKernels.Frame.Hydra,
+  Styx = coreKernels.Frame.Styx,
+  Nix = coreKernels.Frame.Nix,
+  Kerberos = coreKernels.Frame.Kerberos
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(NewHorizonsKernels)
+  openspace.spice.loadKernel(PlutoKernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(PlutoKernels)
+  openspace.spice.unloadKernel(NewHorizonsKernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
 asset.export("NewHorizonsKernels", NewHorizonsKernels)
 asset.export("PlutoKernels", PlutoKernels)

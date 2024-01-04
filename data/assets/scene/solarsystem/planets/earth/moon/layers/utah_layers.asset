@@ -1,0 +1,24 @@
+asset.require("./colorlayers/wac_utah", asset.enabled)
+asset.require("./colorlayers/clemuvvis_utah", false)
+asset.require("./colorlayers/uvvishybrid_utah", false)
+asset.require("./colorlayers/kaguya_utah", false)
+asset.require("./colorlayers/lola_clr_shade_utah", false)
+asset.require("./colorlayers/lola_shade_utah", false)
+
+asset.require("./heightlayers/loladem_utah", asset.enabled)
+
+
+
+asset.meta = {
+  Name = "Default Moon layers (Utah)",
+  Version = "1.0",
+  Description = [[Default Moon layers are: WAC, Clem Uvvis, Uvvis Hybrid, Kaguya,
+    LRO LOLA Color Shaded Relief 388m v4, Lola Shade, and Lola DEM (3D).
+
+
+    Layers only loaded from the Utah server
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -5,37 +5,37 @@ local Mission = {
   Milestones = {
     {
       Name = "Earth flyby 1",
-      Date = "2024 AUG 01 00:00:00",
+      Date = "2024 AUG 01 00:00:00"
     },
     {
       Name = "Venus flyby",
-      Date = "2025 AUG 01 00:00:00",
+      Date = "2025 AUG 01 00:00:00"
     },
     {
       Name = "Earth flyby 2",
-      Date = "2026 SEP 01 00:00:00",
+      Date = "2026 SEP 01 00:00:00"
     },
     {
       Name = "Earth flyby 3",
-      Date = "2029 JAN 01 00:00:00",
+      Date = "2029 JAN 01 00:00:00"
     },
     {
       Name = "Arrival at Jupiter",
-      Date = "2031 JUL 01 00:00:00",
+      Date = "2031 JUL 01 00:00:00"
     },
     {
       Name = "Europa flyby 1",
-      Date = "2032 JUL 02 16:21:51",
+      Date = "2032 JUL 02 16:21:51"
     },
     {
       Name = "Europa flyby 2",
-      Date = "2032 JUL 16 22:18:22",
+      Date = "2032 JUL 16 22:18:22"
     }
   },
   Phases = {
     {
       Name = "Journey to Jupiter",
-      TimeRange = { Start = "2023 APR 05 16:25:00", End = "2031 JUL 01 00:00:00" },
+      TimeRange = { Start = "2023 APR 05 16:25:00", End = "2031 JUL 01 00:00:00" }
     },
     {
       Name = "Jupiter orbit",

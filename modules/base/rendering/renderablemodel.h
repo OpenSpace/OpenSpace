@@ -80,7 +80,6 @@ private:
 
     std::filesystem::path _file;
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
-    properties::DoubleProperty _modelScale;
     bool _invertModelScale = false;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
@@ -98,6 +97,7 @@ private:
     properties::BoolProperty _enableFaceCulling;
     properties::DMat4Property _modelTransform;
     properties::Vec3Property _pivot;
+    properties::DoubleProperty _modelScale;
     properties::Vec3Property _rotationVec;
 
     properties::BoolProperty _enableDepthTest;

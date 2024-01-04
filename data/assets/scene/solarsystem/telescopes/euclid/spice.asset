@@ -1,0 +1,38 @@
+local kernels = asset.resource({
+  Name = "Euclid Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "euclid_kernels",
+  Version = 1
+})
+
+
+local EuclidKernels = {
+  kernels .. "de432s.bsp",
+  kernels .. "euclid_flp_00044_20230701_20311013_v01.bsp"
+}
+
+local ID = {
+  Euclid = -680
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(EuclidKernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(EuclidKernels)
+end)
+
+asset.export("ID", ID)
+
+
+
+asset.meta = {
+  Name = "Euclid Kernels",
+  Version = "1.0",
+  Description = "This asset contains the SPICE kernels for ESA's Euclid mission.",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

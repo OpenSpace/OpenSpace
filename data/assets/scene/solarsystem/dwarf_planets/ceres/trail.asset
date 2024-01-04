@@ -1,6 +1,6 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +11,8 @@ local CeresTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CERES",
-      Observer = "SSB"
+      Target = kernels.ID.Ceres,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.2, 0.8, 0.3 },
     Period = 1680,
@@ -27,15 +27,11 @@ local CeresTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.CeresKernels)
-
   openspace.addSceneGraphNode(CeresTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CeresTrail)
-
-  openspace.spice.unloadKernel(kernels.CeresKernels)
 end)
 
 asset.export(CeresTrail)

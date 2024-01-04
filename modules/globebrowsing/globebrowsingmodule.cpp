@@ -513,45 +513,16 @@ void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& gl
     using namespace globebrowsing;
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianPosition(geo3);
 
-
-    const glm::dvec3 slightlyNorth = globe.ellipsoid().cartesianSurfacePosition(
-        Geodetic2{ geo3.geodetic2.lat + 0.001, geo3.geodetic2.lon }
-    );
-
     interaction::NavigationState state;
     state.anchor = globe.owner()->identifier();
     state.referenceFrame = globe.owner()->identifier();
     state.position = positionModelSpace;
-    state.up = slightlyNorth;
+    // For globes, we know that the up-direction will always be positive Z.
+    // @TODO (2023-12-06 emmbr) Eventually, we want each scene graph node to be aware of
+    // its own preferred up-direction. At that time, this should no longer be hardcoded
+    state.up = glm::dvec3(0.0, 0.0, 1.0);
 
     global::navigationHandler->setNavigationStateNextFrame(state);
-}
-
-glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
-                                              const globebrowsing::RenderableGlobe& globe,
-                                                              glm::dvec3 cameraModelSpace,
-                                                            globebrowsing::Geodetic2 geo2)
-{
-    using namespace globebrowsing;
-
-    // Lookup vector
-    const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianSurfacePosition(
-        geo2
-    );
-    const glm::dvec3 slightlyNorth = globe.ellipsoid().cartesianSurfacePosition(
-        Geodetic2{ geo2.lat + 0.001, geo2.lon }
-    );
-    const glm::dvec3 lookUpModelSpace = glm::normalize(
-        slightlyNorth - positionModelSpace
-    );
-
-    // Matrix
-    const glm::dmat4 lookAtMatrix =
-        glm::lookAt(cameraModelSpace, positionModelSpace, lookUpModelSpace);
-
-    // Set rotation
-    const glm::dquat rotation = glm::quat_cast(inverse(lookAtMatrix));
-    return rotation;
 }
 
 const globebrowsing::RenderableGlobe*

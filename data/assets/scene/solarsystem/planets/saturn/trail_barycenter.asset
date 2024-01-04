@@ -1,4 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -7,15 +8,15 @@ local SaturnBarycenterTrail = {
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SATURN BARYCENTER",
-      Observer = "SSB"
+      Target = coreKernels.ID.SaturnBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.85, 0.75, 0.51 },
     Period = 10746.94,
-    Resolution = 1000,
-    Enabled = false
+    Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
   GUI = {
@@ -41,8 +42,7 @@ asset.export(SaturnBarycenterTrail)
 asset.meta = {
   Name = "Saturn Trail",
   Version = "1.1",
-  Description = [[Trail of Saturn's Barycenter. Data from NASA Spice (see base spice
-    asset)]],
+  Description = "Trail of Saturn's Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
