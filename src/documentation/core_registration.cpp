@@ -57,6 +57,7 @@
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/systemcapabilitiesbinding.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/task.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
 
@@ -74,6 +75,7 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(Scale::Documentation());
     engine.addDocumentation(SceneGraphNode::Documentation());
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
+    engine.addDocumentation(Task::documentation());
     engine.addDocumentation(TimeRange::Documentation());
     engine.addDocumentation(Translation::Documentation());
     engine.addDocumentation(TimeFrame::Documentation());
