@@ -46,9 +46,9 @@ namespace {
     // `openspace.navigation.getNavigationState()` function in the Scripting API.
     //
     // Note that a NavigationState does not include information about what timestamp
-    // within OpenSpace that the NavigationState was generated. The visuals may be
-    // different depending on what the simulation timestamp is when the NavigationState
-    // is loaded, as the relative positions of objects in the scene may have changed.
+    // within OpenSpace that the NavigationState was generated. When laoding a
+    // NavigationState, the visuals may be different depending on what the simulation
+    // timestamp is, as the relative positions of objects in the scene may have changed.
     // The get the exact same visuals as when the NavigationState was saved, make sure
     // to also set the time to be the same as on save.
     struct [[codegen::Dictionary(NavigationState)]] Parameters {
