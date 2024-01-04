@@ -440,14 +440,11 @@ void RenderableTube::readDataFile() {
 
             // Value
             auto v = pt->find("value");
-            if (v == pt->end()) {
-                LERROR("Could not find coordinate value component for polygon in data");
-                return;
+            if (v != pt->end()) {
+                float value;
+                pt->at("value").get_to(value);
+                timePolygonPoint.value = value;
             }
-
-            float value;
-            pt->at("value").get_to(value);
-            timePolygonPoint.value = value;
 
             timePolygon.points.push_back(timePolygonPoint);
         }
