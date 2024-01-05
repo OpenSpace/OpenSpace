@@ -94,11 +94,8 @@ void main() {
   }
 
   if (enableMaxSizeControl) {
-    // WIP: doing this max scaling based on a visual "angular" size instead of
-    // size in pixels => needs no screen space size information
-
-    // The full angle in FOV that the point is allowed to take up.
-    // Note that the max size is the size for the diameter, and we need the radius
+    // Limit the max size of the points, as the angle in "FOV" that the point is allowed
+    // to take up. Note that the max size is for the diameter, and we need the radius
     float desiredAngleRadians = radians(maxAngularSize * 0.5);
 
     double distanceToCamera = length(dpos.xyz - cameraPosition);
