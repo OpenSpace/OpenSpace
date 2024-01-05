@@ -100,6 +100,8 @@ void main() {
 
     double distanceToCamera = length(dpos.xyz - cameraPosition);
     double pointSize = length(dvec3(scaledRight));
+    // @TODO (2023-01-05, emmbr) Consider if this atan computation can be optimized using
+    // approximation
     float angle = atan(float(pointSize / distanceToCamera));
 
     if ((angle > desiredAngleRadians) && (distanceToCamera > 0)) {
