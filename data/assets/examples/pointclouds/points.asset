@@ -41,7 +41,7 @@ local FixedColor_MaxSize = {
       FixedColor = { 0.0, 1.0, 1.0 }
     },
     SizeSettings = {
-      MaxSize = 0.2,
+      MaxSize = 0.7,
       EnableMaxSizeControl = true
     }
   },
