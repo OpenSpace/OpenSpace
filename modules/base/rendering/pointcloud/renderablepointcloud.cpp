@@ -79,7 +79,7 @@ namespace {
         "UseTexture",
         "Use Texture",
         "If true, use the provided sprite texture to render the point. If false, draw "
-        "the points using the default point shape",
+        "the points using the default point shape.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -122,7 +122,7 @@ namespace {
         "Unit, or meters. With normal fading the points are fully visible once the "
         "camera is outside this range and fully invisible when inside the range. With "
         "inverted fading the situation is the opposite: the points are visible inside "
-        "hen closer than the min value of the range and invisible when further away",
+        "hen closer than the min value of the range and invisible when further away.",
         // @VISIBILITY(3.25)
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -131,7 +131,7 @@ namespace {
         "Enabled",
         "Enable Distance-based Fading",
         "Enables/disables the Fade-in effect based on camera distance. Automatically set "
-        "to true if FadeInDistances are specified in the asset",
+        "to true if FadeInDistances are specified in the asset.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -140,7 +140,7 @@ namespace {
         "Invert",
         "This property can be used the invert the fading so that the points are "
         "invisible when the camera is further away than the max fade distance "
-        "and fully visible when it is closer than the min distance",
+        "and fully visible when it is closer than the min distance.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -171,7 +171,7 @@ namespace {
         "value should be. If not included, it is computed based on the maximum "
         "positional component of the data points. This is useful for showing the "
         "dataset at all, but you will likely want to change it to something that looks "
-        "good",
+        "good.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -180,7 +180,7 @@ namespace {
         "Scale Factor",
         "This value is used as a multiplicative factor to adjust the size of the points, "
         "after the exponential scaling and any pixel-size control effects. Simply just "
-        "increases or decreases the visual size of the points",
+        "increases or decreases the visual size of the points.",
         openspace::properties::Property::Visibility::User
     };
 
