@@ -187,17 +187,19 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseMaxSizeControlInfo = {
         "EnableMaxSizeControl",
         "Enable Max Size Control",
-        "If true, the Max Size in Pixels property will be used as an upper limit for the "
-        "size of the point. Reduces the size of the points when approaching them, so that "
-        "they stick to a maximum screen space size. Currently, the scaling is computed "
-        "based on rectangular displays and might look weird in other projections",
+        "If true, the Max Size property will be used as an upper limit for the size of "
+        "the point. This reduces the size of the points when approaching them, so that "
+        "they stick to a maximum visual size depending on the Max Size value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
-        "MaxAngularSize",
-        "Max Size (degrees)",
-        "The maximum size (in pixels) for the billboard representing the point.", // TODO: update description. How does one explain it in a good way?
+        "MaxSize",
+        "Max Size",
+        "This value controls the maximum allowed size for the points, when the max size "
+        "control feature is enabled. This limits the visual size of the points based on "
+        "the distance to the camera. The larger the value, the larger the points are "
+        "allowed to become.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -314,7 +316,7 @@ namespace {
             std::optional<bool> enableMaxSizeControl;
 
             // [[codegen::verbatim(MaxSizeInfo.description)]]
-            std::optional<float> maxAngularSize;
+            std::optional<float> maxSize;
         };
         // Settings related to the scale of the points, whether they should limit to
         // a certain pixel size, etc.
@@ -375,7 +377,7 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
         scaleFactor = settings.scaleFactor.value_or(scaleFactor);
         scaleExponent = settings.scaleExponent.value_or(scaleExponent);
         useMaxSizeControl = settings.enableMaxSizeControl.value_or(useMaxSizeControl);
-        maxAngularSize = settings.maxAngularSize.value_or(maxAngularSize);
+        maxAngularSize = settings.maxSize.value_or(maxAngularSize);
 
         if (settings.sizeMapping.has_value()) {
             std::vector<std::string> opts = *settings.sizeMapping;
