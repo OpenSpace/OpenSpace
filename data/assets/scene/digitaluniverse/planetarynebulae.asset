@@ -34,8 +34,8 @@ local Object = {
     Unit = "pc",
     SizeSettings = {
       ScaleExponent = 18.46,
-      MaxPixelSize = 500.0,
-      EnablePixelSizeControl = true
+      MaxSize = 19.0,
+      EnableMaxSizeControl = true
     }
   },
   GUI = {

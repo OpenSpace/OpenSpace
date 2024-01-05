@@ -25,8 +25,8 @@ local FixedColor_FixedSize = {
 
 -- Point cloud with fixed color and size scaling that is limited by a certain size,
 -- in pixels
-local FixedColor_MaxPixelSize = {
-  Identifier = "ExamplePoints_MaxPixelSize",
+local FixedColor_MaxSize = {
+  Identifier = "ExamplePoints_MaxSize",
   Parent = earthAsset.Earth.Identifier,
   Transform = {
     Rotation = {
@@ -41,8 +41,8 @@ local FixedColor_MaxPixelSize = {
       FixedColor = { 0.0, 1.0, 1.0 }
     },
     SizeSettings = {
-      MaxPixelSize = 4.7,
-      EnablePixelSizeControl = true
+      MaxSize = 0.2,
+      EnableMaxSizeControl = true
     }
   },
   GUI = {
@@ -201,7 +201,7 @@ local ColorMappedAdvanced_NoBlend = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(FixedColor_FixedSize)
-  openspace.addSceneGraphNode(FixedColor_MaxPixelSize)
+  openspace.addSceneGraphNode(FixedColor_MaxSize)
   openspace.addSceneGraphNode(FixedColor_ScaleBasedOnData)
   openspace.addSceneGraphNode(Textured)
   openspace.addSceneGraphNode(ColorMapped_FixedSize)
@@ -213,12 +213,12 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ColorMapped_FixedSize)
   openspace.removeSceneGraphNode(Textured)
   openspace.removeSceneGraphNode(FixedColor_ScaleBasedOnData)
-  openspace.removeSceneGraphNode(FixedColor_MaxPixelSize)
+  openspace.removeSceneGraphNode(FixedColor_MaxSize)
   openspace.removeSceneGraphNode(FixedColor_FixedSize)
 end)
 
 asset.export(FixedColor_FixedSize)
-asset.export(FixedColor_MaxPixelSize)
+asset.export(FixedColor_MaxSize)
 asset.export(FixedColor_ScaleBasedOnData)
 asset.export(Textured)
 asset.export(ColorMapped_FixedSize)

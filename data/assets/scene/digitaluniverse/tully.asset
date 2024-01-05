@@ -52,8 +52,8 @@ local TullyGalaxies = {
     },
     SizeSettings = {
       ScaleExponent = 21.9,
-      MaxPixelSize = 7.0,
-      EnablePixelSizeControl = true
+      MaxSize = 0.3,
+      EnableMaxSizeControl = true
     }
   },
   GUI = {

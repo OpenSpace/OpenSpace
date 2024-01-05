@@ -35,8 +35,8 @@ local DeepSkyObjects = {
     --FadeInDistances = { 0.05, 1.0 }, -- Fade in value in the same unit as "Unit"
     SizeSettings = {
       ScaleExponent = 21.7,
-      MaxPixelSize = 8.22,
-      EnablePixelSizeControl = true
+      MaxSize = 0.32,
+      EnableMaxSizeControl = true
     }
   },
   Transform = {
