@@ -199,7 +199,9 @@ namespace {
         "This value controls the maximum allowed size for the points, when the max size "
         "control feature is enabled. This limits the visual size of the points based on "
         "the distance to the camera. The larger the value, the larger the points are "
-        "allowed to become.",
+        "allowed to become. In the background, the computations are made by limiting the "
+        "size to a certain angle based on the field of view of the camera. So a value of "
+        "1 limits the point size to take up a maximum of one degree of the view space.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
