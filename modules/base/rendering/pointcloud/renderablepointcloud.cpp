@@ -351,7 +351,7 @@ namespace {
         // origin of the dataset
         std::optional<Fading> fading;
 
-        // Transformation matrix to be applied to each object
+        // Transformation matrix to be applied to the position of each object
         std::optional<glm::dmat4x4> transformationMatrix;
     };
 
