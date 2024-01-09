@@ -29,6 +29,7 @@
 
 #include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -55,8 +56,16 @@ protected:
     std::vector<float> createDataSlice() override;
 
 private:
-    properties::FloatProperty _interpolationValue;
-    properties::UIntProperty _nSteps;
+    struct Interpolation : properties::PropertyOwner {
+        Interpolation();
+        properties::FloatProperty value;
+        properties::UIntProperty nSteps;
+
+        //properties::TriggerProperty goToNextStep;
+        //properties::TriggerProperty interpolateToNextStep;
+        //properties::FloatProperty timeForNextStepInterpolation;
+    };
+    Interpolation _interpolation;
 
     // Every N:th point in the dataset will be interpreted as the same point
     unsigned int _nObjects = 0;

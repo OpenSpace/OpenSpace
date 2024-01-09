@@ -36,8 +36,8 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableInterpolatedPoints";
 
     constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
-        "InterpolationValue",
-        "Interpolation Value",
+        "Value",
+        "Value",
         "TODO",
         openspace::properties::Property::Visibility::User
     };
@@ -67,13 +67,23 @@ documentation::Documentation RenderableInterpolatedPoints::Documentation() {
     );
 }
 
+RenderableInterpolatedPoints::Interpolation::Interpolation()
+    : properties::PropertyOwner({ "Interpolation", "Interpolation", "" })
+    , value(InterpolationValueInfo, 0.f, 0.f, 1.f)
+    , nSteps(StepsInfo)
+{
+    addProperty(value);
+    nSteps.setReadOnly(true);
+    addProperty(nSteps);
+}
+
 RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     const ghoul::Dictionary& dictionary)
     : RenderablePointCloud(dictionary)
-    , _interpolationValue(InterpolationValueInfo, 0.f, 0.f, 1.f)
-    , _nSteps(StepsInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addPropertySubOwner(_interpolation);
 
     _nObjects = static_cast<unsigned int>(p.numberOfObjects);
 
@@ -89,19 +99,15 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
         ));
     }
 
-    _nSteps = _nDataPoints / _nObjects;
-    _interpolationValue.setMaxValue(static_cast<float>(_nSteps));
+    _interpolation.nSteps = _nDataPoints / _nObjects;
+    _interpolation.value.setMaxValue(static_cast<float>(_interpolation.nSteps));
 
-    _interpolationValue.onChange([this]() { _dataIsDirty = true; });
+    _interpolation.value.onChange([this]() { _dataIsDirty = true; });
 
     // This property is mostly for show in the UI, but also used to tell how many points
     // shoudl be rendered. So make sure it is updated once we know the number of
     // interpolation steps
     _nDataPoints = _nObjects;
-
-    addProperty(_interpolationValue);
-    _nSteps.setReadOnly(true);
-    addProperty(_nSteps);
 }
 
 std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
@@ -115,8 +121,8 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
     result.reserve(nAttributesPerPoint() * _nObjects);
 
     // Find the information we need for the interpolation and to identify the points
-    float t0 = glm::floor(_interpolationValue);
-    float t1 = glm::ceil(_interpolationValue);
+    float t0 = glm::floor(_interpolation.value);
+    float t1 = glm::ceil(_interpolation.value);
     float t = t1 - t0;
     unsigned int firstStartIndex = static_cast<unsigned int>(t0) * _nDataPoints;
     unsigned int lastStartIndex = static_cast<unsigned int>(t1) * _nDataPoints;
