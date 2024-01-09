@@ -798,7 +798,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     }
 
     glBindVertexArray(_vao);
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nDataPoints));
     glBindVertexArray(0);
     _program->deactivate();
 

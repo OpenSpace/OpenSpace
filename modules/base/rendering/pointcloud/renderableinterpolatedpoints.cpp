@@ -94,7 +94,9 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
 
     _interpolationValue.onChange([this]() { _dataIsDirty = true; });
 
-    // This is just for show in the UI
+    // This property is mostly for show in the UI, but also used to tell how many points
+    // shoudl be rendered. So make sure it is updated once we know the number of
+    // interpolation steps
     _nDataPoints = _nObjects;
 
     addProperty(_interpolationValue);
