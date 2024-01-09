@@ -66,9 +66,6 @@ private:
         //properties::FloatProperty timeForNextStepInterpolation;
     };
     Interpolation _interpolation;
-
-    // Every N:th point in the dataset will be interpreted as the same point
-    unsigned int _nObjects = 0;
 };
 
 } // namespace openspace

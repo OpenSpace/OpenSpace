@@ -28,6 +28,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/interpolator.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <optional>
@@ -85,13 +86,13 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
 
     addPropertySubOwner(_interpolation);
 
-    _nObjects = static_cast<unsigned int>(p.numberOfObjects);
+    unsigned int nObjects = static_cast<unsigned int>(p.numberOfObjects);
 
     // At this point, the dataset has been loaded and the number of points computed. We
     // need to recompute them and compute how many steps the number of points
     // corresponded to
 
-    if (_nDataPoints % _nObjects != 0) {
+    if (_nDataPoints % nObjects != 0) {
         LERROR(fmt::format(
             "Mismatch between provided number of data entries and the specified number "
             "of points. Expected the number of entries in the data file {} to be evenly"
@@ -99,7 +100,7 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
         ));
     }
 
-    _interpolation.nSteps = _nDataPoints / _nObjects;
+    _interpolation.nSteps = _nDataPoints / nObjects - 1;
     _interpolation.value.setMaxValue(static_cast<float>(_interpolation.nSteps));
 
     _interpolation.value.onChange([this]() { _dataIsDirty = true; });
@@ -107,7 +108,7 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     // This property is mostly for show in the UI, but also used to tell how many points
     // shoudl be rendered. So make sure it is updated once we know the number of
     // interpolation steps
-    _nDataPoints = _nObjects;
+    _nDataPoints = nObjects;
 }
 
 std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
@@ -118,14 +119,19 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
     }
 
     std::vector<float> result;
-    result.reserve(nAttributesPerPoint() * _nObjects);
+    result.reserve(nAttributesPerPoint() * _nDataPoints);
+
+    // TODO: Make sure it works with a faulty number of steps, etc
 
     // Find the information we need for the interpolation and to identify the points
-    float t0 = glm::floor(_interpolation.value);
-    float t1 = glm::ceil(_interpolation.value);
-    float t = t1 - t0;
+    float t0 = glm::clamp(
+        glm::floor(_interpolation.value),
+        0.f,
+        static_cast<float>(_interpolation.nSteps - 1) // TODO: correct? Verify larger than 0?
+    );
+    float t = _interpolation.value - t0;
     unsigned int firstStartIndex = static_cast<unsigned int>(t0) * _nDataPoints;
-    unsigned int lastStartIndex = static_cast<unsigned int>(t1) * _nDataPoints;
+    unsigned int lastStartIndex = (static_cast<unsigned int>(t0) + 1) * _nDataPoints;
 
     // What datavar is in use for the index color
     int colorParamIndex = currentColorParameterIndex();
@@ -135,9 +141,9 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
 
     double maxRadius = 0.0;
 
-    // TODO: verify that we have enough entries fopr this computation
+    // TODO: verify that we have enough entries for this computation
 
-    for (unsigned int i = 0; i < _nObjects; i++) {
+    for (unsigned int i = 0; i < _nDataPoints; i++) {
         const dataloader::Dataset::Entry& e0 = _dataset.entries[firstStartIndex + i];
         const dataloader::Dataset::Entry& e1 = _dataset.entries[lastStartIndex + i];
 
@@ -151,6 +157,8 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         glm::dvec3 interpolatedPosition = glm::dvec3(
             glm::mix(e0.position, e1.position, t)
         );
+
+        // TODO: add catmull-rom spline interpolation opition :)
 
         const double unitMeter = toMeter(_unit);
         glm::dvec4 position = glm::dvec4(interpolatedPosition * unitMeter, 1.0);
@@ -168,7 +176,8 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         if (_hasColorMapFile) {
             float value0 = e0.data[colorParamIndex];
             float value1 = e1.data[colorParamIndex];
-            result.push_back(glm::mix(value0, value1, t));
+            float value = ghoul::interpolateLinear(t, value0, value1);
+            result.push_back(value);
         }
 
         // Size data
@@ -178,7 +187,8 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
             // as the color mapping
             float value0 = e0.data[sizeParamIndex];
             float value1 = e1.data[sizeParamIndex];
-            result.push_back(glm::mix(value0, value1, t));
+            float value = ghoul::interpolateLinear(t, value0, value1);
+            result.push_back(value);
         }
     }
     setBoundingSphere(maxRadius);
