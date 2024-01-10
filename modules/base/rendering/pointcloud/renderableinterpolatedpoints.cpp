@@ -44,7 +44,7 @@ namespace {
         "The value to use for interpolation. The max value is set from the number of "
         "interpolation steps, so a step of one corresponds will correspond to doing one "
         "step in the dataset.", // TODO: imrove this description..
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepsInfo = {
@@ -56,40 +56,57 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo JumpToNextInfo = {
         "JumpToNext",
-        "Jump To Next",
+        "Jump to Next",
         "Immediately set the interpolation value to correspond to the next set of point "
         "positions compared to the current.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo JumpToPrevInfo = {
         "JumpToPrevious",
-        "Jump To Previous",
+        "Jump to Previous",
         "Immediately set the interpolation value to correspond to the previous set of "
         "point positions compared to the current.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo InterpolateToNextInfo = {
         "InterpolateToNext",
-        "Interpolate To Next",
+        "Interpolate to Next",
         "Trigger an interpolation to the next set of point positions. The duration of "
-        "the interpolation will be set based on the Interpolaton Duration property.",
-        openspace::properties::Property::Visibility::NoviceUser
+        "the interpolation is set based on the Interpolaton Speed property.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo InterpolateToPrevInfo = {
         "InterpolateToPrevious",
-        "Interpolate To Previous",
+        "Interpolate to Previous",
         "Trigger an interpolation to the previous set of point positions. The duration "
-        "of the interpolation will be set based on the Interpolaton Duration property.",
+        "of the interpolation is set based on the Interpolaton Speed property.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InterpolateToEndInfo = {
+        "InterpolateToEnd",
+        "Interpolate to End",
+        "Trigger an interpolation all the way to the final set of positions. The "
+        "duration of the interpolation is set based on the Interpolaton Speed property.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolationDurationInfo = {
-        "InterpolationDuration",
-        "Interpolation Duration",
-        "The duration used when an interpolation to the next step is triggered.",
+    constexpr openspace::properties::Property::PropertyInfo InterpolateToStartInfo = {
+        "InterpolateToStart",
+        "Interpolate to Start",
+        "Trigger an inverted interpolation to the initial set of positions. The duration "
+        "of the interpolation is set based on the Interpolaton Speed property.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InterpolationSpeedInfo = {
+        "Speed",
+        "Interpolation Speed",
+        "Affects how long the interpolation takes when triggered using one of the "
+        "trigger properties. A value of 1 means that a step takes 1 second.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -99,7 +116,7 @@ namespace {
         "If true, the points will be interpolated using a Catmull-Rom spline instead of "
         "linearly. This leads to a smoother transition at the breakpoints, i.e. between "
         "each step.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     // A RenderableInterpolatedPoints ... TODO
@@ -111,6 +128,9 @@ namespace {
         struct Interpolation {
             // [[codegen::verbatim(InterpolationValueInfo.description)]]
             std::optional<double> value;
+
+            // [[codegen::verbatim(InterpolationSpeedInfo.description)]]
+            std::optional<double> speed;
 
             // [[codegen::verbatim(UseSplineInfo.description)]]
             std::optional<bool> useSplineInterpolation;
@@ -139,7 +159,9 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     , goToPrevStep(JumpToPrevInfo)
     , interpolateToNextStep(InterpolateToNextInfo)
     , interpolateToPrevStep(InterpolateToPrevInfo)
-    , interpolationDuration(InterpolationDurationInfo, 1.f, 0.01f, 10.f)
+    , interpolateToEnd(InterpolateToEndInfo)
+    , interpolateToStart(InterpolateToStartInfo)
+    , speed(InterpolationSpeedInfo, 1.f, 0.01f, 10.f)
     , useSpline(UseSplineInfo, false)
 {
     addProperty(value);
@@ -158,23 +180,40 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
         );
     };
 
+    interpolateToEnd.onChange([triggerInterpolation, this]() {
+        float remaining = value.maxValue() - value;
+        float duration = remaining / speed;
+        triggerInterpolation(
+            value.fullyQualifiedIdentifier(),
+            value.maxValue(),
+            duration
+        );
+    });
+
+    interpolateToStart.onChange([triggerInterpolation, this]() {
+        float duration = value / speed;
+        triggerInterpolation(value.fullyQualifiedIdentifier(), 0.f, duration);
+    });
+
     interpolateToNextStep.onChange([triggerInterpolation, this]() {
         float prevValue = glm::floor(value);
         float newValue = glm::min(prevValue + 1.f, value.maxValue());
-        float duration = interpolationDuration;
+        float duration = 1.f / speed;
         triggerInterpolation(value.fullyQualifiedIdentifier(), newValue, duration);
     });
 
     interpolateToPrevStep.onChange([triggerInterpolation, this]() {
         float prevValue = glm::ceil(value);
         float newValue = glm::max(prevValue - 1.f, value.minValue());
-        float duration = interpolationDuration;
+        float duration = 1.f / speed;
         triggerInterpolation(value.fullyQualifiedIdentifier(), newValue, duration);
     });
 
+    addProperty(interpolateToEnd);
+    addProperty(interpolateToStart);
     addProperty(interpolateToNextStep);
     addProperty(interpolateToPrevStep);
-    addProperty(interpolationDuration);
+    addProperty(speed);
 
     goToNextStep.onChange([this]() {
         float prevValue = glm::floor(value);
@@ -204,7 +243,12 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     addPropertySubOwner(_interpolation);
 
     if (p.interpolation.has_value()) {
-        _interpolation.value = p.interpolation->value.value_or(_interpolation.value);
+        _interpolation.value = static_cast<float>(
+            p.interpolation->value.value_or(_interpolation.value)
+        );
+        _interpolation.speed = static_cast<float>(
+            p.interpolation->speed.value_or(_interpolation.speed)
+        );
         _interpolation.useSpline = p.interpolation->useSplineInterpolation.value_or(
             _interpolation.useSpline
         );

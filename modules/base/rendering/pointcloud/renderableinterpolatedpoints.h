@@ -70,7 +70,9 @@ private:
         properties::TriggerProperty goToPrevStep;
         properties::TriggerProperty interpolateToNextStep;
         properties::TriggerProperty interpolateToPrevStep;
-        properties::FloatProperty interpolationDuration;
+        properties::TriggerProperty interpolateToEnd;
+        properties::TriggerProperty interpolateToStart;
+        properties::FloatProperty speed;
 
         properties::BoolProperty useSpline;
     };
