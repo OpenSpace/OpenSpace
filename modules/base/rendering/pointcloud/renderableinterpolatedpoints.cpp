@@ -100,8 +100,8 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
         ));
     }
 
-    _interpolation.nSteps = _nDataPoints / nObjects - 1;
-    _interpolation.value.setMaxValue(static_cast<float>(_interpolation.nSteps));
+    _interpolation.nSteps = _nDataPoints / nObjects;
+    _interpolation.value.setMaxValue(static_cast<float>(_interpolation.nSteps - 1));
 
     _interpolation.value.onChange([this]() { _dataIsDirty = true; });
 
@@ -121,17 +121,20 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
     std::vector<float> result;
     result.reserve(nAttributesPerPoint() * _nDataPoints);
 
-    // TODO: Make sure it works with a faulty number of steps, etc
+    // Find the information we need for the interpolation and to identify the points,
+    // and make sure these result in valid indices in all cases
+    float t0 = glm::floor(_interpolation.value);
+    // Avoid exceeding allowed values
+    float maxAllowedT0 = glm::max(_interpolation.value.maxValue() - 1.f, 0.f);
+    t0 = glm::clamp(t0, 0.f, maxAllowedT0);
 
-    // Find the information we need for the interpolation and to identify the points
-    float t0 = glm::clamp(
-        glm::floor(_interpolation.value),
-        0.f,
-        static_cast<float>(_interpolation.nSteps - 1) // TODO: correct? Verify larger than 0?
-    );
-    float t = _interpolation.value - t0;
+    float t = glm::clamp(_interpolation.value - t0, 0.f, 1.f);
+
+    float t1 = t0 + 1.f;
+    t1 = glm::clamp(t1, 0.f, _interpolation.value.maxValue());
+
     unsigned int firstStartIndex = static_cast<unsigned int>(t0) * _nDataPoints;
-    unsigned int lastStartIndex = (static_cast<unsigned int>(t0) + 1) * _nDataPoints;
+    unsigned int lastStartIndex = static_cast<unsigned int>(t1) * _nDataPoints;
 
     // What datavar is in use for the index color
     int colorParamIndex = currentColorParameterIndex();
@@ -140,8 +143,6 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
     int sizeParamIndex = currentSizeParameterIndex();
 
     double maxRadius = 0.0;
-
-    // TODO: verify that we have enough entries for this computation
 
     for (unsigned int i = 0; i < _nDataPoints; i++) {
         const dataloader::Dataset::Entry& e0 = _dataset.entries[firstStartIndex + i];
