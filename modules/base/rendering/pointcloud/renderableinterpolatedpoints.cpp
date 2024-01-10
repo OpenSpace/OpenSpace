@@ -98,6 +98,13 @@ namespace {
         // The number of objects to read from the dataset. Every N:th datapoint will
         // be interpreted as the same point, but at a different step in the interpolation
         int numberOfObjects [[codegen::greaterequal(1)]];
+
+        struct Interpolation {
+            // [[codegen::verbatim(InterpolationValueInfo.description)]]
+            std::optional<double> value;
+        };
+        // Initial settings for the interpolation
+        std::optional<Interpolation> interpolation;
     };
 
 #include "renderableinterpolatedpoints_codegen.cpp"
@@ -180,6 +187,10 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addPropertySubOwner(_interpolation);
+
+    if (p.interpolation.has_value()) {
+        _interpolation.value = p.interpolation->value.value_or(_interpolation.value);
+    }
 
     unsigned int nObjects = static_cast<unsigned int>(p.numberOfObjects);
 
