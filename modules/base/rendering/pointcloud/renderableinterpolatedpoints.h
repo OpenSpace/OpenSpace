@@ -65,9 +65,11 @@ private:
         properties::FloatProperty value;
         properties::UIntProperty nSteps;
 
-        //properties::TriggerProperty goToNextStep;
-        //properties::TriggerProperty interpolateToNextStep;
-        //properties::FloatProperty timeForNextStepInterpolation;
+        properties::TriggerProperty goToNextStep;
+        properties::TriggerProperty goToPrevStep;
+        properties::TriggerProperty interpolateToNextStep;
+        properties::TriggerProperty interpolateToPrevStep;
+        properties::FloatProperty interpolationDuration;
     };
     Interpolation _interpolation;
 };

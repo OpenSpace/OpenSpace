@@ -25,6 +25,8 @@
 #include <modules/base/rendering/pointcloud/renderableinterpolatedpoints.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
@@ -52,6 +54,45 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo JumpToNextInfo = {
+        "JumpToNext",
+        "Jump To Next",
+        "Immediately set the interpolation value to correspond to the next set of point "
+        "positions compared to the current.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo JumpToPrevInfo = {
+        "JumpToPrevious",
+        "Jump To Previous",
+        "Immediately set the interpolation value to correspond to the previous set of "
+        "point positions compared to the current.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InterpolateToNextInfo = {
+        "InterpolateToNext",
+        "Interpolate To Next",
+        "Trigger an interpolation to the next set of point positions. The duration of "
+        "the interpolation will be set based on the Interpolaton Duration property.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InterpolateToPrevInfo = {
+        "InterpolateToPrevious",
+        "Interpolate To Previous",
+        "Trigger an interpolation to the previous set of point positions. The duration "
+        "of the interpolation will be set based on the Interpolaton Duration property.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InterpolationDurationInfo = {
+        "InterpolationDuration",
+        "Interpolation Duration",
+        "The duration used when an interpolation to the next step is triggered.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
     // A RenderableInterpolatedPoints ... TODO
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
         // The number of objects to read from the dataset. Every N:th datapoint will
@@ -75,8 +116,59 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     : properties::PropertyOwner({ "Interpolation", "Interpolation", "" })
     , value(InterpolationValueInfo, 0.f, 0.f, 1.f)
     , nSteps(StepsInfo)
+    , goToNextStep(JumpToNextInfo)
+    , goToPrevStep(JumpToPrevInfo)
+    , interpolateToNextStep(InterpolateToNextInfo)
+    , interpolateToPrevStep(InterpolateToPrevInfo)
+    , interpolationDuration(InterpolationDurationInfo, 1.f, 0.01f, 10.f)
 {
     addProperty(value);
+
+    auto triggerInterpolation = [](std::string_view identifier, float v, float d) {
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle(\"{}\", {}, {})",
+            identifier, v, d
+        );
+        // No syncing, as this was triggered from a property change (which happened
+        // based on an already synced script)
+        global::scriptEngine->queueScript(
+            script,
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
+        );
+    };
+
+    interpolateToNextStep.onChange([triggerInterpolation, this]() {
+        float prevValue = glm::floor(value);
+        float newValue = glm::min(prevValue + 1.f, value.maxValue());
+        float duration = interpolationDuration;
+        triggerInterpolation(value.fullyQualifiedIdentifier(), newValue, duration);
+    });
+
+    interpolateToPrevStep.onChange([triggerInterpolation, this]() {
+        float prevValue = glm::ceil(value);
+        float newValue = glm::max(prevValue - 1.f, value.minValue());
+        float duration = interpolationDuration;
+        triggerInterpolation(value.fullyQualifiedIdentifier(), newValue, duration);
+    });
+
+    addProperty(interpolateToNextStep);
+    addProperty(interpolateToPrevStep);
+    addProperty(interpolationDuration);
+
+    goToNextStep.onChange([this]() {
+        float prevValue = glm::floor(value);
+        value = glm::min(prevValue + 1.f, value.maxValue());
+        });
+
+    goToPrevStep.onChange([this]() {
+        float prevValue = glm::ceil(value);
+        value = glm::max(prevValue - 1.f, value.minValue());
+    });
+
+    addProperty(goToNextStep);
+    addProperty(goToPrevStep);
+
     nSteps.setReadOnly(true);
     addProperty(nSteps);
 }
@@ -158,11 +250,9 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         // in any clever way?
 
         // Compute interpolated values
-        glm::vec3 start = e0.position;
-        glm::vec3 end = e1.position;
-        glm::dvec3 interpolatedPosition = glm::dvec3(
-            ghoul::interpolateLinear(t, start, end)
-        );
+        const glm::dvec3 start = glm::dvec3(e0.position);
+        const glm::dvec3 end = glm::dvec3(e1.position);
+        glm::dvec3 interpolatedPosition = ghoul::interpolateLinear(t, start, end);
 
         // TODO: add catmull-rom spline interpolation opition :)
 
