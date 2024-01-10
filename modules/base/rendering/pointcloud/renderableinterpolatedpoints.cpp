@@ -93,6 +93,15 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseSplineInfo = {
+        "UseSplineInterpolation",
+        "Use Spline Interpolation",
+        "If true, the points will be interpolated using a Catmull-Rom spline instead of "
+        "linearly. This leads to a smoother transition at the breakpoints, i.e. between "
+        "each step.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
     // A RenderableInterpolatedPoints ... TODO
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
         // The number of objects to read from the dataset. Every N:th datapoint will
@@ -102,6 +111,9 @@ namespace {
         struct Interpolation {
             // [[codegen::verbatim(InterpolationValueInfo.description)]]
             std::optional<double> value;
+
+            // [[codegen::verbatim(UseSplineInfo.description)]]
+            std::optional<bool> useSplineInterpolation;
         };
         // Initial settings for the interpolation
         std::optional<Interpolation> interpolation;
@@ -128,6 +140,7 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     , interpolateToNextStep(InterpolateToNextInfo)
     , interpolateToPrevStep(InterpolateToPrevInfo)
     , interpolationDuration(InterpolationDurationInfo, 1.f, 0.01f, 10.f)
+    , useSpline(UseSplineInfo, false)
 {
     addProperty(value);
 
@@ -178,6 +191,8 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
 
     nSteps.setReadOnly(true);
     addProperty(nSteps);
+
+    addProperty(useSpline);
 }
 
 RenderableInterpolatedPoints::RenderableInterpolatedPoints(
@@ -190,6 +205,9 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
 
     if (p.interpolation.has_value()) {
         _interpolation.value = p.interpolation->value.value_or(_interpolation.value);
+        _interpolation.useSpline = p.interpolation->useSplineInterpolation.value_or(
+            _interpolation.useSpline
+        );
     }
 
     unsigned int nObjects = static_cast<unsigned int>(p.numberOfObjects);
@@ -227,20 +245,18 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
     std::vector<float> result;
     result.reserve(nAttributesPerPoint() * _nDataPoints);
 
+    const float maxTValue = _interpolation.value.maxValue();
+
     // Find the information we need for the interpolation and to identify the points,
     // and make sure these result in valid indices in all cases
     float t0 = glm::floor(_interpolation.value);
-    // Avoid exceeding allowed values
-    float maxAllowedT0 = glm::max(_interpolation.value.maxValue() - 1.f, 0.f);
+    float maxAllowedT0 = glm::max(maxTValue - 1.f, 0.f);
     t0 = glm::clamp(t0, 0.f, maxAllowedT0);
 
     float t = glm::clamp(_interpolation.value - t0, 0.f, 1.f);
 
     float t1 = t0 + 1.f;
-    t1 = glm::clamp(t1, 0.f, _interpolation.value.maxValue());
-
-    unsigned int firstStartIndex = static_cast<unsigned int>(t0) * _nDataPoints;
-    unsigned int lastStartIndex = static_cast<unsigned int>(t1) * _nDataPoints;
+    t1 = glm::clamp(t1, 0.f, maxTValue);
 
     // What datavar is in use for the index color
     int colorParamIndex = currentColorParameterIndex();
@@ -249,10 +265,13 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
     int sizeParamIndex = currentSizeParameterIndex();
 
     double maxRadius = 0.0;
+    unsigned int t0Index = static_cast<unsigned int>(t0);
+    unsigned int t1Index = static_cast<unsigned int>(t1);
 
     for (unsigned int i = 0; i < _nDataPoints; i++) {
-        const dataloader::Dataset::Entry& e0 = _dataset.entries[firstStartIndex + i];
-        const dataloader::Dataset::Entry& e1 = _dataset.entries[lastStartIndex + i];
+        using namespace dataloader;
+        const Dataset::Entry& e0 = _dataset.entries[t0Index * _nDataPoints + i];
+        const Dataset::Entry& e1 = _dataset.entries[t1Index * _nDataPoints + i];
 
         // TODO::
         // OBS!! Should we rather include two points and do the intrpolation in the shader??
@@ -263,9 +282,28 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         // Compute interpolated values
         const glm::dvec3 start = glm::dvec3(e0.position);
         const glm::dvec3 end = glm::dvec3(e1.position);
-        glm::dvec3 interpolatedPosition = ghoul::interpolateLinear(t, start, end);
 
-        // TODO: add catmull-rom spline interpolation opition :)
+        glm::dvec3 interpolatedPosition;
+        if (!_interpolation.useSpline || _interpolation.nSteps < 2) {
+            interpolatedPosition = ghoul::interpolateLinear(t, start, end);
+        }
+        else {
+            // Compute the extra positions, before and after the interpolated ones
+            unsigned int beforeIndex = static_cast<unsigned int>(
+                glm::max(t0 - 1.f, 0.f)
+            );
+            unsigned int afterIndex = static_cast<unsigned int>(
+                glm::min(t1 + 1.f, maxTValue - 1.f)
+            );
+
+            const Dataset::Entry& e00 = _dataset.entries[beforeIndex * _nDataPoints + i];
+            const Dataset::Entry& e11 = _dataset.entries[afterIndex * _nDataPoints + i];
+            const glm::dvec3 before = glm::dvec3(e00.position);
+            const glm::dvec3 after = glm::dvec3(e11.position);
+
+            interpolatedPosition =
+                ghoul::interpolateCatmullRom(t, before, start, end, after);
+        }
 
         const double unitMeter = toMeter(_unit);
         glm::dvec4 position = glm::dvec4(interpolatedPosition * unitMeter, 1.0);
