@@ -39,20 +39,23 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
         "Value",
         "Value",
-        "TODO",
+        "The value to use for interpolation. The max value is set from the number of "
+        "interpolation steps, so a step of one corresponds will correspond to doing one "
+        "step in the dataset.", // TODO: imrove this description..
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepsInfo = {
         "NumberOfSteps",
         "Number of Steps",
-        "TODO",
+        "The number of steps available in the dataset, including the initial positions.",
         openspace::properties::Property::Visibility::User
     };
 
     // A RenderableInterpolatedPoints ... TODO
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
-        // TODO
+        // The number of objects to read from the dataset. Every N:th datapoint will
+        // be interpreted as the same point, but at a different step in the interpolation
         int numberOfObjects [[codegen::greaterequal(1)]];
     };
 
@@ -155,8 +158,10 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         // in any clever way?
 
         // Compute interpolated values
+        glm::vec3 start = e0.position;
+        glm::vec3 end = e1.position;
         glm::dvec3 interpolatedPosition = glm::dvec3(
-            glm::mix(e0.position, e1.position, t)
+            ghoul::interpolateLinear(t, start, end)
         );
 
         // TODO: add catmull-rom spline interpolation opition :)

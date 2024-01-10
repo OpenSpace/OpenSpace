@@ -38,7 +38,8 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * TODO:
+ * A specialization of the RenderablePointCloud that supports interpolation beetween
+ * different positions for the points.
  */
 class RenderableInterpolatedPoints : public RenderablePointCloud {
 public:
@@ -49,9 +50,12 @@ public:
 
 protected:
     /**
-     * The data slice @TODO
+     * Create the data slice to use for rendering the points. Compared to the regular
+     * point cloud, the data slice for an interpolated set of points will have to be
+     * recreated when the interpolation value changes, and will only include a subset of
+     * the points in the entire dataset
      *
-     * \return
+     * \return The dataslice to use for rendering the points
      */
     std::vector<float> createDataSlice() override;
 
