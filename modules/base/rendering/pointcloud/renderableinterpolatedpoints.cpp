@@ -263,7 +263,7 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     if (_nDataPoints % nObjects != 0) {
         LERROR(fmt::format(
             "Mismatch between provided number of data entries and the specified number "
-            "of points. Expected the number of entries in the data file {} to be evenly"
+            "of points. Expected the number of entries in the data file {} to be evenly "
             "divisible by the number of points", _dataFile
         ));
     }
@@ -362,6 +362,11 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         for (int j = 0; j < 4; ++j) {
             result.push_back(static_cast<float>(position[j]));
         }
+
+        // @TODO: Also need to update label positions, if we have created labels from the dataset
+        // And make sure these are created from only the first set of points..
+
+        // @TODO: make sure interpolation handles missing values for data parameters!
 
         // Colors
         if (_hasColorMapFile) {
