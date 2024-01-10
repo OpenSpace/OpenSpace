@@ -317,11 +317,13 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         const Dataset::Entry& e0 = _dataset.entries[t0Index * _nDataPoints + i];
         const Dataset::Entry& e1 = _dataset.entries[t1Index * _nDataPoints + i];
 
-        // TODO::
-        // OBS!! Should we rather include two points and do the intrpolation in the shader??
-        // Let's see what the performance becomes... Will have to do this update whenever we
-        // pass the interpolation parameter anyways.. Can we buffer the points piece by piece
-        // in any clever way?
+        // TODO (emmbr): Is this too naive?
+        // Should we rather include two points and do the interpolation in the shader?
+        // Let's see what the performance becomes for larger datasets. Maybe we can use
+        // threading or some other approach update the buffered datasets more cleverly,
+        // to reduce the runtime performance cost of recomputing the buffered data
+        // (Although, note that this would require updating the rendering code as well
+        // => more complexity)
 
         // Compute interpolated values
         const glm::dvec3 start = glm::dvec3(e0.position);
