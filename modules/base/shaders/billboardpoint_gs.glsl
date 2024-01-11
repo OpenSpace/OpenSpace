@@ -104,7 +104,7 @@ void main() {
     // approximation
     float angle = atan(float(pointSize / distanceToCamera));
 
-    if ((angle > desiredAngleRadians) && (distanceToCamera > 0)) {
+    if ((angle > desiredAngleRadians) && (distanceToCamera > 0.0)) {
       float correctionScaleFactor = float(distanceToCamera) * tan(desiredAngleRadians) / float(pointSize);
       scaledRight *= correctionScaleFactor;
       scaledUp *= correctionScaleFactor;
