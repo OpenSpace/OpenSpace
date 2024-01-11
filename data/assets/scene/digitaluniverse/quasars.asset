@@ -46,7 +46,7 @@ local Object = {
     },
     SizeSettings = {
       ScaleExponent = 23.5,
-      MaxSize = 0.4,
+      MaxSize = 0.3,
       EnableMaxSizeControl = true
     }
   },
