@@ -374,13 +374,17 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         // @TODO: Also need to update label positions, if we have created labels from the dataset
         // And make sure these are created from only the first set of points..
 
-        // @TODO: make sure interpolation handles missing values for data parameters!
+        auto inteprolateDataValue = [](float t, float v0, float v1) {
+            bool isMissing = std::isnan(v0) || std::isnan(v1);
+            constexpr float NaN = std::numeric_limits<float>::quiet_NaN();
+            return isMissing ? NaN : ghoul::interpolateLinear(t, v0, v1);
+        };
 
         // Colors
         if (_hasColorMapFile) {
             float value0 = e0.data[colorParamIndex];
             float value1 = e1.data[colorParamIndex];
-            float value = ghoul::interpolateLinear(t, value0, value1);
+            float value = inteprolateDataValue(t, value0, value1);
             result.push_back(value);
         }
 
@@ -391,7 +395,7 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
             // as the color mapping
             float value0 = e0.data[sizeParamIndex];
             float value1 = e1.data[sizeParamIndex];
-            float value = ghoul::interpolateLinear(t, value0, value1);
+            float value = inteprolateDataValue(t, value0, value1);
             result.push_back(value);
         }
     }
