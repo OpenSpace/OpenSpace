@@ -377,6 +377,14 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         auto inteprolateDataValue = [](float t, float v0, float v1) {
             bool isMissing = std::isnan(v0) || std::isnan(v1);
             constexpr float NaN = std::numeric_limits<float>::quiet_NaN();
+            // To make sure we render values at knots with neighboring missing values,
+            // check 0 and 1 expicitly
+            if (std::abs(t) < std::numeric_limits<float>::epsilon()) {
+                return v0;
+            }
+            if (std::abs(1.f - t) < std::numeric_limits<float>::epsilon()) {
+                return v1;
+            }
             return isMissing ? NaN : ghoul::interpolateLinear(t, v0, v1);
         };
 
