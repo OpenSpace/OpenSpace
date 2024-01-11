@@ -119,7 +119,15 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    // A RenderableInterpolatedPoints ... TODO
+    // RenderableInterpolatedPoints is a version of the RenderablePointCloud class, where
+    // the dataset may contain multiple time steps that can be interpolated between. It
+    // supports interpolation of both of positions and data values used for color mapping
+    // or size.
+    //
+    // The dataset should be structured in a way so that the first N rows correspond to
+    // the first set of positions for the objects, the next N rows to the second set of
+    // positions, and so on. The number of objects in the dataset must be specified in the
+    // asset.
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
         // The number of objects to read from the dataset. Every N:th datapoint will
         // be interpreted as the same point, but at a different step in the interpolation
