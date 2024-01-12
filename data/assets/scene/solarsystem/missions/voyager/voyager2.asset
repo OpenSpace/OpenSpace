@@ -1,5 +1,6 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -57,7 +58,7 @@ local Voyager2 = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "VG2_SC_BUS",
-      DestinationFrame = "GALACTIC"
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
