@@ -589,7 +589,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderablePointCloud::isReady() const {
-    bool isReady = _program && !_dataset.entries.empty();
+    bool isReady = _program;
 
     // If we have labels, they also need to be loaded
     if (_hasLabels) {
@@ -691,6 +691,10 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
                                             const glm::dvec3& orthoUp,
                                             float fadeInVariable)
 {
+    if (!_hasDataFile || _dataset.entries.empty()) {
+        return;
+    }
+
     glEnablei(GL_BLEND, 0);
 
     if (_useAdditiveBlending) {
@@ -861,7 +865,7 @@ int RenderablePointCloud::nAttributesPerPoint() const {
 }
 
 void RenderablePointCloud::updateBufferData() {
-    if (!_hasDataFile) {
+    if (!_hasDataFile || _dataset.entries.empty()) {
         return;
     }
 
