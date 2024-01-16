@@ -1254,7 +1254,7 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
         _maskingQuantity,
         success
     );
-
+    //if not given range, use min and max of data?
     if (!_havePrintedQuantityRange && !quantities.empty()) {
         float i = *std::min_element(quantities.begin(), quantities.end());
         std::string min = std::to_string(i);
