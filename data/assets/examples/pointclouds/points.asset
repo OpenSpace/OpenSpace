@@ -23,8 +23,7 @@ local FixedColor_FixedSize = {
   }
 }
 
--- Point cloud with fixed color and size scaling that is limited by a certain size,
--- in pixels
+-- Point cloud with fixed color and size scaling that is limited by a certain size
 local FixedColor_MaxSize = {
   Identifier = "ExamplePoints_MaxSize",
   Parent = earthAsset.Earth.Identifier,
@@ -46,9 +45,9 @@ local FixedColor_MaxSize = {
     }
   },
   GUI = {
-    Name = "Fixed Color / Max Pixel Size",
+    Name = "Fixed Color / Max Size",
     Path = "/Example/Point Clouds",
-    Description = "Point cloud with a fixed color and sizing with a given max pixel size"
+    Description = "Point cloud with a fixed color and sizing with a given max size"
   }
 }
 
