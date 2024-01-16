@@ -35,6 +35,7 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/network/messagestructureshelper.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
@@ -48,6 +49,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
@@ -80,6 +82,15 @@ namespace {
         "computed values are used instead",
         openspace::properties::Property::Visibility::Hidden
     };
+
+    constexpr openspace::properties::Property::PropertyInfo AddModelMatrixinAsciiInfo = {
+        "AddModelMatrixinAscii",
+        "Add Model Matrix in ASCII recording",
+        "If this is 'true', the model matrix is written into the ASCII recording format "
+        "in the line before each camera keyframe. The model matrix is the full matrix "
+        "that converts the position into a J2000+Galactic reference frame",
+        openspace::properties::Property::Visibility::Developer
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -92,12 +103,11 @@ SessionRecording::SessionRecording()
     : properties::PropertyOwner({ "SessionRecording", "Session Recording" })
     , _renderPlaybackInformation(RenderPlaybackInfo, false)
     , _ignoreRecordedScale(IgnoreRecordedScaleInfo, false)
+    , _addModelMatrixinAscii(AddModelMatrixinAsciiInfo, false)
 {}
 
 SessionRecording::SessionRecording(bool isGlobal)
-    : properties::PropertyOwner({ "SessionRecording", "Session Recording" })
-    , _renderPlaybackInformation(RenderPlaybackInfo, false)
-    , _ignoreRecordedScale(IgnoreRecordedScaleInfo, false)
+    : SessionRecording()
 {
     if (isGlobal) {
         ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
@@ -106,6 +116,7 @@ SessionRecording::SessionRecording(bool isGlobal)
         fTask->registerClass<ConvertRecFileVersionTask>("ConvertRecFileVersionTask");
         addProperty(_renderPlaybackInformation);
         addProperty(_ignoreRecordedScale);
+        addProperty(_addModelMatrixinAscii);
     }
 }
 
@@ -810,6 +821,14 @@ void SessionRecording::saveCameraKeyframeAscii(Timestamps& times,
                                                datamessagestructures::CameraKeyframe& kf,
                                                std::ofstream& file)
 {
+    if (_addModelMatrixinAscii) {
+        SceneGraphNode* node = sceneGraphNode(kf._focusNode);
+        glm::dmat4 modelTransform = node->modelTransform();
+
+        file << HeaderCommentAscii << ' ' << ghoul::to_string(modelTransform) << '\n';
+    }
+    
+
     std::stringstream keyframeLine = std::stringstream();
     saveHeaderAscii(times, HeaderCameraAscii, keyframeLine);
     kf.write(keyframeLine);

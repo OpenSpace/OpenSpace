@@ -1,7 +1,6 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local kernel = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,15 +9,15 @@ local NeptuneTrailEarth = {
   Parent = earthTransforms.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEPTUNE",
-      Observer = "EARTH"
+      Target = coreKernels.ID.Neptune,
+      Observer = coreKernels.ID.Earth
     },
     Color = { 1.0, 0.5, 0.2 },
     Period = 224.695,
-    Resolution = 1000,
-    Enabled = false
+    Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
   GUI = {
@@ -30,15 +29,11 @@ local NeptuneTrailEarth = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep097)
-
   openspace.addSceneGraphNode(NeptuneTrailEarth)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneTrailEarth)
-
-  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(NeptuneTrailEarth)

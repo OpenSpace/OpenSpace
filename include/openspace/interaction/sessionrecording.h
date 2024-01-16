@@ -585,6 +585,7 @@ public:
      the file format version number.
      *
      * \param filename source filename to be converted
+     * \param mode Whether the file is binary or text-based
      *
      * \return pathname of the converted version of the file
      */
@@ -593,6 +594,7 @@ public:
 protected:
     properties::BoolProperty _renderPlaybackInformation;
     properties::BoolProperty _ignoreRecordedScale;
+    properties::BoolProperty _addModelMatrixinAscii;
 
     enum class RecordedType {
         Camera = 0,

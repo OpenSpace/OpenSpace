@@ -68,7 +68,7 @@ local ENLILSliceEqPlane11AU1 = {
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -93,7 +93,7 @@ local ENLILSliceEqPlane11AU2 = {
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -118,7 +118,7 @@ local ENLILSliceLat411AU1 = {
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -143,7 +143,7 @@ local ENLILSliceLat411AU2 = {
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -166,7 +166,7 @@ local ENLILEarth = {
     Color = { 1.0, 1.0, 1.0, 0.6 },
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -189,7 +189,7 @@ local ENLILStereoA = {
     Color = { 1.0, 1.0, 1.0, 0.6 },
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges,
     FlowEnabled = true,

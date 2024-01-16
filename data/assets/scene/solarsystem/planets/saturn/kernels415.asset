@@ -1,0 +1,58 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local kernels = asset.resource({
+  Name = "Saturn Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_kernels",
+  Version = 2
+})
+
+
+local ID = {
+  Aegaeon = "AEGAEON",
+  Anthe = "ANTHE",
+  Atlas = "ATLAS",
+  Daphnis = "DAPHNIS",
+  Epimetheus = "EPIMETHEUS",
+  Janus = "JANUS",
+  Methone = "METHONE",
+  Pallene = "PALLENE",
+  Pan = "PAN",
+  Pandora = "PANDORA",
+  Prometheus = "PROMETHEUS",
+  Telesto = "TELESTO",
+}
+
+local Frame = {
+  Atlas = coreKernels.Frame.Atlas,
+  Epimetheus = coreKernels.Frame.Epimetheus,
+  Janus = coreKernels.Frame.Janus,
+  Pan = coreKernels.Frame.Pan,
+  Pandora = coreKernels.Frame.Pandora,
+  Prometheus = coreKernels.Frame.Prometheus,
+  Telesto = coreKernels.Frame.Telesto
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "sat415.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "sat415.bsp")
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
+
+
+asset.meta = {
+  Name = "Saturn Spice Kernels",
+  Version = "1.0",
+  Description = "Generic SPICE kernels for Saturn",
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
+  License = "NASA"
+}

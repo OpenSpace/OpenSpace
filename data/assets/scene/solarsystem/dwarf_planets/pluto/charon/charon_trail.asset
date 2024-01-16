@@ -1,6 +1,5 @@
 local transforms = asset.require("../transforms")
-asset.require("spice/base")
-
+local kernels = asset.require("../kernels")
 
 
 local CharonBarycentricTrail = {
@@ -10,8 +9,8 @@ local CharonBarycentricTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CHARON",
-      Observer = "PLUTO BARYCENTER"
+      Target = kernels.ID.Charon,
+      Observer = kernels.ID.PlutoBarycenter
     },
     Color = { 0.00, 0.62, 1.00 },
     Period = 6.38723,
@@ -46,8 +45,7 @@ asset.export(CharonBarycentricTrail)
 asset.meta = {
   Name = "Charon Barycentric Trail",
   Version = "1.0",
-  Description = [[Trail of Charon as observed by Pluto Barycenter. Data from
-    NASA Spice (see base spice asset)]],
+  Description = "Trail of Charon as observed by Pluto Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

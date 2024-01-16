@@ -144,7 +144,7 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
         }
 
         if (_hasLabels) {
-            for (speck::Labelset::Entry& e : _labels->labelSet().entries) {
+            for (dataloader::Labelset::Entry& e : _labels->labelSet().entries) {
                 e.isEnabled = true;
             }
         }
@@ -156,7 +156,7 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
             pair.second.isEnabled = isSelected;
 
             if (_hasLabels) {
-                for (speck::Labelset::Entry& e : _labels->labelSet().entries) {
+                for (dataloader::Labelset::Entry& e : _labels->labelSet().entries) {
                     if (constellationFullName(e.identifier) == pair.second.name) {
                         e.isEnabled = isSelected;
                         break;

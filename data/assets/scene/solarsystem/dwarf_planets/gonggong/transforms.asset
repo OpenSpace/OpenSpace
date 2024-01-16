@@ -17,7 +17,7 @@ local Translation = {
 
 local Position = {
   Identifier = "GonggongPosition",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Transform = {
     Translation = Translation
   },

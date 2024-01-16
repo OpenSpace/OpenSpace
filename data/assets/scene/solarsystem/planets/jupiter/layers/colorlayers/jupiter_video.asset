@@ -11,11 +11,11 @@ local data = asset.resource({
 
 
 local Layer = {
+  Type = "VideoTileProvider",
   Identifier = "JupiterVideo",
-  Video = data .. "/jupiter_movie_3600.mp4",
   Name = "Jupiter Video",
   Enabled = true,
-  Type = "VideoTileLayer"
+  Video = data .. "/jupiter_movie_3600.mp4"
 }
 
 

@@ -208,6 +208,14 @@ bool PathNavigator::isPlayingPath() const {
     return hasCurrentPath() && _isPlaying;
 }
 
+bool PathNavigator::isPaused() const {
+    return hasCurrentPath() && !_isPlaying;
+}
+
+float PathNavigator::estimatedRemainingTimeInPath() const {
+    return hasCurrentPath() ? _currentPath->estimatedRemainingTime(_speedScale) : 0.f;
+}
+
 void PathNavigator::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
@@ -228,11 +236,19 @@ void PathNavigator::updateCamera(double deltaTime) {
     if (_setCameraToEndNextFrame) {
         LDEBUG("Skipped to end of camera path");
         _currentPath->quitPath();
-        camera()->setPose(_currentPath->endPoint().pose());
+
+        const interaction::Waypoint endPoint = _currentPath->endPoint();
+        camera()->setPose(endPoint.pose());
         global::navigationHandler->orbitalNavigator().setFocusNode(
-            _currentPath->endPoint().nodeIdentifier(),
+            endPoint.nodeIdentifier(),
             false
         );
+        if (endPoint.aimIdentifier().has_value()) {
+            global::navigationHandler->orbitalNavigator().setAimNode(
+                *endPoint.aimIdentifier()
+            );
+        }
+
         handlePathEnd();
         _setCameraToEndNextFrame = false;
         return;
@@ -257,13 +273,21 @@ void PathNavigator::updateCamera(double deltaTime) {
     }
 
     if (!_includeRoll) {
-        removeRollRotation(newPose, deltaTime);
+        removeRollRotation(newPose);
     }
 
     camera()->setPose(newPose);
 
     if (_currentPath->hasReachedEnd()) {
         LINFO("Reached target");
+
+        // Also set the aim once the path is finished, if one should be set
+        if (_currentPath->endPoint().aimIdentifier().has_value()) {
+            global::navigationHandler->orbitalNavigator().setAimNode(
+                *_currentPath->endPoint().aimIdentifier()
+            );
+        }
+
         handlePathEnd();
         return;
     }
@@ -537,7 +561,7 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
     return nullptr;
 }
 
-void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {
+void PathNavigator::removeRollRotation(CameraPose& pose) {
     // The actual position for the camera does not really matter. Use the origin,
     // to avoid precision problems when we have large values for the position
     const glm::dvec3 cameraPos = glm::dvec3(0.0);

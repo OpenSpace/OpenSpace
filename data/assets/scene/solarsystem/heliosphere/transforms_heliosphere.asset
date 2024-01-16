@@ -1,6 +1,9 @@
-asset.require("spice/base")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local HEEQ180Kernel = asset.resource("scene/solarsystem/heliosphere/kernels/HEEQ180.tf")
+local coreKernels = asset.require("spice/core")
+
+
+
+local HEEQ180Kernel = asset.resource("kernels/HEEQ180.tf")
 
 local HEEQ180ReferenceFrame = {
   Identifier = "HEEQ180ReferenceFrame",
@@ -14,8 +17,7 @@ local HEEQ180ReferenceFrame = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "HEEQ180",
-      DestinationFrame = "GALACTIC",
-      Kernels = asset.resource("kernels/HEEQ180.tf")
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -42,6 +44,8 @@ local TransformGONG = {
 }
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(HEEQ180Kernel)
+
   openspace.addSceneGraphNode(HEEQ180ReferenceFrame)
   openspace.addSceneGraphNode(TransformGONG)
 end)
@@ -49,6 +53,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TransformGONG)
   openspace.removeSceneGraphNode(HEEQ180ReferenceFrame)
+
+  openspace.spice.unloadKernel(HEEQ180Kernel)
 end)
 
 asset.export(HEEQ180ReferenceFrame)

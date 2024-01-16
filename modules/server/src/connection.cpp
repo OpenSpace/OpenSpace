@@ -26,6 +26,7 @@
 
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
+#include <modules/server/include/topics/camerapathtopic.h>
 #include <modules/server/include/topics/cameratopic.h>
 #include <modules/server/include/topics/documentationtopic.h>
 #include <modules/server/include/topics/enginemodetopic.h>
@@ -99,6 +100,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<VersionTopic>("version");
     _topicFactory.registerClass<SkyBrowserTopic>("skybrowser");
     _topicFactory.registerClass<CameraTopic>("camera");
+    _topicFactory.registerClass<CameraPathTopic>("cameraPath");
 }
 
 void Connection::handleMessage(const std::string& message) {

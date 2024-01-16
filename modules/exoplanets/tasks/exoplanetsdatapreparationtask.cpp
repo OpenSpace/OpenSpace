@@ -40,6 +40,27 @@
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataPreparationTask";
 
+    // This task is used for generating the binary data files that are used for the
+    // exoplanet system loading in OpenSpace. Using this binary file allows efficient
+    // data loading of an arbitrary exoplanet system during runtime, without keeping all
+    // data in memory.
+    //
+    // Two output files are generated, whose paths have to be specified: One binary with
+    // the data for the exoplanets (OutputBIN) and one look-up table that is used to
+    // find where in the binary file a particular system is located (OutputLUT).
+    //
+    // Additionally, the task uses three different files as input: 1) a CSV file with the
+    // data from the NASA Exoplanet Archive, 2) A SPECK file that contains star positions,
+    // and 3) a TXT file that is used for the conversion from the stars' effective
+    // temperature to a B-V color index. The paths for all these paths have to be
+    // specified. The SPECK file (2) will be used for the positions of the host stars, to
+    // make sure that they line up with the stars in that dataset. The cross-matching is
+    // done by star name, as given by the comment in the SPECK file and the host star
+    // column in the exoplanet dataset.
+    //
+    // Note that the CSV (1) has to include a certain set of columns for the rendering to
+    // be correct. Use the accompanying python script to download the datafile, or make
+    // sure to include all columns in your download.
     struct [[codegen::Dictionary(ExoplanetsDataPreparationTask)]] Parameters {
         // The csv file to extract data from
         std::string inputDataFile;
@@ -185,7 +206,7 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
     }
 
     return columnNames;
-};
+}
 
 ExoplanetsDataPreparationTask::PlanetData
 ExoplanetsDataPreparationTask::parseDataRow(std::string row,

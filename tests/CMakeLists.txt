@@ -63,6 +63,10 @@ target_include_directories(OpenSpaceTest
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
 target_link_libraries(OpenSpaceTest PUBLIC Catch2 openspace-core sgct)
 
+target_precompile_headers(OpenSpaceTest PRIVATE
+  <catch2/catch_test_macros.hpp>
+)
+
 foreach (library_name ${all_enabled_modules})
   get_target_property(library_type ${library_name} TYPE)
   if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")

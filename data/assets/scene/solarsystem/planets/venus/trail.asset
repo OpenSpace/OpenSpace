@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,8 +10,8 @@ local VenusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "VENUS",
-      Observer = "SSB"
+      Target = coreKernels.ID.Venus,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 1.0, 0.5, 0.2 },
     Period = 224.695,
@@ -41,8 +41,7 @@ asset.export(VenusTrail)
 asset.meta = {
   Name = "Venus Trail",
   Version = "1.1",
-  Description = [[Trail of Venus as observed by the Sun. Data from NASA Spice (see base
-    spice asset)]],
+  Description = "Trail of Venus as observed by the Sun",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

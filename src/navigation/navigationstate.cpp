@@ -33,6 +33,24 @@ namespace {
 
     constexpr double Epsilon = 1E-7;
 
+    // A NavigationState is an object describing an exact camera position and rotation,
+    // in a certain reference frame (per default, the one of the specified Anchor node).
+    // It can be used to set the same camera position at a later point in time, or
+    // navigating to a specific camera position using the pathnavigation system.
+    //
+    // The camera rotation is specified using Euler angles, in radians. It is also
+    // possible to specify a node to be used as Aim, but note that this will not affect
+    // the actual camera position or view direction.
+    //
+    // To get the current navigation state of the camera, use the
+    // `openspace.navigation.getNavigationState()` function in the Scripting API.
+    //
+    // Note that a NavigationState does not include information about what timestamp
+    // within OpenSpace that the NavigationState was generated. When laoding a
+    // NavigationState, the visuals may be different depending on what the simulation
+    // timestamp is, as the relative positions of objects in the scene may have changed.
+    // The get the exact same visuals as when the NavigationState was saved, make sure
+    // to also set the time to be the same as on save.
     struct [[codegen::Dictionary(NavigationState)]] Parameters {
         // The identifier of the anchor node
         std::string anchor;

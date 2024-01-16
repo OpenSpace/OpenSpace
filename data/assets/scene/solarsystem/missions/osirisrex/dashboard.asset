@@ -1,3 +1,8 @@
+local transforms = asset.require("./transforms")
+local model = asset.require("./model")
+
+
+
 local Spacing = {
   Type = "DashboardItemSpacing",
   Identifier = "OsirisRexSpacing",
@@ -10,9 +15,9 @@ local Distance = {
   Identifier = "OsirisRexBennuDistance",
   GuiName = "OSIRIS-REx Bennu Distance",
   SourceType = "Node",
-  SourceNodeName = "OsirisRex",
+  SourceNodeName = model.OsirisRex.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = "BennuBarycenter"
+  DestinationNodeName = transforms.BennuBarycenter.Identifier
 }
 
 local Instruments = {

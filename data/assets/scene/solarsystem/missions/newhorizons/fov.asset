@@ -1,4 +1,6 @@
 local transforms = asset.require("./transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,17 +20,16 @@ local Lorri = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     Color = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_LORRI",
+      Name = kernels.Frame.Lorri,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -48,17 +49,16 @@ local RalphLeisa = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_RALPH_LEISA",
+      Name = kernels.Frame.RalphLeisa,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -78,17 +78,16 @@ local RalphMvicPan1 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_RALPH_MVIC_PAN1",
+      Name = kernels.Frame.RalphMvicPan1,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -108,17 +107,16 @@ local RalphMvicPan2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_RALPH_MVIC_PAN2",
+      Name = kernels.Frame.RalphMvicPan2,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -138,17 +136,16 @@ local RalphMvicRed = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_RALPH_MVIC_RED",
+      Name = kernels.Frame.RalphMvicRed,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -168,17 +165,16 @@ local RalphMvicBlue = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_RALPH_MVIC_BLUE",
+      Name = kernels.Frame.RalphMvicBlue,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -198,17 +194,16 @@ local RalphMvicFt = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_RALPH_MVIC_FT",
+      Name = kernels.Frame.RalphMvicFT,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -228,17 +223,16 @@ local RalphMvicMethane = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_RALPH_MVIC_METHANE",
+      Name = kernels.Frame.RalphMvicMethane,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -258,17 +252,16 @@ local RalphMvicNir = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_RALPH_MVIC_NIR",
+      Name = kernels.Frame.RalphMvicNIR,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -288,17 +281,16 @@ local AliceAirglow = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_ALICE_AIRGLOW",
+      Name = kernels.Frame.AliceAirglow,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     },
     SimplifyBounds = true
   },
@@ -319,17 +311,16 @@ local AliceSoc = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "NEW HORIZONS",
-    Frame = "NH_SPACECRAFT",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "NH_ALICE_SOC",
+      Name = kernels.Frame.AliceSOC,
       Aberration = "NONE"
     },
     PotentialTargets = {
-      "Pluto",
-      "Charon",
-      -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
+      kernels.ID.Pluto,
+      kernels.ID.Charon
     }
   },
   GUI = {
@@ -353,9 +344,9 @@ local Rex = {
   },
   Renderable = {
     Type = "RenderableCrawlingLine",
-    Source = "NH_REX",
-    Target = "EARTH",
-    Instrument = "NH_REX",
+    Source = kernels.ID.Rex,
+    Target = coreKernels.ID.Earth,
+    Instrument = kernels.Frame.Rex,
     Color = {
       Start = { 1.0, 0.7, 0.0, 1.0 },
       End = { 0.0, 0.0, 0.0, 0.0 }

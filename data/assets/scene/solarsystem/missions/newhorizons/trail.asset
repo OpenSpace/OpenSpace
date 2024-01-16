@@ -1,4 +1,5 @@
 local transforms = asset.require("./transforms")
+local kernels = asset.require("./kernels")
 
 
 
@@ -9,8 +10,8 @@ local TrailAtPluto = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEW HORIZONS",
-      Observer = "PLUTO BARYCENTER"
+      Target = kernels.ID.NewHorizons,
+      Observer = kernels.ID.PlutoBarycenter
     },
     Color = { 1.0, 0.8, 0.4 },
     ShowFullTrail = true,

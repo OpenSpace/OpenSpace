@@ -13,8 +13,8 @@ local JMC1 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_JMC-1",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.JMC1,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_JMC-1",
@@ -42,8 +42,8 @@ local JMC2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_JMC-2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.JMC2,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_JMC-2",
@@ -60,7 +60,6 @@ local JMC2 = {
     Description = "The field-of-views for the Juice Monitoring cameras"
   }
 }
-
 
 
 asset.onInitialize(function()

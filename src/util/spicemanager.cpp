@@ -324,6 +324,15 @@ void SpiceManager::unloadKernel(std::string filePath) {
     }
 }
 
+std::vector<std::string> SpiceManager::loadedKernels() const {
+    std::vector<std::string> res;
+    res.reserve(_loadedKernels.size());
+    for (const KernelInformation& info : _loadedKernels) {
+        res.push_back(info.path);
+    }
+    return res;
+}
+
 bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
     ghoul_assert(!target.empty(), "Empty target");
 
@@ -1530,9 +1539,10 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
         {
             codegen::lua::LoadKernel,
             codegen::lua::UnloadKernel,
+            codegen::lua::Kernels,
             codegen::lua::SpiceBodies,
             codegen::lua::RotationMatrix,
-            codegen::lua::Position
+            codegen::lua::Position,
         }
     };
 }

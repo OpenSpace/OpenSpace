@@ -13,8 +13,8 @@ local Gala = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_GALA_RXT",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.Gala,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_GALA_RXT",

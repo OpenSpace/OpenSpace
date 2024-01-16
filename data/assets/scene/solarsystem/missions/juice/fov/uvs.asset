@@ -13,8 +13,8 @@ local UVS = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_UVS",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.UVS,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_UVS",

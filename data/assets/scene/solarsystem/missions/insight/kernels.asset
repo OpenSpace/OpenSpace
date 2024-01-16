@@ -1,0 +1,36 @@
+local data = asset.resource({
+  Name = "Insight Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "insight_kernels",
+  Version = 1
+})
+
+
+local Kernels = {
+  data .. "nsyt_spk_cruise_od063_v1_approach2surface_SC_Lander.tsc",
+  data .. "insight_v02.tfr",
+  data .. "mar085s.bsp",
+  data .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bsp",
+  data .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bck"
+}
+
+local ID = {
+  Insight = "INSIGHT"
+}
+
+local Frame = {
+  Insight = -189000,
+  InsightCruise = "INSIGHT_LANDER_CRUISE"
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(Kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(Kernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)

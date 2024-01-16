@@ -1,0 +1,21 @@
+asset.require("./colorlayers/alsimap_02122015", false)
+asset.require("./colorlayers/casimap_02122015", false)
+asset.require("./colorlayers/fesimap_02122015", false)
+asset.require("./colorlayers/mgsimap_02122015", false)
+asset.require("./colorlayers/ssimap_02122015", false)
+
+-- Only the Utah server have this map, use it for now
+asset.require("./heightlayers/messenger_dem_utah", asset.enabled)
+
+
+
+asset.meta = {
+  Name = "Base Mercury Layers",
+  Version = "1.0",
+  Description = [[Base Mercury layers are: Aluminium Abundance, Calcium Abundance,
+    Iron Abundance, Magnesium Abundance, Silicon Abundance, and Messenger DEM (3D).
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,6 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,13 +19,13 @@ local Iapetus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "IAPETUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Iapetus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_IAPETUS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Iapetus,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -57,8 +58,8 @@ local IapetusLabel = {
   Identifier = "IapetusLabel",
   Parent = Iapetus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Iapetus",
     FontSize = 70.0,
     Size = 6.2,
@@ -80,8 +81,6 @@ local IapetusLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Iapetus)
   openspace.addSceneGraphNode(IapetusLabel)
 end)
@@ -89,8 +88,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(IapetusLabel)
   openspace.removeSceneGraphNode(Iapetus)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Iapetus)

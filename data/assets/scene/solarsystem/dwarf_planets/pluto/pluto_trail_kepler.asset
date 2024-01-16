@@ -1,6 +1,4 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local kernels = asset.require("./kernels").PlutoKernels
-asset.require("spice/base")
 
 
 
@@ -9,9 +7,10 @@ local AU = 1.496e+8
 
 local PlutoKeplerianTrail = {
   Identifier = "PlutoKeplerianTrail",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "KeplerTranslation",
       Eccentricity = 0.2543033082909471,
@@ -25,8 +24,7 @@ local PlutoKeplerianTrail = {
     },
     Color = { 0.2, 0.8, 0.3 },
     Period = 90487.27692706819,
-    Resolution = 1000,
-    Enabled = false
+    Resolution = 1000
   },
   GUI = {
     Name = "Pluto Keplerian Trail",

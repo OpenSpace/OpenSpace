@@ -1,0 +1,62 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local kernels = asset.resource({
+  Name = "Uranus Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "uranus_kernels",
+  Version = 2
+})
+
+local ID = {
+  Belinda = "BELINDA",
+  Bianca = "BIANCA",
+  Cordelia = "CORDELIA",
+  Cressida = "CRESSIDA",
+  Cupid = "CUPID",
+  Desdemona = "DESDEMONA",
+  Juliet = "JULIET",
+  Mab = "MAB",
+  Ophelia = "OPHELIA",
+  Perdita = "PERDITA",
+  Portia = "PORTIA",
+  Puck = "PUCK",
+  Rosalind = "ROSALIND",
+}
+
+local Frame = {
+  Belinda = coreKernels.Frame.Belinda,
+  Bianca = coreKernels.Frame.Bianca,
+  Cordelia = coreKernels.Frame.Cordelia,
+  Cressida = coreKernels.Frame.Cressida,
+  Desdemona = coreKernels.Frame.Desdemona,
+  Juliet = coreKernels.Frame.Juliet,
+  Ophelia = coreKernels.Frame.Ophelia,
+  Portia = coreKernels.Frame.Portia,
+  Puck = coreKernels.Frame.Puck,
+  Rosalind = coreKernels.Frame.Rosalind
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "ura115.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "ura115.bsp")
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
+
+
+
+asset.meta = {
+  Name = "Uranus Spice Kernels",
+  Version = "1.0",
+  Description = "Generic SPICE kernels for Uranus",
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
+  License = "NASA"
+}

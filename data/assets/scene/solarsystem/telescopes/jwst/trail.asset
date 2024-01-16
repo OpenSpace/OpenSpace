@@ -1,16 +1,8 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-
-
-
-local kernels = asset.resource({
-  Name = "JWST Kernel",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_kernels",
-  Version = 2
-})
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 local LaunchTime = "2021 DEC 25 12:20:00"
@@ -33,8 +25,8 @@ local JWSTTrailLaunch = {
     Translation = {
       Type = "SpiceTranslation",
       Target = 170, -- JWST
-      Observer = "EARTH",
-      Frame = "IAU_EARTH"
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Earth
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = LaunchTime,
@@ -64,9 +56,9 @@ local JWSTTrailCruise = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = 170, -- JWST
-      Observer = "EARTH",
-      Frame = "GALACTIC"
+      Target = kernels.ID.JWST,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = DetachTime,
@@ -97,9 +89,9 @@ local JWSTTrailOrbit = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = 170, -- JWST
-      Observer = 392, -- L2
-      Frame = "GALACTIC"
+      Target = kernels.ID.JWST,
+      Observer = transforms.ID.L2,
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months
@@ -128,8 +120,8 @@ local JWSTTrailCoRevOrbit = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = 170, -- JWST
-      Observer = 392, -- L2
+      Target = kernels.ID.JWST,
+      Observer = transforms.ID.L2,
       Frame = "L2_COREV"
     },
     Color = { 1.0, 0.663, 0.157 },
@@ -157,9 +149,9 @@ local JWSTSunTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = 170, -- JWST
-      Observer = "SSB",
-      Frame = "GALACTIC"
+      Target = kernels.ID.JWST,
+      Observer = coreKernels.ID.SolarSystemBarycenter,
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.0, 0.9, 0.9 },
     Period = 365.242,
@@ -176,8 +168,6 @@ local JWSTSunTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "webb.bsp")
-
   openspace.addSceneGraphNode(JWSTTrailLaunch)
   openspace.addSceneGraphNode(JWSTTrailCruise)
   openspace.addSceneGraphNode(JWSTTrailOrbit)
@@ -191,8 +181,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTTrailOrbit)
   openspace.removeSceneGraphNode(JWSTTrailCruise)
   openspace.removeSceneGraphNode(JWSTTrailLaunch)
-
-  openspace.spice.unloadKernel(kernels .. "webb.bsp")
 end)
 
 asset.export(JWSTTrailLaunch)

@@ -1,0 +1,47 @@
+local kernels = asset.resource({
+  Name = "Jupiter Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "jupiter_kernels",
+  Version = 2
+})
+
+
+local ID = {
+  S2011J3 = 55509,
+  S2018J2 = 55510,
+  S2018J3 = 55511,
+  S2021J1 = 55512,
+  S2021J2 = 55513,
+  S2021J3 = 55514,
+  S2021J4 = 55515,
+  S2021J5 = 55516,
+  S2021J6 = 55517,
+  S2016J3 = 55518,
+  S2016J4 = 55519,
+  S2018J4 = 55520,
+  S2022J1 = 55521,
+  S2022J2 = 55522,
+  S2022J3 = 55523
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "jup346.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "jup346.bsp")
+end)
+
+asset.export("ID", ID)
+
+
+
+asset.meta = {
+  Name = "Jupiter Spice Kernels",
+  Version = "1.0",
+  Description = "Generic SPICE kernels for Jupiter",
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
+  License = "NASA"
+}

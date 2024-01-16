@@ -1,16 +1,9 @@
-asset.require("spice/base")
-asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local l2 = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-
-
-local kernels = asset.resource({
-  Name = "JWST Kernel",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_kernels",
-  Version = 2
-})
 
 
 local LaunchTime = "2021 DEC 25 12:20:00"
@@ -27,21 +20,21 @@ local JWSTPosition = {
       Keyframes = {
         [LaunchTime] = {
           Type = "SpiceTranslation",
-          Target = 170, -- JWST
-          Observer = "EARTH",
-          Frame = "IAU_EARTH"
+          Target = kernels.ID.JWST,
+          Observer = coreKernels.ID.Earth,
+          Frame = coreKernels.Frame.Earth
         },
         [DetachTime] = {
           Type = "SpiceTranslation",
-          Target = 170, -- JWST
-          Observer = "EARTH",
-          Frame = "GALACTIC"
+          Target = kernels.ID.JWST,
+          Observer = coreKernels.ID.Earth,
+          Frame = coreKernels.Frame.Galactic
         },
         [L2orbitInsertionTime] = {
           Type = "SpiceTranslation",
-          Target = 170, -- JWST
-          Observer = 392, -- L2
-          Frame = "GALACTIC"
+          Target = kernels.ID.JWST,
+          Observer = l2.ID.L2,
+          Frame = coreKernels.Frame.Galactic
         }
       }
     }
@@ -49,10 +42,7 @@ local JWSTPosition = {
   GUI = {
     Name = "JWST Position",
     Path = "/Solar System/Telescopes/JWST",
-    Hidden = true,
-    Description = [[
-      James Webb Space Telescope Position relative to Earth.
-    ]]
+    Hidden = true
   }
 }
 
@@ -72,18 +62,13 @@ local JWSTRotation = {
   GUI = {
     Name = "JWST Rotation",
     Path = "/Solar System/Telescopes/JWST",
-    Hidden = true,
-    Description = [[
-      James Webb Space Telescope Rotation so the sunshield always faces the Sun.
-    ]]
+    Hidden = true
   }
 }
 
 
 -- Reparent the JWSTPosition node when the data changes
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "webb.bsp")
-
   openspace.addSceneGraphNode(JWSTPosition)
   openspace.addSceneGraphNode(JWSTRotation)
 
@@ -118,8 +103,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTRotation)
   openspace.removeSceneGraphNode(JWSTPosition)
   openspace.scriptScheduler.clear(1)
-
-  openspace.spice.unloadKernel(kernels .. "webb.bsp")
 end)
 
 asset.export(JWSTPosition)

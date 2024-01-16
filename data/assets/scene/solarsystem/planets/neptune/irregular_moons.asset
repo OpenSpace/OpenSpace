@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels")
+local kernels102 = asset.require("./kernels102")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +10,8 @@ local Halimede = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HALIMEDE",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernels102.ID.Halimede,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -40,8 +41,8 @@ local HalimedeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HALIMEDE",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernels102.ID.Halimede,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 1879.08,
@@ -64,8 +65,8 @@ local HalimedeLabel = {
   Identifier = "HalimedeLabel",
   Parent = Halimede.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Halimede",
     FontSize = 70.0,
     Size = 7.4,
@@ -91,8 +92,8 @@ local Psamathe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PSAMATHE",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernels102.ID.Psamathe,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -122,8 +123,8 @@ local PsamatheTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PSAMATHE",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernels102.ID.Psamathe,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 9074.3,
@@ -146,8 +147,8 @@ local PsamatheLabel = {
   Identifier = "PsamatheLabel",
   Parent = Psamathe.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Psamathe",
     FontSize = 70.0,
     Size = 7.4,
@@ -173,8 +174,8 @@ local Sao = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SAO",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernels102.ID.Sao,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -204,8 +205,8 @@ local SaoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SAO",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernels102.ID.Sao,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 2912.72,
@@ -228,8 +229,8 @@ local SaoLabel = {
   Identifier = "SaoLabel",
   Parent = Sao.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Sao",
     FontSize = 70.0,
     Size = 7.4,
@@ -255,8 +256,8 @@ local Laomedeia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LAOMEDEIA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernels102.ID.Laomedeia,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -286,8 +287,8 @@ local LaomedeiaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "LAOMEDEIA",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernels102.ID.Laomedeia,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 3171.33,
@@ -310,8 +311,8 @@ local LaomedeiaLabel = {
   Identifier = "LaomedeiaLabel",
   Parent = Laomedeia.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Laomedeia",
     FontSize = 70.0,
     Size = 7.4,
@@ -337,8 +338,8 @@ local Neso = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NESO",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernels102.ID.Neso,
+      Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
   Renderable = {
@@ -368,8 +369,8 @@ local NesoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NESO",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = kernels102.ID.Neso,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 9740.73,
@@ -392,8 +393,8 @@ local NesoLabel = {
   Identifier = "NesoLabel",
   Parent = Neso.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Neso",
     FontSize = 70.0,
     Size = 7.4,
@@ -415,9 +416,6 @@ local NesoLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.nep102)
-
-
   openspace.addSceneGraphNode(Halimede)
   openspace.addSceneGraphNode(HalimedeTrail)
   openspace.addSceneGraphNode(HalimedeLabel)
@@ -459,9 +457,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NesoLabel)
   openspace.removeSceneGraphNode(NesoTrail)
   openspace.removeSceneGraphNode(Neso)
-
-
-  openspace.spice.unloadKernel(kernel.nep102)
 end)
 
 asset.export(Halimede)

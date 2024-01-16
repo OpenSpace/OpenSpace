@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -18,7 +18,9 @@ local kernels = asset.resource({
 })
 
 
-local L5 = 395
+local ID = {
+  L5 = 395
+}
 
 local L5Position = {
   Identifier = "L5Position",
@@ -26,8 +28,8 @@ local L5Position = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = L5,
-      Observer = "SSB"
+      Target = ID.L5,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
@@ -77,6 +79,7 @@ local L5Label = {
 }
 
 
+
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "L5_de431.bsp")
 
@@ -93,6 +96,7 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels .. "L5_de431.bsp")
 end)
 
+asset.export("ID", ID)
 asset.export(L5Position)
 asset.export(L5)
 asset.export(L5Label)

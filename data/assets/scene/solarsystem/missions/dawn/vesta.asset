@@ -1,13 +1,8 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
-
-local kernels = asset.resource({
-  Name = "Vesta Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "vesta_kernels",
-  Version = 1
-})
 
 local textures = asset.resource({
   Name = "Vesta Textures",
@@ -37,13 +32,13 @@ local Vesta = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "VESTA",
-      Observer = "SSB"
+      Target = kernels.ID.Vesta,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_VESTA",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Vesta,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   BoundingSphere = 262000,
@@ -54,8 +49,8 @@ local Vesta = {
     Projection = {
       Sequence = images,
       SequenceType = "image-sequence",
-      Observer = "DAWN",
-      Target = "VESTA",
+      Observer = kernels.ID.Dawn,
+      Target = kernels.ID.Vesta,
       Aberration = "NONE",
 
       DataInputTranslation = {
@@ -121,8 +116,8 @@ local VestaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "VESTA",
-      Observer = "SSB"
+      Target = kernels.ID.Vesta,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.7, 0.8, 0.7 },
     StartTime = "2007 JUL 20 12:00:00",
@@ -138,8 +133,6 @@ local VestaTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "sb_vesta_071107.bsp")
-
   openspace.addSceneGraphNode(Vesta)
   openspace.addSceneGraphNode(VestaTrail)
 end)
@@ -147,8 +140,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VestaTrail)
   openspace.removeSceneGraphNode(Vesta)
-
-  openspace.spice.unloadKernel(kernels .. "sb_vesta_071107.bsp")
 end)
 
 asset.export(Vesta)

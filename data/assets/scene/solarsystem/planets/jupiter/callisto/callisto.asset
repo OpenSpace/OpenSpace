@@ -1,7 +1,7 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -17,15 +17,15 @@ local Callisto = {
   Identifier = "Callisto",
   Parent = transforms.JupiterBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_CALLISTO",
-      DestinationFrame = "GALACTIC"
-    },
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALLISTO",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels.ID.Callisto,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Callisto,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -57,8 +57,8 @@ local CallistoLabel = {
   Identifier = "CallistoLabel",
   Parent = Callisto.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Callisto",
     FontSize = 70.0,
     Size = 6.0,
@@ -80,8 +80,6 @@ local CallistoLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
   openspace.addSceneGraphNode(Callisto)
   openspace.addSceneGraphNode(CallistoLabel)
 end)
@@ -89,8 +87,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CallistoLabel)
   openspace.removeSceneGraphNode(Callisto)
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Callisto)
