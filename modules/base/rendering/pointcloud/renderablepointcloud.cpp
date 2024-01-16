@@ -179,7 +179,7 @@ namespace {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor to adjust the size of the points, "
-        "after the exponential scaling and any pixel-size control effects. Simply just "
+        "after the exponential scaling and any max size control effects. Simply just "
         "increases or decreases the visual size of the points.",
         openspace::properties::Property::Visibility::User
     };
@@ -219,7 +219,7 @@ namespace {
         "Parameter Option",
         "This value determines which parameter is used for scaling of the point. The "
         "parameter value will be used as a miltiplicative factor to scale the size of "
-        "the points. Not that they may however still be scaled by pixel size adjustment "
+        "the points. Note that they may however still be scaled by max size adjustment "
         "effects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -241,8 +241,8 @@ namespace {
     //   interactively when OpenSpace is running until you find a value that you find
     //   suitable.
     //
-    // - There is also an option to limit the size of the points based on a given pixel
-    //   size. For now, this only works for flat projection displays.
+    // - There is also an option to limit the size of the points based on a given max
+    //   size value.
     //
     // - To easily change the visual size of the points, the multiplicative 'ScaleFactor'
     //   may be used. A value of 2 makes the points twice as large, visually, compared
@@ -321,7 +321,7 @@ namespace {
             std::optional<float> maxSize;
         };
         // Settings related to the scale of the points, whether they should limit to
-        // a certain pixel size, etc.
+        // a certain max size, etc.
         std::optional<SizeSettings> sizeSettings;
 
         struct ColorSettings {
