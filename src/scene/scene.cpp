@@ -572,14 +572,6 @@ void Scene::updateInterpolations() {
     );
 }
 
-void Scene::addInterestingTime(InterestingTime time) {
-    _interestingTimes.push_back(std::move(time));
-}
-
-const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
-    return _interestingTimes;
-}
-
 void Scene::setPropertiesFromProfile(const Profile& p) {
     ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
 
@@ -873,7 +865,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
             codegen::lua::SceneGraphNodes,
             codegen::lua::NodeByRenderableType,
             codegen::lua::ScreenSpaceRenderables,
-            codegen::lua::AddInterestingTime,
             codegen::lua::WorldPosition,
             codegen::lua::WorldRotation,
             codegen::lua::SetParent,

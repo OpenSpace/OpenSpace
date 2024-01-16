@@ -78,6 +78,7 @@ struct Configuration {
     Logging logging;
 
     std::string scriptLog;
+    int scriptLogRotation = 3;
 
     struct DocumentationInfo {
         std::string path;
