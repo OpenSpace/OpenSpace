@@ -54,13 +54,14 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 28> UniformNames = {
-        "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
-        "renderOption", "maxAngularSize", "color", "opacity", "scaleExponent",
-        "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture", "spriteTexture",
-        "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax", "nanColor",
-        "useNanColor", "hideOutsideRange", "enableMaxSizeControl", "aboveRangeColor",
-        "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor", "hasDvarScaling"
+    constexpr std::array<const char*, 29> UniformNames = {
+        "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
+        "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
+        "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
+        "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
+        "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
+        "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
+        "hasDvarScaling"
     };
 
     enum RenderOption {
@@ -720,9 +721,15 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     );
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
     _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
+
     _program->setUniform(
-        _uniformCache.cameraViewProjectionMatrix,
-        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
+        _uniformCache.cameraViewMatrix,
+        data.camera.combinedViewMatrix()
+    );
+
+    _program->setUniform(
+        _uniformCache.projectionMatrix,
+        glm::dmat4(data.camera.projectionMatrix())
     );
 
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
@@ -813,8 +820,6 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     glm::dmat4 modelMatrix = calcModelTransform(data);
-    glm::dmat4 modelViewProjectionMatrix =
-        calcModelViewProjectionTransform(data, modelMatrix);
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -836,6 +841,9 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     if (_hasLabels) {
+        glm::dmat4 modelViewProjectionMatrix =
+            calcModelViewProjectionTransform(data, modelMatrix);
+
         _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
     }
 }

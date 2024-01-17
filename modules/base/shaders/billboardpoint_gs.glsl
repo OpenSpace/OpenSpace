@@ -34,12 +34,14 @@ layout(triangle_strip, max_vertices = 4) out;
 flat out float gs_colorParameter;
 out vec2 texCoord;
 flat out float vs_screenSpaceDepth;
+flat out vec4 vs_positionViewSpace;
 
 // General settings
 uniform float scaleExponent;
 uniform float scaleFactor;
 uniform int renderOption;
-uniform dmat4 cameraViewProjectionMatrix;
+uniform dmat4 cameraViewMatrix;
+uniform dmat4 projectionMatrix;
 uniform dmat4 modelMatrix;
 uniform bool enableMaxSizeControl;
 uniform bool hasDvarScaling;
@@ -111,11 +113,16 @@ void main() {
     }
   }
 
+  dmat4 cameraViewProjectionMatrix = projectionMatrix * cameraViewMatrix;
+
   vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
   vec4 scaledRightClip = scaleFactor *
     vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
   vec4 scaledUpClip = scaleFactor *
     vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
+
+  vec4 dposViewSpace= vec4(cameraViewMatrix * dpos);
+  vs_positionViewSpace = dposViewSpace;
 
   vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
   vs_screenSpaceDepth = initialPosition.w;
