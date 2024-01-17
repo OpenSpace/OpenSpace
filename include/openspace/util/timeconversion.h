@@ -100,20 +100,16 @@ TimeUnitNamesPlural = {
 };
 
 constexpr bool isValidTimeUnitName(std::string_view name) {
-    int i = 0;
     for (std::string_view val : TimeUnitNamesSingular) {
         if (val == name) {
             return true;
         }
-        ++i;
     }
 
-    i = 0;
     for (std::string_view val : TimeUnitNamesPlural) {
         if (val == name) {
             return true;
         }
-        ++i;
     }
     return false;
 }

@@ -223,8 +223,6 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         addProperty(_guiDescription);
     }
 
-    TileTextureInitData initData = tileTextureInitData(_layerGroupId);
-
     _opacity = p.opacity.value_or(_opacity);
     addProperty(Fadeable::_opacity);
     addProperty(Fadeable::_fade);

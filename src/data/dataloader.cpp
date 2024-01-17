@@ -44,10 +44,6 @@ namespace {
     constexpr int8_t LabelCacheFileVersion = 11;
     constexpr int8_t ColorCacheFileVersion = 11;
 
-    constexpr std::string_view DefaultXColumn = "x";
-    constexpr std::string_view DefaultYColumn = "y";
-    constexpr std::string_view DefaultZColumn = "z";
-
     template <typename T, typename U>
     void checkSize(U value, std::string_view message) {
         if (value > std::numeric_limits<U>::max()) {

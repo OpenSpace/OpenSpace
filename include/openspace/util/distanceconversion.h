@@ -157,20 +157,16 @@ DistanceUnitNamesPlural = {
 };
 
 constexpr bool isValidDistanceUnitName(std::string_view name) {
-    int i = 0;
     for (std::string_view val : DistanceUnitNamesSingular) {
         if (val == name) {
             return true;
         }
-        ++i;
     }
 
-    i = 0;
     for (std::string_view val : DistanceUnitNamesPlural) {
         if (val == name) {
             return true;
         }
-        ++i;
     }
     return false;
 }

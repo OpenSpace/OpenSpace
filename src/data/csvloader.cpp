@@ -57,7 +57,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             return result;
         }
         return std::numeric_limits<float>::quiet_NaN();
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         // clang is missing float support for std::from_chars
         try {
             result = std::stof(str.c_str(), nullptr);
@@ -65,9 +65,9 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
                 return result;
             }
         }
-        catch (std::invalid_argument const& e) {}
+        catch (const std::invalid_argument&) {}
         return NAN;
-#endif
+#endif // WIN32
     };
 
     LDEBUG("Parsing CSV file");
