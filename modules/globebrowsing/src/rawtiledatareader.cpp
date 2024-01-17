@@ -210,16 +210,6 @@ int edge(const PixelRegion& pixelRegion, Side side) {
     }
 }
 
-PixelRegion localCut(PixelRegion& pr, Side side, int localPos) {
-    if (localPos < 1) {
-        return PixelRegion();
-    }
-    else {
-        const int edgeDirectionSign = (side < Side::Right) ? -1 : 1;
-        return globalCut(pr, side, edge(pr, side) - edgeDirectionSign * localPos);
-    }
-}
-
 bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
     glm::ivec2 e = lhs.start + lhs.numPixels;
     glm::ivec2 re = rhs.start + rhs.numPixels;
