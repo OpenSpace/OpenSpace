@@ -92,7 +92,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     _image = p.image.value_or(_image);
     _link = p.link.value_or(_link);
 
-    if (p.phases.has_value()) {
+    if (p.phases.has_value() && !p.phases->empty()) {
         _subphases.reserve(p.phases->size());
         for (const ghoul::Dictionary& phase : *p.phases) {
             _subphases.emplace_back(phase);

@@ -1415,9 +1415,12 @@ int main(int argc, char* argv[]) {
 
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
+    LDEBUG("Parsing commandline arguments");
     sgct::Configuration config = parseArguments(arg);
+    LDEBUG("Loading cluster information");
     config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
 
+    LDEBUG("Setting callbacks");
     Engine::Callbacks callbacks;
     callbacks.initOpenGL = mainInitFunc;
     callbacks.preSync = mainPreSyncFunc;

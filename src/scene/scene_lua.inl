@@ -925,16 +925,6 @@ namespace {
 }
 
 /**
- * Adds an interesting time to the current scene. The first argument is the name of the
- * time and the second argument is the time itself in the format YYYY-MM-DDThh:mm:ss.uuu
- */
-[[codegen::luawrap]] void addInterestingTime(std::string name, std::string time) {
-    openspace::global::renderEngine->scene()->addInterestingTime(
-        { std::move(name), std::move(time) }
-    );
-}
-
-/**
  * Returns the world position of the scene graph node with the given string as identifier.
  */
 [[codegen::luawrap]] glm::dvec3 worldPosition(std::string identifier) {

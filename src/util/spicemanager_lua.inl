@@ -69,6 +69,13 @@ namespace {
 }
 
 /**
+ * Returns a list of all loaded kernels 
+ */
+[[codegen::luawrap]] std::vector<std::string> kernels() {
+    return openspace::SpiceManager::ref().loadedKernels();
+}
+
+/**
  * Returns a list of Spice Bodies loaded into the system. Returns SPICE built in frames if
  * builtInFrames. Returns User loaded frames if !builtInFrames.
  */

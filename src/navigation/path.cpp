@@ -45,9 +45,24 @@ namespace {
     constexpr std::string_view _loggerCat = "Path";
     constexpr float LengthEpsilon = 1e-5f;
 
-    // TODO: where should this documentation be?
-    // It's nice to have these to interpret the dictionary when creating the path, but
-    // maybe it's not really necessary
+    // A PathInstruction is a table describing the specification for a camera path.
+    // It is used as an input to the `openspace.pathnavigation.createPath` function.
+    //
+    // There are two types of paths that can be created, as specified by the required
+    // TargetType parameter: 'Node' or 'NavigationState'. The difference is what kind
+    // of target the path is created for, a scene graph node or a specific navigation
+    // state for the camera.
+    //
+    // Depending on the type, the parameters that can be specified are a bit different.
+    // A 'NavigationState' already contains all details for the camera position, so no
+    // other details may be specified. For a 'Node' instruction, only a 'Target' node is
+    // required, but a 'Height' or 'Position' may also be specified. If both a position
+    // and height is specified, the height value will be ignored.
+    //
+    // For 'Node' paths it is also possible to specify whether the target camera state
+    // at the end of the flight should take the up direction of the target node into
+    // account. Note that for this to give an effect on the path, rolling motions have
+    // to be enabled.
     struct [[codegen::Dictionary(PathInstruction)]] Parameters {
         // The type of the instruction. Decides what other parameters are
         // handled/available
@@ -61,7 +76,7 @@ namespace {
         std::optional<float> duration;
 
         // (Node): The target node of the camera path. Not optional for 'Node'
-        // instructions
+        // type instructions
         std::optional<std::string> target;
 
         // (Node): An optional position in relation to the target node, in model
@@ -76,7 +91,7 @@ namespace {
         std::optional<bool> useTargetUpDirection;
 
         // (NavigationState): A navigation state that will be the target
-        // of this path segment
+        // of the resulting path
         std::optional<ghoul::Dictionary> navigationState
             [[codegen::reference("core_navigation_state")]];
 
