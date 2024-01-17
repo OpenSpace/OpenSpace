@@ -104,7 +104,10 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the points"
+        "The labels for the points. If no label file is provided, the labels will be "
+        "created to match the points in the data file. For a CSV file, you should then "
+        "specify which column is the 'Name' column in the data mapping. For SPECK files "
+        "the labels are created from the comment at the end of each line"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
@@ -524,14 +527,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _hasSpriteTexture = p.texture.has_value();
 
-    if (p.labels.has_value()) {
-        _labels = std::make_unique<LabelsComponent>(*p.labels);
-        _hasLabels = true;
-        addPropertySubOwner(_labels.get());
-        // Fading of the labels should also depend on the fading of the renderable
-        _labels->setParentFadeable(this);
-    }
-
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
     if (p.sizeSettings.has_value() && p.sizeSettings->sizeMapping.has_value()) {
@@ -586,6 +581,21 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (p.labels.has_value()) {
+        if (!p.labels->hasKey("File") && _hasDataFile) {
+            // Load the labelset from the dataset if no file was included
+            _labels = std::make_unique<LabelsComponent>(*p.labels, _dataset, _unit);
+        }
+        else {
+            _labels = std::make_unique<LabelsComponent>(*p.labels);
+        }
+
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
+    }
+
     _nDataPoints.setReadOnly(true);
     addProperty(_nDataPoints);
 }
@@ -609,7 +619,6 @@ void RenderablePointCloud::initialize() {
 
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
