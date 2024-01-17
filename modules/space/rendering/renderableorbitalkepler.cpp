@@ -358,7 +358,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         const double scale = static_cast<double>(_segmentQuality) * 10.0;
         const kepler::Parameters& p = parameters[i];
         _segmentSize.push_back(
-            static_cast<size_t>(scale + (scale / pow(1 - p.eccentricity, 1.2)))
+            static_cast<int>(scale + (scale / pow(1.0 - p.eccentricity, 1.2)))
         );
         _startIndex.push_back(_startIndex[i] + static_cast<GLint>(_segmentSize[i]));
     }

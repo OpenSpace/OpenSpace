@@ -1987,8 +1987,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 
         glm::vec2 transformedUv = layer->tileUvToTextureSamplePosition(
             uvTransform,
-            patchUV,
-            glm::uvec2(tileTexture->dimensions())
+            patchUV
         );
 
         // Sample and do linear interpolation

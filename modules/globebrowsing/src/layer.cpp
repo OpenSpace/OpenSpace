@@ -457,8 +457,7 @@ void Layer::update() {
 }
 
 glm::vec2 Layer::tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-                                               const glm::vec2& tileUV,
-                                               const glm::uvec2& resolution)
+                                               const glm::vec2& tileUV)
 {
     glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
     return uv;
