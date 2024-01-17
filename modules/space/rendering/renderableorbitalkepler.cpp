@@ -354,7 +354,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     _segmentSize.clear();
     _startIndex.clear();
     _startIndex.push_back(0);
-    for (int i = 0; i < parameters.size(); ++i) {
+    for (size_t i = 0; i < parameters.size(); ++i) {
         const double scale = static_cast<double>(_segmentQuality) * 10.0;
         const kepler::Parameters& p = parameters[i];
         _segmentSize.push_back(
@@ -388,7 +388,7 @@ void RenderableOrbitalKepler::updateBuffers() {
             orbit.epoch
         );
 
-        for (size_t j = 0 ; j < (_segmentSize[orbitIdx]); ++j) {
+        for (GLint j = 0 ; j < (_segmentSize[orbitIdx]); ++j) {
             double timeOffset = orbit.period *
                 static_cast<double>(j) / static_cast<double>(_segmentSize[orbitIdx] - 1);
 

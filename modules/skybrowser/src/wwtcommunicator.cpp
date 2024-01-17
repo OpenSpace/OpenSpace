@@ -58,15 +58,6 @@ namespace {
         return msg;
     }
 
-    ghoul::Dictionary setForegroundMessage(const std::string& name) {
-        using namespace std::string_literals;
-
-        ghoul::Dictionary msg;
-        msg.setValue("event", "set_foreground_by_name"s);
-        msg.setValue("name", name);
-        return msg;
-    }
-
     ghoul::Dictionary addImageMessage(const std::string& url) {
         using namespace std::string_literals;
 

@@ -140,30 +140,6 @@ int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
     return static_cast<int>(intdiff);
 }
 
-/**
- * Aligns one the sides of the pixel regino to the specified position. This does
- * not change the number of pixels within the region.
- *
- * Example: Side = left and pos = 16:
- *                 start.x = 16 and keep the size the same
- */
-void alignPixelRegion(PixelRegion& pixelRegion, Side side, int pos) {
-    switch (side) {
-        case Side::Left:
-            pixelRegion.start.x = pos;
-            break;
-        case Side::Top:
-            pixelRegion.start.y = pos;
-            break;
-        case Side::Right:
-            pixelRegion.start.x = pos - pixelRegion.numPixels.x;
-            break;
-        case Side::Bottom:
-            pixelRegion.start.y = pos - pixelRegion.numPixels.y;
-            break;
-    }
-}
-
 PixelRegion globalCut(PixelRegion& pixelRegion, Side side, int p) {
     const bool lineIntersect = [pr = pixelRegion, side, p]() {
         switch (side) {
@@ -249,28 +225,6 @@ bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
     glm::ivec2 re = rhs.start + rhs.numPixels;
     return rhs.start.x <= lhs.start.x && e.x <= re.x &&
            rhs.start.y <= lhs.start.y && e.y <= re.y;
-}
-
-IODescription cutIODescription(IODescription& io, Side side, int pos) {
-    glm::dvec2 ratio = glm::dvec2(
-        io.write.region.numPixels.x / static_cast<double>(io.read.region.numPixels.x),
-        io.write.region.numPixels.y / static_cast<double>(io.read.region.numPixels.y)
-    );
-
-    IODescription whatCameOff = io;
-    whatCameOff.read.region = globalCut(io.read.region, side, pos);
-
-    glm::ivec2 cutSize = whatCameOff.read.region.numPixels;
-    glm::ivec2 localWriteCutSize = ratio * glm::dvec2(cutSize);
-
-    int localWriteCutPos =
-        (side == Side::Left || side == Side::Right) ?
-        localWriteCutSize.x :
-        localWriteCutSize.y;
-
-    whatCameOff.write.region = localCut(io.write.region, side, localWriteCutPos);
-
-    return whatCameOff;
 }
 
 /**
