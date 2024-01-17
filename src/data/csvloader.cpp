@@ -93,6 +93,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     int xColumn = -1;
     int yColumn = -1;
     int zColumn = -1;
+    int nameColumn = -1;
 
     int nDataColumns = 0;
     bool hasExcludeColumns = specs.has_value() && (*specs).hasExcludeColumns();
@@ -114,6 +115,9 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             if (isColumnZ(col, specs)) {
                 zColumn = static_cast<int>(i);
             }
+        }
+        else if (isNameColumn(col, specs)) {
+            nameColumn = static_cast<int>(i);
         }
         else if (hasExcludeColumns && (*specs).isExcludeColumn(col)) {
             skipColumns.push_back(i);
@@ -170,11 +174,14 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             else if (i == zColumn) {
                 entry.position.z = value;
             }
+            else if (i == nameColumn) {
+                // Note that were we use the original stirng value, rather than the
+                // converted one
+                entry.comment = strValue;
+            }
             else {
                 entry.data.push_back(value);
             }
-
-            // @TODO: comment mapping
         }
 
         glm::vec3 positive = glm::abs(entry.position);

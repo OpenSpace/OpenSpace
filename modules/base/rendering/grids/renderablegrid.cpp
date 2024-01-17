@@ -192,7 +192,6 @@ bool RenderableGrid::isReady() const {
 void RenderableGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 

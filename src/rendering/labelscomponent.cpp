@@ -105,7 +105,7 @@ namespace {
         std::optional<bool> enabled;
 
         // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path file;
+        std::optional<std::filesystem::path> file;
 
         // If true (default), the loaded labels file will be cached so that it can be
         // loaded faster at a later time. Note that this also means that changes in the
@@ -170,7 +170,7 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _labelFile = absPath(p.file);
+    _labelFile = absPath(p.file.value_or(""));
     _useCache = p.useCaching.value_or(true);
 
     if (p.unit.has_value()) {
@@ -223,6 +223,21 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 }
 
+LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary,
+                                 const dataloader::Dataset& dataset,
+                                 DistanceUnit unit)
+    : LabelsComponent(dictionary)
+{
+    // The unit should match the one in the dataset, not the one that was included in the
+    // asset (if any)
+    _unit = unit;
+
+    // Load the labelset directly based on the dataset, and keep track of that it has
+    // already been loaded this way
+    _labelset = dataloader::label::loadFromDataset(dataset);
+    _createdFromDataset = true;
+}
+
 dataloader::Labelset& LabelsComponent::labelSet() {
     return _labelset;
 }
@@ -238,10 +253,18 @@ void LabelsComponent::initialize() {
         ghoul::fontrendering::FontManager::Outline::Yes,
         ghoul::fontrendering::FontManager::LoadGlyphs::No
     );
+
+    loadLabels();
 }
 
 void LabelsComponent::loadLabels() {
     LINFO(fmt::format("Loading label file {}", _labelFile));
+
+    if (_createdFromDataset) {
+        // The labelset should already have been loaded
+        return;
+    }
+
     if (_useCache) {
         _labelset = dataloader::label::loadFileWithCache(_labelFile);
     }

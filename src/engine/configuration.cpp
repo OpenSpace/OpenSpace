@@ -134,6 +134,10 @@ namespace {
         // from previous runs) will be silently overwritten
         std::optional<std::string> scriptLog;
 
+        // If this value is specified, this many number of script log files are being
+        // retained before overwriting any
+        std::optional<int> scriptLogRotation;
+
         struct Documentation {
             // The path where the documentation files will be stored
             std::optional<std::string> path;
@@ -368,6 +372,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     }
 
     res.setValue("ScriptLog", scriptLog);
+    res.setValue("ScriptLogRotation", scriptLogRotation);
 
     {
         ghoul::Dictionary documentationDict;
@@ -518,6 +523,7 @@ void parseLuaState(Configuration& configuration) {
     c.fontSize.cameraInfo = p.fontSize.cameraInfo;
     c.fontSize.versionInfo = p.fontSize.versionInfo;
     c.scriptLog = p.scriptLog.value_or(c.scriptLog);
+    c.scriptLogRotation = p.scriptLogRotation.value_or(3);
     c.versionCheckUrl = p.versionCheckUrl.value_or(c.versionCheckUrl);
     c.useMultithreadedInitialization =
         p.useMultithreadedInitialization.value_or(c.useMultithreadedInitialization);

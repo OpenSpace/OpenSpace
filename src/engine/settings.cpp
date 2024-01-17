@@ -25,6 +25,7 @@
 #include <openspace/engine/settings.h>
 
 #include <openspace/engine/configuration.h>
+#include <sstream>
 
 namespace openspace {
 

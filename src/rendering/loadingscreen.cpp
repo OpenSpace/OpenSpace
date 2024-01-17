@@ -41,7 +41,9 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <random>
+#include <sstream>
 #include <thread>
+
 
 namespace {
     constexpr float LoadingFontSize = 25.f;

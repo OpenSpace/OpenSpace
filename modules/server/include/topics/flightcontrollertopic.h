@@ -63,7 +63,6 @@ private:
     void disconnect();
     void processInputState(const nlohmann::json& json);
     void setFocusNodes();
-    void setInterestingTimes();
     void updateView(const nlohmann::json& json) const;
     void changeFocus(const nlohmann::json& json) const;
     void setRenderableEnabled(const nlohmann::json& json) const;

@@ -44,6 +44,7 @@ struct DataMapping {
     std::optional<std::string> xColumnName;
     std::optional<std::string> yColumnName;
     std::optional<std::string> zColumnName;
+    std::optional<std::string> nameColumn;
 
     std::optional<float> missingDataValue;
 
@@ -68,6 +69,8 @@ bool isColumnX(const std::string& c, const std::optional<DataMapping>& mapping);
 bool isColumnY(const std::string& c, const std::optional<DataMapping>& mapping);
 
 bool isColumnZ(const std::string& c, const std::optional<DataMapping>& mapping);
+
+bool isNameColumn(const std::string& c, const std::optional<DataMapping>& mapping);
 
 } // namespace openspace::dataloader
 

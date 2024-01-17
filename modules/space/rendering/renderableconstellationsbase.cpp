@@ -193,7 +193,6 @@ void RenderableConstellationsBase::initialize() {
     }
 
     _labels->initialize();
-    _labels->loadLabels();
 
     for (dataloader::Labelset::Entry& entry : _labels->labelSet().entries) {
         if (!entry.identifier.empty()) {

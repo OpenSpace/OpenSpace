@@ -458,6 +458,23 @@ Labelset loadFileWithCache(std::filesystem::path filePath) {
     );
 }
 
+Labelset loadFromDataset(const Dataset& dataset) {
+    Labelset res;
+    res.entries.reserve(dataset.entries.size());
+
+    int count = 0;
+    for (const Dataset::Entry& entry : dataset.entries) {
+        Labelset::Entry label;
+        label.position = entry.position;
+        label.text = entry.comment.value_or("MISSING LABEL");
+        // @TODO: make is possible to configure this identifier?
+        label.identifier = fmt::format("Point-{}", count);
+        res.entries.push_back(std::move(label));
+    }
+
+    return res;
+}
+
 } // namespace label
 
 namespace color {

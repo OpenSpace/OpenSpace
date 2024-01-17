@@ -33,6 +33,7 @@
 #include <openspace/engine/configuration.h>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 
 using namespace openspace;
 

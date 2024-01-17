@@ -104,7 +104,10 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the points"
+        "The labels for the points. If no label file is provided, the labels will be "
+        "created to match the points in the data file. For a CSV file, you should then "
+        "specify which column is the 'Name' column in the data mapping. For SPECK files "
+        "the labels are created from the comment at the end of each line"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
@@ -524,14 +527,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _hasSpriteTexture = p.texture.has_value();
 
-    if (p.labels.has_value()) {
-        _labels = std::make_unique<LabelsComponent>(*p.labels);
-        _hasLabels = true;
-        addPropertySubOwner(_labels.get());
-        // Fading of the labels should also depend on the fading of the renderable
-        _labels->setParentFadeable(this);
-    }
-
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
     if (p.sizeSettings.has_value() && p.sizeSettings->sizeMapping.has_value()) {
@@ -572,16 +567,33 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
         }
         _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
+
+        // If no scale exponent was specified, compute one that will at least show the
+        // points based on the scale of the positions in the dataset
+        if (!p.sizeSettings.has_value() || !p.sizeSettings->scaleExponent.has_value()) {
+            double dist = _dataset.maxPositionComponent * toMeter(_unit);
+            if (dist > 0.0) {
+                float exponent = static_cast<float>(std::log10(dist));
+                // Reduce the actually used exponent a little bit, as just using the
+                // logarithm as is leads to very large points
+                _sizeSettings.scaleExponent = 0.9f * exponent;
+            }
+        }
     }
 
-    // If no scale exponent was specified, compute one that will at least show the points
-    // based on the scale of the positions in the dataset
-    if (!p.sizeSettings.has_value() || !p.sizeSettings->scaleExponent.has_value()) {
-        double dist = _dataset.maxPositionComponent * toMeter(_unit);
-        float exponent = static_cast<float>(std::log10(dist));
-        // Reduce the actually used exponent a little bit, as just using the logarithm
-        // as is leads to very large points
-        _sizeSettings.scaleExponent = 0.9f * exponent;
+    if (p.labels.has_value()) {
+        if (!p.labels->hasKey("File") && _hasDataFile) {
+            // Load the labelset from the dataset if no file was included
+            _labels = std::make_unique<LabelsComponent>(*p.labels, _dataset, _unit);
+        }
+        else {
+            _labels = std::make_unique<LabelsComponent>(*p.labels);
+        }
+
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
     }
 
     _nDataPoints.setReadOnly(true);
@@ -589,7 +601,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderablePointCloud::isReady() const {
-    bool isReady = _program && !_dataset.entries.empty();
+    bool isReady = _program;
 
     // If we have labels, they also need to be loaded
     if (_hasLabels) {
@@ -607,7 +619,6 @@ void RenderablePointCloud::initialize() {
 
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
@@ -691,6 +702,10 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
                                             const glm::dvec3& orthoUp,
                                             float fadeInVariable)
 {
+    if (!_hasDataFile || _dataset.entries.empty()) {
+        return;
+    }
+
     glEnablei(GL_BLEND, 0);
 
     if (_useAdditiveBlending) {
@@ -861,7 +876,7 @@ int RenderablePointCloud::nAttributesPerPoint() const {
 }
 
 void RenderablePointCloud::updateBufferData() {
-    if (!_hasDataFile) {
+    if (!_hasDataFile || _dataset.entries.empty()) {
         return;
     }
 
