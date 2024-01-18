@@ -577,7 +577,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
             return 1;
         },
-        2
+        1
     );
     lua_setfield(*_luaState, assetTableIndex, "localResource");
 
