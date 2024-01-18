@@ -50,6 +50,8 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+    void extraInitializeGL() override;
+
     /**
      * Create the data slice to use for rendering the points. Compared to the regular
      * point cloud, the data slice for an interpolated set of points will have to be
@@ -59,6 +61,9 @@ protected:
      * \return The dataslice to use for rendering the points
      */
     std::vector<float> createDataSlice() override;
+
+    void initializeBufferData();
+    void updateBufferData() override;
 
 private:
     struct Interpolation : properties::PropertyOwner {

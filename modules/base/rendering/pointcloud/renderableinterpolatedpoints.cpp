@@ -287,6 +287,10 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     _nDataPoints = nObjects;
 }
 
+void RenderableInterpolatedPoints::extraInitializeGL() {
+    initializeBufferData();
+}
+
 std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
     ZoneScoped;
 
@@ -409,6 +413,92 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
     }
     setBoundingSphere(maxRadius);
     return result;
+}
+
+void RenderableInterpolatedPoints::initializeBufferData() {
+    if (_vao == 0) {
+        glGenVertexArrays(1, &_vao);
+        LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
+    }
+    if (_vbo == 0) {
+        glGenBuffers(1, &_vbo);
+        LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
+    }
+
+    const int attibutesPerPoint = nAttributesPerPoint();
+    const unsigned int bufferSize = nAttributesPerPoint() * _nDataPoints * sizeof(float);
+
+    // Allocate the memory for the buffer (we will want to upload the data quite often)
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+
+
+    // From here it's a copy u
+    int attributeOffset = 0;
+
+    GLint positionAttrib = _program->attributeLocation("in_position");
+    glEnableVertexAttribArray(positionAttrib);
+    glVertexAttribPointer(
+        positionAttrib,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        attibutesPerPoint * sizeof(float),
+        nullptr
+    );
+    attributeOffset += 4;
+
+    if (_hasColorMapFile) {
+        GLint colorParamAttrib = _program->attributeLocation("in_colorParameter");
+        glEnableVertexAttribArray(colorParamAttrib);
+        glVertexAttribPointer(
+            colorParamAttrib,
+            1,
+            GL_FLOAT,
+            GL_FALSE,
+            attibutesPerPoint * sizeof(float),
+            reinterpret_cast<void*>(attributeOffset * sizeof(float))
+        );
+        attributeOffset += 1;
+    }
+
+    if (_hasDatavarSize) {
+        GLint scalingAttrib = _program->attributeLocation("in_scalingParameter");
+        glEnableVertexAttribArray(scalingAttrib);
+        glVertexAttribPointer(
+            scalingAttrib,
+            1,
+            GL_FLOAT,
+            GL_FALSE,
+            attibutesPerPoint * sizeof(float),
+            reinterpret_cast<void*>(attributeOffset * sizeof(float))
+        );
+        attributeOffset += 1;
+    }
+
+    glBindVertexArray(0);
+}
+
+void RenderableInterpolatedPoints::updateBufferData() {
+    if (!_hasDataFile || _dataset.entries.empty()) {
+        return;
+    }
+
+    ZoneScopedN("Data dirty");
+    TracyGpuZone("Data dirty");
+    //LDEBUG("Regenerating data");
+
+    // Regenerate data and update buffer
+    std::vector<float> slice = createDataSlice();
+
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, slice.size() * sizeof(float), slice.data());
+
+    glBindVertexArray(0);
+
+    _dataIsDirty = false;
 }
 
 } // namespace openspace

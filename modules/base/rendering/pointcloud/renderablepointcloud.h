@@ -74,8 +74,10 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+    virtual void extraInitializeGL();
+
     int nAttributesPerPoint() const;
-    void updateBufferData();
+    virtual void updateBufferData();
     void updateSpriteTexture();
 
     /// Find the index of the currently chosen color parameter in the dataset
