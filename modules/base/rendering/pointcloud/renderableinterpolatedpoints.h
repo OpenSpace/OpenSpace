@@ -53,6 +53,9 @@ protected:
     void initializeShadersAndGlExtras() override;
     void deinitializeShaders() override;
     void bindDataForPointRendering() override;
+    void preUpdate() override;
+
+    int nAttributesPerPoint() const override;
 
     /**
      * Create the data slice to use for rendering the points. Compared to the regular
@@ -89,6 +92,7 @@ private:
     Interpolation _interpolation;
 
     float _prevInterpolationValue = 0.f;
+    bool _shouldReinitializeBufferdata = false;
 };
 
 } // namespace openspace

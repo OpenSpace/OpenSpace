@@ -77,8 +77,9 @@ protected:
     virtual void initializeShadersAndGlExtras();
     virtual void deinitializeShaders();
     virtual void bindDataForPointRendering();
+    virtual void preUpdate();
 
-    int nAttributesPerPoint() const;
+    virtual int nAttributesPerPoint() const;
     virtual void updateBufferData();
     void updateSpriteTexture();
 

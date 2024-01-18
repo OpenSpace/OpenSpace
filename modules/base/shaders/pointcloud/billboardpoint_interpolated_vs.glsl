@@ -26,13 +26,19 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-in vec4 in_position;
-in vec4 in_position_1;
-in float in_colorParameter;
-in float in_colorParameter_1;
-in float in_scalingParameter;
-in float in_scalingParameter_1;
+in vec4 in_position0;
+in vec4 in_position1;
 
+// Only used if spline interpolation is desired
+in vec4 in_position_before;
+in vec4 in_position_after;
+
+in float in_colorParameter0;
+in float in_colorParameter1;
+in float in_scalingParameter0;
+in float in_scalingParameter1;
+
+uniform bool useSpline;
 uniform float interpolationValue;
 
 flat out float colorParameter;
@@ -53,13 +59,33 @@ float interpolateDataValue(float v0, float v1, float t) {
   return isMissing ? NaN : mix(v0, v1, t);
 };
 
+vec4 interpolateCatmullRom(float t, vec4 p0, vec4 p1, vec4 p2, vec4 p3) {
+    float t2 = t * t;
+    float t3 = t2 * t;
+    return 0.5 * (
+        2.0 * p1 +
+        t * (p2 - p0) +
+        t2 * (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) +
+        t3 * (3.0 * p1 - p0  - 3.0 * p2 + p3)
+    );
+}
+
 void main() {
   float t = interpolationValue;
 
-  colorParameter = interpolateDataValue(in_colorParameter, in_colorParameter_1, t);
-  scalingParameter = interpolateDataValue(in_scalingParameter, in_scalingParameter_1, t);
+  colorParameter = interpolateDataValue(in_colorParameter0, in_colorParameter1, t);
+  scalingParameter = interpolateDataValue(in_scalingParameter0, in_scalingParameter1, t);
 
-  // @TODO: Handle spline
+  vec4 position = mix(in_position0, in_position1, t);
+  if (useSpline) {
+    position = interpolateCatmullRom(
+      t,
+      in_position_before,
+      in_position0,
+      in_position1,
+      in_position_after
+    );
+  }
 
-  gl_Position = mix(in_position, in_position_1, t);
+  gl_Position = position;
 }

@@ -870,8 +870,12 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     }
 }
 
+void RenderablePointCloud::preUpdate() {}
+
 void RenderablePointCloud::update(const UpdateData&) {
     ZoneScoped;
+
+    preUpdate();
 
     if (_dataIsDirty) {
         updateBufferData();
