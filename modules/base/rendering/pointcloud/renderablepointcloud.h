@@ -74,7 +74,9 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void extraInitializeGL();
+    virtual void initializeShadersAndGlExtras();
+    virtual void deinitializeShaders();
+    virtual void bindDataForPointRendering();
 
     int nAttributesPerPoint() const;
     virtual void updateBufferData();

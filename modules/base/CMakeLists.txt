@@ -154,9 +154,6 @@ set(SHADER_FILES
   shaders/arrow_vs.glsl
   shaders/axes_fs.glsl
   shaders/axes_vs.glsl
-  shaders/billboardpoint_fs.glsl
-  shaders/billboardpoint_gs.glsl
-  shaders/billboardpoint_vs.glsl
   shaders/disc_fs.glsl
   shaders/disc_vs.glsl
   shaders/grid_vs.glsl
@@ -169,6 +166,10 @@ set(SHADER_FILES
   shaders/model_vs.glsl
   shaders/plane_fs.glsl
   shaders/plane_vs.glsl
+  shaders/pointcloud/billboardpoint_fs.glsl
+  shaders/pointcloud/billboardpoint_gs.glsl
+  shaders/pointcloud/billboardpoint_vs.glsl
+  shaders/pointcloud/billboardpoint_interpolated_vs.glsl
   shaders/polygon_fs.glsl
   shaders/polygon_gs.glsl
   shaders/polygon_vs.glsl

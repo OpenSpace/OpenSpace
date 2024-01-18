@@ -50,7 +50,9 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    void extraInitializeGL() override;
+    void initializeShadersAndGlExtras() override;
+    void deinitializeShaders() override;
+    void bindDataForPointRendering() override;
 
     /**
      * Create the data slice to use for rendering the points. Compared to the regular
@@ -66,6 +68,9 @@ protected:
     void updateBufferData() override;
 
 private:
+    bool isAtKnot() const;
+    float computeCurrentLowerValue() const;
+
     struct Interpolation : properties::PropertyOwner {
         Interpolation();
         properties::FloatProperty value;
@@ -82,6 +87,8 @@ private:
         properties::BoolProperty useSpline;
     };
     Interpolation _interpolation;
+
+    float _prevInterpolationValue = 0.f;
 };
 
 } // namespace openspace
