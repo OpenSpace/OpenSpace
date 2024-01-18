@@ -1,5 +1,5 @@
 local transforms = asset.require("../model")
-local spice = asset.require("../spice")
+local kernels = asset.require("../kernels")
 
 
 
@@ -8,8 +8,8 @@ local HGA = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.HGA,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.HGA,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_HGA",
@@ -28,11 +28,12 @@ local HGA = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(HGA)
+  -- Circle shapes are currently not supported
+  -- openspace.addSceneGraphNode(HGA)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HGA)
+  -- openspace.removeSceneGraphNode(HGA)
 end)
 
 

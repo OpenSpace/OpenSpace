@@ -1,5 +1,5 @@
 local transforms = asset.require("../model")
-local spice = asset.require("../spice")
+local kernels = asset.require("../kernels")
 
 
 
@@ -8,8 +8,8 @@ local StarTracker1 = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.StarTracker1,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.StarTracker1,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_STR-1",
@@ -31,8 +31,8 @@ local StarTracker2 = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.StarTracker2,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.StarTracker2,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_STR-2",
@@ -54,8 +54,8 @@ local StarTracker3 = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.StarTracker3,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.StarTracker3,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_STR-3",
@@ -74,15 +74,16 @@ local StarTracker3 = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(StarTracker1)
-  openspace.addSceneGraphNode(StarTracker2)
-  openspace.addSceneGraphNode(StarTracker3)
+  -- Circle shapes are currently not supported
+  -- openspace.addSceneGraphNode(StarTracker1)
+  -- openspace.addSceneGraphNode(StarTracker2)
+  -- openspace.addSceneGraphNode(StarTracker3)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(StarTracker1)
-  openspace.removeSceneGraphNode(StarTracker2)
-  openspace.removeSceneGraphNode(StarTracker3)
+  -- openspace.removeSceneGraphNode(StarTracker1)
+  -- openspace.removeSceneGraphNode(StarTracker2)
+  -- openspace.removeSceneGraphNode(StarTracker3)
 end)
 
 

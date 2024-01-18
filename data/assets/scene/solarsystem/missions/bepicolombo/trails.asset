@@ -1,11 +1,9 @@
-local spice = asset.require("./spice")
+local kernels = asset.require("./kernels")
 local mercury = asset.require("scene/solarsystem/planets/mercury/transforms")
 local solarsystem = asset.require("scene/solarsystem/sun/transforms")
 local coreKernels = asset.require("spice/core")
 
 
-local StartTime = "2018 OCT 20 01:45:00"
-local EndTime = "2028 MAY 01 12:00:00"
 
 local BepiColomboTrailSun = {
   Identifier = "BepiColomboTrailSun",
@@ -14,12 +12,12 @@ local BepiColomboTrailSun = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.MPO,
+      Target = kernels.ID.MPO,
       Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.70, 0.50, 0.20 },
-    StartTime = StartTime,
-    EndTime = EndTime,
+    StartTime = "2018 OCT 20 01:45:00",
+    EndTime = "2028 MAY 01 12:00:00",
     SampleInterval = 60000
   },
   GUI = {
@@ -35,13 +33,13 @@ local BepiColomboTrailMercury = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.MPO,
+      Target = kernels.ID.MPO,
       Observer = coreKernels.ID.Mercury
     },
     Color = { 0.625, 0.255, 0.45 },
-    StartTime = StartTime,
-    EndTime = EndTime,
-    SampleInterval = 60000
+    StartTime = "2025 DEC 05 12:00:00",
+    EndTime = "2028 MAY 01 12:00:00",
+    SampleInterval = 600
   },
   GUI = {
     Name = "BepiColombo Trail (Mercury)",

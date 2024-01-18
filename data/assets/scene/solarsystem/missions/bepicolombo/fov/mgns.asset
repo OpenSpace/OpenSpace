@@ -1,5 +1,5 @@
 local transforms = asset.require("../model")
-local spice = asset.require("../spice")
+local kernels = asset.require("../kernels")
 
 
 
@@ -8,8 +8,8 @@ local MGNS = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.MGNS,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MGNS,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_MGNS",
@@ -28,11 +28,12 @@ local MGNS = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(MGNS)
+  -- Circle shapes are currently not supported
+  -- openspace.addSceneGraphNode(MGNS)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MGNS)
+  -- openspace.removeSceneGraphNode(MGNS)
 end)
 
 

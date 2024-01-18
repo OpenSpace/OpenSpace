@@ -1,5 +1,5 @@
 local transforms = asset.require("../model")
-local spice = asset.require("../spice")
+local kernels = asset.require("../kernels")
 
 
 
@@ -8,8 +8,8 @@ local SixsX1 = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.Sixs_X1,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.Sixs_X1,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_SIXS-X-1",
@@ -31,8 +31,8 @@ local SixsX2 = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.Sixs_X2,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.Sixs_X2,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_SIXS-X-2",
@@ -54,8 +54,8 @@ local SixsX3 = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.Sixs_X3,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.Sixs_X3,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_SIXS-X-3",
@@ -74,15 +74,16 @@ local SixsX3 = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(SixsX1)
-  openspace.addSceneGraphNode(SixsX2)
-  openspace.addSceneGraphNode(SixsX3)
+  -- Circle shapes are currently not supported
+  -- openspace.addSceneGraphNode(SixsX1)
+  -- openspace.addSceneGraphNode(SixsX2)
+  -- openspace.addSceneGraphNode(SixsX3)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SixsX3)
-  openspace.removeSceneGraphNode(SixsX2)
-  openspace.removeSceneGraphNode(SixsX1)
+  -- openspace.removeSceneGraphNode(SixsX3)
+  -- openspace.removeSceneGraphNode(SixsX2)
+  -- openspace.removeSceneGraphNode(SixsX1)
 end)
 
 

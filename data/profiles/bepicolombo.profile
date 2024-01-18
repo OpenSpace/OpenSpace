@@ -49,6 +49,128 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "properties": [
+    {
+      "name": "Scene.BepiColomboMPO_MertisTis.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_MertisTisPlanet.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_MertisTisSpace.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_Phebus100.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_Phebus75.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_PhebusSlit100.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_PhebusSlit75.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SerenaElena.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_HRIC_F550.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_HRIC_F750.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_HRIC_F880.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_HRIC_FPA.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_HRIC_FPAN.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_STC_H.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_STC_H_F420.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_STC_H_F750.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_STC_H_P700.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_STC_L.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_STC_L_F550.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_STC_L_F920.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_STC_L_P700.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_SIMBIOSYS_VIHI.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_MIXS-C.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.BepiColomboMPO_MIXS-T.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    }
+  ],
   "time": {
     "is_paused": false,
     "type": "relative",

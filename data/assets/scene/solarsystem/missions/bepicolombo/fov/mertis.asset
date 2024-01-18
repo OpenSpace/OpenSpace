@@ -1,5 +1,5 @@
 local transforms = asset.require("../model")
-local spice = asset.require("../spice")
+local kernels = asset.require("../kernels")
 
 
 
@@ -8,8 +8,8 @@ local MertisTis = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.MertisTis,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MertisTis,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_MERTIS_TIS",
@@ -31,8 +31,8 @@ local MertisTisPlanet = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.MertisTisPlanet,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MertisTisPlanet,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_MERTIS_TIS_PLANET",
@@ -54,8 +54,8 @@ local MertisTisSpace = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.MertisTisSpace,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MertisTisSpace,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_MERTIS_TIS_SPACE",

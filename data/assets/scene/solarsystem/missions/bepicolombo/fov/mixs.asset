@@ -1,5 +1,5 @@
 local transforms = asset.require("../model")
-local spice = asset.require("../spice")
+local kernels = asset.require("../kernels")
 
 
 
@@ -8,8 +8,8 @@ local MIXS_C = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.MIXS_C,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MIXS_C,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_MIXS-C",
@@ -31,8 +31,8 @@ local MIXS_T = {
   Parent = transforms.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = spice.ID.MPO,
-    Frame = spice.Frame.MIXS_T,
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MIXS_T,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "MPO_MIXS-T",
