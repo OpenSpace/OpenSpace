@@ -34,14 +34,16 @@ layout(triangle_strip, max_vertices = 4) out;
 flat out float gs_colorParameter;
 out vec2 texCoord;
 flat out float vs_screenSpaceDepth;
+flat out vec4 vs_positionViewSpace;
 
 // General settings
 uniform float scaleExponent;
 uniform float scaleFactor;
 uniform int renderOption;
-uniform dmat4 cameraViewProjectionMatrix;
+uniform dmat4 cameraViewMatrix;
+uniform dmat4 projectionMatrix;
 uniform dmat4 modelMatrix;
-uniform bool enablePixelSizeControl;
+uniform bool enableMaxSizeControl;
 uniform bool hasDvarScaling;
 
 // RenderOption: CameraViewDirection
@@ -52,9 +54,9 @@ uniform vec3 right;
 uniform dvec3 cameraPosition;
 uniform vec3 cameraLookUp;
 
-// Pixel size control: true
-uniform vec2 screenSize;
-uniform float maxBillboardSize;
+// Max size control: true
+// The max size is an angle, in degrees, for the diameter
+uniform float maxAngularSize;
 
 const vec2 corners[4] = vec2[4](
   vec2(0.0, 0.0),
@@ -93,40 +95,34 @@ void main() {
     scaledUp = scaleMultiply * newUp * 0.5;
   }
 
-  // @TODO: Come up with some better solution for this scaling, that
-  // also work with non planar projections and multiple viewport resolutions.
-  if (enablePixelSizeControl) {
-    vec4 initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
-      dvec4(dpos.xyz - dvec3(scaledRight - scaledUp), dpos.w)));
+  if (enableMaxSizeControl) {
+    // Limit the max size of the points, as the angle in "FOV" that the point is allowed
+    // to take up. Note that the max size is for the diameter, and we need the radius
+    float desiredAngleRadians = radians(maxAngularSize * 0.5);
 
-    vs_screenSpaceDepth = initialPosition.w;
+    double distanceToCamera = length(dpos.xyz - cameraPosition);
+    double pointSize = length(dvec3(scaledRight));
+    // @TODO (2023-01-05, emmbr) Consider if this atan computation can be optimized using
+    // approximation
+    float angle = atan(float(pointSize / distanceToCamera));
 
-    vec4 crossCorner = z_normalization(vec4(cameraViewProjectionMatrix *
-      dvec4(dpos.xyz + dvec3(scaledRight + scaledUp), dpos.w)));
-
-    // Testing size for rectangular viewport:
-    vec2 halfViewSize = screenSize * 0.5;
-    vec2 topRight = crossCorner.xy / crossCorner.w;
-    vec2 bottomLeft = initialPosition.xy / initialPosition.w;
-
-    // width and height
-    vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
-
-    if (length(sizes) > maxBillboardSize) {
-      float correctionScale = maxBillboardSize / length(sizes);
-      scaledRight *= correctionScale;
-      scaledUp *= correctionScale;
+    if ((angle > desiredAngleRadians) && (distanceToCamera > 0.0)) {
+      float correctionScaleFactor = float(distanceToCamera) * tan(desiredAngleRadians) / float(pointSize);
+      scaledRight *= correctionScaleFactor;
+      scaledUp *= correctionScaleFactor;
     }
-
-    // TODO: add checks for wether the generated plane covers too many or too few pixels
   }
 
-  // Saving one matrix multiplication:
+  dmat4 cameraViewProjectionMatrix = projectionMatrix * cameraViewMatrix;
+
   vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
   vec4 scaledRightClip = scaleFactor *
     vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
   vec4 scaledUpClip = scaleFactor *
     vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
+
+  vec4 dposViewSpace= vec4(cameraViewMatrix * dpos);
+  vs_positionViewSpace = dposViewSpace;
 
   vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
   vs_screenSpaceDepth = initialPosition.w;
