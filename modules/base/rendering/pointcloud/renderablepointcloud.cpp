@@ -888,16 +888,16 @@ void RenderablePointCloud::update(const UpdateData&) {
     }
 }
 
-glm::dvec4 RenderablePointCloud::transformedPosition(
+glm::dvec3 RenderablePointCloud::transformedPosition(
                                                 const dataloader::Dataset::Entry& e) const
 {
     const double unitMeter = toMeter(_unit);
     glm::dvec4 position = glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0);
-    return _transformationMatrix * position;
+    return glm::dvec3(_transformationMatrix * position);
 }
 
 int RenderablePointCloud::nAttributesPerPoint() const {
-    int n = 4; // position
+    int n = 3; // position
     n += _hasColorMapFile ? 1 : 0;
     n += _hasDatavarSize ? 1 : 0;
     return n;
@@ -936,13 +936,13 @@ void RenderablePointCloud::updateBufferData() {
     glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(
         positionAttrib,
-        4,
+        3,
         GL_FLOAT,
         GL_FALSE,
         attibutesPerPoint * sizeof(float),
         nullptr
     );
-    attributeOffset += 4;
+    attributeOffset += 3;
 
     if (_hasColorMapFile) {
         GLint colorParamAttrib = _program->attributeLocation("in_colorParameter");
@@ -1051,13 +1051,13 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     double maxRadius = 0.0;
 
     for (const dataloader::Dataset::Entry& e : _dataset.entries) {
-        glm::dvec4 position = transformedPosition(e);
+        glm::dvec3 position = transformedPosition(e);
 
         const double r = glm::length(position);
         maxRadius = std::max(maxRadius, r);
 
         // Positions
-        for (int j = 0; j < 4; ++j) {
+        for (int j = 0; j < 3; ++j) {
             result.push_back(static_cast<float>(position[j]));
         }
 

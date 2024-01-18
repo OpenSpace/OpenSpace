@@ -349,8 +349,8 @@ int RenderableInterpolatedPoints::nAttributesPerPoint() const {
     // Need twice as much information as the regular points
     n *= 2;
     if (_interpolation.useSpline) {
-        // Use two more positions
-        n += 8;
+        // Use two more positions (xyz)
+        n += 2 * 3;
     }
     return n;
 }
@@ -385,18 +385,18 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         using namespace dataloader;
         const Dataset::Entry& e0 = _dataset.entries[t0Index * _nDataPoints + i];
         const Dataset::Entry& e1 = _dataset.entries[t1Index * _nDataPoints + i];
-        glm::dvec4 position0 = transformedPosition(e0);
-        glm::dvec4 position1 = transformedPosition(e1);
+        glm::dvec3 position0 = transformedPosition(e0);
+        glm::dvec3 position1 = transformedPosition(e1);
 
         const double r = glm::max(glm::length(position0), glm::length(position1));
         maxRadius = glm::max(maxRadius, r);
 
         // Positions
-        for (int j = 0; j < 4; ++j) {
+        for (int j = 0; j < 3; ++j) {
             result.push_back(static_cast<float>(position0[j]));
         }
 
-        for (int j = 0; j < 4; ++j) {
+        for (int j = 0; j < 3; ++j) {
             result.push_back(static_cast<float>(position1[j]));
         }
 
@@ -411,14 +411,14 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
 
             const Dataset::Entry& e00 = _dataset.entries[beforeIndex * _nDataPoints + i];
             const Dataset::Entry& e11 = _dataset.entries[afterIndex * _nDataPoints + i];
-            glm::dvec4 positionBefore = transformedPosition(e00);
-            glm::dvec4 positionAfter = transformedPosition(e11);
+            glm::dvec3 positionBefore = transformedPosition(e00);
+            glm::dvec3 positionAfter = transformedPosition(e11);
 
-            for (int j = 0; j < 4; ++j) {
+            for (int j = 0; j < 3; ++j) {
                 result.push_back(static_cast<float>(positionBefore[j]));
             }
 
-            for (int j = 0; j < 4; ++j) {
+            for (int j = 0; j < 3; ++j) {
                 result.push_back(static_cast<float>(positionAfter[j]));
             }
         }
@@ -481,12 +481,12 @@ void RenderableInterpolatedPoints::initializeBufferData() {
         attributeOffset += nValues;
     };
 
-    addFloatAttribute("in_position0", 4);
-    addFloatAttribute("in_position1", 4);
+    addFloatAttribute("in_position0", 3);
+    addFloatAttribute("in_position1", 3);
 
     if (_interpolation.useSpline) {
-        addFloatAttribute("in_position_before", 4);
-        addFloatAttribute("in_position_after", 4);
+        addFloatAttribute("in_position_before", 3);
+        addFloatAttribute("in_position_after", 3);
     }
 
     if (_hasColorMapFile) {
