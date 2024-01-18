@@ -57,7 +57,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             return result;
         }
         return std::numeric_limits<float>::quiet_NaN();
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         // clang is missing float support for std::from_chars
         try {
             result = std::stof(str.c_str(), nullptr);
@@ -65,9 +65,9 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
                 return result;
             }
         }
-        catch (std::invalid_argument const& e) {}
+        catch (const std::invalid_argument&) {}
         return NAN;
-#endif
+#endif // WIN32
     };
 
     LDEBUG("Parsing CSV file");
@@ -142,7 +142,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     LINFO(fmt::format(
         "Loading {} rows with {} columns", rows.size(), columns.size()
     ));
-    ProgressBar progress(rows.size());
+    ProgressBar progress = ProgressBar(static_cast<int>(rows.size()));
 
     // Skip first row (column names)
     for (size_t rowIdx = 1; rowIdx < rows.size(); ++rowIdx) {
@@ -192,7 +192,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 
         res.entries.push_back(entry);
 
-        progress.print(rowIdx + 1);
+        progress.print(static_cast<int>(rowIdx + 1));
     }
 
     return res;

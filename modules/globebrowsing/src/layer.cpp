@@ -223,8 +223,6 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         addProperty(_guiDescription);
     }
 
-    TileTextureInitData initData = tileTextureInitData(_layerGroupId);
-
     _opacity = p.opacity.value_or(_opacity);
     addProperty(Fadeable::_opacity);
     addProperty(Fadeable::_fade);
@@ -457,8 +455,7 @@ void Layer::update() {
 }
 
 glm::vec2 Layer::tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-                                               const glm::vec2& tileUV,
-                                               const glm::uvec2& resolution)
+                                               const glm::vec2& tileUV)
 {
     glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
     return uv;

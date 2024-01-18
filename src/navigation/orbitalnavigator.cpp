@@ -2060,11 +2060,6 @@ double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
 
-    const glm::dvec3 outDirection = glm::normalize(
-        glm::dmat3(modelTransform) *
-        positionHandle.referenceSurfaceOutDirection
-    );
-
     const glm::dvec3 posDiff = cameraPosition - anchorPos;
     const glm::dvec3 centerToActualSurfaceModelSpace =
         positionHandle.centerToReferenceSurface +

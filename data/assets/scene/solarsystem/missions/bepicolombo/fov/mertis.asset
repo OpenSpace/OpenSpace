@@ -1,0 +1,104 @@
+local transforms = asset.require("../model")
+local kernels = asset.require("../kernels")
+
+
+
+local MertisTis = {
+  Identifier = "BepiColomboMPO_MertisTis",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MertisTis,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_MERTIS_TIS",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO MERTIS TIS",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local MertisTisPlanet = {
+  Identifier = "BepiColomboMPO_MertisTisPlanet",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MertisTisPlanet,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_MERTIS_TIS_PLANET",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO MERTIS TIS Planet",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local MertisTisSpace = {
+  Identifier = "BepiColomboMPO_MertisTisSpace",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MertisTisSpace,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_MERTIS_TIS_SPACE",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO MERTIS TIS Space",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MertisTis)
+  openspace.addSceneGraphNode(MertisTisPlanet)
+  openspace.addSceneGraphNode(MertisTisSpace)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MertisTisSpace)
+  openspace.removeSceneGraphNode(MertisTisPlanet)
+  openspace.removeSceneGraphNode(MertisTis)
+end)
+
+
+
+asset.meta = {
+  Name = "MERTIS",
+  Version = "1.0",
+  Description = [[
+    The Mercury Radiometer and Thermal Infrared Spectrometer (MERTIS) is an innovative
+    instrument for studying the surface composition and mineralogy of planet Mercury.
+    MERTIS combines an uncooled grating push broom IR-spectrometer (TIS) with a radiometer
+    (TIR), which will operate in the wavelength region of 7-14 and 7-40 um, respectively.
+    The spatial resolution of the MERTIS observations will be about 500 m globally and
+    better than 500 m for approximately 5-10 percent of the surface.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

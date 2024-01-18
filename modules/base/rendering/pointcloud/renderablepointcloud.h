@@ -122,8 +122,8 @@ protected:
         properties::FloatProperty scaleExponent;
         properties::FloatProperty scaleFactor;
 
-        properties::BoolProperty pixelSizeControl;
-        properties::FloatProperty maxPixelSize;
+        properties::BoolProperty useMaxSizeControl;
+        properties::FloatProperty maxAngularSize;
     };
     SizeSettings _sizeSettings;
 
@@ -156,12 +156,12 @@ protected:
     ghoul::opengl::ProgramObject* _program = nullptr;
 
     UniformCache(
-        cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
-        maxBillboardSize, color, opacity, scaleExponent, scaleFactor, up, right,
-        fadeInValue, screenSize, hasSpriteTexture, spriteTexture, useColormap,
-        colorMapTexture, cmapRangeMin, cmapRangeMax, nanColor, useNanColor,
-        hideOutsideRange, enablePixelSizeControl, aboveRangeColor, useAboveRangeColor,
-        belowRangeColor, useBelowRangeColor, hasDvarScaling
+        cameraViewMatrix, projectionMatrix, modelMatrix, cameraPos, cameraLookup,
+        renderOption, maxAngularSize, color, opacity, scaleExponent, scaleFactor, up,
+        right, fadeInValue, hasSpriteTexture, spriteTexture, useColormap, colorMapTexture,
+        cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
+        enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
+        useBelowRangeColor, hasDvarScaling
     ) _uniformCache;
 
     std::string _dataFile;

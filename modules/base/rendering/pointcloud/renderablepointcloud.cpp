@@ -28,7 +28,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -56,11 +55,11 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
     constexpr std::array<const char*, 29> UniformNames = {
-        "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
-        "renderOption", "maxBillboardSize", "color", "opacity", "scaleExponent",
-        "scaleFactor", "up", "right", "fadeInValue", "screenSize", "hasSpriteTexture",
+        "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
+        "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
+        "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
         "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
-        "nanColor", "useNanColor", "hideOutsideRange", "enablePixelSizeControl",
+        "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
         "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
         "hasDvarScaling"
     };
@@ -81,7 +80,7 @@ namespace {
         "UseTexture",
         "Use Texture",
         "If true, use the provided sprite texture to render the point. If false, draw "
-        "the points using the default point shape",
+        "the points using the default point shape.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -127,7 +126,7 @@ namespace {
         "Unit, or meters. With normal fading the points are fully visible once the "
         "camera is outside this range and fully invisible when inside the range. With "
         "inverted fading the situation is the opposite: the points are visible inside "
-        "hen closer than the min value of the range and invisible when further away",
+        "hen closer than the min value of the range and invisible when further away.",
         // @VISIBILITY(3.25)
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -136,7 +135,7 @@ namespace {
         "Enabled",
         "Enable Distance-based Fading",
         "Enables/disables the Fade-in effect based on camera distance. Automatically set "
-        "to true if FadeInDistances are specified in the asset",
+        "to true if FadeInDistances are specified in the asset.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -145,7 +144,7 @@ namespace {
         "Invert",
         "This property can be used the invert the fading so that the points are "
         "invisible when the camera is further away than the max fade distance "
-        "and fully visible when it is closer than the min distance",
+        "and fully visible when it is closer than the min distance.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -176,7 +175,7 @@ namespace {
         "value should be. If not included, it is computed based on the maximum "
         "positional component of the data points. This is useful for showing the "
         "dataset at all, but you will likely want to change it to something that looks "
-        "good",
+        "good.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -184,25 +183,29 @@ namespace {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor to adjust the size of the points, "
-        "after the exponential scaling and any pixel-size control effects. Simply just "
-        "increases or decreases the visual size of the points",
+        "after the exponential scaling and any max size control effects. Simply just "
+        "increases or decreases the visual size of the points.",
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
-        "EnablePixelSizeControl",
-        "Enable Pixel Size Control",
-        "If true, the Max Size in Pixels property will be used as an upper limit for the "
-        "size of the point. Reduces the size of the points when approaching them, so that "
-        "they stick to a maximum screen space size. Currently, the scaling is computed "
-        "based on rectangular displays and might look weird in other projections",
+    constexpr openspace::properties::Property::PropertyInfo UseMaxSizeControlInfo = {
+        "EnableMaxSizeControl",
+        "Enable Max Size Control",
+        "If true, the Max Size property will be used as an upper limit for the size of "
+        "the point. This reduces the size of the points when approaching them, so that "
+        "they stick to a maximum visual size depending on the Max Size value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxPixelSizeInfo = {
-        "MaxPixelSize",
-        "Max Size in Pixels",
-        "The maximum size (in pixels) for the billboard representing the point.",
+    constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
+        "MaxSize",
+        "Max Size",
+        "This value controls the maximum allowed size for the points, when the max size "
+        "control feature is enabled. This limits the visual size of the points based on "
+        "the distance to the camera. The larger the value, the larger the points are "
+        "allowed to become. In the background, the computations are made by limiting the "
+        "size to a certain angle based on the field of view of the camera. So a value of "
+        "1 limits the point size to take up a maximum of one degree of the view space.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -220,7 +223,7 @@ namespace {
         "Parameter Option",
         "This value determines which parameter is used for scaling of the point. The "
         "parameter value will be used as a miltiplicative factor to scale the size of "
-        "the points. Not that they may however still be scaled by pixel size adjustment "
+        "the points. Note that they may however still be scaled by max size adjustment "
         "effects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -242,8 +245,8 @@ namespace {
     //   interactively when OpenSpace is running until you find a value that you find
     //   suitable.
     //
-    // - There is also an option to limit the size of the points based on a given pixel
-    //   size. For now, this only works for flat projection displays.
+    // - There is also an option to limit the size of the points based on a given max
+    //   size value.
     //
     // - To easily change the visual size of the points, the multiplicative 'ScaleFactor'
     //   may be used. A value of 2 makes the points twice as large, visually, compared
@@ -315,14 +318,14 @@ namespace {
             // [[codegen::verbatim(ScaleFactorInfo.description)]]
             std::optional<float> scaleFactor;
 
-            // [[codegen::verbatim(PixelSizeControlInfo.description)]]
-            std::optional<bool> enablePixelSizeControl;
+            // [[codegen::verbatim(UseMaxSizeControlInfo.description)]]
+            std::optional<bool> enableMaxSizeControl;
 
-            // [[codegen::verbatim(MaxPixelSizeInfo.description)]]
-            std::optional<float> maxPixelSize;
+            // [[codegen::verbatim(MaxSizeInfo.description)]]
+            std::optional<float> maxSize;
         };
         // Settings related to the scale of the points, whether they should limit to
-        // a certain pixel size, etc.
+        // a certain max size, etc.
         std::optional<SizeSettings> sizeSettings;
 
         struct ColorSettings {
@@ -352,7 +355,7 @@ namespace {
         // origin of the dataset
         std::optional<Fading> fading;
 
-        // Transformation matrix to be applied to each object
+        // Transformation matrix to be applied to the position of each object
         std::optional<glm::dmat4x4> transformationMatrix;
     };
 
@@ -369,8 +372,8 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
     : properties::PropertyOwner({ "Sizing", "Sizing", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 25.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
-    , pixelSizeControl(PixelSizeControlInfo, false)
-    , maxPixelSize(MaxPixelSizeInfo, 400.f, 0.f, 1000.f)
+    , useMaxSizeControl(UseMaxSizeControlInfo, false)
+    , maxAngularSize(MaxSizeInfo, 1.f, 0.f, 45.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -379,8 +382,8 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
 
         scaleFactor = settings.scaleFactor.value_or(scaleFactor);
         scaleExponent = settings.scaleExponent.value_or(scaleExponent);
-        pixelSizeControl = settings.enablePixelSizeControl.value_or(pixelSizeControl);
-        maxPixelSize = settings.maxPixelSize.value_or(maxPixelSize);
+        useMaxSizeControl = settings.enableMaxSizeControl.value_or(useMaxSizeControl);
+        maxAngularSize = settings.maxSize.value_or(maxAngularSize);
 
         if (settings.sizeMapping.has_value()) {
             std::vector<std::string> opts = *settings.sizeMapping;
@@ -396,8 +399,8 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
 
     addProperty(scaleFactor);
     addProperty(scaleExponent);
-    addProperty(pixelSizeControl);
-    addProperty(maxPixelSize);
+    addProperty(useMaxSizeControl);
+    addProperty(maxAngularSize);
 }
 
 RenderablePointCloud::SizeSettings::SizeMapping::SizeMapping()
@@ -710,8 +713,8 @@ void RenderablePointCloud::bindDataForPointRendering() {
 
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
-    _program->setUniform(_uniformCache.enablePixelSizeControl, _sizeSettings.pixelSizeControl);
-    _program->setUniform(_uniformCache.maxBillboardSize, _sizeSettings.maxPixelSize);
+    _program->setUniform(_uniformCache.enableMaxSizeControl, _sizeSettings.useMaxSizeControl);
+    _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
     _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
 
     bool useTexture = _hasSpriteTexture && _useSpriteTexture;
@@ -800,24 +803,22 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     _program->activate();
 
-    _program->setUniform(
-        "screenSize",
-        glm::vec2(global::renderEngine->renderingResolution())
-    );
-
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
-
     _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
     _program->setUniform(
         _uniformCache.cameraLookup,
         glm::vec3(data.camera.lookUpVectorWorldSpace())
     );
+    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
     _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
+
     _program->setUniform(
-        _uniformCache.cameraViewProjectionMatrix,
-        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
+        _uniformCache.cameraViewMatrix,
+        data.camera.combinedViewMatrix()
+    );
+
+    _program->setUniform(
+        _uniformCache.projectionMatrix,
+        glm::dmat4(data.camera.projectionMatrix())
     );
 
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
@@ -843,8 +844,6 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     glm::dmat4 modelMatrix = calcModelTransform(data);
-    glm::dmat4 modelViewProjectionMatrix =
-        calcModelViewProjectionTransform(data, modelMatrix);
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -866,6 +865,9 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     if (_hasLabels) {
+        glm::dmat4 modelViewProjectionMatrix =
+            calcModelViewProjectionTransform(data, modelMatrix);
+
         _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
     }
 }

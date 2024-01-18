@@ -401,8 +401,8 @@ QWidget* LauncherWindow::createCentralWidget() {
             connect(
                 &dialog,
                 &SettingsDialog::saveSettings,
-                [](Settings settings) {
-                    saveSettings(settings, findSettings());
+                [](Settings s) {
+                    saveSettings(s, findSettings());
                 }
             );
 

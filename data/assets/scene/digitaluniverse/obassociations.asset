@@ -41,8 +41,8 @@ local Object = {
     SizeSettings = {
       SizeMapping = { "diameter" },
       ScaleExponent = 16.9,
-      MaxPixelSize = 450.0,
-      EnablePixelSizeControl = true
+      MaxSize = 17,
+      EnableMaxSizeControl = true
     }
   },
   GUI = {

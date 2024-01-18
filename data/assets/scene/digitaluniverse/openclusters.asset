@@ -34,8 +34,8 @@ local Object = {
     PolygonSides = 12,
     SizeSettings = {
       ScaleExponent = 17.6,
-      MaxPixelSize = 604.0,
-      EnablePixelSizeControl = true
+      MaxSize = 23.0,
+      EnableMaxSizeControl = true
     }
   },
   GUI = {
