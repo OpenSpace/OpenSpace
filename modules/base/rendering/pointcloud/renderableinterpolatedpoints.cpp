@@ -385,13 +385,8 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         using namespace dataloader;
         const Dataset::Entry& e0 = _dataset.entries[t0Index * _nDataPoints + i];
         const Dataset::Entry& e1 = _dataset.entries[t1Index * _nDataPoints + i];
-
-        const double unitMeter = toMeter(_unit);
-        glm::dvec4 position0 = glm::dvec4(glm::dvec3(e0.position) * unitMeter, 1.0);
-        position0 = _transformationMatrix * position0;
-
-        glm::dvec4 position1 = glm::dvec4(glm::dvec3(e1.position) * unitMeter, 1.0);
-        position1 = _transformationMatrix * position1;
+        glm::dvec4 position0 = transformedPosition(e0);
+        glm::dvec4 position1 = transformedPosition(e1);
 
         // @TODO
         const double r = glm::length(position0);
@@ -417,15 +412,8 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
 
             const Dataset::Entry& e00 = _dataset.entries[beforeIndex * _nDataPoints + i];
             const Dataset::Entry& e11 = _dataset.entries[afterIndex * _nDataPoints + i];
-            const glm::dvec3 before = glm::dvec3(e00.position);
-            const glm::dvec3 after = glm::dvec3(e11.position);
-
-            const double unitMeter = toMeter(_unit);
-            glm::dvec4 positionBefore = glm::dvec4(before * unitMeter, 1.0);
-            positionBefore = _transformationMatrix * positionBefore;
-
-            glm::dvec4 positionAfter = glm::dvec4(after * unitMeter, 1.0);
-            positionAfter = _transformationMatrix * positionAfter;
+            glm::dvec4 positionBefore = transformedPosition(e00);
+            glm::dvec4 positionAfter = transformedPosition(e11);
 
             for (int j = 0; j < 4; ++j) {
                 result.push_back(static_cast<float>(positionBefore[j]));

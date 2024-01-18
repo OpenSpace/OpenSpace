@@ -79,7 +79,10 @@ protected:
     virtual void bindDataForPointRendering();
     virtual void preUpdate();
 
+    glm::dvec4 transformedPosition(const dataloader::Dataset::Entry& e) const;
+
     virtual int nAttributesPerPoint() const;
+
     virtual void updateBufferData();
     void updateSpriteTexture();
 

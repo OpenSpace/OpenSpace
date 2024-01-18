@@ -886,6 +886,14 @@ void RenderablePointCloud::update(const UpdateData&) {
     }
 }
 
+glm::dvec4 RenderablePointCloud::transformedPosition(
+                                                const dataloader::Dataset::Entry& e) const
+{
+    const double unitMeter = toMeter(_unit);
+    glm::dvec4 position = glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0);
+    return _transformationMatrix * position;
+}
+
 int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 4; // position
     n += _hasColorMapFile ? 1 : 0;
@@ -1040,9 +1048,7 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     double maxRadius = 0.0;
 
     for (const dataloader::Dataset::Entry& e : _dataset.entries) {
-        const double unitMeter = toMeter(_unit);
-        glm::dvec4 position = glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0);
-        position = _transformationMatrix * position;
+        glm::dvec4 position = transformedPosition(e);
 
         const double r = glm::length(position);
         maxRadius = std::max(maxRadius, r);
