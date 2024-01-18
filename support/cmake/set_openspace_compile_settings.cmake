@@ -145,6 +145,7 @@ function (set_openspace_compile_settings target)
     "-Wno-attributes"
     "-Wno-deprecated-enum-enum-conversion"
     "-Wno-missing-braces"
+    "-Wno-sign-compare"
     "-Wno-unknown-attributes"
   )
 
@@ -182,6 +183,7 @@ function (set_openspace_compile_settings target)
     "-Wno-float-equal"
     "-Wno-long-long"
     "-Wno-missing-field-initializers"
+    "-Wno-sign-compare"
     "-Wno-unknown-attributes"
     "-Wno-write-strings"
   )

@@ -313,8 +313,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         glm::vec2(90.f, 180.f)
     )
     , _flyToFeature(FlyToFeatureInfo)
-    , _deleteThisComponent(DeleteInfo)
     , _deletePropertyOwner({ "Deletion", "Deletion" })
+    , _deleteThisComponent(DeleteInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _featuresPropertyOwner({ "Features", "Features" })
 {

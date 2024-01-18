@@ -440,7 +440,7 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
             }
             // While iterating over options, try to find the one provided, if any
             else if (_providedParameter.has_value() && *_providedParameter == o) {
-                indexOfProvidedOption = i;
+                indexOfProvidedOption = static_cast<int>(i);
             }
         }
     }

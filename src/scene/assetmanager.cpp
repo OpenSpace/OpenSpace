@@ -556,7 +556,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_setfield(*_luaState, assetTableIndex, "resource");
 
     // @DEPRECATED(abock) This should be removed after 0.20.0
-    ghoul::lua::push(*_luaState, this, asset);
+    ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
@@ -565,8 +565,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 "'asset.resource' instead. No change to the parameters are needed"
             );
 
-            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
-            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
+            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 1);
             ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::resource");
 
             auto [name] = ghoul::lua::values<std::optional<std::string>>(L);

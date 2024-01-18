@@ -65,7 +65,6 @@ void ReadFileJob::execute() {
 
     int nStars = table->readRows - _firstRow + 1;
 
-    int nNullArr = 0;
     size_t nColumnsRead = _allColumns.size();
     if (nColumnsRead != _nDefaultCols) {
         LINFO(
@@ -117,7 +116,6 @@ void ReadFileJob::execute() {
 
         // Return early if star doesn't have a measured position.
         if (std::isnan(ra[i]) || std::isnan(dec[i])) {
-            nNullArr++;
             continue;
         }
 
@@ -260,8 +258,6 @@ void ReadFileJob::execute() {
 
         _octants[index].insert(_octants[index].end(), values.begin(), values.end());
     }
-
-    // LINFO(fmt::format("{} out of {} read stars were nullArrays", nNullArr, nStars));
 }
 
 std::vector<std::vector<float>> ReadFileJob::product() {

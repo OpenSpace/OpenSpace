@@ -151,7 +151,7 @@ namespace {
             }
         }
         return color;
-    };
+    }
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",

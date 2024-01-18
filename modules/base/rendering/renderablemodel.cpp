@@ -593,7 +593,7 @@ void RenderableModel::initializeGL() {
         }
 
         // Set animation settings
-        _geometry->setTimeScale(_animationTimeScale);
+        _geometry->setTimeScale(static_cast<float>(_animationTimeScale));
     }
 
     // Initialize shaders
