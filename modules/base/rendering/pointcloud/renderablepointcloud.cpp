@@ -925,6 +925,7 @@ void RenderablePointCloud::updateBufferData() {
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
 
     const int attibutesPerPoint = nAttributesPerPoint();
     int attributeOffset = 0;
