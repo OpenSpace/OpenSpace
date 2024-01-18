@@ -478,106 +478,38 @@ void RenderableInterpolatedPoints::initializeBufferData() {
 
     int attributeOffset = 0;
 
-    GLint positionAttrib = _program->attributeLocation("in_position0");
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(
-        positionAttrib,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        attibutesPerPoint * sizeof(float),
-        nullptr
-    );
-    attributeOffset += 4;
+    auto addFloatAttribute = [&](const std::string& name, GLint nValues) {
+        GLint attrib = _program->attributeLocation(name);
+        glEnableVertexAttribArray(attrib);
+        glVertexAttribPointer(
+            attrib,
+            nValues,
+            GL_FLOAT,
+            GL_FALSE,
+            attibutesPerPoint * sizeof(float),
+            (attributeOffset > 0) ?
+                reinterpret_cast<void*>(attributeOffset * sizeof(float)) :
+                nullptr
+        );
+        attributeOffset += nValues;
+    };
 
-    GLint position1Attrib = _program->attributeLocation("in_position1");
-    glEnableVertexAttribArray(position1Attrib);
-    glVertexAttribPointer(
-        position1Attrib,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        attibutesPerPoint * sizeof(float),
-        reinterpret_cast<void*>(attributeOffset * sizeof(float))
-    );
-    attributeOffset += 4;
+    addFloatAttribute("in_position0", 4);
+    addFloatAttribute("in_position1", 4);
 
     if (_interpolation.useSpline) {
-        GLint posBeforeAttrib = _program->attributeLocation("in_position_before");
-        glEnableVertexAttribArray(posBeforeAttrib);
-        glVertexAttribPointer(
-            posBeforeAttrib,
-            4,
-            GL_FLOAT,
-            GL_FALSE,
-            attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeOffset * sizeof(float))
-        );
-        attributeOffset += 4;
-
-        GLint posAfterAttrib = _program->attributeLocation("in_position_after");
-        glEnableVertexAttribArray(posAfterAttrib);
-        glVertexAttribPointer(
-            posAfterAttrib,
-            4,
-            GL_FLOAT,
-            GL_FALSE,
-            attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeOffset * sizeof(float))
-        );
-        attributeOffset += 4;
+        addFloatAttribute("in_position_before", 4);
+        addFloatAttribute("in_position_after", 4);
     }
 
     if (_hasColorMapFile) {
-        GLint colorParamAttrib = _program->attributeLocation("in_colorParameter0");
-        glEnableVertexAttribArray(colorParamAttrib);
-        glVertexAttribPointer(
-            colorParamAttrib,
-            1,
-            GL_FLOAT,
-            GL_FALSE,
-            attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeOffset * sizeof(float))
-        );
-        attributeOffset += 1;
-
-        GLint colorParam1Attrib = _program->attributeLocation("in_colorParameter1");
-        glEnableVertexAttribArray(colorParam1Attrib);
-        glVertexAttribPointer(
-            colorParam1Attrib,
-            1,
-            GL_FLOAT,
-            GL_FALSE,
-            attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeOffset * sizeof(float))
-        );
-        attributeOffset += 1;
+        addFloatAttribute("in_colorParameter0", 1);
+        addFloatAttribute("in_colorParameter1", 1);
     }
 
     if (_hasDatavarSize) {
-        GLint scalingAttrib = _program->attributeLocation("in_scalingParameter0");
-        glEnableVertexAttribArray(scalingAttrib);
-        glVertexAttribPointer(
-            scalingAttrib,
-            1,
-            GL_FLOAT,
-            GL_FALSE,
-            attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeOffset * sizeof(float))
-        );
-        attributeOffset += 1;
-
-        GLint scaling1Attrib = _program->attributeLocation("in_scalingParameter1");
-        glEnableVertexAttribArray(scaling1Attrib);
-        glVertexAttribPointer(
-            scaling1Attrib,
-            1,
-            GL_FLOAT,
-            GL_FALSE,
-            attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeOffset * sizeof(float))
-        );
-        attributeOffset += 1;
+        addFloatAttribute("in_scalingParameter0", 1);
+        addFloatAttribute("in_scalingParameter1", 1);
     }
 
     glBindVertexArray(0);
