@@ -388,9 +388,8 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         glm::dvec4 position0 = transformedPosition(e0);
         glm::dvec4 position1 = transformedPosition(e1);
 
-        // @TODO
-        const double r = glm::length(position0);
-        maxRadius = std::max(maxRadius, r);
+        const double r = glm::max(glm::length(position0), glm::length(position1));
+        maxRadius = glm::max(maxRadius, r);
 
         // Positions
         for (int j = 0; j < 4; ++j) {
@@ -533,7 +532,7 @@ float RenderableInterpolatedPoints::computeCurrentLowerValue() const {
     float t0 = glm::floor(_interpolation.value);
 
     if (isAtKnot()) {
-        t0 = t0 - 1.0;
+        t0 = t0 - 1.f;
     }
 
     const float maxTValue = _interpolation.value.maxValue();
