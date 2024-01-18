@@ -1,0 +1,56 @@
+local transforms = asset.require("../model")
+local kernels = asset.require("../kernels")
+
+
+
+local SerenaElena = {
+  Identifier = "BepiColomboMPO_SerenaElena",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElena,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA",
+      Method = "POLYGON",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SerenaElena)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SerenaElena)
+end)
+
+
+
+asset.meta = {
+  Name = "Serena",
+  Version = "1.0",
+  Description = [[
+    The Search for Exospheric Refilling and Emitted Natural Abundances (SERENA) is a
+    single instrument composed by 4 units devoted to the detection of neutral and ionized
+    particles in the Hermean environment. It addresses some of the main scientific
+    objectives of the BepiColombo mission: composition, origin and dynamics of Mercury's
+    exosphere and polar deposits; and structure and dynamics of Mercury's magnetosphere.
+    Each unit is able to operate individually and to achieve its specific scientific
+    objectives. In addition, the opportunity to operate sensors simultaneously greatly
+    improves the success of scientific objectives and allows for additional objectives.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

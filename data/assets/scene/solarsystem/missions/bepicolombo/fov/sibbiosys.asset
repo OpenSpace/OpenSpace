@@ -1,0 +1,378 @@
+local transforms = asset.require("../model")
+local kernels = asset.require("../kernels")
+
+
+
+local SimbioSys_HRIC_FPA = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_HRIC_FPA",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysHricFpa,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_HRIC_FPA",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys HRIC FPA",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_HRIC_F550 = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_HRIC_F550",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysHricF550,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_HRIC_F550",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys HRIC F550",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_HRIC_FPAN = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_HRIC_FPAN",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysHricFpan,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_HRIC_FPAN",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys HRIC FPAN",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_HRIC_F750 = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_HRIC_F750",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysHricF750,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_HRIC_F750",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys HRIC F750",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_HRIC_F880 = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_HRIC_F880",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysHricF880,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_HRIC_F880",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys HRIC F880",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_STC_L = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_STC_L",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysSTCL,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_STC-L",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys STC L",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_STC_H = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_STC_H",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysSTCH,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_STC-H",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys STC H",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_STC_L_F920 = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_STC_L_F920",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysSTCLF920,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_STC-L_F920",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys STC L F920",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_STC_L_F550 = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_STC_L_F550",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysSTCLF550,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_STC-L_F550",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys STC L F550",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_STC_L_P700 = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_STC_L_P700",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysSTCLP700,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_STC-L_P700",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys STC L P700",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_STC_H_P700 = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_STC_H_P700",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysSTCHP700,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_STC-H_P700",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys STC H P700",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_STC_H_F420 = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_STC_H_F420",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysSTCHF420,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_STC-H_F420",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys STC H F420",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_STC_H_F750 = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_STC_H_F750",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysSTCHF750,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_STC-H_F750",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys STC H F750",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SimbioSys_VIHI = {
+  Identifier = "BepiColomboMPO_SIMBIOSYS_VIHI",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SymbioSysVIHI,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIMBIO-SYS_VIHI",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Simbio-Sys VIHI",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SimbioSys_HRIC_FPA)
+  openspace.addSceneGraphNode(SimbioSys_HRIC_F550)
+  openspace.addSceneGraphNode(SimbioSys_HRIC_FPAN)
+  openspace.addSceneGraphNode(SimbioSys_HRIC_F750)
+  openspace.addSceneGraphNode(SimbioSys_HRIC_F880)
+  openspace.addSceneGraphNode(SimbioSys_STC_L)
+  openspace.addSceneGraphNode(SimbioSys_STC_H)
+  openspace.addSceneGraphNode(SimbioSys_STC_L_F920)
+  openspace.addSceneGraphNode(SimbioSys_STC_L_F550)
+  openspace.addSceneGraphNode(SimbioSys_STC_L_P700)
+  openspace.addSceneGraphNode(SimbioSys_STC_H_P700)
+  openspace.addSceneGraphNode(SimbioSys_STC_H_F420)
+  openspace.addSceneGraphNode(SimbioSys_STC_H_F750)
+  openspace.addSceneGraphNode(SimbioSys_VIHI)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SimbioSys_VIHI)
+  openspace.removeSceneGraphNode(SimbioSys_STC_H_F750)
+  openspace.removeSceneGraphNode(SimbioSys_STC_H_F420)
+  openspace.removeSceneGraphNode(SimbioSys_STC_H_P700)
+  openspace.removeSceneGraphNode(SimbioSys_STC_L_P700)
+  openspace.removeSceneGraphNode(SimbioSys_STC_L_F550)
+  openspace.removeSceneGraphNode(SimbioSys_STC_L_F920)
+  openspace.removeSceneGraphNode(SimbioSys_STC_H)
+  openspace.removeSceneGraphNode(SimbioSys_STC_L)
+  openspace.removeSceneGraphNode(SimbioSys_HRIC_F880)
+  openspace.removeSceneGraphNode(SimbioSys_HRIC_F750)
+  openspace.removeSceneGraphNode(SimbioSys_HRIC_FPAN)
+  openspace.removeSceneGraphNode(SimbioSys_HRIC_F550)
+  openspace.removeSceneGraphNode(SimbioSys_HRIC_FPA)
+end)
+
+
+
+asset.meta = {
+  Name = "SYMBIO-SYS",
+  Version = "1.0",
+  Description = [[
+    SIMBIO-SYS has been conceived to be integrated on the BepiColombo MPO pointing in the
+    nadir direction in order to perform the remote sensing of the Mercury surface during
+    the satellite orbits. The SIMBIO-SYS instrument architecture is based on 3 different
+    channels composing the instrument front-end with a common main electronics and power
+    supply.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
