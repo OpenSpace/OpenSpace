@@ -244,14 +244,14 @@ ColorMappingComponent::ColorMappingComponent()
         if (!fileExists) {
             LERROR(fmt::format("Could not find cmap file: '{}'", colorMapFile.value()));
         }
-        _colorMapIsDirty = true;
+        _colorMapFileIsDirty = true;
     });
     addProperty(colorMapFile);
 
     invert.onChange([this]() {
         // Invert the entries of the colormap
         std::reverse(_colorMap.entries.begin(), _colorMap.entries.end());
-        _colorMapIsDirty = true;
+        _colorMapTextureIsDirty = true;
     });
     addProperty(invert);
 
@@ -384,11 +384,17 @@ void ColorMappingComponent::initializeTexture() {
     _texture->uploadTexture();
 }
 
-void ColorMappingComponent::update() {
-    if (!_colorMapIsDirty) {
-        return;
+void ColorMappingComponent::update(const dataloader::Dataset& dataset) {
+    if (_colorMapFileIsDirty) {
+        initialize(dataset);
+        _colorMapTextureIsDirty = true;
+        _colorMapFileIsDirty = false;
     }
-    initializeTexture();
+
+    if (_colorMapTextureIsDirty) {
+        initializeTexture();
+        _colorMapTextureIsDirty = false;
+    }
 }
 
 glm::vec4 ColorMappingComponent::colorFromColorMap(float valueToColorFrom) const {

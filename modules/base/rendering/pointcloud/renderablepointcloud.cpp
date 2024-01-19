@@ -865,7 +865,7 @@ void RenderablePointCloud::update(const UpdateData&) {
     ZoneScoped;
 
     if (_hasColorMapFile) {
-        _colorSettings.colorMapping->update();
+        _colorSettings.colorMapping->update(_dataset);
     }
 
     if (_dataIsDirty) {

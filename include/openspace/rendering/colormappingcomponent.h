@@ -70,7 +70,7 @@ public:
      */
     void initializeTexture();
 
-    void update();
+    void update(const dataloader::Dataset& dataset);
 
     static documentation::Documentation Documentation();
 
@@ -114,7 +114,8 @@ private:
     bool _hasBelowRangeColorInAsset = false;
     bool _hasAboveRangeColorInAsset = false;
 
-    bool _colorMapIsDirty = true;
+    bool _colorMapFileIsDirty = true;
+    bool _colorMapTextureIsDirty = true;
 };
 
 } // namespace openspace
