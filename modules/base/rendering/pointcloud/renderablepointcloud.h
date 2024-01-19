@@ -94,6 +94,7 @@ protected:
 
     bool _dataIsDirty = true;
     bool _spriteTextureIsDirty = true;
+    bool _cmapIsDirty = true;
 
     bool _hasSpriteTexture = false;
     bool _hasDataFile = false;

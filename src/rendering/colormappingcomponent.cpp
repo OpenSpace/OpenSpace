@@ -228,8 +228,13 @@ ColorMappingComponent::ColorMappingComponent()
     addProperty(valueRange);
     addProperty(setRangeFromData);
 
-    colorMapFile.setReadOnly(true); // Currently this can't be changed
     addProperty(colorMapFile);
+    colorMapFile.onChange([this]() {
+        bool fileExists = std::filesystem::exists(colorMapFile.value());
+        if (!fileExists) {
+            LERROR(fmt::format("Could not find cmap file: '{}'", colorMapFile.value()));
+        }
+    });
 
     addProperty(hideOutsideRange);
     addProperty(useNanColor);
