@@ -69,7 +69,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.addSceneGraphNode(Points_Smoothed)
+  openspace.removeSceneGraphNode(Points_Smoothed)
   openspace.removeSceneGraphNode(Points)
 end)
 
