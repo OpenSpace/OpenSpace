@@ -707,8 +707,9 @@ void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoi
     glm::dvec3 firstNormal = firstCenter - lastCenter;
     glm::dvec3 lastNormal = lastCenter - firstCenter;
 
-    // Add the first polygon's center point
+    // Add the bottom
     if (_addEdges) {
+        // Add the first polygon's center point
         PolygonVertex firstCenterPoint;
         firstCenterPoint.position[0] = firstCenter.x;
         firstCenterPoint.position[1] = firstCenter.y;
@@ -755,9 +756,9 @@ void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoi
                 currentTimePolygon.points[pointIndex + 1];
 
             // Calculate normal of this section of the tube
-            glm::dvec3 toNextPoly = v1.coordinate - v0.coordinate;
-            glm::dvec3 toNextPoint = v3.coordinate - v0.coordinate;
-            glm::dvec3 normal = glm::cross(toNextPoly, toNextPoint);
+            glm::dvec3 toNextPoly = glm::normalize(v1.coordinate - v0.coordinate);
+            glm::dvec3 toNextPoint = glm::normalize(v3.coordinate - v0.coordinate);
+            glm::dvec3 normal = glm::cross(toNextPoint, toNextPoly);
 
             // Create the Verticies for all points in this section
             PolygonVertex sidePointTriangleV0, sidePointTriangleV1, sidePointTriangleV2,
@@ -858,12 +859,12 @@ void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoi
 
             // 2 triangles per sector
             _indicies.push_back(v0);
-            _indicies.push_back(v1);
             _indicies.push_back(v2);
+            _indicies.push_back(v1);
 
             _indicies.push_back(v0);
-            _indicies.push_back(v2);
             _indicies.push_back(v3);
+            _indicies.push_back(v2);
 
             vIndex += nPointsPerSection;
         }
@@ -883,8 +884,8 @@ void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoi
             unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
 
             _indicies.push_back(v0);
-            _indicies.push_back(v1);
             _indicies.push_back(v2);
+            _indicies.push_back(v1);
         }
 
         // Indices for last polygon that will be the top
