@@ -843,62 +843,6 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
     if ((distanceToCamera < distance) || (_generalProperties.renderAtDistance)) {
         try {
-            if (_shadowers.size() > 0) {
-                ghoul::GLDebugGroup group("SHMAP");
-                for (const std::string& shadower : _shadowers) {
-                    SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(shadower);
-                    SceneGraphNode* lightsource = global::renderEngine->scene()->sceneGraphNode("Sun");
-                    if (node) {
-                        const auto rndl = dynamic_cast<RenderableModel*>(node->renderable());
-                        if (rndl) {
-                            prog->activate();
-
-                            glm::dvec3 node_pos = glm::dvec3(node->worldPosition());
-
-                            glm::dmat4 model = glm::translate(glm::dmat4(1), node_pos);
-                            prog->setUniform("model", model);
-
-                            glm::dvec3 light_pos = lightsource->worldPosition();
-                            glm::dvec3 light_dir = glm::normalize(node_pos - light_pos);
-                            glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), light_dir));
-
-                            glm::dvec3 eye = node_pos + light_dir * 500.;
-                            glm::dvec3 center = node_pos;
-                            glm::dvec3 up = glm::cross(right, light_dir);
-                            glm::dmat4 view = glm::lookAt(eye, center, up);
-                            prog->setUniform("view", view);
-
-                            double aspect = static_cast<double>(dw) / static_cast<double>(dh);
-                            double near = 0.1;
-                            double far = 5000.;
-                            glm::dmat4 projection = glm::perspective(glm::radians(90.), aspect, near, far);
-                            prog->setUniform("projection", projection);
-
-                            GLint prevfbo;
-                            glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevfbo);
-
-                            GLint prevvp[4];
-                            glGetIntegerv(GL_VIEWPORT, prevvp);
-
-                            glBindFramebuffer(GL_FRAMEBUFFER, dfbo);
-                            glViewport(0, 0, dw, dh);
-                            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-                            rndl->geometry()->render(*prog, false, true);
-
-                            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                            prog->deactivate();
-
-                            // Restore
-                            glBindFramebuffer(GL_FRAMEBUFFER, prevfbo);
-                            glViewport(prevvp[0], prevvp[1], prevvp[2], prevvp[3]);
-                        }
-                        else {
-                            LERROR(fmt::format("Could not find renderable node for shadower {}", shadower));
-                        }
-                    }
-                }
-            }
             if (_shadowComponent && _shadowComponent->isEnabled()) {
                 // Set matrices and other GL states
                 const RenderData lightRenderData(_shadowComponent->begin(data));
