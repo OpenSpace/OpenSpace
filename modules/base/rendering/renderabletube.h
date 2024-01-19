@@ -82,6 +82,8 @@ private:
 
     struct TimePolygon {
         double timestamp = 0.0;
+        bool hasCenter = false;
+        glm::dvec3 center = glm::dvec3(0.0);
         std::vector<TimePolygonPoint> points;
     };
 

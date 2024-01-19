@@ -364,10 +364,10 @@ void RenderableTube::readDataFile() {
     data.append(buf, 0, fileStream.gcount());
     fileStream.close();
 
-    // convert to a json object
+    // Convert to a json object
     json jsonData = json::parse(data);
 
-    // Ceck version
+    // Check version
     bool foundVersion = false;
     if (auto version = jsonData.find("version"); version != jsonData.end()) {
         auto major = version->find("major");
@@ -413,6 +413,17 @@ void RenderableTube::readDataFile() {
         );
         timePolygon.timestamp = Time::convertTime(timeString);
 
+        // Center (optional)
+        auto centerPt = it->find("center");
+        if (centerPt != it->end()) {
+            double x, y, z;
+            centerPt->at("x").get_to(x);
+            centerPt->at("y").get_to(y);
+            centerPt->at("z").get_to(z);
+            timePolygon.center = glm::dvec3(x, y, z);
+            timePolygon.hasCenter = true;
+        }
+
         // Points
         auto points = it->find("points");
         if (points == it->end() || points->size() < 1) {
@@ -438,7 +449,7 @@ void RenderableTube::readDataFile() {
             pt->at("z").get_to(z);
             timePolygonPoint.coordinate = glm::dvec3(x, y, z);
 
-            // Value
+            // Value (optional)
             auto v = pt->find("value");
             if (v != pt->end()) {
                 float value;
@@ -481,31 +492,44 @@ void RenderableTube::updateTubeData() {
 
 void RenderableTube::createSmoothTube(const size_t nPolygons, const size_t nPoints) {
     // Verticies
-    // Calculate the center points for the first and last polygon
-    glm::dvec3 firstCenter = glm::dvec3(0.0);
+   // Use the center point for the first and last polygon if it exiost in the data
+    // If not then calculate the center points assuming that if one polygon have a
+    // center point then all polygons have acenter point
+    bool hasCenter = _data.front().hasCenter;
+    glm::dvec3 firstCenter = hasCenter ? _data.front().center : glm::dvec3(0.0);
     float firstValue = 0.f;
-    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
-        firstCenter += timePolygonPoint.coordinate;
-        firstValue += timePolygonPoint.value;
-    }
-    firstCenter /= nPoints;
-    firstValue /= nPoints;
 
-    glm::dvec3 lastCenter = glm::dvec3(0.0);
+    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
+        firstValue += timePolygonPoint.value;
+        if (!hasCenter) {
+            firstCenter += timePolygonPoint.coordinate;
+        }
+    }
+    firstValue /= nPoints;
+    if (!hasCenter) {
+        firstCenter /= nPoints;
+    }
+
+    glm::dvec3 lastCenter = hasCenter ? _data.back().center : glm::dvec3(0.0);
     float lastValue = 0.f;
     for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
-        lastCenter += timePolygonPoint.coordinate;
         lastValue += timePolygonPoint.value;
+        if (!hasCenter) {
+            lastCenter += timePolygonPoint.coordinate;
+        }
     }
-    lastCenter /= nPoints;
     lastValue /= nPoints;
+    if (!hasCenter) {
+        lastCenter /= nPoints;
+    }
 
     // Calciulate the normals of the first and last poylgon
     glm::dvec3 firstNormal = firstCenter - lastCenter;
     glm::dvec3 lastNormal = lastCenter - firstCenter;
 
-    // Add the first polygon's center point
+    // Add the bottom
     if (_addEdges) {
+        // Add the first polygon's center point
         PolygonVertex firstCenterPoint;
         firstCenterPoint.position[0] = firstCenter.x;
         firstCenterPoint.position[1] = firstCenter.y;
@@ -593,22 +617,22 @@ void RenderableTube::createSmoothTube(const size_t nPolygons, const size_t nPoin
     // Indices for side triangles
     for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
         for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-            unsigned int vIndex = firstSideIndex + pointIndex + polyIndex * nPolygons;
+            unsigned int vIndex = firstSideIndex + pointIndex + polyIndex * nPoints;
             bool isLast = pointIndex == nPoints - 1;
 
             unsigned int v0 = vIndex;
             unsigned int v1 = v0 + nPoints;
-            unsigned int v2 = isLast ? v0 + 1 : v0 + nPoints + 1;
+            unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
             unsigned int v3 = isLast ? v0 + 1 - nPoints : v0 + 1;
 
             // 2 triangles per sector
             _indicies.push_back(v0);
-            _indicies.push_back(v1);
             _indicies.push_back(v2);
+            _indicies.push_back(v1);
 
             _indicies.push_back(v0);
-            _indicies.push_back(v2);
             _indicies.push_back(v3);
+            _indicies.push_back(v2);
         }
     }
 
@@ -623,11 +647,11 @@ void RenderableTube::createSmoothTube(const size_t nPolygons, const size_t nPoin
 
             unsigned int v0 = firstCenterIndex;
             unsigned int v1 = vIndex;
-            unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
+            unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
 
             _indicies.push_back(v0);
-            _indicies.push_back(v1);
             _indicies.push_back(v2);
+            _indicies.push_back(v1);
         }
 
         // Indices for last polygon that will be the top
@@ -637,35 +661,47 @@ void RenderableTube::createSmoothTube(const size_t nPolygons, const size_t nPoin
 
             unsigned int v0 = lastCenterIndex;
             unsigned int v1 = vIndex;
-            unsigned int v2 = isLast ? v0 - 1 : vIndex - 1;
+            unsigned int v2 = isLast ? v0 - 1 : v1 - 1;
 
             _indicies.push_back(v0);
-            _indicies.push_back(v1);
             _indicies.push_back(v2);
+            _indicies.push_back(v1);
         }
     }
 }
 
 void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoints) {
     // Verticies
-    // Calculate the center points for the first and last polygon
-    glm::dvec3 firstCenter = glm::dvec3(0.0);
+    // Use the center point for the first and last polygon if it exiost in the data
+    // If not then calculate the center points assuming that if one polygon have a
+    // center point then all polygons have acenter point
+    bool hasCenter = _data.front().hasCenter;
+    glm::dvec3 firstCenter = hasCenter ? _data.front().center : glm::dvec3(0.0);
     float firstValue = 0.f;
-    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
-        firstCenter += timePolygonPoint.coordinate;
-        firstValue += timePolygonPoint.value;
-    }
-    firstCenter /= nPoints;
-    firstValue /= nPoints;
 
-    glm::dvec3 lastCenter = glm::dvec3(0.0);
+    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
+        firstValue += timePolygonPoint.value;
+        if (!hasCenter) {
+            firstCenter += timePolygonPoint.coordinate;
+        }
+    }
+    firstValue /= nPoints;
+    if (!hasCenter) {
+        firstCenter /= nPoints;
+    }
+
+    glm::dvec3 lastCenter = hasCenter ? _data.back().center : glm::dvec3(0.0);
     float lastValue = 0.f;
     for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
-        lastCenter += timePolygonPoint.coordinate;
         lastValue += timePolygonPoint.value;
+        if (!hasCenter) {
+            lastCenter += timePolygonPoint.coordinate;
+        }
     }
-    lastCenter /= nPoints;
     lastValue /= nPoints;
+    if (!hasCenter) {
+        lastCenter /= nPoints;
+    }
 
     // Calciulate the normals of the first and last poylgon
     glm::dvec3 firstNormal = firstCenter - lastCenter;
