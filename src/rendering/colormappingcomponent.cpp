@@ -143,6 +143,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo InvertColorMapInfo = {
+        "Invert",
+        "Invert Color Map",
+        "If true, the colors of the color map will be read in the inverse order",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(ColorMappingComponent)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -192,6 +199,9 @@ namespace {
 
         // [[codegen::verbatim(BelowRangeColorInfo.description)]]
         std::optional<glm::vec4> belowRangeColor [[codegen::color()]];
+
+        // [[codegen::verbatim(InvertColorMapInfo.description)]]
+        std::optional<bool> invert;
     };
 #include "colormappingcomponent_codegen.cpp"
 }  // namespace
@@ -205,6 +215,7 @@ documentation::Documentation ColorMappingComponent::Documentation() {
 ColorMappingComponent::ColorMappingComponent()
     : properties::PropertyOwner({ "ColorMapping", "Color Mapping", "" })
     , enabled(EnabledInfo, true)
+    , invert(InvertColorMapInfo, false)
     , dataColumn(ParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
     , colorMapFile(FileInfo)
     , valueRange(RangeInfo, glm::vec2(0.f))
@@ -228,13 +239,21 @@ ColorMappingComponent::ColorMappingComponent()
     addProperty(valueRange);
     addProperty(setRangeFromData);
 
-    addProperty(colorMapFile);
     colorMapFile.onChange([this]() {
         bool fileExists = std::filesystem::exists(colorMapFile.value());
         if (!fileExists) {
             LERROR(fmt::format("Could not find cmap file: '{}'", colorMapFile.value()));
         }
+        _colorMapIsDirty = true;
     });
+    addProperty(colorMapFile);
+
+    invert.onChange([this]() {
+        // Invert the entries of the colormap
+        std::reverse(_colorMap.entries.begin(), _colorMap.entries.end());
+        _colorMapIsDirty = true;
+    });
+    addProperty(invert);
 
     addProperty(hideOutsideRange);
     addProperty(useNanColor);
@@ -363,6 +382,13 @@ void ColorMappingComponent::initializeTexture() {
     );
 
     _texture->uploadTexture();
+}
+
+void ColorMappingComponent::update() {
+    if (!_colorMapIsDirty) {
+        return;
+    }
+    initializeTexture();
 }
 
 glm::vec4 ColorMappingComponent::colorFromColorMap(float valueToColorFrom) const {
