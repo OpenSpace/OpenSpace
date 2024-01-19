@@ -22,20 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SPECKLOADER___H__
-#define __OPENSPACE_MODULE_SPACE___SPECKLOADER___H__
+#ifndef __OPENSPACE_CORE___DATALOADER___H__
+#define __OPENSPACE_CORE___DATALOADER___H__
 
+#include <openspace/data/datamapping.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
+#include <ghoul/misc/csvreader.h>
 #include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>
 
-namespace openspace::speck {
+namespace openspace::dataloader {
 
-BooleanType(SkipAllZeroLines);
-
+/**
+ * A dataset representing objects with positions and various other data columns.
+ * Based on the SPECK format originally used for the digital universe datasets.
+ * Mostly used for point-data.
+ *
+ * The read data files may also have associated texture values to be used for the
+ * points.
+ */
 struct Dataset {
     struct Variable {
         int index = -1;
@@ -59,8 +67,14 @@ struct Dataset {
     };
     std::vector<Entry> entries;
 
+    /// This variable can be used to get an understanding of the world scale size of
+    /// the dataset
+    float maxPositionComponent = 0.f;
+
     int index(std::string_view variableName) const;
     bool normalizeVariable(std::string_view variableName);
+    glm::vec2 findValueRange(int variableIndex) const;
+    glm::vec2 findValueRange(std::string_view variableName) const;
 };
 
 struct Labelset {
@@ -76,49 +90,50 @@ struct Labelset {
 };
 
 struct ColorMap {
+    std::optional<glm::vec4> belowRangeColor;
+    std::optional<glm::vec4> aboveRangeColor;
+    std::optional<glm::vec4> nanColor;
     std::vector<glm::vec4> entries;
 };
 
 namespace data {
 
     Dataset loadFile(std::filesystem::path path,
-        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+        std::optional<DataMapping> specs = std::nullopt);
 
     std::optional<Dataset> loadCachedFile(std::filesystem::path path);
     void saveCachedFile(const Dataset& dataset, std::filesystem::path path);
 
-    Dataset loadFileWithCache(std::filesystem::path speckPath,
-        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+    Dataset loadFileWithCache(std::filesystem::path path,
+        std::optional<DataMapping> specs = std::nullopt);
 
 } // namespace data
 
 namespace label {
 
     Labelset loadFile(std::filesystem::path path,
-        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+        std::optional<DataMapping> specs = std::nullopt);
 
     std::optional<Labelset> loadCachedFile(std::filesystem::path path);
     void saveCachedFile(const Labelset& labelset, std::filesystem::path path);
 
-    Labelset loadFileWithCache(std::filesystem::path speckPath,
-        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+    Labelset loadFileWithCache(std::filesystem::path path);
 
+    Labelset loadFromDataset(const dataloader::Dataset& dataset);
 } // namespace label
 
 namespace color {
 
     ColorMap loadFile(std::filesystem::path path,
-        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+        std::optional<DataMapping> specs = std::nullopt);
 
     std::optional<ColorMap> loadCachedFile(std::filesystem::path path);
     void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path);
 
-    ColorMap loadFileWithCache(std::filesystem::path path,
-        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+    ColorMap loadFileWithCache(std::filesystem::path path);
 
 } // namespace color
 
+} // namespace openspace::dataloader
 
-} // namespace openspace::speck
-
-#endif // __OPENSPACE_MODULE_SPACE___SPECKLOADER___H__
+#endif // __OPENSPACE_CORE___DATALOADER___H__

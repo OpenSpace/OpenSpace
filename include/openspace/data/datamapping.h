@@ -22,53 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#ifndef __OPENSPACE_CORE___DATAMAPPING___H__
+#define __OPENSPACE_CORE___DATAMAPPING___H__
 
-flat in vec4 gs_colorMap;
-flat in float vs_screenSpaceDepth;
-in vec2 texCoord;
-in float ta;
+#include <optional>
+#include <string>
+#include <vector>
 
-uniform float alphaValue;
-uniform vec3 color;
-uniform sampler2D spriteTexture;
-uniform bool hasColorMap;
-uniform bool useColorMap;
-uniform float fadeInValue;
+namespace openspace::documentation { struct Documentation; }
+namespace ghoul { class Dictionary; }
 
+namespace openspace::dataloader {
 
-Fragment getFragment() {
-  if (gs_colorMap.a == 0.0 || ta == 0.0 || fadeInValue == 0.0 || alphaValue == 0.0) {
-    discard;
-  }
+struct DataMapping {
+    static DataMapping createFromDictionary(const ghoul::Dictionary& dictionary);
+    static documentation::Documentation Documentation();
 
-  vec4 textureColor = texture(spriteTexture, texCoord);
-  if (textureColor.a == 0.0) {
-    discard;
-  }
+    bool hasExcludeColumns() const;
+    bool isExcludeColumn(std::string_view column) const;
 
-  vec4 fullColor = textureColor;
+    std::optional<std::string> xColumnName;
+    std::optional<std::string> yColumnName;
+    std::optional<std::string> zColumnName;
+    std::optional<std::string> nameColumn;
 
-  if (hasColorMap && useColorMap) {
-    fullColor *= gs_colorMap;
-  }
-  else {
-    fullColor.rgb *= color;
-  }
+    std::optional<float> missingDataValue;
 
-  float textureOpacity = dot(fullColor.rgb, vec3(1.0));
-  if (textureOpacity == 0.0) {
-    discard;
-  }
+    bool isCaseSensitive = false;
 
-  fullColor.a *= alphaValue * fadeInValue * ta;
+    std::vector<std::string> excludeColumns;
 
-  Fragment frag;
-  frag.color = fullColor;
-  frag.depth = vs_screenSpaceDepth;
-  // Setting the position of the billboards to not interact with the ATM
-  frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
-  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+    // OBS! When new parameters are added they should be included in the generateHash
+    // function
+};
 
-  return frag;
-}
+/**
+ * Generate a string based on the data mapping, that can be used to uniquely
+ * identify the dataset.
+ */
+std::string generateHashString(const DataMapping& dm);
+
+bool isPositionColumn(const std::string& c, const std::optional<DataMapping>& mapping);
+
+bool isColumnX(const std::string& c, const std::optional<DataMapping>& mapping);
+
+bool isColumnY(const std::string& c, const std::optional<DataMapping>& mapping);
+
+bool isColumnZ(const std::string& c, const std::optional<DataMapping>& mapping);
+
+bool isNameColumn(const std::string& c, const std::optional<DataMapping>& mapping);
+
+} // namespace openspace::dataloader
+
+#endif // __OPENSPACE_CORE___DATAMAPPING___H__

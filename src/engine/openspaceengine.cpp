@@ -308,6 +308,38 @@ void OpenSpaceEngine::initialize() {
     }
 #endif // GHOUL_LOGGING_ENABLE_TRACE
 
+    if (!global::configuration->scriptLog.empty() &&
+        global::configuration->scriptLogRotation > 0)
+    {
+        int rot = global::configuration->scriptLogRotation;
+        while (rot > 0) {
+            // Move all of the existing logs one position up
+
+            std::filesystem::path file = absPath(global::configuration->scriptLog);
+            std::string fname = file.stem().string();
+            std::string ext = file.extension().string();
+
+            std::filesystem::path newCandidate = file;
+            newCandidate.replace_filename(fmt::format("{}-{}{}", fname, rot, ext));
+
+            std::filesystem::path oldCandidate = file;
+            if (rot > 1) {
+                // We don't actually have a -0 version, it is just the base name
+                oldCandidate.replace_filename(
+                    fmt::format("{}-{}{}", fname, rot - 1, ext)
+                );
+            }
+
+            if (std::filesystem::exists(newCandidate)) {
+                std::filesystem::remove(newCandidate);
+            }
+            if (std::filesystem::exists(oldCandidate)) {
+                std::filesystem::rename(oldCandidate, newCandidate);
+            }
+
+            rot--;
+        }
+    }
 
 
     LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION_STRING_FULL));

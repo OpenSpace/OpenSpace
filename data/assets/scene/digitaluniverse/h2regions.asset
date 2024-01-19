@@ -16,7 +16,7 @@ local speck = asset.resource({
 local Object = {
   Identifier = "HIIRegions",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePolygonCloud",
     Enabled = false,
     Labels = {
       File = speck .. "h2.label",
@@ -25,15 +25,18 @@ local Object = {
       MinMaxSize = { 4, 20 },
       Unit = "pc"
     },
-    Color = { 0.0, 0.5, 1.0 },
+    Coloring = {
+      FixedColor = { 0.0, 0.5, 1.0 }
+    },
     Opacity = 0.70,
     File = speck .. "h2.speck",
-    Texture = textures .. "point4.png",
     PolygonSides = 6,
     Unit = "pc",
-    ScaleFactor = 420.0,
-    BillboardMinMaxSize = { 0.0, 300.0 },
-    EnablePixelSizeControl = false
+    SizeSettings = {
+      ScaleExponent = 18.24,
+      MaxSize = 8.0,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "HII Regions",
@@ -67,7 +70,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "HII Regions",
-  Version = "1.1",
+  Version = "2.0",
   Description = "Digital Universe asset for HII Regions",
   Author = "Carter Emmart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

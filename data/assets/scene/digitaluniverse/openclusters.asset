@@ -16,7 +16,7 @@ local speck = asset.resource({
 local Object = {
   Identifier = "OpenStarClusters",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePolygonCloud",
     Enabled = false,
     Labels = {
       File = speck .. "oc.label",
@@ -25,15 +25,18 @@ local Object = {
       MinMaxSize = { 4, 30 },
       Unit = "pc"
     },
-    Color = { 0.1, 0.8, 0.4 },
+    Coloring = {
+      FixedColor = { 0.1, 0.8, 0.4 }
+    },
     Opacity = 0.5,
     File = speck .. "oc.speck",
     Unit = "pc",
-    Texture = textures .. "point4.png",
     PolygonSides = 12,
-    ScaleFactor = 405.75,
-    BillboardMinMaxSize = { 0.0, 604.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 17.6,
+      MaxSize = 23.0,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Open Star Clusters",
@@ -68,7 +71,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Open Star Clusters",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for Open Star Clusters",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

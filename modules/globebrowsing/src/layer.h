@@ -69,7 +69,7 @@ public:
     void update();
 
     glm::vec2 tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-        const glm::vec2& tileUV, const glm::uvec2& resolution);
+        const glm::vec2& tileUV);
 
     static documentation::Documentation Documentation();
 

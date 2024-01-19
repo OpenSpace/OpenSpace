@@ -156,7 +156,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
 
         // [[codegen::verbatim(TransformationMatrixInfo.description)]]
         std::optional<glm::dmat4x4> transformationMatrix;
@@ -322,7 +322,7 @@ void RenderablePlanesCloud::initialize() {
     ZoneScoped;
 
     if (_hasSpeckFile && std::filesystem::is_regular_file(_speckFile)) {
-        _dataset = speck::data::loadFileWithCache(_speckFile);
+        _dataset = dataloader::data::loadFileWithCache(_speckFile);
         if (_dataset.entries.empty()) {
             throw ghoul::RuntimeError("Error loading data");
         }
@@ -330,7 +330,6 @@ void RenderablePlanesCloud::initialize() {
 
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
@@ -488,7 +487,7 @@ void RenderablePlanesCloud::update(const UpdateData&) {
 }
 
 void RenderablePlanesCloud::loadTextures() {
-    for (const speck::Dataset::Texture& tex : _dataset.textures) {
+    for (const dataloader::Dataset::Texture& tex : _dataset.textures) {
         std::filesystem::path fullPath = absPath(_texturesPath.string() + '/' + tex.file);
         std::filesystem::path pngPath = fullPath;
         pngPath.replace_extension(".png");
@@ -535,7 +534,7 @@ void RenderablePlanesCloud::createPlanes() {
         LDEBUG("Creating planes...");
         float maxSize = 0.f;
         double maxRadius = 0.0;
-        for (const speck::Dataset::Entry& e : _dataset.entries) {
+        for (const dataloader::Dataset::Entry& e : _dataset.entries) {
             const glm::vec4 transformedPos = glm::vec4(
                 _transformationMatrix * glm::dvec4(e.position, 1.0)
             );

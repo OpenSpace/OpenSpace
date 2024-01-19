@@ -1,6 +1,7 @@
 local transform = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local spice = asset.require("./spice")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -23,8 +24,8 @@ local Euclid = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Euclid,
-      Observer = "EARTH BARYCENTER"
+      Target = kernels.ID.Euclid,
+      Observer = coreKernels.ID.EarthBarycenter
     },
     Rotation = {
       Type = "FixedRotation",

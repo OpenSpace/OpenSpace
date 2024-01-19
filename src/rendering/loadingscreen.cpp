@@ -41,7 +41,9 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <random>
+#include <sstream>
 #include <thread>
+
 
 namespace {
     constexpr float LoadingFontSize = 25.f;
@@ -317,10 +319,9 @@ void LoadingScreen::render() {
                         rectOverlaps(messageLl, messageUr, ll, ur) :
                         false;
 
-                    const bool logOverlap = rectOverlaps(
-                        logLl, logUr,
-                        ll, ur
-                    );
+                    const bool logOverlap = _showLog ? 
+                        rectOverlaps(logLl, logUr,ll, ur) :
+                        false;
 
                     if (logoOverlap || loadingOverlap || messageOverlap || logOverlap) {
                         // We never want to have an overlap with these, so this try didn't

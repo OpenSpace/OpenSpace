@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/space/labelscomponent.h>
+#include <openspace/rendering/labelscomponent.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -105,7 +105,13 @@ namespace {
         std::optional<bool> enabled;
 
         // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path file;
+        std::optional<std::filesystem::path> file;
+
+        // If true (default), the loaded labels file will be cached so that it can be
+        // loaded faster at a later time. Note that this also means that changes in the
+        // file will not be registered until the cached file is deleted. Set to false
+        // to disable chaching and always do a fresh load of the label file
+        std::optional<bool> useCaching;
 
         // The opacity of the labels
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
@@ -145,7 +151,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LabelsComponent::Documentation() {
-    return codegen::doc<Parameters>("space_labelscomponent");
+    return codegen::doc<Parameters>("labelscomponent");
 }
 
 LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
@@ -164,7 +170,8 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _labelFile = absPath(p.file);
+    _labelFile = absPath(p.file.value_or(""));
+    _useCache = p.useCaching.value_or(true);
 
     if (p.unit.has_value()) {
         _unit = codegen::map<DistanceUnit>(*p.unit);
@@ -216,11 +223,26 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 }
 
-speck::Labelset& LabelsComponent::labelSet() {
+LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary,
+                                 const dataloader::Dataset& dataset,
+                                 DistanceUnit unit)
+    : LabelsComponent(dictionary)
+{
+    // The unit should match the one in the dataset, not the one that was included in the
+    // asset (if any)
+    _unit = unit;
+
+    // Load the labelset directly based on the dataset, and keep track of that it has
+    // already been loaded this way
+    _labelset = dataloader::label::loadFromDataset(dataset);
+    _createdFromDataset = true;
+}
+
+dataloader::Labelset& LabelsComponent::labelSet() {
     return _labelset;
 }
 
-const speck::Labelset& LabelsComponent::labelSet() const {
+const dataloader::Labelset& LabelsComponent::labelSet() const {
     return _labelset;
 }
 
@@ -231,11 +253,24 @@ void LabelsComponent::initialize() {
         ghoul::fontrendering::FontManager::Outline::Yes,
         ghoul::fontrendering::FontManager::LoadGlyphs::No
     );
+
+    loadLabels();
 }
 
 void LabelsComponent::loadLabels() {
     LINFO(fmt::format("Loading label file {}", _labelFile));
-    _labelset = speck::label::loadFileWithCache(_labelFile);
+
+    if (_createdFromDataset) {
+        // The labelset should already have been loaded
+        return;
+    }
+
+    if (_useCache) {
+        _labelset = dataloader::label::loadFileWithCache(_labelFile);
+    }
+    else {
+        _labelset = dataloader::label::loadFile(_labelFile);
+    }
 }
 
 bool LabelsComponent::isReady() const {
@@ -273,7 +308,7 @@ void LabelsComponent::render(const RenderData& data,
 
     glm::vec4 textColor = glm::vec4(glm::vec3(_color), opacity() * fadeInVariable);
 
-    for (const speck::Labelset::Entry& e : _labelset.entries) {
+    for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         if (!e.isEnabled) {
             continue;
         }

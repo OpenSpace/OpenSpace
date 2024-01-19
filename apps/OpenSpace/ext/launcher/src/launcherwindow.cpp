@@ -401,8 +401,8 @@ QWidget* LauncherWindow::createCentralWidget() {
             connect(
                 &dialog,
                 &SettingsDialog::saveSettings,
-                [](Settings settings) {
-                    saveSettings(settings, findSettings());
+                [](Settings s) {
+                    saveSettings(s, findSettings());
                 }
             );
 
@@ -588,10 +588,17 @@ bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_en
 
     // Add tooltip
     if (isJson) {
-        sgct::config::Meta meta = sgct::readMeta(p.path().string(), true);
-        if (!meta.description.empty()) {
+        std::string tooltipDescription;
+        try {
+            sgct::config::Meta meta = sgct::readMeta(p.path().string());
+            tooltipDescription = meta.description;
+        }
+        catch (const sgct::Error&) {
+            tooltipDescription = "(no description available)";
+        }
+        if (!tooltipDescription.empty()) {
             QString toolTip = QString::fromStdString(
-                fmt::format("<p>{}</p>", meta.description)
+                fmt::format("<p>{}</p>", tooltipDescription)
             );
             box.setItemData(box.count() - 1, toolTip, Qt::ToolTipRole);
         }

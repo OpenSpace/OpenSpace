@@ -142,7 +142,7 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
     bool firstWindowGuiIsEnabled = (nWindows > 1);
     int graphicsSelectionForFirstWindow = 0;
     int nGuiRenderTagsFound = 0;
-    _settingsWidget->nWindowsDisplayedChanged(nWindows);
+    _settingsWidget->nWindowsDisplayedChanged(static_cast<int>(nWindows));
 
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
@@ -185,7 +185,7 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
         // Call these again in order to ensure that GUI is configured correctly based on
         // the values read from the config file
         _settingsWidget->setEnableShowUiOnFirstWindowCheckbox(true);
-        _settingsWidget->nWindowsDisplayedChanged(nWindows);
+        _settingsWidget->nWindowsDisplayedChanged(static_cast<int>(nWindows));
     }
     _settingsWidget->setGraphicsSelectionForShowUiOnFirstWindow(
         graphicsSelectionForFirstWindow

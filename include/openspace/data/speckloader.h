@@ -22,67 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
-#define __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+#ifndef __OPENSPACE_CORE___SPECKLOADER___H__
+#define __OPENSPACE_CORE___SPECKLOADER___H__
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/rendering/fadeable.h>
-
-#include <modules/space/speckloader.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/ivec2property.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/distanceconversion.h>
-#include <ghoul/glm.h>
+#include <openspace/data/dataloader.h>
 #include <filesystem>
+#include <optional>
 
-namespace ghoul::fontrendering { class Font; }
+namespace openspace::dataloader::speck {
 
-namespace openspace {
-struct RenderData;
+Dataset loadSpeckFile(std::filesystem::path path,
+    std::optional<DataMapping> specs = std::nullopt);
 
-namespace documentation { struct Documentation; }
+Labelset loadLabelFile(std::filesystem::path path);
 
-class LabelsComponent : public properties::PropertyOwner, public Fadeable {
-public:
-    explicit LabelsComponent(const ghoul::Dictionary& dictionary);
-    ~LabelsComponent() override = default;
+ColorMap loadCmapFile(std::filesystem::path path);
 
-    speck::Labelset& labelSet();
-    const speck::Labelset& labelSet() const;
+} // namespace openspace::dataloader::speck
 
-    void initialize();
-
-    void loadLabels();
-
-    bool isReady() const;
-    bool enabled() const;
-
-    void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-        const glm::vec3& orthoRight, const glm::vec3& orthoUp,
-        float fadeInVariable = 1.f);
-
-    static documentation::Documentation Documentation();
-
-private:
-    std::filesystem::path _labelFile;
-    DistanceUnit _unit = DistanceUnit::Parsec;
-    speck::Labelset _labelset;
-
-    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
-
-    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
-
-    // Properties
-    properties::BoolProperty _enabled;
-    properties::Vec3Property _color;
-    properties::FloatProperty _size;
-    properties::FloatProperty _fontSize;
-    properties::IVec2Property _minMaxSize;
-    properties::BoolProperty _faceCamera;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+#endif // __OPENSPACE_CORE___SPECKLOADER___H__

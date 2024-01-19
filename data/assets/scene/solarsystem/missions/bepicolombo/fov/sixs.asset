@@ -1,0 +1,104 @@
+local transforms = asset.require("../model")
+local kernels = asset.require("../kernels")
+
+
+
+local SixsX1 = {
+  Identifier = "BepiColomboMPO_SixsX1",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.Sixs_X1,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIXS-X-1",
+      Method = "ELLIPSE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Sixs X1",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SixsX2 = {
+  Identifier = "BepiColomboMPO_SixsX2",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.Sixs_X2,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIXS-X-2",
+      Method = "ELLIPSE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Sixs X2",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SixsX3 = {
+  Identifier = "BepiColomboMPO_SixsX3",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.Sixs_X3,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SIXS-X-3",
+      Method = "ELLIPSE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Sixs X3",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+
+asset.onInitialize(function()
+  -- Circle shapes are currently not supported
+  -- openspace.addSceneGraphNode(SixsX1)
+  -- openspace.addSceneGraphNode(SixsX2)
+  -- openspace.addSceneGraphNode(SixsX3)
+end)
+
+asset.onDeinitialize(function()
+  -- openspace.removeSceneGraphNode(SixsX3)
+  -- openspace.removeSceneGraphNode(SixsX2)
+  -- openspace.removeSceneGraphNode(SixsX1)
+end)
+
+
+
+asset.meta = {
+  Name = "Sixs",
+  Version = "1.0",
+  Description = [[
+    The scientific investigation performed by the Solar Intensity X-ray and particle
+    Spectrometer (SIXS) is the determination of solar impact on the Hermean surface in the
+    form of direct X-rays and energetic particles, which induce observable X-ray emission
+    via interaction with the surface of the planet. Particles of concern here are highly
+    energetic solar protons and electrons.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

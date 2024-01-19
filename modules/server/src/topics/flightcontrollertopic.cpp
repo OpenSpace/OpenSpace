@@ -213,7 +213,6 @@ void FlightControllerTopic::connect() {
     std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _payload[TypeKey] = Connect;
     setFocusNodes();
-    setInterestingTimes();
     _payload[Connect][FocusNodesKey] = _focusNodes;
     _payload[Connect][AllNodesKey] = _allNodes;
     _payload[Connect][InterestingTimesKey] = _interestingTimes;
@@ -258,25 +257,7 @@ void FlightControllerTopic::setFocusNodes() {
     }
 }
 
-void FlightControllerTopic::setInterestingTimes() {
-    std::vector<Scene::InterestingTime> times =
-        global::renderEngine->scene()->interestingTimes();
-
-    std::sort(
-        times.begin(),
-        times.end(),
-        [](Scene::InterestingTime lhs, Scene::InterestingTime rhs) {
-            return lhs.name < rhs.name;
-        }
-    );
-
-    for (const Scene::InterestingTime& t : times) {
-        _interestingTimes[t.name] = t.time;
-    }
-}
-
 void FlightControllerTopic::updateView(const nlohmann::json& json) const {
-
     if (json.find(RenderableKey) != json.end()) {
         setRenderableEnabled(json);
     }

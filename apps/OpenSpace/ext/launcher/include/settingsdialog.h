@@ -50,7 +50,7 @@ private:
     void updateSaveButton();
 
     void save();
-    void reject();
+    void reject() override;
 
     QLineEdit* _configuration = nullptr;
     QCheckBox* _rememberLastConfiguration = nullptr;

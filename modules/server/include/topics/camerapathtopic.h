@@ -22,29 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_SERVER___CAMERAPATHTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___CAMERAPATHTOPIC___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <modules/server/include/topics/topic.h>
+#include <chrono>
 
-in dvec4 in_position;
-in dvec4 in_colormap;
+namespace openspace {
 
-out float vs_screenSpaceDepth;
-out float vs_scaleFactor;
-out vec4 colorMap;
+class CameraPathTopic : public Topic {
+public:
+    CameraPathTopic();
+    ~CameraPathTopic() override;
 
-uniform dmat4 modelViewProjectionTransform;
-uniform float scaleFactor;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
+private:
+    static constexpr int UnsetOnChangeHandle = -1;
 
-void main() {
-  vec4 positionClipSpace = vec4(modelViewProjectionTransform * in_position);
-  vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
+    void sendCameraPathData();
 
-  vs_screenSpaceDepth = positionScreenSpace.w;
-  vs_scaleFactor = scaleFactor;
-  colorMap = vec4(in_colormap);
+    int _dataCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
+    std::chrono::system_clock::time_point _lastUpdateTime;
 
-  gl_PointSize = scaleFactor;
-  gl_Position = positionScreenSpace;
-}
+    std::chrono::milliseconds _cameraPathUpdateTime = std::chrono::milliseconds(100);
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___CAMERAPATHTOPIC___H__

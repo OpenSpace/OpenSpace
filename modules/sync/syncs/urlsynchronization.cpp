@@ -293,7 +293,6 @@ bool UrlSynchronization::trySyncUrls() {
 
     std::unordered_map<std::string, SizeData> sizeData;
     std::mutex fileSizeMutex;
-    size_t nDownloads = 0;
     std::atomic_bool startedAllDownloads = false;
     std::vector<std::unique_ptr<HttpFileDownload>> downloads;
 
@@ -327,7 +326,6 @@ bool UrlSynchronization::trySyncUrls() {
 
         downloads.push_back(std::move(download));
 
-        ++nDownloads;
         sizeData[url] = SizeData();
 
         dl->onProgress(

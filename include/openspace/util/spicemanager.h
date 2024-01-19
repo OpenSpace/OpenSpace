@@ -233,6 +233,14 @@ public:
     void unloadKernel(KernelHandle kernelId);
 
     /**
+     * Returns a list of all loaded kernels in the kernel pool that have been loaded
+     * through the SpiceManager. The kernels are reported in order of their loading.
+     *
+     * \return The list of all loaded kernels that have been loaded through this manager
+     */
+    std::vector<std::string> loadedKernels() const;
+
+    /**
      * Unloads a SPICE kernel identified by the \p filePath which was used in the
      * loading call to #loadKernel. The unloading is done by calling the `unload_c`
      * function.

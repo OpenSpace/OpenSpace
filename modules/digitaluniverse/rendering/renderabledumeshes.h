@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/speckloader.h>
+#include <openspace/data/dataloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -130,7 +130,7 @@ private:
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     std::vector<float> _fullData;
-    speck::Labelset _labelset;
+    dataloader::Labelset _labelset;
 
     std::unordered_map<int, glm::vec3> _meshColorMap;
     std::unordered_map<int, RenderingMesh> _renderingMeshesMap;

@@ -24,24 +24,92 @@
 
 #include "fragment.glsl"
 
-in float vs_screenSpaceDepth;
+flat in float gs_colorParameter;
+flat in float vs_screenSpaceDepth;
+flat in vec4 vs_positionViewSpace;
+in vec2 texCoord;
 
+uniform float opacity;
 uniform vec3 color;
-uniform float alphaValue;
+
+uniform vec4 nanColor = vec4(0.5);
+uniform bool useNanColor = true;
+
+uniform vec4 aboveRangeColor;
+uniform bool useAboveRangeColor;
+
+uniform vec4 belowRangeColor;
+uniform bool useBelowRangeColor;
+
+uniform bool hasSpriteTexture;
 uniform sampler2D spriteTexture;
 
+uniform bool useColorMap;
+uniform sampler1D colorMapTexture;
+uniform float cmapRangeMin;
+uniform float cmapRangeMax;
+uniform bool hideOutsideRange;
+
+uniform float fadeInValue;
+
+vec4 sampleColorMap(float dataValue) {
+    if (useNanColor && isnan(dataValue)) {
+        return nanColor;
+    }
+
+    bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
+    if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
+        discard;
+    }
+
+    if (useBelowRangeColor && dataValue < cmapRangeMin) {
+        return belowRangeColor;
+    }
+
+    if (useAboveRangeColor && dataValue > cmapRangeMax) {
+        return aboveRangeColor;
+    }
+
+    float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
+    t = clamp(t, 0.0, 1.0);
+    return texture(colorMapTexture, t);
+}
 
 Fragment getFragment() {
-  Fragment frag;
-
-  if (alphaValue == 0.0) {
+  if (fadeInValue == 0.0 || opacity == 0.0) {
     discard;
   }
 
-  frag.color = texture(spriteTexture, gl_PointCoord) * vec4(color, alphaValue);
-  //frag.depth = gs_screenSpaceDepth;
+   if (!hasSpriteTexture) {
+    // Moving the origin to the center
+    vec2 st = (texCoord - vec2(0.5)) * 2.0;
+    if (length(st) > 1.0) {
+      discard;
+    }
+  }
+
+  vec4 fullColor = vec4(1.0);
+  if (hasSpriteTexture) {
+    fullColor = texture(spriteTexture, texCoord);
+  }
+
+  if (useColorMap) {
+    fullColor *= sampleColorMap(gs_colorParameter);
+  }
+  else {
+    fullColor.rgb *= color;
+  }
+
+  fullColor.a *= opacity * fadeInValue;
+  if (fullColor.a < 0.01) {
+    discard;
+  }
+
+  Fragment frag;
+  frag.color = fullColor;
   frag.depth = vs_screenSpaceDepth;
-  frag.blend = BLEND_MODE_ADDITIVE;
+  frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
   return frag;
 }

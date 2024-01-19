@@ -82,7 +82,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
     };
 #include "renderableconstellationsbase_codegen.cpp"
 } // namespace
@@ -193,9 +193,8 @@ void RenderableConstellationsBase::initialize() {
     }
 
     _labels->initialize();
-    _labels->loadLabels();
 
-    for (speck::Labelset::Entry& entry : _labels->labelSet().entries) {
+    for (dataloader::Labelset::Entry& entry : _labels->labelSet().entries) {
         if (!entry.identifier.empty()) {
             std::string fullName = constellationFullName(entry.identifier);
             if (!fullName.empty()) {

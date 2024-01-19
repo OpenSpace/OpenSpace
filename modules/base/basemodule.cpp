@@ -43,6 +43,8 @@
 #include <modules/base/rendering/grids/renderablegrid.h>
 #include <modules/base/rendering/grids/renderableradialgrid.h>
 #include <modules/base/rendering/grids/renderablesphericalgrid.h>
+#include <modules/base/rendering/pointcloud/renderablepointcloud.h>
+#include <modules/base/rendering/pointcloud/renderablepolygoncloud.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderabledisc.h>
 #include <modules/base/rendering/renderablelabel.h>
@@ -145,6 +147,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePlaneTimeVaryingImage>(
         "RenderablePlaneTimeVaryingImage"
     );
+    fRenderable->registerClass<RenderablePointCloud>("RenderablePointCloud");
+    fRenderable->registerClass<RenderablePolygonCloud>("RenderablePolygonCloud");
     fRenderable->registerClass<RenderablePrism>("RenderablePrism");
     fRenderable->registerClass<RenderableTimeVaryingSphere>(
         "RenderableTimeVaryingSphere"
@@ -232,6 +236,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderablePlaneImageLocal::Documentation(),
         RenderablePlaneImageOnline::Documentation(),
         RenderablePlaneTimeVaryingImage::Documentation(),
+        RenderablePointCloud::Documentation(),
+        RenderablePolygonCloud::Documentation(),
         RenderablePrism::Documentation(),
         RenderableRadialGrid::Documentation(),
         RenderableSphere::Documentation(),
