@@ -44,8 +44,8 @@ namespace {
         "Value",
         "Value",
         "The value to use for interpolation. The max value is set from the number of "
-        "interpolation steps, so a step of one corresponds will correspond to doing one "
-        "step in the dataset.", // TODO: imrove this description..
+        "steps in the dataset, so a step of one corresponds to one step in the dataset "
+        "and values in-between will be determined using interpolation.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
