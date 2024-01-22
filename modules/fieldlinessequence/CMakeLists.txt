@@ -26,6 +26,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   rendering/renderablefieldlinessequence.h
+  tasks/cdftoosflstask.h
   util/fieldlinesstate.h
   util/commons.h
   util/kameleonfieldlinehelper.h
@@ -35,6 +36,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   rendering/renderablefieldlinessequence.cpp
+  tasks/cdftoosflstask.cpp
   util/fieldlinesstate.cpp
   util/dynamicfilesequencedownloader.cpp
   util/commons.cpp

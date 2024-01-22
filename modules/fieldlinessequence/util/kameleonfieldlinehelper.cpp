@@ -126,6 +126,73 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 }
 
+std::unordered_map<std::string, std::vector<glm::vec3>>
+extractSeedPointsFromFiles(std::filesystem::path filePath)
+{
+    std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
+
+    if (!std::filesystem::is_directory(filePath)) {
+        LERROR(fmt::format(
+            "The specified seed point directory: '{}' does not exist", filePath
+        ));
+        return outMap;
+    }
+
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& spFile : fs::directory_iterator(filePath)) {
+        std::string seedFilePath = spFile.path().string();
+        if (!spFile.is_regular_file() ||
+            seedFilePath.substr(seedFilePath.find_last_of('.') + 1) != "txt")
+        {
+            continue;
+        }
+
+        std::ifstream seedFile(seedFilePath);
+        if (!seedFile.good()) {
+            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
+            outMap.clear();
+            return {};
+        }
+
+        LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
+        std::string line;
+        std::vector<glm::vec3> outVec;
+        int linenumber = 0;
+        while (std::getline(seedFile, line)) {
+            ++linenumber;
+            std::stringstream ss(line);
+            glm::vec3 point;
+            if (!(ss >> point.x) || !(ss >> point.y) || !(ss >> point.z)) {
+                LERROR(fmt::format(
+                    "Could not read line '{}' in file '{}'. ",
+                    "Line is not formatted with 3 values representing a point",
+                    linenumber, seedFilePath
+                ));
+            }
+            else {
+                outVec.push_back(std::move(point));
+            }
+        }
+
+        if (outVec.empty()) {
+            LERROR(fmt::format("Found no seed points in: {}", seedFilePath));
+            outMap.clear();
+            return {};
+        }
+
+        size_t lastIndex = seedFilePath.find_last_of('.');
+        std::string name = seedFilePath.substr(0, lastIndex);   // remove file extention
+        size_t dateAndTimeSeperator = name.find_last_of('_');
+        std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
+        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    // 8 for yyyymmdd
+        std::string dateAndTime = date + time;
+
+        // add outVec as value and time stamp as int as key
+        outMap[dateAndTime] = outVec;
+    }
+    return outMap;
+}
+
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 /**
  * Traces and adds line vertices to state.
