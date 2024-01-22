@@ -1,129 +1,187 @@
--- TODO: This should be synced
-local cmaps_base = asset.resource("./colormaps")
+-- For detailed explanations about the categories and the color maps, please refer to
+-- source page from Matplotlib
+-- https://matplotlib.org/stable/users/explain/colors/colormaps.html
+
 
 -- Perceptually Uniform Sequental colormaps
+
+local uniform = asset.resource({
+  Name = "Perceptually Uniform Color Maps",
+  Type = "HttpSynchronization",
+  Identifier = "default_colormaps_uniform",
+  Version = 1
+})
+
 local Uniform = {
-  viridis = cmaps_base .. "/uniform/viridis.cmap",
-  plasma = cmaps_base .. "/uniform/plasma.cmap",
-  inferno = cmaps_base .. "/uniform/inferno.cmap",
-  magma = cmaps_base .. "/uniform/magma.cmap",
-  cividis = cmaps_base .. "/uniform/cividis.cmap"
+  viridis = uniform .. "/viridis.cmap",
+  plasma = uniform .. "/plasma.cmap",
+  inferno = uniform .. "/inferno.cmap",
+  magma = uniform .. "/magma.cmap",
+  cividis = uniform .. "/cividis.cmap"
 }
 asset.export("Uniform", Uniform)
 
 
 -- Sequential maps, where the lightness value increases monotonically through the colormaps
+
+local sequential = asset.resource({
+  Name = "Sequential Color Maps",
+  Type = "HttpSynchronization",
+  Identifier = "default_colormaps_sequential",
+  Version = 1
+})
+
 local Sequential = {
-  Greys = cmaps_base .. "/sequential/Greys.cmap",
-  Purples = cmaps_base .. "/sequential/Purples.cmap",
-  Blues = cmaps_base .. "/sequential/Blues.cmap",
-  Greens = cmaps_base .. "/sequential/Greens.cmap",
-  Oranges = cmaps_base .. "/sequential/Oranges.cmap",
-  Reds = cmaps_base .. "/sequential/Reds.cmap",
-  YlOrBr = cmaps_base .. "/sequential/YlOrBr.cmap",
-  YlOrRd = cmaps_base .. "/sequential/YlOrRd.cmap",
-  OrRd = cmaps_base .. "/sequential/OrRd.cmap",
-  PuRd = cmaps_base .. "/sequential/PuRd.cmap",
-  RdPu = cmaps_base .. "/sequential/RdPu.cmap",
-  BuPu = cmaps_base .. "/sequential/BuPu.cmap",
-  GnBu = cmaps_base .. "/sequential/GnBu.cmap",
-  PuBu = cmaps_base .. "/sequential/PuBu.cmap",
-  YlGnBu = cmaps_base .. "/sequential/YlGnBu.cmap",
-  PuBuGn = cmaps_base .. "/sequential/PuBuGn.cmap",
-  BuGn = cmaps_base .. "/sequential/BuGn.cmap",
-  YlGn = cmaps_base .. "/sequential/YlGn.cmap"
+  Greys = sequential .. "/Greys.cmap",
+  Purples = sequential .. "/Purples.cmap",
+  Blues = sequential .. "/Blues.cmap",
+  Greens = sequential .. "/Greens.cmap",
+  Oranges = sequential .. "/Oranges.cmap",
+  Reds = sequential .. "/Reds.cmap",
+  YlOrBr = sequential .. "/YlOrBr.cmap",
+  YlOrRd = sequential .. "/YlOrRd.cmap",
+  OrRd = sequential .. "/OrRd.cmap",
+  PuRd = sequential .. "/PuRd.cmap",
+  RdPu = sequential .. "/RdPu.cmap",
+  BuPu = sequential .. "/BuPu.cmap",
+  GnBu = sequential .. "/GnBu.cmap",
+  PuBu = sequential .. "/PuBu.cmap",
+  YlGnBu = sequential .. "/YlGnBu.cmap",
+  PuBuGn = sequential .. "/PuBuGn.cmap",
+  BuGn = sequential .. "/BuGn.cmap",
+  YlGn = sequential .. "/YlGn.cmap"
 }
 asset.export("Sequential", Sequential)
 
 
--- Sequential colormaps where the lightness might plateu or go both up or down
+-- Sequential color maps where the lightness might plateu or go both up or down
+
+local sequential2 = asset.resource({
+  Name = "Sequential2 Color Maps",
+  Type = "HttpSynchronization",
+  Identifier = "default_colormaps_sequential2",
+  Version = 1
+})
+
 local Sequential2 = {
-  binary = cmaps_base .. "/sequential2/binary.cmap",
-  gist_yarg = cmaps_base .. "/sequential2/gist_yarg.cmap",
-  gist_gray = cmaps_base .. "/sequential2/gist_gray.cmap",
-  gray = cmaps_base .. "/sequential2/gray.cmap",
-  bone = cmaps_base .. "/sequential2/bone.cmap",
-  pink = cmaps_base .. "/sequential2/pink.cmap",
-  spring = cmaps_base .. "/sequential2/spring.cmap",
-  summer = cmaps_base .. "/sequential2/summer.cmap",
-  autumn = cmaps_base .. "/sequential2/autumn.cmap",
-  winter = cmaps_base .. "/sequential2/winter.cmap",
-  cool = cmaps_base .. "/sequential2/cool.cmap",
-  Wistia = cmaps_base .. "/sequential2/Wistia.cmap",
-  hot = cmaps_base .. "/sequential2/hot.cmap",
-  afmhot = cmaps_base .. "/sequential2/afmhot.cmap",
-  gist_heat = cmaps_base .. "/sequential2/gist_heat.cmap",
-  copper = cmaps_base .. "/sequential2/copper.cmap"
+  binary = sequential2 .. "/binary.cmap",
+  gist_yarg = sequential2 .. "/gist_yarg.cmap",
+  gist_gray = sequential2 .. "/gist_gray.cmap",
+  gray = sequential2 .. "/gray.cmap",
+  bone = sequential2 .. "/bone.cmap",
+  pink = sequential2 .. "/pink.cmap",
+  spring = sequential2 .. "/spring.cmap",
+  summer = sequential2 .. "/summer.cmap",
+  autumn = sequential2 .. "/autumn.cmap",
+  winter = sequential2 .. "/winter.cmap",
+  cool = sequential2 .. "/cool.cmap",
+  Wistia = sequential2 .. "/Wistia.cmap",
+  hot = sequential2 .. "/hot.cmap",
+  afmhot = sequential2 .. "/afmhot.cmap",
+  gist_heat = sequential2 .. "/gist_heat.cmap",
+  copper = sequential2 .. "/copper.cmap"
 }
 asset.export("Sequential2", Sequential2)
 
 
 -- Diverging maps, with lightness monotonically increasing up to a maximum,
 -- followed by monotonically decreasing
+
+local diverging = asset.resource({
+  Name = "Diverging Color Maps",
+  Type = "HttpSynchronization",
+  Identifier = "default_colormaps_diverging",
+  Version = 1
+})
+
 local Diverging = {
-  PiYG = cmaps_base .. "/diverging/PiYG.cmap",
-  PRGn = cmaps_base .. "/diverging/PRGn.cmap",
-  BrBG = cmaps_base .. "/diverging/BrBG.cmap",
-  PuOr = cmaps_base .. "/diverging/PuOr.cmap",
-  RdGy = cmaps_base .. "/diverging/RdGy.cmap",
-  RdBu = cmaps_base .. "/diverging/RdBu.cmap",
-  RdYlBu = cmaps_base .. "/diverging/RdYlBu.cmap",
-  RdYlGn = cmaps_base .. "/diverging/RdYlGn.cmap",
-  Spectral = cmaps_base .. "/diverging/Spectral.cmap",
-  coolwarm = cmaps_base .. "/diverging/coolwarm.cmap",
-  bwr = cmaps_base .. "/diverging/bwr.cmap",
-  seismic = cmaps_base .. "/diverging/seismic.cmap"
+  PiYG = diverging .. "/PiYG.cmap",
+  PRGn = diverging .. "/PRGn.cmap",
+  BrBG = diverging .. "/BrBG.cmap",
+  PuOr = diverging .. "/PuOr.cmap",
+  RdGy = diverging .. "/RdGy.cmap",
+  RdBu = diverging .. "/RdBu.cmap",
+  RdYlBu = diverging .. "/RdYlBu.cmap",
+  RdYlGn = diverging .. "/RdYlGn.cmap",
+  Spectral = diverging .. "/Spectral.cmap",
+  coolwarm = diverging .. "/coolwarm.cmap",
+  bwr = diverging .. "/bwr.cmap",
+  seismic = diverging .. "/seismic.cmap"
 }
 asset.export("Diverging", Diverging)
 
 
 -- Cyclic colormaps, that start and end on the same color, and meet a symmetric center
 -- point in the middle
+
+local cyclic = asset.resource({
+  Name = "Cyclic Color Maps",
+  Type = "HttpSynchronization",
+  Identifier = "default_colormaps_cyclic",
+  Version = 1
+})
+
 local Cyclic = {
-  twilight = cmaps_base .. "/cyclic/twilight.cmap",
-  twilight_shifted = cmaps_base .. "/cyclic/twilight_shifted.cmap",
-  hsv = cmaps_base .. "/cyclic/hsv.cmap"
+  twilight = cyclic .. "/twilight.cmap",
+  twilight_shifted = cyclic .. "/twilight_shifted.cmap",
+  hsv = cyclic .. "/hsv.cmap"
 }
 asset.export("Cyclic", Cyclic)
 
 
 -- Qualitative colormaps
+
+local qualitative = asset.resource({
+  Name = "Qualitative Color Maps",
+  Type = "HttpSynchronization",
+  Identifier = "default_colormaps_qualitative",
+  Version = 1
+})
+
 local Qualitative = {
-  Pastel1 = cmaps_base .. "/qualitative/Pastel1.cmap",
-  Pastel2 = cmaps_base .. "/qualitative/Pastel2.cmap",
-  Paired = cmaps_base .. "/qualitative/Paired.cmap",
-  Accent = cmaps_base .. "/qualitative/Accent.cmap",
-  Dark2 = cmaps_base .. "/qualitative/Dark2.cmap",
-  Set1 = cmaps_base .. "/qualitative/Set1.cmap",
-  Set2 = cmaps_base .. "/qualitative/Set2.cmap",
-  Set3 = cmaps_base .. "/qualitative/Set3.cmap",
-  tab10 = cmaps_base .. "/qualitative/tab10.cmap",
-  tab20 = cmaps_base .. "/qualitative/tab20.cmap",
-  tab20b = cmaps_base .. "/qualitative/tab20b.cmap",
-  tab20c = cmaps_base .. "/qualitative/tab20c.cmap"
+  Pastel1 = qualitative .. "/Pastel1.cmap",
+  Pastel2 = qualitative .. "/Pastel2.cmap",
+  Paired = qualitative .. "/Paired.cmap",
+  Accent = qualitative .. "/Accent.cmap",
+  Dark2 = qualitative .. "/Dark2.cmap",
+  Set1 = qualitative .. "/Set1.cmap",
+  Set2 = qualitative .. "/Set2.cmap",
+  Set3 = qualitative .. "/Set3.cmap",
+  tab10 = qualitative .. "/tab10.cmap",
+  tab20 = qualitative .. "/tab20.cmap",
+  tab20b = qualitative .. "/tab20b.cmap",
+  tab20c = qualitative .. "/tab20c.cmap"
 }
 asset.export("Qualitative", Qualitative)
 
 
 -- Miscellaneous colormaps
+
+local misc = asset.resource({
+  Name = "Miscellaneous Color Maps",
+  Type = "HttpSynchronization",
+  Identifier = "default_colormaps_misc",
+  Version = 1
+})
+
 local Misc = {
-  flag = cmaps_base .. "/misc/flag.cmap",
-  prism = cmaps_base .. "/misc/prism.cmap",
-  ocean = cmaps_base .. "/misc/ocean.cmap",
-  gist_earth = cmaps_base .. "/misc/gist_earth.cmap",
-  terrain = cmaps_base .. "/misc/terrain.cmap",
-  gist_stern = cmaps_base .. "/misc/gist_stern.cmap",
-  gnuplot = cmaps_base .. "/misc/gnuplot.cmap",
-  gnuplot2 = cmaps_base .. "/misc/gnuplot2.cmap",
-  CMRmap = cmaps_base .. "/misc/CMRmap.cmap",
-  cubehelix = cmaps_base .. "/misc/cubehelix.cmap",
-  brg = cmaps_base .. "/misc/brg.cmap",
-  gist_rainbow = cmaps_base .. "/misc/gist_rainbow.cmap",
-  rainbow = cmaps_base .. "/misc/rainbow.cmap",
-  jet = cmaps_base .. "/misc/jet.cmap",
-  turbo = cmaps_base .. "/misc/turbo.cmap",
-  nipy_spectral = cmaps_base .. "/misc/nipy_spectral.cmap",
-  gist_ncar = cmaps_base .. "/misc/gist_ncar.cmap"
+  flag = misc .. "/flag.cmap",
+  prism = misc .. "/prism.cmap",
+  ocean = misc .. "/ocean.cmap",
+  gist_earth = misc .. "/gist_earth.cmap",
+  terrain = misc .. "/terrain.cmap",
+  gist_stern = misc .. "/gist_stern.cmap",
+  gnuplot = misc .. "/gnuplot.cmap",
+  gnuplot2 = misc .. "/gnuplot2.cmap",
+  CMRmap = misc .. "/CMRmap.cmap",
+  cubehelix = misc .. "/cubehelix.cmap",
+  brg = misc .. "/brg.cmap",
+  gist_rainbow = misc .. "/gist_rainbow.cmap",
+  rainbow = misc .. "/rainbow.cmap",
+  jet = misc .. "/jet.cmap",
+  turbo = misc .. "/turbo.cmap",
+  nipy_spectral = misc .. "/nipy_spectral.cmap",
+  gist_ncar = misc .. "/gist_ncar.cmap"
 }
 asset.export("Misc", Misc)
 
