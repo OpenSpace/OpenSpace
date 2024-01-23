@@ -413,16 +413,18 @@ void RenderableTube::readDataFile() {
         );
         timePolygon.timestamp = Time::convertTime(timeString);
 
-        // Center (optional)
+        // Center
         auto centerPt = it->find("center");
-        if (centerPt != it->end()) {
-            double x, y, z;
-            centerPt->at("x").get_to(x);
-            centerPt->at("y").get_to(y);
-            centerPt->at("z").get_to(z);
-            timePolygon.center = glm::dvec3(x, y, z);
-            timePolygon.hasCenter = true;
+        if (centerPt == it->end()) {
+            LERROR("Could not find center for polygon in data");
+            return;
         }
+        double x, y, z;
+        centerPt->at("x").get_to(x);
+        centerPt->at("y").get_to(y);
+        centerPt->at("z").get_to(z);
+        timePolygon.center = glm::dvec3(x, y, z);
+        timePolygon.hasCenter = true;
 
         // Points
         auto points = it->find("points");
@@ -490,125 +492,48 @@ void RenderableTube::updateTubeData() {
     }
 }
 
-void RenderableTube::createSmoothTube(const size_t nPolygons, const size_t nPoints) {
+void RenderableTube::createSmoothTube(size_t nPolygons, size_t nPoints) {
     // Verticies
-   // Use the center point for the first and last polygon if it exiost in the data
-    // If not then calculate the center points assuming that if one polygon have a
-    // center point then all polygons have acenter point
-    bool hasCenter = _data.front().hasCenter;
-    glm::dvec3 firstCenter = hasCenter ? _data.front().center : glm::dvec3(0.0);
-    float firstValue = 0.f;
-
-    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
-        firstValue += timePolygonPoint.value;
-        if (!hasCenter) {
-            firstCenter += timePolygonPoint.coordinate;
-        }
-    }
-    firstValue /= nPoints;
-    if (!hasCenter) {
-        firstCenter /= nPoints;
-    }
-
-    glm::dvec3 lastCenter = hasCenter ? _data.back().center : glm::dvec3(0.0);
-    float lastValue = 0.f;
-    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
-        lastValue += timePolygonPoint.value;
-        if (!hasCenter) {
-            lastCenter += timePolygonPoint.coordinate;
-        }
-    }
-    lastValue /= nPoints;
-    if (!hasCenter) {
-        lastCenter /= nPoints;
-    }
-
-    // Calciulate the normals of the first and last poylgon
-    glm::dvec3 firstNormal = firstCenter - lastCenter;
-    glm::dvec3 lastNormal = lastCenter - firstCenter;
+    // Calciulate the normals for the top and bottom
+    glm::dvec3 bottomCenter = _data.front().center;
+    glm::dvec3 topCenter = _data.back().center;
+    glm::dvec3 bottomNormal = bottomCenter - topCenter;
+    glm::dvec3 topNormal = topCenter - bottomCenter;
 
     // Add the bottom
     if (_addEdges) {
-        // Add the first polygon's center point
-        PolygonVertex firstCenterPoint;
-        firstCenterPoint.position[0] = firstCenter.x;
-        firstCenterPoint.position[1] = firstCenter.y;
-        firstCenterPoint.position[2] = firstCenter.z;
-
-        firstCenterPoint.normal[0] = firstNormal.x;
-        firstCenterPoint.normal[1] = firstNormal.y;
-        firstCenterPoint.normal[2] = firstNormal.z;
-
-        firstCenterPoint.value = firstValue;
-        _verticies.push_back(firstCenterPoint);
-
-        // Add the first polygon's sides with proper normals
-        // This will ensure a hard shadow on the tube edge
-        for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
-            PolygonVertex firstsSidePoint;
-            firstsSidePoint.position[0] = timePolygonPoint.coordinate.x;
-            firstsSidePoint.position[1] = timePolygonPoint.coordinate.y;
-            firstsSidePoint.position[2] = timePolygonPoint.coordinate.z;
-
-            firstsSidePoint.normal[0] = firstNormal.x;
-            firstsSidePoint.normal[1] = firstNormal.y;
-            firstsSidePoint.normal[2] = firstNormal.z;
-
-            firstsSidePoint.value = timePolygonPoint.value;
-            _verticies.push_back(firstsSidePoint);
-        }
+        addBottom(nPoints, bottomCenter, bottomNormal);
     }
 
     // Add all the polygons that will create the sides of the tube
-    for (const TimePolygon& poly : _data) {
-        for (const TimePolygonPoint& timePolygonPoint : poly.points) {
+    for (unsigned int polyIndex = 0; polyIndex < nPolygons; ++polyIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+            bool isLast = polyIndex == nPolygons - 1;
+
             PolygonVertex sidePoint;
-            sidePoint.position[0] = timePolygonPoint.coordinate.x;
-            sidePoint.position[1] = timePolygonPoint.coordinate.y;
-            sidePoint.position[2] = timePolygonPoint.coordinate.z;
+            sidePoint.position[0] = _data[polyIndex].points[pointIndex].coordinate.x;
+            sidePoint.position[1] = _data[polyIndex].points[pointIndex].coordinate.y;
+            sidePoint.position[2] = _data[polyIndex].points[pointIndex].coordinate.z;
 
             // Calculate normal
-            glm::dvec3 normal = timePolygonPoint.coordinate -
-                glm::proj(timePolygonPoint.coordinate, firstNormal) - firstNormal;
+            glm::dvec3 centerLine = isLast ?
+                _data[polyIndex - 1].center - _data[polyIndex].center :
+                _data[polyIndex].center - _data[polyIndex + 1].center;
+            glm::dvec3 normal = _data[polyIndex].points[pointIndex].coordinate -
+                glm::proj(_data[polyIndex].points[pointIndex].coordinate, centerLine) - centerLine;
+
             sidePoint.normal[0] = normal.x;
             sidePoint.normal[1] = normal.y;
             sidePoint.normal[2] = normal.z;
 
-            sidePoint.value = timePolygonPoint.value;
+            sidePoint.value = _data[polyIndex].points[pointIndex].value;
             _verticies.push_back(sidePoint);
         }
     }
 
     // Add the top
     if (_addEdges) {
-        // Add the last polygon's sides with proper normals
-        // This will ensure a hard shadow on the tube edge
-        for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
-            PolygonVertex lastsSidePoint;
-            lastsSidePoint.position[0] = timePolygonPoint.coordinate.x;
-            lastsSidePoint.position[1] = timePolygonPoint.coordinate.y;
-            lastsSidePoint.position[2] = timePolygonPoint.coordinate.z;
-
-            lastsSidePoint.normal[0] = lastNormal.x;
-            lastsSidePoint.normal[1] = lastNormal.y;
-            lastsSidePoint.normal[2] = lastNormal.z;
-
-            lastsSidePoint.value = timePolygonPoint.value;
-            _verticies.push_back(lastsSidePoint);
-        }
-
-        // Add the last polygon's center point
-        PolygonVertex lastCenterPoint;
-        lastCenterPoint.position[0] = lastCenter.x;
-        lastCenterPoint.position[1] = lastCenter.y;
-        lastCenterPoint.position[2] = lastCenter.z;
-
-        lastCenterPoint.normal[0] = lastNormal.x;
-        lastCenterPoint.normal[1] = lastNormal.y;
-        lastCenterPoint.normal[2] = lastNormal.z;
-
-        lastCenterPoint.value = lastValue;
-        _verticies.push_back(lastCenterPoint);
+        addTop(nPoints, topCenter, topNormal);
     }
 
     // Indicies
@@ -637,15 +562,15 @@ void RenderableTube::createSmoothTube(const size_t nPolygons, const size_t nPoin
     }
 
     if (_addEdges) {
-        unsigned int firstCenterIndex = 0;
-        unsigned int lastCenterIndex = _verticies.size() - 1;
+        unsigned int bottomCenterIndex = 0;
+        unsigned int topCenterIndex = _verticies.size() - 1;
 
-        // Indices for first polygon that will be the bottom
+        // Indices for bottom
         for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
             unsigned int vIndex = pointIndex + 1;
             bool isLast = pointIndex == nPoints - 1;
 
-            unsigned int v0 = firstCenterIndex;
+            unsigned int v0 = bottomCenterIndex;
             unsigned int v1 = vIndex;
             unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
 
@@ -654,12 +579,12 @@ void RenderableTube::createSmoothTube(const size_t nPolygons, const size_t nPoin
             _indicies.push_back(v1);
         }
 
-        // Indices for last polygon that will be the top
+        // Indices for top
         for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-            unsigned int vIndex = lastCenterIndex - pointIndex - 1;
+            unsigned int vIndex = topCenterIndex - pointIndex - 1;
             bool isLast = pointIndex == nPoints - 1;
 
-            unsigned int v0 = lastCenterIndex;
+            unsigned int v0 = topCenterIndex;
             unsigned int v1 = vIndex;
             unsigned int v2 = isLast ? v0 - 1 : v1 - 1;
 
@@ -670,72 +595,17 @@ void RenderableTube::createSmoothTube(const size_t nPolygons, const size_t nPoin
     }
 }
 
-void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoints) {
+void RenderableTube::createLowPolyTube(size_t nPolygons, size_t nPoints) {
     // Verticies
-    // Use the center point for the first and last polygon if it exiost in the data
-    // If not then calculate the center points assuming that if one polygon have a
-    // center point then all polygons have acenter point
-    bool hasCenter = _data.front().hasCenter;
-    glm::dvec3 firstCenter = hasCenter ? _data.front().center : glm::dvec3(0.0);
-    float firstValue = 0.f;
-
-    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
-        firstValue += timePolygonPoint.value;
-        if (!hasCenter) {
-            firstCenter += timePolygonPoint.coordinate;
-        }
-    }
-    firstValue /= nPoints;
-    if (!hasCenter) {
-        firstCenter /= nPoints;
-    }
-
-    glm::dvec3 lastCenter = hasCenter ? _data.back().center : glm::dvec3(0.0);
-    float lastValue = 0.f;
-    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
-        lastValue += timePolygonPoint.value;
-        if (!hasCenter) {
-            lastCenter += timePolygonPoint.coordinate;
-        }
-    }
-    lastValue /= nPoints;
-    if (!hasCenter) {
-        lastCenter /= nPoints;
-    }
-
-    // Calciulate the normals of the first and last poylgon
-    glm::dvec3 firstNormal = firstCenter - lastCenter;
-    glm::dvec3 lastNormal = lastCenter - firstCenter;
+    // Calciulate the normals for the top and bottom
+    glm::dvec3 bottomCenter = _data.front().center;
+    glm::dvec3 topCenter = _data.back().center;
+    glm::dvec3 bottomNormal = bottomCenter - topCenter;
+    glm::dvec3 topNormal = topCenter - bottomCenter;
 
     // Add the bottom
     if (_addEdges) {
-        // Add the first polygon's center point
-        PolygonVertex firstCenterPoint;
-        firstCenterPoint.position[0] = firstCenter.x;
-        firstCenterPoint.position[1] = firstCenter.y;
-        firstCenterPoint.position[2] = firstCenter.z;
-
-        firstCenterPoint.normal[0] = firstNormal.x;
-        firstCenterPoint.normal[1] = firstNormal.y;
-        firstCenterPoint.normal[2] = firstNormal.z;
-
-        firstCenterPoint.value = firstValue;
-        _verticies.push_back(firstCenterPoint);
-
-        // Add the first polygon's sides
-        for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
-            PolygonVertex firstsSidePoint;
-            firstsSidePoint.position[0] = timePolygonPoint.coordinate.x;
-            firstsSidePoint.position[1] = timePolygonPoint.coordinate.y;
-            firstsSidePoint.position[2] = timePolygonPoint.coordinate.z;
-
-            firstsSidePoint.normal[0] = firstNormal.x;
-            firstsSidePoint.normal[1] = firstNormal.y;
-            firstsSidePoint.normal[2] = firstNormal.z;
-
-            firstsSidePoint.value = timePolygonPoint.value;
-            _verticies.push_back(firstsSidePoint);
-        }
+        addBottom(nPoints, bottomCenter, bottomNormal);
     }
 
     // Add all the polygons that will create the sides of the tube
@@ -814,33 +684,7 @@ void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoi
 
     // Add the top
     if (_addEdges) {
-        // Add the last polygon's sides
-        for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
-            PolygonVertex lastsSidePoint;
-            lastsSidePoint.position[0] = timePolygonPoint.coordinate.x;
-            lastsSidePoint.position[1] = timePolygonPoint.coordinate.y;
-            lastsSidePoint.position[2] = timePolygonPoint.coordinate.z;
-
-            lastsSidePoint.normal[0] = lastNormal.x;
-            lastsSidePoint.normal[1] = lastNormal.y;
-            lastsSidePoint.normal[2] = lastNormal.z;
-
-            lastsSidePoint.value = timePolygonPoint.value;
-            _verticies.push_back(lastsSidePoint);
-        }
-
-        // Add the last polygon's center point
-        PolygonVertex lastCenterPoint;
-        lastCenterPoint.position[0] = lastCenter.x;
-        lastCenterPoint.position[1] = lastCenter.y;
-        lastCenterPoint.position[2] = lastCenter.z;
-
-        lastCenterPoint.normal[0] = lastNormal.x;
-        lastCenterPoint.normal[1] = lastNormal.y;
-        lastCenterPoint.normal[2] = lastNormal.z;
-
-        lastCenterPoint.value = lastValue;
-        _verticies.push_back(lastCenterPoint);
+        addTop(nPoints, topCenter, topNormal);
     }
 
     // Indicies
@@ -871,15 +715,15 @@ void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoi
     }
 
     if (_addEdges) {
-        unsigned int firstCenterIndex = 0;
-        unsigned int lastCenterIndex = _verticies.size() - 1;
+        unsigned int bottomCenterIndex = 0;
+        unsigned int topCenterIndex = _verticies.size() - 1;
 
-        // Indices for first polygon that will be the bottom
+        // Indices for bottom
         for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
             unsigned int vIndex = pointIndex + 1;
             bool isLast = pointIndex == nPoints - 1;
 
-            unsigned int v0 = firstCenterIndex;
+            unsigned int v0 = bottomCenterIndex;
             unsigned int v1 = vIndex;
             unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
 
@@ -888,12 +732,12 @@ void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoi
             _indicies.push_back(v1);
         }
 
-        // Indices for last polygon that will be the top
+        // Indices for the top
         for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-            unsigned int vIndex = lastCenterIndex - pointIndex - 1;
+            unsigned int vIndex = topCenterIndex - pointIndex - 1;
             bool isLast = pointIndex == nPoints - 1;
 
-            unsigned int v0 = lastCenterIndex;
+            unsigned int v0 = topCenterIndex;
             unsigned int v1 = vIndex;
             unsigned int v2 = isLast ? v0 - 1 : vIndex - 1;
 
@@ -902,6 +746,86 @@ void RenderableTube::createLowPolyTube(const size_t nPolygons, const size_t nPoi
             _indicies.push_back(v2);
         }
     }
+}
+
+void RenderableTube::addBottom(size_t nPoints, const glm::dvec3& bottomCenter,
+                               const glm::dvec3& bottomNormal)
+{
+    // Calculate the transfer function value for the center point of the bottom
+    float bottomCenterValue = 0.f;
+    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
+        bottomCenterValue += timePolygonPoint.value;
+    }
+    bottomCenterValue /= nPoints;
+
+    // Add the bottom's center point
+    PolygonVertex bottomCenterPoint;
+    bottomCenterPoint.position[0] = bottomCenter.x;
+    bottomCenterPoint.position[1] = bottomCenter.y;
+    bottomCenterPoint.position[2] = bottomCenter.z;
+
+    bottomCenterPoint.normal[0] = bottomNormal.x;
+    bottomCenterPoint.normal[1] = bottomNormal.y;
+    bottomCenterPoint.normal[2] = bottomNormal.z;
+
+    bottomCenterPoint.value = bottomCenterValue;
+    _verticies.push_back(bottomCenterPoint);
+
+    // Add the bottom's sides with proper normals
+    // This will ensure a hard shadow on the tube edge
+    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
+        PolygonVertex bottomSidePoint;
+        bottomSidePoint.position[0] = timePolygonPoint.coordinate.x;
+        bottomSidePoint.position[1] = timePolygonPoint.coordinate.y;
+        bottomSidePoint.position[2] = timePolygonPoint.coordinate.z;
+
+        bottomSidePoint.normal[0] = bottomNormal.x;
+        bottomSidePoint.normal[1] = bottomNormal.y;
+        bottomSidePoint.normal[2] = bottomNormal.z;
+
+        bottomSidePoint.value = timePolygonPoint.value;
+        _verticies.push_back(bottomSidePoint);
+    }
+}
+
+void RenderableTube::addTop(size_t nPoints, const glm::dvec3& topCenter,
+                            const glm::dvec3& topNormal)
+{
+    // Calculate the transfer function value for the center point of the top
+    float topCenterValue = 0.f;
+    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
+        topCenterValue += timePolygonPoint.value;
+    }
+    topCenterValue /= nPoints;
+
+    // Add the top's sides with proper normals
+    // This will ensure a hard shadow on the tube edge
+    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
+        PolygonVertex topSidePoint;
+        topSidePoint.position[0] = timePolygonPoint.coordinate.x;
+        topSidePoint.position[1] = timePolygonPoint.coordinate.y;
+        topSidePoint.position[2] = timePolygonPoint.coordinate.z;
+
+        topSidePoint.normal[0] = topNormal.x;
+        topSidePoint.normal[1] = topNormal.y;
+        topSidePoint.normal[2] = topNormal.z;
+
+        topSidePoint.value = timePolygonPoint.value;
+        _verticies.push_back(topSidePoint);
+    }
+
+    // Add the top's center point
+    PolygonVertex topCenterPoint;
+    topCenterPoint.position[0] = topCenter.x;
+    topCenterPoint.position[1] = topCenter.y;
+    topCenterPoint.position[2] = topCenter.z;
+
+    topCenterPoint.normal[0] = topNormal.x;
+    topCenterPoint.normal[1] = topNormal.y;
+    topCenterPoint.normal[2] = topNormal.z;
+
+    topCenterPoint.value = topCenterValue;
+    _verticies.push_back(topCenterPoint);
 }
 
 void RenderableTube::updateBufferData() {

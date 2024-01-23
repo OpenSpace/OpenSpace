@@ -90,8 +90,12 @@ private:
     void readDataFile();
 
     void updateTubeData();
-    void createSmoothTube(const size_t nPolygons, const size_t nPoints);
-    void createLowPolyTube(const size_t nPolygons, const size_t nPoints);
+    void createSmoothTube(size_t nPolygons, size_t nPoints);
+    void createLowPolyTube(size_t nPolygons, size_t nPoints);
+    void addBottom(size_t nPoints, const glm::dvec3& bottomCenter,
+        const glm::dvec3& bottomNormal);
+    void addTop(size_t nPoints, const glm::dvec3& bottomCenter,
+        const glm::dvec3& bottomNormal);
     void updateBufferData();
 
     // Properties
