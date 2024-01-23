@@ -29,10 +29,23 @@ in vec3 vs_normal;
 in vec4 vs_positionViewSpace;
 in float vs_value;
 
-uniform vec3 color;
 uniform float opacity;
-uniform bool hasTransferFunction;
-uniform sampler1D transferFunction;
+uniform vec3 color;
+
+uniform vec4 nanColor = vec4(0.5);
+uniform bool useNanColor = true;
+
+uniform vec4 aboveRangeColor;
+uniform bool useAboveRangeColor;
+
+uniform vec4 belowRangeColor;
+uniform bool useBelowRangeColor;
+
+uniform bool useColorMap;
+uniform sampler1D colorMapTexture;
+uniform float cmapRangeMin;
+uniform float cmapRangeMax;
+uniform bool hideOutsideRange;
 
 uniform bool performShading = true;
 uniform float ambientIntensity;
@@ -47,39 +60,61 @@ uniform float lightIntensities[8];
 const vec3 LightColor = vec3(1.0);
 const float SpecularPower = 100.0;
 
+vec4 sampleColorMap(float dataValue) {
+  if (useNanColor && isnan(dataValue)) {
+    return nanColor;
+  }
+
+  bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
+  if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
+    discard;
+  }
+
+  if (useBelowRangeColor && dataValue < cmapRangeMin) {
+    return belowRangeColor;
+  }
+
+  if (useAboveRangeColor && dataValue > cmapRangeMax) {
+    return aboveRangeColor;
+  }
+
+  float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
+  t = clamp(t, 0.0, 1.0);
+  return texture(colorMapTexture, t);
+}
+
 Fragment getFragment() {
   if (opacity == 0.0) {
     discard;
   }
 
   Fragment frag;
-  frag.depth = vs_depth;
-  frag.gPosition = vs_positionViewSpace;
-  frag.gNormal = vec4(vs_normal, 0.0);
-  frag.disableLDR2HDR = true;
-  frag.color.a = opacity;
 
-  vec3 objectColor;
-  if (hasTransferFunction) {
-    vec4 tfColor = texture(transferFunction, vs_value);
-    objectColor = tfColor.rgb;
-    frag.color.a = opacity * tfColor.a;
+  // Color map
+  vec4 objectColor = vec4(1.0);
+  if (useColorMap) {
+    objectColor = sampleColorMap(vs_value);
   }
   else {
-    objectColor = color;
+    objectColor.rgb = color;
   }
-  //objectColor = color;
+
+  objectColor.a *= opacity;
+  if (objectColor.a == 0.0) {
+    discard;
+  }
 
   if (performShading) {
     // Ambient light
-    vec3 totalLightColor = ambientIntensity * LightColor * objectColor;
+    vec3 totalLightColor = ambientIntensity * LightColor * objectColor.rgb;
     vec3 viewDirection = normalize(vs_positionViewSpace.xyz);
 
+    // Light sources
     for (int i = 0; i < nLightSources; ++i) {
       // Diffuse light
       vec3 lightDirection = lightDirectionsViewSpace[i];
       float diffuseFactor =  max(dot(vs_normal, lightDirection), 0.0);
-      vec3 diffuseColor = diffuseIntensity * LightColor * diffuseFactor * objectColor;
+      vec3 diffuseColor = diffuseIntensity * LightColor * diffuseFactor * objectColor.rgb;
 
       // Specular light
       vec3 reflectDirection = reflect(lightDirection, vs_normal);
@@ -87,6 +122,7 @@ Fragment getFragment() {
         pow(max(dot(viewDirection, reflectDirection), 0.0), SpecularPower);
       vec3 specularColor = specularIntensity * LightColor * specularFactor;
 
+      // Total Light
       totalLightColor += lightIntensities[i] * (diffuseColor + specularColor);
     }
     frag.color.rgb = totalLightColor;
@@ -95,6 +131,11 @@ Fragment getFragment() {
     frag.color.rgb = objectColor.rgb;
   }
 
+  frag.depth = vs_depth;
+  frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(vs_normal, 0.0);
+  frag.disableLDR2HDR = true;
+  frag.color.a = opacity;
 
   return frag;
 }

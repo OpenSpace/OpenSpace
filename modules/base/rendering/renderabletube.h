@@ -32,7 +32,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/rendering/transferfunction.h>
+#include <openspace/rendering/colormappingcomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <ghoul/glm.h>
@@ -61,14 +61,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    struct Shading : properties::PropertyOwner {
-        Shading();
-        properties::BoolProperty enabled;
-        properties::FloatProperty ambientIntensity;
-        properties::FloatProperty diffuseIntensity;
-        properties::FloatProperty specularIntensity;
-    };
-
     struct PolygonVertex {
         GLfloat position[3];
         GLfloat normal[3];
@@ -77,7 +69,6 @@ private:
 
     struct TimePolygonPoint {
         glm::dvec3 coordinate = glm::dvec3(0.0);
-        float value = 0.f;
     };
 
     struct TimePolygon {
@@ -87,33 +78,51 @@ private:
         std::vector<TimePolygonPoint> points;
     };
 
+    /// Find the index of the currently chosen color parameter in the data
+    int currentColorParameterIndex() const;
+
     void readDataFile();
 
     void updateTubeData();
     void createSmoothTube(size_t nPolygons, size_t nPoints);
     void createLowPolyTube(size_t nPolygons, size_t nPoints);
-    void addBottom(size_t nPoints, const glm::dvec3& bottomCenter,
-        const glm::dvec3& bottomNormal);
-    void addTop(size_t nPoints, const glm::dvec3& bottomCenter,
-        const glm::dvec3& bottomNormal);
+    void addBottom(size_t nPoints, int pointCounter, const glm::dvec3& bottomCenter,
+        const glm::dvec3& bottomNormal, int colorParamIndex);
+    void addTop(size_t nPoints, int pointCounter, const glm::dvec3& bottomCenter,
+        const glm::dvec3& bottomNormal, int colorParamIndex);
     void updateBufferData();
 
     // Properties
-    properties::StringProperty _transferFunctionPath;
-    properties::Vec3Property _color;
     properties::BoolProperty _enableFaceCulling;
     properties::PropertyOwner _lightSourcePropertyOwner;
+
+    struct Shading : properties::PropertyOwner {
+        Shading();
+        properties::BoolProperty enabled;
+        properties::FloatProperty ambientIntensity;
+        properties::FloatProperty diffuseIntensity;
+        properties::FloatProperty specularIntensity;
+    };
     Shading _shading;
+
+    struct ColorSettings : properties::PropertyOwner {
+        explicit ColorSettings(const ghoul::Dictionary& dictionary);
+        properties::Vec3Property tubeColor;
+        std::unique_ptr<ColorMappingComponent> colorMapping;
+    };
+    ColorSettings _colorSettings;
 
     properties::BoolProperty _addEdges;
     properties::BoolProperty _drawWireframe;
     properties::FloatProperty _wireLineWidth;
     properties::BoolProperty _useSmoothNormals;
 
-    UniformCache(modelViewTransform, projectionTransform, normalTransform, color,
-        opacity, hasTransferFunction, transferFunction, performShading, nLightSources,
-        lightDirectionsViewSpace, lightIntensities, ambientIntensity, diffuseIntensity,
-        specularIntensity) _uniformCache;
+    UniformCache(modelViewTransform, projectionTransform, normalTransform, opacity, color,
+        nanColor, useNanColor, aboveRangeColor, useAboveRangeColor, belowRangeColor,
+        useBelowRangeColor, useColorMap, colorMapTexture, cmapRangeMin, cmapRangeMax,
+        hideOutsideRange, performShading, nLightSources, lightDirectionsViewSpace,
+        lightIntensities, ambientIntensity, diffuseIntensity,
+        specularIntensity)_uniformCache;
 
     std::vector<float> _lightIntensitiesBuffer;
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
@@ -121,8 +130,9 @@ private:
 
     std::filesystem::path _dataFile;
     std::vector<TimePolygon> _data;
+    dataloader::Dataset _colorDataset;
     bool _tubeIsDirty = false;
-    bool _hasTransferFunction = false;
+    bool _hasColorMapFile = false;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     GLuint _vaoId = 0;
@@ -131,7 +141,7 @@ private:
 
     std::vector<PolygonVertex> _verticies;
     std::vector<unsigned int> _indicies;
-    std::shared_ptr<openspace::TransferFunction> _transferFunction;
+
 };
 
 } // namespace openspace
