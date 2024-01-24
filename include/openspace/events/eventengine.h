@@ -123,7 +123,8 @@ public:
     void unregisterEventAction(uint32_t identifier);
 
     /**
-     * Removing registration for a topic/type combination
+     * Removing registration for a topic/type combination, does nothing if topicId or type
+     * combination does not exist
      *
      * \param topicId The id of the topic that should be unregistered
      * \param type The type of the topic that should be unregistered

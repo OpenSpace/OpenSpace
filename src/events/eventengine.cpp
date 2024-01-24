@@ -29,6 +29,10 @@
 
 #include "eventengine_lua.inl"
 
+namespace {
+    constexpr std::string_view _loggerCat = "EventEngine";
+}
+
 namespace openspace {
 
 uint32_t EventEngine::nextRegisteredEventId = 0;
@@ -143,6 +147,16 @@ void EventEngine::unregisterEventTopic(size_t topicId, events::Event::Type type)
                 _eventTopics.erase(it);
             }
         }
+        else {
+            LWARNING(fmt::format("Could not find registered event '{}' with topicId: {}",
+                events::toString(type), topicId)
+            );
+        }
+    }
+    else {
+        LWARNING(fmt::format("Could not find registered event '{}'",
+            events::toString(type))
+        );
     }
 }
 
