@@ -72,7 +72,7 @@ void EventEngine::registerEventAction(events::Event::Type type,
 }
 
 void EventEngine::registerEventTopic(size_t topicId, events::Event::Type type,
-                                     ScriptCallBack callback)
+                                     ScriptCalback callback)
 {
     TopicInfo ti;
     ti.id = topicId;

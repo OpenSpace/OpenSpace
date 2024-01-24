@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SERVER___EVENT_TOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
+
 #include <openspace/events/event.h>
 
 namespace openspace::properties { class Property; }
@@ -41,7 +42,7 @@ public:
     bool isDone() const override;
 
 private:
-    // Returns true if there is atleast one subscription active, false otherwise
+    // Returns true if there is at least one subscription active, false otherwise
     bool isSubscribed() const;
 
     std::unordered_map<events::Event::Type, bool> _subscribedEvents;

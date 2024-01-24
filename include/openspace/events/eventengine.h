@@ -36,7 +36,7 @@ namespace events { struct Event; }
 
 class EventEngine {
 public:
-    using ScriptCallBack = std::function<void(ghoul::Dictionary)>;
+    using ScriptCallback = std::function<void(ghoul::Dictionary)>;
 
     struct ActionInfo {
         events::Event::Type type;
@@ -47,8 +47,8 @@ public:
     };
 
     struct TopicInfo {
-        size_t id;
-        ScriptCallBack callback;
+        uint32_t id = std::numeric_limits<uint32_t>::max();
+        ScriptCallback callback;
     };
 
     /**
@@ -102,7 +102,7 @@ public:
      * \param callback The callback function that will be called on triggered event
     */
     void registerEventTopic(size_t topicId, events::Event::Type type,
-        ScriptCallBack callback);
+        ScriptCallback callback);
 
     /**
      * Removing registration for a type/action combination.
@@ -125,7 +125,7 @@ public:
     /**
      * Removing registration for a topic/type combination
      *
-     * \param topicId The id of the topic that should b unregistered
+     * \param topicId The id of the topic that should be unregistered
      * \param type The type of the topic that should be unregistered
     */
     void unregisterEventTopic(size_t topicId, events::Event::Type type);

@@ -101,7 +101,7 @@ bool EventTopic::isSubscribed() const {
     bool hasActiveSubscription = std::any_of(
         _subscribedEvents.begin(),
         _subscribedEvents.end(),
-        [](const std::pair<events::Event::Type, bool> subscription) {
+        [](const std::pair<const events::Event::Type, bool>& subscription) {
             return subscription.second;
     });
 
