@@ -50,6 +50,19 @@ bool EventTopic::isDone() const {
 void EventTopic::handleJson(const nlohmann::json& json) {
     std::vector<std::string> events;
 
+    auto eventJson = json.find("event");
+    auto statusJson = json.find("status");
+
+    if (eventJson == json.end()) {
+        LERROR("Payload does not contain 'event' key");
+        return;
+    }
+
+    if (statusJson == json.end() || !statusJson->is_string()) {
+        LERROR("Status must be a string");
+        return;
+    }
+
     if (json.at("event").is_array()) {
         events = json.at("event").get<std::vector<std::string>>();
     }
