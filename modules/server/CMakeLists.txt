@@ -37,6 +37,7 @@ set(HEADER_FILES
   include/topics/cameratopic.h
   include/topics/documentationtopic.h
   include/topics/enginemodetopic.h
+  include/topics/eventtopic.h
   include/topics/flightcontrollertopic.h
   include/topics/getpropertytopic.h
   include/topics/luascripttopic.h
@@ -65,6 +66,7 @@ set(SOURCE_FILES
   src/topics/cameratopic.cpp
   src/topics/documentationtopic.cpp
   src/topics/enginemodetopic.cpp
+  src/topics/eventtopic.cpp
   src/topics/flightcontrollertopic.cpp
   src/topics/getpropertytopic.cpp
   src/topics/luascripttopic.cpp

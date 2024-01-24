@@ -80,7 +80,8 @@ struct Event {
         CameraPathStarted,
         CameraPathFinished,
         CameraMovedPosition,
-        Custom
+        Custom,
+        Last // sentinel value
     };
     constexpr explicit Event(Type type_) : type(type_) {}
 

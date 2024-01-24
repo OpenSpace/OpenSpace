@@ -1321,12 +1321,7 @@ void OpenSpaceEngine::postDraw() {
         events::logAllEvents(e);
     }
     global::eventEngine->triggerActions();
-    while (e) {
-        // @TODO (abock, 2021-08-25) Need to send all events to a topic to be sent out to
-        // others
-
-        e = e->next;
-    }
+    global::eventEngine->triggerTopics();
 
 
     global::eventEngine->postFrameCleanup();
