@@ -30,7 +30,7 @@ local Example = {
     -- missing data values in a specific color
     Coloring = {
       ColorMapping = {
-        File = colormaps.Uniform.magma,
+        File = colormaps.Uniform.Magma,
         ShowMissingData = true,
         NoDataColor = { 1.0, 0.0, 0.0, 1.0 }
       }
