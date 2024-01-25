@@ -171,7 +171,7 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     , interpolateToPrevStep(InterpolateToPrevInfo)
     , interpolateToEnd(InterpolateToEndInfo)
     , interpolateToStart(InterpolateToStartInfo)
-    , speed(InterpolationSpeedInfo, 1.f, 0.01f, 10.f)
+    , speed(InterpolationSpeedInfo, 1.f, 0.01f, 100.f)
     , useSpline(UseSplineInfo, false)
 {
     addProperty(value);
