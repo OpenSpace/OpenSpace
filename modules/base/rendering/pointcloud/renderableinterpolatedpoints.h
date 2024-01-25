@@ -28,8 +28,8 @@
 #include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
 namespace ghoul::opengl { class Texture; }
@@ -74,7 +74,7 @@ private:
     bool isAtKnot() const;
     float computeCurrentLowerValue() const;
 
-    struct Interpolation : properties::PropertyOwner {
+    struct Interpolation : public properties::PropertyOwner {
         Interpolation();
         properties::FloatProperty value;
         properties::UIntProperty nSteps;

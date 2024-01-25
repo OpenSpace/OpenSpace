@@ -228,7 +228,7 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     goToNextStep.onChange([this]() {
         float prevValue = glm::floor(value);
         value = glm::min(prevValue + 1.f, value.maxValue());
-        });
+    });
 
     goToPrevStep.onChange([this]() {
         float prevValue = glm::ceil(value);
@@ -297,7 +297,7 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     });
 
     // This property is mostly for show in the UI, but also used to tell how many points
-    // shoudl be rendered. So make sure it is updated once we know the number of
+    // should be rendered. So make sure it is updated once we know the number of
     // interpolation steps
     _nDataPoints = nObjects;
 }
@@ -540,6 +540,5 @@ float RenderableInterpolatedPoints::computeCurrentLowerValue() const {
     t0 = glm::clamp(t0, 0.f, maxAllowedT0);
     return t0;
 }
-
 
 } // namespace openspace

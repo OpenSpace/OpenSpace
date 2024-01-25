@@ -7,7 +7,7 @@ local Points = {
     File = asset.resource("data/interpolation_expand.csv"),
     -- Specify how many objects the rows in the dataset represent. Here, the dataset is
     -- consists of 10 objects with positions at 6 different time steps. This information
-    -- is reqiired
+    -- is required
     NumberOfObjects = 10,
     -- Both the position and data values will be interpolated, so use a color map
     Coloring = {
@@ -56,9 +56,9 @@ local Points_Smoothed = {
     Name = "Interpolating Points (Spline)",
     Path = "/Example/Interpolated Point Clouds",
     Description = [[Example of interpolating points with spline-based interpolation
-      for the position. This leads to smoother transitions at the knots of the
+      for the position. This leads to smoother transitions at the nodes of the
       interpolation. Try disabling the spline interpolation in the GUI (under
-      Renderable->Interpolation)to see the difference.]]
+      Renderable->Interpolation) to see the difference.]]
   }
 }
 
@@ -82,7 +82,7 @@ asset.meta = {
   Name = "Example - Interpolated Point Clouds",
   Version = "1.0",
   Description = [[Example of point clouds that support interpolation. One uses a linear
-    motion and color mapping. the other example uses a spline interpolation for the
+    motion and color mapping. The other example uses a spline interpolation for the
     approximation of the positions, to result in smoother transitions between the sets
     of positions. The interpolation can be triggered using the properties under
     Renderable->Interpolation in the Scene menu.]],

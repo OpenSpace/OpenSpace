@@ -57,7 +57,7 @@ float interpolateDataValue(float v0, float v1, float t) {
   }
   bool isMissing = isnan(v0) || isnan(v1);
   return isMissing ? NaN : mix(v0, v1, t);
-};
+}
 
 vec3 interpolateCatmullRom(float t, vec3 p0, vec3 p1, vec3 p2, vec3 p3) {
     float t2 = t * t;
