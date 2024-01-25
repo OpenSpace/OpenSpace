@@ -188,7 +188,7 @@ asset.export("Misc", Misc)
 
 
 asset.meta = {
-  Name = "Default Colormaps",
+  Name = "Default Color Maps",
   Version = "1.0",
   Description = [[Load a set of default color maps that can be used in other assets. The
     color maps are created and categorized based on the ones in Matplotlib.
