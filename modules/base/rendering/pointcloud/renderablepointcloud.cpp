@@ -776,7 +776,6 @@ void RenderablePointCloud::bindDataForPointRendering() {
             _colorSettings.colorMapping->useBelowRangeColor
         );
     }
-
 }
 
 void RenderablePointCloud::renderBillboards(const RenderData& data,
