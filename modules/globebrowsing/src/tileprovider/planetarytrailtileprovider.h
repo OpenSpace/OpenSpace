@@ -63,6 +63,7 @@ private:
     properties::FloatProperty _lineWidth;
     properties::FloatProperty _pointSize;
     properties::FloatProperty _cutoff;
+    properties::FloatProperty _cutahead;
     properties::BoolProperty _renderFullTrail;
     properties::OptionProperty _kernelSize;
     properties::OptionProperty _renderingMode;
