@@ -158,6 +158,14 @@ private:
     bool _isSeeking = false; // Prevent seeking while already seeking
     bool _isDestroying = false;
     double _seekThreshold = 1.0; // Threshold to ensure we seek to a different time
+
+    // There is currently an issue that we are calling the `update` methods of all objects
+    // in the scene multiple times per frame. Once in the preSync and once in the
+    // postSync. This throws libMPV off, so we need to make sure we only actually do the
+    // work once per frame.
+    // This semaphore-ish construct will be reset to `true` at the end of the frame and
+    // ensure that only the first `update` will get to do some work
+    bool _preventMultipleUpdatesSemaphore = true;
 };
 } // namespace video::globebrowsing
 
