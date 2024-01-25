@@ -13,11 +13,11 @@ local uniform = asset.resource({
 })
 
 local Uniform = {
-  viridis = uniform .. "/viridis.cmap",
-  plasma = uniform .. "/plasma.cmap",
-  inferno = uniform .. "/inferno.cmap",
-  magma = uniform .. "/magma.cmap",
-  cividis = uniform .. "/cividis.cmap"
+  viridis = uniform .. "viridis.cmap",
+  plasma = uniform .. "plasma.cmap",
+  inferno = uniform .. "inferno.cmap",
+  magma = uniform .. "magma.cmap",
+  cividis = uniform .. "cividis.cmap"
 }
 asset.export("Uniform", Uniform)
 
@@ -32,24 +32,24 @@ local sequential = asset.resource({
 })
 
 local Sequential = {
-  Greys = sequential .. "/Greys.cmap",
-  Purples = sequential .. "/Purples.cmap",
-  Blues = sequential .. "/Blues.cmap",
-  Greens = sequential .. "/Greens.cmap",
-  Oranges = sequential .. "/Oranges.cmap",
-  Reds = sequential .. "/Reds.cmap",
-  YlOrBr = sequential .. "/YlOrBr.cmap",
-  YlOrRd = sequential .. "/YlOrRd.cmap",
-  OrRd = sequential .. "/OrRd.cmap",
-  PuRd = sequential .. "/PuRd.cmap",
-  RdPu = sequential .. "/RdPu.cmap",
-  BuPu = sequential .. "/BuPu.cmap",
-  GnBu = sequential .. "/GnBu.cmap",
-  PuBu = sequential .. "/PuBu.cmap",
-  YlGnBu = sequential .. "/YlGnBu.cmap",
-  PuBuGn = sequential .. "/PuBuGn.cmap",
-  BuGn = sequential .. "/BuGn.cmap",
-  YlGn = sequential .. "/YlGn.cmap"
+  Greys = sequential .. "Greys.cmap",
+  Purples = sequential .. "Purples.cmap",
+  Blues = sequential .. "Blues.cmap",
+  Greens = sequential .. "Greens.cmap",
+  Oranges = sequential .. "Oranges.cmap",
+  Reds = sequential .. "Reds.cmap",
+  YlOrBr = sequential .. "YlOrBr.cmap",
+  YlOrRd = sequential .. "YlOrRd.cmap",
+  OrRd = sequential .. "OrRd.cmap",
+  PuRd = sequential .. "PuRd.cmap",
+  RdPu = sequential .. "RdPu.cmap",
+  BuPu = sequential .. "BuPu.cmap",
+  GnBu = sequential .. "GnBu.cmap",
+  PuBu = sequential .. "PuBu.cmap",
+  YlGnBu = sequential .. "YlGnBu.cmap",
+  PuBuGn = sequential .. "PuBuGn.cmap",
+  BuGn = sequential .. "BuGn.cmap",
+  YlGn = sequential .. "YlGn.cmap"
 }
 asset.export("Sequential", Sequential)
 
@@ -64,22 +64,22 @@ local sequential2 = asset.resource({
 })
 
 local Sequential2 = {
-  binary = sequential2 .. "/binary.cmap",
-  gist_yarg = sequential2 .. "/gist_yarg.cmap",
-  gist_gray = sequential2 .. "/gist_gray.cmap",
-  gray = sequential2 .. "/gray.cmap",
-  bone = sequential2 .. "/bone.cmap",
-  pink = sequential2 .. "/pink.cmap",
-  spring = sequential2 .. "/spring.cmap",
-  summer = sequential2 .. "/summer.cmap",
-  autumn = sequential2 .. "/autumn.cmap",
-  winter = sequential2 .. "/winter.cmap",
-  cool = sequential2 .. "/cool.cmap",
-  Wistia = sequential2 .. "/Wistia.cmap",
-  hot = sequential2 .. "/hot.cmap",
-  afmhot = sequential2 .. "/afmhot.cmap",
-  gist_heat = sequential2 .. "/gist_heat.cmap",
-  copper = sequential2 .. "/copper.cmap"
+  binary = sequential2 .. "binary.cmap",
+  gist_yarg = sequential2 .. "gist_yarg.cmap",
+  gist_gray = sequential2 .. "gist_gray.cmap",
+  gray = sequential2 .. "gray.cmap",
+  bone = sequential2 .. "bone.cmap",
+  pink = sequential2 .. "pink.cmap",
+  spring = sequential2 .. "spring.cmap",
+  summer = sequential2 .. "summer.cmap",
+  autumn = sequential2 .. "autumn.cmap",
+  winter = sequential2 .. "winter.cmap",
+  cool = sequential2 .. "cool.cmap",
+  Wistia = sequential2 .. "Wistia.cmap",
+  hot = sequential2 .. "hot.cmap",
+  afmhot = sequential2 .. "afmhot.cmap",
+  gist_heat = sequential2 .. "gist_heat.cmap",
+  copper = sequential2 .. "copper.cmap"
 }
 asset.export("Sequential2", Sequential2)
 
@@ -95,18 +95,18 @@ local diverging = asset.resource({
 })
 
 local Diverging = {
-  PiYG = diverging .. "/PiYG.cmap",
-  PRGn = diverging .. "/PRGn.cmap",
-  BrBG = diverging .. "/BrBG.cmap",
-  PuOr = diverging .. "/PuOr.cmap",
-  RdGy = diverging .. "/RdGy.cmap",
-  RdBu = diverging .. "/RdBu.cmap",
-  RdYlBu = diverging .. "/RdYlBu.cmap",
-  RdYlGn = diverging .. "/RdYlGn.cmap",
-  Spectral = diverging .. "/Spectral.cmap",
-  coolwarm = diverging .. "/coolwarm.cmap",
-  bwr = diverging .. "/bwr.cmap",
-  seismic = diverging .. "/seismic.cmap"
+  PiYG = diverging .. "PiYG.cmap",
+  PRGn = diverging .. "PRGn.cmap",
+  BrBG = diverging .. "BrBG.cmap",
+  PuOr = diverging .. "PuOr.cmap",
+  RdGy = diverging .. "RdGy.cmap",
+  RdBu = diverging .. "RdBu.cmap",
+  RdYlBu = diverging .. "RdYlBu.cmap",
+  RdYlGn = diverging .. "RdYlGn.cmap",
+  Spectral = diverging .. "Spectral.cmap",
+  coolwarm = diverging .. "coolwarm.cmap",
+  bwr = diverging .. "bwr.cmap",
+  seismic = diverging .. "seismic.cmap"
 }
 asset.export("Diverging", Diverging)
 
@@ -122,9 +122,9 @@ local cyclic = asset.resource({
 })
 
 local Cyclic = {
-  twilight = cyclic .. "/twilight.cmap",
-  twilight_shifted = cyclic .. "/twilight_shifted.cmap",
-  hsv = cyclic .. "/hsv.cmap"
+  twilight = cyclic .. "twilight.cmap",
+  twilight_shifted = cyclic .. "twilight_shifted.cmap",
+  hsv = cyclic .. "hsv.cmap"
 }
 asset.export("Cyclic", Cyclic)
 
@@ -139,18 +139,18 @@ local qualitative = asset.resource({
 })
 
 local Qualitative = {
-  Pastel1 = qualitative .. "/Pastel1.cmap",
-  Pastel2 = qualitative .. "/Pastel2.cmap",
-  Paired = qualitative .. "/Paired.cmap",
-  Accent = qualitative .. "/Accent.cmap",
-  Dark2 = qualitative .. "/Dark2.cmap",
-  Set1 = qualitative .. "/Set1.cmap",
-  Set2 = qualitative .. "/Set2.cmap",
-  Set3 = qualitative .. "/Set3.cmap",
-  tab10 = qualitative .. "/tab10.cmap",
-  tab20 = qualitative .. "/tab20.cmap",
-  tab20b = qualitative .. "/tab20b.cmap",
-  tab20c = qualitative .. "/tab20c.cmap"
+  Pastel1 = qualitative .. "Pastel1.cmap",
+  Pastel2 = qualitative .. "Pastel2.cmap",
+  Paired = qualitative .. "Paired.cmap",
+  Accent = qualitative .. "Accent.cmap",
+  Dark2 = qualitative .. "Dark2.cmap",
+  Set1 = qualitative .. "Set1.cmap",
+  Set2 = qualitative .. "Set2.cmap",
+  Set3 = qualitative .. "Set3.cmap",
+  tab10 = qualitative .. "tab10.cmap",
+  tab20 = qualitative .. "tab20.cmap",
+  tab20b = qualitative .. "tab20b.cmap",
+  tab20c = qualitative .. "tab20c.cmap"
 }
 asset.export("Qualitative", Qualitative)
 
@@ -165,23 +165,23 @@ local misc = asset.resource({
 })
 
 local Misc = {
-  flag = misc .. "/flag.cmap",
-  prism = misc .. "/prism.cmap",
-  ocean = misc .. "/ocean.cmap",
-  gist_earth = misc .. "/gist_earth.cmap",
-  terrain = misc .. "/terrain.cmap",
-  gist_stern = misc .. "/gist_stern.cmap",
-  gnuplot = misc .. "/gnuplot.cmap",
-  gnuplot2 = misc .. "/gnuplot2.cmap",
-  CMRmap = misc .. "/CMRmap.cmap",
-  cubehelix = misc .. "/cubehelix.cmap",
-  brg = misc .. "/brg.cmap",
-  gist_rainbow = misc .. "/gist_rainbow.cmap",
-  rainbow = misc .. "/rainbow.cmap",
-  jet = misc .. "/jet.cmap",
-  turbo = misc .. "/turbo.cmap",
-  nipy_spectral = misc .. "/nipy_spectral.cmap",
-  gist_ncar = misc .. "/gist_ncar.cmap"
+  flag = misc .. "flag.cmap",
+  prism = misc .. "prism.cmap",
+  ocean = misc .. "ocean.cmap",
+  gist_earth = misc .. "gist_earth.cmap",
+  terrain = misc .. "terrain.cmap",
+  gist_stern = misc .. "gist_stern.cmap",
+  gnuplot = misc .. "gnuplot.cmap",
+  gnuplot2 = misc .. "gnuplot2.cmap",
+  CMRmap = misc .. "CMRmap.cmap",
+  cubehelix = misc .. "cubehelix.cmap",
+  brg = misc .. "brg.cmap",
+  gist_rainbow = misc .. "gist_rainbow.cmap",
+  rainbow = misc .. "rainbow.cmap",
+  jet = misc .. "jet.cmap",
+  turbo = misc .. "turbo.cmap",
+  nipy_spectral = misc .. "nipy_spectral.cmap",
+  gist_ncar = misc .. "gist_ncar.cmap"
 }
 asset.export("Misc", Misc)
 
@@ -191,7 +191,7 @@ asset.meta = {
   Name = "Default Colormaps",
   Version = "1.0",
   Description = [[Load a set of default color maps that can be used in other assets. The
-    colormaps are created and categorized based on the ones in Matplotlib.
+    color maps are created and categorized based on the ones in Matplotlib.
     https://matplotlib.org/stable/users/explain/colors/colormaps.html]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
