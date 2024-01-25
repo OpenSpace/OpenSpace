@@ -245,7 +245,7 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
 }
 
 RenderableInterpolatedPoints::RenderableInterpolatedPoints(
-    const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : RenderablePointCloud(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
