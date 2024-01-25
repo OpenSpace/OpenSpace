@@ -100,6 +100,14 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo CutaheadInfo = {
+        "CutAhead",
+        "CutAhead",
+        "This value specifies the trail cut ahead (in seconds). The higher the value the "
+        "longer from the head of the trail will be faded out.",
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
@@ -159,6 +167,9 @@ namespace {
         // [[codegen::verbatim(CutoffInfo.description)]]
         std::optional<float> cutoff;
 
+        // [[codegen::verbatim(CutaheadInfo.description)]]
+        std::optional<float> cutahead;
+
         // [[codegen::verbatim(LineColorInfo.description)]]
         std::optional<glm::vec3> lineColor [[codegen::color()]];
 
@@ -200,6 +211,7 @@ PlanetaryTrailTileProvider::PlanetaryTrailTileProvider(const ghoul::Dictionary& 
     _lineWidth(LineWidthInfo, 10.f, 1.f, 1000.f),
     _pointSize(PointSizeInfo, 10.f, 1.f, 1000.f),
     _cutoff(CutoffInfo, 30.f, 0.f, 3600.f, 1.f),
+    _cutahead(CutaheadInfo, 10.f, 0.f, 60.f, 1.f),
     _renderFullTrail(RenderFullTrailInfo, false),
     _kernelSize(KernelSizeInfo,
         openspace::properties::OptionProperty::DisplayType::Dropdown),
@@ -237,6 +249,8 @@ PlanetaryTrailTileProvider::PlanetaryTrailTileProvider(const ghoul::Dictionary& 
 
     addProperty(_cutoff);
 
+    addProperty(_cutahead);
+
     addProperty(_renderFullTrail);
 
     _kernelSize.addOptions({
@@ -263,6 +277,7 @@ PlanetaryTrailTileProvider::PlanetaryTrailTileProvider(const ghoul::Dictionary& 
     _pointColor = p.pointColor.value_or(_pointColor);
     _pointSize = p.pointSize.value_or(_pointSize);
     _cutoff = p.cutoff.value_or(_cutoff);
+    _cutahead = p.cutahead.value_or(_cutahead);
     _renderFullTrail = p.renderFullTrail.value_or(_renderFullTrail);
     if (p.kernelSize.has_value()) {
         _kernelSize = static_cast<int>(codegen::map<KernelSize>(*p.kernelSize));
@@ -538,40 +553,53 @@ void PlanetaryTrailTileProvider::update() {
        });
     }
     else {
-        const double now = openspace::global::timeManager->time().j2000Seconds();
-        if (_start <= now) {
-            std::size_t index = 0;
-            Feature last;
-
-            // Add all feature-points up until the current time
+        const double t = openspace::global::timeManager->time().j2000Seconds();
+        if (_start <= t) {
+            const double now = t - _start;
             for (const Feature& feature : _features) {
-                if (_start + feature._time > now) {
+                if (feature._time > now) {
                     break;
                 }
-                double opacity = 1.0;
-                if (_cutoff > 0) {
-                    opacity -= glm::smoothstep(
-                        static_cast<double>(_start + feature._time),
-                        static_cast<double>(_start + feature._time + _cutoff),
-                        now);
+
+                double opacity = 1.;
+                if (_cutoff > 0.f) {
+                    opacity = std::min(
+                        opacity,
+                        glm::smoothstep(
+                            now - _cutoff,
+                            now,
+                            static_cast<double>(feature._time))
+                        );
                 }
+
+                if (_cutahead > 0.) {
+                    opacity = std::min(
+                        opacity,
+                        1.0 - glm::smoothstep(
+                            now - _cutahead,
+                            now,
+                            static_cast<double>(feature._time))
+                        );
+                }
+
                 points.push_back({ feature._lat, feature._lon, opacity });
-                last = feature;
-                index++;
             }
 
-            // If there's still feature-points left, interpolate between current & next
-            if (index > 0 && index < _features.size() - 1) {
-                Feature next = _features[index];
-                const double fact
-                    = (now - (_start + last._time)) / (next._time - last._time);
-                points.push_back(
-                    {
-                        last._lat + fact * (next._lat - last._lat),
-                        last._lon + fact * (next._lon - last._lon),
-                        1.0
-                    }
-                );
+            const size_t num_points = points.size();
+            if (num_points < _features.size() - 1) {
+                const Feature& prev = _features[num_points - 1];
+                const Feature& next = _features[num_points];
+                const double fact = (now - prev._time) / (next._time - prev._time);
+
+                points.push_back({
+                    prev._lat + fact * (next._lat - prev._lat),
+                    prev._lon + fact * (next._lon - prev._lon),
+                    _cutahead > 0. ? 1.0 - glm::smoothstep(
+                            now - _cutahead,
+                            now,
+                            prev._time + fact * (next._time - prev._time)
+                        ) : 1.0
+                });
             }
         }
     }
