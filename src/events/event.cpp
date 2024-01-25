@@ -595,6 +595,8 @@ void logAllEvents(const Event* e) {
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
                 break;
+            default:
+                break;
         }
 
         i++;

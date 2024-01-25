@@ -293,5 +293,6 @@ Fragment getFragment() {
 #endif
 
   frag.color.a *= opacity;
+  frag.color = clamp(frag.color, 0.0, 1.0);
   return frag;
 }
