@@ -142,6 +142,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShowAllTubeInfo = {
+        "ShowAllTube",
+        "Show all the tube",
+        "If ture, only the part of the tube that corresponds to the current time is "
+        "shown. If false, the whole tube is shown.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableTube)]] Parameters {
         // The input file with data for the tube
         std::string file;
@@ -188,6 +196,9 @@ namespace {
 
         // [[codegen::verbatim(UseSmoothNormalsInfo.description)]]
         std::optional<bool> useSmoothNormals;
+
+        // [[codegen::verbatim(ShowAllTubeInfo.description)]]
+        std::optional<bool> showAllTube;
     };
 #include "renderabletube_codegen.cpp"
 } // namespace
@@ -241,6 +252,7 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _drawWireframe(DrawWireframeInfo, false)
     , _wireLineWidth(WireLineWidthInfo, 1.f, 1.f, 10.f)
     , _useSmoothNormals(UseSmoothNormalsInfo, true)
+    , _showAllTube(ShowAllTubeInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -295,6 +307,9 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     _useSmoothNormals.onChange([this]() { _tubeIsDirty = true; });
     _useSmoothNormals = p.useSmoothNormals.value_or(_useSmoothNormals);
     addProperty(_useSmoothNormals);
+
+    _showAllTube = p.showAllTube.value_or(_showAllTube);
+    addProperty(_showAllTube);
 
     addProperty(Fadeable::_opacity);
 }
@@ -474,7 +489,6 @@ void RenderableTube::readDataFile() {
         centerPt->at("y").get_to(y);
         centerPt->at("z").get_to(z);
         timePolygon.center = glm::dvec3(x, y, z);
-        timePolygon.hasCenter = true;
 
         // Points
         auto points = it->find("points");
@@ -607,6 +621,23 @@ void RenderableTube::createSmoothTube(size_t nPolygons, size_t nPoints) {
     // Indicies
     unsigned int firstSideIndex = _addEdges ? nPoints + 1 : 0;
 
+    // Add Indices for bottom
+    if (_addEdges) {
+        unsigned int bottomCenterIndex = 0;
+        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+            unsigned int vIndex = pointIndex + 1;
+            bool isLast = pointIndex == nPoints - 1;
+
+            unsigned int v0 = bottomCenterIndex;
+            unsigned int v1 = vIndex;
+            unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
+
+            _indicies.push_back(v0);
+            _indicies.push_back(v2);
+            _indicies.push_back(v1);
+        }
+    }
+
     // Indices for side triangles
     for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
         for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
@@ -629,25 +660,9 @@ void RenderableTube::createSmoothTube(size_t nPolygons, size_t nPoints) {
         }
     }
 
+    // Add Indices for bottom
     if (_addEdges) {
-        unsigned int bottomCenterIndex = 0;
         unsigned int topCenterIndex = _verticies.size() - 1;
-
-        // Indices for bottom
-        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-            unsigned int vIndex = pointIndex + 1;
-            bool isLast = pointIndex == nPoints - 1;
-
-            unsigned int v0 = bottomCenterIndex;
-            unsigned int v1 = vIndex;
-            unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
-
-            _indicies.push_back(v0);
-            _indicies.push_back(v2);
-            _indicies.push_back(v1);
-        }
-
-        // Indices for top
         for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
             unsigned int vIndex = topCenterIndex - pointIndex - 1;
             bool isLast = pointIndex == nPoints - 1;
@@ -771,6 +786,23 @@ void RenderableTube::createLowPolyTube(size_t nPolygons, size_t nPoints) {
     unsigned int nPointsPerSection = 4;
     unsigned int vIndex = _addEdges ? nPoints + 1 : 0;
 
+    // Add Indices for bottom
+    if (_addEdges) {
+        unsigned int bottomCenterIndex = 0;
+        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+            unsigned int vIndex = pointIndex + 1;
+            bool isLast = pointIndex == nPoints - 1;
+
+            unsigned int v0 = bottomCenterIndex;
+            unsigned int v1 = vIndex;
+            unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
+
+            _indicies.push_back(v0);
+            _indicies.push_back(v2);
+            _indicies.push_back(v1);
+        }
+    }
+
     // Indices for side triangles
     for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
         for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
@@ -794,25 +826,9 @@ void RenderableTube::createLowPolyTube(size_t nPolygons, size_t nPoints) {
         }
     }
 
+    // Add Indices for top
     if (_addEdges) {
-        unsigned int bottomCenterIndex = 0;
         unsigned int topCenterIndex = _verticies.size() - 1;
-
-        // Indices for bottom
-        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-            unsigned int vIndex = pointIndex + 1;
-            bool isLast = pointIndex == nPoints - 1;
-
-            unsigned int v0 = bottomCenterIndex;
-            unsigned int v1 = vIndex;
-            unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
-
-            _indicies.push_back(v0);
-            _indicies.push_back(v2);
-            _indicies.push_back(v1);
-        }
-
-        // Indices for the top
         for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
             unsigned int vIndex = topCenterIndex - pointIndex - 1;
             bool isLast = pointIndex == nPoints - 1;
@@ -1058,13 +1074,12 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
         );
     }
 
-
     // Render
     glBindVertexArray(_vaoId);
 
     glDrawElements(
         GL_TRIANGLES,
-        static_cast<GLsizei>(_indicies.size()),
+        static_cast<GLsizei>(_nIndiciesToRender),
         GL_UNSIGNED_INT,
         nullptr
     );
@@ -1090,11 +1105,99 @@ void RenderableTube::update(const UpdateData& data) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
+
     if (_tubeIsDirty) {
         updateTubeData();
         updateBufferData();
         //setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));
         _tubeIsDirty = false;
+    }
+
+    if (_showAllTube) {
+        _nIndiciesToRender = _indicies.size();
+        return;
+    }
+
+    const double now = data.time.j2000Seconds();
+    double prev = 0.0;
+    double next = std::numeric_limits<double>::max();
+    size_t prevPolygon = 0;
+    size_t nextPolygon = std::numeric_limits<size_t>::max();
+    bool hasPrev = false;
+    bool interpolationNeeded = true;
+
+    for (size_t i = 0; i < _data.size(); ++i) {
+        // Found a time smaller than now
+        if (_data[i].timestamp < now) {
+            prev = _data[i].timestamp;
+            prevPolygon = i;
+            hasPrev = true;
+        }
+        // Found a time larger than now
+        else if (_data[i].timestamp > now && _data[i].timestamp < next) {
+            next = _data[i].timestamp;
+            nextPolygon = i;
+        }
+        // Found a time exactly equal to now
+        else if (std::abs(_data[i].timestamp - now) < std::numeric_limits<double>::epsilon()) {
+            prev = _data[i].timestamp;
+            prevPolygon = i;
+            hasPrev = true;
+            interpolationNeeded = false;
+            LDEBUG(fmt::format("Polygon nr: '{}' is exactly at NOW", prevPolygon));
+        }
+    }
+
+    // How many points are to and including polygon prevPolygon?
+    const size_t nPolygons = _data.size();
+    const size_t nPoints = _data.front().points.size();
+
+    int nPointsUntilNow = 0;
+
+    // Where on the tube are we located in time
+    if (!hasPrev) {
+        // Before the time of the tube, do not show anything
+        nPointsUntilNow = 0;
+        LDEBUG("Before");
+    }
+    else if (prevPolygon == nPolygons - 1) {
+        // The previous step before now is the last polygon,
+        // either after the time of the full tube or just at the exact end of it,
+        // either way, show all of the tube
+        nPointsUntilNow = _indicies.size();
+        LDEBUG("After or End");
+    }
+    else {
+        // Somewhere in the middle of the tube
+        // could also be the very first polygon, prevPolygon == 0
+
+        // First add the bottom if that property is turned on
+        if (_addEdges) {
+            // Show at least the bottom
+            nPointsUntilNow += static_cast<int>(nPoints * 3);
+        }
+
+        // Show the sides until prevPolygon
+        nPointsUntilNow += static_cast<int>(prevPolygon * nPoints * 6);
+
+        // We need at least one full side to show if we do not show the edges
+        if (!_addEdges && prevPolygon == 0) {
+
+            LDEBUG("Nothing to show except edges");
+            nPointsUntilNow = 0;
+        }
+    }
+
+    LDEBUG(fmt::format("\nprev: '{}'\nnext: '{}'\nnPointsUntilNow: '{}'\n", prevPolygon,
+        nextPolygon, nPointsUntilNow)
+    );
+
+    if (nPointsUntilNow > _indicies.size()) {
+        LERROR("Cannot render more verticies than what is in the tube");
+        _nIndiciesToRender = 0;
+    }
+    else {
+        _nIndiciesToRender = nPointsUntilNow;
     }
 }
 

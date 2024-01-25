@@ -73,7 +73,6 @@ private:
 
     struct TimePolygon {
         double timestamp = 0.0;
-        bool hasCenter = false;
         glm::dvec3 center = glm::dvec3(0.0);
         std::vector<TimePolygonPoint> points;
     };
@@ -116,6 +115,7 @@ private:
     properties::BoolProperty _drawWireframe;
     properties::FloatProperty _wireLineWidth;
     properties::BoolProperty _useSmoothNormals;
+    properties::BoolProperty _showAllTube;
 
     UniformCache(modelViewTransform, projectionTransform, normalTransform, opacity, color,
         nanColor, useNanColor, aboveRangeColor, useAboveRangeColor, belowRangeColor,
@@ -133,6 +133,7 @@ private:
     dataloader::Dataset _colorDataset;
     bool _tubeIsDirty = false;
     bool _hasColorMapFile = false;
+    size_t _nIndiciesToRender = 0;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     GLuint _vaoId = 0;
