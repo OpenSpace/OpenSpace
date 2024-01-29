@@ -5,7 +5,7 @@ local globeIdentifier = mars.Mars.Identifier
  -- Coordinate offset to match hirise image in Jezero crater
 local offset = { -0.0024, 0.0 }
 local handlePosition = { -5.397273407690904, 137.86468505859378 }
-local roverPosition = { -4.744157, 137.396317 } -- as of october 2021
+local roverPosition = { -4.778673, 137.405913, } -- as of january 2024
 
 local Path = {
   Identifier = "Curiosity-Rover-Path",
