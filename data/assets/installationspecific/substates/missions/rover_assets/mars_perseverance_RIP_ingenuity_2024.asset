@@ -13,6 +13,7 @@ local ingenuityPosition = { 18.497263, 77.322539 }
 local Handle = {
   Identifier = "Mars-Ingenuity-Handle",
   Parent = globeIdentifier,
+  InteractionSphere = 10,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
