@@ -1,3 +1,4 @@
-asset.require("./mars_perseverance_path.asset")
-asset.require("./perserverance_sampling_locations.asset")
-asset.require("./hirise_jezero_map.asset")
+asset.require("./mars_perseverance_path")
+asset.require("./mars_perseverance_RIP_ingenuity_2024")
+asset.require("./perserverance_sampling_locations")
+asset.require("./hirise_jezero_map")

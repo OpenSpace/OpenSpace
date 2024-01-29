@@ -51,7 +51,7 @@ for index, position in pairs(positions) do
       Texture = asset.localResource('./images/sampletube_icon.png'),
       RenderBinMode = "PostDeferredTransparent"
     },
-    Tag = { "perseverance_sample" },
+    Tag = { "perseverance_sample", "perseverance_only" },
     GUI = {
       Name = "Perseverance sample " .. tostring(index),
       Path = "/Missions/Mars2020/Perseverance Samples"

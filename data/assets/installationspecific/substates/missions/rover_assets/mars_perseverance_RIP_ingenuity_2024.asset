@@ -1,0 +1,137 @@
+local mars = asset.require('scene/solarsystem/planets/mars/mars')
+local globeIdentifier = mars.Mars.Identifier
+
+-- Coordinate offset to match hirise image in Jezero crater
+local LatLongOffset = asset.require('./mars_perseverance_path.asset').LatLongOffset
+
+
+-- Some useful lat, long positions
+local handlePosition = { 18.4768446, 77.378537 }
+local ingenuityPosition = { 18.497263, 77.322539 }
+
+-- A "handle" that can be used for navigation and such
+local Handle = {
+  Identifier = "Mars-Ingenuity-Handle",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = handlePosition[1] + LatLongOffset[1],
+      Longitude = handlePosition[2] + LatLongOffset[2],
+      Altitude = -2540.0, -- put on surface. Need a static position for camera paths
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = handlePosition[1] + LatLongOffset[1],
+      Longitude = handlePosition[2] + LatLongOffset[2]
+    }
+  },
+  GUI = {
+    Name = "Ingenuity Handle",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+-------------------------------------
+-- PATHS
+-------------------------------------
+
+local PerseverancePath = {
+  Identifier = "Perseverance-Rover-Path-2024",
+  File = asset.localResource("./geojson/Rover Drive Path_240129.geojson"),
+  HeightOffset = 10,
+  CoordinateOffset = LatLongOffset,
+  IgnoreHeights = true,
+  PreventHeightUpdate = true, -- Prevent automatic updates form height map. Too performance heavy!
+  DefaultProperties = {
+    LineWidth = 2.0,
+    AltitudeMode = "RelativeToGround"
+  },
+  Name = "Perseverance Path 2024"
+}
+
+local IngenuityPath = {
+  Identifier = "Ingenuity-Path-2024",
+  File = asset.localResource("./geojson/Helicopter Flight Path_240129.geojson"),
+  HeightOffset = 10,
+  CoordinateOffset = LatLongOffset,
+  IgnoreHeights = true,
+  PreventHeightUpdate = true, -- Prevent automatic updates form height map. Too performance heavy!
+  DefaultProperties = {
+    LineWidth = 2.0,
+    Color = { 1.0, 0.95, 0.0 }, -- Yellow
+    AltitudeMode = "RelativeToGround"
+  },
+  Name = "Ingenuity Path 2024"
+}
+
+-------------------------------------
+-- POSITIONS
+-------------------------------------
+
+local IngenuityPosition = {
+  Identifier = "Mars-Ingenuity-Position-2024",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = ingenuityPosition[1] + LatLongOffset[1],
+      Longitude = ingenuityPosition[2] + LatLongOffset[2],
+      Altitude = 5,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = ingenuityPosition[1] + LatLongOffset[1],
+      Longitude = ingenuityPosition[2] + LatLongOffset[2]
+    }
+  },
+  Tag = { "ingenuity_only" },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 400.0,
+    Billboard = true,
+    Texture = asset.localResource('./images/helicoper_icon.png'),
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Name = "Ingenuity Position (At Death 2024)",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Handle)
+  openspace.globebrowsing.addGeoJson(mars.Mars.Identifier, PerseverancePath)
+  openspace.globebrowsing.addGeoJson(mars.Mars.Identifier, IngenuityPath)
+  openspace.addSceneGraphNode(IngenuityPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IngenuityPosition)
+  openspace.globebrowsing.deleteGeoJson(mars.Mars.Identifier, PerseverancePath)
+  openspace.globebrowsing.deleteGeoJson(mars.Mars.Identifier, IngenuityPath)
+  openspace.removeSceneGraphNode(Handle)
+end)
+
+asset.export(Handle)
+asset.export(PerseverancePath)
+asset.export(IngenuityPath)
+asset.export(IngenuityPosition)
+
+asset.meta = {
+  Name = "Ingenuity 2024 RIP",
+  Version = "1.0",
+  Description = [[
+    Renderables used to show the traversal path of the Perseverance rover and the
+    helicopter Ingenuity, until its "death" in 2024.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
