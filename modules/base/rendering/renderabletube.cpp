@@ -320,7 +320,8 @@ bool RenderableTube::isReady() const {
 
 void RenderableTube::initialize() {
     readDataFile();
-    updateTubeData();
+    updateTube();
+    updateBufferData();
 
     if (_hasColorMapFile) {
         _colorSettings.colorMapping->initialize(_colorDataset);
@@ -374,6 +375,52 @@ void RenderableTube::initializeGL() {
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, value))
     );
 
+    // Ending
+    glGenVertexArrays(1, &_vaoIdEnding);
+    glGenBuffers(1, &_vboIdEnding);
+    glGenBuffers(1, &_iboIdEnding);
+
+    glBindVertexArray(_vaoIdEnding);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vboIdEnding);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _verticiesEnding.size() * sizeof(PolygonVertex),
+        _verticiesEnding.data(),
+        GL_STREAM_DRAW
+    );
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboIdEnding);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        _indiciesEnding.size() * sizeof(unsigned int),
+        _indiciesEnding.data(),
+        GL_STREAM_DRAW
+    );
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(PolygonVertex), nullptr);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(PolygonVertex),
+        reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, normal))
+    );
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(
+        2,
+        1,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(PolygonVertex),
+        reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, value))
+    );
+
     glBindVertexArray(0);
 }
 
@@ -389,6 +436,16 @@ void RenderableTube::deinitializeGL() {
 
     glDeleteBuffers(1, &_iboId);
     _iboId = 0;
+
+    // Ending
+    glDeleteVertexArrays(1, &_vaoIdEnding);
+    _vaoIdEnding = 0;
+
+    glDeleteBuffers(1, &_vboIdEnding);
+    _vboIdEnding = 0;
+
+    glDeleteBuffers(1, &_iboIdEnding);
+    _iboIdEnding = 0;
 }
 
 int RenderableTube::currentColorParameterIndex() const {
@@ -538,12 +595,16 @@ void RenderableTube::readDataFile() {
     }
 }
 
-void RenderableTube::updateTubeData() {
+void RenderableTube::updateTube() {
     // Tube needs at least two polygons
     const size_t nPolygons = _data.size();
     if (nPolygons < 2) {
         LERROR("Tube is empty");
+        _nPolygons = 0;
         return;
+    }
+    else {
+        _nPolygons = nPolygons;
     }
 
     // Polygon needs at least 3 sides
@@ -551,21 +612,25 @@ void RenderableTube::updateTubeData() {
     const size_t nPoints = _data.front().points.size();
     if (nPoints < 3) {
         LERROR("Polygons need at least 3 edges");
+        _nPoints = 0;
         return;
+    }
+    else {
+        _nPoints = nPoints;
     }
 
     _verticies.clear();
     _indicies.clear();
 
     if (_useSmoothNormals) {
-        createSmoothTube(nPolygons, nPoints);
+        createSmoothTube();
     }
     else {
-        createLowPolyTube(nPolygons, nPoints);
+        createLowPolyTube();
     }
 }
 
-void RenderableTube::createSmoothTube(size_t nPolygons, size_t nPoints) {
+void RenderableTube::createSmoothTube() {
     // Verticies
     int pointCounter = 0;
 
@@ -580,13 +645,13 @@ void RenderableTube::createSmoothTube(size_t nPolygons, size_t nPoints) {
 
     // Add the bottom
     if (_addEdges) {
-        addBottom(nPoints, pointCounter, bottomCenter, bottomNormal, colorParamIndex);
+        addBottom(pointCounter, bottomCenter, bottomNormal, colorParamIndex);
     }
 
     // Add all the polygons that will create the sides of the tube
-    for (unsigned int polyIndex = 0; polyIndex < nPolygons; ++polyIndex) {
-        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-            bool isLast = polyIndex == nPolygons - 1;
+    for (unsigned int polyIndex = 0; polyIndex < _nPolygons; ++polyIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+            bool isLast = polyIndex == _nPolygons - 1;
 
             PolygonVertex sidePoint;
             sidePoint.position[0] = _data[polyIndex].points[pointIndex].coordinate.x;
@@ -615,18 +680,18 @@ void RenderableTube::createSmoothTube(size_t nPolygons, size_t nPoints) {
 
     // Add the top
     if (_addEdges) {
-        addTop(nPoints, pointCounter - nPoints, topCenter, topNormal, colorParamIndex);
+        addTop(pointCounter - _nPoints, topCenter, topNormal, colorParamIndex);
     }
 
     // Indicies
-    unsigned int firstSideIndex = _addEdges ? nPoints + 1 : 0;
+    unsigned int firstSideIndex = _addEdges ? _nPoints + 1 : 0;
 
     // Add Indices for bottom
     if (_addEdges) {
         unsigned int bottomCenterIndex = 0;
-        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
             unsigned int vIndex = pointIndex + 1;
-            bool isLast = pointIndex == nPoints - 1;
+            bool isLast = pointIndex == _nPoints - 1;
 
             unsigned int v0 = bottomCenterIndex;
             unsigned int v1 = vIndex;
@@ -639,15 +704,15 @@ void RenderableTube::createSmoothTube(size_t nPolygons, size_t nPoints) {
     }
 
     // Indices for side triangles
-    for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
-        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-            unsigned int vIndex = firstSideIndex + pointIndex + polyIndex * nPoints;
-            bool isLast = pointIndex == nPoints - 1;
+    for (unsigned int polyIndex = 0; polyIndex < _nPolygons - 1; ++polyIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+            unsigned int vIndex = firstSideIndex + pointIndex + polyIndex * _nPoints;
+            bool isLast = pointIndex == _nPoints - 1;
 
             unsigned int v0 = vIndex;
-            unsigned int v1 = v0 + nPoints;
+            unsigned int v1 = v0 + _nPoints;
             unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
-            unsigned int v3 = isLast ? v0 + 1 - nPoints : v0 + 1;
+            unsigned int v3 = isLast ? v0 + 1 - _nPoints : v0 + 1;
 
             // 2 triangles per sector
             _indicies.push_back(v0);
@@ -660,12 +725,12 @@ void RenderableTube::createSmoothTube(size_t nPolygons, size_t nPoints) {
         }
     }
 
-    // Add Indices for bottom
+    // Add Indices for top
     if (_addEdges) {
         unsigned int topCenterIndex = _verticies.size() - 1;
-        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
             unsigned int vIndex = topCenterIndex - pointIndex - 1;
-            bool isLast = pointIndex == nPoints - 1;
+            bool isLast = pointIndex == _nPoints - 1;
 
             unsigned int v0 = topCenterIndex;
             unsigned int v1 = vIndex;
@@ -678,7 +743,7 @@ void RenderableTube::createSmoothTube(size_t nPolygons, size_t nPoints) {
     }
 }
 
-void RenderableTube::createLowPolyTube(size_t nPolygons, size_t nPoints) {
+void RenderableTube::createLowPolyTube() {
     // Verticies
     int pointCounter = 0;
 
@@ -693,24 +758,24 @@ void RenderableTube::createLowPolyTube(size_t nPolygons, size_t nPoints) {
 
     // Add the bottom
     if (_addEdges) {
-        addBottom(nPoints, pointCounter, bottomCenter, bottomNormal, colorParamIndex);
+        addBottom(pointCounter, bottomCenter, bottomNormal, colorParamIndex);
     }
 
     // Add all the polygons that will create the sides of the tube
-    for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
-        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+    for (unsigned int polyIndex = 0; polyIndex < _nPolygons - 1; ++polyIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
             TimePolygon currentTimePolygon = _data[polyIndex];
             TimePolygon nextTimePolygon = _data[polyIndex + 1];
-            bool isLast = pointIndex == nPoints - 1;
+            bool isLast = pointIndex == _nPoints - 1;
 
             // Identify all the points that are included in this section
             TimePolygonPoint v0 = currentTimePolygon.points[pointIndex];
             TimePolygonPoint v1 = nextTimePolygon.points[pointIndex];
             TimePolygonPoint v2 = isLast ?
-                nextTimePolygon.points[pointIndex + 1 - nPoints] :
+                nextTimePolygon.points[pointIndex + 1 - _nPoints] :
                 nextTimePolygon.points[pointIndex + 1];
             TimePolygonPoint v3 = isLast ?
-                currentTimePolygon.points[pointIndex + 1 - nPoints] :
+                currentTimePolygon.points[pointIndex + 1 - _nPoints] :
                 currentTimePolygon.points[pointIndex + 1];
 
             // Calculate normal of this section of the tube
@@ -744,11 +809,11 @@ void RenderableTube::createLowPolyTube(size_t nPolygons, size_t nPoints) {
                 sidePointTriangleV0.value =
                     _colorDataset.entries[pointCounter].data[colorParamIndex];
                 sidePointTriangleV1.value =
-                    _colorDataset.entries[pointCounter + nPoints].data[colorParamIndex];
+                    _colorDataset.entries[pointCounter + _nPoints].data[colorParamIndex];
                 sidePointTriangleV2.value =
-                    _colorDataset.entries[isLast ? pointCounter + 1 : pointCounter + nPoints + 1].data[colorParamIndex];
+                    _colorDataset.entries[isLast ? pointCounter + 1 : pointCounter + _nPoints + 1].data[colorParamIndex];
                 sidePointTriangleV3.value =
-                    _colorDataset.entries[isLast ? pointCounter + 1 - nPoints : pointCounter + 1].data[colorParamIndex];
+                    _colorDataset.entries[isLast ? pointCounter + 1 - _nPoints : pointCounter + 1].data[colorParamIndex];
                 ++pointCounter;
             }
 
@@ -779,19 +844,19 @@ void RenderableTube::createLowPolyTube(size_t nPolygons, size_t nPoints) {
 
     // Add the top
     if (_addEdges) {
-        addTop(nPoints, pointCounter, topCenter, topNormal, colorParamIndex);
+        addTop(pointCounter, topCenter, topNormal, colorParamIndex);
     }
 
     // Indicies
     unsigned int nPointsPerSection = 4;
-    unsigned int vIndex = _addEdges ? nPoints + 1 : 0;
+    unsigned int vIndex = _addEdges ? _nPoints + 1 : 0;
 
     // Add Indices for bottom
     if (_addEdges) {
         unsigned int bottomCenterIndex = 0;
-        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
             unsigned int vIndex = pointIndex + 1;
-            bool isLast = pointIndex == nPoints - 1;
+            bool isLast = pointIndex == _nPoints - 1;
 
             unsigned int v0 = bottomCenterIndex;
             unsigned int v1 = vIndex;
@@ -804,9 +869,9 @@ void RenderableTube::createLowPolyTube(size_t nPolygons, size_t nPoints) {
     }
 
     // Indices for side triangles
-    for (unsigned int polyIndex = 0; polyIndex < nPolygons - 1; ++polyIndex) {
-        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
-            bool isLast = pointIndex == nPoints - 1;
+    for (unsigned int polyIndex = 0; polyIndex < _nPolygons - 1; ++polyIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+            bool isLast = pointIndex == _nPoints - 1;
 
             unsigned int v0 = vIndex;
             unsigned int v1 = v0 + 1;
@@ -829,9 +894,9 @@ void RenderableTube::createLowPolyTube(size_t nPolygons, size_t nPoints) {
     // Add Indices for top
     if (_addEdges) {
         unsigned int topCenterIndex = _verticies.size() - 1;
-        for (unsigned int pointIndex = 0; pointIndex < nPoints; ++pointIndex) {
+        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
             unsigned int vIndex = topCenterIndex - pointIndex - 1;
-            bool isLast = pointIndex == nPoints - 1;
+            bool isLast = pointIndex == _nPoints - 1;
 
             unsigned int v0 = topCenterIndex;
             unsigned int v1 = vIndex;
@@ -844,8 +909,7 @@ void RenderableTube::createLowPolyTube(size_t nPolygons, size_t nPoints) {
     }
 }
 
-void RenderableTube::addBottom(size_t nPoints, int pointCounter,
-                               const glm::dvec3& bottomCenter,
+void RenderableTube::addBottom(int pointCounter, const glm::dvec3& bottomCenter,
                                const glm::dvec3& bottomNormal, int colorParamIndex)
 {
     // Calculate the transfer function value for the center point of the bottom
@@ -856,7 +920,7 @@ void RenderableTube::addBottom(size_t nPoints, int pointCounter,
         for (size_t pointIndex = 0; pointIndex < _data.front().points.size(); ++pointIndex) {
             bottomCenterValue += _colorDataset.entries[loopPointCounter++].data[colorParamIndex];
         }
-        bottomCenterValue /= nPoints;
+        bottomCenterValue /= _nPoints;
     }
 
     // Add the bottom's center point
@@ -893,8 +957,7 @@ void RenderableTube::addBottom(size_t nPoints, int pointCounter,
     }
 }
 
-void RenderableTube::addTop(size_t nPoints, int pointCounter,
-                            const glm::dvec3& topCenter,
+void RenderableTube::addTop(int pointCounter, const glm::dvec3& topCenter,
                             const glm::dvec3& topNormal, int colorParamIndex)
 {
     // Calculate the transfer function value for the center point of the top
@@ -905,7 +968,7 @@ void RenderableTube::addTop(size_t nPoints, int pointCounter,
         for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
             topCenterValue += _colorDataset.entries[loopPointCounter++].data[colorParamIndex];
         }
-        topCenterValue /= nPoints;
+        topCenterValue /= _nPoints;
     }
 
     // Add the top's sides with proper normals
@@ -942,25 +1005,115 @@ void RenderableTube::addTop(size_t nPoints, int pointCounter,
     _verticies.push_back(topCenterPoint);
 }
 
-void RenderableTube::updateBufferData() {
-    glBindBuffer(GL_ARRAY_BUFFER, _vboId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _verticies.size() * sizeof(PolygonVertex),
-        _verticies.data(),
-        GL_STREAM_DRAW
-    );
+void RenderableTube::createSmoothEnding(double now) {
+    // Get the selected color parameter
+    int colorParamIndex = currentColorParameterIndex();
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        _indicies.size() * sizeof(unsigned int),
-        _indicies.data(),
-        GL_STREAM_DRAW
-    );
+    // Verticies
+    // Add the points of the polygon before now
+    size_t polyIndex = _lastPolygonBeforeNow;
+    for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+        PolygonVertex sidePoint;
+        glm::dvec3 sidePointPos = _data[polyIndex].points[pointIndex].coordinate;
+        sidePoint.position[0] = sidePointPos.x;
+        sidePoint.position[1] = sidePointPos.y;
+        sidePoint.position[2] = sidePointPos.z;
+
+        // Calculate normal
+        glm::dvec3 centerLine = _data[polyIndex].center - _data[polyIndex + 1].center;
+        glm::dvec3 normal = _data[polyIndex].points[pointIndex].coordinate -
+            glm::proj(_data[polyIndex].points[pointIndex].coordinate, centerLine) -
+            centerLine;
+
+        sidePoint.normal[0] = normal.x;
+        sidePoint.normal[1] = normal.y;
+        sidePoint.normal[2] = normal.z;
+
+        if (_hasColorMapFile) {
+            sidePoint.value =
+                _colorDataset.entries[polyIndex * _nPoints + pointIndex].data[colorParamIndex];
+        }
+
+        _verticiesEnding.push_back(sidePoint);
+    }
+
+    // Interpolate to find the values for the current polygon
+    double prevTime = _data[_lastPolygonBeforeNow].timestamp;
+    double nextTime = _data[_firstPolygonAfterNow].timestamp;
+    double t = (now - prevTime) / (nextTime - prevTime);
+
+    // Add the points for the current polygon
+    polyIndex = _firstPolygonAfterNow;
+    for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+        bool isLast = polyIndex == _nPolygons - 1;
+
+        glm::dvec3 prevPolyPointPos = _data[_lastPolygonBeforeNow].points[pointIndex].coordinate;
+        glm::dvec3 nextPolyPointPos = _data[_firstPolygonAfterNow].points[pointIndex].coordinate;
+        glm::dvec3 currPolyPointPos = t * nextPolyPointPos + (1.0 - t) * prevPolyPointPos;
+
+        PolygonVertex sidePoint;
+        sidePoint.position[0] = currPolyPointPos.x;
+        sidePoint.position[1] = currPolyPointPos.y;
+        sidePoint.position[2] = currPolyPointPos.z;
+
+        // Calculate normal
+        glm::dvec3 centerLine = isLast ?
+            _data[polyIndex - 1].center - _data[polyIndex].center :
+            _data[polyIndex].center - _data[polyIndex + 1].center;
+        glm::dvec3 normal = _data[polyIndex].points[pointIndex].coordinate -
+            glm::proj(_data[polyIndex].points[pointIndex].coordinate, centerLine) -
+            centerLine;
+
+        sidePoint.normal[0] = normal.x;
+        sidePoint.normal[1] = normal.y;
+        sidePoint.normal[2] = normal.z;
+
+        if (_hasColorMapFile) {
+            float prevPolyPointValue =
+                _colorDataset.entries[polyIndex * _nPoints + pointIndex - 1].data[colorParamIndex];
+            float currPolyPointValue =
+                _colorDataset.entries[polyIndex * _nPoints + pointIndex].data[colorParamIndex];
+            currPolyPointValue = t * currPolyPointValue + (1.0 - t) * prevPolyPointValue;
+
+            sidePoint.value = currPolyPointValue;
+        }
+
+        _verticiesEnding.push_back(sidePoint);
+    }
+
+    // Add the cutplane for the current polygon
+
+    // Indicies
+    for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+        bool isLast = pointIndex == _nPoints - 1;
+
+        unsigned int v0 = pointIndex;
+        unsigned int v1 = v0 + _nPoints;
+        unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
+        unsigned int v3 = isLast ? v0 + 1 - _nPoints : v0 + 1;
+
+        // 2 triangles per sector
+        _indiciesEnding.push_back(v0);
+        _indiciesEnding.push_back(v2);
+        _indiciesEnding.push_back(v1);
+
+        _indiciesEnding.push_back(v0);
+        _indiciesEnding.push_back(v3);
+        _indiciesEnding.push_back(v2);
+    }
+}
+
+void RenderableTube::createLowPolyEnding(double now) {
+
+
+
 }
 
 void RenderableTube::render(const RenderData& data, RendererTasks&) {
+    if (_nIndiciesToRender == 0) {
+        return;
+    }
+
     _shader->activate();
 
     // Model transform and view transform needs to be in double precision
@@ -1076,13 +1229,23 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
 
     // Render
     glBindVertexArray(_vaoId);
-
     glDrawElements(
         GL_TRIANGLES,
         static_cast<GLsizei>(_nIndiciesToRender),
         GL_UNSIGNED_INT,
         nullptr
     );
+
+    // Render the last section until now with interpolation
+    if (_interpolationNeeded) {
+        glBindVertexArray(_vaoIdEnding);
+        glDrawElements(
+            GL_TRIANGLES,
+            static_cast<GLsizei>(_indiciesEnding.size()),
+            GL_UNSIGNED_INT,
+            nullptr
+        );
+    }
 
     // Reset
     if (!_enableFaceCulling) {
@@ -1100,6 +1263,25 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
+void RenderableTube::updateBufferData() {
+    glBindVertexArray(_vaoId);
+    glBindBuffer(GL_ARRAY_BUFFER, _vaoId);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _verticies.size() * sizeof(PolygonVertex),
+        _verticies.data(),
+        GL_STREAM_DRAW
+    );
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        _indicies.size() * sizeof(unsigned int),
+        _indicies.data(),
+        GL_STREAM_DRAW
+    );
+}
+
 void RenderableTube::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
@@ -1107,7 +1289,7 @@ void RenderableTube::update(const UpdateData& data) {
     }
 
     if (_tubeIsDirty) {
-        updateTubeData();
+        updateTube();
         updateBufferData();
         //setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));
         _tubeIsDirty = false;
@@ -1121,34 +1303,38 @@ void RenderableTube::update(const UpdateData& data) {
     const double now = data.time.j2000Seconds();
     double prev = 0.0;
     double next = std::numeric_limits<double>::max();
-    size_t prevPolygon = 0;
-    size_t nextPolygon = std::numeric_limits<size_t>::max();
+    _lastPolygonBeforeNow = 0;
+    _firstPolygonAfterNow = std::numeric_limits<size_t>::max();
     bool hasPrev = false;
-    bool interpolationNeeded = true;
+    _interpolationNeeded = true;
 
     for (size_t i = 0; i < _data.size(); ++i) {
         // Found a time smaller than now
         if (_data[i].timestamp < now) {
             prev = _data[i].timestamp;
-            prevPolygon = i;
+            _lastPolygonBeforeNow = i;
             hasPrev = true;
         }
         // Found a time larger than now
         else if (_data[i].timestamp > now && _data[i].timestamp < next) {
             next = _data[i].timestamp;
-            nextPolygon = i;
+            _firstPolygonAfterNow = i;
         }
         // Found a time exactly equal to now
-        else if (std::abs(_data[i].timestamp - now) < std::numeric_limits<double>::epsilon()) {
+        else if (std::abs(_data[i].timestamp - now) <
+                 std::numeric_limits<double>::epsilon())
+        {
             prev = _data[i].timestamp;
-            prevPolygon = i;
+            _lastPolygonBeforeNow = i;
             hasPrev = true;
-            interpolationNeeded = false;
-            LDEBUG(fmt::format("Polygon nr: '{}' is exactly at NOW", prevPolygon));
+            _interpolationNeeded = false;
+            LDEBUG(fmt::format("Polygon nr: '{}' is exactly at NOW",
+                _lastPolygonBeforeNow)
+            );
         }
     }
 
-    // How many points are to and including polygon prevPolygon?
+    // How many points are to and including polygon _lastPolygonBeforeNow?
     const size_t nPolygons = _data.size();
     const size_t nPoints = _data.front().points.size();
 
@@ -1158,18 +1344,20 @@ void RenderableTube::update(const UpdateData& data) {
     if (!hasPrev) {
         // Before the time of the tube, do not show anything
         nPointsUntilNow = 0;
+        _interpolationNeeded = false;
         LDEBUG("Before");
     }
-    else if (prevPolygon == nPolygons - 1) {
+    else if (_lastPolygonBeforeNow == nPolygons - 1) {
         // The previous step before now is the last polygon,
         // either after the time of the full tube or just at the exact end of it,
         // either way, show all of the tube
         nPointsUntilNow = _indicies.size();
+        _interpolationNeeded = false;
         LDEBUG("After or End");
     }
     else {
         // Somewhere in the middle of the tube
-        // could also be the very first polygon, prevPolygon == 0
+        // could also be the very first polygon, _lastPolygonBeforeNow == 0
 
         // First add the bottom if that property is turned on
         if (_addEdges) {
@@ -1177,19 +1365,18 @@ void RenderableTube::update(const UpdateData& data) {
             nPointsUntilNow += static_cast<int>(nPoints * 3);
         }
 
-        // Show the sides until prevPolygon
-        nPointsUntilNow += static_cast<int>(prevPolygon * nPoints * 6);
+        // Show the sides until _lastPolygonBeforeNow
+        nPointsUntilNow += static_cast<int>(_lastPolygonBeforeNow * nPoints * 6);
 
         // We need at least one full side to show if we do not show the edges
-        if (!_addEdges && prevPolygon == 0) {
-
+        if (!_addEdges && _lastPolygonBeforeNow == 0) {
             LDEBUG("Nothing to show except edges");
             nPointsUntilNow = 0;
         }
     }
 
-    LDEBUG(fmt::format("\nprev: '{}'\nnext: '{}'\nnPointsUntilNow: '{}'\n", prevPolygon,
-        nextPolygon, nPointsUntilNow)
+    LDEBUG(fmt::format("\nprev: '{}'\nnext: '{}'\nnPointsUntilNow: '{}'\n",
+        _lastPolygonBeforeNow, _firstPolygonAfterNow, nPointsUntilNow)
     );
 
     if (nPointsUntilNow > _indicies.size()) {
@@ -1199,6 +1386,40 @@ void RenderableTube::update(const UpdateData& data) {
     else {
         _nIndiciesToRender = nPointsUntilNow;
     }
+
+    // Update the ending of the tube
+    if (_interpolationNeeded) {
+        _verticiesEnding.clear();
+        _indiciesEnding.clear();
+
+        // Create the last piece of the tube
+        if (_useSmoothNormals) {
+            createSmoothEnding(now);
+        }
+        else {
+            createLowPolyEnding(now);
+        }
+
+        // Update the buffer for the last piece
+        glBindVertexArray(_vaoIdEnding);
+        glBindBuffer(GL_ARRAY_BUFFER, _vboIdEnding);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            _verticiesEnding.size() * sizeof(PolygonVertex),
+            _verticiesEnding.data(),
+            GL_STREAM_DRAW
+        );
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboIdEnding);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            _indiciesEnding.size() * sizeof(unsigned int),
+            _indiciesEnding.data(),
+            GL_STREAM_DRAW
+        );
+    }
+
+    glBindVertexArray(0);
 }
 
 } // namespace openspace

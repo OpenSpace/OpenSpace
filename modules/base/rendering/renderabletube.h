@@ -82,13 +82,15 @@ private:
 
     void readDataFile();
 
-    void updateTubeData();
-    void createSmoothTube(size_t nPolygons, size_t nPoints);
-    void createLowPolyTube(size_t nPolygons, size_t nPoints);
-    void addBottom(size_t nPoints, int pointCounter, const glm::dvec3& bottomCenter,
+    void updateTube();
+    void createSmoothTube();
+    void createLowPolyTube();
+    void addBottom(int pointCounter, const glm::dvec3& bottomCenter,
         const glm::dvec3& bottomNormal, int colorParamIndex);
-    void addTop(size_t nPoints, int pointCounter, const glm::dvec3& bottomCenter,
+    void addTop(int pointCounter, const glm::dvec3& bottomCenter,
         const glm::dvec3& bottomNormal, int colorParamIndex);
+    void createSmoothEnding(double now);
+    void createLowPolyEnding(double now);
     void updateBufferData();
 
     // Properties
@@ -130,10 +132,15 @@ private:
 
     std::filesystem::path _dataFile;
     std::vector<TimePolygon> _data;
+    size_t _nPolygons = 0;
+    size_t _nPoints = 0;
     dataloader::Dataset _colorDataset;
     bool _tubeIsDirty = false;
     bool _hasColorMapFile = false;
     size_t _nIndiciesToRender = 0;
+    size_t _lastPolygonBeforeNow = 0;
+    size_t _firstPolygonAfterNow = 0;
+    bool _interpolationNeeded = false;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     GLuint _vaoId = 0;
@@ -143,6 +150,13 @@ private:
     std::vector<PolygonVertex> _verticies;
     std::vector<unsigned int> _indicies;
 
+    // Ending stuff
+    GLuint _vaoIdEnding = 0;
+    GLuint _vboIdEnding = 0;
+    GLuint _iboIdEnding = 0;
+
+    std::vector<PolygonVertex> _verticiesEnding;
+    std::vector<unsigned int> _indiciesEnding;
 };
 
 } // namespace openspace
