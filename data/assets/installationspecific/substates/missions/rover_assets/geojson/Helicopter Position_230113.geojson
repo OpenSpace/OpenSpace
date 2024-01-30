@@ -1,6 +1,0 @@
-{
-  "type": "FeatureCollection",
-  "features": [
-{"type":"Feature","properties":{"Flight":39,"Sol":673,"SF3_X":748.416,"SF3_Y":-2305.013,"SF3_Z":-29.874,"Easting":4352189.073,"Northing":1094048.111,"Elev_Geoid":-2540.04,"Lon":77.40988779,"Lat":18.45725338,"Dist_m":140.448,"Total_m":7905.932,"Total_km":7.906,"Dist_ft":460.787,"Total_ft":25938.097,"Total_mi":4.913,"Max_Alt_m":10,"Max_Alt_ft":32.808,"Max_Spd_m":4,"Max_mph":8.9,"Duration_s":78.72,"Earth_Date":"Jan. 11, 2023","FromAirfld":"Airfield Z","ToAirfld":"Airfield Z"},"geometry":{"type":"Point","coordinates":[77.409888,18.457253,-2540.04]}}
-]
-}

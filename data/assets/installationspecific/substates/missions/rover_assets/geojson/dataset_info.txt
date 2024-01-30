@@ -1,0 +1,8 @@
+Helicopter flight and Perseverance traversal Jan 2024 path date:
+2024-01-29
+
+Perseverance path date: (roverpath_perseverance.geojson)
+2024-01-29
+
+Curiosity rover path date: (roverpath_curiosity.geojson)
+2024-01-29

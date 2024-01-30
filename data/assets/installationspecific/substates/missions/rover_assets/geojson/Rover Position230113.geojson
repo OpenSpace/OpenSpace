@@ -1,6 +1,0 @@
-{
-  "type": "FeatureCollection",
-  "features": [
-{"type":"Feature","properties":{"RMC":"32_774","site":32,"drive":774,"sol":674,"easting":4352101.639,"northing":1093780.015,"elev_geoid":-2545.443359,"elev_radii":-4229.772949,"radius":3391960.23,"lon":77.40833265,"lat":18.45273043,"roll":-0.378,"pitch":-0.497,"yaw":-66.392,"yaw_rad":-1.1588,"tilt":0.625,"dist_m":7.05,"dist_total_m":13973.555,"dist_km":13.97,"dist_mi":8.68,"final":"y","Note":"Used Mobility Report WID 36741","images":[{"name":"Panorama","isPanoramic":true,"url":"Layers/mosaics/N_LRGB_0674_RZS_0320774_CYL_L_AUTOGENJ01.jpg","rows":"2024","columns":"7615","azmin":"169.229","azmax":"104.249","elmin":"-66.5778","elmax":"11.84","elzero":"306.613"}]},"geometry":{"type":"Point","coordinates":[77.408333,18.45273,-2545.443359]}}
-]
-}

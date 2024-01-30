@@ -42,7 +42,7 @@ local Handle = {
 
 local PerseverancePath = {
   Identifier = "Perseverance-Rover-Path-2024",
-  File = asset.localResource("./geojson/Rover Drive Path_240129.geojson"),
+  File = asset.localResource("./geojson/roverpath_perseverance_tojan2024.geojson"),
   HeightOffset = 10,
   CoordinateOffset = LatLongOffset,
   IgnoreHeights = true,
@@ -56,7 +56,7 @@ local PerseverancePath = {
 
 local IngenuityPath = {
   Identifier = "Ingenuity-Path-2024",
-  File = asset.localResource("./geojson/Helicopter Flight Path_240129.geojson"),
+  File = asset.localResource("./geojson/helicopter_flightpath_tojan2024.geojson"),
   HeightOffset = 10,
   CoordinateOffset = LatLongOffset,
   IgnoreHeights = true,
