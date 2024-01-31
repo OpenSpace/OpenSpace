@@ -84,6 +84,7 @@
 #endif // _MSC_VER
 
 #include <cpl_string.h>
+#include <cpl_conv.h>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -258,6 +259,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
             static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
         );
         addPropertySubOwner(GdalWrapper::ref());
+
+        CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "15");
     });
 
     global::callback::deinitializeGL->emplace_back([]() {
