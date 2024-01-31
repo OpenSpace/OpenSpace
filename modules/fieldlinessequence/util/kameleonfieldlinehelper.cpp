@@ -281,7 +281,40 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
                         std::vector<std::string>& extraMagVars,
                         FieldlinesState& state)
 {
+    int nGlobalAttributes = kameleon->getNumberOfGlobalAttributes();
+    int nVariableAttributes = kameleon->getNumberOfVariableAttributes();
+    int nTotalAttributes = kameleon->getNumberOfVariables();
+// Total?
+    std::vector<std::string> attributeNames;
+    for (int i = 0; i < nTotalAttributes; ++i) {
+        std::string varname = kameleon->getVariableName(i);
+        std::string varunit = kameleon->getNativeUnit(varname);
+        std::string varVizUnit = kameleon->getVisUnit(varname);
 
+        LWARNING(fmt::format("Total? Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'. ", i, varname, varunit, varVizUnit));
+        attributeNames.push_back(varname);
+    }
+// Variable?
+    std::vector<std::string> variablesAttributeNames;
+    for (int i = 0; i < nVariableAttributes; ++i) {
+        std::string varname = kameleon->getVariableAttributeName(i);
+        std::string varunit = kameleon->getNativeUnit(varname);
+        std::string varVizUnit = kameleon->getVisUnit(varname);
+
+        LWARNING(fmt::format("Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'. ", i, varname, varunit, varVizUnit));
+        variablesAttributeNames.push_back(varname);
+    }
+
+// Global?
+    std::vector<std::string> gloablAttributeNames;
+    for (int i = 0; i < nGlobalAttributes; ++i) {
+        std::string varname = kameleon->getGlobalAttributeName(i);
+        std::string varunit = kameleon->getNativeUnit(varname);
+        std::string varVizUnit = kameleon->getVisUnit(varname);
+
+        LWARNING(fmt::format("Global Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'. ", i, varname, varunit, varVizUnit));
+        gloablAttributeNames.push_back(varname);
+    }
     prepareStateAndKameleonForExtras(kameleon, extraScalarVars, extraMagVars, state);
 
     const size_t nXtraScalars = extraScalarVars.size();

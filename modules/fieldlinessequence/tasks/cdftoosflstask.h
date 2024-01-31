@@ -45,7 +45,7 @@ private:
     std::vector<std::string> _extraScalarVars;
     std::vector<std::string> _extraMagnitudeVars;
     std::string _inputPath;
-    std::string _timeKernelPath;
+    std::string _timeKernelPath = "";
     std::string _seedpointsPath;
     std::string _outputFolder;
     // Manual time offset

@@ -96,7 +96,7 @@ void CDFtoOSFLStask::perform(const Task::ProgressCallback& progressCallback) {
     std::unordered_map<std::string, std::vector<glm::vec3>> seedPoints =
         fls::extractSeedPointsFromFiles(_seedpointsPath);
 
-    SpiceManager::ref().loadKernel(_timeKernelPath);
+    //SpiceManager::ref().loadKernel(_timeKernelPath);
 
     FieldlinesState newState;
     bool isSuccessful = fls::convertCdfToFieldlinesState(

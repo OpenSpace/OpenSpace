@@ -1,0 +1,40 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
+
+
+local testOsfls = "C:/Users/eolsson/Documents/openspace/data/2012/outputTest2024"
+
+--scene graph node
+local testSGN = {
+    Identifier = "testAssetForFieldLineTracerConverterTask",
+    Partent = transforms.GSMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        SourceFolder = testOsfls,
+        InputFileType = "Osfls",
+        ShowAtAllTimes = true,
+        Color = { 0.7, 0.4, 0.0, 0.6 }, -- Default color
+    },
+    GUI = {
+        Name = "Test2024",
+        Path = ""
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(testSGN)
+end)
+
+asset.onDeinitialize(function()
+    openspace.addSceneGraphNode(testSGN)
+end)
+
+asset.export(testSGN)
+
+asset.meta = {
+    Name = "",
+    Version = "",
+    Description = "",
+    Author = "",
+    URL = "",
+    License = ""
+}
