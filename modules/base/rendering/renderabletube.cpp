@@ -1104,9 +1104,127 @@ void RenderableTube::createSmoothEnding(double now) {
 }
 
 void RenderableTube::createLowPolyEnding(double now) {
+    // Get the selected color parameter
+    int colorParamIndex = currentColorParameterIndex();
 
+    // Interpolate to find current data
+    double prevTime = _data[_lastPolygonBeforeNow].timestamp;
+    double nextTime = _data[_firstPolygonAfterNow].timestamp;
+    double t = (now - prevTime) / (nextTime - prevTime);
 
+    // Verticies
+    // Add the points of the polygon before now
+    for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+        bool isLast = pointIndex == _nPoints - 1;
 
+        TimePolygon prevTimePolygon = _data[_lastPolygonBeforeNow];
+        TimePolygon nextTimePolygon = _data[_firstPolygonAfterNow];
+
+        // Identify all the points that are included in this section
+        glm::dvec3 v0 = prevTimePolygon.points[pointIndex].coordinate;
+        glm::dvec3 v1 = nextTimePolygon.points[pointIndex].coordinate;
+        glm::dvec3 v2 = isLast ?
+            nextTimePolygon.points[pointIndex + 1 - _nPoints].coordinate :
+            nextTimePolygon.points[pointIndex + 1].coordinate;
+        glm::dvec3 v3 = isLast ?
+            prevTimePolygon.points[pointIndex + 1 - _nPoints].coordinate :
+            prevTimePolygon.points[pointIndex + 1].coordinate;
+
+        // Interpolate the points related to the next polygon
+        v1 = t * v1 + (1.0 - t) * v0;
+        v2 = t * v2 + (1.0 - t) * v3;
+
+        // Calculate normal of this section of the tube
+        glm::dvec3 toNextPoly = glm::normalize(v1 - v0);
+        glm::dvec3 toNextPoint = glm::normalize(v3 - v0);
+        glm::dvec3 normal = glm::cross(toNextPoint, toNextPoly);
+
+        // Create the Verticies for all points in this section
+        PolygonVertex sidePointTriangleV0, sidePointTriangleV1, sidePointTriangleV2,
+            sidePointTriangleV3;
+
+        // Position
+        sidePointTriangleV0.position[0] = v0.x;
+        sidePointTriangleV0.position[1] = v0.y;
+        sidePointTriangleV0.position[2] = v0.z;
+
+        sidePointTriangleV1.position[0] = v1.x;
+        sidePointTriangleV1.position[1] = v1.y;
+        sidePointTriangleV1.position[2] = v1.z;
+
+        sidePointTriangleV2.position[0] = v2.x;
+        sidePointTriangleV2.position[1] = v2.y;
+        sidePointTriangleV2.position[2] = v2.z;
+
+        sidePointTriangleV3.position[0] = v3.x;
+        sidePointTriangleV3.position[1] = v3.y;
+        sidePointTriangleV3.position[2] = v3.z;
+
+        if (_hasColorMapFile) {
+            // Value
+            unsigned int pointCounter = _lastPolygonBeforeNow * _nPoints + pointIndex;
+
+            sidePointTriangleV0.value =
+                _colorDataset.entries[pointCounter].data[colorParamIndex];
+            sidePointTriangleV1.value =
+                _colorDataset.entries[pointCounter + _nPoints].data[colorParamIndex];
+            sidePointTriangleV2.value =
+                _colorDataset.entries[isLast ? pointCounter + 1 : pointCounter + _nPoints + 1].data[colorParamIndex];
+            sidePointTriangleV3.value =
+                _colorDataset.entries[isLast ? pointCounter + 1 - _nPoints : pointCounter + 1].data[colorParamIndex];
+
+            sidePointTriangleV1.value =
+                t * sidePointTriangleV1.value + (1.0 - t) * sidePointTriangleV0.value;
+            sidePointTriangleV2.value =
+                t * sidePointTriangleV2.value + (1.0 - t) * sidePointTriangleV3.value;
+        }
+
+        // Normal
+        sidePointTriangleV0.normal[0] = normal.x;
+        sidePointTriangleV0.normal[1] = normal.y;
+        sidePointTriangleV0.normal[2] = normal.z;
+
+        sidePointTriangleV1.normal[0] = normal.x;
+        sidePointTriangleV1.normal[1] = normal.y;
+        sidePointTriangleV1.normal[2] = normal.z;
+
+        sidePointTriangleV2.normal[0] = normal.x;
+        sidePointTriangleV2.normal[1] = normal.y;
+        sidePointTriangleV2.normal[2] = normal.z;
+
+        sidePointTriangleV3.normal[0] = normal.x;
+        sidePointTriangleV3.normal[1] = normal.y;
+        sidePointTriangleV3.normal[2] = normal.z;
+
+        // Add all points to the list
+        _verticiesEnding.push_back(sidePointTriangleV0);
+        _verticiesEnding.push_back(sidePointTriangleV1);
+        _verticiesEnding.push_back(sidePointTriangleV2);
+        _verticiesEnding.push_back(sidePointTriangleV3);
+    }
+
+    // Indicies
+    unsigned int nPointsPerSection = 4;
+    unsigned int vIndex = 0;
+    for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+        bool isLast = pointIndex == _nPoints - 1;
+
+        unsigned int v0 = vIndex;
+        unsigned int v1 = v0 + 1;
+        unsigned int v2 = v1 + 1;
+        unsigned int v3 = v2 + 1;
+
+        // 2 triangles per sector
+        _indiciesEnding.push_back(v0);
+        _indiciesEnding.push_back(v2);
+        _indiciesEnding.push_back(v1);
+
+        _indiciesEnding.push_back(v0);
+        _indiciesEnding.push_back(v3);
+        _indiciesEnding.push_back(v2);
+
+        vIndex += nPointsPerSection;
+    }
 }
 
 void RenderableTube::render(const RenderData& data, RendererTasks&) {
@@ -1237,7 +1355,7 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     );
 
     // Render the last section until now with interpolation
-    if (_interpolationNeeded) {
+    if (_interpolationNeeded && !_showAllTube) {
         glBindVertexArray(_vaoIdEnding);
         glDrawElements(
             GL_TRIANGLES,
