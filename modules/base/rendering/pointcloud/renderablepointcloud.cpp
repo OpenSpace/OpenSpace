@@ -40,6 +40,7 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/string_cast.hpp>
 #include <array>
@@ -703,7 +704,7 @@ void RenderablePointCloud::bindTextureForRendering() const {
     }
     else { // Multiple textures
         // TODO: make this work when using single textures
-        glBindTexture(GL_TEXTURE_2D_ARRAY, _arrayTextureIds.front());
+        glBindTexture(GL_TEXTURE_2D_ARRAY, _arrayTextureIds.back());
     }
 }
 
@@ -731,13 +732,19 @@ void RenderablePointCloud::loadTextures() {
         std::unique_ptr<ghoul::opengl::Texture> t =
             ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
+        bool useAlpha = (t->dimensions().length() > 3);
+
         if (t) {
             LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
             // Do not upload the loaded texture to the GPU, we just want it to hold the data.
-            // However, make sure all texctures ahve the same format.
-            t->setFormat(ghoul::opengl::Texture::Format::RGB);
-            t->setInternalFormat(GL_RGB);
-            t->setDataType(GL_UNSIGNED_BYTE);
+            // However, convert textures make sure they all usethe same format.
+            using namespace ghoul::opengl;
+            if (useAlpha) {
+                convertTextureFormat(*t, Texture::Format::RGBA);
+            }
+            else {
+                convertTextureFormat(*t, Texture::Format::RGB);
+            }
         }
         else {
             // Same here, we won't be able to recover from this nullptr
@@ -746,18 +753,22 @@ void RenderablePointCloud::loadTextures() {
             ));
         }
 
-        TextureResolution res = glm::uvec2(t->width(), t->height());
-        _textureMapByResolution[res].push_back(tex.index);
+        glm::uvec2 res = glm::uvec2(t->width(), t->height());
+        TextureFormat format = {
+            .resolution = res,
+            .useAlpha = useAlpha
+        };
+        _textureMapByFormat[format].push_back(tex.index);
 
         _textures.insert(std::pair(tex.index, std::move(t)));
     }
 }
 
 void RenderablePointCloud::generateArrayTextures() {
-    _arrayTextureIds.reserve(_textureMapByResolution.size());
+    _arrayTextureIds.reserve(_textureMapByFormat.size());
 
-    using Entry = std::pair<TextureResolution, std::vector<int>>;
-    for (const Entry& e : _textureMapByResolution) {
+    using Entry = std::pair<TextureFormat, std::vector<int>>;
+    for (const Entry& e : _textureMapByFormat) {
         unsigned int id = 0;
         //Generate an array texture
         glGenTextures(1, &id);
@@ -765,14 +776,15 @@ void RenderablePointCloud::generateArrayTextures() {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
-        glm::uvec2 res = e.first;
+        glm::uvec2 res = e.first.resolution;
+        bool useAlpha = e.first.useAlpha;
         size_t nLayers = e.second.size();
 
         // Create storage for the texture
         glTexStorage3D(
             GL_TEXTURE_2D_ARRAY,
             1, // No mipmaps
-            GL_RGB8, // internal format
+            useAlpha ? GL_RGBA8 : GL_RGB8, // internal format
             res.x, res.y,
             static_cast<gl::GLsizei>(nLayers)
         );
@@ -782,12 +794,19 @@ void RenderablePointCloud::generateArrayTextures() {
         for (const int& texId : e.second) {
             const ghoul::opengl::Texture* texture = _textures[texId].get();
 
+            // TODO: find out how to use a compressed format on upla
+            gl::GLenum format = gl::GLenum(
+                useAlpha ?
+                    ghoul::opengl::Texture::Format::RGBA :
+                    ghoul::opengl::Texture::Format::RGB
+            );
+
             glTexSubImage3D(
                 GL_TEXTURE_2D_ARRAY,
                 0, // Mipmap number
                 0, 0, gl::GLint(layer), // xoffset, yoffset, zoffset
                 gl::GLsizei(res.x), gl::GLsizei(res.y), 1, // width, height, depth
-                GLenum(ghoul::opengl::Texture::Format::RGB), // format
+                format, // format
                 GL_UNSIGNED_BYTE, // type
                 texture->pixelData() // pointer to data
             );

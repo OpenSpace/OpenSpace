@@ -197,28 +197,33 @@ protected:
     // Index to texture (generated from the dataset)
     std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textures;
 
-    using TextureResolution = glm::uvec2;
-    struct TextureResolutionHash {
-        std::size_t operator()(const TextureResolution& k) const {
-            return (
-                std::hash<unsigned int>()(k.x) ^
-                (std::hash<unsigned int>()(k.y) << 1)
-            );
+    struct TextureFormat {
+        glm::uvec2 resolution;
+        bool useAlpha = false;
+
+        friend bool operator==(const TextureFormat& l, const TextureFormat& r) {
+            return (l.resolution == r.resolution) && (l.useAlpha == r.useAlpha);
+        }
+    };
+    struct TextureFormatHash {
+        std::size_t operator()(const TextureFormat& k) const {
+            return ((std::hash<unsigned int>()(k.resolution.x) ^
+                    (std::hash<unsigned int>()(k.resolution.y) << 1)) >> 1) ^
+                    (std::hash<bool>()(k.useAlpha) << 1);
         }
     };
 
     // Resolution to index (each resolution creates one texture array)
-    std::unordered_map<TextureResolution, std::vector<int>, TextureResolutionHash>
-        _textureMapByResolution;
+    std::unordered_map<TextureFormat, std::vector<int>, TextureFormatHash> _textureMapByFormat;
 
     // One per resolution above
     std::vector<int> _arrayTextureIds;
     std::unordered_map<int, unsigned int> _textureIdToLayerInArray;
+    // TODO: somehow, each point need to know which texture array it belongs to.
 
-    struct TextureArray {
+    struct TextureArrayInfo {
         unsigned int id;
-        TextureResolution res;
-        ghoul::opengl::Texture::Format format;
+        TextureFormat format;
     };
 };
 
