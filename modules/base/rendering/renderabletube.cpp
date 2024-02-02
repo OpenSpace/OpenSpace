@@ -698,8 +698,8 @@ void RenderableTube::createSmoothTube() {
             unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
 
             _indicies.push_back(v0);
-            _indicies.push_back(v2);
             _indicies.push_back(v1);
+            _indicies.push_back(v2);
         }
     }
 
@@ -716,12 +716,12 @@ void RenderableTube::createSmoothTube() {
 
             // 2 triangles per sector
             _indicies.push_back(v0);
-            _indicies.push_back(v2);
             _indicies.push_back(v1);
+            _indicies.push_back(v2);
 
             _indicies.push_back(v0);
-            _indicies.push_back(v3);
             _indicies.push_back(v2);
+            _indicies.push_back(v3);
         }
     }
 
@@ -737,8 +737,8 @@ void RenderableTube::createSmoothTube() {
             unsigned int v2 = isLast ? v0 - 1 : v1 - 1;
 
             _indicies.push_back(v0);
-            _indicies.push_back(v2);
             _indicies.push_back(v1);
+            _indicies.push_back(v2);
         }
     }
 }
@@ -863,8 +863,8 @@ void RenderableTube::createLowPolyTube() {
             unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
 
             _indicies.push_back(v0);
-            _indicies.push_back(v2);
             _indicies.push_back(v1);
+            _indicies.push_back(v2);
         }
     }
 
@@ -880,12 +880,12 @@ void RenderableTube::createLowPolyTube() {
 
             // 2 triangles per sector
             _indicies.push_back(v0);
-            _indicies.push_back(v2);
             _indicies.push_back(v1);
+            _indicies.push_back(v2);
 
             _indicies.push_back(v0);
-            _indicies.push_back(v3);
             _indicies.push_back(v2);
+            _indicies.push_back(v3);
 
             vIndex += nPointsPerSection;
         }
@@ -1094,12 +1094,12 @@ void RenderableTube::createSmoothEnding(double now) {
 
         // 2 triangles per sector
         _indiciesEnding.push_back(v0);
-        _indiciesEnding.push_back(v2);
         _indiciesEnding.push_back(v1);
+        _indiciesEnding.push_back(v2);
 
         _indiciesEnding.push_back(v0);
-        _indiciesEnding.push_back(v3);
         _indiciesEnding.push_back(v2);
+        _indiciesEnding.push_back(v3);
     }
 }
 
@@ -1216,12 +1216,12 @@ void RenderableTube::createLowPolyEnding(double now) {
 
         // 2 triangles per sector
         _indiciesEnding.push_back(v0);
-        _indiciesEnding.push_back(v2);
         _indiciesEnding.push_back(v1);
+        _indiciesEnding.push_back(v2);
 
         _indiciesEnding.push_back(v0);
-        _indiciesEnding.push_back(v3);
         _indiciesEnding.push_back(v2);
+        _indiciesEnding.push_back(v3);
 
         vIndex += nPointsPerSection;
     }
