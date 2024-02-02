@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-layout (location = 0) in vec3 in_position;
+layout (location = 0) in dvec3 in_position;
 layout (location = 1) in vec3 in_normal;
 layout (location = 2) in float in_value;
 
@@ -41,7 +41,7 @@ void main() {
   vs_value = in_value;
   vs_normal = normalize(normalTransform * in_normal);
 
-  dvec4 position = dvec4(dvec3(in_position), 1.0);
+  dvec4 position = dvec4(in_position, 1.0);
   dvec4 positionViewSpace = modelViewTransform * position;
   vs_positionViewSpace = vec4(positionViewSpace);
   dvec4 positionClipSpace = projectionTransform * positionViewSpace;

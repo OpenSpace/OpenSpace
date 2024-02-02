@@ -62,7 +62,7 @@ public:
 
 private:
     struct PolygonVertex {
-        GLfloat position[3];
+        GLdouble position[3];
         GLfloat normal[3];
         GLfloat value;
     };

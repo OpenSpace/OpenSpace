@@ -353,7 +353,7 @@ void RenderableTube::initializeGL() {
     updateBufferData();
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(PolygonVertex), nullptr);
+    glVertexAttribLPointer(0, 3, GL_DOUBLE, sizeof(PolygonVertex), nullptr);
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
@@ -399,7 +399,7 @@ void RenderableTube::initializeGL() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(PolygonVertex), nullptr);
+    glVertexAttribLPointer(0, 3, GL_DOUBLE, sizeof(PolygonVertex), nullptr);
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
