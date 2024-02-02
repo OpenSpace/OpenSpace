@@ -35,13 +35,15 @@ namespace openspace {
 class FieldlinesState;
 
 namespace fls {
+std::vector<std::string>
+    extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 /**
 * Extract seedpoints from a text file. Function is used both in
 * renderablefieldlinesequence and cdf to osfls converter task.
 * \param path is the part to the seedpoint file
 */
  std::unordered_map<std::string, std::vector<glm::vec3>>
-        extractSeedPointsFromFiles(std::filesystem::path path);
+    extractSeedPointsFromFiles(std::filesystem::path path);
 /**
  * Traces field lines from the provided cdf file using kameleon and stores the data in the
  * provided FieldlinesState. Returns `false` if it fails to create a valid state. Requires

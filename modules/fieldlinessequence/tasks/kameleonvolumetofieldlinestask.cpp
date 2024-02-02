@@ -27,8 +27,9 @@
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -48,13 +49,13 @@ namespace {
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.
-        std::optional<double> manualTimeOffset;
+        std::optional<float> manualTimeOffset;
         // The name of the kameleon variable to use for tracing, like b, or u
         std::string tracingVar;
         // The folder to write the files to
         std::filesystem::path outputFolder [[codegen::directory()]];
 
-        enum class [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::outputType)]] OutputType {
+        enum class [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::OutputType)]] OutputType {
             Json,
             Osfls
         };
@@ -82,10 +83,10 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
     _seedpointsPath = p.seedpoints;
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _outputFolder = p.outputFolder;
-    if (&_outputFolder.string().back() != "/") {
-        _outputFolder += "/";
+    if (_outputFolder.string().back() != '/') {
+        _outputFolder += '/';
     }
-    _outputType = codegen::map<openspace::KameleonVolumeToFieldlinesTask::OutputType>(
+    _outputType = codegen::map<OutputType>(
         p.outputType
     );
     _tracingVar = p.tracingVar;
@@ -137,26 +138,45 @@ std::string KameleonVolumeToFieldlinesTask::description() {
 void KameleonVolumeToFieldlinesTask::perform(
                                            const Task::ProgressCallback& progressCallback)
 {
+    std::vector<std::string> extraMagVars =
+        fls::extractMagnitudeVarsFromStrings(_extraVars);
+
     std::unordered_map<std::string, std::vector<glm::vec3>> seedPoints =
         fls::extractSeedPointsFromFiles(_seedpointsPath);
+    if (seedPoints.empty()) {
+        LERROR("Falied to read seedpoints");
+        return;
+    }
 
     //SpiceManager::ref().loadKernel(_timeKernelPath);
 
-    FieldlinesState newState;
-    bool isSuccessful = fls::convertCdfToFieldlinesState(
-        newState,
-        _inputPath,
-        seedPoints,
-        _manualTimeOffset,
-        _tracingVar,
-        _extraScalarVars,
-        _extraMagnitudeVars
-    );
+    for (const std::string& cdfPath : _sourceFiles) {
+        FieldlinesState newState;
+        bool isSuccessful = fls::convertCdfToFieldlinesState(
+            newState,
+            cdfPath,
+            seedPoints,
+            _manualTimeOffset,
+            _tracingVar,
+            _extraVars,
+            extraMagVars
+        );
 
-    if (isSuccessful) {
-        return newState.saveStateToOsfls(_outputFolder);
+        if (isSuccessful) {
+            switch(_outputType) {
+                case OutputType::Osfls:
+                    newState.saveStateToOsfls(absPath(_outputFolder).string());
+                case OutputType::Json:
+                    std::string timeStr =
+                        std::string(Time(newState.triggerTime()).ISO8601());
+                    timeStr.replace(13, 1, "-");
+                    timeStr.replace(16, 1, "-");
+                    timeStr.replace(19, 1, "-");
+                    std::string fileName = timeStr;
+                    newState.saveStateToJson(_outputFolder.string() + fileName);
+            }
+        }
     }
-
     // Ideally, we would want to signal about progress earlier as well, but
     // convertCdfToFieldlinesState does all the work encapsulated in one function call.
     progressCallback(1.0f);

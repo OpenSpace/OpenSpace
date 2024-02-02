@@ -36,6 +36,11 @@ class KameleonVolumeToFieldlinesTask : public Task {
 public:
     KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
 
+    enum class OutputType {
+        Json,
+        Osfls
+    };
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation Documentation();
@@ -48,10 +53,6 @@ private:
     std::vector<std::string> _sourceFiles;
     //std::string _timeKernelPath = "";
     std::filesystem::path _seedpointsPath;
-    enum class OutputType {
-        Json,
-        Osfls
-    };
     OutputType _outputType;
     std::filesystem::path _outputFolder;
     // Manual time offset

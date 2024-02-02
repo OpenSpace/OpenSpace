@@ -270,9 +270,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-std::vector<std::string>
-    extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 const double extractTriggerTimeFromFilename(std::filesystem::path filePath);
 
 documentation::Documentation RenderableFieldlinesSequence::Documentation() {
@@ -515,7 +512,7 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
                 _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
                 _tracingVariable = tracingVariable.value_or(_tracingVariable);
                 std::vector<std::string> extraMagVars =
-                    extractMagnitudeVarsFromStrings(_extraVars);
+                    fls::extractMagnitudeVarsFromStrings(_extraVars);
                 std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
                     fls::extractSeedPointsFromFiles(_seedPointDirectory);
                 if (seedsPerFiles.empty()) {
@@ -568,47 +565,6 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
         }
     }
     std::sort(_files.begin(), _files.end());
-}
-
-std::vector<std::string>
-extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
-{
-    std::vector<std::string> extraMagVars;
-    for (int i = 0; i < static_cast<int>(extrVars.size()); i++) {
-        const std::string& str = extrVars[i];
-        // Check if string is in the format specified for magnitude variables
-        // As of now, unknown why parameters |( )| where used, or if it was used
-        if (str.substr(0, 2) == "|(" ) {
-            throw ghoul::RuntimeError(
-                "The formating of specifying extra variables no longer requires |( )|"
-            );
-        }
-
-        std::istringstream ss(str);
-        std::string magVar;
-        size_t counter = 0;
-        while (std::getline(ss, magVar, ',')) {
-            magVar.erase(
-                std::remove_if(
-                    magVar.begin(),
-                    magVar.end(),
-                    ::isspace
-                ),
-                magVar.end()
-            );
-            extraMagVars.push_back(magVar);
-            counter++;
-            if (counter == 3) {
-                break;
-            }
-        }
-        if (counter != 3 && counter > 0) {
-            extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
-        }
-        extrVars.erase(extrVars.begin() + i);
-        i--;
-    }
-    return extraMagVars;
 }
 
 void RenderableFieldlinesSequence::initialize() {

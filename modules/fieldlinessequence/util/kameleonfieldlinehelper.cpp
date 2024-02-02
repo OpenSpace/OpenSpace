@@ -192,6 +192,39 @@ extractSeedPointsFromFiles(std::filesystem::path filePath)
     }
     return outMap;
 }
+std::vector<std::string>
+extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
+{
+    std::vector<std::string> extraMagVars;
+    for (int i = 0; i < static_cast<int>(extrVars.size()); i++) {
+        const std::string& str = extrVars[i];
+
+        std::istringstream ss(str);
+        std::string magVar;
+        size_t counter = 0;
+        while (std::getline(ss, magVar, ',')) {
+            magVar.erase(
+                std::remove_if(
+                    magVar.begin(),
+                    magVar.end(),
+                    ::isspace
+                ),
+                magVar.end()
+            );
+            extraMagVars.push_back(magVar);
+            counter++;
+            if (counter == 3) {
+                break;
+            }
+        }
+        if (counter != 3 && counter > 0) {
+            extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
+        }
+        extrVars.erase(extrVars.begin() + i);
+        i--;
+    }
+    return extraMagVars;
+}
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 /**
