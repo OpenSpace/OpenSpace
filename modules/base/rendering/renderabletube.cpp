@@ -1241,10 +1241,10 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     // Uniforms
     _shader->setUniform(_uniformCache.opacity, opacity());
 
-    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
+    _shader->setUniform(_uniformCache.modelViewTransform, modelViewTransform);
     _shader->setUniform(
         _uniformCache.projectionTransform,
-        data.camera.projectionMatrix()
+        glm::dmat4(data.camera.projectionMatrix())
     );
     _shader->setUniform(_uniformCache.normalTransform, glm::mat3(normalTransform));
 

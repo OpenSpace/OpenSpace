@@ -24,8 +24,6 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 layout (location = 0) in vec3 in_position;
 layout (location = 1) in vec3 in_normal;
 layout (location = 2) in float in_value;
@@ -35,18 +33,21 @@ out vec3 vs_normal;
 out vec4 vs_positionViewSpace;
 out float vs_value;
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
+uniform dmat4 modelViewTransform;
+uniform dmat4 projectionTransform;
 uniform mat3 normalTransform;
 
 void main() {
   vs_value = in_value;
-  vec4 position = vec4(in_position, 1.0);
-  vs_positionViewSpace = vec4(modelViewTransform * position);
-  vec4 positionClipSpace = projectionTransform * vs_positionViewSpace;
-  vec4 positionScreenSpace = z_normalization(positionClipSpace);
   vs_normal = normalize(normalTransform * in_normal);
 
-  gl_Position = positionScreenSpace;
-  vs_depth = positionScreenSpace.w;
+  dvec4 position = dvec4(dvec3(in_position), 1.0);
+  dvec4 positionViewSpace = modelViewTransform * position;
+  vs_positionViewSpace = vec4(positionViewSpace);
+  dvec4 positionClipSpace = projectionTransform * positionViewSpace;
+  dvec4 positionScreenSpace = positionClipSpace;
+  positionScreenSpace.z = 0.0;
+
+  gl_Position = vec4(positionScreenSpace);
+  vs_depth = float(positionScreenSpace.w);
 }
