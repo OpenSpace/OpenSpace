@@ -217,14 +217,20 @@ protected:
     std::unordered_map<TextureFormat, std::vector<int>, TextureFormatHash> _textureMapByFormat;
 
     // One per resolution above
-    std::vector<int> _arrayTextureIds;
-    std::unordered_map<int, unsigned int> _textureIdToLayerInArray;
-    // TODO: somehow, each point need to know which texture array it belongs to.
-
     struct TextureArrayInfo {
-        unsigned int id;
+        unsigned int renderId;
         TextureFormat format;
+        GLint startOffset = -1;
+        int nPoints = -1;
     };
+    std::vector<TextureArrayInfo> _textureArrays;
+
+    struct TextureId {
+        unsigned int arrayId;
+        unsigned int layer;
+    };
+
+    std::unordered_map<int, TextureId> _textureIdToArrayMap;
 };
 
 } // namespace openspace

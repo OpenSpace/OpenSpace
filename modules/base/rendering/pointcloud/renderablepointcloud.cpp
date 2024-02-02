@@ -699,12 +699,8 @@ void RenderablePointCloud::deinitializeShaders() {
 }
 
 void RenderablePointCloud::bindTextureForRendering() const {
-    if (_spriteTexture && (_textureMode == TextureInputMode::Single)) {
+    if (_spriteTexture) {
         _spriteTexture->bind(); // TODO: does this work with the
-    }
-    else { // Multiple textures
-        // TODO: make this work when using single textures
-        glBindTexture(GL_TEXTURE_2D_ARRAY, _arrayTextureIds.back());
     }
 }
 
@@ -765,20 +761,25 @@ void RenderablePointCloud::loadTextures() {
 }
 
 void RenderablePointCloud::generateArrayTextures() {
-    _arrayTextureIds.reserve(_textureMapByFormat.size());
+    _textureArrays.reserve(_textureMapByFormat.size());
 
     using Entry = std::pair<TextureFormat, std::vector<int>>;
+    unsigned int arrayIndex = 0;
     for (const Entry& e : _textureMapByFormat) {
         unsigned int id = 0;
         //Generate an array texture
         glGenTextures(1, &id);
-        _arrayTextureIds.push_back(id);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
         glm::uvec2 res = e.first.resolution;
         bool useAlpha = e.first.useAlpha;
         size_t nLayers = e.second.size();
+
+        _textureArrays.push_back({
+            .renderId = id,
+            .format = e.first // TODO: do we need to keep track of this?
+        });
 
         // Create storage for the texture
         glTexStorage3D(
@@ -812,7 +813,7 @@ void RenderablePointCloud::generateArrayTextures() {
             );
 
             // Keept track of the layer for this id, so we can use it when generating vertex data
-            _textureIdToLayerInArray[texId] = layer;
+            _textureIdToArrayMap[texId] = { .arrayId = arrayIndex, .layer = layer };
             layer++;
         }
 
@@ -824,6 +825,8 @@ void RenderablePointCloud::generateArrayTextures() {
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        arrayIndex++;
     }
 }
 
@@ -865,65 +868,7 @@ void RenderablePointCloud::bindDataForPointRendering() {
     _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
     _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
 
-    bool useTexture = _hasSpriteTexture && _useSpriteTexture;
-    _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
-
-    ghoul::opengl::TextureUnit spriteTextureUnit;
-    _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
-    if (useTexture) {
-        spriteTextureUnit.activate();
-        bindTextureForRendering();
-    }
-
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
-
-    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
-        _colorSettings.colorMapping->texture();
-
-    _program->setUniform(_uniformCache.useColormap, useColorMap);
-
-    ghoul::opengl::TextureUnit colorMapTextureUnit;
-    _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
-
-    if (useColorMap) {
-        colorMapTextureUnit.activate();
-        _colorSettings.colorMapping->texture()->bind();
-
-        const glm::vec2 range = _colorSettings.colorMapping->valueRange;
-        _program->setUniform(_uniformCache.cmapRangeMin, range.x);
-        _program->setUniform(_uniformCache.cmapRangeMax, range.y);
-        _program->setUniform(
-            _uniformCache.hideOutsideRange,
-            _colorSettings.colorMapping->hideOutsideRange
-        );
-
-        _program->setUniform(
-            _uniformCache.nanColor,
-            _colorSettings.colorMapping->nanColor
-        );
-        _program->setUniform(
-            _uniformCache.useNanColor,
-            _colorSettings.colorMapping->useNanColor
-        );
-
-        _program->setUniform(
-            _uniformCache.aboveRangeColor,
-            _colorSettings.colorMapping->aboveRangeColor
-        );
-        _program->setUniform(
-            _uniformCache.useAboveRangeColor,
-            _colorSettings.colorMapping->useAboveRangeColor
-        );
-
-        _program->setUniform(
-            _uniformCache.belowRangeColor,
-            _colorSettings.colorMapping->belowRangeColor
-        );
-        _program->setUniform(
-            _uniformCache.useBelowRangeColor,
-            _colorSettings.colorMapping->useBelowRangeColor
-        );
-    }
 }
 
 void RenderablePointCloud::renderBillboards(const RenderData& data,
@@ -974,8 +919,82 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     bindDataForPointRendering();
 
+    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
+        _colorSettings.colorMapping->texture();
+
+    _program->setUniform(_uniformCache.useColormap, useColorMap);
+
+    ghoul::opengl::TextureUnit colorMapTextureUnit;
+    _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
+
+    if (useColorMap) {
+        colorMapTextureUnit.activate();
+        _colorSettings.colorMapping->texture()->bind();
+
+        const glm::vec2 range = _colorSettings.colorMapping->valueRange;
+        _program->setUniform(_uniformCache.cmapRangeMin, range.x);
+        _program->setUniform(_uniformCache.cmapRangeMax, range.y);
+        _program->setUniform(
+            _uniformCache.hideOutsideRange,
+            _colorSettings.colorMapping->hideOutsideRange
+        );
+
+        _program->setUniform(
+            _uniformCache.nanColor,
+            _colorSettings.colorMapping->nanColor
+        );
+        _program->setUniform(
+            _uniformCache.useNanColor,
+            _colorSettings.colorMapping->useNanColor
+        );
+
+        _program->setUniform(
+            _uniformCache.aboveRangeColor,
+            _colorSettings.colorMapping->aboveRangeColor
+        );
+        _program->setUniform(
+            _uniformCache.useAboveRangeColor,
+            _colorSettings.colorMapping->useAboveRangeColor
+        );
+
+        _program->setUniform(
+            _uniformCache.belowRangeColor,
+            _colorSettings.colorMapping->belowRangeColor
+        );
+        _program->setUniform(
+            _uniformCache.useBelowRangeColor,
+            _colorSettings.colorMapping->useBelowRangeColor
+        );
+    }
+
+    // For now, handle all texturing here
+
+    bool useTexture = _hasSpriteTexture && _useSpriteTexture;
+    _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
+
+    ghoul::opengl::TextureUnit spriteTextureUnit;
+    _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
+
     glBindVertexArray(_vao);
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nDataPoints));
+
+    for (const TextureArrayInfo& arrayInfo : _textureArrays) {
+        if (useTexture) {
+            spriteTextureUnit.activate();
+            switch (_textureMode) {
+                case TextureInputMode::Single:
+                    bindTextureForRendering();
+                    break;
+                case TextureInputMode::Multi:
+                    glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        glDrawArrays(GL_POINTS, arrayInfo.startOffset, static_cast<GLsizei>(arrayInfo.nPoints));
+    }
+
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -1201,9 +1220,6 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         return std::vector<float>();
     }
 
-    std::vector<float> result;
-    result.reserve(nAttributesPerPoint() * _dataset.entries.size());
-
     // Whgat datavar is the texture, if any.
     int textureIdIndex = _dataset.textureDataIndex;
 
@@ -1215,34 +1231,53 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
 
     double maxRadius = 0.0;
 
-    for (const dataloader::Dataset::Entry& e : _dataset.entries) {
-        glm::dvec3 position = transformedPosition(e);
+    // One sub-array per texture array, since each of these will correspond to a separate
+    // draw call. We need at least one sub result array
+    std::vector<std::vector<float>> subResults = std::vector<std::vector<float>>(
+        (_textureArrays.size() > 0) ? _textureArrays.size() : 1
+    );
 
+    // Reserve enough space for all points in each for now
+    for (std::vector<float>& subres : subResults) {
+        subres.reserve(nAttributesPerPoint() * _dataset.entries.size());
+    }
+
+    for (const dataloader::Dataset::Entry& e : _dataset.entries) {
+        unsigned int subresultIndex = 0;
+        float textureLayer = 0.f;
+
+        bool useMultiTexture = (_textureMode == TextureInputMode::Multi) &&
+            (textureIdIndex > -1);
+
+        if (_hasSpriteTexture && useMultiTexture) {
+            int texId = static_cast<int>(e.data[textureIdIndex]);
+            textureLayer = static_cast<float>(
+                _textureIdToArrayMap[texId].layer
+            );
+            subresultIndex = _textureIdToArrayMap[texId].arrayId;
+        }
+
+        std::vector<float>& subArrayToUse = subResults[subresultIndex];
+
+        // @TODO: Break the following code out into an overridable function for subclasses to use
+
+        glm::dvec3 position = transformedPosition(e);
         const double r = glm::length(position);
         maxRadius = std::max(maxRadius, r);
 
         // Positions
         for (int j = 0; j < 3; ++j) {
-            result.push_back(static_cast<float>(position[j]));
+            subArrayToUse.push_back(static_cast<float>(position[j]));
         }
 
         // Texture layer
         if (_hasSpriteTexture) {
-            if (_textureMode == TextureInputMode::Single || textureIdIndex == -1) {
-                result.push_back(0.f); // Only one texture => no need to know the layer
-            }
-            else { // Multiple textures. But we need a valid
-                int texId = static_cast<int>(e.data[textureIdIndex]);
-                unsigned int layer = _textureIdToLayerInArray[texId];
-                result.push_back(static_cast<float>(layer));
-
-                //result.push_back(0.f); // >Use only first texture for now
-            }
+            subArrayToUse.push_back(static_cast<float>(textureLayer));
         }
 
         // Colors
         if (_hasColorMapFile) {
-            result.push_back(e.data[colorParamIndex]);
+            subArrayToUse.push_back(e.data[colorParamIndex]);
         }
 
         // Size data
@@ -1250,9 +1285,28 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
             // @TODO: Consider more detailed control over the scaling. Currently the value
             // is multiplied with the value as is. Should have similar mapping properties
             // as the color mapping
-            result.push_back(e.data[sizeParamIndex]);
+            subArrayToUse.push_back(e.data[sizeParamIndex]);
         }
     }
+
+    for (std::vector<float>& subres : subResults) {
+        subres.shrink_to_fit();
+    }
+
+    // Combine subresults, which should be in same order as texture arrays
+    std::vector<float> result;
+    result.reserve(nAttributesPerPoint() * _dataset.entries.size());
+    size_t vertexCount = 0;
+    for (size_t i = 0; i < subResults.size(); ++i) {
+        result.insert(result.end(), subResults[i].begin(), subResults[i].end());
+        int nVertices = static_cast<int>(subResults[i].size()) / nAttributesPerPoint();
+        if (_textureArrays.size() > 0) { // TODO: Make sure there always is one, even when a single texture is used
+            _textureArrays[i].nPoints = nVertices;
+            _textureArrays[i].startOffset = static_cast<GLint>(vertexCount);
+        }
+        vertexCount += nVertices;
+    }
+
     setBoundingSphere(maxRadius);
     return result;
 }
