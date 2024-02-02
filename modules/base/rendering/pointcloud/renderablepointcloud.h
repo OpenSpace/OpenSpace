@@ -95,6 +95,11 @@ protected:
 
     virtual void bindTextureForRendering() const;
 
+    /// Load textures from the dataset
+    void loadTextures();
+
+    void generateArrayTextures();
+
     float computeDistanceFadeValue(const RenderData& data) const;
 
     void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
@@ -177,6 +182,44 @@ protected:
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
+
+
+    // Everything related to handling multiple textures
+
+    enum class TextureInputMode {
+        Single = 0,
+        Multi
+    };
+    TextureInputMode _textureMode = TextureInputMode::Single;
+
+    std::filesystem::path _texturesDirectory;
+
+    // Index to texture (generated from the dataset)
+    std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textures;
+
+    using TextureResolution = glm::uvec2;
+    struct TextureResolutionHash {
+        std::size_t operator()(const TextureResolution& k) const {
+            return (
+                std::hash<unsigned int>()(k.x) ^
+                (std::hash<unsigned int>()(k.y) << 1)
+            );
+        }
+    };
+
+    // Resolution to index (each resolution creates one texture array)
+    std::unordered_map<TextureResolution, std::vector<int>, TextureResolutionHash>
+        _textureMapByResolution;
+
+    // One per resolution above
+    std::vector<int> _arrayTextureIds;
+    std::unordered_map<int, unsigned int> _textureIdToLayerInArray;
+
+    struct TextureArray {
+        unsigned int id;
+        TextureResolution res;
+        ghoul::opengl::Texture::Format format;
+    };
 };
 
 } // namespace openspace

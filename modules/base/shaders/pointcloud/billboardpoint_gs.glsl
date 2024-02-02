@@ -27,12 +27,13 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
+flat in float textureLayer[];
 flat in float colorParameter[];
 flat in float scalingParameter[];
 
 layout(triangle_strip, max_vertices = 4) out;
 flat out float gs_colorParameter;
-out vec2 texCoord;
+out vec3 texCoord;
 flat out float vs_screenSpaceDepth;
 flat out vec4 vs_positionViewSpace;
 
@@ -70,6 +71,7 @@ const int RenderOptionCameraPositionNormal = 1;
 
 void main() {
   vec4 pos = gl_in[0].gl_Position;
+  float textureLayer = textureLayer[0];
   gs_colorParameter = colorParameter[0];
 
   dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
@@ -131,19 +133,19 @@ void main() {
   vec4 thirdPosition = z_normalization(dposClip + scaledUpClip - scaledRightClip);
 
   // Build primitive
-  texCoord = corners[0];
+  texCoord = vec3(corners[0], textureLayer);
   gl_Position = initialPosition;
   EmitVertex();
 
-  texCoord = corners[1];
+  texCoord = vec3(corners[1], textureLayer);
   gl_Position = secondPosition;
   EmitVertex();
 
-  texCoord = corners[3];
+  texCoord = vec3(corners[3], textureLayer);
   gl_Position = thirdPosition;
   EmitVertex();
 
-  texCoord = corners[2];
+  texCoord = vec3(corners[2], textureLayer);
   gl_Position = crossCorner;
   EmitVertex();
 

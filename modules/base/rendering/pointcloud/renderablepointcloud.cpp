@@ -271,8 +271,14 @@ namespace {
         std::optional<ghoul::Dictionary> dataMapping
             [[codegen::reference("dataloader_datamapping")]];
 
+        //struct MiltiTexture {
+        //    // The folder where the textures are located
+        //    std::filesystem::path folder [[codegen::directory()]];
+
+        //    // @TODO: Mapping between texture ID and image
+        //};
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
-        std::optional<std::string> texture;
+        std::optional<std::variant<std::string, ghoul::Dictionary>> texture;
 
         // [[codegen::verbatim(UseSpriteTextureInfo.description)]]
         std::optional<bool> useTexture;
@@ -518,17 +524,30 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _unit = DistanceUnit::Meter;
     }
 
-    _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
-    addProperty(_spriteTexturePath);
-
     _useSpriteTexture = p.useTexture.value_or(_useSpriteTexture);
     addProperty(_useSpriteTexture);
 
     if (p.texture.has_value()) {
-        _spriteTexturePath = absPath(*p.texture).string();
-    }
+        if (std::holds_alternative<std::string>(*p.texture)) {
+            _textureMode = TextureInputMode::Single;
+            _spriteTexturePath = absPath(std::get<std::string>(*p.texture)).string();
+            _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
+            addProperty(_spriteTexturePath);
+        }
+        else {
+            _textureMode = TextureInputMode::Multi;
 
-    _hasSpriteTexture = p.texture.has_value();
+            // TODO: make sure this is documented and verified
+            ghoul::Dictionary multiTextureDetails = std::get<ghoul::Dictionary>(*p.texture);
+            using namespace std::string_literals;
+            std::filesystem::path folder = absPath(
+                multiTextureDetails.value<std::string>("Directory"s)
+            );
+            //LINFO(folder.string());
+            _texturesDirectory = absPath(folder).string();
+        }
+        _hasSpriteTexture = true;
+    }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
@@ -635,6 +654,11 @@ void RenderablePointCloud::initializeGL() {
     if (_hasColorMapFile) {
         _colorSettings.colorMapping->initializeTexture();
     }
+
+    if (_textureMode == TextureInputMode::Multi) {
+        loadTextures();
+        generateArrayTextures();
+    }
 }
 
 void RenderablePointCloud::deinitializeGL() {
@@ -674,8 +698,113 @@ void RenderablePointCloud::deinitializeShaders() {
 }
 
 void RenderablePointCloud::bindTextureForRendering() const {
-    if (_spriteTexture) {
-        _spriteTexture->bind();
+    if (_spriteTexture && (_textureMode == TextureInputMode::Single)) {
+        _spriteTexture->bind(); // TODO: does this work with the
+    }
+    else { // Multiple textures
+        // TODO: make this work when using single textures
+        glBindTexture(GL_TEXTURE_2D_ARRAY, _arrayTextureIds.front());
+    }
+}
+
+void RenderablePointCloud::loadTextures() {
+    for (const dataloader::Dataset::Texture& tex : _dataset.textures) {
+        std::filesystem::path fullPath = _texturesDirectory / tex.file;
+        // Always check if a png version of the file exists (TODO: why do we do this..?)
+        std::filesystem::path pngPath = fullPath;
+        pngPath.replace_extension(".png");
+
+        std::filesystem::path path;
+        if (std::filesystem::is_regular_file(fullPath)) {
+            path = fullPath;
+        }
+        else if (std::filesystem::is_regular_file(pngPath)) {
+            path = pngPath;
+        }
+        else {
+            // We can't really recover from this as it would crash during rendering anyway
+            throw ghoul::RuntimeError(fmt::format(
+                "Could not find image file '{}'", tex.file
+            ));
+        }
+
+        std::unique_ptr<ghoul::opengl::Texture> t =
+            ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
+
+        if (t) {
+            LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
+            // Do not upload the loaded texture to the GPU, we just want it to hold the data.
+            // However, make sure all texctures ahve the same format.
+            t->setFormat(ghoul::opengl::Texture::Format::RGB);
+            t->setInternalFormat(GL_RGB);
+            t->setDataType(GL_UNSIGNED_BYTE);
+        }
+        else {
+            // Same here, we won't be able to recover from this nullptr
+            throw ghoul::RuntimeError(fmt::format(
+                "Could not find image file '{}'", tex.file
+            ));
+        }
+
+        TextureResolution res = glm::uvec2(t->width(), t->height());
+        _textureMapByResolution[res].push_back(tex.index);
+
+        _textures.insert(std::pair(tex.index, std::move(t)));
+    }
+}
+
+void RenderablePointCloud::generateArrayTextures() {
+    _arrayTextureIds.reserve(_textureMapByResolution.size());
+
+    using Entry = std::pair<TextureResolution, std::vector<int>>;
+    for (const Entry& e : _textureMapByResolution) {
+        unsigned int id = 0;
+        //Generate an array texture
+        glGenTextures(1, &id);
+        _arrayTextureIds.push_back(id);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, id);
+
+        glm::uvec2 res = e.first;
+        size_t nLayers = e.second.size();
+
+        // Create storage for the texture
+        glTexStorage3D(
+            GL_TEXTURE_2D_ARRAY,
+            1, // No mipmaps
+            GL_RGB8, // internal format
+            res.x, res.y,
+            static_cast<gl::GLsizei>(nLayers)
+        );
+
+        // Fill that storage with the data from the individual textures
+        unsigned int layer = 0;
+        for (const int& texId : e.second) {
+            const ghoul::opengl::Texture* texture = _textures[texId].get();
+
+            glTexSubImage3D(
+                GL_TEXTURE_2D_ARRAY,
+                0, // Mipmap number
+                0, 0, gl::GLint(layer), // xoffset, yoffset, zoffset
+                gl::GLsizei(res.x), gl::GLsizei(res.y), 1, // width, height, depth
+                GLenum(ghoul::opengl::Texture::Format::RGB), // format
+                GL_UNSIGNED_BYTE, // type
+                texture->pixelData() // pointer to data
+            );
+
+            // Keept track of the layer for this id, so we can use it when generating vertex data
+            _textureIdToLayerInArray[texId] = layer;
+            layer++;
+        }
+
+        // @TODO: Potentially use GL_MAX_ARRAY_TEXTURE_LAYERS to split up an array if it contains
+        // too many layers
+
+        // Set filtering etc.
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 }
 
@@ -882,7 +1011,7 @@ void RenderablePointCloud::update(const UpdateData&) {
         updateBufferData();
     }
 
-    if (_spriteTextureIsDirty) {
+    if ((_textureMode == TextureInputMode::Single) && _spriteTextureIsDirty) {
         updateSpriteTexture();
     }
 }
@@ -897,6 +1026,7 @@ glm::dvec3 RenderablePointCloud::transformedPosition(
 
 int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 3; // position
+    n += _hasSpriteTexture ? 1 : 0; // texture id
     n += _hasColorMapFile ? 1 : 0;
     n += _hasDatavarSize ? 1 : 0;
     return n;
@@ -911,7 +1041,7 @@ void RenderablePointCloud::updateBufferData() {
     TracyGpuZone("Data dirty");
     LDEBUG("Regenerating data");
 
-    std::vector<float> slice = createDataSlice();
+    std::vector<float> slice = createDataSlice(); // TODO: This ought to be one per texture array
 
     int size = static_cast<int>(slice.size());
 
@@ -942,6 +1072,20 @@ void RenderablePointCloud::updateBufferData() {
         nullptr
     );
     attributeOffset += 3;
+
+    if (_hasSpriteTexture) {
+        GLint textureLayerAttrib = _program->attributeLocation("in_textureLayer");
+        glEnableVertexAttribArray(textureLayerAttrib);
+        glVertexAttribPointer(
+            textureLayerAttrib,
+            1,
+            GL_FLOAT,
+            GL_FALSE,
+            attibutesPerPoint * sizeof(float),
+            reinterpret_cast<void*>(attributeOffset * sizeof(float))
+        );
+        attributeOffset += 1;
+    }
 
     if (_hasColorMapFile) {
         GLint colorParamAttrib = _program->attributeLocation("in_colorParameter");
@@ -1041,6 +1185,9 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     std::vector<float> result;
     result.reserve(nAttributesPerPoint() * _dataset.entries.size());
 
+    // Whgat datavar is the texture, if any.
+    int textureIdIndex = _dataset.textureDataIndex;
+
     // What datavar is in use for the index color
     int colorParamIndex = currentColorParameterIndex();
 
@@ -1058,6 +1205,20 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         // Positions
         for (int j = 0; j < 3; ++j) {
             result.push_back(static_cast<float>(position[j]));
+        }
+
+        // Texture layer
+        if (_hasSpriteTexture) {
+            if (_textureMode == TextureInputMode::Single || textureIdIndex == -1) {
+                result.push_back(0.f); // Only one texture => no need to know the layer
+            }
+            else { // Multiple textures. But we need a valid
+                int texId = static_cast<int>(e.data[textureIdIndex]);
+                unsigned int layer = _textureIdToLayerInArray[texId];
+                result.push_back(static_cast<float>(layer));
+
+                //result.push_back(0.f); // >Use only first texture for now
+            }
         }
 
         // Colors

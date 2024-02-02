@@ -27,7 +27,7 @@
 flat in float gs_colorParameter;
 flat in float vs_screenSpaceDepth;
 flat in vec4 vs_positionViewSpace;
-in vec2 texCoord;
+in vec3 texCoord;
 
 uniform float opacity;
 uniform vec3 color;
@@ -42,7 +42,7 @@ uniform vec4 belowRangeColor;
 uniform bool useBelowRangeColor;
 
 uniform bool hasSpriteTexture;
-uniform sampler2D spriteTexture;
+uniform sampler2DArray spriteTexture; // OBS! texture array. Hence the 3D texCoord
 
 uniform bool useColorMap;
 uniform sampler1D colorMapTexture;
@@ -80,9 +80,9 @@ Fragment getFragment() {
     discard;
   }
 
-   if (!hasSpriteTexture) {
+  if (!hasSpriteTexture) {
     // Moving the origin to the center
-    vec2 st = (texCoord - vec2(0.5)) * 2.0;
+    vec2 st = (texCoord.xy - vec2(0.5)) * 2.0;
     if (length(st) > 1.0) {
       discard;
     }

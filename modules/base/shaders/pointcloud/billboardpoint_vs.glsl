@@ -27,13 +27,16 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 in vec3 in_position;
+in float in_textureLayer;
 in float in_colorParameter;
 in float in_scalingParameter;
 
+flat out float textureLayer;
 flat out float colorParameter;
 flat out float scalingParameter;
 
 void main() {
+  textureLayer = in_textureLayer;
   colorParameter = in_colorParameter;
   scalingParameter = in_scalingParameter;
   gl_Position = vec4(in_position, 1.0);
