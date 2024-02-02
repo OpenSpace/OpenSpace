@@ -25,7 +25,7 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <modules/fieldlinessequence/tasks/cdftoosflstask.h>
+#include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -68,7 +68,7 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
 
     ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTask, "No task factory existed");
-    fTask->registerClass<CDFtoOSFLStask>("CDFtoOSFLStask");
+    fTask->registerClass<KameleonVolumeToFieldlinesTask>("KameleonVolumeToFieldlinesTask");
 
 }
 
@@ -76,7 +76,7 @@ std::vector<documentation::Documentation> FieldlinesSequenceModule::documentatio
 {
     return {
         RenderableFieldlinesSequence::Documentation(),
-        CDFtoOSFLStask::Documentation()
+        KameleonVolumeToFieldlinesTask::Documentation()
     };
 }
 

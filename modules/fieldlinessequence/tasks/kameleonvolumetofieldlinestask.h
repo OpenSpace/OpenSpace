@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___CDFTOOSFLSTASK___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___CDFTOOSFLSTASK___H__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
 
 #include <openspace/util/task.h>
 
@@ -32,9 +32,9 @@
 
 namespace openspace {
 
-class CDFtoOSFLStask : public Task {
+class KameleonVolumeToFieldlinesTask : public Task {
 public:
-    CDFtoOSFLStask(const ghoul::Dictionary& dictionary);
+    KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
@@ -42,16 +42,22 @@ public:
 
 private:
     std::string _tracingVar;
-    std::vector<std::string> _extraScalarVars;
+    std::vector<std::string> _extraVars;
     std::vector<std::string> _extraMagnitudeVars;
-    std::string _inputPath;
-    std::string _timeKernelPath = "";
-    std::string _seedpointsPath;
-    std::string _outputFolder;
+    std::filesystem::path _inputPath;
+    std::vector<std::string> _sourceFiles;
+    //std::string _timeKernelPath = "";
+    std::filesystem::path _seedpointsPath;
+    enum class OutputType {
+        Json,
+        Osfls
+    };
+    OutputType _outputType;
+    std::filesystem::path _outputFolder;
     // Manual time offset
     float _manualTimeOffset = 0.0;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___CDFTOOSFLSTASK___H__
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
