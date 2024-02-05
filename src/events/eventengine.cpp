@@ -29,6 +29,10 @@
 
 #include "eventengine_lua.inl"
 
+namespace {
+    constexpr std::string_view _loggerCat = "EventEngine";
+}
+
 namespace openspace {
 
 uint32_t EventEngine::nextRegisteredEventId = 0;
@@ -69,6 +73,16 @@ void EventEngine::registerEventAction(events::Event::Type type,
     }
 
     nextRegisteredEventId++;
+}
+
+void EventEngine::registerEventTopic(size_t topicId, events::Event::Type type,
+                                     ScriptCallback callback)
+{
+    TopicInfo ti;
+    ti.id = topicId;
+    ti.callback = callback;
+
+    _eventTopics[type].push_back(ti);
 }
 
 void EventEngine::unregisterEventAction(events::Event::Type type,
@@ -113,6 +127,37 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
     throw ghoul::RuntimeError(fmt::format(
         "Could not find event with identifier {}", identifier
     ));
+}
+
+void EventEngine::unregisterEventTopic(size_t topicId, events::Event::Type type) {
+    const auto it = _eventTopics.find(type);
+    if (it != _eventTopics.end()) {
+        const auto jt = std::find_if(
+            it->second.begin(), it->second.end(),
+            [topicId](const TopicInfo& ti) {
+                return ti.id == topicId;
+            }
+        );
+        if (jt != it->second.end()) {
+            it->second.erase(jt);
+
+            // This might have been the last action so we might need to remove the
+            // entry alltogether
+            if (it->second.empty()) {
+                _eventTopics.erase(it);
+            }
+        }
+        else {
+            LWARNING(fmt::format("Could not find registered event '{}' with topicId: {}",
+                events::toString(type), topicId)
+            );
+        }
+    }
+    else {
+        LWARNING(fmt::format("Could not find registered event '{}'",
+            events::toString(type))
+        );
+    }
 }
 
 std::vector<EventEngine::ActionInfo> EventEngine::registeredActions() const {
@@ -172,6 +217,27 @@ void EventEngine::triggerActions() const {
                         interaction::ActionManager::ShouldBeSynchronized::No
                     );
                 }
+            }
+        }
+
+        e = e->next;
+    }
+}
+
+void EventEngine::triggerTopics() const {
+    if (_eventTopics.empty()) {
+        // Nothing to do here
+        return;
+    }
+
+    const events::Event* e = _firstEvent;
+    while (e) {
+        const auto it = _eventTopics.find(e->type);
+
+        if (it != _eventTopics.end()) {
+            ghoul::Dictionary params = toParameter(*e);
+            for (const TopicInfo& ti : it->second) {
+                ti.callback(params);
             }
         }
 
