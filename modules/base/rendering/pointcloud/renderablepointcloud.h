@@ -39,6 +39,7 @@
 #include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <openspace/util/distanceconversion.h>
+#include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <functional>
@@ -117,12 +118,7 @@ protected:
     struct SizeSettings : properties::PropertyOwner {
         explicit SizeSettings(const ghoul::Dictionary& dictionary);
 
-        struct SizeMapping : properties::PropertyOwner {
-            SizeMapping();
-            properties::BoolProperty enabled;
-            properties::OptionProperty parameterOption;
-        };
-        SizeMapping sizeMapping;
+        std::unique_ptr<SizeMappingComponent> sizeMapping;
 
         properties::FloatProperty scaleExponent;
         properties::FloatProperty scaleFactor;
@@ -166,7 +162,7 @@ protected:
         right, fadeInValue, hasSpriteTexture, spriteTexture, useColormap, colorMapTexture,
         cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
         enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
-        useBelowRangeColor, hasDvarScaling
+        useBelowRangeColor, hasDvarScaling, dvarScaleFactor
     ) _uniformCache;
 
     std::string _dataFile;

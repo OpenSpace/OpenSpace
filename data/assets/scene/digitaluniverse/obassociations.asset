@@ -39,7 +39,9 @@ local Object = {
     Texture = textures .. "point4.png",
     PolygonSides = 7,
     SizeSettings = {
-      SizeMapping = { "diameter" },
+      SizeMapping = {
+        ParameterOptions = { "diameter" }
+      },
       ScaleExponent = 16.9,
       MaxSize = 17,
       EnableMaxSizeControl = true

@@ -46,6 +46,7 @@ uniform dmat4 projectionMatrix;
 uniform dmat4 modelMatrix;
 uniform bool enableMaxSizeControl;
 uniform bool hasDvarScaling;
+uniform float dvarScaleFactor;
 
 // RenderOption: CameraViewDirection
 uniform vec3 up;
@@ -78,7 +79,7 @@ void main() {
 
   float scaleMultiply = pow(10.0, scaleExponent);
   if (hasDvarScaling) {
-    scaleMultiply *= scalingParameter[0];
+    scaleMultiply *= scalingParameter[0] * dvarScaleFactor;
   }
 
   vec3 scaledRight = vec3(0.0);

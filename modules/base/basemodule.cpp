@@ -46,6 +46,7 @@
 #include <modules/base/rendering/pointcloud/renderableinterpolatedpoints.h>
 #include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 #include <modules/base/rendering/pointcloud/renderablepolygoncloud.h>
+#include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderabledisc.h>
 #include <modules/base/rendering/renderablelabel.h>
@@ -250,6 +251,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableTimeVaryingSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
+
+        SizeMappingComponent::Documentation(),
 
         ScreenSpaceDashboard::Documentation(),
         ScreenSpaceFramebuffer::Documentation(),

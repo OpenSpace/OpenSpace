@@ -55,14 +55,14 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 29> UniformNames = {
+    constexpr std::array<const char*, 30> UniformNames = {
         "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
         "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
         "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
         "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
         "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
         "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
-        "hasDvarScaling"
+        "hasDvarScaling", "dvarScaleFactor"
     };
 
     enum RenderOption {
@@ -210,25 +210,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
-        "Enabled",
-        "Size Mapping Enabled",
-        "If this value is set to 'true' and at least one column was loaded as an option "
-        "for size mapping, the chosen data column will be used to scale the size of the "
-        "points. The first option in the list is selected per default.",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SizeMappingOptionInfo = {
-        "Parameter",
-        "Parameter Option",
-        "This value determines which parameter is used for scaling of the point. The "
-        "parameter value will be used as a miltiplicative factor to scale the size of "
-        "the points. Note that they may however still be scaled by max size adjustment "
-        "effects.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     // A RenderablePointCloud can be used to render point-based datasets in 3D space,
     // optionally including color mapping, a sprite texture and labels. There are several
     // properties that affect the visuals of the points, such as settings for scaling,
@@ -315,9 +296,9 @@ namespace {
             [[codegen::reference("labelscomponent")]];
 
         struct SizeSettings {
-            // A list specifying all parameters that may be used for size mapping, i.e.
-            // scaling the points based on the provided data columns
-            std::optional<std::vector<std::string>> sizeMapping;
+            // Settings related to scaling the points based on data
+            std::optional<ghoul::Dictionary> sizeMapping
+                [[codegen::reference("base_sizemappingcomponent")]];
 
             // [[codegen::verbatim(ScaleExponentInfo.description)]]
             std::optional<float> scaleExponent;
@@ -393,14 +374,10 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
         maxAngularSize = settings.maxSize.value_or(maxAngularSize);
 
         if (settings.sizeMapping.has_value()) {
-            std::vector<std::string> opts = *settings.sizeMapping;
-            for (size_t i = 0; i < opts.size(); ++i) {
-                // Note that options are added in order
-                sizeMapping.parameterOption.addOption(static_cast<int>(i), opts[i]);
-            }
-            sizeMapping.enabled = true;
-
-            addPropertySubOwner(sizeMapping);
+            sizeMapping = std::make_unique<SizeMappingComponent>(
+                *settings.sizeMapping
+            );
+            addPropertySubOwner(sizeMapping.get());
         }
     }
 
@@ -408,18 +385,6 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
     addProperty(scaleExponent);
     addProperty(useMaxSizeControl);
     addProperty(maxAngularSize);
-}
-
-RenderablePointCloud::SizeSettings::SizeMapping::SizeMapping()
-    : properties::PropertyOwner({ "SizeMapping", "Size Mapping", "" })
-    , enabled(SizeMappingEnabledInfo, false)
-    , parameterOption(
-        SizeMappingOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-{
-    addProperty(enabled);
-    addProperty(parameterOption);
 }
 
 RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
@@ -553,7 +518,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
     if (p.sizeSettings.has_value() && p.sizeSettings->sizeMapping.has_value()) {
-        _sizeSettings.sizeMapping.parameterOption.onChange(
+        _sizeSettings.sizeMapping->parameterOption.onChange(
             [this]() { _dataIsDirty = true; }
         );
         _hasDatavarSize = true;
@@ -866,7 +831,11 @@ void RenderablePointCloud::bindDataForPointRendering() {
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
     _program->setUniform(_uniformCache.enableMaxSizeControl, _sizeSettings.useMaxSizeControl);
     _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
-    _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
+
+    if (_hasDatavarSize && _sizeSettings.sizeMapping) {
+        _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping->enabled);
+        _program->setUniform(_uniformCache.dvarScaleFactor, _sizeSettings.sizeMapping->scaleFactor);
+    }
 
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
 }
@@ -1204,7 +1173,7 @@ int RenderablePointCloud::currentColorParameterIndex() const {
 
 int RenderablePointCloud::currentSizeParameterIndex() const {
     const properties::OptionProperty& property =
-        _sizeSettings.sizeMapping.parameterOption;
+        _sizeSettings.sizeMapping->parameterOption;
 
     if (!_hasDatavarSize || property.options().empty()) {
         return 0;
