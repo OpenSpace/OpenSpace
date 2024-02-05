@@ -1,4 +1,5 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local colormaps = asset.require("util/default_colormaps")
 
 
 
@@ -10,7 +11,11 @@ local Example = {
     File = asset.resource("data/dummydata.csv"),
     Coloring = {
       ColorMapping = {
-        File = asset.resource("viridis.cmap"),
+        -- Use white-to-black color map
+        File = colormaps.Sequential.Greys,
+        -- Invert the color map so it goes from dark to bright (black-to-white) instead
+        -- of from bright to dark
+        Invert = true,
         -- Set the default choice of parameter and value range explicitly. Values
         -- outside this range will be given special colors
         Parameter = "normaldist_withMissing",
