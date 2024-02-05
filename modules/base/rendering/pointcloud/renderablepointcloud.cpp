@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -544,6 +545,13 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
                 parameterIndex
             );
         });
+
+        _colorSettings.colorMapping->colorMapFile.onChange([this]() {
+            _dataIsDirty = true;
+            _hasColorMapFile = std::filesystem::exists(
+                _colorSettings.colorMapping->colorMapFile.value()
+            );
+        });
     }
 
     if (_hasDataFile) {
@@ -616,10 +624,6 @@ void RenderablePointCloud::initializeGL() {
     initializeShadersAndGlExtras();
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
-
-    if (_hasColorMapFile) {
-        _colorSettings.colorMapping->initializeTexture();
-    }
 
     if (_textureMode == TextureInputMode::Multi) {
         loadTextures();
@@ -1013,6 +1017,10 @@ void RenderablePointCloud::update(const UpdateData&) {
     ZoneScoped;
 
     preUpdate();
+
+    if (_hasColorMapFile) {
+        _colorSettings.colorMapping->update(_dataset);
+    }
 
     if (_dataIsDirty) {
         updateBufferData();

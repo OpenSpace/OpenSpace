@@ -70,11 +70,14 @@ public:
      */
     void initializeTexture();
 
+    void update(const dataloader::Dataset& dataset);
+
     static documentation::Documentation Documentation();
 
     glm::vec4 colorFromColorMap(float value) const;
 
     properties::BoolProperty enabled;
+    properties::BoolProperty invert;
     properties::OptionProperty dataColumn;
     properties::StringProperty colorMapFile;
     properties::Vec2Property valueRange;
@@ -110,6 +113,9 @@ private:
     bool _hasNanColorInAsset = false;
     bool _hasBelowRangeColorInAsset = false;
     bool _hasAboveRangeColorInAsset = false;
+
+    bool _colorMapFileIsDirty = true;
+    bool _colorMapTextureIsDirty = true;
 };
 
 } // namespace openspace
