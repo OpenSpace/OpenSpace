@@ -442,7 +442,7 @@ ExoplanetsDataPreparationTask::parseDataRow(std::string row,
 }
 
 glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starName,
-                                                      const std::filesystem::path& sourceFile)
+                                                  const std::filesystem::path& sourceFile)
 {
     glm::vec3 position = glm::vec3(std::numeric_limits<float>::quiet_NaN());
 

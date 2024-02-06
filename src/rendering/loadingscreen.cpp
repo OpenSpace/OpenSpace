@@ -319,7 +319,7 @@ void LoadingScreen::render() {
                         rectOverlaps(messageLl, messageUr, ll, ur) :
                         false;
 
-                    const bool logOverlap = _showLog ? 
+                    const bool logOverlap = _showLog ?
                         rectOverlaps(logLl, logUr,ll, ur) :
                         false;
 

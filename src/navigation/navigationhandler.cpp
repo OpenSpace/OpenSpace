@@ -400,12 +400,12 @@ void NavigationHandler::updateCameraTransitions() {
     }
     else {
         if (_inAnchorApproachSphere && !wasInApproachSphere) {
-            // Transitioned into the approach sphere from somewhere further away => approach
+            // Transitioned to the approach sphere from somewhere further away => approach
             triggerApproachEvent(anchorNode());
         }
 
         if (_inAnchorReachSphere && !wasInReachSphere) {
-            // Transitioned into the reach sphere from somewhere further away => reach
+            // Transitioned to the reach sphere from somewhere further away => reach
             triggerReachEvent(anchorNode());
         }
 

@@ -548,9 +548,10 @@ void Scene::updateInterpolations() {
 
         if (i.isExpired) {
             if (!i.postScript.empty()) {
-                // No sync or send because this is already inside a Lua script that was triggered
-                // when the interpolation of the property was triggered, therefor it has already been
-                // synced and sent to the connected nodes and peers
+                // No sync or send because this is already inside a Lua script that was
+                // triggered when the interpolation of the property was triggered,
+                // therefore it has already been synced and sent to the connected nodes
+                // and peers
                 global::scriptEngine->queueScript(
                     std::move(i.postScript),
                     scripting::ScriptEngine::ShouldBeSynchronized::No,

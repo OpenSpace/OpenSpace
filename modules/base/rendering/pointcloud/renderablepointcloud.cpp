@@ -717,7 +717,10 @@ void RenderablePointCloud::bindDataForPointRendering() {
 
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
-    _program->setUniform(_uniformCache.enableMaxSizeControl, _sizeSettings.useMaxSizeControl);
+    _program->setUniform(
+        _uniformCache.enableMaxSizeControl,
+        _sizeSettings.useMaxSizeControl
+    );
     _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
     _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
 

@@ -307,7 +307,9 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 if (_shouldSendToRemote) {
                     _shouldSendToRemote = false;
                 }
-                else if (global::parallelPeer->status() == ParallelConnection::Status::Host) {
+                else if (global::parallelPeer->status() ==
+                         ParallelConnection::Status::Host)
+                {
                     _shouldSendToRemote = true;
                 }
             }

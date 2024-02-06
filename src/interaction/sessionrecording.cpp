@@ -827,7 +827,6 @@ void SessionRecording::saveCameraKeyframeAscii(Timestamps& times,
 
         file << HeaderCommentAscii << ' ' << ghoul::to_string(modelTransform) << '\n';
     }
-    
 
     std::stringstream keyframeLine = std::stringstream();
     saveHeaderAscii(times, HeaderCameraAscii, keyframeLine);

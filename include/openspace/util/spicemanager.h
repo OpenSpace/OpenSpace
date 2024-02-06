@@ -678,8 +678,8 @@ public:
      * Struct that is used as the return value from the #surfaceIntercept method.
      */
     struct SurfaceInterceptResult {
-        /// The closest surface intercept point on the target body in Cartesian Coordinates
-        /// relative to the reference frame
+        /// The closest surface intercept point on the target body in Cartesian
+        /// Coordinates relative to the reference frame
         glm::dvec3 surfaceIntercept = glm::dvec3(0.0);
 
         /// If the aberration correction is not AberrationCorrection::Type::None, this

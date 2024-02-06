@@ -409,7 +409,8 @@ GeoJsonProperties::GeoJsonProperties()
     altitudeModeOption.addOptions({
         { static_cast<int>(AltitudeMode::Absolute), "Absolute" },
         { static_cast<int>(AltitudeMode::RelativeToGround), "Relative to Ground" }
-        //{ static_cast<int>(AltitudeMode::ClampToGround), "Clamp to Ground" } / TODO: add ClampToGround
+        // TODO: add ClampToGround
+        //{ static_cast<int>(AltitudeMode::ClampToGround), "Clamp to Ground" }
     });
     addProperty(altitudeModeOption);
 
@@ -642,7 +643,9 @@ GeoJsonProperties::AltitudeMode PropertySet::altitudeMode() const {
 }
 
 bool PropertySet::tessellationEnabled() const {
-    return overrideValues.tessellationEnabled.value_or(defaultValues.tessellation.enabled);
+    return overrideValues.tessellationEnabled.value_or(
+        defaultValues.tessellation.enabled
+    );
 }
 
 bool PropertySet::useTessellationLevel() const {

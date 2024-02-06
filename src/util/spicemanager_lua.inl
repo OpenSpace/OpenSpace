@@ -69,7 +69,7 @@ namespace {
 }
 
 /**
- * Returns a list of all loaded kernels 
+ * Returns a list of all loaded kernels
  */
 [[codegen::luawrap]] std::vector<std::string> kernels() {
     return openspace::SpiceManager::ref().loadedKernels();

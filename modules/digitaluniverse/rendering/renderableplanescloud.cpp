@@ -469,7 +469,13 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
             glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))
         );
 
-        _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp, fadeInVariable);
+        _labels->render(
+            data,
+            modelViewProjectionTransform,
+            orthoRight,
+            orthoUp,
+            fadeInVariable
+        );
     }
 }
 

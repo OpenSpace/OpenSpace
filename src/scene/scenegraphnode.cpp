@@ -122,10 +122,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EvalInteractionSphereInfo = {
         "EvaluatedInteractionSphere",
         "Evaluated Interaction Sphere",
-        "This read-only property contains the evaluated value for the interaction sphere. "
-        "This is the actual value that is used internally within the software. If the "
-        "InteractionSphere property is set to -1, it is the computed value, otherwise it "
-        "matches the one set in the property",
+        "This read-only property contains the evaluated value for the interaction "
+        "sphere. This is the actual value that is used internally within the software. "
+        "If the InteractionSphere property is set to -1, it is the computed value, "
+        "otherwise it matches the one set in the property",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

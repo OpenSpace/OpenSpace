@@ -113,9 +113,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ComparisonCircleColorInfo = {
         "ComparisonCircleColor",
         "Comparison Circle Color",
-        "Decides the color of the 1 AU size comparison circles that are generated as part "
-        "of an exoplanet system. Changing the color will not modify already existing "
-        "circles",
+        "Decides the color of the 1 AU size comparison circles that are generated as "
+        "part of an exoplanet system. Changing the color will not modify already "
+        "existing circles",
         openspace::properties::Property::Visibility::NoviceUser
     };
 

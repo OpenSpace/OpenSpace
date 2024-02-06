@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___COLORMAPCOMPONENT___H__
-#define __OPENSPACE_MODULE_BASE___COLORMAPCOMPONENT___H__
+#ifndef __OPENSPACE_CORE___COLORMAPCOMPONENT___H__
+#define __OPENSPACE_CORE___COLORMAPCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -120,4 +120,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___COLORMAPCOMPONENT___H__
+#endif // __OPENSPACE_CORE___COLORMAPCOMPONENT___H__

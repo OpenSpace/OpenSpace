@@ -121,7 +121,7 @@ void HttpSynchronization::start() {
             for (const std::string& url : _syncRepositories) {
                 const SynchronizationState syncState = trySyncFromUrl(url + q);
 
-                // Could not get this sync repository list of files. 
+                // Could not get this sync repository list of files.
                 if (syncState == SynchronizationState::ListDownloadFail) {
                     continue;
                 }
@@ -131,7 +131,7 @@ void HttpSynchronization::start() {
                     createSyncFile(true);
                 }
                 else if (syncState == SynchronizationState::FileDownloadFail) {
-                    // If it was not successful we should add any files that were 
+                    // If it was not successful we should add any files that were
                     // potentially downloaded to avoid downloading from other repositories
                     _existingSyncedFiles.insert(
                         _existingSyncedFiles.end(),
@@ -143,7 +143,7 @@ void HttpSynchronization::start() {
                 }
                 break;
             }
-            
+
             if (!isResolved() && !_shouldCancel) {
                 _state = State::Rejected;
             }
@@ -424,7 +424,7 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     }
     if (failed) {
         for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
-            // Store all files that were synced to the ossync 
+            // Store all files that were synced to the ossync
             if (d->hasSucceeded()) {
                 _newSyncedFiles.push_back(d->url());
             }
