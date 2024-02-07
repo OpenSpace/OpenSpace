@@ -1,11 +1,12 @@
 return {
     {
-        Type = "CDFtoOSFLStask",
+        Type = "KameleonVolumeToFieldlinesTask",
         TracingVar = 'b',
-        Input = "C:/Users/eolsson/Documents/openspace/data/2012/3d__var_1_e20120714-160000-000.out.cdf",
+        Input = "C:/Users/eolsson/Downloads/cdfTestFeb2024",
         TimeKernel = "",
-        OutputFolder = "C:/Users/eolsson/Documents/openspace/data/2012/outputTest2024/",
+        OutputType = "Json",
+        OutputFolder = "C:/Users/eolsson/Documents/openspace/data/2012/outputTest2024/feb/",
         Seedpoints = "C:/Users/eolsson/Documents/openspace/data/2012/seeds",
-        ExtraMagnitudeVars = {bx, by, bz}
+        ExtraVars = {"bx", "by", "bz"}
     }
 }
