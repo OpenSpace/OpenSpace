@@ -625,14 +625,16 @@ void RenderablePointCloud::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    if (_textureMode == TextureInputMode::Multi) {
-        loadTextures();
-        generateArrayTextures();
+    switch (_textureMode) {
+        case TextureInputMode::Multi:
+            initializeMultiTextures();
+        case TextureInputMode::Single:
+            initializeSingleTexture();
+        case TextureInputMode::Other:
+            initializeCustomTexture();
     }
-    else {
-        updateSpriteTexture();
-        generateArrayTextures();
-    }
+
+    generateArrayTextures();
 }
 
 void RenderablePointCloud::deinitializeGL() {
@@ -642,9 +644,6 @@ void RenderablePointCloud::deinitializeGL() {
     _vao = 0;
 
     deinitializeShaders();
-
-    BaseModule::TextureManager.release(_spriteTexture);
-    _spriteTexture = nullptr;
 }
 
 void RenderablePointCloud::initializeShadersAndGlExtras() {
@@ -671,34 +670,16 @@ void RenderablePointCloud::deinitializeShaders() {
     _program = nullptr;
 }
 
-void RenderablePointCloud::bindTextureForRendering() const {
-    //if (_spriteTexture) {
-    //    _spriteTexture->bind(); // TODO: does this work with the
-    //}
-}
+void RenderablePointCloud::initializeCustomTexture() {}
 
-void RenderablePointCloud::createArrayFromSingleTexture() {
-
+void RenderablePointCloud::initializeSingleTexture() {
     std::filesystem::path p = absPath(_spriteTexturePath);
-    std::unique_ptr<ghoul::opengl::Texture> t =
-        ghoul::io::TextureReader::ref().loadTexture(p.string(), 2);
-
-    bool useAlpha = (t->numberOfChannels() > 3);
-
     _textures.clear();
     _textureMapByFormat.clear();
-
-    glm::uvec2 res = glm::uvec2(t->width(), t->height());
-    TextureFormat format = {
-        .resolution = res,
-        .useAlpha = useAlpha
-    };
-    _textureMapByFormat[format].push_back(0);
-
-    _textures.insert(std::pair(0, std::move(t)));
+    loadTexture(p, 0);
 }
 
-void RenderablePointCloud::loadTextures() {
+void RenderablePointCloud::initializeMultiTextures() {
     for (const dataloader::Dataset::Texture& tex : _dataset.textures) {
         std::filesystem::path fullPath = _texturesDirectory / tex.file;
         // TODO: Remove this change to png extension... (Requires updating the dataset)
@@ -718,40 +699,46 @@ void RenderablePointCloud::loadTextures() {
                 "Could not find image file '{}'", tex.file
             ));
         }
+        loadTexture(path, tex.index);
+    }
+}
 
-        std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
+void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int index) {
+    if (path.empty()) {
+        return;
+    }
 
-        bool useAlpha = (t->numberOfChannels() > 3);
+    std::unique_ptr<ghoul::opengl::Texture> t =
+        ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
-        if (t) {
-            LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
-            // Do not upload the loaded texture to the GPU, we just want it to hold the data.
-            // However, convert textures make sure they all usethe same format.
-            using namespace ghoul::opengl;
-            if (useAlpha) {
-                convertTextureFormat(*t, Texture::Format::RGBA);
-            }
-            else {
-                convertTextureFormat(*t, Texture::Format::RGB);
-            }
+    bool useAlpha = (t->numberOfChannels() > 3);
+
+    if (t) {
+        LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
+        // Do not upload the loaded texture to the GPU, we just want it to hold the data.
+        // However, convert textures make sure they all usethe same format.
+        using namespace ghoul::opengl;
+        if (useAlpha) {
+            convertTextureFormat(*t, Texture::Format::RGBA);
         }
         else {
-            // Same here, we won't be able to recover from this nullptr
-            throw ghoul::RuntimeError(fmt::format(
-                "Could not find image file '{}'", tex.file
-            ));
+            convertTextureFormat(*t, Texture::Format::RGB);
         }
-
-        glm::uvec2 res = glm::uvec2(t->width(), t->height());
-        TextureFormat format = {
-            .resolution = res,
-            .useAlpha = useAlpha
-        };
-        _textureMapByFormat[format].push_back(tex.index);
-
-        _textures.insert(std::pair(tex.index, std::move(t)));
     }
+    else {
+        throw ghoul::RuntimeError(fmt::format(
+            "Could not find image file {}", path
+        ));
+    }
+
+    glm::uvec2 res = glm::uvec2(t->width(), t->height());
+    TextureFormat format = {
+        .resolution = res,
+        .useAlpha = useAlpha
+    };
+    _textureMapByFormat[format].push_back(index);
+
+    _textures.insert(std::pair(index, std::move(t)));
 }
 
 void RenderablePointCloud::generateArrayTextures() {
@@ -760,20 +747,17 @@ void RenderablePointCloud::generateArrayTextures() {
     using Entry = std::pair<TextureFormat, std::vector<int>>;
     unsigned int arrayIndex = 0;
     for (const Entry& e : _textureMapByFormat) {
+        glm::uvec2 res = e.first.resolution;
+        bool useAlpha = e.first.useAlpha;
+        size_t nLayers = e.second.size();
+
         unsigned int id = 0;
         // Generate an array texture
         glGenTextures(1, &id);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
-        glm::uvec2 res = e.first.resolution;
-        bool useAlpha = e.first.useAlpha;
-        size_t nLayers = e.second.size();
-
-        _textureArrays.push_back({
-            .renderId = id,
-            .format = e.first // TODO: do we need to keep track of this?
-        });
+        _textureArrays.push_back({ .renderId = id });
 
         // Create storage for the texture
         glTexStorage3D(
@@ -789,7 +773,7 @@ void RenderablePointCloud::generateArrayTextures() {
         for (const int& texId : e.second) {
             const ghoul::opengl::Texture* texture = _textures[texId].get();
 
-            // TODO: find out how to use a compressed format on upla
+            // TODO: find out how to use a compressed format on upload
             gl::GLenum format = gl::GLenum(
                 useAlpha ?
                     ghoul::opengl::Texture::Format::RGBA :
@@ -978,18 +962,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     for (const TextureArrayInfo& arrayInfo : _textureArrays) {
         if (useTexture) {
             spriteTextureUnit.activate();
-            switch (_textureMode) {
-                case TextureInputMode::Single:
-                    //bindTextureForRendering();
-                    glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
-
-                    break;
-                case TextureInputMode::Multi:
-                    glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
-                    break;
-                default:
-                    break;
-            }
+            glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
         }
 
         glDrawArrays(GL_POINTS, arrayInfo.startOffset, static_cast<GLsizei>(arrayInfo.nPoints));
@@ -1173,27 +1146,7 @@ void RenderablePointCloud::updateSpriteTexture() {
     ZoneScopedN("Sprite texture");
     TracyGpuZone("Sprite texture");
 
-    //ghoul::opengl::Texture* texture = _spriteTexture;
-
-    //unsigned int hash = ghoul::hashCRC32File(_spriteTexturePath);
-
-    //_spriteTexture = BaseModule::TextureManager.request(
-    //    std::to_string(hash),
-    //    [path = _spriteTexturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
-    //        std::filesystem::path p = absPath(path);
-    //        LINFO(fmt::format("Loaded texture from {}", p));
-    //        std::unique_ptr<ghoul::opengl::Texture> t =
-    //            ghoul::io::TextureReader::ref().loadTexture(p.string(), 2);
-    //        return t;
-    //    }
-    //);
-
-    createArrayFromSingleTexture();
-
-    ////_spriteTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-    //_spriteTexture->purgeFromRAM();
-
-    //BaseModule::TextureManager.release(texture);
+    initializeSingleTexture();
 
     _spriteTextureIsDirty = false;
 }

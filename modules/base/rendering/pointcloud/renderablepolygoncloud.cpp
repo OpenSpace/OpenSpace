@@ -72,13 +72,8 @@ RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictiona
     // The texture to use for the rendering will be generated in initializeGl. Make sure
     // we use it in the rnedering
     _hasSpriteTexture = true;
-}
 
-void RenderablePolygonCloud::initializeGL() {
-    ZoneScoped;
-
-    RenderablePointCloud::initializeGL();
-    createPolygonTexture();
+    _textureMode = TextureInputMode::Other;
 }
 
 void RenderablePolygonCloud::deinitializeGL() {
@@ -92,11 +87,7 @@ void RenderablePolygonCloud::deinitializeGL() {
     RenderablePointCloud::deinitializeGL();
 }
 
-void RenderablePolygonCloud::bindTextureForRendering() const {
-    glBindTexture(GL_TEXTURE_2D, _pTexture);
-}
-
-void RenderablePolygonCloud::createPolygonTexture() {
+void RenderablePolygonCloud::initializeCustomTexture() {
     ZoneScoped;
 
     LDEBUG("Creating Polygon Texture");
@@ -110,9 +101,55 @@ void RenderablePolygonCloud::createPolygonTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, TexSize, TexSize, 0, GL_RGBA, GL_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, TexSize, TexSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     renderToTexture(_pTexture, TexSize, TexSize);
+
+    // Download the data and use it to intialize the data we need to rendering
+    void* pixelData = nullptr;
+    // Allocate memory: 4 channels, with one byte each
+    unsigned int arraySize = TexSize * TexSize * 4 * 1;
+    pixelData = new GLubyte[arraySize];
+    glBindTexture(GL_TEXTURE_2D, _pTexture);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+
+    // Create array from data, size and format
+
+    unsigned int id = 0;
+    // Generate an array texture
+    glGenTextures(1, &id);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, id);
+
+    _textureArrays.push_back({ .renderId = id });
+
+    glm::uvec2 res = glm::uvec2(TexSize);
+    size_t nLayers = 1;
+
+    // Create storage for the texture
+    glTexStorage3D(
+        GL_TEXTURE_2D_ARRAY,
+        1,
+        GL_RGBA8,
+        res.x, res.y,
+        static_cast<gl::GLsizei>(nLayers)
+    );
+
+    gl::GLenum format = gl::GLenum(
+        ghoul::opengl::Texture::Format::RGBA
+    );
+
+    glTexSubImage3D(
+        GL_TEXTURE_2D_ARRAY,
+        0, // Mipmap number
+        0, 0, 0, // xoffset, yoffset, zoffset
+        gl::GLsizei(res.x), gl::GLsizei(res.y), 1, // width, height, depth
+        format, // format
+        GL_UNSIGNED_BYTE, // type
+        pixelData // pointer to data
+    );
+
+    _textureIdToArrayMap[0] = { .arrayId = 0, .layer = 0 };
 }
 
 void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,

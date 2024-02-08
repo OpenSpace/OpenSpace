@@ -94,11 +94,15 @@ protected:
 
     virtual std::vector<float> createDataSlice();
 
-    virtual void bindTextureForRendering() const;
-    void createArrayFromSingleTexture();
+    /**
+     * A function that subclasses could override to initialize their own textures to
+     * use for rendering, when the \code _textureMode is set to Other
+     */
+    virtual void initializeCustomTexture();
+    void initializeSingleTexture();
+    void initializeMultiTextures();
 
-    /// Load textures from the dataset
-    void loadTextures();
+    void loadTexture(const std::filesystem::path& path, int index);
 
     void generateArrayTextures();
 
@@ -185,7 +189,8 @@ protected:
 
     enum class TextureInputMode {
         Single = 0,
-        Multi
+        Multi,
+        Other // For subclasses that need to handle their own texture
     };
     TextureInputMode _textureMode = TextureInputMode::Single;
 
@@ -197,6 +202,7 @@ protected:
     struct TextureFormat {
         glm::uvec2 resolution;
         bool useAlpha = false;
+        // @TODO: Support single channel format (e.g. for polygons)
 
         friend bool operator==(const TextureFormat& l, const TextureFormat& r) {
             return (l.resolution == r.resolution) && (l.useAlpha == r.useAlpha);
@@ -216,7 +222,6 @@ protected:
     // One per resolution above
     struct TextureArrayInfo {
         unsigned int renderId;
-        TextureFormat format;
         GLint startOffset = -1;
         int nPoints = -1;
     };
