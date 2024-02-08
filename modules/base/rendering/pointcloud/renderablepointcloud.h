@@ -95,6 +95,7 @@ protected:
     virtual std::vector<float> createDataSlice();
 
     virtual void bindTextureForRendering() const;
+    void createArrayFromSingleTexture();
 
     /// Load textures from the dataset
     void loadTextures();
@@ -154,7 +155,6 @@ protected:
 
     properties::UIntProperty _nDataPoints;
 
-    ghoul::opengl::Texture* _spriteTexture = nullptr;
     ghoul::opengl::ProgramObject* _program = nullptr;
 
     UniformCache(
