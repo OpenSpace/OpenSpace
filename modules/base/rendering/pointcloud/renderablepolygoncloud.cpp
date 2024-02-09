@@ -114,42 +114,15 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
 
     // Create array from data, size and format
-
     unsigned int id = 0;
-    // Generate an array texture
     glGenTextures(1, &id);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, id);
-
-    _textureArrays.push_back({ .renderId = id });
-
-    glm::uvec2 res = glm::uvec2(TexSize);
-    size_t nLayers = 1;
-
-    // Create storage for the texture
-    glTexStorage3D(
-        GL_TEXTURE_2D_ARRAY,
-        1,
-        GL_RGBA8,
-        res.x, res.y,
-        static_cast<gl::GLsizei>(nLayers)
-    );
-
+    initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, GL_RGBA8);
     gl::GLenum format = gl::GLenum(
         ghoul::opengl::Texture::Format::RGBA
     );
-
-    glTexSubImage3D(
-        GL_TEXTURE_2D_ARRAY,
-        0, // Mipmap number
-        0, 0, 0, // xoffset, yoffset, zoffset
-        gl::GLsizei(res.x), gl::GLsizei(res.y), 1, // width, height, depth
-        format, // format
-        GL_UNSIGNED_BYTE, // type
-        pixelData // pointer to data
-    );
-
-    _textureIdToArrayMap[0] = { .arrayId = 0, .layer = 0 };
+    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), format, pixelData);
 }
 
 void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,

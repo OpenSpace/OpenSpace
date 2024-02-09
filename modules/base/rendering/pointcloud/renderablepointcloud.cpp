@@ -626,15 +626,18 @@ void RenderablePointCloud::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     switch (_textureMode) {
-        case TextureInputMode::Multi:
-            initializeMultiTextures();
         case TextureInputMode::Single:
             initializeSingleTexture();
+            break;
+        case TextureInputMode::Multi:
+            initializeMultiTextures();
+            break;
         case TextureInputMode::Other:
             initializeCustomTexture();
+            break;
+        default:
+            break;
     }
-
-    generateArrayTextures();
 }
 
 void RenderablePointCloud::deinitializeGL() {
@@ -673,10 +676,27 @@ void RenderablePointCloud::deinitializeShaders() {
 void RenderablePointCloud::initializeCustomTexture() {}
 
 void RenderablePointCloud::initializeSingleTexture() {
+    if (!_hasSpriteTexture || _spriteTexturePath.value().empty()) {
+        return;
+    }
+
     std::filesystem::path p = absPath(_spriteTexturePath);
-    _textures.clear();
-    _textureMapByFormat.clear();
+
+    if (!std::filesystem::is_regular_file(p)) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Could not find image file '{}'", _spriteTexturePath.value()
+        ));
+    }
+
+    // Single tectures may be updated => make sure to clear the data structures
+    // before updating them
+    clearTextureDataStructures();
+
     loadTexture(p, 0);
+
+    generateArrayTextures();
+
+    _spriteTextureIsDirty = false;
 }
 
 void RenderablePointCloud::initializeMultiTextures() {
@@ -701,6 +721,15 @@ void RenderablePointCloud::initializeMultiTextures() {
         }
         loadTexture(path, tex.index);
     }
+
+    generateArrayTextures();
+}
+
+void RenderablePointCloud::clearTextureDataStructures() {
+    _textures.clear();
+    _textureMapByFormat.clear();
+    _textureArrays.clear();
+    _textureIdToArrayMap.clear();
 }
 
 void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int index) {
@@ -741,6 +770,49 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     _textures.insert(std::pair(index, std::move(t)));
 }
 
+void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
+                                                      glm::uvec2 resolution,
+                                                      size_t nLayers,
+                                                      gl::GLenum internalFormat)
+{
+    _textureArrays.push_back({ .renderId = textureId });
+
+    // Create storage for the texture
+    glTexStorage3D(
+        GL_TEXTURE_2D_ARRAY,
+        1, // No mipmaps
+        internalFormat,
+        resolution.x,
+        resolution.y,
+        static_cast<gl::GLsizei>(nLayers)
+    );
+}
+
+void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
+                                                     unsigned int layer,
+                                                     unsigned int textureId,
+                                                     glm::uvec2 resolution,
+                                                     gl::GLenum format,
+                                                     const void* pixelData)
+{
+    glTexSubImage3D(
+        GL_TEXTURE_2D_ARRAY,
+        0, // Mipmap number
+        0, // xoffset
+        0, // yoffset
+        gl::GLint(layer), // zoffset
+        gl::GLsizei(resolution.x), // width
+        gl::GLsizei(resolution.y), // height
+        1, // depth
+        format,
+        GL_UNSIGNED_BYTE, // type
+        pixelData
+    );
+
+    // Keept track of the layer for this id, so we can use it when generating vertex data
+    _textureIdToArrayMap[textureId] = { .arrayId = arrayIndex, .layer = layer };
+}
+
 void RenderablePointCloud::generateArrayTextures() {
     _textureArrays.reserve(_textureMapByFormat.size());
 
@@ -751,22 +823,16 @@ void RenderablePointCloud::generateArrayTextures() {
         bool useAlpha = e.first.useAlpha;
         size_t nLayers = e.second.size();
 
-        unsigned int id = 0;
+        gl::GLenum internalFormat = useAlpha ? GL_RGBA8 : GL_RGB8;
+
+        // And and create storage for texture (bind the texture for writing)
         // Generate an array texture
+        unsigned int id = 0;
         glGenTextures(1, &id);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
-        _textureArrays.push_back({ .renderId = id });
-
-        // Create storage for the texture
-        glTexStorage3D(
-            GL_TEXTURE_2D_ARRAY,
-            1, // No mipmaps
-            useAlpha ? GL_RGBA8 : GL_RGB8, // internal format
-            res.x, res.y,
-            static_cast<gl::GLsizei>(nLayers)
-        );
+        initAndAllocateTextureArray(id, res, nLayers, internalFormat);
 
         // Fill that storage with the data from the individual textures
         unsigned int layer = 0;
@@ -780,25 +846,13 @@ void RenderablePointCloud::generateArrayTextures() {
                     ghoul::opengl::Texture::Format::RGB
             );
 
-            glTexSubImage3D(
-                GL_TEXTURE_2D_ARRAY,
-                0, // Mipmap number
-                0, 0, gl::GLint(layer), // xoffset, yoffset, zoffset
-                gl::GLsizei(res.x), gl::GLsizei(res.y), 1, // width, height, depth
-                format, // format
-                GL_UNSIGNED_BYTE, // type
-                texture->pixelData() // pointer to data
-            );
-
-            // Keept track of the layer for this id, so we can use it when generating vertex data
-            _textureIdToArrayMap[texId] = { .arrayId = arrayIndex, .layer = layer };
+            fillAndUploadTextureLayer(arrayIndex, layer, texId, res, format, texture->pixelData());
             layer++;
         }
 
-        // @TODO: Potentially use GL_MAX_ARRAY_TEXTURE_LAYERS to split up an array if it contains
-        // too many layers
+        // @TODO: Potentially use GL_MAX_ARRAY_TEXTURE_LAYERS to split up an array if it
+        // contains too many layers
 
-        // Set filtering etc.
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -842,12 +896,21 @@ void RenderablePointCloud::bindDataForPointRendering() {
 
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
-    _program->setUniform(_uniformCache.enableMaxSizeControl, _sizeSettings.useMaxSizeControl);
+    _program->setUniform(
+        _uniformCache.enableMaxSizeControl,
+        _sizeSettings.useMaxSizeControl
+    );
     _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
 
     if (_hasDatavarSize && _sizeSettings.sizeMapping) {
-        _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping->enabled);
-        _program->setUniform(_uniformCache.dvarScaleFactor, _sizeSettings.sizeMapping->scaleFactor);
+        _program->setUniform(
+            _uniformCache.hasDvarScaling,
+            _sizeSettings.sizeMapping->enabled
+        );
+        _program->setUniform(
+            _uniformCache.dvarScaleFactor,
+            _sizeSettings.sizeMapping->scaleFactor
+        );
     }
 
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
@@ -965,7 +1028,11 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
             glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
         }
 
-        glDrawArrays(GL_POINTS, arrayInfo.startOffset, static_cast<GLsizei>(arrayInfo.nPoints));
+        glDrawArrays(
+            GL_POINTS,
+            arrayInfo.startOffset,
+            static_cast<GLsizei>(arrayInfo.nPoints)
+        );
     }
 
     glBindVertexArray(0);
@@ -1147,8 +1214,6 @@ void RenderablePointCloud::updateSpriteTexture() {
     TracyGpuZone("Sprite texture");
 
     initializeSingleTexture();
-
-    _spriteTextureIsDirty = false;
 }
 
 int RenderablePointCloud::currentColorParameterIndex() const {

@@ -101,8 +101,15 @@ protected:
     virtual void initializeCustomTexture();
     void initializeSingleTexture();
     void initializeMultiTextures();
+    void clearTextureDataStructures();
 
     void loadTexture(const std::filesystem::path& path, int index);
+
+    void initAndAllocateTextureArray(unsigned int textureId,
+        glm::uvec2 resolution, size_t nLayers, gl::GLenum internalFormat);
+
+    void fillAndUploadTextureLayer(unsigned int arrayindex, unsigned int layer,
+        unsigned int textureId, glm::uvec2 resolution, gl::GLenum format, const void* pixelData);
 
     void generateArrayTextures();
 
