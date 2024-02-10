@@ -75,6 +75,11 @@ std::string formatJson(T value);
  */
 void sortJson(nlohmann::json& json, const std::string& key);
 
+/**
+ * Converts the provided JSON object into its corresponding Dictionary format. 
+ */
+ghoul::Dictionary jsonToDictionary(const nlohmann::json& json);
+
 } // namespace openspace
 
 #include "json_helper.inl"

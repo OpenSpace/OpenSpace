@@ -133,7 +133,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
 
     if (p.forceOverride.has_value()) {
         LWARNING(fmt::format(
-            "{}: The variable ForceOverride has been deprecated."
+            "{}: The variable ForceOverride has been deprecated. "
             "Optionally, use SecondsUntilResync instead to specify file validity date.",
             p.identifier
         ));

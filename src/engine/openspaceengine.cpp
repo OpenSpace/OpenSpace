@@ -1698,7 +1698,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::ReadCSVFile,
             codegen::lua::ResetCamera,
             codegen::lua::Configuration,
-            codegen::lua::LayerServer
+            codegen::lua::LayerServer,
+            codegen::lua::LoadJson
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")

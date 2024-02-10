@@ -251,4 +251,21 @@ namespace {
     return layerServerToString(config.layerServer);
 }
 
+/**
+ * Loads the provided JSON file and returns it back to the caller.
+ */
+[[codegen::luawrap]] ghoul::Dictionary loadJson(std::filesystem::path path) {
+    if (!std::filesystem::exists(path)) {
+        throw ghoul::RuntimeError(fmt::format("File {} did not exist", path));
+    }
+
+    std::ifstream f(path);
+    std::string contents = std::string(
+        (std::istreambuf_iterator<char>(f)),
+        std::istreambuf_iterator<char>()
+    );
+    nlohmann::json json = nlohmann::json::parse(contents);
+    return openspace::jsonToDictionary(json);
+}
+
 #include "openspaceengine_lua_codegen.cpp"
