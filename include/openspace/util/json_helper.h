@@ -76,7 +76,9 @@ std::string formatJson(T value);
 void sortJson(nlohmann::json& json, const std::string& key);
 
 /**
- * Converts the provided JSON object into its corresponding Dictionary format. 
+ * Converts the provided JSON object into its corresponding Dictionary format. Please note
+ * that if the JSON contains keys that array of an array type, they are converted into a
+ * Dictionary with numerical keys and the numerical keys start with 1.
  */
 ghoul::Dictionary jsonToDictionary(const nlohmann::json& json);
 
