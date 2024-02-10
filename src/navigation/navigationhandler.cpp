@@ -567,7 +567,7 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
         ));
     }
 
-    ofs << "return " << ghoul::formatLua(state.dictionary());
+    ofs << state.toJson().dump(2);
 }
 
 void NavigationHandler::loadNavigationState(const std::string& filepath) {
@@ -578,22 +578,15 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
         throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
     }
 
-    ghoul::Dictionary navigationStateDictionary;
-    try {
-        ghoul::lua::loadDictionaryFromFile(
-            absolutePath.string(),
-            navigationStateDictionary
-        );
-        openspace::documentation::testSpecificationAndThrow(
-            NavigationState::Documentation(),
-            navigationStateDictionary,
-            "NavigationState"
-        );
-        setNavigationStateNextFrame(NavigationState(navigationStateDictionary));
-    }
-    catch (ghoul::RuntimeError& e) {
-        LERROR(fmt::format("Unable to set camera position: {}", e.message));
-    }
+    std::ifstream f(filepath);
+    std::string contents = std::string(
+        (std::istreambuf_iterator<char>(f)),
+        std::istreambuf_iterator<char>()
+    );
+    nlohmann::json json = nlohmann::json::parse(contents);
+
+    NavigationState state = NavigationState(json);
+    setNavigationStateNextFrame(state);
 }
 
 std::vector<std::string> NavigationHandler::listAllJoysticks() const {

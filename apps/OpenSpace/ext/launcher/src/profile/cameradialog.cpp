@@ -25,15 +25,18 @@
 #include "profile/cameradialog.h"
 
 #include "profile/line.h"
+#include <openspace/navigation/navigationstate.h>
 #include <QDialogButtonBox>
 #include <QDoubleValidator>
+#include <QFileDialog>
 #include <QFrame>
 #include <QGridLayout>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
-#include <QTabWidget>
 #include <QPlainTextEdit>
+#include <QPushButton>
+#include <QTabWidget>
 
 namespace {
     constexpr int CameraTypeNode = 0;
@@ -344,6 +347,45 @@ QWidget* CameraDialog::createNavStateWidget() {
 
         mainLayout->addWidget(box);
     }
+
+    QPushButton* loadFile = new QPushButton("Load state from file");
+    loadFile->setIcon(loadFile->style()->standardIcon(QStyle::SP_FileIcon));
+    connect(
+        loadFile, &QPushButton::clicked,
+        [this]() {
+            QString file = QFileDialog::getOpenFileName(
+                this,
+                "Select navigate state file"
+            );
+
+            std::ifstream f(file.toStdString());
+            std::string contents = std::string(
+                (std::istreambuf_iterator<char>(f)),
+                std::istreambuf_iterator<char>()
+            );
+            nlohmann::json json = nlohmann::json::parse(contents);
+
+            using namespace openspace::interaction;
+            NavigationState state = NavigationState(json);
+
+            _navState.anchor->setText(QString::fromStdString(state.anchor));
+            _navState.aim->setText(QString::fromStdString(state.aim));
+            _navState.refFrame->setText(QString::fromStdString(state.referenceFrame));
+            _navState.positionX->setText(QString::number(state.position.x));
+            _navState.positionY->setText(QString::number(state.position.y));
+            _navState.positionZ->setText(QString::number(state.position.z));
+
+            if (state.up.has_value()) {
+                _navState.upX->setText(QString::number(state.up->x));
+                _navState.upY->setText(QString::number(state.up->y));
+                _navState.upZ->setText(QString::number(state.up->z));
+            }
+
+            _navState.yaw->setText(QString::number(state.yaw));
+            _navState.pitch->setText(QString::number(state.pitch));
+        }
+    );
+    mainLayout->addWidget(loadFile);
 
     return tab;
 }
