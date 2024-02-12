@@ -33,7 +33,8 @@ flat in float scalingParameter[];
 
 layout(triangle_strip, max_vertices = 4) out;
 flat out float gs_colorParameter;
-out vec3 texCoord;
+out vec2 texCoord;
+flat out int layer;
 flat out float vs_screenSpaceDepth;
 flat out vec4 vs_positionViewSpace;
 
@@ -72,7 +73,7 @@ const int RenderOptionCameraPositionNormal = 1;
 
 void main() {
   vec4 pos = gl_in[0].gl_Position;
-  float textureLayer = textureLayer[0];
+  layer = int(textureLayer[0]);
   gs_colorParameter = colorParameter[0];
 
   dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
@@ -134,19 +135,19 @@ void main() {
   vec4 thirdPosition = z_normalization(dposClip + scaledUpClip - scaledRightClip);
 
   // Build primitive
-  texCoord = vec3(corners[0], textureLayer);
+  texCoord = corners[0];
   gl_Position = initialPosition;
   EmitVertex();
 
-  texCoord = vec3(corners[1], textureLayer);
+  texCoord = corners[1];
   gl_Position = secondPosition;
   EmitVertex();
 
-  texCoord = vec3(corners[3], textureLayer);
+  texCoord = corners[3];
   gl_Position = thirdPosition;
   EmitVertex();
 
-  texCoord = vec3(corners[2], textureLayer);
+  texCoord = corners[2];
   gl_Position = crossCorner;
   EmitVertex();
 

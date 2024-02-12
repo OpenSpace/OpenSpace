@@ -27,7 +27,8 @@
 flat in float gs_colorParameter;
 flat in float vs_screenSpaceDepth;
 flat in vec4 vs_positionViewSpace;
-in vec3 texCoord;
+in vec2 texCoord;
+flat in int layer;
 
 uniform float opacity;
 uniform vec3 color;
@@ -90,7 +91,7 @@ Fragment getFragment() {
 
   vec4 fullColor = vec4(1.0);
   if (hasSpriteTexture) {
-    fullColor = texture(spriteTexture, texCoord);
+    fullColor = texture(spriteTexture, vec3(texCoord, layer));
   }
 
   if (useColorMap) {
