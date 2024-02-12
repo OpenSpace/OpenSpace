@@ -1023,17 +1023,20 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     glBindVertexArray(_vao);
 
-    for (const TextureArrayInfo& arrayInfo : _textureArrays) {
-        if (useTexture) {
-            spriteTextureUnit.activate();
+    if (useTexture && !_textureArrays.empty()) {
+        spriteTextureUnit.activate();
+        for (const TextureArrayInfo& arrayInfo : _textureArrays) {
             glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
+            glDrawArrays(
+                GL_POINTS,
+                arrayInfo.startOffset,
+                static_cast<GLsizei>(arrayInfo.nPoints)
+            );
         }
-
-        glDrawArrays(
-            GL_POINTS,
-            arrayInfo.startOffset,
-            static_cast<GLsizei>(arrayInfo.nPoints)
-        );
+        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    }
+    else {
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nDataPoints));
     }
 
     glBindVertexArray(0);
