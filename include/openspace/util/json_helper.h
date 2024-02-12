@@ -27,6 +27,7 @@
 
 #include <string>
 #include <openspace/json.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
