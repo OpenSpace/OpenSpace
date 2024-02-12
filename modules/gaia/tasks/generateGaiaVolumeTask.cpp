@@ -83,7 +83,7 @@ GenerateGaiaVolumeTask::GenerateGaiaVolumeTask(const ghoul::Dictionary& dictiona
     _dimensions = p.dimensions;
     _time = p.time;
     _lowerDomainBound = glm::vec3(std::numeric_limits<float>::max());
-    _upperDomainBound = glm::vec3(std::numeric_limits<float>::min());
+    _upperDomainBound = glm::vec3(std::numeric_limits<float>::lowest());
     _applyFilter = p.applyFilter.value_or(false);
     _normalize = p.normalizeData.value_or(true);
 
