@@ -101,11 +101,15 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
 
     enabled = p.enabled.value_or(enabled);
 
-    std::vector<std::string> opts = *p.parameterOptions;
-    for (size_t i = 0; i < opts.size(); ++i) {
-        // Note that options are added in order
-        parameterOption.addOption(static_cast<int>(i), opts[i]);
+    if (p.parameterOptions.has_value()) {
+        std::vector<std::string> opts = *p.parameterOptions;
+        for (size_t i = 0; i < opts.size(); ++i) {
+            // Note that options are added in order
+            parameterOption.addOption(static_cast<int>(i), opts[i]);
+        }
     }
+
+    // TODO: Read passed in parameter
 
     scaleFactor = p.scaleFactor.value_or(scaleFactor);
 }
