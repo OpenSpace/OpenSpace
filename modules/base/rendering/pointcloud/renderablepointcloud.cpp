@@ -647,6 +647,11 @@ void RenderablePointCloud::deinitializeGL() {
     _vao = 0;
 
     deinitializeShaders();
+
+    // Unload texture arrays from GPU memory
+    for (const TextureArrayInfo& arrayInfo : _textureArrays) {
+        glDeleteTextures(1, &arrayInfo.renderId);
+    }
 }
 
 void RenderablePointCloud::initializeShadersAndGlExtras() {
@@ -728,6 +733,10 @@ void RenderablePointCloud::initializeMultiTextures() {
 void RenderablePointCloud::clearTextureDataStructures() {
     _textures.clear();
     _textureMapByFormat.clear();
+    // Unload texture arrays from GPU memory
+    for (const TextureArrayInfo& arrayInfo : _textureArrays) {
+        glDeleteTextures(1, &arrayInfo.renderId);
+    }
     _textureArrays.clear();
     _textureIdToArrayMap.clear();
 }
@@ -786,6 +795,29 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
         resolution.y,
         static_cast<gl::GLsizei>(nLayers)
     );
+
+    // @TODO: This function should probably be used instead, as glTexStorage is only
+    // available in OpenGl 4.2 and above
+    //glTexImage3D(
+    //    GL_TEXTURE_2D_ARRAY,
+    //    1, // No mipmaps
+    //    internalFormat,
+    //    0,
+    //    GL_RGBA8, // internal format @TODO
+    //    resolution.x,
+    //    resolution.y,
+    //    static_cast<gl::GLsizei>(nLayers)
+    //    static_cast<gl::GLsizei>(nLayers),
+    //    0,
+    //    GL_RGBA, // format @TODO
+    //    GL_UNSIGNED_BYTE,
+    //    nullptr
+    //);
+
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
@@ -853,10 +885,7 @@ void RenderablePointCloud::generateArrayTextures() {
         // @TODO: Potentially use GL_MAX_ARRAY_TEXTURE_LAYERS to split up an array if it
         // contains too many layers
 
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
         arrayIndex++;
     }
@@ -1127,7 +1156,7 @@ void RenderablePointCloud::updateBufferData() {
     TracyGpuZone("Data dirty");
     LDEBUG("Regenerating data");
 
-    std::vector<float> slice = createDataSlice(); // TODO: This ought to be one per texture array
+    std::vector<float> slice = createDataSlice();
 
     int size = static_cast<int>(slice.size());
 

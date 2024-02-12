@@ -228,7 +228,7 @@ protected:
 
     // One per resolution above
     struct TextureArrayInfo {
-        unsigned int renderId;
+        GLuint renderId;
         GLint startOffset = -1;
         int nPoints = -1;
     };
