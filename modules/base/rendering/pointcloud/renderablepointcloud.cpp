@@ -902,11 +902,12 @@ void RenderablePointCloud::bindDataForPointRendering() {
     );
     _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
 
-    if (_hasDatavarSize && _sizeSettings.sizeMapping) {
-        _program->setUniform(
-            _uniformCache.hasDvarScaling,
-            _sizeSettings.sizeMapping->enabled
-        );
+    bool useSizeMapping = _hasDatavarSize && _sizeSettings.sizeMapping &&
+        _sizeSettings.sizeMapping->enabled;
+
+    _program->setUniform(_uniformCache.hasDvarScaling, useSizeMapping);
+
+    if (useSizeMapping) {
         _program->setUniform(
             _uniformCache.dvarScaleFactor,
             _sizeSettings.sizeMapping->scaleFactor
