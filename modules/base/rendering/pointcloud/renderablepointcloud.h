@@ -75,6 +75,12 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+    enum class TextureColorMode : int {
+        Transparency = 0,
+        OpaqueColor,
+        Greyscale
+    };
+
     virtual void initializeShadersAndGlExtras();
     virtual void deinitializeShaders();
     virtual void bindDataForPointRendering();
@@ -106,10 +112,11 @@ protected:
     void loadTexture(const std::filesystem::path& path, int index);
 
     void initAndAllocateTextureArray(unsigned int textureId,
-        glm::uvec2 resolution, size_t nLayers, gl::GLenum internalFormat);
+        glm::uvec2 resolution, size_t nLayers, TextureColorMode colorMode);
 
     void fillAndUploadTextureLayer(unsigned int arrayindex, unsigned int layer,
-        unsigned int textureId, glm::uvec2 resolution, gl::GLenum format, const void* pixelData);
+        unsigned int textureId, glm::uvec2 resolution, TextureColorMode colorMode,
+        const void* pixelData);
 
     void generateArrayTextures();
 
@@ -191,9 +198,7 @@ protected:
     GLuint _vao = 0;
     GLuint _vbo = 0;
 
-
     // Everything related to handling multiple textures
-
     enum class TextureInputMode {
         Single = 0,
         Multi,
@@ -206,20 +211,22 @@ protected:
     // Index to texture (generated from the dataset)
     std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textures;
 
+    gl::GLenum internalGlFormatFromColorMode(TextureColorMode mode) const;
+    ghoul::opengl::Texture::Format glFormatFromColorMode(TextureColorMode mode) const;
+
     struct TextureFormat {
         glm::uvec2 resolution;
-        bool useAlpha = false;
-        // @TODO: Support single channel format (e.g. for polygons)
+        TextureColorMode colorMode = TextureColorMode::OpaqueColor;
 
         friend bool operator==(const TextureFormat& l, const TextureFormat& r) {
-            return (l.resolution == r.resolution) && (l.useAlpha == r.useAlpha);
+            return (l.resolution == r.resolution) && (l.colorMode == r.colorMode);
         }
     };
     struct TextureFormatHash {
         std::size_t operator()(const TextureFormat& k) const {
             return ((std::hash<unsigned int>()(k.resolution.x) ^
                     (std::hash<unsigned int>()(k.resolution.y) << 1)) >> 1) ^
-                    (std::hash<bool>()(k.useAlpha) << 1);
+                    (std::hash<int>()(static_cast<int>(k.colorMode)) << 1);
         }
     };
 

@@ -93,6 +93,11 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     LDEBUG("Creating Polygon Texture");
     constexpr gl::GLsizei TexSize = 512;
 
+    //TextureColorMode colorMode = TextureColorMode::Greyscale; // TODO: Fix grayscale not including transparenccy, and only red color being passed to shader!
+    TextureColorMode colorMode = TextureColorMode::Transparency;
+    gl::GLenum internalFormat = internalGlFormatFromColorMode(colorMode);
+    gl::GLenum format = gl::GLenum(glFormatFromColorMode(colorMode));
+
     glGenTextures(1, &_pTexture);
     glBindTexture(GL_TEXTURE_2D, _pTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -101,7 +106,17 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, TexSize, TexSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        internalFormat,
+        TexSize,
+        TexSize,
+        0,
+        format,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
 
     renderToTexture(_pTexture, TexSize, TexSize);
 
@@ -111,18 +126,14 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     unsigned int arraySize = TexSize * TexSize * 4 * 1;
     pixelData = new GLubyte[arraySize];
     glBindTexture(GL_TEXTURE_2D, _pTexture);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+    glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, pixelData);
 
     // Create array from data, size and format
     unsigned int id = 0;
     glGenTextures(1, &id);
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, id);
-    initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, GL_RGBA8);
-    gl::GLenum format = gl::GLenum(
-        ghoul::opengl::Texture::Format::RGBA
-    );
-    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), format, pixelData);
+    initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, colorMode);
+    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), colorMode, pixelData);
 }
 
 void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
