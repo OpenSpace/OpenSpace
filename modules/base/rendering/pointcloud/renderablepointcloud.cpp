@@ -771,9 +771,9 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 }
 
 void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
-                                                      glm::uvec2 resolution,
-                                                      size_t nLayers,
-                                                      gl::GLenum internalFormat)
+                                                       glm::uvec2 resolution,
+                                                       size_t nLayers,
+                                                       gl::GLenum internalFormat)
 {
     _textureArrays.push_back({ .renderId = textureId });
 
