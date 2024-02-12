@@ -746,6 +746,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
         return;
     }
 
+    // @TODO: Make sure we don't load the same texture twice... That we use the texture manager somehow..?
     std::unique_ptr<ghoul::opengl::Texture> t =
         ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
