@@ -375,6 +375,16 @@ void RenderableTube::initializeGL() {
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, value))
     );
 
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(
+        3,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(PolygonVertex),
+        reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, tex))
+    );
+
     // Ending
     glGenVertexArrays(1, &_vaoIdEnding);
     glGenBuffers(1, &_vboIdEnding);
@@ -419,6 +429,16 @@ void RenderableTube::initializeGL() {
         GL_FALSE,
         sizeof(PolygonVertex),
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, value))
+    );
+
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(
+        3,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(PolygonVertex),
+        reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, tex))
     );
 
     glBindVertexArray(0);
@@ -589,6 +609,17 @@ void RenderableTube::readDataFile() {
                     isFirstPlygonAndPoint = false;
                 }
             }
+
+            // Texture coordinates (optional)
+            auto pu = pt->find("u");
+            auto pv = pt->find("v");
+            if (pu != pt->end() && pv != pt->end()) {
+                float u, v;
+                pt->at("u").get_to(u);
+                pt->at("v").get_to(v);
+                timePolygonPoint.tex = glm::vec2(u, v);
+            }
+
             timePolygon.points.push_back(timePolygonPoint);
         }
         _data.push_back(timePolygon);
@@ -657,6 +688,10 @@ void RenderableTube::createSmoothTube() {
             sidePoint.position[0] = _data[polyIndex].points[pointIndex].coordinate.x;
             sidePoint.position[1] = _data[polyIndex].points[pointIndex].coordinate.y;
             sidePoint.position[2] = _data[polyIndex].points[pointIndex].coordinate.z;
+
+            // Texture coordinate
+            sidePoint.tex[0] = _data[polyIndex].points[pointIndex].tex.x;
+            sidePoint.tex[1] = _data[polyIndex].points[pointIndex].tex.y;
 
             // Calculate normal
             glm::dvec3 centerLine = isLast ?
@@ -804,6 +839,19 @@ void RenderableTube::createLowPolyTube() {
             sidePointTriangleV3.position[1] = v3.coordinate.y;
             sidePointTriangleV3.position[2] = v3.coordinate.z;
 
+            // Texture coordinate
+            sidePointTriangleV0.tex[0] = v0.tex.x;
+            sidePointTriangleV0.tex[1] = v0.tex.y;
+
+            sidePointTriangleV1.tex[0] = v1.tex.x;
+            sidePointTriangleV1.tex[1] = v1.tex.y;
+
+            sidePointTriangleV2.tex[0] = v2.tex.x;
+            sidePointTriangleV2.tex[1] = v2.tex.y;
+
+            sidePointTriangleV3.tex[0] = v3.tex.x;
+            sidePointTriangleV3.tex[1] = v3.tex.y;
+
             if (_hasColorMapFile) {
                 // Value
                 sidePointTriangleV0.value =
@@ -923,11 +971,21 @@ void RenderableTube::addBottom(int pointCounter, const glm::dvec3& bottomCenter,
         bottomCenterValue /= _nPoints;
     }
 
+    // Calculate texture coordinate
+    glm::vec2 bottomCenterTex = glm::vec2(0.f);
+    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
+        bottomCenterTex += timePolygonPoint.tex;
+    }
+    bottomCenterTex /= _nPoints;
+
     // Add the bottom's center point
     PolygonVertex bottomCenterPoint;
     bottomCenterPoint.position[0] = bottomCenter.x;
     bottomCenterPoint.position[1] = bottomCenter.y;
     bottomCenterPoint.position[2] = bottomCenter.z;
+
+    bottomCenterPoint.tex[0] = bottomCenterTex.x;
+    bottomCenterPoint.tex[1] = bottomCenterTex.y;
 
     bottomCenterPoint.normal[0] = bottomNormal.x;
     bottomCenterPoint.normal[1] = bottomNormal.y;
@@ -940,11 +998,14 @@ void RenderableTube::addBottom(int pointCounter, const glm::dvec3& bottomCenter,
 
     // Add the bottom's sides with proper normals
     // This will ensure a hard shadow on the tube edge
-    for (size_t pointIndex = 0; pointIndex < _data.front().points.size(); ++pointIndex) {
+    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
         PolygonVertex bottomSidePoint;
-        bottomSidePoint.position[0] = _data.front().points[pointIndex].coordinate.x;
-        bottomSidePoint.position[1] = _data.front().points[pointIndex].coordinate.y;
-        bottomSidePoint.position[2] = _data.front().points[pointIndex].coordinate.z;
+        bottomSidePoint.position[0] = timePolygonPoint.coordinate.x;
+        bottomSidePoint.position[1] = timePolygonPoint.coordinate.y;
+        bottomSidePoint.position[2] = timePolygonPoint.coordinate.z;
+
+        bottomSidePoint.tex[0] = timePolygonPoint.tex.x;
+        bottomSidePoint.tex[1] = timePolygonPoint.tex.y;
 
         bottomSidePoint.normal[0] = bottomNormal.x;
         bottomSidePoint.normal[1] = bottomNormal.y;
@@ -971,6 +1032,13 @@ void RenderableTube::addTop(int pointCounter, const glm::dvec3& topCenter,
         topCenterValue /= _nPoints;
     }
 
+    // Calculate texture coordinate
+    glm::vec2 topCenterTex = glm::vec2(0.f);
+    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
+        topCenterTex += timePolygonPoint.tex;
+    }
+    topCenterTex /= _nPoints;
+
     // Add the top's sides with proper normals
     // This will ensure a hard shadow on the tube edge
     for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
@@ -978,6 +1046,9 @@ void RenderableTube::addTop(int pointCounter, const glm::dvec3& topCenter,
         topSidePoint.position[0] = timePolygonPoint.coordinate.x;
         topSidePoint.position[1] = timePolygonPoint.coordinate.y;
         topSidePoint.position[2] = timePolygonPoint.coordinate.z;
+
+        topSidePoint.tex[0] = timePolygonPoint.tex.x;
+        topSidePoint.tex[1] = timePolygonPoint.tex.y;
 
         topSidePoint.normal[0] = topNormal.x;
         topSidePoint.normal[1] = topNormal.y;
@@ -994,6 +1065,9 @@ void RenderableTube::addTop(int pointCounter, const glm::dvec3& topCenter,
     topCenterPoint.position[0] = topCenter.x;
     topCenterPoint.position[1] = topCenter.y;
     topCenterPoint.position[2] = topCenter.z;
+
+    topCenterPoint.tex[0] = topCenterTex.x;
+    topCenterPoint.tex[1] = topCenterTex.y;
 
     topCenterPoint.normal[0] = topNormal.x;
     topCenterPoint.normal[1] = topNormal.y;
@@ -1014,10 +1088,14 @@ void RenderableTube::createSmoothEnding(double now) {
     size_t polyIndex = _lastPolygonBeforeNow;
     for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
         PolygonVertex sidePoint;
-        glm::dvec3 sidePointPos = _data[polyIndex].points[pointIndex].coordinate;
-        sidePoint.position[0] = sidePointPos.x;
-        sidePoint.position[1] = sidePointPos.y;
-        sidePoint.position[2] = sidePointPos.z;
+        TimePolygonPoint sidePointData = _data[polyIndex].points[pointIndex];
+        sidePoint.position[0] = sidePointData.coordinate.x;
+        sidePoint.position[1] = sidePointData.coordinate.y;
+        sidePoint.position[2] = sidePointData.coordinate.z;
+
+        // Texture coordinate
+        sidePoint.tex[0] = sidePointData.tex.x;
+        sidePoint.tex[1] = sidePointData.tex.y;
 
         // Calculate normal
         glm::dvec3 centerLine = _data[polyIndex].center - _data[polyIndex + 1].center;
@@ -1055,6 +1133,8 @@ void RenderableTube::createSmoothEnding(double now) {
         sidePoint.position[0] = currPolyPointPos.x;
         sidePoint.position[1] = currPolyPointPos.y;
         sidePoint.position[2] = currPolyPointPos.z;
+
+        // Texture coordinate??
 
         // Calculate normal
         glm::dvec3 centerLine = isLast ?
@@ -1102,6 +1182,8 @@ void RenderableTube::createSmoothEnding(double now) {
             sidePoint.position[2] = currPolyPointPos.z;
             cutplaneCenterPoint += currPolyPointPos;
 
+            // Texture coordinate??
+
             sidePoint.normal[0] = cutplaneNormal.x;
             sidePoint.normal[1] = cutplaneNormal.y;
             sidePoint.normal[2] = cutplaneNormal.z;
@@ -1120,12 +1202,14 @@ void RenderableTube::createSmoothEnding(double now) {
             _verticiesEnding.push_back(sidePoint);
         }
 
-        // Add the top's center point
+        // Add the cutplane's center point
         PolygonVertex topCenterPoint;
         cutplaneCenterPoint /= _nPoints;
         topCenterPoint.position[0] = cutplaneCenterPoint.x;
         topCenterPoint.position[1] = cutplaneCenterPoint.y;
         topCenterPoint.position[2] = cutplaneCenterPoint.z;
+
+        // Texture coordinate??
 
         topCenterPoint.normal[0] = cutplaneNormal.x;
         topCenterPoint.normal[1] = cutplaneNormal.y;
@@ -1156,7 +1240,7 @@ void RenderableTube::createSmoothEnding(double now) {
         _indiciesEnding.push_back(v3);
     }
 
-    // Add Indices for top
+    // Add Indices for cutplane
     if (_addEdges) {
         unsigned int topCenterIndex = _verticiesEnding.size() - 1;
         for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
@@ -1192,22 +1276,24 @@ void RenderableTube::createLowPolyEnding(double now) {
         TimePolygon nextTimePolygon = _data[_firstPolygonAfterNow];
 
         // Identify all the points that are included in this section
-        glm::dvec3 v0 = prevTimePolygon.points[pointIndex].coordinate;
-        glm::dvec3 v1 = nextTimePolygon.points[pointIndex].coordinate;
-        glm::dvec3 v2 = isLast ?
-            nextTimePolygon.points[pointIndex + 1 - _nPoints].coordinate :
-            nextTimePolygon.points[pointIndex + 1].coordinate;
-        glm::dvec3 v3 = isLast ?
-            prevTimePolygon.points[pointIndex + 1 - _nPoints].coordinate :
-            prevTimePolygon.points[pointIndex + 1].coordinate;
+        TimePolygonPoint v0 = prevTimePolygon.points[pointIndex];
+        TimePolygonPoint v1 = nextTimePolygon.points[pointIndex];
+        TimePolygonPoint v2 = isLast ?
+            nextTimePolygon.points[pointIndex + 1 - _nPoints] :
+            nextTimePolygon.points[pointIndex + 1];
+        TimePolygonPoint v3 = isLast ?
+            prevTimePolygon.points[pointIndex + 1 - _nPoints] :
+            prevTimePolygon.points[pointIndex + 1];
 
         // Interpolate the points related to the next polygon
-        v1 = t * v1 + (1.0 - t) * v0;
-        v2 = t * v2 + (1.0 - t) * v3;
+        glm::dvec3 v1Pos = glm::dvec3(0.0);
+        glm::dvec3 v2Pos = glm::dvec3(0.0);
+        v1Pos = t * v1.coordinate + (1.0 - t) * v0.coordinate;
+        v2Pos = t * v2.coordinate + (1.0 - t) * v3.coordinate;
 
         // Calculate normal of this section of the tube
-        glm::dvec3 toNextPoly = glm::normalize(v1 - v0);
-        glm::dvec3 toNextPoint = glm::normalize(v3 - v0);
+        glm::dvec3 toNextPoly = glm::normalize(v1Pos - v0.coordinate);
+        glm::dvec3 toNextPoint = glm::normalize(v3.coordinate - v0.coordinate);
         glm::dvec3 normal = glm::cross(toNextPoint, toNextPoly);
 
         // Create the Verticies for all points in this section
@@ -1215,24 +1301,39 @@ void RenderableTube::createLowPolyEnding(double now) {
             sidePointTriangleV3;
 
         // Position
-        sidePointTriangleV0.position[0] = v0.x;
-        sidePointTriangleV0.position[1] = v0.y;
-        sidePointTriangleV0.position[2] = v0.z;
+        sidePointTriangleV0.position[0] = v0.coordinate.x;
+        sidePointTriangleV0.position[1] = v0.coordinate.y;
+        sidePointTriangleV0.position[2] = v0.coordinate.z;
 
-        sidePointTriangleV1.position[0] = v1.x;
-        sidePointTriangleV1.position[1] = v1.y;
-        sidePointTriangleV1.position[2] = v1.z;
+        sidePointTriangleV1.position[0] = v1Pos.x;
+        sidePointTriangleV1.position[1] = v1Pos.y;
+        sidePointTriangleV1.position[2] = v1Pos.z;
 
-        sidePointTriangleV2.position[0] = v2.x;
-        sidePointTriangleV2.position[1] = v2.y;
-        sidePointTriangleV2.position[2] = v2.z;
+        sidePointTriangleV2.position[0] = v2Pos.x;
+        sidePointTriangleV2.position[1] = v2Pos.y;
+        sidePointTriangleV2.position[2] = v2Pos.z;
 
-        sidePointTriangleV3.position[0] = v3.x;
-        sidePointTriangleV3.position[1] = v3.y;
-        sidePointTriangleV3.position[2] = v3.z;
+        sidePointTriangleV3.position[0] = v3.coordinate.x;
+        sidePointTriangleV3.position[1] = v3.coordinate.y;
+        sidePointTriangleV3.position[2] = v3.coordinate.z;
 
+        // Texture coordinate
+        sidePointTriangleV0.tex[0] = v0.tex.x;
+        sidePointTriangleV0.tex[1] = v0.tex.y;
+
+        // Interpolate?
+        //sidePointTriangleV1.tex[0] = v1.tex.x;
+        //sidePointTriangleV1.tex[1] = v1.tex.y;
+
+        // Interpolate?
+        //sidePointTriangleV2.tex[0] = v2.tex.x;
+        //sidePointTriangleV2.tex[1] = v2.tex.y;
+
+        sidePointTriangleV3.tex[0] = v3.tex.x;
+        sidePointTriangleV3.tex[1] = v3.tex.y;
+
+        // Value
         if (_hasColorMapFile) {
-            // Value
             unsigned int pointCounter = _lastPolygonBeforeNow * _nPoints + pointIndex;
 
             sidePointTriangleV0.value =
@@ -1281,7 +1382,7 @@ void RenderableTube::createLowPolyEnding(double now) {
         float cutplaneCenterValue = 0.f;
         glm::dvec3 cutplaneCenterPoint = glm::dvec3(0.0);
 
-        // Add the top's sides with proper normals
+        // Add the cutplane's sides with proper normals
         // This will ensure a hard shadow on the tube edge
         int polyIndex = _firstPolygonAfterNow;
         for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
@@ -1294,6 +1395,8 @@ void RenderableTube::createLowPolyEnding(double now) {
             sidePoint.position[1] = currPolyPointPos.y;
             sidePoint.position[2] = currPolyPointPos.z;
             cutplaneCenterPoint += currPolyPointPos;
+
+            // Texture coordinate??
 
             sidePoint.normal[0] = cutplaneNormal.x;
             sidePoint.normal[1] = cutplaneNormal.y;
@@ -1313,12 +1416,14 @@ void RenderableTube::createLowPolyEnding(double now) {
             _verticiesEnding.push_back(sidePoint);
         }
 
-        // Add the top's center point
+        // Add the cutplane's center point
         PolygonVertex topCenterPoint;
         cutplaneCenterPoint /= _nPoints;
         topCenterPoint.position[0] = cutplaneCenterPoint.x;
         topCenterPoint.position[1] = cutplaneCenterPoint.y;
         topCenterPoint.position[2] = cutplaneCenterPoint.z;
+
+        // Texture coordinate??
 
         topCenterPoint.normal[0] = cutplaneNormal.x;
         topCenterPoint.normal[1] = cutplaneNormal.y;
@@ -1353,7 +1458,7 @@ void RenderableTube::createLowPolyEnding(double now) {
         vIndex += nPointsPerSection;
     }
 
-    // Add Indices for top
+    // Add Indices for cutplane
     if (_addEdges) {
         unsigned int topCenterIndex = _verticiesEnding.size() - 1;
         for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {

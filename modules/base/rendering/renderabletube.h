@@ -65,10 +65,12 @@ private:
         GLdouble position[3];
         GLfloat normal[3];
         GLfloat value;
+        GLfloat tex[2];
     };
 
     struct TimePolygonPoint {
         glm::dvec3 coordinate = glm::dvec3(0.0);
+        glm::vec2 tex = glm::vec2(0.f);
     };
 
     struct TimePolygon {
