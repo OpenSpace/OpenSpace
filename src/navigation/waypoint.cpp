@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -224,7 +224,8 @@ Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
     // Compute rotation so the camera is looking at the targetted node
     glm::dvec3 lookAtPos = targetNode->worldPosition();
 
-    // Check if we can distinguish between targetpos and lookAt pos. Otherwise, move it further away
+    // Check if we can distinguish between targetpos and lookAt pos. Otherwise, move it
+    // further away
     const glm::dvec3 diff = targetPos - lookAtPos;
     double distSquared = glm::dot(diff, diff);
     if (std::isnan(distSquared) || distSquared < LengthEpsilon) {

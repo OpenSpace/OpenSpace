@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___COLORMAPCOMPONENT___H__
-#define __OPENSPACE_MODULE_BASE___COLORMAPCOMPONENT___H__
+#ifndef __OPENSPACE_CORE___COLORMAPCOMPONENT___H__
+#define __OPENSPACE_CORE___COLORMAPCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -70,11 +70,14 @@ public:
      */
     void initializeTexture();
 
+    void update(const dataloader::Dataset& dataset);
+
     static documentation::Documentation Documentation();
 
     glm::vec4 colorFromColorMap(float value) const;
 
     properties::BoolProperty enabled;
+    properties::BoolProperty invert;
     properties::OptionProperty dataColumn;
     properties::StringProperty colorMapFile;
     properties::Vec2Property valueRange;
@@ -110,8 +113,11 @@ private:
     bool _hasNanColorInAsset = false;
     bool _hasBelowRangeColorInAsset = false;
     bool _hasAboveRangeColorInAsset = false;
+
+    bool _colorMapFileIsDirty = true;
+    bool _colorMapTextureIsDirty = true;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___COLORMAPCOMPONENT___H__
+#endif // __OPENSPACE_CORE___COLORMAPCOMPONENT___H__

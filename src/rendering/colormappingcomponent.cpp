@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -143,6 +143,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo InvertColorMapInfo = {
+        "Invert",
+        "Invert Color Map",
+        "If true, the colors of the color map will be read in the inverse order",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(ColorMappingComponent)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -192,6 +199,9 @@ namespace {
 
         // [[codegen::verbatim(BelowRangeColorInfo.description)]]
         std::optional<glm::vec4> belowRangeColor [[codegen::color()]];
+
+        // [[codegen::verbatim(InvertColorMapInfo.description)]]
+        std::optional<bool> invert;
     };
 #include "colormappingcomponent_codegen.cpp"
 }  // namespace
@@ -205,6 +215,7 @@ documentation::Documentation ColorMappingComponent::Documentation() {
 ColorMappingComponent::ColorMappingComponent()
     : properties::PropertyOwner({ "ColorMapping", "Color Mapping", "" })
     , enabled(EnabledInfo, true)
+    , invert(InvertColorMapInfo, false)
     , dataColumn(ParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
     , colorMapFile(FileInfo)
     , valueRange(RangeInfo, glm::vec2(0.f))
@@ -228,8 +239,21 @@ ColorMappingComponent::ColorMappingComponent()
     addProperty(valueRange);
     addProperty(setRangeFromData);
 
-    colorMapFile.setReadOnly(true); // Currently this can't be changed
+    colorMapFile.onChange([this]() {
+        bool fileExists = std::filesystem::exists(colorMapFile.value());
+        if (!fileExists) {
+            LERROR(fmt::format("Could not find cmap file: '{}'", colorMapFile.value()));
+        }
+        _colorMapFileIsDirty = true;
+    });
     addProperty(colorMapFile);
+
+    invert.onChange([this]() {
+        // Invert the entries of the colormap
+        std::reverse(_colorMap.entries.begin(), _colorMap.entries.end());
+        _colorMapTextureIsDirty = true;
+    });
+    addProperty(invert);
 
     addProperty(hideOutsideRange);
     addProperty(useNanColor);
@@ -310,7 +334,8 @@ void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
 
     if (_colorMap.nanColor.has_value() && !_hasNanColorInAsset) {
         nanColor = *_colorMap.nanColor;
-        useNanColor = true; // @ TODO: Avoid overriding value set in asset? (also for useBelow and useAbove)
+        // @ TODO: Avoid overriding value set in asset? (also for useBelow and useAbove)
+        useNanColor = true;
     }
 
     if (_colorMap.belowRangeColor.has_value() && !_hasBelowRangeColorInAsset) {
@@ -358,6 +383,19 @@ void ColorMappingComponent::initializeTexture() {
     );
 
     _texture->uploadTexture();
+}
+
+void ColorMappingComponent::update(const dataloader::Dataset& dataset) {
+    if (_colorMapFileIsDirty) {
+        initialize(dataset);
+        _colorMapTextureIsDirty = true;
+        _colorMapFileIsDirty = false;
+    }
+
+    if (_colorMapTextureIsDirty) {
+        initializeTexture();
+        _colorMapTextureIsDirty = false;
+    }
 }
 
 glm::vec4 ColorMappingComponent::colorFromColorMap(float valueToColorFrom) const {

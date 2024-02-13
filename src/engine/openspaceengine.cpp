@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -1321,12 +1321,7 @@ void OpenSpaceEngine::postDraw() {
         events::logAllEvents(e);
     }
     global::eventEngine->triggerActions();
-    while (e) {
-        // @TODO (abock, 2021-08-25) Need to send all events to a topic to be sent out to
-        // others
-
-        e = e->next;
-    }
+    global::eventEngine->triggerTopics();
 
 
     global::eventEngine->postFrameCleanup();
@@ -1703,7 +1698,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::ReadCSVFile,
             codegen::lua::ResetCamera,
             codegen::lua::Configuration,
-            codegen::lua::LayerServer
+            codegen::lua::LayerServer,
+            codegen::lua::LoadJson
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")

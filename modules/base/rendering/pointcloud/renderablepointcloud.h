@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,8 +74,16 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    int nAttributesPerPoint() const;
-    void updateBufferData();
+    virtual void initializeShadersAndGlExtras();
+    virtual void deinitializeShaders();
+    virtual void bindDataForPointRendering();
+    virtual void preUpdate();
+
+    glm::dvec3 transformedPosition(const dataloader::Dataset::Entry& e) const;
+
+    virtual int nAttributesPerPoint() const;
+
+    virtual void updateBufferData();
     void updateSpriteTexture();
 
     /// Find the index of the currently chosen color parameter in the dataset
@@ -83,7 +91,7 @@ protected:
     /// Find the index of the currently chosen size parameter in the dataset
     int currentSizeParameterIndex() const;
 
-    std::vector<float> createDataSlice();
+    virtual std::vector<float> createDataSlice();
 
     virtual void bindTextureForRendering() const;
 
@@ -94,6 +102,7 @@ protected:
 
     bool _dataIsDirty = true;
     bool _spriteTextureIsDirty = true;
+    bool _cmapIsDirty = true;
 
     bool _hasSpriteTexture = false;
     bool _hasDataFile = false;

@@ -44,6 +44,7 @@ set(HEADER_FILES
   rendering/grids/renderablegrid.h
   rendering/grids/renderableradialgrid.h
   rendering/grids/renderablesphericalgrid.h
+  rendering/pointcloud/renderableinterpolatedpoints.h
   rendering/pointcloud/renderablepointcloud.h
   rendering/pointcloud/renderablepolygoncloud.h
   rendering/renderablecartesianaxes.h
@@ -106,6 +107,7 @@ set(SOURCE_FILES
   rendering/grids/renderablegrid.cpp
   rendering/grids/renderableradialgrid.cpp
   rendering/grids/renderablesphericalgrid.cpp
+  rendering/pointcloud/renderableinterpolatedpoints.cpp
   rendering/pointcloud/renderablepointcloud.cpp
   rendering/pointcloud/renderablepolygoncloud.cpp
   rendering/renderablecartesianaxes.cpp
@@ -154,9 +156,6 @@ set(SHADER_FILES
   shaders/arrow_vs.glsl
   shaders/axes_fs.glsl
   shaders/axes_vs.glsl
-  shaders/billboardpoint_fs.glsl
-  shaders/billboardpoint_gs.glsl
-  shaders/billboardpoint_vs.glsl
   shaders/disc_fs.glsl
   shaders/disc_vs.glsl
   shaders/grid_vs.glsl
@@ -169,6 +168,10 @@ set(SHADER_FILES
   shaders/model_vs.glsl
   shaders/plane_fs.glsl
   shaders/plane_vs.glsl
+  shaders/pointcloud/billboardpoint_fs.glsl
+  shaders/pointcloud/billboardpoint_gs.glsl
+  shaders/pointcloud/billboardpoint_vs.glsl
+  shaders/pointcloud/billboardpoint_interpolated_vs.glsl
   shaders/polygon_fs.glsl
   shaders/polygon_gs.glsl
   shaders/polygon_vs.glsl

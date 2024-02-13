@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -559,6 +560,13 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
                 parameterIndex
             );
         });
+
+        _colorSettings.colorMapping->colorMapFile.onChange([this]() {
+            _dataIsDirty = true;
+            _hasColorMapFile = std::filesystem::exists(
+                _colorSettings.colorMapping->colorMapFile.value()
+            );
+        });
     }
 
     if (_hasDataFile) {
@@ -628,23 +636,9 @@ void RenderablePointCloud::initialize() {
 void RenderablePointCloud::initializeGL() {
     ZoneScoped;
 
-    _program = BaseModule::ProgramObjectManager.request(
-        "RenderablePointCloud",
-        []() {
-            return global::renderEngine->buildRenderProgram(
-                "RenderablePointCloud",
-                absPath("${MODULE_BASE}/shaders/billboardpoint_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/billboardpoint_fs.glsl"),
-                absPath("${MODULE_BASE}/shaders/billboardpoint_gs.glsl")
-            );
-        }
-    );
+    initializeShadersAndGlExtras();
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
-
-    if (_hasColorMapFile) {
-        _colorSettings.colorMapping->initializeTexture();
-    }
 }
 
 void RenderablePointCloud::deinitializeGL() {
@@ -653,6 +647,27 @@ void RenderablePointCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
+    deinitializeShaders();
+
+    BaseModule::TextureManager.release(_spriteTexture);
+    _spriteTexture = nullptr;
+}
+
+void RenderablePointCloud::initializeShadersAndGlExtras() {
+    _program = BaseModule::ProgramObjectManager.request(
+        "RenderablePointCloud",
+        []() {
+            return global::renderEngine->buildRenderProgram(
+                "RenderablePointCloud",
+                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_fs.glsl"),
+                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_gs.glsl")
+            );
+        }
+    );
+}
+
+void RenderablePointCloud::deinitializeShaders() {
     BaseModule::ProgramObjectManager.release(
         "RenderablePointCloud",
         [](ghoul::opengl::ProgramObject* p) {
@@ -660,9 +675,6 @@ void RenderablePointCloud::deinitializeGL() {
         }
     );
     _program = nullptr;
-
-    BaseModule::TextureManager.release(_spriteTexture);
-    _spriteTexture = nullptr;
 }
 
 void RenderablePointCloud::bindTextureForRendering() const {
@@ -699,56 +711,16 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
     return fadeValue * funcValue;
 }
 
-void RenderablePointCloud::renderBillboards(const RenderData& data,
-                                            const glm::dmat4& modelMatrix,
-                                            const glm::dvec3& orthoRight,
-                                            const glm::dvec3& orthoUp,
-                                            float fadeInVariable)
-{
-    if (!_hasDataFile || _dataset.entries.empty()) {
-        return;
-    }
-
-    glEnablei(GL_BLEND, 0);
-
-    if (_useAdditiveBlending) {
-        glDepthMask(false);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    }
-    else {
-        // Normal blending, with transparency
-        glDepthMask(true);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    _program->activate();
-
-    _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
-    _program->setUniform(
-        _uniformCache.cameraLookup,
-        glm::vec3(data.camera.lookUpVectorWorldSpace())
-    );
+void RenderablePointCloud::bindDataForPointRendering() {
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
-    _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
-
-    _program->setUniform(
-        _uniformCache.cameraViewMatrix,
-        data.camera.combinedViewMatrix()
-    );
-
-    _program->setUniform(
-        _uniformCache.projectionMatrix,
-        glm::dmat4(data.camera.projectionMatrix())
-    );
-
-    _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
-    _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
-    _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
     _program->setUniform(_uniformCache.opacity, opacity());
 
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
-    _program->setUniform(_uniformCache.enableMaxSizeControl, _sizeSettings.useMaxSizeControl);
+    _program->setUniform(
+        _uniformCache.enableMaxSizeControl,
+        _sizeSettings.useMaxSizeControl
+    );
     _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
     _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
 
@@ -811,9 +783,58 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
             _colorSettings.colorMapping->useBelowRangeColor
         );
     }
+}
+
+void RenderablePointCloud::renderBillboards(const RenderData& data,
+                                            const glm::dmat4& modelMatrix,
+                                            const glm::dvec3& orthoRight,
+                                            const glm::dvec3& orthoUp,
+                                            float fadeInVariable)
+{
+    if (!_hasDataFile || _dataset.entries.empty()) {
+        return;
+    }
+
+    glEnablei(GL_BLEND, 0);
+
+    if (_useAdditiveBlending) {
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+    else {
+        // Normal blending, with transparency
+        glDepthMask(true);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    _program->activate();
+
+    _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
+    _program->setUniform(
+        _uniformCache.cameraLookup,
+        glm::vec3(data.camera.lookUpVectorWorldSpace())
+    );
+    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
+    _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
+
+    _program->setUniform(
+        _uniformCache.cameraViewMatrix,
+        data.camera.combinedViewMatrix()
+    );
+
+    _program->setUniform(
+        _uniformCache.projectionMatrix,
+        glm::dmat4(data.camera.projectionMatrix())
+    );
+
+    _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
+    _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
+    _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
+
+    bindDataForPointRendering();
 
     glBindVertexArray(_vao);
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nDataPoints));
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -857,8 +878,16 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     }
 }
 
+void RenderablePointCloud::preUpdate() {}
+
 void RenderablePointCloud::update(const UpdateData&) {
     ZoneScoped;
+
+    preUpdate();
+
+    if (_hasColorMapFile) {
+        _colorSettings.colorMapping->update(_dataset);
+    }
 
     if (_dataIsDirty) {
         updateBufferData();
@@ -869,8 +898,16 @@ void RenderablePointCloud::update(const UpdateData&) {
     }
 }
 
+glm::dvec3 RenderablePointCloud::transformedPosition(
+                                                const dataloader::Dataset::Entry& e) const
+{
+    const double unitMeter = toMeter(_unit);
+    glm::dvec4 position = glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0);
+    return glm::dvec3(_transformationMatrix * position);
+}
+
 int RenderablePointCloud::nAttributesPerPoint() const {
-    int n = 4; // position
+    int n = 3; // position
     n += _hasColorMapFile ? 1 : 0;
     n += _hasDatavarSize ? 1 : 0;
     return n;
@@ -909,13 +946,13 @@ void RenderablePointCloud::updateBufferData() {
     glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(
         positionAttrib,
-        4,
+        3,
         GL_FLOAT,
         GL_FALSE,
         attibutesPerPoint * sizeof(float),
         nullptr
     );
-    attributeOffset += 4;
+    attributeOffset += 3;
 
     if (_hasColorMapFile) {
         GLint colorParamAttrib = _program->attributeLocation("in_colorParameter");
@@ -1022,24 +1059,20 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     int sizeParamIndex = currentSizeParameterIndex();
 
     double maxRadius = 0.0;
-    double biggestCoord = -1.0;
 
     for (const dataloader::Dataset::Entry& e : _dataset.entries) {
-        const double unitMeter = toMeter(_unit);
-        glm::dvec4 position = glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0);
-        position = _transformationMatrix * position;
+        glm::dvec3 position = transformedPosition(e);
 
         const double r = glm::length(position);
         maxRadius = std::max(maxRadius, r);
 
         // Positions
-        for (int j = 0; j < 4; ++j) {
+        for (int j = 0; j < 3; ++j) {
             result.push_back(static_cast<float>(position[j]));
         }
 
         // Colors
         if (_hasColorMapFile) {
-            biggestCoord = std::max(biggestCoord, glm::compMax(position));
             result.push_back(e.data[colorParamIndex]);
         }
 

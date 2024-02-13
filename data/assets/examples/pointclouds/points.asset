@@ -1,4 +1,5 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local colormaps = asset.require("util/default_colormaps")
 
 
 
@@ -66,7 +67,7 @@ local ColorMapped_FixedSize = {
     File = asset.resource("data/dummydata.csv"),
     Coloring = {
       ColorMapping = {
-        File = asset.resource("viridis.cmap")
+        File = colormaps.Uniform.Viridis
       }
     },
     SizeSettings = {
@@ -144,7 +145,7 @@ local Textured = {
         -- Disable color map per default. When enabled, the texture color will be
         -- multiplied with the color from the color map
         Enabled = false,
-        File = asset.resource("viridis.cmap")
+        File = colormaps.Uniform.Viridis
       }
     }
   },
@@ -175,7 +176,7 @@ local ColorMappedAdvanced_NoBlend = {
     UseAdditiveBlending = false, -- Disable additive blending
     Coloring = {
       ColorMapping = {
-        File = asset.resource("viridis.cmap"),
+        File = colormaps.Uniform.Viridis,
         ParameterOptions = {
           { Key = "number_withNan" }, -- no range => compute min and max
           { Key = "normaldist_withMissing", Range = { -0.5, 0.5 } }

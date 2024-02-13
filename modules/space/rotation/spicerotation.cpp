@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,8 +68,10 @@ namespace {
         std::string sourceFrame
             [[codegen::annotation("A valid SPICE NAIF name or integer")]];
 
-        // [[codegen::verbatim(DestinationInfo.description)]]
-        std::string destinationFrame;
+        // This value specifies the destination frame that is used for the coordinate
+        // transformation. This has to be a valid SPICE name. If this value is not
+        // specified, a reference frame of 'GALACTIC' is used instead
+        std::optional<std::string> destinationFrame;
 
         // [[codegen::verbatim(DestinationInfo.description)]]
         std::optional<std::variant<std::vector<std::string>, std::string>> kernels;
@@ -99,7 +101,7 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _sourceFrame = p.sourceFrame;
-    _destinationFrame = p.destinationFrame;
+    _destinationFrame = p.destinationFrame.value_or("GALACTIC");
 
     if (p.kernels.has_value()) {
         if (std::holds_alternative<std::string>(*p.kernels)) {

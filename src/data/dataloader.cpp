@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,7 +79,10 @@ namespace {
         if (specs.has_value()) {
             info = openspace::dataloader::generateHashString(*specs);
         }
-        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(filePath, info);
+        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+            filePath,
+            info
+        );
 
         if (std::filesystem::exists(cached)) {
             LINFOC(
@@ -321,10 +324,14 @@ void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
 
     //
     // Store max data point variable
-    file.write(reinterpret_cast<const char*>(&dataset.maxPositionComponent), sizeof(float));
+    file.write(
+        reinterpret_cast<const char*>(&dataset.maxPositionComponent),
+        sizeof(float)
+    );
 }
 
-Dataset loadFileWithCache(std::filesystem::path filePath, std::optional<DataMapping> specs)
+Dataset loadFileWithCache(std::filesystem::path filePath,
+                          std::optional<DataMapping> specs)
 {
     return internalLoadFileWithCache<Dataset>(
         filePath,
