@@ -87,17 +87,19 @@ private:
     void updateTube();
     void createSmoothTube();
     void createLowPolyTube();
-    void addBottom(int pointCounter, const glm::dvec3& bottomCenter,
-        const glm::dvec3& bottomNormal, int colorParamIndex);
-    void addTop(int pointCounter, const glm::dvec3& bottomCenter,
-        const glm::dvec3& bottomNormal, int colorParamIndex);
+    void addEdge(int pointCounter, const glm::dvec3& center,
+        const glm::dvec3& normal, const TimePolygon const* polygon);
     void createSmoothEnding(double now);
     void createLowPolyEnding(double now);
     void updateBufferData();
 
     // Properties
-    properties::BoolProperty _enableFaceCulling;
-    properties::PropertyOwner _lightSourcePropertyOwner;
+    struct ColorSettings : properties::PropertyOwner {
+        explicit ColorSettings(const ghoul::Dictionary& dictionary);
+        properties::Vec3Property tubeColor;
+        std::unique_ptr<ColorMappingComponent> colorMapping;
+    };
+    ColorSettings _colorSettings;
 
     struct Shading : properties::PropertyOwner {
         Shading();
@@ -108,18 +110,13 @@ private:
     };
     Shading _shading;
 
-    struct ColorSettings : properties::PropertyOwner {
-        explicit ColorSettings(const ghoul::Dictionary& dictionary);
-        properties::Vec3Property tubeColor;
-        std::unique_ptr<ColorMappingComponent> colorMapping;
-    };
-    ColorSettings _colorSettings;
-
-    properties::BoolProperty _addEdges;
+    properties::PropertyOwner _lightSourcePropertyOwner;
     properties::BoolProperty _drawWireframe;
     properties::FloatProperty _wireLineWidth;
     properties::BoolProperty _useSmoothNormals;
+    properties::BoolProperty _addEdges;
     properties::BoolProperty _showAllTube;
+    properties::BoolProperty _enableFaceCulling;
 
     UniformCache(modelViewTransform, projectionTransform, normalTransform, opacity, color,
         nanColor, useNanColor, aboveRangeColor, useAboveRangeColor, belowRangeColor,
@@ -134,21 +131,21 @@ private:
 
     std::filesystem::path _dataFile;
     std::vector<TimePolygon> _data;
+    bool _tubeIsDirty = false;
     size_t _nPolygons = 0;
     size_t _nPoints = 0;
-    dataloader::Dataset _colorDataset;
-    bool _tubeIsDirty = false;
-    bool _hasColorMapFile = false;
     size_t _nIndiciesToRender = 0;
     size_t _lastPolygonBeforeNow = 0;
     size_t _firstPolygonAfterNow = 0;
     bool _interpolationNeeded = false;
 
+    dataloader::Dataset _colorDataset;
+    bool _hasColorMapFile = false;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     GLuint _vaoId = 0;
     GLuint _vboId = 0;
     GLuint _iboId = 0;
-
     std::vector<PolygonVertex> _verticies;
     std::vector<unsigned int> _indicies;
 
@@ -156,7 +153,6 @@ private:
     GLuint _vaoIdEnding = 0;
     GLuint _vboIdEnding = 0;
     GLuint _iboIdEnding = 0;
-
     std::vector<PolygonVertex> _verticiesEnding;
     std::vector<unsigned int> _indiciesEnding;
 };

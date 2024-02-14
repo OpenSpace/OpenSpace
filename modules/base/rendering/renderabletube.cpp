@@ -255,11 +255,32 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _showAllTube(ShowAllTubeInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
     _dataFile = p.file;
 
-    _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
-    addProperty(_enableFaceCulling);
+    addProperty(Fadeable::_opacity);
+
+    if (p.coloring.has_value() && (*p.coloring).colorMapping.has_value()) {
+        _hasColorMapFile = true;
+
+        _colorSettings.colorMapping->dataColumn.onChange(
+            [this]() { _tubeIsDirty = true; }
+        );
+
+        _colorSettings.colorMapping->setRangeFromData.onChange([this]() {
+            int parameterIndex = currentColorParameterIndex();
+            _colorSettings.colorMapping->valueRange = _colorDataset.findValueRange(
+                parameterIndex
+            );
+        });
+
+        _colorSettings.colorMapping->colorMapFile.onChange([this]() {
+            _tubeIsDirty = true;
+            _hasColorMapFile = std::filesystem::exists(
+                _colorSettings.colorMapping->colorMapFile.value()
+            );
+        });
+    }
+    addPropertySubOwner(_colorSettings);
 
     _shading.enabled = p.performShading.value_or(_shading.enabled);
     _shading.ambientIntensity = p.ambientIntensity.value_or(_shading.ambientIntensity);
@@ -278,26 +299,6 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (p.coloring.has_value() && (*p.coloring).colorMapping.has_value()) {
-        _hasColorMapFile = true;
-
-        _colorSettings.colorMapping->dataColumn.onChange(
-            [this]() { _tubeIsDirty = true; }
-        );
-
-        _colorSettings.colorMapping->setRangeFromData.onChange([this]() {
-            int parameterIndex = currentColorParameterIndex();
-            _colorSettings.colorMapping->valueRange = _colorDataset.findValueRange(
-                parameterIndex
-            );
-        });
-    }
-    addPropertySubOwner(_colorSettings);
-
-    _addEdges.onChange([this]() { _tubeIsDirty = true; });
-    _addEdges = p.addEdges.value_or(_addEdges);
-    addProperty(_addEdges);
-
     _drawWireframe = p.drawWireframe.value_or(_drawWireframe);
     addProperty(_drawWireframe);
 
@@ -308,10 +309,15 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     _useSmoothNormals = p.useSmoothNormals.value_or(_useSmoothNormals);
     addProperty(_useSmoothNormals);
 
+    _addEdges.onChange([this]() { _tubeIsDirty = true; });
+    _addEdges = p.addEdges.value_or(_addEdges);
+    addProperty(_addEdges);
+
     _showAllTube = p.showAllTube.value_or(_showAllTube);
     addProperty(_showAllTube);
 
-    addProperty(Fadeable::_opacity);
+    _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
+    addProperty(_enableFaceCulling);
 }
 
 bool RenderableTube::isReady() const {
@@ -676,7 +682,7 @@ void RenderableTube::createSmoothTube() {
 
     // Add the bottom
     if (_addEdges) {
-        addBottom(pointCounter, bottomCenter, bottomNormal, colorParamIndex);
+        addEdge(pointCounter, bottomCenter, bottomNormal, &_data.front());
     }
 
     // Add all the polygons that will create the sides of the tube
@@ -715,7 +721,7 @@ void RenderableTube::createSmoothTube() {
 
     // Add the top
     if (_addEdges) {
-        addTop(pointCounter - _nPoints, topCenter, topNormal, colorParamIndex);
+        addEdge(pointCounter - _nPoints, topCenter, topNormal, &_data.back());
     }
 
     // Indicies
@@ -762,14 +768,14 @@ void RenderableTube::createSmoothTube() {
 
     // Add Indices for top
     if (_addEdges) {
-        unsigned int topCenterIndex = _verticies.size() - 1;
+        unsigned int topCenterIndex = _verticies.size() - 1 - _nPoints;
         for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
-            unsigned int vIndex = topCenterIndex - pointIndex - 1;
+            unsigned int vIndex = topCenterIndex + pointIndex + 1;
             bool isLast = pointIndex == _nPoints - 1;
 
             unsigned int v0 = topCenterIndex;
             unsigned int v1 = vIndex;
-            unsigned int v2 = isLast ? v0 - 1 : v1 - 1;
+            unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
 
             _indicies.push_back(v0);
             _indicies.push_back(v1);
@@ -793,7 +799,7 @@ void RenderableTube::createLowPolyTube() {
 
     // Add the bottom
     if (_addEdges) {
-        addBottom(pointCounter, bottomCenter, bottomNormal, colorParamIndex);
+        addEdge(pointCounter, bottomCenter, bottomNormal, &_data.front());
     }
 
     // Add all the polygons that will create the sides of the tube
@@ -892,7 +898,7 @@ void RenderableTube::createLowPolyTube() {
 
     // Add the top
     if (_addEdges) {
-        addTop(pointCounter, topCenter, topNormal, colorParamIndex);
+        addEdge(pointCounter, topCenter, topNormal, &_data.back());
     }
 
     // Indicies
@@ -941,14 +947,14 @@ void RenderableTube::createLowPolyTube() {
 
     // Add Indices for top
     if (_addEdges) {
-        unsigned int topCenterIndex = _verticies.size() - 1;
+        unsigned int topCenterIndex = _verticies.size() - 1 - _nPoints;
         for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
-            unsigned int vIndex = topCenterIndex - pointIndex - 1;
+            unsigned int vIndex = topCenterIndex + pointIndex + 1;
             bool isLast = pointIndex == _nPoints - 1;
 
             unsigned int v0 = topCenterIndex;
             unsigned int v1 = vIndex;
-            unsigned int v2 = isLast ? v0 - 1 : vIndex - 1;
+            unsigned int v2 = isLast ? v0 + 1 : vIndex + 1;
 
             _indicies.push_back(v0);
             _indicies.push_back(v1);
@@ -957,48 +963,50 @@ void RenderableTube::createLowPolyTube() {
     }
 }
 
-void RenderableTube::addBottom(int pointCounter, const glm::dvec3& bottomCenter,
-                               const glm::dvec3& bottomNormal, int colorParamIndex)
+void RenderableTube::addEdge(int pointCounter, const glm::dvec3& center,
+    const glm::dvec3& normal, const TimePolygon const* polygon)
 {
-    // Calculate the transfer function value for the center point of the bottom
-    // Get the color for selected color parameter
-    float bottomCenterValue = 0.f;
+    // Get the selected color parameter
+    int colorParamIndex = currentColorParameterIndex();
+
+    // Calculate the transfer function value for the center point of the given polygon
+    float centerValue = 0.f;
     if (_hasColorMapFile) {
         int loopPointCounter = pointCounter;
-        for (size_t pointIndex = 0; pointIndex < _data.front().points.size(); ++pointIndex) {
-            bottomCenterValue += _colorDataset.entries[loopPointCounter++].data[colorParamIndex];
+        for (size_t pointIndex = 0; pointIndex < polygon->points.size(); ++pointIndex) {
+            centerValue += _colorDataset.entries[loopPointCounter++].data[colorParamIndex];
         }
-        bottomCenterValue /= _nPoints;
+        centerValue /= _nPoints;
     }
 
     // Calculate texture coordinate
-    glm::vec2 bottomCenterTex = glm::vec2(0.f);
-    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
-        bottomCenterTex += timePolygonPoint.tex;
+    glm::vec2 centerTex = glm::vec2(0.f);
+    for (const TimePolygonPoint& timePolygonPoint : polygon->points) {
+        centerTex += timePolygonPoint.tex;
     }
-    bottomCenterTex /= _nPoints;
+    centerTex /= _nPoints;
 
-    // Add the bottom's center point
+    // Add the polygons's center point
     PolygonVertex bottomCenterPoint;
-    bottomCenterPoint.position[0] = bottomCenter.x;
-    bottomCenterPoint.position[1] = bottomCenter.y;
-    bottomCenterPoint.position[2] = bottomCenter.z;
+    bottomCenterPoint.position[0] = center.x;
+    bottomCenterPoint.position[1] = center.y;
+    bottomCenterPoint.position[2] = center.z;
 
-    bottomCenterPoint.tex[0] = bottomCenterTex.x;
-    bottomCenterPoint.tex[1] = bottomCenterTex.y;
+    bottomCenterPoint.tex[0] = centerTex.x;
+    bottomCenterPoint.tex[1] = centerTex.y;
 
-    bottomCenterPoint.normal[0] = bottomNormal.x;
-    bottomCenterPoint.normal[1] = bottomNormal.y;
-    bottomCenterPoint.normal[2] = bottomNormal.z;
+    bottomCenterPoint.normal[0] = normal.x;
+    bottomCenterPoint.normal[1] = normal.y;
+    bottomCenterPoint.normal[2] = normal.z;
 
     if (_hasColorMapFile) {
-        bottomCenterPoint.value = bottomCenterValue;
+        bottomCenterPoint.value = centerValue;
     }
     _verticies.push_back(bottomCenterPoint);
 
-    // Add the bottom's sides with proper normals
-    // This will ensure a hard shadow on the tube edge
-    for (const TimePolygonPoint& timePolygonPoint : _data.front().points) {
+    // Add the polygon's sides with proper normals
+    // This will ensure a hard shadow on the edge
+    for (const TimePolygonPoint& timePolygonPoint : polygon->points) {
         PolygonVertex bottomSidePoint;
         bottomSidePoint.position[0] = timePolygonPoint.coordinate.x;
         bottomSidePoint.position[1] = timePolygonPoint.coordinate.y;
@@ -1007,76 +1015,15 @@ void RenderableTube::addBottom(int pointCounter, const glm::dvec3& bottomCenter,
         bottomSidePoint.tex[0] = timePolygonPoint.tex.x;
         bottomSidePoint.tex[1] = timePolygonPoint.tex.y;
 
-        bottomSidePoint.normal[0] = bottomNormal.x;
-        bottomSidePoint.normal[1] = bottomNormal.y;
-        bottomSidePoint.normal[2] = bottomNormal.z;
+        bottomSidePoint.normal[0] = normal.x;
+        bottomSidePoint.normal[1] = normal.y;
+        bottomSidePoint.normal[2] = normal.z;
 
         if (_hasColorMapFile) {
             bottomSidePoint.value = _colorDataset.entries[pointCounter++].data[colorParamIndex];
         }
         _verticies.push_back(bottomSidePoint);
     }
-}
-
-void RenderableTube::addTop(int pointCounter, const glm::dvec3& topCenter,
-                            const glm::dvec3& topNormal, int colorParamIndex)
-{
-    // Calculate the transfer function value for the center point of the top
-    // Get the color for selected color parameter
-    float topCenterValue = 0.f;
-    if (_hasColorMapFile) {
-        int loopPointCounter = pointCounter;
-        for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
-            topCenterValue += _colorDataset.entries[loopPointCounter++].data[colorParamIndex];
-        }
-        topCenterValue /= _nPoints;
-    }
-
-    // Calculate texture coordinate
-    glm::vec2 topCenterTex = glm::vec2(0.f);
-    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
-        topCenterTex += timePolygonPoint.tex;
-    }
-    topCenterTex /= _nPoints;
-
-    // Add the top's sides with proper normals
-    // This will ensure a hard shadow on the tube edge
-    for (const TimePolygonPoint& timePolygonPoint : _data.back().points) {
-        PolygonVertex topSidePoint;
-        topSidePoint.position[0] = timePolygonPoint.coordinate.x;
-        topSidePoint.position[1] = timePolygonPoint.coordinate.y;
-        topSidePoint.position[2] = timePolygonPoint.coordinate.z;
-
-        topSidePoint.tex[0] = timePolygonPoint.tex.x;
-        topSidePoint.tex[1] = timePolygonPoint.tex.y;
-
-        topSidePoint.normal[0] = topNormal.x;
-        topSidePoint.normal[1] = topNormal.y;
-        topSidePoint.normal[2] = topNormal.z;
-
-        if (_hasColorMapFile) {
-            topSidePoint.value = _colorDataset.entries[pointCounter++].data[colorParamIndex];
-        }
-        _verticies.push_back(topSidePoint);
-    }
-
-    // Add the top's center point
-    PolygonVertex topCenterPoint;
-    topCenterPoint.position[0] = topCenter.x;
-    topCenterPoint.position[1] = topCenter.y;
-    topCenterPoint.position[2] = topCenter.z;
-
-    topCenterPoint.tex[0] = topCenterTex.x;
-    topCenterPoint.tex[1] = topCenterTex.y;
-
-    topCenterPoint.normal[0] = topNormal.x;
-    topCenterPoint.normal[1] = topNormal.y;
-    topCenterPoint.normal[2] = topNormal.z;
-
-    if (_hasColorMapFile) {
-        topCenterPoint.value = topCenterValue;
-    }
-    _verticies.push_back(topCenterPoint);
 }
 
 void RenderableTube::createSmoothEnding(double now) {
@@ -1653,6 +1600,10 @@ void RenderableTube::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    }
+
+    if (_hasColorMapFile) {
+        _colorSettings.colorMapping->update(_colorDataset);
     }
 
     if (_tubeIsDirty) {
