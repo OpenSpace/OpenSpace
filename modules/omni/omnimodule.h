@@ -30,6 +30,8 @@
 #include <websocketpp/config/core.hpp>
 #include <websocketpp/server.hpp>
 
+namespace ghoul::io { class Socket; }
+
 namespace openspace {
 
 class OmniModule : public OpenSpaceModule {
@@ -37,13 +39,18 @@ public:
     constexpr static const char* Name = "Omni";
 
     OmniModule();
-    ~OmniModule() override = default;
+    ~OmniModule() override;
 
     void internalInitialize(const ghoul::Dictionary& config) override;
 
 private:
+    void preSync();
+    void handleConnection();
+
     websocketpp::server<websocketpp::config::core> _server;
 
+    std::unique_ptr<ghoul::io::Socket> _wSocket;
+    std::thread _thread;
 };
 
 } // namespace openspace

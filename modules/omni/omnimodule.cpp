@@ -24,9 +24,16 @@
 
 #include <modules/omni/omnimodule.h>
 
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/io/socket/websocket.h>
 #include <ghoul/io/socket/tcpsocket.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
+namespace {
+    constexpr std::string_view _loggerCat = "Omni";
+}
 
 namespace openspace {
 
@@ -37,13 +44,69 @@ OmniModule::OmniModule() : OpenSpaceModule(OmniModule::Name) {
     _server.set_access_channels(websocketpp::log::alevel::app);
 }
 
+OmniModule::~OmniModule() {
+    if (_wSocket->isConnected()) {
+        _wSocket->disconnect(
+            static_cast<int>(ghoul::io::WebSocket::ClosingReason::ClosingAll)
+        );
+    }
+    if (_thread.joinable()) {
+        _thread.join();
+    }
+}
 
 void OmniModule::internalInitialize(const ghoul::Dictionary& config) {
-    
-    //auto tcpSocket = std::make_unique<ghoul::io::TcpSocket>("wss://omni.itn.liu.se/ws/", 443);
+    using namespace ghoul::io;
+    //global::callback::preSync->emplace_back([this]() {
+    //    ZoneScopedN("OmniModule");
 
-    //auto websocket = std::make_unique<ghoul::io::WebSocket>(tcpSocket, _server);
+    //    preSync();
+    //});
     
+    std::unique_ptr<TcpSocket> tcpSocket = std::make_unique<TcpSocket>("localhost", 5051);
+    if (!tcpSocket) {
+        LERROR("No socket connection to omni");
+        return;
+    }
+    tcpSocket->connect();
+
+    if (tcpSocket->isConnected()) {
+        LERROR("TCP Connected");
+    }
+    else if (tcpSocket->isConnecting()) {
+        LERROR("TCP Connecting");
+    }
+    else {
+        LERROR("TCP Not connected");
+    }
+    _wSocket = std::move(tcpSocket);
+    //_wSocket = std::make_unique<WebSocket>(std::move(tcpSocket), _server);
+    //_wSocket->startStreams();
+
+    //if (_wSocket->isConnected()) {
+    //    LERROR("Connected");
+    //}
+    //else if (_wSocket->isConnecting()) {
+    //    LERROR("Connecting");
+    //}
+    //else {
+    //    LERROR("Not connected");
+    //}
+
+    _thread = std::move(std::thread([this]() { handleConnection(); }));
+}
+
+void OmniModule::preSync() {
+    LDEBUG("Presync");
+}
+
+void OmniModule::handleConnection() {
+    std::string messageString;
+    messageString.reserve(256);
+    while (_wSocket->getMessage(messageString)) {
+        LERROR(messageString);
+    }
+    //LERROR(messageString);
 }
 
 } // namespace openspace
