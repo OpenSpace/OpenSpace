@@ -5,7 +5,7 @@ return {
   Earth = {
     {
       Name = "GIBS",
-      URL  = "https://gitc.earthdata.nasa.gov/twms/epsg4326/best/twms.cgi?request=GetTileService"
+      URL  = "https://gibs.earthdata.nasa.gov/twms/epsg4326/best/twms.cgi?request=GetTileService"
     }
   },
   Moon = {
