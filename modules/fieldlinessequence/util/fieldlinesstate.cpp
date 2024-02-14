@@ -308,6 +308,9 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
         ofs.write(reinterpret_cast<char*>(vec.data()), sizeof(float) * nPoints);
     }
     ofs.write(allExtraQuantityNamesInOne.c_str(), nStringBytes);
+
+    LINFO(fmt::format("Saving fieldline state to: {}", absPath));
+
 }
 
 // TODO: This should probably be rewritten, but this is the way the files were structured

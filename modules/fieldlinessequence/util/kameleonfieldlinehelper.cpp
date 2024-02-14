@@ -160,6 +160,10 @@ extractSeedPointsFromFiles(std::filesystem::path filePath)
         int linenumber = 0;
         while (std::getline(seedFile, line)) {
             ++linenumber;
+            if (!line.empty() && line[0] == '#') {
+                //ignore line, assume it's a comment
+                continue;
+            }
             std::stringstream ss(line);
             glm::vec3 point;
             if (!(ss >> point.x) || !(ss >> point.y) || !(ss >> point.z)) {

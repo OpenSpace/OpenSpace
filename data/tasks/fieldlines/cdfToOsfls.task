@@ -4,9 +4,10 @@ return {
         TracingVar = 'b',
         Input = "C:/Users/eolsson/Downloads/cdfTestFeb2024",
         TimeKernel = "",
-        OutputType = "Json",
-        OutputFolder = "C:/Users/eolsson/Documents/openspace/data/2012/outputTest2024/feb/",
-        Seedpoints = "C:/Users/eolsson/Documents/openspace/data/2012/seeds",
-        ExtraVars = {"bx", "by", "bz"}
+        OutputType = "Osfls",
+        OutputFolder = "C:/Users/eolsson/Documents/openspace/data/2012/outputTest2024/testMoreParamOsfls/",
+        Seedpoints = "C:/Users/eolsson/Documents/openspace/data/SeedpointsFor2023Storms/2023-03/SWMF-02_2023-03-TP-01_080223_1_MAGNETOPAUSE3D",
+        ScalarVars = {"rho", "p", "e"},
+        MagnitudeVars = {"bx, by, bz", "ux, uy, uz", "jx, jy, jz"}
     }
 }

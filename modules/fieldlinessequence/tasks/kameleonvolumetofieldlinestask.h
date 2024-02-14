@@ -47,8 +47,8 @@ public:
 
 private:
     std::string _tracingVar;
-    std::vector<std::string> _extraVars;
-    std::vector<std::string> _extraMagnitudeVars;
+    std::vector<std::string> _scalarVars;
+    std::vector<std::string> _magnitudeVars;
     std::filesystem::path _inputPath;
     std::vector<std::string> _sourceFiles;
     //std::string _timeKernelPath = "";

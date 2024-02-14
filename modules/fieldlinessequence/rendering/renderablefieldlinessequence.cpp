@@ -907,6 +907,22 @@ void RenderableFieldlinesSequence::firstUpdate() {
 
     _shouldUpdateColorBuffer = true;
     _shouldUpdateMaskingBuffer = true;
+
+    if (!_havePrintedQuantityRange && !quantities.empty()) {
+        for (int i = 0; i < extraNamesVec.size(); ++i) {
+            //if not given range, use min and max of data?
+            std::vector<float> q = quantities[i];
+            float minNr = *std::min_element(q.begin(), q.end());
+            std::string min = std::to_string(minNr);
+            float maxNr = *std::max_element(q.begin(), q.end());
+            std::string max = std::to_string(maxNr);
+            LWARNING(fmt::format("min :{}", min));
+            LWARNING(fmt::format("max :{}", max));
+            std::string name = extraNamesVec[i];
+            LWARNING(fmt::format("name:{}", name));
+        }
+        _havePrintedQuantityRange = true;
+    }
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
@@ -1126,9 +1142,9 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
-        unbindGL();
         _shouldUpdateColorBuffer = false;
     }
+    unbindGL();
 }
 
 void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
@@ -1141,19 +1157,6 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
         _maskingQuantity,
         success
     );
-    //if not given range, use min and max of data?
-    if (!_havePrintedQuantityRange && !quantities.empty()) {
-        float i = *std::min_element(quantities.begin(), quantities.end());
-        std::string min = std::to_string(i);
-        float a = *std::max_element(quantities.begin(), quantities.end());
-        std::string max = std::to_string(a);
-        LWARNING(fmt::format("min :{}", min));
-        LWARNING(fmt::format("max :{}", max));
-        const std::vector<std::string>& names = state.extraQuantityNames();
-        std::string name = names[_maskingQuantity];
-        LWARNING(fmt::format("name:{}", name));
-        _havePrintedQuantityRange = true;
-    }
 
     if (success) {
         glBufferData(

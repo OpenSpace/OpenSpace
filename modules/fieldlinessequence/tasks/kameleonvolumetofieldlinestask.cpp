@@ -61,9 +61,12 @@ namespace {
         };
         // Output type. Either osfls (OpenSpace FieldLineSequence) or json
         OutputType outputType;
-        // A list of vector variables to extract along the fieldlines
-        std::optional<std::vector<std::string>> extraVars;
-        //"ExtraMagnitudeVars" ?
+        // A list of scalar variables to extract along the fieldlines
+        // like temperature or density
+        std::optional<std::vector<std::string>> scalarVars;
+        // A list of vector field variables. Must be in groups of 3,
+        // for example \"bx, by, bz\", \"ux, uy, uz\"
+        std::optional<std::vector<std::string>> magnitudeVars;
     };
 #include "kameleonvolumetofieldlinestask_codegen.cpp"
 } // namespace
@@ -91,26 +94,23 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
     );
     _tracingVar = p.tracingVar;
 
-    if (p.extraVars.has_value()) {
-        for (auto var : p.extraVars.value()) {
-            _extraVars.push_back(var);
+    if (p.scalarVars.has_value()) {
+        for (auto var : p.scalarVars.value()) {
+            _scalarVars.push_back(var);
         }
     }
     else {
-        LWARNING(
-            "No variable was specified to be saved",
-            "Fieldlines will only be able to be colored uniformly"
-        );
+        LINFO("No scalar variable was specified to be saved");
     }
 
-    //if (dictionary.hasKey(KeyExtraMagnitudeVars)) {
-    //    ghoul::Dictionary list =
-    //        dictionary.value<ghoul::Dictionary>(KeyExtraMagnitudeVars);
-
-    //    for (size_t i = 0; i < list.size(); ++i) {
-    //        _extraMagnitudeVars.push_back(list.value<std::string>(std::to_string(i)));
-    //    }
-    //}
+    if (p.magnitudeVars.has_value()) {
+        for (auto var : p.magnitudeVars.value()) {
+            _magnitudeVars.push_back(var);
+        }
+    }
+    else {
+        LINFO("No vector field variable was specified to be saved");
+    }
 
     if (!std::filesystem::is_directory(_inputPath)) {
         LERROR(fmt::format(
@@ -139,7 +139,7 @@ void KameleonVolumeToFieldlinesTask::perform(
                                            const Task::ProgressCallback& progressCallback)
 {
     std::vector<std::string> extraMagVars =
-        fls::extractMagnitudeVarsFromStrings(_extraVars);
+        fls::extractMagnitudeVarsFromStrings(_magnitudeVars);
 
     std::unordered_map<std::string, std::vector<glm::vec3>> seedPoints =
         fls::extractSeedPointsFromFiles(_seedpointsPath);
@@ -158,7 +158,7 @@ void KameleonVolumeToFieldlinesTask::perform(
             seedPoints,
             _manualTimeOffset,
             _tracingVar,
-            _extraVars,
+            _scalarVars,
             extraMagVars
         );
 
@@ -166,6 +166,7 @@ void KameleonVolumeToFieldlinesTask::perform(
             switch(_outputType) {
                 case OutputType::Osfls:
                     newState.saveStateToOsfls(absPath(_outputFolder).string());
+                    break;
                 case OutputType::Json:
                     std::string timeStr =
                         std::string(Time(newState.triggerTime()).ISO8601());
@@ -174,6 +175,7 @@ void KameleonVolumeToFieldlinesTask::perform(
                     timeStr.replace(19, 1, "-");
                     std::string fileName = timeStr;
                     newState.saveStateToJson(_outputFolder.string() + fileName);
+                    break;
             }
         }
     }
