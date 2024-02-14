@@ -77,14 +77,14 @@
 
 #include <gdal.h>
 
+#include <cpl_conv.h>
+#include <cpl_string.h>
+
 #ifdef _MSC_VER
 #pragma warning (push)
 // CPL throws warning about missing DLL interface
 #pragma warning (disable : 4251)
 #endif // _MSC_VER
-
-#include <cpl_string.h>
-#include <cpl_conv.h>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -259,8 +259,6 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
             static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
         );
         addPropertySubOwner(GdalWrapper::ref());
-
-        CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "15");
     });
 
     global::callback::deinitializeGL->emplace_back([]() {
@@ -553,10 +551,12 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
 {
     auto downloadFunction = [](const std::string& downloadUrl) {
         LDEBUG("Opening WMS capabilities: " + downloadUrl);
+        CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "15"); // 3 seconds
         GDALDatasetH dataset = GDALOpen(
             downloadUrl.c_str(),
             GA_ReadOnly
         );
+        CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "3"); // 3 seconds
 
         if (!dataset) {
             LWARNING("Could not open dataset: " + downloadUrl);
