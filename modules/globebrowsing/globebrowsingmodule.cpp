@@ -77,14 +77,14 @@
 
 #include <gdal.h>
 
-#include <cpl_conv.h>
-#include <cpl_string.h>
-
 #ifdef _MSC_VER
 #pragma warning (push)
 // CPL throws warning about missing DLL interface
 #pragma warning (disable : 4251)
 #endif // _MSC_VER
+
+#include <cpl_conv.h>
+#include <cpl_string.h>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
