@@ -83,12 +83,11 @@ private:
     int currentColorParameterIndex() const;
 
     void readDataFile();
-
-    void updateTube();
+    void createTube();
     void createSmoothTube();
     void createLowPolyTube();
-    void addEdge(int pointCounter, const glm::dvec3& center,
-        const glm::dvec3& normal, const TimePolygon const* polygon);
+    void addEdge(int pointColorCounter, const glm::dvec3& center,
+        const glm::dvec3& normal, const TimePolygon const* polygon, int centerIndex);
     void createSmoothEnding(double now);
     void createLowPolyEnding(double now);
     void updateBufferData();
