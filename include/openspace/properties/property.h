@@ -382,6 +382,17 @@ public:
     void setReadOnly(bool state);
 
     /**
+     * This method determines if this Property requires confirmation upon every change of
+     * the value. This setting is only a hint and does not need to be followed by GUI
+     * applications and does not have any effect on the Property::set or
+     * Property::setLuaValue methods. The value is stored in the metaData Dictionary with
+     * the key: `needsConfirmation`. The default value is `false`.
+     *
+     * \param state `true` if the Property needs confirmation, `false` otherwise
+     */
+    void setNeedsConfirmation(bool state);
+
+    /**
      * Default view options that can be used in the Property::setViewOption method. The
      * values are:
      *   - Property::ViewOptions::Color = `Color` (Intended for Vec3 and Vec4),
