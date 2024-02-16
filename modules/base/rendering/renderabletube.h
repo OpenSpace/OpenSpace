@@ -88,9 +88,16 @@ private:
     void createLowPolyTube();
     void addEdge(int pointColorCounter, const glm::dvec3& center,
         const glm::dvec3& normal, const TimePolygon const* polygon, int centerIndex);
+    void addSmoothSection(int& pointColorCounter, const TimePolygon const* polygon,
+        bool isFirstPoly, unsigned int vIndex);
+    void addLowPolySection(int& pointColorCounter, const TimePolygon const* polygon,
+        const TimePolygon const* nextPolygon, unsigned int& vIndex);
+    void interpolateEnd(double now);
+    void creteEnding(double now);
     void createSmoothEnding(double now);
     void createLowPolyEnding(double now);
     void updateBufferData();
+    void updateEndingBufferData();
 
     // Properties
     struct ColorSettings : properties::PropertyOwner {

@@ -398,21 +398,7 @@ void RenderableTube::initializeGL() {
 
     glBindVertexArray(_vaoIdEnding);
 
-    glBindBuffer(GL_ARRAY_BUFFER, _vboIdEnding);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _verticiesEnding.size() * sizeof(PolygonVertex),
-        _verticiesEnding.data(),
-        GL_STREAM_DRAW
-    );
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboIdEnding);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        _indiciesEnding.size() * sizeof(unsigned int),
-        _indiciesEnding.data(),
-        GL_STREAM_DRAW
-    );
+    updateEndingBufferData();
 
     glEnableVertexAttribArray(0);
     glVertexAttribLPointer(0, 3, GL_DOUBLE, sizeof(PolygonVertex), nullptr);
@@ -671,9 +657,6 @@ void RenderableTube::createSmoothTube() {
     // Keep track of index in colormap entries list
     int pointColorCounter = 0;
 
-    // Get the selected color parameter
-    int colorParamIndex = currentColorParameterIndex();
-
     // Calciulate the normals for the top and bottom
     glm::dvec3 bottomCenter = _data.front().center;
     glm::dvec3 topCenter = _data.back().center;
@@ -686,59 +669,13 @@ void RenderableTube::createSmoothTube() {
         addEdge(pointColorCounter, bottomCenter, bottomNormal, &_data.front(), bottomCenterIndex);
     }
 
-    // Add verticies for the sides of the tube
-    for (unsigned int polyIndex = 0; polyIndex < _nPolygons; ++polyIndex) {
-        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
-            bool isLastPoly = polyIndex == _nPolygons - 1;
-
-            PolygonVertex sidePoint;
-            sidePoint.position[0] = _data[polyIndex].points[pointIndex].coordinate.x;
-            sidePoint.position[1] = _data[polyIndex].points[pointIndex].coordinate.y;
-            sidePoint.position[2] = _data[polyIndex].points[pointIndex].coordinate.z;
-
-            // Calculate normal
-            glm::dvec3 centerLine = isLastPoly ?
-                _data[polyIndex - 1].center - _data[polyIndex].center :
-                _data[polyIndex].center - _data[polyIndex + 1].center;
-            glm::dvec3 normal = _data[polyIndex].points[pointIndex].coordinate -
-                glm::proj(_data[polyIndex].points[pointIndex].coordinate, centerLine) -
-                centerLine;
-
-            sidePoint.normal[0] = normal.x;
-            sidePoint.normal[1] = normal.y;
-            sidePoint.normal[2] = normal.z;
-
-            if (_hasColorMapFile) {
-                sidePoint.value = _colorDataset.entries[pointColorCounter++].data[colorParamIndex];
-            }
-
-            sidePoint.tex[0] = _data[polyIndex].points[pointIndex].tex.x;
-            sidePoint.tex[1] = _data[polyIndex].points[pointIndex].tex.y;
-
-            _verticies.push_back(sidePoint);
-        }
-    }
-
-    // Add indices for the sides of the tube
+    // Add verticies and indicies for the sides of the tube
     unsigned int firstSideIndex = _addEdges ? _nPoints + 1 : 0;
-    for (unsigned int polyIndex = 0; polyIndex < _nPolygons - 1; ++polyIndex) {
-        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
-            bool isLastPoint = pointIndex == _nPoints - 1;
-
-            unsigned int v0 = firstSideIndex + pointIndex + polyIndex * _nPoints;
-            unsigned int v1 = v0 + _nPoints;
-            unsigned int v2 = isLastPoint ? v0 + 1 : v1 + 1;
-            unsigned int v3 = isLastPoint ? v0 + 1 - _nPoints : v0 + 1;
-
-            // 2 triangles per sector
-            _indicies.push_back(v0);
-            _indicies.push_back(v1);
-            _indicies.push_back(v2);
-
-            _indicies.push_back(v0);
-            _indicies.push_back(v2);
-            _indicies.push_back(v3);
-        }
+    for (unsigned int polyIndex = 0; polyIndex < _nPolygons; ++polyIndex) {
+        // Check if this is the the last polygon that will run in the loop
+        bool isLastPoly = polyIndex == _nPolygons - 1;
+        unsigned int vIndex = firstSideIndex + polyIndex * _nPoints;
+        addSmoothSection(pointColorCounter, &_data[polyIndex], isLastPoly, vIndex);
     }
 
     // Add the top verticies and indicies
@@ -752,9 +689,6 @@ void RenderableTube::createLowPolyTube() {
     // Keep track of index in colormap entries list
     int pointColorCounter = 0;
 
-    // Get the selected color parameter
-    int colorParamIndex = currentColorParameterIndex();
-
     // Calciulate the normals for the top and bottom
     glm::dvec3 bottomCenter = _data.front().center;
     glm::dvec3 topCenter = _data.back().center;
@@ -767,123 +701,14 @@ void RenderableTube::createLowPolyTube() {
         addEdge(pointColorCounter, bottomCenter, bottomNormal, &_data.front(), bottomCenterIndex);
     }
 
-    // Add verticies for the sides of the tube
-    for (unsigned int polyIndex = 0; polyIndex < _nPolygons - 1; ++polyIndex) {
-        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
-            TimePolygon currentTimePolygon = _data[polyIndex];
-            TimePolygon nextTimePolygon = _data[polyIndex + 1];
-            bool isLastPoint = pointIndex == _nPoints - 1;
-
-            // Identify all the points that are included in this section
-            TimePolygonPoint v0 = currentTimePolygon.points[pointIndex];
-            TimePolygonPoint v1 = nextTimePolygon.points[pointIndex];
-            TimePolygonPoint v2 = isLastPoint ?
-                nextTimePolygon.points[pointIndex + 1 - _nPoints] :
-                nextTimePolygon.points[pointIndex + 1];
-            TimePolygonPoint v3 = isLastPoint ?
-                currentTimePolygon.points[pointIndex + 1 - _nPoints] :
-                currentTimePolygon.points[pointIndex + 1];
-
-            // Calculate normal of this section of the tube
-            glm::dvec3 toNextPoly = glm::normalize(v1.coordinate - v0.coordinate);
-            glm::dvec3 toNextPoint = glm::normalize(v3.coordinate - v0.coordinate);
-            glm::dvec3 normal = glm::cross(toNextPoint, toNextPoly);
-
-            // Create the Verticies for all points in this section
-            PolygonVertex sidePointTriangleV0, sidePointTriangleV1, sidePointTriangleV2,
-                sidePointTriangleV3;
-
-            // Position
-            sidePointTriangleV0.position[0] = v0.coordinate.x;
-            sidePointTriangleV0.position[1] = v0.coordinate.y;
-            sidePointTriangleV0.position[2] = v0.coordinate.z;
-
-            sidePointTriangleV1.position[0] = v1.coordinate.x;
-            sidePointTriangleV1.position[1] = v1.coordinate.y;
-            sidePointTriangleV1.position[2] = v1.coordinate.z;
-
-            sidePointTriangleV2.position[0] = v2.coordinate.x;
-            sidePointTriangleV2.position[1] = v2.coordinate.y;
-            sidePointTriangleV2.position[2] = v2.coordinate.z;
-
-            sidePointTriangleV3.position[0] = v3.coordinate.x;
-            sidePointTriangleV3.position[1] = v3.coordinate.y;
-            sidePointTriangleV3.position[2] = v3.coordinate.z;
-
-            // Normal
-            sidePointTriangleV0.normal[0] = normal.x;
-            sidePointTriangleV0.normal[1] = normal.y;
-            sidePointTriangleV0.normal[2] = normal.z;
-
-            sidePointTriangleV1.normal[0] = normal.x;
-            sidePointTriangleV1.normal[1] = normal.y;
-            sidePointTriangleV1.normal[2] = normal.z;
-
-            sidePointTriangleV2.normal[0] = normal.x;
-            sidePointTriangleV2.normal[1] = normal.y;
-            sidePointTriangleV2.normal[2] = normal.z;
-
-            sidePointTriangleV3.normal[0] = normal.x;
-            sidePointTriangleV3.normal[1] = normal.y;
-            sidePointTriangleV3.normal[2] = normal.z;
-
-            // Value
-            if (_hasColorMapFile) {
-                sidePointTriangleV0.value =
-                    _colorDataset.entries[pointColorCounter].data[colorParamIndex];
-                sidePointTriangleV1.value =
-                    _colorDataset.entries[pointColorCounter + _nPoints].data[colorParamIndex];
-                sidePointTriangleV2.value =
-                    _colorDataset.entries[isLastPoint ? pointColorCounter + 1 : pointColorCounter + _nPoints + 1].data[colorParamIndex];
-                sidePointTriangleV3.value =
-                    _colorDataset.entries[isLastPoint ? pointColorCounter + 1 - _nPoints : pointColorCounter + 1].data[colorParamIndex];
-                ++pointColorCounter;
-            }
-
-            // Texture coordinate
-            sidePointTriangleV0.tex[0] = v0.tex.x;
-            sidePointTriangleV0.tex[1] = v0.tex.y;
-
-            sidePointTriangleV1.tex[0] = v1.tex.x;
-            sidePointTriangleV1.tex[1] = v1.tex.y;
-
-            sidePointTriangleV2.tex[0] = v2.tex.x;
-            sidePointTriangleV2.tex[1] = v2.tex.y;
-
-            sidePointTriangleV3.tex[0] = v3.tex.x;
-            sidePointTriangleV3.tex[1] = v3.tex.y;
-
-            // Add all points to the list
-            _verticies.push_back(sidePointTriangleV0);
-            _verticies.push_back(sidePointTriangleV1);
-            _verticies.push_back(sidePointTriangleV2);
-            _verticies.push_back(sidePointTriangleV3);
-        }
-    }
-
-    // Add indices for the sides of the tube
-    unsigned int nPointsPerSection = 4;
+    // Add verticies and indices for the sides of the tube
     unsigned int firstSideIndex = _addEdges ? _nPoints + 1 : 0;
     unsigned int vIndex = firstSideIndex;
-
     for (unsigned int polyIndex = 0; polyIndex < _nPolygons - 1; ++polyIndex) {
-        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
-            unsigned int v0 = vIndex;
-            unsigned int v1 = v0 + 1;
-            unsigned int v2 = v1 + 1;
-            unsigned int v3 = v2 + 1;
+        TimePolygon* currentTimePolygon = &_data[polyIndex];
+        TimePolygon* nextTimePolygon = &_data[polyIndex + 1];
 
-            // 2 triangles per sector
-            _indicies.push_back(v0);
-            _indicies.push_back(v1);
-            _indicies.push_back(v2);
-
-            _indicies.push_back(v0);
-            _indicies.push_back(v2);
-            _indicies.push_back(v3);
-
-            vIndex += nPointsPerSection;
-        }
+        addLowPolySection(pointColorCounter, currentTimePolygon, nextTimePolygon, vIndex);
     }
 
     // Add the top verticies and indicies
@@ -973,6 +798,288 @@ void RenderableTube::addEdge(int pointColorCounter, const glm::dvec3& center,
     }
 }
 
+void RenderableTube::addSmoothSection(int& pointColorCounter,
+                                      const TimePolygon const* polygon,
+                                      bool isLastPoly, unsigned int vIndex)
+{
+    // Get the selected color parameter
+    int colorParamIndex = currentColorParameterIndex();
+
+    // Add the verticies and indicies for the polygon
+    for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+        bool isLast = pointIndex == _nPoints - 1;
+
+        PolygonVertex sidePoint;
+        sidePoint.position[0] = polygon->points[pointIndex].coordinate.x;
+        sidePoint.position[1] = polygon->points[pointIndex].coordinate.y;
+        sidePoint.position[2] = polygon->points[pointIndex].coordinate.z;
+
+        // Calculate normal
+        glm::dvec3 normal =
+            polygon->points[pointIndex].coordinate - polygon->center;
+        sidePoint.normal[0] = normal.x;
+        sidePoint.normal[1] = normal.y;
+        sidePoint.normal[2] = normal.z;
+
+        if (_hasColorMapFile) {
+            sidePoint.value =
+                _colorDataset.entries[pointColorCounter++].data[colorParamIndex];
+        }
+
+        sidePoint.tex[0] = polygon->points[pointIndex].tex.x;
+        sidePoint.tex[1] = polygon->points[pointIndex].tex.y;
+
+        _verticies.push_back(sidePoint);
+
+        // Add indicies
+        if (isLastPoly) {
+            // The indicies for the last polygon have already been added before
+            continue;
+        }
+
+        // Add the indicies and connect this polygon to the next
+        // v0 is the current point in this polygon
+        unsigned int v0 = vIndex + pointIndex;
+        // v1 is the coresponding current point in the next polygon
+        unsigned int v1 = v0 + _nPoints;
+        // v2 is the coresponding next point in the next polygon
+        unsigned int v2 = isLast ? v1 + 1 - _nPoints : v1 + 1;
+        // v3 is the next point in this polygon
+        unsigned int v3 = isLast ? v0 + 1 - _nPoints : v0 + 1;
+
+        // 2 triangles per sector
+        _indicies.push_back(v0);
+        _indicies.push_back(v1);
+        _indicies.push_back(v2);
+
+        _indicies.push_back(v0);
+        _indicies.push_back(v2);
+        _indicies.push_back(v3);
+    }
+}
+
+void RenderableTube::addLowPolySection(int& pointColorCounter,
+                                       const TimePolygon const* polygon,
+                                       const TimePolygon const* nextPolygon,
+                                       unsigned int& vIndex)
+{
+    // Get the selected color parameter
+    int colorParamIndex = currentColorParameterIndex();
+
+    // Add verticies for this section
+    const unsigned int nPointsPerSide = 4;
+    for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+        bool isLast = pointIndex == _nPoints - 1;
+
+        // Identify all the points that are included in this section
+        // v0 is the current point in polygon
+        TimePolygonPoint v0 = polygon->points[pointIndex];
+        // v1 is the coresponding current point in the nextPolygon
+        TimePolygonPoint v1 = nextPolygon->points[pointIndex];
+        // v2 is the coresponding next point in the nextPolygon
+        TimePolygonPoint v2 = isLast ?
+            nextPolygon->points[pointIndex + 1 - _nPoints] :
+            nextPolygon->points[pointIndex + 1];
+        // v3 is the next point in the polygon
+        TimePolygonPoint v3 = isLast ?
+            polygon->points[pointIndex + 1 - _nPoints] :
+            polygon->points[pointIndex + 1];
+
+        // Calculate the normal for this section
+        glm::dvec3 toNextPoly = glm::normalize(v1.coordinate - v0.coordinate);
+        glm::dvec3 toNextPoint = glm::normalize(v3.coordinate - v0.coordinate);
+        glm::dvec3 normal = glm::cross(toNextPoint, toNextPoly);
+
+        // Create the verticies for all points in this section
+        PolygonVertex sidePointV0, sidePointV1, sidePointV2, sidePointV3;
+
+        // Position
+        sidePointV0.position[0] = v0.coordinate.x;
+        sidePointV0.position[1] = v0.coordinate.y;
+        sidePointV0.position[2] = v0.coordinate.z;
+
+        sidePointV1.position[0] = v1.coordinate.x;
+        sidePointV1.position[1] = v1.coordinate.y;
+        sidePointV1.position[2] = v1.coordinate.z;
+
+        sidePointV2.position[0] = v2.coordinate.x;
+        sidePointV2.position[1] = v2.coordinate.y;
+        sidePointV2.position[2] = v2.coordinate.z;
+
+        sidePointV3.position[0] = v3.coordinate.x;
+        sidePointV3.position[1] = v3.coordinate.y;
+        sidePointV3.position[2] = v3.coordinate.z;
+
+        // Normal
+        sidePointV0.normal[0] = normal.x;
+        sidePointV0.normal[1] = normal.y;
+        sidePointV0.normal[2] = normal.z;
+
+        sidePointV1.normal[0] = normal.x;
+        sidePointV1.normal[1] = normal.y;
+        sidePointV1.normal[2] = normal.z;
+
+        sidePointV2.normal[0] = normal.x;
+        sidePointV2.normal[1] = normal.y;
+        sidePointV2.normal[2] = normal.z;
+
+        sidePointV3.normal[0] = normal.x;
+        sidePointV3.normal[1] = normal.y;
+        sidePointV3.normal[2] = normal.z;
+
+        // Value
+        if (_hasColorMapFile) {
+            int pointColorIndexV0 = pointColorCounter;
+            int pointColorIndexV1 = pointColorCounter + _nPoints;
+            int pointColorIndexV2 =
+                isLast ? pointColorCounter + 1 : pointColorCounter + _nPoints + 1;
+            int pointColorIndexV3 =
+                isLast ? pointColorCounter + 1 - _nPoints : pointColorCounter + 1;
+            ++pointColorCounter;
+
+            sidePointV0.value =
+                _colorDataset.entries[pointColorIndexV0].data[colorParamIndex];
+            sidePointV1.value =
+                _colorDataset.entries[pointColorIndexV1].data[colorParamIndex];
+            sidePointV2.value =
+                _colorDataset.entries[pointColorIndexV2].data[colorParamIndex];
+            sidePointV3.value =
+                _colorDataset.entries[pointColorIndexV3].data[colorParamIndex];
+        }
+
+        // Texture coordinate
+        sidePointV0.tex[0] = v0.tex.x;
+        sidePointV0.tex[1] = v0.tex.y;
+
+        sidePointV1.tex[0] = v1.tex.x;
+        sidePointV1.tex[1] = v1.tex.y;
+
+        sidePointV2.tex[0] = v2.tex.x;
+        sidePointV2.tex[1] = v2.tex.y;
+
+        sidePointV3.tex[0] = v3.tex.x;
+        sidePointV3.tex[1] = v3.tex.y;
+
+        // Add all points to the list
+        _verticies.push_back(sidePointV0);
+        _verticies.push_back(sidePointV1);
+        _verticies.push_back(sidePointV2);
+        _verticies.push_back(sidePointV3);
+
+        // Add indicies for this point
+        unsigned int indexV0 = vIndex;
+        unsigned int indexV1 = indexV0 + 1;
+        unsigned int indexV2 = indexV1 + 1;
+        unsigned int indexV3 = indexV2 + 1;
+        vIndex += nPointsPerSide;
+
+        // 2 triangles per side
+        _indicies.push_back(indexV0);
+        _indicies.push_back(indexV1);
+        _indicies.push_back(indexV2);
+
+        _indicies.push_back(indexV0);
+        _indicies.push_back(indexV2);
+        _indicies.push_back(indexV3);
+    }
+}
+
+void RenderableTube::interpolateEnd(double now) {
+    // Find the polygon before and after the current time
+    _lastPolygonBeforeNow = 0;
+    _firstPolygonAfterNow = std::numeric_limits<size_t>::max();
+    double nextPolygonTime = std::numeric_limits<double>::max();
+    bool foundPrev = false;
+    _interpolationNeeded = true;
+
+    for (size_t i = 0; i < _data.size(); ++i) {
+        // Found a time smaller than now
+        if (_data[i].timestamp < now) {
+            _lastPolygonBeforeNow = i;
+            foundPrev = true;
+        }
+        // Found a time larger than now
+        else if (_data[i].timestamp > now && _data[i].timestamp < nextPolygonTime) {
+            nextPolygonTime = _data[i].timestamp;
+            _firstPolygonAfterNow = i;
+        }
+        // Found a time exactly equal to now
+        else if (std::abs(_data[i].timestamp - now) <
+                 std::numeric_limits<double>::epsilon())
+        {
+            _lastPolygonBeforeNow = i;
+            foundPrev = true;
+            _interpolationNeeded = false;
+            LDEBUG(fmt::format("Polygon nr: '{}' is exactly at NOW",
+                _lastPolygonBeforeNow)
+            );
+        }
+    }
+
+    // Count the number of indicies in the tube up to and including the
+    // _lastPolygonBeforeNow polygon
+    int nIndiciesUntilNow = 0;
+    // Before beginning
+    if (!foundPrev) {
+        // Do not show anything
+        nIndiciesUntilNow = 0;
+        _interpolationNeeded = false;
+        LDEBUG("Before");
+    }
+    // At or after end
+    else if (_lastPolygonBeforeNow == _nPolygons - 1) {
+        // Show all of the tube
+        nIndiciesUntilNow = _indicies.size();
+        _interpolationNeeded = false;
+        LDEBUG("After or End");
+    }
+    // Middle
+    else {
+        // First add the bottom
+        if (_addEdges) {
+            nIndiciesUntilNow += static_cast<int>(_nPoints * 3);
+        }
+
+        // Show all sections until and including the _lastPolygonBeforeNow polygon
+        const unsigned int nIndiciesPerSection = 6;
+        nIndiciesUntilNow +=
+            static_cast<int>(_lastPolygonBeforeNow * _nPoints * nIndiciesPerSection);
+    }
+
+    LDEBUG(fmt::format("\nprev: '{}'\nnext: '{}'\nnPointsUntilNow: '{}'\n",
+        _lastPolygonBeforeNow, _firstPolygonAfterNow, nIndiciesUntilNow)
+    );
+
+    if (nIndiciesUntilNow > _indicies.size()) {
+        LERROR("Cannot render more verticies than what is in the tube");
+        _nIndiciesToRender = 0;
+    }
+    else {
+        _nIndiciesToRender = nIndiciesUntilNow;
+    }
+
+    // Update the end of the tube
+    if (_interpolationNeeded) {
+        _verticiesEnding.clear();
+        _indiciesEnding.clear();
+
+        // Interpolate the last step
+        creteEnding(now);
+        updateEndingBufferData();
+    }
+
+    glBindVertexArray(0);
+}
+
+void RenderableTube::creteEnding(double now) {
+    if (_useSmoothNormals) {
+        createSmoothEnding(now);
+    }
+    else {
+        createLowPolyEnding(now);
+    }
+}
+
 void RenderableTube::createSmoothEnding(double now) {
     // Get the selected color parameter
     int colorParamIndex = currentColorParameterIndex();
@@ -986,10 +1093,6 @@ void RenderableTube::createSmoothEnding(double now) {
         sidePoint.position[0] = sidePointData.coordinate.x;
         sidePoint.position[1] = sidePointData.coordinate.y;
         sidePoint.position[2] = sidePointData.coordinate.z;
-
-        // Texture coordinate
-        sidePoint.tex[0] = sidePointData.tex.x;
-        sidePoint.tex[1] = sidePointData.tex.y;
 
         // Calculate normal
         glm::dvec3 centerLine = _data[polyIndex].center - _data[polyIndex + 1].center;
@@ -1005,6 +1108,10 @@ void RenderableTube::createSmoothEnding(double now) {
             sidePoint.value =
                 _colorDataset.entries[polyIndex * _nPoints + pointIndex].data[colorParamIndex];
         }
+
+        // Texture coordinate
+        sidePoint.tex[0] = sidePointData.tex.x;
+        sidePoint.tex[1] = sidePointData.tex.y;
 
         _verticiesEnding.push_back(sidePoint);
     }
@@ -1543,6 +1650,25 @@ void RenderableTube::updateBufferData() {
     );
 }
 
+void RenderableTube::updateEndingBufferData() {
+    glBindVertexArray(_vaoIdEnding);
+    glBindBuffer(GL_ARRAY_BUFFER, _vboIdEnding);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _verticiesEnding.size() * sizeof(PolygonVertex),
+        _verticiesEnding.data(),
+        GL_STREAM_DRAW
+    );
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboIdEnding);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        _indiciesEnding.size() * sizeof(unsigned int),
+        _indiciesEnding.data(),
+        GL_STREAM_DRAW
+    );
+}
+
 void RenderableTube::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
@@ -1556,7 +1682,7 @@ void RenderableTube::update(const UpdateData& data) {
     if (_tubeIsDirty) {
         createTube();
         updateBufferData();
-        //setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));
+        //setBoundingSphere(???);
         _tubeIsDirty = false;
     }
 
@@ -1565,126 +1691,7 @@ void RenderableTube::update(const UpdateData& data) {
         return;
     }
 
-    const double now = data.time.j2000Seconds();
-    double prev = 0.0;
-    double next = std::numeric_limits<double>::max();
-    _lastPolygonBeforeNow = 0;
-    _firstPolygonAfterNow = std::numeric_limits<size_t>::max();
-    bool hasPrev = false;
-    _interpolationNeeded = true;
-
-    for (size_t i = 0; i < _data.size(); ++i) {
-        // Found a time smaller than now
-        if (_data[i].timestamp < now) {
-            prev = _data[i].timestamp;
-            _lastPolygonBeforeNow = i;
-            hasPrev = true;
-        }
-        // Found a time larger than now
-        else if (_data[i].timestamp > now && _data[i].timestamp < next) {
-            next = _data[i].timestamp;
-            _firstPolygonAfterNow = i;
-        }
-        // Found a time exactly equal to now
-        else if (std::abs(_data[i].timestamp - now) <
-                 std::numeric_limits<double>::epsilon())
-        {
-            prev = _data[i].timestamp;
-            _lastPolygonBeforeNow = i;
-            hasPrev = true;
-            _interpolationNeeded = false;
-            LDEBUG(fmt::format("Polygon nr: '{}' is exactly at NOW",
-                _lastPolygonBeforeNow)
-            );
-        }
-    }
-
-    // How many points are to and including polygon _lastPolygonBeforeNow?
-    const size_t nPolygons = _data.size();
-    const size_t nPoints = _data.front().points.size();
-
-    int nPointsUntilNow = 0;
-
-    // Where on the tube are we located in time
-    if (!hasPrev) {
-        // Before the time of the tube, do not show anything
-        nPointsUntilNow = 0;
-        _interpolationNeeded = false;
-        LDEBUG("Before");
-    }
-    else if (_lastPolygonBeforeNow == nPolygons - 1) {
-        // The previous step before now is the last polygon,
-        // either after the time of the full tube or just at the exact end of it,
-        // either way, show all of the tube
-        nPointsUntilNow = _indicies.size();
-        _interpolationNeeded = false;
-        LDEBUG("After or End");
-    }
-    else {
-        // Somewhere in the middle of the tube
-        // could also be the very first polygon, _lastPolygonBeforeNow == 0
-
-        // First add the bottom if that property is turned on
-        if (_addEdges) {
-            // Show at least the bottom
-            nPointsUntilNow += static_cast<int>(nPoints * 3);
-        }
-
-        // Show the sides until _lastPolygonBeforeNow
-        nPointsUntilNow += static_cast<int>(_lastPolygonBeforeNow * nPoints * 6);
-
-        // We need at least one full side to show if we do not show the edges
-        if (!_addEdges && _lastPolygonBeforeNow == 0) {
-            LDEBUG("Nothing to show except edges");
-            nPointsUntilNow = 0;
-        }
-    }
-
-    LDEBUG(fmt::format("\nprev: '{}'\nnext: '{}'\nnPointsUntilNow: '{}'\n",
-        _lastPolygonBeforeNow, _firstPolygonAfterNow, nPointsUntilNow)
-    );
-
-    if (nPointsUntilNow > _indicies.size()) {
-        LERROR("Cannot render more verticies than what is in the tube");
-        _nIndiciesToRender = 0;
-    }
-    else {
-        _nIndiciesToRender = nPointsUntilNow;
-    }
-
-    // Update the ending of the tube
-    if (_interpolationNeeded) {
-        _verticiesEnding.clear();
-        _indiciesEnding.clear();
-
-        // Create the last piece of the tube
-        if (_useSmoothNormals) {
-            createSmoothEnding(now);
-        }
-        else {
-            createLowPolyEnding(now);
-        }
-
-        // Update the buffer for the last piece
-        glBindVertexArray(_vaoIdEnding);
-        glBindBuffer(GL_ARRAY_BUFFER, _vboIdEnding);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            _verticiesEnding.size() * sizeof(PolygonVertex),
-            _verticiesEnding.data(),
-            GL_STREAM_DRAW
-        );
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboIdEnding);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
-            _indiciesEnding.size() * sizeof(unsigned int),
-            _indiciesEnding.data(),
-            GL_STREAM_DRAW
-        );
-    }
-
-    glBindVertexArray(0);
+    interpolateEnd(data.time.j2000Seconds());
 }
 
 } // namespace openspace
