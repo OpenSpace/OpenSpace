@@ -645,9 +645,6 @@ void RenderableTube::createTube() {
     _verticies.clear();
     _indicies.clear();
 
-    // Keep track of index in colormap entries list
-    int pointColorCounter = 0;
-
     // Calciulate the normals for the top and bottom
     glm::dvec3 bottomCenter = _data.front().center;
     glm::dvec3 topCenter = _data.back().center;
@@ -657,7 +654,7 @@ void RenderableTube::createTube() {
     // Add the bottom verticies and indicies
     if (_addEdges) {
         unsigned int bottomCenterIndex = 0;
-        addEdge(pointColorCounter, bottomCenter, bottomNormal, &_data.front(), bottomCenterIndex);
+        addEdge(0, bottomNormal, &_data.front(), bottomCenterIndex);
     }
 
     // Add the sides of the tube
@@ -671,8 +668,7 @@ void RenderableTube::createTube() {
     // Add the top verticies and indicies
     if (_addEdges) {
         unsigned int topCenterIndex = _verticies.size();
-        pointColorCounter = (_nPolygons - 1) * _nPoints;
-        addEdge(pointColorCounter, topCenter, topNormal, & _data.back(), topCenterIndex);
+        addEdge(_nPolygons - 1, topNormal, & _data.back(), topCenterIndex);
     }
 }
 
@@ -698,20 +694,34 @@ void RenderableTube::createLowPolyTube() {
     }
 }
 
-void RenderableTube::addEdge(int pointColorCounter, const glm::dvec3& center,
-                             const glm::dvec3& normal, const TimePolygon const* polygon,
-                             int centerIndex)
+void RenderableTube::addEdge(int polygonIndex, const glm::dvec3& normal,
+                             const TimePolygon const* polygon, int centerIndex,
+                             double tInterpolation)
 {
+    // Set where to store the verticies and indicies
+    std::vector<PolygonVertex>* verticies =
+        tInterpolation > 0.0 ? &_verticiesEnding : &_verticies;
+    std::vector<unsigned int>* indicies =
+        tInterpolation > 0.0 ? &_indiciesEnding : &_indicies;
+
     // Get the selected color parameter
     int colorParamIndex = currentColorParameterIndex();
+    int pointColorIndex = polygonIndex * _nPoints;
 
     // Calculate the transfer function value for the center point of the given polygon
     float centerValue = 0.f;
     if (_hasColorMapFile) {
-        int loopPointCounter = pointColorCounter;
         for (size_t pointIndex = 0; pointIndex < polygon->points.size(); ++pointIndex) {
-            centerValue +=
-                _colorDataset.entries[loopPointCounter++].data[colorParamIndex];
+            float tempCenterValue =
+                _colorDataset.entries[pointColorIndex + pointIndex].data[colorParamIndex];
+
+            if (tInterpolation > 0.0) {
+                int prevPointColorIndex = (polygonIndex - 1) * _nPoints + pointIndex;
+                float prevPolyValue = _colorDataset.entries[prevPointColorIndex + pointIndex].data[colorParamIndex];
+                tempCenterValue = tInterpolation * tempCenterValue + (1.0 - tInterpolation) * prevPolyValue;
+            }
+
+            centerValue += tempCenterValue;
         }
         centerValue /= _nPoints;
     }
@@ -725,9 +735,9 @@ void RenderableTube::addEdge(int pointColorCounter, const glm::dvec3& center,
 
     // Add the center point of the edge
     PolygonVertex centerPoint;
-    centerPoint.position[0] = center.x;
-    centerPoint.position[1] = center.y;
-    centerPoint.position[2] = center.z;
+    centerPoint.position[0] = polygon->center.x;
+    centerPoint.position[1] = polygon->center.y;
+    centerPoint.position[2] = polygon->center.z;
 
     centerPoint.normal[0] = normal.x;
     centerPoint.normal[1] = normal.y;
@@ -740,14 +750,14 @@ void RenderableTube::addEdge(int pointColorCounter, const glm::dvec3& center,
     centerPoint.tex[0] = centerTex.x;
     centerPoint.tex[1] = centerTex.y;
 
-    _verticies.push_back(centerPoint);
+    verticies->push_back(centerPoint);
 
     // Add the side verticies for the edge
-    for (const TimePolygonPoint& timePolygonPoint : polygon->points) {
+    for (size_t pointIndex = 0; pointIndex < polygon->points.size(); ++pointIndex) {
         PolygonVertex sidePoint;
-        sidePoint.position[0] = timePolygonPoint.coordinate.x;
-        sidePoint.position[1] = timePolygonPoint.coordinate.y;
-        sidePoint.position[2] = timePolygonPoint.coordinate.z;
+        sidePoint.position[0] = polygon->points[pointIndex].coordinate.x;
+        sidePoint.position[1] = polygon->points[pointIndex].coordinate.y;
+        sidePoint.position[2] = polygon->points[pointIndex].coordinate.z;
 
         sidePoint.normal[0] = normal.x;
         sidePoint.normal[1] = normal.y;
@@ -755,13 +765,19 @@ void RenderableTube::addEdge(int pointColorCounter, const glm::dvec3& center,
 
         if (_hasColorMapFile) {
             sidePoint.value =
-                _colorDataset.entries[pointColorCounter++].data[colorParamIndex];
+                _colorDataset.entries[pointColorIndex + pointIndex].data[colorParamIndex];
+
+            if (tInterpolation > 0.0) {
+                int prevPointColorIndex = (polygonIndex - 1) * _nPoints + pointIndex;
+                float prevPolyValue = _colorDataset.entries[prevPointColorIndex].data[colorParamIndex];
+                sidePoint.value = tInterpolation * sidePoint.value + (1.0 - tInterpolation) * prevPolyValue;
+            }
         }
 
-        sidePoint.tex[0] = timePolygonPoint.tex.x;
-        sidePoint.tex[1] = timePolygonPoint.tex.y;
+        sidePoint.tex[0] = polygon->points[pointIndex].tex.x;
+        sidePoint.tex[1] = polygon->points[pointIndex].tex.y;
 
-        _verticies.push_back(sidePoint);
+        verticies->push_back(sidePoint);
     }
 
     // Add Indices for edge
@@ -772,14 +788,13 @@ void RenderableTube::addEdge(int pointColorCounter, const glm::dvec3& center,
         unsigned int v1 = centerIndex + pointIndex + 1;
         unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
 
-        _indicies.push_back(v0);
-        _indicies.push_back(v1);
-        _indicies.push_back(v2);
+        indicies->push_back(v0);
+        indicies->push_back(v1);
+        indicies->push_back(v2);
     }
 }
 
-void RenderableTube::addSmoothSection(unsigned int polygonIndex,
-                                      const TimePolygon const* polygon,
+void RenderableTube::addSmoothSection(int polygonIndex, const TimePolygon const* polygon,
                                       bool isLastPoly, unsigned int vIndex,
                                       bool isEnding, double tInterpolation)
 {
@@ -811,9 +826,8 @@ void RenderableTube::addSmoothSection(unsigned int polygonIndex,
             float value = _colorDataset.entries[pointColorIndex].data[colorParamIndex];
 
             if (tInterpolation > 0.0) {
-                pointColorIndex = (polygonIndex - 1)* _nPoints + pointIndex;
-                float prevPolyValue = _colorDataset
-                    .entries[pointColorIndex + _nPoints].data[colorParamIndex];
+                int prevPointColorIndex = (polygonIndex - 1)* _nPoints + pointIndex;
+                float prevPolyValue = _colorDataset.entries[prevPointColorIndex].data[colorParamIndex];
                 value = tInterpolation * value + (1.0 - tInterpolation) * prevPolyValue;
             }
 
@@ -852,8 +866,7 @@ void RenderableTube::addSmoothSection(unsigned int polygonIndex,
     }
 }
 
-void RenderableTube::addLowPolySection(unsigned int polygonIndex,
-                                       const TimePolygon const* polygon,
+void RenderableTube::addLowPolySection(int polygonIndex, const TimePolygon const* polygon,
                                        const TimePolygon const* nextPolygon,
                                        unsigned int& vIndex, double tInterpolation)
 {
@@ -1115,6 +1128,16 @@ void RenderableTube::creteEnding(double now) {
     else {
         createLowPolyEnding(t, prevTimePolygon, &currentTimePolygon);
     }
+
+    // Add cutplane
+    if (_addEdges) {
+        // Calculate normal
+        glm::dvec3 normal =
+            _data[_firstPolygonAfterNow].center - _data[_lastPolygonBeforeNow].center;
+
+        unsigned int centerIndex = _verticiesEnding.size();
+        addEdge(_firstPolygonAfterNow, normal, &currentTimePolygon, centerIndex, t);
+    }
 }
 
 void RenderableTube::createSmoothEnding(double tInterpolation,
@@ -1156,86 +1179,6 @@ void RenderableTube::createLowPolyEnding(double tInterpolation,
         vIndex,
         tInterpolation
     );
-
-
-    /*
-    // Add cutplane
-    if (_addEdges) {
-        // Calculate normal
-        glm::dvec3 cutplaneNormal =
-            _data[_firstPolygonAfterNow].center - _data[_lastPolygonBeforeNow].center;
-        float cutplaneCenterValue = 0.f;
-        glm::dvec3 cutplaneCenterPoint = glm::dvec3(0.0);
-
-        // Add the cutplane's sides with proper normals
-        // This will ensure a hard shadow on the tube edge
-        int polyIndex = _firstPolygonAfterNow;
-        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
-            glm::dvec3 prevPolyPointPos = _data[_lastPolygonBeforeNow].points[pointIndex].coordinate;
-            glm::dvec3 nextPolyPointPos = _data[_firstPolygonAfterNow].points[pointIndex].coordinate;
-            glm::dvec3 currPolyPointPos = t * nextPolyPointPos + (1.0 - t) * prevPolyPointPos;
-
-            PolygonVertex sidePoint;
-            sidePoint.position[0] = currPolyPointPos.x;
-            sidePoint.position[1] = currPolyPointPos.y;
-            sidePoint.position[2] = currPolyPointPos.z;
-            cutplaneCenterPoint += currPolyPointPos;
-
-            // Texture coordinate??
-
-            sidePoint.normal[0] = cutplaneNormal.x;
-            sidePoint.normal[1] = cutplaneNormal.y;
-            sidePoint.normal[2] = cutplaneNormal.z;
-
-            if (_hasColorMapFile) {
-                float prevPolyPointValue =
-                    _colorDataset.entries[polyIndex * _nPoints + pointIndex - 1].data[colorParamIndex];
-                float currPolyPointValue =
-                    _colorDataset.entries[polyIndex * _nPoints + pointIndex].data[colorParamIndex];
-                currPolyPointValue = t * currPolyPointValue + (1.0 - t) * prevPolyPointValue;
-
-                sidePoint.value = currPolyPointValue;
-                cutplaneCenterValue += currPolyPointValue;
-            }
-
-            _verticiesEnding.push_back(sidePoint);
-        }
-
-        // Add the cutplane's center point
-        PolygonVertex topCenterPoint;
-        cutplaneCenterPoint /= _nPoints;
-        topCenterPoint.position[0] = cutplaneCenterPoint.x;
-        topCenterPoint.position[1] = cutplaneCenterPoint.y;
-        topCenterPoint.position[2] = cutplaneCenterPoint.z;
-
-        // Texture coordinate??
-
-        topCenterPoint.normal[0] = cutplaneNormal.x;
-        topCenterPoint.normal[1] = cutplaneNormal.y;
-        topCenterPoint.normal[2] = cutplaneNormal.z;
-
-        if (_hasColorMapFile) {
-            topCenterPoint.value = cutplaneCenterValue / _nPoints;
-        }
-        _verticiesEnding.push_back(topCenterPoint);
-    }
-
-    // Add Indices for cutplane
-    if (_addEdges) {
-        unsigned int topCenterIndex = _verticiesEnding.size() - 1;
-        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
-            unsigned int vIndex = topCenterIndex - pointIndex - 1;
-            bool isLast = pointIndex == _nPoints - 1;
-
-            unsigned int v0 = topCenterIndex;
-            unsigned int v1 = vIndex;
-            unsigned int v2 = isLast ? v0 - 1 : vIndex - 1;
-
-            _indiciesEnding.push_back(v0);
-            _indiciesEnding.push_back(v1);
-            _indiciesEnding.push_back(v2);
-        }
-    }*/
 }
 
 void RenderableTube::render(const RenderData& data, RendererTasks&) {
