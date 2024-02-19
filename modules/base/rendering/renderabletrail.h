@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
@@ -92,9 +93,9 @@ public:
         /// Specifies a multiplicative factor that fades out the line
         properties::Vec2Property lineFade;
         /// Specifies a multiplicative factor that fades out the line
-        properties::Vec2Property lineFadeStarPointDuration;
+        properties::Vec2Property lineFadeEndPointAmount;
         /// Specifies a multiplicative factor that fades out the line
-        properties::Vec2Property lineFadeEndPointDuration;
+        properties::Vec2Property lineFadeBreakPointAmount;
         // Option to select fademode
         properties::OptionProperty fadingModes;
     };
@@ -187,6 +188,9 @@ protected:
     bool _splitTrailRenderMode = false;
     /// Number of unique vertices used when rendering segmented trails
     int _numberOfUniqueVertices = 0;
+
+    // TEMP
+    double _orbitPeriod = 0.0;
 
 private:
     void internalRender(bool renderLines, bool renderPoints,

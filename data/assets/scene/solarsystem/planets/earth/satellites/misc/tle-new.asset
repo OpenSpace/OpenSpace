@@ -21,7 +21,8 @@ local Last30DaysSatellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.65, 0.25, 0.45 },
-    Fade = 1.5,
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },

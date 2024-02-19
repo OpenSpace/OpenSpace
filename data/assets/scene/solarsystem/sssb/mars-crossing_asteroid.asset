@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 1,
     Color = { 0.814, 0.305, 0.22 },
-    TrailFade = 13
+    TrailFade = 13,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Mars-crossing Asteroids",

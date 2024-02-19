@@ -21,7 +21,8 @@ local DebrisIridium = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.8, 0.0, 0.3 },
-    Fade = 1.5,
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },

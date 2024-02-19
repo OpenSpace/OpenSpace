@@ -20,7 +20,11 @@ local Object = {
     Segments = 200,
     SegmentQuality = 1,
     Color = { 0.5, 0.8, 0.5 },
-    TrailFade = 5
+    TrailFade = 5,
+    PointSizeExponent = 9.2,
+    EnableMaxSize = true,
+    MaxSize = 2.0,
+    Rendering = "Point"
   },
   GUI = {
     Name = "Jupiter Trojan Asteroids",

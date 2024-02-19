@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 6,
     Color = { 0.7, 0.7, 1.0 },
-    TrailFade = 10
+    TrailFade = 10,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Apollo Asteroids",

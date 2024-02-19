@@ -22,50 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
 
-#include "PowerScaling/powerScalingMath.hglsl"
+in float projectionViewDepth;
+in vec4 viewSpace;
+in vec2 texCoord;
+flat in int skip;
+//flat in float alpha;
 
-layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
-layout (location = 1) in vec2 orbitData; // 1: epoch, 2: period
+uniform vec3 color;
+uniform float opacity;
 
-out vec4 viewSpacePosition;
-out float viewSpaceDepth;
-out float periodFraction;
-out float offsetPeriods;
-
-uniform dmat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform double inGameTime;
-
-
-void main() {
-  // The way the position and line fade is calculated is:
-  // By using inGameTime, epoch and period of this orbit, we get how many revolutions it
-  // has done since epoch. The fract of that, is how far into a revolution it has traveled
-  // since epoch. Similarly we do the same but for this vertex, but calculating
-  // offsetPeriods. In the fragment shader the difference between periodFraction_f and
-  // offsetPeriods is calculated to know how much to fade that specific fragment.
-
-  // If orbit_data is doubles, cast to float first
-  float epoch = orbitData.x;
-  float period = orbitData.y;
-
-  // calculate nr of periods, get fractional part to know where the vertex closest to the
-  // debris part is right now
-  double nrOfRevolutions = (inGameTime - epoch) / period;
-  double frac = double(int(nrOfRevolutions));
-  double periodFractiond = nrOfRevolutions - frac;
-  if (periodFractiond < 0.0) {
-    periodFractiond += 1.0;
+Fragment getFragment() {
+  Fragment frag;
+  
+  if (skip == 1) {
+    discard;
   }
-  periodFraction = float(periodFractiond);
 
-  // same procedure for the current vertex
-  offsetPeriods = vertexData.w / float(period);
+  // Only draw circle instead of entire quad
+  vec2 st = (texCoord - vec2(0.5)) * 2.0;
+  if (length(st) > 1.0) {
+    discard;
+  }
 
-  viewSpacePosition = vec4(modelViewTransform * dvec4(vertexData.xyz, 1));
-  vec4 vs_position = z_normalization(projectionTransform * viewSpacePosition);
-  gl_Position = vs_position;
-  viewSpaceDepth = vs_position.w;
+  // Creates outline for circle
+  vec3 _color = color;
+  if (length(st) > 0.8 && length(st) < 1.0) {
+    _color *= 0.f;
+  }
+
+  frag.color = vec4(_color, opacity);
+  frag.depth = projectionViewDepth;
+  frag.gPosition = viewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+
+  return frag;
 }

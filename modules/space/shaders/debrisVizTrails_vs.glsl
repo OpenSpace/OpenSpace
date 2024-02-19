@@ -24,91 +24,48 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "PowerScaling/powerScalingMath.hglsl"
 
-layout(location = 0) in vec3 in_point_position;
+layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
+layout (location = 1) in vec2 orbitData; // 1: epoch, 2: period
 
-out float vs_positionDepth;
-out vec4 vs_gPosition;
-out float fade;
-noperspective out vec2 mathLine;
+out vec4 viewSpacePosition;
+out float viewSpaceDepth;
+out float periodFraction;
+out float offsetPeriods;
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
-uniform int idOffset;
-uniform int nVertices;
-uniform bool useLineFade;
-uniform vec2 lineFade;
-uniform int vertexSortingMethod;
-uniform int pointSize;
-uniform int stride;
-
-uniform vec4 viewport;
-
-uniform bool useSplitRenderMode;
-uniform int numberOfUniqueVertices;
-uniform int floatingOffset;
-
-// Fragile! Keep in sync with RenderableTrail::render
-#define VERTEX_SORTING_NEWESTFIRST 0
-#define VERTEX_SORTING_OLDESTFIRST 1
-#define VERTEX_SORTING_NOSORTING 2
+uniform double inGameTime;
 
 
 void main() {
-  int modId = gl_VertexID;
+  // The way the position and trail fade is calculated is:
+  // By using inGameTime, epoch and period of this orbit, we get how many revolutions it
+  // has done since epoch. The fract of that, is how far into a revolution it has traveled
+  // since epoch. Similarly we do the same but for this vertex, but calculating
+  // offsetPeriods. In the fragment shader the difference between periodFraction_f and
+  // offsetPeriods is calculated to know how much to fade that specific fragment.
 
-  if ((vertexSortingMethod != VERTEX_SORTING_NOSORTING) && useLineFade) {
-    float id = 0;
+  // If orbit_data is doubles, cast to float first
+  float epoch = orbitData.x;
+  float period = orbitData.y;
 
-    if(useSplitRenderMode) {
-        // Calculates id for when using split render mode (renderableTrailTrajectory)
-        id = float(floatingOffset + modId) / float(numberOfUniqueVertices - 1);
-    }
-    else {
-        // Account for a potential rolling buffer
-        modId = gl_VertexID - idOffset;
-        if (modId < 0) {
-          modId += nVertices;
-        }
-        
-        // Convert the index to a [0,1] ranger
-        id = float(modId) / float(nVertices);
-    }
-
-    if (vertexSortingMethod == VERTEX_SORTING_NEWESTFIRST) {
-      id = 1.0 - id;
-    }
-
-    float b0 = lineFade[0];
-    float b1 = lineFade[1];
-
-    float fadeValue = 0.0;
-    if (id <= b0) {
-        fadeValue = 0.0;
-    }
-    else if (id > b0 && id < b1) {
-        float delta = b1 - b0;
-        fadeValue = (id-b0) / delta;
-    }
-    else {
-        fadeValue = 1.0;
-    }
-
-    fade = clamp(fadeValue, 0.0, 1.0);
+  // calculate nr of periods, get fractional part to know where the vertex closest to the
+  // debris part is right now
+  double nrOfRevolutions = (inGameTime - epoch) / period;
+  double frac = double(int(nrOfRevolutions));
+  double periodFractiond = nrOfRevolutions - frac;
+  if (periodFractiond < 0.0) {
+    periodFractiond += 1.0;
   }
-  else {
-    fade = 1.0;
-  }
+  periodFraction = float(periodFractiond);
 
-  vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
-  vec4 vs_positionClipSpace = projectionTransform * vs_gPosition;
-  vec4 vs_positionNDC = vs_positionClipSpace / vs_positionClipSpace.w;
-  vs_positionDepth = vs_positionClipSpace.w;
+  // same procedure for the current vertex
+  offsetPeriods = vertexData.w / float(period);
 
-  gl_PointSize = (stride == 1 || int(modId) % stride == 0) ?
-                  float(pointSize) : float(pointSize) / 2;
-  gl_Position  = z_normalization(vs_positionClipSpace);
-
-  mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * viewport.zw;
+  viewSpacePosition = vec4(modelViewTransform * dvec4(vertexData.xyz, 1));
+  vec4 vs_position = z_normalization(projectionTransform * viewSpacePosition);
+  gl_Position = vs_position;
+  viewSpaceDepth = vs_position.w;
 }

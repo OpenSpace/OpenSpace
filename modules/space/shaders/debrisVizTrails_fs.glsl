@@ -31,58 +31,45 @@ in float offsetPeriods;
 
 uniform vec3 color;
 uniform float opacity = 1.0;
-uniform vec2 lineFade;
-uniform bool useLineFade;
+uniform float trailFade;
 
+/// Different modes - sync with renderableorbitalkepler.cpp
+// RenderingModeLines = 0
+// RenderingModePoint = 1
 
 Fragment getFragment() {
   Fragment frag;
+
+  float invert = 1.0;
   float fade = 1.0;
-  if (useLineFade) {
-    // float offsetPeriods = offset / period;
-    // This is now done in the fragment shader instead to make smooth movement between
-    // vertices. We want vertexDistance to be double up to this point, I think, (hence the
-    // unnessesary float to float conversion)
-    float vertexDistance = periodFraction - offsetPeriods;
 
-    // This is the alternative way of calculating
-    // the offsetPeriods: (vertexID_perOrbit/nrOfSegments_f)
-    // float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
-    // float nrOfSegments_f = float(numberOfSegments);
-    // float vertexDistance = periodFraction - (vertexID_perOrbit/nrOfSegments_f);
-    if (vertexDistance < 0.0) {
-      vertexDistance += 1.0;
-    }
+  // float offsetPeriods = offset / period;
+  // This is now done in the fragment shader instead to make smooth movement between
+  // vertices. We want vertexDistance to be double up to this point, I think, (hence the
+  // unnessesary float to float conversion)
+  float vertexDistance = periodFraction - offsetPeriods;
 
-    float b0 = lineFade[0] / 100.0;
-    float b1 = lineFade[1] / 100.0;
+  // This is the alternative way of calculating
+  // the offsetPeriods: (vertexID_perOrbit/nrOfSegments_f)
+  // float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
+  // float nrOfSegments_f = float(numberOfSegments);
+  // float vertexDistance = periodFraction - (vertexID_perOrbit/nrOfSegments_f);
+  if (vertexDistance < 0.0) {
+    vertexDistance += 1.0;
+  }
 
-    float id = 1.0 - vertexDistance;
+  invert = pow((1.0 - vertexDistance), trailFade);  
+  fade = clamp(invert, 0.0, 1.0);
 
-    float fadeValue = 0.0;
-    if (id <= b0) {
-        fadeValue = 0.0;
-    }
-    else if (id > b0 && id < b1) {
-        float delta = b1 - b0;
-        fadeValue = (id-b0) / delta;
-    }
-    else {
-        fadeValue = 1.0;
-    }
-    
-    fade = clamp(fadeValue, 0.0, 1.0);
-
-    // Currently even fully transparent lines can occlude other lines, thus we discard these
-    // fragments since debris and satellites are rendered so close to each other
-    if (fade < 0.05) {
-      discard;
-    }
-    
-    // Use additive blending for some values to make the discarding less abrupt
-    if (fade < 0.15) {
-      frag.blend = BLEND_MODE_ADDITIVE;
-    }
+  // Currently even fully transparent lines can occlude other lines, thus we discard these
+  // fragments since debris and satellites are rendered so close to each other
+  if (fade < 0.05) {
+    discard;
+  }
+  
+  // Use additive blending for some values to make the discarding less abrupt
+  if (fade < 0.15) {
+    frag.blend = BLEND_MODE_ADDITIVE;
   }
   
   frag.color = vec4(color, fade * opacity);

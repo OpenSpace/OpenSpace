@@ -45,6 +45,13 @@
 #include <vector>
 
 namespace {
+
+    // The possible values for the _renderingModes property
+    enum RenderingMode {
+        RenderingModeTrail = 0,
+        RenderingModePoint
+    };
+
     constexpr openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
@@ -63,25 +70,63 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
+    constexpr openspace::properties::Property::PropertyInfo TrailWidthInfo = {
+        "TrailWidth",
+        "Trail Width",
         "This value specifies the line width of the trail if the selected rendering "
         "method includes lines. If the rendering mode is set to Points, this value is "
         "ignored",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PointSizeExponentInfo = {
+        "PointSizeExponent",
+        "Point Size Exponent",
+        "This value is used as in exponential scaling to set the absolute size of the "
+        "point.",
+        // @VISIBILITY(2.4)
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableMaxSizeInfo = {
+        "EnableMaxSize",
+        "Enable Max Size",
+        "If true, the Max Size property will be used as an upper limit for the size of "
+        "the point. This reduces the size of the points when approaching them, so that "
+        "they stick to a maximum visual size depending on the Max Size value.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
+        "MaxSize",
+        "Max Size",
+        "This value controls the maximum allowed size for the points, when the max size "
+        "control feature is enabled. This limits the visual size of the points based on "
+        "the distance to the camera. The larger the value, the larger the points are "
+        "allowed to be. In the background, the computations are made by limiting the "
+        "size of the angle between the CameraToPointMid and CameraToPointEdge vectors.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+        "Rendering",
+        "Rendering Mode",
+        "Determines how the trail should be rendered to the screen. If 'Trail' is "
+        "selected, only the line part is visible, if 'Point' is selected, only the "
+        "current satellite/debris point is visible.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the trail",
+        "This value determines the RGB main color for the trails and points.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineFadeInfo = {                        // THINK ABOUT NAME HERE
-        "LineFade",
-        "Name Fade",
+    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
+        "TrailFade",
+        "Trail Fade Factor",
         "This value determines how fast the trail fades and is an appearance property.",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
@@ -130,14 +175,21 @@ namespace {
         // [[codegen::verbatim(SegmentQualityInfo.description)]]
         int segmentQuality;
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        // [[codegen::verbatim(TrailWidthInfo.description)]]
+        std::optional<float> trailWidth;
 
-        // [[codegen::verbatim(LineColorInfo.description)]]
+        // [[codegen::verbatim(ColorInfo.description)]]
         glm::dvec3 color [[codegen::color()]];
 
-        // [[codegen::verbatim(LineFadeInfo.description)]]
-        std::optional<glm::vec2> lineFade;
+        // [[codegen::verbatim(TrailFadeInfo.description)]]
+        std::optional<float> trailFade;
+
+        enum class RenderingMode {
+            Trail,
+            Point
+        };
+        // [[codegen::verbatim(RenderingModeInfo.description)]]
+        std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
 
         // [[codegen::verbatim(StartRenderIdxInfo.description)]]
         std::optional<int> startRenderIdx;
@@ -147,6 +199,15 @@ namespace {
 
         // [[codegen::verbatim(ContiguousModeInfo.description)]]
         std::optional<bool> contiguousMode;
+
+        // [[codegen::verbatim(PointSizeExponentInfo.description)]]
+        std::optional<float> pointSizeExponent;
+
+        // [[codegen::verbatim(EnableMaxSizeInfo.description)]]
+        std::optional<bool> enableMaxSize;
+
+        // [[codegen::verbatim(MaxSizeInfo.description)]]
+        std::optional<float> maxSize;
     };
 #include "renderableorbitalkepler_codegen.cpp"
 } // namespace
@@ -155,6 +216,38 @@ namespace openspace {
 
 documentation::Documentation RenderableOrbitalKepler::Documentation() {
     return codegen::doc<Parameters>("space_renderableorbitalkepler");
+}
+
+RenderableOrbitalKepler::Appearance::Appearance()
+    : properties::PropertyOwner({
+        "Appearance",
+        "Appearance",
+        "Appearance of RenderableOrbitalKepler"
+    })
+    , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , trailWidth(TrailWidthInfo, 10.f, 1.f, 20.f)
+    , pointSizeExponent(PointSizeExponentInfo, 1.0f, 0.f, 25.f)
+    , renderingModes(
+        RenderingModeInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
+    , trailFade(TrailFadeInfo, 20.f, 0.f, 30.f)
+    , enableMaxSize(EnableMaxSizeInfo, false)
+    , maxSize(MaxSizeInfo, 1.f, 0.f, 45.f)
+{
+    renderingModes.addOptions({
+        { RenderingModeTrail, "Trails" },
+        { RenderingModePoint, "Points" }
+    });
+
+    color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(renderingModes);
+    addProperty(color);
+    addProperty(trailWidth);
+    addProperty(trailFade);
+    addProperty(pointSizeExponent);
+    addProperty(enableMaxSize);
+    addProperty(maxSize);
 }
 
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
@@ -173,10 +266,26 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _segmentQuality.onChange([this]() { updateBuffers(); });
     addProperty(_segmentQuality);
 
-    _appearance.lineColor = p.color;
-    _appearance.lineFade = p.lineFade.value_or(_appearance.lineFade);
-    _appearance.lineWidth = p.lineWidth.value_or(2.f);
-    _appearance.useLineFade = true;
+    _appearance.color = p.color;
+    _appearance.trailFade = p.trailFade.value_or(_appearance.trailFade);
+    _appearance.trailWidth = p.trailWidth.value_or(2.f);
+    _appearance.pointSizeExponent = p.pointSizeExponent.value_or(_appearance.pointSizeExponent);
+    _appearance.enableMaxSize = p.enableMaxSize.value_or(_appearance.enableMaxSize);
+    _appearance.maxSize = p.maxSize.value_or(_appearance.maxSize);
+
+    if (p.renderingMode.has_value()) {
+        switch (*p.renderingMode) {
+        case Parameters::RenderingMode::Trail:
+            _appearance.renderingModes = RenderingModeTrail;
+            break;
+        case Parameters::RenderingMode::Point:
+            _appearance.renderingModes = RenderingModePoint;
+            break;
+        }
+    }
+    else {
+        _appearance.renderingModes = RenderingModeTrail;
+    }
     addPropertySubOwner(_appearance);
 
     _path = p.path.string();
@@ -218,24 +327,51 @@ void RenderableOrbitalKepler::initializeGL() {
     glGenVertexArrays(1, &_vertexArray);
     glGenBuffers(1, &_vertexBuffer);
 
-    _programObject = SpaceModule::ProgramObjectManager.request(
-        "OrbitalKepler",
+    // Program for line rendering
+    _trailProgram = SpaceModule::ProgramObjectManager.request(
+        "OrbitalKeplerTrails",
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine->buildRenderProgram(
-               "OrbitalKepler",
-               absPath("${MODULE_SPACE}/shaders/debrisViz_vs.glsl"),
-               absPath("${MODULE_SPACE}/shaders/debrisViz_fs.glsl")
+               "OrbitalKeplerTrails",
+               absPath("${MODULE_SPACE}/shaders/debrisVizTrails_vs.glsl"),
+               absPath("${MODULE_SPACE}/shaders/debrisVizTrails_fs.glsl")
            );
        }
    );
+   
+    // Program for point rendering
+    _pointProgram = SpaceModule::ProgramObjectManager.request(
+        "OrbitalKeplerPoints",
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine->buildRenderProgram(
+                "OrbitalKeplerPoints",
+                absPath("${MODULE_SPACE}/shaders/debrisVizPoints_vs.glsl"),
+                absPath("${MODULE_SPACE}/shaders/debrisVizPoints_fs.glsl"),
+                absPath("${MODULE_SPACE}/shaders/debrisVizPoints_gs.glsl")
+            );
+        }
+    );
 
-    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
-    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
-    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
-    _uniformCache.inGameTime = _programObject->uniformLocation("inGameTime");
-    _uniformCache.color = _programObject->uniformLocation("color");
-    _uniformCache.opacity = _programObject->uniformLocation("opacity");
+    // Init cache for line rendering
+    _uniformTrailCache.modelView = _trailProgram->uniformLocation("modelViewTransform");
+    _uniformTrailCache.projection = _trailProgram->uniformLocation("projectionTransform");
+    _uniformTrailCache.trailFade = _trailProgram->uniformLocation("trailFade");
+    _uniformTrailCache.inGameTime = _trailProgram->uniformLocation("inGameTime");
+    _uniformTrailCache.color = _trailProgram->uniformLocation("color");
+    _uniformTrailCache.opacity = _trailProgram->uniformLocation("opacity");
+
+    // Init cache for point rendering
+    _uniformPointCache.modelTransform = _pointProgram->uniformLocation("modelTransform");
+    _uniformPointCache.viewTransform = _pointProgram->uniformLocation("viewTransform");
+    _uniformPointCache.projectionTransform = _pointProgram->uniformLocation("projectionTransform");
+    _uniformPointCache.cameraPositionWorld = _pointProgram->uniformLocation("cameraPositionWorld");
+    _uniformPointCache.cameraUpWorld = _pointProgram->uniformLocation("cameraUpWorld");
+    _uniformPointCache.inGameTime = _pointProgram->uniformLocation("inGameTime");
+    _uniformPointCache.color = _pointProgram->uniformLocation("color");
+    _uniformPointCache.pointSizeExponent = _pointProgram->uniformLocation("pointSizeExponent");
+    _uniformPointCache.enableMaxSize = _pointProgram->uniformLocation("enableMaxSize");
+    _uniformPointCache.maxSize = _pointProgram->uniformLocation("maxSize");
+    _uniformPointCache.opacity = _pointProgram->uniformLocation("opacity");
 
     updateBuffers();
 }
@@ -245,16 +381,25 @@ void RenderableOrbitalKepler::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArray);
 
     SpaceModule::ProgramObjectManager.release(
-        "OrbitalKepler",
+        "OrbitalKeplerTrails",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
-    _programObject = nullptr;
+
+    SpaceModule::ProgramObjectManager.release(
+        "OrbitalKeplerPoints",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+
+    _pointProgram = nullptr;
+    _trailProgram = nullptr;
 }
 
 bool RenderableOrbitalKepler::isReady() const {
-    return _programObject != nullptr;
+    return _pointProgram != nullptr && _trailProgram != nullptr;
 }
 
 void RenderableOrbitalKepler::update(const UpdateData&) {
@@ -269,54 +414,52 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    _programObject->activate();
-    _programObject->setUniform(_uniformCache.opacity, opacity());
-    _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
-    _programObject->setUniform(_uniformCache.modelView, calcModelViewTransform(data));
-    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
-    _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-
-    // TEMP
-    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-    if (_appearance.useLineFade) {
-        int selection = _appearance.fadingModes;
-        // Check which rendering method should be used
-        if (selection == 0) {
-            // use point+point
-            _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-        }
-        else if (selection == 1) {
-            // use startpoint+duration
-            float startPoint = _appearance.lineFadeStarPointDuration.value()[0];
-            float remainingRange = 100.0f - startPoint;
-            float delta = remainingRange * _appearance.lineFadeStarPointDuration.value()[1] / 100.f;
-            float endPoint = std::min(startPoint + delta, 100.f);
-            _programObject->setUniform(_uniformCache.lineFade, glm::vec2(startPoint, endPoint));
-        }
-        else if (selection == 2) {
-            // use endpoint+duration
-            float endPoint = (_appearance.lineFadeEndPointDuration.value())[0];
-            float remainingRange = endPoint;
-            float delta = remainingRange * (_appearance.lineFadeEndPointDuration.value())[1] / 100.0f;
-            float startPoint = std::max(endPoint - delta, 0.f);
-            _programObject->setUniform(_uniformCache.lineFade, glm::vec2(startPoint, endPoint));
-        }
-    }
-
-    glLineWidth(_appearance.lineWidth);
-
-    //glDepthMask(false);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE)
-
     GLint* _si = _startIndex.data();
     GLint* _ss = _segmentSize.data();
 
-    glBindVertexArray(_vertexArray);
-    glMultiDrawArrays(GL_LINE_STRIP, _si, _ss, static_cast<GLsizei>(_startIndex.size()));
-    glBindVertexArray(0);
+    int selection = _appearance.renderingModes;
+    if (selection == RenderingModePoint) {
+        _pointProgram->activate();
 
-    _programObject->deactivate();
+        _pointProgram->setUniform(_uniformPointCache.modelTransform, calcModelTransform(data));
+        _pointProgram->setUniform(_uniformPointCache.viewTransform, data.camera.combinedViewMatrix());
+        _pointProgram->setUniform(_uniformPointCache.projectionTransform, data.camera.projectionMatrix());
+        _pointProgram->setUniform(_uniformPointCache.cameraPositionWorld, data.camera.positionVec3());
+        _pointProgram->setUniform(_uniformPointCache.cameraUpWorld, data.camera.lookUpVectorWorldSpace());
+        _pointProgram->setUniform(_uniformPointCache.inGameTime, data.time.j2000Seconds());
+        _pointProgram->setUniform(_uniformPointCache.color, _appearance.color);
+        _pointProgram->setUniform(_uniformPointCache.pointSizeExponent, _appearance.pointSizeExponent);
+        _pointProgram->setUniform(_uniformPointCache.enableMaxSize, _appearance.enableMaxSize);
+        _pointProgram->setUniform(_uniformPointCache.maxSize, _appearance.maxSize);
+        _pointProgram->setUniform(_uniformPointCache.opacity, opacity());
+        
+        glBindVertexArray(_vertexArray);
+        glMultiDrawArrays(GL_LINE_STRIP, _si, _ss, static_cast<GLsizei>(_startIndex.size()));
+        glBindVertexArray(0);
+
+        _pointProgram->deactivate();
+    }
+    else { // selection == RenderingModeTrail 
+        _trailProgram->activate();
+
+        _trailProgram->setUniform(_uniformTrailCache.opacity, opacity());
+        _trailProgram->setUniform(_uniformTrailCache.inGameTime, data.time.j2000Seconds());
+        _trailProgram->setUniform(_uniformTrailCache.modelView, calcModelViewTransform(data));
+        _trailProgram->setUniform(_uniformTrailCache.projection, data.camera.projectionMatrix());
+        _trailProgram->setUniform(_uniformTrailCache.color, _appearance.color);
+
+        // Because we want the property to work similar to the planet trails
+        const float fade = pow(_appearance.trailFade.maxValue() - _appearance.trailFade, 2.f);
+        _trailProgram->setUniform(_uniformTrailCache.trailFade, fade);
+
+        glLineWidth(_appearance.trailWidth);
+
+        glBindVertexArray(_vertexArray);
+        glMultiDrawArrays(GL_LINE_STRIP, _si, _ss, static_cast<GLsizei>(_startIndex.size()));
+        glBindVertexArray(0);
+
+        _trailProgram->deactivate();
+    }
 }
 
 void RenderableOrbitalKepler::updateBuffers() {

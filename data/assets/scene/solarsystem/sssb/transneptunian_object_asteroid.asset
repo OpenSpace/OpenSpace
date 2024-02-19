@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 8,
     Color = { 0.56, 0.64, 0.95 },
-    TrailFade = 10
+    TrailFade = 10,
+    PointSizeExponent = 10.3
   },
   GUI = {
     Name = "Transneptunian Object Asteroids",
