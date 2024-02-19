@@ -1,3 +1,7 @@
+local colormaps = asset.require("util/default_colormaps")
+
+
+
 local Points = {
   Identifier = "Example_InterpolatedPoints_ColorMapped",
   Renderable = {
@@ -12,7 +16,7 @@ local Points = {
     -- Both the position and data values will be interpolated, so use a color map
     Coloring = {
       ColorMapping = {
-        File = asset.resource("viridis.cmap")
+        File = colormaps.Uniform.Viridis
       }
     },
     -- Reduce the scale of the points a bit compared to default, so we see them more clearly
