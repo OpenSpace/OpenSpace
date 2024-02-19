@@ -86,16 +86,26 @@ private:
     void createTube();
     void createSmoothTube();
     void createLowPolyTube();
+
     void addEdge(int pointColorCounter, const glm::dvec3& center,
         const glm::dvec3& normal, const TimePolygon const* polygon, int centerIndex);
-    void addSmoothSection(int& pointColorCounter, const TimePolygon const* polygon,
-        bool isFirstPoly, unsigned int vIndex);
-    void addLowPolySection(int& pointColorCounter, const TimePolygon const* polygon,
-        const TimePolygon const* nextPolygon, unsigned int& vIndex);
+
+    void addSmoothSection(unsigned int polygonIndex, const TimePolygon const* polygon,
+        bool isFirstPoly, unsigned int vIndex, bool isEnding = false,
+        double tInterpolation = -1.0);
+    void addLowPolySection(unsigned int polygonIndex, const TimePolygon const* polygon,
+        const TimePolygon const* nextPolygon, unsigned int& vIndex,
+        double tInterpolation = -1.0);
+
     void interpolateEnd(double now);
     void creteEnding(double now);
-    void createSmoothEnding(double now);
-    void createLowPolyEnding(double now);
+    void createSmoothEnding(double tInterpolation,
+        const TimePolygon const* prevTimePolygon,
+        const TimePolygon const* currentTimePolygon);
+    void createLowPolyEnding(double tInterpolation,
+        const TimePolygon const* prevTimePolygon,
+        const TimePolygon const* currentTimePolygon);
+
     void updateBufferData();
     void updateEndingBufferData();
 
