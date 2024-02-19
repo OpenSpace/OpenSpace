@@ -1149,7 +1149,7 @@ int RenderablePointCloud::nAttributesPerPoint() const {
     return n;
 }
 
-void RenderablePointCloud::bufferVertexAttribute(const std::string& name, GLint nValues,
+int RenderablePointCloud::bufferVertexAttribute(const std::string& name, GLint nValues,
                                                  int nAttributesPerPoint, int offset) const
 {
     GLint attrib = _program->attributeLocation(name);
@@ -1162,6 +1162,8 @@ void RenderablePointCloud::bufferVertexAttribute(const std::string& name, GLint 
         nAttributesPerPoint * sizeof(float),
         (offset > 0) ? reinterpret_cast<void*>(offset * sizeof(float)) : nullptr
     );
+
+    return offset + nValues;
 }
 
 void RenderablePointCloud::updateBufferData() {
@@ -1191,24 +1193,20 @@ void RenderablePointCloud::updateBufferData() {
     glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
 
     const int attibutesPerPoint = nAttributesPerPoint();
-    int attributeOffset = 0;
+    int offset = 0;
 
-    bufferVertexAttribute("in_position", 3, attibutesPerPoint, attributeOffset);
-    attributeOffset += 3;
+    offset = bufferVertexAttribute("in_position", 3, attibutesPerPoint, offset);
 
     if (_hasColorMapFile) {
-        bufferVertexAttribute("in_colorParameter", 1, attibutesPerPoint, attributeOffset);
-        attributeOffset += 1;
+        offset = bufferVertexAttribute("in_colorParameter", 1, attibutesPerPoint, offset);
     }
 
     if (_hasDatavarSize) {
-        bufferVertexAttribute("in_scalingParameter", 1, attibutesPerPoint, attributeOffset);
-        attributeOffset += 1;
+        offset = bufferVertexAttribute("in_scalingParameter", 1, attibutesPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {
-        bufferVertexAttribute("in_textureLayer", 1, attibutesPerPoint, attributeOffset);
-        attributeOffset += 1;
+        offset = bufferVertexAttribute("in_textureLayer", 1, attibutesPerPoint, offset);
     }
 
     glBindVertexArray(0);

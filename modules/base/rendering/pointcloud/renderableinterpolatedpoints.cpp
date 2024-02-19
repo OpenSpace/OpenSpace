@@ -391,21 +391,18 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
     }
 
     if (useSplineInterpolation()) {
-        float t0 = computeCurrentLowerValue();
-        float t1 = computeCurrentUpperValue();
-
         // Compute the extra positions, before and after the other ones. But make sure
         // we do not overflow the allowed bound for the current interpolation step
-        unsigned int beforeIndex = static_cast<unsigned int>(
-            glm::max(t0 - 1.f, 0.f)
+        int beforeIndex = glm::max(static_cast<int>(firstIndex - _nDataPoints), 0);
+        int maxT = static_cast<int>(_interpolation.value.maxValue() - 1.f);
+        int maxAllowedindex = maxT * _nDataPoints + index;
+        int afterIndex = glm::min(
+            static_cast<int>(secondIndex + _nDataPoints),
+            maxAllowedindex
         );
-        unsigned int afterIndex = static_cast<unsigned int>(
-            glm::min(t1 + 1.f, _interpolation.value.maxValue() - 1.f)
-        );
-        // @TODO: Can do this based on the previously computed indices, for simpler code
 
-        const Dataset::Entry& e00 = _dataset.entries[beforeIndex * _nDataPoints + index];
-        const Dataset::Entry& e11 = _dataset.entries[afterIndex * _nDataPoints + index];
+        const Dataset::Entry& e00 = _dataset.entries[beforeIndex];
+        const Dataset::Entry& e11 = _dataset.entries[afterIndex];
         glm::dvec3 positionBefore = transformedPosition(e00);
         glm::dvec3 positionAfter = transformedPosition(e11);
 
@@ -465,37 +462,28 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
 
-    int attributeOffset = 0;
+    int offset = 0;
 
-    bufferVertexAttribute("in_position0", 3, attibutesPerPoint, attributeOffset);
-    attributeOffset += 3;
-    bufferVertexAttribute("in_position1", 3, attibutesPerPoint, attributeOffset);
-    attributeOffset += 3;
+    offset = bufferVertexAttribute("in_position0", 3, attibutesPerPoint, offset);
+    offset = bufferVertexAttribute("in_position1", 3, attibutesPerPoint, offset);
 
     if (useSplineInterpolation()) {
-        bufferVertexAttribute("in_position_before", 3, attibutesPerPoint, attributeOffset);
-        attributeOffset += 3;
-        bufferVertexAttribute("in_position_after", 3, attibutesPerPoint, attributeOffset);
-        attributeOffset += 3;
+        offset = bufferVertexAttribute("in_position_before", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_position_after", 3, attibutesPerPoint, offset);
     }
 
     if (_hasColorMapFile) {
-        bufferVertexAttribute("in_colorParameter0", 1, attibutesPerPoint, attributeOffset);
-        attributeOffset += 1;
-        bufferVertexAttribute("in_colorParameter1", 1, attibutesPerPoint, attributeOffset);
-        attributeOffset += 1;
+        offset = bufferVertexAttribute("in_colorParameter0", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_colorParameter1", 1, attibutesPerPoint, offset);
     }
 
     if (_hasDatavarSize) {
-        bufferVertexAttribute("in_scalingParameter0", 1, attibutesPerPoint, attributeOffset);
-        attributeOffset += 1;
-        bufferVertexAttribute("in_scalingParameter1", 1, attibutesPerPoint, attributeOffset);
-        attributeOffset += 1;
+        offset = bufferVertexAttribute("in_scalingParameter0", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_scalingParameter1", 1, attibutesPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {
-        bufferVertexAttribute("in_textureLayer", 1, attibutesPerPoint, attributeOffset);
-        attributeOffset += 1;
+        offset = bufferVertexAttribute("in_textureLayer", 1, attibutesPerPoint, offset);
     }
 
     glBindVertexArray(0);

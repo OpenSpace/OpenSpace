@@ -90,8 +90,15 @@ protected:
 
     virtual int nAttributesPerPoint() const;
 
-    void bufferVertexAttribute(const std::string& name, GLint nValues,
+    /**
+     * Helper function to buffer the vertex attribute with the given name and number
+     * of values. Assumes that the value is a float value
+     *
+     * Returns the updated offset after this attribute is added
+     */
+    int bufferVertexAttribute(const std::string& name, GLint nValues,
         int nAttributesPerPoint, int offset) const;
+
     virtual void updateBufferData();
     void updateSpriteTexture();
 
