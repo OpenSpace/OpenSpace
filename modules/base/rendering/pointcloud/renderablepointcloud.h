@@ -90,6 +90,8 @@ protected:
 
     virtual int nAttributesPerPoint() const;
 
+    void bufferVertexAttribute(const std::string& name, GLint nValues,
+        int nAttributesPerPoint, int offset) const;
     virtual void updateBufferData();
     void updateSpriteTexture();
 
@@ -98,7 +100,12 @@ protected:
     /// Find the index of the currently chosen size parameter in the dataset
     int currentSizeParameterIndex() const;
 
-    virtual std::vector<float> createDataSlice();
+    virtual void addPositionDataForPoint(unsigned int index, std::vector<float>& result,
+        double& maxRadius) const;
+    virtual void addColorAndSizeDataForPoint(unsigned int index,
+        std::vector<float>& result) const;
+
+    std::vector<float> createDataSlice();
 
     /**
      * A function that subclasses could override to initialize their own textures to

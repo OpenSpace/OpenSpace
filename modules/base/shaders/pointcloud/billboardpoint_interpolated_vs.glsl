@@ -38,9 +38,12 @@ in float in_colorParameter1;
 in float in_scalingParameter0;
 in float in_scalingParameter1;
 
+in float in_textureLayer;
+
 uniform bool useSpline;
 uniform float interpolationValue;
 
+flat out float textureLayer;
 flat out float colorParameter;
 flat out float scalingParameter;
 
@@ -86,6 +89,8 @@ void main() {
       in_position_after
     );
   }
+
+  textureLayer = in_textureLayer;
 
   gl_Position = vec4(position, 1.0);
 }

@@ -1143,10 +1143,25 @@ glm::dvec3 RenderablePointCloud::transformedPosition(
 
 int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 3; // position
-    n += _hasSpriteTexture ? 1 : 0; // texture id
     n += _hasColorMapFile ? 1 : 0;
     n += _hasDatavarSize ? 1 : 0;
+    n += _hasSpriteTexture ? 1 : 0; // texture id
     return n;
+}
+
+void RenderablePointCloud::bufferVertexAttribute(const std::string& name, GLint nValues,
+                                                 int nAttributesPerPoint, int offset) const
+{
+    GLint attrib = _program->attributeLocation(name);
+    glEnableVertexAttribArray(attrib);
+    glVertexAttribPointer(
+        attrib,
+        nValues,
+        GL_FLOAT,
+        GL_FALSE,
+        nAttributesPerPoint * sizeof(float),
+        (offset > 0) ? reinterpret_cast<void*>(offset * sizeof(float)) : nullptr
+    );
 }
 
 void RenderablePointCloud::updateBufferData() {
@@ -1178,57 +1193,21 @@ void RenderablePointCloud::updateBufferData() {
     const int attibutesPerPoint = nAttributesPerPoint();
     int attributeOffset = 0;
 
-    GLint positionAttrib = _program->attributeLocation("in_position");
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(
-        positionAttrib,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        attibutesPerPoint * sizeof(float),
-        nullptr
-    );
+    bufferVertexAttribute("in_position", 3, attibutesPerPoint, attributeOffset);
     attributeOffset += 3;
 
-    if (_hasSpriteTexture) {
-        GLint textureLayerAttrib = _program->attributeLocation("in_textureLayer");
-        glEnableVertexAttribArray(textureLayerAttrib);
-        glVertexAttribPointer(
-            textureLayerAttrib,
-            1,
-            GL_FLOAT,
-            GL_FALSE,
-            attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeOffset * sizeof(float))
-        );
-        attributeOffset += 1;
-    }
-
     if (_hasColorMapFile) {
-        GLint colorParamAttrib = _program->attributeLocation("in_colorParameter");
-        glEnableVertexAttribArray(colorParamAttrib);
-        glVertexAttribPointer(
-            colorParamAttrib,
-            1,
-            GL_FLOAT,
-            GL_FALSE,
-            attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeOffset * sizeof(float))
-        );
+        bufferVertexAttribute("in_colorParameter", 1, attibutesPerPoint, attributeOffset);
         attributeOffset += 1;
     }
 
     if (_hasDatavarSize) {
-        GLint scalingAttrib = _program->attributeLocation("in_scalingParameter");
-        glEnableVertexAttribArray(scalingAttrib);
-        glVertexAttribPointer(
-            scalingAttrib,
-            1,
-            GL_FLOAT,
-            GL_FALSE,
-            attibutesPerPoint * sizeof(float),
-            reinterpret_cast<void*>(attributeOffset * sizeof(float))
-        );
+        bufferVertexAttribute("in_scalingParameter", 1, attibutesPerPoint, attributeOffset);
+        attributeOffset += 1;
+    }
+
+    if (_hasSpriteTexture) {
+        bufferVertexAttribute("in_textureLayer", 1, attibutesPerPoint, attributeOffset);
         attributeOffset += 1;
     }
 
@@ -1273,6 +1252,43 @@ int RenderablePointCloud::currentSizeParameterIndex() const {
     return _dataset.index(property.option().description);
 }
 
+void RenderablePointCloud::addPositionDataForPoint(unsigned int index,
+                                                   std::vector<float> &result,
+                                                   double& maxRadius) const
+{
+    const dataloader::Dataset::Entry& e = _dataset.entries[index];
+    glm::dvec3 position = transformedPosition(e);
+    const double r = glm::length(position);
+
+    // Add values to result
+    for (int j = 0; j < 3; ++j) {
+        result.push_back(static_cast<float>(position[j]));
+    }
+
+    maxRadius = std::max(maxRadius, r);
+}
+
+void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
+                                                       std::vector<float>& result) const
+{
+    const dataloader::Dataset::Entry& e = _dataset.entries[index];
+
+    // Colors
+    if (_hasColorMapFile) {
+        int colorParamIndex = currentColorParameterIndex();
+        result.push_back(e.data[colorParamIndex]);
+    }
+
+    // Size data
+    if (_hasDatavarSize) {
+        int sizeParamIndex = currentSizeParameterIndex();
+        // @TODO: Consider more detailed control over the scaling. Currently the value
+        // is multiplied with the value as is. Should have similar mapping properties
+        // as the color mapping
+        result.push_back(e.data[sizeParamIndex]);
+    }
+}
+
 std::vector<float> RenderablePointCloud::createDataSlice() {
     ZoneScoped;
 
@@ -1280,14 +1296,8 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         return std::vector<float>();
     }
 
-    // Whgat datavar is the texture, if any.
+    // Whgat datavar is the texture, if any
     int textureIdIndex = _dataset.textureDataIndex;
-
-    // What datavar is in use for the index color
-    int colorParamIndex = currentColorParameterIndex();
-
-    // What datavar is in use for the size scaling (if present)
-    int sizeParamIndex = currentSizeParameterIndex();
 
     double maxRadius = 0.0;
 
@@ -1302,7 +1312,9 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         subres.reserve(nAttributesPerPoint() * _dataset.entries.size());
     }
 
-    for (const dataloader::Dataset::Entry& e : _dataset.entries) {
+    for (unsigned int i = 0; i < _nDataPoints; i++) {
+        const dataloader::Dataset::Entry& e = _dataset.entries[i];
+
         unsigned int subresultIndex = 0;
         float textureLayer = 0.f;
 
@@ -1319,33 +1331,13 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
 
         std::vector<float>& subArrayToUse = subResults[subresultIndex];
 
-        // @TODO: Break the following code out into an overridable function for subclasses to use
-
-        glm::dvec3 position = transformedPosition(e);
-        const double r = glm::length(position);
-        maxRadius = std::max(maxRadius, r);
-
-        // Positions
-        for (int j = 0; j < 3; ++j) {
-            subArrayToUse.push_back(static_cast<float>(position[j]));
-        }
+        // Add position, color and size data (subclasses may compute these differently)
+        addPositionDataForPoint(i, subArrayToUse, maxRadius);
+        addColorAndSizeDataForPoint(i, subArrayToUse);
 
         // Texture layer
         if (_hasSpriteTexture) {
             subArrayToUse.push_back(static_cast<float>(textureLayer));
-        }
-
-        // Colors
-        if (_hasColorMapFile) {
-            subArrayToUse.push_back(e.data[colorParamIndex]);
-        }
-
-        // Size data
-        if (_hasDatavarSize) {
-            // @TODO: Consider more detailed control over the scaling. Currently the value
-            // is multiplied with the value as is. Should have similar mapping properties
-            // as the color mapping
-            subArrayToUse.push_back(e.data[sizeParamIndex]);
         }
     }
 
@@ -1360,7 +1352,7 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     for (size_t i = 0; i < subResults.size(); ++i) {
         result.insert(result.end(), subResults[i].begin(), subResults[i].end());
         int nVertices = static_cast<int>(subResults[i].size()) / nAttributesPerPoint();
-        if (_textureArrays.size() > 0) { // TODO: Make sure there always is one, even when a single texture is used
+        if (_textureArrays.size() > 0) {
             _textureArrays[i].nPoints = nVertices;
             _textureArrays[i].startOffset = static_cast<GLint>(vertexCount);
         }
