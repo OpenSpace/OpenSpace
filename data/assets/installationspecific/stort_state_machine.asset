@@ -36,7 +36,6 @@ local solarSystemState = {
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.startOrbiting() .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
-    openspace.setPropertyValueSingle("Scene.Jupiter.Renderable.Layers.ColorLayers.JupiterVideo.TileProvider.VideoPlayer.Reload", nil)
     openspace.setPropertyValueSingle("Scene.Jupiter.Renderable.Layers.ColorLayers.JupiterVideo.TileProvider.VideoPlayer.Play", nil)
   ]],
   Exit = [[
