@@ -80,7 +80,6 @@ asset.onInitialize(function ()
   openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Fade", 0.0)
 
   -- Mars layers and rovers
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Enabled", false)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_LiU.Enabled", true)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Enabled", true)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Fade", 0.0)
