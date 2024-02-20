@@ -694,13 +694,11 @@ void RenderableTube::createLowPolyTube(unsigned int firstSideIndex) {
 }
 
 void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
-                             int centerIndex, double tInterpolation)
+                             int centerIndex, bool isCutplane, double tInterpolation)
 {
     // Set where to store the verticies and indicies
-    std::vector<PolygonVertex>* verticies =
-        tInterpolation > 0.0 ? &_verticiesEnding : &_verticies;
-    std::vector<unsigned int>* indicies =
-        tInterpolation > 0.0 ? &_indiciesEnding : &_indicies;
+    std::vector<PolygonVertex>* verticies = isCutplane ? &_verticiesEnding : &_verticies;
+    std::vector<unsigned int>* indicies = isCutplane ? &_indiciesCutplane : &_indicies;
 
     // Get the selected color parameter
     int colorParamIndex = currentColorParameterIndex();
@@ -737,14 +735,15 @@ void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
     centerPoint.position[1] = polygon->center.y;
     centerPoint.position[2] = polygon->center.z;
 
+    // Calculate the normal
     glm::dvec3 normal;
-    if ( polygonIndex - 1 > 0) {
-        // Normal points along the tube
-        normal = _data[polygonIndex].center - _data[polygonIndex - 1].center;
-    }
-    else {
+    if ( polygonIndex - 1 < 0) {
         // Normal points behind the tube
         normal = _data[polygonIndex].center - _data[polygonIndex + 1].center;
+    }
+    else {
+        // Normal points along the tube
+        normal = _data[polygonIndex].center - _data[polygonIndex - 1].center;
     }
 
     centerPoint.normal[0] = normal.x;
@@ -1023,6 +1022,7 @@ void RenderableTube::interpolateEnd(double now) {
     double nextPolygonTime = std::numeric_limits<double>::max();
     bool foundPrev = false;
     _interpolationNeeded = true;
+    bool onSlice = false;
 
     for (size_t i = 0; i < _data.size(); ++i) {
         // Found a time smaller than now
@@ -1042,6 +1042,7 @@ void RenderableTube::interpolateEnd(double now) {
             _lastPolygonBeforeNow = i;
             foundPrev = true;
             _interpolationNeeded = false;
+            onSlice = true;
             LDEBUG(fmt::format("Polygon nr: '{}' is exactly at NOW",
                 _lastPolygonBeforeNow)
             );
@@ -1095,6 +1096,17 @@ void RenderableTube::interpolateEnd(double now) {
         creteEnding(now);
         updateEndingBufferData();
     }
+    else if (onSlice && _addEdges) {
+        // Reset
+        _verticiesEnding.clear();
+        _indiciesEnding.clear();
+        _indiciesCutplane.clear();
+
+        // Add cutplane exactly at polygon _lastPolygonBeforeNow
+        addEdge(_lastPolygonBeforeNow, &_data[_lastPolygonBeforeNow], 0, true);
+        updateEndingBufferData();
+        _interpolationNeeded = true;
+    }
 
     glBindVertexArray(0);
 }
@@ -1103,6 +1115,7 @@ void RenderableTube::creteEnding(double now) {
     // Reset
     _verticiesEnding.clear();
     _indiciesEnding.clear();
+    _indiciesCutplane.clear();
 
     // Interpolate to find current data
     double prevTime = _data[_lastPolygonBeforeNow].timestamp;
@@ -1140,7 +1153,7 @@ void RenderableTube::creteEnding(double now) {
     // Add cutplane
     if (_addEdges) {
         unsigned int centerIndex = _verticiesEnding.size();
-        addEdge(_firstPolygonAfterNow, &currentTimePolygon, centerIndex, t);
+        addEdge(_firstPolygonAfterNow, &currentTimePolygon, centerIndex, true, t);
     }
 }
 
@@ -1312,18 +1325,32 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
         nullptr
     );
 
-    // Make sure there is a cutplane
-    if (_addEdges && !_interpolationNeeded && _nIndiciesToRender < _indicies.size() && !_showAllTube) {
-        addEdge(_lastPolygonBeforeNow, &_data[_lastPolygonBeforeNow], 0);
-        _interpolationNeeded = true;
-    }
-
     // Render the last section until now with interpolation
     if (_interpolationNeeded && !_showAllTube) {
         glBindVertexArray(_vaoIdEnding);
         glDrawElements(
             GL_TRIANGLES,
             static_cast<GLsizei>(_indiciesEnding.size()),
+            GL_UNSIGNED_INT,
+            nullptr
+        );
+    }
+
+    // Render the cutplane
+    if (_addEdges && !_showAllTube && (_interpolationNeeded || _nIndiciesToRender < _indicies.size())) {
+        // Bind the cutplane ibo instead
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboIdEnding);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            _indiciesCutplane.size() * sizeof(unsigned int),
+            _indiciesCutplane.data(),
+            GL_STREAM_DRAW
+        );
+
+        // Render the cutplane
+        glDrawElements(
+            GL_TRIANGLES,
+            static_cast<GLsizei>(_indiciesCutplane.size()),
             GL_UNSIGNED_INT,
             nullptr
         );

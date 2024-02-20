@@ -88,7 +88,7 @@ private:
     void createLowPolyTube(unsigned int firstSideIndex);
 
     void addEdge(int polygonIndex, const TimePolygon const* polygon, int centerIndex,
-        double tInterpolation = -1.0);
+        bool isCutplane = false, double tInterpolation = -1.0);
 
     void addSmoothSection(int polygonIndex, const TimePolygon const* polygon,
         bool isFirstPoly, unsigned int vIndex, bool isEnding = false,
@@ -171,6 +171,7 @@ private:
     GLuint _iboIdEnding = 0;
     std::vector<PolygonVertex> _verticiesEnding;
     std::vector<unsigned int> _indiciesEnding;
+    std::vector<unsigned int> _indiciesCutplane;
 };
 
 } // namespace openspace
