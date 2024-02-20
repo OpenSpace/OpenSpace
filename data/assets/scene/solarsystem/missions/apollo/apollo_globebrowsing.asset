@@ -2,7 +2,7 @@ local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 -- This is technically not necessary, but we need to ensure that the default layers load
 -- first before we add the layers from this assets or else the default layers might be
 -- initialized later, causing them to appear **after** these layers
---asset.require("scene/solarsystem/planets/earth/moon/default_layers") -- Commented out this line for the installaiton as it leads to warnings
+--asset.require("scene/solarsystem/planets/earth/moon/default_layers") -- Commented out this line for the installaiton as it leads to warnings (emmbr, 2024-02-20)
 
 
 local heightmaps = asset.resource({
