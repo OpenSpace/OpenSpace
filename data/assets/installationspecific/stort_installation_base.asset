@@ -47,6 +47,9 @@ asset.require("scene/solarsystem/missions/voyagerpioneer/voyager1_2__pioneer10_1
 -- ISS
 asset.require("scene/solarsystem/planets/earth/satellites/misc/iss")
 
+-- Jupiter Video Layer
+asset.require("scene/solarsystem/planets/jupiter/layers/colorlayers/jupiter_video")
+
 -- Minor / weird moons of some other planets
 asset.require("scene/solarsystem/planets/jupiter/major_moons")
 asset.require("scene/solarsystem/planets/jupiter/minor_moons")
@@ -72,6 +75,9 @@ asset.onInitialize(function ()
   openspace.setPropertyValue("{moonTrail_minor}.Renderable.Appearance.Color", {0.3, 0.5, 0.5})
   openspace.setPropertyValue("Scene.Voyager*.Renderable.Appearance.Color", {0.424000, 1.000000, 0.404000})
   openspace.setPropertyValue("Scene.Pioneer*.Renderable.Appearance.Color", {0.910000, 0.478000, 0.976000})
+
+  -- Jupiter video layer
+  openspace.setPropertyValueSingle("Scene.Jupiter.Renderable.Layers.ColorLayers.JupiterVideo.Settings.Multiplier", 1.200000)
 
   -- Constellations
   openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
