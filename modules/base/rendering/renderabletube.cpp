@@ -654,27 +654,27 @@ void RenderableTube::createTube() {
     // Add the bottom verticies and indicies
     if (_addEdges) {
         unsigned int bottomCenterIndex = 0;
-        addEdge(0, bottomNormal, &_data.front(), bottomCenterIndex);
+        addEdge(0, &_data.front(), bottomCenterIndex);
     }
 
     // Add the sides of the tube
+    unsigned int firstSideIndex = _addEdges ? _nPoints + 1 : 0;
     if (_useSmoothNormals) {
-        createSmoothTube();
+        createSmoothTube(firstSideIndex);
     }
     else {
-        createLowPolyTube();
+        createLowPolyTube(firstSideIndex);
     }
 
     // Add the top verticies and indicies
     if (_addEdges) {
         unsigned int topCenterIndex = _verticies.size();
-        addEdge(_nPolygons - 1, topNormal, & _data.back(), topCenterIndex);
+        addEdge(_nPolygons - 1, & _data.back(), topCenterIndex);
     }
 }
 
-void RenderableTube::createSmoothTube() {
+void RenderableTube::createSmoothTube(unsigned int firstSideIndex) {
     // Add verticies and indicies for the sides of the tube
-    unsigned int firstSideIndex = _addEdges ? _nPoints + 1 : 0;
     for (unsigned int polyIndex = 0; polyIndex < _nPolygons; ++polyIndex) {
         // Check if this is the the last polygon that will run in the loop
         bool isLastPoly = polyIndex == _nPolygons - 1;
@@ -683,9 +683,8 @@ void RenderableTube::createSmoothTube() {
     }
 }
 
-void RenderableTube::createLowPolyTube() {
+void RenderableTube::createLowPolyTube(unsigned int firstSideIndex) {
     // Add verticies and indices for the sides of the tube
-    unsigned int firstSideIndex = _addEdges ? _nPoints + 1 : 0;
     unsigned int vIndex = firstSideIndex;
     for (unsigned int polyIndex = 0; polyIndex < _nPolygons - 1; ++polyIndex) {
         TimePolygon* currentTimePolygon = &_data[polyIndex];
@@ -694,9 +693,8 @@ void RenderableTube::createLowPolyTube() {
     }
 }
 
-void RenderableTube::addEdge(int polygonIndex, const glm::dvec3& normal,
-                             const TimePolygon const* polygon, int centerIndex,
-                             double tInterpolation)
+void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
+                             int centerIndex, double tInterpolation)
 {
     // Set where to store the verticies and indicies
     std::vector<PolygonVertex>* verticies =
@@ -738,6 +736,16 @@ void RenderableTube::addEdge(int polygonIndex, const glm::dvec3& normal,
     centerPoint.position[0] = polygon->center.x;
     centerPoint.position[1] = polygon->center.y;
     centerPoint.position[2] = polygon->center.z;
+
+    glm::dvec3 normal;
+    if ( polygonIndex - 1 > 0) {
+        // Normal points along the tube
+        normal = _data[polygonIndex].center - _data[polygonIndex - 1].center;
+    }
+    else {
+        // Normal points behind the tube
+        normal = _data[polygonIndex].center - _data[polygonIndex + 1].center;
+    }
 
     centerPoint.normal[0] = normal.x;
     centerPoint.normal[1] = normal.y;
@@ -1131,12 +1139,8 @@ void RenderableTube::creteEnding(double now) {
 
     // Add cutplane
     if (_addEdges) {
-        // Calculate normal
-        glm::dvec3 normal =
-            _data[_firstPolygonAfterNow].center - _data[_lastPolygonBeforeNow].center;
-
         unsigned int centerIndex = _verticiesEnding.size();
-        addEdge(_firstPolygonAfterNow, normal, &currentTimePolygon, centerIndex, t);
+        addEdge(_firstPolygonAfterNow, &currentTimePolygon, centerIndex, t);
     }
 }
 
@@ -1307,6 +1311,12 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
         GL_UNSIGNED_INT,
         nullptr
     );
+
+    // Make sure there is a cutplane
+    if (_addEdges && !_interpolationNeeded && _nIndiciesToRender < _indicies.size() && !_showAllTube) {
+        addEdge(_lastPolygonBeforeNow, &_data[_lastPolygonBeforeNow], 0);
+        _interpolationNeeded = true;
+    }
 
     // Render the last section until now with interpolation
     if (_interpolationNeeded && !_showAllTube) {

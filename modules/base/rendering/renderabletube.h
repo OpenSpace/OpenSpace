@@ -84,11 +84,11 @@ private:
 
     void readDataFile();
     void createTube();
-    void createSmoothTube();
-    void createLowPolyTube();
+    void createSmoothTube(unsigned int firstSideIndex);
+    void createLowPolyTube(unsigned int firstSideIndex);
 
-    void addEdge(int polygonIndex, const glm::dvec3& normal,
-        const TimePolygon const* polygon, int centerIndex, double tInterpolation = -1.0);
+    void addEdge(int polygonIndex, const TimePolygon const* polygon, int centerIndex,
+        double tInterpolation = -1.0);
 
     void addSmoothSection(int polygonIndex, const TimePolygon const* polygon,
         bool isFirstPoly, unsigned int vIndex, bool isEnding = false,
