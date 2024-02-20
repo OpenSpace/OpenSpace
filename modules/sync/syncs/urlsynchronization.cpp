@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,8 +67,8 @@ namespace {
         // parameter only only contain exactly one URL
         std::optional<std::string> filename;
 
-        // This variable determines the validity period of a file(s) in seconds before it 
-        // needs to be re-downloaded. The default value keeps the file permanently cached, 
+        // This variable determines the validity period of a file(s) in seconds before it
+        // needs to be re-downloaded. The default value keeps the file permanently cached,
         // while a value of 0 forces the file to be downloaded on every startup.
         std::optional<double> secondsUntilResync [[codegen::greaterequal(0.0)]];
     };
@@ -133,7 +133,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
 
     if (p.forceOverride.has_value()) {
         LWARNING(fmt::format(
-            "{}: The variable ForceOverride has been deprecated."
+            "{}: The variable ForceOverride has been deprecated. "
             "Optionally, use SecondsUntilResync instead to specify file validity date.",
             p.identifier
         ));

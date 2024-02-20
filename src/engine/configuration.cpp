@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -421,15 +421,27 @@ ghoul::Dictionary Configuration::createDictionary() {
     {
         ghoul::Dictionary openGLDebugContextDict;
         openGLDebugContextDict.setValue("IsActive", openGLDebugContext.isActive);
-        openGLDebugContextDict.setValue("PrintStacktrace", openGLDebugContext.printStacktrace);
-        openGLDebugContextDict.setValue("IsSynchronous", openGLDebugContext.isSynchronous);
+        openGLDebugContextDict.setValue(
+            "PrintStacktrace",
+            openGLDebugContext.printStacktrace
+        );
+        openGLDebugContextDict.setValue(
+            "IsSynchronous",
+            openGLDebugContext.isSynchronous
+        );
 
         ghoul::Dictionary identifierFiltersDict;
         for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); ++i) {
             {
                 ghoul::Dictionary identifierFilterDict;
-                identifierFilterDict.setValue("Type", openGLDebugContext.identifierFilters[i].type);
-                identifierFilterDict.setValue("Source", openGLDebugContext.identifierFilters[i].source);
+                identifierFilterDict.setValue(
+                    "Type",
+                    openGLDebugContext.identifierFilters[i].type
+                );
+                identifierFilterDict.setValue(
+                    "Source",
+                    openGLDebugContext.identifierFilters[i].source
+                );
                 identifierFilterDict.setValue(
                     "Identifier",
                     static_cast<int>(openGLDebugContext.identifierFilters[i].identifier)

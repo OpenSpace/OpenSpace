@@ -42,7 +42,7 @@ Requirements for compiling are:
  - [Boost](http://www.boost.org/)
  - [Qt](http://www.qt.io/download)
 
-Feel free to create issues for missing features, bug reports, or compile problems or contact us via [email](mailto:openspace@amnh.org?subject=OpenSpace:).  Regarding any issues, you are very welcome on our [Slack support channel](https://openspacesupport.slack.com) to which you can freely [sign-up](https://join.slack.com/t/openspacesupport/shared_invite/zt-37niq6y9-T0JaCIk4UoFLI4VF5U9Vsw).
+Feel free to create issues for missing features, bug reports, or compile problems or contact us via [email](mailto:openspace@amnh.org?subject=OpenSpace:).  Regarding any issues, you are very welcome on our [Slack support channel](https://openspacesupport.slack.com) to which you can freely [sign-up](https://join.slack.com/t/openspacesupport/shared_invite/zt-24uhn3wvo-gCGHgjg2m9tHzKUEb_FyMQ).
 
 ![Image](https://docs.openspaceproject.com/en/latest/_static/images/himalaya-nkpg-dome.jpg)
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -914,7 +914,10 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     }
 
     if (!std::filesystem::is_regular_file(path)) {
-        throw ghoul::RuntimeError(fmt::format("Could not find asset file {}", path));
+        throw ghoul::RuntimeError(fmt::format(
+            "Could not find asset file {} requested by {}",
+            path, retriever
+        ));
     }
     auto asset = std::make_unique<Asset>(*this, path, explicitEnable);
     Asset* res = asset.get();

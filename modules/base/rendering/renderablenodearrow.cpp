@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -438,7 +438,9 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
 
     // Create transformation matrices to reshape to size and position
     _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
-    glm::dvec3 cylinderScale = glm::dvec3(s * glm::dvec4(_width, _width, cylinderLength, 0.0));
+    glm::dvec3 cylinderScale = glm::dvec3(
+        s * glm::dvec4(_width, _width, cylinderLength, 0.0)
+    );
     _cylinderScale = glm::scale(glm::dmat4(1.0), cylinderScale);
 
     // Adapt arrow head start to scaled size

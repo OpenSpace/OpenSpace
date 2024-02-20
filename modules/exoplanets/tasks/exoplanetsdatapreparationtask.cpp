@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -442,7 +442,7 @@ ExoplanetsDataPreparationTask::parseDataRow(std::string row,
 }
 
 glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starName,
-                                                      const std::filesystem::path& sourceFile)
+                                                  const std::filesystem::path& sourceFile)
 {
     glm::vec3 position = glm::vec3(std::numeric_limits<float>::quiet_NaN());
 

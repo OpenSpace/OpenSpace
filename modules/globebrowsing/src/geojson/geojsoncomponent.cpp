@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -168,8 +168,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
-        "Triggering this will remove this GeoJson component from its globe. Note that the "
-        "GUI may have to be reloaded for the change to be reflect in the user interface.",
+        "Triggering this will remove this GeoJson component from its globe. Note that "
+        "the GUI may have to be reloaded for the change to be reflect in the user "
+        "interface.",
         openspace::properties::Property::Visibility::User
     };
 
