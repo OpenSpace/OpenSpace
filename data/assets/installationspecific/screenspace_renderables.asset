@@ -1,0 +1,21 @@
+local textImagefolder = asset.resource("screenspacetexts")
+
+local InactiveWarning = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "Installation-Inactive-Warning",
+  Enabled = false,
+  Name = "Inactive Warning",
+  FaceCamera = false,
+  Scale = 0.3,
+  CartesianPosition = { 0.0, 0.0, -2.0 },
+  TexturePath = textImagefolder .. "/inactive-warning.png",
+  Tag = { "installation_onscreen_text" }
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(InactiveWarning)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(InactiveWarning.Identifier)
+end)

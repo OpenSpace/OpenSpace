@@ -1,0 +1,22 @@
+--------------------------------------------------------------
+-- Asset that is responsible for hosting the stort installaiton interface.
+-- Note that it relies on a very specific folder structure
+----------------------------------------------------------------
+
+local pathToWebpage = "${BASE}/../Stort-webpage"
+
+asset.onInitialize(function()
+  local directories = openspace.propertyValue("Modules.WebGui.Directories")
+
+  -- The served directories are given as a pair:
+  -- First the route
+  table.insert(directories, "stort-installation")
+  -- Then the path to the files to be hosted
+  table.insert(directories, openspace.absPath(pathToWebpage))
+
+  openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
+end)
+
+asset.onDeinitialize(function()
+
+end)

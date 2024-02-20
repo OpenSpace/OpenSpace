@@ -1,0 +1,78 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+-- A "handle" for the Sun, that can be used for navigation and such
+local SunHandle = {
+  Identifier = "Sun-Handle",
+  Parent = sun.Sun.Identifier,
+  InteractionSphere = 700000000,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = sun.Sun.Identifier,
+      Latitude = 90.0,
+      Longitude = 0.0,
+      Altitude = 1000,
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = sun.Sun.Identifier,
+      Latitude = 90.0,
+      Longitude = 0.0
+    }
+  },
+  GUI = {
+    Name = "Sun Handle",
+    Path = "/Solar System/Sun"
+  }
+}
+
+-- A "handle" for Apollo 11 landing site, that can be used for navigation and such
+local landingPosition = { 0.673950, 23.473093 }
+local Apollo11Handle = {
+  Identifier = "Apollo11-landing-Handle",
+  Parent = moon_transforms.Moon.Identifier,
+  InteractionSphere = 6,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon_transforms.Moon.Identifier,
+      Latitude = landingPosition[1],
+      Longitude = landingPosition[2],
+      Altitude = -1925,
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = moon_transforms.Moon.Identifier,
+      Latitude = landingPosition[1],
+      Longitude = landingPosition[2]
+    }
+  },
+  GUI = {
+    Name = "Apollo 11 landing site Handle",
+    Path = "/Solar System/Missions/Apollo/11"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SunHandle)
+  openspace.addSceneGraphNode(Apollo11Handle)
+
+  openspace.addCustomProperty("MissionTitle", "StringProperty", "Mission Title Property")
+  openspace.addCustomProperty("DeltaTimeValue", "IntProperty", "Delta Time ValueProperty")
+  openspace.addCustomProperty("DeltaTimeUnit", "StringProperty", "Delta Time Unit Property")
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeCustomProperty("DeltaTimeUnit")
+  openspace.removeCustomProperty("DeltaTimeValue")
+  openspace.removeCustomProperty("MissionTitle")
+
+  openspace.removeSceneGraphNode(Apollo11Handle)
+  openspace.removeSceneGraphNode(SunHandle)
+end)
+
+asset.export(SunHandle)
+asset.export(Apollo11Handle)

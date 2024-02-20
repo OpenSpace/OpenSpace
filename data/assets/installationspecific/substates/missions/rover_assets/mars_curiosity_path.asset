@@ -1,0 +1,109 @@
+local mars = asset.require('scene/solarsystem/planets/mars/mars')
+
+local globeIdentifier = mars.Mars.Identifier
+
+ -- Coordinate offset to match hirise image in Jezero crater
+local offset = { -0.0024, 0.0 }
+local handlePosition = { -5.397273407690904, 137.86468505859378 }
+local roverPosition = { -4.778673, 137.405913, } -- as of january 2024
+
+local Path = {
+  Identifier = "Curiosity-Rover-Path",
+  File = asset.resource("./geojson/roverpath_Curiosity.geojson"),
+  HeightOffset = 200.0,
+  CoordinateOffset = offset,
+  IgnoreHeights = true,
+  PreventHeightUpdate = true, -- Prevent automatic updates form height map. Too performance heavy!
+  DefaultProperties = {
+    LineWidth = 2.0,
+    AltitudeMode = "RelativeToGround"
+  },
+  Name = "Curiosity Rover Path"
+}
+
+-- A "handle" that can be used for navigation and such
+local Handle = {
+  Identifier = "Mars-Curiosity-Handle",
+  Parent = globeIdentifier,
+  InteractionSphere = 10,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = handlePosition[1] + offset[1],
+      Longitude = handlePosition[2] + offset[2],
+      Altitude = 10.0,
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = handlePosition[1] + offset[1],
+      Longitude = handlePosition[2] + offset[2]
+    }
+  },
+  GUI = {
+    Name = "Curiosity Overview Handle",
+    Path = "/Missions/Curiosity"
+  }
+}
+
+local RoverPosition = {
+  Identifier = "Mars-Curiosity-Position",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = roverPosition[1] + offset[1],
+      Longitude = roverPosition[2] + offset[2],
+      Altitude = 200.0,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = roverPosition[1] + offset[1],
+      Longitude = roverPosition[2] + offset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 3500.0,
+    Billboard = true,
+    Texture = asset.resource('./images/rover_icon.png'),
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Name = "Curiosity Position",
+    Path = "/Missions/Curiosity"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(mars.Mars.Identifier, Path)
+
+  openspace.addSceneGraphNode(Handle)
+  openspace.addSceneGraphNode(RoverPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(mars.Mars.Identifier, Path)
+
+  openspace.removeSceneGraphNode(RoverPosition)
+  openspace.removeSceneGraphNode(Handle)
+end)
+
+asset.export(Path)
+asset.export(Handle)
+asset.export(RoverPosition)
+
+
+asset.meta = {
+  Name = "Curiosity Rover Path",
+  Version = "1.0",
+  Description = "Renderables used to show the traversal path of the Curiosity rover",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

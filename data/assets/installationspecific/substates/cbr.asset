@@ -1,0 +1,42 @@
+local util = asset.require('./../utility_functions')
+local flyHome = asset.require('./../fly_home_alternatives')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+
+-- No zoom, can "zoom" to predetermined distances using the buttons on the webpage
+local cbrState = {
+    Identifier = "CBR",
+    Enter = [[
+        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+        ]] .. util.startOrbiting() .. [[
+        ]] .. util.orbitOnArrival() .. [[
+    ]],
+    Exit = [[
+        ]] .. util.stopOrbiting() .. [[
+    ]]
+}
+
+local states = { cbrState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+
+local transitions = {
+  -- Transition to/from this state
+  {
+    From = "Home",
+    To = "CBR",
+    Action = [[]] -- This flight happens on the webpage
+  },
+  {
+    From = "CBR",
+    To = "Home",
+    Action = flyHome.linearFlight
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

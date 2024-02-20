@@ -1,0 +1,110 @@
+local mars = asset.require('scene/solarsystem/planets/mars/mars')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+ -- Coordinate offset to match hirise image in Jezero crater
+local latLongOffset = asset.require('./mars_perseverance_path.asset').LatLongOffset
+
+local globeIdentifier = mars.Mars.Identifier
+
+-- Samples as of 2023-01-13
+local positions = {
+  { sol="164", lon=77.45167282, lat=18.4276677, coordinates={77.451673,18.427668,-2584.822} },
+  { sol="194 & 196", lon=77.44432638, lat=18.43073498, coordinates={77.444326,18.430735,-2574.27} },
+  { sol="262 & 271", lon=77.44305448, lat=18.43398032, coordinates={77.443054,18.43398,-2568.823} },
+  { sol="298 & 337", lon=77.44134387, lat=18.4326357, coordinates={77.441344,18.432636,-2573.989} },
+  { sol="371 & 377", lon=77.45242176, lat=18.44386406, coordinates={77.452422,18.443864,-2568.35668} },
+  { sol="490 & 495", lon=77.40617493, lat=18.45893136, coordinates={77.406175,18.458931,-2520.188} },
+  { sol="509 & 516", lon=77.40588851,lat=18.45863707, coordinates={77.405889,18.458637,-2523.0974} },
+  { sol="575 & 579", lon=77.40144029,lat=18.45072631, coordinates={77.40144,18.450726,-2526.525146} },
+  { sol="631", lon=77.39911421,lat=18.45363597, coordinates={77.399114,18.453636,-2517.093594} },
+  { sol="634 & 639",lon=77.40121811,lat=18.45131442, coordinates={77.401218,18.451314,-2525.061741} }
+}
+
+local altitude = -2574.27;
+
+local nodes = {}
+
+for index, position in pairs(positions) do
+  local sample = {
+    Identifier = "Sample" .. tostring(index),
+    Parent = globeIdentifier,
+    Transform = {
+      Translation = {
+        Type = "GlobeTranslation",
+        Globe = globeIdentifier,
+        Latitude = position["coordinates"][2] + latLongOffset[1],
+        Longitude = position["coordinates"][1]  + latLongOffset[2],
+        Altitude = 10,
+        UseHeightmap = true
+      },
+      Rotation = {
+        Type = "GlobeRotation",
+        Globe = globeIdentifier,
+        Latitude = position["coordinates"][2] + latLongOffset[1],
+        Longitude = position["coordinates"][1]  + latLongOffset[2]
+      }
+    },
+    Renderable = {
+      Type = "RenderablePlaneImageLocal",
+      Size = 30.0,
+      Billboard = true,
+      Texture = asset.resource('./images/sampletube_icon.png'),
+      RenderBinMode = "PostDeferredTransparent"
+    },
+    Tag = { "perseverance_sample", "perseverance_only" },
+    GUI = {
+      Name = "Perseverance sample " .. tostring(index),
+      Path = "/Missions/Mars2020/Perseverance Samples"
+    }
+  }
+  table.insert(nodes, sample)
+end
+
+local showSamplesAction = {
+  Identifier = "os.show_perseverance_samples",
+  Name = "Show Perseverance Samples",
+  Command = [[
+    openspace.setPropertyValue('{perseverance_sample}.Renderable.Fade', 1.0, 1.0);
+  ]],
+  Documentation = "Fades in the Perseverance samples",
+  GuiPath = "/Mars2020",
+  IsLocal = false
+}
+
+local hideSamplesAction = {
+  Identifier = "os.hide_perseverance_samples",
+  Name = "Hide Perseverance Samples",
+  Command = [[
+    openspace.setPropertyValue('{perseverance_sample}.Renderable.Fade', 0.0, 1.0);
+  ]],
+  Documentation = "Fades out the Perseverance samples",
+  GuiPath = "/Mars2020",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  for _, node in pairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+  openspace.action.registerAction(showSamplesAction)
+  openspace.action.registerAction(hideSamplesAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(hideSamplesAction)
+  openspace.action.removeAction(showSamplesAction)
+  for _, node in pairs(nodes) do
+    openspace.removeSceneGraphNode(node)
+  end
+end)
+
+-- TODO: export nodes?
+
+asset.meta = {
+  Name = "Perseverance Rover Samples",
+  Version = "1.0",
+  Description = [[  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

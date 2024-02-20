@@ -1,0 +1,144 @@
+local util = asset.require('./../../utility_functions')
+local flyHome = asset.require('./../../fly_home_alternatives')
+local scripts = asset.require("./cassini/scripts")
+
+----------------------------------------------------------------
+-- SCRIPTS
+----------------------------------------------------------------
+local cassiniStart = "2004-06-16T08:14:57.000" -- Primary mission start
+local missionEquinoxStart = "2008-08-09T00:00:00.000"
+local missionSolsticeStart = "2010-11-24T00:00:00.000"
+local grandFinaleStart = "2017-04-26T00:00:00.000"
+local cassiniEnd = "2017-09-15T10:34:05.000"
+
+local cassiniNavigationState = [[{ Anchor = 'Saturn', Pitch = -0.000071, Position = { 3641029278.891357, 7812048554.762817, -1533586357.197266 }, ReferenceFrame = 'Root', Up = { -0.739154, 0.443940, 0.506525 }, Yaw = 0.003681 }]]
+
+local huygensDetach = "2004-11-21 08:44:53.000"
+local huygensEnd = "2005-01-14 09:05:55.000"
+
+local approachDistance = 1000000000
+local landingDistance = 45000000
+
+local huygensNavigationState = [[{ Anchor = 'Saturn', Pitch = -0.003934, Position = { 1343293062.949463, 3847226689.074280, -1700869686.287659 }, ReferenceFrame = 'Root', Up = { -0.697954, 0.479043, 0.532333 }, Yaw = 0.003055 }]]
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local trails = { "primaryMission", "equinoxMission", "solsticeMission", "grandFinale" }
+
+local cassiniState = {
+  Identifier = "Cassini",
+  Enter = [[
+    openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', true)
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitConstantLatitudeOnArrival() .. [[
+    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Fade', 0.0, 3.0)
+    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Fade', 0.0, 3.0)
+    openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', false)
+    ]] .. util.fadeInNodes(trails) .. [[
+    ]] .. scripts.cassiniScripts .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+    openspace.scriptScheduler.clear()
+    openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', false)
+    ]] .. util.fadeOutNodes(trails) .. [[
+    openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', true)
+    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Fade', 1.0, 3.0)
+    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Fade', 1.0, 3.0)
+  ]]
+}
+
+-- No zoom, scheduled scripts
+local huygensState = {
+  Identifier = "Huygens",
+  Enter = [[
+    openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', true)
+    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Fade', 0.0, 3.0)
+    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Fade', 0.0, 3.0)
+    openspace.setPropertyValueSingle('Scene.Titan.Renderable.Fade', 1.0, 3.0)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnabledMinimumAllowedDistance", false);
+    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
+    ]] .. util.fadeInNodes({ "TitanTrail", "Titan" }) .. [[
+    ]] .. util.fadeInNodes({ "huygensTrail" }) .. [[
+    ]] .. scripts.huygensScripts .. [[
+  ]],
+  Exit = [[
+    openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle("Scene.CassiniSaturnLabel.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.CassiniTitanLabel.Renderable.Enabled", false)
+    openspace.scriptScheduler.clear()
+    ]] .. util.fadeOutNodes({ "huygensTrail" }) .. [[
+    openspace.setPropertyValue('{moon_major_saturn}.Renderable.Fade', 1.0, 3.0)
+    openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Fade', 1.0, 3.0)
+    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
+  ]]
+}
+
+local states = { cassiniState, huygensState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+-- The action we want to happen when moving from any of the substates back
+-- to the SolarSystem state
+local goToHome = [[
+  ]] .. util.disableRoll() .. [[
+  ]] .. flyHome.cameraPath .. [[
+]]
+
+local goToCassiniOverview = [[
+  ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.flyToNavState(cassiniNavigationState) .. [[
+]]
+
+local goToHuygensOverview = [[
+  ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.flyToNavState(huygensNavigationState) .. [[
+]]
+
+local transitions = {
+  -- Transition to/from this state
+  {
+    From = "Home",
+    To = "Cassini",
+    Action = goToCassiniOverview
+  },
+  {
+    From = "Cassini",
+    To = "Home",
+    Action = goToHome
+  },
+  -- Cassini - Huygens
+  {
+    From = "Cassini",
+    To = "Huygens",
+    Action = goToHuygensOverview
+  },
+  {
+    From = "Huygens",
+    To = "Cassini",
+    Action = goToCassiniOverview
+  },
+  -- Back to SolarSystem from substates
+  {
+    From = "Huygens",
+    To = "Home",
+    Action = goToHome
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

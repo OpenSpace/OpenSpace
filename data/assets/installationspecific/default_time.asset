@@ -1,0 +1,5 @@
+-- The time the applicaiton should start at, and all states should set when going back to Home
+-- OBS! Needs to match the time in the profile (plus a few seconds)
+local time = "2021-08-26T03:21:00.505"
+
+asset.export("time", time)

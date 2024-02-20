@@ -1,0 +1,49 @@
+local util = asset.require('./../utility_functions')
+local flyHome = asset.require('./../fly_home_alternatives')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local opacityUri = "Scene.Exoplanets.Renderable.Fade"
+
+-- No zoom, no camera path to home to reset afterwards. Want to hide that the stars are not aligned with the rings.
+local exoplanetsState = {
+    Identifier = "Exoplanets",
+    Enter = [[
+        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+        ]] .. util.startOrbiting() .. [[
+        ]] .. util.interpolateProperty(opacityUri, 1.0, 2) .. [[
+        openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
+    ]],
+    Exit = [[
+        ]] .. util.interpolateProperty(opacityUri, 0.0, 2) .. [[
+        ]] .. util.stopOrbiting() .. [[
+          openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
+        openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
+    ]]
+}
+
+-- Idea on additional state: Go to Trappist-1
+-- Has multiple planets in the habitable zone!
+
+local states = { exoplanetsState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local transitions = {
+  -- Transition to/from this state
+  {
+    From = "Home",
+    To = "Exoplanets"
+  },
+  {
+    From = "Exoplanets",
+    To = "Home"
+    -- No action. Should already be at the desired distance
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

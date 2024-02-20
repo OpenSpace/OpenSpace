@@ -1,0 +1,149 @@
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local saturnTransforms = asset.require('scene/solarsystem/planets/saturn/transforms')
+local kernels = asset.require('./kernels')
+
+-- TIMELINE
+local launchTime = "1997 OCT 15 09:27:11.572"
+local beginSaturnOrbit = "2004 JUN 16 08:14:57.000"
+local aprilStart = "2017 APR 02 00:01:12.557"
+local aprilEnd = "2017 MAY 07 00:01:09.153"
+local endCassini = "2017 SEP 15 10:34:05.000"
+
+local huygensDetach = "2004 NOV 21 08:44:53.000"
+local endHuygens = "2005 JAN 15 11:06:00.000"
+
+------------------------------------------------------------------------------------------
+-- CASSINI Position in relation to SSB                                                  --
+------------------------------------------------------------------------------------------
+local CassiniSSB = {
+  Identifier = "CassiniSSB",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier, 
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SUN",
+      Kernels = kernels.ephemerisKernels
+    },
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = launchTime,
+    End = endCassini
+  },
+  GUI = {
+    Hidden = true,
+    Name = "Cassini (SSB)",
+    Path = "/Solar System/Missions/Cassini",
+    Description = "Cassini position in relation to SSB"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Position in relation to Saturn                                               --
+------------------------------------------------------------------------------------------
+local CassiniSAT = {
+  Identifier = "CassiniSAT",
+  Parent = saturnTransforms.SaturnBarycenter.Identifier, 
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SATURN",
+      Kernels = kernels.ephemerisKernels
+    },
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = beginSaturnOrbit,
+    End = endCassini
+  },
+  GUI = {
+    Hidden = true,
+    Name = "Cassini (SAT)",
+    Path = "/Solar System/Missions/Cassini",
+    Description = "Cassini position in relation to Saturn"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Rotation in relation to Saturn, April 2017                                   --
+------------------------------------------------------------------------------------------
+local CassiniROT = {
+  Identifier = "CassiniROT",
+  Parent = CassiniSAT.Identifier, 
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "CASSINI_SC_COORD",
+      DestinationFrame = "J2000",
+      Kernels = kernels.ephemerisKernels
+    }
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = aprilStart,
+    End = aprilEnd
+  },
+  GUI = {
+    Hidden = true,
+    Name = "Cassini (SAT, April 2017)",
+    Path = "/Solar System/Missions/Cassini",
+    Description = "Cassini rotation in relation to Saturn"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- HUYGENS Position in relation to Saturn                                               --
+------------------------------------------------------------------------------------------
+local Huygens = {
+  Identifier = "Huygens",
+  Parent = saturnTransforms.SaturnBarycenter.Identifier, 
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-150", -- Huygens
+      Observer = "SATURN",
+      Kernels = kernels.ephemerisKernels
+    },
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = huygensDetach,
+    End = endHuygens
+  },
+  GUI = {
+    Hidden = true,
+    Name = "Huygens Probe (SAT)",
+    Path = "/Solar System/Missions/Cassini/Huygens Probe",
+    Description = "Huygens position in relation to Saturn"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CassiniSSB)
+  openspace.addSceneGraphNode(CassiniSAT)
+  openspace.addSceneGraphNode(CassiniROT)
+  openspace.addSceneGraphNode(Huygens)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Huygens)
+  openspace.removeSceneGraphNode(CassiniROT)
+  openspace.removeSceneGraphNode(CassiniSAT)
+  openspace.removeSceneGraphNode(CassiniSSB)
+end)
+
+asset.export(CassiniSSB)
+asset.export(CassiniSAT)
+asset.export(CassiniROT)
+asset.export(Huygens)
+
+asset.meta = {
+  Name = "Cassini Mission Transforms",
+  Version = "1.0",
+  Description = "", -- TODO
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

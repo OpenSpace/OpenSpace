@@ -1,0 +1,57 @@
+local globeIdentifier = asset.require("scene/solarsystem/planets/mars/mars").Mars.Identifier
+
+local UrlBase = "http://liu-se.cdn.openspaceproject.com/files/nvab/stort/jezhirise_caltech/"
+
+local syncedDirectory = asset.resource({
+  Name = "HiRISE Jezero Map",
+  Type = "UrlSynchronization",
+  Identifier = "hirise-jezero",
+  Url = {
+    UrlBase .. "E77-5_N18-0_ll.tif",
+    UrlBase .. "E77-5_N18-5_ll.tif",
+    UrlBase .. "E77-5_N18-25_ll.tif",
+    UrlBase .. "E77-25_N18-0_ll.tif",
+    UrlBase .. "E77-25_N18-5_ll.tif",
+    UrlBase .. "E77-25_N18-25_ll.tif",
+    UrlBase .. "E77-75_N18-0_ll.tif",
+    UrlBase .. "E77-75_N18-5_ll.tif",
+    UrlBase .. "E77-75_N18-25_ll.tif",
+    UrlBase .. "Jezero.info",
+    UrlBase .. "jezctr.txt",
+    UrlBase .. "jezctr.vrt"
+  }
+})
+
+local layer = {
+  Identifier = "HiRISE-jezero",
+  Name = "HiRISE Jezero",
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "jezctr.vrt",
+  BlendMode = "Color",
+  Settings = {
+    Gamma = 1.0,
+    Multiplier = 1.0
+  },
+  Description = [[]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "HiRISE Jezero",
+  Version = "1.0",
+  Description = [[HiRISE map of Jezero Crater]],
+  Author = "OpenSpace Team",
+  URL = "", -- TODO
+  License = "MIT License"
+}

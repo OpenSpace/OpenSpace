@@ -1,0 +1,383 @@
+local util = asset.require('./../../utility_functions')
+local flyHome = asset.require('./../../fly_home_alternatives')
+local today = asset.require('./../../default_time').time
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local trails = { "Voyager1", "Voyager2", "Pioneer10", "Pioneer11" }
+
+local voyagerPioneerNavigationState = [[{
+  Anchor = "Sun",
+  Pitch = 4.8502868388310596e-15,
+  Position = { 14097490002262.918, 6855666924101.269, 34182234858284.91 },
+  ReferenceFrame = "Root",
+  Up = { -0.2122075783104489, 0.971316980781961, -0.10729057065851644 },
+  Yaw = -8.616371505176941e-15
+}]]
+
+local doLinearFlightTo2021View = util.flyLinearlyToHeight(3.6E13)
+
+local voyagerPioneerState = {
+  Identifier = "VoyagerPioneer"
+}
+
+-- 1973 Pioneers reaches Jupiter
+local time1973 = "1973-11-25T12:58:03.505";
+local year1973state = {
+  Identifier = "year1973",
+  Enter = util.flyLinearlyToHeight(1.5E12),
+  Exit = [[]]
+}
+
+-- 1974 Pioneers reaches Jupiter
+local time1974 = "1974-11-25T12:58:03.505";
+local year1974state = {
+  Identifier = "year1974",
+  Enter = util.flyLinearlyToHeight(1.5E12),
+  Exit = [[]]
+}
+
+-- 1977 Voyagers launches
+local time1977 = "1977-11-01T12:58:03.505";
+local year1977state = {
+  Identifier = "year1977",
+  Enter = util.flyLinearlyToHeight(1.5E12),
+  Exit = [[]]
+}
+
+-- 1979 Pioneers reaches Saturn, Voyagers reaches Jupiter
+local time1979 = "1979-09-09T12:58:03.505";
+local year1979state = {
+  Identifier = "year1979",
+  Enter = util.flyLinearlyToHeight(3.0E12),
+  Exit = [[]]
+}
+
+-- 1986 Voyager 2 reacher Uranus
+local time1986 = "1986-01-24T12:58:03.505";
+local year1986state = {
+  Identifier = "year1986",
+  Enter = util.flyLinearlyToHeight(6.9E12),
+  Exit = [[]]
+}
+
+-- 1989 Voyager 2 reacher Neptune
+local time1989 = "1989-09-09T12:58:03.505";
+local year1989state = {
+  Identifier = "year1989",
+  Enter = util.flyLinearlyToHeight(9.7E12),
+  Exit = [[]]
+}
+
+local states = {
+  voyagerPioneerState,
+  year1973state,
+  year1974state,
+  year1977state,
+  year1979state,
+  year1986state,
+  year1989state
+}
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+-- The action we want to happen when moving from any of the substates back
+-- to the Home state
+local onLeavingMainStateAction = [[
+  ]] .. util.setTime(today) .. [[
+  ]] .. flyHome.linearFlight .. [[
+  ]] .. util.disableRoll() .. [[
+  ]] .. util.stopOrbiting() .. [[
+  ]] .. util.fadeOutNodes(trails) .. [[
+]]
+
+local transitions = {
+  -- Transition to/from this state
+  {
+    From = "Home",
+    To = "VoyagerPioneer",
+    Action = [[
+      ]] .. util.setTime(today) .. [[
+      ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
+      ]] .. util.orbitConstantLatitudeOnArrival() .. [[
+      ]] .. util.enableRoll() .. [[
+      ]] .. util.flyToNavState(voyagerPioneerNavigationState) .. [[
+      ]] .. util.fadeInNodes(trails) .. [[
+    ]]
+  },
+  {
+    From = "VoyagerPioneer",
+    To = "Home",
+    Action = onLeavingMainStateAction
+  },
+  -- 1973
+  {
+    From = "VoyagerPioneer",
+    To = "year1973",
+    Action = util.setTime(time1973)
+  },
+  {
+    From = "year1973",
+    To = "VoyagerPioneer",
+    Action = [[
+      ]] .. util.interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
+  },
+  {
+    From = "year1974",
+    To = "year1973",
+    Action = util.interpolateTime(time1973)
+  },
+  {
+    From = "year1973",
+    To = "year1974",
+    Action = util.interpolateTime(time1974)
+  },
+  {
+    From = "year1973",
+    To = "year1979",
+    Action = util.interpolateTime(time1979)
+  },
+  {
+    From = "year1979",
+    To = "year1973",
+    Action = util.interpolateTime(time1973)
+  },
+  {
+    From = "year1973",
+    To = "year1986",
+    Action = util.interpolateTime(time1986)
+  },
+  {
+    From = "year1986",
+    To = "year1973",
+    Action = util.interpolateTime(time1973)
+  },
+  {
+    From = "year1973",
+    To = "year1989",
+    Action = util.interpolateTime(time1989)
+  },
+  {
+    From = "year1989",
+    To = "year1973",
+    Action = util.interpolateTime(time1973)
+  },
+  {
+    From = "year1973",
+    To = "year1977",
+    Action = util.interpolateTime(time1977)
+  },
+  {
+    From = "year1977",
+    To = "year1973",
+    Action = util.interpolateTime(time1973)
+  },
+  -- 1974
+  {
+    From = "VoyagerPioneer",
+    To = "year1974",
+    Action = util.setTime(time1974)
+  },
+  {
+    From = "year1974",
+    To = "VoyagerPioneer",
+    Action = [[
+      ]] .. util.interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
+  },
+  {
+    From = "year1974",
+    To = "year1979",
+    Action = util.interpolateTime(time1979)
+  },
+  {
+    From = "year1979",
+    To = "year1974",
+    Action = util.interpolateTime(time1974)
+  },
+  {
+    From = "year1974",
+    To = "year1986",
+    Action = util.interpolateTime(time1986)
+  },
+  {
+    From = "year1986",
+    To = "year1974",
+    Action = util.interpolateTime(time1974)
+  },
+  {
+    From = "year1974",
+    To = "year1989",
+    Action = util.interpolateTime(time1989)
+  },
+  {
+    From = "year1989",
+    To = "year1974",
+    Action = util.interpolateTime(time1974)
+  },
+  {
+    From = "year1974",
+    To = "year1977",
+    Action = util.interpolateTime(time1977)
+  },
+  {
+    From = "year1977",
+    To = "year1974",
+    Action = util.interpolateTime(time1974)
+  },
+  -- 1977
+  {
+    From = "VoyagerPioneer",
+    To = "year1977",
+    Action = util.setTime(time1977)
+  },
+  {
+    From = "year1977",
+    To = "VoyagerPioneer",
+    Action = [[
+      ]] .. util.interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
+  },
+  {
+    From = "year1977",
+    To = "year1979",
+    Action = util.interpolateTime(time1979)
+  },
+  {
+    From = "year1979",
+    To = "year1977",
+    Action = util.interpolateTime(time1977)
+  },
+  {
+    From = "year1977",
+    To = "year1986",
+    Action = util.interpolateTime(time1986)
+  },
+  {
+    From = "year1986",
+    To = "year1977",
+    Action = util.interpolateTime(time1977)
+  },
+  {
+    From = "year1977",
+    To = "year1989",
+    Action = util.interpolateTime(time1989)
+  },
+  {
+    From = "year1989",
+    To = "year1977",
+    Action = util.interpolateTime(time1977)
+  },
+  -- 1979
+  {
+    From = "VoyagerPioneer",
+    To = "year1979",
+    Action = util.interpolateTime(time1979)
+  },
+  {
+    From = "year1979",
+    To = "VoyagerPioneer",
+    Action = [[
+      ]] .. util.interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
+  },
+  {
+    From = "year1979",
+    To = "year1986",
+    Action = util.interpolateTime(time1986)
+  },
+  {
+    From = "year1986",
+    To = "year1979",
+    Action = util.interpolateTime(time1979)
+  },
+  {
+    From = "year1979",
+    To = "year1989",
+    Action = util.interpolateTime(time1989)
+  },
+  {
+    From = "year1989",
+    To = "year1979",
+    Action = util.interpolateTime(time1979)
+  },
+  -- 1986
+  {
+    From = "year1986",
+    To = "VoyagerPioneer",
+    Action = [[
+      ]] .. util.interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
+  },
+  {
+    From = "VoyagerPioneer",
+    To = "year1986",
+    Action = util.interpolateTime(time1986)
+  },
+  {
+    From = "year1986",
+    To = "year1989",
+    Action = util.interpolateTime(time1989)
+  },
+  {
+    From = "year1989",
+    To = "year1986",
+    Action = util.interpolateTime(time1986)
+  },
+  -- 1989
+  {
+    From = "year1989",
+    To = "VoyagerPioneer",
+    Action = [[
+      ]] .. util.interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
+  },
+  {
+    From = "VoyagerPioneer",
+    To = "year1989",
+    Action = util.interpolateTime(time1989)
+  },
+  -- Back to SolarSystem from substates
+  {
+    From = "year1973",
+    To = "Home",
+    Action = onLeavingMainStateAction
+  },
+  {
+    From = "year1974",
+    To = "Home",
+    Action = onLeavingMainStateAction
+  },
+  {
+    From = "year1977",
+    To = "Home",
+    Action = onLeavingMainStateAction
+  },
+  {
+    From = "year1979",
+    To = "Home",
+    Action = onLeavingMainStateAction
+  },
+  {
+    From = "year1986",
+    To = "Home",
+    Action = onLeavingMainStateAction
+  },
+  {
+    From = "year1989",
+    To = "Home",
+    Action = onLeavingMainStateAction
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

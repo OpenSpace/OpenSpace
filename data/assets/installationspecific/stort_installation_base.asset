@@ -1,0 +1,158 @@
+-- Specifying which other assets should be loaded in this scene
+
+-- The base OpenSpace content
+asset.require("base")
+
+-- Host the interface
+asset.require("installationspecific/host_interface")
+
+-- Action for GUI scale
+asset.require("installationspecific/guiscaleaction")
+
+-- The state machine to control the installation
+asset.require("installationspecific/stort_state_machine")
+
+asset.require("installationspecific/screenspace_renderables")
+
+asset.require("installationspecific/extra_scenegraphnodes")
+asset.require("installationspecific/others/olympus_mons_node")
+asset.require("installationspecific/substates/missions/cassini/trail")
+asset.require("installationspecific/substates/missions/cassini/labels")
+asset.require("installationspecific/substates/missions/rover_assets/mars_curiosity_path")
+asset.require("installationspecific/substates/missions/rover_assets/perseverance")
+
+-- Ceres assets
+asset.require("scene/solarsystem/dwarf_planets/ceres/ceres")
+asset.require("scene/solarsystem/dwarf_planets/ceres/default_layers")
+asset.require("scene/solarsystem/dwarf_planets/ceres/trail")
+
+-- Pluto moons assets
+asset.require("scene/solarsystem/dwarf_planets/pluto/charon/charon")
+asset.require("scene/solarsystem/dwarf_planets/pluto/charon/charon_trail")
+asset.require("scene/solarsystem/dwarf_planets/pluto/minor/hydra")
+asset.require("scene/solarsystem/dwarf_planets/pluto/minor/kerberos")
+asset.require("scene/solarsystem/dwarf_planets/pluto/minor/nix")
+asset.require("scene/solarsystem/dwarf_planets/pluto/minor/styx")
+asset.require("scene/solarsystem/dwarf_planets/pluto/pluto")
+
+-- Apollo mission assets
+asset.require("scene/solarsystem/missions/apollo/11/apollo11")
+asset.require("scene/solarsystem/missions/apollo/8/apollo8")
+asset.require("scene/solarsystem/missions/apollo/apollo_globebrowsing")
+asset.require("scene/solarsystem/missions/apollo/insignias_map")
+
+-- Voyager & Pioneer mission
+asset.require("scene/solarsystem/missions/voyagerpioneer/voyager1_2__pioneer10_11")
+
+-- ISS
+asset.require("scene/solarsystem/planets/earth/satellites/misc/iss")
+
+-- Minor / weird moons of some other planets
+asset.require("scene/solarsystem/planets/jupiter/major_moons")
+asset.require("scene/solarsystem/planets/jupiter/minor_moons")
+asset.require("scene/solarsystem/planets/neptune/inner_moons")
+asset.require("scene/solarsystem/planets/neptune/irregular_moons")
+asset.require("scene/solarsystem/planets/neptune/major_moons")
+asset.require("scene/solarsystem/planets/neptune/minor_moons")
+asset.require("scene/solarsystem/planets/saturn/major_moons")
+asset.require("scene/solarsystem/planets/saturn/minor_moons")
+asset.require("scene/solarsystem/planets/uranus/major_moons")
+asset.require("scene/solarsystem/planets/uranus/minor_moons")
+
+
+
+
+asset.onInitialize(function ()
+  -- Set a bunch of properties! To override the default values in the assets based on the configuraiton we want.
+
+  -- OBS! Need to match the desired startup for the state machine, so maybe some should really live in the
+  -- start state of the state machine (@TODO)
+
+  -- Appearances
+  openspace.setPropertyValue("{moonTrail_minor}.Renderable.Appearance.Color", {0.3, 0.5, 0.5})
+  openspace.setPropertyValue("Scene.Voyager*.Renderable.Appearance.Color", {0.424000, 1.000000, 0.404000})
+  openspace.setPropertyValue("Scene.Pioneer*.Renderable.Appearance.Color", {0.910000, 0.478000, 0.976000})
+
+  -- Constellations
+  openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0.0)
+  openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", true)
+  openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Fade", 0.0)
+
+  -- Mars layers and rovers
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_LiU.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Fade", 0.0)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Fade", 0.0)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Europe.Enabled", true)
+
+  openspace.setPropertyValueSingle("Scene.PerseveranceModel.Renderable.LightSources.Camera.Intensity", 0.7)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Curiosity-Rover-Path.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.Enabled", false)
+
+  -- Exoplanets
+  openspace.setPropertyValueSingle("Scene.Exoplanets.Renderable.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Exoplanets.Renderable.Fade", 0.0)
+
+  -- Apollo
+  openspace.setPropertyValueSingle("Scene.Apollo8LaunchTrail.Renderable.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.Apollo11MoonTrail.Renderable.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.Apollo11LemDescentModel.Renderable.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.Apollo11.Renderable.Enabled", false)
+
+  -- Insignias - for some reason they have opacity 0.0 per default in the asset
+  openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1.0)
+
+  -- Have Cassini missing trails faded out per default
+  openspace.setPropertyValue("{cassini_trail}.Renderable.Fade", 0.0)
+
+  -- Other planet color layers
+  openspace.setPropertyValueSingle("Scene.Neptune.Renderable.Layers.ColorLayers.Texture.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma", 0.5)
+
+  -- Disable minor moons on startup
+  openspace.setPropertyValue("{moonTrail_minor}.Renderable.Enabled", false)
+  openspace.setPropertyValue("{moon_minor}.Renderable.Enabled", false)
+
+  -- Disable dwarf planets on startup
+  openspace.setPropertyValueSingle("Scene.CeresTrail.Renderable.Period", 336.4)
+  openspace.setPropertyValue("{dwarf_planet}.Renderable.Enabled", false)
+  openspace.setPropertyValue("{planetTrail_dwarf}.Renderable.Enabled", false)
+  openspace.setPropertyValue("{moon_dwarf}.Renderable.Enabled", false)
+  openspace.setPropertyValue("{moonTrail_dwarf}.Renderable.Enabled", false)
+
+  -- Ambient intesity of a bunch of planets and moons (to make the dark side less dark)
+  openspace.setPropertyValue("{planet_solarSystem}.Renderable.AmbientIntensity", 0.3)
+  openspace.setPropertyValue("{moon_solarSystem}.Renderable.AmbientIntensity", 0.3)
+  openspace.setPropertyValueSingle("Scene.Mercury.Renderable.AmbientIntensity", 0.4)
+  openspace.setPropertyValueSingle("Scene.Venus.Renderable.AmbientIntensity", 0.5)
+  openspace.setPropertyValueSingle("Scene.Earth.Renderable.AmbientIntensity", 0.05)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.AmbientIntensity", 0.5)
+  openspace.setPropertyValueSingle("Scene.Jupiter.Renderable.AmbientIntensity", 0.13)
+  openspace.setPropertyValueSingle("Scene.Saturn.Renderable.AmbientIntensity", 0.05)
+  openspace.setPropertyValueSingle("Scene.Pluto.Renderable.AmbientIntensity", 0.15)
+  openspace.setPropertyValueSingle("Scene.Phobos.Renderable.AmbientIntensity", 0.1)
+  openspace.setPropertyValueSingle("Scene.Deimos.Renderable.AmbientIntensity", 0.1)
+  openspace.setPropertyValueSingle("Scene.Io.Renderable.AmbientIntensity", 0.2)
+  openspace.setPropertyValueSingle("Scene.Titan.Renderable.AmbientIntensity", 0.25)
+  openspace.setPropertyValueSingle("Scene.Charon.Renderable.AmbientIntensity", 0.25)
+
+  -- Disable dashboard and other onscreen visuals
+  openspace.setPropertyValueSingle("Dashboard.IsEnabled", false)
+  openspace.setPropertyValueSingle("RenderEngine.ShowLog", false)
+  openspace.setPropertyValueSingle("RenderEngine.ShowVersion", false)
+  openspace.setPropertyValueSingle("RenderEngine.ShowCamera", false)
+  openspace.setPropertyValueSingle("RenderEngine.ShowCamera", false)
+
+  -- Idle behavior settings
+  openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleBehavior.ShouldTriggerWhenIdle", true)
+  openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleBehavior.IdleWaitTime", 10) -- seconds
+  openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleBehavior.SpeedFactor", 0.5)
+  openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleBehavior.ShouldTriggerWhenIdle", true)
+
+  -- Touch settings
+  openspace.setPropertyValueSingle("Modules.Touch.TouchMarker.Visibility", false)
+
+end)

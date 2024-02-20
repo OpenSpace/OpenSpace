@@ -1,0 +1,174 @@
+local util = asset.require('./../../utility_functions')
+local flyHome = asset.require('./../../fly_home_alternatives')
+local scripts = asset.require("./apollo/scripts")
+
+----------------------------------------------------------------
+-- SCRIPTS
+----------------------------------------------------------------
+local apollo8NavigationState = [[{ Up = { -0.639234, 0.734826, 0.226741 }, ReferenceFrame = 'Root', Position = { 1481965.290802, 635156.777273, 2119562.935007 }, Yaw = 0.005130, Pitch = -0.002823, Anchor = 'Apollo8' }]]
+
+local apollo11LandingState = [[{ Up = { -0.775178, 0.600074, 0.197509 }, Yaw = 0.005949, Position = { -30.476334, -14.669479, -75.043663 }, ReferenceFrame = 'Root', Pitch = 0.003976, Anchor = 'Apollo11-landing-Handle' }]]
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local insignias = {
+  "Apollo11Insignia",
+  "Apollo12Insignia",
+  "Apollo14Insignia",
+  "Apollo15Insignia",
+  "Apollo16Insignia",
+  "Apollo17Insignia"
+}
+
+local apolloMainState = {
+  Identifier = "Apollo",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+    ]] .. util.fadeInNodes(insignias) .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+    ]] .. util.fadeOutNodes(insignias) .. [[
+  ]]
+}
+
+-- No zoom, scheduled scripts
+local apollo8State = {
+  Identifier = "Apollo8",
+  Enter = [[
+    ]] .. util.fadeInNodes({ "Apollo8EarthBarycenterTrail" }) .. [[
+    ]] .. util.fadeOutNodes({ "ISS_trail", "ISS" }) .. [[
+    ]] .. scripts.apolloScripts .. [[
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnabledMinimumAllowedDistance", false);
+    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
+  ]],
+  Exit = [[
+    openspace.scriptScheduler.clear()
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
+    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
+    ]] .. util.fadeOutNodes({ "Apollo8EarthBarycenterTrail" }) .. [[
+    ]] .. util.fadeInNodes({ "ISS_trail", "ISS" }) .. [[
+  ]]
+}
+
+local apollo11State = {
+  Identifier = "Apollo11",
+  Enter = [[
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', true);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 20.11);
+    ]] .. util.fadeInNodes({ "Apollo11LemTrail" }) .. [[
+    ]] .. util.setOrbitSpeedFactor(0.8) .. [[
+    ]] .. util.orbitAroundUpOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', false);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', false);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 15.0);
+    ]] .. util.fadeOutNodes({ "Apollo11LemTrail" }) .. [[
+  ]]
+}
+
+local states = { apolloMainState, apollo8State, apollo11State }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local leaveState = [[
+  ]] .. util.disableRoll() .. [[
+  ]] .. flyHome.cameraPath .. [[
+]]
+
+local flyToMoon = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.flyTo('Moon', true)
+]]
+
+local flyToApollo8 = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.flyToNavState(apollo8NavigationState) .. [[
+]]
+
+local jumpToApollo8 = [[
+  openspace.navigation.setNavigationState(]] .. tostring(apollo8NavigationState) .. [[)
+]]
+
+local flyToApollo11 = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.flyToNavState(apollo11LandingState) .. [[
+]]
+
+local jumpToApollo11 = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.flyToNavState(apollo11LandingState) .. [[
+]]
+
+local transitions = {
+  -- Transition to/from this state
+  {
+    From = "Home",
+    To = "Apollo",
+    Action = flyToMoon
+  },
+  {
+    From = "Apollo",
+    To = "Home",
+    Action = leaveState
+  },
+  -- Overview - Apollo 8
+  {
+    From = "Apollo",
+    To = "Apollo8",
+    Action = flyToApollo8
+  },
+  {
+    From = "Apollo8",
+    To = "Apollo",
+    Action = flyToMoon
+  },
+  -- Overview - Apollo 11
+  {
+    From = "Apollo",
+    To = "Apollo11",
+    Action = flyToApollo11
+  },
+  {
+    From = "Apollo11",
+    To = "Apollo",
+    Action = flyToMoon
+  },
+  -- Apollo 8 - Apollo 11
+  {
+    From = "Apollo8",
+    To = "Apollo11",
+    Action = jumpToApollo11
+  },
+  {
+    From = "Apollo11",
+    To = "Apollo8",
+    Action = jumpToApollo8
+  },
+  -- Back to SolarSystem from substates
+  {
+    From = "Apollo8",
+    To = "Home",
+    Action = leaveState
+  },
+  {
+    From = "Apollo11",
+    To = "Home",
+    Action = leaveState
+  },
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

@@ -1,0 +1,262 @@
+local mars = asset.require('scene/solarsystem/planets/mars/mars')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local globeIdentifier = mars.Mars.Identifier
+
+local models = asset.resource({
+  Name = "Perseverance Models",
+  Type = "HttpSynchronization",
+  Identifier = "perseverance_models",
+  Version = 2
+})
+
+ -- Coordinate offset to match hirise image in Jezero crater
+local LatLongOffset = { -0.0019, 0.0009 }
+
+-- Some useful lat, long positions
+local landingPosition = { 18.444634598608634, 77.45088440206018 }
+local finalPosition = { 18.45273043, 77.40833265 }
+local handlePosition = finalPosition
+
+-- A "handle" that can be used for navigation and such
+local Handle = {
+  Identifier = "Mars-Perseverance-Handle",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = handlePosition[1] + LatLongOffset[1],
+      Longitude = handlePosition[2] + LatLongOffset[2],
+      Altitude = -2540.0, -- put on surface. Need a static position for camera paths
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = handlePosition[1] + LatLongOffset[1],
+      Longitude = handlePosition[2] + LatLongOffset[2]
+    }
+  },
+  GUI = {
+    Name = "Perseverance Handle",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+-------------------------------------
+-- ROVER PATH
+-------------------------------------
+
+local Path = {
+  Identifier = "Perseverance-Rover-Path",
+  File = asset.resource("./geojson/roverpath_perseverance.geojson"),
+  HeightOffset = 10,
+  CoordinateOffset = LatLongOffset,
+  IgnoreHeights = true,
+  PreventHeightUpdate = true, -- Prevent automatic updates form height map. Too performance heavy!
+  DefaultProperties = {
+    LineWidth = 2.0,
+    AltitudeMode = "RelativeToGround"
+  },
+  Name = "Perseverance Rover Path"
+}
+
+-------------------------------------
+-- POSITIONS
+-------------------------------------
+
+local LandingPosition = {
+  Identifier = "Mars-Perseverance-Landing-Position",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = landingPosition[1] + LatLongOffset[1],
+      Longitude = landingPosition[2] + LatLongOffset[2],
+      Altitude = 40,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = landingPosition[1] + LatLongOffset[1],
+      Longitude = landingPosition[2] + LatLongOffset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 50.0,
+    Billboard = true,
+    Texture = asset.resource('./images/M20_JPL_second_insignia.svg.png'),
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Name = "Perseverance Rover Landing Position",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+local RoverPosition = {
+  Identifier = "Mars-Perseverance-Rover-Position",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2],
+      Altitude = 10,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2]
+    }
+  },
+  Tag = { "perseverance_only" },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 50.0,
+    Billboard = true,
+    Texture = asset.resource('./images/rover_icon.png'),
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Name = "Perseverance Rover Position",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+-------------------------------------
+-- LABELS
+-------------------------------------
+local RoverLabel = {
+  Identifier = "Perseverance-Rover-Label",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2],
+      Altitude = 4,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2]
+    }
+  },
+  Tag = { "perseverance_only" },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 2.0,
+    Billboard = true,
+    Texture = asset.resource('./images/perseverance_label.png'),
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Name = "Perseverance Label",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+-------------------------------------
+-- MODELS
+-------------------------------------
+
+-- Perseverance Model --
+local PerseveranceModel = {
+  Identifier = "PerseveranceModel",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2],
+      Altitude = -2540.0, -- put on surface. Need a static position for camera paths
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "/Perseverance.obj",
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      },
+      {
+        Type = "CameraLightSource",
+        Identifier = "Camera",
+        Intensity = 0.5
+      }
+    }
+  },
+  GUI = {
+    Name = "Perseverance Model",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Handle)
+
+  openspace.globebrowsing.addGeoJson(mars.Mars.Identifier, Path)
+
+  openspace.addSceneGraphNode(LandingPosition)
+  openspace.addSceneGraphNode(RoverPosition)
+
+  openspace.addSceneGraphNode(RoverLabel)
+
+  openspace.addSceneGraphNode(PerseveranceModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PerseveranceModel)
+
+  openspace.removeSceneGraphNode(RoverLabel)
+
+  openspace.removeSceneGraphNode(RoverPosition)
+  openspace.removeSceneGraphNode(LandingPosition)
+
+  openspace.globebrowsing.deleteGeoJson(mars.Mars.Identifier, Path)
+
+  openspace.removeSceneGraphNode(Handle)
+end)
+
+asset.export(Handle)
+asset.export(Path)
+asset.export(LandingPosition)
+asset.export(PerseveranceModel)
+asset.export(RoverPosition)
+asset.export("LatLongOffset", LatLongOffset)
+asset.export("RoverLatLongPosition", finalPosition)
+
+
+asset.meta = {
+  Name = "Perseverance Rover",
+  Version = "2.0",
+  Description = [[
+    Renderables used to show the traversal path of the Perseverance rover, as well as "
+    "a placed 3D model of the rover.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

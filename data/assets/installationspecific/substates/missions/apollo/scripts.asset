@@ -1,0 +1,140 @@
+local launchOverviewDistance = 20000000
+local earthOverviewDistance = 50000000
+local apollo8OverviewDistance = 400000000
+local moonOverviewDistance = 80000000
+
+local apollo8NavigationState = [[{ Up = { -0.639234, 0.734826, 0.226741 }, ReferenceFrame = 'Root', Position = { 1481965.290802, 635156.777273, 2119562.935007 }, Yaw = 0.005130, Pitch = -0.002823, Anchor = 'Apollo8' }]]
+
+local apollo8Scripts = [[
+  -- Launch
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T12:51:52", -- 1 sec delay
+    "openspace.time.interpolateDeltaTime(60)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'm')"
+  )
+
+  -- Zoom out a little
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T12:54:51",
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(launchOverviewDistance) .. [[)"
+  )
+
+  -- Focus on Apollo 8 again
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T12:55:51", -- 1 min after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Retarget to Earth and zoom out
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T13:06:51",
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 30)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'm')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(earthOverviewDistance) .. [[)" ..
+    "openspace.time.interpolateDeltaTime(1800)" -- 30 min per second
+
+  )
+
+  -- Leaving Earth
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T17:20:51",
+    "openspace.time.interpolateDeltaTime(10800)" .. -- 3 hours per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 3)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'h')" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(apollo8OverviewDistance) .. [[)"
+  )
+
+  -- Half way to moon
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-22T08:51:51",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- At Moon
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-24T01:51:51",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(moonOverviewDistance) .. [[)" ..
+    "openspace.time.interpolateDeltaTime(3600)" .. -- 1 hour per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'h')"
+  )
+
+  -- Leaving Moon
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-25T09:51:51",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(apollo8OverviewDistance) .. [[)" ..
+    "openspace.time.interpolateDeltaTime(10800)" .. -- 3 hours per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 3)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'h')"
+  )
+
+  -- Coming home
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-27T10:51:51",
+    "openspace.time.interpolateDeltaTime(3600)" .. -- 1 hour per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'h')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Landing
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-27T12:51:51",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(earthOverviewDistance) .. [[)" ..
+    "openspace.time.interpolateDeltaTime(1800)" .. -- 30 min per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 30)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'm')"
+
+  )
+
+  -- Slow down for landing
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-27T15:10:51",
+    "openspace.time.interpolateDeltaTime(600)" .. -- 10 min per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 10)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'm')"
+  )
+
+  -- Take a moment to understand they landed
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-27T15:36:39",
+    "openspace.time.interpolateDeltaTime(1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 's')"
+  )
+
+  -- End
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-27T15:42:09", -- 5 minute 10 seconds delay
+    "openspace.time.setTime('1968-12-21T12:51:51')" .. -- Loop
+    "openspace.navigation.setNavigationState(]] .. tostring(apollo8NavigationState) .. [[)"
+  )
+]]
+
+asset.export("apolloScripts", apollo8Scripts)

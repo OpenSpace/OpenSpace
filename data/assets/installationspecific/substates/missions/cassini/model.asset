@@ -1,0 +1,152 @@
+local sun = asset.require('scene/solarsystem/sun/sun')
+local transforms = asset.require('./transforms')
+
+local model = asset.syncedResource({
+  Name = "Cassini Model",
+  Type = "HttpSynchronization",
+  Identifier = "cassini_model",
+  Version = 2
+})
+
+-- Timeline
+local launchTime = "1997 OCT 15 09:27:11.572"
+local beginSaturnOrbit = "2004 JUN 16 08:14:57.000"
+local aprilStart = "2017 APR 02 00:01:12.557"
+local aprilEnd = "2017 MAY 07 00:01:09.153"
+local endCassini = "2017 SEP 15 10:34:05.000"
+
+------------------------------------------------------------------------------------------
+-- CASSINI MODEL in relation to SSB                                                     --
+------------------------------------------------------------------------------------------
+local Cassini_SSB = {
+  Identifier = "Cassini_SSB",
+  Parent = transforms.CassiniSSB.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Cassini_SSB",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      YAxis = "Sun",
+      YAxisInverted = true
+    },
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "CASSINI",
+    GeometryFile = model .. "/Cassini.glb",
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = launchTime,
+    End = endCassini
+  },
+  GUI = {
+    Name = "Cassini Model (SSB)",
+    Path = "/Solar System/Missions/Cassini",
+    Description = "Cassini model in relation to SSB"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI MODEL with SPICE rotation in relation to Saturn (April 2017)                 --
+------------------------------------------------------------------------------------------
+local Cassini_ROT = {
+  Identifier = "Cassini_ROT",
+  Parent = transforms.CassiniROT.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "CASSINI_ROT",
+    GeometryFile = model .. "/Cassini.glb",
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = aprilStart,
+    End = aprilEnd
+  },
+  GUI = {
+    Hidden = true,
+    Name = "Cassini Model (SAT, April 2017)",
+    Path = "/Solar System/Missions/Cassini",
+    Description = "Cassini model with SPICE rotation in relation to Saturn (April 2017)"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI MODEL in relation to Saturn                                                  --
+------------------------------------------------------------------------------------------
+local Cassini_SAT = {
+  Identifier = "Cassini_SAT",
+  Parent = transforms.CassiniSAT.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Cassini_SAT",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      YAxis = "Sun",
+      YAxisInverted = true
+    },
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "CASSINI",
+    GeometryFile = model .. "/Cassini.glb",
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  TimeFrame = {
+    Type = "TimeFrameUnion",
+    TimeFrames = {
+      {
+        Type = "TimeFrameInterval",
+        Start = beginSaturnOrbit,
+        End = aprilStart
+      },
+      {
+        Type = "TimeFrameInterval",
+        Start = aprilEnd,
+        End = endCassini
+      }
+    }
+  },
+  GUI = {
+    Hidden = true,
+    Name = "Cassini Model (SAT)",
+    Path = "/Solar System/Missions/Cassini",
+    Description = "Cassini model in relation to Saturn"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Cassini_SSB)
+  openspace.addSceneGraphNode(Cassini_ROT)
+  openspace.addSceneGraphNode(Cassini_SAT)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Cassini_SAT)
+  openspace.removeSceneGraphNode(Cassini_ROT)
+  openspace.removeSceneGraphNode(Cassini_SSB)
+end)
+
+asset.export(Cassini_SSB)
+asset.export(Cassini_ROT)
+asset.export(Cassini_SAT)
+
+
+asset.meta = {
+  Name = "Cassini Models",
+  Version = "1.0",
+  Description = "", -- TODO
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

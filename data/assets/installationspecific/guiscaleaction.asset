@@ -1,0 +1,35 @@
+local gui_scaleup_action = {
+  Identifier = "gui.scaleup",
+  Name = "Increase GUI scale",
+  Command = [[
+      local guiScale = openspace.propertyValue('Modules.CefWebGui.GuiScale');
+      openspace.setPropertyValueSingle('Modules.CefWebGui.GuiScale', guiScale + 0.05)
+  ]],
+  Documentation = "Increase GUI scale by 5%",
+  GuiPath = "/GUI",
+  IsLocal = true
+}
+asset.export("gui_scaleup_action", gui_scaleup_action.Identifier)
+
+local gui_scaledown_action = {
+  Identifier = "gui.scaledown",
+  Name = "Decrease GUI scale",
+  Command = [[
+      local guiScale = openspace.propertyValue('Modules.CefWebGui.GuiScale');
+      openspace.setPropertyValueSingle('Modules.CefWebGui.GuiScale', guiScale - 0.05)
+  ]],
+  Documentation = "Decrease GUI scale by 5%",
+  GuiPath = "/GUI",
+  IsLocal = true
+}
+asset.export("gui_scaledown_action", gui_scaledown_action.Identifier)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(gui_scaleup_action)
+  openspace.action.registerAction(gui_scaledown_action)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(gui_scaledown_action)
+  openspace.action.removeAction(gui_scaleup_action)
+end)

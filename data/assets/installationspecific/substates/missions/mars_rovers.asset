@@ -1,0 +1,334 @@
+local util = asset.require('./../../utility_functions')
+local flyHome = asset.require('./../../fly_home_alternatives')
+
+local enterStateSettings = [[
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", true);
+]]
+
+  -- Reset things that might have been set during the state (either here or from webpage)
+local leaveStateSettings = [[
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Fade", 0.0, 1.0);
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Fade", 0.0, 1.0)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", false)
+  openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.IncludeRoll", false);
+]]
+
+-- For the states close to the surface, the ambient intensity of Mars needs to be turned off
+local reduceAmbientIntensity = [[
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.AmbientIntensity", 0.05, 1.0);
+]]
+
+local resetAmbientIntensity = [[
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.AmbientIntensity", 0.5, 1.0);
+]]
+
+local setUpJezeroCrater = [[
+  ]] .. reduceAmbientIntensity .. [[
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Fade", 1.0, 5.0);
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Fade", 1.0, 5.0);
+]]
+
+local resetJezeroCrater = [[
+  ]] .. resetAmbientIntensity .. [[
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Fade", 0.0, 5.0);
+]]
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+
+local marsRoversState = {
+  Identifier = "MarsRovers",
+  -- Hide some renderables and geojson layers in overlapping positions on enter
+  Enter = [[
+    openspace.setPropertyValue("{ingenuity_only}.Renderable.Fade", 0.0, 2.0);
+    openspace.setPropertyValue("{perseverance_only}.Renderable.Fade", 0.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.Fade", 0.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path-2024.Fade", 0.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Ingenuity-Path-2024.Fade", 0.0);
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local goToMarsOverview = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.flyTo('Mars', true)
+]]
+
+-----
+-- Curiosity
+-----
+
+local galeCrater_TiltedNavState = [[{
+  Anchor = 'Mars-Curiosity-Handle',
+  ReferenceFrame = 'Root',
+  Up = { -0.388564, -0.373363, -0.842388 },
+  Yaw = -0.024106,
+  Pitch = -0.162116,
+  Position = { 7470.144476, 112056.853134, -53111.525452 }
+}]]
+
+local curiosityState = {
+  Identifier = "Curiosity",
+  Enter = [[
+    ]] .. reduceAmbientIntensity .. [[
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Fade", 1.0, 5.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Curiosity-Rover-Path.Enabled", true);
+    ]] .. util.setOrbitSpeedFactor(0.8) .. [[
+    ]] .. util.orbitAroundUpOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. resetAmbientIntensity .. [[
+    ]] .. util.stopOrbiting() .. [[
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Curiosity-Rover-Path.Enabled", false);
+    ]] .. util.disableRoll() .. [[
+  ]]
+}
+
+-----
+-- Perseverance
+-----
+
+-- Perseverance tilted state
+local perseverance_TiltedNavState_Path = [[{
+  Up = { 0.444587, 0.644127, -0.622450 },
+  ReferenceFrame = 'Root',
+  Anchor = 'Mars-Perseverance-Handle',
+  Yaw = -0.005563,
+  Position = { 530.380697, -754.288422, -401.730408 },
+  Pitch = -0.000264
+}]]
+
+-- No zoom, scheduled scripts
+local perseveranceState = {
+  Identifier = "Perseverance",
+  Enter = [[
+    ]] .. util.stopOrbiting() .. [[
+    openspace.setPropertyValue("{perseverance_only}.Enabled", true);
+    openspace.setPropertyValue("{perseverance_only}.Renderable.Fade", 1.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.Enabled", true);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.Fade", 1.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.ForceUpdateHeightData", nil);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.MinimumAllowedDistance", 10);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnabledMinimumAllowedDistance", false);
+    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.DisableZoom", true);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
+    ]] .. util.setOrbitSpeedFactor(0.6) .. [[
+    ]] .. util.orbitAroundUpOnArrival() .. [[
+  ]],
+  Exit = [[
+    openspace.setPropertyValue("{perseverance_only}.Renderable.Fade", 0.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.Fade", 0.0, 2.0);
+    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.DisableZoom", false);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
+    ]] .. util.stopOrbiting() .. [[
+    ]] .. util.disableRoll() .. [[
+  ]]
+}
+
+-----
+-- Ingenuity
+-----
+
+-- Ingenuity tilted state
+local ingenuity_TiltedNavState_Path = [[{
+  Up = { 0.2854573917581581, 0.6111426669374651, -0.7382538304263595 },
+  ReferenceFrame = 'Root',
+  Anchor = 'Mars-Ingenuity-Handle',
+  Yaw =  0.023399272151548467,
+  Position = { 5753.775778770447, -3251.6498107910156, -466.9994201660156  },
+  Pitch = 0.03626665858009378
+}]]
+
+
+local ingenuityState = {
+  Identifier = "Ingenuity",
+  Enter = [[
+    openspace.setPropertyValue("{ingenuity_only}.Enabled", true);
+    openspace.setPropertyValue("{ingenuity_only}.Renderable.Fade", 1.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars-Ingenuity-Position-2024.Renderable.Fade", 1.0, 2.0);
+
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path-2024.Enabled", true);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path-2024.Fade", 1.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path-2024.ForceUpdateHeightData", nil);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Ingenuity-Path-2024.Enabled", true);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Ingenuity-Path-2024.Fade", 1.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Ingenuity-Path-2024.ForceUpdateHeightData", nil);
+    ]] .. util.orbitAroundUpOnArrival() .. [[
+  ]],
+  Exit = [[
+    openspace.setPropertyValue("{ingenuity_only}.Renderable.Fade", 0.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars-Ingenuity-Position-2024.Renderable.Fade", 0.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path-2024.Fade", 0.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Ingenuity-Path-2024.Fade", 0.0, 2.0);
+    ]] .. util.stopOrbiting() .. [[
+    ]] .. util.disableRoll() .. [[
+  ]]
+}
+
+
+local states = {
+  marsRoversState,
+  curiosityState,
+  perseveranceState,
+  ingenuityState
+}
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+
+-- Note: time is set on the webpage
+local enterTransition = [[
+  ]] .. enterStateSettings .. [[
+  ]] .. goToMarsOverview .. [[
+]]
+
+local leaveTransition = [[
+  ]] .. leaveStateSettings .. [[
+  ]] .. flyHome.cameraPath .. [[
+]]
+
+local toPerseveranceTransition = [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.pathnavigation.flyToNavigationState( ]] .. perseverance_TiltedNavState_Path .. [[)
+]]
+
+local toIngenuityTransition = [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.pathnavigation.flyToNavigationState( ]] .. ingenuity_TiltedNavState_Path .. [[)
+]]
+
+local toCuriosityTransition = [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.pathnavigation.flyToNavigationState( ]] .. galeCrater_TiltedNavState .. [[)
+]]
+
+local transitions = {
+  -- Transition to/from this state
+  {
+    From = "Home",
+    To = "MarsRovers",
+    Action = enterTransition
+  },
+  {
+    From = "MarsRovers",
+    To = "Home",
+    Action = leaveTransition
+  },
+  -- Curiosity
+  {
+    From = "MarsRovers",
+    To = "Curiosity",
+    Action = toCuriosityTransition
+  },
+  {
+    From = "Curiosity",
+    To = "MarsRovers",
+    Action = goToMarsOverview
+  },
+  {
+    From = "Curiosity",
+    To = "Perseverance",
+    Action = [[
+      ]] .. setUpJezeroCrater .. [[
+      ]] .. toPerseveranceTransition .. [[
+    ]]
+  },
+  {
+    From = "Perseverance",
+    To = "Curiosity",
+    Action = [[
+      ]] .. resetJezeroCrater .. [[
+      ]] .. toCuriosityTransition .. [[
+    ]]
+  },
+  {
+    From = "Curiosity",
+    To = "Ingenuity",
+    Action = [[
+      ]] .. setUpJezeroCrater .. [[
+      ]] .. toIngenuityTransition .. [[
+    ]]
+  },
+  {
+    From = "Ingenuity",
+    To = "Curiosity",
+    Action = [[
+      ]] .. resetJezeroCrater .. [[
+      ]] .. toCuriosityTransition .. [[
+    ]]
+  },
+  -- Perseverance
+  {
+    From = "MarsRovers",
+    To = "Perseverance",
+    Action = [[
+      ]] .. setUpJezeroCrater .. [[
+      ]] .. toPerseveranceTransition .. [[
+    ]]
+  },
+  {
+    From = "Perseverance",
+    To = "MarsRovers",
+    Action = [[
+      ]] .. resetJezeroCrater .. [[
+      ]] .. goToMarsOverview .. [[
+    ]]
+  },
+  {
+    From = "Ingenuity",
+    To = "Perseverance",
+    Action = toPerseveranceTransition
+  },
+  {
+    From = "Perseverance",
+    To = "Ingenuity",
+    Action = toIngenuityTransition
+  },
+  -- Ingenuity
+  {
+    From = "MarsRovers",
+    To = "Ingenuity",
+    Action = [[
+      ]] .. setUpJezeroCrater .. [[
+      ]] .. toIngenuityTransition .. [[
+    ]]
+  },
+  {
+    From = "Ingenuity",
+    To = "MarsRovers",
+    Action = [[
+      ]] .. resetJezeroCrater .. [[
+      ]] .. goToMarsOverview .. [[
+    ]]
+  },
+  -- Back to SolarSystem from substates
+  {
+    From = "Curiosity",
+    To = "Home",
+    Action = leaveTransition
+  },
+  {
+    From = "Perseverance",
+    To = "Home",
+    Action = leaveTransition
+  },
+  {
+    From = "Ingenuity",
+    To = "Home",
+    Action = leaveTransition
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

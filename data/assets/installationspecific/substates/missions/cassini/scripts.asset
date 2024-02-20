@@ -1,0 +1,206 @@
+local cassiniNavigationState = [[{ Anchor = 'Saturn', Pitch = -0.000071, Position = { 3641029278.891357, 7812048554.762817, -1533586357.197266 }, ReferenceFrame = 'Root', Up = { -0.739154, 0.443940, 0.506525 }, Yaw = 0.003681 }]]
+
+local approachDistance = 1000000000
+local landingDistance = 45000000
+
+local huygensNavigationState = [[{ Anchor = 'Saturn', Pitch = -0.003934, Position = { 1343293062.949463, 3847226689.074280, -1700869686.287659 }, ReferenceFrame = 'Root', Up = { -0.697954, 0.479043, 0.532333 }, Yaw = 0.003055 }]]
+
+local cassiniScripts = [[
+  -- Primary start
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-06-16T08:14:58.000", -- 1 sec pre delay
+    "openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', true)" ..
+    "openspace.setPropertyValueSingle('UserProperties.MissionTitle', 'P')" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 10)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'd')" ..
+    "openspace.time.interpolateDeltaTime(864000)" .. -- 10 days per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Focus on Saturn again
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-06-26T08:14:57.000", -- 10 days after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Focus on Saturn again
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-11-10T00:00:00.000", -- 10 days after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Equinox start
+  openspace.scriptScheduler.loadScheduledScript(
+    "2008-08-09T00:00:00.000",
+    "openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', true)" ..
+    "openspace.setPropertyValueSingle('UserProperties.MissionTitle', 'E')" ..
+    "openspace.time.interpolateDeltaTime(864000)" .. -- 10 days per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Solstice start
+  openspace.scriptScheduler.loadScheduledScript(
+    "2010-11-24T00:00:00.000",
+    "openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', true)" ..
+    "openspace.setPropertyValueSingle('UserProperties.MissionTitle', 'S')" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 15)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'd')" ..
+    "openspace.time.interpolateDeltaTime(1314871)" .. -- 15 days per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Focus on Saturn again
+  openspace.scriptScheduler.loadScheduledScript(
+    "2010-12-04T00:00:00.000", -- ~10 days after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Grand Finale start
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-04-16T00:00:00.000", -- 10 day pre delay
+    "openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', true)" ..
+    "openspace.setPropertyValueSingle('UserProperties.MissionTitle', 'F')" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 2)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'd')" ..
+    "openspace.time.interpolateDeltaTime(172800)" .. -- 2 Days  per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Focus on Saturn again
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-04-26T00:00:00.000", -- 10 days after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Slow down to see the last dive
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-09-12T10:34:05.000",
+    "openspace.time.interpolateDeltaTime(10800)" .. -- 3 hour per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 3)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'h')"
+  )
+
+  -- Slow down even more
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-09-14T10:34:05.000",
+    "openspace.time.interpolateDeltaTime(3600)" .. -- 1 hour per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'h')"
+  )
+
+  -- Take a moment
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-09-15T10:34:05.000",
+    "openspace.time.interpolateDeltaTime(1)"
+  )
+
+  -- End
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-09-15T11:05:10.000", -- 31 minutes and 5 seconds delay
+    "openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', false)" ..
+    "openspace.time.setTime('2004-06-16T08:14:57.000')" .. -- Loop
+    "openspace.navigation.setNavigationState(]] .. tostring(cassiniNavigationState) .. [[)"
+  )
+]]
+
+local huygensScripts = [[
+  -- Detach
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-11-21 08:44:54.000", -- 1 sec pre delay
+    "openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', true)" ..
+    "openspace.setPropertyValueSingle('Scene.CassiniSaturnLabel.Renderable.Enabled', true)" ..
+    "openspace.setPropertyValueSingle('Scene.CassiniTitanLabel.Renderable.Enabled', true)" ..
+    "openspace.time.interpolateDeltaTime(172800)" .. -- 2 days per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 2)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'd')"
+  )
+
+  -- Slow
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-12-21 08:44:53.000",
+    "openspace.time.interpolateDeltaTime(86400)" .. -- 1 day per second
+    "openspace.setPropertyValueSingle('Scene.CassiniSaturnLabel.Renderable.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('Scene.CassiniTitanLabel.Renderable.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'd')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Approach
+  openspace.scriptScheduler.loadScheduledScript(
+    "2005-01-13 00:00:00.000",
+    "openspace.time.interpolateDeltaTime(3600)" .. -- 1 hour per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'h')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(approachDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Landing
+  openspace.scriptScheduler.loadScheduledScript(
+    "2005-01-14 06:41:40.000", -- 30 min pre delay
+    "openspace.time.interpolateDeltaTime(600)" .. -- 10 min per second
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 10)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'm')" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(landingDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Take a moment
+  openspace.scriptScheduler.loadScheduledScript(
+    "2005-01-14 09:05:55.000",
+    "openspace.time.interpolateDeltaTime(1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 's')"
+  )
+
+  -- End
+  openspace.scriptScheduler.loadScheduledScript(
+    "2005-01-14 09:11:15.000", -- 6 minutes and 20 secods delay
+    "openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', false)" ..
+    "openspace.time.setTime('2004-11-21 08:44:50.000')" .. -- Loop
+    "openspace.navigation.setNavigationState(]] .. tostring(huygensNavigationState) .. [[)"
+  )
+]]
+
+asset.export("cassiniScripts", cassiniScripts)
+asset.export("huygensScripts", huygensScripts)
