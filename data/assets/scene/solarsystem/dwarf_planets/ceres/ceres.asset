@@ -11,7 +11,7 @@ local Ceres = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet" },
+  Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet", "ceres_system" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Ceres"
   }

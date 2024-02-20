@@ -54,7 +54,8 @@ local PhoebeTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Phoebe Trail",
@@ -136,7 +137,8 @@ local SkathiTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Skathi Trail",
@@ -218,7 +220,8 @@ local S2007S2Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2007 S 2 Trail",
@@ -300,7 +303,8 @@ local SkollTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Skoll Trail",
@@ -382,7 +386,8 @@ local S2004S13Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 13 Trail",
@@ -464,7 +469,8 @@ local GreipTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Greip Trail",
@@ -546,7 +552,8 @@ local HyrrokkinTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Hyrrokkin Trail",
@@ -628,7 +635,8 @@ local JarnsaxaTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Jarnsaxa Trail",
@@ -710,7 +718,8 @@ local MundilfariTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Mundilfari Trail",
@@ -792,7 +801,8 @@ local S2006S1Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2006 S 1 Trail",
@@ -874,7 +884,8 @@ local S2004S17Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 17 Trail",
@@ -956,7 +967,8 @@ local BergelmirTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Bergelmir Trail",
@@ -1038,7 +1050,8 @@ local NarviTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Narvi Trail",
@@ -1120,7 +1133,8 @@ local SuttungrTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Suttungr Trail",
@@ -1202,7 +1216,8 @@ local HatiTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Hati Trail",
@@ -1284,7 +1299,8 @@ local S2004S12Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 12 Trail",
@@ -1366,7 +1382,8 @@ local FarbautiTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Farbauti Trail",
@@ -1448,7 +1465,8 @@ local ThrymrTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Thrymr Trail",
@@ -1530,7 +1548,8 @@ local AegirTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Aegir Trail",
@@ -1612,7 +1631,8 @@ local S2007S3Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2007 S 3 Trail",
@@ -1694,7 +1714,8 @@ local BestlaTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Bestla Trail",
@@ -1776,7 +1797,8 @@ local S2004S7Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 7 Trail",
@@ -1858,7 +1880,8 @@ local S2006S3Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2006 S 3 Trail",
@@ -1940,7 +1963,8 @@ local FenrirTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Fenrir Trail",
@@ -2022,7 +2046,8 @@ local SurturTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Surtur Trail",
@@ -2104,7 +2129,8 @@ local KariTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Kari Trail",
@@ -2186,7 +2212,8 @@ local YmirTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Ymir Trail",
@@ -2268,7 +2295,8 @@ local LogeTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Loge Trail",
@@ -2350,7 +2378,8 @@ local FornjotTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Fornjot Trail",
@@ -2432,7 +2461,8 @@ local SkadiTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Skadi Trail",
@@ -2514,7 +2544,8 @@ local GridrTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Gridr Trail",
@@ -2596,7 +2627,8 @@ local AngrbodaTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Angrboda Trail",
@@ -2678,7 +2710,8 @@ local SkrymirTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Skrymir Trail",
@@ -2760,7 +2793,8 @@ local GerdTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Gerd Trail",
@@ -2842,7 +2876,8 @@ local S2004S26Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 26 Trail",
@@ -2924,7 +2959,8 @@ local EggtherTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Eggther Trail",
@@ -3006,7 +3042,8 @@ local BeliTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Beli Trail",
@@ -3088,7 +3125,8 @@ local GunnlodTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Gunnlod Trail",
@@ -3170,7 +3208,8 @@ local ThiazziTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Thiazzi Trail",
@@ -3252,7 +3291,8 @@ local S2004S34Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 34 Trail",
@@ -3334,7 +3374,8 @@ local AlvaldiTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Alvaldi Trail",
@@ -3416,7 +3457,8 @@ local GeirrodTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Geirrod Trail",
@@ -3498,7 +3540,8 @@ local S2004S28Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 28 Trail",
@@ -3580,7 +3623,8 @@ local S2004S21Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 21 Trail",
@@ -3662,7 +3706,8 @@ local S2004S36Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 36 Trail",
@@ -3744,7 +3789,8 @@ local S2004S37Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 37 Trail",
@@ -3826,7 +3872,8 @@ local S2004S39Trail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 39 Trail",

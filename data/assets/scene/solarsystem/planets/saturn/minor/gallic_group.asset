@@ -53,7 +53,8 @@ local AlbiorixTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Albiorix Trail",
@@ -135,7 +136,8 @@ local BebhionnTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Bebhionn Trail",
@@ -217,7 +219,8 @@ local ErriapusTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Erriapus Trail",
@@ -299,7 +302,8 @@ local TarvosTrail = {
     "moonTrail_giants",
     "moonTrail_saturn",
     "moonTrail_minor",
-    "moonTrail_minor_saturn"
+    "moonTrail_minor_saturn",
+    "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Tarvos Trail",
