@@ -1072,12 +1072,12 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         }
 
         // Colors
-        if (_hasColorMapFile) {
+        if (_hasColorMapFile && colorParamIndex > -1) {
             result.push_back(e.data[colorParamIndex]);
         }
 
         // Size data
-        if (_hasDatavarSize) {
+        if (_hasDatavarSize && sizeParamIndex > -1) {
             // @TODO: Consider more detailed control over the scaling. Currently the value
             // is multiplied with the value as is. Should have similar mapping properties
             // as the color mapping
