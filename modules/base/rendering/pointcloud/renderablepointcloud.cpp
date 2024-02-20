@@ -1272,14 +1272,14 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
 
     // Colors
-    if (_hasColorMapFile) {
-        int colorParamIndex = currentColorParameterIndex();
+    int colorParamIndex = currentColorParameterIndex();
+    if (_hasColorMapFile && colorParamIndex > -1) {
         result.push_back(e.data[colorParamIndex]);
     }
 
     // Size data
-    if (_hasDatavarSize) {
-        int sizeParamIndex = currentSizeParameterIndex();
+    int sizeParamIndex = currentSizeParameterIndex();
+    if (_hasDatavarSize && sizeParamIndex > -1) {
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping

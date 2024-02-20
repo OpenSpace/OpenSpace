@@ -425,17 +425,15 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
     const Dataset::Entry& e1 = _dataset.entries[secondIndex];
 
     // Colors
-    if (_hasColorMapFile) {
-        int colorParamIndex = currentColorParameterIndex();
-
+    int colorParamIndex = currentColorParameterIndex();
+    if (_hasColorMapFile && colorParamIndex > -1) {
         result.push_back(e0.data[colorParamIndex]);
         result.push_back(e1.data[colorParamIndex]);
     }
 
     // Size data
-    if (_hasDatavarSize) {
-        int sizeParamIndex = currentSizeParameterIndex();
-
+    int sizeParamIndex = currentSizeParameterIndex();
+    if (_hasDatavarSize && sizeParamIndex > -1) {
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
