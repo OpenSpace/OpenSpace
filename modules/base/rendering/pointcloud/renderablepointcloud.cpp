@@ -240,7 +240,7 @@ namespace {
     struct [[codegen::Dictionary(RenderablePointCloud)]] Parameters {
         // The path to the data file that contains information about the point to be
         // rendered. Can be either a CSV or SPECK file
-        std::optional<std::string> file;
+        std::optional<std::filesystem::path> file;
 
         // If true (default), the loaded dataset will be cached so that it can be loaded
         // faster at a later time. This does however mean that any updates to the values
