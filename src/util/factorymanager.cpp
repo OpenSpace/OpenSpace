@@ -82,9 +82,11 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
         }
         else if (tv) {
             Documentation doc = { .entries = tv->documentations };
-            nlohmann::json restrictions = generateJsonDocumentation(doc);
             // We have a TableVerifier, so we need to recurse
-            entry["restrictions"] = restrictions;
+            nlohmann::json tableDocs = generateJsonDocumentation(doc);
+            // Set the members entry to the members of the table
+            // to not have unnecessary nestling
+            entry["members"] = tableDocs["members"];
         }
         else {
             entry["description"] = p.verifier->documentation();
