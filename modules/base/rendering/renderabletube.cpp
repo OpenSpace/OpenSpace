@@ -31,6 +31,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -74,7 +75,7 @@ namespace {
         "PerformShading",
         "Perform Shading",
         "This value determines whether shading should be applied to the tube",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
@@ -117,7 +118,7 @@ namespace {
         "AddEdges",
         "Add Edges",
         "This value determines whether a bottom and top should b eadded to the tube",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawWireframeInfo = {
@@ -148,6 +149,20 @@ namespace {
         "If ture, only the part of the tube that corresponds to the current time is "
         "shown. If false, the whole tube is shown.",
         openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo JumpToPrevPolygonInfo = {
+        "JumpToPrevPolygon",
+        "Jump To Previous Polygon",
+        "Jumps to the exact time of the previous polygon relative the current time",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo JumpToNextPolygonInfo = {
+        "JumpToNextPolygon",
+        "Jump To Next Polygon",
+        "Jumps to the exact time of the next polygon relative the current time",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableTube)]] Parameters {
@@ -253,6 +268,8 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _wireLineWidth(WireLineWidthInfo, 1.f, 1.f, 10.f)
     , _useSmoothNormals(UseSmoothNormalsInfo, true)
     , _showAllTube(ShowAllTubeInfo, false)
+    , _jumpToPrevPolygon(JumpToPrevPolygonInfo)
+    , _jumpToNextPolygon(JumpToNextPolygonInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _dataFile = p.file;
@@ -318,6 +335,12 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
 
     _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
     addProperty(_enableFaceCulling);
+
+    _jumpToPrevPolygon.onChange([this]() { jumpToPrevPolygon(); });
+    addProperty(_jumpToPrevPolygon);
+
+    _jumpToNextPolygon.onChange([this]() { jumpToNextPolygon(); });
+    addProperty(_jumpToNextPolygon);
 }
 
 bool RenderableTube::isReady() const {
@@ -952,21 +975,25 @@ void RenderableTube::addLowPolySection(int polygonIndex, const TimePolygon const
 
             // v0 is the current point in polygon
             int pointColorIndexV0 = pointColorIndex;
-            float v0Value = _colorDataset.entries[pointColorIndexV0].data[colorParamIndex];
+            float v0Value =
+                _colorDataset.entries[pointColorIndexV0].data[colorParamIndex];
 
             // v1 is the coresponding current point in the nextPolygon
             int pointColorIndexV1 = pointColorIndex + _nPoints;
-            float v1Value = _colorDataset.entries[pointColorIndexV1].data[colorParamIndex];
+            float v1Value =
+                _colorDataset.entries[pointColorIndexV1].data[colorParamIndex];
 
             // v2 is the coresponding next point in the nextPolygon
             int pointColorIndexV2 =
                 isLast ? pointColorIndex + 1 : pointColorIndex + _nPoints + 1;
-            float v2Value = _colorDataset.entries[pointColorIndexV2].data[colorParamIndex];
+            float v2Value =
+                _colorDataset.entries[pointColorIndexV2].data[colorParamIndex];
 
             // v3 is the next point in the polygon
             int pointColorIndexV3 =
                 isLast ? pointColorIndex + 1 - _nPoints : pointColorIndex + 1;
-            float v3Value = _colorDataset.entries[pointColorIndexV3].data[colorParamIndex];
+            float v3Value =
+                _colorDataset.entries[pointColorIndexV3].data[colorParamIndex];
 
             sidePointV0.value = v0Value;
             sidePointV1.value = tInterpolation > 0.0 ?
@@ -1015,45 +1042,99 @@ void RenderableTube::addLowPolySection(int polygonIndex, const TimePolygon const
     }
 }
 
-void RenderableTube::interpolateEnd(double now) {
+RenderableTube::FindTimeStruct RenderableTube::findTime(double time) const {
+    FindTimeStruct result;
+
     // Find the polygon before and after the current time
-    _lastPolygonBeforeNow = 0;
-    _firstPolygonAfterNow = std::numeric_limits<size_t>::max();
     double nextPolygonTime = std::numeric_limits<double>::max();
-    bool foundPrev = false;
-    _interpolationNeeded = true;
-    bool onSlice = false;
 
     for (size_t i = 0; i < _data.size(); ++i) {
         // Found a time smaller than now
-        if (_data[i].timestamp < now) {
-            _lastPolygonBeforeNow = i;
-            foundPrev = true;
+        if (_data[i].timestamp < time) {
+            result.lastPolygonBeforeTime = i;
+            result.foundPrev = true;
         }
         // Found a time larger than now
-        else if (_data[i].timestamp > now && _data[i].timestamp < nextPolygonTime) {
+        else if (_data[i].timestamp > time && _data[i].timestamp < nextPolygonTime) {
             nextPolygonTime = _data[i].timestamp;
-            _firstPolygonAfterNow = i;
+            result.firstPolygonAfterTime = i;
         }
         // Found a time exactly equal to now
-        else if (std::abs(_data[i].timestamp - now) <
+        else if (std::abs(_data[i].timestamp - time) <
                  std::numeric_limits<double>::epsilon())
         {
-            _lastPolygonBeforeNow = i;
-            foundPrev = true;
-            _interpolationNeeded = false;
-            onSlice = true;
+            result.lastPolygonBeforeTime = i;
+            result.foundPrev = true;
+            result.onSlice = true;
             LDEBUG(fmt::format("Polygon nr: '{}' is exactly at NOW",
-                _lastPolygonBeforeNow)
-            );
+                _lastPolygonBeforeNow
+            ));
         }
     }
+
+    return result;
+}
+
+void RenderableTube::jumpToPrevPolygon() const {
+    double now = global::timeManager->time().j2000Seconds();
+
+    // Find the polygons that are closest to the current time
+    FindTimeStruct result = findTime(now);
+    double prevTime = _data[result.lastPolygonBeforeTime].timestamp;
+
+    // If we are exactly on a polygon, take the previous one instead of the current one
+    if (std::abs(now - prevTime) < std::numeric_limits<double>::epsilon()) {
+        result = findTime(now - 1);
+        prevTime = _data[result.lastPolygonBeforeTime].timestamp;
+    }
+
+    // Before beginning
+    if (!result.foundPrev) {
+        LWARNING("Current time is before the start time for the tube");
+        return;
+    }
+
+    global::timeManager->setTimeNextFrame(Time(prevTime));
+}
+
+void RenderableTube::jumpToNextPolygon() const {
+    double now = global::timeManager->time().j2000Seconds();
+
+    // Find the polygons that are closest to the current time
+    FindTimeStruct result = findTime(now);
+    double nextTime = _data[result.firstPolygonAfterTime].timestamp;
+
+    // If we are exactly on a polygon, take the next one instead of the current one
+    if (std::abs(now - nextTime) < std::numeric_limits<double>::epsilon()) {
+        result = findTime(now + 1);
+        nextTime = _data[result.firstPolygonAfterTime].timestamp;
+    }
+
+    // After end
+    if (result.firstPolygonAfterTime == std::numeric_limits<size_t>::max()) {
+        LWARNING("Current time is after the end time for the tube");
+        return;
+    }
+
+    global::timeManager->setTimeNextFrame(Time(nextTime));
+}
+
+void RenderableTube::interpolateEnd(double now) {
+    // Find the polygons that are closest to the current time
+    FindTimeStruct result = findTime(now);
+
+    _interpolationNeeded = true;
+    if (result.onSlice) {
+        _interpolationNeeded = false;
+    }
+    _lastPolygonBeforeNow = result.lastPolygonBeforeTime;
+    _firstPolygonAfterNow = result.firstPolygonAfterTime;
 
     // Count the number of indicies in the tube up to and including the
     // _lastPolygonBeforeNow polygon
     int nIndiciesUntilNow = 0;
     // Before beginning
-    if (!foundPrev) {
+    if (!result.foundPrev) {
         // Do not show anything
         nIndiciesUntilNow = 0;
         _interpolationNeeded = false;
@@ -1096,7 +1177,7 @@ void RenderableTube::interpolateEnd(double now) {
         creteEnding(now);
         updateEndingBufferData();
     }
-    else if (onSlice && _addEdges) {
+    else if (result.onSlice && _addEdges) {
         // Reset
         _verticiesEnding.clear();
         _indiciesEnding.clear();
@@ -1105,7 +1186,6 @@ void RenderableTube::interpolateEnd(double now) {
         // Add cutplane exactly at polygon _lastPolygonBeforeNow
         addEdge(_lastPolygonBeforeNow, &_data[_lastPolygonBeforeNow], 0, true);
         updateEndingBufferData();
-        _interpolationNeeded = true;
     }
 
     glBindVertexArray(0);
@@ -1339,6 +1419,7 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     // Render the cutplane
     if (_addEdges && !_showAllTube && (_interpolationNeeded || _nIndiciesToRender < _indicies.size())) {
         // Bind the cutplane ibo instead
+        glBindVertexArray(_vaoIdEnding);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboIdEnding);
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,

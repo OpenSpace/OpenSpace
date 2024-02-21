@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/colormappingcomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -79,10 +80,18 @@ private:
         std::vector<TimePolygonPoint> points;
     };
 
+    struct FindTimeStruct {
+        bool foundPrev = false;
+        bool onSlice = false;
+        size_t lastPolygonBeforeTime = 0;
+        size_t firstPolygonAfterTime = std::numeric_limits<size_t>::max();
+    };
+
     /// Find the index of the currently chosen color parameter in the data
     int currentColorParameterIndex() const;
 
     void readDataFile();
+
     void createTube();
     void createSmoothTube(unsigned int firstSideIndex);
     void createLowPolyTube(unsigned int firstSideIndex);
@@ -96,6 +105,10 @@ private:
     void addLowPolySection(int polygonIndex, const TimePolygon const* polygon,
         const TimePolygon const* nextPolygon, unsigned int& vIndex,
         double tInterpolation = -1.0);
+
+    FindTimeStruct findTime(double time) const;
+    void jumpToPrevPolygon() const;
+    void jumpToNextPolygon() const;
 
     void interpolateEnd(double now);
     void creteEnding(double now);
@@ -133,6 +146,8 @@ private:
     properties::BoolProperty _addEdges;
     properties::BoolProperty _showAllTube;
     properties::BoolProperty _enableFaceCulling;
+    properties::TriggerProperty _jumpToPrevPolygon;
+    properties::TriggerProperty _jumpToNextPolygon;
 
     UniformCache(modelViewTransform, projectionTransform, normalTransform, opacity, color,
         nanColor, useNanColor, aboveRangeColor, useAboveRangeColor, belowRangeColor,
