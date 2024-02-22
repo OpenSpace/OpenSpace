@@ -721,7 +721,7 @@ void RenderablePointCloud::initializeMultiTextures() {
         else {
             // We can't really recover from this as it would crash during rendering anyway
             throw ghoul::RuntimeError(fmt::format(
-                "Could not find image file '{}'", tex.file
+                "Could not find image file '{}'", path
             ));
         }
         loadTexture(path, tex.index);
