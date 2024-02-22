@@ -328,9 +328,7 @@ void RenderableInterpolatedPoints::deinitializeShaders() {
     _program = nullptr;
 }
 
-void RenderableInterpolatedPoints::bindDataForPointRendering() {
-    RenderablePointCloud::bindDataForPointRendering();
-
+void RenderableInterpolatedPoints::setExtraUniforms() {
     float t0 = computeCurrentLowerValue();
     float t = glm::clamp(_interpolation.value - t0, 0.f, 1.f);
 

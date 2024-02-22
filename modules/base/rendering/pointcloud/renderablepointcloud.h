@@ -83,7 +83,7 @@ protected:
 
     virtual void initializeShadersAndGlExtras();
     virtual void deinitializeShaders();
-    virtual void bindDataForPointRendering();
+    virtual void setExtraUniforms();
     virtual void preUpdate();
 
     glm::dvec3 transformedPosition(const dataloader::Dataset::Entry& e) const;

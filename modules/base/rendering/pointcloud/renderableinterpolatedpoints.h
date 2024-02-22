@@ -52,7 +52,7 @@ public:
 protected:
     void initializeShadersAndGlExtras() override;
     void deinitializeShaders() override;
-    void bindDataForPointRendering() override;
+    void setExtraUniforms() override;
     void preUpdate() override;
 
     int nAttributesPerPoint() const override;

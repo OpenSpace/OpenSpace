@@ -750,8 +750,6 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     std::unique_ptr<ghoul::opengl::Texture> t =
         ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
-    bool useAlpha = (t->numberOfChannels() > 3);
-
     TextureColorMode colorMode; // TODO: Make possible to set from asset
     if (t->numberOfChannels() == 1) {
         // TODO: OBS!  This results in only red colors in the shader... Remove?
@@ -867,7 +865,6 @@ void RenderablePointCloud::generateArrayTextures() {
         TextureColorMode colorMode = e.first.colorMode;
         size_t nLayers = e.second.size();
 
-
         // And and create storage for texture (bind the texture for writing)
         // Generate an array texture
         unsigned int id = 0;
@@ -921,32 +918,7 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
     return fadeValue * funcValue;
 }
 
-void RenderablePointCloud::bindDataForPointRendering() {
-    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
-    _program->setUniform(_uniformCache.opacity, opacity());
-
-    _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
-    _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
-    _program->setUniform(
-        _uniformCache.enableMaxSizeControl,
-        _sizeSettings.useMaxSizeControl
-    );
-    _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
-
-    bool useSizeMapping = _hasDatavarSize && _sizeSettings.sizeMapping &&
-        _sizeSettings.sizeMapping->enabled;
-
-    _program->setUniform(_uniformCache.hasDvarScaling, useSizeMapping);
-
-    if (useSizeMapping) {
-        _program->setUniform(
-            _uniformCache.dvarScaleFactor,
-            _sizeSettings.sizeMapping->scaleFactor
-        );
-    }
-
-    _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
-}
+void RenderablePointCloud::setExtraUniforms() {}
 
 void RenderablePointCloud::renderBillboards(const RenderData& data,
                                             const glm::dmat4& modelMatrix,
@@ -994,7 +966,30 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
-    bindDataForPointRendering();
+    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
+    _program->setUniform(_uniformCache.opacity, opacity());
+
+    _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
+    _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
+    _program->setUniform(
+        _uniformCache.enableMaxSizeControl,
+        _sizeSettings.useMaxSizeControl
+    );
+    _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
+
+    bool useSizeMapping = _hasDatavarSize && _sizeSettings.sizeMapping &&
+        _sizeSettings.sizeMapping->enabled;
+
+    _program->setUniform(_uniformCache.hasDvarScaling, useSizeMapping);
+
+    if (useSizeMapping) {
+        _program->setUniform(
+            _uniformCache.dvarScaleFactor,
+            _sizeSettings.sizeMapping->scaleFactor
+        );
+    }
+
+    _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
 
     bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
         _colorSettings.colorMapping->texture();
@@ -1044,13 +1039,13 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
         );
     }
 
-    // For now, handle all texturing here
-
     bool useTexture = _hasSpriteTexture && _useSpriteTexture;
     _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
 
     ghoul::opengl::TextureUnit spriteTextureUnit;
     _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
+
+    setExtraUniforms();
 
     glBindVertexArray(_vao);
 
@@ -1393,6 +1388,5 @@ ghoul::opengl::Texture::Format RenderablePointCloud::glFormatFromColorMode(
             return ghoul::opengl::Texture::Format::RGB;
     }
 }
-
 
 } // namespace openspace
