@@ -268,7 +268,7 @@ namespace {
         // Settings related to mapping multiple different textures to the points in the
         // dataset. Note that this requires that texture information has been included
         // in the dataset, either in the SPECK file directly or as part of the data
-        // mapping for a CSV file.
+        // mapping for a CSV file. // @TODO: Should this be named somethign like texture from data? instead?
         std::optional<MultiTexture> multiTexture;
 
         // [[codegen::verbatim(UseSpriteTextureInfo.description)]]
