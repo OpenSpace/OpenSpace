@@ -261,6 +261,8 @@ protected:
     };
 
     std::unordered_map<int, TextureId> _textureIdToArrayMap;
+
+    bool _allowCompression = true;
 };
 
 } // namespace openspace

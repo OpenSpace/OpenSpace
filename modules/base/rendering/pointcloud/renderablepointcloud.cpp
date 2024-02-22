@@ -262,6 +262,12 @@ namespace {
             // The folder where the textures are located
             std::filesystem::path folder [[codegen::directory()]];
 
+            // If true, the textures will be compressed to preserve graphics card memory.
+            // This is enabled per default, but may lead to visible artefacts for certain
+            // images, especially up close. Set this to false to disable any hardware
+            // compression of the textures, and represent each color channel wit 8 bits
+            std::optional<bool> allowCompression;
+
             // TODO: THIS will be required for CSV files!
             std::optional<std::filesystem::path> textureMappingFile;
         };
@@ -507,12 +513,14 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _textureMode = TextureInputMode::Multi;
         _hasSpriteTexture = true;
         _texturesDirectory = absPath((*p.multiTexture).folder).string();
+        _allowCompression = (*p.multiTexture).allowCompression.value_or(true);
 
         if (p.texture.has_value()) {
-            LWARNING(
-                "Both a MultiTexture and Texture was set in the asset. The "
-                "MultiTexture has priority and any single texture will be ignored"
-            );
+            LWARNING(fmt::format(
+                "Both a MultiTexture and Texture was provided. The MultiTexture with the "
+                "folder '{}' has priority and the single texture with the following path "
+                "will be ignored: '{}'", (*p.multiTexture).folder, *p.texture
+            ));
         }
     }
     else if (p.texture.has_value()) {
@@ -1370,9 +1378,9 @@ gl::GLenum RenderablePointCloud::internalGlFormatFromColorMode(
     // TODO: investigate compressed formats
     switch (mode) {
         case TextureColorMode::Transparency:
-            return GL_RGBA8;
+            return _allowCompression ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_RGBA8;
         case TextureColorMode::OpaqueColor:
-            return GL_RGB8;
+            return _allowCompression ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_RGB8;
         case TextureColorMode::Greyscale:
             // TODO: OBS!  This results in only red colors in the shader...
             return GL_R8;
