@@ -1070,6 +1070,7 @@ void OpenSpaceEngine::writeDocumentation() {
     nlohmann::json sceneProperties = settings.get();
     nlohmann::json sceneGraph = scene.get();
     nlohmann::json actions = global::actionManager->generateJson();
+    nlohmann::json events = global::eventEngine->generateJson();
 
     sceneProperties["name"] = "Settings";
     sceneGraph["name"] = "Scene";
@@ -1081,7 +1082,7 @@ void OpenSpaceEngine::writeDocumentation() {
     scriptingResult["data"] = scripting;
 
     nlohmann::json documentation = {
-        sceneGraph, sceneProperties, actions, keybindings, license, scriptingResult, factory
+        sceneGraph, sceneProperties, actions, events, keybindings, license, scriptingResult, factory
     };
 
     nlohmann::json result;
