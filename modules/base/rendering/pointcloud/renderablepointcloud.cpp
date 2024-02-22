@@ -74,7 +74,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite",
+        "The path to the texture that should be used as the point sprite. Note that if "
+        "the MultiTexture option is set in the asset, this value will be ignored.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -254,14 +255,21 @@ namespace {
         std::optional<ghoul::Dictionary> dataMapping
             [[codegen::reference("dataloader_datamapping")]];
 
-        //struct MiltiTexture {
-        //    // The folder where the textures are located
-        //    std::filesystem::path folder [[codegen::directory()]];
-
-        //    // @TODO: Mapping between texture ID and image
-        //};
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
-        std::optional<std::variant<std::string, ghoul::Dictionary>> texture;
+        std::optional<std::string> texture;
+
+        struct MultiTexture {
+            // The folder where the textures are located
+            std::filesystem::path folder [[codegen::directory()]];
+
+            // TODO: THIS will be required for CSV files!
+            std::optional<std::filesystem::path> textureMappingFile;
+        };
+        // Settings related to mapping multiple different textures to the points in the
+        // dataset. Note that this requires that texture information has been included
+        // in the dataset, either in the SPECK file directly or as part of the data
+        // mapping for a CSV file.
+        std::optional<MultiTexture> multiTexture;
 
         // [[codegen::verbatim(UseSpriteTextureInfo.description)]]
         std::optional<bool> useTexture;
@@ -494,26 +502,25 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     _useSpriteTexture = p.useTexture.value_or(_useSpriteTexture);
     addProperty(_useSpriteTexture);
 
-    if (p.texture.has_value()) {
-        if (std::holds_alternative<std::string>(*p.texture)) {
-            _textureMode = TextureInputMode::Single;
-            _spriteTexturePath = absPath(std::get<std::string>(*p.texture)).string();
-            _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
-            addProperty(_spriteTexturePath);
-        }
-        else {
-            _textureMode = TextureInputMode::Multi;
-
-            // TODO: make sure this is documented and verified
-            ghoul::Dictionary multiTextureDetails = std::get<ghoul::Dictionary>(*p.texture);
-            using namespace std::string_literals;
-            std::filesystem::path folder = absPath(
-                multiTextureDetails.value<std::string>("Directory"s)
-            );
-            //LINFO(folder.string());
-            _texturesDirectory = absPath(folder).string();
-        }
+    // Read texture information. Multi-texture is prioritized over texture
+    if (p.multiTexture.has_value()) {
+        _textureMode = TextureInputMode::Multi;
         _hasSpriteTexture = true;
+        _texturesDirectory = absPath((*p.multiTexture).folder).string();
+
+        if (p.texture.has_value()) {
+            LWARNING(
+                "Both a MultiTexture and Texture was set in the asset. The "
+                "MultiTexture has priority and any single texture will be ignored"
+            );
+        }
+    }
+    else if (p.texture.has_value()) {
+        _textureMode = TextureInputMode::Single;
+        _hasSpriteTexture = true;
+        _spriteTexturePath = absPath(*p.texture).string();
+        _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
+        addProperty(_spriteTexturePath);
     }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);

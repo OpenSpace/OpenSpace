@@ -130,6 +130,10 @@ namespace {
     // the first set of positions for the objects, the next N rows to the second set of
     // positions, and so on. The number of objects in the dataset must be specified in the
     // asset.
+    //
+    // MultiTexture:
+    // Note that if using multiple textures for the points based on values in the dataset,
+    // the used texture will be decided based on the first N set of points.
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
         // The number of objects to read from the dataset. Every N:th datapoint will
         // be interpreted as the same point, but at a different step in the interpolation
