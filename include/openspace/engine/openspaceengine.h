@@ -135,7 +135,6 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
-    void writeDocumentation();
     void createUserDirectoriesIfNecessary();
 
     /**

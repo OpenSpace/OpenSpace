@@ -27,13 +27,25 @@
 #include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/configuration.h>
+#include <openspace/events/eventengine.h>
+#include <openspace/interaction/actionmanager.h>
+#include <openspace/interaction/keybindingmanager.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/json.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenelicensewriter.h>
+#include <openspace/scripting/scriptscheduler.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/factorymanager.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
 
 #include <fstream>
+#include <future>
 
 namespace openspace::documentation {
 
@@ -135,14 +147,58 @@ std::string DocumentationEngine::generateJson() const {
     return json.dump();
 }
 
-nlohmann::json DocumentationEngine::generateJsonJson() const {
-    nlohmann::json json;
+void DocumentationEngine::writeDocumentation() const {
+    ZoneScoped;
 
-    for (const Documentation& d : _documentations) {
-        json.push_back(generateJsonDocumentation(d));
+    // Write documentation to json files if config file supplies path for doc files
+    std::string path = global::configuration->documentation.path;
+    if (path.empty()) {
+        // if path was empty, that means that no documentation is requested
+        return;
     }
+    path = absPath(path).string() + '/';
 
-    return json;
+    // Start the async requests as soon as possible so they are finished when we need them
+    std::future<nlohmann::json> settings = std::async(
+        &properties::PropertyOwner::generateJson,
+        global::rootPropertyOwner
+    );
+
+    std::future<nlohmann::json> sceneJson = std::async(
+        &properties::PropertyOwner::generateJson,
+        global::renderEngine->scene()
+    );
+
+    SceneLicenseWriter writer;
+
+    nlohmann::json scripting = global::scriptEngine->generateJson();
+    nlohmann::json factory = FactoryManager::ref().generateJson();
+    nlohmann::json keybindings = global::keybindingManager->generateJson();
+    nlohmann::json license = writer.generateJsonGroupedByLicense();
+    nlohmann::json sceneProperties = settings.get();
+    nlohmann::json sceneGraph = sceneJson.get();
+    nlohmann::json actions = global::actionManager->generateJson();
+    nlohmann::json events = global::eventEngine->generateJson();
+
+    sceneProperties["name"] = "Settings";
+    sceneGraph["name"] = "Scene";
+
+    // Add this here so that the generateJson function is the same as before to ensure
+    // backwards compatibility
+    nlohmann::json scriptingResult;
+    scriptingResult["name"] = "Scripting API";
+    scriptingResult["data"] = scripting;
+
+    nlohmann::json documentation = {
+        sceneGraph, sceneProperties, actions, events, keybindings, license, scriptingResult, factory
+    };
+
+    nlohmann::json result;
+    result["documentation"] = documentation;
+
+    std::ofstream out(absPath("${DOCUMENTATION}/documentationData.js"));
+    out << "var data = " << result.dump();
+    out.close();
 }
 
 

@@ -88,7 +88,7 @@ public:
 
     std::string generateJson() const;
 
-    nlohmann::json generateJsonJson() const;
+    void writeDocumentation() const;
 
 private:
     /// The list of all Documentation%s that are stored by the DocumentationEngine
