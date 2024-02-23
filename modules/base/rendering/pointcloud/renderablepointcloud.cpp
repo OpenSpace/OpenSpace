@@ -55,14 +55,14 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 29> UniformNames = {
+    constexpr std::array<const char*, 32> UniformNames = {
         "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
         "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
         "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
         "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
         "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
         "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
-        "hasDvarScaling"
+        "hasDvarScaling", "enableOutline", "outlineColor", "outlineWeight"
     };
 
     enum RenderOption {
@@ -229,6 +229,27 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
+        "EnableOutline",
+        "Outline Enabled",
+        "Enables the outline for each data point",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
+        "OutlineColor",
+        "Outline Color",
+        "Sets the color of the outline.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
+        "OutlineWeight",
+        "Outline Weight",
+        "Determines how thick the outline is.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     // A RenderablePointCloud can be used to render point-based datasets in 3D space,
     // optionally including color mapping, a sprite texture and labels. There are several
     // properties that affect the visuals of the points, such as settings for scaling,
@@ -336,6 +357,15 @@ namespace {
             // Settings related to the choice of color map, parameters, etc.
             std::optional<ghoul::Dictionary> colorMapping
                 [[codegen::reference("colormappingcomponent")]];
+
+            // [[codegen::verbatim(EnableOutlineInfo.description)]]
+            std::optional<bool> enableOutline;
+
+            // [[codegen::verbatim(OutlineColorInfo.description)]]
+            std::optional<glm::vec3> outlineColor;
+
+            // [[codegen::verbatim(OutlineColorInfo.description)]]
+            std::optional<float> outlineWeight;
         };
         // Settings related to the coloring of the points, such as a fixed color,
         // color map, etc.
@@ -419,10 +449,14 @@ RenderablePointCloud::SizeSettings::SizeMapping::SizeMapping()
 RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Coloring", "Coloring", "" })
     , pointColor(PointColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , enableOutline(EnableOutlineInfo, false)
+    , outlineColor(OutlineColorInfo, glm::vec3(0.23f), glm::vec3(0.f), glm::vec3(1.0))
+    , outlineWeight(OutlineWeightInfo, 0.2f, 0.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (p.coloring.has_value()) {
+    const bool hasColoring = p.coloring.has_value();
+    if (hasColoring) {
         const Parameters::ColorSettings settings = *p.coloring;
         pointColor = settings.fixedColor.value_or(pointColor);
 
@@ -435,6 +469,20 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     }
     pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(pointColor);
+
+    if (hasColoring) {
+        const Parameters::ColorSettings settings = *p.coloring;
+        enableOutline = settings.enableOutline.value_or(enableOutline);
+        addProperty(enableOutline);
+
+        outlineColor.setViewOption(properties::Property::ViewOptions::Color);
+        outlineColor = settings.outlineColor.value_or(outlineColor);
+        addProperty(outlineColor);
+
+        outlineWeight = settings.outlineWeight.value_or(outlineWeight);
+        addProperty(outlineWeight);
+    }
+
 }
 
 RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
@@ -735,6 +783,9 @@ void RenderablePointCloud::bindDataForPointRendering() {
     }
 
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
+    _program->setUniform(_uniformCache.enableOutline, _colorSettings.enableOutline);
+    _program->setUniform(_uniformCache.outlineColor, _colorSettings.outlineColor);
+    _program->setUniform(_uniformCache.outlineWeight, _colorSettings.outlineWeight);
 
     bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
         _colorSettings.colorMapping->texture();
