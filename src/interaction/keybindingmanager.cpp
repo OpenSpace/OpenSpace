@@ -115,25 +115,6 @@ const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBinding
     return _keyLua;
 }
 
-nlohmann::json KeybindingManager::generateJson() const {
-    ZoneScoped;
-
-    nlohmann::json json;
-
-    for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
-        nlohmann::json keybind;
-        keybind["name"] = ghoul::to_string(p.first);
-        keybind["action"] = p.second;
-        json.push_back(std::move(keybind));
-    }
-    sortJson(json, "name");
-
-    nlohmann::json result;
-    result["name"] = "Keybindings";
-    result["keybindings"] = json;
-    return result;
-}
-
 scripting::LuaLibrary KeybindingManager::luaLibrary() {
     return {
         "",

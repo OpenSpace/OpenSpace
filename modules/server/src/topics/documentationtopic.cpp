@@ -53,10 +53,10 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
         response = DocEng.generateFactoryManagerJson();
     }
     else if (requestedType == "keyboard") {
-        response = global::keybindingManager->generateJson();
+        response = DocEng.generateKeybindingsJson();
     }
     else if (requestedType == "asset") {
-        response = global::keybindingManager->generateJson();
+        // TODO: Add asset documentation here
     }
     else if (requestedType == "meta") {
         response = SceneLicenseWriter().generateJsonList();

@@ -90,6 +90,7 @@ public:
 
     nlohmann::json generateScriptEngineJson() const;
     nlohmann::json generateFactoryManagerJson() const;
+    nlohmann::json generateKeybindingsJson() const;
 private:
     /// The list of all Documentation%s that are stored by the DocumentationEngine
     std::vector<Documentation> _documentations;

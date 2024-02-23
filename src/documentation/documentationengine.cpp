@@ -281,6 +281,27 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
     return result;
 }
 
+nlohmann::json DocumentationEngine::generateKeybindingsJson() const {
+    ZoneScoped;
+
+    nlohmann::json json;
+    const std::multimap<KeyWithModifier, std::string>& luaKeys =
+        global::keybindingManager->keyBindings();
+
+    for (const std::pair<const KeyWithModifier, std::string>& p : luaKeys) {
+        nlohmann::json keybind;
+        keybind["name"] = ghoul::to_string(p.first);
+        keybind["action"] = p.second;
+        json.push_back(std::move(keybind));
+    }
+    sortJson(json, "name");
+
+    nlohmann::json result;
+    result["name"] = "Keybindings";
+    result["keybindings"] = json;
+    return result;
+}
+
 void DocumentationEngine::writeDocumentation() const {
     ZoneScoped;
 
