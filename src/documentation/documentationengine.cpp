@@ -103,6 +103,43 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
     return json;
 }
 
+nlohmann::json createPropertyJson(openspace::properties::PropertyOwner* owner) {
+    ZoneScoped;
+
+    using namespace openspace;
+    nlohmann::json json;
+    json["name"] = !owner->guiName().empty() ? owner->guiName() : owner->identifier();
+
+    json["description"] = owner->description();
+    json["properties"] = nlohmann::json::array();
+    json["propertyOwners"] = nlohmann::json::array();
+    json["type"] = owner->type();
+    json["tags"] = owner->tags();
+
+    const std::vector<properties::Property*>& properties = owner->properties();
+    for (properties::Property* p : properties) {
+        nlohmann::json propertyJson;
+        std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
+        propertyJson["name"] = name;
+        propertyJson["type"] = p->className();
+        propertyJson["uri"] = p->fullyQualifiedIdentifier();
+        propertyJson["identifier"] = p->identifier();
+        propertyJson["description"] = p->description();
+
+        json["properties"].push_back(propertyJson);
+    }
+    sortJson(json["properties"], "name");
+
+    auto propertyOwners = owner->propertySubOwners();
+    for (properties::PropertyOwner* o : propertyOwners) {
+        nlohmann::json propertyOwner;
+        json["propertyOwners"].push_back(createPropertyJson(o));
+    }
+    sortJson(json["propertyOwners"], "name");
+
+    return json;
+}
+
 nlohmann::json LuaFunctionToJson(const openspace::scripting::LuaLibrary::Function& f,
     bool includeSourceLocation)
 {
@@ -302,6 +339,28 @@ nlohmann::json DocumentationEngine::generateKeybindingsJson() const {
     return result;
 }
 
+nlohmann::json DocumentationEngine::generatePropertyOwnerJson(
+    properties::PropertyOwner* owner) const {
+    ZoneScoped;
+
+    nlohmann::json json;
+    std::vector<properties::PropertyOwner*> subOwners = owner->propertySubOwners();
+    for (properties::PropertyOwner* owner : subOwners) {
+        if (owner->identifier() != "Scene") {
+            nlohmann::json jsonOwner = createPropertyJson(owner);
+
+            json.push_back(jsonOwner);
+        }
+    }
+    sortJson(json, "name");
+
+    nlohmann::json result;
+    result["name"] = "propertyOwner";
+    result["data"] = json;
+
+    return result;
+}
+
 void DocumentationEngine::writeDocumentation() const {
     ZoneScoped;
 
@@ -315,12 +374,14 @@ void DocumentationEngine::writeDocumentation() const {
 
     // Start the async requests as soon as possible so they are finished when we need them
     std::future<nlohmann::json> settings = std::async(
-        &properties::PropertyOwner::generateJson,
+        &DocumentationEngine::generatePropertyOwnerJson,
+        this,
         global::rootPropertyOwner
     );
 
     std::future<nlohmann::json> sceneJson = std::async(
-        &properties::PropertyOwner::generateJson,
+        &DocumentationEngine::generatePropertyOwnerJson,
+        this,
         global::renderEngine->scene()
     );
 
@@ -328,7 +389,7 @@ void DocumentationEngine::writeDocumentation() const {
 
     nlohmann::json scripting = generateScriptEngineJson();
     nlohmann::json factory = generateFactoryManagerJson();
-    nlohmann::json keybindings = global::keybindingManager->generateJson();
+    nlohmann::json keybindings = generateKeybindingsJson();
     nlohmann::json license = writer.generateJsonGroupedByLicense();
     nlohmann::json sceneProperties = settings.get();
     nlohmann::json sceneGraph = sceneJson.get();
@@ -345,7 +406,8 @@ void DocumentationEngine::writeDocumentation() const {
     scriptingResult["data"] = scripting;
 
     nlohmann::json documentation = {
-        sceneGraph, sceneProperties, actions, events, keybindings, license, scriptingResult, factory
+        sceneGraph, sceneProperties, actions, events, keybindings, license,
+        scriptingResult, factory
     };
 
     nlohmann::json result;
@@ -355,7 +417,6 @@ void DocumentationEngine::writeDocumentation() const {
     out << "var data = " << result.dump();
     out.close();
 }
-
 
 void DocumentationEngine::addDocumentation(Documentation documentation) {
     if (documentation.id.empty()) {

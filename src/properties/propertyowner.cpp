@@ -40,43 +40,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
-
-    nlohmann::json createJson(openspace::properties::PropertyOwner* owner) {
-        ZoneScoped;
-
-        using namespace openspace;
-        nlohmann::json json;
-        json["name"] = !owner->guiName().empty() ? owner->guiName() : owner->identifier();
-
-        json["description"] = owner->description();
-        json["properties"] = nlohmann::json::array();
-        json["propertyOwners"] = nlohmann::json::array();
-        json["type"] = owner->type();
-        json["tags"] = owner->tags();
-
-        const std::vector<properties::Property*>& properties = owner->properties();
-        for (properties::Property* p : properties) {
-            nlohmann::json propertyJson;
-            std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
-            propertyJson["name"] = name;
-            propertyJson["type"] = p->className();
-            propertyJson["uri"] = p->fullyQualifiedIdentifier();
-            propertyJson["identifier"] = p->identifier();
-            propertyJson["description"] = p->description();
-
-            json["properties"].push_back(propertyJson);
-        }
-        sortJson(json["properties"], "name");
-
-        auto propertyOwners = owner->propertySubOwners();
-        for (properties::PropertyOwner* o : propertyOwners) {
-            nlohmann::json propertyOwner;
-            json["propertyOwners"].push_back(createJson(o));
-        }
-        sortJson(json["propertyOwners"], "name");
-
-        return json;
-    }
 } // namespace
 
 namespace openspace::properties {
@@ -384,27 +347,6 @@ void PropertyOwner::addTag(std::string tag) {
 
 void PropertyOwner::removeTag(const std::string& tag) {
     _tags.erase(std::remove(_tags.begin(), _tags.end(), tag), _tags.end());
-}
-
-nlohmann::json PropertyOwner::generateJson() const {
-    ZoneScoped;
-
-    nlohmann::json json;
-    std::vector<PropertyOwner*> subOwners = propertySubOwners();
-    for (PropertyOwner* owner : subOwners) {
-        if (owner->identifier() != "Scene") {
-            nlohmann::json jsonOwner = createJson(owner);
-
-            json.push_back(jsonOwner);
-        }
-    }
-    sortJson(json, "name");
-
-    nlohmann::json result;
-    result["name"] = "propertyOwner";
-    result["data"] = json;
-
-    return result;
 }
 
 } // namespace openspace::properties
