@@ -231,22 +231,27 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
-        "Outline Enabled",
-        "Enables the outline for each data point",
+        "Enable Point Outline",
+        "This setting determines if each point should have an outline or not. "
+        "An outline is only applied when rendering as colored points "
+        "(not when using textures).",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
         "Outline Color",
-        "Sets the color of the outline.",
+        "This value defines the color of the outline. "
+        "Darker colors will be less visible if Additive Blending is enabled.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
         "OutlineWeight",
         "Outline Weight",
-        "Determines how thick the outline is.",
+        "This setting determines the thickness of the outline. "
+        "A value of 0.0 will not show any outline, while a value of 1.0 will "
+        "cover the whole point.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
