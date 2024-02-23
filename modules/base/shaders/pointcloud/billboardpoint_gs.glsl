@@ -61,6 +61,8 @@ uniform vec3 cameraLookUp;
 // The max size is an angle, in degrees, for the diameter
 uniform float maxAngularSize;
 
+uniform vec2 aspectRatioScale;
+
 const vec2 corners[4] = vec2[4](
   vec2(0.0, 0.0),
   vec2(1.0, 0.0),
@@ -120,9 +122,9 @@ void main() {
   dmat4 cameraViewProjectionMatrix = projectionMatrix * cameraViewMatrix;
 
   vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
-  vec4 scaledRightClip = scaleFactor *
+  vec4 scaledRightClip = scaleFactor * aspectRatioScale.x *
     vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
-  vec4 scaledUpClip = scaleFactor *
+  vec4 scaledUpClip = scaleFactor * aspectRatioScale.y *
     vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
 
   vec4 dposViewSpace= vec4(cameraViewMatrix * dpos);

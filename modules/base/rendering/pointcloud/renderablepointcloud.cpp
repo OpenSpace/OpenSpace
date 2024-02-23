@@ -805,7 +805,14 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
                                                        size_t nLayers,
                                                        TextureColorMode colorMode)
 {
-    _textureArrays.push_back({ .renderId = textureId });
+    float w = static_cast<float>(resolution.x);
+    float h = static_cast<float>(resolution.y);
+    glm::vec2 aspectScale = w > h ? glm::vec2(1.f, h / w) : glm::vec2(w / h, 1.f);
+
+    _textureArrays.push_back({
+        .renderId = textureId,
+        .aspectRatioScale = aspectScale
+    });
 
     gl::GLenum internalFormat = internalGlFormatFromColorMode(colorMode);
 
@@ -1067,6 +1074,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     if (useTexture && !_textureArrays.empty()) {
         spriteTextureUnit.activate();
         for (const TextureArrayInfo& arrayInfo : _textureArrays) {
+            _program->setUniform("aspectRatioScale", arrayInfo.aspectRatioScale);
             glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
             glDrawArrays(
                 GL_POINTS,

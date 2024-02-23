@@ -252,6 +252,7 @@ protected:
         GLuint renderId;
         GLint startOffset = -1;
         int nPoints = -1;
+        glm::vec2 aspectRatioScale = glm::vec2(1.f);
     };
     std::vector<TextureArrayInfo> _textureArrays;
 
