@@ -81,36 +81,7 @@ namespace {
         return result;
     }
 
-    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f,
-                          bool includeSourceLocation)
-    {
-        using namespace openspace;
-        using namespace openspace::scripting;
-        nlohmann::json function;
-        function["name"] = f.name;
-        nlohmann::json arguments = nlohmann::json::array();
 
-        for (const LuaLibrary::Function::Argument& arg : f.arguments) {
-            nlohmann::json argument;
-            argument["name"] = arg.name;
-            argument["type"] = arg.type;
-            argument["defaultValue"] = arg.defaultValue.value_or("");
-            arguments.push_back(argument);
-        }
-
-        function["arguments"] = arguments;
-        function["returnType"] = f.returnType;
-        function["help"] = f.helpText;
-
-        if (includeSourceLocation) {
-            nlohmann::json sourceLocation;
-            sourceLocation["file"] = f.sourceLocation.file;
-            sourceLocation["line"] = f.sourceLocation.line;
-            function["sourceLocation"] = sourceLocation;
-        }
-
-        return function;
-    }
 
 #include "scriptengine_codegen.cpp"
 } // namespace
@@ -448,38 +419,8 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     return result;
 }
 
-nlohmann::json ScriptEngine::generateJson() const {
-    ZoneScoped;
-
-    nlohmann::json json;
-
-    for (const LuaLibrary& l : _registeredLibraries) {
-        using namespace openspace;
-        using namespace openspace::scripting;
-
-        nlohmann::json library;
-        std::string libraryName = l.name;
-        // Keep the library key for backwards compatability
-        library["library"] = libraryName;
-        library["name"] = libraryName;
-        std::string os = "openspace";
-        library["fullName"] = libraryName.empty() ? os : os  + "." + libraryName;
-
-        for (const LuaLibrary::Function& f : l.functions) {
-            bool hasSourceLocation = true;
-            library["functions"].push_back(toJson(f, hasSourceLocation));
-        }
-
-        for (const LuaLibrary::Function& f : l.documentations) {
-            bool hasSourceLocation = false;
-            library["functions"].push_back(toJson(f, hasSourceLocation));
-        }
-        sortJson(library["functions"], "name");
-        json.push_back(library);
-
-        sortJson(json, "library");
-    }
-    return json;
+const std::vector<LuaLibrary>& ScriptEngine::allLuaLibraries() const {
+    return _registeredLibraries;
 }
 
 void ScriptEngine::writeLog(const std::string& script) {

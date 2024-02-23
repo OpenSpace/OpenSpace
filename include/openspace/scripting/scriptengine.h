@@ -96,8 +96,7 @@ public:
         ShouldSendToRemote shouldSendToRemote, ScriptCallback cb = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
-
-    nlohmann::json generateJson() const;
+    const std::vector<LuaLibrary>& allLuaLibraries() const;
 
 private:
     BooleanType(Replace);

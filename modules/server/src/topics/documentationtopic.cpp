@@ -28,7 +28,7 @@
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
 
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/documentation/documentationengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/scene/scenelicensewriter.h>
@@ -47,7 +47,7 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
     // Do not parse generated json. Instead implement ability to get
     // ghoul::Dictionary objects from ScriptEngine, FactoryManager, and KeybindingManager.
     if (requestedType == "lua") {
-        response = global::scriptEngine->generateJson();
+        response = DocEng.generateScriptEngineJson();
     }
     else if (requestedType == "factories") {
         response = FactoryManager::ref().generateJson();
