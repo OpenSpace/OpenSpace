@@ -72,17 +72,17 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
-        "Texture",
-        "Point Sprite Texture",
+        "File",
+        "Point Sprite Texture File",
         "The path to the texture that should be used as the point sprite. Note that if "
-        "the MultiTexture option is set in the asset, this value will be ignored.",
+        "multiple textures option is set in the asset, this value will be ignored.",  // TODO
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseSpriteTextureInfo = {
-        "UseTexture",
-        "Use Texture",
-        "If true, use the provided sprite texture to render the point. If false, draw "
+    constexpr openspace::properties::Property::PropertyInfo TextureEnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "If true, use a provided sprite texture to render the point. If false, draw "
         "the points using the default point shape.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -255,30 +255,27 @@ namespace {
         std::optional<ghoul::Dictionary> dataMapping
             [[codegen::reference("dataloader_datamapping")]];
 
-        // [[codegen::verbatim(SpriteTextureInfo.description)]]
-        std::optional<std::string> texture;
+        struct Texture {
+            // [[codegen::verbatim(TextureEnabledInfo.description)]]
+            std::optional<bool> enabled;
 
-        struct MultiTexture {
-            // The folder where the textures are located
-            std::filesystem::path folder [[codegen::directory()]];
+            // [[codegen::verbatim(SpriteTextureInfo.description)]]
+            std::optional<std::filesystem::path> file;
+
+            // The folder where the textures are located when using multiple different
+            // textures to render the points, based on a mapping to a column in the
+            // dataset... TODO!!
+            std::optional<std::filesystem::path> folder [[codegen::directory()]];
 
             // If true, the textures will be compressed to preserve graphics card memory.
             // This is enabled per default, but may lead to visible artefacts for certain
             // images, especially up close. Set this to false to disable any hardware
             // compression of the textures, and represent each color channel wit 8 bits
             std::optional<bool> allowCompression;
-
-            // TODO: THIS will be required for CSV files!
-            std::optional<std::filesystem::path> textureMappingFile;
         };
-        // Settings related to mapping multiple different textures to the points in the
-        // dataset. Note that this requires that texture information has been included
-        // in the dataset, either in the SPECK file directly or as part of the data
-        // mapping for a CSV file. // @TODO: Should this be named somethign like texture from data? instead?
-        std::optional<MultiTexture> multiTexture;
+        // Settings related to the texturing of the points. Note that there are two ways....
+        std::optional<Texture> texture;
 
-        // [[codegen::verbatim(UseSpriteTextureInfo.description)]]
-        std::optional<bool> useTexture;
 
         // [[codegen::verbatim(DrawElementsInfo.description)]]
         std::optional<bool> drawElements;
@@ -423,6 +420,15 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     addProperty(pointColor);
 }
 
+RenderablePointCloud::Texture::Texture()
+    : properties::PropertyOwner({ "Texture", "Texture", "" })
+    , enabled(TextureEnabledInfo, false)
+    , spriteTexturePath(SpriteTextureInfo)
+{
+    addProperty(enabled);
+    addProperty(spriteTexturePath);
+}
+
 RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Fading", "Fading", "" })
     , enabled(EnableDistanceFadeInfo, false)
@@ -458,8 +464,6 @@ RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
 
 RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _spriteTexturePath(SpriteTextureInfo)
-    , _useSpriteTexture(UseSpriteTextureInfo, true)
     , _drawElements(DrawElementsInfo, true)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -505,30 +509,34 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _unit = DistanceUnit::Meter;
     }
 
-    _useSpriteTexture = p.useTexture.value_or(_useSpriteTexture);
-    addProperty(_useSpriteTexture);
+    addPropertySubOwner(_texture);
 
-    // Read texture information. Multi-texture is prioritized over texture
-    if (p.multiTexture.has_value()) {
-        _textureMode = TextureInputMode::Multi;
-        _hasSpriteTexture = true;
-        _texturesDirectory = absPath((*p.multiTexture).folder).string();
-        _allowCompression = (*p.multiTexture).allowCompression.value_or(true);
+    if (p.texture.has_value()) {
+        const Parameters::Texture t = *p.texture;
 
-        if (p.texture.has_value()) {
-            LWARNING(fmt::format(
-                "Both a MultiTexture and Texture was provided. The MultiTexture with the "
-                "folder '{}' has priority and the single texture with the following path "
-                "will be ignored: '{}'", (*p.multiTexture).folder, *p.texture
-            ));
+        // Read texture information. Multi-texture is prioritized over single-texture
+        if (t.folder.has_value()) {
+            _textureMode = TextureInputMode::Multi;
+            _hasSpriteTexture = true;
+            _texturesDirectory = absPath(*t.folder).string();
+
+            if (t.file.has_value()) {
+                LWARNING(fmt::format(
+                    "Both a single texture File and multi-texture Folder was provided. "
+                    "The folder '{}' has priority and the single texture with the "
+                    "following path will be ignored: '{}'", *t.folder, *t.file
+                ));
+            }
         }
-    }
-    else if (p.texture.has_value()) {
-        _textureMode = TextureInputMode::Single;
-        _hasSpriteTexture = true;
-        _spriteTexturePath = absPath(*p.texture).string();
-        _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
-        addProperty(_spriteTexturePath);
+        else if (t.file.has_value()) {
+            _textureMode = TextureInputMode::Single;
+            _hasSpriteTexture = true;
+            _texture.spriteTexturePath = absPath(*t.file).string();
+            _texture.spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
+        }
+
+        _texture.enabled = t.enabled.value_or(true);
+        _allowCompression = t.allowCompression.value_or(true);
     }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
@@ -696,15 +704,15 @@ void RenderablePointCloud::deinitializeShaders() {
 void RenderablePointCloud::initializeCustomTexture() {}
 
 void RenderablePointCloud::initializeSingleTexture() {
-    if (!_hasSpriteTexture || _spriteTexturePath.value().empty()) {
+    if (!_hasSpriteTexture || _texture.spriteTexturePath.value().empty()) {
         return;
     }
 
-    std::filesystem::path p = absPath(_spriteTexturePath);
+    std::filesystem::path p = absPath(_texture.spriteTexturePath);
 
     if (!std::filesystem::is_regular_file(p)) {
         throw ghoul::RuntimeError(fmt::format(
-            "Could not find image file '{}'", _spriteTexturePath.value()
+            "Could not find image file '{}'", p
         ));
     }
 
@@ -1061,7 +1069,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
         );
     }
 
-    bool useTexture = _hasSpriteTexture && _useSpriteTexture;
+    bool useTexture = _hasSpriteTexture && _texture.enabled;
     _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
 
     ghoul::opengl::TextureUnit spriteTextureUnit;
@@ -1234,7 +1242,7 @@ void RenderablePointCloud::updateBufferData() {
 
 void RenderablePointCloud::updateSpriteTexture() {
     bool shouldUpdate = _hasSpriteTexture && _spriteTextureIsDirty &&
-        !_spriteTexturePath.value().empty();
+        !_texture.spriteTexturePath.value().empty();
 
     if (!shouldUpdate) {
         return;

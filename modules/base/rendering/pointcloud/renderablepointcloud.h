@@ -177,8 +177,12 @@ protected:
     };
     Fading _fading;
 
-    properties::BoolProperty _useSpriteTexture;
-    properties::StringProperty _spriteTexturePath;
+    struct Texture : properties::PropertyOwner {
+        Texture();
+        properties::BoolProperty enabled;
+        properties::StringProperty spriteTexturePath;
+    };
+    Texture _texture;
 
     properties::BoolProperty _useAdditiveBlending;
 
