@@ -86,8 +86,6 @@ public:
      */
     static DocumentationEngine& ref();
 
-    std::string generateJson() const;
-
     void writeDocumentation() const;
 
     nlohmann::json generateScriptEngineJson() const;

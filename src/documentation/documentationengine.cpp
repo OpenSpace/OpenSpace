@@ -115,69 +115,6 @@ DocumentationEngine& DocumentationEngine::ref() {
     return *_instance;
 }
 
-nlohmann::json generateJsonDocumentation(const Documentation& d) {
-    nlohmann::json json;
-
-    json["name"] = d.name;
-    json["id"] = d.id;
-    json["description"] = d.description;
-    json["properties"] = nlohmann::json::array();
-
-    for (const DocumentationEntry& p : d.entries) {
-        nlohmann::json entry;
-        entry["key"] = p.key;
-        entry["optional"] = p.optional ? true : false;
-        entry["type"] = p.verifier->type();
-        entry["documentation"] = p.documentation;
-
-        TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
-        ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
-
-        if (rv) {
-            const std::vector<Documentation>& documentations = DocEng.documentations();
-            auto it = std::find_if(
-                documentations.begin(),
-                documentations.end(),
-                [rv](const Documentation& doc) { return doc.id == rv->identifier; }
-            );
-
-            if (it == documentations.end()) {
-                entry["reference"]["found"] = false;
-            }
-            else {
-                nlohmann::json reference;
-                reference["found"] = true;
-                reference["name"] = it->name;
-                reference["identifier"] = rv->identifier;
-
-                entry["reference"] = reference;
-            }
-        }
-        else if (tv) {
-            Documentation doc = { .entries = tv->documentations };
-            nlohmann::json restrictions = generateJsonDocumentation(doc);
-            // We have a TableVerifier, so we need to recurse
-            entry["restrictions"] = restrictions;
-        }
-        else {
-            entry["description"] = p.verifier->documentation();
-        }
-        json["properties"].push_back(entry);
-    }
-
-    return json;
-}
-
-std::string DocumentationEngine::generateJson() const {
-    nlohmann::json json;
-
-    for (const Documentation& d : _documentations) {
-        json["data"].push_back(generateJsonDocumentation(d));
-    }
-
-    return json.dump();
-}
-
 nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
     ZoneScoped;
 
