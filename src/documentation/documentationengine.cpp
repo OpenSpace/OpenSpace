@@ -49,6 +49,60 @@
 
 namespace openspace::documentation {
 
+nlohmann::json generateJsonDocumentation(const Documentation& d) {
+    nlohmann::json json;
+
+    json["name"] = d.name;
+    json["identifier"] = d.id;
+    json["description"] = d.description;
+    json["members"] = nlohmann::json::array();
+
+    for (const DocumentationEntry& p : d.entries) {
+        nlohmann::json entry;
+        entry["name"] = p.key;
+        entry["optional"] = p.optional.value;
+        entry["type"] = p.verifier->type();
+        entry["documentation"] = p.documentation;
+
+        TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
+        ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
+
+        if (rv) {
+            const std::vector<Documentation>& documentations = DocEng.documentations();
+            auto it = std::find_if(
+                documentations.begin(),
+                documentations.end(),
+                [rv](const Documentation& doc) { return doc.id == rv->identifier; }
+            );
+
+            if (it == documentations.end()) {
+                entry["reference"]["found"] = false;
+            }
+            else {
+                nlohmann::json reference;
+                reference["found"] = true;
+                reference["name"] = it->name;
+                reference["identifier"] = rv->identifier;
+
+                entry["reference"] = reference;
+            }
+        }
+        else if (tv) {
+            Documentation doc = { .entries = tv->documentations };
+            nlohmann::json restrictions = generateJsonDocumentation(doc);
+            // We have a TableVerifier, so we need to recurse
+            entry["restrictions"] = restrictions;
+        }
+        else {
+            entry["description"] = p.verifier->documentation();
+        }
+        json["members"].push_back(entry);
+    }
+    sortJson(json["members"], "name");
+
+    return json;
+}
+
 nlohmann::json LuaFunctionToJson(const openspace::scripting::LuaLibrary::Function& f,
     bool includeSourceLocation)
 {
@@ -150,6 +204,82 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
     return json;
 }
 
+nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {                 
+    nlohmann::json json;
+
+    std::vector<Documentation> docs = _documentations; // Copy the documentations
+    const std::vector<FactoryManager::FactoryInfo>& factories =
+        FactoryManager::ref().factories();
+
+    for (const FactoryManager::FactoryInfo& factoryInfo : factories) {
+        nlohmann::json factory;
+        factory["name"] = factoryInfo.name;
+        factory["identifier"] = "category" + factoryInfo.name;
+
+        ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
+        // Add documentation about base class
+        auto factoryDoc = std::find_if(
+            docs.begin(),
+            docs.end(),
+            [&factoryInfo](const Documentation& d) {
+                return d.name == factoryInfo.name;
+            });
+        if (factoryDoc != docs.end()) {
+            nlohmann::json documentation = generateJsonDocumentation(*factoryDoc);
+            factory["classes"].push_back(documentation);
+            // Remove documentation from list check at the end if all docs got put in
+            docs.erase(factoryDoc);
+        }
+        else {
+            nlohmann::json documentation;
+            documentation["name"] = factoryInfo.name;
+            documentation["identifier"] = factoryInfo.name;
+            factory["classes"].push_back(documentation);
+        }
+
+        // Add documentation about derived classes
+        const std::vector<std::string>& registeredClasses = f->registeredClasses();
+        for (const std::string& c : registeredClasses) {
+            auto found = std::find_if(
+                docs.begin(),
+                docs.end(),
+                [&c](const Documentation& d) {
+                    return d.name == c;
+                });
+            if (found != docs.end()) {
+                nlohmann::json documentation = generateJsonDocumentation(*found);
+                factory["classes"].push_back(documentation);
+                docs.erase(found);
+            }
+            else {
+                nlohmann::json documentation;
+                documentation["name"] = c;
+                documentation["identifier"] = c;
+                factory["classes"].push_back(documentation);
+            }
+        }
+        sortJson(factory["classes"], "name");
+        json.push_back(factory);
+    }
+    // Add all leftover docs
+    nlohmann::json leftovers;
+    leftovers["name"] = "Other";
+    leftovers["identifier"] = "other";
+
+    for (const Documentation& doc : docs) {
+        leftovers["classes"].push_back(generateJsonDocumentation(doc));
+    }
+    sortJson(leftovers["classes"], "name");
+    json.push_back(leftovers);
+    sortJson(json, "name");
+
+    // I did not check the output of this for correctness ---abock
+    nlohmann::json result;
+    result["name"] = "Asset Types";
+    result["data"] = json;
+
+    return result;
+}
 
 void DocumentationEngine::writeDocumentation() const {
     ZoneScoped;
@@ -176,7 +306,7 @@ void DocumentationEngine::writeDocumentation() const {
     SceneLicenseWriter writer;
 
     nlohmann::json scripting = generateScriptEngineJson();
-    nlohmann::json factory = FactoryManager::ref().generateJson();
+    nlohmann::json factory = generateFactoryManagerJson();
     nlohmann::json keybindings = global::keybindingManager->generateJson();
     nlohmann::json license = writer.generateJsonGroupedByLicense();
     nlohmann::json sceneProperties = settings.get();

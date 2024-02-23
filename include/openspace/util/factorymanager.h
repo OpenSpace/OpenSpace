@@ -39,6 +39,10 @@ namespace openspace {
  */
 class FactoryManager {
 public:
+    struct FactoryInfo {
+        std::unique_ptr<ghoul::TemplateFactoryBase> factory;
+        std::string name;
+    };
     /**
      * This exception is thrown if the ghoul::TemplateFactory could not be found in the
      * #factory method.
@@ -117,16 +121,12 @@ public:
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
 
-    nlohmann::json generateJson() const;
+    const std::vector<FactoryInfo>& factories() const;
 
 private:
     /// Singleton member for the Factory Manager
     static FactoryManager* _manager;
 
-    struct FactoryInfo {
-        std::unique_ptr<ghoul::TemplateFactoryBase> factory;
-        std::string name;
-    };
     std::vector<FactoryInfo> _factories;
 };
 

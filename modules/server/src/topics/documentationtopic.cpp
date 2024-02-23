@@ -50,7 +50,7 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
         response = DocEng.generateScriptEngineJson();
     }
     else if (requestedType == "factories") {
-        response = FactoryManager::ref().generateJson();
+        response = DocEng.generateFactoryManagerJson();
     }
     else if (requestedType == "keyboard") {
         response = global::keybindingManager->generateJson();

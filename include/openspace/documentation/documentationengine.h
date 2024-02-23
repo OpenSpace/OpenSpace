@@ -89,6 +89,7 @@ public:
     void writeDocumentation() const;
 
     nlohmann::json generateScriptEngineJson() const;
+    nlohmann::json generateFactoryManagerJson() const;
 private:
     /// The list of all Documentation%s that are stored by the DocumentationEngine
     std::vector<Documentation> _documentations;
