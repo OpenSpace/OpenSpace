@@ -112,15 +112,14 @@ private:
 
     void interpolateEnd(double now);
     void creteEnding(double now);
-    void createSmoothEnding(double tInterpolation,
-        const TimePolygon const* prevTimePolygon,
+    void createSmoothEnding(const TimePolygon const* prevTimePolygon,
         const TimePolygon const* currentTimePolygon);
-    void createLowPolyEnding(double tInterpolation,
-        const TimePolygon const* prevTimePolygon,
+    void createLowPolyEnding(const TimePolygon const* prevTimePolygon,
         const TimePolygon const* currentTimePolygon);
 
     void updateBufferData();
     void updateEndingBufferData();
+    void setCommonUniforms(ghoul::opengl::ProgramObject* shader, const RenderData& data);
 
     // Properties
     struct ColorSettings : properties::PropertyOwner {
@@ -144,17 +143,11 @@ private:
     properties::FloatProperty _wireLineWidth;
     properties::BoolProperty _useSmoothNormals;
     properties::BoolProperty _addEdges;
+    properties::OptionProperty _interpolationMethod;
     properties::BoolProperty _showAllTube;
     properties::BoolProperty _enableFaceCulling;
     properties::TriggerProperty _jumpToPrevPolygon;
     properties::TriggerProperty _jumpToNextPolygon;
-
-    UniformCache(modelViewTransform, projectionTransform, normalTransform, opacity, color,
-        nanColor, useNanColor, aboveRangeColor, useAboveRangeColor, belowRangeColor,
-        useBelowRangeColor, useColorMap, colorMapTexture, cmapRangeMin, cmapRangeMax,
-        hideOutsideRange, performShading, nLightSources, lightDirectionsViewSpace,
-        lightIntensities, ambientIntensity, diffuseIntensity,
-        specularIntensity)_uniformCache;
 
     std::vector<float> _lightIntensitiesBuffer;
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
@@ -169,6 +162,7 @@ private:
     size_t _lastPolygonBeforeNow = 0;
     size_t _firstPolygonAfterNow = 0;
     bool _interpolationNeeded = false;
+    float _tValue = 0.f;
 
     dataloader::Dataset _colorDataset;
     bool _hasColorMapFile = false;
@@ -181,6 +175,8 @@ private:
     std::vector<unsigned int> _indicies;
 
     // Ending stuff
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderCutplane;
+    bool _hasInterpolationTextures = false;
     GLuint _vaoIdEnding = 0;
     GLuint _vboIdEnding = 0;
     GLuint _iboIdEnding = 0;

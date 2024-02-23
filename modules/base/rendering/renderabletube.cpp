@@ -48,13 +48,13 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableTube";
     constexpr int8_t CurrentMajorVersion = 0;
     constexpr int8_t CurrentMinorVersion = 1;
-    constexpr std::array<const char*, 23> UniformNames = {
-        "modelViewTransform", "projectionTransform", "normalTransform", "opacity",
-        "color", "nanColor", "useNanColor", "aboveRangeColor", "useAboveRangeColor",
-        "belowRangeColor", "useBelowRangeColor", "useColorMap", "colorMapTexture",
-        "cmapRangeMin", "cmapRangeMax", "hideOutsideRange", "performShading",
-        "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "ambientIntensity", "diffuseIntensity", "specularIntensity"
+
+    constexpr int NearestInterpolation = 0;
+    constexpr int LinearInterpolation = 1;
+
+    std::map<std::string, int> InterpolationMapping = {
+        { "Nearest Neighbor", NearestInterpolation },
+        { "Linear", LinearInterpolation },
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
@@ -165,6 +165,13 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo InterpolationMethodInfo = {
+        "InterpolationMethod",
+        "Interpolation Method",
+        "Which interpolaiton method to use for the cutplane texture",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableTube)]] Parameters {
         // The input file with data for the tube
         std::string file;
@@ -202,6 +209,9 @@ namespace {
 
         // [[codegen::verbatim(AddEdgesInfo.description)]]
         std::optional<bool> addEdges;
+
+        // [[codegen::verbatim(InterpolationMethodInfo.description)]]
+        std::optional<std::string> interpolationMethod;
 
         // [[codegen::verbatim(DrawWireframeInfo.description)]]
         std::optional<bool> drawWireframe;
@@ -264,6 +274,10 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _colorSettings(dictionary)
     , _addEdges(AddEdgesInfo, true)
+    , _interpolationMethod(
+        InterpolationMethodInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _drawWireframe(DrawWireframeInfo, false)
     , _wireLineWidth(WireLineWidthInfo, 1.f, 1.f, 10.f)
     , _useSmoothNormals(UseSmoothNormalsInfo, true)
@@ -330,6 +344,14 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     _addEdges = p.addEdges.value_or(_addEdges);
     addProperty(_addEdges);
 
+    _interpolationMethod.addOption(NearestInterpolation, "Nearest Neighbor");
+    _interpolationMethod.addOption(LinearInterpolation, "Linear");
+    addProperty(_interpolationMethod);
+    if (p.interpolationMethod.has_value()) {
+        const std::string interpolationMethod = *p.interpolationMethod;
+        _interpolationMethod = InterpolationMapping[interpolationMethod];
+    }
+
     _showAllTube = p.showAllTube.value_or(_showAllTube);
     addProperty(_showAllTube);
 
@@ -366,7 +388,12 @@ void RenderableTube::initializeGL() {
         absPath("${MODULE_BASE}/shaders/tube_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/tube_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+
+    _shaderCutplane = global::renderEngine->buildRenderProgram(
+        "TubeProgram",
+        absPath("${MODULE_BASE}/shaders/tube_cutplane_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/tube_cutplane_fs.glsl")
+    );
 
     if (_hasColorMapFile) {
         _colorSettings.colorMapping->initializeTexture();
@@ -461,6 +488,9 @@ void RenderableTube::initializeGL() {
 void RenderableTube::deinitializeGL() {
     global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
+
+    global::renderEngine->removeRenderProgram(_shaderCutplane.get());
+    _shaderCutplane = nullptr;
 
     glDeleteVertexArrays(1, &_vaoId);
     _vaoId = 0;
@@ -632,6 +662,9 @@ void RenderableTube::readDataFile() {
                 pt->at("u").get_to(u);
                 pt->at("v").get_to(v);
                 timePolygonPoint.tex = glm::vec2(u, v);
+
+                //@TODO Move this when the proper reading of textures are added
+                //_hasInterpolationTextures = true;
             }
 
             timePolygon.points.push_back(timePolygonPoint);
@@ -1201,6 +1234,7 @@ void RenderableTube::creteEnding(double now) {
     double prevTime = _data[_lastPolygonBeforeNow].timestamp;
     double nextTime = _data[_firstPolygonAfterNow].timestamp;
     double t = (now - prevTime) / (nextTime - prevTime);
+    _tValue = t;
 
     // Create a temporary TimePolygon at time t between prev and next using interpolation
     const TimePolygon const* prevTimePolygon = &_data[_lastPolygonBeforeNow];
@@ -1224,10 +1258,10 @@ void RenderableTube::creteEnding(double now) {
     }
 
     if (_useSmoothNormals) {
-        createSmoothEnding(t, prevTimePolygon, &currentTimePolygon);
+        createSmoothEnding(prevTimePolygon, &currentTimePolygon);
     }
     else {
-        createLowPolyEnding(t, prevTimePolygon, &currentTimePolygon);
+        createLowPolyEnding(prevTimePolygon, &currentTimePolygon);
     }
 
     // Add cutplane
@@ -1237,8 +1271,7 @@ void RenderableTube::creteEnding(double now) {
     }
 }
 
-void RenderableTube::createSmoothEnding(double tInterpolation,
-                                        const TimePolygon const* prevTimePolygon,
+void RenderableTube::createSmoothEnding(const TimePolygon const* prevTimePolygon,
                                         const TimePolygon const* currentTimePolygon)
 {
     // Add the trianles of the ending
@@ -1258,12 +1291,11 @@ void RenderableTube::createSmoothEnding(double tInterpolation,
         true, // The last polygon in this section
         vIndex,
         true, // This is part of the ending
-        tInterpolation
+        _tValue
     );
 }
 
-void RenderableTube::createLowPolyEnding(double tInterpolation,
-                                         const TimePolygon const* prevTimePolygon,
+void RenderableTube::createLowPolyEnding(const TimePolygon const* prevTimePolygon,
                                          const TimePolygon const* currentTimePolygon)
 {
     // Add the trianles of the ending
@@ -1274,45 +1306,23 @@ void RenderableTube::createLowPolyEnding(double tInterpolation,
         prevTimePolygon,
         currentTimePolygon,
         vIndex,
-        tInterpolation
+        _tValue
     );
 }
 
-void RenderableTube::render(const RenderData& data, RendererTasks&) {
-    if (_nIndiciesToRender == 0) {
-        return;
-    }
-
-    _shader->activate();
+void RenderableTube::setCommonUniforms(ghoul::opengl::ProgramObject* shader, const RenderData& data) {
+    shader->setUniform("opacity", opacity());
 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 modelViewTransform = calcModelViewTransform(data);
     glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 
-    // Uniforms
-    _shader->setUniform(_uniformCache.opacity, opacity());
-
-    _shader->setUniform(_uniformCache.modelViewTransform, modelViewTransform);
-    _shader->setUniform(
-        _uniformCache.projectionTransform,
+    shader->setUniform("modelViewTransform", modelViewTransform);
+    shader->setUniform(
+        "projectionTransform",
         glm::dmat4(data.camera.projectionMatrix())
     );
-    _shader->setUniform(_uniformCache.normalTransform, glm::mat3(normalTransform));
-
-    // Settings
-    if (!_enableFaceCulling) {
-        glDisable(GL_CULL_FACE);
-    }
-
-    if (_drawWireframe) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-#ifndef __APPLE__
-        glLineWidth(_wireLineWidth);
-#else
-        glLineWidth(1.f);
-#endif
-    }
+    shader->setUniform("normalTransform", glm::mat3(normalTransform));
 
     // Shading and light settings
     int nLightSources = 0;
@@ -1329,71 +1339,94 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
         ++nLightSources;
     }
 
-    if (_uniformCache.performShading != -1) {
-        _shader->setUniform(_uniformCache.performShading, _shading.enabled);
-    }
-
+    shader->setUniform("performShading", _shading.enabled);
     if (_shading.enabled) {
-        _shader->setUniform(_uniformCache.nLightSources, nLightSources);
-        _shader->setUniform(_uniformCache.lightIntensities, _lightIntensitiesBuffer);
-        _shader->setUniform(
-            _uniformCache.lightDirectionsViewSpace,
+        shader->setUniform("nLightSources", nLightSources);
+        shader->setUniform("lightIntensities", _lightIntensitiesBuffer);
+        shader->setUniform(
+            "lightDirectionsViewSpace",
             _lightDirectionsViewSpaceBuffer
         );
 
-        _shader->setUniform(_uniformCache.ambientIntensity, _shading.ambientIntensity);
-        _shader->setUniform(_uniformCache.diffuseIntensity, _shading.diffuseIntensity);
-        _shader->setUniform(_uniformCache.specularIntensity, _shading.specularIntensity);
+        shader->setUniform("ambientIntensity", _shading.ambientIntensity);
+        shader->setUniform("diffuseIntensity", _shading.diffuseIntensity);
+        shader->setUniform("specularIntensity", _shading.specularIntensity);
     }
 
     // Colormap settings
     bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
         _colorSettings.colorMapping->texture();
-    _shader->setUniform(_uniformCache.useColorMap, useColorMap);
+    shader->setUniform("useColorMap", useColorMap);
 
-    _shader->setUniform(_uniformCache.color, _colorSettings.tubeColor);
+    shader->setUniform("color", _colorSettings.tubeColor);
 
     ghoul::opengl::TextureUnit colorMapTextureUnit;
-    _shader->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
+    shader->setUniform("colorMapTexture", colorMapTextureUnit);
 
     if (useColorMap) {
         colorMapTextureUnit.activate();
         _colorSettings.colorMapping->texture()->bind();
 
         const glm::vec2 range = _colorSettings.colorMapping->valueRange;
-        _shader->setUniform(_uniformCache.cmapRangeMin, range.x);
-        _shader->setUniform(_uniformCache.cmapRangeMax, range.y);
-        _shader->setUniform(
-            _uniformCache.hideOutsideRange,
+        shader->setUniform("cmapRangeMin", range.x);
+        shader->setUniform("cmapRangeMax", range.y);
+        shader->setUniform(
+            "hideOutsideRange",
             _colorSettings.colorMapping->hideOutsideRange
         );
 
-        _shader->setUniform(
-            _uniformCache.nanColor,
+        shader->setUniform(
+            "nanColor",
             _colorSettings.colorMapping->nanColor
         );
-        _shader->setUniform(
-            _uniformCache.useNanColor,
+        shader->setUniform(
+            "useNanColor",
             _colorSettings.colorMapping->useNanColor
         );
 
-        _shader->setUniform(
-            _uniformCache.aboveRangeColor,
+        shader->setUniform(
+            "aboveRangeColor",
             _colorSettings.colorMapping->aboveRangeColor
         );
-        _shader->setUniform(
-            _uniformCache.useAboveRangeColor,
+        shader->setUniform(
+            "useAboveRangeColor",
             _colorSettings.colorMapping->useAboveRangeColor
         );
 
-        _shader->setUniform(
-            _uniformCache.belowRangeColor,
+        shader->setUniform(
+            "belowRangeColor",
             _colorSettings.colorMapping->belowRangeColor
         );
-        _shader->setUniform(
-            _uniformCache.useBelowRangeColor,
+        shader->setUniform(
+            "useBelowRangeColor",
             _colorSettings.colorMapping->useBelowRangeColor
         );
+    }
+}
+
+void RenderableTube::render(const RenderData& data, RendererTasks&) {
+    if (_nIndiciesToRender == 0) {
+        return;
+    }
+
+    _shader->activate();
+
+    // Uniforms
+    setCommonUniforms(_shader.get(), data);
+
+    // Settings
+    if (!_enableFaceCulling) {
+        glDisable(GL_CULL_FACE);
+    }
+
+    if (_drawWireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+#ifndef __APPLE__
+        glLineWidth(_wireLineWidth);
+#else
+        glLineWidth(1.f);
+#endif
     }
 
     // Render
@@ -1417,7 +1450,31 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     }
 
     // Render the cutplane
-    if (_addEdges && !_showAllTube && (_interpolationNeeded || _nIndiciesToRender < _indicies.size())) {
+    if (_addEdges && !_showAllTube &&
+        (_interpolationNeeded || _nIndiciesToRender < _indicies.size()))
+    {
+        // Use the texture based shader instead for the cutplane if textures exist
+        if (_hasInterpolationTextures) {
+            // Switch shader
+            _shaderCutplane->activate();
+
+            // Uniforms
+            setCommonUniforms(_shaderCutplane.get(), data);
+            _shaderCutplane->setUniform(
+                "hasInterpolationTexture",
+                _hasInterpolationTextures
+            );
+            _shaderCutplane->setUniform(
+                "useNearesNeighbor",
+                _interpolationMethod == NearestInterpolation
+            );
+            _shaderCutplane->setUniform("interpolationTime", _tValue);
+
+            // @TODO: Find the textures relevant to this cutplane and bind them
+            _shaderCutplane->setUniform("texture_prev", false);
+            _shaderCutplane->setUniform("texture_next", false);
+        }
+
         // Bind the cutplane ibo instead
         glBindVertexArray(_vaoIdEnding);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboIdEnding);
@@ -1435,6 +1492,8 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
             GL_UNSIGNED_INT,
             nullptr
         );
+
+        _shaderCutplane->deactivate();
     }
 
     // Reset
@@ -1449,7 +1508,6 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(0);
     global::renderEngine->openglStateCache().resetLineState();
-
     _shader->deactivate();
 }
 
@@ -1494,7 +1552,10 @@ void RenderableTube::updateEndingBufferData() {
 void RenderableTube::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    }
+
+    if (_shaderCutplane->isDirty()) {
+        _shaderCutplane->rebuildFromFile();
     }
 
     if (_hasColorMapFile) {
