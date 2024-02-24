@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_CORE___JSON_HELPER___H__
 #define __OPENSPACE_CORE___JSON_HELPER___H__
 
-#include <string>
 #include <openspace/json.h>
+#include <ghoul/misc/dictionary.h>
+#include <string>
 
 namespace openspace {
 

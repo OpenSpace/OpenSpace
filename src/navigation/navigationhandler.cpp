@@ -557,6 +557,10 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
     }
 
     std::filesystem::path absolutePath = absPath(filepath);
+    if (!absolutePath.has_extension()) {
+        // Adding the .navstate extension to the filepath if it came without one
+        absolutePath.replace_extension(".navstate");
+    }
     LINFO(fmt::format("Saving camera position: {}", absolutePath));
 
     std::ofstream ofs(absolutePath);
@@ -580,7 +584,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
 
     std::ifstream f(filepath);
     std::string contents = std::string(
-        (std::istreambuf_iterator<char>(f)),
+        std::istreambuf_iterator<char>(f),
         std::istreambuf_iterator<char>()
     );
     nlohmann::json json = nlohmann::json::parse(contents);

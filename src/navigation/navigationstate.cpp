@@ -104,6 +104,9 @@ NavigationState::NavigationState(const nlohmann::json& json) {
     if (auto it = json.find("referenceframe");  it != json.end()) {
         referenceFrame = it->get<std::string>();
     }
+    else {
+        referenceFrame = anchor;
+    }
 
     if (auto it = json.find("aim");  it != json.end()) {
         aim = it->get<std::string>();
@@ -214,6 +217,9 @@ ghoul::Dictionary NavigationState::dictionary() const {
 
 nlohmann::json NavigationState::toJson() const {
     nlohmann::json result = nlohmann::json::object();
+
+    // Obligatory version number
+    result["version"] = 1;
 
     {
         nlohmann::json posObj = nlohmann::json::object();
