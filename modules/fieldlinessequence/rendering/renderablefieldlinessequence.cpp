@@ -678,7 +678,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         }
         else
         {
-            //TODO: message to the user that the path is invalid
+            LWARNING("Invalid path to transferfunction, please enter new path.");
         }
     });
 }
@@ -916,7 +916,7 @@ void RenderableFieldlinesSequence::firstUpdate() {
     }
     else
     {
-        //TODO: message to the user that the path is invalid
+        LWARNING("Invalid path to transferfunction, please enter new path.");
     }
 
     _shouldUpdateColorBuffer = true;
