@@ -119,11 +119,10 @@ void RenderablePolygonCloud::initializeCustomTexture() {
 
     renderToTexture(_pTexture, TexSize, TexSize);
 
-    // Download the data and use it to intialize the data we need to rendering
-    void* pixelData = nullptr;
+    // Download the data and use it to intialize the data we need to rendering.
     // Allocate memory: 4 channels, with one byte each
     unsigned int arraySize = TexSize * TexSize * 4 * 1;
-    pixelData = new GLubyte[arraySize];
+    void* pixelData = new GLubyte[arraySize];
     glBindTexture(GL_TEXTURE_2D, _pTexture);
     glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, pixelData);
 
