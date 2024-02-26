@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -1897,7 +1897,8 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
     ZoneScoped;
 
     return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (_debugProperties.performFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
+           (_debugProperties.performFrustumCulling &&
+               isCullableByFrustum(chunk, renderData, mvp));
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
@@ -1987,8 +1988,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 
         glm::vec2 transformedUv = layer->tileUvToTextureSamplePosition(
             uvTransform,
-            patchUV,
-            glm::uvec2(tileTexture->dimensions())
+            patchUV
         );
 
         // Sample and do linear interpolation
@@ -2364,9 +2364,11 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
         const std::vector<Layer*>& lyrs = _layerManager.layerGroup(gi.id).activeLayers();
         for (Layer* layer : lyrs) {
             Tile::Status status = layer->tileStatus(chunk.tileIndex);
-            // Ensure that the current tile is OK and that the tileprovider for the current
-            // layer has enough data to support an additional level.
-            if (status == Tile::Status::OK && layer->tileProvider()->maxLevel() > currLevel + 1) {
+            // Ensure that the current tile is OK and that the tileprovider for the
+            // current layer has enough data to support an additional level.
+            if (status == Tile::Status::OK &&
+                layer->tileProvider()->maxLevel() > currLevel + 1)
+            {
                 return UnknownDesiredLevel;
             }
         }

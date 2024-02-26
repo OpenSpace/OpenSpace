@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,6 +71,8 @@ struct Dataset {
     /// the dataset
     float maxPositionComponent = 0.f;
 
+    bool isEmpty() const;
+
     int index(std::string_view variableName) const;
     bool normalizeVariable(std::string_view variableName);
     glm::vec2 findValueRange(int variableIndex) const;
@@ -119,6 +121,7 @@ namespace label {
 
     Labelset loadFileWithCache(std::filesystem::path path);
 
+    Labelset loadFromDataset(const dataloader::Dataset& dataset);
 } // namespace label
 
 namespace color {

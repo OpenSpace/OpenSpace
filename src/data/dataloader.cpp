@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,10 +44,6 @@ namespace {
     constexpr int8_t LabelCacheFileVersion = 11;
     constexpr int8_t ColorCacheFileVersion = 11;
 
-    constexpr std::string_view DefaultXColumn = "x";
-    constexpr std::string_view DefaultYColumn = "y";
-    constexpr std::string_view DefaultZColumn = "z";
-
     template <typename T, typename U>
     void checkSize(U value, std::string_view message) {
         if (value > std::numeric_limits<U>::max()) {
@@ -83,7 +79,10 @@ namespace {
         if (specs.has_value()) {
             info = openspace::dataloader::generateHashString(*specs);
         }
-        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(filePath, info);
+        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+            filePath,
+            info
+        );
 
         if (std::filesystem::exists(cached)) {
             LINFOC(
@@ -325,10 +324,14 @@ void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
 
     //
     // Store max data point variable
-    file.write(reinterpret_cast<const char*>(&dataset.maxPositionComponent), sizeof(float));
+    file.write(
+        reinterpret_cast<const char*>(&dataset.maxPositionComponent),
+        sizeof(float)
+    );
 }
 
-Dataset loadFileWithCache(std::filesystem::path filePath, std::optional<DataMapping> specs)
+Dataset loadFileWithCache(std::filesystem::path filePath,
+                          std::optional<DataMapping> specs)
 {
     return internalLoadFileWithCache<Dataset>(
         filePath,
@@ -456,6 +459,23 @@ Labelset loadFileWithCache(std::filesystem::path filePath) {
         &loadCachedFile,
         &saveCachedFile
     );
+}
+
+Labelset loadFromDataset(const Dataset& dataset) {
+    Labelset res;
+    res.entries.reserve(dataset.entries.size());
+
+    int count = 0;
+    for (const Dataset::Entry& entry : dataset.entries) {
+        Labelset::Entry label;
+        label.position = entry.position;
+        label.text = entry.comment.value_or("MISSING LABEL");
+        // @TODO: make is possible to configure this identifier?
+        label.identifier = fmt::format("Point-{}", count);
+        res.entries.push_back(std::move(label));
+    }
+
+    return res;
 }
 
 } // namespace label
@@ -602,6 +622,10 @@ ColorMap loadFileWithCache(std::filesystem::path path)
 }
 
 } // namespace color
+
+bool Dataset::isEmpty() const {
+    return variables.empty() || entries.empty();
+}
 
 int Dataset::index(std::string_view variableName) const {
     for (const Dataset::Variable& v : variables) {

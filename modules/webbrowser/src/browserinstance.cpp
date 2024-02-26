@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -118,6 +118,8 @@ void BrowserInstance::reshape(const glm::ivec2& windowSize) {
 
 void BrowserInstance::draw() {
     ZoneScoped;
+    TracyGpuZone("CEF Draw");
+
 
     if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
         _browser->GetHost()->SetZoomLevel(_zoomLevel);

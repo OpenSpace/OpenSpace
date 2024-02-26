@@ -1,0 +1,48 @@
+local transforms = asset.require("../model")
+local kernels = asset.require("../kernels")
+
+
+
+local HGA = {
+  Identifier = "BepiColomboMPO_HGA",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.HGA,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_HGA",
+      Method = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO HGA",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+
+asset.onInitialize(function()
+  -- Circle shapes are currently not supported
+  -- openspace.addSceneGraphNode(HGA)
+end)
+
+asset.onDeinitialize(function()
+  -- openspace.removeSceneGraphNode(HGA)
+end)
+
+
+
+asset.meta = {
+  Name = "HGA",
+  Version = "1.0",
+  Description = "Shows the field-view for the High Gain Antenna of the MPO spacecraft.",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

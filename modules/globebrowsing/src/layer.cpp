@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -222,8 +222,6 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         _guiDescription = description();
         addProperty(_guiDescription);
     }
-
-    TileTextureInitData initData = tileTextureInitData(_layerGroupId);
 
     _opacity = p.opacity.value_or(_opacity);
     addProperty(Fadeable::_opacity);
@@ -457,8 +455,7 @@ void Layer::update() {
 }
 
 glm::vec2 Layer::tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-                                               const glm::vec2& tileUV,
-                                               const glm::uvec2& resolution)
+                                               const glm::vec2& tileUV)
 {
     glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
     return uv;

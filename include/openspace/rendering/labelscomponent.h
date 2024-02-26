@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,6 +47,20 @@ namespace documentation { struct Documentation; }
 class LabelsComponent : public properties::PropertyOwner, public Fadeable {
 public:
     explicit LabelsComponent(const ghoul::Dictionary& dictionary);
+
+    /**
+     * Create a labels component from an already loaded dataset. That dataset should have
+     * a comment per point to be used for the labels.
+     *
+     * \param dictionary A dictionary with the other information used for constructing
+     *        the dataset
+     * \param dataset The dataset to create the labelset from, including xyz position and
+     *        a string to be used for the text.
+     * \param unit The unit to use when interpreting the point information in the dataset
+     */
+    explicit LabelsComponent(const ghoul::Dictionary& dictionary,
+        const dataloader::Dataset& dataset, DistanceUnit unit);
+
     ~LabelsComponent() override = default;
 
     dataloader::Labelset& labelSet();
@@ -76,7 +90,8 @@ private:
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
-    // Properties
+    bool _createdFromDataset = false;
+
     properties::BoolProperty _enabled;
     properties::Vec3Property _color;
     properties::FloatProperty _size;

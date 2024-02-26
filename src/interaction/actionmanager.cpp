@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -99,16 +99,20 @@ void ActionManager::triggerAction(const std::string& identifier,
         a.command :
         fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
 
-    using ShouldBeSynchronized = scripting::ScriptEngine::ShouldBeSynchronized;
-    using ShouldSendToRemote = scripting::ScriptEngine::ShouldSendToRemote;
-    ShouldBeSynchronized sync = ShouldBeSynchronized::Yes;
-    ShouldSendToRemote send = ShouldSendToRemote::Yes;
     if (!shouldBeSynchronized || a.isLocal) {
-        sync = ShouldBeSynchronized::No;
-        send = ShouldSendToRemote::No;
+        global::scriptEngine->queueScript(
+            script,
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
+        );
     }
-
-    global::scriptEngine->queueScript(script, sync, send);
+    else {
+        global::scriptEngine->queueScript(
+            script,
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
+        );
+    }
 }
 
 scripting::LuaLibrary ActionManager::luaLibrary() {

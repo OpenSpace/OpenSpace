@@ -45,8 +45,8 @@ local Object = {
     TransformationMatrix = TransformMatrix,
     SizeSettings = {
       ScaleExponent = 22.6,
-      MaxPixelSize = 7.0,
-      EnablePixelSizeControl = true
+      MaxSize = 0.27,
+      EnableMaxSizeControl = true
     }
   },
   GUI = {

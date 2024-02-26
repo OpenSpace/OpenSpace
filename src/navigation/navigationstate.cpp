@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,11 +89,42 @@ NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
     referenceFrame = p.referenceFrame.value_or(anchor);
     aim = p.aim.value_or(aim);
 
-    if (p.up.has_value()) {
-        up = *p.up;
+    up = p.up;
+    yaw = p.yaw.value_or(yaw);
+    pitch = p.pitch.value_or(pitch);
+}
 
-        yaw = p.yaw.value_or(yaw);
-        pitch = p.pitch.value_or(pitch);
+NavigationState::NavigationState(const nlohmann::json& json) {
+    position.x = json["position"]["x"].get<double>();
+    position.y = json["position"]["y"].get<double>();
+    position.z = json["position"]["z"].get<double>();
+
+    anchor = json["anchor"];
+
+    if (auto it = json.find("referenceframe");  it != json.end()) {
+        referenceFrame = it->get<std::string>();
+    }
+    else {
+        referenceFrame = anchor;
+    }
+
+    if (auto it = json.find("aim");  it != json.end()) {
+        aim = it->get<std::string>();
+    }
+
+    if (auto it = json.find("up");  it != json.end()) {
+        up = glm::dvec3();
+        up->x = it->at("x").get<double>();
+        up->y = it->at("y").get<double>();
+        up->z = it->at("z").get<double>();
+    }
+
+    if (auto it = json.find("yaw");  it != json.end()) {
+        yaw = it->get<double>();
+    }
+
+    if (auto it = json.find("pitch");  it != json.end()) {
+        pitch = it->get<double>();
     }
 }
 
@@ -174,16 +205,56 @@ ghoul::Dictionary NavigationState::dictionary() const {
     }
     if (up.has_value()) {
         cameraDict.setValue("Up", *up);
+    }
+    if (std::abs(yaw) > Epsilon) {
+        cameraDict.setValue("Yaw", yaw);
+    }
+    if (std::abs(pitch) > Epsilon) {
+        cameraDict.setValue("Pitch", pitch);
+    }
+    return cameraDict;
+}
 
-        if (std::abs(yaw) > Epsilon) {
-            cameraDict.setValue("Yaw", yaw);
-        }
-        if (std::abs(pitch) > Epsilon) {
-            cameraDict.setValue("Pitch", pitch);
-        }
+nlohmann::json NavigationState::toJson() const {
+    nlohmann::json result = nlohmann::json::object();
+
+    // Obligatory version number
+    result["version"] = 1;
+
+    {
+        nlohmann::json posObj = nlohmann::json::object();
+        posObj["x"] = position.x;
+        posObj["y"] = position.y;
+        posObj["z"] = position.z;
+        result["position"] = posObj;
     }
 
-    return cameraDict;
+    result["anchor"] = anchor;
+
+    if (anchor != referenceFrame) {
+        result["referenceframe"] = referenceFrame;
+    }
+
+    if (!aim.empty()) {
+        result["aim"] = aim;
+    }
+
+    if (up.has_value()) {
+        nlohmann::json upObj = nlohmann::json::object();
+        upObj["x"] = up->x;
+        upObj["y"] = up->y;
+        upObj["z"] = up->z;
+        result["up"] = upObj;
+    }
+
+    if (std::abs(yaw) > Epsilon) {
+        result["yaw"] = yaw;
+    }
+    if (std::abs(pitch) > Epsilon) {
+        result["pitch"] = pitch;
+    }
+
+    return result;
 }
 
 documentation::Documentation NavigationState::Documentation() {

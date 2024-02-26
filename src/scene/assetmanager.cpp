@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -556,7 +556,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_setfield(*_luaState, assetTableIndex, "resource");
 
     // @DEPRECATED(abock) This should be removed after 0.20.0
-    ghoul::lua::push(*_luaState, this, asset);
+    ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
@@ -565,8 +565,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 "'asset.resource' instead. No change to the parameters are needed"
             );
 
-            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
-            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
+            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 1);
             ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::resource");
 
             auto [name] = ghoul::lua::values<std::optional<std::string>>(L);
@@ -578,7 +577,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
             return 1;
         },
-        2
+        1
     );
     lua_setfield(*_luaState, assetTableIndex, "localResource");
 
@@ -915,7 +914,10 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     }
 
     if (!std::filesystem::is_regular_file(path)) {
-        throw ghoul::RuntimeError(fmt::format("Could not find asset file {}", path));
+        throw ghoul::RuntimeError(fmt::format(
+            "Could not find asset file {} requested by {}",
+            path, retriever
+        ));
     }
     auto asset = std::make_unique<Asset>(*this, path, explicitEnable);
     Asset* res = asset.get();

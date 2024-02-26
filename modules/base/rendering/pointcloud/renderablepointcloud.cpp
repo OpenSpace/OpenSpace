@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,9 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -56,11 +56,11 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
     constexpr std::array<const char*, 29> UniformNames = {
-        "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
-        "renderOption", "maxBillboardSize", "color", "opacity", "scaleExponent",
-        "scaleFactor", "up", "right", "fadeInValue", "screenSize", "hasSpriteTexture",
+        "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
+        "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
+        "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
         "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
-        "nanColor", "useNanColor", "hideOutsideRange", "enablePixelSizeControl",
+        "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
         "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
         "hasDvarScaling"
     };
@@ -81,7 +81,7 @@ namespace {
         "UseTexture",
         "Use Texture",
         "If true, use the provided sprite texture to render the point. If false, draw "
-        "the points using the default point shape",
+        "the points using the default point shape.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -104,7 +104,10 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the points"
+        "The labels for the points. If no label file is provided, the labels will be "
+        "created to match the points in the data file. For a CSV file, you should then "
+        "specify which column is the 'Name' column in the data mapping. For SPECK files "
+        "the labels are created from the comment at the end of each line"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
@@ -124,7 +127,7 @@ namespace {
         "Unit, or meters. With normal fading the points are fully visible once the "
         "camera is outside this range and fully invisible when inside the range. With "
         "inverted fading the situation is the opposite: the points are visible inside "
-        "hen closer than the min value of the range and invisible when further away",
+        "hen closer than the min value of the range and invisible when further away.",
         // @VISIBILITY(3.25)
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -133,7 +136,7 @@ namespace {
         "Enabled",
         "Enable Distance-based Fading",
         "Enables/disables the Fade-in effect based on camera distance. Automatically set "
-        "to true if FadeInDistances are specified in the asset",
+        "to true if FadeInDistances are specified in the asset.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -142,7 +145,7 @@ namespace {
         "Invert",
         "This property can be used the invert the fading so that the points are "
         "invisible when the camera is further away than the max fade distance "
-        "and fully visible when it is closer than the min distance",
+        "and fully visible when it is closer than the min distance.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -173,7 +176,7 @@ namespace {
         "value should be. If not included, it is computed based on the maximum "
         "positional component of the data points. This is useful for showing the "
         "dataset at all, but you will likely want to change it to something that looks "
-        "good",
+        "good.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -181,25 +184,29 @@ namespace {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor to adjust the size of the points, "
-        "after the exponential scaling and any pixel-size control effects. Simply just "
-        "increases or decreases the visual size of the points",
+        "after the exponential scaling and any max size control effects. Simply just "
+        "increases or decreases the visual size of the points.",
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
-        "EnablePixelSizeControl",
-        "Enable Pixel Size Control",
-        "If true, the Max Size in Pixels property will be used as an upper limit for the "
-        "size of the point. Reduces the size of the points when approaching them, so that "
-        "they stick to a maximum screen space size. Currently, the scaling is computed "
-        "based on rectangular displays and might look weird in other projections",
+    constexpr openspace::properties::Property::PropertyInfo UseMaxSizeControlInfo = {
+        "EnableMaxSizeControl",
+        "Enable Max Size Control",
+        "If true, the Max Size property will be used as an upper limit for the size of "
+        "the point. This reduces the size of the points when approaching them, so that "
+        "they stick to a maximum visual size depending on the Max Size value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxPixelSizeInfo = {
-        "MaxPixelSize",
-        "Max Size in Pixels",
-        "The maximum size (in pixels) for the billboard representing the point.",
+    constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
+        "MaxSize",
+        "Max Size",
+        "This value controls the maximum allowed size for the points, when the max size "
+        "control feature is enabled. This limits the visual size of the points based on "
+        "the distance to the camera. The larger the value, the larger the points are "
+        "allowed to become. In the background, the computations are made by limiting the "
+        "size to a certain angle based on the field of view of the camera. So a value of "
+        "1 limits the point size to take up a maximum of one degree of the view space.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -217,7 +224,7 @@ namespace {
         "Parameter Option",
         "This value determines which parameter is used for scaling of the point. The "
         "parameter value will be used as a miltiplicative factor to scale the size of "
-        "the points. Not that they may however still be scaled by pixel size adjustment "
+        "the points. Note that they may however still be scaled by max size adjustment "
         "effects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -239,8 +246,8 @@ namespace {
     //   interactively when OpenSpace is running until you find a value that you find
     //   suitable.
     //
-    // - There is also an option to limit the size of the points based on a given pixel
-    //   size. For now, this only works for flat projection displays.
+    // - There is also an option to limit the size of the points based on a given max
+    //   size value.
     //
     // - To easily change the visual size of the points, the multiplicative 'ScaleFactor'
     //   may be used. A value of 2 makes the points twice as large, visually, compared
@@ -312,14 +319,14 @@ namespace {
             // [[codegen::verbatim(ScaleFactorInfo.description)]]
             std::optional<float> scaleFactor;
 
-            // [[codegen::verbatim(PixelSizeControlInfo.description)]]
-            std::optional<bool> enablePixelSizeControl;
+            // [[codegen::verbatim(UseMaxSizeControlInfo.description)]]
+            std::optional<bool> enableMaxSizeControl;
 
-            // [[codegen::verbatim(MaxPixelSizeInfo.description)]]
-            std::optional<float> maxPixelSize;
+            // [[codegen::verbatim(MaxSizeInfo.description)]]
+            std::optional<float> maxSize;
         };
         // Settings related to the scale of the points, whether they should limit to
-        // a certain pixel size, etc.
+        // a certain max size, etc.
         std::optional<SizeSettings> sizeSettings;
 
         struct ColorSettings {
@@ -349,7 +356,7 @@ namespace {
         // origin of the dataset
         std::optional<Fading> fading;
 
-        // Transformation matrix to be applied to each object
+        // Transformation matrix to be applied to the position of each object
         std::optional<glm::dmat4x4> transformationMatrix;
     };
 
@@ -366,8 +373,8 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
     : properties::PropertyOwner({ "Sizing", "Sizing", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 25.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
-    , pixelSizeControl(PixelSizeControlInfo, false)
-    , maxPixelSize(MaxPixelSizeInfo, 400.f, 0.f, 1000.f)
+    , useMaxSizeControl(UseMaxSizeControlInfo, false)
+    , maxAngularSize(MaxSizeInfo, 1.f, 0.f, 45.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -376,8 +383,8 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
 
         scaleFactor = settings.scaleFactor.value_or(scaleFactor);
         scaleExponent = settings.scaleExponent.value_or(scaleExponent);
-        pixelSizeControl = settings.enablePixelSizeControl.value_or(pixelSizeControl);
-        maxPixelSize = settings.maxPixelSize.value_or(maxPixelSize);
+        useMaxSizeControl = settings.enableMaxSizeControl.value_or(useMaxSizeControl);
+        maxAngularSize = settings.maxSize.value_or(maxAngularSize);
 
         if (settings.sizeMapping.has_value()) {
             std::vector<std::string> opts = *settings.sizeMapping;
@@ -393,8 +400,8 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
 
     addProperty(scaleFactor);
     addProperty(scaleExponent);
-    addProperty(pixelSizeControl);
-    addProperty(maxPixelSize);
+    addProperty(useMaxSizeControl);
+    addProperty(maxAngularSize);
 }
 
 RenderablePointCloud::SizeSettings::SizeMapping::SizeMapping()
@@ -524,14 +531,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _hasSpriteTexture = p.texture.has_value();
 
-    if (p.labels.has_value()) {
-        _labels = std::make_unique<LabelsComponent>(*p.labels);
-        _hasLabels = true;
-        addPropertySubOwner(_labels.get());
-        // Fading of the labels should also depend on the fading of the renderable
-        _labels->setParentFadeable(this);
-    }
-
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
     if (p.sizeSettings.has_value() && p.sizeSettings->sizeMapping.has_value()) {
@@ -561,6 +560,13 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
                 parameterIndex
             );
         });
+
+        _colorSettings.colorMapping->colorMapFile.onChange([this]() {
+            _dataIsDirty = true;
+            _hasColorMapFile = std::filesystem::exists(
+                _colorSettings.colorMapping->colorMapFile.value()
+            );
+        });
     }
 
     if (_hasDataFile) {
@@ -586,6 +592,21 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (p.labels.has_value()) {
+        if (!p.labels->hasKey("File") && _hasDataFile) {
+            // Load the labelset from the dataset if no file was included
+            _labels = std::make_unique<LabelsComponent>(*p.labels, _dataset, _unit);
+        }
+        else {
+            _labels = std::make_unique<LabelsComponent>(*p.labels);
+        }
+
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
+    }
+
     _nDataPoints.setReadOnly(true);
     addProperty(_nDataPoints);
 }
@@ -609,30 +630,15 @@ void RenderablePointCloud::initialize() {
 
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
 void RenderablePointCloud::initializeGL() {
     ZoneScoped;
 
-    _program = BaseModule::ProgramObjectManager.request(
-        "RenderablePointCloud",
-        []() {
-            return global::renderEngine->buildRenderProgram(
-                "RenderablePointCloud",
-                absPath("${MODULE_BASE}/shaders/billboardpoint_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/billboardpoint_fs.glsl"),
-                absPath("${MODULE_BASE}/shaders/billboardpoint_gs.glsl")
-            );
-        }
-    );
+    initializeShadersAndGlExtras();
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
-
-    if (_hasColorMapFile) {
-        _colorSettings.colorMapping->initializeTexture();
-    }
 }
 
 void RenderablePointCloud::deinitializeGL() {
@@ -641,6 +647,27 @@ void RenderablePointCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
+    deinitializeShaders();
+
+    BaseModule::TextureManager.release(_spriteTexture);
+    _spriteTexture = nullptr;
+}
+
+void RenderablePointCloud::initializeShadersAndGlExtras() {
+    _program = BaseModule::ProgramObjectManager.request(
+        "RenderablePointCloud",
+        []() {
+            return global::renderEngine->buildRenderProgram(
+                "RenderablePointCloud",
+                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_fs.glsl"),
+                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_gs.glsl")
+            );
+        }
+    );
+}
+
+void RenderablePointCloud::deinitializeShaders() {
     BaseModule::ProgramObjectManager.release(
         "RenderablePointCloud",
         [](ghoul::opengl::ProgramObject* p) {
@@ -648,9 +675,6 @@ void RenderablePointCloud::deinitializeGL() {
         }
     );
     _program = nullptr;
-
-    BaseModule::TextureManager.release(_spriteTexture);
-    _spriteTexture = nullptr;
 }
 
 void RenderablePointCloud::bindTextureForRendering() const {
@@ -687,61 +711,18 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
     return fadeValue * funcValue;
 }
 
-void RenderablePointCloud::renderBillboards(const RenderData& data,
-                                            const glm::dmat4& modelMatrix,
-                                            const glm::dvec3& orthoRight,
-                                            const glm::dvec3& orthoUp,
-                                            float fadeInVariable)
-{
-    if (!_hasDataFile || _dataset.entries.empty()) {
-        return;
-    }
-
-    glEnablei(GL_BLEND, 0);
-
-    if (_useAdditiveBlending) {
-        glDepthMask(false);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    }
-    else {
-        // Normal blending, with transparency
-        glDepthMask(true);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    _program->activate();
-
-    _program->setUniform(
-        "screenSize",
-        glm::vec2(global::renderEngine->renderingResolution())
-    );
-
-    _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
-    _program->setUniform(
-        _uniformCache.cameraLookup,
-        glm::vec3(data.camera.lookUpVectorWorldSpace())
-    );
+void RenderablePointCloud::bindDataForPointRendering() {
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
-    _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
-    _program->setUniform(
-        _uniformCache.cameraViewProjectionMatrix,
-        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
-    );
-
-    _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
-    _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
-    _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
     _program->setUniform(_uniformCache.opacity, opacity());
 
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);
     _program->setUniform(_uniformCache.scaleFactor, _sizeSettings.scaleFactor);
-    _program->setUniform(_uniformCache.enablePixelSizeControl, _sizeSettings.pixelSizeControl);
-    _program->setUniform(_uniformCache.maxBillboardSize, _sizeSettings.maxPixelSize);
+    _program->setUniform(
+        _uniformCache.enableMaxSizeControl,
+        _sizeSettings.useMaxSizeControl
+    );
+    _program->setUniform(_uniformCache.maxAngularSize, _sizeSettings.maxAngularSize);
     _program->setUniform(_uniformCache.hasDvarScaling, _sizeSettings.sizeMapping.enabled);
-
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
     bool useTexture = _hasSpriteTexture && _useSpriteTexture;
     _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
@@ -802,9 +783,58 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
             _colorSettings.colorMapping->useBelowRangeColor
         );
     }
+}
+
+void RenderablePointCloud::renderBillboards(const RenderData& data,
+                                            const glm::dmat4& modelMatrix,
+                                            const glm::dvec3& orthoRight,
+                                            const glm::dvec3& orthoUp,
+                                            float fadeInVariable)
+{
+    if (!_hasDataFile || _dataset.entries.empty()) {
+        return;
+    }
+
+    glEnablei(GL_BLEND, 0);
+
+    if (_useAdditiveBlending) {
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+    else {
+        // Normal blending, with transparency
+        glDepthMask(true);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    _program->activate();
+
+    _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
+    _program->setUniform(
+        _uniformCache.cameraLookup,
+        glm::vec3(data.camera.lookUpVectorWorldSpace())
+    );
+    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
+    _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
+
+    _program->setUniform(
+        _uniformCache.cameraViewMatrix,
+        data.camera.combinedViewMatrix()
+    );
+
+    _program->setUniform(
+        _uniformCache.projectionMatrix,
+        glm::dmat4(data.camera.projectionMatrix())
+    );
+
+    _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
+    _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
+    _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
+
+    bindDataForPointRendering();
 
     glBindVertexArray(_vao);
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nDataPoints));
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -820,8 +850,6 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     glm::dmat4 modelMatrix = calcModelTransform(data);
-    glm::dmat4 modelViewProjectionMatrix =
-        calcModelViewProjectionTransform(data, modelMatrix);
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -843,12 +871,23 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     if (_hasLabels) {
+        glm::dmat4 modelViewProjectionMatrix =
+            calcModelViewProjectionTransform(data, modelMatrix);
+
         _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
     }
 }
 
+void RenderablePointCloud::preUpdate() {}
+
 void RenderablePointCloud::update(const UpdateData&) {
     ZoneScoped;
+
+    preUpdate();
+
+    if (_hasColorMapFile) {
+        _colorSettings.colorMapping->update(_dataset);
+    }
 
     if (_dataIsDirty) {
         updateBufferData();
@@ -859,8 +898,16 @@ void RenderablePointCloud::update(const UpdateData&) {
     }
 }
 
+glm::dvec3 RenderablePointCloud::transformedPosition(
+                                                const dataloader::Dataset::Entry& e) const
+{
+    const double unitMeter = toMeter(_unit);
+    glm::dvec4 position = glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0);
+    return glm::dvec3(_transformationMatrix * position);
+}
+
 int RenderablePointCloud::nAttributesPerPoint() const {
-    int n = 4; // position
+    int n = 3; // position
     n += _hasColorMapFile ? 1 : 0;
     n += _hasDatavarSize ? 1 : 0;
     return n;
@@ -899,13 +946,13 @@ void RenderablePointCloud::updateBufferData() {
     glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(
         positionAttrib,
-        4,
+        3,
         GL_FLOAT,
         GL_FALSE,
         attibutesPerPoint * sizeof(float),
         nullptr
     );
-    attributeOffset += 4;
+    attributeOffset += 3;
 
     if (_hasColorMapFile) {
         GLint colorParamAttrib = _program->attributeLocation("in_colorParameter");
@@ -1012,29 +1059,25 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     int sizeParamIndex = currentSizeParameterIndex();
 
     double maxRadius = 0.0;
-    double biggestCoord = -1.0;
 
     for (const dataloader::Dataset::Entry& e : _dataset.entries) {
-        const double unitMeter = toMeter(_unit);
-        glm::dvec4 position = glm::dvec4(glm::dvec3(e.position) * unitMeter, 1.0);
-        position = _transformationMatrix * position;
+        glm::dvec3 position = transformedPosition(e);
 
         const double r = glm::length(position);
         maxRadius = std::max(maxRadius, r);
 
         // Positions
-        for (int j = 0; j < 4; ++j) {
+        for (int j = 0; j < 3; ++j) {
             result.push_back(static_cast<float>(position[j]));
         }
 
         // Colors
-        if (_hasColorMapFile) {
-            biggestCoord = std::max(biggestCoord, glm::compMax(position));
+        if (_hasColorMapFile && colorParamIndex > -1) {
             result.push_back(e.data[colorParamIndex]);
         }
 
         // Size data
-        if (_hasDatavarSize) {
+        if (_hasDatavarSize && sizeParamIndex > -1) {
             // @TODO: Consider more detailed control over the scaling. Currently the value
             // is multiplied with the value as is. Should have similar mapping properties
             // as the color mapping

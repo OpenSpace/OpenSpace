@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,19 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_SERVER___EVENT_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___EVENT_TOPIC___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <modules/server/include/topics/topic.h>
 
-in vec4 in_position;
-in float in_colorParameter;
-in float in_scalingParameter;
+#include <openspace/events/event.h>
 
-flat out float colorParameter;
-flat out float scalingParameter;
+namespace openspace::properties { class Property; }
 
-void main() {
-  colorParameter = in_colorParameter;
-  scalingParameter = in_scalingParameter;
-  gl_Position = in_position;
-}
+namespace openspace {
+
+class EventTopic : public Topic {
+public:
+    EventTopic() = default;
+    ~EventTopic() override = default;
+
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+
+private:
+    // Returns true if there is at least one subscription active, false otherwise
+    bool isSubscribed() const;
+
+    std::unordered_map<events::Event::Type, bool> _subscribedEvents;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___EVENT_TOPIC___H__

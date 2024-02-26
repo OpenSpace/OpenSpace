@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,7 @@
 namespace {
     constexpr std::string_view MetaDataKeyGroup = "Group";
     constexpr std::string_view MetaDataKeyReadOnly = "isReadOnly";
+    constexpr std::string_view MetaDataKeyNeedsConfirmation = "needsConfirmation";
     constexpr std::string_view MetaDataKeyViewOptions = "ViewOptions";
     constexpr std::string_view MetaDataKeyVisibility = "Visibility";
 
@@ -148,6 +149,10 @@ Property::Visibility Property::visibility() const {
 
 void Property::setReadOnly(bool state) {
     _metaData.setValue(std::string(MetaDataKeyReadOnly), state);
+}
+
+void Property::setNeedsConfirmation(bool state) {
+    _metaData.setValue(std::string(MetaDataKeyNeedsConfirmation), state);
 }
 
 void Property::setViewOption(std::string option, bool value) {
@@ -295,6 +300,12 @@ std::string Property::generateMetaDataJsonDescription() const {
     }
     std::string isReadOnlyString = (isReadOnly ? "true" : "false");
 
+    bool needsConfirmation = false;
+    if (_metaData.hasValue<bool>(MetaDataKeyNeedsConfirmation)) {
+        needsConfirmation = _metaData.value<bool>(MetaDataKeyNeedsConfirmation);
+    }
+    std::string needsConfirmationString = (needsConfirmation ? "true" : "false");
+
     std::string groupId = groupIdentifier();
     std::string sanitizedGroupId = escapedJson(groupId);
 
@@ -306,10 +317,11 @@ std::string Property::generateMetaDataJsonDescription() const {
     }
 
     std::string result = fmt::format(
-        R"({{"{}":"{}","{}":"{}","{}":{},"{}":{}}})",
+        R"({{"{}":"{}","{}":"{}","{}":{},"{}":{},"{}":{}}})",
         MetaDataKeyGroup, sanitizedGroupId,
         MetaDataKeyVisibility, vis,
         MetaDataKeyReadOnly, isReadOnlyString,
+        MetaDataKeyNeedsConfirmation, needsConfirmationString,
         MetaDataKeyViewOptions, viewOptions
     );
     return result;

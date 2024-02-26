@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace {
         X, Y, Z
     };
 
-    bool checkColumnInternal(PositionColumn columnCase, const std::string& c,
+    bool checkPosColumnInternal(PositionColumn columnCase, const std::string& c,
                          const std::optional<openspace::dataloader::DataMapping>& mapping,
                              const std::string_view defaultValue)
     {
@@ -88,6 +88,10 @@ namespace {
         // Specifies the column name for the z coordinate
         std::optional<std::string> z;
 
+        // Specifies the column name for the optional name column. Not valid for SPECK
+        // files, where the name is given by the comment at the end of each line
+        std::optional<std::string> name;
+
         // Specifies whether to do case sensitive checks when reading column names.
         // Default is not to, so that 'X' and 'x' are both valid column names for the
         // x position column, for example
@@ -119,6 +123,7 @@ DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionar
     result.xColumnName = p.x;
     result.yColumnName = p.y;
     result.zColumnName = p.z;
+    result.nameColumn = p.name;
 
     result.missingDataValue = p.missingDataValue;
 
@@ -145,10 +150,11 @@ std::string generateHashString(const DataMapping& dm) {
     unsigned int excludeColumnsHash = ghoul::hashCRC32(a);
 
     return fmt::format(
-        "DM|x{}|y{}|z{}|m{}|{}|{}",
+        "DM|x{}|y{}|z{}|name{}|m{}|{}|{}",
         dm.xColumnName.value_or(""),
         dm.yColumnName.value_or(""),
         dm.zColumnName.value_or(""),
+        dm.nameColumn.value_or(""),
         dm.missingDataValue.has_value() ? ghoul::to_string(*dm.missingDataValue) : "",
         dm.isCaseSensitive ? "1" : "0",
         excludeColumnsHash
@@ -160,15 +166,29 @@ bool isPositionColumn(const std::string& c, const std::optional<DataMapping>& ma
 }
 
 bool isColumnX(const std::string& c, const std::optional<DataMapping>& mapping) {
-    return checkColumnInternal(PositionColumn::X, c, mapping, DefaultX);
+    return checkPosColumnInternal(PositionColumn::X, c, mapping, DefaultX);
 }
 
 bool isColumnY(const std::string& c, const std::optional<DataMapping>& mapping) {
-    return checkColumnInternal(PositionColumn::Y, c, mapping, DefaultY);
+    return checkPosColumnInternal(PositionColumn::Y, c, mapping, DefaultY);
 }
 
 bool isColumnZ(const std::string& c, const std::optional<DataMapping>& mapping) {
-    return checkColumnInternal(PositionColumn::Z, c, mapping, DefaultZ);
+    return checkPosColumnInternal(PositionColumn::Z, c, mapping, DefaultZ);
+}
+
+bool isNameColumn(const std::string& c, const std::optional<DataMapping>& mapping) {
+    if (!mapping.has_value() || !mapping->nameColumn.has_value()) {
+        return false;
+    }
+
+    std::string testColumn = c;
+    std::string mappedColumn = *mapping->nameColumn;
+    if (!mapping->isCaseSensitive) {
+        testColumn = ghoul::toLowerCase(testColumn);
+        mappedColumn = ghoul::toLowerCase(mappedColumn);
+    }
+    return testColumn == mappedColumn;
 }
 
 } // namespace openspace::dataloader

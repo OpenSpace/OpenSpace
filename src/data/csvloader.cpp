@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,7 +57,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             return result;
         }
         return std::numeric_limits<float>::quiet_NaN();
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         // clang is missing float support for std::from_chars
         try {
             result = std::stof(str.c_str(), nullptr);
@@ -65,9 +65,9 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
                 return result;
             }
         }
-        catch (std::invalid_argument const& e) {}
+        catch (const std::invalid_argument&) {}
         return NAN;
-#endif
+#endif // WIN32
     };
 
     LDEBUG("Parsing CSV file");
@@ -93,6 +93,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     int xColumn = -1;
     int yColumn = -1;
     int zColumn = -1;
+    int nameColumn = -1;
 
     int nDataColumns = 0;
     bool hasExcludeColumns = specs.has_value() && (*specs).hasExcludeColumns();
@@ -114,6 +115,9 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             if (isColumnZ(col, specs)) {
                 zColumn = static_cast<int>(i);
             }
+        }
+        else if (isNameColumn(col, specs)) {
+            nameColumn = static_cast<int>(i);
         }
         else if (hasExcludeColumns && (*specs).isExcludeColumn(col)) {
             skipColumns.push_back(i);
@@ -138,7 +142,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     LINFO(fmt::format(
         "Loading {} rows with {} columns", rows.size(), columns.size()
     ));
-    ProgressBar progress(rows.size());
+    ProgressBar progress = ProgressBar(static_cast<int>(rows.size()));
 
     // Skip first row (column names)
     for (size_t rowIdx = 1; rowIdx < rows.size(); ++rowIdx) {
@@ -170,11 +174,14 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             else if (i == zColumn) {
                 entry.position.z = value;
             }
+            else if (i == nameColumn) {
+                // Note that were we use the original stirng value, rather than the
+                // converted one
+                entry.comment = strValue;
+            }
             else {
                 entry.data.push_back(value);
             }
-
-            // @TODO: comment mapping
         }
 
         glm::vec3 positive = glm::abs(entry.position);
@@ -185,7 +192,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 
         res.entries.push_back(entry);
 
-        progress.print(rowIdx + 1);
+        progress.print(static_cast<int>(rowIdx + 1));
     }
 
     return res;

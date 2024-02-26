@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -524,7 +524,10 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 modelTransform = calcModelTransform(data);
 
-    _programObject->setUniform(_mainUniformCache.modelTransform, glm::mat4(modelTransform));
+    _programObject->setUniform(
+        _mainUniformCache.modelTransform,
+        glm::mat4(modelTransform)
+    );
     _programObject->setUniform(
         _mainUniformCache.modelViewProjectionTransform,
         glm::mat4(calcModelViewProjectionTransform(data, modelTransform))

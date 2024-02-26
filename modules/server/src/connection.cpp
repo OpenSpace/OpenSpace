@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <modules/server/include/topics/cameratopic.h>
 #include <modules/server/include/topics/documentationtopic.h>
 #include <modules/server/include/topics/enginemodetopic.h>
+#include <modules/server/include/topics/eventtopic.h>
 #include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
@@ -101,6 +102,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<SkyBrowserTopic>("skybrowser");
     _topicFactory.registerClass<CameraTopic>("camera");
     _topicFactory.registerClass<CameraPathTopic>("cameraPath");
+    _topicFactory.registerClass<EventTopic>("event");
 }
 
 void Connection::handleMessage(const std::string& message) {

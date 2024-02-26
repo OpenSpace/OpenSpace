@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -748,7 +748,9 @@ listOfExoplanetsDeprecated()
         LINFO(fmt::format("Reading data for planet: '{}' ", planetData.name));
 
         if (!hasSufficientData(planetData.dataEntry)) {
-            LWARNING(fmt::format("Insufficient data for exoplanet: '{}'", planetData.name));
+            LWARNING(fmt::format(
+                "Insufficient data for exoplanet: '{}'", planetData.name
+            ));
             continue;
         }
 
@@ -774,7 +776,9 @@ listOfExoplanetsDeprecated()
     }
 
     // Add all the added exoplanet systems
-    for (const std::pair<const std::string, ExoplanetSystem>& entry : hostNameToSystemDataMap) {
+    using K = const std::string;
+    using V = ExoplanetSystem;
+    for (const std::pair<K, V>& entry : hostNameToSystemDataMap) {
         const std::string& hostName = entry.first;
         const ExoplanetSystem& data = entry.second;
         createExoplanetSystem(hostName, data);

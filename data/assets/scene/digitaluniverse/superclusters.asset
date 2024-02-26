@@ -33,8 +33,8 @@ local Object = {
     Unit = "Mpc",
     SizeSettings = {
       ScaleExponent = 23.1,
-      MaxPixelSize = 7.2,
-      EnablePixelSizeControl = true
+      MaxSize = 0.2,
+      EnableMaxSizeControl = true
     }
   },
   GUI = {

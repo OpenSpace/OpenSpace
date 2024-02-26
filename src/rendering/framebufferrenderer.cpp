@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -511,17 +511,15 @@ void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
 }
 
 void FramebufferRenderer::updateDownscaleTextures() {
+    float cdf = _downscaleVolumeRendering.currentDownscaleFactor;
+
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.colorTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
         GL_RGBA32F,
-        static_cast<GLsizei>(
-            glm::max(_resolution.x * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
-        ),
-        static_cast<GLsizei>(
-            glm::max(_resolution.y * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
-        ),
+        static_cast<GLsizei>(glm::max(_resolution.x * cdf, 1.f)),
+        static_cast<GLsizei>(glm::max(_resolution.y * cdf, 1.f)),
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -537,12 +535,8 @@ void FramebufferRenderer::updateDownscaleTextures() {
         GL_TEXTURE_2D,
         0,
         GL_DEPTH_COMPONENT32F,
-        static_cast<GLsizei>(
-            glm::max(_resolution.x * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
-        ),
-        static_cast<GLsizei>(
-            glm::max(_resolution.y * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
-        ),
+        static_cast<GLsizei>(glm::max(_resolution.x * cdf, 1.f)),
+        static_cast<GLsizei>(glm::max(_resolution.y * cdf, 1.f)),
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,
@@ -839,18 +833,16 @@ void FramebufferRenderer::updateResolution() {
         glObjectLabel(GL_TEXTURE, _fxaaBuffers.fxaaTexture, -1, "FXAA");
     }
 
+    float cdf = _downscaleVolumeRendering.currentDownscaleFactor;
+
     // Downscale Volume Rendering
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.colorTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
         GL_RGBA32F,
-        static_cast<GLsizei>(
-            glm::max(_resolution.x * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
-        ),
-        static_cast<GLsizei>(
-            glm::max(_resolution.y * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
-        ),
+        static_cast<GLsizei>(glm::max(_resolution.x * cdf, 1.f)),
+        static_cast<GLsizei>(glm::max(_resolution.y * cdf, 1.f)),
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -877,12 +869,8 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D,
         0,
         GL_DEPTH_COMPONENT32F,
-        static_cast<GLsizei>(
-            glm::max(_resolution.x * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
-        ),
-        static_cast<GLsizei>(
-            glm::max(_resolution.y * _downscaleVolumeRendering.currentDownscaleFactor, 1.f)
-        ),
+        static_cast<GLsizei>(glm::max(_resolution.x * cdf, 1.f)),
+        static_cast<GLsizei>(glm::max(_resolution.y * cdf, 1.f)),
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,

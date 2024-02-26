@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,15 +55,6 @@ namespace {
         msg.setValue("event", "load_image_collection"s);
         msg.setValue("url", url);
         msg.setValue("loadChildFolders", true);
-        return msg;
-    }
-
-    ghoul::Dictionary setForegroundMessage(const std::string& name) {
-        using namespace std::string_literals;
-
-        ghoul::Dictionary msg;
-        msg.setValue("event", "set_foreground_by_name"s);
-        msg.setValue("name", name);
         return msg;
     }
 

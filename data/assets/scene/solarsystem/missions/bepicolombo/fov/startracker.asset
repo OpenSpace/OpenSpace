@@ -1,0 +1,107 @@
+local transforms = asset.require("../model")
+local kernels = asset.require("../kernels")
+
+
+
+local StarTracker1 = {
+  Identifier = "BepiColomboMPO_StarTracker1",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.StarTracker1,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_STR-1",
+      Method = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Star Tracker 1",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local StarTracker2 = {
+  Identifier = "BepiColomboMPO_StarTracker2",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.StarTracker2,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_STR-2",
+      Method = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Star Tracker 2",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local StarTracker3 = {
+  Identifier = "BepiColomboMPO_StarTracker3",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.StarTracker3,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_STR-3",
+      Method = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Star Tracker 3",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+
+asset.onInitialize(function()
+  -- Circle shapes are currently not supported
+  -- openspace.addSceneGraphNode(StarTracker1)
+  -- openspace.addSceneGraphNode(StarTracker2)
+  -- openspace.addSceneGraphNode(StarTracker3)
+end)
+
+asset.onDeinitialize(function()
+  -- openspace.removeSceneGraphNode(StarTracker1)
+  -- openspace.removeSceneGraphNode(StarTracker2)
+  -- openspace.removeSceneGraphNode(StarTracker3)
+end)
+
+
+
+asset.meta = {
+  Name = "Star Tracker",
+  Version = "1.0",
+  Description = [[
+    From a functional point of view, the Autonomous Star Trackers can be seen as a video
+    camera plus an image processing unit that, starting from an image of the sky, extracts
+    the attitude information for the AOCS, measured with respect to the J2000 inertial
+    reference system.
+
+    The STR can track up to 15 stars simultaneously and consists of a Single box that
+    contains the optical head, the main electronics and a baffle which is thermally
+    decoupled from the box.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

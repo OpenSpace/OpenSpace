@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -380,6 +380,17 @@ public:
      * \param state `true` if the Property should be read only, `false` otherwise
      */
     void setReadOnly(bool state);
+
+    /**
+     * This method determines if this Property requires confirmation upon every change of
+     * the value. This setting is only a hint and does not need to be followed by GUI
+     * applications and does not have any effect on the Property::set or
+     * Property::setLuaValue methods. The value is stored in the metaData Dictionary with
+     * the key: `needsConfirmation`. The default value is `false`.
+     *
+     * \param state `true` if the Property needs confirmation, `false` otherwise
+     */
+    void setNeedsConfirmation(bool state);
 
     /**
      * Default view options that can be used in the Property::setViewOption method. The

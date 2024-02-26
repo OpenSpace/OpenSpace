@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 flat in float gs_colorParameter;
 flat in float vs_screenSpaceDepth;
+flat in vec4 vs_positionViewSpace;
 in vec2 texCoord;
 
 uniform float opacity;
@@ -107,8 +108,7 @@ Fragment getFragment() {
   Fragment frag;
   frag.color = fullColor;
   frag.depth = vs_screenSpaceDepth;
-  // Setting the position of the billboards to not interact with the ATM
-  frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
+  frag.gPosition = vs_positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
   return frag;
