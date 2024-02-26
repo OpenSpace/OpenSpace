@@ -26,9 +26,6 @@
 
 out vec4 finalColor;
 
-uniform vec3 polygonColor;
-
-
 void main() {
-  finalColor = vec4(polygonColor, 1.0);
+  finalColor = vec4(1.0);
 }
