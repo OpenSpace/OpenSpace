@@ -31,6 +31,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/rendering/renderengine.h>
@@ -515,7 +516,7 @@ void DocumentationEngine::writeDocumentation() const {
     nlohmann::json license = generateLicensesGroupedByLicense();
     nlohmann::json sceneProperties = settings.get();
     nlohmann::json sceneGraph = sceneJson.get();
-    nlohmann::json actions = global::actionManager->generateJson();
+    nlohmann::json actions = generateActionJson();
     nlohmann::json events = global::eventEngine->generateJson();
 
     sceneProperties["name"] = "Settings";
@@ -539,6 +540,28 @@ void DocumentationEngine::writeDocumentation() const {
     out << "var data = " << result.dump();
     out.close();
 }
+
+nlohmann::json DocumentationEngine::generateActionJson() const {
+    using namespace interaction;
+
+    nlohmann::json res;
+    res["name"] = "Actions";
+    res["data"] = nlohmann::json::array();
+    std::vector<Action> actions = global::actionManager->actions();
+
+    for (const Action& action : actions) {
+        nlohmann::json d;
+        // Use identifier as name to make it more similar to scripting api
+        d["name"] = action.identifier;
+        d["guiName"] = action.name;
+        d["documentation"] = action.documentation;
+        d["command"] = action.command;
+        res["data"].push_back(d);
+    }
+    sortJson(res["data"], "name");
+    return res;
+}
+
 
 void DocumentationEngine::addDocumentation(Documentation documentation) {
     if (documentation.id.empty()) {

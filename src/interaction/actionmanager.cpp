@@ -25,7 +25,6 @@
 #include <openspace/interaction/actionmanager.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/json.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
@@ -129,24 +128,4 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
         }
     };
 }
-
-nlohmann::json ActionManager::generateJson() const {
-    nlohmann::json res; 
-    res["name"] = "Actions";
-    res["data"] = nlohmann::json::array();
-
-    for (const std::pair<const unsigned int, Action>& a : _actions) {
-        const Action& action = a.second;
-        nlohmann::json d;
-        // Use identifier as name to make it more similar to scripting api
-        d["name"] = action.identifier;
-        d["guiName"] = action.name;
-        d["documentation"] = action.documentation;
-        d["command"] = action.command;
-        res["data"].push_back(d);
-    }
-    sortJson(res["data"], "name");
-    return res;
-}
-
 } // namespace openspace::interaction

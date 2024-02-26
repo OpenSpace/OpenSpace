@@ -94,6 +94,7 @@ public:
     nlohmann::json generatePropertyOwnerJson(properties::PropertyOwner* owner) const;
     nlohmann::json generateLicensesGroupedByLicense() const;
     nlohmann::json generateLicenseList() const;
+    nlohmann::json generateActionJson() const;
 
 private:
     /// The list of all Documentation%s that are stored by the DocumentationEngine

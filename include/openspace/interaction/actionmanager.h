@@ -46,7 +46,6 @@ public:
     void triggerAction(const std::string& identifier, const ghoul::Dictionary& arguments,
         ShouldBeSynchronized shouldBeSynchronized) const;
     static scripting::LuaLibrary luaLibrary();
-    nlohmann::json generateJson() const;
 
 private:
     std::unordered_map<unsigned int, Action> _actions;
