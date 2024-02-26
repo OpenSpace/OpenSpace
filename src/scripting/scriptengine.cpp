@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/util/json_helper.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>

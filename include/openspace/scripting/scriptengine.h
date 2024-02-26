@@ -27,7 +27,6 @@
 
 #include <openspace/util/syncable.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/json.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
 #include <filesystem>

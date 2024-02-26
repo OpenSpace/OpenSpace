@@ -27,10 +27,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/json.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>

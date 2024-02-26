@@ -26,7 +26,6 @@
 
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/json.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/lightsource.h>

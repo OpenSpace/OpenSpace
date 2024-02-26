@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___FACTORYMANAGER___H__
 #define __OPENSPACE_CORE___FACTORYMANAGER___H__
 
-#include <openspace/json.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/templatefactory.h>
 #include <memory>
