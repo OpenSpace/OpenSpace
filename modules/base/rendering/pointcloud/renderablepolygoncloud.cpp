@@ -94,8 +94,11 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     constexpr gl::GLsizei TexSize = 512;
 
     bool useAlpha = _allowAlpha;
-    gl::GLenum internalFormat = internalGlFormat(useAlpha);
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
+
+    // We can't use the helper function for internal format here,
+    // as we don't want the compression to be used for the polygon texture
+    gl::GLenum internalFormat = useAlpha ? GL_RGBA8 : GL_RGB8;
 
     glGenTextures(1, &_pTexture);
     glBindTexture(GL_TEXTURE_2D, _pTexture);
@@ -120,8 +123,9 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     renderToTexture(_pTexture, TexSize, TexSize);
 
     // Download the data and use it to intialize the data we need to rendering.
-    // Allocate memory: 4 channels, with one byte each
-    unsigned int arraySize = TexSize * TexSize * 4 * 1;
+    // Allocate memory: N channels, with one byte each
+    unsigned int nChannels = useAlpha ? 4 : 3;
+    unsigned int arraySize = TexSize * TexSize * nChannels;
     void* pixelData = new GLubyte[arraySize];
     glBindTexture(GL_TEXTURE_2D, _pTexture);
     glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, pixelData);
@@ -132,6 +136,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     glBindTexture(GL_TEXTURE_2D_ARRAY, id);
     initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, useAlpha);
     fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixelData);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
 void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
