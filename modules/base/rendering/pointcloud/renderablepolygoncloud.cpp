@@ -93,10 +93,9 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     LDEBUG("Creating Polygon Texture");
     constexpr gl::GLsizei TexSize = 512;
 
-    //TextureColorMode colorMode = TextureColorMode::Greyscale; // TODO: Fix grayscale not including transparenccy, and only red color being passed to shader!
-    TextureColorMode colorMode = TextureColorMode::Transparency;
-    gl::GLenum internalFormat = internalGlFormatFromColorMode(colorMode);
-    gl::GLenum format = gl::GLenum(glFormatFromColorMode(colorMode));
+    constexpr bool useAlpha = true;
+    gl::GLenum internalFormat = internalGlFormat(useAlpha);
+    gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
     glGenTextures(1, &_pTexture);
     glBindTexture(GL_TEXTURE_2D, _pTexture);
@@ -132,8 +131,8 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     unsigned int id = 0;
     glGenTextures(1, &id);
     glBindTexture(GL_TEXTURE_2D_ARRAY, id);
-    initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, colorMode);
-    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), colorMode, pixelData);
+    initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, useAlpha);
+    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixelData);
 }
 
 void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,

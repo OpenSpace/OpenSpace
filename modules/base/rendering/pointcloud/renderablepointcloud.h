@@ -75,12 +75,6 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    enum class TextureColorMode : int {
-        Transparency = 0,
-        OpaqueColor,
-        Greyscale
-    };
-
     virtual void initializeShadersAndGlExtras();
     virtual void deinitializeShaders();
     virtual void setExtraUniforms();
@@ -126,10 +120,10 @@ protected:
     void loadTexture(const std::filesystem::path& path, int index);
 
     void initAndAllocateTextureArray(unsigned int textureId,
-        glm::uvec2 resolution, size_t nLayers, TextureColorMode colorMode);
+        glm::uvec2 resolution, size_t nLayers, bool useAlpha);
 
     void fillAndUploadTextureLayer(unsigned int arrayindex, unsigned int layer,
-        unsigned int textureId, glm::uvec2 resolution, TextureColorMode colorMode,
+        unsigned int textureId, glm::uvec2 resolution, bool useAlpha,
         const void* pixelData);
 
     void generateArrayTextures();
@@ -229,22 +223,22 @@ protected:
     // Index to texture (generated from the dataset)
     std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textures;
 
-    gl::GLenum internalGlFormatFromColorMode(TextureColorMode mode) const;
-    ghoul::opengl::Texture::Format glFormatFromColorMode(TextureColorMode mode) const;
+    gl::GLenum internalGlFormat(bool useAlpha) const;
+    ghoul::opengl::Texture::Format glFormat(bool useAlpha) const;
 
     struct TextureFormat {
         glm::uvec2 resolution;
-        TextureColorMode colorMode = TextureColorMode::OpaqueColor;
+        bool useAlpha = false;
 
         friend bool operator==(const TextureFormat& l, const TextureFormat& r) {
-            return (l.resolution == r.resolution) && (l.colorMode == r.colorMode);
+            return (l.resolution == r.resolution) && (l.useAlpha == r.useAlpha);
         }
     };
     struct TextureFormatHash {
         std::size_t operator()(const TextureFormat& k) const {
             return ((std::hash<unsigned int>()(k.resolution.x) ^
                     (std::hash<unsigned int>()(k.resolution.y) << 1)) >> 1) ^
-                    (std::hash<int>()(static_cast<int>(k.colorMode)) << 1);
+                    (std::hash<bool>()(k.useAlpha) << 1);
         }
     };
 

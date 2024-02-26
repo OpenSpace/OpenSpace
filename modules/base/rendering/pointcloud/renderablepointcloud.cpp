@@ -773,23 +773,13 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     std::unique_ptr<ghoul::opengl::Texture> t =
         ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
-    TextureColorMode colorMode; // TODO: Make possible to set from asset
-    if (t->numberOfChannels() == 1) {
-        // TODO: OBS!  This results in only red colors in the shader... Remove?
-        colorMode = TextureColorMode::Greyscale;
-    }
-    else if (t->numberOfChannels() > 3) {
-        colorMode = TextureColorMode::Transparency;
-    }
-    else {
-        colorMode = TextureColorMode::OpaqueColor;
-    }
+    bool useAlpha = (t->numberOfChannels() > 3); // TODO: Allow setting from asset
 
     if (t) {
         LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
         // Do not upload the loaded texture to the GPU, we just want it to hold the data.
         // However, convert textures make sure they all use the same format.
-        ghoul::opengl::Texture::Format targetFormat = glFormatFromColorMode(colorMode);
+        ghoul::opengl::Texture::Format targetFormat = glFormat(useAlpha);
         convertTextureFormat(*t, targetFormat);
     }
     else {
@@ -801,7 +791,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     glm::uvec2 res = glm::uvec2(t->width(), t->height());
     TextureFormat format = {
         .resolution = res,
-        .colorMode = colorMode
+        .useAlpha = useAlpha
     };
     _textureMapByFormat[format].push_back(index);
 
@@ -811,7 +801,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
                                                        glm::uvec2 resolution,
                                                        size_t nLayers,
-                                                       TextureColorMode colorMode)
+                                                       bool useAlpha)
 {
     float w = static_cast<float>(resolution.x);
     float h = static_cast<float>(resolution.y);
@@ -822,7 +812,7 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
         .aspectRatioScale = aspectScale
     });
 
-    gl::GLenum internalFormat = internalGlFormatFromColorMode(colorMode);
+    gl::GLenum internalFormat = internalGlFormat(useAlpha);
 
     // Create storage for the texture
     glTexStorage3D(
@@ -862,10 +852,10 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
                                                      unsigned int layer,
                                                      unsigned int textureId,
                                                      glm::uvec2 resolution,
-                                                     TextureColorMode colorMode,
+                                                     bool useAlpha,
                                                      const void* pixelData)
 {
-    gl::GLenum format = gl::GLenum(glFormatFromColorMode(colorMode));
+    gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
     glTexSubImage3D(
         GL_TEXTURE_2D_ARRAY,
@@ -892,7 +882,7 @@ void RenderablePointCloud::generateArrayTextures() {
     unsigned int arrayIndex = 0;
     for (const Entry& e : _textureMapByFormat) {
         glm::uvec2 res = e.first.resolution;
-        TextureColorMode colorMode = e.first.colorMode;
+        bool useAlpha = e.first.useAlpha;
         size_t nLayers = e.second.size();
 
         // And and create storage for texture (bind the texture for writing)
@@ -901,13 +891,13 @@ void RenderablePointCloud::generateArrayTextures() {
         glGenTextures(1, &id);
         glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
-        initAndAllocateTextureArray(id, res, nLayers, colorMode);
+        initAndAllocateTextureArray(id, res, nLayers, useAlpha);
 
         // Fill that storage with the data from the individual textures
         unsigned int layer = 0;
         for (const int& texId : e.second) {
             const ghoul::opengl::Texture* texture = _textures[texId].get();
-            fillAndUploadTextureLayer(arrayIndex, layer, texId, res, colorMode, texture->pixelData());
+            fillAndUploadTextureLayer(arrayIndex, layer, texId, res, useAlpha, texture->pixelData());
             layer++;
         }
 
@@ -1388,36 +1378,19 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
 }
 
 
-gl::GLenum RenderablePointCloud::internalGlFormatFromColorMode(
-                                                              TextureColorMode mode) const
-{
-    // TODO: investigate compressed formats
-    switch (mode) {
-        case TextureColorMode::Transparency:
-            return _allowCompression ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_RGBA8;
-        case TextureColorMode::OpaqueColor:
-            return _allowCompression ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_RGB8;
-        case TextureColorMode::Greyscale:
-            // TODO: OBS!  This results in only red colors in the shader...
-            return GL_R8;
-        default:
-            return GL_RGB8;
+gl::GLenum RenderablePointCloud::internalGlFormat(bool useAlpha) const {
+    if (useAlpha) {
+        return _allowCompression ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_RGBA8;
+    }
+    else {
+        return _allowCompression ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_RGB8;
     }
 }
 
-ghoul::opengl::Texture::Format RenderablePointCloud::glFormatFromColorMode(
-                                                              TextureColorMode mode) const
-{
-    switch (mode) {
-        case TextureColorMode::Transparency:
-            return ghoul::opengl::Texture::Format::RGBA;
-        case TextureColorMode::OpaqueColor:
-            return ghoul::opengl::Texture::Format::RGB;
-        case TextureColorMode::Greyscale:
-            return ghoul::opengl::Texture::Format::Red;
-        default:
-            return ghoul::opengl::Texture::Format::RGB;
-    }
+ghoul::opengl::Texture::Format RenderablePointCloud::glFormat(bool useAlpha) const {
+    return useAlpha ?
+        ghoul::opengl::Texture::Format::RGBA :
+        ghoul::opengl::Texture::Format::RGB;
 }
 
 } // namespace openspace
