@@ -433,7 +433,7 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
 
 RenderablePointCloud::Texture::Texture()
     : properties::PropertyOwner({ "Texture", "Texture", "" })
-    , enabled(TextureEnabledInfo, false)
+    , enabled(TextureEnabledInfo, true)
     , spriteTexturePath(SpriteTextureInfo)
 {
     addProperty(enabled);
@@ -1095,6 +1095,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
     else {
+        _program->setUniform("aspectRatioScale", glm::vec2(1.f));
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nDataPoints));
     }
 
