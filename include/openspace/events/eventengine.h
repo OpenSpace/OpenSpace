@@ -168,8 +168,6 @@ public:
 
     static scripting::LuaLibrary luaLibrary();
 
-    nlohmann::json generateJson() const;
-
 private:
     /// The storage space in which Events are stored
     ghoul::MemoryPool<4096> _memory;

@@ -257,27 +257,4 @@ scripting::LuaLibrary EventEngine::luaLibrary() {
         }
     };
 }
-
-nlohmann::json EventEngine::generateJson() const {
-    nlohmann::json result;
-    result["name"] = "Events";
-    nlohmann::json data = nlohmann::json::array();
-
-    for (auto& [key, value] : _eventActions) {
-        nlohmann::json eventJson;
-        std::string eventName = std::string(events::toString(key));
-        eventJson["name"] = eventName;
-        data.push_back(eventJson);
-    }
-    for (auto& [key, value] : _eventTopics) {
-        nlohmann::json eventJson;
-        std::string eventName = std::string(events::toString(key));
-        eventJson["name"] = eventName;
-        data.push_back(eventJson);
-    }
-
-    result["data"] = data;
-    return result;
-}
-
 } // namespace openspace

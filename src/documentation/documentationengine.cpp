@@ -366,6 +366,25 @@ nlohmann::json DocumentationEngine::generateLicenseList() const {
     return json;
 }
 
+nlohmann::json DocumentationEngine::generateEventJson() const {
+    nlohmann::json result;
+    result["name"] = "Events";
+    nlohmann::json data = nlohmann::json::array();
+
+    std::vector<EventEngine::ActionInfo> eventActions =
+        global::eventEngine->registeredActions();
+
+    for (const EventEngine::ActionInfo& eventAction : eventActions) {
+        nlohmann::json eventJson;
+        std::string eventName = std::string(events::toString(eventAction.type));
+        eventJson["name"] = eventName;
+        data.push_back(eventJson);
+    }
+
+    result["data"] = data;
+    return result;
+}
+
 nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {                 
     nlohmann::json json;
 
@@ -517,7 +536,7 @@ void DocumentationEngine::writeDocumentation() const {
     nlohmann::json sceneProperties = settings.get();
     nlohmann::json sceneGraph = sceneJson.get();
     nlohmann::json actions = generateActionJson();
-    nlohmann::json events = global::eventEngine->generateJson();
+    nlohmann::json events = generateEventJson();
 
     sceneProperties["name"] = "Settings";
     sceneGraph["name"] = "Scene";
