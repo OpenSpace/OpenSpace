@@ -38,6 +38,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <thread>
+#include <iostream>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableFieldlinesSequence";
@@ -670,10 +671,15 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     });
 
     _colorTablePath.onChange([this]() {
-        //_transferFunction->setPath(_colorTablePath);
-        _transferFunction = std::make_unique<TransferFunction>(
-            absPath(_colorTablePath).string()
-        );
+        std::filesystem::path newPath = absPath(_colorTablePath);
+
+        if (std::filesystem::exists(newPath)) {
+            _transferFunction = std::make_unique<TransferFunction>(newPath.string());
+        }
+        else
+        {
+            //TODO: message to the user that the path is invalid
+        }
     });
 }
 
@@ -901,9 +907,20 @@ void RenderableFieldlinesSequence::firstUpdate() {
     _firstLoad = false;
     _colorQuantity = _colorQuantityTemp;
     _maskingQuantity = _maskingQuantityTemp;
-    _transferFunction = std::make_unique<TransferFunction>(
+
+
+    std::filesystem::path newPath = absPath(_colorTablePath);
+
+    if (std::filesystem::exists(newPath)) {
+        _transferFunction = std::make_unique<TransferFunction>(newPath.string());
+    }
+    else
+    {
+        //TODO: message to the user that the path is invalid
+    }
+    /*_transferFunction = std::make_unique<TransferFunction>(
         absPath(_colorTablePath).string()
-    );
+    );*/
 
     _shouldUpdateColorBuffer = true;
     _shouldUpdateMaskingBuffer = true;
