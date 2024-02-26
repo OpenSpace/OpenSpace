@@ -53,6 +53,16 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
+struct TextureFormat {
+    glm::uvec2 resolution;
+    bool useAlpha = false;
+
+    friend bool operator==(const TextureFormat& l, const TextureFormat& r);
+};
+struct TextureFormatHash {
+    std::size_t operator()(const TextureFormat& k) const;
+};
+
 /**
  * This class describes a point cloud renderable that can be used to draw billboraded
  * points based on a data file with 3D positions.  Alternatively the points can also
@@ -75,6 +85,12 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+    enum class TextureInputMode {
+        Single = 0,
+        Multi,
+        Other // For subclasses that need to handle their own texture
+    };
+
     virtual void initializeShadersAndGlExtras();
     virtual void deinitializeShaders();
     virtual void setExtraUniforms();
@@ -123,8 +139,7 @@ protected:
         glm::uvec2 resolution, size_t nLayers, bool useAlpha);
 
     void fillAndUploadTextureLayer(unsigned int arrayindex, unsigned int layer,
-        unsigned int textureId, glm::uvec2 resolution, bool useAlpha,
-        const void* pixelData);
+        size_t textureIndex, glm::uvec2 resolution, bool useAlpha, const void* pixelData);
 
     void generateArrayTextures();
 
@@ -132,6 +147,9 @@ protected:
 
     void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
+
+    gl::GLenum internalGlFormat(bool useAlpha) const;
+    ghoul::opengl::Texture::Format glFormat(bool useAlpha) const;
 
     bool _dataIsDirty = true;
     bool _spriteTextureIsDirty = true;
@@ -171,19 +189,23 @@ protected:
     };
     Fading _fading;
 
-    struct Texture : properties::PropertyOwner {
-        Texture();
-        properties::BoolProperty enabled;
-        properties::StringProperty spriteTexturePath;
-    };
-    Texture _texture;
-
     properties::BoolProperty _useAdditiveBlending;
 
     properties::BoolProperty _drawElements;
     properties::OptionProperty _renderOption;
 
     properties::UIntProperty _nDataPoints;
+
+    struct Texture : properties::PropertyOwner {
+        Texture();
+        properties::BoolProperty enabled;
+        properties::StringProperty spriteTexturePath;
+    };
+    Texture _texture;
+    TextureInputMode _textureMode = TextureInputMode::Single;
+    std::filesystem::path _texturesDirectory;
+    bool _allowTextureCompression = true;
+    bool _useAlphachannelInTexture = true;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
 
@@ -210,40 +232,17 @@ protected:
     GLuint _vao = 0;
     GLuint _vbo = 0;
 
-    // Everything related to handling multiple textures
-    enum class TextureInputMode {
-        Single = 0,
-        Multi,
-        Other // For subclasses that need to handle their own texture
-    };
-    TextureInputMode _textureMode = TextureInputMode::Single;
+    // List of (unique) loaded textures. The other maps refer to the index in this vector
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+    std::unordered_map<std::string, size_t> _textureNameToIndex;
 
-    std::filesystem::path _texturesDirectory;
+    // Texture index in dataset to index in vector of textures
+    std::unordered_map<int, size_t> _indexInDataToTextureIndex;
 
-    // Index to texture (generated from the dataset)
-    std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textures;
-
-    gl::GLenum internalGlFormat(bool useAlpha) const;
-    ghoul::opengl::Texture::Format glFormat(bool useAlpha) const;
-
-    struct TextureFormat {
-        glm::uvec2 resolution;
-        bool useAlpha = false;
-
-        friend bool operator==(const TextureFormat& l, const TextureFormat& r) {
-            return (l.resolution == r.resolution) && (l.useAlpha == r.useAlpha);
-        }
-    };
-    struct TextureFormatHash {
-        std::size_t operator()(const TextureFormat& k) const {
-            return ((std::hash<unsigned int>()(k.resolution.x) ^
-                    (std::hash<unsigned int>()(k.resolution.y) << 1)) >> 1) ^
-                    (std::hash<bool>()(k.useAlpha) << 1);
-        }
-    };
-
-    // Resolution to index (each resolution creates one texture array)
-    std::unordered_map<TextureFormat, std::vector<int>, TextureFormatHash> _textureMapByFormat;
+    // Resolution/format to index in textures vector (used to generate one texture
+    // array per unique format)
+    std::unordered_map<TextureFormat, std::vector<size_t>, TextureFormatHash>
+        _textureMapByFormat;
 
     // One per resolution above
     struct TextureArrayInfo {
@@ -258,11 +257,7 @@ protected:
         unsigned int arrayId;
         unsigned int layer;
     };
-
-    std::unordered_map<int, TextureId> _textureIdToArrayMap;
-
-    bool _allowCompression = true;
-    bool _allowAlpha = true;
+    std::unordered_map<size_t, TextureId> _textureIndexToArrayMap;
 };
 
 } // namespace openspace

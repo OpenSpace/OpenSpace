@@ -547,8 +547,8 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         }
 
         _texture.enabled = t.enabled.value_or(true);
-        _allowCompression = t.allowCompression.value_or(true);
-        _allowAlpha = t.useAlphaChannel.value_or(true);
+        _allowTextureCompression = t.allowCompression.value_or(true);
+        _useAlphachannelInTexture = t.useAlphaChannel.value_or(true);
     }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
@@ -767,13 +767,15 @@ void RenderablePointCloud::initializeMultiTextures() {
 
 void RenderablePointCloud::clearTextureDataStructures() {
     _textures.clear();
+    _textureNameToIndex.clear();
+    _indexInDataToTextureIndex.clear();
     _textureMapByFormat.clear();
     // Unload texture arrays from GPU memory
     for (const TextureArrayInfo& arrayInfo : _textureArrays) {
         glDeleteTextures(1, &arrayInfo.renderId);
     }
     _textureArrays.clear();
-    _textureIdToArrayMap.clear();
+    _textureIndexToArrayMap.clear();
 }
 
 void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int index) {
@@ -781,11 +783,19 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
         return;
     }
 
-    // @TODO: Make sure we don't load the same texture twice... That we use the texture manager somehow..?
+    std::string filename = path.filename().string();
+    auto search = _textureNameToIndex.find(filename);
+    if (search != _textureNameToIndex.end()) {
+        // The texture has already been loaded. Find the index
+        size_t indexInTextureArray = _textureNameToIndex[filename];
+        _indexInDataToTextureIndex[index] = indexInTextureArray;
+        return;
+    }
+
     std::unique_ptr<ghoul::opengl::Texture> t =
         ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
-    bool useAlpha = (t->numberOfChannels() > 3) && _allowAlpha;
+    bool useAlpha = (t->numberOfChannels() > 3) && _useAlphachannelInTexture;
 
     if (t) {
         LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
@@ -800,14 +810,16 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
         ));
     }
 
-    glm::uvec2 res = glm::uvec2(t->width(), t->height());
     TextureFormat format = {
-        .resolution = res,
+        .resolution = glm::uvec2(t->width(), t->height()),
         .useAlpha = useAlpha
     };
-    _textureMapByFormat[format].push_back(index);
 
-    _textures.insert(std::pair(index, std::move(t)));
+    size_t indexInTextureArray = _textures.size();
+    _textures.push_back(std::move(t));
+    _textureNameToIndex[filename] = indexInTextureArray;
+    _textureMapByFormat[format].push_back(indexInTextureArray);
+    _indexInDataToTextureIndex[index] = indexInTextureArray;
 }
 
 void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
@@ -862,7 +874,7 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
 
 void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
                                                      unsigned int layer,
-                                                     unsigned int textureId,
+                                                     size_t textureIndex,
                                                      glm::uvec2 resolution,
                                                      bool useAlpha,
                                                      const void* pixelData)
@@ -883,19 +895,24 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
         pixelData
     );
 
-    // Keept track of the layer for this id, so we can use it when generating vertex data
-    _textureIdToArrayMap[textureId] = { .arrayId = arrayIndex, .layer = layer };
+    // Keept track of which layer in which texture array corresponds to the texture with
+    // this index, so we can use it when generating vertex data
+    _textureIndexToArrayMap[textureIndex] = {
+        .arrayId = arrayIndex,
+        .layer = layer
+    };
 }
 
 void RenderablePointCloud::generateArrayTextures() {
     _textureArrays.reserve(_textureMapByFormat.size());
 
-    using Entry = std::pair<TextureFormat, std::vector<int>>;
+    using Entry = std::pair<TextureFormat, std::vector<size_t>>;
     unsigned int arrayIndex = 0;
     for (const Entry& e : _textureMapByFormat) {
         glm::uvec2 res = e.first.resolution;
         bool useAlpha = e.first.useAlpha;
-        size_t nLayers = e.second.size();
+        std::vector<size_t> textureListIndices = e.second;
+        size_t nLayers = textureListIndices.size();
 
         // And and create storage for texture (bind the texture for writing)
         // Generate an array texture
@@ -907,9 +924,9 @@ void RenderablePointCloud::generateArrayTextures() {
 
         // Fill that storage with the data from the individual textures
         unsigned int layer = 0;
-        for (const int& texId : e.second) {
-            const ghoul::opengl::Texture* texture = _textures[texId].get();
-            fillAndUploadTextureLayer(arrayIndex, layer, texId, res, useAlpha, texture->pixelData());
+        for (const size_t& i : textureListIndices) {
+            const ghoul::opengl::Texture* texture = _textures[i].get();
+            fillAndUploadTextureLayer(arrayIndex, layer, i, res, useAlpha, texture->pixelData());
             layer++;
         }
 
@@ -1350,10 +1367,11 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
 
         if (_hasSpriteTexture && useMultiTexture) {
             int texId = static_cast<int>(e.data[textureIdIndex]);
+            size_t texIndex = _indexInDataToTextureIndex[texId];
             textureLayer = static_cast<float>(
-                _textureIdToArrayMap[texId].layer
+                _textureIndexToArrayMap[texIndex].layer
             );
-            subresultIndex = _textureIdToArrayMap[texId].arrayId;
+            subresultIndex = _textureIndexToArrayMap[texIndex].arrayId;
         }
 
         std::vector<float>& subArrayToUse = subResults[subresultIndex];
@@ -1393,10 +1411,10 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
 
 gl::GLenum RenderablePointCloud::internalGlFormat(bool useAlpha) const {
     if (useAlpha) {
-        return _allowCompression ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_RGBA8;
+        return _allowTextureCompression ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_RGBA8;
     }
     else {
-        return _allowCompression ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_RGB8;
+        return _allowTextureCompression ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_RGB8;
     }
 }
 
@@ -1404,6 +1422,16 @@ ghoul::opengl::Texture::Format RenderablePointCloud::glFormat(bool useAlpha) con
     return useAlpha ?
         ghoul::opengl::Texture::Format::RGBA :
         ghoul::opengl::Texture::Format::RGB;
+}
+
+bool operator==(const TextureFormat& l, const TextureFormat& r) {
+    return (l.resolution == r.resolution) && (l.useAlpha == r.useAlpha);
+}
+
+std::size_t TextureFormatHash::operator()(const TextureFormat& k) const {
+    return ((std::hash<unsigned int>()(k.resolution.x) ^
+        (std::hash<unsigned int>()(k.resolution.y) << 1)) >> 1) ^
+        (std::hash<bool>()(k.useAlpha) << 1);
 }
 
 } // namespace openspace
