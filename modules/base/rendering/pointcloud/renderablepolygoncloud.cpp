@@ -93,7 +93,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     LDEBUG("Creating Polygon Texture");
     constexpr gl::GLsizei TexSize = 512;
 
-    constexpr bool useAlpha = true;
+    bool useAlpha = _allowAlpha;
     gl::GLenum internalFormat = internalGlFormat(useAlpha);
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 

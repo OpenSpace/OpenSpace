@@ -272,10 +272,21 @@ namespace {
             // images, especially up close. Set this to false to disable any hardware
             // compression of the textures, and represent each color channel wit 8 bits
             std::optional<bool> allowCompression;
+
+            // If true, include transparency information in the loaded textures, if there
+            // is any. If false, all loaded textures will be converted to RGB format.
+            //
+            // This setting can be used if you have textures with transparency, but do
+            // not actually need the trasparency information. Converting the files to
+            // RGB on load may then reduce the memory footprint and/or lead to some
+            // optimization in terms of rendering speed.
+            //
+            // Note that when using additive blending, the transparency is not really
+            // utilized and can often be disabled.
+            std::optional<bool> useAlphaChannel;
         };
         // Settings related to the texturing of the points. Note that there are two ways....
         std::optional<Texture> texture;
-
 
         // [[codegen::verbatim(DrawElementsInfo.description)]]
         std::optional<bool> drawElements;
@@ -537,6 +548,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
         _texture.enabled = t.enabled.value_or(true);
         _allowCompression = t.allowCompression.value_or(true);
+        _allowAlpha = t.useAlphaChannel.value_or(true);
     }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
@@ -773,7 +785,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     std::unique_ptr<ghoul::opengl::Texture> t =
         ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
-    bool useAlpha = (t->numberOfChannels() > 3); // TODO: Allow setting from asset
+    bool useAlpha = (t->numberOfChannels() > 3) && _allowAlpha;
 
     if (t) {
         LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
