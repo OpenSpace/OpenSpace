@@ -345,9 +345,9 @@ nlohmann::json DocumentationEngine::generatePropertyOwnerJson(
 
     nlohmann::json json;
     std::vector<properties::PropertyOwner*> subOwners = owner->propertySubOwners();
-    for (properties::PropertyOwner* owner : subOwners) {
-        if (owner->identifier() != "Scene") {
-            nlohmann::json jsonOwner = createPropertyJson(owner);
+    for (properties::PropertyOwner* o : subOwners) {
+        if (o->identifier() != "Scene") {
+            nlohmann::json jsonOwner = createPropertyJson(o);
 
             json.push_back(jsonOwner);
         }
