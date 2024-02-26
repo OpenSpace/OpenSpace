@@ -918,9 +918,6 @@ void RenderableFieldlinesSequence::firstUpdate() {
     {
         //TODO: message to the user that the path is invalid
     }
-    /*_transferFunction = std::make_unique<TransferFunction>(
-        absPath(_colorTablePath).string()
-    );*/
 
     _shouldUpdateColorBuffer = true;
     _shouldUpdateMaskingBuffer = true;
