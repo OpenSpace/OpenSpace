@@ -38,7 +38,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>

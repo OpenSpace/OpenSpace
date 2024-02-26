@@ -31,7 +31,6 @@
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/scene/scenelicensewriter.h>
 #include <ghoul/logging/logmanager.h>
 
 using nlohmann::json;
@@ -59,7 +58,7 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
         // TODO: Add asset documentation here
     }
     else if (requestedType == "meta") {
-        response = SceneLicenseWriter().generateJsonList();
+        response = DocEng.generateLicenseList();
     }
 
     _connection->sendJson(wrappedPayload(response));
