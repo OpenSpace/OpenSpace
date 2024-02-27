@@ -595,6 +595,10 @@ public:
 
     void binary2ascii(const std::string& filename);
 
+    void setOverrideRecordingStereoDepth(bool override);
+
+    const bool shouldOverrideRecordingStereoDepth() const;
+
 protected:
     properties::BoolProperty _renderPlaybackInformation;
     properties::BoolProperty _ignoreRecordedScale;
@@ -740,6 +744,7 @@ protected:
     double _playbackPauseOffset = 0.0;
     double _previousTime = 0.0;
 
+    bool _overrideRecordingStereoDepth = false;
     bool _saveRenderingDuringPlayback = false;
     double _saveRenderingDeltaTime = 1.0 / 30.0;
     double _saveRenderingCurrentRecordedTime = 0.0;
