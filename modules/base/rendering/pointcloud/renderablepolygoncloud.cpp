@@ -74,6 +74,7 @@ RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictiona
     _hasSpriteTexture = true;
 
     _textureMode = TextureInputMode::Other;
+    _texture.removeProperty(_texture.spriteTexturePath);
 }
 
 void RenderablePolygonCloud::deinitializeGL() {

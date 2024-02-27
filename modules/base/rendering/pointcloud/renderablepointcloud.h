@@ -200,6 +200,7 @@ protected:
         Texture();
         properties::BoolProperty enabled;
         properties::StringProperty spriteTexturePath;
+        properties::StringProperty inputMode;
     };
     Texture _texture;
     TextureInputMode _textureMode = TextureInputMode::Single;

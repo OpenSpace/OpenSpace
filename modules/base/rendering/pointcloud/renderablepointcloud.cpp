@@ -71,19 +71,32 @@ namespace {
         PositionNormal
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
-        "File",
-        "Point Sprite Texture File",
-        "The path to the texture that should be used as the point sprite. Note that if "
-        "multiple textures option is set in the asset, this value will be ignored.",  // TODO
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextureEnabledInfo = {
         "Enabled",
         "Enabled",
         "If true, use a provided sprite texture to render the point. If false, draw "
         "the points using the default point shape.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
+        "File",
+        "Point Sprite Texture File",
+        "The path to the texture that should be used as the point sprite. Note that if "
+        "multiple textures option is set in the asset, by provising a texture folder, "
+        "this value will be ignored.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureModeInfo = {
+        "TextureMode",
+        "Texture Mode",
+        "This tells which texture mode is being used for this renderable. There are "
+        "three different texture modes: 1) One single sprite texture used for all "
+        "points, 2) Multiple textures, that are mapped to the points based on a column "
+        "in the dataset, and 3) Other, which is used for specific subtypes where the "
+        "texture is internally controlled by the renderable and can't be set from a "
+        "file (such as the RenderablePolygonCloud).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -435,9 +448,13 @@ RenderablePointCloud::Texture::Texture()
     : properties::PropertyOwner({ "Texture", "Texture", "" })
     , enabled(TextureEnabledInfo, true)
     , spriteTexturePath(SpriteTextureInfo)
+    , inputMode(TextureModeInfo)
 {
     addProperty(enabled);
     addProperty(spriteTexturePath);
+
+    inputMode.setReadOnly(true);
+    addProperty(inputMode);
 }
 
 RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
@@ -538,6 +555,8 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
                     "following path will be ignored: '{}'", *t.folder, *t.file
                 ));
             }
+
+            _texture.removeProperty(_texture.spriteTexturePath);
         }
         else if (t.file.has_value()) {
             _textureMode = TextureInputMode::Single;
@@ -644,6 +663,20 @@ bool RenderablePointCloud::isReady() const {
 void RenderablePointCloud::initialize() {
     ZoneScoped;
 
+    switch (_textureMode) {
+        case TextureInputMode::Single:
+            _texture.inputMode = "Single Sprite Texture";
+            break;
+        case TextureInputMode::Multi:
+            _texture.inputMode = "Multipe Textures / Data-based";
+            break;
+        case TextureInputMode::Other:
+            _texture.inputMode = "Other";
+            break;
+        default:
+            break;
+    }
+
     if (_hasDataFile && _hasColorMapFile) {
         _colorSettings.colorMapping->initialize(_dataset);
     }
@@ -728,7 +761,7 @@ void RenderablePointCloud::initializeSingleTexture() {
         ));
     }
 
-    // Single tectures may be updated => make sure to clear the data structures
+    // Single textures may be updated => make sure to clear the data structures
     // before updating them
     clearTextureDataStructures();
 
@@ -1101,6 +1134,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     if (useTexture && !_textureArrays.empty()) {
         spriteTextureUnit.activate();
         for (const TextureArrayInfo& arrayInfo : _textureArrays) {
+            // TODO: Use uniform cache after Adams PR
             _program->setUniform("aspectRatioScale", arrayInfo.aspectRatioScale);
             glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
             glDrawArrays(
@@ -1112,6 +1146,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
     else {
+        // TODO: Use uniform cache after Adams PR
         _program->setUniform("aspectRatioScale", glm::vec2(1.f));
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nDataPoints));
     }
