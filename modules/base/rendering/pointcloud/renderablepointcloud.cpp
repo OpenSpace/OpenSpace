@@ -964,8 +964,17 @@ void RenderablePointCloud::generateArrayTextures() {
             layer++;
         }
 
-        // @TODO: Potentially use GL_MAX_ARRAY_TEXTURE_LAYERS to split up an array if it
-        // contains too many layers
+        int nMaxTextureLayers = 0;
+        glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &nMaxTextureLayers);
+        if (layer > nMaxTextureLayers) {
+            LERROR(fmt::format(
+                "Too many layers bound in the same texture array. Found {} textures with "
+                "resolution {}x{} pixels. Max supported is {}.",
+                layer, res.x, res.y, nMaxTextureLayers
+            ));
+            // @TODO: Should we split the array up? Do we think this will ever become
+            // a problem?
+        }
 
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
