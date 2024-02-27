@@ -177,7 +177,21 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             // The parameter in #1 is currently being ignored
 
             std::vector<std::string> tokens = ghoul::tokenizeString(line, ' ');
-            bool hasExtraParameter = static_cast<int>(tokens.size() > 3);
+            int nNonEmptyTokens = 0;
+            for (const std::string& t : tokens) {
+                if (!t.empty()) {
+                    nNonEmptyTokens++;
+                }
+            }
+
+            if (nNonEmptyTokens > 4) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Error loading speck file {}: Too many arguments for texture on line {}",
+                    path, currentLineNumber
+                ));
+            }
+
+            bool hasExtraParameter = nNonEmptyTokens > 3;
 
             std::stringstream str(line);
 
