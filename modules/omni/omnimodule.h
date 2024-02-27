@@ -28,14 +28,38 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <websocketpp/config/core.hpp>
+#include <ghoul/io/socket/tcpsocket.h>
 #include <websocketpp/server.hpp>
 
+#include <deque>
+#include <mutex>
+#include <set>
+
 namespace ghoul::io { class Socket; }
+
+namespace openspace::omni {
+    enum class Type {
+        ServerConnect = 0,
+        ServerDisconnect,
+        ServerAuthorized,
+        Token,
+        ServerCode,
+        ServerJoin,
+        ServerLeave,
+        ServerError
+    };
+
+
+    std::string_view toString(Type type);
+    Type fromString(std::string_view str);
+
+} // namespace openspace::omni
 
 namespace openspace {
 
 class OmniModule : public OpenSpaceModule {
 public:
+
     constexpr static const char* Name = "Omni";
 
     OmniModule();
@@ -46,11 +70,22 @@ public:
 private:
     void preSync();
     void handleConnection();
+    void handleJson(const nlohmann::json& json);
+    void userJoin(const nlohmann::json& json);
+    void userLeave(const nlohmann::json& json);
+
 
     websocketpp::server<websocketpp::config::core> _server;
 
-    std::unique_ptr<ghoul::io::Socket> _wSocket;
+    std::unique_ptr<ghoul::io::TcpSocket> _socket;
     std::thread _thread;
+
+    std::mutex _messageQueueMutex;
+    std::deque<std::string> _messageQueue;
+
+    std::string _serverCode;
+
+    std::set<int> _users;
 };
 
 } // namespace openspace

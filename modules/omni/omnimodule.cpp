@@ -33,6 +33,60 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "Omni";
+
+    constexpr std::string_view MessageKeyCode = "code";
+    constexpr std::string_view MessageKeyMessage = "message";
+    constexpr std::string_view MessageKeyRole = "role";
+    constexpr std::string_view MessageKeyType = "type";
+    constexpr std::string_view MessageKeyUser = "user";
+
+}
+
+namespace openspace::omni {
+
+    std::string_view toString(Type type) {
+        switch (type) {
+            case Type::ServerConnect: return "server_connect";
+            case Type::ServerDisconnect: return "server_disconnect";
+            case Type::ServerAuthorized: return "server_authorized";
+            case Type::Token: return "token";
+            case Type::ServerCode: return "server_code";
+            case Type::ServerJoin: return "server_join";
+            case Type::ServerLeave: return "server_leave";
+            case Type::ServerError: return "server_error";
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }
+
+    Type fromString(std::string_view str) {
+        if (str == "server_connect") {
+            return Type::ServerConnect;
+        }
+        else if (str == "server_disconnect") {
+            return Type::ServerDisconnect;
+        }
+        else if (str == "server_authorized") {
+            return Type::ServerAuthorized;
+        }
+        else if (str == "token") {
+            return Type::Token;
+        }
+        else if (str == "server_code") {
+            return Type::ServerCode;
+        }
+        else if (str == "server_join") {
+            return Type::ServerJoin;
+        }
+        else if (str == "server_leave") {
+            return Type::ServerLeave;
+        }
+        else if (str == "server_error") {
+            return Type::ServerError;
+        }
+
+        throw ghoul::RuntimeError(fmt::format("Unknown event type '{}'", str));
+    }
 }
 
 namespace openspace {
@@ -45,8 +99,8 @@ OmniModule::OmniModule() : OpenSpaceModule(OmniModule::Name) {
 }
 
 OmniModule::~OmniModule() {
-    if (_wSocket->isConnected()) {
-        _wSocket->disconnect(
+    if (_socket->isConnected()) {
+        _socket->disconnect(
             static_cast<int>(ghoul::io::WebSocket::ClosingReason::ClosingAll)
         );
     }
@@ -56,57 +110,146 @@ OmniModule::~OmniModule() {
 }
 
 void OmniModule::internalInitialize(const ghoul::Dictionary& config) {
-    using namespace ghoul::io;
-    //global::callback::preSync->emplace_back([this]() {
-    //    ZoneScopedN("OmniModule");
+    using namespace ghoul::io; // TODO this has to be included, otherwise wont compile..
 
-    //    preSync();
-    //});
-    
-    std::unique_ptr<TcpSocket> tcpSocket = std::make_unique<TcpSocket>("localhost", 5051);
+    const int Port = 4685;
+    const std:: string Address = "localhost";
+
+    global::callback::preSync->emplace_back([this]() {
+        ZoneScopedN("OmniModule");
+
+        preSync();
+    });
+
+    std::unique_ptr<TcpSocket> tcpSocket = std::make_unique<TcpSocket>(Address, Port);
     if (!tcpSocket) {
-        LERROR("No socket connection to omni");
+        LERROR("Error creating tcp socket, aborting...");
         return;
     }
     tcpSocket->connect();
 
     if (tcpSocket->isConnected()) {
-        LERROR("TCP Connected");
+        LDEBUG("Tcp socket connected");
     }
     else if (tcpSocket->isConnecting()) {
-        LERROR("TCP Connecting");
+        LDEBUG("Tcp socket connecting...");
     }
     else {
-        LERROR("TCP Not connected");
+        LERROR("Tcp socket could not connect");
+        return;
     }
-    _wSocket = std::move(tcpSocket);
-    //_wSocket = std::make_unique<WebSocket>(std::move(tcpSocket), _server);
-    //_wSocket->startStreams();
 
-    //if (_wSocket->isConnected()) {
-    //    LERROR("Connected");
-    //}
-    //else if (_wSocket->isConnecting()) {
-    //    LERROR("Connecting");
-    //}
-    //else {
-    //    LERROR("Not connected");
-    //}
+    _socket = std::move(tcpSocket);
 
     _thread = std::move(std::thread([this]() { handleConnection(); }));
 }
 
 void OmniModule::preSync() {
-    LDEBUG("Presync");
+
+    std::lock_guard lock(_messageQueueMutex);
+    while (!_messageQueue.empty()) {
+        const std::string& msg = _messageQueue.front();
+        nlohmann::json j = nlohmann::json::parse(msg.c_str());
+        handleJson(j);
+        _messageQueue.pop_front();
+    }
 }
 
 void OmniModule::handleConnection() {
+
     std::string messageString;
     messageString.reserve(256);
-    while (_wSocket->getMessage(messageString)) {
-        LERROR(messageString);
+    while (_socket->getMessage(messageString)) {
+        std::lock_guard lock(_messageQueueMutex);
+        _messageQueue.push_back(messageString);
     }
-    //LERROR(messageString);
+}
+
+void OmniModule::handleJson(const nlohmann::json& json) {
+    auto typeJson = json.find(MessageKeyType);
+
+    if (typeJson == json.end()) {
+        LERROR("Message ignored, could not find a message 'type'");
+        return;
+    }
+
+    omni::Type msgType = omni::fromString(*typeJson);
+
+    switch (msgType) {
+        case omni::Type::ServerCode: {
+            auto codeJson = json.find(MessageKeyCode);
+            _serverCode = *codeJson;
+            break;
+        }
+        case omni::Type::ServerJoin: {
+            userJoin(json);
+            break;
+        }
+        case omni::Type::ServerLeave:
+        {
+            userLeave(json);
+            break;
+        }
+    }
+}
+
+void OmniModule::userJoin(const nlohmann::json& json) {
+    auto userJson = json.find(MessageKeyUser);
+    auto userRole = json.find(MessageKeyRole);
+
+    if (userJson == json.end()) {
+        LERROR("User joined but could not find user ID");
+        return;
+    }
+    if (!userJson->is_string()) {
+        LERROR("'user' must be specified as a string when joining server");
+        return;
+    }
+    if (userRole == json.end() || !userRole->is_string()) {
+        LERROR("User role not specified or not in string format when joining");
+        return;
+    }
+
+    std::string role = *userRole;
+
+    if (role != "guest") {
+        return;
+    }
+
+    std::string user = *userJson;
+    int userId = std::stoi(user, nullptr, 16);
+    _users.insert(userId);
+}
+
+void OmniModule::userLeave(const nlohmann::json& json) {
+    auto userJson = json.find(MessageKeyUser);
+    auto userRole = json.find(MessageKeyRole);
+
+    if (userJson == json.end()) {
+        LERROR("User left but could not find user ID");
+        return;
+    }
+    if (!userJson->is_string()) {
+        LERROR("'user' must be specified as a string when leaving server");
+        return;
+    }
+    if (userRole == json.end() || !userRole->is_string()) {
+        LERROR("User role not specified or not in string format when leaving");
+        return;
+    }
+
+    std::string role = *userRole;
+
+    if (role != "guest") {
+        return;
+    }
+
+    std::string user = *userJson;
+    int userId = std::stoi(user, nullptr, 16);
+    auto it = _users.find(userId);
+    if (it != _users.end()) {
+        _users.erase(it);
+    }
 }
 
 } // namespace openspace
