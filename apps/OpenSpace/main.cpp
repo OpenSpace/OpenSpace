@@ -71,10 +71,6 @@
 #include <modules/spout/spoutwrapper.h>
 #endif // OPENSPACE_HAS_SPOUT
 
-#ifdef OPENSPACE_HAS_NVTOOLS
-#include "nvToolsExt.h"
-#endif // OPENSPACE_HAS_NVTOOLS
-
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 #include <float.h>
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
@@ -417,9 +413,6 @@ void mainPreSyncFunc() {
 void mainPostSyncPreDrawFunc() {
     ZoneScoped;
 
-#ifdef OPENSPACE_HAS_NVTOOLS
-    nvtxRangePush("postSyncPreDraw");
-#endif // OPENSPACE_HAS_NVTOOLS
     LTRACE("main::postSynchronizationPreDraw(begin)");
 
     global::openSpaceEngine->postSynchronizationPreDraw();
@@ -432,10 +425,6 @@ void mainPostSyncPreDrawFunc() {
 #endif // OPENVR_SUPPORT
 
     LTRACE("main::postSynchronizationPreDraw(end)");
-
-#ifdef OPENSPACE_HAS_NVTOOLS
-    nvtxRangePop();
-#endif // OPENSPACE_HAS_NVTOOLS
 }
 
 
