@@ -401,8 +401,16 @@ QWidget* LauncherWindow::createCentralWidget() {
             connect(
                 &dialog,
                 &SettingsDialog::saveSettings,
-                [](Settings s) {
+                [this](Settings s) {
                     saveSettings(s, findSettings());
+
+                    if (s.profile.has_value()) {
+                        populateProfilesList(*s.profile);
+                    }
+
+                    if (s.configuration.has_value()) {
+                        populateWindowConfigsList(*s.configuration);
+                    }
                 }
             );
 

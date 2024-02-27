@@ -1379,6 +1379,44 @@ int main(int argc, char* argv[]) {
         }
         glfwInit();
 
+        // We are just reloading the configuration file here in case the user has changed
+        // anything in the settings panel. In that case want to apply these settings
+        // immediately rather than waiting for the next startup.
+        // What follows is some copy-paste code that should be cleaned up at some point
+
+        LDEBUG("Reloading configuration from disk");
+        // Find configuration
+        std::filesystem::path configurationFilePath;
+        if (commandlineArguments.configuration.has_value()) {
+            configurationFilePath = absPath(*commandlineArguments.configuration);
+        }
+        else {
+            LDEBUG("Finding configuration");
+            configurationFilePath = findConfiguration();
+        }
+
+        // The previous incarnation of this was initializing GLFW to get the primary
+        // monitor's resolution, but that had some massive performance implications as
+        // there was some issue with the swap buffer handling inside of GLFW. My
+        // assumption is that GLFW doesn't like being initialized, destroyed, and then
+        // initialized again. Therefore we are using the platform specific functions now
+        glm::ivec2 size = glm::ivec2(1920, 1080);
+#ifdef WIN32
+        DEVMODEW dm = { 0 };
+        dm.dmSize = sizeof(DEVMODEW);
+        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+        if (success) {
+            size.x = dm.dmPelsWidth;
+            size.y = dm.dmPelsHeight;
+        }
+#endif // WIN32
+
+        *global::configuration = loadConfigurationFromFile(
+            configurationFilePath.string(),
+            findSettings(),
+            size
+        );
+
         global::configuration->profile = win.selectedProfile();
         windowConfiguration = selectedSgctProfileFromLauncher(
             win,
