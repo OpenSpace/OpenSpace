@@ -124,6 +124,8 @@ protected:
 
     std::vector<float> createDataSlice();
 
+    void reInitializeTextures();
+
     /**
      * A function that subclasses could override to initialize their own textures to
      * use for rendering, when the \code _textureMode is set to Other
@@ -152,7 +154,7 @@ protected:
     ghoul::opengl::Texture::Format glFormat(bool useAlpha) const;
 
     bool _dataIsDirty = true;
-    bool _spriteTextureIsDirty = true;
+    bool _spriteTextureIsDirty = false;
     bool _cmapIsDirty = true;
 
     bool _hasSpriteTexture = false;
@@ -199,14 +201,14 @@ protected:
     struct Texture : properties::PropertyOwner {
         Texture();
         properties::BoolProperty enabled;
+        properties::BoolProperty allowCompression;
+        properties::BoolProperty useAlphaChannel;
         properties::StringProperty spriteTexturePath;
         properties::StringProperty inputMode;
     };
     Texture _texture;
     TextureInputMode _textureMode = TextureInputMode::Single;
     std::filesystem::path _texturesDirectory;
-    bool _allowTextureCompression = true;
-    bool _useAlphachannelInTexture = true;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
 

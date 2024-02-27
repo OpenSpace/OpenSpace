@@ -79,6 +79,29 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AllowTextureCompressionInfo =
+    {
+        "AllowCompression",
+        "Allow Compression",
+        "If true, the textures will be compressed to preserve graphics card memory. This "
+        "is enabled per default, but may lead to visible artefacts for certain images, "
+        "especially up close. Set this to false to disable any hardware compression of "
+        "the textures, and represent each color channel wit 8 bits.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseAlphaInfo = {
+        "UseAlphaChannel",
+        "Use Alpha Channel",
+        "If true, include transparency information in the loaded textures, if there "
+        "is any. If false, all loaded textures will be converted to RGB format. \n"
+        "This setting can be used if you have textures with transparency, but do not "
+        "need the trasparency information. This imay be the case when using additive "
+        "blending, for example. Converting the files to RGB on load may then reduce the "
+        "memory footprint and/or lead to some optimization in terms of rendering speed.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "File",
         "Point Sprite Texture File",
@@ -277,25 +300,14 @@ namespace {
 
             // The folder where the textures are located when using multiple different
             // textures to render the points, based on a mapping to a column in the
-            // dataset... TODO!!
+            // dataset. Setting this value means that multiple textures shall be used
+            // and any single sprite texture is ignored.
             std::optional<std::filesystem::path> folder [[codegen::directory()]];
 
-            // If true, the textures will be compressed to preserve graphics card memory.
-            // This is enabled per default, but may lead to visible artefacts for certain
-            // images, especially up close. Set this to false to disable any hardware
-            // compression of the textures, and represent each color channel wit 8 bits
+            // [[codegen::verbatim(AllowTextureCompressionInfo.description)]]
             std::optional<bool> allowCompression;
 
-            // If true, include transparency information in the loaded textures, if there
-            // is any. If false, all loaded textures will be converted to RGB format.
-            //
-            // This setting can be used if you have textures with transparency, but do
-            // not actually need the trasparency information. Converting the files to
-            // RGB on load may then reduce the memory footprint and/or lead to some
-            // optimization in terms of rendering speed.
-            //
-            // Note that when using additive blending, the transparency is not really
-            // utilized and can often be disabled.
+            // [[codegen::verbatim(UseAlphaInfo.description)]]
             std::optional<bool> useAlphaChannel;
         };
         // Settings related to the texturing of the points. Note that there are two ways....
@@ -447,10 +459,14 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
 RenderablePointCloud::Texture::Texture()
     : properties::PropertyOwner({ "Texture", "Texture", "" })
     , enabled(TextureEnabledInfo, true)
+    , allowCompression(AllowTextureCompressionInfo, true)
+    , useAlphaChannel(UseAlphaInfo, true)
     , spriteTexturePath(SpriteTextureInfo)
     , inputMode(TextureModeInfo)
 {
     addProperty(enabled);
+    addProperty(allowCompression);
+    addProperty(useAlphaChannel);
     addProperty(spriteTexturePath);
 
     inputMode.setReadOnly(true);
@@ -565,10 +581,13 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             _texture.spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
         }
 
-        _texture.enabled = t.enabled.value_or(true);
-        _allowTextureCompression = t.allowCompression.value_or(true);
-        _useAlphachannelInTexture = t.useAlphaChannel.value_or(true);
+        _texture.enabled = t.enabled.value_or(_texture.enabled);
+        _texture.allowCompression = t.allowCompression.value_or(_texture.allowCompression);
+        _texture.useAlphaChannel = t.useAlphaChannel.value_or(_texture.useAlphaChannel);
     }
+
+    _texture.allowCompression.onChange([this]() { _spriteTextureIsDirty = true; });
+    _texture.useAlphaChannel.onChange([this]() { _spriteTextureIsDirty = true; });
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
@@ -693,18 +712,20 @@ void RenderablePointCloud::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    switch (_textureMode) {
-        case TextureInputMode::Single:
-            initializeSingleTexture();
-            break;
-        case TextureInputMode::Multi:
-            initializeMultiTextures();
-            break;
-        case TextureInputMode::Other:
-            initializeCustomTexture();
-            break;
-        default:
-            break;
+    if (_hasSpriteTexture) {
+        switch (_textureMode) {
+            case TextureInputMode::Single:
+                initializeSingleTexture();
+                break;
+            case TextureInputMode::Multi:
+                initializeMultiTextures();
+                break;
+            case TextureInputMode::Other:
+                initializeCustomTexture();
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -749,36 +770,20 @@ void RenderablePointCloud::deinitializeShaders() {
 void RenderablePointCloud::initializeCustomTexture() {}
 
 void RenderablePointCloud::initializeSingleTexture() {
-    if (!_hasSpriteTexture || _texture.spriteTexturePath.value().empty()) {
+    if (_texture.spriteTexturePath.value().empty()) {
         return;
     }
 
     std::filesystem::path p = absPath(_texture.spriteTexturePath);
 
     if (!std::filesystem::is_regular_file(p)) {
-        _spriteTextureIsDirty = false;
         throw ghoul::RuntimeError(fmt::format(
             "Could not find image file '{}'", p
         ));
     }
 
-    // Single textures may be updated => make sure to clear the data structures
-    // before updating them
-    clearTextureDataStructures();
-
     loadTexture(p, 0);
-
     generateArrayTextures();
-
-    // Note that these are usually set when the data slice initialized. Hoewver, we want
-    // to avoid reinitializing the data, and here we know that all points will be rendered
-    // using the same texture array
-    if (!_textureArrays.empty()) {
-        _textureArrays.front().nPoints = _nDataPoints;
-        _textureArrays.front().startOffset = 0;
-    }
-
-    _spriteTextureIsDirty = false;
 }
 
 void RenderablePointCloud::initializeMultiTextures() {
@@ -837,7 +842,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     std::unique_ptr<ghoul::opengl::Texture> t =
         ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
-    bool useAlpha = (t->numberOfChannels() > 3) && _useAlphachannelInTexture;
+    bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 
     if (t) {
         LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
@@ -946,8 +951,6 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
 }
 
 void RenderablePointCloud::generateArrayTextures() {
-    _textureArrays.reserve(_textureMapByFormat.size());
-
     using Entry = std::pair<TextureFormat, std::vector<size_t>>;
     unsigned int arrayIndex = 0;
     for (const Entry& e : _textureMapByFormat) {
@@ -1214,7 +1217,7 @@ void RenderablePointCloud::update(const UpdateData&) {
         _colorSettings.colorMapping->update(_dataset);
     }
 
-    if ((_textureMode == TextureInputMode::Single) && _spriteTextureIsDirty) {
+    if (_spriteTextureIsDirty) {
         updateSpriteTexture();
     }
 
@@ -1305,8 +1308,7 @@ void RenderablePointCloud::updateBufferData() {
 }
 
 void RenderablePointCloud::updateSpriteTexture() {
-    bool shouldUpdate = _hasSpriteTexture && _spriteTextureIsDirty &&
-        !_texture.spriteTexturePath.value().empty();
+    bool shouldUpdate = _hasSpriteTexture && _spriteTextureIsDirty;
 
     if (!shouldUpdate) {
         return;
@@ -1315,7 +1317,35 @@ void RenderablePointCloud::updateSpriteTexture() {
     ZoneScopedN("Sprite texture");
     TracyGpuZone("Sprite texture");
 
-    initializeSingleTexture();
+    clearTextureDataStructures();
+
+    // We also have to update the dataset, to update the texture array offsets
+    _dataIsDirty = true;
+
+    // Always set set sprite texture is dirty flag.  even if something goes wrong, we
+    // want to prevent filling the log with error messages from multiple loading attempts
+    // without any changed input
+    _spriteTextureIsDirty = false;
+
+    switch (_textureMode) {
+        case TextureInputMode::Single:
+            initializeSingleTexture();
+            // Note that these are usually set when the data slice initialized. However,
+            // we want to avoid reinitializing the data, and here we know that all points
+            // will be rendered using the same texture array and hence the data can stay fixed
+            _textureArrays.front().nPoints = _nDataPoints;
+            _textureArrays.front().startOffset = 0;
+            _dataIsDirty = false;
+            break;
+        case TextureInputMode::Multi:
+            initializeMultiTextures();
+            break;
+        case TextureInputMode::Other:
+            initializeCustomTexture();
+            break;
+        default:
+            break;
+    }
 }
 
 int RenderablePointCloud::currentColorParameterIndex() const {
@@ -1441,12 +1471,13 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     for (size_t i = 0; i < subResults.size(); ++i) {
         result.insert(result.end(), subResults[i].begin(), subResults[i].end());
         int nVertices = static_cast<int>(subResults[i].size()) / nAttributesPerPoint();
-        if (_textureArrays.size() > 0) {
+        if (!_textureArrays.empty()) {
             _textureArrays[i].nPoints = nVertices;
             _textureArrays[i].startOffset = static_cast<GLint>(vertexCount);
         }
         vertexCount += nVertices;
     }
+    result.shrink_to_fit();
 
     setBoundingSphere(maxRadius);
     return result;
@@ -1455,10 +1486,10 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
 
 gl::GLenum RenderablePointCloud::internalGlFormat(bool useAlpha) const {
     if (useAlpha) {
-        return _allowTextureCompression ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_RGBA8;
+        return _texture.allowCompression ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_RGBA8;
     }
     else {
-        return _allowTextureCompression ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_RGB8;
+        return _texture.allowCompression ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_RGB8;
     }
 }
 
