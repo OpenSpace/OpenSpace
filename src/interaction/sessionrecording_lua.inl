@@ -214,6 +214,10 @@ namespace {
     openspace::global::sessionRecording->binary2ascii(fp);
 }
 
+[[codegen::luawrap]] void setOverrideRecordingStereoDepth(bool value) {
+    openspace::global::sessionRecording->setOverrideRecordingStereoDepth(value);
+}
+
 #include "sessionrecording_lua_codegen.cpp"
 
 } // namespace
