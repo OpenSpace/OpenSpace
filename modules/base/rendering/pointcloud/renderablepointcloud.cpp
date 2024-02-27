@@ -756,6 +756,7 @@ void RenderablePointCloud::initializeSingleTexture() {
     std::filesystem::path p = absPath(_texture.spriteTexturePath);
 
     if (!std::filesystem::is_regular_file(p)) {
+        _spriteTextureIsDirty = false;
         throw ghoul::RuntimeError(fmt::format(
             "Could not find image file '{}'", p
         ));
@@ -768,6 +769,14 @@ void RenderablePointCloud::initializeSingleTexture() {
     loadTexture(p, 0);
 
     generateArrayTextures();
+
+    // Note that these are usually set when the data slice initialized. Hoewver, we want
+    // to avoid reinitializing the data, and here we know that all points will be rendered
+    // using the same texture array
+    if (!_textureArrays.empty()) {
+        _textureArrays.front().nPoints = _nDataPoints;
+        _textureArrays.front().startOffset = 0;
+    }
 
     _spriteTextureIsDirty = false;
 }
@@ -1205,12 +1214,12 @@ void RenderablePointCloud::update(const UpdateData&) {
         _colorSettings.colorMapping->update(_dataset);
     }
 
-    if (_dataIsDirty) {
-        updateBufferData();
-    }
-
     if ((_textureMode == TextureInputMode::Single) && _spriteTextureIsDirty) {
         updateSpriteTexture();
+    }
+
+    if (_dataIsDirty) {
+        updateBufferData();
     }
 }
 
