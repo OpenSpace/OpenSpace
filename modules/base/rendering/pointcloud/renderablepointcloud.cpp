@@ -884,34 +884,23 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
     });
 
     gl::GLenum internalFormat = internalGlFormat(useAlpha);
+    gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
     // Create storage for the texture
-    glTexStorage3D(
+    // The nicer way would be to use glTexStorage3D, but that is only available in OpenGl
+    // 4.2 and above
+    glTexImage3D(
         GL_TEXTURE_2D_ARRAY,
-        1, // No mipmaps
+        0,
         internalFormat,
         resolution.x,
         resolution.y,
-        static_cast<gl::GLsizei>(nLayers)
+        static_cast<gl::GLsizei>(nLayers),
+        0,
+        format,
+        GL_UNSIGNED_BYTE,
+        nullptr
     );
-
-    // @TODO: This function should probably be used instead, as glTexStorage is only
-    // available in OpenGl 4.2 and above
-    //glTexImage3D(
-    //    GL_TEXTURE_2D_ARRAY,
-    //    1, // No mipmaps
-    //    internalFormat,
-    //    0,
-    //    GL_RGBA8, // internal format @TODO
-    //    resolution.x,
-    //    resolution.y,
-    //    static_cast<gl::GLsizei>(nLayers)
-    //    static_cast<gl::GLsizei>(nLayers),
-    //    0,
-    //    GL_RGBA, // format @TODO
-    //    GL_UNSIGNED_BYTE,
-    //    nullptr
-    //);
 
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
