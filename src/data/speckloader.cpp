@@ -176,12 +176,14 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             // 2:   texture 1 M1.sgi
             // The parameter in #1 is currently being ignored
 
+            std::vector<std::string> tokens = ghoul::tokenizeString(line, ' ');
+            bool hasExtraParameter = static_cast<int>(tokens.size() > 3);
+
             std::stringstream str(line);
 
             std::string dummy;
             str >> dummy;
-
-            if (line.find('-') != std::string::npos) {
+            if (hasExtraParameter) {
                 str >> dummy;
             }
 
