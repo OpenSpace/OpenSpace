@@ -114,8 +114,8 @@ namespace {
             case Mode::UserControl: return "UserControl";
             case Mode::CameraPath: return "CameraPath";
             case Mode::SessionRecordingPlayback: return "SessionRecording";
-            default: throw ghoul::MissingCaseException();
         }
+        throw ghoul::MissingCaseException();
     }
 
     constexpr openspace::properties::Property::PropertyInfo PrintEventsInfo = {
@@ -393,21 +393,7 @@ void OpenSpaceEngine::initialize() {
     }
 
     // Load the profile
-    std::ifstream inFile;
-    try {
-        inFile.open(profile, std::ifstream::in);
-    }
-    catch (const std::ifstream::failure& e) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Exception opening profile file for read: {} ({})", profile, e.what()
-        ));
-    }
-
-    std::string content(
-        (std::istreambuf_iterator<char>(inFile)),
-        std::istreambuf_iterator<char>()
-    );
-    *global::profile = Profile(content);
+    *global::profile = Profile(profile);
 
     // Set up asset loader
     _assetManager = std::make_unique<AssetManager>(
@@ -770,118 +756,9 @@ void OpenSpaceEngine::loadAssets() {
         _assetManager->add(a);
     }
 
-    _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
-    _loadingScreen->postMessage("Loading assets");
-
-    std::unordered_set<const ResourceSynchronization*> finishedSynchronizations;
-
-    while (true) {
-        _loadingScreen->render();
-        _assetManager->update();
-
-        std::vector<const Asset*> allAssets = _assetManager->allAssets();
-
-        std::vector<const ResourceSynchronization*> allSyncs =
-            _assetManager->allSynchronizations();
-
-        // Filter already synchronized assets so we don't check them anymore
-        auto syncIt = std::remove_if(
-            allSyncs.begin(),
-            allSyncs.end(),
-            [&finishedSynchronizations](const ResourceSynchronization* sync) {
-                return finishedSynchronizations.contains(sync);
-            }
-        );
-        allSyncs.erase(syncIt, allSyncs.end());
-
-        auto it = allSyncs.begin();
-        while (it != allSyncs.end()) {
-            ZoneScopedN("Update resource synchronization");
-
-            if ((*it)->isSyncing()) {
-                LoadingScreen::ProgressInfo progressInfo;
-
-                progressInfo.progress = [](const ResourceSynchronization* sync) {
-                    if (!sync->nTotalBytesIsKnown()) {
-                        return 0.f;
-                    }
-                    if (sync->nTotalBytes() == 0) {
-                        return 1.f;
-                    }
-                    return
-                        static_cast<float>(sync->nSynchronizedBytes()) /
-                        static_cast<float>(sync->nTotalBytes());
-                }(*it);
-
-                progressInfo.currentSize = (*it)->nSynchronizedBytes();
-                if ((*it)->nTotalBytesIsKnown()) {
-                    progressInfo.totalSize = (*it)->nTotalBytes();
-                }
-
-                _loadingScreen->updateItem(
-                    (*it)->identifier(),
-                    (*it)->name(),
-                    LoadingScreen::ItemStatus::Started,
-                    progressInfo
-                );
-                ++it;
-            }
-            else if ((*it)->isRejected()) {
-                _loadingScreen->updateItem(
-                    (*it)->identifier(),
-                    (*it)->name(),
-                    LoadingScreen::ItemStatus::Failed,
-                    LoadingScreen::ProgressInfo()
-                );
-                ++it;
-            }
-            else {
-                LoadingScreen::ProgressInfo progressInfo;
-                progressInfo.progress = 1.f;
-
-                _loadingScreen->updateItem(
-                    (*it)->identifier(),
-                    (*it)->name(),
-                    LoadingScreen::ItemStatus::Finished,
-                    progressInfo
-                );
-                finishedSynchronizations.insert(*it);
-                it = allSyncs.erase(it);
-            }
-        }
-
-        if (_shouldAbortLoading) {
-            global::windowDelegate->terminate();
-            break;
-        }
-
-        bool finishedLoading = std::all_of(
-            allAssets.begin(),
-            allAssets.end(),
-            [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
-        );
-
-        if (finishedLoading) {
-            break;
-        }
-    } // while(true)
-
-    if (_shouldAbortLoading) {
-        _loadingScreen = nullptr;
-        return;
-    }
-
-    _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
-
-    _loadingScreen->postMessage("Initializing scene");
-    while (_scene->isInitializing()) {
-        _loadingScreen->render();
-    }
-
-    _loadingScreen->postMessage("Initializing OpenGL");
-    _loadingScreen->finalize();
-
+    _loadingScreen->exec(*_assetManager, *_scene);
     _loadingScreen = nullptr;
+
 
     global::renderEngine->updateScene();
 
@@ -1358,7 +1235,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         // If the loading screen object exists, we are currently loading and want key
         // presses to behave differently
         if (key == Key::Escape) {
-            _shouldAbortLoading = true;
+            _loadingScreen->abort();
         }
 
         return;

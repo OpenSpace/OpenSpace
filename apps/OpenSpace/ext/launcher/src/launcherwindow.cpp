@@ -110,22 +110,8 @@ namespace {
             return std::nullopt;
         }
 
-        std::ifstream inFile;
         try {
-            inFile.open(filename, std::ifstream::in);
-        }
-        catch (const std::ifstream::failure& e) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Exception opening {} profile for read: {}", filename, e.what()
-            ));
-        }
-        std::string content;
-        std::string line;
-        while (std::getline(inFile, line)) {
-            content += line;
-        }
-        try {
-            return Profile(content);
+            return Profile(filename);
         }
         catch (const Profile::ParsingError& e) {
             QMessageBox::critical(
