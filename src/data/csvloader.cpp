@@ -96,6 +96,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     int yColumn = -1;
     int zColumn = -1;
     int nameColumn = -1;
+    int textureColumn = -1;
 
     int nDataColumns = 0;
     bool hasExcludeColumns = specs.has_value() && specs->hasExcludeColumns();
@@ -129,6 +130,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             // note that the texture column is also a regular column. Just save the index
             if (isTextureColumn(col, specs)) {
                 res.textureDataIndex = nDataColumns;
+                textureColumn = static_cast<int>(i);
             }
 
             res.variables.push_back({
@@ -139,6 +141,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         }
     }
 
+    // Some eerrors/warnings
     if (specs.has_value()) {
         bool hasAllProvided = specs->checkIfAllProvidedColumnsExist(columns);
         if (!hasAllProvided) {
@@ -149,19 +152,20 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         }
     }
 
-    // Parse textures
     bool hasProvidedTextureFile = specs.has_value() && specs->textureMap.has_value();
-    if (hasProvidedTextureFile) {
-        const std::filesystem::path path = *specs->textureMap;
-        if (!std::filesystem::is_regular_file(path)) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Failed to open texture map file {}", path
-            ));
-        }
+    bool hasTextureIndex = (res.textureDataIndex > -1);
 
-        // TODO: Allow using just the filenames directly in the CSV?
-
-        res.textures = loadTextureMapFile(path);
+    if (hasProvidedTextureFile && !hasTextureIndex && !specs->textureColumn.has_value()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error loading data file {}. No texture column was specified in the data "
+            "mapping", filePath
+        ));
+    }
+    if (!hasProvidedTextureFile && hasTextureIndex) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error loading data file {}. Missing texture map file location in data "
+            "mapping", filePath
+        ));
     }
 
     if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
@@ -175,6 +179,8 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         "Loading {} rows with {} columns", rows.size(), columns.size()
     ));
     ProgressBar progress = ProgressBar(static_cast<int>(rows.size()));
+
+    std::set<int> uniqueTextureIndicesInData;
 
     // Skip first row (column names)
     for (size_t rowIdx = 1; rowIdx < rows.size(); ++rowIdx) {
@@ -214,6 +220,10 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             else {
                 entry.data.push_back(value);
             }
+
+            if (i == textureColumn) {
+                uniqueTextureIndicesInData.emplace(static_cast<int>(value));
+            }
         }
 
         glm::vec3 positive = glm::abs(entry.position);
@@ -227,10 +237,23 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         progress.print(static_cast<int>(rowIdx + 1));
     }
 
+    // Load the textures. Skip textures that are not included in the dataset
+    if (hasProvidedTextureFile) {
+        const std::filesystem::path path = *specs->textureMap;
+        if (!std::filesystem::is_regular_file(path)) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Failed to open texture map file {}", path
+            ));
+        }
+        res.textures = loadTextureMapFile(path, uniqueTextureIndicesInData);
+    }
+
     return res;
 }
 
-std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path) {
+std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
+                                                 std::set<int> texturesInData)
+{
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
@@ -271,7 +294,9 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path) {
             }
         }
 
-        res.push_back(texture);
+        if (texturesInData.contains(texture.index)) {
+            res.push_back(texture);
+        }
     }
 
     return res;
