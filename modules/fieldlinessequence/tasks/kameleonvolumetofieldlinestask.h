@@ -50,9 +50,11 @@ private:
     std::vector<std::string> _scalarVars;
     std::vector<std::string> _magnitudeVars;
     std::filesystem::path _inputPath;
+    size_t _nthTimeStep = 1;
     std::vector<std::string> _sourceFiles;
     //std::string _timeKernelPath = "";
     std::filesystem::path _seedpointsPath;
+    size_t _nthSeedPoint = 1;
     OutputType _outputType;
     std::filesystem::path _outputFolder;
     // Manual time offset

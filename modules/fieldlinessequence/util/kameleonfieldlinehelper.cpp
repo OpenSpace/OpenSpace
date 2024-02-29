@@ -30,6 +30,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <memory>
+#include <iostream>
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 
@@ -127,7 +128,7 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
 }
 
 std::unordered_map<std::string, std::vector<glm::vec3>>
-extractSeedPointsFromFiles(std::filesystem::path filePath)
+extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
 {
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
 
@@ -159,23 +160,25 @@ extractSeedPointsFromFiles(std::filesystem::path filePath)
         std::vector<glm::vec3> outVec;
         int linenumber = 0;
         while (std::getline(seedFile, line)) {
+            if (linenumber % nth == 0) {
+                if (!line.empty() && line[0] == '#') {
+                    //ignore line, assume it's a comment
+                    continue;
+                }
+                std::stringstream ss(line);
+                glm::vec3 point;
+                if (!(ss >> point.x) || !(ss >> point.y) || !(ss >> point.z)) {
+                    LERROR(fmt::format(
+                        "Could not read line '{}' in file '{}'. ",
+                        "Line is not formatted with 3 values representing a point",
+                        linenumber, seedFilePath
+                    ));
+                }
+                else {
+                    outVec.push_back(std::move(point));
+                }
+            }
             ++linenumber;
-            if (!line.empty() && line[0] == '#') {
-                //ignore line, assume it's a comment
-                continue;
-            }
-            std::stringstream ss(line);
-            glm::vec3 point;
-            if (!(ss >> point.x) || !(ss >> point.y) || !(ss >> point.z)) {
-                LERROR(fmt::format(
-                    "Could not read line '{}' in file '{}'. ",
-                    "Line is not formatted with 3 values representing a point",
-                    linenumber, seedFilePath
-                ));
-            }
-            else {
-                outVec.push_back(std::move(point));
-            }
         }
 
         if (outVec.empty()) {

@@ -41,11 +41,15 @@ namespace {
     struct [[codegen::Dictionary(KameleonVolumeToFieldlinesTask)]] Parameters {
         // The folder to the cdf files to extract data from
         std::filesystem::path input [[codegen::directory()]];
+        // Choose to decrese cadence and only use every nth time step/ input file
+        std::optional<int> nthTimeStep;
         // A path to folder with text files with seedpoints.
         // The format of points: x1 y1 z1 x2 y2 z2 ...
         // Seedpoints are expressed in the native coordinate system of the model.
         // Filename must mutch date and time for CDF file
         std::filesystem::path seedpoints [[codegen::directory()]];
+        // Choose to only include every n:th seedpoint from each file.
+        std::optional<int> nthSeedpoint;
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.
@@ -83,7 +87,9 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inputPath = p.input;
+    _nthTimeStep = p.nthTimeStep.value_or(_nthTimeStep);
     _seedpointsPath = p.seedpoints;
+    _nthSeedPoint = p.nthSeedpoint.value_or(_nthSeedPoint);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _outputFolder = p.outputFolder;
     if (_outputFolder.string().back() != '/') {
@@ -142,42 +148,45 @@ void KameleonVolumeToFieldlinesTask::perform(
         fls::extractMagnitudeVarsFromStrings(_magnitudeVars);
 
     std::unordered_map<std::string, std::vector<glm::vec3>> seedPoints =
-        fls::extractSeedPointsFromFiles(_seedpointsPath);
+        fls::extractSeedPointsFromFiles(_seedpointsPath, _nthSeedPoint);
     if (seedPoints.empty()) {
         LERROR("Falied to read seedpoints");
         return;
     }
 
     //SpiceManager::ref().loadKernel(_timeKernelPath);
-
+    size_t fileNumber = 0;
     for (const std::string& cdfPath : _sourceFiles) {
-        FieldlinesState newState;
-        bool isSuccessful = fls::convertCdfToFieldlinesState(
-            newState,
-            cdfPath,
-            seedPoints,
-            _manualTimeOffset,
-            _tracingVar,
-            _scalarVars,
-            extraMagVars
-        );
+        if (fileNumber % _nthTimeStep == 0) {
+            FieldlinesState newState;
+            bool isSuccessful = fls::convertCdfToFieldlinesState(
+                newState,
+                cdfPath,
+                seedPoints,
+                _manualTimeOffset,
+                _tracingVar,
+                _scalarVars,
+                extraMagVars
+            );
 
-        if (isSuccessful) {
-            switch(_outputType) {
-                case OutputType::Osfls:
-                    newState.saveStateToOsfls(absPath(_outputFolder).string());
-                    break;
-                case OutputType::Json:
-                    std::string timeStr =
-                        std::string(Time(newState.triggerTime()).ISO8601());
-                    timeStr.replace(13, 1, "-");
-                    timeStr.replace(16, 1, "-");
-                    timeStr.replace(19, 1, "-");
-                    std::string fileName = timeStr;
-                    newState.saveStateToJson(_outputFolder.string() + fileName);
-                    break;
+            if (isSuccessful) {
+                switch(_outputType) {
+                    case OutputType::Osfls:
+                        newState.saveStateToOsfls(absPath(_outputFolder).string());
+                        break;
+                    case OutputType::Json:
+                        std::string timeStr =
+                            std::string(Time(newState.triggerTime()).ISO8601());
+                        timeStr.replace(13, 1, "-");
+                        timeStr.replace(16, 1, "-");
+                        timeStr.replace(19, 1, "-");
+                        std::string fileName = timeStr;
+                        newState.saveStateToJson(_outputFolder.string() + fileName);
+                        break;
+                }
             }
         }
+        ++fileNumber;
     }
     // Ideally, we would want to signal about progress earlier as well, but
     // convertCdfToFieldlinesState does all the work encapsulated in one function call.
