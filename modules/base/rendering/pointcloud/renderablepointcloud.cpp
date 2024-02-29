@@ -969,7 +969,7 @@ void RenderablePointCloud::generateArrayTextures() {
 
         int nMaxTextureLayers = 0;
         glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &nMaxTextureLayers);
-        if (layer > nMaxTextureLayers) {
+        if (static_cast<int>(layer) > nMaxTextureLayers) {
             LERROR(fmt::format(
                 "Too many layers bound in the same texture array. Found {} textures with "
                 "resolution {}x{} pixels. Max supported is {}.",
@@ -1392,13 +1392,11 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
 {
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
 
-    // Colors
     int colorParamIndex = currentColorParameterIndex();
     if (_hasColorMapFile && colorParamIndex > -1) {
         result.push_back(e.data[colorParamIndex]);
     }
 
-    // Size data
     int sizeParamIndex = currentSizeParameterIndex();
     if (_hasDatavarSize && sizeParamIndex > -1) {
         // @TODO: Consider more detailed control over the scaling. Currently the value

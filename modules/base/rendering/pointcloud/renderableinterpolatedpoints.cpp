@@ -383,7 +383,6 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
     const double r = glm::max(glm::length(position0), glm::length(position1));
     maxRadius = glm::max(maxRadius, r);
 
-    // Positions
     for (int j = 0; j < 3; ++j) {
         result.push_back(static_cast<float>(position0[j]));
     }
@@ -426,14 +425,12 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
     const Dataset::Entry& e0 = _dataset.entries[firstIndex];
     const Dataset::Entry& e1 = _dataset.entries[secondIndex];
 
-    // Colors
     int colorParamIndex = currentColorParameterIndex();
     if (_hasColorMapFile && colorParamIndex > -1) {
         result.push_back(e0.data[colorParamIndex]);
         result.push_back(e1.data[colorParamIndex]);
     }
 
-    // Size data
     int sizeParamIndex = currentSizeParameterIndex();
     if (_hasDatavarSize && sizeParamIndex > -1) {
         // @TODO: Consider more detailed control over the scaling. Currently the value
