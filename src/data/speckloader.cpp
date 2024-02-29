@@ -177,12 +177,11 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             // The parameter in #1 is currently being ignored
 
             std::vector<std::string> tokens = ghoul::tokenizeString(line, ' ');
-            int nNonEmptyTokens = 0;
-            for (const std::string& t : tokens) {
-                if (!t.empty()) {
-                    nNonEmptyTokens++;
-                }
-            }
+            int nNonEmptyTokens = static_cast<int>(std::count_if(
+                tokens.begin(),
+                tokens.end(),
+                [](const std::string& t) { return !t.empty(); }
+            ));
 
             if (nNonEmptyTokens > 4) {
                 throw ghoul::RuntimeError(fmt::format(

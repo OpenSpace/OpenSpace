@@ -276,14 +276,28 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
             continue;
         }
 
+        std::vector<std::string> tokens = ghoul::tokenizeString(line, ' ');
+        int nNonEmptyTokens = static_cast<int>(std::count_if(
+            tokens.begin(),
+            tokens.end(),
+            [](const std::string& t) { return !t.empty(); }
+        ));
+
+        if (nNonEmptyTokens > 2) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading texture map file {}: Line {} has too many parameters. "
+                "Expected 2: an integer index followed by a filename, where the file "
+                "name may not include whitespaces",
+                path, currentLineNumber
+            ));
+        }
+
         std::stringstream str(line);
 
         // each line is following the form:
         // <idx> <file name>
         Dataset::Texture texture;
         str >> texture.index >> texture.file;
-
-        // @TODO: handle when reading fails or data mapping is missing
 
         for (const Dataset::Texture& t : res) {
             if (t.index == texture.index) {
