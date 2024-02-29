@@ -301,7 +301,10 @@ namespace {
             // The folder where the textures are located when using multiple different
             // textures to render the points, based on a mapping to a column in the
             // dataset. Setting this value means that multiple textures shall be used
-            // and any single sprite texture is ignored.
+            // and any single sprite texture file is ignored.
+            //
+            // Note that the textures can be any format, but rendering efficiency will
+            // be best if using textures with the exact same resolution.
             std::optional<std::filesystem::path> folder [[codegen::directory()]];
 
             // [[codegen::verbatim(AllowTextureCompressionInfo.description)]]
@@ -310,7 +313,7 @@ namespace {
             // [[codegen::verbatim(UseAlphaInfo.description)]]
             std::optional<bool> useAlphaChannel;
         };
-        // Settings related to the texturing of the points. Note that there are two ways....
+        // Settings related to the texturing of the points
         std::optional<Texture> texture;
 
         // [[codegen::verbatim(DrawElementsInfo.description)]]

@@ -116,13 +116,15 @@ namespace {
         std::optional<std::string> name;
 
         // Specifies a column name for a column that has the data for which texture to
-        // use for each point (given as an integer index)
+        // use for each point (given as an integer index). If included, a texture map
+        // file need to be included as well
         std::optional<std::string> textureColumn;
 
         // A file where each line contains an integer index and an image file name.
         // Not valid for SPECK files, which includes this information as part of its
         // data format. This map will be used to map the data in the TextureColumn to
-        // an image file to use for rendering the points
+        // an image file to use for rendering the points. Not that only the files with
+        // indices that are used in the dataset will actually be loaded
         std::optional<std::filesystem::path> textureMapFile;
 
         // Specifies whether to do case sensitive checks when reading column names.
