@@ -33,11 +33,13 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cmath>
 #include <cctype>
 #include <fstream>
 #include <functional>
+#include <sstream>
 #include <string_view>
 
 namespace {
@@ -96,7 +98,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     int nameColumn = -1;
 
     int nDataColumns = 0;
-    bool hasExcludeColumns = specs.has_value() && (*specs).hasExcludeColumns();
+    bool hasExcludeColumns = specs.has_value() && specs->hasExcludeColumns();
     std::vector<size_t> skipColumns;
     if (hasExcludeColumns) {
         skipColumns.reserve((*specs).excludeColumns.size());
@@ -119,17 +121,47 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         else if (isNameColumn(col, specs)) {
             nameColumn = static_cast<int>(i);
         }
-        else if (hasExcludeColumns && (*specs).isExcludeColumn(col)) {
+        else if (hasExcludeColumns && specs->isExcludeColumn(col)) {
             skipColumns.push_back(i);
             continue;
         }
         else {
+            // note that the texture column is also a regular column. Just save the index
+            if (isTextureColumn(col, specs)) {
+                res.textureDataIndex = nDataColumns;
+            }
+
             res.variables.push_back({
                 .index = nDataColumns,
                 .name = col
             });
             nDataColumns++;
         }
+    }
+
+    if (specs.has_value()) {
+        bool hasAllProvided = specs->checkIfAllProvidedColumnsExist(columns);
+        if (!hasAllProvided) {
+            LERROR(fmt::format(
+                "Error loading data file {}. Not all columns provided in data mapping "
+                "exists in dataset", filePath
+            ));
+        }
+    }
+
+    // Parse textures
+    bool hasProvidedTextureFile = specs.has_value() && specs->textureMap.has_value();
+    if (hasProvidedTextureFile) {
+        const std::filesystem::path path = *specs->textureMap;
+        if (!std::filesystem::is_regular_file(path)) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Failed to open texture map file {}", path
+            ));
+        }
+
+        // TODO: Allow using just the filenames directly in the CSV?
+
+        res.textures = loadTextureMapFile(path);
     }
 
     if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
@@ -193,6 +225,53 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         res.entries.push_back(entry);
 
         progress.print(static_cast<int>(rowIdx + 1));
+    }
+
+    return res;
+}
+
+std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path) {
+    ghoul_assert(std::filesystem::exists(path), "File must exist");
+
+    std::ifstream file(path);
+    if (!file.good()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Failed to open texture map file {}", path
+        ));
+    }
+
+    int currentLineNumber = 0;
+
+    std::vector<Dataset::Texture> res;
+
+    std::string line;
+    while (std::getline(file, line)) {
+        ghoul::trimWhitespace(line);
+        currentLineNumber++;
+
+        if (line.empty() || line.starts_with("#")) {
+            continue;
+        }
+
+        std::stringstream str(line);
+
+        // each line is following the form:
+        // <idx> <file name>
+        Dataset::Texture texture;
+        str >> texture.index >> texture.file;
+
+        // @TODO: handle when reading fails or data mapping is missing
+
+        for (const Dataset::Texture& t : res) {
+            if (t.index == texture.index) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Error loading texture map file {}: Texture index '{}' defined twice",
+                    path, texture.index
+                ));
+            }
+        }
+
+        res.push_back(texture);
     }
 
     return res;
