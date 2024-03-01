@@ -51,6 +51,7 @@
 #include <future>
 
 namespace openspace::documentation {
+constexpr std::string_view _loggerCat = "DocumentationEngine";
 
 // Titles shown in the documentation sidebar 
 constexpr const char* ScriptingName = "Scripting API";
@@ -68,18 +69,26 @@ constexpr const char* DescriptionKey = "description";
 constexpr const char* DataKey = "data";
 constexpr const char* TypeKey = "type";
 constexpr const char* DocumentationKey = "documentation";
+constexpr const char* ActionKey = "action";
 
-// Actions keys
+// Actions
 constexpr const char* GuiNameKey = "guiName";
+constexpr const char* CommandKey = "command";
 
-// Factory keys
+// Factory
 constexpr const char* MembersKey = "members";
 constexpr const char* OptionalKey = "optional";
 constexpr const char* ReferenceKey = "reference";
 constexpr const char* FoundKey = "found";
 constexpr const char* RestrictionsKey = "restrictions";
+constexpr const char* ClassesKey = "classes";
 
-// Properties keys
+constexpr const char* OtherName = "Other";
+constexpr const char* OtherIdentifierName = "other";
+constexpr const char* propertyOwnerName = "propertyOwner";
+constexpr const char* categoryName = "category";
+
+// Properties
 constexpr const char* PropertiesKeys = "properties";
 constexpr const char* PropertyOwnersKey = "propertyOwners";
 constexpr const char* TagsKey = "tags";
@@ -117,21 +126,14 @@ constexpr const char* PathKey = "path";
 constexpr const char* AssetKey = "assets";
 constexpr const char* LicensesKey = "licenses";
 
-// Factory
-constexpr const char* OtherName = "Other";
-
-constexpr const char* OtherIdentifierName = "other";
-constexpr const char* propertyOwnerName = "propertyOwner";
-constexpr const char* categoryName = "category";
-
-constexpr const char* ClassesKey = "classes";
-
-// Actions
-constexpr const char* CommandKey = "command";
-
 // Keybindings
 constexpr const char* KeybindingsKey = "keybindings";
-constexpr const char* ActionKey = "action";
+
+// Event
+constexpr const char* FiltersKey = "filters";
+constexpr const char* ActionsKey = "actions";
+constexpr const char* IdKey = "id";
+
 
 nlohmann::json generateJsonDocumentation(const Documentation & d) {
     nlohmann::json json;
@@ -449,20 +451,51 @@ nlohmann::json DocumentationEngine::generateLicenseList() const {
 }
 
 nlohmann::json DocumentationEngine::generateEventJson() const {
-    nlohmann::json result;
-    result[NameKey] = EventsName;
+    const std::unordered_map<events::Event::Type, std::vector<EventEngine::ActionInfo>>& eventActions =
+        global::eventEngine->eventActions();
+    nlohmann::json events;
+
     nlohmann::json data = nlohmann::json::array();
 
-    std::vector<EventEngine::ActionInfo> eventActions =
-        global::eventEngine->registeredActions();
-
-    for (const EventEngine::ActionInfo& eventAction : eventActions) {
+    // Group actions by events
+    for (const auto& [eventType, actions] : eventActions) {
         nlohmann::json eventJson;
-        std::string eventName = std::string(events::toString(eventAction.type));
-        eventJson[NameKey] = eventName;
+
+        eventJson[NameKey] = std::string(events::toString(eventType));
+        nlohmann::json actionsJson = nlohmann::json::array();
+
+        for (const EventEngine::ActionInfo& action : actions) {
+            nlohmann::json actionJson;
+            actionJson[NameKey] = eventJson[NameKey];
+            actionJson[ActionKey] = action.action;
+            // Create a unique ID
+            actionJson[IdKey] = fmt::format("{}{}", action.action, action.id);
+
+            if (action.filter.has_value()) {
+                ghoul::Dictionary filters = action.filter.value();
+                std::vector<std::string_view> keys = filters.keys();
+                nlohmann::json filtersJson = nlohmann::json::array();
+
+                std::string filtersString = "";
+                for (std::string_view key : keys) {
+                    std::string value = filters.value<std::string>(key);
+                    filtersString += fmt::format("{} = {}, ", std::string(key), value);
+                }
+                filtersString.pop_back(); // Remove last space from last entry
+                filtersString.pop_back(); // Remove last comma from last entry
+
+                actionJson[FiltersKey] = filtersString;
+
+            }
+            actionsJson.push_back(actionJson);
+        }
+        eventJson[ActionsKey] = actionsJson;
         data.push_back(eventJson);
     }
 
+    // Format resulting json
+    nlohmann::json result;
+    result[NameKey] = EventsName;
     result[DataKey] = data;
     return result;
 }

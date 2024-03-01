@@ -170,6 +170,11 @@ std::vector<EventEngine::ActionInfo> EventEngine::registeredActions() const {
     return result;
 }
 
+const std::unordered_map<events::Event::Type, std::vector<EventEngine::ActionInfo>>& const
+EventEngine::eventActions() const {
+    return _eventActions;
+}
+
 void EventEngine::enableEvent(uint32_t identifier) {
     using Type = events::Event::Type;
     for (std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
