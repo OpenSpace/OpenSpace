@@ -469,20 +469,20 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
            );
            addPropertySubOwner(colorMapping.get());
         }
+
+        enableOutline = p.coloring->enableOutline.value_or(enableOutline);
+        outlineColor = p.coloring->outlineColor.value_or(outlineColor);
+        outlineWeight = p.coloring->outlineWeight.value_or(outlineWeight);
     }
     pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(pointColor);
 
-    enableOutline = p.coloring->enableOutline.value_or(enableOutline);
     addProperty(enableOutline);
 
     outlineColor.setViewOption(properties::Property::ViewOptions::Color);
-    outlineColor = p.coloring->outlineColor.value_or(outlineColor);
     addProperty(outlineColor);
 
-    outlineWeight = p.coloring->outlineWeight.value_or(outlineWeight);
     addProperty(outlineWeight);
-
 }
 
 RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
