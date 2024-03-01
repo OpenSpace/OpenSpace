@@ -24,8 +24,13 @@
 
 #include <modules/omni/omnimodule.h>
 
-#include <openspace/engine/globalscallbacks.h>
+#include <modules/omni/include/scene.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <ghoul/io/socket/websocket.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/logging/logmanager.h>
@@ -39,8 +44,11 @@ namespace {
     constexpr std::string_view MessageKeyRole = "role";
     constexpr std::string_view MessageKeyType = "type";
     constexpr std::string_view MessageKeyUser = "user";
+    constexpr std::string_view MessageKeySceneType = "SceneType";
 
-}
+} // namespace 
+
+#include "omnimodule_lua.inl"
 
 namespace openspace::omni {
 
@@ -54,6 +62,7 @@ namespace openspace::omni {
             case Type::ServerJoin: return "server_join";
             case Type::ServerLeave: return "server_leave";
             case Type::ServerError: return "server_error";
+            //case Type::OpenSpaceType: return "openspace";
             default:
                 throw ghoul::MissingCaseException();
         }
@@ -84,6 +93,9 @@ namespace openspace::omni {
         else if (str == "server_error") {
             return Type::ServerError;
         }
+        //else if (str == "openspace") {
+        //    return Type::OpenSpaceType;
+        //}
 
         throw ghoul::RuntimeError(fmt::format("Unknown event type '{}'", str));
     }
@@ -107,6 +119,10 @@ OmniModule::~OmniModule() {
     if (_thread.joinable()) {
         _thread.join();
     }
+
+    //if (_scene) {
+    //    delete _scene;
+    //}
 }
 
 void OmniModule::internalInitialize(const ghoul::Dictionary& config) {
@@ -142,6 +158,15 @@ void OmniModule::internalInitialize(const ghoul::Dictionary& config) {
     _socket = std::move(tcpSocket);
 
     _thread = std::move(std::thread([this]() { handleConnection(); }));
+
+    FactoryManager::ref().addFactory<omni::Scene>("OmniScene");
+    auto factory = FactoryManager::ref().factory<omni::Scene>();
+    factory->registerClass<omni::Poll>("poll");
+    
+}
+
+void OmniModule::addScene(omni::Scene* scene) {
+    _scene = scene;
 }
 
 void OmniModule::preSync() {
@@ -190,6 +215,12 @@ void OmniModule::handleJson(const nlohmann::json& json) {
             userLeave(json);
             break;
         }
+        //case omni::Type::OpenSpaceType: {
+        //    break;
+        //}
+        default:
+            return;
+
     }
 }
 
@@ -250,6 +281,21 @@ void OmniModule::userLeave(const nlohmann::json& json) {
     if (it != _users.end()) {
         _users.erase(it);
     }
+}
+
+scripting::LuaLibrary OmniModule::luaLibrary() const {
+    return {
+        "omni",
+        {
+            codegen::lua::CreateSceneFromDictionary
+        }
+    };
+}
+
+std::vector<documentation::Documentation> OmniModule::documentations() const {
+    return {
+        omni::Poll::Documentation(),
+    };
 }
 
 } // namespace openspace

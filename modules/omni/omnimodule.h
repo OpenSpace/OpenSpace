@@ -27,13 +27,15 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <websocketpp/config/core.hpp>
+#include <modules/omni/include/poll.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/io/socket/tcpsocket.h>
-#include <websocketpp/server.hpp>
 
 #include <deque>
 #include <mutex>
 #include <set>
+#include <websocketpp/config/core.hpp>
+#include <websocketpp/server.hpp>
 
 namespace ghoul::io { class Socket; }
 
@@ -46,7 +48,8 @@ namespace openspace::omni {
         ServerCode,
         ServerJoin,
         ServerLeave,
-        ServerError
+        ServerError,
+        //OpenSpaceType
     };
 
 
@@ -67,6 +70,11 @@ public:
 
     void internalInitialize(const ghoul::Dictionary& config) override;
 
+    void addScene(omni::Scene* scene);
+
+    scripting::LuaLibrary luaLibrary() const override;
+    std::vector<documentation::Documentation> documentations() const override;
+
 private:
     void preSync();
     void handleConnection();
@@ -86,6 +94,8 @@ private:
     std::string _serverCode;
 
     std::set<int> _users;
+
+    omni::Scene* _scene = nullptr;
 };
 
 } // namespace openspace
