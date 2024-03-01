@@ -26,11 +26,15 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   omnimodule.h
+  include/poll.h
+  include/scene.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   omnimodule.cpp
+  src/poll.cpp
+  src/scene.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
