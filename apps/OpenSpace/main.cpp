@@ -403,7 +403,6 @@ void mainPreSyncFunc() {
     }
     catch (const ghoul::RuntimeError& e) {
         LFATALC(e.component, e.message);
-        Engine::instance().terminate();
     }
 
     // Query joystick status, those connected at run time
