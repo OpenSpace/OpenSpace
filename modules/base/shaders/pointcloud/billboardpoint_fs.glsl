@@ -101,10 +101,8 @@ Fragment getFragment() {
 
   if (hasSpriteTexture) {
     fullColor *= texture(spriteTexture, texCoord);
-  } else if (enableOutline) {
-    if (lengthFromCenter > (1.0 - outlineWeight)) {
-      fullColor.rgb = outlineColor;
-    }
+  } else if (enableOutline && (lengthFromCenter > (1.0 - outlineWeight))) {
+    fullColor.rgb = outlineColor;
   }
 
   fullColor.a *= opacity * fadeInValue;

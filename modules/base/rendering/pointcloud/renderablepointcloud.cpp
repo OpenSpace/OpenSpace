@@ -232,26 +232,24 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable Point Outline",
-        "This setting determines if each point should have an outline or not. "
-        "An outline is only applied when rendering as colored points "
-        "(not when using textures).",
+        "This setting determines if each point should have an outline or not. An outline "
+        "is only applied when rendering as colored points (not when using textures).",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
         "Outline Color",
-        "This value defines the color of the outline. "
-        "Darker colors will be less visible if Additive Blending is enabled.",
+        "This value defines the color of the outline. Darker colors will be "
+        "less visible if Additive Blending is enabled.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
         "OutlineWeight",
         "Outline Weight",
-        "This setting determines the thickness of the outline. "
-        "A value of 0.0 will not show any outline, while a value of 1.0 will "
-        "cover the whole point.",
+        "This setting determines the thickness of the outline. A value of 0 will "
+        "not show any outline, while a value of 1 will cover the whole point.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -455,7 +453,7 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     : properties::PropertyOwner({ "Coloring", "Coloring", "" })
     , pointColor(PointColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , enableOutline(EnableOutlineInfo, false)
-    , outlineColor(OutlineColorInfo, glm::vec3(0.23f), glm::vec3(0.f), glm::vec3(1.0))
+    , outlineColor(OutlineColorInfo, glm::vec3(0.23f), glm::vec3(0.f), glm::vec3(1.f))
     , outlineWeight(OutlineWeightInfo, 0.2f, 0.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -475,18 +473,15 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(pointColor);
 
-    if (hasColoring) {
-        const Parameters::ColorSettings settings = *p.coloring;
-        enableOutline = settings.enableOutline.value_or(enableOutline);
-        addProperty(enableOutline);
+    enableOutline = p.coloring->enableOutline.value_or(enableOutline);
+    addProperty(enableOutline);
 
-        outlineColor.setViewOption(properties::Property::ViewOptions::Color);
-        outlineColor = settings.outlineColor.value_or(outlineColor);
-        addProperty(outlineColor);
+    outlineColor.setViewOption(properties::Property::ViewOptions::Color);
+    outlineColor = p.coloring->outlineColor.value_or(outlineColor);
+    addProperty(outlineColor);
 
-        outlineWeight = settings.outlineWeight.value_or(outlineWeight);
-        addProperty(outlineWeight);
-    }
+    outlineWeight = p.coloring->outlineWeight.value_or(outlineWeight);
+    addProperty(outlineWeight);
 
 }
 
