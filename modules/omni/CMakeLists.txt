@@ -33,6 +33,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   omnimodule.cpp
+  omnimodule_lua.inl
   src/poll.cpp
   src/scene.cpp
 )
