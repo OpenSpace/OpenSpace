@@ -33,6 +33,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
 
@@ -372,7 +373,7 @@ void RenderableFieldlines::loadSeedPointsFromFile() {
         ));
     else {
         std::string line;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             std::stringstream s(line);
 
             glm::vec3 point;

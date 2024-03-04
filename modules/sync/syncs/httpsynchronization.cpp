@@ -29,6 +29,7 @@
 #include <openspace/util/httprequest.h>
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 #include <unordered_map>
 
@@ -212,7 +213,7 @@ bool HttpSynchronization::isEachFileDownloaded() {
     //Optionally list of already synched files
 
     if (ossyncVersion == OssyncVersionNumber) {
-        std::getline(file >> std::ws, line); // Read synchronization status
+        ghoul::getline(file >> std::ws, line); // Read synchronization status
         if (line == SynchronizationToken) {
             return true;
         }

@@ -42,6 +42,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
@@ -736,10 +737,10 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
 
     // Read header for OFF (Object File Format)
     std::string line;
-    std::getline(pointFile, line);
+    ghoul::getline(pointFile, line);
 
     // Read point count
-    std::getline(pointFile, line);
+    ghoul::getline(pointFile, line);
     std::istringstream iss(line);
     iss >> nPoints;
 
@@ -752,7 +753,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
         ++i)
     {
         float x, y, z, r, g, b, a;
-        std::getline(pointFile, line);
+        ghoul::getline(pointFile, line);
         std::istringstream issp(line);
         issp >> x >> y >> z >> r >> g >> b >> a;
 

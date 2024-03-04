@@ -40,6 +40,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <cstdlib>
 #include <filesystem>
@@ -359,14 +360,14 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
 
         std::string sline;
         while (!csvLabelFile.eof()) {
-            std::getline(csvLabelFile, sline);
+            ghoul::getline(csvLabelFile, sline);
             if (sline.size() <= 10) {
                 continue;
             }
 
             std::istringstream iss(sline);
             std::string token;
-            std::getline(iss, token, ',');
+            ghoul::getline(iss, token, ',');
 
             // First line is just the Header
             if (token == "Feature_Name") {
@@ -392,18 +393,18 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
                 tokenChar++;
             }
 
-            std::getline(iss, token, ','); // Target is not used
+            ghoul::getline(iss, token, ','); // Target is not used
 
-            std::getline(iss, token, ','); // Diameter
+            ghoul::getline(iss, token, ','); // Diameter
             lEntry.diameter = std::stof(token);
 
-            std::getline(iss, token, ','); // Latitude
+            ghoul::getline(iss, token, ','); // Latitude
             lEntry.latitude = std::stof(token);
 
-            std::getline(iss, token, ','); // Longitude
+            ghoul::getline(iss, token, ','); // Longitude
             lEntry.longitude = std::stof(token);
 
-            std::getline(iss, token, ','); // Coord System
+            ghoul::getline(iss, token, ','); // Coord System
             std::string coordinateSystem(token);
             std::size_t found = coordinateSystem.find("West");
             if (found != std::string::npos) {
@@ -412,9 +413,9 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
 
             // Clean white spaces
             std::istringstream issFeature(lEntry.feature);
-            std::getline(issFeature, token, '=');
+            ghoul::getline(issFeature, token, '=');
             if (token.empty()) {
-                std::getline(issFeature, token, '=');
+                ghoul::getline(issFeature, token, '=');
             }
             strncpy(lEntry.feature, token.c_str(), 255);
 

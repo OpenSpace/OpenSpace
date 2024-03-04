@@ -34,6 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 #include <queue>
 
@@ -266,11 +267,11 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
     std::string line = "-";
     for (int i = 0; i < numberOfObjects; i++) {
 
-        std::getline(file, line); // get rid of title
+        ghoul::getline(file, line); // get rid of title
 
         KeplerParameters keplerElements;
 
-        std::getline(file, line);
+        ghoul::getline(file, line);
         if (line[0] == '1') {
             // First line
             // Field Columns   Content
@@ -296,7 +297,7 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
             ));
         }
 
-        std::getline(file, line);
+        ghoul::getline(file, line);
         if (line[0] == '2') {
             // Second line
             // Field    Columns   Content

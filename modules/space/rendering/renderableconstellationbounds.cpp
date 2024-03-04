@@ -30,6 +30,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
 #include <optional>
@@ -238,7 +239,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
     // a new constellation name, at which point the currentBound is stored away, a new,
     // empty ConstellationBound is created and set at the currentBound
     while (file.good()) {
-        std::getline(file, currentLine);
+        ghoul::getline(file, currentLine);
         if (currentLine.empty()) {
             continue;
         }

@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 
@@ -94,7 +95,7 @@ bool InstrumentTimesParser::create() {
             std::smatch matches;
             TimeRange instrumentActiveTimeRange;
             bool successfulRead = true;
-            while (std::getline(inFile, line)) {
+            while (ghoul::getline(inFile, line)) {
                 if (!std::regex_match(line, matches, _pattern)) {
                     continue;
                 }

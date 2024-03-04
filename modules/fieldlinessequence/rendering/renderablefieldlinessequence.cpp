@@ -877,7 +877,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
         LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
         std::string line;
         std::vector<glm::vec3> outVec;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             std::stringstream ss(line);
             glm::vec3 point;
             ss >> point.x;
@@ -916,7 +916,7 @@ std::vector<std::string>
             std::istringstream ss(str.substr(2, str.size() - 4));
             std::string magVar;
             size_t counter = 0;
-            while (std::getline(ss, magVar, ',')) {
+            while (ghoul::getline(ss, magVar, ',')) {
                 magVar.erase(
                     std::remove_if(
                         magVar.begin(),

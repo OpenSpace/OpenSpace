@@ -25,6 +25,7 @@
 #include "profile/assettreeitem.h"
 #include "profile/assettreemodel.h"
 #include "filesystemaccess.h"
+#include <ghoul/misc/stringhelper.h>
 #include <sstream>
 #include <QColor>
 
@@ -58,7 +59,7 @@ namespace {
     }
 
     bool importGetNextLine(ImportElement& elem, std::istringstream& iss) {
-        std::getline(iss, elem.line);
+        ghoul::getline(iss, elem.line);
         const bool ok = iss.good();
         if (!ok) {
             elem.line = "";

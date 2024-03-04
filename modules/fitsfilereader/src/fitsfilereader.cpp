@@ -28,6 +28,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 
 #ifdef WIN32
@@ -544,7 +545,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     std::string line;
     while (true) {
         std::streampos position = fileStream.tellg();
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
 
         if (line.empty() || line[0] == '#') {
             continue;
@@ -597,7 +598,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
         std::vector<float> readValues(nValuesPerStar);
         nStars++;
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
         std::stringstream str(line);
 
         // Read values.

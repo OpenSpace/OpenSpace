@@ -52,6 +52,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <filesystem>
 #include <iomanip>
@@ -1111,7 +1112,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
         }
     }
     else {
-        while (parsingStatusOk && std::getline(_playbackFile, _playbackLineParsing)) {
+        while (parsingStatusOk && ghoul::getline(_playbackFile, _playbackLineParsing)) {
             _playbackLineNum++;
 
             std::istringstream iss(_playbackLineParsing);
@@ -2484,7 +2485,7 @@ bool SessionRecording::convertEntries(std::string& inFilename,
         }
     }
     else {
-        while (conversionStatusOk && std::getline(inStream, lineParsing)) {
+        while (conversionStatusOk && ghoul::getline(inStream, lineParsing)) {
             lineNum++;
 
             std::istringstream iss(lineParsing);
