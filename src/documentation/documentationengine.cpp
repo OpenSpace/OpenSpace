@@ -378,10 +378,10 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
 
     using K = std::string;
     using V = nlohmann::json;
-    for (const std::pair<const K, V>& assetLicense : assetLicenses) {
+    for (std::pair<const K, V>& assetLicense : assetLicenses) {
         nlohmann::json entry;
         entry[NameKey] = assetLicense.first;
-        entry[AssetKey] = assetLicense.second;
+        entry[AssetKey] = std::move(assetLicense.second);
         sortJson(entry[AssetKey], NameKey);
         assetsJson[LicensesKey].push_back(entry);
     }
