@@ -773,7 +773,8 @@ void OpenSpaceEngine::loadAssets() {
 
     
     _writeDocumentationTask = std::async(
-        &documentation::DocumentationEngine::writeDocumentation, DocEng
+        &documentation::DocumentationEngine::writeDocumentation,
+        DocEng
     );
 
     LTRACE("OpenSpaceEngine::loadAsset(end)");

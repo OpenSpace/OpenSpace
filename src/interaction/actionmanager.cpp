@@ -128,4 +128,5 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
         }
     };
 }
+
 } // namespace openspace::interaction

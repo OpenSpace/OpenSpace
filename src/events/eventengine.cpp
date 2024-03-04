@@ -31,7 +31,7 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "EventEngine";
-}
+} // namespace
 
 namespace openspace {
 
@@ -54,8 +54,7 @@ void EventEngine::postFrameCleanup() {
 #endif // _DEBUG
 }
 
-void EventEngine::registerEventAction(events::Event::Type type,
-                                      std::string identifier,
+void EventEngine::registerEventAction(events::Event::Type type, std::string identifier,
                                       std::optional<ghoul::Dictionary> filter)
 {
     ActionInfo ai;
@@ -171,7 +170,8 @@ std::vector<EventEngine::ActionInfo> EventEngine::registeredActions() const {
 }
 
 const std::unordered_map<events::Event::Type, std::vector<EventEngine::ActionInfo>>& const
-EventEngine::eventActions() const {
+EventEngine::eventActions() const
+{
     return _eventActions;
 }
 
