@@ -71,10 +71,6 @@
 #include <modules/spout/spoutwrapper.h>
 #endif // OPENSPACE_HAS_SPOUT
 
-#ifdef OPENSPACE_HAS_NVTOOLS
-#include "nvToolsExt.h"
-#endif // OPENSPACE_HAS_NVTOOLS
-
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 #include <float.h>
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
@@ -96,7 +92,6 @@ constexpr std::string_view OpenVRTag = "OpenVR";
 const Window* currentWindow = nullptr;
 const BaseViewport* currentViewport = nullptr;
 Frustum::Mode currentFrustumMode;
-glm::mat4 currentModelViewProjectionMatrix;
 glm::mat4 currentModelMatrix;
 glm::ivec2 currentDrawResolution;
 
@@ -130,7 +125,6 @@ std::vector<SpoutWindow> SpoutWindows;
 
 #endif // OPENSPACE_HAS_SPOUT
 
-}
 
 //
 //  MiniDump generation
@@ -417,9 +411,6 @@ void mainPreSyncFunc() {
 void mainPostSyncPreDrawFunc() {
     ZoneScoped;
 
-#ifdef OPENSPACE_HAS_NVTOOLS
-    nvtxRangePush("postSyncPreDraw");
-#endif // OPENSPACE_HAS_NVTOOLS
     LTRACE("main::postSynchronizationPreDraw(begin)");
 
     global::openSpaceEngine->postSynchronizationPreDraw();
@@ -432,10 +423,6 @@ void mainPostSyncPreDrawFunc() {
 #endif // OPENVR_SUPPORT
 
     LTRACE("main::postSynchronizationPreDraw(end)");
-
-#ifdef OPENSPACE_HAS_NVTOOLS
-    nvtxRangePop();
-#endif // OPENSPACE_HAS_NVTOOLS
 }
 
 
@@ -443,9 +430,6 @@ void mainPostSyncPreDrawFunc() {
 void mainRenderFunc(const sgct::RenderData& data) {
     ZoneScoped;
 
-#ifdef OPENSPACE_HAS_NVTOOLS
-    nvtxRangePush("render");
-#endif // OPENSPACE_HAS_NVTOOLS
     LTRACE("main::mainRenderFunc(begin)");
 
     currentWindow = &data.window;
@@ -491,7 +475,6 @@ void mainRenderFunc(const sgct::RenderData& data) {
             sizeof(mat4)
         );
         currentModelMatrix = modelMatrix;
-        currentModelViewProjectionMatrix = modelMatrix * viewMatrix * projectionMatrix;
         global::openSpaceEngine->render(modelMatrix, viewMatrix, projectionMatrix);
 
 #ifdef OPENSPACE_HAS_SPOUT
@@ -522,9 +505,6 @@ void mainRenderFunc(const sgct::RenderData& data) {
     }
 
     LTRACE("main::mainRenderFunc(end)");
-#ifdef OPENSPACE_HAS_NVTOOLS
-    nvtxRangePop();
-#endif // OPENSPACE_HAS_NVTOOLS
 }
 
 
@@ -641,6 +621,8 @@ void mainCharCallback(unsigned int codepoint, int modifiers, sgct::Window* windo
 
 
 void mainDropCallback(int amount, const char** paths) {
+    ZoneScoped;
+
     ghoul_assert(amount > 0, "Expected at least one file path");
     ghoul_assert(paths, "expected non-nullptr");
 
@@ -651,25 +633,25 @@ void mainDropCallback(int amount, const char** paths) {
 
 
 
-std::vector<std::byte> mainEncodeFun() {
+std::vector<std::byte> mainEncode() {
     ZoneScoped;
-    LTRACE("main::mainEncodeFun(begin)");
+    LTRACE("main::mainEncode(begin)");
 
     std::vector<std::byte> data = global::openSpaceEngine->encode();
 
-    LTRACE("main::mainEncodeFun(end)");
+    LTRACE("main::mainEncode(end)");
     return data;
 }
 
 
 
-void mainDecodeFun(const std::vector<std::byte>& data) {
+void mainDecode(const std::vector<std::byte>& data) {
     ZoneScoped;
-    LTRACE("main::mainDecodeFun(begin)");
+    LTRACE("main::mainDecode(begin)");
 
     global::openSpaceEngine->decode(data);
 
-    LTRACE("main::mainDecodeFun(end)");
+    LTRACE("main::mainDecode(end)");
 }
 
 
@@ -690,9 +672,8 @@ void mainLogCallback(Log::Level level, std::string_view message) {
         case Log::Level::Error:
             LERRORC("SGCT", message);
             break;
+    }
 }
-
-} // namespace
 
 
 void setSgctDelegateFunctions() {
@@ -1113,6 +1094,9 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
     return config;
 }
 
+} // namespace
+
+
 int main(int argc, char* argv[]) {
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
     _clearfp();
@@ -1379,6 +1363,44 @@ int main(int argc, char* argv[]) {
         }
         glfwInit();
 
+        // We are just reloading the configuration file here in case the user has changed
+        // anything in the settings panel. In that case want to apply these settings
+        // immediately rather than waiting for the next startup.
+        // What follows is some copy-paste code that should be cleaned up at some point
+
+        LDEBUG("Reloading configuration from disk");
+        // Find configuration
+        std::filesystem::path configurationFilePath;
+        if (commandlineArguments.configuration.has_value()) {
+            configurationFilePath = absPath(*commandlineArguments.configuration);
+        }
+        else {
+            LDEBUG("Finding configuration");
+            configurationFilePath = findConfiguration();
+        }
+
+        // The previous incarnation of this was initializing GLFW to get the primary
+        // monitor's resolution, but that had some massive performance implications as
+        // there was some issue with the swap buffer handling inside of GLFW. My
+        // assumption is that GLFW doesn't like being initialized, destroyed, and then
+        // initialized again. Therefore we are using the platform specific functions now
+        glm::ivec2 size = glm::ivec2(1920, 1080);
+#ifdef WIN32
+        DEVMODEW dm = { 0 };
+        dm.dmSize = sizeof(DEVMODEW);
+        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+        if (success) {
+            size.x = dm.dmPelsWidth;
+            size.y = dm.dmPelsHeight;
+        }
+#endif // WIN32
+
+        *global::configuration = loadConfigurationFromFile(
+            configurationFilePath.string(),
+            findSettings(),
+            size
+        );
+
         global::configuration->profile = win.selectedProfile();
         windowConfiguration = selectedSgctProfileFromLauncher(
             win,
@@ -1421,21 +1443,22 @@ int main(int argc, char* argv[]) {
     config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
 
     LDEBUG("Setting callbacks");
-    Engine::Callbacks callbacks;
-    callbacks.initOpenGL = mainInitFunc;
-    callbacks.preSync = mainPreSyncFunc;
-    callbacks.postSyncPreDraw = mainPostSyncPreDrawFunc;
-    callbacks.draw = mainRenderFunc;
-    callbacks.draw2D = mainDraw2DFunc;
-    callbacks.postDraw = mainPostDrawFunc;
-    callbacks.keyboard = mainKeyboardCallback;
-    callbacks.mouseButton = mainMouseButtonCallback;
-    callbacks.mousePos = mainMousePosCallback;
-    callbacks.mouseScroll = mainMouseScrollCallback;
-    callbacks.character = mainCharCallback;
-    callbacks.drop = mainDropCallback;
-    callbacks.encode = mainEncodeFun;
-    callbacks.decode = mainDecodeFun;
+    Engine::Callbacks callbacks = {
+        .initOpenGL = mainInitFunc,
+        .preSync = mainPreSyncFunc,
+        .postSyncPreDraw = mainPostSyncPreDrawFunc,
+        .draw = mainRenderFunc,
+        .draw2D = mainDraw2DFunc,
+        .postDraw = mainPostDrawFunc,
+        .encode = mainEncode,
+        .decode = mainDecode,
+        .keyboard = mainKeyboardCallback,
+        .character = mainCharCallback,
+        .mouseButton = mainMouseButtonCallback,
+        .mousePos = mainMousePosCallback,
+        .mouseScroll = mainMouseScrollCallback,
+        .drop = mainDropCallback
+    };
     Log::instance().setNotifyLevel(Log::Level::Debug);
 
     try {

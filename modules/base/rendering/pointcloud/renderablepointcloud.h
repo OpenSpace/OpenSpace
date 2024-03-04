@@ -132,6 +132,9 @@ protected:
         explicit ColorSettings(const ghoul::Dictionary& dictionary);
         properties::Vec3Property pointColor;
         std::unique_ptr<ColorMappingComponent> colorMapping;
+        properties::BoolProperty enableOutline;
+        properties::Vec3Property outlineColor;
+        properties::FloatProperty outlineWeight;
     };
     ColorSettings _colorSettings;
 
@@ -162,7 +165,7 @@ protected:
         right, fadeInValue, hasSpriteTexture, spriteTexture, useColormap, colorMapTexture,
         cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
         enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
-        useBelowRangeColor, hasDvarScaling
+        useBelowRangeColor, hasDvarScaling, enableOutline, outlineColor, outlineWeight
     ) _uniformCache;
 
     std::string _dataFile;

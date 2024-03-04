@@ -159,7 +159,6 @@ private:
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
-    bool _shouldAbortLoading = false;
     std::unique_ptr<LoadingScreen> _loadingScreen;
     std::unique_ptr<VersionChecker> _versionChecker;
 
