@@ -53,15 +53,6 @@
 namespace openspace::documentation {
 constexpr std::string_view _loggerCat = "DocumentationEngine";
 
-// Titles shown in the documentation sidebar 
-constexpr const char* ScriptingName = "Scripting API";
-constexpr const char* ActionName = "Actions";
-constexpr const char* SceneName = "Scene";
-constexpr const char* SettingsName = "Settings";
-constexpr const char* EventsName = "Events";
-constexpr const char* FactoryName = "Asset Types";
-constexpr const char* KeybindingsName = "Keybindings";
-
 // General keys
 constexpr const char* NameKey = "name";
 constexpr const char* IdentifierKey = "identifier";
@@ -72,10 +63,12 @@ constexpr const char* DocumentationKey = "documentation";
 constexpr const char* ActionKey = "action";
 
 // Actions
+constexpr const char* ActionTitle = "Actions"; // Title in documentation sidebar
 constexpr const char* GuiNameKey = "guiName";
 constexpr const char* CommandKey = "command";
 
 // Factory
+constexpr const char* FactoryTitle = "Asset Types"; // Title in documentation sidebar
 constexpr const char* MembersKey = "members";
 constexpr const char* OptionalKey = "optional";
 constexpr const char* ReferenceKey = "reference";
@@ -89,12 +82,15 @@ constexpr const char* propertyOwnerName = "propertyOwner";
 constexpr const char* categoryName = "category";
 
 // Properties
+constexpr const char* SettingsTitle = "Settings"; // Title in documentation sidebar
+constexpr const char* SceneTitle = "Scene"; // Title in documentation sidebar
 constexpr const char* PropertiesKeys = "properties";
 constexpr const char* PropertyOwnersKey = "propertyOwners";
 constexpr const char* TagsKey = "tags";
 constexpr const char* UriKey = "uri";
 
 // Scripting
+constexpr const char* ScriptingTitle = "Scripting API"; // Title in documentation sidebar
 constexpr const char* DefaultValueKey = "defaultValue";
 constexpr const char* ArgumentsKey = "arguments";
 constexpr const char* ReturnTypeKey = "returnType";
@@ -108,12 +104,12 @@ constexpr const char* SourceLocationKey = "sourceLocation";
 constexpr const char* OpenSpaceScriptingKey = "openspace";
 
 // Licenses
+constexpr const char* LicensesTitle = "Licenses"; // Title in documentation sidebar
 constexpr const char* ProfileName = "Profile";
 constexpr const char* AssetsName = "Assets";
 constexpr const char* LicensesName = "Licenses";
-constexpr const char* LicenseTypeName = "license";
 constexpr const char* NoLicenseName = "No License";
-constexpr const char* NoData = "";
+constexpr const char* NoDataName = "";
 
 constexpr const char* ProfileNameKey = "profileName";
 constexpr const char* VersionKey = "version";
@@ -127,9 +123,11 @@ constexpr const char* AssetKey = "assets";
 constexpr const char* LicensesKey = "licenses";
 
 // Keybindings
+constexpr const char* KeybindingsTitle = "Keybindings"; // Title in documentation sidebar
 constexpr const char* KeybindingsKey = "keybindings";
 
-// Event
+// Events
+constexpr const char* EventsTitle = "Events"; // Title in documentation sidebar
 constexpr const char* FiltersKey = "filters";
 constexpr const char* ActionsKey = "actions";
 constexpr const char* IdKey = "id";
@@ -239,7 +237,7 @@ nlohmann::json LuaFunctionToJson(const openspace::scripting::LuaLibrary::Functio
         nlohmann::json argument;
         argument[NameKey] = arg.name;
         argument[TypeKey] = arg.type;
-        argument[DefaultValueKey] = arg.defaultValue.value_or(NoData);
+        argument[DefaultValueKey] = arg.defaultValue.value_or(NoDataName);
         arguments.push_back(argument);
     }
 
@@ -346,13 +344,12 @@ nlohmann::json DocumentationEngine::generateLicensesGroupedByLicense() const {
         metaTotal++;
         nlohmann::json metaJson;
         metaJson[NameKey] = ProfileName;
-        metaJson[ProfileNameKey] = global::profile->meta->name.value_or(NoData);
-        metaJson[VersionKey] = global::profile->meta->version.value_or(NoData);
-        metaJson[DescriptionKey] = global::profile->meta->description.value_or(NoData);
-        metaJson[AuthorKey] = global::profile->meta->author.value_or(NoData);
-        metaJson[UrlKey] = global::profile->meta->url.value_or(NoData);
-        metaJson[LicenseKey] = global::profile->meta->license.value_or(NoData);
-        metaJson[TypeKey] = LicenseTypeName;
+        metaJson[ProfileNameKey] = global::profile->meta->name.value_or(NoDataName);
+        metaJson[VersionKey] = global::profile->meta->version.value_or(NoDataName);
+        metaJson[DescriptionKey] = global::profile->meta->description.value_or(NoDataName);
+        metaJson[AuthorKey] = global::profile->meta->author.value_or(NoDataName);
+        metaJson[UrlKey] = global::profile->meta->url.value_or(NoDataName);
+        metaJson[LicenseKey] = global::profile->meta->license.value_or(NoDataName);
         json.push_back(std::move(metaJson));
     }
 
@@ -362,19 +359,19 @@ nlohmann::json DocumentationEngine::generateLicensesGroupedByLicense() const {
 
         nlohmann::json assetJson;
         if (!meta.has_value()) {
-            assetJson[NameKey] = NoData;
-            assetJson[VersionKey] = NoData;
-            assetJson[DescriptionKey] = NoData;
-            assetJson[AuthorKey] = NoData;
-            assetJson[UrlKey] = NoData;
+            assetJson[NameKey] = NoDataName;
+            assetJson[VersionKey] = NoDataName;
+            assetJson[DescriptionKey] = NoDataName;
+            assetJson[AuthorKey] = NoDataName;
+            assetJson[UrlKey] = NoDataName;
             assetJson[LicenseKey] = NoLicenseName;
-            assetJson[IdentifiersKey] = NoData;
+            assetJson[IdentifiersKey] = NoDataName;
             assetJson[PathKey] = asset->path().string();
 
             assetLicenses[NoLicenseKey].push_back(assetJson);
         }
         else {
-            std::string licenseName = meta->license == NoData ? NoLicenseName :
+            std::string licenseName = meta->license == NoDataName ? NoLicenseName :
                 meta->license;
             assetJson[NameKey] = meta->name;
             assetJson[VersionKey] = meta->version;
@@ -405,7 +402,7 @@ nlohmann::json DocumentationEngine::generateLicensesGroupedByLicense() const {
     json.push_back(assetsJson);
 
     nlohmann::json result;
-    result[NameKey] = LicensesName;
+    result[NameKey] = LicensesTitle;
     result[DataKey] = json;
 
     return result;
@@ -416,12 +413,12 @@ nlohmann::json DocumentationEngine::generateLicenseList() const {
 
     if (global::profile->meta.has_value()) {
         nlohmann::json profile;
-        profile[NameKey] = global::profile->meta->name.value_or(NoData);
-        profile[VersionKey] = global::profile->meta->version.value_or(NoData);
-        profile[DescriptionKey] = global::profile->meta->description.value_or(NoData);
-        profile[AuthorKey] = global::profile->meta->author.value_or(NoData);
-        profile[UrlKey] = global::profile->meta->url.value_or(NoData);
-        profile[LicenseKey] = global::profile->meta->license.value_or(NoData);
+        profile[NameKey] = global::profile->meta->name.value_or(NoDataName);
+        profile[VersionKey] = global::profile->meta->version.value_or(NoDataName);
+        profile[DescriptionKey] = global::profile->meta->description.value_or(NoDataName);
+        profile[AuthorKey] = global::profile->meta->author.value_or(NoDataName);
+        profile[UrlKey] = global::profile->meta->url.value_or(NoDataName);
+        profile[LicenseKey] = global::profile->meta->license.value_or(NoDataName);
         json.push_back(profile);
     }
 
@@ -471,6 +468,7 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
             // Create a unique ID
             actionJson[IdKey] = fmt::format("{}{}", action.action, action.id);
 
+            // Output filters as a string
             if (action.filter.has_value()) {
                 ghoul::Dictionary filters = action.filter.value();
                 std::vector<std::string_view> keys = filters.keys();
@@ -495,7 +493,7 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
 
     // Format resulting json
     nlohmann::json result;
-    result[NameKey] = EventsName;
+    result[NameKey] = EventsTitle;
     result[DataKey] = data;
     return result;
 }
@@ -571,7 +569,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
 
     // I did not check the output of this for correctness ---abock
     nlohmann::json result;
-    result[NameKey] = FactoryName;
+    result[NameKey] = FactoryTitle;
     result[DataKey] = json;
 
     return result;
@@ -593,7 +591,7 @@ nlohmann::json DocumentationEngine::generateKeybindingsJson() const {
     sortJson(json, NameKey);
 
     nlohmann::json result;
-    result[NameKey] = KeybindingsName;
+    result[NameKey] = KeybindingsTitle;
     result[KeybindingsKey] = json;
     return result;
 }
@@ -605,7 +603,7 @@ nlohmann::json DocumentationEngine::generatePropertyOwnerJson(
     nlohmann::json json;
     std::vector<properties::PropertyOwner*> subOwners = owner->propertySubOwners();
     for (properties::PropertyOwner* o : subOwners) {
-        if (o->identifier() != SceneName) {
+        if (o->identifier() != SceneTitle) {
             nlohmann::json jsonOwner = createPropertyJson(o);
 
             json.push_back(jsonOwner);
@@ -653,13 +651,13 @@ void DocumentationEngine::writeDocumentation() const {
     nlohmann::json actions = generateActionJson();
     nlohmann::json events = generateEventJson();
 
-    sceneProperties[NameKey] = SettingsName;
-    sceneGraph[NameKey] = SceneName;
+    sceneProperties[NameKey] = SettingsTitle;
+    sceneGraph[NameKey] = SceneTitle;
 
     // Add this here so that the generateJson function is the same as before to ensure
     // backwards compatibility
     nlohmann::json scriptingResult;
-    scriptingResult[NameKey] = ScriptingName;
+    scriptingResult[NameKey] = ScriptingTitle;
     scriptingResult[DataKey] = scripting;
 
     nlohmann::json documentation = {
@@ -679,7 +677,7 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
     using namespace interaction;
 
     nlohmann::json res;
-    res[NameKey] = ActionName;
+    res[NameKey] = ActionTitle;
     res[DataKey] = nlohmann::json::array();
     std::vector<Action> actions = global::actionManager->actions();
 
