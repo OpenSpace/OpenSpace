@@ -61,6 +61,7 @@ constexpr const char* DataKey = "data";
 constexpr const char* TypeKey = "type";
 constexpr const char* DocumentationKey = "documentation";
 constexpr const char* ActionKey = "action";
+constexpr const char* IdKey = "id";
 
 // Actions
 constexpr const char* ActionTitle = "Actions"; // Title in documentation sidebar
@@ -130,7 +131,6 @@ constexpr const char* KeybindingsKey = "keybindings";
 constexpr const char* EventsTitle = "Events"; // Title in documentation sidebar
 constexpr const char* FiltersKey = "filters";
 constexpr const char* ActionsKey = "actions";
-constexpr const char* IdKey = "id";
 
 
 nlohmann::json generateJsonDocumentation(const Documentation & d) {
@@ -328,20 +328,7 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
 nlohmann::json DocumentationEngine::generateLicensesGroupedByLicense() const {
     nlohmann::json json;
 
-    std::vector<const Asset*> assets =
-        global::openSpaceEngine->assetManager().allAssets();
-
-    int metaTotal = 0;
-    for (const Asset* asset : assets) {
-        std::optional<Asset::MetaInformation> meta = asset->metaInformation();
-        if (!meta.has_value()) {
-            continue;
-        }
-        metaTotal++;
-    }
-
     if (global::profile->meta.has_value()) {
-        metaTotal++;
         nlohmann::json metaJson;
         metaJson[NameKey] = ProfileName;
         metaJson[ProfileNameKey] = global::profile->meta->name.value_or(NoDataName);
@@ -353,37 +340,34 @@ nlohmann::json DocumentationEngine::generateLicensesGroupedByLicense() const {
         json.push_back(std::move(metaJson));
     }
 
+    // Go through all assets and group them in a map with the key as the license name
+    std::vector<const Asset*> assets =
+        global::openSpaceEngine->assetManager().allAssets();
+
     std::map<std::string, nlohmann::json> assetLicenses;
     for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
 
+        // Ensure the license is not going to be an empty string
+        std::string licenseName = NoLicenseName;
+        if (meta.has_value() && meta->license != NoDataName) {
+            licenseName = meta->license;
+        }
+
         nlohmann::json assetJson;
-        if (!meta.has_value()) {
-            assetJson[NameKey] = NoDataName;
-            assetJson[VersionKey] = NoDataName;
-            assetJson[DescriptionKey] = NoDataName;
-            assetJson[AuthorKey] = NoDataName;
-            assetJson[UrlKey] = NoDataName;
-            assetJson[LicenseKey] = NoLicenseName;
-            assetJson[IdentifiersKey] = NoDataName;
-            assetJson[PathKey] = asset->path().string();
 
-            assetLicenses[NoLicenseKey].push_back(assetJson);
-        }
-        else {
-            std::string licenseName = meta->license == NoDataName ? NoLicenseName :
-                meta->license;
-            assetJson[NameKey] = meta->name;
-            assetJson[VersionKey] = meta->version;
-            assetJson[DescriptionKey] = meta->description;
-            assetJson[AuthorKey] = meta->author;
-            assetJson[UrlKey] = meta->url;
-            assetJson[LicenseKey] = licenseName;
-            assetJson[IdentifiersKey] = meta->identifiers;
-            assetJson[PathKey] = asset->path().string();
+        assetJson[NameKey] = meta.has_value() ? meta->name : NoDataName;
+        assetJson[VersionKey] = meta.has_value() ? meta->version : NoDataName;
+        assetJson[DescriptionKey] = meta.has_value() ? meta->description : NoDataName;
+        assetJson[AuthorKey] = meta.has_value() ? meta->author : NoDataName; 
+        assetJson[UrlKey] = meta.has_value() ? meta->url : NoDataName; 
+        assetJson[LicenseKey] = licenseName;
+        assetJson[PathKey] = asset->path().string();
+        assetJson[IdKey] = asset->path().string();
+        assetJson[IdentifiersKey] = meta.has_value() ? meta->identifiers :
+            std::vector<std::string>();
 
-            assetLicenses[licenseName].push_back(assetJson);
-        }
+        assetLicenses[licenseName].push_back(assetJson);
     }
 
     nlohmann::json assetsJson;
@@ -392,10 +376,10 @@ nlohmann::json DocumentationEngine::generateLicensesGroupedByLicense() const {
 
     using K = const std::string;
     using V = nlohmann::json;
-    for (const std::pair<K, V>& assetLicense : assetLicenses) {
+    for (std::pair<K, V>& assetLicense : assetLicenses) {
         nlohmann::json entry;
-        entry[NameKey] = assetLicense.first;
-        entry[AssetKey] = assetLicense.second;
+        entry[NameKey] = std::move(assetLicense.first);
+        entry[AssetKey] = std::move(assetLicense.second);
         sortJson(entry[AssetKey], NameKey);
         assetsJson[LicensesKey].push_back(entry);
     }
