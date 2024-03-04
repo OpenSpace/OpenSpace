@@ -173,8 +173,9 @@ nlohmann::json generateJsonDocumentation(const Documentation & d) {
         }
         else if (tv) {
             Documentation doc = { .entries = tv->documentations };
+
+            // Since this is a table we need to recurse this function to extract all data
             nlohmann::json restrictions = generateJsonDocumentation(doc);
-            // We have a TableVerifier, so we need to recurse
             entry[RestrictionsKey] = restrictions;
         }
         else {
