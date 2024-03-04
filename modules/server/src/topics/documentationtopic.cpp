@@ -58,7 +58,7 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
         // TODO: Add asset documentation here
     }
     else if (requestedType == "meta") {
-        response = DocEng.generateLicenseList();
+        response = DocEng.generateLicenseListJson();
     }
 
     _connection->sendJson(wrappedPayload(response));

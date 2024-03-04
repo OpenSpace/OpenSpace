@@ -131,7 +131,7 @@ namespace {
     constexpr const char* FiltersKey = "filters";
     constexpr const char* ActionsKey = "actions";
 
-    nlohmann::json generateJsonDocumentation(
+    nlohmann::json documentationToJson(
                                          const openspace::documentation::Documentation& d)
     {
         using namespace openspace::documentation;
@@ -177,7 +177,7 @@ namespace {
                 Documentation doc = { .entries = tv->documentations };
 
                 // Since this is a table we need to recurse this function to extract data
-                nlohmann::json restrictions = generateJsonDocumentation(doc);
+                nlohmann::json restrictions = documentationToJson(doc);
                 entry[RestrictionsKey] = restrictions;
             }
             else {
@@ -190,7 +190,7 @@ namespace {
         return json;
     }
 
-    nlohmann::json createPropertyJson(openspace::properties::PropertyOwner* owner) {
+    nlohmann::json propertyOwnerToJson(openspace::properties::PropertyOwner* owner) {
         ZoneScoped;
 
         using namespace openspace;
@@ -218,7 +218,7 @@ namespace {
 
         for (properties::PropertyOwner* o : owner->propertySubOwners()) {
             nlohmann::json propertyOwner;
-            json[PropertyOwnersKey].push_back(createPropertyJson(o));
+            json[PropertyOwnersKey].push_back(propertyOwnerToJson(o));
         }
         sortJson(json[PropertyOwnersKey], NameKey);
 
@@ -327,7 +327,7 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
     return json;
 }
 
-nlohmann::json DocumentationEngine::generateLicensesGroupedByLicense() const {
+nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
     nlohmann::json json;
 
     if (global::profile->meta.has_value()) {
@@ -393,7 +393,7 @@ nlohmann::json DocumentationEngine::generateLicensesGroupedByLicense() const {
     return result;
 }
 
-nlohmann::json DocumentationEngine::generateLicenseList() const {
+nlohmann::json DocumentationEngine::generateLicenseListJson() const {
     nlohmann::json json;
 
     if (global::profile->meta.has_value()) {
@@ -503,7 +503,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
             [&factoryInfo](const Documentation& d) { return d.name == factoryInfo.name; }
         );
         if (factoryDoc != docs.end()) {
-            nlohmann::json documentation = generateJsonDocumentation(*factoryDoc);
+            nlohmann::json documentation = documentationToJson(*factoryDoc);
             factory[ClassesKey].push_back(documentation);
             // Remove documentation from list check at the end if all docs got put in
             docs.erase(factoryDoc);
@@ -524,7 +524,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
                 [&c](const Documentation& d) { return d.name == c; }
             );
             if (found != docs.end()) {
-                nlohmann::json documentation = generateJsonDocumentation(*found);
+                nlohmann::json documentation = documentationToJson(*found);
                 factory[ClassesKey].push_back(documentation);
                 docs.erase(found);
             }
@@ -544,7 +544,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
     leftovers[IdentifierKey] = OtherIdentifierName;
 
     for (const Documentation& doc : docs) {
-        leftovers[ClassesKey].push_back(generateJsonDocumentation(doc));
+        leftovers[ClassesKey].push_back(documentationToJson(doc));
     }
     sortJson(leftovers[ClassesKey], NameKey);
     json.push_back(leftovers);
@@ -590,7 +590,7 @@ nlohmann::json DocumentationEngine::generatePropertyOwnerJson(
     std::vector<properties::PropertyOwner*> subOwners = owner->propertySubOwners();
     for (properties::PropertyOwner* o : subOwners) {
         if (o->identifier() != SceneTitle) {
-            nlohmann::json jsonOwner = createPropertyJson(o);
+            nlohmann::json jsonOwner = propertyOwnerToJson(o);
 
             json.push_back(jsonOwner);
         }
@@ -631,7 +631,7 @@ void DocumentationEngine::writeDocumentation() const {
     nlohmann::json scripting = generateScriptEngineJson();
     nlohmann::json factory = generateFactoryManagerJson();
     nlohmann::json keybindings = generateKeybindingsJson();
-    nlohmann::json license = generateLicensesGroupedByLicense();
+    nlohmann::json license = generateLicenseGroupsJson();
     nlohmann::json sceneProperties = settings.get();
     nlohmann::json sceneGraph = sceneJson.get();
     nlohmann::json actions = generateActionJson();

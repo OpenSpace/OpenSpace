@@ -92,8 +92,8 @@ public:
     nlohmann::json generateFactoryManagerJson() const;
     nlohmann::json generateKeybindingsJson() const;
     nlohmann::json generatePropertyOwnerJson(properties::PropertyOwner* owner) const;
-    nlohmann::json generateLicensesGroupedByLicense() const;
-    nlohmann::json generateLicenseList() const;
+    nlohmann::json generateLicenseGroupsJson() const;
+    nlohmann::json generateLicenseListJson() const;
     nlohmann::json generateActionJson() const;
     nlohmann::json generateEventJson() const;
 
