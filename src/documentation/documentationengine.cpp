@@ -68,7 +68,7 @@ namespace {
     constexpr const char* CommandKey = "command";
 
     // Factory
-    constexpr const char* FactoryTitle = "Asset Types";
+    constexpr const char* FactoryTitle = "Asset Components";
     constexpr const char* MembersKey = "members";
     constexpr const char* OptionalKey = "optional";
     constexpr const char* ReferenceKey = "reference";
