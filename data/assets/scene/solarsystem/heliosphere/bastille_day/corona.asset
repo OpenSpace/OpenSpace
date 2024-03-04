@@ -1,20 +1,14 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
+local tf = asset.resource("scene/solarsystem/heliosphere/bastille_day/transferfunctions/mas-mhd-r-squared.txt")
 
-
-local densityDirectory = asset.resource({
-  Name = "Bastille Day MAS Density",
-  Type = "HttpSynchronization",
-  Identifier = "bastille_day_mas_density",
-  Version = 1
-})
-
+local densityDirectory = "C:/OpenSpace/sync/temp/corona";
 
 local SunRadius = 6.957E8
 
-local DensityVolume = {
-  Identifier = "MAS-MHD-Density-bastille-day-2000",
+local CoronaOneTimestep = {
+  Identifier = "corona-one-timestep",
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 1 / 695700000,
@@ -35,38 +29,38 @@ local DensityVolume = {
     Type = "RenderableTimeVaryingVolume",
     StepSize = 0.004,
     Brightness = 0.3,
-    TransferFunction = asset.resource("transferfunctions/mas-mhd-r-squared.txt"),
+    TransferFunction = tf, --asset.resource("scene/solarsystem/heliosphere/bastille_day/transferfunctions/mas-mhd-r-squared.txt"),
     SourceDirectory = densityDirectory,
     GridType = "Spherical",
-    SecondsBefore = 24 * 60 * 60,
-    SecondsAfter = 24 * 60 * 60,
+    SecondsBefore = 24 * 60 * 60 * 365 * 100,
+    SecondsAfter = 24 * 60 * 60 * 365 * 100,
     Dimensions = { 100, 100, 128 },
     InvertDataAtZ = true
   },
   GUI = {
-    Name = "MAS Density",
-    Path = "/Solar System/Heliosphere/Bastille Day 2000",
+    Name = "Corona Density",
+    Path = "/Solar System/Sun",
     Description = [[Volumetric rendering for the bastille day CME event. This asset
       contain data from 2000-07-14 08:33 to 2000-07-14 11:49]]
   }
 }
 
-local ToggleVolume = {
-  Identifier = "os.bastilleday.densityvolume.ToggleVolume",
+local ToggleCorona = {
+  Identifier = "os.bastilleday.corona.toggelcorona",
   Name = "Toggle volume",
   Command = [[
-    if openspace.propertyValue("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled") then
+    if openspace.propertyValue("Scene.corona-one-timestep.Renderable.Enabled") then
       openspace.setPropertyValueSingle(
-        "Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Fade",
+        "Scene.corona-one-timestep.Renderable.Fade",
         0.0,
         openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear",
-        'openspace.setPropertyValueSingle("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled", false)'
+        'openspace.setPropertyValueSingle("Scene.corona-one-timestep.Renderable.Enabled", false)'
       )
     else
-      openspace.setPropertyValueSingle("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle("Scene.corona-one-timestep.Renderable.Enabled", true)
       openspace.setPropertyValueSingle(
-        "Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Fade",
+        "Scene.corona-one-timestep.Renderable.Fade",
         1.0,
         openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear"
@@ -74,23 +68,23 @@ local ToggleVolume = {
     end
   ]],
   Documentation = "Toggle volume rendering of CME",
-  GuiPath = "/Bastille-Day 2000",
+  GuiPath = "/Corona",
   IsLocal = false
 }
 
 
 asset.onInitialize(function()
-  openspace.action.registerAction(ToggleVolume)
-  openspace.addSceneGraphNode(DensityVolume)
+  openspace.action.registerAction(ToggleCorona)
+  openspace.addSceneGraphNode(CoronaOneTimestep)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(DensityVolume)
-  openspace.action.removeAction(ToggleVolume)
+  openspace.removeSceneGraphNode(CoronaOneTimestep)
+  openspace.action.removeAction(ToggleCorona)
 end)
 
-asset.export(DensityVolume)
-asset.export("ToggleVolume", ToggleVolume.Identifier)
+asset.export(CoronaOneTimestep)
+asset.export("ToggleCorona", ToggleCorona.Identifier)
 
 
 

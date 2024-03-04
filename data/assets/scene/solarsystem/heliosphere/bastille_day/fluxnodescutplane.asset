@@ -1,4 +1,3 @@
-local propertyHelper = asset.require("util/property_helper")
 local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 local rot = asset.require("./carrington_to_heeq_rotation")
 
