@@ -313,7 +313,7 @@ private:
     std::vector<SceneGraphNode*> _circularNodes;
     std::unordered_map<std::string, SceneGraphNode*> _nodesByIdentifier;
     bool _dirtyNodeRegistry = false;
-    SceneGraphNode _rootDummy;
+    SceneGraphNode _rootNode;
     std::unique_ptr<SceneInitializer> _initializer;
     std::string _profilePropertyName;
     bool _valueIsTable = false;

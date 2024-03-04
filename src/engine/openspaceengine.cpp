@@ -159,6 +159,19 @@ namespace {
         // @VISIBILITY(2.67)
         openspace::properties::Property::Visibility::User
     };
+
+    void viewportChanged() {
+        using namespace openspace;
+
+        // Needs to be updated since each render call potentially targets a different
+        // window and/or viewport
+        using FR = ghoul::fontrendering::FontRenderer;
+        FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
+
+        FR::defaultProjectionRenderer().setFramebufferSize(
+            global::renderEngine->renderingResolution()
+        );
+    }
 } // namespace
 
 namespace openspace {
@@ -509,7 +522,7 @@ void OpenSpaceEngine::initializeGL() {
         global::luaConsole->initialize();
         global::luaConsole->setCommandInputButton(global::configuration->consoleKey);
     }
-    catch (ghoul::RuntimeError& e) {
+    catch (const ghoul::RuntimeError& e) {
         LERROR("Error initializing Console with error:");
         LERRORC(e.component, e.message);
     }
@@ -558,40 +571,41 @@ void OpenSpaceEngine::initializeGL() {
             );
         }
 
-        auto callback = [](Source source, Type type, Severity severity,
-                           unsigned int id, std::string message) -> void
-        {
-            const std::string s = ghoul::to_string(source);
-            const std::string t = ghoul::to_string(type);
+        ghoul::opengl::debug::setDebugCallback(
+            [](Source source, Type type, Severity severity, unsigned int id,
+               std::string message)
+            {
+                const std::string s = ghoul::to_string(source);
+                const std::string t = ghoul::to_string(type);
 
-            const std::string category = fmt::format("OpenGL ({}) [{}] {{{}}}", s, t, id);
-            switch (severity) {
-                case Severity::High:
-                    LERRORC(category, message);
-                    break;
-                case Severity::Medium:
-                    LWARNINGC(category, message);
-                    break;
-                case Severity::Low:
-                    LINFOC(category, message);
-                    break;
-                case Severity::Notification:
-                    LDEBUGC(category, message);
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
-
-            if (global::configuration->openGLDebugContext.printStacktrace) {
-                std::string stackString = "Stacktrace\n";
-                std::vector<std::string> stack = ghoul::stackTrace();
-                for (size_t i = 0; i < stack.size(); i++) {
-                    stackString += fmt::format("{}: {}\n", i, stack[i]);
+                const std::string cat = fmt::format("OpenGL ({}) [{}] {{{}}}", s, t, id);
+                switch (severity) {
+                    case Severity::High:
+                        LERRORC(cat, message);
+                        break;
+                    case Severity::Medium:
+                        LWARNINGC(cat, message);
+                        break;
+                    case Severity::Low:
+                        LINFOC(cat, message);
+                        break;
+                    case Severity::Notification:
+                        LDEBUGC(cat, message);
+                        break;
+                    default:
+                        throw ghoul::MissingCaseException();
                 }
-                LDEBUGC(category, stackString);
+
+                if (global::configuration->openGLDebugContext.printStacktrace) {
+                    std::string stackString = "Stacktrace\n";
+                    std::vector<std::string> stack = ghoul::stackTrace();
+                    for (size_t i = 0; i < stack.size(); i++) {
+                        stackString += fmt::format("{}: {}\n", i, stack[i]);
+                    }
+                    LDEBUGC(cat, stackString);
+                }
             }
-        };
-        ghoul::opengl::debug::setDebugCallback(callback);
+        );
     }
     LTRACE("OpenSpaceEngine::initializeGL::DebugContext(end)");
 
@@ -1114,17 +1128,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(end)");
 }
 
-void OpenSpaceEngine::viewportChanged() {
-    // Needs to be updated since each render call potentially targets a different
-    // window and/or viewport
-    using FR = ghoul::fontrendering::FontRenderer;
-    FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
-
-    FR::defaultProjectionRenderer().setFramebufferSize(
-        global::renderEngine->renderingResolution()
-    );
-}
-
 void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
@@ -1390,8 +1393,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
 void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
     ZoneScoped;
 
-    using F = std::function<bool (TouchInput)>;
-    for (const F& func : *global::callback::touchDetected) {
+    for (const std::function<bool(TouchInput)>& func : *global::callback::touchDetected) {
         bool isConsumed = func(input);
         if (isConsumed) {
             return;
@@ -1402,8 +1404,7 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
 void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
     ZoneScoped;
 
-    using F = std::function<bool(TouchInput)>;
-    for (const F& func : *global::callback::touchUpdated) {
+    for (const std::function<bool(TouchInput)>& func : *global::callback::touchUpdated) {
         bool isConsumed = func(input);
         if (isConsumed) {
             return;
@@ -1414,8 +1415,7 @@ void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
 void OpenSpaceEngine::touchExitCallback(TouchInput input) {
     ZoneScoped;
 
-    using F = std::function<void(TouchInput)>;
-    for (const F& func : *global::callback::touchExit) {
+    for (const std::function<void(TouchInput)>& func : *global::callback::touchExit) {
         func(input);
     }
 }

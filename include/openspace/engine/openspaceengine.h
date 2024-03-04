@@ -96,7 +96,6 @@ public:
     void deinitializeGL();
     void preSynchronization();
     void postSynchronizationPreDraw();
-    void viewportChanged();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
     void drawOverlays();

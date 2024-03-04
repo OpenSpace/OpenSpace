@@ -61,6 +61,7 @@ namespace {
     constexpr std::string_view _loggerCat = "Scene";
     constexpr std::string_view KeyIdentifier = "Identifier";
     constexpr std::string_view KeyParent = "Parent";
+    constexpr const char* RootNodeIdentifier = "Root";
 
 #ifdef TRACY_ENABLE
     constexpr const char* renderBinToString(int renderBin) {
@@ -104,10 +105,10 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     , _camera(std::make_unique<Camera>())
     , _initializer(std::move(initializer))
 {
-    _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
-    _rootDummy.setScene(this);
+    _rootNode.setIdentifier(RootNodeIdentifier);
+    _rootNode.setScene(this);
 
-    _camera->setParent(&_rootDummy);
+    _camera->setParent(&_rootNode);
 }
 
 Scene::~Scene() {
@@ -128,16 +129,16 @@ Scene::~Scene() {
         node->deinitializeGL();
         node->deinitialize();
     }
-    _rootDummy.clearChildren();
-    _rootDummy.setScene(nullptr);
+    _rootNode.clearChildren();
+    _rootNode.setScene(nullptr);
 }
 
 void Scene::attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node) {
-    _rootDummy.attachChild(std::move(node));
+    _rootNode.attachChild(std::move(node));
 }
 
 ghoul::mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
-    return _rootDummy.detachChild(node);
+    return _rootNode.detachChild(node);
 }
 
 Camera* Scene::camera() const {
@@ -146,9 +147,9 @@ Camera* Scene::camera() const {
 
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByIdentifier.count(node->identifier())) {
-        throw Scene::InvalidSceneError(
-            "Node with identifier " + node->identifier() + " already exists"
-        );
+        throw Scene::InvalidSceneError(fmt::format(
+            "Node with identifier '{}' already exists", node->identifier()
+        ));
     }
 
     _topologicallySortedNodes.push_back(node);
@@ -207,7 +208,7 @@ void Scene::sortTopologically() {
     }
 
     // Only the Root node can have an in-degree of 0
-    SceneGraphNode* root = _nodesByIdentifier[SceneGraphNode::RootNodeIdentifier];
+    SceneGraphNode* root = _nodesByIdentifier[RootNodeIdentifier];
     if (!root) {
         throw Scene::InvalidSceneError("No root node found");
     }
@@ -263,6 +264,8 @@ void Scene::sortTopologically() {
 }
 
 void Scene::initializeNode(SceneGraphNode* node) {
+    ghoul_assert(node, "Node must not be nullptr");
+
     _initializer->initializeNode(node);
 }
 
@@ -334,11 +337,11 @@ const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByIdentifier
 }
 
 SceneGraphNode* Scene::root() {
-    return &_rootDummy;
+    return &_rootNode;
 }
 
 const SceneGraphNode* Scene::root() const {
-    return &_rootDummy;
+    return &_rootNode;
 }
 
 SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
@@ -384,10 +387,6 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     ghoul::mm_unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
         nodeDictionary
     );
-    if (!node) {
-        // TODO: Throw exception
-        LERROR("Could not create node from dictionary: " + nodeIdentifier);
-    }
 
     if (nodeDictionary.hasKey(SceneGraphNode::KeyDependencies)) {
         if (!nodeDictionary.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies))
@@ -616,7 +615,7 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
     _valueIsTable = false;
     ProfilePropertyLua elem = propertyProcessValue(L, value);
     if (!_valueIsTable) {
-        std::visit(overloaded{
+        std::visit(overloaded {
             [&L](bool v) {
                 ghoul::lua::push(L, v);
             },
@@ -681,21 +680,21 @@ void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::stri
         case PropertyValueType::Boolean:
             LERROR(fmt::format(
                 "A lua table of bool values is not supported. (processing property {})",
-                _profilePropertyName)
-            );
+                _profilePropertyName
+            ));
             break;
         case PropertyValueType::Float:
             {
-                std::vector<float> valsF;
-                processPropertyValueTableEntries(L, value, valsF);
-                ghoul::lua::push(L, valsF);
+                std::vector<float> vals;
+                processPropertyValueTableEntries(L, value, vals);
+                ghoul::lua::push(L, vals);
             }
             break;
         case PropertyValueType::String:
             {
-                std::vector<std::string> valsS;
-                processPropertyValueTableEntries(L, value, valsS);
-                ghoul::lua::push(L, valsS);
+                std::vector<std::string> vals;
+                processPropertyValueTableEntries(L, value, vals);
+                ghoul::lua::push(L, vals);
             }
             break;
         case PropertyValueType::Table:
@@ -768,7 +767,7 @@ PropertyValueType Scene::propertyValueType(const std::string& value) {
 }
 
 std::vector<properties::Property*> Scene::propertiesMatchingRegex(
-                                                              std::string propertyString)
+                                                               std::string propertyString)
 {
     return findMatchesInAllProperties(propertyString, allProperties(), "");
 }
