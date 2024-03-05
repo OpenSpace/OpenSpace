@@ -41,14 +41,14 @@ void Scenario::sendJson(const nlohmann::json& json) const {
     sendMessage(json.dump());
 }
 
-void Scenario::enableScene() {
+void Scenario::enableScenario() {
     _isActive = true;
-    onEnableScene();
+    onEnableScenario();
 }
 
-void Scenario::disableScene() {
+void Scenario::disableScenario() {
     _isActive = false;
-    onDisableScene();
+    onDisableScenario();
 }
 
 bool Scenario::isActive() const {

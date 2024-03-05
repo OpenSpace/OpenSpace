@@ -25,44 +25,62 @@
 #ifndef __OPENSPACE_MODULE_OMNI___POLL___H__
 #define __OPENSPACE_MODULE_OMNI___POLL___H__
 
-#include <modules/omni/include/scene.h>
+#include <modules/omni/include/scenario.h>
 
 
 
 #include <openspace/json.h>
 #include <ghoul/misc/dictionary.h>
 
+// Seems to be compiling fine without these #include 
+#include <map>
+#include <set>
 
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::omni {
 
 
-class Poll : public Scene {
+class Poll : public Scenario {
 public:
+    using User = int;
+    using VoteOption = std::string;
+
+    struct Option {
+        const std::string identifier;
+        const std::string script;
+    };
+
     explicit Poll(const ghoul::Dictionary& dictionary);
     virtual ~Poll() = default;
 
-
-    static documentation::Documentation Documentation();
+    void handleMessage(const nlohmann::json& json) override;
+    void onHandleMessage() override;
 
     nlohmann::json getAssetInformation();
 
-    void enableScene();
-    void disableScene();
+    static documentation::Documentation Documentation();
 
+
+protected:
+    void onEnableScenario() override;
+    void onDisableScenario() override;
 private:
-    void onEnable();
-    void onDisable();
 
-
-    const std::string _identifier;
+    std::string _onEnableScript;
+    std::string _onDisableScript;
 
     ghoul::Dictionary _dictionary;
+
+    std::vector<Option> _options;
+
+    std::map<VoteOption, std::set<User>> _votes;
+
+    bool _allowMultipleVoting;
 
 };
 
 } // namespace openspace::omni
 
 
-#endif // !__OPENSPACE_MODULE_OMNI___POLL___H__
+#endif // __OPENSPACE_MODULE_OMNI___POLL___H__

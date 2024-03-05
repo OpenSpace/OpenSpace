@@ -42,16 +42,16 @@ public:
     virtual void handleMessage(const nlohmann::json& obj) = 0;
     virtual void onHandleMessage() = 0;
 
-    void enableScene();
-    void disableScene();
+    void enableScenario();
+    void disableScenario();
 
     bool isActive() const;
 
     std::string_view identifier() const;
 
 protected:
-    virtual void onEnableScene() = 0;
-    virtual void onDisableScene() = 0;
+    virtual void onEnableScenario() = 0;
+    virtual void onDisableScenario() = 0;
 
 private:
     std::shared_ptr<ghoul::io::TcpSocket> _socket;
