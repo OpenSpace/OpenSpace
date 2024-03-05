@@ -114,58 +114,14 @@ local TullyGalaxiesImages = {
   }
 }
 
-local TullyGalaxiesImagesNew = {
-  Identifier = "TullyGalaxiesImages_new",
-  Renderable = {
-    Type = "RenderablePointCloud",
-    Opacity = 0.99,
-    File = speck .. "tully.speck",
-    -- TexturePath = textures,
-    -- Texture = textures .. "m31.png",
-    Texture = {
-      -- Where to find the textures, specified in the speck file
-      Directory = textures
-    },
-    -- Luminosity = "diamkpc",
-    -- ScaleLuminosity = 0.001,
-    TransformationMatrix = TransformMatrix,
-    Unit = "Mpc",
-    Fading = {
-      FadeInDistances = { 0.001, 1.0 } -- Fade in value in the same unit as "Unit"
-    },
-    SizeSettings = {
-      SizeMapping = {
-        ParameterOptions = { "diamkpc" },
-        -- ScaleFactor = 0.001
-      },
-      ScaleExponent = 21.9
-    }
-  },
-  GUI = {
-    Name = "Tully Galaxies Images (new)",
-    Path = "/Universe/Galaxies",
-    Description = [[Each galaxy is represented by an image
-      that represents its morphological type (spiral, elliptical, etc.). Most of these
-      come from The Galaxy Catalog. A handful of nearby galaxies are represented by
-      their actual images, which come mostly from the National Optical Astronomy
-      Observatory (NOAO). Each of these images has been altered from its original state.
-      These images were taken from Earth on some of the world's largest telescopes, so
-      foreground stars from our own Galaxy appear in each image. We are representing
-      galaxies in extragalactic space, so we have removed the stars from each image.
-      (Description from URL) <br><br> Data Reference: Tully Galaxy Catalog: Brent Tully
-      (U Hawaii), Stuart Levy (NCSA/UIUC)]]
-  }
-}
 
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TullyGalaxies)
   openspace.addSceneGraphNode(TullyGalaxiesImages)
-  openspace.addSceneGraphNode(TullyGalaxiesImagesNew)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(TullyGalaxiesImagesNew)
   openspace.removeSceneGraphNode(TullyGalaxiesImages)
   openspace.removeSceneGraphNode(TullyGalaxies)
 end)
