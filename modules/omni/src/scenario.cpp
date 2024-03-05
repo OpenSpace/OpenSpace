@@ -22,4 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/omni/include/scenario.h>
 
+namespace openspace::omni {
+
+Scenario::Scenario(const std::string& identifier) : _identifier{ identifier } {}
+
+void openspace::omni::Scenario::initialize(std::shared_ptr<ghoul::io::TcpSocket> socket)
+{
+    _socket = std::move(socket);
+}
+
+void Scenario::sendMessage(const std::string& message) const {
+    _socket->putMessage(message);
+}
+
+void Scenario::sendJson(const nlohmann::json& json) const {
+    sendMessage(json.dump());
+}
+
+void Scenario::enableScene() {
+    _isActive = true;
+    onEnableScene();
+}
+
+void Scenario::disableScene() {
+    _isActive = false;
+    onDisableScene();
+}
+
+bool Scenario::isActive() const {
+    return _isActive;
+}
+
+std::string_view Scenario::identifier() const {
+    return _identifier;
+}
+
+} // namespace openspace::omni

@@ -22,20 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_OMNI___SCENE___H__
-#define __OPENSPACE_MODULE_OMNI___SCENE___H__
+#ifndef __OPENSPACE_MODULE_OMNI___SCENARIO___H__
+#define __OPENSPACE_MODULE_OMNI___SCENARIO___H__
+
+#include <openspace/json.h>
+#include <ghoul/io/socket/tcpsocket.h>
 
 namespace openspace::omni {
 
-class Scene {
+class Scenario {
 public:
-    Scene() = default;
-    virtual ~Scene() = default;
+    Scenario(const std::string& identifier);
+    virtual ~Scenario() = default;
+    void initialize(std::shared_ptr<ghoul::io::TcpSocket> socket);
+
+    void sendMessage(const std::string& message) const;
+    void sendJson(const nlohmann::json& json) const;
+
+    virtual void handleMessage(const nlohmann::json& obj) = 0;
+    virtual void onHandleMessage() = 0;
+
+    void enableScene();
+    void disableScene();
+
+    bool isActive() const;
+
+    std::string_view identifier() const;
+
+protected:
+    virtual void onEnableScene() = 0;
+    virtual void onDisableScene() = 0;
 
 private:
+    std::shared_ptr<ghoul::io::TcpSocket> _socket;
+    const std::string _identifier;
+
+    bool _isActive = false;
 
 };
 
 } // namespace openspace::omni
 
-#endif // !__OPENSPACE_MODULE_OMNI___SCENE___H__
+#endif // __OPENSPACE_MODULE_OMNI___SCENARIO___H__
