@@ -623,6 +623,10 @@ ColorMap loadFileWithCache(std::filesystem::path path)
 
 } // namespace color
 
+bool Dataset::isEmpty() const {
+    return variables.empty() || entries.empty();
+}
+
 int Dataset::index(std::string_view variableName) const {
     for (const Dataset::Variable& v : variables) {
         if (v.name == variableName) {

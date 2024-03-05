@@ -380,15 +380,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 *p.transform->translation
             );
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.translation == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create ephemeris for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
             LDEBUG(fmt::format(
                 "Successfully created ephemeris for '{}'", result->identifier()
             ));
@@ -399,15 +390,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 *p.transform->rotation
             );
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.rotation == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create rotation for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
             LDEBUG(fmt::format(
                 "Successfully created rotation for '{}'", result->identifier()
             ));
@@ -416,15 +398,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.transform->scale.has_value()) {
             result->_transform.scale = Scale::createFromDictionary(*p.transform->scale);
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.scale == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create scale for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
             LDEBUG(fmt::format(
                 "Successfully created scale for '{}'", result->identifier()
             ));
@@ -438,15 +411,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     if (p.timeFrame.has_value()) {
         result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
 
-        // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-        // transitioned to throwing exceptions when the construction fails
-        if (result->_timeFrame == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create time frame for SceneGraphNode '{}'",
-                result->identifier()
-            ));
-            return nullptr;
-        }
         LDEBUG(fmt::format(
             "Successfully created time frame for '{}'", result->identifier()
         ));

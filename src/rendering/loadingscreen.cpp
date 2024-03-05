@@ -27,6 +27,10 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
+#include <openspace/scene/asset.h>
+#include <openspace/scene/assetmanager.h>
+#include <openspace/scene/scene.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>
@@ -43,6 +47,7 @@
 #include <random>
 #include <sstream>
 #include <thread>
+#include <unordered_set>
 
 
 namespace {
@@ -165,6 +170,117 @@ LoadingScreen::~LoadingScreen() {
     _itemFont = nullptr;
     ghoul::logging::LogManager::ref().removeLog(_log);
     _log = nullptr;
+}
+
+void LoadingScreen::abort() {
+    _shouldAbortLoading = true;
+}
+
+void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
+    setPhase(LoadingScreen::Phase::Construction);
+    postMessage("Loading assets");
+
+    std::unordered_set<const ResourceSynchronization*> finishedSynchronizations;
+    while (true) {
+        render();
+        manager.update();
+
+        std::vector<const Asset*> allAssets = manager.allAssets();
+
+        std::vector<const ResourceSynchronization*> allSyncs =
+            manager.allSynchronizations();
+
+        // Filter already synchronized assets so we don't check them anymore
+        auto syncIt = std::remove_if(
+            allSyncs.begin(),
+            allSyncs.end(),
+            [&finishedSynchronizations](const ResourceSynchronization* sync) {
+                return finishedSynchronizations.contains(sync);
+            }
+        );
+        allSyncs.erase(syncIt, allSyncs.end());
+
+        auto it = allSyncs.begin();
+        while (it != allSyncs.end()) {
+            ZoneScopedN("Update resource synchronization");
+
+            if ((*it)->isSyncing()) {
+                LoadingScreen::ProgressInfo progressInfo;
+
+                progressInfo.progress = [](const ResourceSynchronization* sync) {
+                    if (!sync->nTotalBytesIsKnown()) {
+                        return 0.f;
+                    }
+                    if (sync->nTotalBytes() == 0) {
+                        return 1.f;
+                    }
+                    return
+                        static_cast<float>(sync->nSynchronizedBytes()) /
+                        static_cast<float>(sync->nTotalBytes());
+                    }(*it);
+
+                    progressInfo.currentSize = (*it)->nSynchronizedBytes();
+                    if ((*it)->nTotalBytesIsKnown()) {
+                        progressInfo.totalSize = (*it)->nTotalBytes();
+                    }
+
+                    updateItem(
+                        (*it)->identifier(),
+                        (*it)->name(),
+                        LoadingScreen::ItemStatus::Started,
+                        progressInfo
+                    );
+                    ++it;
+            }
+            else if ((*it)->isRejected()) {
+                updateItem(
+                    (*it)->identifier(),
+                    (*it)->name(),
+                    LoadingScreen::ItemStatus::Failed,
+                    LoadingScreen::ProgressInfo()
+                );
+                ++it;
+            }
+            else {
+                LoadingScreen::ProgressInfo progressInfo;
+                progressInfo.progress = 1.f;
+
+                updateItem(
+                    (*it)->identifier(),
+                    (*it)->name(),
+                    LoadingScreen::ItemStatus::Finished,
+                    progressInfo
+                );
+                finishedSynchronizations.insert(*it);
+                it = allSyncs.erase(it);
+            }
+        }
+
+        if (_shouldAbortLoading) {
+            global::windowDelegate->terminate();
+            return;
+        }
+
+        bool finishedLoading = std::all_of(
+            allAssets.begin(),
+            allAssets.end(),
+            [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
+        );
+
+        if (finishedLoading) {
+            break;
+        }
+    } // while(true)
+
+    setPhase(LoadingScreen::Phase::Initialization);
+
+    postMessage("Initializing scene");
+    while (scene.isInitializing()) {
+        render();
+    }
+
+    postMessage("Initializing OpenGL");
+    finalize();
 }
 
 void LoadingScreen::render() {

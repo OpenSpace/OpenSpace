@@ -194,7 +194,7 @@ asset.onInitialize(function()
   openspace.bindKey("Ctrl+F", ToggleRollFriction.Identifier)
 
   openspace.action.registerAction(FadeToBlack)
-  openspace.bindKey("W", FadeToBlack.Identifier)
+  openspace.bindKey("B", FadeToBlack.Identifier)
 
   openspace.action.registerAction(ToggleMainGui)
   openspace.bindKey("TAB", ToggleMainGui.Identifier)
@@ -246,7 +246,7 @@ asset.onDeinitialize(function()
   openspace.clearKey("TAB")
   openspace.action.removeAction(ToggleMainGui)
 
-  openspace.clearKey("W")
+  openspace.clearKey("B")
   openspace.action.removeAction(FadeToBlack)
 
   openspace.clearKey("Ctrl+F")

@@ -74,7 +74,6 @@ public:
 
     BooleanType(UpdateScene);
 
-    static constexpr const char* RootNodeIdentifier = "Root";
     static constexpr std::string_view KeyIdentifier = "Identifier";
     static constexpr std::string_view KeyParentName = "Parent";
     static constexpr std::string_view KeyDependencies = "Dependencies";

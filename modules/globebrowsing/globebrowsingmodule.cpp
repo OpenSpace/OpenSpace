@@ -83,6 +83,7 @@
 #pragma warning (disable : 4251)
 #endif // _MSC_VER
 
+#include <cpl_conv.h>
 #include <cpl_string.h>
 
 #ifdef _MSC_VER
@@ -550,10 +551,12 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
 {
     auto downloadFunction = [](const std::string& downloadUrl) {
         LDEBUG("Opening WMS capabilities: " + downloadUrl);
+        CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "15"); // 3 seconds
         GDALDatasetH dataset = GDALOpen(
             downloadUrl.c_str(),
             GA_ReadOnly
         );
+        CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "3"); // 3 seconds
 
         if (!dataset) {
             LWARNING("Could not open dataset: " + downloadUrl);

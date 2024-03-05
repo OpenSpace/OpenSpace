@@ -599,7 +599,7 @@ void RenderEngine::updateRenderer() {
         using FR = ghoul::fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
-        //Override the aspect ratio property value to match that of resized window
+        // Override the aspect ratio property value to match that of resized window
         _horizFieldOfView =
             static_cast<float>(global::windowDelegate->getHorizFieldOfView());
     }
@@ -1033,11 +1033,6 @@ void RenderEngine::removeRenderProgram(ghoul::opengl::ProgramObject* program) {
     }
 }
 
-/**
-* Set renderer data
-* Called from the renderer, whenever it needs to update
-* the dictionary of all rendering programs.
-*/
 void RenderEngine::setRendererData(ghoul::Dictionary rendererData) {
     _rendererData = std::move(rendererData);
     for (ghoul::opengl::ProgramObject* program : _programs) {
@@ -1047,11 +1042,6 @@ void RenderEngine::setRendererData(ghoul::Dictionary rendererData) {
     }
 }
 
-/**
-* Set resolve data
-* Called from the renderer, whenever it needs to update
-* the dictionary of all post rendering programs.
-*/
 void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
     _resolveData = std::move(resolveData);
     for (ghoul::opengl::ProgramObject* program : _programs) {
@@ -1061,9 +1051,6 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
     }
 }
 
-/**
- * Take a screenshot and store it in the ${SCREENSHOTS} directory
- */
 void RenderEngine::takeScreenshot() {
     // We only create the directory here, as we don't want to spam the users
     // screenshot folder everytime we start OpenSpace even when we are not taking any
@@ -1274,7 +1261,7 @@ void RenderEngine::renderVersionInformation() {
 
     // If a developer hasn't placed the Git command in the path, this variable will be
     // empty
-    if (!std::string_view(OPENSPACE_GIT_COMMIT).empty()) {
+    if (!OPENSPACE_GIT_COMMIT.empty()) {
         // We check OPENSPACE_GIT_COMMIT but use OPENSPACE_GIT_FULL on purpose since
         // OPENSPACE_GIT_FULL will never be empty (always will contain at least @, but
         // checking for that is a bit brittle)

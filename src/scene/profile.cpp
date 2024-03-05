@@ -741,7 +741,24 @@ std::string Profile::serialize() const {
     return r.dump(2);
 }
 
-Profile::Profile(const std::string& content) {
+Profile::Profile(const std::filesystem::path& path) {
+    ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
+
+    std::ifstream inFile;
+    try {
+        inFile.open(path, std::ifstream::in);
+    }
+    catch (const std::ifstream::failure& e) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Exception opening profile file for read: {} ({})", path, e.what()
+        ));
+    }
+
+    std::string content(
+        (std::istreambuf_iterator<char>(inFile)),
+        std::istreambuf_iterator<char>()
+    );
+
     try {
         nlohmann::json profile = nlohmann::json::parse(content);
         profile.at("version").get_to(version);
