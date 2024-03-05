@@ -336,7 +336,7 @@ namespace {
 
         struct Tessellation {
             // [[codegen::verbatim(TessellationEnabledInfo.description)]]
-            std::optional<bool> ebabled;
+            std::optional<bool> enabled;
 
             // [[codegen::verbatim(UseTessellationLevelInfo.description)]]
             std::optional<bool> useTessellationLevel;

@@ -50,6 +50,9 @@ uniform sampler1D colorMapTexture;
 uniform float cmapRangeMin;
 uniform float cmapRangeMax;
 uniform bool hideOutsideRange;
+uniform bool enableOutline;
+uniform vec3 outlineColor;
+uniform float outlineWeight;
 
 uniform float fadeInValue;
 
@@ -81,24 +84,22 @@ Fragment getFragment() {
     discard;
   }
 
-  if (!hasSpriteTexture) {
-    // Moving the origin to the center
-    vec2 st = (texCoord.xy - vec2(0.5)) * 2.0;
-    if (length(st) > 1.0) {
-      discard;
-    }
+  // Moving the origin to the center and calculating the length
+  float lengthFromCenter = length((texCoord - vec2(0.5)) * 2.0);
+  if (!hasSpriteTexture && (lengthFromCenter > 1.0)) {
+    discard;
   }
 
-  vec4 fullColor = vec4(1.0);
-  if (hasSpriteTexture) {
-    fullColor = texture(spriteTexture, vec3(texCoord, layer));
-  }
-
+  vec4 fullColor = glm::vec4(color, 1.0);
   if (useColorMap) {
-    fullColor *= sampleColorMap(gs_colorParameter);
+    fullColor = sampleColorMap(gs_colorParameter);
   }
-  else {
-    fullColor.rgb *= color;
+
+  if (hasSpriteTexture) {
+    fullColor *= texture(spriteTexture, vec3(texCoord, layer));
+  }
+  else if (enableOutline && (lengthFromCenter > (1.0 - outlineWeight))) {
+    fullColor.rgb = outlineColor;
   }
 
   fullColor.a *= opacity * fadeInValue;

@@ -56,14 +56,15 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 30> UniformNames = {
+    constexpr std::array<const char*, 33> UniformNames = {
         "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
         "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
         "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
         "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
         "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
         "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
-        "hasDvarScaling", "dvarScaleFactor"
+        "hasDvarScaling", "dvarScaleFactor", "enableOutline", "outlineColor",
+        "outlineWeight"
     };
 
     enum RenderOption {
@@ -248,6 +249,49 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
+        "Enabled",
+        "Size Mapping Enabled",
+        "If this value is set to 'true' and at least one column was loaded as an option "
+        "for size mapping, the chosen data column will be used to scale the size of the "
+        "points. The first option in the list is selected per default.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SizeMappingOptionInfo = {
+        "Parameter",
+        "Parameter Option",
+        "This value determines which parameter is used for scaling of the point. The "
+        "parameter value will be used as a miltiplicative factor to scale the size of "
+        "the points. Note that they may however still be scaled by max size adjustment "
+        "effects.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
+        "EnableOutline",
+        "Enable Point Outline",
+        "This setting determines if each point should have an outline or not. An outline "
+        "is only applied when rendering as colored points (not when using textures).",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
+        "OutlineColor",
+        "Outline Color",
+        "This value defines the color of the outline. Darker colors will be "
+        "less visible if Additive Blending is enabled.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
+        "OutlineWeight",
+        "Outline Weight",
+        "This setting determines the thickness of the outline. A value of 0 will "
+        "not show any outline, while a value of 1 will cover the whole point.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     // A RenderablePointCloud can be used to render point-based datasets in 3D space,
     // optionally including color mapping, a sprite texture and labels. There are several
     // properties that affect the visuals of the points, such as settings for scaling,
@@ -374,6 +418,15 @@ namespace {
             // Settings related to the choice of color map, parameters, etc.
             std::optional<ghoul::Dictionary> colorMapping
                 [[codegen::reference("colormappingcomponent")]];
+
+            // [[codegen::verbatim(EnableOutlineInfo.description)]]
+            std::optional<bool> enableOutline;
+
+            // [[codegen::verbatim(OutlineColorInfo.description)]]
+            std::optional<glm::vec3> outlineColor;
+
+            // [[codegen::verbatim(OutlineColorInfo.description)]]
+            std::optional<float> outlineWeight;
         };
         // Settings related to the coloring of the points, such as a fixed color,
         // color map, etc.
@@ -441,10 +494,14 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
 RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Coloring", "Coloring", "" })
     , pointColor(PointColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , enableOutline(EnableOutlineInfo, false)
+    , outlineColor(OutlineColorInfo, glm::vec3(0.23f), glm::vec3(0.f), glm::vec3(1.f))
+    , outlineWeight(OutlineWeightInfo, 0.2f, 0.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (p.coloring.has_value()) {
+    const bool hasColoring = p.coloring.has_value();
+    if (hasColoring) {
         const Parameters::ColorSettings settings = *p.coloring;
         pointColor = settings.fixedColor.value_or(pointColor);
 
@@ -454,9 +511,20 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
            );
            addPropertySubOwner(colorMapping.get());
         }
+
+        enableOutline = p.coloring->enableOutline.value_or(enableOutline);
+        outlineColor = p.coloring->outlineColor.value_or(outlineColor);
+        outlineWeight = p.coloring->outlineWeight.value_or(outlineWeight);
     }
     pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(pointColor);
+
+    addProperty(enableOutline);
+
+    outlineColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(outlineColor);
+
+    addProperty(outlineWeight);
 }
 
 RenderablePointCloud::Texture::Texture()
@@ -1085,6 +1153,9 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     }
 
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
+    _program->setUniform(_uniformCache.enableOutline, _colorSettings.enableOutline);
+    _program->setUniform(_uniformCache.outlineColor, _colorSettings.outlineColor);
+    _program->setUniform(_uniformCache.outlineWeight, _colorSettings.outlineWeight);
 
     bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
         _colorSettings.colorMapping->texture();

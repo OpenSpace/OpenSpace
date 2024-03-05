@@ -96,7 +96,6 @@ public:
     void deinitializeGL();
     void preSynchronization();
     void postSynchronizationPreDraw();
-    void viewportChanged();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
     void drawOverlays();
@@ -159,7 +158,6 @@ private:
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
-    bool _shouldAbortLoading = false;
     std::unique_ptr<LoadingScreen> _loadingScreen;
     std::unique_ptr<VersionChecker> _versionChecker;
 

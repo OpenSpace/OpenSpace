@@ -3,6 +3,7 @@ asset.require("./communications/geostationary")
 asset.require("./navigation/gps")
 asset.require("./misc/spacestations")
 asset.require("./misc/iss")
+asset.require("./misc/tiangong")
 asset.require("./misc/tle-new")
 
 
