@@ -25,31 +25,54 @@
 namespace {
 
 /**
-* Create a omni scene from .asset
+* Create an omni scenario from an asset
 */
-[[codegen::luawrap]] void createSceneFromDictionary(ghoul::Dictionary dictionary)
+[[codegen::luawrap]] void createScenarioFromDictionary(ghoul::Dictionary dictionary)
 {
     using namespace openspace;
 
-    if (!dictionary.hasKey(MessageKeySceneType)) {
-        throw ghoul::RuntimeError("Error creating scene, missing key 'SceneType'");
+    if (!dictionary.hasKey(MessageKeyScenarioType)) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error creating scene, missing key '{}'",
+            MessageKeyScenarioType
+        ));
     }
 
-    const std::string sceneType = dictionary.value<std::string>(MessageKeySceneType);
+    const std::string scenarioType = dictionary.value<std::string>(MessageKeyScenarioType);
 
-    ghoul::TemplateFactory<omni::Scene>* factory =
-        FactoryManager::ref().factory<omni::Scene>();
+    ghoul::TemplateFactory<omni::Scenario>* factory =
+        FactoryManager::ref().factory<omni::Scenario>();
 
     ghoul_assert(factory, "Omni scene factory did not exist");
 
-    omni::Scene* scene = factory->create(
-        sceneType,
-        dictionary,
-        &global::memoryManager->PersistentMemory
+    omni::Scenario* scenario = factory->create(
+        scenarioType,
+        dictionary
     );
 
+    auto ptr = std::unique_ptr<omni::Scenario>(scenario);
+
     OmniModule* module = global::moduleEngine->module<OmniModule>();
-    module->addScene(scene);
+    module->addScenario(std::move(ptr));
+}
+
+/**
+* Enable a scenario with identifier 
+*/
+[[codegen::luawrap]] void enableScenario(std::string identifier) {
+    using namespace openspace;
+    OmniModule* module = global::moduleEngine->module<OmniModule>();
+    module->enableScenario(identifier);
+}
+
+
+/**
+* Disable the currently active scenario with identifier
+*/
+[[codegen::luawrap]] void disableScenario(std::string identifier) {
+    using namespace openspace;
+    OmniModule* module = global::moduleEngine->module<OmniModule>();
+    module->disableScenario(identifier);
 }
 
 #include "omnimodule_lua_codegen.cpp"
