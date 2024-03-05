@@ -43,7 +43,7 @@ uniform vec4 belowRangeColor;
 uniform bool useBelowRangeColor;
 
 uniform bool hasSpriteTexture;
-uniform sampler2DArray spriteTexture; // OBS! texture array. Hence the 3D texCoord
+uniform sampler2DArray spriteTexture;
 
 uniform bool useColorMap;
 uniform sampler1D colorMapTexture;

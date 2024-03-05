@@ -56,7 +56,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 33> UniformNames = {
+    constexpr std::array<const char*, 34> UniformNames = {
         "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
         "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
         "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
@@ -64,7 +64,7 @@ namespace {
         "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
         "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
         "hasDvarScaling", "dvarScaleFactor", "enableOutline", "outlineColor",
-        "outlineWeight"
+        "outlineWeight", "aspectRatioScale"
     };
 
     enum RenderOption {
@@ -1218,8 +1218,10 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     if (useTexture && !_textureArrays.empty()) {
         spriteTextureUnit.activate();
         for (const TextureArrayInfo& arrayInfo : _textureArrays) {
-            // TODO: Use uniform cache after Adams PR
-            _program->setUniform("aspectRatioScale", arrayInfo.aspectRatioScale);
+            _program->setUniform(
+                _uniformCache.aspectRatioScale,
+                arrayInfo.aspectRatioScale
+            );
             glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
             glDrawArrays(
                 GL_POINTS,
@@ -1230,8 +1232,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
     else {
-        // TODO: Use uniform cache after Adams PR
-        _program->setUniform("aspectRatioScale", glm::vec2(1.f));
+        _program->setUniform(_uniformCache.aspectRatioScale, glm::vec2(1.f));
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nDataPoints));
     }
 

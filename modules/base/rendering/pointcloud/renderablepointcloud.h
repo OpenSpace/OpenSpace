@@ -124,8 +124,6 @@ protected:
 
     std::vector<float> createDataSlice();
 
-    void reInitializeTextures();
-
     /**
      * A function that subclasses could override to initialize their own textures to
      * use for rendering, when the \code _textureMode is set to Other
@@ -222,7 +220,7 @@ protected:
         cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
         enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
         useBelowRangeColor, hasDvarScaling, dvarScaleFactor, enableOutline, outlineColor,
-        outlineWeight
+        outlineWeight, aspectRatioScale
     ) _uniformCache;
 
     std::string _dataFile;
