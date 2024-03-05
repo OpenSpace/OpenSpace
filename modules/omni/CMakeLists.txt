@@ -27,7 +27,8 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 set(HEADER_FILES
   omnimodule.h
   include/poll.h
-  include/scene.h
+  include/scenario.h
+  include/utility.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -35,7 +36,8 @@ set(SOURCE_FILES
   omnimodule.cpp
   omnimodule_lua.inl
   src/poll.cpp
-  src/scene.cpp
+  src/scenario.cpp
+  src/utility.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
