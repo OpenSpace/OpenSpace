@@ -24,7 +24,8 @@
 
 #include <modules/omni/omnimodule.h>
 
-#include <modules/omni/include/scene.h>
+#include <modules/omni/include/scenario.h>
+#include <modules/omni/include/utility.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
@@ -44,7 +45,7 @@ namespace {
     constexpr std::string_view MessageKeyRole = "role";
     constexpr std::string_view MessageKeyType = "type";
     constexpr std::string_view MessageKeyUser = "user";
-    constexpr std::string_view MessageKeySceneType = "SceneType";
+    constexpr std::string_view MessageKeyScenarioType = "ScenarioType";
 
 } // namespace 
 
@@ -62,7 +63,7 @@ namespace openspace::omni {
             case Type::ServerJoin: return "server_join";
             case Type::ServerLeave: return "server_leave";
             case Type::ServerError: return "server_error";
-            //case Type::OpenSpaceType: return "openspace";
+            case Type::OpenSpaceType: return "openspace";
             default:
                 throw ghoul::MissingCaseException();
         }
@@ -93,9 +94,9 @@ namespace openspace::omni {
         else if (str == "server_error") {
             return Type::ServerError;
         }
-        //else if (str == "openspace") {
-        //    return Type::OpenSpaceType;
-        //}
+        else if (str == "openspace") {
+            return Type::OpenSpaceType;
+        }
 
         throw ghoul::RuntimeError(fmt::format("Unknown event type '{}'", str));
     }
@@ -119,14 +120,9 @@ OmniModule::~OmniModule() {
     if (_thread.joinable()) {
         _thread.join();
     }
-
-    //if (_scene) {
-    //    delete _scene;
-    //}
 }
 
 void OmniModule::internalInitialize(const ghoul::Dictionary& config) {
-    using namespace ghoul::io; // TODO this has to be included, otherwise wont compile..
 
     const int Port = 4685;
     const std:: string Address = "localhost";
@@ -137,7 +133,7 @@ void OmniModule::internalInitialize(const ghoul::Dictionary& config) {
         preSync();
     });
 
-    std::unique_ptr<TcpSocket> tcpSocket = std::make_unique<TcpSocket>(Address, Port);
+    std::unique_ptr<ghoul::io::TcpSocket> tcpSocket = std::make_unique<ghoul::io::TcpSocket>(Address, Port);
     if (!tcpSocket) {
         LERROR("Error creating tcp socket, aborting...");
         return;
@@ -159,14 +155,74 @@ void OmniModule::internalInitialize(const ghoul::Dictionary& config) {
 
     _thread = std::move(std::thread([this]() { handleConnection(); }));
 
-    FactoryManager::ref().addFactory<omni::Scene>("OmniScene");
-    auto factory = FactoryManager::ref().factory<omni::Scene>();
+    FactoryManager::ref().addFactory<omni::Scenario>("OmniScene");
+    auto factory = FactoryManager::ref().factory<omni::Scenario>();
     factory->registerClass<omni::Poll>("poll");
     
 }
 
-void OmniModule::addScene(omni::Scene* scene) {
-    _scene = scene;
+void OmniModule::addScenario(std::unique_ptr<omni::Scenario> scene) {
+    scene->initialize(_socket);
+    _scenarios.push_back(std::move(scene));
+}
+
+void OmniModule::enableScenario(const std::string& identifier) {
+
+    auto it = std::find_if(_scenarios.begin(), _scenarios.end(),
+        [&identifier](const std::unique_ptr<omni::Scenario>& scene) {
+            return scene->identifier() == identifier;
+        }
+    );
+
+    if (it == _scenarios.end()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "No scene with identifier {} found", identifier
+        ));
+    }
+
+    omni::Scenario* scene = it->get();
+
+    // Ignore if this is already the active scene
+    if (scene->isActive()) {
+        return; 
+    }
+
+    // Disable the current active scene
+    if (_activeScenario) {
+        _activeScenario->disableScenario();
+    }
+
+    // Enable new scene
+    _activeScenario = scene;
+    _activeScenario->enableScenario();
+}
+
+void OmniModule::disableScenario(const std::string& identifier) {
+    // Quick exist if we have no active scene
+    if (!_activeScenario) {
+        return;
+    }
+
+    // If we are trying to disable a non active scenario
+    if (identifier != _activeScenario->identifier()) {
+        LWARNING(fmt::format(
+            "Identifier {} does not match the currently active scenario identifier {}",
+            identifier,
+            _activeScenario->identifier()
+        ));
+        return;
+    }
+
+    _activeScenario->disableScenario();
+    _activeScenario = nullptr;
+}
+
+void OmniModule::sendMessage(const std::string& message) {
+    _socket->putMessage(message);
+}
+
+void OmniModule::sendJson(const nlohmann::json& json) {
+    sendMessage(json.dump());
 }
 
 void OmniModule::preSync() {
@@ -198,7 +254,14 @@ void OmniModule::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    omni::Type msgType = omni::fromString(*typeJson);
+    omni::Type msgType;
+    try {
+        msgType = omni::fromString(*typeJson);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERROR(fmt::format("Message ignored {}, {}", e.component, e.message));
+        return;
+    }
 
     switch (msgType) {
         case omni::Type::ServerCode: {
@@ -215,12 +278,21 @@ void OmniModule::handleJson(const nlohmann::json& json) {
             userLeave(json);
             break;
         }
-        //case omni::Type::OpenSpaceType: {
-        //    break;
-        //}
+        case omni::Type::OpenSpaceType: {
+            if (!_activeScenario) {
+                break;
+            }
+            // TODO: get the identifier of the msg and only if it matches the active scene
+            // pass it to that scene
+            // 
+            // TODO: if we have multiple scenes, should we get the correct scene here
+            // by looking at the identifier of the message or should we pass it to all
+            // scenes and let them decide if they should handle the message or not? 
+            _activeScenario->handleMessage(json);
+            break;
+        }
         default:
-            return;
-
+            break;
     }
 }
 
@@ -241,14 +313,14 @@ void OmniModule::userJoin(const nlohmann::json& json) {
         return;
     }
 
-    std::string role = *userRole;
+    const std::string role = *userRole;
 
+    // Ignore client or host joining
     if (role != "guest") {
         return;
     }
 
-    std::string user = *userJson;
-    int userId = std::stoi(user, nullptr, 16);
+    int userId = omni::details::convertToUserID(*userJson);
     _users.insert(userId);
 }
 
@@ -269,25 +341,28 @@ void OmniModule::userLeave(const nlohmann::json& json) {
         return;
     }
 
-    std::string role = *userRole;
+    const std::string role = *userRole;
 
     if (role != "guest") {
         return;
     }
 
-    std::string user = *userJson;
-    int userId = std::stoi(user, nullptr, 16);
+    // Remove user from internal storage
+    int userId = omni::details::convertToUserID(*userJson);
     auto it = _users.find(userId);
     if (it != _users.end()) {
         _users.erase(it);
     }
+
+
+
 }
 
 scripting::LuaLibrary OmniModule::luaLibrary() const {
     return {
         "omni",
         {
-            codegen::lua::CreateSceneFromDictionary
+            codegen::lua::CreateScenarioFromDictionary
         }
     };
 }

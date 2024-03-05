@@ -49,7 +49,7 @@ namespace openspace::omni {
         ServerJoin,
         ServerLeave,
         ServerError,
-        //OpenSpaceType
+        OpenSpaceType
     };
 
 
@@ -70,7 +70,12 @@ public:
 
     void internalInitialize(const ghoul::Dictionary& config) override;
 
-    void addScene(omni::Scene* scene);
+    void addScenario(std::unique_ptr<omni::Scenario> scenario);
+    void enableScenario(const std::string& identifier);
+    void disableScenario(const std::string& identifier);
+
+    void sendMessage(const std::string& message);
+    void sendJson(const nlohmann::json& json);
 
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
@@ -85,7 +90,7 @@ private:
 
     websocketpp::server<websocketpp::config::core> _server;
 
-    std::unique_ptr<ghoul::io::TcpSocket> _socket;
+    std::shared_ptr<ghoul::io::TcpSocket> _socket;
     std::thread _thread;
 
     std::mutex _messageQueueMutex;
@@ -95,7 +100,9 @@ private:
 
     std::set<int> _users;
 
-    omni::Scene* _scene = nullptr;
+
+    std::vector<std::unique_ptr<omni::Scenario>> _scenarios;
+    omni::Scenario* _activeScenario = nullptr;
 };
 
 } // namespace openspace
