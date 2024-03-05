@@ -34,6 +34,7 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
@@ -119,6 +120,13 @@ namespace {
         "Add Edges",
         "This value determines whether a bottom and top should b eadded to the tube",
         openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureDirectoryInfo = {
+        "TextureDirectory",
+        "Texture Directory",
+        "The directory where the cut-plane textures are located",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawWireframeInfo = {
@@ -210,6 +218,21 @@ namespace {
         // [[codegen::verbatim(AddEdgesInfo.description)]]
         std::optional<bool> addEdges;
 
+        struct ColorSettingsCutplane {
+            // [[codegen::verbatim(TubeColorInfo.description)]]
+            std::optional<glm::vec3> fixedColor [[codegen::color()]];
+
+            // Settings related to the choice of color map, parameters, etc.
+            std::optional<ghoul::Dictionary> colorMapping
+                [[codegen::reference("colormappingcomponent")]];
+        };
+        // Settings related to the coloring of the points, such as a fixed color,
+        // color map, etc.
+        std::optional<ColorSettingsCutplane> coloringCutplane;
+
+        // [[codegen::verbatim(TextureDirectoryInfo.description)]]
+        std::optional<std::string> textureDirectory;
+
         // [[codegen::verbatim(InterpolationMethodInfo.description)]]
         std::optional<std::string> interpolationMethod;
 
@@ -268,6 +291,27 @@ RenderableTube::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary
     addProperty(tubeColor);
 }
 
+RenderableTube::ColorSettingsCutplane::ColorSettingsCutplane(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "ColoringCutplane", "Coloring Cutplane", "" })
+    , fixedColor(TubeColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.coloringCutplane.has_value()) {
+        const Parameters::ColorSettingsCutplane settings = *p.coloringCutplane;
+        fixedColor = settings.fixedColor.value_or(fixedColor);
+
+        if (settings.colorMapping.has_value()) {
+            colorMapping = std::make_unique<ColorMappingComponent>(
+                *settings.colorMapping
+            );
+            addPropertySubOwner(colorMapping.get());
+        }
+    }
+    fixedColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(fixedColor);
+}
+
 RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _enableFaceCulling(EnableFaceCullingInfo, true)
@@ -284,6 +328,7 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _showAllTube(ShowAllTubeInfo, false)
     , _jumpToPrevPolygon(JumpToPrevPolygonInfo)
     , _jumpToNextPolygon(JumpToNextPolygonInfo)
+    , _colorSettingsCutplane(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _dataFile = p.file;
@@ -298,9 +343,8 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
         );
 
         _colorSettings.colorMapping->setRangeFromData.onChange([this]() {
-            int parameterIndex = currentColorParameterIndex();
             _colorSettings.colorMapping->valueRange = _colorDataset.findValueRange(
-                parameterIndex
+                currentColorParameterIndex()
             );
         });
 
@@ -344,6 +388,11 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     _addEdges = p.addEdges.value_or(_addEdges);
     addProperty(_addEdges);
 
+    if (p.textureDirectory.has_value()) {
+        std::filesystem::path folder = absPath(*p.textureDirectory);
+        _texturesDirectory = absPath(folder).string();
+    }
+
     _interpolationMethod.addOption(NearestInterpolation, "Nearest Neighbor");
     _interpolationMethod.addOption(LinearInterpolation, "Linear");
     addProperty(_interpolationMethod);
@@ -363,6 +412,27 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
 
     _jumpToNextPolygon.onChange([this]() { jumpToNextPolygon(); });
     addProperty(_jumpToNextPolygon);
+
+    if (p.coloringCutplane.has_value() && (*p.coloringCutplane).colorMapping.has_value()) {
+        if (!_hasColorMapFile) {
+            LWARNING("Color map provided for sides of the tube but not the cutplane of the tube");
+        }
+        else {
+            _colorSettingsCutplane.colorMapping->dataColumn.onChange(
+                [this]() { _tubeIsDirty = true; }
+            );
+
+            _colorSettingsCutplane.colorMapping->valueRange = glm::vec2(0.0, 1.0);
+
+            _colorSettingsCutplane.colorMapping->colorMapFile.onChange([this]() {
+                _tubeIsDirty = true;
+                _hasColorMapFile = std::filesystem::exists(
+                    _colorSettingsCutplane.colorMapping->colorMapFile.value()
+                );
+            });
+        }
+    }
+    addPropertySubOwner(_colorSettingsCutplane);
 }
 
 bool RenderableTube::isReady() const {
@@ -375,6 +445,7 @@ void RenderableTube::initialize() {
 
     if (_hasColorMapFile) {
         _colorSettings.colorMapping->initialize(_colorDataset);
+        _colorSettingsCutplane.colorMapping->initialize(_colorDatasetCutplane);
     }
 
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
@@ -397,6 +468,11 @@ void RenderableTube::initializeGL() {
 
     if (_hasColorMapFile) {
         _colorSettings.colorMapping->initializeTexture();
+        _colorSettingsCutplane.colorMapping->initializeTexture();
+    }
+
+    if (_hasInterpolationTextures) {
+        initializeTextures();
     }
 
     glGenVertexArrays(1, &_vaoId);
@@ -438,6 +514,16 @@ void RenderableTube::initializeGL() {
         GL_FALSE,
         sizeof(PolygonVertex),
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, tex))
+    );
+
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(
+        4,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(PolygonVertex),
+        reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, tex_next))
     );
 
     // Ending
@@ -482,6 +568,16 @@ void RenderableTube::initializeGL() {
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, tex))
     );
 
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(
+        4,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(PolygonVertex),
+        reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, tex_next))
+    );
+
     glBindVertexArray(0);
 }
 
@@ -510,6 +606,9 @@ void RenderableTube::deinitializeGL() {
 
     glDeleteBuffers(1, &_iboIdEnding);
     _iboIdEnding = 0;
+
+    _textures.clear();
+    glDeleteTextures(1, &_texArrayId);
 }
 
 int RenderableTube::currentColorParameterIndex() const {
@@ -521,6 +620,17 @@ int RenderableTube::currentColorParameterIndex() const {
     }
 
     return _colorDataset.index(property.option().description);
+}
+
+int RenderableTube::currentColorCutplaneParameterIndex() const {
+    const properties::OptionProperty& property =
+        _colorSettingsCutplane.colorMapping->dataColumn;
+
+    if (!_hasColorMapFile || property.options().empty()) {
+        return 0;
+    }
+
+    return _colorDatasetCutplane.index(property.option().description);
 }
 
 void RenderableTube::readDataFile() {
@@ -574,6 +684,37 @@ void RenderableTube::readDataFile() {
         LWARNING("Could not find version information, version might not be supported");
     }
 
+    // Meta informaiton about the textures (optional)
+    auto textureMeta = jsonData.find("texture-channels");
+    if (textureMeta != jsonData.end()) {
+        int colorDataIndex = 0;
+
+        for (auto channelInfo = textureMeta->begin();
+             channelInfo < textureMeta->end();
+             ++channelInfo)
+        {
+            std::string channelName = channelInfo->dump();
+            channelName.erase(
+                std::remove(channelName.begin(), channelName.end(), '\"'),
+                channelName.end()
+            );
+
+            _colorDatasetCutplane.variables.push_back({
+                .index = colorDataIndex++, .name = channelName
+            });
+        }
+
+        // Fill with some data even if it is not usefull
+        dataloader::Dataset::Entry entry;
+        entry.data.push_back(0.0);
+        entry.data.push_back(1.0);
+        _colorDatasetCutplane.entries.push_back(entry);
+
+        if (colorDataIndex > 4) {
+            LERROR("Texture can only handle maximum 4 channels");
+        }
+    }
+
     // Find polygons
     auto polygons = jsonData.find("polygons");
     if (polygons == jsonData.end() || polygons->size() < 1) {
@@ -611,6 +752,30 @@ void RenderableTube::readDataFile() {
         centerPt->at("z").get_to(z);
         timePolygon.center = glm::dvec3(x, y, z);
 
+        // Texture (optional)
+        auto texPt = it->find("texture");
+        if (texPt != it->end()) {
+            if (_texturesDirectory.empty()) {
+                LWARNING("Cannot load textures form empty texture directory");
+            }
+            else {
+                std::string filename = texPt->dump();
+                filename.erase(
+                    std::remove(filename.begin(), filename.end(), '\"'),
+                    filename.end()
+                );
+                std::filesystem::path fullPath = _texturesDirectory / filename;
+
+                // Check that file exits
+                if (!std::filesystem::is_regular_file(fullPath)) {
+                    LERROR(fmt::format("Cannot find texture file {}", fullPath));
+                }
+
+                timePolygon.texturePath = fullPath;
+                _hasInterpolationTextures = true;
+            }
+        }
+
         // Points
         auto points = it->find("points");
         if (points == it->end() || points->size() < 1) {
@@ -643,7 +808,9 @@ void RenderableTube::readDataFile() {
                 dataloader::Dataset::Entry entry;
                 for (auto dt : colorData->items()) {
                     if (isFirstPlygonAndPoint) {
-                        _colorDataset.variables.push_back({ .index = colorDataIndex++, .name = dt.key() });
+                        _colorDataset.variables.push_back({
+                           .index = colorDataIndex++, .name = dt.key()
+                        });
                     }
                     entry.data.push_back(dt.value());
                 }
@@ -662,15 +829,92 @@ void RenderableTube::readDataFile() {
                 pt->at("u").get_to(u);
                 pt->at("v").get_to(v);
                 timePolygonPoint.tex = glm::vec2(u, v);
-
-                //@TODO Move this when the proper reading of textures are added
-                //_hasInterpolationTextures = true;
+            }
+            else if (_hasInterpolationTextures) {
+                // Texture exist but no texture coordinates
+                LERROR("Could not find texture coordinates for polygon with texture");
+                _hasInterpolationTextures = false;
+                return;
             }
 
             timePolygon.points.push_back(timePolygonPoint);
         }
         _data.push_back(timePolygon);
     }
+}
+
+void RenderableTube::initializeTextures() {
+    _textures.reserve(_data.size());
+
+    for (size_t i = 0; i < _data.size(); ++i) {
+        std::unique_ptr<ghoul::opengl::Texture> t =
+            ghoul::io::TextureReader::ref().loadTexture(_data[i].texturePath.string(), 2);
+        if (t) {
+            LINFO(fmt::format("Loaded texture {}", _data[i].texturePath));
+            // Do not upload the loaded texture to the GPU, we just want it to
+            // hold the data
+            LDEBUG(fmt::format("Channels: {}", t->numberOfChannels()));
+        }
+        else {
+            throw ghoul::RuntimeError(fmt::format(
+                "Could not find image file {}", _data[i].texturePath
+            ));
+        }
+
+        // Check the resolution of first image and assume all texturea are same size
+        if (i == 0) {
+            _textureResolution = glm::uvec2(t->width(), t->height());
+        }
+
+        _textures.push_back(std::move(t));
+    }
+
+    // Generate textuer array
+    glGenTextures(1, &_texArrayId);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _texArrayId);
+
+    // Create storage for the texture (OpenGl 4.2 and above)
+    glTexStorage3D(
+        GL_TEXTURE_2D_ARRAY,
+        1, // No mipmaps
+        GL_RGBA32F,
+        _textureResolution.x,
+        _textureResolution.y,
+        static_cast<gl::GLsizei>(_textures.size())
+    );
+
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    if (_textures.size() > GL_MAX_ARRAY_TEXTURE_LAYERS) {
+        LERROR("Too many textures for one texture array");
+        // We will need to split the textures over several texture arrays if there are
+        // too many
+    }
+
+    // Fill that storage with the data from each textures
+    // TODO loop over textures instead
+    for (size_t i = 0; i < _textures.size(); ++i) {
+        const ghoul::opengl::Texture* texture = _textures[i].get();
+        glTexSubImage3D(
+            GL_TEXTURE_2D_ARRAY,
+            0, // Mipmap number
+            0, // xoffset
+            0, // yoffset
+            gl::GLint(i), // zoffset
+            gl::GLsizei(_textureResolution.x), // width
+            gl::GLsizei(_textureResolution.y), // height
+            1, // depth
+            gl::GLenum(ghoul::opengl::Texture::Format::RGBA),
+            GL_UNSIGNED_BYTE, // type
+            texture->pixelData()
+        );
+    }
+
+    // Reset
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
 void RenderableTube::createTube() {
@@ -837,8 +1081,17 @@ void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
             }
         }
 
-        sidePoint.tex[0] = polygon->points[pointIndex].tex.x;
-        sidePoint.tex[1] = polygon->points[pointIndex].tex.y;
+        if (isCutplane) {
+            sidePoint.tex[0] = polygon->points[pointIndex].tex.x;
+            sidePoint.tex[1] = polygon->points[pointIndex].tex.y;
+
+            sidePoint.tex_next[0] = polygon->points[pointIndex].tex_next.x;
+            sidePoint.tex_next[1] = polygon->points[pointIndex].tex_next.y;
+        }
+        else {
+            sidePoint.tex[0] = polygon->points[pointIndex].tex.x;
+            sidePoint.tex[1] = polygon->points[pointIndex].tex.y;
+        }
 
         verticies->push_back(sidePoint);
     }
@@ -1099,9 +1352,9 @@ RenderableTube::FindTimeStruct RenderableTube::findTime(double time) const {
             result.lastPolygonBeforeTime = i;
             result.foundPrev = true;
             result.onSlice = true;
-            LDEBUG(fmt::format("Polygon nr: '{}' is exactly at NOW",
+            /*LDEBUG(fmt::format("Polygon nr: '{}' is exactly at NOW",
                 _lastPolygonBeforeNow
-            ));
+            ));*/
         }
     }
 
@@ -1171,14 +1424,14 @@ void RenderableTube::interpolateEnd(double now) {
         // Do not show anything
         nIndiciesUntilNow = 0;
         _interpolationNeeded = false;
-        LDEBUG("Before");
+        //LDEBUG("Before");
     }
     // At or after end
     else if (_lastPolygonBeforeNow == _nPolygons - 1) {
         // Show all of the tube
         nIndiciesUntilNow = _indicies.size();
         _interpolationNeeded = false;
-        LDEBUG("After or End");
+        //LDEBUG("After or End");
     }
     // Middle
     else {
@@ -1193,9 +1446,9 @@ void RenderableTube::interpolateEnd(double now) {
             static_cast<int>(_lastPolygonBeforeNow * _nPoints * nIndiciesPerSection);
     }
 
-    LDEBUG(fmt::format("\nprev: '{}'\nnext: '{}'\nnPointsUntilNow: '{}'\n",
+    /*LDEBUG(fmt::format("\nprev: '{}'\nnext: '{}'\nnPointsUntilNow: '{}'\n",
         _lastPolygonBeforeNow, _firstPolygonAfterNow, nIndiciesUntilNow)
-    );
+    );*/
 
     if (nIndiciesUntilNow > _indicies.size()) {
         LERROR("Cannot render more verticies than what is in the tube");
@@ -1217,7 +1470,15 @@ void RenderableTube::interpolateEnd(double now) {
         _indiciesCutplane.clear();
 
         // Add cutplane exactly at polygon _lastPolygonBeforeNow
-        addEdge(_lastPolygonBeforeNow, &_data[_lastPolygonBeforeNow], 0, true);
+        TimePolygon currentTimePolygon = _data[_lastPolygonBeforeNow];
+
+        // Add texture coordinates for adjacent plane
+        for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
+            currentTimePolygon.points[pointIndex].tex_next =
+                _data[_lastPolygonBeforeNow].points[pointIndex].tex;
+        }
+
+        addEdge(_lastPolygonBeforeNow, &currentTimePolygon, 0, true);
         updateEndingBufferData();
     }
 
@@ -1253,6 +1514,8 @@ void RenderableTube::creteEnding(double now) {
             (1.0 - t) * prevTimePolygon->points[pointIndex].coordinate;
 
         // Texture coordinate?
+        currentTimePolygonPoint.tex = _data[_lastPolygonBeforeNow].points[pointIndex].tex;
+        currentTimePolygonPoint.tex_next = _data[_firstPolygonAfterNow].points[pointIndex].tex;
 
         currentTimePolygon.points.push_back(currentTimePolygonPoint);
     }
@@ -1352,56 +1615,6 @@ void RenderableTube::setCommonUniforms(ghoul::opengl::ProgramObject* shader, con
         shader->setUniform("diffuseIntensity", _shading.diffuseIntensity);
         shader->setUniform("specularIntensity", _shading.specularIntensity);
     }
-
-    // Colormap settings
-    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
-        _colorSettings.colorMapping->texture();
-    shader->setUniform("useColorMap", useColorMap);
-
-    shader->setUniform("color", _colorSettings.tubeColor);
-
-    ghoul::opengl::TextureUnit colorMapTextureUnit;
-    shader->setUniform("colorMapTexture", colorMapTextureUnit);
-
-    if (useColorMap) {
-        colorMapTextureUnit.activate();
-        _colorSettings.colorMapping->texture()->bind();
-
-        const glm::vec2 range = _colorSettings.colorMapping->valueRange;
-        shader->setUniform("cmapRangeMin", range.x);
-        shader->setUniform("cmapRangeMax", range.y);
-        shader->setUniform(
-            "hideOutsideRange",
-            _colorSettings.colorMapping->hideOutsideRange
-        );
-
-        shader->setUniform(
-            "nanColor",
-            _colorSettings.colorMapping->nanColor
-        );
-        shader->setUniform(
-            "useNanColor",
-            _colorSettings.colorMapping->useNanColor
-        );
-
-        shader->setUniform(
-            "aboveRangeColor",
-            _colorSettings.colorMapping->aboveRangeColor
-        );
-        shader->setUniform(
-            "useAboveRangeColor",
-            _colorSettings.colorMapping->useAboveRangeColor
-        );
-
-        shader->setUniform(
-            "belowRangeColor",
-            _colorSettings.colorMapping->belowRangeColor
-        );
-        shader->setUniform(
-            "useBelowRangeColor",
-            _colorSettings.colorMapping->useBelowRangeColor
-        );
-    }
 }
 
 void RenderableTube::render(const RenderData& data, RendererTasks&) {
@@ -1413,6 +1626,57 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
 
     // Uniforms
     setCommonUniforms(_shader.get(), data);
+
+    // Colormap settings
+    ghoul::opengl::TextureUnit colorMapTextureUnit;
+    _shader->setUniform("colorMapTexture", colorMapTextureUnit);
+    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
+        _colorSettings.colorMapping->texture();
+    if (useColorMap) {
+        colorMapTextureUnit.activate();
+        _colorSettings.colorMapping->texture()->bind();
+    }
+    _shader->setUniform("useColorMap", useColorMap);
+
+    _shader->setUniform("color", _colorSettings.tubeColor);
+
+    if (useColorMap) {
+        const glm::vec2 range = _colorSettings.colorMapping->valueRange;
+        _shader->setUniform("cmapRangeMin", range.x);
+        _shader->setUniform("cmapRangeMax", range.y);
+        _shader->setUniform(
+            "hideOutsideRange",
+            _colorSettings.colorMapping->hideOutsideRange
+        );
+
+        _shader->setUniform(
+            "nanColor",
+            _colorSettings.colorMapping->nanColor
+        );
+        _shader->setUniform(
+            "useNanColor",
+            _colorSettings.colorMapping->useNanColor
+        );
+
+        _shader->setUniform(
+            "aboveRangeColor",
+            _colorSettings.colorMapping->aboveRangeColor
+        );
+        _shader->setUniform(
+            "useAboveRangeColor",
+            _colorSettings.colorMapping->useAboveRangeColor
+        );
+
+        _shader->setUniform(
+            "belowRangeColor",
+            _colorSettings.colorMapping->belowRangeColor
+        );
+        _shader->setUniform(
+            "useBelowRangeColor",
+            _colorSettings.colorMapping->useBelowRangeColor
+        );
+    }
+
 
     // Settings
     if (!_enableFaceCulling) {
@@ -1460,6 +1724,62 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
 
             // Uniforms
             setCommonUniforms(_shaderCutplane.get(), data);
+
+            // Colormap settings
+            ghoul::opengl::TextureUnit colorMapTextureUnit;
+            _shaderCutplane->setUniform("colorMapTexture", colorMapTextureUnit);
+            bool useColorMap = _hasColorMapFile && _colorSettingsCutplane.colorMapping->enabled &&
+                _colorSettingsCutplane.colorMapping->texture();
+            if (useColorMap) {
+                colorMapTextureUnit.activate();
+                _colorSettingsCutplane.colorMapping->texture()->bind();
+            }
+            _shaderCutplane->setUniform("useColorMap", useColorMap);
+
+            _shaderCutplane->setUniform("color", _colorSettingsCutplane.fixedColor);
+
+            if (useColorMap) {
+                const glm::vec2 range = _colorSettingsCutplane.colorMapping->valueRange;
+                _shaderCutplane->setUniform("cmapRangeMin", range.x);
+                _shaderCutplane->setUniform("cmapRangeMax", range.y);
+                _shaderCutplane->setUniform(
+                    "hideOutsideRange",
+                    _colorSettingsCutplane.colorMapping->hideOutsideRange
+                );
+
+                _shaderCutplane->setUniform(
+                    "nanColor",
+                    _colorSettingsCutplane.colorMapping->nanColor
+                );
+                _shaderCutplane->setUniform(
+                    "useNanColor",
+                    _colorSettingsCutplane.colorMapping->useNanColor
+                );
+
+                _shaderCutplane->setUniform(
+                    "aboveRangeColor",
+                    _colorSettingsCutplane.colorMapping->aboveRangeColor
+                );
+                _shaderCutplane->setUniform(
+                    "useAboveRangeColor",
+                    _colorSettingsCutplane.colorMapping->useAboveRangeColor
+                );
+
+                _shaderCutplane->setUniform(
+                    "belowRangeColor",
+                    _colorSettingsCutplane.colorMapping->belowRangeColor
+                );
+                _shaderCutplane->setUniform(
+                    "useBelowRangeColor",
+                    _colorSettingsCutplane.colorMapping->useBelowRangeColor
+                );
+            }
+
+            _shaderCutplane->setUniform(
+                "selectedChannel",
+                currentColorCutplaneParameterIndex()
+            );
+
             _shaderCutplane->setUniform(
                 "hasInterpolationTexture",
                 _hasInterpolationTextures
@@ -1470,9 +1790,36 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
             );
             _shaderCutplane->setUniform("interpolationTime", _tValue);
 
-            // @TODO: Find the textures relevant to this cutplane and bind them
-            _shaderCutplane->setUniform("texture_prev", false);
-            _shaderCutplane->setUniform("texture_next", false);
+            // Cutplane textures
+            ghoul::opengl::TextureUnit texturesUnit;
+            _shaderCutplane->setUniform("textures", texturesUnit);
+            texturesUnit.activate();
+            glBindTexture(GL_TEXTURE_2D_ARRAY, _texArrayId);
+
+            // Find the polygons corresponding to before and after now
+            double now = data.time.j2000Seconds();
+            FindTimeStruct result = findTime(now);
+            double prevTime = _data[result.lastPolygonBeforeTime].timestamp;
+            double nextTime = _data[result.firstPolygonAfterTime].timestamp;
+
+            // Check if time is before or after valid time for tube
+            if (!result.foundPrev) {
+                LWARNING("Current time is before the start time for the tube");
+                result.lastPolygonBeforeTime = 0;
+            }
+            if (result.firstPolygonAfterTime == std::numeric_limits<size_t>::max()) {
+                LWARNING("Current time is after the end time for the tube");
+                result.firstPolygonAfterTime = _data.size() - 1;
+            }
+
+            _shaderCutplane->setUniform(
+                "prev_texture_index",
+                static_cast<int>(result.lastPolygonBeforeTime)
+            );
+            _shaderCutplane->setUniform(
+                "next_texture_index",
+                static_cast<int>(result.lastPolygonBeforeTime)
+            );
         }
 
         // Bind the cutplane ibo instead
@@ -1507,6 +1854,7 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
     }
 
     glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     global::renderEngine->openglStateCache().resetLineState();
     _shader->deactivate();
 }
@@ -1560,6 +1908,7 @@ void RenderableTube::update(const UpdateData& data) {
 
     if (_hasColorMapFile) {
         _colorSettings.colorMapping->update(_colorDataset);
+        _colorSettingsCutplane.colorMapping->update(_colorDatasetCutplane);
     }
 
     if (_tubeIsDirty) {

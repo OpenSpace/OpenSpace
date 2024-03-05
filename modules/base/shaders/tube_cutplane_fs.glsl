@@ -28,7 +28,8 @@ in float vs_depth;
 in vec3 vs_normal;
 in vec4 vs_positionViewSpace;
 in float vs_value;
-in vec2 vs_st;
+in vec2 vs_st_prev;
+in vec2 vs_st_next;
 
 uniform float opacity;
 uniform vec3 color;
@@ -61,8 +62,10 @@ uniform float lightIntensities[8];
 uniform bool hasInterpolationTexture = false;
 uniform bool useNearesNeighbor;
 uniform float interpolationTime;
-uniform sampler2D texture_prev;
-uniform sampler2D texture_next;
+uniform sampler2DArray textures;
+uniform int selectedChannel = 0;
+uniform int prev_texture_index;
+uniform int next_texture_index;
 
 // Could be seperated into ambinet, diffuse and specular and passed in as uniforms
 const vec3 LightColor = vec3(1.0);
@@ -87,9 +90,9 @@ vec4 sampleColorMap(float dataValue) {
     return aboveRangeColor;
   }
 
-  float v = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
-  v = clamp(v, 0.0, 1.0);
-  return texture(colorMapTexture, v);
+  float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
+  t = clamp(t, 0.0, 1.0);
+  return texture(colorMapTexture, t);
 }
 
 Fragment getFragment() {
@@ -111,8 +114,8 @@ Fragment getFragment() {
       }
 
       // Interpolate with linear interpolation
-      float valuePrev = texture(texture_prev, vs_st).r;
-      float valueNext = texture(texture_next, vs_st).r;
+      float valuePrev = texture(textures, vec3(vs_st_prev, prev_texture_index))[selectedChannel];
+      float valueNext = texture(textures, vec3(vs_st_next, next_texture_index))[selectedChannel];
       float value = t * valueNext + (1.0 - t) * valuePrev;
 
       value = clamp(value, 0.0, 1.0);
@@ -125,6 +128,7 @@ Fragment getFragment() {
   else {
     objectColor.rgb = color;
   }
+  //objectColor.rgb = texture(textures, vec3(vs_st_prev, prev_texture_index)).rgb;
 
   objectColor.a *= opacity;
   if (objectColor.a == 0.0) {

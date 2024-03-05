@@ -67,17 +67,20 @@ private:
         GLfloat normal[3];
         GLfloat value;
         GLfloat tex[2];
+        GLfloat tex_next[2];
     };
 
     struct TimePolygonPoint {
         glm::dvec3 coordinate = glm::dvec3(0.0);
         glm::vec2 tex = glm::vec2(0.f);
+        glm::vec2 tex_next = glm::vec2(0.f);
     };
 
     struct TimePolygon {
         double timestamp = 0.0;
         glm::dvec3 center = glm::dvec3(0.0);
         std::vector<TimePolygonPoint> points;
+        std::filesystem::path texturePath;
     };
 
     struct FindTimeStruct {
@@ -89,8 +92,10 @@ private:
 
     /// Find the index of the currently chosen color parameter in the data
     int currentColorParameterIndex() const;
+    int currentColorCutplaneParameterIndex() const;
 
     void readDataFile();
+    void initializeTextures();
 
     void createTube();
     void createSmoothTube(unsigned int firstSideIndex);
@@ -175,14 +180,28 @@ private:
     std::vector<unsigned int> _indicies;
 
     // Ending stuff
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderCutplane;
-    bool _hasInterpolationTextures = false;
     GLuint _vaoIdEnding = 0;
     GLuint _vboIdEnding = 0;
     GLuint _iboIdEnding = 0;
     std::vector<PolygonVertex> _verticiesEnding;
     std::vector<unsigned int> _indiciesEnding;
     std::vector<unsigned int> _indiciesCutplane;
+
+    // Textured cutplane
+    struct ColorSettingsCutplane : properties::PropertyOwner {
+        explicit ColorSettingsCutplane(const ghoul::Dictionary& dictionary);
+        properties::Vec3Property fixedColor;
+        std::unique_ptr<ColorMappingComponent> colorMapping;
+    };
+    ColorSettingsCutplane _colorSettingsCutplane;
+    dataloader::Dataset _colorDatasetCutplane;
+
+    GLuint _texArrayId = 0;
+    bool _hasInterpolationTextures = false;
+    std::filesystem::path _texturesDirectory;
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+    glm::uvec2 _textureResolution = glm::uvec2(0);
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderCutplane;
 };
 
 } // namespace openspace

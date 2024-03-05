@@ -27,13 +27,15 @@
 layout (location = 0) in dvec3 in_position;
 layout (location = 1) in vec3 in_normal;
 layout (location = 2) in float in_value;
-layout (location = 3) in vec2 in_st;
+layout (location = 3) in vec2 in_st_prev;
+layout (location = 4) in vec2 in_st_next;
 
 out float vs_depth;
 out vec3 vs_normal;
 out vec4 vs_positionViewSpace;
 out float vs_value;
-out vec2 vs_st;
+out vec2 vs_st_prev;
+out vec2 vs_st_next;
 
 uniform dmat4 modelViewTransform;
 uniform dmat4 projectionTransform;
@@ -52,5 +54,6 @@ void main() {
 
   gl_Position = vec4(positionScreenSpace);
   vs_depth = float(positionScreenSpace.w);
-  vs_st = in_st;
+  vs_st_prev = in_st_prev;
+  vs_st_next = in_st_next;
 }
