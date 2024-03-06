@@ -1030,9 +1030,13 @@ void RenderablePointCloud::generateArrayTextures() {
         // Fill that storage with the data from the individual textures
         unsigned int layer = 0;
         for (const size_t& i : textureListIndices) {
-            const ghoul::opengl::Texture* texture = _textures[i].get();
+            ghoul::opengl::Texture* texture = _textures[i].get();
             fillAndUploadTextureLayer(arrayIndex, layer, i, res, useAlpha, texture->pixelData());
             layer++;
+
+            // At this point we don't need the keep the texture data around anymore. If
+            // the textures need updating, we will reload them from file
+            texture->purgeFromRAM();
         }
 
         int nMaxTextureLayers = 0;
