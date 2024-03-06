@@ -723,7 +723,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     if (p.labels.has_value()) {
         if (!p.labels->hasKey("File") && _hasDataFile) {
-            // Load the labelset from the dataset if no file was included
+            // Load the labelset from the dataset if no label file was included
             _labels = std::make_unique<LabelsComponent>(*p.labels, _dataset, _unit);
         }
         else {
@@ -732,7 +732,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
-        // Fading of the labels should also depend on the fading of the renderable
+        // Fading of the labels should depend on the fading of the renderable
         _labels->setParentFadeable(this);
     }
 
@@ -742,8 +742,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
 bool RenderablePointCloud::isReady() const {
     bool isReady = _program;
-
-    // If we have labels, they also need to be loaded
     if (_hasLabels) {
         isReady = isReady && _labels->isReady();
     }
@@ -808,10 +806,7 @@ void RenderablePointCloud::deinitializeGL() {
 
     deinitializeShaders();
 
-    // Unload texture arrays from GPU memory
-    for (const TextureArrayInfo& arrayInfo : _textureArrays) {
-        glDeleteTextures(1, &arrayInfo.renderId);
-    }
+    clearTextureDataStructures();
 }
 
 void RenderablePointCloud::initializeShadersAndGlExtras() {
@@ -859,20 +854,9 @@ void RenderablePointCloud::initializeSingleTexture() {
 
 void RenderablePointCloud::initializeMultiTextures() {
     for (const dataloader::Dataset::Texture& tex : _dataset.textures) {
-        std::filesystem::path fullPath = _texturesDirectory / tex.file;
-        // TODO: Remove this change to png extension... (Requires updating the dataset)
-        std::filesystem::path pngPath = fullPath;
-        pngPath.replace_extension(".png");
+        std::filesystem::path path = _texturesDirectory / tex.file;
 
-        std::filesystem::path path;
-        if (std::filesystem::is_regular_file(fullPath)) {
-            path = fullPath;
-        }
-        else if (std::filesystem::is_regular_file(pngPath)) {
-            path = pngPath;
-        }
-        else {
-            // We can't really recover from this as it would crash during rendering anyway
+        if (!std::filesystem::is_regular_file(path)) {
             throw ghoul::RuntimeError(fmt::format(
                 "Could not find image file '{}'", path
             ));
@@ -918,7 +902,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     if (t) {
         LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
         // Do not upload the loaded texture to the GPU, we just want it to hold the data.
-        // However, convert textures make sure they all use the same format.
+        // However, convert textures make sure they all use the same format
         ghoul::opengl::Texture::Format targetFormat = glFormat(useAlpha);
         convertTextureFormat(*t, targetFormat);
     }
@@ -1002,7 +986,7 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
         pixelData
     );
 
-    // Keept track of which layer in which texture array corresponds to the texture with
+    // Keep track of which layer in which texture array corresponds to the texture with
     // this index, so we can use it when generating vertex data
     _textureIndexToArrayMap[textureIndex] = {
         .arrayId = arrayIndex,
@@ -1019,8 +1003,7 @@ void RenderablePointCloud::generateArrayTextures() {
         std::vector<size_t> textureListIndices = e.second;
         size_t nLayers = textureListIndices.size();
 
-        // And and create storage for texture (bind the texture for writing)
-        // Generate an array texture
+        // Generate an array texture storage
         unsigned int id = 0;
         glGenTextures(1, &id);
         glBindTexture(GL_TEXTURE_2D_ARRAY, id);
