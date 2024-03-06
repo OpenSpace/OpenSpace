@@ -25,6 +25,12 @@
 #include <modules/omni/include/scenario.h>
 
 #include <modules/server/include/jsonconverters.h> // TODO: move this outside server module?
+#include <string>
+
+namespace {
+    constexpr std::string_view ScenarioMessageKeySetIdle = "setIdle";
+    constexpr std::string_view ScenarioMessageKeySetScenario = "setScenario";
+}
 
 namespace openspace::omni {
 
@@ -44,7 +50,7 @@ void Scenario::sendJson(const nlohmann::json& json) const {
     sendMessage(json.dump());
 }
 
-nlohmann::json Scenario::wrappedPayload(const std::string& type,
+nlohmann::json Scenario::wrappedPayload(std::string_view type,
                                                       const nlohmann::json& payload) const
 {
     ZoneScoped;
@@ -63,7 +69,7 @@ void Scenario::enableScenario() {
 }
 
 void Scenario::disableScenario() {
-    sendJson(wrappedPayload("setIdle", ""));
+    sendJson(wrappedPayload(ScenarioMessageKeySetIdle, ""));
     _isActive = false;
     onDisableScenario();
 }
@@ -77,7 +83,7 @@ std::string_view Scenario::identifier() const {
 }
 
 void Scenario::sendAssetInfo() const {
-    sendJson(wrappedPayload("setScenario", _assetInformation));
+    sendJson(wrappedPayload(ScenarioMessageKeySetScenario, _assetInformation));
 }
 
 } // namespace openspace::omni

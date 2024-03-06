@@ -29,6 +29,15 @@
 #include <string>
 
 namespace openspace::omni::details {
+    // Common message key strings used in messages passed to and from omni-server
+    constexpr std::string_view MessageKeyCode = "code";
+    constexpr std::string_view MessageKeyMessage = "message";
+    constexpr std::string_view MessageKeyPayload = "payload";
+    constexpr std::string_view MessageKeyRole = "role";
+    constexpr std::string_view MessageKeyType = "type";
+    constexpr std::string_view MessageKeyUser = "user";
+    constexpr std::string_view MessageKeyIdentifier = "identifier";
+
     // Converts user string from hex to int
     int convertToUserID(const nlohmann::json& json);
 

@@ -71,8 +71,8 @@ public:
     void internalInitialize(const ghoul::Dictionary& config) override;
 
     void addScenario(std::unique_ptr<omni::Scenario> scenario);
-    void enableScenario(const std::string& identifier);
-    void disableScenario(const std::string& identifier);
+    void enableScenario(std::string_view identifier);
+    void disableScenario(std::string_view identifier);
 
     void sendMessage(const std::string& message);
     void sendJson(const nlohmann::json& json);

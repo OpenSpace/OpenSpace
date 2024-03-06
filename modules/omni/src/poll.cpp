@@ -37,8 +37,8 @@
 namespace {
     constexpr std::string_view _loggerCat = "Poll";
 
-    constexpr std::string_view PollMessageKeyUser = "user";
-    constexpr std::string_view PollMessageKeyVote = "Vote";
+    constexpr std::string_view PollMessageKeyVote = "vote";
+    constexpr std::string_view PollMessageKeyPollResult = "pollResult";
 
     // Explanation of Parameters
     struct [[codegen::Dictionary(Poll)]] Parameters {
@@ -60,7 +60,7 @@ namespace {
         // Unique identifier for this scenario
         std::string identifier;
 
-        // Type of scenario e.g., poll 
+        // Type of scenario e.g., poll
         std::string scenarioType;
 
         // The poll options to vote for
@@ -77,9 +77,9 @@ namespace {
 
         // If set to true, allow users to change their vote after casting the first time.
         // If false, users cannot change their vote.
-        std::optional<bool> allowMultipleVoting;
+        std::optional<int> allowMultipleVoting;
 
-        bool allowChangeVote;
+        std::optional<bool> allowChangeVote;
     };
 
 #include "poll_codegen.cpp"
@@ -96,7 +96,10 @@ Poll::Poll(const ghoul::Dictionary& dictionary) :
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _allowMultipleVoting = p.allowMultipleVoting.value_or(false);
+    if (p.allowMultipleVoting.has_value()) {
+        _allowMultipleVoting = p.allowMultipleVoting.value();
+    }
+    _allowChangeVote = p.allowChangeVote.value_or(false);
 
     for (const auto& option : p.options) {
         _options.push_back({ option.identifier, option.script });
@@ -108,7 +111,7 @@ Poll::Poll(const ghoul::Dictionary& dictionary) :
 
 void Poll::handleMessage(const nlohmann::json& json) {
     auto voteJson = json.find(PollMessageKeyVote);
-    auto userJson = json.find(PollMessageKeyUser);
+    auto userJson = json.find(details::MessageKeyUser);
 
     const bool isValidJsonObject =
         voteJson != json.end() &&
@@ -118,41 +121,22 @@ void Poll::handleMessage(const nlohmann::json& json) {
 
     if (!isValidJsonObject) {
         LWARNING(fmt::format("{}: Ignored user vote, missing key '{}' or '{}'",
-            identifier(), PollMessageKeyVote, PollMessageKeyUser
+            identifier(), PollMessageKeyVote, details::MessageKeyUser
         ));
         return;
     }
 
-    const std::string newVote = *voteJson;
+    const std::string newVote = voteJson->get<std::string>();
     const User user = omni::details::convertToUserID(*userJson);
 
-    // Make sure the vote we are receiving exists among the possible options available.
-    auto optionIt = std::find_if(_options.begin(), _options.end(),
-        [&newVote](const Option& option) {
-            return option.identifier == newVote;
-        }
-    );
-
-    if (optionIt == _options.end()) {
-        LERROR(fmt::format(
-            "Error vote '{}' does not exist among the provided vote options",
-            newVote
-        ));
-        return;
-    }
-
-    // TODO: could do the other option if we can guarantee that users wont be able to send
-    // multiple vote commands from their phone, that way we could reduce some overhead
-    // when disallowing recasting your vote (see code below)
-    
     // User may have casted a vote previously, so we look through all vote options
     // if the user exists in any set
     for (auto& [vote, users] : _votes) {
         auto it = users.find(user);
 
         if (it != users.end()) {
-            if (!_allowMultipleVoting) {
-                // User already voted on something
+            if (!_allowChangeVote) {
+                // User already voted on something ignore new vote
                 return;
             }
 
@@ -165,24 +149,12 @@ void Poll::handleMessage(const nlohmann::json& json) {
     // add user to new vote set
     _votes[newVote].insert(user);
 
-    //// Add the user vote to the correct list
-    //if (!_allowMultipleVoting) {
-    //    _votes[newVote].insert(user);
-    //}
-    //else {
-    //    // User may have casted a vote previously, so we look through all vote options
-    //    // if the user exists in any set
-    //    for (auto& [vote, users] : _votes) {
-    //        auto it = users.find(user);
-    //        if (it != users.end()) {
-    //            users.erase(it);
-    //            // User can only exist in one vote option at a time
-    //            break; 
-    //        }
-    //    }
-    //    // add user to new vote set
-    //    _votes[newVote].insert(user);
-    //}
+    // Get the option object user voted for
+    auto optionIt = std::find_if(_options.begin(), _options.end(),
+        [&newVote](const Option& option) {
+            return option.identifier == newVote;
+        }
+    );
 
     // Execute corresponding script user voted for
     global::scriptEngine->queueScript(
@@ -190,6 +162,7 @@ void Poll::handleMessage(const nlohmann::json& json) {
         openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
         openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
+
     // Send back information to client/guests
     onHandleMessage();
 }
@@ -202,10 +175,10 @@ void Poll::onHandleMessage() {
         LDEBUG(fmt::format("Vote: {} has {} number of votes", voteId, users.size()));
         result.setValue(voteId, static_cast<int>(users.size()));
     }
-    //ghoul::Dictionary dictionary;
-    //dictionary.setValue("result", result);
+    ghoul::Dictionary dictionary;
+    dictionary.setValue("result", result);
 
-    sendJson(wrappedPayload("pollResult", result));
+    sendJson(wrappedPayload(PollMessageKeyPollResult, dictionary));
 }
 
 void Poll::onEnableScenario() {

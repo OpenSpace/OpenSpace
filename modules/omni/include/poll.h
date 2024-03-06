@@ -29,8 +29,6 @@
 
 #include <openspace/json.h>
 #include <ghoul/misc/dictionary.h>
-
-// Seems to be compiling fine without these #include 
 #include <map>
 #include <set>
 
@@ -66,7 +64,9 @@ private:
 
     std::vector<Option> _options;
     std::map<VoteOption, std::set<User>> _votes;
-    bool _allowMultipleVoting = false;
+
+    std::optional<int> _allowMultipleVoting;
+    bool _allowChangeVote = false;
 };
 
 } // namespace openspace::omni

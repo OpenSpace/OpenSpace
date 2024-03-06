@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 namespace {
+    constexpr std::string_view AssetKeyScenarioType = "ScenarioType";
 
 /**
 * Create an omni scenario from an asset
@@ -31,19 +32,19 @@ namespace {
 {
     using namespace openspace;
 
-    if (!dictionary.hasKey(MessageKeyScenarioType)) {
+    if (!dictionary.hasKey(AssetKeyScenarioType)) {
         throw ghoul::RuntimeError(fmt::format(
-            "Error creating scene, missing key '{}'",
-            MessageKeyScenarioType
+            "Error creating scenario, missing key '{}'",
+            AssetKeyScenarioType
         ));
     }
 
-    const std::string scenarioType = dictionary.value<std::string>(MessageKeyScenarioType);
+    const std::string scenarioType = dictionary.value<std::string>(AssetKeyScenarioType);
 
     ghoul::TemplateFactory<omni::Scenario>* factory =
         FactoryManager::ref().factory<omni::Scenario>();
 
-    ghoul_assert(factory, "Omni scene factory did not exist");
+    ghoul_assert(factory, "Omni scenario factory did not exist");
 
     omni::Scenario* scenario = factory->create(
         scenarioType,
@@ -57,7 +58,7 @@ namespace {
 }
 
 /**
-* Enable a scenario with identifier 
+* Enable a scenario with identifier
 */
 [[codegen::luawrap]] void enableScenario(std::string identifier) {
     using namespace openspace;

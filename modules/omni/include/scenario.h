@@ -41,7 +41,7 @@ public:
     void sendJson(const nlohmann::json& json) const;
     void sendAssetInfo() const;
 
-    nlohmann::json wrappedPayload(const std::string& type,
+    nlohmann::json wrappedPayload(std::string_view type,
                                                      const nlohmann::json& payload) const;
 
     virtual void handleMessage(const nlohmann::json& obj) = 0;

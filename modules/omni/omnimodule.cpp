@@ -40,14 +40,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "Omni";
 
-    constexpr std::string_view MessageKeyCode = "code";
-    constexpr std::string_view MessageKeyMessage = "message";
-    constexpr std::string_view MessageKeyRole = "role";
-    constexpr std::string_view MessageKeyType = "type";
-    constexpr std::string_view MessageKeyUser = "user";
-    constexpr std::string_view MessageKeyScenarioType = "ScenarioType";
-
-} // namespace 
+} // namespace
 
 #include "omnimodule_lua.inl"
 
@@ -112,6 +105,10 @@ OmniModule::OmniModule() : OpenSpaceModule(OmniModule::Name) {
 }
 
 OmniModule::~OmniModule() {
+    if (_activeScenario) {
+        _activeScenario->disableScenario();
+        _activeScenario = nullptr;
+    }
     if (_socket->isConnected()) {
         _socket->disconnect(
             static_cast<int>(ghoul::io::WebSocket::ClosingReason::ClosingAll)
@@ -155,50 +152,49 @@ void OmniModule::internalInitialize(const ghoul::Dictionary& config) {
 
     _thread = std::move(std::thread([this]() { handleConnection(); }));
 
-    FactoryManager::ref().addFactory<omni::Scenario>("OmniScene");
+    FactoryManager::ref().addFactory<omni::Scenario>("OmniScenario");
     auto factory = FactoryManager::ref().factory<omni::Scenario>();
     factory->registerClass<omni::Poll>("poll");
-    
 }
 
-void OmniModule::addScenario(std::unique_ptr<omni::Scenario> scene) {
-    scene->initialize(_socket);
-    _scenarios.push_back(std::move(scene));
+void OmniModule::addScenario(std::unique_ptr<omni::Scenario> scenario) {
+    scenario->initialize(_socket);
+    _scenarios.push_back(std::move(scenario));
 }
 
-void OmniModule::enableScenario(const std::string& identifier) {
+void OmniModule::enableScenario(std::string_view identifier) {
 
     auto it = std::find_if(_scenarios.begin(), _scenarios.end(),
-        [&identifier](const std::unique_ptr<omni::Scenario>& scene) {
-            return scene->identifier() == identifier;
+        [&identifier](const std::unique_ptr<omni::Scenario>& scenario) {
+            return scenario->identifier() == identifier;
         }
     );
 
     if (it == _scenarios.end()) {
         throw ghoul::RuntimeError(fmt::format(
-            "No scene with identifier {} found", identifier
+            "No scenario with identifier '{}' found", identifier
         ));
     }
 
-    omni::Scenario* scene = it->get();
+    omni::Scenario* scenario = it->get();
 
-    // Ignore if this is already the active scene
-    if (scene->isActive()) {
-        return; 
+    // Ignore if this is already the active scenario
+    if (scenario->isActive()) {
+        return;
     }
 
-    // Disable the current active scene
+    // Disable the current active scenario
     if (_activeScenario) {
         _activeScenario->disableScenario();
     }
 
-    // Enable new scene
-    _activeScenario = scene;
+    // Enable new scenario
+    _activeScenario = scenario;
     _activeScenario->enableScenario();
 }
 
-void OmniModule::disableScenario(const std::string& identifier) {
-    // Quick exist if we have no active scene
+void OmniModule::disableScenario(std::string_view identifier) {
+    // Quick exist if we have no active scenario
     if (!_activeScenario) {
         return;
     }
@@ -206,7 +202,7 @@ void OmniModule::disableScenario(const std::string& identifier) {
     // If we are trying to disable a non active scenario
     if (identifier != _activeScenario->identifier()) {
         LWARNING(fmt::format(
-            "Identifier {} does not match the currently active scenario identifier {}",
+            "Scenario '{}' does not match the currently active scenario '{}'",
             identifier,
             _activeScenario->identifier()
         ));
@@ -247,7 +243,8 @@ void OmniModule::handleConnection() {
 }
 
 void OmniModule::handleJson(const nlohmann::json& json) {
-    auto typeJson = json.find(MessageKeyType);
+    auto typeJson = json.find(omni::details::MessageKeyType);
+    auto payloadJson = json.find(omni::details::MessageKeyPayload);
 
     if (typeJson == json.end()) {
         LERROR("Message ignored, could not find a message 'type'");
@@ -265,7 +262,7 @@ void OmniModule::handleJson(const nlohmann::json& json) {
 
     switch (msgType) {
         case omni::Type::ServerCode: {
-            auto codeJson = json.find(MessageKeyCode);
+            auto codeJson = json.find(omni::details::MessageKeyCode);
             _serverCode = *codeJson;
             break;
         }
@@ -282,13 +279,13 @@ void OmniModule::handleJson(const nlohmann::json& json) {
             if (!_activeScenario) {
                 break;
             }
-            // TODO: get the identifier of the msg and only if it matches the active scene
-            // pass it to that scene
-            // 
-            // TODO: if we have multiple scenes, should we get the correct scene here
-            // by looking at the identifier of the message or should we pass it to all
-            // scenes and let them decide if they should handle the message or not? 
-            _activeScenario->handleMessage(json);
+
+            //  We only handle messages for the currently active scenario
+            auto identifierJson = json.find(omni::details::MessageKeyIdentifier);
+            const std::string id = identifierJson->get<std::string>();
+            if (_activeScenario->identifier() == id) {
+                _activeScenario->handleMessage(json);
+            }
             break;
         }
         default:
@@ -297,9 +294,10 @@ void OmniModule::handleJson(const nlohmann::json& json) {
 }
 
 void OmniModule::userJoin(const nlohmann::json& json) {
-    auto userJson = json.find(MessageKeyUser);
-    auto userRole = json.find(MessageKeyRole);
+    auto userJson = json.find(omni::details::MessageKeyUser);
+    auto userRoleJson = json.find(omni::details::MessageKeyRole);
 
+    // TODO: these keys are added by Omni so the checks might be redundant?
     if (userJson == json.end()) {
         LERROR("User joined but could not find user ID");
         return;
@@ -308,12 +306,12 @@ void OmniModule::userJoin(const nlohmann::json& json) {
         LERROR("'user' must be specified as a string when joining server");
         return;
     }
-    if (userRole == json.end() || !userRole->is_string()) {
+    if (userRoleJson == json.end() || !userRoleJson->is_string()) {
         LERROR("User role not specified or not in string format when joining");
         return;
     }
 
-    const std::string role = *userRole;
+    const std::string role = userRoleJson->get<std::string>();
 
     // Ignore client or host joining
     if (role != "guest") {
@@ -330,23 +328,26 @@ void OmniModule::userJoin(const nlohmann::json& json) {
 }
 
 void OmniModule::userLeave(const nlohmann::json& json) {
-    auto userJson = json.find(MessageKeyUser);
-    auto userRole = json.find(MessageKeyRole);
+    auto userJson = json.find(omni::details::MessageKeyUser);
+    auto userRoleJson = json.find(omni::details::MessageKeyRole);
 
+    // TODO: these keys are added by Omni so the checks might be redundant?
     if (userJson == json.end()) {
         LERROR("User left but could not find user ID");
         return;
     }
     if (!userJson->is_string()) {
-        LERROR("'user' must be specified as a string when leaving server");
+        LERROR(fmt::format("'{}' must be specified as a string when leaving server",
+            omni::details::MessageKeyUser
+        ));
         return;
     }
-    if (userRole == json.end() || !userRole->is_string()) {
+    if (userRoleJson == json.end() || !userRoleJson->is_string()) {
         LERROR("User role not specified or not in string format when leaving");
         return;
     }
 
-    const std::string role = *userRole;
+    const std::string role = userRoleJson->get<std::string>();
 
     if (role != "guest") {
         return;
@@ -358,9 +359,6 @@ void OmniModule::userLeave(const nlohmann::json& json) {
     if (it != _users.end()) {
         _users.erase(it);
     }
-
-
-
 }
 
 scripting::LuaLibrary OmniModule::luaLibrary() const {
