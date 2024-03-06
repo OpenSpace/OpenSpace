@@ -1024,8 +1024,19 @@ void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
 
     // Calculate texture coordinate for the center point of the given polygon
     glm::vec2 centerTex = glm::vec2(0.f);
+    glm::vec2 centerTexNext = glm::vec2(0.f);
     for (const TimePolygonPoint& timePolygonPoint : polygon->points) {
-        centerTex += timePolygonPoint.tex;
+        if (isCutplane) {
+            centerTex += timePolygonPoint.tex;
+            centerTexNext += timePolygonPoint.tex_next;
+        }
+        else {
+            centerTex += timePolygonPoint.tex;
+        }
+    }
+
+    if (isCutplane) {
+        centerTexNext /= _nPoints;
     }
     centerTex /= _nPoints;
 
@@ -1056,6 +1067,11 @@ void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
 
     centerPoint.tex[0] = centerTex.x;
     centerPoint.tex[1] = centerTex.y;
+
+    if (isCutplane) {
+        centerPoint.tex_next[0] = centerTexNext.x;
+        centerPoint.tex_next[1] = centerTexNext.y;
+    }
 
     verticies->push_back(centerPoint);
 
@@ -1513,7 +1529,7 @@ void RenderableTube::creteEnding(double now) {
             t * nextTimePolygon->points[pointIndex].coordinate +
             (1.0 - t) * prevTimePolygon->points[pointIndex].coordinate;
 
-        // Texture coordinate?
+        // Texture coordinate
         currentTimePolygonPoint.tex = _data[_lastPolygonBeforeNow].points[pointIndex].tex;
         currentTimePolygonPoint.tex_next = _data[_firstPolygonAfterNow].points[pointIndex].tex;
 
@@ -1818,7 +1834,7 @@ void RenderableTube::render(const RenderData& data, RendererTasks&) {
             );
             _shaderCutplane->setUniform(
                 "next_texture_index",
-                static_cast<int>(result.lastPolygonBeforeTime)
+                static_cast<int>(result.firstPolygonAfterTime)
             );
         }
 

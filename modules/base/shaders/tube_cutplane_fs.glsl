@@ -128,7 +128,7 @@ Fragment getFragment() {
   else {
     objectColor.rgb = color;
   }
-  //objectColor.rgb = texture(textures, vec3(vs_st_prev, prev_texture_index)).rgb;
+  //objectColor.rgb = texture(textures, vec3(vs_st_next, next_texture_index)).rgb;
 
   objectColor.a *= opacity;
   if (objectColor.a == 0.0) {
