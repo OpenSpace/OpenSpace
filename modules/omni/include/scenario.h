@@ -27,17 +27,21 @@
 
 #include <openspace/json.h>
 #include <ghoul/io/socket/tcpsocket.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace::omni {
 
 class Scenario {
 public:
-    Scenario(const std::string& identifier);
+    Scenario(const std::string& identifier, const ghoul::Dictionary& dictionary);
     virtual ~Scenario() = default;
     void initialize(std::shared_ptr<ghoul::io::TcpSocket> socket);
 
     void sendMessage(const std::string& message) const;
     void sendJson(const nlohmann::json& json) const;
+
+    nlohmann::json wrappedPayload(const std::string& type,
+                                                     const nlohmann::json& payload) const;
 
     virtual void handleMessage(const nlohmann::json& obj) = 0;
     virtual void onHandleMessage() = 0;
@@ -54,11 +58,12 @@ protected:
     virtual void onDisableScenario() = 0;
 
 private:
-    std::shared_ptr<ghoul::io::TcpSocket> _socket;
     const std::string _identifier;
+    const ghoul::Dictionary _assetInformation;
+
+    std::shared_ptr<ghoul::io::TcpSocket> _socket;
 
     bool _isActive = false;
-
 };
 
 } // namespace openspace::omni

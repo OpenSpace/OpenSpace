@@ -24,9 +24,12 @@
 
 #include <modules/omni/include/scenario.h>
 
+#include <modules/server/include/jsonconverters.h> // TODO: move this outside server module?
+
 namespace openspace::omni {
 
-Scenario::Scenario(const std::string& identifier) : _identifier{ identifier } {}
+Scenario::Scenario(const std::string& identifier, const ghoul::Dictionary& dictionary)
+    : _identifier{ identifier }, _assetInformation{ dictionary } {}
 
 void openspace::omni::Scenario::initialize(std::shared_ptr<ghoul::io::TcpSocket> socket)
 {
@@ -41,12 +44,26 @@ void Scenario::sendJson(const nlohmann::json& json) const {
     sendMessage(json.dump());
 }
 
+nlohmann::json Scenario::wrappedPayload(const std::string& type,
+                                                      const nlohmann::json& payload) const
+{
+    ZoneScoped;
+
+    nlohmann::json j = {
+        { "type", type},
+        { "payload", payload }
+    };
+    return j;
+}
+
 void Scenario::enableScenario() {
+    sendJson(wrappedPayload("setScenario", _assetInformation));
     _isActive = true;
     onEnableScenario();
 }
 
 void Scenario::disableScenario() {
+    sendJson(wrappedPayload("setIdle", ""));
     _isActive = false;
     onDisableScenario();
 }

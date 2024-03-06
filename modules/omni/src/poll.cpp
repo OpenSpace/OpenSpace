@@ -44,7 +44,6 @@ namespace {
     struct [[codegen::Dictionary(Poll)]] Parameters {
 
         // Explanation of Options
-
         struct Option {
             // Identifier of something
             std::string identifier;
@@ -58,11 +57,11 @@ namespace {
             std::string script;
         };
 
-        // Unique identifier for this scene
+        // Unique identifier for this scenario
         std::string identifier;
 
-        // Type of scene 
-        std::string sceneType;
+        // Type of scenario e.g., poll 
+        std::string scenarioType;
 
         // The poll options to vote for
         std::vector<Option> options;
@@ -79,6 +78,8 @@ namespace {
         // If set to true, allow users to change their vote after casting the first time.
         // If false, users cannot change their vote.
         std::optional<bool> allowMultipleVoting;
+
+        bool allowChangeVote;
     };
 
 #include "poll_codegen.cpp"
@@ -91,11 +92,9 @@ documentation::Documentation Poll::Documentation() {
 }
 
 Poll::Poll(const ghoul::Dictionary& dictionary) :
-    Scenario{ codegen::bake<Parameters>(dictionary).identifier }
+    Scenario{ codegen::bake<Parameters>(dictionary).identifier, dictionary }
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    _dictionary.setValue("Scene", dictionary);
 
     _allowMultipleVoting = p.allowMultipleVoting.value_or(false);
 
@@ -203,14 +202,10 @@ void Poll::onHandleMessage() {
         LDEBUG(fmt::format("Vote: {} has {} number of votes", voteId, users.size()));
         result.setValue(voteId, static_cast<int>(users.size()));
     }
-    ghoul::Dictionary dictionary;
-    dictionary.setValue("result", result);
+    //ghoul::Dictionary dictionary;
+    //dictionary.setValue("result", result);
 
-    sendJson(dictionary);
-}
-
-nlohmann::json Poll::getAssetInformation() {
-    return _dictionary;
+    sendJson(wrappedPayload("pollResult", result));
 }
 
 void Poll::onEnableScenario() {

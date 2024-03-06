@@ -27,8 +27,6 @@
 
 #include <modules/omni/include/scenario.h>
 
-
-
 #include <openspace/json.h>
 #include <ghoul/misc/dictionary.h>
 
@@ -39,7 +37,6 @@
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::omni {
-
 
 class Poll : public Scenario {
 public:
@@ -57,27 +54,19 @@ public:
     void handleMessage(const nlohmann::json& json) override;
     void onHandleMessage() override;
 
-    nlohmann::json getAssetInformation();
-
     static documentation::Documentation Documentation();
-
 
 protected:
     void onEnableScenario() override;
     void onDisableScenario() override;
-private:
 
+private:
     std::string _onEnableScript;
     std::string _onDisableScript;
 
-    ghoul::Dictionary _dictionary;
-
     std::vector<Option> _options;
-
     std::map<VoteOption, std::set<User>> _votes;
-
-    bool _allowMultipleVoting;
-
+    bool _allowMultipleVoting = false;
 };
 
 } // namespace openspace::omni
