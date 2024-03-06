@@ -22,7 +22,7 @@ local Layer = {
 
     Thanks to Visualizer Ernie Wright and Technical support Ian Jones and Laurence Schuler for this.
 
-    This map is based on the paper by Jean Meeus, The Frequency of Total and Annular Solar Eclipses for a Given Place, JBAA 92, 3 (April 1982), pp 124-126.
+    See also the paper by Jean Meeus, The Frequency of Total and Annular Solar Eclipses for a Given Place, JBAA 92, 3 (April 1982), pp 124-126.
   ]],
   CacheSettings = { Enabled = false }
 }
