@@ -20,6 +20,15 @@ local omm = asset.resource({
   SecondsUntilResync = 24 * 60 * 60
 })
 
+local tle = asset.resource({
+  Name = "Satellite TLE Data (ISS)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_tle_data_iss",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25544&FORMAT=tle",
+  Filename = "ISS.txt",
+  SecondsUntilResync = 24 * 60 * 60
+})
+
 
 local IssPosition = {
   Identifier = "ISSPosition",
@@ -27,10 +36,14 @@ local IssPosition = {
   BoundingSphere = 54.5, -- half the width
   Transform = {
     Translation = {
-      Type = "GPTranslation",
-      Observer = transforms.EarthInertial.Identifier,
-      File = omm .. "ISS.txt",
-      Format = "OMM"
+      Type = "SpiceTranslation",
+      Target = "<<patched in onInitialize>>",
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.J2000
+      -- Type = "GPTranslation",
+      -- Observer = transforms.EarthInertial.Identifier,
+      -- File = omm .. "ISS.txt",
+      -- Format = "OMM"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -80,6 +93,33 @@ local IssTrail = {
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
+      Type = "SpiceTranslation",
+      Target = "<<patched in onInitialize>>",
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.J2000
+      -- Type = "GPTranslation",
+      -- Observer = transforms.EarthInertial.Identifier,
+      -- File = omm .. "ISS.txt",
+      -- Format = "OMM"
+    },
+    RenderBinMode = "PostDeferredTransparent",
+    Color = { 0.9, 0.6715, 0.0 },
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellite", "ISS" },
+  GUI = {
+    Name = "ISS Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/ISS"
+  }
+}
+
+local IssTrailold = {
+  Identifier = "ISS_trailOLD",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
       Type = "GPTranslation",
       Observer = transforms.EarthInertial.Identifier,
       File = omm .. "ISS.txt",
@@ -92,7 +132,7 @@ local IssTrail = {
   },
   Tag = { "earth_satellite", "ISS" },
   GUI = {
-    Name = "ISS Trail",
+    Name = "ISS Trail old",
     Path = "/Solar System/Planets/Earth/Satellites/ISS"
   }
 }
@@ -138,18 +178,32 @@ local FocusIss = {
 asset.onInitialize(function()
   local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
   IssTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
+  IssTrailold.Renderable.Period = i[1].Period / (60 * 60 * 24)
+
+  -- Convert the TLE file into a SPICE kernel
+  local id, startTime, endTime = openspace.spice.convertTLEtoSPK(
+    tle .. "ISS.txt",
+    openspace.absPath("${TEMPORARY}/ISS.bsp")
+  )
+  openspace.spice.loadKernel(openspace.absPath("${TEMPORARY}/ISS.bsp"))
+  IssPosition.Transform.Translation.Target = tostring(id);
+  IssTrail.Renderable.Translation.Target = tostring(id);
 
   openspace.addSceneGraphNode(IssPosition)
   openspace.addSceneGraphNode(IssModel)
   openspace.addSceneGraphNode(IssTrail)
+  openspace.addSceneGraphNode(IssTrailold)
 
   openspace.setPropertyValueSingle("Scene.ISS.Rotation.yAxisInvertObject", true)
   openspace.action.registerAction(FocusIss)
 end)
 
 asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(openspace.absPath("${TEMPORARY}/ISS.bsp"))
+
   openspace.action.removeAction(FocusIss)
 
+  openspace.removeSceneGraphNode(IssTrailold)
   openspace.removeSceneGraphNode(IssTrail)
   openspace.removeSceneGraphNode(IssModel)
   openspace.removeSceneGraphNode(IssPosition)

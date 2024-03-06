@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/misc/stringhelper.h>
+
 namespace {
 
 /**
@@ -129,6 +131,156 @@ namespace {
         ephemerisTime
     );
     return position;
+}
+
+/**
+ * This function converts a TLE file into SPK format and saves it at the provided path.
+ * The last parameter is only used if there are multiple craft specified in the provided
+ * TLE file and is selecting which (0-based index) of the list to create a kernel from.
+ *
+ * This function returns the SPICE ID of the object for which the kernel was created, and
+ * the start and end time for the time period covered by the kernel
+ */
+[[codegen::luawrap]] std::tuple<int, std::string, std::string> convertTLEtoSPK(
+                                                                std::filesystem::path tle,
+                                                                std::filesystem::path spk,
+                                                                int elementToExtract = 0)
+{
+    // Code adopted from
+    // https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getelm_c.html
+    SpiceInt n = 0;
+
+    //
+    // First exact the constants required by a type 10 SPK kernel.
+    //
+
+    std::array<double, 8> constants;
+    // J2 gravitational harmonic for Earth
+    bodvcd_c(399, "J2", 1, &n, &constants[0]);
+
+    // J3 gravitational harmonic for Earth
+    bodvcd_c(399, "J3", 1, &n, &constants[1]);
+
+    // J4 gravitational harmonic for Earth
+    bodvcd_c(399, "J4", 1, &n, &constants[2]);
+
+    // Square root of the GM for Earth
+    bodvcd_c(399, "KE", 1, &n, &constants[3]);
+
+    // High altitude bound for atmospheric model
+    bodvcd_c(399, "QO", 1, &n, &constants[4]);
+
+    // Low altitude bound for atmospheric model
+    bodvcd_c(399, "SO", 1, &n, &constants[5]);
+
+    // Equatorial radius of the Earth
+    bodvcd_c(399, "ER", 1, &n, &constants[6]);
+
+    // Distance units/earth radius
+    bodvcd_c(399, "AE", 1, &n, &constants[7]);
+
+    //
+    // Load the TLE file
+    //
+    std::ifstream f = std::ifstream(tle);
+    std::string contents = std::string(
+        std::istreambuf_iterator<char>(f),
+        std::istreambuf_iterator<char>()
+    );
+
+    // The TLE files returned by Celestrak are of the 3-line variant where the first line
+    // contains a human-readable name for the spacecraft
+
+    std::vector<std::string> lines = ghoul::tokenizeString(contents, '\n');
+    const size_t nElements = lines.size() / 3;
+    if (elementToExtract > nElements) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error loading {}. Element number {} requested, but only {} found",
+            tle, nElements, elementToExtract
+        ));
+    }
+
+    constexpr int TLEColumnWidth = 70;
+
+    // It should be 70, but we're removing the \n character at the end in the tokenization
+    std::string line1 = lines[3 * elementToExtract + 1];
+    if (line1.size() != TLEColumnWidth - 1) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Illformed TLE file {}, expected {} characters per line, got {}",
+            tle, TLEColumnWidth, line1.size()
+        ));
+    }
+    std::string line2 = lines[3 * elementToExtract + 2];
+    if (line2.size() != TLEColumnWidth - 1) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Illformed TLE file {}, expected {} characters per line, got {}",
+            tle, TLEColumnWidth, line2.size()
+        ));
+    }
+
+    // Copy the lines into a format that SPICE understands
+    SpiceChar spiceLines[2][TLEColumnWidth];
+    std::strcpy(spiceLines[0], line1.c_str());
+    std::strcpy(spiceLines[1], line2.c_str());
+
+
+    // Convert the Two Line Elements lines to the element sets
+    SpiceDouble epoch;
+    std::array<SpiceDouble, 10> elems;
+    getelm_c(1950, TLEColumnWidth, spiceLines, &epoch, elems.data());
+
+    SpiceDouble first = -std::numeric_limits<double>::max();
+    SpiceDouble last = std::numeric_limits<double>::max();
+    //SpiceDouble first = epoch - 150 * 365 * spd_c();
+    //SpiceDouble last = epoch + 150 * 365 * spd_c();
+
+    // Extract the body id
+    std::vector<std::string> tokens = ghoul::tokenizeString(line2, ' ');
+    if (tokens.size() < 2) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error parsing TLE file {}. Expected 8-9 elements in the second row, got {}",
+            tle, tokens.size()
+        ));
+    }
+    // Earth-orbiting spacecraft usually lack a DSN identification code, so the NAIF ID
+    // is derived from the tracking ID assigned to it by NORAD via:
+    //   NAIF ID = -100000 - NORAD ID
+    int bodyId = -100000 - std::stoi(tokens[1]);
+
+
+    // Write the elements to a new SPK file
+    const SpiceInt nCommentCharacters = 0;
+    std::string internalFileName = fmt::format("Type 10 SPK for {}", tle);
+    std::string segmentId = "Segment";
+
+    if (std::filesystem::exists(spk)) {
+        std::filesystem::remove(spk);
+    }
+
+    std::string outFile = spk.string();
+    SpiceInt handle;
+    spkopn_c(outFile.c_str(), internalFileName.c_str(), nCommentCharacters, &handle);
+
+    spkw10_c(
+        handle,
+        bodyId,
+        399,
+        "J2000",
+        first,
+        last,
+        segmentId.c_str(),
+        constants.data(),
+        1,
+        elems.data(),
+        &epoch
+    );
+
+    spkcls_c(handle);
+
+    std::string startTime = openspace::SpiceManager::ref().dateFromEphemerisTime(first);
+    std::string endTime = openspace::SpiceManager::ref().dateFromEphemerisTime(last);
+
+    return { bodyId, startTime, endTime };
 }
 
 #include "spicemanager_lua_codegen.cpp"
