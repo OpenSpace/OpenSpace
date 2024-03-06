@@ -322,6 +322,11 @@ void OmniModule::userJoin(const nlohmann::json& json) {
 
     int userId = omni::details::convertToUserID(*userJson);
     _users.insert(userId);
+
+    // We need to send the asset information if a user joins after activating a scenario
+    if (_activeScenario) {
+        _activeScenario->sendAssetInfo();
+    }
 }
 
 void OmniModule::userLeave(const nlohmann::json& json) {

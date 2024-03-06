@@ -39,6 +39,7 @@ public:
 
     void sendMessage(const std::string& message) const;
     void sendJson(const nlohmann::json& json) const;
+    void sendAssetInfo() const;
 
     nlohmann::json wrappedPayload(const std::string& type,
                                                      const nlohmann::json& payload) const;

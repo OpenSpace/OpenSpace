@@ -57,7 +57,7 @@ nlohmann::json Scenario::wrappedPayload(const std::string& type,
 }
 
 void Scenario::enableScenario() {
-    sendJson(wrappedPayload("setScenario", _assetInformation));
+    sendAssetInfo();
     _isActive = true;
     onEnableScenario();
 }
@@ -74,6 +74,10 @@ bool Scenario::isActive() const {
 
 std::string_view Scenario::identifier() const {
     return _identifier;
+}
+
+void Scenario::sendAssetInfo() const {
+    sendJson(wrappedPayload("setScenario", _assetInformation));
 }
 
 } // namespace openspace::omni
