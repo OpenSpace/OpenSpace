@@ -367,7 +367,9 @@ scripting::LuaLibrary OmniModule::luaLibrary() const {
     return {
         "omni",
         {
-            codegen::lua::CreateScenarioFromDictionary
+            codegen::lua::CreateScenarioFromDictionary,
+            codegen::lua::EnableScenario,
+            codegen::lua::DisableScenario
         }
     };
 }
