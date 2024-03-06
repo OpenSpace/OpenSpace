@@ -31,11 +31,11 @@ local Frame = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "nep102.bsp")
+  openspace.spice.loadKernel(kernels .. "nep095.bsp")
 end)
 
 asset.onDeinitialize(function()
-  openspace.spice.unloadKernel(kernels .. "nep102.bsp")
+  openspace.spice.unloadKernel(kernels .. "nep095.bsp")
 end)
 
 asset.export("ID", ID)

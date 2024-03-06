@@ -137,7 +137,7 @@ public:
     using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
 
     Profile() = default;
-    explicit Profile(const std::string& content);
+    explicit Profile(const std::filesystem::path& path);
     std::string serialize() const;
 
     /**

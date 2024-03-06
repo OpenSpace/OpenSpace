@@ -1247,11 +1247,11 @@ bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPositi
     const glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform *
         glm::dvec4(cameraPosition, 1.0));
 
-    const SurfacePositionHandle positionHandle =
-        _anchorNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
+    const glm::dvec3 centerToReference =
+        glm::normalize(cameraPositionModelSpace) * _anchorNode->boundingSphere();
 
     const double maximumDistanceForRotation = glm::length(
-        glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface
+        glm::dmat3(modelTransform) * centerToReference
     ) * _followAnchorNodeRotationDistance;
 
     const double distanceToCamera =

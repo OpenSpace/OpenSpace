@@ -46,5 +46,3 @@ return {
   }
 }
 
-
--- https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html

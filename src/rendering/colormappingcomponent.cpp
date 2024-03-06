@@ -428,6 +428,10 @@ glm::vec4 ColorMappingComponent::colorFromColorMap(float valueToColorFrom) const
 }
 
 void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& dataset) {
+    if (dataset.isEmpty()) {
+        return;
+    }
+
     // Initialize empty ranges based on values in the dataset
     for (const properties::OptionProperty::Option& option : dataColumn.options()) {
         int optionIndex = option.value;

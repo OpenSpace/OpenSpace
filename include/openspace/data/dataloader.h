@@ -71,6 +71,8 @@ struct Dataset {
     /// the dataset
     float maxPositionComponent = 0.f;
 
+    bool isEmpty() const;
+
     int index(std::string_view variableName) const;
     bool normalizeVariable(std::string_view variableName);
     glm::vec2 findValueRange(int variableIndex) const;

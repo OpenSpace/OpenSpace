@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___NAVIGATIONSTATE___H__
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/json.h>
 #include <optional>
 
 namespace openspace {
@@ -37,12 +38,14 @@ namespace openspace::interaction {
 struct NavigationState {
     NavigationState() = default;
     explicit NavigationState(const ghoul::Dictionary& dictionary);
+    explicit NavigationState(const nlohmann::json& json);
     NavigationState(std::string anchor, std::string aim, std::string referenceFrame,
         glm::dvec3 position, std::optional<glm::dvec3> up = std::nullopt,
         double yaw = 0.0, double pitch = 0.0);
 
     CameraPose cameraPose() const;
     ghoul::Dictionary dictionary() const;
+    nlohmann::json toJson() const;
     static documentation::Documentation Documentation();
 
     std::string anchor;

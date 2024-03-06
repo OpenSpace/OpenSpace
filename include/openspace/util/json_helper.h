@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_CORE___JSON_HELPER___H__
 #define __OPENSPACE_CORE___JSON_HELPER___H__
 
-#include <string>
 #include <openspace/json.h>
+#include <ghoul/misc/dictionary.h>
+#include <string>
 
 namespace openspace {
 
@@ -74,6 +75,13 @@ std::string formatJson(T value);
  * \param key The key the JSON should be sorted by
  */
 void sortJson(nlohmann::json& json, const std::string& key);
+
+/**
+ * Converts the provided JSON object into its corresponding Dictionary format. Please note
+ * that if the JSON contains keys that array of an array type, they are converted into a
+ * Dictionary with numerical keys and the numerical keys start with 1.
+ */
+ghoul::Dictionary jsonToDictionary(const nlohmann::json& json);
 
 } // namespace openspace
 
