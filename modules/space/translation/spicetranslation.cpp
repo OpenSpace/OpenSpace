@@ -88,10 +88,6 @@ namespace {
 
         std::optional<std::string> fixedDate
             [[codegen::annotation("A date to lock the position to")]];
-
-        // A single kernel or list of kernels that this SpiceTranslation depends on. All
-        // provided kernels will be loaded before any other operation is performed
-        std::optional<std::variant<std::vector<std::string>, std::string>> kernels;
     };
 #include "spicetranslation_codegen.cpp"
 } // namespace
@@ -125,17 +121,6 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
             LERRORC("SpiceEphemeris", exception.message);
         }
     };
-
-    if (p.kernels.has_value()) {
-        if (std::holds_alternative<std::string>(*p.kernels)) {
-            loadKernel(absPath(std::get<std::string>(*p.kernels)).string());
-        }
-        else {
-            for (const std::string& k : std::get<std::vector<std::string>>(*p.kernels)) {
-                loadKernel(absPath(k).string());
-            }
-        }
-    }
 
     _target.onChange([this]() {
         _cachedTarget = _target;
