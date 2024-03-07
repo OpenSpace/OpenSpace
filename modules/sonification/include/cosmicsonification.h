@@ -27,7 +27,7 @@
 
 #include <modules/sonification/include/sonificationbase.h>
 
-#include <modules/space/speckloader.h>
+#include <openspace/data/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <map>
@@ -135,7 +135,7 @@ private:
         }
 
         std::string identifier;
-        speck::Labelset* labels = nullptr;
+        dataloader::Labelset* labels = nullptr;
         DistanceUnit unit;
         bool isInitialized = false;
         std::vector<LabelsData> data;

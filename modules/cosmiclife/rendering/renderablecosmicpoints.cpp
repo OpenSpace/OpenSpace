@@ -239,7 +239,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableCosmicPoints)]] Parameters {
-        // The path to the SPECK file that contains information about the astronomical
+        // The path to the dataloader file that contains information about the astronomical
         // object being rendered
         std::optional<std::string> file;
 
@@ -574,7 +574,7 @@ RenderableCosmicPoints::RenderableCosmicPoints(const ghoul::Dictionary& dictiona
 
         float minValue = std::numeric_limits<float>::max();
         float maxValue = -std::numeric_limits<float>::max();
-        for (const speck::Dataset::Entry& e : _dataset.entries) {
+        for (const dataloader::Dataset::Entry& e : _dataset.entries) {
             float color = e.data[colorMapInUse];
             minValue = std::min(minValue, color);
             maxValue = std::max(maxValue, color);
@@ -599,16 +599,16 @@ bool RenderableCosmicPoints::isReady() const {
 
 void RenderableCosmicPoints::initialize() {
     if (_hasSpeckFile) {
-        _dataset = speck::data::loadFileWithCache(_speckFile);
+        _dataset = dataloader::data::loadFileWithCache(_speckFile);
     }
 
     if (_hasColorMapFile) {
-        _colorMap = speck::color::loadFileWithCache(_colorMapFile);
+        _colorMap = dataloader::color::loadFileWithCache(_colorMapFile);
     }
 
     if (!_labelFile.empty()) {
-        _labelset = speck::label::loadFileWithCache(_labelFile);
-        for (speck::Labelset::Entry& e : _labelset.entries) {
+        _labelset = dataloader::label::loadFileWithCache(_labelFile);
+        for (dataloader::Labelset::Entry& e : _labelset.entries) {
             e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
         }
     }
@@ -798,7 +798,7 @@ void RenderableCosmicPoints::renderLabels(const RenderData& data,
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = true;
 
-    for (const speck::Labelset::Entry& e : _labelset.entries) {
+    for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         glm::vec3 scaledPos(e.position);
         scaledPos *= toMeter(_unit);
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
@@ -1019,7 +1019,7 @@ void RenderableCosmicPoints::update(const UpdateData&) {
 
 
 // For sonification
-speck::Labelset* RenderableCosmicPoints::labels() {
+dataloader::Labelset* RenderableCosmicPoints::labels() {
     return &_labelset;
 }
 
@@ -1051,7 +1051,7 @@ std::vector<float> RenderableCosmicPoints::createDataSlice() {
 
     float minColorIdx = std::numeric_limits<float>::max();
     float maxColorIdx = -std::numeric_limits<float>::max();
-    for (const speck::Dataset::Entry& e : _dataset.entries) {
+    for (const dataloader::Dataset::Entry& e : _dataset.entries) {
         if (e.data.size() > 0) {
             float color = e.data[colorMapInUse];
             minColorIdx = std::min(color, minColorIdx);
@@ -1065,7 +1065,7 @@ std::vector<float> RenderableCosmicPoints::createDataSlice() {
     double maxRadius = 0.0;
 
     float biggestCoord = -1.f;
-    for (const speck::Dataset::Entry& e : _dataset.entries) {
+    for (const dataloader::Dataset::Entry& e : _dataset.entries) {
         glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::vec4(
             e.position, 1.0
         ));

@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/speckloader.h>
+#include <openspace/data/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -71,7 +71,7 @@ public:
     void update(const UpdateData& data) override;
 
     // For sonification
-    speck::Labelset* labels();
+    dataloader::Labelset* labels();
     DistanceUnit unit() const;
 
     static documentation::Documentation Documentation();
@@ -160,9 +160,9 @@ private:
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     // speck files
-    speck::Dataset _dataset;
-    speck::Labelset _labelset;
-    speck::ColorMap _colorMap;
+    dataloader::Dataset _dataset;
+    dataloader::Labelset _labelset;
+    dataloader::ColorMap _colorMap;
 
     // range data, do we need conversion map?
     std::vector<glm::vec2> _colorRangeData;

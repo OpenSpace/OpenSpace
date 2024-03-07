@@ -1,11 +1,11 @@
-local constellationsCSV = asset.localResource("constellation_data.csv")
+local constellationsCSV = asset.resource("constellation_data.csv")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local constellations_helper = asset.require("util/constellations_helper")
 
-local treeoflifeBW =  asset.localResource("ToLBW.png")
-local treeoflifeEdited =  asset.localResource("ToLEdited.png")
-local treeoflifeColored =  asset.localResource("ToLColored.png")
-local qrkulturnatten =  asset.localResource("QRwithText2.png")
+local treeoflifeBW =  asset.resource("ToLBW.png")
+local treeoflifeEdited =  asset.resource("ToLEdited.png")
+local treeoflifeColored =  asset.resource("ToLColored.png")
+local qrkulturnatten =  asset.resource("QRwithText2.png")
 
 --local zodiacs = {
 --  "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
