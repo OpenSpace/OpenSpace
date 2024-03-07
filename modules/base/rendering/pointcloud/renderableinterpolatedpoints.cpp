@@ -418,7 +418,7 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
 }
 
 void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int index,
-    std::vector<float>& result) const
+                                                         std::vector<float>& result) const
 {
     using namespace dataloader;
     auto [firstIndex, secondIndex] = interpolationIndices(index);

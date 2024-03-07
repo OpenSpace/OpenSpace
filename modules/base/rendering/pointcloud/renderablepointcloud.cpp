@@ -1313,7 +1313,7 @@ int RenderablePointCloud::bufferVertexAttribute(const std::string& name, GLint n
         GL_FLOAT,
         GL_FALSE,
         nAttributesPerPoint * sizeof(float),
-        (offset > 0) ? reinterpret_cast<void*>(offset * sizeof(float)) : nullptr
+        reinterpret_cast<void*>(offset * sizeof(float))
     );
 
     return offset + nValues;
