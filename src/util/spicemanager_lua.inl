@@ -138,13 +138,11 @@ namespace {
  * The last parameter is only used if there are multiple craft specified in the provided
  * TLE file and is selecting which (0-based index) of the list to create a kernel from.
  *
- * This function returns the SPICE ID of the object for which the kernel was created, and
- * the start and end time for the time period covered by the kernel
+ * This function returns the SPICE ID of the object for which the kernel was created
  */
-[[codegen::luawrap]] std::tuple<int, std::string, std::string> convertTLEtoSPK(
-                                                                std::filesystem::path tle,
-                                                                std::filesystem::path spk,
-                                                                int elementToExtract = 0)
+[[codegen::luawrap]] int convertTLEtoSPK(std::filesystem::path tle,
+                                         std::filesystem::path spk,
+                                         int elementToExtract = 0)
 {
     // Code adopted from
     // https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getelm_c.html
@@ -229,10 +227,10 @@ namespace {
     std::array<SpiceDouble, 10> elems;
     getelm_c(1950, TLEColumnWidth, spiceLines, &epoch, elems.data());
 
+    // The size of a type SPK10 spice kernel is not affected by the time validity, so we
+    // just pick the greatest one
     SpiceDouble first = -std::numeric_limits<double>::max();
     SpiceDouble last = std::numeric_limits<double>::max();
-    //SpiceDouble first = epoch - 150 * 365 * spd_c();
-    //SpiceDouble last = epoch + 150 * 365 * spd_c();
 
     // Extract the body id
     std::vector<std::string> tokens = ghoul::tokenizeString(line2, ' ');
@@ -277,10 +275,7 @@ namespace {
 
     spkcls_c(handle);
 
-    std::string startTime = openspace::SpiceManager::ref().dateFromEphemerisTime(first);
-    std::string endTime = openspace::SpiceManager::ref().dateFromEphemerisTime(last);
-
-    return { bodyId, startTime, endTime };
+    return bodyId;
 }
 
 #include "spicemanager_lua_codegen.cpp"
