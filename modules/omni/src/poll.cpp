@@ -28,10 +28,12 @@
 #include <modules/server/include/jsonconverters.h> // TODO: move this outside server module?
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/json.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <openspace/json.h>
+#include <ghoul/misc/stringhelper.h>
 
 
 namespace {
@@ -40,59 +42,87 @@ namespace {
     constexpr std::string_view PollMessageKeyVote = "vote";
     constexpr std::string_view PollMessageKeyPollResult = "pollResult";
 
-    // Explanation of Parameters
+    // @TODO: Explanation of Poll
     struct [[codegen::Dictionary(Poll)]] Parameters {
-
         // Explanation of Options
         struct Option {
-            // Identifier of something
+            // A unique key that represents the option
             std::string identifier;
 
+            // The name of the option that will be shown in the interface
             std::string name;
 
-            std::optional<std::filesystem::path> url;
-
-            glm::vec3 color;
-
+            // A script to be triggered when the otpion is chosen
             std::string script;
+
+            // An optional color to use for the button that represents the option
+            std::optional<glm::vec3> color;
+
+            // A url to use for an image to show on the button for the option
+            std::optional<std::filesystem::path> url;
         };
-
-        // Unique identifier for this scenario
-        std::string identifier;
-
-        // Type of scenario e.g., poll
-        std::string scenarioType;
 
         // The poll options to vote for
         std::vector<Option> options;
 
-        // Description of this poll
-        std::string description;
+        // Description of this poll. Will show up on the interface above the options.
+        std::optional<std::string> description;
 
-        // What should happen when we enable this scene
-        std::string onEnable;
-
-        // What should happen we we disable this scene
-        std::string onDisable;
+        // @TODO
+        std::optional<int> allowMultipleVoting;
 
         // If set to true, allow users to change their vote after casting the first time.
         // If false, users cannot change their vote.
-        std::optional<int> allowMultipleVoting;
-
         std::optional<bool> allowChangeVote;
-    };
 
+        struct StyleSettings {
+            std::optional<std::string> layout [[codegen::inlist("Grid", "List")]];
+        };
+        std::optional<StyleSettings> styleSettings;
+    };
 #include "poll_codegen.cpp"
 }
 
 namespace openspace::omni {
 
-documentation::Documentation Poll::Documentation() {
-    return codegen::doc<Parameters>("poll");
+/**
+ * Json converter for an option.
+ */
+void to_json(nlohmann::json& j, const Poll::Option& o) {
+    j = {
+        { "identifier", o.identifier },
+        { "name", escapedJson(o.name) }
+        // Note that the GUI does not need to know about the script, so we don't
+        // include it here
+    };
+
+    if (o.color.has_value()) {
+        // Format the color in a way that is CSS compatible
+        glm::ivec3 c = glm::ivec3(*o.color * 255.f);
+        j["color"] = fmt::format("rgb({}, {}, {})", c.r, c.g, c.b);
+    }
+
+    if (o.url.has_value()) {
+        j["url"] = escapedJson(o.url->string());
+    }
 }
 
-Poll::Poll(const ghoul::Dictionary& dictionary) :
-    Scenario{ codegen::bake<Parameters>(dictionary).identifier, dictionary }
+void to_json(nlohmann::json& j, const Poll::StyleSettings& s) {
+    j = {};
+    if (!s.layout.empty()) {
+        j["layout"] = ghoul::toLowerCase(s.layout);
+    }
+}
+
+documentation::Documentation Poll::Documentation() {
+    return codegen::doc<Parameters>(
+        "omni_poll",
+        Scenario::Documentation()
+    );
+}
+
+Poll::Poll(const ghoul::Dictionary& dictionary)
+    : Scenario(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -100,13 +130,34 @@ Poll::Poll(const ghoul::Dictionary& dictionary) :
         _allowMultipleVoting = p.allowMultipleVoting.value();
     }
     _allowChangeVote = p.allowChangeVote.value_or(false);
+    _description = p.description.value_or("");
 
-    for (const auto& option : p.options) {
-        _options.push_back({ option.identifier, option.script });
+    if (p.styleSettings.has_value()) {
+        _styleSettings.layout = p.styleSettings->layout.value_or("Grid");
     }
 
-    _onEnableScript = p.onEnable;
-    _onDisableScript = p.onDisable;
+    for (const auto& option : p.options) {
+        _options.push_back({
+            .identifier = option.identifier,
+            .name = option.name,
+            .script = option.script,
+            .url = option.url,
+            .color = option.color
+        });
+    }
+}
+
+nlohmann::json Poll::jsonPayload() const {
+    nlohmann::json j = {
+        { "identifier", _identifier },
+        { "inputMode", "poll" },
+        { "options", _options },
+        { "description", _description },
+        { "allowChangingVote", _allowChangeVote },
+        { "nAllowedVotes", _allowMultipleVoting.value_or(1) },
+        { "styleSettings", _styleSettings }
+    };
+    return j;
 }
 
 void Poll::handleMessage(const nlohmann::json& json) {
@@ -179,22 +230,6 @@ void Poll::onHandleMessage() {
     dictionary.setValue("result", result);
 
     sendJson(wrappedPayload(PollMessageKeyPollResult, dictionary));
-}
-
-void Poll::onEnableScenario() {
-    global::scriptEngine->queueScript(
-        _onEnableScript,
-        openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
-}
-
-void Poll::onDisableScenario() {
-    global::scriptEngine->queueScript(
-        _onDisableScript,
-        openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
 }
 
 } // namespace openspace::omni

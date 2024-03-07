@@ -43,27 +43,33 @@ public:
 
     struct Option {
         const std::string identifier;
+        const std::string name;
         const std::string script;
+
+        const std::optional<std::filesystem::path> url;
+        const std::optional<glm::vec3> color;
+    };
+
+    struct StyleSettings {
+        std::string layout;
     };
 
     explicit Poll(const ghoul::Dictionary& dictionary);
     virtual ~Poll() = default;
+
+    nlohmann::json jsonPayload() const override;
 
     void handleMessage(const nlohmann::json& json) override;
     void onHandleMessage() override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    void onEnableScenario() override;
-    void onDisableScenario() override;
-
 private:
-    std::string _onEnableScript;
-    std::string _onDisableScript;
-
+    std::string _description;
     std::vector<Option> _options;
     std::map<VoteOption, std::set<User>> _votes;
+
+    StyleSettings _styleSettings;
 
     std::optional<int> _allowMultipleVoting;
     bool _allowChangeVote = false;

@@ -24,21 +24,51 @@
 
 #include <modules/omni/include/scenario.h>
 
-#include <modules/server/include/jsonconverters.h> // TODO: move this outside server module?
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <string>
 
 namespace {
     constexpr std::string_view ScenarioMessageKeySetIdle = "setIdle";
     constexpr std::string_view ScenarioMessageKeySetScenario = "setScenario";
+
+    // The base class for any OMNI scenarios that can be created
+    struct [[codegen::Dictionary(OmniScenario)]] Parameters {
+        // A unique identifier for this scenario
+        std::string identifier;
+
+        // Type of scenario, e.g. 'Poll'
+        std::string scenarioType;
+
+        // A Lua script that should trigger when this scenario is enabled. For example,
+        // adding something to the render scene or placing the camera in a certain
+        // position
+        std::string onEnable;
+
+        // A Lua script that should trigger when this scenario is disabled. For example,
+        // resetting the render scene, or otherwise undoing the change that was done
+        // through the enable script
+        std::string onDisable;
+    };
+#include "scenario_codegen.cpp"
 }
 
 namespace openspace::omni {
 
-Scenario::Scenario(const std::string& identifier, const ghoul::Dictionary& dictionary)
-    : _identifier{ identifier }, _assetInformation{ dictionary } {}
+documentation::Documentation Scenario::Documentation() {
+    return codegen::doc<Parameters>("omni_scenario");
+}
 
-void openspace::omni::Scenario::initialize(std::shared_ptr<ghoul::io::TcpSocket> socket)
-{
+Scenario::Scenario(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _identifier = p.identifier;
+    _onEnableScript = p.onEnable;
+    _onDisableScript = p.onDisable;
+}
+
+void openspace::omni::Scenario::initialize(std::shared_ptr<ghoul::io::TcpSocket> socket) {
     _socket = std::move(socket);
 }
 
@@ -56,22 +86,36 @@ nlohmann::json Scenario::wrappedPayload(std::string_view type,
     ZoneScoped;
 
     nlohmann::json j = {
-        { "type", type},
+        { "type", type },
         { "payload", payload }
     };
     return j;
 }
 
+void Scenario::sendScenarioData() const {
+    sendJson(wrappedPayload(ScenarioMessageKeySetScenario, jsonPayload()));
+}
+
 void Scenario::enableScenario() {
-    sendAssetInfo();
+    sendScenarioData();
     _isActive = true;
-    onEnableScenario();
+
+    global::scriptEngine->queueScript(
+        _onEnableScript,
+        openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
+    );
 }
 
 void Scenario::disableScenario() {
     sendJson(wrappedPayload(ScenarioMessageKeySetIdle, ""));
     _isActive = false;
-    onDisableScenario();
+
+    global::scriptEngine->queueScript(
+        _onDisableScript,
+        openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
+    );
 }
 
 bool Scenario::isActive() const {
@@ -80,10 +124,6 @@ bool Scenario::isActive() const {
 
 std::string_view Scenario::identifier() const {
     return _identifier;
-}
-
-void Scenario::sendAssetInfo() const {
-    sendJson(wrappedPayload(ScenarioMessageKeySetScenario, _assetInformation));
 }
 
 } // namespace openspace::omni
