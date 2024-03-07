@@ -41,32 +41,37 @@ namespace {
     constexpr std::string_view PollMessageKeyVote = "vote";
     constexpr std::string_view PollMessageKeyPollResult = "pollResult";
 
-    // Explanation of Poll
+    // @TODO: Explanation of Poll
     struct [[codegen::Dictionary(Poll)]] Parameters {
         // Explanation of Options
         struct Option {
-            // Identifier of something
+            // A unique key that represents the option
             std::string identifier;
 
+            // The name of the option that will be shown in the interface
             std::string name;
 
+            // A script to be triggered when the otpion is chosen
             std::string script;
 
-            std::optional<std::filesystem::path> url;
-
+            // An optional color to use for the button that represents the option
             std::optional<glm::vec3> color;
+
+            // A url to use for an image to show on the button for the option
+            std::optional<std::filesystem::path> url;
         };
 
         // The poll options to vote for
         std::vector<Option> options;
 
-        // Description of this poll. Will show up on the web page above the options.
+        // Description of this poll. Will show up on the interface above the options.
         std::optional<std::string> description;
+
+        // @TODO
+        std::optional<int> allowMultipleVoting;
 
         // If set to true, allow users to change their vote after casting the first time.
         // If false, users cannot change their vote.
-        std::optional<int> allowMultipleVoting;
-
         std::optional<bool> allowChangeVote;
     };
 #include "poll_codegen.cpp"

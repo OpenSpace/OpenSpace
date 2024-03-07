@@ -24,7 +24,6 @@
 
 #include <modules/omni/include/scenario.h>
 
-#include <modules/server/include/jsonconverters.h> // TODO: move this outside server module?
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
@@ -34,12 +33,12 @@ namespace {
     constexpr std::string_view ScenarioMessageKeySetIdle = "setIdle";
     constexpr std::string_view ScenarioMessageKeySetScenario = "setScenario";
 
-    // Explanation of Scenario
+    // @TODO Explanation of Scenario
     struct [[codegen::Dictionary(Scenario)]] Parameters {
-        // Unique identifier for this scenario
+        // A unique identifier for this scenario
         std::string identifier;
 
-        // Type of scenario, e.g. poll
+        // Type of scenario, e.g. 'Poll'
         std::string scenarioType;
 
         // What should happen when we enable this scenario
