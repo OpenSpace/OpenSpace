@@ -88,8 +88,7 @@ end)
 
 asset.export(Test)
 asset.export(Test_Interpolated)
-
-asset.export(Text_Speck)
+asset.export(Test_Speck)
 
 
 asset.meta = {

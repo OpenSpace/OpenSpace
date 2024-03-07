@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -39,7 +40,6 @@
 #include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <openspace/util/distanceconversion.h>
-#include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <functional>

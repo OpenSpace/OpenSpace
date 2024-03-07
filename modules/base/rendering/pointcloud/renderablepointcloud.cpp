@@ -1382,9 +1382,8 @@ void RenderablePointCloud::updateSpriteTexture() {
     // We also have to update the dataset, to update the texture array offsets
     _dataIsDirty = true;
 
-    // Always set set sprite texture is dirty flag.  even if something goes wrong, we
-    // want to prevent filling the log with error messages from multiple loading attempts
-    // without any changed input
+    // Always set the is-dirty flag, even if the loading fails, as to not try to reload
+    // the texture without the input file being changed
     _spriteTextureIsDirty = false;
 
     switch (_textureMode) {
@@ -1552,9 +1551,8 @@ gl::GLenum RenderablePointCloud::internalGlFormat(bool useAlpha) const {
 }
 
 ghoul::opengl::Texture::Format RenderablePointCloud::glFormat(bool useAlpha) const {
-    return useAlpha ?
-        ghoul::opengl::Texture::Format::RGBA :
-        ghoul::opengl::Texture::Format::RGB;
+    using Texture = ghoul::opengl::Texture;
+    return useAlpha ? Texture::Format::RGBA : Texture::Format::RGB;
 }
 
 bool operator==(const TextureFormat& l, const TextureFormat& r) {
@@ -1562,9 +1560,11 @@ bool operator==(const TextureFormat& l, const TextureFormat& r) {
 }
 
 size_t TextureFormatHash::operator()(const TextureFormat& k) const {
-    return ((std::hash<unsigned int>()(k.resolution.x) ^
-        (std::hash<unsigned int>()(k.resolution.y) << 1)) >> 1) ^
-        (std::hash<bool>()(k.useAlpha) << 1);
+    size_t res = 0;
+    res += static_cast<uint16_t>(k.resolution.x) << 32;
+    res += static_cast<uint16_t>(k.resolution.y) << 16;
+    res += k.useAlpha ? 0 : 1;
+    return res;
 }
 
 } // namespace openspace
