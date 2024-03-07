@@ -33,18 +33,22 @@ namespace {
     constexpr std::string_view ScenarioMessageKeySetIdle = "setIdle";
     constexpr std::string_view ScenarioMessageKeySetScenario = "setScenario";
 
-    // @TODO Explanation of Scenario
-    struct [[codegen::Dictionary(Scenario)]] Parameters {
+    // The base class for any OMNI scenarios that can be created
+    struct [[codegen::Dictionary(OmniScenario)]] Parameters {
         // A unique identifier for this scenario
         std::string identifier;
 
         // Type of scenario, e.g. 'Poll'
         std::string scenarioType;
 
-        // What should happen when we enable this scenario
+        // A Lua script that should trigger when this scenario is enabled. For example,
+        // adding something to the render scene or placing the camera in a certain
+        // position
         std::string onEnable;
 
-        // What should happen we we disable this scenario
+        // A Lua script that should trigger when this scenario is disabled. For example,
+        // resetting the render scene, or otherwise undoing the change that was done
+        // through the enable script
         std::string onDisable;
     };
 #include "scenario_codegen.cpp"
