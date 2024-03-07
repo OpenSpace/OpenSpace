@@ -50,6 +50,10 @@ public:
         const std::optional<glm::vec3> color;
     };
 
+    struct StyleSettings {
+        std::string layout;
+    };
+
     explicit Poll(const ghoul::Dictionary& dictionary);
     virtual ~Poll() = default;
 
@@ -64,6 +68,8 @@ private:
     std::string _description;
     std::vector<Option> _options;
     std::map<VoteOption, std::set<User>> _votes;
+
+    StyleSettings _styleSettings;
 
     std::optional<int> _allowMultipleVoting;
     bool _allowChangeVote = false;

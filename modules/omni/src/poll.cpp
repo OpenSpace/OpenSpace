@@ -33,6 +33,7 @@
 #include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 
 
 namespace {
@@ -73,6 +74,11 @@ namespace {
         // If set to true, allow users to change their vote after casting the first time.
         // If false, users cannot change their vote.
         std::optional<bool> allowChangeVote;
+
+        struct StyleSettings {
+            std::optional<std::string> layout [[codegen::inlist("Grid", "List")]];
+        };
+        std::optional<StyleSettings> styleSettings;
     };
 #include "poll_codegen.cpp"
 }
@@ -91,13 +97,20 @@ void to_json(nlohmann::json& j, const Poll::Option& o) {
     };
 
     if (o.color.has_value()) {
-        // Format the color in a wass that is CSS compatible
+        // Format the color in a way that is CSS compatible
         glm::ivec3 c = glm::ivec3(*o.color * 255.f);
         j["color"] = fmt::format("rgb({}, {}, {})", c.r, c.g, c.b);
     }
 
     if (o.url.has_value()) {
         j["url"] = escapedJson(o.url->string());
+    }
+}
+
+void to_json(nlohmann::json& j, const Poll::StyleSettings& s) {
+    j = {};
+    if (!s.layout.empty()) {
+        j["layout"] = ghoul::toLowerCase(s.layout);
     }
 }
 
@@ -119,6 +132,10 @@ Poll::Poll(const ghoul::Dictionary& dictionary)
     _allowChangeVote = p.allowChangeVote.value_or(false);
     _description = p.description.value_or("");
 
+    if (p.styleSettings.has_value()) {
+        _styleSettings.layout = p.styleSettings->layout.value_or("Grid");
+    }
+
     for (const auto& option : p.options) {
         _options.push_back({
             .identifier = option.identifier,
@@ -137,7 +154,8 @@ nlohmann::json Poll::jsonPayload() const {
         { "options", _options },
         { "description", _description },
         { "allowChangingVote", _allowChangeVote },
-        { "nAllowedVotes", _allowMultipleVoting.value_or(1) }
+        { "nAllowedVotes", _allowMultipleVoting.value_or(1) },
+        { "styleSettings", _styleSettings }
     };
     return j;
 }
