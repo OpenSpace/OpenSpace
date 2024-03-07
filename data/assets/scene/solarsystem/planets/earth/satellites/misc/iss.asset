@@ -136,6 +136,11 @@ local FocusIss = {
 
 local kernelFile
 asset.onInitialize(function()
+  -- In order to get the orientation of the ISS correctly, we need to have its position
+  -- available as a SPICE object. We don't want to just convert the TLE file once as we
+  -- want it to update with every startup.
+  -- For this reason we convert the TLE file into a type 10 SPICE kernel and since we are
+  -- already doing that, we can also get a more accurate position for free, too
   local translation, kernel = openspace.space.tleToSpiceTranslation(tle .. "ISS.txt")
   kernelFile = kernel -- Store the path for the deinitialize function
   openspace.spice.loadKernel(kernelFile)
