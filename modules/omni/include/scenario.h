@@ -29,23 +29,28 @@
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/misc/dictionary.h>
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace openspace::omni {
 
 class Scenario {
 public:
-    Scenario(const std::string& identifier, const ghoul::Dictionary& dictionary);
+    Scenario(const ghoul::Dictionary& dictionary);
     virtual ~Scenario() = default;
     void initialize(std::shared_ptr<ghoul::io::TcpSocket> socket);
 
     void sendMessage(const std::string& message) const;
     void sendJson(const nlohmann::json& json) const;
-    void sendAssetInfo() const;
 
     nlohmann::json wrappedPayload(std::string_view type,
-                                                     const nlohmann::json& payload) const;
+        const nlohmann::json& payload) const;
+
+    virtual nlohmann::json jsonPayload() const = 0;
 
     virtual void handleMessage(const nlohmann::json& obj) = 0;
     virtual void onHandleMessage() = 0;
+
+    void sendScenarioData() const;
 
     void enableScenario();
     void disableScenario();
@@ -54,13 +59,14 @@ public:
 
     std::string_view identifier() const;
 
+    static documentation::Documentation Documentation();
+
 protected:
-    virtual void onEnableScenario() = 0;
-    virtual void onDisableScenario() = 0;
+    std::string _identifier;
 
 private:
-    const std::string _identifier;
-    const ghoul::Dictionary _assetInformation;
+    std::string _onEnableScript;
+    std::string _onDisableScript;
 
     std::shared_ptr<ghoul::io::TcpSocket> _socket;
 

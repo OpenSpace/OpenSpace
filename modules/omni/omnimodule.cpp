@@ -154,7 +154,7 @@ void OmniModule::internalInitialize(const ghoul::Dictionary& config) {
 
     FactoryManager::ref().addFactory<omni::Scenario>("OmniScenario");
     auto factory = FactoryManager::ref().factory<omni::Scenario>();
-    factory->registerClass<omni::Poll>("poll");
+    factory->registerClass<omni::Poll>("Poll");
 }
 
 void OmniModule::addScenario(std::unique_ptr<omni::Scenario> scenario) {
@@ -163,7 +163,6 @@ void OmniModule::addScenario(std::unique_ptr<omni::Scenario> scenario) {
 }
 
 void OmniModule::enableScenario(std::string_view identifier) {
-
     auto it = std::find_if(_scenarios.begin(), _scenarios.end(),
         [&identifier](const std::unique_ptr<omni::Scenario>& scenario) {
             return scenario->identifier() == identifier;
@@ -222,7 +221,6 @@ void OmniModule::sendJson(const nlohmann::json& json) {
 }
 
 void OmniModule::preSync() {
-
     std::lock_guard lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {
         const std::string& msg = _messageQueue.front();
@@ -233,7 +231,6 @@ void OmniModule::preSync() {
 }
 
 void OmniModule::handleConnection() {
-
     std::string messageString;
     messageString.reserve(256);
     while (_socket->getMessage(messageString)) {
@@ -270,8 +267,7 @@ void OmniModule::handleJson(const nlohmann::json& json) {
             userJoin(json);
             break;
         }
-        case omni::Type::ServerLeave:
-        {
+        case omni::Type::ServerLeave: {
             userLeave(json);
             break;
         }
@@ -323,7 +319,7 @@ void OmniModule::userJoin(const nlohmann::json& json) {
 
     // We need to send the asset information if a user joins after activating a scenario
     if (_activeScenario) {
-        _activeScenario->sendAssetInfo();
+        _activeScenario->sendScenarioData();
     }
 }
 
@@ -374,6 +370,7 @@ scripting::LuaLibrary OmniModule::luaLibrary() const {
 
 std::vector<documentation::Documentation> OmniModule::documentations() const {
     return {
+        omni::Scenario::Documentation(),
         omni::Poll::Documentation(),
     };
 }
