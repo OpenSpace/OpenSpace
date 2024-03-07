@@ -1042,7 +1042,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             int changeInValue = newValue - _accumulatedIndices[offset + 1];
             _accumulatedIndices[offset + 1] = newValue;
             // Propagate change.
-            for (int i = offset + 1; i < nChunksToRender; ++i) {
+            for (int i = offset + 1; i < nChunksToRender; i++) {
                 _accumulatedIndices[i + 1] += changeInValue;
             }
         }

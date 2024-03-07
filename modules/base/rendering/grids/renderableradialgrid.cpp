@@ -289,7 +289,7 @@ void RenderableRadialGrid::update(const UpdateData&) {
         addRing(_circleSegments, innerRadius);
     }
 
-    for (int i = 0; i < nRadialSegments; ++i) {
+    for (int i = 0; i < nRadialSegments; i++) {
         const float ri = static_cast<float>(i + 1) * deltaRadius + innerRadius;
         addRing(_circleSegments, ri);
     }
@@ -308,7 +308,7 @@ void RenderableRadialGrid::update(const UpdateData&) {
         std::vector<rendering::helper::Vertex> innerVertices =
             rendering::helper::createRing(nLines, innerRadius);
 
-        for (int i = 0; i < nLines; ++i) {
+        for (int i = 0; i < nLines; i++) {
             const rendering::helper::VertexXYZ vOut =
                 rendering::helper::convertToXYZ(outerVertices[i]);
 

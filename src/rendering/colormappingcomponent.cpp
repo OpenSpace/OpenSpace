@@ -280,7 +280,7 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
         std::vector<Parameters::ColorMapParameter> opts = *p.parameterOptions;
 
         _colorRangeData.reserve(opts.size());
-        for (size_t i = 0; i < opts.size(); ++i) {
+        for (size_t i = 0; i < opts.size(); i++) {
             dataColumn.addOption(static_cast<int>(i), opts[i].key);
             // Add the provided range or an empty range. We will fill it later on,
             // when the dataset is loaded, if it is empty
@@ -464,7 +464,7 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
     }
     else {
         // Otherwise, check if the selected columns exist
-        for (size_t i = 0; i < dataColumn.options().size(); ++i) {
+        for (size_t i = 0; i < dataColumn.options().size(); i++) {
             std::string o = dataColumn.options()[i].description;
 
             bool found = false;

@@ -139,7 +139,7 @@ void AvoidCollisionCurve::removeCollisions(int step) {
     }
 
     const int nSegments = static_cast<int>(_points.size() - 3);
-    for (int i = 0; i < nSegments; ++i) {
+    for (int i = 0; i < nSegments; i++) {
         const glm::dvec3 lineStart = _points[i + 1];
         const glm::dvec3 lineEnd = _points[i + 2];
 

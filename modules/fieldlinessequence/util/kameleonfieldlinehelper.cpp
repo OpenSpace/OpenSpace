@@ -243,7 +243,7 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
             state.appendToExtra(i, val);
         }
         // Calculate and store the magnitudes!
-        for (size_t i = 0; i < nXtraMagnitudes; ++i) {
+        for (size_t i = 0; i < nXtraMagnitudes; i++) {
             const size_t idx = i*3;
 
             const float x = interpolator->interpolate(extraMagVars[idx]  , p.x, p.y, p.z);
@@ -292,7 +292,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
 
     // Load the existing SCALAR variables into kameleon.
     // Remove non-existing variables from vector
-    for (int i = 0; i < static_cast<int>(extraScalarVars.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(extraScalarVars.size()); i++) {
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&

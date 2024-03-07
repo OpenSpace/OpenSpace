@@ -178,7 +178,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
         std::set<std::string> selected = p->value();
         const std::vector<std::string>& options = p->options();
 
-        for (int i = 0; i < static_cast<int>(options.size()); ++i) {
+        for (int i = 0; i < static_cast<int>(options.size()); i++) {
             const std::string key = options[i];
             bool isSelected = p->isSelected(key);
 

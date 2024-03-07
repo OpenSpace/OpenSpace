@@ -239,7 +239,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
 
     std::array<glm::vec3, 4> projection;
     std::fill(projection.begin(), projection.end(), glm::vec3(0.f));
-    for (size_t j = 0; j < bounds.size(); ++j) {
+    for (size_t j = 0; j < bounds.size(); j++) {
         bounds[j] = SpiceManager::ref().frameTransformationMatrix(
             frame,
             "GALACTIC",

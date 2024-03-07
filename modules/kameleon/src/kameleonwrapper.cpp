@@ -290,7 +290,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     int stop = 0;
     constexpr float TruncationLimit = 0.9f;
     const int upperLimit = static_cast<int>(size * TruncationLimit);
-    for (int i = 0; i < NBins; ++i) {
+    for (int i = 0; i < NBins; i++) {
         sum += histogram[i];
         if (sum > upperLimit) {
             stop = i;
@@ -301,7 +301,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     const double dist = ((varMax - varMin) / NBins) * stop;
 
     const double varMaxNew = varMin + dist;
-    for(size_t i = 0; i < size; ++i) {
+    for(size_t i = 0; i < size; i++) {
         const double normalizedVal = (doubleData[i] - varMin) / (varMaxNew - varMin);
 
         data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
@@ -1072,7 +1072,7 @@ std::vector<std::string> KameleonWrapper::variables() const {
 
     int numVariables = _model->getNumberOfVariables();
 
-    for (int i = 0; i < numVariables; ++i) {
+    for (int i = 0; i < numVariables; i++) {
         variableNames.push_back(_model->getVariableName(i));;
     }
     return variableNames;

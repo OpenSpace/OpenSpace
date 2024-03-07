@@ -294,7 +294,7 @@ void ImGUIModule::internalInitializeGL() {
     int nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
-    for (int i = 0; i < nWindows; ++i) {
+    for (int i = 0; i < nWindows; i++) {
         _contexts[i] = ImGui::CreateContext();
         ImGui::SetCurrentContext(_contexts[i]);
 
@@ -395,7 +395,7 @@ void ImGUIModule::internalInitializeGL() {
     {
         unsigned char* texData;
         glm::ivec2 texSize = glm::ivec2(0, 0);
-        for (int i = 0; i < nWindows; ++i) {
+        for (int i = 0; i < nWindows; i++) {
             ImGui::SetCurrentContext(_contexts[i]);
 
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
@@ -409,7 +409,7 @@ void ImGUIModule::internalInitializeGL() {
         _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         _fontTexture->uploadTexture();
     }
-    for (int i = 0; i < nWindows; ++i) {
+    for (int i = 0; i < nWindows; i++) {
         uintptr_t texture = static_cast<GLuint>(*_fontTexture);
         ImGui::SetCurrentContext(_contexts[i]);
         ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(texture);
@@ -590,7 +590,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 
     glBindVertexArray(vao);
 
-    for (int i = 0; i < drawData->CmdListsCount; ++i) {
+    for (int i = 0; i < drawData->CmdListsCount; i++) {
         const ImDrawList* cmdList = drawData->CmdLists[i];
         const ImDrawIdx* indexBufferOffset = nullptr;
 

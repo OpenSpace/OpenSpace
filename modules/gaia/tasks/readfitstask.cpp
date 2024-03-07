@@ -271,7 +271,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
             finishedJobs++;
 
-            for (int i = 0; i < 8; ++i) {
+            for (int i = 0; i < 8; i++) {
                 // Add read values to global octant and check if it's time to write!
                 octants[i].insert(
                     octants[i].end(),

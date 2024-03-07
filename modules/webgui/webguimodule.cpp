@@ -259,7 +259,7 @@ void WebGuiModule::startProcess() {
     std::string formattedDirectories = "[";
 
     std::vector<std::string> directories = _directories;
-    for (size_t i = 0; i < directories.size(); ++i) {
+    for (size_t i = 0; i < directories.size(); i++) {
         std::string arg = directories[i];
         if (i % 2 == 1) {
             arg = absPath(arg).string();

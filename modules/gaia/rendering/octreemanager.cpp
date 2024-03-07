@@ -72,7 +72,7 @@ void OctreeManager::initOctree(long long cpuRamBudget, int maxDist, int maxStars
         MAX_STARS_PER_NODE = static_cast<size_t>(maxStarsPerNode);
     }
 
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         _numLeafNodes++;
         _root->Children[i] = std::make_shared<OctreeNode>();
         _root->Children[i]->posData = std::vector<float>();
@@ -127,7 +127,7 @@ void OctreeManager::sliceLodData(size_t branchIndex) {
         sliceNodeLodCache(*_root->Children[branchIndex]);
     }
     else {
-        for (int i = 0; i < 7; ++i) {
+        for (int i = 0; i < 7; i++) {
             sliceNodeLodCache(*_root->Children[i]);
         }
     }
@@ -136,7 +136,7 @@ void OctreeManager::sliceLodData(size_t branchIndex) {
 void OctreeManager::printStarsPerNode() const {
     std::string accumulatedString;
 
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; i++) {
         std::string prefix = "{" + std::to_string(i);
         accumulatedString += printStarsPerNode(*_root->Children[i], prefix);
     }
@@ -159,7 +159,7 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
             // Fetch first layer of children
             fetchChildrenNodes(*_root, 0);
 
-            for (int i = 0; i < 8; ++i) {
+            for (int i = 0; i < 8; i++) {
                 // Check so branch doesn't have a single layer.
                 if (_root->Children[i]->isLeaf) {
                     continue;
@@ -437,7 +437,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
     // Check if entire tree is too small to see, and if so remove it.
     std::vector<glm::dvec4> corners(8);
     float fMaxDist = static_cast<float>(MAX_DIST);
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; i++) {
         float x = (i % 2 == 0) ? fMaxDist : -fMaxDist;
         float y = (i % 4 < 2) ? fMaxDist : -fMaxDist;
         float z = (i < 4) ? fMaxDist : -fMaxDist;
@@ -451,7 +451,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
     float totalPixels = nodeSize.x * nodeSize.y;
     if (totalPixels < _minTotalPixelsLod * 2) {
         // Remove LOD from first layer of children.
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 8; i++) {
             std::map<int, std::vector<float>> tmpData = removeNodeFromCache(
                 *_root->Children[i],
                 deltaStars
@@ -461,7 +461,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
         return renderData;
     }
 
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         if (i < _traversedBranchesInRenderCall) {
             continue;
         }
@@ -524,7 +524,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
 std::vector<float> OctreeManager::getAllData(gaia::RenderMode mode) {
     std::vector<float> fullData;
 
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         std::vector<float> tmpData = getNodeData(*_root->Children[i], mode);
         fullData.insert(fullData.end(), tmpData.begin(), tmpData.end());
     }
@@ -537,7 +537,7 @@ void OctreeManager::clearAllData(int branchIndex) {
         clearNodeData(*_root->Children[branchIndex]);
     }
     else {
-        for (size_t i = 0; i < 8; ++i) {
+        for (size_t i = 0; i < 8; i++) {
             clearNodeData(*_root->Children[i]);
         }
     }
@@ -552,7 +552,7 @@ void OctreeManager::writeToFile(std::ofstream& outFileStream, bool writeData) {
     outFileStream.write(reinterpret_cast<const char*>(&MAX_DIST), sizeof(int32_t));
 
     // Use pre-traversal (Morton code / Z-order).
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         writeNodeToFile(outFileStream, *_root->Children[i], writeData);
     }
 }
@@ -582,7 +582,7 @@ void OctreeManager::writeNodeToFile(std::ofstream& outFileStream, const OctreeNo
 
     // Write children to file (in Morton order) if we're in an inner node.
     if (!node.isLeaf) {
-        for (size_t i = 0; i < 8; ++i) {
+        for (size_t i = 0; i < 8; i++) {
             writeNodeToFile(outFileStream, *node.Children[i], writeData);
         }
     }
@@ -612,7 +612,7 @@ int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData,
 
     // Octree Manager root halfDistance must be updated before any nodes are created!
     if (static_cast<int>(MAX_DIST) != oldMaxdist) {
-        for (size_t i = 0; i < 8; ++i) {
+        for (size_t i = 0; i < 8; i++) {
             _root->Children[i]->halfDimension = MAX_DIST / 2.f;
             _root->Children[i]->originX = (i % 2 == 0) ?
                 _root->Children[i]->halfDimension :
@@ -631,7 +631,7 @@ int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData,
     }
 
     // Use the same technique to construct octree from file.
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         nStarsRead += readNodeFromFile(inFileStream, *_root->Children[i], readData);
     }
     return nStarsRead;
@@ -675,7 +675,7 @@ int OctreeManager::readNodeFromFile(std::ifstream& inFileStream, OctreeNode& nod
     if (!node.isLeaf) {
         numStars = 0;
         createNodeChildren(node);
-        for (size_t i = 0; i < 8; ++i) {
+        for (size_t i = 0; i < 8; i++) {
             numStars += readNodeFromFile(inFileStream, *node.Children[i], readData);
         }
     }
@@ -730,7 +730,7 @@ void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix,
     // Recursively write children to file (in Morton order) if we're in an inner node.
     if (!node.isLeaf) {
         std::vector<std::thread> writeThreads(8);
-        for (size_t i = 0; i < 8; ++i) {
+        for (size_t i = 0; i < 8; i++) {
             std::string newOutFilePrefix = outFilePrefix + std::to_string(i);
             if (threadWrites) {
                 // Divide writing to new threads to speed up the process.
@@ -760,7 +760,7 @@ void OctreeManager::fetchChildrenNodes(OctreeNode& parentNode,
     // Lock node to make sure nobody else are trying to load the same children.
     std::lock_guard lock(parentNode.loadingLock);
 
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; i++) {
         // Fetch node data if we're streaming and it doesn't exist in RAM yet.
         // (As long as there is any RAM budget left and node actually has any data!)
         if (!parentNode.Children[i]->isLoaded &&
@@ -1050,7 +1050,7 @@ void OctreeManager::sliceNodeLodCache(OctreeNode& node) {
         node.velData = std::move(tmpVel);
         node.numStars = node.magOrder.size(); // = MAX_STARS_PER_NODE
 
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 8; i++) {
             sliceNodeLodCache(*node.Children[i]);
         }
     }
@@ -1090,7 +1090,7 @@ std::string OctreeManager::printStarsPerNode(const OctreeNode& node,
     }
     else {
         str += fmt::format("LOD: {} - [Parent]\n", node.posData.size() / POS_SIZE);
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 8; i++) {
             auto pref = prefix + "->" + std::to_string(i);
             str += printStarsPerNode(*node.Children[i], pref);
         }
@@ -1108,7 +1108,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
 
     // Calculate the corners of the node.
     std::vector<glm::dvec4> corners(8);
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; i++) {
         const float x = (i % 2 == 0) ?
             node.originX + node.halfDimension :
             node.originX - node.halfDimension;
@@ -1160,7 +1160,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
                 }
 
                 // We're in an inner node, remove indices from potential children in cache
-                for (int i = 0; i < 8; ++i) {
+                for (int i = 0; i < 8; i++) {
                     std::map<int, std::vector<float>> tmpData = removeNodeFromCache(
                         *node.Children[i],
                         deltaStars
@@ -1202,7 +1202,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
     fetchedData = removeNodeFromCache(node, deltaStars, false);
 
     // Recursively check if children should be rendered.
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         // Observe that if there exists identical keys in fetchedData then those values in
         // tmpData will be ignored! Thus we store the removed keys until next render call!
         std::map<int, std::vector<float>> tmpData = checkNodeIntersection(
@@ -1242,7 +1242,7 @@ std::map<int, std::vector<float>> OctreeManager::removeNodeFromCache(OctreeNode&
 
     // Check children recursively if we're in an inner node.
     if (!(node.isLeaf) && recursive) {
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 8; i++) {
             std::map<int, std::vector<float>> tmpData = removeNodeFromCache(
                 *node.Children[i],
                 deltaStars
@@ -1264,7 +1264,7 @@ std::vector<float> OctreeManager::getNodeData(const OctreeNode& node,
 
     // If we're not in a leaf, get data from all children recursively.
     std::vector<float> nodeData;
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         std::vector<float> tmpData = getNodeData(*node.Children[i], mode);
         nodeData.insert(nodeData.end(), tmpData.begin(), tmpData.end());
     }
@@ -1286,14 +1286,14 @@ void OctreeManager::clearNodeData(OctreeNode& node) {
 
     if (!node.isLeaf) {
         // Remove data from all children recursively.
-        for (size_t i = 0; i < 8; ++i) {
+        for (size_t i = 0; i < 8; i++) {
             clearNodeData(*node.Children[i]);
         }
     }
 }
 
 void OctreeManager::createNodeChildren(OctreeNode& node) {
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         _numLeafNodes++;
         node.Children[i] = std::make_shared<OctreeNode>();
         node.Children[i]->isLeaf = true;

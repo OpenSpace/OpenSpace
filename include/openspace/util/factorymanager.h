@@ -97,7 +97,7 @@ public:
      *
      * \tparam Factory The type for which a factory should be created and added
      * \param name A user-readable name for the registered factory
-     *     *
+     *
      * \pre \p name must not be empty
      */
     template <typename T>

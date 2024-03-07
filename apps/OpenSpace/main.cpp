@@ -198,7 +198,7 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 void checkJoystickStatus() {
     using namespace interaction;
 
-    for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
+    for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
         ZoneScopedN("Joystick state");
 
         JoystickInputState& state = global::joystickInputStates->at(i);
@@ -228,7 +228,7 @@ void checkJoystickStatus() {
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
         const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-        for (int j = 0; j < state.nButtons; ++j) {
+        for (int j = 0; j < state.nButtons; j++) {
             const bool currentlyPressed = buttons[j] == GLFW_PRESS;
 
             if (currentlyPressed) {
@@ -340,7 +340,7 @@ void mainInitFunc(GLFWwindow*) {
         }
     }
 
-    for (size_t i = 0; i < Engine::instance().windows().size(); ++i) {
+    for (size_t i = 0; i < Engine::instance().windows().size(); i++) {
         Window& window = *Engine::instance().windows()[i];
         if (!window.hasTag(SpoutTag)) {
             continue;
@@ -620,14 +620,11 @@ void mainCharCallback(unsigned int codepoint, int modifiers, sgct::Window* windo
 
 
 
-void mainDropCallback(int amount, const char** paths) {
+void mainDropCallback(std::vector<std::string_view> paths) {
     ZoneScoped;
 
-    ghoul_assert(amount > 0, "Expected at least one file path");
-    ghoul_assert(paths, "expected non-nullptr");
-
-    for (int i = 0; i < amount; ++i) {
-        global::openSpaceEngine->handleDragDrop(paths[i]);
+    for (std::string_view path : paths) {
+        global::openSpaceEngine->handleDragDrop(path);
     }
 }
 
@@ -957,7 +954,7 @@ void setSgctDelegateFunctions() {
 
         return currentWindow->swapGroupFrameNumber();
     };
-    sgctDelegate.setScreenshotFolder = [](std::string path) {
+    sgctDelegate.setScreenshotFolder = [](std::filesystem::path path) {
         sgct::Settings::instance().setCapturePath(std::move(path));
     };
     sgctDelegate.showStatistics = [](bool enabled) {
@@ -1003,7 +1000,7 @@ void setSgctDelegateFunctions() {
 void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
                                  std::string& sgctFunctionName)
 {
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; i++) {
         const std::string arg = argv[i];
         if (arg == "-c" || arg == "--config") {
             std::string p = ((i + 1) < argc) ? argv[i + 1] : "";

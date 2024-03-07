@@ -169,7 +169,7 @@ void AssetManager::update() {
 
     // Initialize all assets that have been loaded and synchronized but that not yet
     // initialized
-    for (auto it = _toBeInitialized.cbegin(); it != _toBeInitialized.cend(); ++it) {
+    for (auto it = _toBeInitialized.cbegin(); it != _toBeInitialized.cend(); it++) {
         ZoneScopedN("Initializing queued assets");
         Asset* a = *it;
 
@@ -297,7 +297,7 @@ void AssetManager::update() {
             it = _unfinishedSynchronizations.erase(it);
         }
         else {
-            ++it;
+            it++;
         }
     }
 }

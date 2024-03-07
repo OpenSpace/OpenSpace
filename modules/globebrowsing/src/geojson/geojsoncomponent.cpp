@@ -537,7 +537,7 @@ void GeoJsonComponent::render(const RenderData& data) {
 
     // Do two render passes, to properly render opacity of overlaying objects
     for (int renderPass = 0; renderPass < 2; ++renderPass) {
-        for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
+        for (size_t i = 0; i < _geometryFeatures.size(); i++) {
             if (_features[i]->enabled && _features[i]->isVisible()) {
                 _geometryFeatures[i].render(
                     data,
@@ -569,7 +569,7 @@ void GeoJsonComponent::update() {
 
     glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset);
 
-    for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
+    for (size_t i = 0; i < _geometryFeatures.size(); i++) {
         if (!_features[i]->enabled) {
             continue;
         }
@@ -661,7 +661,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
     else {
         size_t nGeom = geom->getNumGeometries();
         geomsToAdd.reserve(nGeom);
-        for (size_t i = 0; i < nGeom; ++i) {
+        for (size_t i = 0; i < nGeom; i++) {
             const geos::geom::Geometry* subGeometry = geom->getGeometryN(i);
             if (subGeometry) {
                 geomsToAdd.push_back(subGeometry);

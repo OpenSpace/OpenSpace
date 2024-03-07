@@ -168,7 +168,7 @@ bool BrickManager::buildBrickList(BUFFER_INDEX bufferIndex,
     // For every non-zero entry in the request list, assign a texture atlas
     // coordinate. For zero entries, signal "no brick" using -1.
 
-    for (unsigned int i = 0; i < brickRequest.size(); ++i) {
+    for (unsigned int i = 0; i < brickRequest.size(); i++) {
         if (brickRequest[i] > 0) {
             numBricks++;
 
@@ -367,7 +367,7 @@ bool BrickManager::diskToPBO(BUFFER_INDEX pboIndex) {
             //INFO("Disk read "<<mb<<" MB in "<<time<<" s, "<< mb/time<<" MB/s");
 
             // For each brick in the buffer, put it the correct buffer spot
-            for (unsigned int i = 0; i < sequence; ++i) {
+            for (unsigned int i = 0; i < sequence; i++) {
                 // Only upload if needed
                 // Pointless if implementation only skips reading when ALL bricks in
                 // sequence are in PBO, but could be useful if other solutions that

@@ -127,7 +127,7 @@ void SettingsWidget::nWindowsDisplayedChanged(int newCount) {
     graphicsSelect = std::max(0, graphicsSelect);
 
     QList<QString> graphicsOptions = {"None (GUI only)"};
-    for (int i = CountOneWindow; i <= newCount; ++i) {
+    for (int i = CountOneWindow; i <= newCount; i++) {
         graphicsOptions.append("Window " + QString::number(i));
     }
     _firstWindowGraphicsSelection->clear();

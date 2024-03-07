@@ -421,7 +421,7 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
 
         if (settings.sizeMapping.has_value()) {
             std::vector<std::string> opts = *settings.sizeMapping;
-            for (size_t i = 0; i < opts.size(); ++i) {
+            for (size_t i = 0; i < opts.size(); i++) {
                 // Note that options are added in order
                 sizeMapping.parameterOption.addOption(static_cast<int>(i), opts[i]);
             }
@@ -1118,7 +1118,7 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         maxRadius = std::max(maxRadius, r);
 
         // Positions
-        for (int j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; j++) {
             result.push_back(static_cast<float>(position[j]));
         }
 

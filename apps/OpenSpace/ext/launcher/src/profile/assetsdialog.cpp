@@ -249,7 +249,7 @@ QString AssetsDialog::createTextSummary() {
         return "";
     }
     QString summary;
-    for (size_t i = 0; i < summaryItems.size(); ++i) {
+    for (size_t i = 0; i < summaryItems.size(); i++) {
         bool existsInFilesystem = summaryItems.at(i)->doesExistInFilesystem();
 
         std::string s = existsInFilesystem ?

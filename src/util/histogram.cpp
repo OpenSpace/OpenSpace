@@ -42,7 +42,7 @@ Histogram::Histogram(float minValue, float maxValue, int numBins, float* data)
 {
     if (!data) {
         _data = new float[numBins];
-        for (int i = 0; i < numBins; ++i) {
+        for (int i = 0; i < numBins; i++) {
             _data[i] = 0.0;
         }
     }
@@ -268,7 +268,7 @@ float Histogram::equalize(float value) const {
 
 float Histogram::entropy() {
     float entropy = 0.f;
-    for (int i = 0; i < _numBins; ++i) {
+    for (int i = 0; i < _numBins; i++) {
         if (_data[i] != 0) {
             entropy -= (_data[i] / static_cast<float>(_numValues)) *
                         (log2(_data[i]) / static_cast<float>(_numValues));

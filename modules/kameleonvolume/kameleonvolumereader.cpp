@@ -133,7 +133,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     };
 
     float* data = volume->data();
-    for (size_t index = 0; index < volume->nCells(); ++index) {
+    for (size_t index = 0; index < volume->nCells(); index++) {
         const glm::vec3 coords = volume->indexToCoords(index);
         const glm::vec3 coordsZeroToOne = coords / dims;
         const glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
@@ -150,7 +150,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
 std::vector<std::string> KameleonVolumeReader::variableNames() const {
     std::vector<std::string> variableNames;
     const int nVariables = _kameleon->model->getNumberOfVariables();
-    for (int i = 0; i < nVariables; ++i) {
+    for (int i = 0; i < nVariables; i++) {
         variableNames.push_back(_kameleon->model->getVariableName(i));
     }
     return variableNames;
@@ -163,7 +163,7 @@ std::vector<std::string> KameleonVolumeReader::variableAttributeNames() const {
 std::vector<std::string> KameleonVolumeReader::globalAttributeNames() const {
     std::vector<std::string> attributeNames;
     const int nAttributes = _kameleon->model->getNumberOfGlobalAttributes();
-    for (int i = 0; i < nAttributes; ++i) {
+    for (int i = 0; i < nAttributes; i++) {
         attributeNames.push_back(_kameleon->model->getGlobalAttributeName(i));
     }
     return attributeNames;

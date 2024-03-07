@@ -173,7 +173,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
 {
     const int numOptions = static_cast<int>(optionValues.size());
 
-    for (int i = 0; i < numOptions; ++i) {
+    for (int i = 0; i < numOptions; i++) {
         const std::vector<float>& values = optionValues[i];
         const int numValues = static_cast<int>(values.size());
 
@@ -248,7 +248,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
                 numBins
             );
 
-            for (int j = 0; j < numBins; ++j) {
+            for (int j = 0; j < numBins; j++) {
                 float value = unnormalizeWithStandardScore(
                     j * (histMax - histMin) + histMin,
                     oldMean,
@@ -269,7 +269,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
             _histograms[i] = std::move(newHist);
         }
 
-        for (int j = 0; j < numValues; ++j) {
+        for (int j = 0; j < numValues; j++) {
             _histograms[i]->add(
                 normalizeWithStandardScore(
                     values[j],

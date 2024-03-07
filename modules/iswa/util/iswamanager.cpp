@@ -677,7 +677,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString) {
 
         for (const std::string& list : lists) {
             nlohmann::json jsonList = j[list];
-            for (size_t i = 0; i < jsonList.size(); ++i) {
+            for (size_t i = 0; i < jsonList.size(); i++) {
                 nlohmann::json jCygnet = jsonList.at(i);
 
                 std::string name = jCygnet["cygnetDisplayTitle"];
@@ -709,7 +709,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
 
         if (jsonFile.is_open()) {
             nlohmann::json cdfGroups = nlohmann::json::parse(jsonFile);
-            for(size_t i = 0; i < cdfGroups.size(); ++i) {
+            for(size_t i = 0; i < cdfGroups.size(); i++) {
                 nlohmann::json cdfGroup = cdfGroups.at(i);
 
                 std::string groupName = cdfGroup["group"];

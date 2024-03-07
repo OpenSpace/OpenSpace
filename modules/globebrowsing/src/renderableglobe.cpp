@@ -332,11 +332,11 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
         const Geodetic2 center = n->surfacePatch.center();
         int index = 0;
         if (center.lon < location.lon) {
-            ++index;
+            index++;
         }
         if (location.lat < center.lat) {
-            ++index;
-            ++index;
+            index++;
+            index++;
         }
         n = n->children[static_cast<Quad>(index)];
     }
@@ -504,7 +504,7 @@ std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
     const Geodetic2 pGeodetic = ellipsoid.cartesianToGeodetic2(p);
     const double latDiff = latCloseToEquator - pGeodetic.lat;
 
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         const Quad q = static_cast<Quad>(i % 4);
         const double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
         Geodetic3 cornerGeodetic = { chunk.surfacePatch.corner(q), cornerHeight };
@@ -1063,7 +1063,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
 
-        for (size_t i = 0; i < layerGroups.size(); ++i) {
+        for (size_t i = 0; i < layerGroups.size(); i++) {
             _globalRenderer.gpuLayerGroups[i].bind(
                 *_globalRenderer.program,
                 *layerGroups[i]
@@ -1085,7 +1085,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
 
-        for (size_t i = 0; i < layerGroups.size(); ++i) {
+        for (size_t i = 0; i < layerGroups.size(); i++) {
             _localRenderer.gpuLayerGroups[i].bind(
                 *_localRenderer.program,
                 *layerGroups[i]
@@ -1233,17 +1233,17 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             if (isLeaf(*n) && n->isVisible) {
                 if (n->tileIndex.level < cutoff) {
                     global[iGlobal] = n;
-                    ++iGlobal;
+                    iGlobal++;
                 }
                 else {
                     local[iLocal] = n;
-                    ++iLocal;
+                    iLocal++;
                 }
             }
 
             // Add children to queue, if any
             if (!isLeaf(*n)) {
-                for (int i = 0; i < 4; ++i) {
+                for (int i = 0; i < 4; i++) {
                     traversalMemory.push_back(n->children[i]);
                 }
             }
@@ -1271,7 +1271,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
-    for (int i = 0; i < globalCount; ++i) {
+    for (int i = 0; i < globalCount; i++) {
         renderChunkGlobally(*_globalChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
     _globalRenderer.program->deactivate();
@@ -1279,7 +1279,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
-    for (int i = 0; i < localCount; ++i) {
+    for (int i = 0; i < localCount; i++) {
         renderChunkLocally(*_localChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
@@ -1327,7 +1327,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     std::array<LayerGroup*, LayerManager::NumLayerGroups> layerGroups =
         _layerManager.layerGroups();
-    for (size_t i = 0; i < layerGroups.size(); ++i) {
+    for (size_t i = 0; i < layerGroups.size(); i++) {
         _globalRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);
     }
 
@@ -1419,7 +1419,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
         _layerManager.layerGroups();
-    for (size_t i = 0; i < layerGroups.size(); ++i) {
+    for (size_t i = 0; i < layerGroups.size(); i++) {
         _localRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);
     }
 
@@ -1445,7 +1445,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     std::array<glm::dvec3, 4> cornersCameraSpace;
     std::array<glm::dvec3, 4> cornersModelSpace;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; i++) {
         const Quad q = static_cast<Quad>(i);
         const Geodetic2 corner = chunk.surfacePatch.corner(q);
         const glm::dvec3 cornerModelSpace = _ellipsoid.cartesianSurfacePosition(corner);
@@ -1554,7 +1554,7 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
     std::vector<glm::vec4> clippingSpaceCorners(8);
     AABB3 screenSpaceBounds;
 
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         const glm::vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
         clippingSpaceCorners[i] = clippingSpaceCorner;
 
@@ -1748,7 +1748,7 @@ void RenderableGlobe::recompileShaders() {
 
         for (int j = 0;
              j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1;
-             ++j)
+             j++)
         {
             shaderDictionary.setValue(
                 groupName + std::to_string(j) + "LayerType",
@@ -1761,7 +1761,7 @@ void RenderableGlobe::recompileShaders() {
 
         for (int j = 0;
              j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1;
-             ++j)
+             j++)
         {
             shaderDictionary.setValue(
                 groupName + std::to_string(j) + "BlendMode",
@@ -1775,7 +1775,7 @@ void RenderableGlobe::recompileShaders() {
 
         for (int j = 0;
              j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1;
-             ++j)
+             j++)
         {
             shaderDictionary.setValue(
                 groupName + std::to_string(j) + "LayerAdjustmentType",
@@ -1787,7 +1787,7 @@ void RenderableGlobe::recompileShaders() {
     }
 
     ghoul::Dictionary layerGroupNames;
-    for (size_t i = 0; i < layers::Groups.size(); ++i) {
+    for (size_t i = 0; i < layers::Groups.size(); i++) {
         layerGroupNames.setValue(
             std::to_string(i),
             std::string(layers::Groups[i].identifier)
@@ -2391,7 +2391,7 @@ bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
 
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         const glm::dvec4 cornerClippingSpace = mvp * corners[i];
         const glm::dvec3 ndc = glm::dvec3(
             (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
@@ -2435,7 +2435,7 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
         _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch.corner(SOUTH_EAST))
     };
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; i++) {
         const double distance = glm::length(cameraPos - corners[i]);
         if (distance < glm::length(cameraPos - objectPos)) {
             objectPos = corners[i];
@@ -2483,7 +2483,7 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
         std::vector<void*> memory = _chunkPool.allocate(
             static_cast<int>(cn.children.size())
         );
-        for (size_t i = 0; i < cn.children.size(); ++i) {
+        for (size_t i = 0; i < cn.children.size(); i++) {
             cn.children[i] = new (memory[i]) Chunk(
                 cn.tileIndex.child(static_cast<Quad>(i))
             );
@@ -2557,7 +2557,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
     else {
         ZoneScopedN("!leaf");
         char requestedMergeMask = 0;
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 4; i++) {
             if (updateChunkTree(*cn.children[i], data, mvp)) {
                 requestedMergeMask |= (1 << i);
             }

@@ -71,7 +71,7 @@ namespace {
         }
 
         size_t i;
-        for (i = 0; i < (TimeIntervals.size() - 1); ++i) {
+        for (i = 0; i < (TimeIntervals.size() - 1); i++) {
             if (abs(value) >= TimeIntervals[i].secondsPerInterval) {
                 break;
             }
@@ -362,7 +362,7 @@ void DeltaTimesDialog::parseSelections() {
         }
     }
     std::vector<double> tempDt;
-    for (int i = 0; i < (finalNonzeroIndex + 1); ++i) {
+    for (int i = 0; i < (finalNonzeroIndex + 1); i++) {
         tempDt.push_back(_deltaTimesData[i]);
     }
     *_deltaTimes = std::move(_deltaTimesData);

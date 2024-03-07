@@ -114,7 +114,7 @@ struct WindowDelegate {
 
     uint64_t (*swapGroupFrameNumber)() = []() { return uint64_t(0); };
 
-    void (*setScreenshotFolder)(std::string) = [](std::string) {};
+    void (*setScreenshotFolder)(std::filesystem::path) = [](std::filesystem::path) {};
 
     void (*showStatistics)(bool) = [](bool) {};
 

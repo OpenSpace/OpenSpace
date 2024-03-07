@@ -105,7 +105,7 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
     // Extrude polygon
     for (size_t nBound = 0; nBound < edgeVertices.size(); ++nBound) {
         const std::vector<glm::vec3>& boundary = edgeVertices[nBound];
-        for (size_t i = 1; i < boundary.size(); ++i) {
+        for (size_t i = 1; i < boundary.size(); i++) {
             glm::vec3 v0 = boundary[i - 1];
             glm::vec3 v1 = boundary[i ];
 
@@ -242,8 +242,8 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
 
     const float lengthEdge01 = glm::length(v1 - v0);
     const float lengthEdge02 = glm::length(v2 - v0);
-    for (size_t i = 1; i < nSteps01; ++i) {
-        for (size_t j = 1; j < nSteps02; ++j) {
+    for (size_t i = 1; i < nSteps01; i++) {
+        for (size_t j = 1; j < nSteps02; j++) {
             glm::vec3 comp01 = edge01[i].position - v0;
             glm::vec3 comp02 = edge02[j].position - v0;
 
@@ -267,7 +267,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     }
 
     // Add egde positions
-    for (size_t i = 0; i < maxSteps; ++i) {
+    for (size_t i = 0; i < maxSteps; i++) {
         if (i < edge01.size() - 1) {
             Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(edge01[i].position);
             Geodetic3 geo3 = { geo2, edge01[i].height };

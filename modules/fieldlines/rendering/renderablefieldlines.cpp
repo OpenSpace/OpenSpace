@@ -292,7 +292,7 @@ void RenderableFieldlines::update(const UpdateData&) {
         int prevEnd = 0;
         std::vector<LinePoint> vertexData;
         // Arrange data for glMultiDrawArrays
-        for (size_t j = 0; j < fieldlines.size(); ++j) {
+        for (size_t j = 0; j < fieldlines.size(); j++) {
             _lineStart.push_back(prevEnd);
             _lineCount.push_back(static_cast<int>(fieldlines[j].size()));
             prevEnd = prevEnd + static_cast<int>(fieldlines[j].size());

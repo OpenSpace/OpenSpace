@@ -39,7 +39,7 @@ TransferFunction::TransferFunction(const std::string& s) {
 
 bool TransferFunction::setEnvelopesFromString(const std::string& s) {
     json j = json::parse(s);
-    for (json::iterator it = j.begin(); it != j.end(); ++it) {
+    for (json::iterator it = j.begin(); it != j.end(); it++) {
         Envelope env;
         std::vector<EnvelopePoint> tmpVec;
         for (size_t i = 0; i < 4; i++) {
@@ -92,7 +92,7 @@ bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
 
 void TransferFunction::envelopesToLua(lua_State* state) const {
     lua_newtable(state);
-    for (auto iter = _envelopes.begin(); iter != _envelopes.end(); ++iter) {
+    for (auto iter = _envelopes.begin(); iter != _envelopes.end(); iter++) {
         lua_newtable(state);
         iter->setEnvelopeLuaTable(state);
         lua_setfield(
@@ -163,7 +163,7 @@ bool TransferFunction::operator!=(const TransferFunction& tf) {
 
     auto iter = _envelopes.begin();
     auto tfIter = tf._envelopes.begin();
-    for (; iter != _envelopes.end(); ++iter, ++tfIter) {
+    for (; iter != _envelopes.end(); iter++, tfIter++) {
         if (*iter != *tfIter)
             return true;
     }
@@ -193,7 +193,7 @@ bool TransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
         float* transferFunction = new float[_width * 4];
         std::memset(transferFunction, 0, _width * 4 * sizeof(float));
 
-        for (int i = 0; i < _width ; ++i) {
+        for (int i = 0; i < _width ; i++) {
             const float position = static_cast<float>(i) / static_cast<float>(_width);
             int count = 0;
             glm::vec4 rgbFromEnvelopes(0.f);

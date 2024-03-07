@@ -165,7 +165,7 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::p
                 endRow = numRowsInTable;
             }
 
-            for (int i = 0; i < numCols; ++i) {
+            for (int i = 0; i < numCols; i++) {
                 std::vector<T> columnData;
                 //LINFO("Read column: " + columnNames[i]);
                 table.column(columnNames[i]).read(columnData, firstRow, endRow);
@@ -288,7 +288,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     std::vector<float> tycho_v_err = std::move(tableContent[allColumnNames[16]]);
 
     // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
-    for (int i = 0; i < nStars * multiplier; ++i) {
+    for (int i = 0; i < nStars * multiplier; i++) {
         std::vector<float> values(nValuesPerStar);
         size_t idx = 0;
 
@@ -345,7 +345,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
             values[idx++] = vecData[i];
         }
 
-        for (int j = 0; j < nValuesPerStar; ++j) {
+        for (int j = 0; j < nValuesPerStar; j++) {
             // The astronomers in Vienna use -999 as default value. Change it to 0.
             if (values[j] == -999) {
                 values[j] = 0.f;
@@ -413,7 +413,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     std::vector<float> radial_vel = std::move(tableContent[allColumnNames[8]]);
 
     // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
-    for (int i = 0; i < nStars; ++i) {
+    for (int i = 0; i < nStars; i++) {
         std::vector<float> values(nValuesPerStar);
         size_t idx = 0;
 
@@ -601,7 +601,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
         std::stringstream str(line);
 
         // Read values.
-        for (int i = 0; i < nValuesPerStar; ++i) {
+        for (int i = 0; i < nValuesPerStar; i++) {
             str >> readValues[i];
         }
 

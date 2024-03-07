@@ -54,7 +54,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
                                        bool resetToDefault)
 {
     // Add all window controls (some will be hidden from GUI initially)
-    for (int i = 0; i < nMaxWindows; ++i) {
+    for (int i = 0; i < nMaxWindows; i++) {
         const int monitorNumForThisWindow =
             (monitorResolutions.size() > 1 && i >= 2) ? 1 : 0;
 
@@ -114,7 +114,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
     QBoxLayout* layoutWindows = new QHBoxLayout;
     layoutWindows->setContentsMargins(0, 0, 0, 0);
     layoutWindows->setSpacing(0);
-    for (int i = 0; i < nMaxWindows; ++i) {
+    for (int i = 0; i < nMaxWindows; i++) {
         layoutWindows->addWidget(_windowControl[i]);
         if (i < (nMaxWindows - 1)) {
             QFrame* frameForNextWindow = new QFrame;
@@ -130,7 +130,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
 std::vector<WindowControl*> DisplayWindowUnion::activeWindowControls() const {
     std::vector<WindowControl*> res;
     res.reserve(_nWindowsDisplayed);
-    for (unsigned int i = 0; i < _nWindowsDisplayed; ++i) {
+    for (unsigned int i = 0; i < _nWindowsDisplayed; i++) {
         res.push_back(_windowControl[i]);
     }
     return res;
@@ -160,10 +160,10 @@ unsigned int DisplayWindowUnion::numWindowsDisplayed() const {
 }
 
 void DisplayWindowUnion::showWindows() {
-    for (size_t i = 0; i < _windowControl.size(); ++i) {
+    for (size_t i = 0; i < _windowControl.size(); i++) {
         _windowControl[i]->setVisible(i < _nWindowsDisplayed);
     }
-    for (size_t i = 0; i < _frameBorderLines.size(); ++i) {
+    for (size_t i = 0; i < _frameBorderLines.size(); i++) {
         _frameBorderLines[i]->setVisible(i < (_nWindowsDisplayed - 1));
     }
     _removeWindowButton->setEnabled(_nWindowsDisplayed > 1);

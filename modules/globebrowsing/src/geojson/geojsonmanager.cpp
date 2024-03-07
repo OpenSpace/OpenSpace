@@ -108,7 +108,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
 void GeoJsonManager::deleteLayer(const std::string& layerIdentifier) {
     ZoneScoped;
 
-    for (auto it = _geoJsonObjects.begin(); it != _geoJsonObjects.end(); ++it) {
+    for (auto it = _geoJsonObjects.begin(); it != _geoJsonObjects.end(); it++) {
         if (it->get()->identifier() == layerIdentifier) {
             // we need to make a copy as the layerIdentifier is only a reference
             // which will no longer be valid once it is deleted

@@ -104,7 +104,7 @@ void PathCurve::initializeParameterData() {
         double sStart = _lengthSums[i];
         _parameterSamples.push_back({ uStart, sStart });
         // Intermediate sampels
-        for (int j = 1; j < Steps; ++j) {
+        for (int j = 1; j < Steps; j++) {
             double u = uStart + j * uStep;
             double s = sStart + arcLength(uStart, u);
             // Identify samples that are indistinguishable due to precision limitations
@@ -185,7 +185,7 @@ double PathCurve::curveParameter(double s) const {
     double lower = uMin;
     double upper = uMax;
 
-    for (int i = 0; i < maxIterations; ++i) {
+    for (int i = 0; i < maxIterations; i++) {
         double F = arcLength(uMin, u) - segmentS;
 
         // The error we tolerate, in meters. Note that distances are very large

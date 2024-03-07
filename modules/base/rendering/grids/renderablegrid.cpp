@@ -336,8 +336,8 @@ void RenderableGrid::update(const UpdateData&) {
 
     // If the number of segments are uneven the center won't be completly centered
     const glm::uvec2 center = glm::uvec2(nSegments.x / 2.f, nSegments.y / 2.f);
-    for (unsigned int i = 0; i < nSegments.x; ++i) {
-        for (unsigned int j = 0; j < nSegments.y; ++j) {
+    for (unsigned int i = 0; i < nSegments.x; i++) {
+        for (unsigned int j = 0; j < nSegments.y; j++) {
             const double y0 = -halfSize.y + j * step.y;
             const double y1 = y0 + step.y;
 
@@ -381,7 +381,7 @@ void RenderableGrid::update(const UpdateData&) {
     }
 
     // last x row
-    for (unsigned int i = 0; i < nSegments.x; ++i) {
+    for (unsigned int i = 0; i < nSegments.x; i++) {
         const double x0 = -halfSize.x + i * step.x;
         const double x1 = x0 + step.x;
 
@@ -403,7 +403,7 @@ void RenderableGrid::update(const UpdateData&) {
     }
 
     // last y col
-    for (unsigned int j = 0; j < nSegments.y; ++j) {
+    for (unsigned int j = 0; j < nSegments.y; j++) {
         const double y0 = -halfSize.y + j * step.y;
         const double y1 = y0 + step.y;
 

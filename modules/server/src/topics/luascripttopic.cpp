@@ -73,7 +73,7 @@ namespace {
     std::string formatObjectAsLuaTable(const nlohmann::json& json) {
         std::string output = "{";
         auto it = json.begin();
-        for (size_t i = 0; i < json.size(); ++i, ++it) {
+        for (size_t i = 0; i < json.size(); i++, it++) {
             output += formatKeyValuePair(it);
             if (i < json.size() - 1) {
                 output += ",";
@@ -85,7 +85,7 @@ namespace {
     std::string formatArrayAsLuaTable(const nlohmann::json& json) {
         std::string output = "{";
         auto it = json.begin();
-        for (size_t i = 0; i < json.size(); ++i, ++it) {
+        for (size_t i = 0; i < json.size(); i++, it++) {
             output += formatLua(it);
             if (i < json.size() - 1) {
                 output += ",";
@@ -121,7 +121,7 @@ namespace {
     {
         std::string script = "return " + function + "(";
         auto it = args.begin();
-        for (size_t i = 0; i < args.size(); ++i, ++it) {
+        for (size_t i = 0; i < args.size(); i++, it++) {
             script += *it;
             if (i < args.size() - 1) {
                 script += ",";
@@ -175,7 +175,7 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
 
             std::vector<std::string> formattedArgs;
             formattedArgs.reserve(args->size());
-            for (auto it = args->begin(); it != args->end(); ++it) {
+            for (auto it = args->begin(); it != args->end(); it++) {
                 formattedArgs.push_back(formatLua(it));
             }
 

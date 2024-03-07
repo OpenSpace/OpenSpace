@@ -120,7 +120,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     }
 
     double values[3];
-    for (int i = 1; i <= 3; ++i) {
+    for (int i = 1; i <= 3; i++) {
         values[i - 1] = ghoul::lua::value<double>(_state, i);
     }
 

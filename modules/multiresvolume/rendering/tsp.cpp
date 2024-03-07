@@ -147,7 +147,7 @@ bool TSP::construct() {
         unsigned int OTLevel = 0;
         while (OTLevel < _numOTLevels) {
             unsigned int OTNodesInLevel = static_cast<unsigned int>(pow(8, OTLevel));
-            for (unsigned int i = 0; i<OTNodesInLevel; ++i) {
+            for (unsigned int i = 0; i<OTNodesInLevel; i++) {
                 // Brick index
                 _data[OTNode*NUM_DATA + BRICK_INDEX] = static_cast<int>(OTNode);
 
@@ -363,7 +363,7 @@ bool TSP::calculateSpatialError() {
     // "Normalize" errors
     float minNorm = 1e20f;
     float maxNorm = 0.f;
-    for (unsigned int i = 0; i<_numTotalNodes; ++i) {
+    for (unsigned int i = 0; i<_numTotalNodes; i++) {
         //float normalized = (stdDevs[i]-minError)/(maxError-minError);
         if (stdDevs[i] > 0.f) {
             stdDevs[i] = pow(stdDevs[i], 0.5f);
@@ -476,7 +476,7 @@ bool TSP::calculateTemporalError() {
     // Adjust errors using user-provided exponents
     float minNorm = 1e20f;
     float maxNorm = 0.f;
-    for (unsigned int i = 0; i < _numTotalNodes; ++i) {
+    for (unsigned int i = 0; i < _numTotalNodes; i++) {
         if (errors[i] > 0.f) {
             errors[i] = pow(errors[i], 0.25f);
         }
@@ -649,7 +649,7 @@ std::list<unsigned int> TSP::coveredLeafBricks(unsigned int brickIndex) const {
         }
         else {
             // Queue the eight children
-            for (int i = 0; i<8; ++i) {
+            for (int i = 0; i<8; i++) {
                 queue.push(child + i);
             }
         }

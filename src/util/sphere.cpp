@@ -90,8 +90,8 @@ Sphere::Sphere(glm::vec3 radius, int segments)
 
     nr = 0;
     // define indices for all triangles
-    for (int i = 1; i <= segments; ++i) {
-        for (int j = 0; j < segments; ++j) {
+    for (int i = 1; i <= segments; i++) {
+        for (int j = 0; j < segments; j++) {
             const int t = segments + 1;
             _iarray[nr] = t * (i - 1) + j + 0; //1
             ++nr;

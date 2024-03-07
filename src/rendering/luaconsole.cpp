@@ -210,7 +210,7 @@ void LuaConsole::initialize() {
                 int64_t nCommands;
                 file.read(reinterpret_cast<char*>(&nCommands), sizeof(int64_t));
 
-                for (int64_t i = 0; i < nCommands; ++i) {
+                for (int64_t i = 0; i < nCommands; i++) {
                     int64_t length;
                     file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
 
@@ -500,7 +500,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             _autoCompleteInfo.hasInitialValue = true;
         }
 
-        for (int i = 0; i < static_cast<int>(allCommands.size()); ++i) {
+        for (int i = 0; i < static_cast<int>(allCommands.size()); i++) {
             const std::string& command = allCommands[i];
 
             // Check if the command has enough length (we don't want crashes here)

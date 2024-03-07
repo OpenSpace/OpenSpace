@@ -70,8 +70,8 @@ void PropertiesDialog::createWidgets() {
             _list, &QListWidget::itemSelectionChanged,
             this, &PropertiesDialog::listItemSelected
         );
-        for (size_t i = 0; i < _propertyData.size(); ++i) {
-            _list->addItem(new QListWidgetItem(createOneLineSummary(_propertyData[i])));
+        for (const Profile::Property& property : _propertyData) {
+            _list->addItem(new QListWidgetItem(createOneLineSummary(property)));
         }
         layout->addWidget(_list);
     }

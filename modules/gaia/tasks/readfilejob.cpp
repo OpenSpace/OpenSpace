@@ -100,7 +100,7 @@ void ReadFileJob::execute() {
 
 
     // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
-    for (int i = 0; i < nStars; ++i) {
+    for (int i = 0; i < nStars; i++) {
         std::vector<float> values(_nValuesPerStar);
         size_t idx = 0;
 

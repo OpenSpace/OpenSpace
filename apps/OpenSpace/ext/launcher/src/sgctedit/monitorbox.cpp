@@ -68,7 +68,7 @@ MonitorBox::MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolu
         computeScaledResolutionLandscape(monitorArrangement, monitorResolutions) :
         computeScaledResolutionPortrait(monitorArrangement, monitorResolutions);
 
-    for (size_t i = 0; i < monitorResolutions.size(); ++i) {
+    for (size_t i = 0; i < monitorResolutions.size(); i++) {
         _monitorDimensionsScaled.emplace_back(
             offsets[i].width(),
             offsets[i].height(),
@@ -89,7 +89,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     //
     // Draw window out-of-bounds region(s) first
-    for (int i = 0; i < _nWindows; ++i) {
+    for (int i = 0; i < _nWindows; i++) {
         painter.setBrush(Qt::BDiagPattern);
         painter.setPen(QPen(_colorsForWindows[i], 0));
         painter.drawRect(_windowRendering[i]);
@@ -99,7 +99,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
     painter.setPen(QPen(Qt::black, 2));
     painter.setBrush(Qt::NoBrush);
 
-    for (size_t i = 0; i < _monitorDimensionsScaled.size(); ++i) {
+    for (size_t i = 0; i < _monitorDimensionsScaled.size(); i++) {
         const QColor Grey = QColor(0xDD, 0xDD, 0xDD);
 
         painter.drawRect(_monitorDimensionsScaled[i]);
@@ -120,7 +120,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     // Draw window number(s) first for darker contrast, then window(s) over both
     // out-of-bounds and monitors
-    for (int i = 0; i < _nWindows; ++i) {
+    for (int i = 0; i < _nWindows; i++) {
         QPointF p = QPointF(
             _windowRendering[i].left() + 5.0,
             _windowRendering[i].bottom() - 5.0
@@ -132,7 +132,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     //
     // Paint window
-    for (int i = 0; i < _nWindows; ++i) {
+    for (int i = 0; i < _nWindows; i++) {
         painter.setPen(QPen(_colorsForWindows[i], 1));
         painter.drawRect(_windowRendering[i]);
         

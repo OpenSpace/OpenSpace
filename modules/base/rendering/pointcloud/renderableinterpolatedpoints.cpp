@@ -392,11 +392,11 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
         maxRadius = glm::max(maxRadius, r);
 
         // Positions
-        for (int j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; j++) {
             result.push_back(static_cast<float>(position0[j]));
         }
 
-        for (int j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; j++) {
             result.push_back(static_cast<float>(position1[j]));
         }
 
@@ -414,11 +414,11 @@ std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
             glm::dvec3 positionBefore = transformedPosition(e00);
             glm::dvec3 positionAfter = transformedPosition(e11);
 
-            for (int j = 0; j < 3; ++j) {
+            for (int j = 0; j < 3; j++) {
                 result.push_back(static_cast<float>(positionBefore[j]));
             }
 
-            for (int j = 0; j < 3; ++j) {
+            for (int j = 0; j < 3; j++) {
                 result.push_back(static_cast<float>(positionAfter[j]));
             }
         }

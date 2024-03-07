@@ -118,7 +118,7 @@ void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
             json fieldlines = json::parse(fileContent);
             int i = 0;
 
-            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
+            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); it++) {
                 _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     identifier() + "/" + it.key(),

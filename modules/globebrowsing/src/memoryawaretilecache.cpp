@@ -220,7 +220,7 @@ void MemoryAwareTileCache::TextureContainer::reset() {
         ghoul::opengl::Texture::FilterMode::Linear :
         ghoul::opengl::Texture::FilterMode::AnisotropicMipMap;
 
-    for (size_t i = 0; i < _numTextures; ++i) {
+    for (size_t i = 0; i < _numTextures; i++) {
         using namespace ghoul::opengl;
 
         std::unique_ptr<Texture> tex = std::make_unique<Texture>(

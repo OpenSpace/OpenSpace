@@ -685,8 +685,8 @@ listOfExoplanetsDeprecated()
     std::vector<std::string> names = hostStarsWithSufficientData();
 
     std::string output;
-    for (auto it = names.begin(); it != names.end(); ++it) {
-        output += *it + ", ";
+    for (const std::string& name : names) {
+        output += name + ", ";
     }
     output.pop_back();
     output.pop_back();

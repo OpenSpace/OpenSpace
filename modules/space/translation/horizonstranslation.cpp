@@ -241,7 +241,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     );
 
     // Extract the data from the cache Keyframe vector
-    for (int i = 0; i < nKeyframes; ++i) {
+    for (int i = 0; i < nKeyframes; i++) {
         // Add keyframe in timeline
         _timeline.addKeyframe(
             std::move(cacheKeyframes[i].timestamp),
