@@ -101,15 +101,29 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
 
     enabled = p.enabled.value_or(enabled);
 
+    int indexOfProvidedOption = -1;
+
     if (p.parameterOptions.has_value()) {
         std::vector<std::string> opts = *p.parameterOptions;
         for (size_t i = 0; i < opts.size(); ++i) {
             // Note that options are added in order
             parameterOption.addOption(static_cast<int>(i), opts[i]);
+
+            if (p.parameter.has_value() && *p.parameter == opts[i]) {
+                indexOfProvidedOption = i;
+            }
         }
     }
 
-    // TODO: Read passed in parameter
+    if (indexOfProvidedOption >= 0) {
+        parameterOption = indexOfProvidedOption;
+    }
+    else if (p.parameter.has_value()) {
+        LERROR(fmt::format(
+            "Error when reading Parameter. Could not find provided parameter '{}' in "
+            "list of parameter options. Using default.", *p.parameter
+        ));
+    }
 
     scaleFactor = p.scaleFactor.value_or(scaleFactor);
 }
