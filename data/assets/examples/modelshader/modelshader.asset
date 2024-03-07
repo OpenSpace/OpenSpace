@@ -3,7 +3,7 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local model = asset.syncedResource({
+local model = asset.resource({
   Name = "Animated Box",
   Type = "HttpSynchronization",
   Identifier = "animated_box",
@@ -27,8 +27,8 @@ local Model = {
     -- (malej 2023-MAY-22) Note that PerformShading should be false in this example,
     -- these example shaders dont't contain any light calculations
     PerformShading = false,
-    VertexShader = asset.localResource("model_vs.glsl"),
-    FragmentShader = asset.localResource("model_fs.glsl"),
+    VertexShader = asset.resource("model_vs.glsl"),
+    FragmentShader = asset.resource("model_fs.glsl"),
     EnableAnimation = true,
     AnimationStartTime = "2023 05 11 00:00:00",
     AnimationTimeScale = "Second",

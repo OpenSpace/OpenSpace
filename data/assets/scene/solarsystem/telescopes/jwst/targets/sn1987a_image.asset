@@ -1,4 +1,4 @@
-local image = asset.syncedResource({
+local image = asset.resource({
   Name = "Supernova SN 1987a Image",
   Type = "HttpSynchronization",
   Identifier = "sn1987a_image",

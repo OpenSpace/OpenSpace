@@ -1,11 +1,11 @@
-local voyager_horizons = asset.syncedResource({
+local voyager_horizons = asset.resource({
   Name = "Voyager horizons",
   Type = "HttpSynchronization",
   Identifier = "voyager_horizons",
   Version = 1
 })
 
-local pioneer_horizons = asset.syncedResource({
+local pioneer_horizons = asset.resource({
   Name = "Pioneer horizons",
   Type = "HttpSynchronization",
   Identifier = "pioneer_horizons",

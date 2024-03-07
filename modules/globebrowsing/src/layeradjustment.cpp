@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -126,8 +126,6 @@ void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmen
             case Parameters::Type::TransferFunction:
                 _typeOption = static_cast<int>(layers::Adjustment::ID::TransferFunction);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
     }
 

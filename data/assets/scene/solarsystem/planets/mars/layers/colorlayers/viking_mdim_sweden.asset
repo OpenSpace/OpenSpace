@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "Viking_MDIM_Sweden",
   Name = "Viking MDIM [Sweden]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("viking_mdim_sweden.wms"),
+  FilePath = asset.resource("viking_mdim_sweden.wms"),
   Description = [[This global image map of Mars has a resolution of 256 pixels/degree
     (scale approximately 232 meters per pixel (m) at the equator). The colorized
     mosaic was completed by NASA AMES which warped the original Viking colorized

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,6 +64,9 @@ public:
     bool hasCurrentPath() const;
     bool hasFinished() const;
     bool isPlayingPath() const;
+    bool isPaused() const;
+
+    float estimatedRemainingTimeInPath() const;
 
     void updateCamera(double deltaTime);
     void createPath(const ghoul::Dictionary& dictionary);
@@ -81,27 +84,28 @@ public:
     const std::vector<SceneGraphNode*>& relevantNodes();
 
     /**
-    * Find a node close to the given node. Closeness is determined by a factor times
-    * the bounding sphere of the object
-    * \return pointer to the SGN if one was found, nullptr otherwise
-    */
+     * Find a node close to the given node. Closeness is determined by a factor times
+     * the bounding sphere of the object.
+     *
+     * \return Pointer to the SGN if one was found, nullptr otherwise
+     */
     static SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
 
     /**
-    * \return The Lua library that contains all Lua functions available to affect the
-    * path navigation
-    */
+     * \return The Lua library that contains all Lua functions available to affect the
+     *         path navigation
+     */
     static scripting::LuaLibrary luaLibrary();
 
 private:
     void handlePathEnd();
 
     /**
-    * Populate list of nodes that are relevant for collision checks, etc
-    */
+     * Populate list of nodes that are relevant for collision checks, etc.
+     */
     void findRelevantNodes();
 
-    void removeRollRotation(CameraPose& pose, double deltaTime);
+    void removeRollRotation(CameraPose& pose);
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;

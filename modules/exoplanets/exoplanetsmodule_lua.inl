@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -355,11 +355,14 @@ void createExoplanetSystem(const std::string& starName,
 
             const std::string discTexture = module->orbitDiscTexturePath();
 
+            bool isDiscEnabled = module->showOrbitUncertainty();
+
             const std::string discNode = "{"
                 "Identifier = '" + planetIdentifier + "_Disc',"
                 "Parent = '" + starIdentifier + "',"
                 "Renderable = {"
                     "Type = 'RenderableOrbitDisc',"
+                    "Enabled = " + (isDiscEnabled ? "true" : "false") +  ","
                     "Texture = openspace.absPath('" +
                         formatPathToLua(discTexture) +
                     "'),"
@@ -377,6 +380,7 @@ void createExoplanetSystem(const std::string& starName,
                         "Rotation = " + ghoul::to_string(rotationMat3) + ""
                     "}"
                 "},"
+                "Tag = {'exoplanet_uncertainty_disc'},"
                 "GUI = {"
                     "Name = '" + planetName + " Disc',"
                     "Path = '" + guiPath + "'"
@@ -402,7 +406,7 @@ void createExoplanetSystem(const std::string& starName,
     const glm::dmat3 meanOrbitPlaneRotationMatrix = static_cast<glm::dmat3>(rotation);
 
     bool isCircleEnabled = module->showComparisonCircle();
-    const std::string isCircleEnabledString = isCircleEnabled ? "true" : "false";
+    glm::vec3 circleColor = module->comparisonCircleColor();
 
     // 1 AU Size Comparison Circle
     const std::string circle = "{"
@@ -410,8 +414,9 @@ void createExoplanetSystem(const std::string& starName,
         "Parent = '" + starIdentifier + "',"
         "Renderable = {"
             "Type = 'RenderableRadialGrid',"
-            "Enabled = " + isCircleEnabledString + ","
+            "Enabled = " + (isCircleEnabled ? "true" : "false") + ","
             "Radii = { 0.0, 1.0 },"
+            "Color = " + ghoul::to_string(circleColor) + ","
             "CircleSegments = 64,"
             "LineWidth = 2.0,"
         "},"
@@ -425,6 +430,7 @@ void createExoplanetSystem(const std::string& starName,
                 "Scale = " + std::to_string(distanceconstants::AstronomicalUnit) + ""
             "}"
         "},"
+        "Tag = {'exoplanet_1au_ring'},"
         "GUI = {"
             "Name = '1 AU Size Comparison Circle',"
             "Path = '" + guiPath + "'"
@@ -455,13 +461,8 @@ void createExoplanetSystem(const std::string& starName,
             "above freezing anywhere on the planet";
 
         const std::string hzTexture = module->habitableZoneTexturePath();
-
         bool isHzEnabled = module->showHabitableZone();
-        const std::string isHzEnabledString = isHzEnabled ? "true" : "false";
-
         bool useOptimistic = module->useOptimisticZone();
-        const std::string useOptimisticString = useOptimistic ? "true" : "false";
-
         float opacity = module->habitableZoneOpacity();
 
         const std::string zoneDiscNode = "{"
@@ -469,11 +470,11 @@ void createExoplanetSystem(const std::string& starName,
             "Parent = '" + starIdentifier + "',"
             "Renderable = {"
                 "Type = 'RenderableHabitableZone',"
-                "Enabled = " + isHzEnabledString + ","
+                "Enabled = " + (isHzEnabled ? "true" : "false") + ","
                 "Texture = openspace.absPath('" + formatPathToLua(hzTexture) + "'),"
                 "Luminosity = " + std::to_string(system.starData.luminosity) + ","
                 "EffectiveTemperature = " + std::to_string(system.starData.teff) + ","
-                "Optimistic = " + useOptimisticString + ","
+                "Optimistic = " + (useOptimistic ? "true" : "false") + ","
                 "Opacity = " + std::to_string(opacity) + ""
             "},"
             "Transform = {"
@@ -482,6 +483,7 @@ void createExoplanetSystem(const std::string& starName,
                     "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
                 "}"
             "},"
+            "Tag = {'exoplanet_habitable_zone'},"
             "GUI = {"
                 "Name = '" + starName + " Habitable Zone',"
                 "Path = '" + guiPath + "',"
@@ -746,7 +748,9 @@ listOfExoplanetsDeprecated()
         LINFO(fmt::format("Reading data for planet: '{}' ", planetData.name));
 
         if (!hasSufficientData(planetData.dataEntry)) {
-            LWARNING(fmt::format("Insufficient data for exoplanet: '{}'", planetData.name));
+            LWARNING(fmt::format(
+                "Insufficient data for exoplanet: '{}'", planetData.name
+            ));
             continue;
         }
 
@@ -772,7 +776,9 @@ listOfExoplanetsDeprecated()
     }
 
     // Add all the added exoplanet systems
-    for (const std::pair<const std::string, ExoplanetSystem>& entry : hostNameToSystemDataMap) {
+    using K = const std::string;
+    using V = ExoplanetSystem;
+    for (const std::pair<K, V>& entry : hostNameToSystemDataMap) {
         const std::string& hostName = entry.first;
         const ExoplanetSystem& data = entry.second;
         createExoplanetSystem(hostName, data);

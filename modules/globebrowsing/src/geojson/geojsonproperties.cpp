@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -151,7 +151,7 @@ namespace {
             }
         }
         return color;
-    };
+    }
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
@@ -336,7 +336,7 @@ namespace {
 
         struct Tessellation {
             // [[codegen::verbatim(TessellationEnabledInfo.description)]]
-            std::optional<bool> ebabled;
+            std::optional<bool> enabled;
 
             // [[codegen::verbatim(UseTessellationLevelInfo.description)]]
             std::optional<bool> useTessellationLevel;
@@ -409,7 +409,8 @@ GeoJsonProperties::GeoJsonProperties()
     altitudeModeOption.addOptions({
         { static_cast<int>(AltitudeMode::Absolute), "Absolute" },
         { static_cast<int>(AltitudeMode::RelativeToGround), "Relative to Ground" }
-        //{ static_cast<int>(AltitudeMode::ClampToGround), "Clamp to Ground" } / TODO: add ClampToGround
+        // TODO: add ClampToGround
+        //{ static_cast<int>(AltitudeMode::ClampToGround), "Clamp to Ground" }
     });
     addProperty(altitudeModeOption);
 
@@ -642,7 +643,9 @@ GeoJsonProperties::AltitudeMode PropertySet::altitudeMode() const {
 }
 
 bool PropertySet::tessellationEnabled() const {
-    return overrideValues.tessellationEnabled.value_or(defaultValues.tessellation.enabled);
+    return overrideValues.tessellationEnabled.value_or(
+        defaultValues.tessellation.enabled
+    );
 }
 
 bool PropertySet::useTessellationLevel() const {

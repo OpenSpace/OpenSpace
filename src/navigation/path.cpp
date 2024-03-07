@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,10 +45,27 @@ namespace {
     constexpr std::string_view _loggerCat = "Path";
     constexpr float LengthEpsilon = 1e-5f;
 
-    // TODO: where should this documentation be?
-    // It's nice to have these to interpret the dictionary when creating the path, but
-    // maybe it's not really necessary
+    // A PathInstruction is a table describing the specification for a camera path.
+    // It is used as an input to the `openspace.pathnavigation.createPath` function.
+    //
+    // There are two types of paths that can be created, as specified by the required
+    // TargetType parameter: 'Node' or 'NavigationState'. The difference is what kind
+    // of target the path is created for, a scene graph node or a specific navigation
+    // state for the camera.
+    //
+    // Depending on the type, the parameters that can be specified are a bit different.
+    // A 'NavigationState' already contains all details for the camera position, so no
+    // other details may be specified. For a 'Node' instruction, only a 'Target' node is
+    // required, but a 'Height' or 'Position' may also be specified. If both a position
+    // and height is specified, the height value will be ignored.
+    //
+    // For 'Node' paths it is also possible to specify whether the target camera state
+    // at the end of the flight should take the up direction of the target node into
+    // account. Note that for this to give an effect on the path, rolling motions have
+    // to be enabled.
     struct [[codegen::Dictionary(PathInstruction)]] Parameters {
+        // The type of the instruction. Decides what other parameters are
+        // handled/available
         enum class TargetType {
             Node,
             NavigationState
@@ -59,7 +76,7 @@ namespace {
         std::optional<float> duration;
 
         // (Node): The target node of the camera path. Not optional for 'Node'
-        // instructions
+        // type instructions
         std::optional<std::string> target;
 
         // (Node): An optional position in relation to the target node, in model
@@ -74,7 +91,7 @@ namespace {
         std::optional<bool> useTargetUpDirection;
 
         // (NavigationState): A navigation state that will be the target
-        // of this path segment
+        // of the resulting path
         std::optional<ghoul::Dictionary> navigationState
             [[codegen::reference("core_navigation_state")]];
 
@@ -96,9 +113,14 @@ namespace {
 
 namespace openspace::interaction {
 
-Path::Path(Waypoint start, Waypoint end, Type type,
-           std::optional<double> duration)
-    : _start(start), _end(end), _type(type)
+documentation::Documentation Path::Documentation() {
+    return codegen::doc<Parameters>("core_path_instruction");
+}
+
+Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duration)
+    : _start(start)
+    , _end(end)
+    , _type(type)
 {
     switch (_type) {
         case Type::AvoidCollision:
@@ -111,46 +133,74 @@ Path::Path(Waypoint start, Waypoint end, Type type,
         case Type::ZoomOutOverview:
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
-        default:
-            LERROR("Could not create curve. Type does not exist");
-            throw ghoul::MissingCaseException();
     }
 
     _prevPose = _start.pose();
 
-    // Compute speed factor to match any given duration, by traversing the path and
-    // computing how much faster/slower it should be
+    // Estimate how long time the camera path will take to traverse
+    constexpr double dt = 0.05; // 20 fps
+    while (!hasReachedEnd()) {
+        traversePath(dt);
+    }
+    float estimatedDuration = _progressedTime;
+    resetPlaybackVariables();
+
+    // We now know how long it took to traverse the path. Use that to compute the
+    // speed factor to match any given duration
     _speedFactorFromDuration = 1.0;
     if (duration.has_value()) {
-        constexpr double dt = 0.05; // 20 fps
-        while (!hasReachedEnd()) {
-            traversePath(dt);
+        if (*duration > 0.0) {
+            _speedFactorFromDuration = estimatedDuration / *duration;
+            estimatedDuration = *duration;
         }
-
-        // We now know how long it took to traverse the path. Use that
-        _speedFactorFromDuration = _progressedTime / *duration;
-        resetPlaybackVariables();
+        else {
+            // A duration of zero means infinite speed. Handle this explicity
+            _speedFactorFromDuration = std::numeric_limits<float>::infinity();
+            estimatedDuration = 0.f;
+        }
     }
+    _expectedDuration = estimatedDuration;
 }
 
-Waypoint Path::startPoint() const { return _start; }
+Waypoint Path::startPoint() const {
+    return _start;
+}
 
-Waypoint Path::endPoint() const { return _end; }
+Waypoint Path::endPoint() const {
+    return _end;
+}
 
-double Path::pathLength() const { return _curve->length(); }
+double Path::pathLength() const {
+    return _curve->length();
+}
+
+double Path::remainingDistance() const {
+    return pathLength() - _traveledDistance;
+}
+
+float Path::estimatedRemainingTime(float speedScale) const {
+    return _expectedDuration / speedScale - _progressedTime;
+}
 
 std::vector<glm::dvec3> Path::controlPoints() const {
     return _curve->points();
 }
 
 CameraPose Path::traversePath(double dt, float speedScale) {
+    if (std::isinf(_speedFactorFromDuration)) {
+        _shouldQuit = true;
+        _prevPose = _start.pose();
+        _traveledDistance = pathLength();
+        return _end.pose();
+    }
+
     double speed = speedAlongPath(_traveledDistance);
     speed *= static_cast<double>(speedScale);
     double displacement = dt * speed;
 
     const double prevDistance = _traveledDistance;
 
-    _progressedTime += dt;
+    _progressedTime += static_cast<float>(dt);
     _traveledDistance += displacement;
 
     CameraPose newPose;
@@ -283,7 +333,7 @@ glm::dquat Path::easedSlerpRotation(double t) const {
     return glm::slerp(_start.rotation(), _end.rotation(), tScaled);
 }
 
-glm::dquat Path::linearPathRotation(double t) const {
+glm::dquat Path::linearPathRotation(double) const {
     const glm::dvec3 a = ghoul::viewDirection(_start.rotation());
     const glm::dvec3 b = ghoul::viewDirection(_end.rotation());
     const double angle = std::acos(glm::dot(a, b)); // assumes length 1.0 for a & b
@@ -570,8 +620,6 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             waypoints = { computeWaypointFromNodeInfo(info, startPoint, isLinear) };
             break;
         }
-        default:
-            throw ghoul::MissingCaseException();
     }
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints

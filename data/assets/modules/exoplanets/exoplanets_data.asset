@@ -1,11 +1,11 @@
-local dataPath = asset.syncedResource({
+local dataPath = asset.resource({
   Name = "Exoplanet Data Files",
   Type = "HttpSynchronization",
   Identifier = "exoplanets_data",
   Version = 5
 })
 
-local colormaps = asset.syncedResource({
+local colormaps = asset.resource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",

@@ -2,12 +2,12 @@ local bookmarkHelper = asset.require("util/generate_bookmarks")
 
 local dataProvider = "http://data.openspaceproject.com/files/bookmarks/v1/bookmarks.csv"
 
-local bookmarksCSV = asset.syncedResource({
+local bookmarksCSV = asset.resource({
   Identifier = "openspace_bookmarks",
   Name = "OpenSpace Bookmarks",
   Type = "UrlSynchronization",
   UseHash = false,
-  Override = true,
+  SecondsUntilResync = 0,
   Url = dataProvider
 })
 

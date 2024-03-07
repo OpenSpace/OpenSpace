@@ -1,16 +1,17 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Voyager Model",
   Type = "HttpSynchronization",
   Identifier = "voyager_model",
   Version = 1
 })
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Voyager 1 Kernels",
   Type = "HttpSynchronization",
   Identifier = "voyager1_spice",
@@ -49,7 +50,7 @@ local Voyager1 = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "VG1_SC_BUS",
-      DestinationFrame = "GALACTIC",
+      DestinationFrame = coreKernels.Frame.Galactic,
       TimeFrame = {
         Type = "TimeFrameInterval",
         Start = "1977-SEP-05 14:10:11.786",
@@ -124,7 +125,7 @@ local VoyagerTrailCruiseEarthJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB"
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977 SEP 05",
@@ -148,7 +149,7 @@ local VoyagerTrailEncounterJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB"
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.70, 0.50, 0.20 },
     EnableFade = false,
@@ -173,7 +174,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB"
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -198,7 +199,7 @@ local VoyagerTrailEncounterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB"
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -223,7 +224,7 @@ local VoyagerTrailCruiseSaturnInf = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB"
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },

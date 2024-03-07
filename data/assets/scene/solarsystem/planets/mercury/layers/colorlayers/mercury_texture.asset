@@ -2,7 +2,7 @@ local globe = asset.require("../../mercury")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Mercury Textures",
   Type = "HttpSynchronization",
   Identifier = "mercury_textures",

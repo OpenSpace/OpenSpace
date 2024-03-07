@@ -2,7 +2,7 @@ local globe = asset.require("../../triton")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Triton Textures",
   Type = "HttpSynchronization",
   Identifier = "triton_textures",

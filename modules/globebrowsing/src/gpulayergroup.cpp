@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -99,8 +99,6 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
             case layers::Layer::ID::SolidColor:
                 program.setUniform(galuc.color, al.solidColor());
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
 
         if (gal.isHeightLayer) {
@@ -165,8 +163,6 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
             case layers::Layer::ID::SolidColor:
                 galuc.color = p.uniformLocation(name + "color");
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
 
         if (gal.isHeightLayer) {

@@ -2,7 +2,7 @@ local NewHorizonsModel = asset.require("./model")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "New Horizons Model",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_model",
@@ -14,7 +14,6 @@ local Labels = {
   Parent = NewHorizonsModel.NewHorizons.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    Body = "NEW HORIZONS",
     GeometryFile = models .. "Labels.obj",
     AmbientIntensity = 0.8
   },

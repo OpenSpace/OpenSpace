@@ -1,16 +1,16 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
-local circle = asset.syncedResource({
+local circle = asset.resource({
   Name = "Circle",
   Type = "HttpSynchronization",
   Identifier = "circle_image",
   Version = 1
 })
 
-local kernels = asset.syncedResource({
+local kernels = asset.resource({
   Name = "Lagrange Kernels",
   Type = "HttpSynchronization",
   Identifier = "earth_lagrange_kernels",
@@ -18,7 +18,9 @@ local kernels = asset.syncedResource({
 })
 
 
-local L5 = 395
+local ID = {
+  L5 = 395
+}
 
 local L5Position = {
   Identifier = "L5Position",
@@ -26,14 +28,14 @@ local L5Position = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = L5,
-      Observer = "SSB"
+      Target = ID.L5,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
   GUI = {
     Name = "L5 Position",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
     Hidden = true
   }
 }
@@ -51,7 +53,7 @@ local L5 = {
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
   GUI = {
     Name = "L5",
-    Path = "/Solar System/Planets/Earth/Lagrange points"
+    Path = "/Solar System/Planets/Earth/Lagrange Points"
   }
 }
 
@@ -71,10 +73,11 @@ local L5Label = {
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
   GUI = {
     Name = "L5 Label",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
     Description = "Main label for L5"
   }
 }
+
 
 
 asset.onInitialize(function()
@@ -93,6 +96,7 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels .. "L5_de431.bsp")
 end)
 
+asset.export("ID", ID)
 asset.export(L5Position)
 asset.export(L5)
 asset.export(L5Label)

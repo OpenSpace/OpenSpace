@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -162,13 +162,18 @@ void logError(const SpecificationError& error, std::string component) {
         LERRORC(fmt::format("{}: {}", component, error.component), error.message);
     }
     for (const documentation::TestResult::Offense& o : error.result.offenses) {
-        LERRORC(
-            o.offender,
-            fmt::format("{}: {}", ghoul::to_string(o.reason), o.explanation)
-        );
+        if (o.explanation.empty()) {
+            LERRORC(ghoul::to_string(o.reason), o.offender);
+        }
+        else {
+            LERRORC(
+                ghoul::to_string(o.reason),
+                fmt::format("{}: {}", o.offender, o.explanation)
+            );
+        }
     }
     for (const documentation::TestResult::Warning& w : error.result.warnings) {
-        LWARNINGC(w.offender, ghoul::to_string(w.reason));
+        LWARNINGC(ghoul::to_string(w.reason), w.offender);
     }
 }
 
@@ -187,20 +192,6 @@ DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
                                        std::string doc)
     : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt,
                          std::move(doc))
-{}
-
-Documentation::Documentation(std::string n, std::string i, DocumentationEntries ents)
-    : name(std::move(n))
-    , id(std::move(i))
-    , entries(std::move(ents))
-{}
-
-Documentation::Documentation(std::string n, DocumentationEntries ents)
-    : Documentation(std::move(n), "", std::move(ents))
-{}
-
-Documentation::Documentation(DocumentationEntries ents)
-    : Documentation("", "", std::move(ents))
 {}
 
 TestResult testSpecification(const Documentation& documentation,

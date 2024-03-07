@@ -1,11 +1,11 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Local Dwarfs Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_localdwarfs_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Local Dwarfs Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_localdwarfs_speck",
@@ -16,7 +16,7 @@ local speck = asset.syncedResource({
 local Object = {
   Identifier = "LocalDwarfGalaxies",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePolygonCloud",
     Enabled = false,
     Labels = {
       File = speck .. "localgroup.label",
@@ -25,17 +25,29 @@ local Object = {
       MinMaxSize = { 7, 20 },
       Unit = "Mpc"
     },
-    Color = { 0.5, 1.0, 0.2 },
-    ColorMap = speck .. "localgroup.cmap",
-    ColorOption = { "association" },
+    Coloring = {
+      FixedColor = { 0.0, 1.0, 0.0 },
+      -- @TODO: This one wasn't actually properly used before the point cloud update.
+      -- All points were mapped to green. Decide if we want it around.
+      -- @TODO: Also, the cmap is currently not applied correctly, due to speck file
+      -- not being read properly (it inlcudes more information than just datavar-s).
+      -- This should be adressed. (2023-12-13, emmbr)
+      ColorMapping = {
+        File = speck .. "localgroup.cmap",
+        ParameterOptions = {
+          { Key = "association" }
+        }
+      }
+    },
     Opacity = 0.3,
     File = speck .. "localgroup.speck",
-    Texture = textures .. "point4.png",
     PolygonSides = 12,
     Unit = "Mpc",
-    ScaleFactor = 465.0,
-    BillboardMinMaxSize = { 0.0, 20.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 20.2,
+      MaxSize = 0.7,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Local Group",
@@ -69,7 +81,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Local Group",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for the Local Goup",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

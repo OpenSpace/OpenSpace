@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -8,15 +8,15 @@ local MarsTrailEarth = {
   Parent = transforms.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS",
-      Observer = "EARTH"
+      Target = coreKernels.ID.Mars,
+      Observer = coreKernels.ID.Earth
     },
     Color = { 1.0, 0.5, 0.2 },
     Period = 224.695,
-    Resolution = 1000,
-    Enabled = false
+    Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
   GUI = {
@@ -42,8 +42,7 @@ asset.export(MarsTrailEarth)
 asset.meta = {
   Name = "Mars Trail from Earth",
   Version = "1.1",
-  Description = [[Trail of Mars, parented to Earth with Earth as the SPICE observer. Data
-    from NASA SPICE (see base spice asset)]],
+  Description = "Trail of Mars, parented to Earth with Earth as the SPICE observer",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

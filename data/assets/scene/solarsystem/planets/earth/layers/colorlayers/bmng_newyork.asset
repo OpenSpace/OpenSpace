@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "BMNG_NewYork",
   Name = "BMNG [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("bmng_newyork.wms"),
+  FilePath = asset.resource("bmng_newyork.wms"),
   Description = [[Web loaded full resolution map of Blue Marble Next Generation. This map
     is hosted on the OpenSpace servers in New York]]
 }

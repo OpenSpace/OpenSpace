@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -495,6 +495,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetAim(RetargetAimInfo)
     , _followAnchorNodeRotation(FollowAnchorNodeInfo, true)
     , _followAnchorNodeRotationDistance(FollowAnchorNodeDistanceInfo, 5.f, 0.f, 20.f)
+    , _disableZoom(DisableZoomInfo, false)
+    , _disableRoll(DisableRollInfo, false)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
@@ -511,13 +513,11 @@ OrbitalNavigator::OrbitalNavigator()
     , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
     , _followRotationInterpolationTime(FollowRotationInterpTimeInfo, 1.0, 0.0, 10.0)
     , _invertMouseButtons(InvertMouseButtons, false)
+    , _shouldRotateAroundUp(ShouldRotateAroundUpInfo, false)
+    , _upToUseForRotation(UpToUseForRotationInfo)
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
-    , _disableZoom(DisableZoomInfo, false)
-    , _disableRoll(DisableRollInfo, false)
-    , _shouldRotateAroundUp(ShouldRotateAroundUpInfo, false)
-    , _upToUseForRotation(UpToUseForRotationInfo)
 {
     _anchor.onChange([this]() {
         if (_anchor.value().empty()) {
@@ -1089,8 +1089,8 @@ void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode,
 }
 
 void OrbitalNavigator::setFocusNode(const std::string& focusNode, bool) {
-    _anchor.set(focusNode);
-    _aim.set(std::string(""));
+    _anchor = focusNode;
+    _aim = std::string("");
 }
 
 void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
@@ -1128,11 +1128,11 @@ void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {
 }
 
 void OrbitalNavigator::setAnchorNode(const std::string& anchorNode) {
-    _anchor.set(anchorNode);
+    _anchor = anchorNode;
 }
 
 void OrbitalNavigator::setAimNode(const std::string& aimNode) {
-    _aim.set(aimNode);
+    _aim = aimNode;
 }
 
 void OrbitalNavigator::updatePreviousAnchorState() {
@@ -1247,11 +1247,11 @@ bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPositi
     const glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform *
         glm::dvec4(cameraPosition, 1.0));
 
-    const SurfacePositionHandle positionHandle =
-        _anchorNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
+    const glm::dvec3 centerToReference =
+        glm::normalize(cameraPositionModelSpace) * _anchorNode->boundingSphere();
 
     const double maximumDistanceForRotation = glm::length(
-        glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface
+        glm::dmat3(modelTransform) * centerToReference
     ) * _followAnchorNodeRotationDistance;
 
     const double distanceToCamera =
@@ -1634,14 +1634,10 @@ void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
 {
     const glm::dvec3 axis = [](UpDirectionChoice upAxis) {
         switch (upAxis) {
-            case UpDirectionChoice::XAxis:
-                return glm::dvec3(1.0, 0.0, 0.0);
-            case UpDirectionChoice::YAxis:
-                return glm::dvec3(0.0, 1.0, 0.0);
-            case UpDirectionChoice::ZAxis:
-                return glm::dvec3(0.0, 0.0, 1.0);
-            default:
-                throw ghoul::MissingCaseException();
+            case UpDirectionChoice::XAxis: return glm::dvec3(1.0, 0.0, 0.0);
+            case UpDirectionChoice::YAxis: return glm::dvec3(0.0, 1.0, 0.0);
+            case UpDirectionChoice::ZAxis: return glm::dvec3(0.0, 0.0, 1.0);
+            default:                       throw ghoul::MissingCaseException();
         }
     }(UpDirectionChoice(_upToUseForRotation.value()));
 
@@ -2063,11 +2059,6 @@ double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
 {
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
-
-    const glm::dvec3 outDirection = glm::normalize(
-        glm::dmat3(modelTransform) *
-        positionHandle.referenceSurfaceOutDirection
-    );
 
     const glm::dvec3 posDiff = cameraPosition - anchorPos;
     const glm::dvec3 centerToActualSurfaceModelSpace =

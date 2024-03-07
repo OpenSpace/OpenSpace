@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -233,6 +233,41 @@ namespace {
  */
 [[codegen::luawrap]] void resetCamera() {
     openspace::setCameraFromProfile(*openspace::global::profile);
+}
+
+/**
+ * Returns the whole configuration object as a Dictionary
+ */
+[[codegen::luawrap]] ghoul::Dictionary configuration() {
+    openspace::Configuration& config = *openspace::global::configuration;
+    return config.createDictionary();
+}
+
+/**
+ * Returns the current layer server from the configuration
+ */
+[[codegen::luawrap]] std::string layerServer() {
+    openspace::Configuration& config = *openspace::global::configuration;
+    return layerServerToString(config.layerServer);
+}
+
+/**
+ * Loads the provided JSON file and returns it back to the caller. Please note that if the
+ * JSON contains keys that array of an array type, they are converted into a Dictionary
+ * with numerical keys and the numerical keys start with 1.
+ */
+[[codegen::luawrap]] ghoul::Dictionary loadJson(std::filesystem::path path) {
+    if (!std::filesystem::exists(path)) {
+        throw ghoul::RuntimeError(fmt::format("File {} did not exist", path));
+    }
+
+    std::ifstream f(path);
+    std::string contents = std::string(
+        (std::istreambuf_iterator<char>(f)),
+        std::istreambuf_iterator<char>()
+    );
+    nlohmann::json json = nlohmann::json::parse(contents);
+    return openspace::jsonToDictionary(json);
 }
 
 #include "openspaceengine_lua_codegen.cpp"

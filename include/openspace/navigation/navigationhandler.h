@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -151,7 +151,7 @@ public:
      * Set camera state from a provided navigation state next frame. The actual position
      * will computed from the scene in the same frame as it is set.
      *
-     * \param state the navigation state to compute a camera positon from
+     * \param state The navigation state to compute a camera positon from
      */
     void setNavigationStateNextFrame(const NavigationState& state);
 
@@ -161,14 +161,14 @@ public:
      * node info. The actual position will computed from the scene in the same frame as
      * it is set.
      *
-     * \param spec the node specification from which to compute the resulting camera pose
+     * \param spec The node specification from which to compute the resulting camera pose
      */
     void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
 
     /**
-    * \return The Lua library that contains all Lua functions available to affect the
-    * interaction
-    */
+     * \return The Lua library that contains all Lua functions available to affect the
+     *         interaction
+     */
     static scripting::LuaLibrary luaLibrary();
 
 private:
@@ -181,9 +181,9 @@ private:
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
-    static constexpr double InteractionHystersis = 0.0125;
     bool _inAnchorApproachSphere = false;
     bool _inAnchorReachSphere = false;
+    const SceneGraphNode* _lastAnchor = nullptr;
 
     OrbitalNavigator _orbitalNavigator;
     KeyframeNavigator _keyframeNavigator;

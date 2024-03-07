@@ -2,7 +2,7 @@ local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "GeoJSON Example Polygon Multiple",
   Type = "UrlSynchronization",
   Identifier = "geojson_example_polygon_multiple",

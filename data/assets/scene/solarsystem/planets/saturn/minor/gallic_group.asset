@@ -1,5 +1,6 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels452 = asset.require("../kernels452")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +10,8 @@ local Albiorix = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ALBIORIX",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Albiorix,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -40,8 +41,8 @@ local AlbiorixTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ALBIORIX",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Albiorix,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 774.58,
@@ -64,8 +65,8 @@ local AlbiorixLabel = {
   Identifier = "AlbiorixLabel",
   Parent = Albiorix.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Albiorix",
     FontSize = 70.0,
     Size = 7.1,
@@ -91,8 +92,8 @@ local Bebhionn = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BEBHIONN",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Bebhionn,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -122,8 +123,8 @@ local BebhionnTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BEBHIONN",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Bebhionn,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 838.77,
@@ -146,8 +147,8 @@ local BebhionnLabel = {
   Identifier = "BebhionnLabel",
   Parent = Bebhionn.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Bebhionn",
     FontSize = 70.0,
     Size = 7.1,
@@ -173,8 +174,8 @@ local Erriapus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ERRIAPUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Erriapus,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -204,8 +205,8 @@ local ErriapusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ERRIAPUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Erriapus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 844.89,
@@ -228,8 +229,8 @@ local ErriapusLabel = {
   Identifier = "ErriapusLabel",
   Parent = Erriapus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Erriapus",
     FontSize = 70.0,
     Size = 7.1,
@@ -255,8 +256,8 @@ local Tarvos = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TARVOS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Tarvos,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -286,8 +287,8 @@ local TarvosTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TARVOS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Tarvos,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 944.23,
@@ -310,8 +311,8 @@ local TarvosLabel = {
   Identifier = "TarvosLabel",
   Parent = Tarvos.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Tarvos",
     FontSize = 70.0,
     Size = 7.1,
@@ -333,9 +334,6 @@ local TarvosLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat452)
-
-
   openspace.addSceneGraphNode(Albiorix)
   openspace.addSceneGraphNode(AlbiorixTrail)
   openspace.addSceneGraphNode(AlbiorixLabel)
@@ -369,9 +367,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(AlbiorixLabel)
   openspace.removeSceneGraphNode(AlbiorixTrail)
   openspace.removeSceneGraphNode(Albiorix)
-
-
-  openspace.spice.unloadKernel(kernel.sat452)
 end)
 
 asset.export(Albiorix)

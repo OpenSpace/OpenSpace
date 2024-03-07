@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,17 +37,17 @@ class SearchProxyModel : public QSortFilterProxyModel {
 Q_OBJECT
 public:
     /**
-     * Constructor for SearchProxyModel class
+     * Constructor for SearchProxyModel class.
      *
-     * \param parent The QObject* object that is the Qt parent of this object
+     * \param parent The parent object of this object
      */
     SearchProxyModel(QObject* parent = nullptr);
 
 public slots:
     /**
-     * Sets the regular expression pattern to apply to the filter
+     * Sets the regular expression pattern to apply to the filter.
      *
-     * \param pattern The QString reference containing the regex pattern
+     * \param pattern The regex pattern used for filtering
      */
     void setFilterRegularExpression(const QString& pattern);
 
@@ -64,14 +64,14 @@ class AssetsDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for assets class
+     * Constructor for assets class.
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
+     * \param parent Pointer to parent Qt widget
+     * \param profile The #openspace::Profile object containing all data of the new or
+     *        imported profile
      * \param assetBasePath The path to the folder in which all of the assets are living
      * \param userAssetBasePath The path to the folder in which the users' assets are
      *        living
-     * \param parent Pointer to parent Qt widget
      */
     AssetsDialog(QWidget* parent, openspace::Profile* profile,
         const std::string& assetBasePath, const std::string& userAssetBasePath);
@@ -84,7 +84,10 @@ private:
     void setViewToBaseModel();
     void parseSelections();
     void selected(const QModelIndex&);
-    /// Creates a text summary of all assets and their paths
+
+    /**
+     * Creates a text summary of all assets and their paths.
+     */
     QString createTextSummary();
     void openAssetEditor();
 

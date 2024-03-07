@@ -3,7 +3,7 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local model = asset.syncedResource({
+local model = asset.resource({
   Name = "Gaia Model",
   Type = "HttpSynchronization",
   Identifier = "gaia_model",
@@ -20,7 +20,7 @@ local Gaia = {
       Attached = "Gaia",
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
-      YAxis = "Sun",
+      YAxis = sun.Sun.Identifier,
       YAxisInvert = true
     },
     Scale = {
@@ -31,7 +31,6 @@ local Gaia = {
   -- X Orthogonal
   Renderable = {
     Type = "RenderableModel",
-    Body = "GAIA",
     GeometryFile = model .. "gaia.obj",
     LightSources = {
       sun.LightSource,

@@ -13,7 +13,7 @@ from the GLOBE project which has a global digital elevation model]]
 local URL = "https://sos.noaa.gov/catalog/datasets/etopo2-bathymetry/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

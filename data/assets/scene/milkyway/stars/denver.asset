@@ -1,18 +1,18 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Stars Textures",
   Type = "HttpSynchronization",
   Identifier = "stars-denver_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Stars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "stars-denver_speck",
   Version = 1
 })
 
-local colorLUT = asset.syncedResource({
+local colorLUT = asset.resource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars-denver_colormap",

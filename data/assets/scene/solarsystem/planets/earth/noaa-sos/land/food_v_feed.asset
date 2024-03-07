@@ -12,7 +12,7 @@ where most of the crops are used as animal feed (in red)]]
 local URL = "https://sos.noaa.gov/catalog/datasets/agriculture-food-vs-feed/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

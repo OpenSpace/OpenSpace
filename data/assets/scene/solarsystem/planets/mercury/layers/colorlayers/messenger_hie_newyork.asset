@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "Messenger_HIE_NewYork",
   Name = "Messenger HIE [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("messenger_hie_newyork.wms")
+  FilePath = asset.resource("messenger_hie_newyork.wms")
 }
 
 

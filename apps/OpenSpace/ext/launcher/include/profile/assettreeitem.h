@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,8 +36,8 @@ public:
      * Constructor for assetTreeItem class.
      *
      * \param data QVector containing the data contained in this tree view item
-     * \param parentItem The parent that contains this (and possibly other) children
-     *                   in the tree structure (optional).
+     * \param parentItem The parent that contains this (and possibly other) children in
+     *        the tree structure (optional)
      */
     AssetTreeItem(std::vector<QVariant> data, AssetTreeItem* parentItem = nullptr);
 
@@ -49,7 +49,7 @@ public:
     /**
       * Returns pointer to this tree item's child at position \p row.
       *
-      * \param row int of the row number of the child to get pointer
+      * \param row The row number of the child to get pointer
       */
     AssetTreeItem* child(int row) const;
 
@@ -78,27 +78,27 @@ public:
     /**
       * Inserts children item(s) to the current item.
       *
-      * \param position where in this item's children to insert new children
-      * \param count number of children to insert
-      * \param columns number of data columns in each child
+      * \param position Where in this item's children to insert new children
+      * \param count Number of children to insert
+      * \param columns Number of data columns in each child
       *
-      * \return true if new children were successfully inserted
+      * \return `true` if new children were successfully inserted
       */
     bool insertChildren(int position, int count, int columns);
 
     /**
       * Inserts data column(s) in the current item.
       *
-      * \param position column number at which to insert column(s)
-      * \param columns number of columns to insert
-      * \return true if columns were successfully inserted
+      * \param position Column number at which to insert column(s)
+      * \param columns Number of columns to insert
+      * \return `true` if columns were successfully inserted
       */
     bool insertColumns(int position, int columns);
 
     /**
       * Returns a pointer to the current item's parent.
       *
-      * \return pointer to the \p assetTreeItem parent
+      * \return Pointer to the \p assetTreeItem parent
       */
     AssetTreeItem* parent();
 
@@ -112,10 +112,10 @@ public:
     /**
       * Returns the data at column \p column of this item.
       *
-      * \param position The position of the child(ren) to remove from the current
-      *                 item (which is parent)
+      * \param position The position of the child(ren) to remove from the current item
+      *        (which is parent)
       * \param count The number of children to remove
-      * \return true if child item(s) successfully removed
+      * \return `true` if child item(s) successfully removed
       */
     bool removeChildren(int position, int count);
 
@@ -124,7 +124,7 @@ public:
       *
       * \param column The data column number to set
       * \param value The #QVariant data element to store at column \p column
-      * \return true if the data set was successful
+      * \return `true` if the data set was successful
       */
     bool setData(int column, const QVariant& value);
 
@@ -132,30 +132,30 @@ public:
       * Returns the checked state of this item. If an asset is selected to be included
       * in a profile, then it is checked.
       *
-      * \return true if this item is checked
+      * \return `true` if this item is checked
       */
     bool isChecked() const;
 
     /**
       * Sets the checked state of this item (whether or not it is selected for a profile).
       *
-      * \param set bool for whether or not this is checked
+      * \param set Whether or not this item is checked
       */
     void setChecked(bool set);
 
     /**
-      * Returns a bool for whether or not this is an asset. If it is a file
-      * (has no children in the filesystem tree), then it is an asset.
+      * Returns a bool for whether or not this is an asset. If it is a file (has no
+      * children in the filesystem tree), then it is an asset.
       *
-      * \return true if this is an asset file and not a directory containing asset(s)
+      * \return `true` if this is an asset file and not a directory containing asset(s)
       */
     bool isAsset() const;
 
     /**
-      * Returns a bool for whether or not this is a category. If it is a directory
-      * and not an asset (file), then it is a category.
+      * Returns a bool for whether or not this is a category. If it is a directory and not
+      * an asset (file), then it is a category.
       *
-      * \return true if this is a category
+      * \return `true` if this is a category
       */
     bool isCategory() const;
 
@@ -164,14 +164,14 @@ public:
       * possible that an imported profile lists an asset from another system that is not
       * included on the current filesystem.
       *
-      * \param set to true if the asset file exists in the current filesystem
+      * \param fileExists `true` if the asset file exists in the current filesystem
       */
     void setExistsInFilesystem(bool fileExists);
 
     /**
       * Returns bool for whether or not the asset exists in the current filesystem.
       *
-      * \return true if the asset exists in the current filesystem
+      * \return `true` if the asset exists in the current filesystem
       */
     bool doesExistInFilesystem() const;
 

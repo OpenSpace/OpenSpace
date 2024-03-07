@@ -1,4 +1,4 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Background Radiation Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_backgroundradiation_textures",

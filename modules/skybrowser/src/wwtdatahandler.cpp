@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -204,7 +204,7 @@ namespace {
         // Collect name, image url and credits
         std::string name = attribute(node, Name);
         if (std::islower(name[0])) {
-            // convert string to upper case
+            // convert first character in string to upper case
             name[0] = static_cast<char>(std::toupper(name[0]));
         }
 

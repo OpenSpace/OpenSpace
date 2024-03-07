@@ -1,5 +1,7 @@
 local jupiterTransforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernelsJup = asset.require("scene/solarsystem/planets/jupiter/kernels")
 local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -14,13 +16,13 @@ local Juice = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JUICE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels.ID.Juice,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "JUICE_SPACECRAFT",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Juice,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -36,8 +38,8 @@ local GanymedePosition = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "GANYMEDE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernelsJup.ID.Ganymede,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   GUI = {
@@ -52,8 +54,8 @@ local GPHIO = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "GPHIO",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.GPHIO,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -69,8 +71,6 @@ local GPHIO = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.Kernels)
-
   openspace.addSceneGraphNode(Juice)
   openspace.addSceneGraphNode(GanymedePosition)
   openspace.addSceneGraphNode(GPHIO)
@@ -80,8 +80,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GPHIO)
   openspace.removeSceneGraphNode(GanymedePosition)
   openspace.removeSceneGraphNode(Juice)
-
-  openspace.spice.unloadKernel(kernels.Kernels)
 end)
 
 asset.export(Juice)

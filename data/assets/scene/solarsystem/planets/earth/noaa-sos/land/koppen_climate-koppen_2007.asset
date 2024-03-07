@@ -14,7 +14,7 @@ climatologist Rudolf Geiger.This particular revision is from 2007]]
 local URL = "https://sos.noaa.gov/catalog/datasets/koppen-geiger-climate-classification-2007/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

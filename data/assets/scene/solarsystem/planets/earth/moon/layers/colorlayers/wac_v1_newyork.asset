@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "WAC_V1_NewYork",
   Name = "WAC V1 [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("wac_v1_newyork.wms"),
+  FilePath = asset.resource("wac_v1_newyork.wms"),
   Settings = { Gamma = 0.84 },
   Description = [[Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera (WAC)
     aboard the Lunar Reconnaissance Orbiter (LRO) has allowed the instrument team to

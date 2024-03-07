@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -460,8 +460,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     // AssetInfo
     // |- Exports (table<name, exported data>)
     // |- Asset
-    // |  |- localResource
-    // |  |- syncedResource
+    // |  |- resource
     // |  |- require
     // |  |- exists
     // |  |- export
@@ -498,31 +497,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     const int assetTableIndex = lua_gettop(*_luaState);
 
     // Register local resource function
-    // string localResource(string path)
-    ghoul::lua::push(*_luaState, asset);
-    lua_pushcclosure(
-        *_luaState,
-        [](lua_State* L) {
-            ZoneScoped;
-
-            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 1);
-            ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::localResourceLua");
-
-            auto [name] = ghoul::lua::values<std::optional<std::string>>(L);
-            std::filesystem::path path =
-                name.has_value() ?
-                thisAsset->path().parent_path() / *name :
-                thisAsset->path().parent_path();
-
-            ghoul::lua::push(L, path);
-            return 1;
-        },
-        1
-    );
-    lua_setfield(*_luaState, assetTableIndex, "localResource");
-
-    // Register synced resource function
-    // string syncedResource(table)
+    // string resource(string path or table)
     ghoul::lua::push(*_luaState, this, asset);
     lua_pushcclosure(
         *_luaState,
@@ -531,7 +506,95 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
-            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::syncedResourceLua");
+            ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::resource");
+
+            if (ghoul::lua::hasValue<ghoul::Dictionary>(L)) {
+                ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+                std::unique_ptr<ResourceSynchronization> s =
+                    ResourceSynchronization::createFromDictionary(d);
+
+                std::string uid = d.value<std::string>("Type") + "/" + s->generateUid();
+                SyncItem* syncItem = nullptr;
+                auto it = manager->_synchronizations.find(uid);
+                if (it == manager->_synchronizations.end()) {
+                    auto si = std::make_unique<SyncItem>();
+                    si->synchronization = std::move(s);
+                    si->assets.push_back(thisAsset);
+                    syncItem = si.get();
+                    manager->_synchronizations[uid] = std::move(si);
+                }
+                else {
+                    syncItem = it->second.get();
+                    syncItem->assets.push_back(thisAsset);
+                }
+
+                if (!syncItem->synchronization->isResolved()) {
+                    manager->_unfinishedSynchronizations.push_back(syncItem);
+                }
+
+                thisAsset->addSynchronization(syncItem->synchronization.get());
+                std::filesystem::path path = syncItem->synchronization->directory();
+                path += std::filesystem::path::preferred_separator;
+                ghoul::lua::push(L, path);
+            }
+            else if (ghoul::lua::hasValue<std::optional<std::string>>(L)) {
+                auto [name] = ghoul::lua::values<std::optional<std::string>>(L);
+                std::filesystem::path path =
+                    name.has_value() ?
+                    thisAsset->path().parent_path() / *name :
+                    thisAsset->path().parent_path();
+                ghoul::lua::push(L, path);
+            }
+            else {
+                ghoul::lua::luaError(L, "Invalid parameter");
+            }
+
+            return 1;
+        },
+        2
+    );
+    lua_setfield(*_luaState, assetTableIndex, "resource");
+
+    // @DEPRECATED(abock) This should be removed after 0.20.0
+    ghoul::lua::push(*_luaState, asset);
+    lua_pushcclosure(
+        *_luaState,
+        [](lua_State* L) {
+            LWARNING(
+                "'asset.localResource' has been deprecrated and should be replaced with "
+                "'asset.resource' instead. No change to the parameters are needed"
+            );
+
+            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 1);
+            ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::resource");
+
+            auto [name] = ghoul::lua::values<std::optional<std::string>>(L);
+            std::filesystem::path path =
+                name.has_value() ?
+                thisAsset->path().parent_path() / *name :
+                thisAsset->path().parent_path();
+            ghoul::lua::push(L, path);
+
+            return 1;
+        },
+        1
+    );
+    lua_setfield(*_luaState, assetTableIndex, "localResource");
+
+    // @DEPRECATED(abock) This should be removed after 0.20.0
+    ghoul::lua::push(*_luaState, this, asset);
+    lua_pushcclosure(
+        *_luaState,
+        [](lua_State* L) {
+            LWARNING(
+                "'asset.syncedResource' has been deprecrated and should be replaced with "
+                "'asset.resource' instead. No change to the parameters are needed"
+            );
+
+            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
+            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
+            ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::resource");
+
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
             std::unique_ptr<ResourceSynchronization> s =
                 ResourceSynchronization::createFromDictionary(d);
@@ -559,11 +622,13 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             std::filesystem::path path = syncItem->synchronization->directory();
             path += std::filesystem::path::preferred_separator;
             ghoul::lua::push(L, path);
+
             return 1;
         },
         2
     );
     lua_setfield(*_luaState, assetTableIndex, "syncedResource");
+
 
     // Register require function
     // Asset require(string path, bool? explicitEnable = true)
@@ -849,7 +914,10 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     }
 
     if (!std::filesystem::is_regular_file(path)) {
-        throw ghoul::RuntimeError(fmt::format("Could not find asset file {}", path));
+        throw ghoul::RuntimeError(fmt::format(
+            "Could not find asset file {} requested by {}",
+            path, retriever
+        ));
     }
     auto asset = std::make_unique<Asset>(*this, path, explicitEnable);
     Asset* res = asset.get();

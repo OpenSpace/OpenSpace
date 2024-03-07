@@ -1,0 +1,50 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local data = asset.resource({
+  Name = "Mars 2020 Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "perseverance_kernels",
+  Version = 2
+})
+
+
+local Kernels = {
+  data .. "m2020.tf",
+  data .. "m2020.tsc",
+  data .. "m2020_v04.tf",
+
+  data .. "m2020_cruise_recon_nospin_v1.bc",
+  data .. "m2020_cruise_recon_rawrt_v1.bc",
+  data .. "m2020_cruise_recon_raweng_v1.bc",
+  data .. "m2020_edl_v01.bc",
+
+  data .. "m2020_cruise_od138_v1.bsp",
+  data .. "m2020_edl_v01.bsp",
+  data .. "m2020_surf_rover_loc_0000_0089_v1.bsp"
+}
+
+local ID = {
+  Perseverance = -168,
+
+  Mars = coreKernels.ID.Mars,
+  MarsBarycenter = coreKernels.ID.MarsBarycenter
+}
+
+local Frame = {
+  Mars = coreKernels.Frame.Mars
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(Kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(Kernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
+

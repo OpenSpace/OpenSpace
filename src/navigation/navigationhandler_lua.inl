@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@ namespace {
 }
 
 /**
- * Return the current navigation state as a lua table. The optional argument is the scene
+ * Return the current navigation state as a Lua table. The optional argument is the scene
  * graph node to use as reference frame. By default, the reference frame will picked based
  * on whether the orbital navigator is currently following the anchor node rotation. If it
  * is, the anchor will be chosen as reference frame. If not, the reference frame will be

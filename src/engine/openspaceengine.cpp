@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,6 +62,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
+#include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
@@ -76,6 +77,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
@@ -112,8 +114,8 @@ namespace {
             case Mode::UserControl: return "UserControl";
             case Mode::CameraPath: return "CameraPath";
             case Mode::SessionRecordingPlayback: return "SessionRecording";
-            default: throw ghoul::MissingCaseException();
         }
+        throw ghoul::MissingCaseException();
     }
 
     constexpr openspace::properties::Property::PropertyInfo PrintEventsInfo = {
@@ -157,6 +159,19 @@ namespace {
         // @VISIBILITY(2.67)
         openspace::properties::Property::Visibility::User
     };
+
+    void viewportChanged() {
+        using namespace openspace;
+
+        // Needs to be updated since each render call potentially targets a different
+        // window and/or viewport
+        using FR = ghoul::fontrendering::FontRenderer;
+        FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
+
+        FR::defaultProjectionRenderer().setFramebufferSize(
+            global::renderEngine->renderingResolution()
+        );
+    }
 } // namespace
 
 namespace openspace {
@@ -306,6 +321,38 @@ void OpenSpaceEngine::initialize() {
     }
 #endif // GHOUL_LOGGING_ENABLE_TRACE
 
+    if (!global::configuration->scriptLog.empty() &&
+        global::configuration->scriptLogRotation > 0)
+    {
+        int rot = global::configuration->scriptLogRotation;
+        while (rot > 0) {
+            // Move all of the existing logs one position up
+
+            std::filesystem::path file = absPath(global::configuration->scriptLog);
+            std::string fname = file.stem().string();
+            std::string ext = file.extension().string();
+
+            std::filesystem::path newCandidate = file;
+            newCandidate.replace_filename(fmt::format("{}-{}{}", fname, rot, ext));
+
+            std::filesystem::path oldCandidate = file;
+            if (rot > 1) {
+                // We don't actually have a -0 version, it is just the base name
+                oldCandidate.replace_filename(
+                    fmt::format("{}-{}{}", fname, rot - 1, ext)
+                );
+            }
+
+            if (std::filesystem::exists(newCandidate)) {
+                std::filesystem::remove(newCandidate);
+            }
+            if (std::filesystem::exists(oldCandidate)) {
+                std::filesystem::rename(oldCandidate, newCandidate);
+            }
+
+            rot--;
+        }
+    }
 
 
     LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION_STRING_FULL));
@@ -321,7 +368,7 @@ void OpenSpaceEngine::initialize() {
             DocEng.addDocumentation(doc);
         }
     }
-    DocEng.addDocumentation(configuration::Configuration::Documentation);
+    DocEng.addDocumentation(Configuration::Documentation);
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
@@ -359,21 +406,7 @@ void OpenSpaceEngine::initialize() {
     }
 
     // Load the profile
-    std::ifstream inFile;
-    try {
-        inFile.open(profile, std::ifstream::in);
-    }
-    catch (const std::ifstream::failure& e) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Exception opening profile file for read: {} ({})", profile, e.what()
-        ));
-    }
-
-    std::string content(
-        (std::istreambuf_iterator<char>(inFile)),
-        std::istreambuf_iterator<char>()
-    );
-    *global::profile = Profile(content);
+    *global::profile = Profile(profile);
 
     // Set up asset loader
     _assetManager = std::make_unique<AssetManager>(
@@ -477,23 +510,19 @@ void OpenSpaceEngine::initializeGL() {
         LoadingScreen::ShowNodeNames(
             global::configuration->loadingScreen.isShowingNodeNames
         ),
-        LoadingScreen::ShowProgressbar(
-            global::configuration->loadingScreen.isShowingProgressbar
+        LoadingScreen::ShowLogMessages(
+            global::configuration->loadingScreen.isShowingLogMessages
         )
-        );
+    );
 
     _loadingScreen->render();
-
-
-
-
 
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
     try {
         global::luaConsole->initialize();
         global::luaConsole->setCommandInputButton(global::configuration->consoleKey);
     }
-    catch (ghoul::RuntimeError& e) {
+    catch (const ghoul::RuntimeError& e) {
         LERROR("Error initializing Console with error:");
         LERRORC(e.component, e.message);
     }
@@ -519,7 +548,7 @@ void OpenSpaceEngine::initializeGL() {
         bool synchronous = global::configuration->openGLDebugContext.isSynchronous;
         setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
 
-        for (const configuration::Configuration::OpenGLDebugContext::IdentifierFilter& f :
+        for (const Configuration::OpenGLDebugContext::IdentifierFilter& f :
             global::configuration->openGLDebugContext.identifierFilters)
         {
             setDebugMessageControl(
@@ -542,40 +571,41 @@ void OpenSpaceEngine::initializeGL() {
             );
         }
 
-        auto callback = [](Source source, Type type, Severity severity,
-                           unsigned int id, std::string message) -> void
-        {
-            const std::string s = ghoul::to_string(source);
-            const std::string t = ghoul::to_string(type);
+        ghoul::opengl::debug::setDebugCallback(
+            [](Source source, Type type, Severity severity, unsigned int id,
+               std::string message)
+            {
+                const std::string s = ghoul::to_string(source);
+                const std::string t = ghoul::to_string(type);
 
-            const std::string category = fmt::format("OpenGL ({}) [{}] {{{}}}", s, t, id);
-            switch (severity) {
-                case Severity::High:
-                    LERRORC(category, message);
-                    break;
-                case Severity::Medium:
-                    LWARNINGC(category, message);
-                    break;
-                case Severity::Low:
-                    LINFOC(category, message);
-                    break;
-                case Severity::Notification:
-                    LDEBUGC(category, message);
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
-
-            if (global::configuration->openGLDebugContext.printStacktrace) {
-                std::string stackString = "Stacktrace\n";
-                std::vector<std::string> stack = ghoul::stackTrace();
-                for (size_t i = 0; i < stack.size(); i++) {
-                    stackString += fmt::format("{}: {}\n", i, stack[i]);
+                const std::string cat = fmt::format("OpenGL ({}) [{}] {{{}}}", s, t, id);
+                switch (severity) {
+                    case Severity::High:
+                        LERRORC(cat, message);
+                        break;
+                    case Severity::Medium:
+                        LWARNINGC(cat, message);
+                        break;
+                    case Severity::Low:
+                        LINFOC(cat, message);
+                        break;
+                    case Severity::Notification:
+                        LDEBUGC(cat, message);
+                        break;
+                    default:
+                        throw ghoul::MissingCaseException();
                 }
-                LDEBUGC(category, stackString);
+
+                if (global::configuration->openGLDebugContext.printStacktrace) {
+                    std::string stackString = "Stacktrace\n";
+                    std::vector<std::string> stack = ghoul::stackTrace();
+                    for (size_t i = 0; i < stack.size(); i++) {
+                        stackString += fmt::format("{}: {}\n", i, stack[i]);
+                    }
+                    LDEBUGC(cat, stackString);
+                }
             }
-        };
-        ghoul::opengl::debug::setDebugCallback(callback);
+        );
     }
     LTRACE("OpenSpaceEngine::initializeGL::DebugContext(end)");
 
@@ -740,137 +770,9 @@ void OpenSpaceEngine::loadAssets() {
         _assetManager->add(a);
     }
 
-    _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
-    _loadingScreen->postMessage("Loading assets");
-
-    while (true) {
-        _loadingScreen->render();
-        _assetManager->update();
-
-        std::vector<const Asset*> allAssets = _assetManager->allAssets();
-
-        std::vector<const ResourceSynchronization*> allSyncs =
-            _assetManager->allSynchronizations();
-
-        for (const ResourceSynchronization* sync : allSyncs) {
-            ZoneScopedN("Update resource synchronization");
-
-            if (sync->isSyncing()) {
-                LoadingScreen::ProgressInfo progressInfo;
-
-                progressInfo.progress = [](const ResourceSynchronization* s) {
-                    if (!s->nTotalBytesIsKnown()) {
-                        return 0.f;
-                    }
-                    if (s->nTotalBytes() == 0) {
-                        return 1.f;
-                    }
-                    return
-                        static_cast<float>(s->nSynchronizedBytes()) /
-                        static_cast<float>(s->nTotalBytes());
-                }(sync);
-
-                _loadingScreen->updateItem(
-                    sync->identifier(),
-                    sync->name(),
-                    LoadingScreen::ItemStatus::Started,
-                    progressInfo
-                );
-            }
-
-            if (sync->isRejected()) {
-                _loadingScreen->updateItem(
-                    sync->identifier(), sync->name(), LoadingScreen::ItemStatus::Failed,
-                    LoadingScreen::ProgressInfo()
-                );
-            }
-        }
-
-        _loadingScreen->setItemNumber(static_cast<int>(allSyncs.size()));
-
-        if (_shouldAbortLoading) {
-            global::windowDelegate->terminate();
-            break;
-        }
-
-        bool finishedLoading = std::all_of(
-            allAssets.begin(),
-            allAssets.end(),
-            [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
-        );
-
-        if (finishedLoading) {
-            break;
-        }
-
-        auto it = allSyncs.begin();
-        while (it != allSyncs.end()) {
-            if ((*it)->isSyncing()) {
-                LoadingScreen::ProgressInfo progressInfo;
-
-                progressInfo.progress = [](const ResourceSynchronization* sync) {
-                    if (!sync->nTotalBytesIsKnown()) {
-                        return 0.f;
-                    }
-                    if (sync->nTotalBytes() == 0) {
-                        return 1.f;
-                    }
-                    return
-                        static_cast<float>(sync->nSynchronizedBytes()) /
-                        static_cast<float>(sync->nTotalBytes());
-                }(*it);
-
-                if ((*it)->nTotalBytesIsKnown()) {
-                    progressInfo.currentSize = (*it)->nSynchronizedBytes();
-                    progressInfo.totalSize = (*it)->nTotalBytes();
-                }
-
-                _loadingScreen->updateItem(
-                    (*it)->identifier(),
-                    (*it)->name(),
-                    LoadingScreen::ItemStatus::Started,
-                    progressInfo
-                );
-                ++it;
-            }
-            else if ((*it)->isRejected()) {
-                _loadingScreen->updateItem(
-                    (*it)->identifier(), (*it)->name(), LoadingScreen::ItemStatus::Failed,
-                    LoadingScreen::ProgressInfo()
-                );
-                ++it;
-            }
-            else {
-                LoadingScreen::ProgressInfo progressInfo;
-                progressInfo.progress = 1.f;
-
-                _loadingScreen->tickItem();
-                _loadingScreen->updateItem(
-                    (*it)->identifier(),
-                    (*it)->name(),
-                    LoadingScreen::ItemStatus::Finished,
-                    progressInfo
-                );
-                it = allSyncs.erase(it);
-            }
-        }
-    }
-    if (_shouldAbortLoading) {
-        _loadingScreen = nullptr;
-        return;
-    }
-
-    _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
-
-    _loadingScreen->postMessage("Initializing scene");
-    while (_scene->isInitializing()) {
-        _loadingScreen->render();
-    }
-
-    _loadingScreen->postMessage("Initializing OpenGL");
-    _loadingScreen->finalize();
-
+    _loadingScreen->exec(*_assetManager, *_scene);
     _loadingScreen = nullptr;
+
 
     global::renderEngine->updateScene();
 
@@ -1226,17 +1128,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(end)");
 }
 
-void OpenSpaceEngine::viewportChanged() {
-    // Needs to be updated since each render call potentially targets a different
-    // window and/or viewport
-    using FR = ghoul::fontrendering::FontRenderer;
-    FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
-
-    FR::defaultProjectionRenderer().setFramebufferSize(
-        global::renderEngine->renderingResolution()
-    );
-}
-
 void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
@@ -1310,12 +1201,7 @@ void OpenSpaceEngine::postDraw() {
         events::logAllEvents(e);
     }
     global::eventEngine->triggerActions();
-    while (e) {
-        // @TODO (abock, 2021-08-25) Need to send all events to a topic to be sent out to
-        // others
-
-        e = e->next;
-    }
+    global::eventEngine->triggerTopics();
 
 
     global::eventEngine->postFrameCleanup();
@@ -1352,7 +1238,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         // If the loading screen object exists, we are currently loading and want key
         // presses to behave differently
         if (key == Key::Escape) {
-            _shouldAbortLoading = true;
+            _loadingScreen->abort();
         }
 
         return;
@@ -1507,8 +1393,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
 void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
     ZoneScoped;
 
-    using F = std::function<bool (TouchInput)>;
-    for (const F& func : *global::callback::touchDetected) {
+    for (const std::function<bool(TouchInput)>& func : *global::callback::touchDetected) {
         bool isConsumed = func(input);
         if (isConsumed) {
             return;
@@ -1519,8 +1404,7 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
 void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
     ZoneScoped;
 
-    using F = std::function<bool(TouchInput)>;
-    for (const F& func : *global::callback::touchUpdated) {
+    for (const std::function<bool(TouchInput)>& func : *global::callback::touchUpdated) {
         bool isConsumed = func(input);
         if (isConsumed) {
             return;
@@ -1531,8 +1415,7 @@ void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
 void OpenSpaceEngine::touchExitCallback(TouchInput input) {
     ZoneScoped;
 
-    using F = std::function<void(TouchInput)>;
-    for (const F& func : *global::callback::touchExit) {
+    for (const std::function<void(TouchInput)>& func : *global::callback::touchExit) {
         func(input);
     }
 }
@@ -1555,11 +1438,8 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     lua_setglobal(s, "basename");
 
     std::string extension = file.extension().string();
-    std::transform(
-        extension.begin(), extension.end(),
-        extension.begin(),
-        [](char c) { return static_cast<char>(::tolower(c)); }
-    );
+    extension = ghoul::toLowerCase(extension);
+
     ghoul::lua::push(s, extension);
     lua_setglobal(s, "extension");
 
@@ -1693,7 +1573,10 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::IsMaster,
             codegen::lua::Version,
             codegen::lua::ReadCSVFile,
-            codegen::lua::ResetCamera
+            codegen::lua::ResetCamera,
+            codegen::lua::Configuration,
+            codegen::lua::LayerServer,
+            codegen::lua::LoadJson
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")

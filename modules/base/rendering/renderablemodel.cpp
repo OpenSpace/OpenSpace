@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -430,8 +430,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             case Parameters::AnimationMode::Once:
                 _animationMode = AnimationMode::Once;
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
     }
 
@@ -528,7 +526,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     if (p.blendingOption.has_value()) {
         const std::string blendingOpt = *p.blendingOption;
-        _blendingFuncOption.set(BlendingMapping[blendingOpt]);
+        _blendingFuncOption = BlendingMapping[blendingOpt];
     }
 
     _originalRenderBin = renderBin();
@@ -595,7 +593,7 @@ void RenderableModel::initializeGL() {
         }
 
         // Set animation settings
-        _geometry->setTimeScale(_animationTimeScale);
+        _geometry->setTimeScale(static_cast<float>(_animationTimeScale));
     }
 
     // Initialize shaders
@@ -1048,7 +1046,7 @@ void RenderableModel::update(const UpdateData& data) {
 
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
-        double relativeTime;
+        double relativeTime = 0.0;
         double now = data.time.j2000Seconds();
         double startTime = data.time.convertTime(_animationStart);
         double duration = _geometry->animationDuration();
@@ -1109,8 +1107,6 @@ void RenderableModel::update(const UpdateData& data) {
                     relativeTime = duration;
                 }
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
         _geometry->update(relativeTime);
     }

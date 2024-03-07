@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -292,8 +292,6 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
             case BlendMode::Additive:
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
     });
 
@@ -505,37 +503,37 @@ float RenderableLabel::computeFadeFactor(float distanceNodeToCamera) const {
 
 float RenderableLabel::unit(int unit) const {
     switch (static_cast<Unit>(unit)) {
-        case Meter: return 1.f;
-        case Kilometer: return 1e3f;
-        case Megameter: return  1e6f;
-        case Gigameter: return 1e9f;
+        case Meter:           return 1.f;
+        case Kilometer:        return 1e3f;
+        case Megameter:        return  1e6f;
+        case Gigameter:        return 1e9f;
         case AstronomicalUnit: return 149597870700.f;
-        case Terameter: return 1e12f;
-        case Petameter: return 1e15f;
-        case Parsec: return static_cast<float>(PARSEC);
-        case KiloParsec: return static_cast<float>(1e3 * PARSEC);
-        case MegaParsec: return static_cast<float>(1e6 * PARSEC);
-        case GigaParsec: return static_cast<float>(1e9 * PARSEC);
-        case GigaLightyear: return static_cast<float>(306391534.73091 * PARSEC);
-        default: throw std::logic_error("Missing case label");
+        case Terameter:        return 1e12f;
+        case Petameter:        return 1e15f;
+        case Parsec:           return static_cast<float>(PARSEC);
+        case KiloParsec:       return static_cast<float>(1e3 * PARSEC);
+        case MegaParsec:       return static_cast<float>(1e6 * PARSEC);
+        case GigaParsec:       return static_cast<float>(1e9 * PARSEC);
+        case GigaLightyear:    return static_cast<float>(306391534.73091 * PARSEC);
+        default:               throw ghoul::MissingCaseException();
     }
 }
 
 std::string_view RenderableLabel::toString(int unit) const {
     switch (static_cast<Unit>(unit)) {
-        case Meter: return MeterUnit;
-        case Kilometer: return KilometerUnit;
-        case Megameter: return  MegameterUnit;
-        case Gigameter: return GigameterUnit;
+        case Meter:            return MeterUnit;
+        case Kilometer:        return KilometerUnit;
+        case Megameter:        return MegameterUnit;
+        case Gigameter:        return GigameterUnit;
         case AstronomicalUnit: return AstronomicalUnitUnit;
-        case Terameter: return TerameterUnit;
-        case Petameter: return PetameterUnit;
-        case Parsec: return ParsecUnit;
-        case KiloParsec: return KiloparsecUnit;
-        case MegaParsec: return MegaparsecUnit;
-        case GigaParsec: return GigaparsecUnit;
-        case GigaLightyear: return GigalightyearUnit;
-        default: throw std::logic_error("Missing case label");
+        case Terameter:        return TerameterUnit;
+        case Petameter:        return PetameterUnit;
+        case Parsec:           return ParsecUnit;
+        case KiloParsec:       return KiloparsecUnit;
+        case MegaParsec:       return MegaparsecUnit;
+        case GigaParsec:       return GigaparsecUnit;
+        case GigaLightyear:    return GigalightyearUnit;
+        default:               throw ghoul::MissingCaseException();
     }
 }
 

@@ -1,0 +1,53 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local kernels = asset.resource({
+  Name = "Neptune Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "neptune_kernels",
+  Version = 2
+})
+
+
+local ID = {
+  Despina = "DESPINA",
+  Galatea = "GALATEA",
+  Hippocamp = 814,
+  Larissa = "LARISSA",
+  Naiad = "NAIAD",
+  Proteus = "PROTEUS",
+  Thalassa = "THALASSA"
+}
+
+local Frame = {
+  Despina = coreKernels.Frame.Despina,
+  Galatea = coreKernels.Frame.Galatea,
+  Larissa = coreKernels.Frame.Larissa,
+  Naiad = coreKernels.Frame.Naiad,
+  Proteus = coreKernels.Frame.Proteus,
+  Thalassa = coreKernels.Frame.Thalassa
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "nep095.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "nep095.bsp")
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
+
+
+
+asset.meta = {
+  Name = "Neptune Spice Kernels",
+  Version = "1.0",
+  Description = "Generic SPICE kernels for Neptune",
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
+  License = "NASA"
+}

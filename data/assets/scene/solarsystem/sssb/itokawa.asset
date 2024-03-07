@@ -3,14 +3,14 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local orbit = asset.syncedResource({
+local orbit = asset.resource({
   Name = "Itokawa Orbit",
   Type = "HttpSynchronization",
   Identifier = "itokawa_horizons",
   Version = 2
 })
 
-local model = asset.syncedResource({
+local model = asset.resource({
   Name = "Itokawa Model",
   Type = "HttpSynchronization",
   Identifier = "itokawa_model",

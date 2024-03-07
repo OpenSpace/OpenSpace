@@ -36,7 +36,7 @@ local Layer = {
       TileProvider = {
         Identifier = "ESRI_World_Imagery",
         Name = "ESRI World Imagery",
-        FilePath = asset.localResource("esri_world_imagery.wms"),
+        FilePath = asset.resource("esri_world_imagery.wms"),
         PadTiles = false
       }
     }

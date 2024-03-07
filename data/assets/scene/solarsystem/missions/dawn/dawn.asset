@@ -1,73 +1,25 @@
 asset.require("scene/solarsystem/missions/dawn/mission")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
-local kernels = asset.syncedResource({
-  Name = "Dawn Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "dawn_kernels",
-  Version = 3
-})
-
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Dawn Textures",
   Type = "HttpSynchronization",
   Identifier = "dawn_textures",
   Version = 1
 })
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Dawn Models",
   Type = "HttpSynchronization",
   Identifier = "dawn_model",
   Version = 2
 })
 
-
-local KernelFiles = {
-  kernels .. "dawn_ref_070926-150201_070829.bsp",
-
-  --ik
-  kernels .. "dawn_fc_v10.ti",
-
-  -- SPK
-  kernels .. "dawn_rec_070927_070930_081218_v1.bsp",
-  -- kernels .. "dawn_rec_110201_110328_110328_v1.bsp",
-  -- kernels .. "dawn_rec_110328_110419_110420_v1.bsp",
-  kernels .. "dawn_rec_110416_110802_110913_v1.bsp",
-  kernels .. "dawn_rec_110802_110831_110922_v1.bsp",
-  -- kernels .. "spk/dawn_rec_110831_110928_111221_v1.bsp",
-  -- kernels .. "dawn_rec_110928_111102_120615_v1.bsp",
-  -- kernels .. "dawn_rec_111102_111210_120618_v1.bsp",
-  -- kernels .. "dawn_rec_111211_120501_120620_v1.bsp",
-  kernels .. "dawn_rec_120724_120913_121213_v1.bsp",
-
-  -- FK
-  kernels .. "dawn_v12.tf",
-
-  --SCLK
-  kernels .. "dawn_203_sclkscet_00039.tsc",
-
-  -- CK
-  kernels .. "dawn_sc_070927_070930.bc",
-  kernels .. "dawn_sc_110801_110807.bc",
-  kernels .. "dawn_sc_110808_110814.bc",
-  kernels .. "dawn_sc_120910_120916.bc",
-
-  -- space craft CK files
-  -- kernels .. "dawn_sc_070927_070930.bc",
-  -- kernels .. "dawn_sc_110801_110807.bc",
-  -- kernels .. "dawn_sc_110808_110814.bc",
-  -- kernels .. "dawn_sc_120910_120916.bc",
-
-  -- Solar array rotation kernels
-  kernels .. "dawn_sa_070927_070930.bc",
-  -- kernels .. "dawn_sa_110801_110807.bc",
-  -- kernels .. "dawn_sa_110808_110814.bc",
-  -- kernels .. "dawn_sa_120910_120916.bc"
-}
 
 local LightSources = {
   sun.LightSource,
@@ -84,8 +36,8 @@ local DawnPosition = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DAWN",
-      Observer = "SSB"
+      Target = kernels.ID.Dawn,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     -- Rotation for model version 2
     Rotation = {
@@ -106,8 +58,8 @@ local Dawn = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "DAWN_SPACECRAFT",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Dawn,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -128,8 +80,8 @@ local DawnTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DAWN",
-      Observer = "SSB"
+      Target = kernels.ID.Dawn,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 1.0, 0.8, 0.4 },
     ShowFullTrail = false,
@@ -153,8 +105,8 @@ local DawnFramingCamera1 = {
   Parent = Dawn.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = "DAWN",
-    Frame = "DAWN_SPACECRAFT",
+    Body = kernels.ID.Dawn,
+    Frame = kernels.Frame.Dawn,
     Color = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "DAWN_FC1",
@@ -174,8 +126,8 @@ local DawnFramingCamera2 = {
   Parent = Dawn.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Body = "DAWN",
-    Frame = "DAWN_SPACECRAFT",
+    Body = kernels.ID.Dawn,
+    Frame = kernels.Frame.Dawn,
     Color = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "DAWN_FC2",
@@ -192,8 +144,6 @@ local DawnFramingCamera2 = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(KernelFiles)
-
   openspace.addSceneGraphNode(DawnPosition)
   openspace.addSceneGraphNode(Dawn)
   openspace.addSceneGraphNode(DawnTrail)
@@ -207,8 +157,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DawnTrail)
   openspace.removeSceneGraphNode(Dawn)
   openspace.removeSceneGraphNode(DawnPosition)
-
-  openspace.spice.unloadKernel(KernelFiles)
 end)
 
 asset.export(DawnPosition)

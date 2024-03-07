@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -191,30 +191,6 @@ void GuiSpaceTimeComponent::render() {
 
     CaptionText("Time Controls");
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
-
-    const std::vector<Scene::InterestingTime>& interestingTimes =
-        global::renderEngine->scene()->interestingTimes();
-    if (!interestingTimes.empty()) {
-        ImGui::Text("%s", "Interesting Times");
-
-        for (size_t i = 0; i < interestingTimes.size(); ++i) {
-            const Scene::InterestingTime& t = interestingTimes[i];
-            if (ImGui::Button(t.name.c_str())) {
-
-                // No sync or send because time settings are always synced and sent
-                // to the connected nodes and peers
-                global::scriptEngine->queueScript(
-                    "openspace.time.setTime(\"" + t.time + "\")",
-                    scripting::ScriptEngine::ShouldBeSynchronized::No,
-                    scripting::ScriptEngine::ShouldSendToRemote::No
-                );
-            }
-
-            if (i != interestingTimes.size() - 1) {
-                ImGui::SameLine();
-            }
-        }
-    }
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 

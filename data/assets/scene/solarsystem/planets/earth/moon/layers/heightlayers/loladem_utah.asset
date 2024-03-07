@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "LolaDem_Utah",
   Name = "Lola DEM [Utah]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("loladem_utah.wms"),
+  FilePath = asset.resource("loladem_utah.wms"),
   TilePixelSize = 360,
   Settings = { Multiplier = 0.5 },
   Description = [[This digital elevation model (DEM) is based on data from the Lunar

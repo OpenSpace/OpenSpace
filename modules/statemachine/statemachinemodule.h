@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,7 +56,7 @@ public:
 
     /**
      * Save the state machine to a file given by the name and optional directory.
-     * If no directory is given, the TEMP folder is used
+     * If no directory is given, the TEMP folder is used.
      */
     void saveToFile(const std::string& fileName,
         std::string directory = "${TEMPORARY}/") const;

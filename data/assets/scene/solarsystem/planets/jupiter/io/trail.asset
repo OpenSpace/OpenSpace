@@ -1,6 +1,6 @@
-asset.require("spice/base")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +11,8 @@ local IoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "IO",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels.ID.Io,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.4, 0.2 },
     Period = 42.0 / 24.0,
@@ -27,15 +27,11 @@ local IoTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup365)
-
   openspace.addSceneGraphNode(IoTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(IoTrail)
-
-  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(IoTrail)
@@ -45,8 +41,7 @@ asset.export(IoTrail)
 asset.meta = {
   Name = "Io Trail",
   Version = "1.1",
-  Description = [[Trail of Io as observed by the Jupiter. Data from NASA Spice (see
-    base spice asset)]],
+  Description = "Trail of Io as observed by the Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

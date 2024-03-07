@@ -1,5 +1,5 @@
-asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -8,15 +8,15 @@ local MercuryBarycenterTrail = {
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY BARYCENTER",
-      Observer = "SSB"
+      Target = coreKernels.ID.MercuryBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.6, 0.5, 0.5 },
     Period = 87.968,
-    Resolution = 1000,
-    Enabled = false
+    Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
   GUI = {
@@ -42,8 +42,7 @@ asset.export(MercuryBarycenterTrail)
 asset.meta = {
   Name = "Mercury Trail",
   Version = "1.1",
-  Description = [[Trail for Mercury's Barycenter. Data from NASA Spice (see base spice
-    asset)]],
+  Description = "Trail for Mercury's Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

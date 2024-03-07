@@ -16,7 +16,7 @@ DART Project will consist of 32 DART buoys]]
 local URL = "https://sos.noaa.gov/catalog/datasets/buoy-locations-dart-only/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

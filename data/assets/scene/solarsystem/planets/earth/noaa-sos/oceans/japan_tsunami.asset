@@ -14,7 +14,7 @@ waves]]
 local URL = "https://sos.noaa.gov/catalog/datasets/japan-tsunami-wave-heights-march-11-2011/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

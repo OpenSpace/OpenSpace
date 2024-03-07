@@ -3,7 +3,7 @@ local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
-local model = asset.syncedResource({
+local model = asset.resource({
   Name = "Apollo Lem Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_lem_model",
@@ -21,12 +21,18 @@ local Apollo17Lem = {
       Longitude = -329.22833,
       Latitude = 20.19092,
       UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = moonAsset.Moon.Identifier,
+      Longitude = -329.22833,
+      Latitude = 20.19092
     }
   },
   GUI = {
-    Hidden = true,
     Name = "Apollo 17 Lem Position",
-    Path = "/Solar System/Missions/Apollo/17"
+    Path = "/Solar System/Missions/Apollo/17",
+    Hidden = true
   }
 }
 
@@ -43,7 +49,7 @@ local Apollo17LemModel = {
     Type = "RenderableModel",
     GeometryFile = model .. "LM-2_ver2clean.obj",
     SpecularIntensity = 0.0,
-    RotationVector = { 110.255219, 171.229706, 126.666664 },
+    RotationVector = { -90.0, 283.86999, 0 },
     LightSources = {
       sun.LightSource,
       {

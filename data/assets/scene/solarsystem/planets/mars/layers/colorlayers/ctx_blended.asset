@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "CTX_blended",
   Name = "CTX Blended",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("ctx_blended.vrt"),
+  FilePath = asset.resource("ctx_blended.vrt"),
   BlendMode = "Color",
   Description = [[The Bruce Murray Laboratory for Planetary Visualization has completed a
     5.7 terapixel mosaic of the surface of Mars rendered at 5.0 m/px. Each pixel in the

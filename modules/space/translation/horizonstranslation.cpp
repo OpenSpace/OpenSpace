@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -91,7 +91,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
 
         std::vector<std::string> files;
         files.push_back(file);
-        _horizonsTextFiles.set(files);
+        _horizonsTextFiles = files;
     }
     else if (std::holds_alternative<std::vector<std::string>>(p.horizonsTextFile)) {
         std::vector<std::string> files =

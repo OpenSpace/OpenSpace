@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "LAMO_Sweden",
   Name = "LAMO [Sweden]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("lamo.wms")
+  FilePath = asset.resource("lamo.wms")
 }
 
 

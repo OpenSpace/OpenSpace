@@ -7,7 +7,7 @@ local Sphere = {
     Type = "RenderableVideoSphere",
     Size = 100.0,
     Segments = 80,
-    Video = asset.localResource("examplevideo.mp4"),
+    Video = asset.resource("examplevideo.mp4"),
     Orientation = "Both"
   },
   GUI = {

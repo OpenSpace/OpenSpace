@@ -1,4 +1,4 @@
-local image = asset.syncedResource({
+local image = asset.resource({
   Name = "HD 84406 Star Image",
   Type = "HttpSynchronization",
   Identifier = "hd84406_image",

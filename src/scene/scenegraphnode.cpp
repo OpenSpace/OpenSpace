@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -106,6 +106,26 @@ namespace {
         "node. This value is only used as an override to the bounding sphere calculated "
         "by the Renderable, if present. If this value is -1, the Renderable's computed "
         "interaction sphere is used",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EvalBoundingSphereInfo = {
+        "EvaluatedBoundingSphere",
+        "Evaluated Bounding Sphere",
+        "This read-only property contains the evaluated value for the bounding sphere. "
+        "This is the actual value that is used internally within the software. If the "
+        "BoundingSphere property is set to -1, it is the computed value, otherwise it "
+        "matches the one set in the property",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EvalInteractionSphereInfo = {
+        "EvaluatedInteractionSphere",
+        "Evaluated Interaction Sphere",
+        "This read-only property contains the evaluated value for the interaction "
+        "sphere. This is the actual value that is used internally within the software. "
+        "If the InteractionSphere property is set to -1, it is the computed value, "
+        "otherwise it matches the one set in the property",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -360,15 +380,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 *p.transform->translation
             );
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.translation == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create ephemeris for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
             LDEBUG(fmt::format(
                 "Successfully created ephemeris for '{}'", result->identifier()
             ));
@@ -379,15 +390,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 *p.transform->rotation
             );
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.rotation == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create rotation for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
             LDEBUG(fmt::format(
                 "Successfully created rotation for '{}'", result->identifier()
             ));
@@ -396,15 +398,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.transform->scale.has_value()) {
             result->_transform.scale = Scale::createFromDictionary(*p.transform->scale);
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.scale == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create scale for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
             LDEBUG(fmt::format(
                 "Successfully created scale for '{}'", result->identifier()
             ));
@@ -418,15 +411,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     if (p.timeFrame.has_value()) {
         result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
 
-        // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-        // transitioned to throwing exceptions when the construction fails
-        if (result->_timeFrame == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create time frame for SceneGraphNode '{}'",
-                result->identifier()
-            ));
-            return nullptr;
-        }
         LDEBUG(fmt::format(
             "Successfully created time frame for '{}'", result->identifier()
         ));
@@ -528,7 +512,9 @@ SceneGraphNode::SceneGraphNode()
         )
     }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
+    , _evaluatedBoundingSphere(EvalBoundingSphereInfo)
     , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
+    , _evaluatedInteractionSphere(EvalInteractionSphereInfo)
     , _approachFactor(ApproachFactorInfo, 5.0, 0.0, 1e4)
     , _reachFactor(ReachFactorInfo, 1.25, 0.0, 1e4)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
@@ -548,6 +534,7 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);
+
     _boundingSphere.onChange([this]() {
         if (_boundingSphere >= 0.0) {
             _overrideBoundingSphere = _boundingSphere;
@@ -555,11 +542,15 @@ SceneGraphNode::SceneGraphNode()
         else {
             _overrideBoundingSphere = std::nullopt;
         }
+        _evaluatedBoundingSphere = boundingSphere();
     });
     // @TODO (2021-06-30, emmbr) Uncomment this when exponential sliders support
     // negative values
     //_boundingSphere.setExponent(10.f);
     addProperty(_boundingSphere);
+    _evaluatedBoundingSphere.setReadOnly(true);
+    addProperty(_evaluatedBoundingSphere);
+
     _interactionSphere.onChange([this]() {
         if (_interactionSphere >= 0.0) {
             _overrideInteractionSphere = _interactionSphere;
@@ -567,11 +558,14 @@ SceneGraphNode::SceneGraphNode()
         else {
             _overrideInteractionSphere = std::nullopt;
         }
+        _evaluatedInteractionSphere = interactionSphere();
     });
     // @TODO (2021-06-30, emmbr) Uncomment this when exponential sliders support
     // negative values
     //_interactionSphere.setExponent(10.f);
     addProperty(_interactionSphere);
+    _evaluatedInteractionSphere.setReadOnly(true);
+    addProperty(_evaluatedInteractionSphere);
 
     _reachFactor.setExponent(3.f);
     addProperty(_reachFactor);
@@ -606,6 +600,10 @@ void SceneGraphNode::initialize() {
         _transform.scale->initialize();
     }
     _state = State::Initialized;
+
+    // Want this computed after the renderable and transforms have been initialized
+    _evaluatedBoundingSphere = boundingSphere();
+    _evaluatedInteractionSphere = interactionSphere();
 
     LDEBUG(fmt::format("Finished initializing: {}", identifier()));
 }

@@ -24,7 +24,7 @@ is leading to wide-spread coral bleaching]]
 local URL = "https://sos.noaa.gov/catalog/datasets/coral-reef-risk-outlook/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

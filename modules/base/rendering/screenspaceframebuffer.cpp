@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -82,7 +82,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
 
     glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
     addProperty(_size);
-    _size.set(glm::vec4(0.f, 0.f, resolution.x, resolution.y));
+    _size = glm::vec4(0.f, 0.f, resolution.x, resolution.y);
 }
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}

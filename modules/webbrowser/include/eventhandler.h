@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,7 +73,9 @@ private:
      * sent to CEF.
      *
      * \param key the pressed key
-     * \return true if event found, false otherwise
+     * \param mods the key modifier that was pressed
+     * \param action the action that was performed that triggered this event
+     * \return `true` if event found, `false` otherwise
      */
     bool specialKeyEvent(Key key, KeyModifier mods, KeyAction action);
 
@@ -114,7 +116,7 @@ private:
     MouseButtonState _leftButton;
     MouseButtonState _rightButton;
 
-    // This vector assumes first element to be the active one:
+    /// This vector assumes first element to be the active one
     std::vector<TouchInput> _validTouchStates;
 
     /**

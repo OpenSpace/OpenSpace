@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,41 +67,43 @@ public:
 
     struct InvalidSceneError : ghoul::RuntimeError {
         /**
-         * \param message The reason that caused this exception to be thrown
-         * \param component The optional compoment that caused this exception to be thrown
+         * \param msg The reason that caused this exception to be thrown
+         * \param comp The optional compoment that caused this exception to be thrown
+         *
          * \pre message may not be empty
          */
         explicit InvalidSceneError(std::string msg, std::string comp = "");
     };
 
-    /// This struct describes a time that has some intrinsic interesting-ness to this
-    /// scene.
+    /**
+     * This struct describes a time that has some intrinsic interesting-ness to this
+     * scene.
+     */
     struct InterestingTime {
         std::string name;
         std::string time;
     };
 
-    // constructors & destructor
     Scene(std::unique_ptr<SceneInitializer> initializer);
     virtual ~Scene() override;
 
     /**
-     * Attach node to the root
+     * Attach node to the root.
      */
     void attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node);
 
     /**
-     * Detach node from the root
+     * Detach node from the root.
      */
     ghoul::mm_unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
 
     /**
-     * Return the camera
+     * Return the camera.
      */
     Camera* camera() const;
 
     /**
-     * Updates all SceneGraphNodes relative positions
+     * Updates all SceneGraphNodes relative positions.
      */
     void update(const UpdateData& data);
 
@@ -121,8 +123,8 @@ public:
     const SceneGraphNode* root() const;
 
     /**
-     * Return the scenegraph node with the specified name or `nullptr` if that
-     * name does not exist.
+     * Return the scenegraph node with the specified name or `nullptr` if that name does
+     * not exist.
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
@@ -137,7 +139,7 @@ public:
     void unregisterNode(SceneGraphNode* node);
 
     /**
-     * Mark the node registry as dirty
+     * Mark the node registry as dirty.
      */
     void markNodeRegistryDirty();
 
@@ -162,7 +164,7 @@ public:
     void initializeNode(SceneGraphNode* node);
 
     /**
-     * Return true if the scene is initializing
+     * Return true if the scene is initializing.
      */
     bool isInitializing() const;
 
@@ -191,11 +193,11 @@ public:
 
     /**
      * Removes the passed \p prop from the list of Property%s that are update each time
-     * the #updateInterpolations method is called
+     * the #updateInterpolations method is called.
      *
      * \param prop The Property that should not longer be updated
      *
-     * \pre \prop must not be nullptr
+     * \pre \p prop must not be nullptr
      * \post No interpolation record exists for \p prop
      */
     void removePropertyInterpolation(properties::Property* prop);
@@ -203,45 +205,28 @@ public:
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
      * using the Property::interpolateValue method, passing a parameter `t` which is `0`
-     * if no time has passed between the #addInterpolation method and `1` if an amount of
-     * time equal to the requested interpolation time has passed. The parameter `t` is
-     * updated with a resolution of 1 microsecond, which means that if this function is
-     * called twice within 1 microsecond, the passed parameter `t` might be the same for
-     * both calls
+     * if no time has passed between the #addPropertyInterpolation method and `1` if an
+     * amount of time equal to the requested interpolation time has passed. The parameter
+     * `t` is updated with a resolution of 1 microsecond, which means that if this
+     * function is called twice within 1 microsecond, the passed parameter `t` might be
+     * the same for both calls.
      */
     void updateInterpolations();
 
     /**
-     * Adds the provided \p time as an interesting time to this scene. The same time can
-     * be added multiple times.
-     *
-     * \param time The time that should be added
-     *
-     * \pre \p time.time must not be empty
-     * \pre \p time.name must not be empty
-     */
-    void addInterestingTime(InterestingTime time);
-
-    /**
-     * Returns the list of all interesting times that are defined for this scene.
-     *
-     * \return The list of all interesting times that are defined for this scene
-     */
-    const std::vector<InterestingTime>& interestingTimes() const;
-
-    /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph.
+     *
      * \return The Lua library that contains all Lua functions available to change the
-     * scene graph
+     *         scene graph
      */
     static scripting::LuaLibrary luaLibrary();
 
     /**
      * Sets a property using the 'properties' contents of a profile. The function will
-     * loop through each setProperty command. A property may be set to a bool, float,
-     * or string value (which must be converted because a Profile stores all values
-     * as strings)
+     * loop through each setProperty command. A property may be set to a bool, float, or
+     * string value (which must be converted because a Profile stores all values as
+     * strings).
      *
      * \param p The Profile to be read.
      */
@@ -251,7 +236,7 @@ public:
      * Searches for any properties that match the regex propertyString, and returns
      * the results in a vector.
      *
-     * \param propertyString the regex string that is intended to match one or more
+     * \param propertyString The regex string that is intended to match one or more
      *        properties in the currently-available properties
      * \return Vector of Property objs containing property names that matched the regex
      */
@@ -268,22 +253,19 @@ public:
 private:
     /**
      * Accepts string version of a property value from a profile, converts it to the
-     * appropriate type, and then pushes the value onto the lua state.
+     * appropriate type, and then pushes the value onto the Lua state.
      *
-     * \param L the lua state to push value to
-     * \param value string representation of the value with which to set property
+     * \param L The Lua state to push value to
+     * \param value String representation of the value with which to set property
      */
     void propertyPushProfileValueToLua(ghoul::lua::LuaState& L, const std::string& value);
 
     /**
      * Accepts string version of a property value from a profile, and processes it
-     * according to the data type of the value
+     * according to the data type of the value.
      *
-     * \param L the lua state to (eventually) push to
-     * \param value string representation of the value with which to set property
-     * \param didPushToLua Bool reference that represents the lua push state at the end
-     *        of this function call. This will be set to true if the value (e.g. table)
-     *        has already been pushed to the lua stack
+     * \param L The Lua state to (eventually) push to
+     * \param value String representation of the value with which to set property
      * \return The ProfilePropertyLua variant type translated from string representation
      */
     ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
@@ -291,31 +273,31 @@ private:
 
     /**
      * Accepts string version of a property value from a profile, and returns the
-     * supported data types that can be pushed to a lua state. Currently, the full
-     * range of possible lua values is not supported.
+     * supported data types that can be pushed to a Lua state. Currently, the full range
+     * of possible Lua values is not supported.
      *
-     * \param value string representation of the value with which to set property
+     * \param value String representation of the value with which to set property
      */
     PropertyValueType propertyValueType(const std::string& value);
 
     /**
      * Accepts string version of a property value from a profile, and adds it to a vector
-     * which will later be used to push as a lua table containing values of type T
+     * which will later be used to push as a Lua table containing values of type T
      *
-     * \param L the lua state to (eventually) push to
-     * \param value string representation of the value with which to set property
-     * \param table the std::vector container which has elements of type T for a lua table
+     * \param L The Lua state to (eventually) push to
+     * \param value String representation of the value with which to set property
+     * \param table The std::vector container which has elements of type T for a Lua table
      */
     template <typename T>
     void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
         const std::string& value, std::vector<T>& table);
 
     /**
-     * Handles a lua table entry, creating a vector of the correct variable type based
-     * on the profile string, and pushes this vector to the lua stack.
+     * Handles a Lua table entry, creating a vector of the correct variable type based
+     * on the profile string, and pushes this vector to the Lua stack.
      *
-     * \param L the lua state to (eventually) push to
-     * \param value string representation of the value with which to set property
+     * \param L The Lua state to (eventually) push to
+     * \param value String representation of the value with which to set property
      */
     void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value);
 
@@ -331,10 +313,9 @@ private:
     std::vector<SceneGraphNode*> _circularNodes;
     std::unordered_map<std::string, SceneGraphNode*> _nodesByIdentifier;
     bool _dirtyNodeRegistry = false;
-    SceneGraphNode _rootDummy;
+    SceneGraphNode _rootNode;
     std::unique_ptr<SceneInitializer> _initializer;
     std::string _profilePropertyName;
-    std::vector<InterestingTime> _interestingTimes;
     bool _valueIsTable = false;
 
     std::mutex _programUpdateLock;

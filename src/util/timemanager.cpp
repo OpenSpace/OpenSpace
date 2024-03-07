@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -952,8 +952,6 @@ void TimeManager::setTimeFromProfile(const Profile& p) {
             case Profile::Time::Type::Absolute:
                 _currentTime.data() = Time(p.time->value);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
 
         setPause(p.time->startPaused);

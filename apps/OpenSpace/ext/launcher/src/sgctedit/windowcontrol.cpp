@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -723,10 +723,10 @@ sgct::config::Projections WindowControl::generateProjectionInformation() const {
             }
         case ProjectionIndices::Planar:
             {
-                double fovH = _planar.fovH->text().toFloat();
+                double fovH = _planar.fovH->value();
                 fovH = std::clamp(fovH, FovEpsilon, 180.0 - FovEpsilon);
                 
-                double fovV = _planar.fovV->text().toFloat();
+                double fovV = _planar.fovV->value();
                 fovV = std::clamp(fovV, FovEpsilon, 180.0 - FovEpsilon);
 
                 // The negative values for left & down are due to SGCT's convention

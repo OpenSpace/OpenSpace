@@ -2,7 +2,7 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local modelFolder = asset.syncedResource({
+local modelFolder = asset.resource({
   Name = "Pioneer 10/11 Models",
   Type = "HttpSynchronization",
   Identifier = "pioneer_10_11_model",

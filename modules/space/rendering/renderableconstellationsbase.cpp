@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
 #include <optional>
@@ -82,7 +82,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
     };
 #include "renderableconstellationsbase_codegen.cpp"
 } // namespace
@@ -193,9 +193,8 @@ void RenderableConstellationsBase::initialize() {
     }
 
     _labels->initialize();
-    _labels->loadLabels();
 
-    for (speck::Labelset::Entry& entry : _labels->labelSet().entries) {
+    for (dataloader::Labelset::Entry& entry : _labels->labelSet().entries) {
         if (!entry.identifier.empty()) {
             std::string fullName = constellationFullName(entry.identifier);
             if (!fullName.empty()) {

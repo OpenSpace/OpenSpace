@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels")
+local kernel = asset.require("./kernels116")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +10,8 @@ local Francisco = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "FRANCISCO",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Francisco,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -40,8 +41,8 @@ local FranciscoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "FRANCISCO",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Francisco,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 266.56,
@@ -64,8 +65,8 @@ local FranciscoLabel = {
   Identifier = "FranciscoLabel",
   Parent = Francisco.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Francisco",
     FontSize = 70.0,
     Size = 7.0,
@@ -91,8 +92,8 @@ local Caliban = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALIBAN",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Caliban,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -122,8 +123,8 @@ local CalibanTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALIBAN",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Caliban,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 579.50,
@@ -146,8 +147,8 @@ local CalibanLabel = {
   Identifier = "CalibanLabel",
   Parent = Caliban.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Caliban",
     FontSize = 70.0,
     Size = 7.0,
@@ -173,8 +174,8 @@ local Stephano = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "STEPHANO",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Stephano,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -204,8 +205,8 @@ local StephanoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "STEPHANO",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Stephano,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 676.50,
@@ -228,8 +229,8 @@ local StephanoLabel = {
   Identifier = "StephanoLabel",
   Parent = Stephano.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Stephano",
     FontSize = 70.0,
     Size = 7.0,
@@ -255,8 +256,8 @@ local Trinculo = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TRINCULO",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Trinculo,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -286,8 +287,8 @@ local TrinculoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TRINCULO",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Trinculo,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 758.10,
@@ -310,8 +311,8 @@ local TrinculoLabel = {
   Identifier = "TrinculoLabel",
   Parent = Trinculo.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Trinculo",
     FontSize = 70.0,
     Size = 7.0,
@@ -337,8 +338,8 @@ local Sycorax = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SYCORAX",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Sycorax,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -368,8 +369,8 @@ local SycoraxTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SYCORAX",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Sycorax,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1283.4,
@@ -392,8 +393,8 @@ local SycoraxLabel = {
   Identifier = "SycoraxLabel",
   Parent = Sycorax.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Sycorax",
     FontSize = 70.0,
     Size = 7.0,
@@ -419,8 +420,8 @@ local Prospero = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PROSPERO",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Prospero,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -450,8 +451,8 @@ local ProsperoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PROSPERO",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Prospero,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1992.8,
@@ -474,8 +475,8 @@ local ProsperoLabel = {
   Identifier = "ProsperoLabel",
   Parent = Prospero.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Prospero",
     FontSize = 70.0,
     Size = 7.0,
@@ -501,8 +502,8 @@ local Setebos = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SETEBOS",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Setebos,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -532,8 +533,8 @@ local SetebosTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SETEBOS",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Setebos,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 2202.3,
@@ -556,8 +557,8 @@ local SetebosLabel = {
   Identifier = "SetebosLabel",
   Parent = Setebos.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Setebos",
     FontSize = 70.0,
     Size = 7.0,
@@ -583,8 +584,8 @@ local Ferdinand = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "FERDINAND",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Ferdinand,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
@@ -614,8 +615,8 @@ local FerdinandTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "FERDINAND",
-      Observer = "URANUS BARYCENTER"
+      Target = kernel.ID.Ferdinand,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 2823.4,
@@ -638,8 +639,8 @@ local FerdinandLabel = {
   Identifier = "FerdinandLabel",
   Parent = Ferdinand.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Ferdinand",
     FontSize = 70.0,
     Size = 7.0,
@@ -661,9 +662,6 @@ local FerdinandLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.ura116)
-
-
   openspace.addSceneGraphNode(Francisco)
   openspace.addSceneGraphNode(FranciscoTrail)
   openspace.addSceneGraphNode(FranciscoLabel)
@@ -729,9 +727,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(FranciscoLabel)
   openspace.removeSceneGraphNode(FranciscoTrail)
   openspace.removeSceneGraphNode(Francisco)
-
-
-  openspace.spice.unloadKernel(kernel.ura116)
 end)
 
 asset.export(Francisco)

@@ -3,7 +3,7 @@ local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local modelFolder = asset.syncedResource({
+local modelFolder = asset.resource({
   Name = "Scale Gateway Arch",
   Type = "HttpSynchronization",
   Identifier = "scale_model_gateway_arch",

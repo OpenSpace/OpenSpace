@@ -9,7 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_LOLA_ClrRoughness_Global_16ppd = {
   Identifier = "LRO_LOLA_ClrRoughness_Global_16ppd",
   Name = [[LOLA Roughness 16ppd, Colorized]],
-  FilePath = asset.localResource("LOLA_Roughness_16ppd/Colorized.vrt"),
+  FilePath = asset.resource("LOLA_Roughness_16ppd/Colorized.vrt"),
   Description = [[]]
 }
 

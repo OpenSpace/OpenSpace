@@ -4,7 +4,21 @@ about: Create a report to help us improve
 title: ''
 labels: 'Type: Bug'
 assignees: ''
-
+body:
+ - type: dropdown
+   id: version
+   attributes:
+     label: Version
+     description: What version of OpenSpace are you running?
+     options:
+       - master branch
+       - 0.19.2 
+       - 0.19.1 
+       - 0.19.0 
+       - 0.18.2 
+       - 0.18.1 
+       - 0.18.0
+     default: 0
 ---
 
 **Describe the bug**

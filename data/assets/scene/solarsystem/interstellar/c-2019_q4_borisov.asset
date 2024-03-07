@@ -2,7 +2,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local trajectory = asset.syncedResource({
+local trajectory = asset.resource({
   Name = "C-2019 Q4 Borisov Trajectory",
   Type = "HttpSynchronization",
   Identifier = "borisov_horizons",

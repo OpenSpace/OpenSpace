@@ -2,7 +2,7 @@ local globe = asset.require("../../ceres")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Ceres Textures",
   Type = "HttpSynchronization",
   Identifier = "ceres_textures",

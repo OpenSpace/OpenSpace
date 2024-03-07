@@ -1,5 +1,6 @@
 asset.require("./base")
-local trailAction = asset.require("actions/trails/toggle_trails_planets_moons").ToggleTrails
+local allTrailsAction = asset.require("actions/trails/toggle_all_trails").ToggleTrails
+local allTrailsInstantAction = asset.require("actions/trails/toggle_all_trails").ToggleTrailsInstant
 
 
 
@@ -14,22 +15,23 @@ local TogglePlanetLabels = {
   ]],
   Documentation = "Turns on visibility for all solar system labels",
   GuiPath = "/Solar System",
-  IsLocal = false,
-  Key = "l"
+  IsLocal = false
 }
 
 asset.onInitialize(function()
   openspace.action.registerAction(TogglePlanetLabels)
-  openspace.bindKey(TogglePlanetLabels.Key, TogglePlanetLabels.Identifier)
+  openspace.bindKey("L", TogglePlanetLabels.Identifier)
 
-  openspace.bindKey("h", trailAction)
+  openspace.bindKey("T", allTrailsAction)
+  openspace.bindKey("SHIFT+T", allTrailsInstantAction)
 end)
 
 asset.onDeinitialize(function()
-  openspace.clearKey("h")
+  openspace.clearKey("SHIFT+T")
+  openspace.clearKey("T")
 
   openspace.action.removeAction(TogglePlanetLabels)
-  openspace.clearKey(TogglePlanetLabels.Key)
+  openspace.clearKey("L")
 end)
 
 asset.export("TogglePlanetLabels", TogglePlanetLabels.Identifier)

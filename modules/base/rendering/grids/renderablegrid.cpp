@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -122,7 +122,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
     };
 #include "renderablegrid_codegen.cpp"
 } // namespace
@@ -192,7 +192,6 @@ bool RenderableGrid::isReady() const {
 void RenderableGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 

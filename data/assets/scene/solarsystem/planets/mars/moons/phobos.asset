@@ -1,20 +1,15 @@
 local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
-local model = asset.syncedResource({
+local model = asset.resource({
   Name = "Phobos Model",
   Type = "HttpSynchronization",
   Identifier = "phobos_model",
-  Version = 1
-})
-
-local kernels = asset.syncedResource({
-  Name = "Mars Spice Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "mars_kernels",
   Version = 1
 })
 
@@ -24,15 +19,15 @@ local Phobos = {
   Parent = transforms.MarsBarycenter.Identifier,
   InteractionSphere = 15000,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_PHOBOS",
-      DestinationFrame = "GALACTIC"
-    },
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PHOBOS",
-      Observer = "MARS BARYCENTER"
+      Target = kernels.ID.Phobos,
+      Observer = coreKernels.ID.MarsBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Phobos,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -62,8 +57,8 @@ local PhobosTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PHOBOS",
-      Observer = "MARS BARYCENTER"
+      Target = kernels.ID.Phobos,
+      Observer = coreKernels.ID.MarsBarycenter
     },
     Color = { 1.0, 0.605, 0.420 },
     Period = 0.31891023,
@@ -81,8 +76,8 @@ local PhobosLabel = {
   Identifier = "PhobosLabel",
   Parent = Phobos.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Phobos",
     FontSize = 70.0,
     Size = 5.0,
@@ -104,8 +99,6 @@ local PhobosLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "mar097.bsp")
-
   openspace.addSceneGraphNode(Phobos)
   openspace.addSceneGraphNode(PhobosTrail)
   openspace.addSceneGraphNode(PhobosLabel)
@@ -115,8 +108,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PhobosLabel)
   openspace.removeSceneGraphNode(PhobosTrail)
   openspace.removeSceneGraphNode(Phobos)
-
-  openspace.spice.unloadKernel(kernels .. "mar097.bsp")
 end)
 
 asset.export(Phobos)

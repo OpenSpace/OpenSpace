@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -310,12 +310,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _sunIntensity(SunIntensityInfo, 5.f, 0.1f, 1000.f)
     , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabled(EclipseHardShadowsInfo, false)
+    , _sunAngularSize(SunAngularSize, 0.3f, 0.f, 180.f)
     , _atmosphereDimmingHeight(AtmosphereDimmingHeightInfo, 0.7f, 0.f, 1.f)
     , _atmosphereDimmingSunsetAngle(
         SunsetAngleInfo,
         glm::vec2(95.f, 100.f), glm::vec2(0.f), glm::vec2(180.f)
     )
-    , _sunAngularSize(SunAngularSize, 0.3f, 0.f, 180.f)
  {
     auto updateWithCalculation = [this]() {
         _deferredCasterNeedsUpdate = true;

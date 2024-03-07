@@ -1,4 +1,3 @@
-asset.require("spice/base")
 local transforms = asset.require("./transforms")
 
 
@@ -26,8 +25,8 @@ local SunLabel = {
   Identifier = "SunLabel",
   Parent = Sun.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Sun",
     FontSize = 70.0,
     Size = 14.17,

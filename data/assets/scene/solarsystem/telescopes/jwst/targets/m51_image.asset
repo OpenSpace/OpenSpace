@@ -1,4 +1,4 @@
-local image = asset.syncedResource({
+local image = asset.resource({
   Name = "M51 Galaxy Image",
   Type = "HttpSynchronization",
   Identifier = "m51_image",

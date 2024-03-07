@@ -3,7 +3,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Vesta Models",
   Type = "HttpSynchronization",
   Identifier = "vesta_model",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,7 +74,6 @@ public:
 
     BooleanType(UpdateScene);
 
-    static constexpr const char* RootNodeIdentifier = "Root";
     static constexpr std::string_view KeyIdentifier = "Identifier";
     static constexpr std::string_view KeyParentName = "Parent";
     static constexpr std::string_view KeyDependencies = "Dependencies";
@@ -197,7 +196,9 @@ private:
     glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
 
     properties::DoubleProperty _boundingSphere;
+    properties::DoubleProperty _evaluatedBoundingSphere;
     properties::DoubleProperty _interactionSphere;
+    properties::DoubleProperty _evaluatedInteractionSphere;
     properties::DoubleProperty _approachFactor;
     properties::DoubleProperty _reachFactor;
     properties::BoolProperty _computeScreenSpaceValues;

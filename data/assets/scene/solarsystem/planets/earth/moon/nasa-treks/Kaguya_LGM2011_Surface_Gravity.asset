@@ -9,14 +9,14 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd = {
   Identifier = "Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd",
   Name = [[Kaguya LGM2011 Surface Gravity, Colorized]],
-  FilePath = asset.localResource("Kaguya_LGM2011_Surface_Gravity/Colorized.vrt"),
+  FilePath = asset.resource("Kaguya_LGM2011_Surface_Gravity/Colorized.vrt"),
   Description = [[]]
 }
 
 local treks_Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd = {
   Identifier = "Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd",
   Name = [[Kaguya LGM2011 Surface Gravity, Greyscale]],
-  FilePath = asset.localResource("Kaguya_LGM2011_Surface_Gravity/Greyscale.vrt"),
+  FilePath = asset.resource("Kaguya_LGM2011_Surface_Gravity/Greyscale.vrt"),
   Description = [[]]
 }
 

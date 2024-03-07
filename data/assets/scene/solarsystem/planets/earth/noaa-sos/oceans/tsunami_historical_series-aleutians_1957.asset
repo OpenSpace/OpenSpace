@@ -24,7 +24,7 @@ These efforts, established in 1948, would later become the Pacific Tsunami Warni
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-aleutian-islands-1957/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

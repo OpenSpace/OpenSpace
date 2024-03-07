@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/configuration.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/openspace.h>
@@ -70,10 +71,6 @@
 #include <modules/spout/spoutwrapper.h>
 #endif // OPENSPACE_HAS_SPOUT
 
-#ifdef OPENSPACE_HAS_NVTOOLS
-#include "nvToolsExt.h"
-#endif // OPENSPACE_HAS_NVTOOLS
-
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 #include <float.h>
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
@@ -95,7 +92,6 @@ constexpr std::string_view OpenVRTag = "OpenVR";
 const Window* currentWindow = nullptr;
 const BaseViewport* currentViewport = nullptr;
 Frustum::Mode currentFrustumMode;
-glm::mat4 currentModelViewProjectionMatrix;
 glm::mat4 currentModelMatrix;
 glm::ivec2 currentDrawResolution;
 
@@ -129,7 +125,6 @@ std::vector<SpoutWindow> SpoutWindows;
 
 #endif // OPENSPACE_HAS_SPOUT
 
-}
 
 //
 //  MiniDump generation
@@ -288,7 +283,7 @@ void mainInitFunc(GLFWwindow*) {
     // to them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", screenshotPath);
-    Settings::instance().setCapturePath(screenshotPath.string());
+    sgct::Settings::instance().setCapturePath(screenshotPath.string());
 
     LDEBUG("Initializing OpenSpace Engine started");
     global::openSpaceEngine->initialize();
@@ -416,9 +411,6 @@ void mainPreSyncFunc() {
 void mainPostSyncPreDrawFunc() {
     ZoneScoped;
 
-#ifdef OPENSPACE_HAS_NVTOOLS
-    nvtxRangePush("postSyncPreDraw");
-#endif // OPENSPACE_HAS_NVTOOLS
     LTRACE("main::postSynchronizationPreDraw(begin)");
 
     global::openSpaceEngine->postSynchronizationPreDraw();
@@ -431,10 +423,6 @@ void mainPostSyncPreDrawFunc() {
 #endif // OPENVR_SUPPORT
 
     LTRACE("main::postSynchronizationPreDraw(end)");
-
-#ifdef OPENSPACE_HAS_NVTOOLS
-    nvtxRangePop();
-#endif // OPENSPACE_HAS_NVTOOLS
 }
 
 
@@ -442,9 +430,6 @@ void mainPostSyncPreDrawFunc() {
 void mainRenderFunc(const sgct::RenderData& data) {
     ZoneScoped;
 
-#ifdef OPENSPACE_HAS_NVTOOLS
-    nvtxRangePush("render");
-#endif // OPENSPACE_HAS_NVTOOLS
     LTRACE("main::mainRenderFunc(begin)");
 
     currentWindow = &data.window;
@@ -490,7 +475,6 @@ void mainRenderFunc(const sgct::RenderData& data) {
             sizeof(mat4)
         );
         currentModelMatrix = modelMatrix;
-        currentModelViewProjectionMatrix = modelMatrix * viewMatrix * projectionMatrix;
         global::openSpaceEngine->render(modelMatrix, viewMatrix, projectionMatrix);
 
 #ifdef OPENSPACE_HAS_SPOUT
@@ -521,9 +505,6 @@ void mainRenderFunc(const sgct::RenderData& data) {
     }
 
     LTRACE("main::mainRenderFunc(end)");
-#ifdef OPENSPACE_HAS_NVTOOLS
-    nvtxRangePop();
-#endif // OPENSPACE_HAS_NVTOOLS
 }
 
 
@@ -640,6 +621,8 @@ void mainCharCallback(unsigned int codepoint, int modifiers, sgct::Window* windo
 
 
 void mainDropCallback(int amount, const char** paths) {
+    ZoneScoped;
+
     ghoul_assert(amount > 0, "Expected at least one file path");
     ghoul_assert(paths, "expected non-nullptr");
 
@@ -650,25 +633,25 @@ void mainDropCallback(int amount, const char** paths) {
 
 
 
-std::vector<std::byte> mainEncodeFun() {
+std::vector<std::byte> mainEncode() {
     ZoneScoped;
-    LTRACE("main::mainEncodeFun(begin)");
+    LTRACE("main::mainEncode(begin)");
 
     std::vector<std::byte> data = global::openSpaceEngine->encode();
 
-    LTRACE("main::mainEncodeFun(end)");
+    LTRACE("main::mainEncode(end)");
     return data;
 }
 
 
 
-void mainDecodeFun(const std::vector<std::byte>& data) {
+void mainDecode(const std::vector<std::byte>& data) {
     ZoneScoped;
-    LTRACE("main::mainDecodeFun(begin)");
+    LTRACE("main::mainDecode(begin)");
 
     global::openSpaceEngine->decode(data);
 
-    LTRACE("main::mainDecodeFun(end)");
+    LTRACE("main::mainDecode(end)");
 }
 
 
@@ -689,9 +672,8 @@ void mainLogCallback(Log::Level level, std::string_view message) {
         case Log::Level::Error:
             LERRORC("SGCT", message);
             break;
+    }
 }
-
-} // namespace
 
 
 void setSgctDelegateFunctions() {
@@ -899,7 +881,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.takeScreenshot = [](bool applyWarping, std::vector<int> windowIds) {
         ZoneScoped;
 
-        Settings::instance().setCaptureFromBackBuffer(applyWarping);
+        sgct::Settings::instance().setCaptureFromBackBuffer(applyWarping);
         Engine::instance().takeScreenshot(std::move(windowIds));
         return Engine::instance().screenShotNumber();
     };
@@ -976,7 +958,7 @@ void setSgctDelegateFunctions() {
         return currentWindow->swapGroupFrameNumber();
     };
     sgctDelegate.setScreenshotFolder = [](std::string path) {
-        Settings::instance().setCapturePath(std::move(path));
+        sgct::Settings::instance().setCapturePath(std::move(path));
     };
     sgctDelegate.showStatistics = [](bool enabled) {
         Engine::instance().setStatsGraphVisibility(enabled);
@@ -1047,16 +1029,14 @@ void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& ha
 }
 
 std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
-                                        bool haveCliSGCTConfig,
-                                        const std::string& sgctFunctionName)
+                                        bool haveCliSGCTConfig)
 {
-    configuration::Configuration& config = *global::configuration;
+    openspace::Configuration& config = *global::configuration;
 
     std::string preset;
     bool sgctConfigFileSpecifiedByLuaFunction = !config.sgctConfigNameInitialized.empty();
     if (haveCliSGCTConfig) {
-        preset = sgctFunctionName.empty() ? config.windowConfiguration : sgctFunctionName;
-        preset += " (from CLI)";
+        preset = fmt::format("{} (from CLI)", config.windowConfiguration);
     }
     else if (sgctConfigFileSpecifiedByLuaFunction) {
         preset = config.sgctConfigNameInitialized + labelFromCfgFile;
@@ -1114,6 +1094,9 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
     return config;
 }
 
+} // namespace
+
+
 int main(int argc, char* argv[]) {
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
     _clearfp();
@@ -1162,23 +1145,35 @@ int main(int argc, char* argv[]) {
 
     CommandlineArguments commandlineArguments;
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.configurationName, "--file", "-f",
+        commandlineArguments.configuration, "--file", "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
         "current working directory"
     ));
-
-    parser.addCommand(std::make_unique<ghoul::cmdparser::MultipleCommand<std::string>>(
-        commandlineArguments.configurationOverride, "--config", "-c",
-        "Provides the ability to pass arbitrary Lua code to the application that will be "
-        "evaluated after the configuration file has been loaded but before the other "
-        "commandline arguments are triggered. This can be used to manipulate the "
-        "configuration file without editing the file on disk, for example in a "
-        "planetarium environment. Please not that the Lua script must not contain any - "
-        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
-        "evaluated before it is passed to OpenSpace. Windows does not approve of using \""
-        "either, so it is recommended to deliniate strings with [[ ]] instead. For "
-        "example:  OpenSpace --config Profile=[[jwst]]"
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.windowConfig, "--config", "-c",
+        "Specifies the window configuration file that should be used to start OpenSpace "
+        "and that will override whatever is specified in the `openspace.cfg` or the "
+        "settings. This value can include path tokens, so for example "
+        "`${CONFIG}/single.json` is a valid value."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.profile, "--profile", "-p",
+        "Specifies the profile that should be used to start OpenSpace and that overrides "
+        "the profile specified in the `openspace.cfg` and the settings."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.propertyVisibility, "--propertyVisibility", "",
+        "Specifies UI visibility settings for properties that this OpenSpace is using. "
+        "This value overrides the values specified in the `openspace.cfg` and the "
+        "settings and also the environment variable, if that value is provided. Allowed "
+        "values for this parameter are: `Developer`, `AdvancedUser`, `User`, and "
+        "`NoviceUser`."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommandZeroArguments>(
+        commandlineArguments.bypassLauncher, "--bypassLauncher", "-b",
+        "Specifies whether the Launcher should be shown at startup or not. This value "
+        "overrides the value specified in the `openspace.cfg` and the settings."
     ));
 
     // setCommandLine returns a reference to the vector that will be filled later
@@ -1210,12 +1205,12 @@ int main(int argc, char* argv[]) {
     try {
         // Find configuration
         std::filesystem::path configurationFilePath;
-        if (!commandlineArguments.configurationName.empty()) {
-            configurationFilePath = absPath(commandlineArguments.configurationName);
+        if (commandlineArguments.configuration.has_value()) {
+            configurationFilePath = absPath(*commandlineArguments.configuration);
         }
         else {
             LDEBUG("Finding configuration");
-            configurationFilePath = configuration::findConfiguration();
+            configurationFilePath = findConfiguration();
         }
 
         if (!std::filesystem::is_regular_file(configurationFilePath)) {
@@ -1249,15 +1244,47 @@ int main(int argc, char* argv[]) {
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
-        std::string override;
-        for (const std::string& arg : commandlineArguments.configurationOverride) {
-            override += arg + ";";
-        }
-        *global::configuration = configuration::loadConfigurationFromFile(
+        *global::configuration = loadConfigurationFromFile(
             configurationFilePath.string(),
-            size,
-            override
+            findSettings(),
+            size
         );
+
+        // Override configuration with commandline arguments
+        if (commandlineArguments.windowConfig.has_value()) {
+            global::configuration->windowConfiguration =
+                *commandlineArguments.windowConfig;
+        }
+        if (commandlineArguments.profile.has_value()) {
+            global::configuration->profile = *commandlineArguments.profile;
+        }
+        if (commandlineArguments.propertyVisibility.has_value()) {
+            if (commandlineArguments.propertyVisibility == "NoviceUser") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::NoviceUser;
+            }
+            else if (commandlineArguments.propertyVisibility == "User") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::User;
+            }
+            else if (commandlineArguments.propertyVisibility == "AdvancedUser") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::AdvancedUser;
+            }
+            else if (commandlineArguments.propertyVisibility == "Developer") {
+                global::configuration->propertyVisibility =
+                    properties::Property::Visibility::Developer;
+            }
+            else {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Unknown property visibility value '{}'",
+                    *commandlineArguments.propertyVisibility
+                ));
+            }
+        }
+        if (commandlineArguments.bypassLauncher.has_value()) {
+            global::configuration->bypassLauncher = *commandlineArguments.bypassLauncher;
+        }
 
         // Determining SGCT configuration file
         LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);
@@ -1282,17 +1309,11 @@ int main(int argc, char* argv[]) {
 
     global::openSpaceEngine->registerPathTokens();
 
-    bool hasSGCTConfig = false;
-    bool hasProfile = false;
-    std::string sgctFunctionName;
-    checkCommandLineForSettings(argc, argv, hasSGCTConfig, hasProfile, sgctFunctionName);
-
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
     std::string windowCfgPreset = setWindowConfigPresetForGui(
         labelFromCfgFile,
-        hasSGCTConfig,
-        sgctFunctionName
+        commandlineArguments.windowConfig.has_value()
     );
 
     //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
@@ -1308,9 +1329,7 @@ int main(int argc, char* argv[]) {
     QApplication app(qac, nullptr);
 #endif // __APPLE__
 
-    bool skipLauncher =
-        (hasProfile && hasSGCTConfig) || global::configuration->bypassLauncher;
-    if (!skipLauncher) {
+    if (!global::configuration->bypassLauncher) {
 #ifndef __APPLE__
         int qac = 0;
         QApplication app(qac, nullptr);
@@ -1330,9 +1349,9 @@ int main(int argc, char* argv[]) {
         }
 
         LauncherWindow win(
-            !hasProfile,
+            !commandlineArguments.profile.has_value(),
             *global::configuration,
-            !hasSGCTConfig,
+            !commandlineArguments.windowConfig.has_value(),
             windowCfgPreset,
             nullptr
         );
@@ -1344,10 +1363,48 @@ int main(int argc, char* argv[]) {
         }
         glfwInit();
 
+        // We are just reloading the configuration file here in case the user has changed
+        // anything in the settings panel. In that case want to apply these settings
+        // immediately rather than waiting for the next startup.
+        // What follows is some copy-paste code that should be cleaned up at some point
+
+        LDEBUG("Reloading configuration from disk");
+        // Find configuration
+        std::filesystem::path configurationFilePath;
+        if (commandlineArguments.configuration.has_value()) {
+            configurationFilePath = absPath(*commandlineArguments.configuration);
+        }
+        else {
+            LDEBUG("Finding configuration");
+            configurationFilePath = findConfiguration();
+        }
+
+        // The previous incarnation of this was initializing GLFW to get the primary
+        // monitor's resolution, but that had some massive performance implications as
+        // there was some issue with the swap buffer handling inside of GLFW. My
+        // assumption is that GLFW doesn't like being initialized, destroyed, and then
+        // initialized again. Therefore we are using the platform specific functions now
+        glm::ivec2 size = glm::ivec2(1920, 1080);
+#ifdef WIN32
+        DEVMODEW dm = { 0 };
+        dm.dmSize = sizeof(DEVMODEW);
+        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+        if (success) {
+            size.x = dm.dmPelsWidth;
+            size.y = dm.dmPelsHeight;
+        }
+#endif // WIN32
+
+        *global::configuration = loadConfigurationFromFile(
+            configurationFilePath.string(),
+            findSettings(),
+            size
+        );
+
         global::configuration->profile = win.selectedProfile();
         windowConfiguration = selectedSgctProfileFromLauncher(
             win,
-            hasSGCTConfig,
+            commandlineArguments.windowConfig.has_value(),
             windowConfiguration,
             labelFromCfgFile
         );
@@ -1380,24 +1437,28 @@ int main(int argc, char* argv[]) {
 
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
-    Configuration config = parseArguments(arg);
+    LDEBUG("Parsing commandline arguments");
+    sgct::Configuration config = parseArguments(arg);
+    LDEBUG("Loading cluster information");
     config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
 
-    Engine::Callbacks callbacks;
-    callbacks.initOpenGL = mainInitFunc;
-    callbacks.preSync = mainPreSyncFunc;
-    callbacks.postSyncPreDraw = mainPostSyncPreDrawFunc;
-    callbacks.draw = mainRenderFunc;
-    callbacks.draw2D = mainDraw2DFunc;
-    callbacks.postDraw = mainPostDrawFunc;
-    callbacks.keyboard = mainKeyboardCallback;
-    callbacks.mouseButton = mainMouseButtonCallback;
-    callbacks.mousePos = mainMousePosCallback;
-    callbacks.mouseScroll = mainMouseScrollCallback;
-    callbacks.character = mainCharCallback;
-    callbacks.drop = mainDropCallback;
-    callbacks.encode = mainEncodeFun;
-    callbacks.decode = mainDecodeFun;
+    LDEBUG("Setting callbacks");
+    Engine::Callbacks callbacks = {
+        .initOpenGL = mainInitFunc,
+        .preSync = mainPreSyncFunc,
+        .postSyncPreDraw = mainPostSyncPreDrawFunc,
+        .draw = mainRenderFunc,
+        .draw2D = mainDraw2DFunc,
+        .postDraw = mainPostDrawFunc,
+        .encode = mainEncode,
+        .decode = mainDecode,
+        .keyboard = mainKeyboardCallback,
+        .character = mainCharCallback,
+        .mouseButton = mainMouseButtonCallback,
+        .mousePos = mainMousePosCallback,
+        .mouseScroll = mainMouseScrollCallback,
+        .drop = mainDropCallback
+    };
     Log::instance().setNotifyLevel(Log::Level::Debug);
 
     try {
@@ -1445,6 +1506,27 @@ int main(int argc, char* argv[]) {
     // Do not print message if clients are waiting for the master
     // Only timeout after 15 minutes
     Engine::instance().setSyncParameters(false, 15.f * 60.f);
+
+    {
+        openspace::Settings settings = loadSettings();
+        settings.hasStartedBefore = true;
+
+        if (settings.rememberLastProfile) {
+            std::filesystem::path p = global::configuration->profile;
+            std::filesystem::path reducedName = p.filename().replace_extension();
+            settings.profile = reducedName.string();
+        }
+
+        if (settings.rememberLastConfiguration &&
+            !global::configuration->sgctConfigNameInitialized.empty())
+        {
+            // We only want to store the window configuration if it was not a dynamically
+            // created one
+            settings.configuration = global::configuration->windowConfiguration;
+        }
+
+        saveSettings(settings, findSettings());
+    }
 
     LINFO("Starting rendering loop");
     Engine::instance().exec();

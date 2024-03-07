@@ -38,3 +38,6 @@
 [submodule "documentation"]
 	path = documentation
 	url = https://github.com/OpenSpace/OpenSpace-Documentation-Dist.git
+[submodule "support/doxygen/css"]
+	path = support/doxygen/css
+	url = https://github.com/jothepro/doxygen-awesome-css.git

@@ -2,13 +2,13 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local omm = asset.syncedResource({
+local omm = asset.resource({
   Name = "Satellite OMM Data (Fengyun Debris)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_1999-025",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=1999-025&FORMAT=kvn",
   Filename = "1999-025.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
 
 

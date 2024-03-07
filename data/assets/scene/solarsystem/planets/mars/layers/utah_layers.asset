@@ -1,0 +1,28 @@
+asset.require("./base_layers")
+asset.require("./colorlayers/moc_wa_color_utah", asset.enabled)
+asset.require("./colorlayers/viking_mdim_utah", false)
+asset.require("./colorlayers/mola_pseudo_color_utah", false)
+asset.require("./colorlayers/mola_hrsc_utah", false)
+asset.require("./colorlayers/themis_ir_day_utah", false)
+asset.require("./colorlayers/themis_ir_night_utah", false)
+asset.require("./colorlayers/ctx_mosaic_utah", false)
+
+asset.require("./heightlayers/mola_utah", false)
+
+
+
+asset.meta = {
+  Name = "Default Mars Layers (Utah)",
+  Version = "1.0",
+  Description = [[Default Mars layers are: Mars texture, CTX Blended, HiRISE,
+    HiRISE Local Set, MOC WA Color, Viking MDIM, MOLA Pseudo Color, MOLA HRSC,
+    Themis IR Day, Themis IR Night, CTX Mosaic, MDEM200M (3D), HiRISE Local Set DEM (3D),
+    Mola Elevation (3D), Tile Indicies, and Size Reference.
+
+
+    Layers only loaded from the Utah server
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

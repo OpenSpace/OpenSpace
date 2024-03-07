@@ -13,7 +13,7 @@ yields, while bright pink areas indicate higher yields]]
 local URL = "https://sos.noaa.gov/catalog/datasets/agriculture-cropland-yield-potential/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
 	Name = Name,
 	Type = "HttpSynchronization",
 	Identifier = Identifier,

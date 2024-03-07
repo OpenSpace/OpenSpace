@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,16 +37,16 @@ Q_OBJECT
 public:
     /**
      * Constructor for OrientationDialog object which contains the input text boxes for
-     * orientation x,y,z values
+     * orientation x,y,z values,
      *
-     * \param orientation x,y,z angles in degrees contained in sgct::quat object
-     * \param parent pointer to Qt QWidget parent object
+     * \param orientation The x,y,z angles in degrees contained in sgct::quat object
+     * \param parent Pointer to Qt QWidget parent object
      */
     OrientationDialog(sgct::quat& orientation, QWidget* parent);
 
 private:
     void ok();
-    
+
     QLineEdit* _linePitch = nullptr;
     QLineEdit* _lineRoll = nullptr;
     QLineEdit* _lineYaw = nullptr;

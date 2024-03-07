@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,9 +110,6 @@ private:
 
     void goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
         globebrowsing::Geodetic3 geo3, bool doResetCameraDirection);
-
-    glm::dquat lookDownCameraRotation(const globebrowsing::RenderableGlobe& globe,
-        glm::dvec3 cameraPositionModelSpace, globebrowsing::Geodetic2 geo2);
 
     properties::UIntProperty _tileCacheSizeMB;
 

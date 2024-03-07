@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -245,7 +245,10 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glm::dmat3 modelRotation = glm::dmat3(data.modelTransform.rotation);
 
     _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
-    _shader->setUniform(_uniformCache.modelViewProjection, glm::mat4(modelViewProjectionTransform));
+    _shader->setUniform(
+        _uniformCache.modelViewProjection,
+        glm::mat4(modelViewProjectionTransform)
+    );
 
     glm::mat3 modelViewRotation = glm::mat3(
         glm::dmat3(data.camera.viewRotationMatrix()) * modelRotation

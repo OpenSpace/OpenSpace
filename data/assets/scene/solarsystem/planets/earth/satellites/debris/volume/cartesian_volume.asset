@@ -18,8 +18,8 @@ local DebrisVolumeCartesian = {
   },
   Renderable = {
     Type = "RenderableTimeVaryingVolume",
-    SourceDirectory = asset.localResource("generatedCartesian"),
-    TransferFunction = asset.localResource("transferfunction.txt"),
+    SourceDirectory = asset.resource("generatedCartesian"),
+    TransferFunction = asset.resource("transferfunction.txt"),
     StepSize = 0.01,
     MinValue = 0,
     MaxValue = 1,

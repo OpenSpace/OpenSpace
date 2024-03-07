@@ -28,7 +28,7 @@ and caused minor damage in San Diego, California and in Japan]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-chile-2010/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

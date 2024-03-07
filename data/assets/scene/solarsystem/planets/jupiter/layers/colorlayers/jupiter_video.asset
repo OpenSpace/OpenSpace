@@ -2,7 +2,7 @@ local globe = asset.require("../../jupiter")
 
 
 
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "Jupiter Video Layer",
   Type = "HttpSynchronization",
   Identifier = "jupiter_videos",
@@ -11,11 +11,11 @@ local data = asset.syncedResource({
 
 
 local Layer = {
+  Type = "VideoTileProvider",
   Identifier = "JupiterVideo",
-  Video = data .. "/jupiter_movie_3600.mp4",
   Name = "Jupiter Video",
   Enabled = true,
-  Type = "VideoTileLayer"
+  Video = data .. "/jupiter_movie_3600.mp4"
 }
 
 

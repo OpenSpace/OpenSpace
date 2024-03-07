@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
@@ -109,12 +110,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
 
 std::string HongKangParser::findPlaybookSpecifiedTarget(std::string line) {
     //remembto add this lua later...
-    std::transform(
-        line.begin(),
-        line.end(),
-        line.begin(),
-        [](char v) { return static_cast<char>(toupper(v)); }
-    );
+    line = ghoul::toUpperCase(line);
     const std::vector<std::string>& ptarg = _potentialTargets;
     std::string target;
     for (const std::string& p : ptarg) {

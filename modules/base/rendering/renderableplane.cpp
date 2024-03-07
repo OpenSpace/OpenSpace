@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -156,15 +156,14 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         { static_cast<int>(BlendMode::Additive), "Additive"}
     });
     _blendMode.onChange([this]() {
-        switch (_blendMode) {
-            case static_cast<int>(BlendMode::Normal):
+        BlendMode m = static_cast<BlendMode>(_blendMode.value());
+        switch (m) {
+            case BlendMode::Normal:
                 setRenderBinFromOpacity();
                 break;
-            case static_cast<int>(BlendMode::Additive):
+            case BlendMode::Additive:
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
     });
 

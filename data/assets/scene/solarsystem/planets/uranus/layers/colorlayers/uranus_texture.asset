@@ -2,7 +2,7 @@ local globe = asset.require("../../uranus")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Uranus Textures",
   Type = "HttpSynchronization",
   Identifier = "uranus_textures",

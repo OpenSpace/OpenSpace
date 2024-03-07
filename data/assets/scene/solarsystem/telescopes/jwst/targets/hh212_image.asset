@@ -1,4 +1,4 @@
-local image = asset.syncedResource({
+local image = asset.resource({
   Name = "HH 212 Image",
   Type = "HttpSynchronization",
   Identifier = "hh212_image",

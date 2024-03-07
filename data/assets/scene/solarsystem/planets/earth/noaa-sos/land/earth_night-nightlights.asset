@@ -16,7 +16,7 @@ Meteorological Satellite Program (DMSP) data spanning October 1994 - March 1995]
 local URL = "https://sos.noaa.gov/catalog/datasets/nighttime-lights/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

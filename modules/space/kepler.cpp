@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <scn/scn.h>
 #include <scn/tuple_return.h>
 #include <fstream>
@@ -756,8 +756,6 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
         case Format::SBDB:
             res = readSbdbFile(file);
             break;
-        default:
-            throw ghoul::MissingCaseException();
     }
 
     LINFO(fmt::format("Saving cache {} for Kepler file {}", cachedFile, file));

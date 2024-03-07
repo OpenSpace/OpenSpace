@@ -1,5 +1,8 @@
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
+local kernels415 = asset.require("../kernels415")
+local kernels452 = asset.require("../kernels452")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,8 +12,8 @@ local Aegaeon = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AEGAEON",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Aegaeon,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -40,8 +43,8 @@ local AegaeonTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AEGAEON",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Aegaeon,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.80812,
@@ -64,8 +67,8 @@ local AegaeonLabel = {
   Identifier = "AegaeonLabel",
   Parent = Aegaeon.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Aegaeon",
     FontSize = 70.0,
     Size = 5.5,
@@ -91,8 +94,8 @@ local Methone = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "METHONE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Methone,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -122,8 +125,8 @@ local MethoneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "METHONE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Methone,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.00957,
@@ -146,8 +149,8 @@ local MethoneLabel = {
   Identifier = "MethoneLabel",
   Parent = Methone.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Methone",
     FontSize = 70.0,
     Size = 5.5,
@@ -173,8 +176,8 @@ local Anthe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ANTHE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Anthe,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -204,8 +207,8 @@ local AntheTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ANTHE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Anthe,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.05089,
@@ -228,8 +231,8 @@ local AntheLabel = {
   Identifier = "AntheLabel",
   Parent = Anthe.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Anthe",
     FontSize = 70.0,
     Size = 5.5,
@@ -255,8 +258,8 @@ local Pallene = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PALLENE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Pallene,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -286,8 +289,8 @@ local PalleneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PALLENE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Pallene,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.370218,
@@ -310,8 +313,8 @@ local PalleneLabel = {
   Identifier = "PalleneLabel",
   Parent = Pallene.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Pallene",
     FontSize = 70.0,
     Size = 5.5,
@@ -337,8 +340,8 @@ local Telesto = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TELESTO",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Telesto,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -368,8 +371,8 @@ local TelestoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TELESTO",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Telesto,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.887802,
@@ -392,8 +395,8 @@ local TelestoLabel = {
   Identifier = "TelestoLabel",
   Parent = Telesto.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Telesto",
     FontSize = 70.0,
     Size = 5.5,
@@ -419,8 +422,8 @@ local Calypso = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALYPSO",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Calypso,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -450,8 +453,8 @@ local CalypsoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALYPSO",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Calypso,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.887802,
@@ -474,8 +477,8 @@ local CalypsoLabel = {
   Identifier = "CalypsoLabel",
   Parent = Calypso.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Calypso",
     FontSize = 70.0,
     Size = 5.5,
@@ -501,8 +504,8 @@ local Helene = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HELENE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Helene,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -532,8 +535,8 @@ local HeleneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HELENE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Helene,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 2.736915,
@@ -556,8 +559,8 @@ local HeleneLabel = {
   Identifier = "HeleneLabel",
   Parent = Helene.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Helene",
     FontSize = 70.0,
     Size = 5.5,
@@ -583,8 +586,8 @@ local Polydeuces = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "POLYDEUCES",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Polydeuces,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -614,8 +617,8 @@ local PolydeucesTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "POLYDEUCES",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Polydeuces,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 2.736915,
@@ -638,8 +641,8 @@ local PolydeucesLabel = {
   Identifier = "PolydeucesLabel",
   Parent = Polydeuces.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Polydeuces",
     FontSize = 70.0,
     Size = 5.5,
@@ -665,8 +668,8 @@ local S2004S24 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65070",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S24,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
@@ -696,8 +699,8 @@ local S2004S24Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65070",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S24,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1293.85,
@@ -720,8 +723,8 @@ local S2004S24Label = {
   Identifier = "S2004S24Label",
   Parent = S2004S24.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 24",
     FontSize = 70.0,
     Size = 5.5,
@@ -743,11 +746,6 @@ local S2004S24Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.sat415)
-  openspace.spice.loadKernel(kernels.sat441)
-  openspace.spice.loadKernel(kernels.sat452)
-
-
   openspace.addSceneGraphNode(Aegaeon)
   openspace.addSceneGraphNode(AegaeonTrail)
   openspace.addSceneGraphNode(AegaeonLabel)
@@ -821,12 +819,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(S2004S24Label)
   openspace.removeSceneGraphNode(S2004S24Trail)
   openspace.removeSceneGraphNode(S2004S24)
-
-
-  openspace.spice.unloadKernel(kernels.sat452)
-  openspace.spice.unloadKernel(kernels.sat441)
-  openspace.spice.unloadKernel(kernels.sat415)
-
 end)
 
 asset.export(Aegaeon)

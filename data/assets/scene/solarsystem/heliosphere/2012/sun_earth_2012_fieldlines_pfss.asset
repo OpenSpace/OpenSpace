@@ -2,14 +2,14 @@ local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
 
 
-local transferFunctions = asset.syncedResource({
+local transferFunctions = asset.resource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-fieldlines_transferfunctions",
   Version = 1
 })
 
-local fieldlineData = asset.syncedResource({
+local fieldlineData = asset.resource({
   Name = "Fieldlines Data PFSS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-pfss",
@@ -62,7 +62,7 @@ local PFSS = {
     FlowSpeed = 75,
     ColorTablePaths = {
       pfssTopologyColorTable,
-      pfssBsignColorTable,
+      pfssBsignColorTable
     },
     ColorTableRanges = {
       { 0, 2 },

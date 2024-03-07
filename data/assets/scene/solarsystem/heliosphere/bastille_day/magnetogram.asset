@@ -1,4 +1,4 @@
-local TexturesPath = asset.syncedResource({
+local TexturesPath = asset.resource({
   Name = "Bastille Day Magnetogram",
   Type = "HttpSynchronization",
   Identifier = "bastille_day_magnetogram",

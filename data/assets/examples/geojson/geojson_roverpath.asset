@@ -2,7 +2,7 @@ local mars = asset.require("scene/solarsystem/planets/mars/mars")
 
 
 
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "GeoJSON Example Path Perseverance",
   Type = "UrlSynchronization",
   Identifier = "geojson_example_path_perseverance",

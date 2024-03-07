@@ -11,7 +11,7 @@ dataset that you are viewing]]
 local URL = "https://sos.noaa.gov/catalog/datasets/plate-boundaries-colorized/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

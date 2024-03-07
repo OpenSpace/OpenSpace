@@ -2,7 +2,7 @@ local globe = asset.require("../../europa")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Europa Textures",
   Type = "HttpSynchronization",
   Identifier = "europa_textures",

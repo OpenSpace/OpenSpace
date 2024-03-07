@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local videos = asset.syncedResource({
+local videos = asset.resource({
   Name = "Eclipse Corona Video",
   Type = "HttpSynchronization",
   Identifier = "earth-eclipse-corona",

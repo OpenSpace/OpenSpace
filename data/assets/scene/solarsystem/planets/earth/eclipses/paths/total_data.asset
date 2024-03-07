@@ -1,4 +1,4 @@
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "Total Eclipse Paths",
   Type = "HttpSynchronization",
   Identifier = "earth-eclipse-path-total",

@@ -17,7 +17,7 @@ Global Map of Human Impacts to Marine Ecosystems]]
 local URL = "https://sos.noaa.gov/catalog/datasets/shipping-routes-with-labels-one-year/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

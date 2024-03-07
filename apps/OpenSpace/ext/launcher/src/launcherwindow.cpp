@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include "launcherwindow.h"
 
 #include "profile/profileedit.h"
+#include "settingsdialog.h"
 
 #include <openspace/engine/configuration.h>
 #include <openspace/openspace.h>
@@ -60,6 +61,8 @@ namespace {
     constexpr int SmallItemWidth = 100;
     constexpr int SmallItemHeight = SmallItemWidth / 4;
 
+    constexpr int SettingsIconSize = 35;
+
     namespace geometry {
         constexpr QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
         constexpr QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
@@ -85,6 +88,12 @@ namespace {
         constexpr QRect VersionString(
             5, ScreenHeight - SmallItemHeight, ItemWidth, SmallItemHeight
         );
+        constexpr QRect SettingsButton(
+            ScreenWidth - SettingsIconSize - 5,
+            ScreenHeight - SettingsIconSize - 5,
+            SettingsIconSize,
+            SettingsIconSize
+        );
     } // geometry
 
     std::optional<Profile> loadProfileFromFile(QWidget* parent, std::string filename) {
@@ -101,22 +110,8 @@ namespace {
             return std::nullopt;
         }
 
-        std::ifstream inFile;
         try {
-            inFile.open(filename, std::ifstream::in);
-        }
-        catch (const std::ifstream::failure& e) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Exception opening {} profile for read: {}", filename, e.what()
-            ));
-        }
-        std::string content;
-        std::string line;
-        while (std::getline(inFile, line)) {
-            content += line;
-        }
-        try {
-            return Profile(content);
+            return Profile(filename);
         }
         catch (const Profile::ParsingError& e) {
             QMessageBox::critical(
@@ -204,7 +199,7 @@ namespace {
 using namespace openspace;
 
 LauncherWindow::LauncherWindow(bool profileEnabled,
-                               const configuration::Configuration& globalConfig,
+                               const Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
@@ -375,6 +370,39 @@ QWidget* LauncherWindow::createCentralWidget() {
     );
     versionLabel->setObjectName("version-info");
     versionLabel->setGeometry(geometry::VersionString);
+
+    QPushButton* settingsButton = new QPushButton(centralWidget);
+    settingsButton->setObjectName("settings");
+    settingsButton->setGeometry(geometry::SettingsButton);
+    settingsButton->setIconSize(QSize(SettingsIconSize, SettingsIconSize));
+    connect(
+        settingsButton,
+        &QPushButton::released,
+        [this]() {
+            using namespace openspace;
+
+            Settings settings = loadSettings();
+
+            SettingsDialog dialog(std::move(settings), this);
+            connect(
+                &dialog,
+                &SettingsDialog::saveSettings,
+                [this](Settings s) {
+                    saveSettings(s, findSettings());
+
+                    if (s.profile.has_value()) {
+                        populateProfilesList(*s.profile);
+                    }
+
+                    if (s.configuration.has_value()) {
+                        populateWindowConfigsList(*s.configuration);
+                    }
+                }
+            );
+
+            dialog.exec();
+        }
+    );
 
     return centralWidget;
 }
@@ -554,10 +582,17 @@ bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_en
 
     // Add tooltip
     if (isJson) {
-        sgct::config::Meta meta = sgct::readMeta(p.path().string(), true);
-        if (!meta.description.empty()) {
+        std::string tooltipDescription;
+        try {
+            sgct::config::Meta meta = sgct::readMeta(p.path().string());
+            tooltipDescription = meta.description;
+        }
+        catch (const sgct::Error&) {
+            tooltipDescription = "(no description available)";
+        }
+        if (!tooltipDescription.empty()) {
             QString toolTip = QString::fromStdString(
-                fmt::format("<p>{}</p>", meta.description)
+                fmt::format("<p>{}</p>", tooltipDescription)
             );
             box.setItemData(box.count() - 1, toolTip, Qt::ToolTipRole);
         }

@@ -1,4 +1,4 @@
-local image = asset.syncedResource({
+local image = asset.resource({
   Name = "Ring Nebula Image",
   Type = "HttpSynchronization",
   Identifier = "ring_image",

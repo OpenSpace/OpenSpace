@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,12 +29,14 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
+
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoPlayer";
@@ -266,15 +268,12 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     if (p.playbackMode.has_value()) {
         switch (*p.playbackMode) {
-        case Parameters::PlaybackMode::RealTimeLoop:
-            _playbackMode = PlaybackMode::RealTimeLoop;
-            break;
-        case Parameters::PlaybackMode::MapToSimulationTime:
-            _playbackMode = PlaybackMode::MapToSimulationTime;
-            break;
-        default:
-            LERROR("Missing playback mode in VideoTileProvider");
-            throw ghoul::MissingCaseException();
+            case Parameters::PlaybackMode::RealTimeLoop:
+                _playbackMode = PlaybackMode::RealTimeLoop;
+                break;
+            case Parameters::PlaybackMode::MapToSimulationTime:
+                _playbackMode = PlaybackMode::MapToSimulationTime;
+                break;
         }
     }
 
@@ -500,6 +499,28 @@ void VideoPlayer::update() {
     if (_isDestroying) {
         return;
     }
+
+    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+        double dt = global::sessionRecording->fixedDeltaTimeDuringFrameOutput();
+        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+            _currentVideoTime = correctVideoPlaybackTime();
+        }
+        else {
+            _currentVideoTime = _currentVideoTime + dt;
+        }
+
+        MpvKey key = MpvKey::Time;
+        mpv_set_property(_mpvHandle, keys[key], formats[key], &_currentVideoTime);
+
+        uint64_t result = mpv_render_context_update(_mpvRenderContext);
+        while ((result & MPV_RENDER_UPDATE_FRAME) == 0) {
+            renderFrame();
+
+            result = mpv_render_context_update(_mpvRenderContext);
+        }
+        return;
+    }
+
     if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         seekToTime(correctVideoPlaybackTime());
     }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -157,20 +157,16 @@ DistanceUnitNamesPlural = {
 };
 
 constexpr bool isValidDistanceUnitName(std::string_view name) {
-    int i = 0;
     for (std::string_view val : DistanceUnitNamesSingular) {
         if (val == name) {
             return true;
         }
-        ++i;
     }
 
-    i = 0;
     for (std::string_view val : DistanceUnitNamesPlural) {
         if (val == name) {
             return true;
         }
-        ++i;
     }
     return false;
 }

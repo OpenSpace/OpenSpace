@@ -5,7 +5,7 @@ local ScreenSpace = {
   Identifier = "ScreenSpaceVideoExample",
   Type = "ScreenSpaceVideo",
   Name = "Screen Space Video Example",
-  Video = asset.localResource("examplevideo.mp4")
+  Video = asset.resource("examplevideo.mp4")
 }
 
 

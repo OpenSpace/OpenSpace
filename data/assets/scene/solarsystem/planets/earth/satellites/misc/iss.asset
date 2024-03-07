@@ -1,22 +1,23 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
+local coreKernels = asset.require("spice/core")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "ISS Models",
   Type = "HttpSynchronization",
   Identifier = "iss_model",
   Version = 3
 })
 
-local omm = asset.syncedResource({
+local omm = asset.resource({
   Name = "Satellite OMM Data (ISS)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_iss",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25544&FORMAT=kvn",
   Filename = "ISS.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
 
 
@@ -33,8 +34,8 @@ local IssPosition = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "GALACTIC",
-      DestinationFrame = "J2000",
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
     }
   },
   Tag = { "earth_satellite", "ISS" },
@@ -101,8 +102,8 @@ local IssLabel = {
   Identifier = "IssLabel",
   Parent = IssPosition.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "ISS",
     FontSize = 70.0,
     Size = 3.4,

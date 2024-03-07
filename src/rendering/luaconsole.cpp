@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/clipboard.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -144,8 +145,8 @@ namespace openspace {
 LuaConsole::LuaConsole()
     : properties::PropertyOwner({ "LuaConsole", "Lua Console" })
     , _isVisible(VisibleInfo, false)
-    , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
     , _shouldBeSynchronized(ShouldBeSynchronizedInfo, true)
+    , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
     , _backgroundColor(
         BackgroundColorInfo,
         glm::vec4(21.f / 255.f, 23.f / 255.f, 28.f / 255.f, 0.8f),
@@ -306,7 +307,9 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 if (_shouldSendToRemote) {
                     _shouldSendToRemote = false;
                 }
-                else if (global::parallelPeer->status() == ParallelConnection::Status::Host) {
+                else if (global::parallelPeer->status() ==
+                         ParallelConnection::Status::Host)
+                {
                     _shouldSendToRemote = true;
                 }
             }
@@ -507,20 +510,10 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             const size_t fullLength = _autoCompleteInfo.initialValue.length();
             const bool correctLength = command.length() >= fullLength;
 
-            std::string commandLowerCase;
-            std::transform(
-                command.begin(), command.end(),
-                std::back_inserter(commandLowerCase),
-                [](char v) { return static_cast<char>(tolower(v)); }
-            );
+            std::string commandLowerCase = ghoul::toLowerCase(command);
 
-            std::string initialValueLowerCase;
-            std::transform(
-                _autoCompleteInfo.initialValue.begin(),
-                _autoCompleteInfo.initialValue.end(),
-                std::back_inserter(initialValueLowerCase),
-                [](char v) { return static_cast<char>(tolower(v)); }
-            );
+            std::string initialValueLowerCase =
+                ghoul::toLowerCase(_autoCompleteInfo.initialValue);
 
             const bool correctCommand =
                 commandLowerCase.substr(0, fullLength) == initialValueLowerCase;

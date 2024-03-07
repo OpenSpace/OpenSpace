@@ -12,7 +12,7 @@ Province, Sumatra, where the tsunami rose as high as 30 m (100 ft.) and traveled
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-sumatra-2004//"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

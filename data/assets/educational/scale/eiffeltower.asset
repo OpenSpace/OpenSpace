@@ -3,7 +3,7 @@ local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 
 
-local modelFolder = asset.syncedResource({
+local modelFolder = asset.resource({
   Name = "Scale Eiffel Tower",
   Type = "HttpSynchronization",
   Identifier = "scale_model_eiffel_tower",

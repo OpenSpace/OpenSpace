@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,10 +40,10 @@ class ProfileEdit final : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for ProfileEdit class
+     * Constructor for ProfileEdit class.
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
+     * \param profile The #openspace::Profile object containing all data of the new or
+     *        imported profile
      * \param profileName The name of the profile to create
      * \param assetBasePath The path to the folder where the assets live
      * \param userAssetBasePath The path to the folder where the user assets live
@@ -59,7 +59,7 @@ public:
     /**
      * Gets the status of the save when the window is closed; was the file saved?
      *
-     * \return true if the file was saved (false if cancel)
+     * \return `true` if the file was saved (false if cancel)
      */
     bool wasSaved() const;
 
@@ -67,14 +67,14 @@ public:
      * Gets the profile name from the top save/edit window. This can be changed by user in
      * order to save to a different file.
      *
-     * \return the profile name
+     * \return The profile name
      */
     std::string specifiedFilename() const;
 
     /**
-     * Handles keypress while the Qt dialog window is open
+     * Handles keypress while the Qt dialog window is open.
      *
-     * \param evt #QKeyEvent object for the key press event
+     * \param evt The QKeyEvent object for the key press event
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 

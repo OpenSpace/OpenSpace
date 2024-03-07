@@ -26,7 +26,7 @@ high also struck Mexico, Chile, and even New Zealand]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-alaska-1964/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,

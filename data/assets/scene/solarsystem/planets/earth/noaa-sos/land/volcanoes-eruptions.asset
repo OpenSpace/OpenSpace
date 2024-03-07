@@ -19,7 +19,7 @@ rising to the surface. The volcanoes on Hawaii are the result of hotspots]]
 local URL = "https://sos.noaa.gov/catalog/datasets/volcano-eruptions-through-2010/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
