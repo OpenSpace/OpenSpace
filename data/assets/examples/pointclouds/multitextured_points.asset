@@ -1,17 +1,16 @@
-
 -- CSV
 local Test = {
   Identifier = "TexturedPointCloudExample_CSV",
   Renderable = {
     Type = "RenderablePointCloud",
-    File = asset.resource("./data/textured_csv/textured_points.csv"),
+    File = asset.resource("data/textured_csv/textured_points.csv"),
     DataMapping = {
       -- The name of the column in the CSV file that corresponds to the texture (should
       -- be an integer)
       TextureColumn = "texture",
       -- A Texture mapping file that provides information about which value/index
       -- corresponds to which texture file
-      TextureMapFile = asset.resource("./data/textured_csv/texturemap.tmap")
+      TextureMapFile = asset.resource("data/textured_csv/texturemap.tmap")
     },
     Texture = {
       -- Where to find the texture files (in this case, in the OpenSpace data folder)
@@ -35,11 +34,11 @@ local Test_Interpolated = {
   Identifier = "TexturedPointCloudExample_Interpolated",
   Renderable = {
     Type = "RenderableInterpolatedPoints",
-    File = asset.resource("./data/textured_csv/textured_points.csv"),
+    File = asset.resource("data/textured_csv/textured_points.csv"),
     NumberOfObjects = 2,
     DataMapping = {
       TextureColumn = "texture",
-      TextureMapFile = asset.resource("./data/textured_csv/texturemap.tmap")
+      TextureMapFile = asset.resource("data/textured_csv/texturemap.tmap")
     },
     Texture = {
       Folder = openspace.absPath("${DATA}")
@@ -53,7 +52,7 @@ local Test_Interpolated = {
 }
 
 -- Speck file (allows storing all data in one single file, including the texture mapping)
--- Note that we disable this one per default
+-- Note that we disable this scene graph node per default
 local Test_Speck = {
   Identifier = "TexturedPointCloudExample_Speck",
   Renderable = {
@@ -61,7 +60,7 @@ local Test_Speck = {
     Enabled = false,
     -- When loading multi-texture information from a speck file, we do not need a
     -- DataMapping entry - all information is in the file
-    File = asset.resource("./data/textured_speck/textures_points.speck"),
+    File = asset.resource("data/textured_speck/textures_points.speck"),
     Texture = {
       -- However, we do still need to specify where the textures are located
       Folder = openspace.absPath("${DATA}")
@@ -91,6 +90,7 @@ end)
 asset.export(Test)
 asset.export(Test_Interpolated)
 
+asset.export(Text_Speck)
 
 
 asset.meta = {
@@ -100,7 +100,8 @@ asset.meta = {
     based on information in the dataset. The dataset may be either CSV or Speck format.
     If CSV is used, additional information must be provided through the DataMapping: 1)
     Which column in the dataset that corresponds to the texture, and a separate file that
-    maps that value to a texture file]],
+    maps that value to a texture file
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

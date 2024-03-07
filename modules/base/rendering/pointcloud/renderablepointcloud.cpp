@@ -97,7 +97,7 @@ namespace {
         "If true, include transparency information in the loaded textures, if there "
         "is any. If false, all loaded textures will be converted to RGB format. \n"
         "This setting can be used if you have textures with transparency, but do not "
-        "need the trasparency information. This imay be the case when using additive "
+        "need the transparency information. This may be the case when using additive "
         "blending, for example. Converting the files to RGB on load may then reduce the "
         "memory footprint and/or lead to some optimization in terms of rendering speed.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -1431,7 +1431,7 @@ int RenderablePointCloud::currentSizeParameterIndex() const {
 }
 
 void RenderablePointCloud::addPositionDataForPoint(unsigned int index,
-                                                   std::vector<float> &result,
+                                                   std::vector<float>& result,
                                                    double& maxRadius) const
 {
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
@@ -1452,12 +1452,12 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
 
     int colorParamIndex = currentColorParameterIndex();
-    if (_hasColorMapFile && colorParamIndex > -1) {
+    if (_hasColorMapFile && colorParamIndex >= 0) {
         result.push_back(e.data[colorParamIndex]);
     }
 
     int sizeParamIndex = currentSizeParameterIndex();
-    if (_hasDatavarSize && sizeParamIndex > -1) {
+    if (_hasDatavarSize && sizeParamIndex >= 0) {
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
@@ -1472,7 +1472,7 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         return std::vector<float>();
     }
 
-    // Whgat datavar is the texture, if any
+    // What datavar is the texture, if any
     int textureIdIndex = _dataset.textureDataIndex;
 
     double maxRadius = 0.0;
@@ -1480,7 +1480,7 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     // One sub-array per texture array, since each of these will correspond to a separate
     // draw call. We need at least one sub result array
     std::vector<std::vector<float>> subResults = std::vector<std::vector<float>>(
-        (_textureArrays.size() > 0) ? _textureArrays.size() : 1
+        !_textureArrays.empty() ? _textureArrays.size() : 1
     );
 
     // Reserve enough space for all points in each for now
@@ -1561,7 +1561,7 @@ bool operator==(const TextureFormat& l, const TextureFormat& r) {
     return (l.resolution == r.resolution) && (l.useAlpha == r.useAlpha);
 }
 
-std::size_t TextureFormatHash::operator()(const TextureFormat& k) const {
+size_t TextureFormatHash::operator()(const TextureFormat& k) const {
     return ((std::hash<unsigned int>()(k.resolution.x) ^
         (std::hash<unsigned int>()(k.resolution.y) << 1)) >> 1) ^
         (std::hash<bool>()(k.useAlpha) << 1);

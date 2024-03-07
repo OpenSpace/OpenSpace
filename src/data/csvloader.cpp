@@ -153,7 +153,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     }
 
     bool hasProvidedTextureFile = specs.has_value() && specs->textureMap.has_value();
-    bool hasTextureIndex = (res.textureDataIndex > -1);
+    bool hasTextureIndex = (res.textureDataIndex >= 0);
 
     if (hasProvidedTextureFile && !hasTextureIndex && !specs->textureColumn.has_value()) {
         throw ghoul::RuntimeError(fmt::format(
@@ -252,7 +252,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 }
 
 std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
-                                                 std::set<int> texturesInData)
+                                          const std::set<int>& texturesInData)
 {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 

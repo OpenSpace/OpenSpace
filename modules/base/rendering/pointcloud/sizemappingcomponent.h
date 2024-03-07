@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 
 /**
  * This is a component that can be used to hold parameters and properties for scaling
- * point cloud points (or other data-based entities) based a parameter in a dataset
+ * point cloud points (or other data-based entities) based a parameter in a dataset.
  */
 struct SizeMappingComponent : public properties::PropertyOwner {
     SizeMappingComponent();

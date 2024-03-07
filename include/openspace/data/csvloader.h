@@ -35,7 +35,7 @@ Dataset loadCsvFile(std::filesystem::path path,
     std::optional<DataMapping> specs = std::nullopt);
 
 std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
-    std::set<int> texturesInData);
+    const std::set<int>& texturesInData);
 
 } // namespace openspace::dataloader
 

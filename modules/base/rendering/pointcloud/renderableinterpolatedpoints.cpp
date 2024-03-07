@@ -432,7 +432,7 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
     }
 
     int sizeParamIndex = currentSizeParameterIndex();
-    if (_hasDatavarSize && sizeParamIndex > -1) {
+    if (_hasDatavarSize && sizeParamIndex >= 0) {
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
@@ -533,7 +533,8 @@ float RenderableInterpolatedPoints::computeCurrentUpperValue() const {
 }
 
 std::pair<size_t, size_t>
-RenderableInterpolatedPoints::interpolationIndices(unsigned int index) const {
+RenderableInterpolatedPoints::interpolationIndices(unsigned int index) const
+{
     float t0 = computeCurrentLowerValue();
     float t1 = computeCurrentUpperValue();
     unsigned int t0Index = static_cast<unsigned int>(t0);

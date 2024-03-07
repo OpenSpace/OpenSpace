@@ -60,7 +60,7 @@ struct TextureFormat {
     friend bool operator==(const TextureFormat& l, const TextureFormat& r);
 };
 struct TextureFormatHash {
-    std::size_t operator()(const TextureFormat& k) const;
+    size_t operator()(const TextureFormat& k) const;
 };
 
 /**
@@ -102,7 +102,7 @@ protected:
 
     /**
      * Helper function to buffer the vertex attribute with the given name and number
-     * of values. Assumes that the value is a float value
+     * of values. Assumes that the value is a float value.
      *
      * Returns the updated offset after this attribute is added
      */
@@ -126,7 +126,7 @@ protected:
 
     /**
      * A function that subclasses could override to initialize their own textures to
-     * use for rendering, when the \code _textureMode is set to Other
+     * use for rendering, when the `_textureMode` is set to Other
      */
     virtual void initializeCustomTexture();
     void initializeSingleTexture();
