@@ -209,12 +209,12 @@ std::string generateHashString(const DataMapping& dm) {
     unsigned int excludeColumnsHash = ghoul::hashCRC32(a);
 
     return fmt::format(
-        "DM|{}|{}|{}|{}|{}|m{}|{}|{}",
-        ghoul::hashCRC32(dm.xColumnName.value_or("")),
-        ghoul::hashCRC32(dm.yColumnName.value_or("")),
-        ghoul::hashCRC32(dm.zColumnName.value_or("")),
-        ghoul::hashCRC32(dm.nameColumn.value_or("")),
-        ghoul::hashCRC32(dm.textureColumn.value_or("")),
+        "DM|{}|{}|{}|{}|{}|{}|{}|{}",
+        dm.xColumnName.value_or(""),
+        dm.yColumnName.value_or(""),
+        dm.zColumnName.value_or(""),
+        dm.nameColumn.value_or(""),
+        dm.textureColumn.value_or(""),
         dm.missingDataValue.has_value() ? ghoul::to_string(*dm.missingDataValue) : "",
         dm.isCaseSensitive ? 1 : 0,
         excludeColumnsHash
