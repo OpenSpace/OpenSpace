@@ -426,7 +426,7 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
     const Dataset::Entry& e1 = _dataset.entries[secondIndex];
 
     int colorParamIndex = currentColorParameterIndex();
-    if (_hasColorMapFile && colorParamIndex > -1) {
+    if (_hasColorMapFile && colorParamIndex >= 0) {
         result.push_back(e0.data[colorParamIndex]);
         result.push_back(e1.data[colorParamIndex]);
     }

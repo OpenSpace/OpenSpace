@@ -1494,7 +1494,7 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         float textureLayer = 0.f;
 
         bool useMultiTexture = (_textureMode == TextureInputMode::Multi) &&
-            (textureIdIndex > -1);
+            (textureIdIndex >= 0);
 
         if (_hasSpriteTexture && useMultiTexture) {
             int texId = static_cast<int>(e.data[textureIdIndex]);
