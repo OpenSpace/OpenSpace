@@ -853,7 +853,6 @@ void RenderableTube::initializeTextures() {
             LINFO(fmt::format("Loaded texture {}", _data[i].texturePath));
             // Do not upload the loaded texture to the GPU, we just want it to
             // hold the data
-            LDEBUG(fmt::format("Channels: {}", t->numberOfChannels()));
         }
         else {
             throw ghoul::RuntimeError(fmt::format(
@@ -1046,16 +1045,17 @@ void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
     centerPoint.position[1] = polygon->center.y;
     centerPoint.position[2] = polygon->center.z;
 
-    // Calculate the normal
-    glm::dvec3 normal;
-    if ( polygonIndex - 1 < 0) {
-        // Normal points behind the tube
-        normal = _data[polygonIndex].center - _data[polygonIndex + 1].center;
-    }
-    else {
-        // Normal points along the tube
-        normal = _data[polygonIndex].center - _data[polygonIndex - 1].center;
-    }
+    // Calculate the normal, we know there are at least 3 point in the polygon
+    glm::dvec3 v0 = polygon->center;
+    glm::dvec3 v1 = polygon->points[0].coordinate;
+    glm::dvec3 v2 = polygon->points[1].coordinate;
+
+    glm::dvec3 a = glm::normalize(v1 - v0);
+    glm::dvec3 b = glm::normalize(v2 - v0);
+
+    // For the first edge make the normal point towards the bottom of the tube
+    // Otherwise the normal should point to the top of hte tube
+    glm::dvec3 normal = polygonIndex == 0 ? glm::cross(a, b) : glm::cross(b, a);
 
     centerPoint.normal[0] = normal.x;
     centerPoint.normal[1] = normal.y;
@@ -1121,8 +1121,17 @@ void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
         unsigned int v2 = isLast ? v0 + 1 : v1 + 1;
 
         indicies->push_back(v0);
-        indicies->push_back(v1);
-        indicies->push_back(v2);
+
+        // For the first edge make the normal point towards the bottom of the tube
+        // Otherwise the normal should point to the top of hte tube
+        if (polygonIndex == 0) {
+            indicies->push_back(v1);
+            indicies->push_back(v2);
+        }
+        else {
+            indicies->push_back(v2);
+            indicies->push_back(v1);
+        }
     }
 }
 
@@ -1253,7 +1262,7 @@ void RenderableTube::addLowPolySection(int polygonIndex, const TimePolygon const
         // Normal
         glm::dvec3 toNextPoly = glm::normalize(v1.coordinate - v0.coordinate);
         glm::dvec3 toNextPoint = glm::normalize(v3.coordinate - v0.coordinate);
-        glm::dvec3 normal = glm::cross(toNextPoint, toNextPoly);
+        glm::dvec3 normal = glm::cross(toNextPoly, toNextPoint);
 
         sidePointV0.normal[0] = normal.x;
         sidePointV0.normal[1] = normal.y;
@@ -1368,9 +1377,6 @@ RenderableTube::FindTimeStruct RenderableTube::findTime(double time) const {
             result.lastPolygonBeforeTime = i;
             result.foundPrev = true;
             result.onSlice = true;
-            /*LDEBUG(fmt::format("Polygon nr: '{}' is exactly at NOW",
-                _lastPolygonBeforeNow
-            ));*/
         }
     }
 
@@ -1440,14 +1446,12 @@ void RenderableTube::interpolateEnd(double now) {
         // Do not show anything
         nIndiciesUntilNow = 0;
         _interpolationNeeded = false;
-        //LDEBUG("Before");
     }
     // At or after end
     else if (_lastPolygonBeforeNow == _nPolygons - 1) {
         // Show all of the tube
         nIndiciesUntilNow = _indicies.size();
         _interpolationNeeded = false;
-        //LDEBUG("After or End");
     }
     // Middle
     else {
@@ -1462,10 +1466,6 @@ void RenderableTube::interpolateEnd(double now) {
             static_cast<int>(_lastPolygonBeforeNow * _nPoints * nIndiciesPerSection);
     }
 
-    /*LDEBUG(fmt::format("\nprev: '{}'\nnext: '{}'\nnPointsUntilNow: '{}'\n",
-        _lastPolygonBeforeNow, _firstPolygonAfterNow, nIndiciesUntilNow)
-    );*/
-
     if (nIndiciesUntilNow > _indicies.size()) {
         LERROR("Cannot render more verticies than what is in the tube");
         _nIndiciesToRender = 0;
@@ -1479,6 +1479,7 @@ void RenderableTube::interpolateEnd(double now) {
         creteEnding(now);
         updateEndingBufferData();
     }
+    // Add cutplane even if exactly on a slice
     else if (result.onSlice && _addEdges) {
         // Reset
         _verticiesEnding.clear();
@@ -1489,6 +1490,8 @@ void RenderableTube::interpolateEnd(double now) {
         TimePolygon currentTimePolygon = _data[_lastPolygonBeforeNow];
 
         // Add texture coordinates for adjacent plane
+        // Since we know that this plane is exactly on the first data slice there will
+        // not be any interpolation, so we can just copy the same coordinate again
         for (unsigned int pointIndex = 0; pointIndex < _nPoints; ++pointIndex) {
             currentTimePolygon.points[pointIndex].tex_next =
                 _data[_lastPolygonBeforeNow].points[pointIndex].tex;
