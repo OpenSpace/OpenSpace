@@ -291,8 +291,8 @@ void RenderableSphericalGrid::update(const UpdateData&) {
         }
         nr = 0;
         // define indices for all triangles
-        for (int i = 1; i <= _segments; ++i) {
-            for (int j = 0; j < _segments; ++j) {
+        for (int i = 1; i <= _segments; i++) {
+            for (int j = 0; j < _segments; j++) {
                 const int t = _segments + 1;
                 _iarray[nr] = t * (i - 1) + j + 0; ++nr;
                 _iarray[nr] = t * (i + 0) + j + 0; ++nr;

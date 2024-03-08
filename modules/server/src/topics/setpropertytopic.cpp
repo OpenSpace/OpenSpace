@@ -81,7 +81,7 @@ namespace {
             }
 
             std::string literal = "{";
-            for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
+            for (nlohmann::json::iterator it = value.begin(); it != value.end(); it++) {
                 literal += luaLiteralFromJson(it.value()) += ",";
             }
             literal.pop_back(); // remove last comma
@@ -94,7 +94,7 @@ namespace {
             }
 
             std::string literal = "{";
-            for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
+            for (nlohmann::json::iterator it = value.begin(); it != value.end(); it++) {
                 literal += it.key() + "=" + luaLiteralFromJson(it.value()) += ",";
             }
             literal.pop_back(); // remove last comma

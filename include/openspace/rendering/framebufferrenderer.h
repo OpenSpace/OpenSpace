@@ -156,9 +156,7 @@ public:
     void setResolution(glm::ivec2 res);
     void setHDRExposure(float hdrExposure);
     void setGamma(float gamma);
-    void setHue(float hue);
-    void setValue(float value);
-    void setSaturation(float sat);
+    void setHueValueSaturation(float hue, float value, float saturation);
 
     void enableFXAA(bool enable);
     void setDisableHDR(bool disable);

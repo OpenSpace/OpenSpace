@@ -57,9 +57,8 @@ void MarkNodesDialog::createWidgets() {
     _list->setDragDropMode(QListView::InternalMove);
     _list->setResizeMode(QListView::Adjust);
 
-    for (size_t i = 0; i < _markedNodes->size(); ++i) {
-        QListWidgetItem* item =
-            new QListWidgetItem(QString::fromStdString(_markedNodes->at(i)));
+    for (const std::string& nodes : *_markedNodes) {
+        QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(nodes));
         _list->addItem(item);
     }
     layout->addWidget(_list);

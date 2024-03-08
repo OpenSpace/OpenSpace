@@ -105,7 +105,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         skipColumns.reserve((*specs).excludeColumns.size());
     }
 
-    for (size_t i = 0; i < columns.size(); ++i) {
+    for (size_t i = 0; i < columns.size(); i++) {
         const std::string& col = columns[i];
 
         if (isPositionColumn(col, specs)) {
@@ -189,7 +189,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         Dataset::Entry entry;
         entry.data.reserve(nDataColumns);
 
-        for (size_t i = 0; i < row.size(); ++i) {
+        for (size_t i = 0; i < row.size(); i++) {
             // Check if column should be exluded. Note that list of indices is sorted
             // so we can do a binary search
             if (hasExcludeColumns &&

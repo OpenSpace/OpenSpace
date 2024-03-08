@@ -72,7 +72,7 @@ std::string formatJson(T value) {
     }
     else if constexpr (internal::isGlmVector<T>()) {
         std::string values;
-        for (glm::length_t i = 0; i < ghoul::glm_components<T>::value; ++i) {
+        for (glm::length_t i = 0; i < ghoul::glm_components<T>::value; i++) {
             values += std::to_string(value[i]) + ',';
         }
         values.pop_back();
@@ -80,8 +80,8 @@ std::string formatJson(T value) {
     }
     else if constexpr (internal::isGlmMatrix<T>()) {
         std::string values;
-        for (glm::length_t i = 0; i < T::type::row_type::length(); ++i) {
-            for (glm::length_t j = 0; j < T::type::col_type::length(); ++j) {
+        for (glm::length_t i = 0; i < T::type::row_type::length(); i++) {
+            for (glm::length_t j = 0; j < T::type::col_type::length(); j++) {
                 values += std::to_string(value[i][j]) + ',';
             }
         }

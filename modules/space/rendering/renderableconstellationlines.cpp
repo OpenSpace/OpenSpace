@@ -128,7 +128,7 @@ RenderableConstellationLines::RenderableConstellationLines(
 
     if (p.colors.has_value()) {
         std::vector<glm::vec3> ops = *p.colors;
-        for (size_t i = 0; i < ops.size(); ++i) {
+        for (size_t i = 0; i < ops.size(); i++) {
             _constellationColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
     }

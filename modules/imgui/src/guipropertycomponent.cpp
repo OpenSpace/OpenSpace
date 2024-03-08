@@ -280,7 +280,6 @@ void GuiPropertyComponent::render() {
     ImGui::SetNextWindowBgAlpha(0.75f);
     ImGui::Begin(guiName().c_str(), &v);
     _isEnabled = v;
-    bool showHiddenNode = openspace::global::openSpaceEngine->showHiddenSceneGraphNodes();
 
     _isCollapsed = ImGui::IsWindowCollapsed();
     using namespace properties;
@@ -397,20 +396,18 @@ void GuiPropertyComponent::render() {
     };
 
     if (!_useTreeLayout || noGuiGroups) {
-        if (!showHiddenNode) {
-            // Remove all of the nodes that we want hidden first
-            owners.erase(
-                std::remove_if(
-                    owners.begin(),
-                    owners.end(),
-                    [](properties::PropertyOwner* p) {
-                        SceneGraphNode* s = dynamic_cast<SceneGraphNode*>(p);
-                        return s && s->hasGuiHintHidden();
-                    }
-                ),
-                owners.end()
-            );
-        }
+        // Remove all of the nodes that we want hidden first
+        owners.erase(
+            std::remove_if(
+                owners.begin(),
+                owners.end(),
+                [](properties::PropertyOwner* p) {
+                    SceneGraphNode* s = dynamic_cast<SceneGraphNode*>(p);
+                    return s && s->hasGuiHintHidden();
+                }
+            ),
+            owners.end()
+        );
         std::for_each(owners.begin(), owners.end(), renderProp);
     }
     else { // _useTreeLayout && gui groups exist
@@ -419,7 +416,7 @@ void GuiPropertyComponent::render() {
         for (properties::PropertyOwner* pOwner : owners) {
             // We checked above that pOwner is a SceneGraphNode
             SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
-            if (!showHiddenNode && nOwner->hasGuiHintHidden()) {
+            if (nOwner->hasGuiHintHidden()) {
                 continue;
             }
             const std::string gui = nOwner->guiPath();

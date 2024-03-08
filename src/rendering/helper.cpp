@@ -524,7 +524,7 @@ std::vector<Vertex> createRing(int nSegments, float radius, glm::vec4 colors) {
     const int nVertices = nSegments + 1;
     std::vector<Vertex> vertices(nVertices);
 
-    for (int i = 0; i <= nSegments; ++i) {
+    for (int i = 0; i <= nSegments; i++) {
         vertices[i] = computeCircleVertex(i, nSegments, radius, colors);
     }
     return vertices;
@@ -534,7 +534,7 @@ std::vector<VertexXYZ> createRingXYZ(int nSegments, float radius) {
     const int nVertices = nSegments + 1;
     std::vector<VertexXYZ> vertices(nVertices);
 
-    for (int i = 0; i <= nSegments; ++i) {
+    for (int i = 0; i <= nSegments; i++) {
         Vertex fullVertex = computeCircleVertex(i, nSegments, radius);
         vertices[i] = { fullVertex.xyz[0], fullVertex.xyz[1], fullVertex.xyz[2] };
     }
@@ -696,7 +696,7 @@ VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegmen
     GLushort botCenterIndex = 0;
     GLushort topCenterIndex = static_cast<GLushort>(vertices.size()) - 1;
 
-    for (unsigned int i = 0; i < nSegments; ++i) {
+    for (unsigned int i = 0; i < nSegments; i++) {
         bool isLast = (i == nSegments - 1);
         GLushort v0, v1, v2, v3;
 

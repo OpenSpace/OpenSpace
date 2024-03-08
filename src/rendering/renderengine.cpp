@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -376,13 +375,16 @@ RenderEngine::RenderEngine()
     _gamma.onChange([this]() { _renderer.setGamma(_gamma); });
     addProperty(_gamma);
 
-    _hue.onChange([this]() { _renderer.setHue(_hue / 360.f); });
+    auto setHueValueSaturation = [this]() {
+        _renderer.setHueValueSaturation(_hue / 360.f, _value, _saturation);
+    };
+    _hue.onChange(setHueValueSaturation);
     addProperty(_hue);
 
-    _saturation.onChange([this]() { _renderer.setSaturation(_saturation); });
+    _saturation.onChange(setHueValueSaturation);
     addProperty(_saturation);
 
-    _value.onChange([this]() { _renderer.setValue(_value); });
+    _value.onChange(setHueValueSaturation);
     addProperty(_value);
 
     addProperty(_globalBlackOutFactor);
@@ -429,7 +431,7 @@ RenderEngine::RenderEngine()
                 ghoul::filesystem::FileSystem::Override::Yes
             );
         }
-        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}").string());
+        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
     });
     addProperty(_screenshotUseDate);
 
@@ -448,10 +450,10 @@ RenderEngine::RenderEngine()
     addProperty(_masterRotation);
     addProperty(_disableMasterRendering);
 
-    _enabledFontColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
+    _enabledFontColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_enabledFontColor);
 
-    _disabledFontColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
+    _disabledFontColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_disabledFontColor);
 }
 
@@ -492,7 +494,7 @@ void RenderEngine::initialize() {
     if (global::versionChecker->hasLatestVersionInfo()) {
         VersionChecker::SemanticVersion latest = global::versionChecker->latestVersion();
 
-        VersionChecker::SemanticVersion current{
+        VersionChecker::SemanticVersion current {
             OPENSPACE_VERSION_MAJOR,
             OPENSPACE_VERSION_MINOR,
             OPENSPACE_VERSION_PATCH
@@ -755,7 +757,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             ssrs.begin(),
             ssrs.end(),
             [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
-                // Render back to front.
+                // Render back to front
                 return lhs->depth() > rhs->depth();
             }
         );
@@ -1180,8 +1182,8 @@ void RenderEngine::renderCameraInformation() {
         return;
     }
 
-    const glm::vec4 EnabledColor = _enabledFontColor.value();
-    const glm::vec4 DisabledColor = _disabledFontColor.value();
+    const glm::vec4 EnabledColor = _enabledFontColor;
+    const glm::vec4 DisabledColor = _disabledFontColor;
 
     const glm::vec2 rotationBox = _fontCameraInfo->boundingBox("Rotation");
 
@@ -1356,7 +1358,7 @@ void RenderEngine::renderScreenLog() {
         std::string_view message = std::string_view(it.message).substr(0, MessageLength);
         nRows += std::count(message.begin(), message.end(), '\n');
 
-        const glm::vec4 white(0.9f, 0.9f, 0.9f, alpha);
+        const glm::vec4 white = glm::vec4(0.9f, 0.9f, 0.9f, alpha);
 
         std::array<char, 15 + 1 + CategoryLength + 3> buf;
         {

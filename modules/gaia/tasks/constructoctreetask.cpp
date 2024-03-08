@@ -475,7 +475,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         _indexOctreeManager->maxDist(), _indexOctreeManager->maxStarsPerNode()
     ));
 
-    for (size_t idx = 0; idx < allInputFiles.size(); ++idx) {
+    for (size_t idx = 0; idx < allInputFiles.size(); idx++) {
         std::filesystem::path inFilePath = allInputFiles[idx];
         int nStarsInfile = 0;
 
@@ -608,7 +608,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     }
 
     // Make sure all threads are done.
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; i++) {
         writeThreads[i].join();
     }
 }

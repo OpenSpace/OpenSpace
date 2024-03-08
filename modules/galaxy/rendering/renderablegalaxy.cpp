@@ -749,7 +749,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
     // Read points
     for (size_t i = 0;
         i < static_cast<size_t>(_nPoints * _enabledPointsRatio.maxValue()) + 1;
-        ++i)
+        i++)
     {
         float x, y, z, r, g, b, a;
         std::getline(pointFile, line);

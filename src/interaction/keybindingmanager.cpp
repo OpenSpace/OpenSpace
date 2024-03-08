@@ -45,7 +45,7 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
         // iterate over key bindings
         auto ret = _keyLua.equal_range({ key, modifier });
-        for (auto it = ret.first; it != ret.second; ++it) {
+        for (auto it = ret.first; it != ret.second; it++) {
             ghoul_assert(!it->second.empty(), "Action must not be empty");
             if (!global::actionManager->hasAction(it->second)) {
                 // Silently ignoring the unknown action as the user might have intended to
@@ -93,7 +93,7 @@ void KeybindingManager::removeKeyBinding(const KeyWithModifier& key) {
         }
         else {
             // If it is not, we continue iteration
-            ++it;
+            it++;
         }
     }
 }
@@ -104,7 +104,7 @@ std::vector<std::pair<KeyWithModifier, std::string>> KeybindingManager::keyBindi
     std::vector<std::pair<KeyWithModifier, std::string>> result;
 
     auto itRange = _keyLua.equal_range(key);
-    for (auto it = itRange.first; it != itRange.second; ++it) {
+    for (auto it = itRange.first; it != itRange.second; it++) {
         result.emplace_back(it->first, it->second);
     }
     return result;

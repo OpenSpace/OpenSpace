@@ -252,7 +252,7 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
     const double L = static_cast<double>(luminosity);
 
     glm::dvec4 distances;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; i++) {
         const Coefficients& coeffs = coefficients[i];
         double seff = coeffs.seffSun + (coeffs.a * tstar) + (coeffs.b * tstar2) +
             (coeffs.c * tstar * tstar2) + (coeffs.d * tstar2 * tstar2);

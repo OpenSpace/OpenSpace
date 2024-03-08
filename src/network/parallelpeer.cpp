@@ -737,7 +737,7 @@ void ParallelPeer::sendTimeTimeline() {
     timelineMessage._keyframes.reserve(timeline.nKeyframes());
 
     // Case 1: Copy all keyframes from the native timeline
-    for (size_t i = 0; i < timeline.nKeyframes(); ++i) {
+    for (size_t i = 0; i < timeline.nKeyframes(); i++) {
         const Keyframe<TimeKeyframeData>& kf = keyframes.at(i);
 
         datamessagestructures::TimeKeyframe kfMessage;

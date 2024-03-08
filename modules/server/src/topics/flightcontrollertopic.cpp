@@ -147,7 +147,7 @@ using nlohmann::json;
 namespace openspace {
 
 FlightControllerTopic::FlightControllerTopic() {
-    for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); ++it) {
+    for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); it++) {
         global::navigationHandler->setWebsocketAxisMapping(
             int(std::distance(AxisIndexMap.begin(), it)),
             it->second
@@ -389,7 +389,7 @@ void FlightControllerTopic::engageAutopilot(const nlohmann::json &json) {
     std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _inputState.isConnected = true;
 
-    for (auto it = input.begin(); it != input.end(); ++it) {
+    for (auto it = input.begin(); it != input.end(); it++) {
         const auto mapIt = AxisIndexMap.find(it.key());
         if (mapIt == AxisIndexMap.end()) {
             if (it.key() != TypeKey || CommandMap.find(it.value()) == CommandMap.end()) {
@@ -429,7 +429,7 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
     // Get "inputState" object from "payload"
     auto input = json[InputState][ValuesKey];
 
-    for (auto it = input.begin(); it != input.end(); ++it) {
+    for (auto it = input.begin(); it != input.end(); it++) {
         const auto mapIt = AxisIndexMap.find(it.key());
         if (mapIt == AxisIndexMap.end()) {
             if (it.key() != TypeKey || CommandMap.find(it.value()) == CommandMap.end()) {

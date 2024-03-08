@@ -973,7 +973,7 @@ SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const 
     }
 
     res.bounds.reserve(nrReturned);
-    for (int i = 0; i < nrReturned; ++i) {
+    for (int i = 0; i < nrReturned; i++) {
         res.bounds.emplace_back(boundsArr[i][0], boundsArr[i][1], boundsArr[i][2]);
     }
 
@@ -1060,7 +1060,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
         throwSpiceError("Error finding Ck Coverage");
     }
 
-    for (SpiceInt i = 0; i < card_c(&ids); ++i) {
+    for (SpiceInt i = 0; i < card_c(&ids); i++) {
         const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);
 
 #if defined __clang__
@@ -1078,7 +1078,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
         // Get the number of intervals in the coverage window.
         const SpiceInt numberOfIntervals = wncard_c(&cover);
 
-        for (SpiceInt j = 0; j < numberOfIntervals; ++j) {
+        for (SpiceInt j = 0; j < numberOfIntervals; j++) {
             // Get the endpoints of the jth interval.
             SpiceDouble b, e;
             wnfetd_c(&cover, j, &b, &e);
@@ -1119,7 +1119,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
         throwSpiceError("Error finding Spk ID for coverage");
     }
 
-    for (SpiceInt i = 0; i < card_c(&ids); ++i) {
+    for (SpiceInt i = 0; i < card_c(&ids); i++) {
         const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i);
 
 #if defined __clang__
@@ -1137,7 +1137,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
         // Get the number of intervals in the coverage window.
         const SpiceInt numberOfIntervals = wncard_c(&cover);
 
-        for (SpiceInt j = 0; j < numberOfIntervals; ++j) {
+        for (SpiceInt j = 0; j < numberOfIntervals; j++) {
             //Get the endpoints of the jth interval.
             SpiceDouble b, e;
             wnfetd_c(&cover, j, &b, &e);

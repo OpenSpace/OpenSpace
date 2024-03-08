@@ -74,7 +74,7 @@ void JoystickCameraStates::updateStateFromInput(
         int nAxes = joystickInputStates.numAxes(joystickInputState.name);
         for (int i = 0;
              i < std::min(nAxes, static_cast<int>(joystick->axisMapping.size()));
-             ++i)
+             i++)
         {
             AxisInformation t = joystick->axisMapping[i];
             if (t.type == AxisType::None) {
@@ -177,9 +177,9 @@ void JoystickCameraStates::updateStateFromInput(
         }
 
         int nButtons = joystickInputStates.numButtons(joystickInputState.name);
-        for (int i = 0; i < nButtons; ++i) {
+        for (int i = 0; i < nButtons; i++) {
             auto itRange = joystick->buttonMapping.equal_range(i);
-            for (auto it = itRange.first; it != itRange.second; ++it) {
+            for (auto it = itRange.first; it != itRange.second; it++) {
                 bool active = global::joystickInputStates->button(
                     joystickInputState.name,
                     i,
@@ -378,7 +378,7 @@ void JoystickCameraStates::clearButtonCommand(const std::string& joystickName,
             it = joystick->buttonMapping.erase(it);
         }
         else {
-            ++it;
+            it++;
         }
     }
 }
@@ -394,7 +394,7 @@ std::vector<std::string> JoystickCameraStates::buttonCommand(
     }
 
     auto itRange = joystick->buttonMapping.equal_range(button);
-    for (auto it = itRange.first; it != itRange.second; ++it) {
+    for (auto it = itRange.first; it != itRange.second; it++) {
         result.push_back(it->second.command);
     }
     return result;

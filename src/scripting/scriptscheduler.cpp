@@ -150,7 +150,7 @@ void ScriptScheduler::clearSchedule(std::optional<int> group) {
                 it = _scripts.erase(it);
             }
             else {
-                ++it;
+                it++;
             }
         }
 
@@ -196,7 +196,7 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
         // Construct result
         for (auto iter = _scripts.begin() + prevIndex;
             iter < (_scripts.begin() + _currentIndex);
-            ++iter)
+            iter++)
         {
             std::string script = iter->universalScript.empty() ?
                 iter->forwardScript :

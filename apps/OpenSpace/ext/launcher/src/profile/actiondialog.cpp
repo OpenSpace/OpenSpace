@@ -140,8 +140,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         this, &ActionDialog::actionSelected
     );
 
-    for (size_t i = 0; i < _actionData.size(); ++i) {
-        const Profile::Action& action = _actionData[i];
+    for (const Profile::Action& action : _actionData) {
         std::string name = action.name.empty() ? action.identifier : action.name;
         _actionWidgets.list->addItem(new QListWidgetItem(QString::fromStdString(name)));
     }
@@ -308,10 +307,9 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         this, &ActionDialog::keybindingSelected
     );
 
-    for (size_t i = 0; i < _keybindingsData.size(); ++i) {
-        const Profile::Keybinding& kv = _keybindingsData[i];
+    for (const Profile::Keybinding& keybinding : _keybindingsData) {
         QListWidgetItem* item = new QListWidgetItem;
-        updateListItem(item, kv);
+        updateListItem(item, keybinding);
         _keybindingWidgets.list->addItem(item);
     }
 
@@ -468,7 +466,7 @@ void ActionDialog::actionRemove() {
     );
 
     // We can't remove an action if it has a keyboard shortcut attached to it
-    for (size_t i = 0; i < _keybindingsData.size(); ++i) {
+    for (size_t i = 0; i < _keybindingsData.size(); i++) {
         const Profile::Keybinding& kb = _keybindingsData[i];
         if (kb.action != action->identifier) {
             continue;
@@ -500,7 +498,7 @@ void ActionDialog::actionRemove() {
         }
     }
 
-    for (size_t i = 0; i < _actionData.size(); ++i) {
+    for (size_t i = 0; i < _actionData.size(); i++) {
         if (_actionData[i].identifier == action->identifier) {
             clearActionFields();
             _actionData.erase(_actionData.begin() + i);
@@ -598,13 +596,13 @@ void ActionDialog::actionSaved() {
             _keybindingWidgets.list->count() == static_cast<int>(_keybindingsData.size()),
             "The list and data got out of sync"
         );
-        for (int i = 0; i < _keybindingWidgets.list->count(); ++i) {
+        for (int i = 0; i < _keybindingWidgets.list->count(); i++) {
             if (_keybindingsData[i].action == oldIdentifier) {
                 _keybindingsData[i].action = newIdentifier;
                 updateListItem(_keybindingWidgets.list->item(i), _keybindingsData[i]);
             }
         }
-        for (int i = 0; i < _keybindingWidgets.action->count(); ++i) {
+        for (int i = 0; i < _keybindingWidgets.action->count(); i++) {
             if (_keybindingWidgets.action->itemText(i).toStdString() == oldIdentifier) {
                 _keybindingWidgets.action->setItemText(
                     i,
@@ -703,7 +701,7 @@ void ActionDialog::keybindingRemove() {
     const Profile::Keybinding* keybinding = selectedKeybinding();
     ghoul_assert(keybinding, "A keybinding must be selected at this point");
     
-    for (size_t i = 0; i < _keybindingsData.size(); ++i) {
+    for (size_t i = 0; i < _keybindingsData.size(); i++) {
         if (_keybindingsData[i].key == keybinding->key &&
             _keybindingsData[i].action == keybinding->action)
         {

@@ -255,7 +255,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
     if (p.meshColor.has_value()) {
         std::vector<glm::vec3> ops = *p.meshColor;
-        for (size_t i = 0; i < ops.size(); ++i) {
+        for (size_t i = 0; i < ops.size(); i++) {
             _meshColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
     }
@@ -304,7 +304,7 @@ void RenderableDUMeshes::initializeGL() {
 
 void RenderableDUMeshes::deinitializeGL() {
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
-        for (int i = 0; i < pair.second.numU; ++i) {
+        for (int i = 0; i < pair.second.numU; i++) {
             glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
             glDeleteBuffers(1, &pair.second.vboArray[i]);
         }
@@ -336,7 +336,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
-        for (size_t i = 0; i < pair.second.vaoArray.size(); ++i) {
+        for (size_t i = 0; i < pair.second.vaoArray.size(); i++) {
             glBindVertexArray(pair.second.vaoArray[i]);
             switch (pair.second.style) {
                 case Solid:
@@ -563,7 +563,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 // Try to read three values for the position
                 glm::vec3 pos;
                 bool success = true;
-                for (int i = 0; i < 3; ++i) {
+                for (int i = 0; i < 3; i++) {
                     GLfloat value;
                     lineData >> value;
                     bool errorReading = lineData.rdstate() & std::ifstream::failbit;
@@ -592,7 +592,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 // OLD CODE:
                 // (2022-03-23, emmbr)  None of our files included texture coordinates,
                 // and if they would they would still not be used by the shader
-                //for (int i = 0; i < 7; ++i) {
+                //for (int i = 0; i < 7; i++) {
                 //    GLfloat value;
                 //    lineData >> value;
                 //    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
@@ -626,7 +626,7 @@ void RenderableDUMeshes::createMeshes() {
     LDEBUG("Creating planes");
 
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
-        for (int i = 0; i < p.second.numU; ++i) {
+        for (int i = 0; i < p.second.numU; i++) {
             GLuint vao;
             glGenVertexArrays(1, &vao);
             p.second.vaoArray.push_back(vao);
@@ -685,7 +685,7 @@ void RenderableDUMeshes::createMeshes() {
 
         // Grid: we need columns
         if (p.second.numU > 1) {
-            for (int i = 0; i < p.second.numV; ++i) {
+            for (int i = 0; i < p.second.numV; i++) {
                 GLuint cvao;
                 glGenVertexArrays(1, &cvao);
                 p.second.vaoArray.push_back(cvao);

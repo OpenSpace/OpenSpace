@@ -41,7 +41,7 @@ namespace {
 
     int getLevelFromLine(std::string line) {
         int level = 0;
-        for (unsigned int i = 0; i < line.length(); ++i) {
+        for (unsigned int i = 0; i < line.length(); i++) {
             if (line.substr(i, 1) == " ") {
                 level++;
             }
@@ -123,7 +123,7 @@ namespace {
                 pathPrefix += itemName;
                 pathPrefix += "/";
             }
-            for (int i = 0; i < item->childCount(); ++i) {
+            for (int i = 0; i < item->childCount(); i++) {
                 parseChildrenForSelected(
                     item->child(i),
                     outputPaths,

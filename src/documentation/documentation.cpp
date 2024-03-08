@@ -162,13 +162,18 @@ void logError(const SpecificationError& error, std::string component) {
         LERRORC(fmt::format("{}: {}", component, error.component), error.message);
     }
     for (const documentation::TestResult::Offense& o : error.result.offenses) {
-        LERRORC(
-            o.offender,
-            fmt::format("{}: {}", ghoul::to_string(o.reason), o.explanation)
-        );
+        if (o.explanation.empty()) {
+            LERRORC(ghoul::to_string(o.reason), o.offender);
+        }
+        else {
+            LERRORC(
+                ghoul::to_string(o.reason),
+                fmt::format("{}: {}", o.offender, o.explanation)
+            );
+        }
     }
     for (const documentation::TestResult::Warning& w : error.result.warnings) {
-        LWARNINGC(w.offender, ghoul::to_string(w.reason));
+        LWARNINGC(ghoul::to_string(w.reason), w.offender);
     }
 }
 

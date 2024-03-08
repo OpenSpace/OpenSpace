@@ -50,7 +50,7 @@ void GuiJoystickComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    for (size_t i = 0; i < global::joystickInputStates->size(); ++i) {
+    for (size_t i = 0; i < global::joystickInputStates->size(); i++) {
         const JoystickInputState& state = global::joystickInputStates->at(i);
         if (!state.isConnected) {
             continue;
@@ -58,7 +58,7 @@ void GuiJoystickComponent::render() {
 
         ImGui::Text("%s [%i]", state.name.c_str(), static_cast<int>(i));
         ImGui::Text("%s", "Axes");
-        for (int j = 0; j < state.nAxes; ++j) {
+        for (int j = 0; j < state.nAxes; j++) {
             float f = state.axes[j];
             std::string id = std::to_string(j) + "##" + state.name + "Axis";
             ImGui::SliderFloat(
@@ -69,7 +69,7 @@ void GuiJoystickComponent::render() {
             );
         }
         ImGui::Text("%s", "Buttons");
-        for (int j = 0; j < state.nButtons; ++j) {
+        for (int j = 0; j < state.nButtons; j++) {
             std::string id = std::to_string(j) + "##" + state.name + "Button";
             ImGui::RadioButton(
                 id.c_str(),
@@ -86,7 +86,7 @@ void GuiJoystickComponent::render() {
 
     ImGui::Text("%s", "Summed contributions");
     ImGui::Text("%s", "Axes");
-    for (int i = 0; i < global::joystickInputStates->numAxes(); ++i) {
+    for (int i = 0; i < global::joystickInputStates->numAxes(); i++) {
         float f = global::joystickInputStates->axis("", i);
         std::string id = std::to_string(i) + "##" + "TotalAxis";
         ImGui::SliderFloat(
@@ -97,7 +97,7 @@ void GuiJoystickComponent::render() {
         );
     }
     ImGui::Text("%s", "Buttons");
-    for (int i = 0; i < global::joystickInputStates->numButtons(); ++i) {
+    for (int i = 0; i < global::joystickInputStates->numButtons(); i++) {
         std::string id = std::to_string(i) + "##" + "TotalButton";
         ImGui::RadioButton(
             id.c_str(),

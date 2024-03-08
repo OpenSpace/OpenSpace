@@ -190,7 +190,7 @@ int DateTime::increment(int value, char unit, double error, double resolution) {
     if (nIncrements == 0) {
         nIncrements = 1;
     }
-    for (unsigned int i = 0; i < nIncrements; ++i) {
+    for (unsigned int i = 0; i < nIncrements; i++) {
         incrementOnce(value, unit);
     }
     return nIncrements;
@@ -237,7 +237,7 @@ int DateTime::decrement(int value, char unit, double error, double resolution) {
     if (nDecrements == 0) {
         nDecrements = 1;
     }
-    for (unsigned int i = 0; i < nDecrements; ++i) {
+    for (unsigned int i = 0; i < nDecrements; i++) {
         decrementOnce(value, unit);
     }
     return nDecrements;

@@ -331,7 +331,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
 
     ghoul::Dictionary globalCustomizationScriptsDict;
-    for (size_t i = 0; i < globalCustomizationScripts.size(); ++i) {
+    for (size_t i = 0; i < globalCustomizationScripts.size(); i++) {
         globalCustomizationScriptsDict.setValue(
             std::to_string(i),
             globalCustomizationScripts[i]
@@ -340,7 +340,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("GlobalCustomizationScripts", globalCustomizationScriptsDict);
 
     ghoul::Dictionary fontsDict;
-    for (auto it = fonts.begin(); it != fonts.end(); ++it) {
+    for (auto it = fonts.begin(); it != fonts.end(); it++) {
         fontsDict.setValue(it->first, it->second);
     }
     res.setValue("Fonts", fontsDict);
@@ -363,7 +363,7 @@ ghoul::Dictionary Configuration::createDictionary() {
         loggingDict.setValue("CapabilitiesVerbosity", logging.capabilitiesVerbosity);
 
         ghoul::Dictionary logsDict;
-        for (size_t i = 0; i < logging.logs.size(); ++i) {
+        for (size_t i = 0; i < logging.logs.size(); i++) {
             logsDict.setValue(std::to_string(i), logging.logs[i]);
         }
         loggingDict.setValue("Logs", logsDict);
@@ -413,7 +413,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("LayerServer", layerServerToString(layerServer));
 
     ghoul::Dictionary moduleConfigurationsDict;
-    for (auto it = moduleConfigurations.begin(); it != moduleConfigurations.end(); ++it) {
+    for (auto it = moduleConfigurations.begin(); it != moduleConfigurations.end(); it++) {
         moduleConfigurationsDict.setValue(it->first, it->second);
     }
     res.setValue("ModuleConfigurations", moduleConfigurationsDict);
@@ -431,7 +431,7 @@ ghoul::Dictionary Configuration::createDictionary() {
         );
 
         ghoul::Dictionary identifierFiltersDict;
-        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); ++i) {
+        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); i++) {
             {
                 ghoul::Dictionary identifierFilterDict;
                 identifierFilterDict.setValue(
@@ -453,7 +453,7 @@ ghoul::Dictionary Configuration::createDictionary() {
         openGLDebugContextDict.setValue("IdentifierFilters", identifierFiltersDict);
 
         ghoul::Dictionary severityFiltersDict;
-        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); ++i) {
+        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); i++) {
             severityFiltersDict.setValue(
                 std::to_string(i),
                 openGLDebugContext.severityFilters[i]

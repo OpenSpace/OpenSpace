@@ -130,7 +130,7 @@ void TransferFunction::setTextureFromTxt() {
             float intensity;
             glm::vec4 rgba = glm::vec4(0.f);
             iss >> intensity;
-            for(int i = 0; i < 4; ++i) {
+            for(int i = 0; i < 4; i++) {
                 iss >> rgba[i];
             }
             mappingKeys.emplace_back(intensity, rgba);
@@ -152,7 +152,7 @@ void TransferFunction::setTextureFromTxt() {
 
     // allocate new float array with zeros
     float* transferFunction = new float[width * 4];
-    for (int i = 0; i < 4 * width; ++i) {
+    for (int i = 0; i < 4 * width; i++) {
         transferFunction[i] = 0.f;
     }
 
@@ -163,7 +163,7 @@ void TransferFunction::setTextureFromTxt() {
     auto currentKey = prevKey + 1;
     auto lastKey = mappingKeys.end() -1;
 
-    for (size_t i = lowerIndex; i <= upperIndex; ++i) {
+    for (size_t i = lowerIndex; i <= upperIndex; i++) {
         const float fpos = static_cast<float>(i) / static_cast<float>(width-1);
         if (fpos > currentKey->position) {
             prevKey = currentKey;

@@ -230,7 +230,7 @@ void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
                         LoadingScreen::ItemStatus::Started,
                         progressInfo
                     );
-                    ++it;
+                    it++;
             }
             else if ((*it)->isRejected()) {
                 updateItem(
@@ -239,7 +239,7 @@ void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
                     LoadingScreen::ItemStatus::Failed,
                     LoadingScreen::ProgressInfo()
                 );
-                ++it;
+                it++;
             }
             else {
                 LoadingScreen::ProgressInfo progressInfo;
@@ -407,7 +407,7 @@ void LoadingScreen::render() {
                 glm::vec2 ll = glm::vec2(0.f);
                 glm::vec2 ur = glm::vec2(0.f);
                 int i = 0;
-                for (; i < MaxNumberLocationSamples; ++i) {
+                for (; i < MaxNumberLocationSamples; i++) {
                     std::uniform_int_distribution<int> distX(
                         15,
                         static_cast<int>(res.x - b.x - 15)

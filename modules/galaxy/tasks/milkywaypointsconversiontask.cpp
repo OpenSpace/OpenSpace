@@ -65,7 +65,7 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
     float b;
     float a;
 
-    for (int64_t i = 0; i < nPoints; ++i) {
+    for (int64_t i = 0; i < nPoints; i++) {
         in >> x >> y >> z >> r >> g >> b >> a;
         if (in.good()) {
             pointData[i * 7 + 0] = x;

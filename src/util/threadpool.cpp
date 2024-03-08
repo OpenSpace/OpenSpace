@@ -57,7 +57,7 @@ void Worker::operator()() {
 }
 
 ThreadPool::ThreadPool(size_t numThreads) : stop(false) {
-    for (size_t i = 0; i < numThreads; ++i) {
+    for (size_t i = 0; i < numThreads; i++) {
         workers.emplace_back(std::thread(Worker(*this)));
     }
 }

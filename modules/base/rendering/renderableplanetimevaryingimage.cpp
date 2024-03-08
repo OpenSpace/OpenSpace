@@ -143,7 +143,7 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
     RenderablePlane::initializeGL();
 
     _textureFiles.resize(_sourceFiles.size());
-    for (size_t i = 0; i < _sourceFiles.size(); ++i) {
+    for (size_t i = 0; i < _sourceFiles.size(); i++) {
         _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
             absPath(_sourceFiles[i]).string(),
             2

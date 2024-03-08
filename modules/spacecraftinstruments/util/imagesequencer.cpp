@@ -254,7 +254,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     }
 
     std::vector<int> toDelete;
-    for (std::vector<Image>::iterator it = captures.begin(); it != captures.end(); ++it) {
+    for (std::vector<Image>::iterator it = captures.begin(); it != captures.end(); it++) {
         if (!it->isPlaceholder) {
             continue;
         }
@@ -274,7 +274,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
         }
     }
 
-    for (size_t i = 0; i < toDelete.size(); ++i) {
+    for (size_t i = 0; i < toDelete.size(); i++) {
         // We have to subtract i here as we already have deleted i value before this and
         // we need to adjust the location
         int v = toDelete[i] - static_cast<int>(i);
@@ -350,7 +350,7 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
         // simple search function
         double min = 10;
         auto findMin = [&min](const std::vector<Image>& vec) -> double {
-            for (size_t i = 1; i < vec.size(); ++i) {
+            for (size_t i = 1; i < vec.size(); i++) {
                 double e = std::abs(vec[i].timeRange.start - vec[i - 1].timeRange.start);
                 min = std::min(e, min);
             }

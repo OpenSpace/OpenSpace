@@ -57,7 +57,7 @@ bool Envelope::operator!=(const Envelope& env) const {
 
     for (auto iter = _points.begin(), envIter = env._points.begin();
          iter != _points.end();
-         ++iter, ++envIter)
+         iter++, envIter++)
     {
       if (std::fabs(iter->position.first - envIter->position.first) > MinDist ||
           std::fabs(iter->position.second - envIter->position.second) > MinDist ||
@@ -134,7 +134,7 @@ glm::vec4 Envelope::valueAtPosition(float pos) const {
 int EnvelopePoint::hexadecimalToDecimal(const std::string& hex) const {
     const size_t hexLength = hex.length();
     double dec = 0;
-    for (size_t i = 0; i < hexLength; ++i) {
+    for (size_t i = 0; i < hexLength; i++) {
         char b = hex[i];
 
         if (b >= 48 && b <= 57) {
@@ -214,7 +214,7 @@ json Envelope::jsonEnvelope() const {
 }
 
 void Envelope::setEnvelopeLuaTable(lua_State* state) const {
-    for (auto iter = _points.begin(); iter != _points.end(); ++iter) {
+    for (auto iter = _points.begin(); iter != _points.end(); iter++) {
         lua_newtable(state);
         ghoul::lua::push(state, iter->colorHex);
         lua_setfield(state, -2, "color");

@@ -575,7 +575,7 @@ void convertVersion10to11(nlohmann::json& profile) {
 
     std::vector<version10::Keybinding> kbs =
         profile.at("keybindings").get<std::vector<version10::Keybinding>>();
-    for (size_t i = 0; i < kbs.size(); ++i) {
+    for (size_t i = 0; i < kbs.size(); i++) {
         version10::Keybinding& kb = kbs[i];
         std::string identifier = fmt::format("profile.keybind.{}", i);
 

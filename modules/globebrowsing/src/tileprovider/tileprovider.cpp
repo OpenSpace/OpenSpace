@@ -227,7 +227,7 @@ ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
 
     ChunkTilePile chunkTilePile;
     std::fill(chunkTilePile.begin(), chunkTilePile.end(), std::nullopt);
-    for (int i = 0; i < pileSize; ++i) {
+    for (int i = 0; i < pileSize; i++) {
         chunkTilePile[i] = chunkTile(tileIndex, i);
         if (chunkTilePile[i]->tile.status == Tile::Status::Unavailable) {
             if (i == 0) {

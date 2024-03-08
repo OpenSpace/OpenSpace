@@ -136,7 +136,7 @@ namespace {
 
         int currentLayerNumber = -1;
         Layer currentLayer;
-        for (int i = 0; i < nSubdatasets; ++i) {
+        for (int i = 0; i < nSubdatasets; i++) {
             int iDataset = -1;
             std::array<char, 256> IdentifierBuffer;
             std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
@@ -634,7 +634,7 @@ GlobeBrowsingModule::urlInfo(const std::string& globe) const
 {
     const auto range = _urlList.equal_range(globe);
     std::vector<UrlInfo> res;
-    for (auto i = range.first; i != range.second; ++i) {
+    for (auto i = range.first; i != range.second; i++) {
         res.emplace_back(i->second);
     }
     return res;

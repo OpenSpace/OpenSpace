@@ -117,7 +117,7 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     }
 
     double values[9];
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < 9; i++) {
         values[i] = luaL_checknumber(_state, -1 - i);
     }
 

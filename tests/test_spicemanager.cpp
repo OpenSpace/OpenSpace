@@ -279,7 +279,7 @@ TEST_CASE("SpiceManager: Get Value From ID ND", "[spicemanager]") {
 
     CHECK(controlVec.size() == returnND.size());
 
-    for (unsigned int i = 0; i < returnND.size(); ++i){
+    for (unsigned int i = 0; i < returnND.size(); i++) {
         CHECK(controlVec[i] == returnND[i]);
     }
 

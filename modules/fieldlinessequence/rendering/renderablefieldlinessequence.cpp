@@ -674,7 +674,7 @@ void RenderableFieldlinesSequence::setupProperties() {
         // the given sequence have the same extra quantities
         const size_t nExtraQuantities = _states[0].nExtraQuantities();
         const std::vector<std::string>& extraNamesVec = _states[0].extraQuantityNames();
-        for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
+        for (int i = 0; i < static_cast<int>(nExtraQuantities); i++) {
             _colorQuantity.addOption(i, extraNamesVec[i]);
             _maskingQuantity.addOption(i, extraNamesVec[i]);
         }

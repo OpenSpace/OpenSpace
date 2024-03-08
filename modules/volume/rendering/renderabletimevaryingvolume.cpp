@@ -255,12 +255,12 @@ void RenderableTimeVaryingVolume::initializeGL() {
         float min = t.metadata.minValue;
         float diff = t.metadata.maxValue - t.metadata.minValue;
         float* data = t.rawVolume->data();
-        for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
+        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
             data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
         }
 
         t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-        for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
+        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
             t.histogram->add(data[i]);
         }
         // TODO: handle normalization properly for different timesteps + transfer function
@@ -398,7 +398,7 @@ int RenderableTimeVaryingVolume::timestepIndex(
         if (&(it.second) == t) {
             return index;
         }
-        ++index;
+        index++;
     }
     return -1;
 }
@@ -415,7 +415,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFrom
         if (index == target) {
             return &(it.second);
         }
-        ++index;
+        index++;
     }
     return nullptr;
 }

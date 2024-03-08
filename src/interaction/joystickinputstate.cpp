@@ -36,7 +36,7 @@ namespace openspace::interaction {
 int JoystickInputStates::numAxes(const std::string& joystickName) const {
     if (joystickName.empty()) {
         int maxNumAxes = -1;
-        for (auto it = begin(); it < end(); ++it) {
+        for (auto it = begin(); it < end(); it++) {
             if (it->nAxes > maxNumAxes) {
                 maxNumAxes = it->nAxes;
             }
@@ -44,7 +44,7 @@ int JoystickInputStates::numAxes(const std::string& joystickName) const {
         return maxNumAxes;
     }
 
-    for (auto it = begin(); it < end(); ++it) {
+    for (auto it = begin(); it < end(); it++) {
         if (it->name == joystickName) {
             return it->nAxes;
         }
@@ -55,7 +55,7 @@ int JoystickInputStates::numAxes(const std::string& joystickName) const {
 int JoystickInputStates::numButtons(const std::string& joystickName) const {
     if (joystickName.empty()) {
         int maxNumButtons = -1;
-        for (auto it = begin(); it < end(); ++it) {
+        for (auto it = begin(); it < end(); it++) {
             if (it->nButtons > maxNumButtons) {
                 maxNumButtons = it->nButtons;
             }
@@ -63,7 +63,7 @@ int JoystickInputStates::numButtons(const std::string& joystickName) const {
         return maxNumButtons;
     }
 
-    for (auto it = begin(); it < end(); ++it) {
+    for (auto it = begin(); it < end(); it++) {
         if (it->name == joystickName) {
             return it->nButtons;
         }
@@ -94,7 +94,7 @@ float JoystickInputStates::axis(const std::string& joystickName, int axis) const
     }
 
     const JoystickInputState* state = nullptr;
-    for (auto it = begin(); it < end(); ++it) {
+    for (auto it = begin(); it < end(); it++) {
         if (it->name == joystickName) {
             state = &(*it);
         }
@@ -124,7 +124,7 @@ bool JoystickInputStates::button(const std::string& joystickName, int button,
     }
 
     const JoystickInputState* state = nullptr;
-    for (auto it = begin(); it < end(); ++it) {
+    for (auto it = begin(); it < end(); it++) {
         if (it->name == joystickName) {
             state = &(*it);
         }

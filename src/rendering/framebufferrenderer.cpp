@@ -157,7 +157,7 @@ void FramebufferRenderer::initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
@@ -970,7 +970,7 @@ void FramebufferRenderer::updateRaycastData() {
 
         try {
             _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
-                "Volume " + std::to_string(data.id) + " exit",
+                fmt::format("Volume {} exit", data.id),
                 absPath(vsPath),
                 absPath(ExitFragmentShaderPath),
                 dict
@@ -983,7 +983,7 @@ void FramebufferRenderer::updateRaycastData() {
             ghoul::Dictionary outsideDict = dict;
             outsideDict.setValue("getEntryPath", std::string(GetEntryOutsidePath));
             _raycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
-                "Volume " + std::to_string(data.id) + " raycast",
+                fmt::format("Volume {} raycast", data.id),
                 absPath(vsPath),
                 absPath(RaycastFragmentShaderPath),
                 outsideDict
@@ -996,7 +996,7 @@ void FramebufferRenderer::updateRaycastData() {
             ghoul::Dictionary insideDict = dict;
             insideDict.setValue("getEntryPath", std::string(GetEntryInsidePath));
             _insideRaycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
-                "Volume " + std::to_string(data.id) + " inside raycast",
+                fmt::format("Volume {} inside raycast", data.id),
                 absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
                 absPath(RaycastFragmentShaderPath),
                 insideDict
@@ -1037,7 +1037,7 @@ void FramebufferRenderer::updateDeferredcastData() {
 
         try {
             _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
-                "Deferred " + std::to_string(data.id) + " raycast",
+                fmt::format("Deferred {} raycast", data.id),
                 vsPath,
                 fsPath,
                 dict
@@ -1045,7 +1045,7 @@ void FramebufferRenderer::updateDeferredcastData() {
 
             caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
         }
-        catch (ghoul::RuntimeError& e) {
+        catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
     }
@@ -1476,20 +1476,15 @@ void FramebufferRenderer::setGamma(float gamma) {
     _gamma = std::move(gamma);
 }
 
-void FramebufferRenderer::setHue(float hue) {
+void FramebufferRenderer::setHueValueSaturation(float hue, float value, float saturation)
+{
     _hue = std::move(hue);
-}
-
-void FramebufferRenderer::setValue(float value) {
     _value = std::move(value);
-}
-
-void FramebufferRenderer::setSaturation(float sat) {
-    _saturation = std::move(sat);
+    _saturation = std::move(saturation);
 }
 
 void FramebufferRenderer::enableFXAA(bool enable) {
-    _enableFXAA = std::move(enable);
+    _enableFXAA = enable;
 }
 
 void FramebufferRenderer::updateRendererData() {

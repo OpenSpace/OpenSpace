@@ -84,7 +84,7 @@ void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options
 }
 
 void OptionProperty::addOptions(std::vector<std::string> options) {
-    for (int i = 0; i < static_cast<int>(options.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(options.size()); i++) {
         addOption(i, std::move(options[i]));
     }
 }
@@ -96,7 +96,7 @@ void OptionProperty::clearOptions() {
 
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
-    for (size_t i = 0; i < _options.size(); ++i) {
+    for (size_t i = 0; i < _options.size(); i++) {
         const Option& o = _options[i];
         if (o.value == value) {
             // If it does, set it by calling the superclasses setValue method
@@ -156,7 +156,7 @@ std::string OptionProperty::generateAdditionalJsonDescription() const {
     // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
     std::string result =
         "{ \"" + OptionsKey + "\": [";
-    for (size_t i = 0; i < _options.size(); ++i) {
+    for (size_t i = 0; i < _options.size(); i++) {
         const Option& o = _options[i];
         std::string v = std::to_string(o.value);
         std::string vSan = escapedJson(v);

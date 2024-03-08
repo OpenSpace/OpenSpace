@@ -1,0 +1,49 @@
+local globe = asset.require("../earth")
+
+
+
+local texturesPath = asset.resource({
+  Name = "5000 Years of Total Solar Eclipses",
+  Type = "HttpSynchronization",
+  Identifier = "earth_eclipse_5000_years",
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = "5000_Years_Eclipses",
+  Name = "5000 Years of Total Solar Eclipses",
+  Enabled = asset.enabled,
+  FilePath = texturesPath .. "eclipse_freq_heatmap.tif",
+  Description = [[
+    This is a heatmap showing the density of solar eclipse paths over the Earth during the 5000-year period between 2000 BCE and 3000 CE. It uses the list of eclipses calculated by Fred Espenak and Jean Meeus and published in 2006 as the Five Millennium Canon of Solar Eclipses. The paths of the 3742 eclipses classified in the Canon as either "T" (total) or "H" (hybrid or total-annular) were drawn into a global map with a pixel resolution of 4 minutes (1/15 of a degree) of latitude and longitude. The pixels counted the eclipse paths as they were drawn, and each pixel location ended up experiencing anywhere from one to 35 eclipses.
+
+    For more information visit the NASA's Scientific Visualization Studio that generated this image: https://svs.gsfc.nasa.gov/5222
+
+    Thanks to Visualizer Ernie Wright and Technical support Ian Jones and Laurence Schuler for this.
+
+    See also the paper by Jean Meeus, The Frequency of Total and Annular Solar Eclipses for a Given Place, JBAA 92, 3 (April 1982), pp 124-126.
+  ]],
+  CacheSettings = { Enabled = false }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+asset.meta = {
+  Name = "5000 Years of Total Solar Eclipses",
+  Version = "1.0",
+  Description = Layer.Description,
+  Author = "OpenSpace Team",
+  URL = "https://svs.gsfc.nasa.gov/5222",
+  License = "NASA"
+}

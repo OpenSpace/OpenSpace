@@ -523,7 +523,7 @@ void TimeManager::addDeltaTimesKeybindings() {
 
     // For each key, add upp to three keybinds (no modifier, then SHIFT and then CTRL),
     // plus inverted version of each time step one using the ALT modifier
-    for (int i = 0; i < nSteps; ++i) {
+    for (int i = 0; i < nSteps; i++) {
         const Key key = Keys[i % nKeys];
         const double deltaTimeStep = steps[i];
 

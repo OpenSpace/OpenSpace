@@ -24,6 +24,7 @@
 
 #include <openspace/scene/asset.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/scene/assetmanager.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -291,6 +292,12 @@ void Asset::initialize() {
     // 2. Call Lua onInitialize
     try {
         _manager.callOnInitialize(this);
+    }
+    catch (const documentation::SpecificationError& e) {
+        LERROR(fmt::format("Failed to initialize asset {}", path()));
+        documentation::logError(e);
+        setState(State::InitializationFailed);
+        return;
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format("Failed to initialize asset {}", path()));

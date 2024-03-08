@@ -582,7 +582,7 @@ geoPositionForCameraDeprecated(bool useEyePosition = false)
 
     std::vector<ghoul::Dictionary> res;
     res.reserve(cap.size());
-    for (size_t i = 0; i < cap.size(); ++i) {
+    for (size_t i = 0; i < cap.size(); i++) {
         ghoul::Dictionary c;
         c.setValue("Name", cap[i].name);
         c.setValue("URL", cap[i].url);

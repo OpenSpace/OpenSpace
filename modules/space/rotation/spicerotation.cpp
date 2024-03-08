@@ -73,9 +73,6 @@ namespace {
         // specified, a reference frame of 'GALACTIC' is used instead
         std::optional<std::string> destinationFrame;
 
-        // [[codegen::verbatim(DestinationInfo.description)]]
-        std::optional<std::variant<std::vector<std::string>, std::string>> kernels;
-
         // [[codegen::verbatim(TimeFrameInfo.description)]]
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
@@ -102,17 +99,6 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 
     _sourceFrame = p.sourceFrame;
     _destinationFrame = p.destinationFrame.value_or("GALACTIC");
-
-    if (p.kernels.has_value()) {
-        if (std::holds_alternative<std::string>(*p.kernels)) {
-            SpiceManager::ref().loadKernel(std::get<std::string>(*p.kernels));
-        }
-        else {
-            for (const std::string& s : std::get<std::vector<std::string>>(*p.kernels)) {
-                SpiceManager::ref().loadKernel(s);
-            }
-        }
-    }
 
     _fixedDate.onChange([this]() {
         if (_fixedDate.value().empty()) {

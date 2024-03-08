@@ -58,7 +58,7 @@ void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
     ZoneScoped;
 
     // First create empty layer groups in case not all are specified
-    for (size_t i = 0; i < _layerGroups.size(); ++i) {
+    for (size_t i = 0; i < _layerGroups.size(); i++) {
         _layerGroups[i] = std::make_unique<LayerGroup>(layers::Groups[i]);
     }
 
@@ -140,7 +140,7 @@ std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups(
     ZoneScoped;
 
     std::array<LayerGroup*, NumLayerGroups> res = {};
-    for (size_t i = 0; i < NumLayerGroups; ++i) {
+    for (size_t i = 0; i < NumLayerGroups; i++) {
         res[i] = _layerGroups[i].get();
     }
     return res;

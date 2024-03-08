@@ -162,7 +162,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
 void LayerGroup::deleteLayer(const std::string& layerName) {
     for (std::vector<std::unique_ptr<Layer>>::iterator it = _layers.begin();
          it != _layers.end();
-         ++it)
+         it++)
     {
         if (it->get()->identifier() == layerName) {
             // we need to make a copy as the layername is only a reference

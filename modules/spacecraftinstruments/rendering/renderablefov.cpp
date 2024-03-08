@@ -308,7 +308,7 @@ void RenderableFov::initializeGL() {
 
     if (_simplifyBounds) {
         const size_t sizeBefore = res.bounds.size();
-        for (size_t i = 1; i < res.bounds.size() - 1; ++i) {
+        for (size_t i = 1; i < res.bounds.size() - 1; i++) {
             const glm::dvec3& prev = res.bounds[i - 1];
             const glm::dvec3& curr = res.bounds[i];
             const glm::dvec3& next = res.bounds[i + 1];
@@ -489,7 +489,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
     // First we fill the field-of-view bounds array by testing each bounds vector against
     // the object. We need to test it against the object (rather than using a fixed
     // distance) as the field of view rendering should stop at the surface
-    for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+    for (size_t i = 0; i < _instrument.bounds.size(); i++) {
         const glm::dvec3& bound = _instrument.bounds[i];
 
         RenderInformation::VBOData& first = _fieldOfViewBounds.data[2 * i];
@@ -582,7 +582,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
 
     // An early out for when the target is not in field of view
     if (!isInFov) {
-        for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+        for (size_t i = 0; i < _instrument.bounds.size(); i++) {
             // If none of the points are able to intersect with the target, we can just
             // copy the values from the field-of-view boundary. So we take each second
             // item (the first one is (0,0,0)) and replicate it 'InterpolationSteps' times
@@ -591,7 +591,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
     }
     else {
         // At least one point will intersect
-        for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+        for (size_t i = 0; i < _instrument.bounds.size(); i++) {
             // Wrap around the array index to 0
             const size_t j = (i == _instrument.bounds.size() - 1) ? 0 : i + 1;
 
@@ -663,7 +663,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
 
 #if 0 // DEBUG_THIS
     // At least one point will intersect
-    for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+    for (size_t i = 0; i < _instrument.bounds.size(); i++) {
         // Wrap around the array index to 0
         const size_t j = (i == _instrument.bounds.size() - 1) ? 0 : i + 1;
 
@@ -726,7 +726,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                     copyFieldOfViewValues(i, p2, indexForBounds(j));
 
                     // Are recompute the intersecting ones
-                    for (size_t k = 0; k <= (p2 - p1); ++k) {
+                    for (size_t k = 0; k <= (p2 - p1); k++) {
                         const double t = t1 + k * (t2 - t1);
                         const glm::dvec3 interpolated = glm::mix(iBound, jBound, t);
                         const glm::vec3 icpt = interceptVector(interpolated);

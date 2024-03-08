@@ -134,13 +134,6 @@ namespace {
         openspace::properties::Property::Visibility::Always
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
-        "ShowHiddenSceneGraphNodes",
-        "Show Hidden Scene Graph Nodes",
-        "If checked, hidden scene graph nodes are visible in the UI",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FadeDurationInfo = {
         "FadeDuration",
         "Fade Duration (seconds)",
@@ -172,6 +165,28 @@ namespace {
             global::renderEngine->renderingResolution()
         );
     }
+
+    void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po) {
+        using namespace openspace;
+
+        for (properties::PropertyOwner* subOwner : po->propertySubOwners()) {
+            resetPropertyChangeFlagsOfSubowners(subOwner);
+        }
+        for (properties::Property* p : po->properties()) {
+            p->resetToUnchanged();
+        }
+    }
+
+    void resetPropertyChangeFlags() {
+        ZoneScoped;
+
+        std::vector<openspace::SceneGraphNode*> nodes =
+            openspace::global::renderEngine->scene()->allSceneGraphNodes();
+        for (openspace::SceneGraphNode* n : nodes) {
+            resetPropertyChangeFlagsOfSubowners(n);
+        }
+    }
+
 } // namespace
 
 namespace openspace {
@@ -182,7 +197,6 @@ OpenSpaceEngine::OpenSpaceEngine()
     : properties::PropertyOwner({ "OpenSpaceEngine", "OpenSpace Engine" })
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
-    , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
     , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
     , _disableAllMouseInputs(DisableMouseInputInfo, false)
 {
@@ -202,7 +216,6 @@ OpenSpaceEngine::OpenSpaceEngine()
     });
     addProperty(_visibility);
 
-    addProperty(_showHiddenSceneGraphNodes);
     addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
 }
@@ -1012,11 +1025,10 @@ void OpenSpaceEngine::preSynchronization() {
 
     global::syncEngine->preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
-        double dt = global::windowDelegate->deltaTime();
-
-        if (global::sessionRecording->isSavingFramesDuringPlayback()) {
-            dt = global::sessionRecording->fixedDeltaTimeDuringFrameOutput();
-        }
+        const double dt =
+            global::sessionRecording->isSavingFramesDuringPlayback() ?
+            global::sessionRecording->fixedDeltaTimeDuringFrameOutput() :
+            global::windowDelegate->deltaTime();
 
         global::timeManager->preSynchronization(dt);
 
@@ -1210,25 +1222,6 @@ void OpenSpaceEngine::postDraw() {
     LTRACE("OpenSpaceEngine::postDraw(end)");
 }
 
-void OpenSpaceEngine::resetPropertyChangeFlags() {
-    ZoneScoped;
-
-    std::vector<SceneGraphNode*> nodes =
-        global::renderEngine->scene()->allSceneGraphNodes();
-    for (SceneGraphNode* n : nodes) {
-        resetPropertyChangeFlagsOfSubowners(n);
-    }
-}
-
-void OpenSpaceEngine::resetPropertyChangeFlagsOfSubowners(properties::PropertyOwner* po) {
-    for (properties::PropertyOwner* subOwner : po->propertySubOwners()) {
-        resetPropertyChangeFlagsOfSubowners(subOwner);
-    }
-    for (properties::Property* p : po->properties()) {
-        p->resetToUnchanged();
-    }
-}
-
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action,
                                        IsGuiWindow isGuiWindow)
 {
@@ -1256,8 +1249,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
-    using F = global::callback::KeyboardCallback;
-    for (const F& func : *global::callback::keyboard) {
+    for (const global::callback::KeyboardCallback& func : *global::callback::keyboard) {
         const bool isConsumed = func(key, mod, action, isGuiWindow);
         if (isConsumed) {
             return;
@@ -1285,8 +1277,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
 {
     ZoneScoped;
 
-    using F = global::callback::CharacterCallback;
-    for (const F& func : *global::callback::character) {
+    for (const global::callback::CharacterCallback& func : *global::callback::character) {
         bool isConsumed = func(codepoint, modifier, isGuiWindow);
         if (isConsumed) {
             return;
@@ -1315,7 +1306,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 
     using F = global::callback::MouseButtonCallback;
     for (const F& func : *global::callback::mouseButton) {
-        bool isConsumed = func(button, action, mods, isGuiWindow);
+        const bool isConsumed = func(button, action, mods, isGuiWindow);
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
             // handler in order to reliably terminate a rotation or zoom, or to the other
@@ -1475,12 +1466,8 @@ void OpenSpaceEngine::decode(std::vector<std::byte> data) {
     global::syncEngine->decodeSyncables(std::move(data));
 }
 
-properties::Property::Visibility openspace::OpenSpaceEngine::visibility() const {
+properties::Property::Visibility OpenSpaceEngine::visibility() const {
     return static_cast<properties::Property::Visibility>(_visibility.value());
-}
-
-bool openspace::OpenSpaceEngine::showHiddenSceneGraphNodes() const {
-    return _showHiddenSceneGraphNodes;
 }
 
 void OpenSpaceEngine::toggleShutdownMode() {
@@ -1535,7 +1522,7 @@ void OpenSpaceEngine::resetMode() {
 }
 
 OpenSpaceEngine::CallbackHandle OpenSpaceEngine::addModeChangeCallback(
-                                                                   ModeChangeCallback cb)
+                                                                    ModeChangeCallback cb)
 {
     CallbackHandle handle = _nextCallbackHandle++;
     _modeChangeCallbacks.emplace_back(handle, std::move(cb));

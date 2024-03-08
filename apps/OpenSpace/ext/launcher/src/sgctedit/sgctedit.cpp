@@ -91,7 +91,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
     createWidgets(monitorSizes, static_cast<unsigned int>(nWindows), false);
     size_t existingWindowsControlSize = _displayWidget->windowControls().size();
-    for (size_t i = 0; i < nWindows; ++i) {
+    for (size_t i = 0; i < nWindows; i++) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         WindowControl* wCtrl = _displayWidget->windowControls()[i];
         if (i < existingWindowsControlSize && wCtrl) {
@@ -144,7 +144,7 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
     int nGuiRenderTagsFound = 0;
     _settingsWidget->nWindowsDisplayedChanged(static_cast<int>(nWindows));
 
-    for (size_t i = 0; i < nWindows; ++i) {
+    for (size_t i = 0; i < nWindows; i++) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         //First window needs to have "GUI" tag if this mode is set
         if (i == 0) {
@@ -318,7 +318,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
             monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
 
-        for (unsigned int i = 0; i < nWindows; ++i) {
+        for (unsigned int i = 0; i < nWindows; i++) {
             _displayWidget->addWindow();
         }
         
@@ -529,7 +529,7 @@ void SgctEdit::generateConfigResizeWindowsAccordingToSelected(sgct::config::Node
 }
 
 void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) {
-    for (size_t i = 0; i < node.windows.size(); ++i) {
+    for (size_t i = 0; i < node.windows.size(); i++) {
         // First apply default settings to each window...
         node.windows[i].id = static_cast<int>(i);
         node.windows[i].draw2D = true;

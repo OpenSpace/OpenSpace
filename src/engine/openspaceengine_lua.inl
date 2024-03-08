@@ -57,7 +57,7 @@ namespace {
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
-    global::windowDelegate->setScreenshotFolder(folder.string());
+    global::windowDelegate->setScreenshotFolder(std::move(folder));
 }
 
 // Adds a Tag to a SceneGraphNode identified by the provided uri
