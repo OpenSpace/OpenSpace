@@ -126,7 +126,7 @@ void Connection::handleMessage(const std::string& message) {
         if (!isAuthorized()) {
             _socket->disconnect();
             LERROR(fmt::format(
-                "Could not parse JSON: '{}'. Connection is unauthorized. Disconnecting",
+                "Could not parse JSON '{}'. Connection is unauthorized. Disconnecting",
                 message
             ));
             return;
@@ -141,7 +141,7 @@ void Connection::handleMessage(const std::string& message) {
                     return std::isprint(c, std::locale("")) ? char(c) : ' ';
                 }
             );
-            LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));
+            LERROR(fmt::format("Could not parse JSON '{}'", sanitizedString));
         }
     }
 }

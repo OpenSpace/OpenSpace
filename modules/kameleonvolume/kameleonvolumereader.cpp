@@ -83,8 +83,9 @@ KameleonVolumeReader::KameleonVolumeReader(std::string path) : _path(std::move(p
 
     const long status = _kameleon->open(_path);
     if (status != ccmc::FileReader::OK) {
-        LERROR(fmt::format("Failed to open file '{}' with Kameleon", _path));
-        throw ghoul::RuntimeError("Failed to open file: " + _path + " with Kameleon");
+        throw ghoul::RuntimeError(fmt::format(
+            "Failed to open file '{}' with Kameleon", _path
+        ));
     }
 
     // Possibly use a kameleon interpolator instead of a model interpolator?

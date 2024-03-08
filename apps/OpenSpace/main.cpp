@@ -1077,7 +1077,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
                 }
                 else {
                     throw ghoul::RuntimeError(fmt::format(
-                        "Error loading configuration file {}. File could not be found",
+                        "Error loading configuration file '{}'. File could not be found",
                         config
                     ));
                 }
@@ -1129,7 +1129,7 @@ int main(int argc, char* argv[]) {
         std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
-    LDEBUG(fmt::format("Registering ${{BIN}} to {}", absPath("${BIN}")));
+    LDEBUG(fmt::format("Registering ${{BIN}} to '{}'", absPath("${BIN}")));
 
     //
     // Parse commandline arguments
@@ -1213,11 +1213,11 @@ int main(int argc, char* argv[]) {
         if (!std::filesystem::is_regular_file(configurationFilePath)) {
             LFATALC(
                 "main",
-                fmt::format("Could not find configuration {}", configurationFilePath)
+                fmt::format("Could not find configuration '{}'", configurationFilePath)
             );
             exit(EXIT_FAILURE);
         }
-        LINFO(fmt::format("Configuration Path: {}", configurationFilePath));
+        LINFO(fmt::format("Configuration Path '{}'", configurationFilePath));
 
         // Register the base path as the directory where the configuration file lives
         std::filesystem::path base = configurationFilePath.parent_path();
@@ -1339,7 +1339,7 @@ int main(int argc, char* argv[]) {
                 "OpenSpace",
                 QString::fromStdString(fmt::format(
                     "The OpenSpace folder is started must not contain any of \"'\", "
-                    "\"\"\", [, or ]. Path is: '{}'. Unexpected errors will occur when "
+                    "\"\"\", [, or ]. Path is: {}. Unexpected errors will occur when "
                     "proceeding to run the software", pwd
                 ))
             );

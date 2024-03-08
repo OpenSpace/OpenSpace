@@ -750,7 +750,7 @@ Profile::Profile(const std::filesystem::path& path) {
     }
     catch (const std::ifstream::failure& e) {
         throw ghoul::RuntimeError(fmt::format(
-            "Exception opening profile file for read: {} ({})", path, e.what()
+            "Exception opening profile file for read '{}': {}", path, e.what()
         ));
     }
 

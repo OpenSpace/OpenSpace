@@ -227,7 +227,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                                                           SuccessCallback successCallback,
                                                               ErrorCallback errorCallback)
 {
-    LDEBUG(fmt::format("Start downloading file: '{}' into memory", url));
+    LDEBUG(fmt::format("Start downloading file '{}' into memory", url));
 
     auto downloadFunction = [url, successCb = std::move(successCallback),
                              errorCb = std::move(errorCallback)]()

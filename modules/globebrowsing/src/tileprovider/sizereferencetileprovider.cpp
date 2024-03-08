@@ -93,7 +93,7 @@ Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
         unit = "m";
     }
 
-    std::string text = fmt::format(" {:.0f} {:s}", tileLongitudalLength, unit);
+    std::string text = fmt::format("{:.0f} {:s}", tileLongitudalLength, unit);
     glm::vec2 textPosition = glm::vec2(
         0.f,
         aboveEquator ?

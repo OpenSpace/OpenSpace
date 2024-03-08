@@ -218,7 +218,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         }
         catch (const ghoul::RuntimeError& e) {
             throw ghoul::RuntimeError(fmt::format(
-                "Could not create time quantizer for Temporal GDAL dataset. {}", e.message
+                "Could not create time quantizer for Temporal GDAL dataset: {}", e.message
             ));
         }
 
@@ -295,7 +295,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
         if (_folder.files.empty()) {
             throw ghoul::RuntimeError(fmt::format(
-                "Error loading layer '{}'. Folder {} does not contain any files that "
+                "Error loading layer '{}'. Folder '{}' does not contain any files that "
                 "matched the time format",
                 _identifier, _folder.folder
             ));

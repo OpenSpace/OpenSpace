@@ -448,7 +448,7 @@ void RenderableDUMeshes::update(const UpdateData&) {
 bool RenderableDUMeshes::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
-        LINFO(fmt::format("Loading Speck file {}", std::filesystem::path(_speckFile)));
+        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
         success = readSpeckFile();
         if (!success) {
             return false;
@@ -466,9 +466,7 @@ bool RenderableDUMeshes::loadData() {
 bool RenderableDUMeshes::readSpeckFile() {
     std::ifstream file(_speckFile);
     if (!file.good()) {
-        LERROR(fmt::format(
-            "Failed to open Speck file {}", std::filesystem::path(_speckFile)
-        ));
+        LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
         return false;
     }
 
@@ -579,7 +577,7 @@ bool RenderableDUMeshes::readSpeckFile() {
 
                 if (!success) {
                     LERROR(fmt::format(
-                        "Failed reading position on line {} of mesh {} in file: '{}'. "
+                        "Failed reading position on line {} of mesh {} in file '{}'. "
                         "Stopped reading mesh data", l, meshIndex, _speckFile
                     ));
                     break;

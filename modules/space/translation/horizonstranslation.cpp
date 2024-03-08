@@ -210,7 +210,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file {} for loading cache file", file));
+        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 
@@ -259,7 +259,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
 void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) const {
     std::ofstream fileStream(file, std::ofstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file {} for save cache file", file));
+        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return;
     }
 

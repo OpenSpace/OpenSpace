@@ -130,7 +130,7 @@ json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath)
     bool failed = false;
     dl->wait();
     if (!dl->hasSucceeded()) {
-        LERROR(fmt::format("Error downloading horizons file with URL {}", dl->url()));
+        LERROR(fmt::format("Error downloading horizons file with URL '{}'", dl->url()));
         failed = true;
     }
 

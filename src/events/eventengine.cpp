@@ -125,7 +125,7 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
 
     // If we get this far, we haven't found the identifier
     throw ghoul::RuntimeError(fmt::format(
-        "Could not find event with identifier {}", identifier
+        "Could not find event with identifier '{}'", identifier
     ));
 }
 

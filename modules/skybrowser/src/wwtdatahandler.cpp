@@ -136,7 +136,7 @@ namespace {
         const bool success = downloadFile(url, file);
         if (!success) {
             LINFO(fmt::format(
-                "Could not download file '{}' to directory {}", url, directory
+                "Could not download file '{}' to directory '{}'", url, directory
             ));
             return false;
         }
@@ -154,7 +154,7 @@ namespace {
         // If the file contains no folders, or there are folders but without urls,
         // stop recursion
         if (!folderExists || folderContainNoUrls) {
-            LINFO(fmt::format("Saving {}", url));
+            LINFO(fmt::format("Saving '{}'", url));
             return true;
         }
 
@@ -261,7 +261,7 @@ void WwtDataHandler::loadImages(const std::string& root,
 
     // 1.
     if (!directoryExists(directory)) {
-        LINFO(fmt::format("Creating directory {}", directory));
+        LINFO(fmt::format("Creating directory '{}'", directory));
         std::filesystem::create_directory(directory);
     }
 

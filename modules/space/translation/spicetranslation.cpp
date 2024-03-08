@@ -107,21 +107,6 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    auto loadKernel = [](const std::string& kernel) {
-        if (!std::filesystem::is_regular_file(kernel)) {
-            throw SpiceManager::SpiceException(fmt::format(
-                "Kernel '{}' does not exist", kernel
-            ));
-        }
-
-        try {
-            SpiceManager::ref().loadKernel(kernel);
-        }
-        catch (const SpiceManager::SpiceException& exception) {
-            LERRORC("SpiceEphemeris", exception.message);
-        }
-    };
-
     _target.onChange([this]() {
         _cachedTarget = _target;
         requireUpdate();

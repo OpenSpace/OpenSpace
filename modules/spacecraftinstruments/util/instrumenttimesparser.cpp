@@ -72,7 +72,7 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
 bool InstrumentTimesParser::create() {
     std::filesystem::path sequenceDir = absPath(_fileName);
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(fmt::format("Could not load Label Directory {}", sequenceDir));
+        LERROR(fmt::format("Could not load label directory '{}'", sequenceDir));
         return false;
     }
 
@@ -84,7 +84,7 @@ bool InstrumentTimesParser::create() {
             std::filesystem::path filepath = sequenceDir / filename;
 
             if (!std::filesystem::is_regular_file(filepath)) {
-                LERROR(fmt::format("Unable to read file {}. Skipping file", filepath));
+                LERROR(fmt::format("Unable to read file '{}'. Skipping file", filepath));
                 continue;
             }
 

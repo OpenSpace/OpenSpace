@@ -504,7 +504,7 @@ json HorizonsDialog::handleReply(QNetworkReply* reply) {
         QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
         if (!checkHttpStatus(statusCode)) {
             std::string msg = fmt::format(
-                "Connection Error '{}' ", reply->errorString().toStdString()
+                "Connection Error '{}'", reply->errorString().toStdString()
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
         }
@@ -666,8 +666,8 @@ std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
                 else {
                     _errorMsg->setText("Could not parse time range");
                     std::string msg = fmt::format(
-                        "Could not read time range '{}' to '{}'", timeRange.first,
-                        timeRange.second
+                        "Could not read time range '{}' to '{}'",
+                        timeRange.first, timeRange.second
                     );
                     appendLog(msg, LogLevel::Error);
                 }
@@ -740,7 +740,7 @@ bool HorizonsDialog::handleRequest() {
         std::filesystem::rename(oldFile, newFile);
 
         std::string msg = fmt::format(
-            "For more information, see the saved error file {}", newFile
+            "For more information, see the saved error file '{}'", newFile
         );
         appendLog(msg, LogLevel::Info);
     }
@@ -865,7 +865,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
 
     auto result = answer.find("result");
     if (result == answer.end()) {
-        std::string msg = fmt::format("Malformed answer recieved '{}'", answer.dump());
+        std::string msg = fmt::format("Malformed answer received '{}'", answer.dump());
         appendLog(msg, HorizonsDialog::LogLevel::Error);
         return openspace::HorizonsFile();
     }
@@ -969,8 +969,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             }
 
             msg = fmt::format(
-                "Valid time range is '{}' to '{}'", _validTimeRange.first,
-                _validTimeRange.second
+                "Valid time range is '{}' to '{}'",
+                _validTimeRange.first, _validTimeRange.second
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
             _importTimeButton->show();
@@ -1020,7 +1020,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
         }
         case HorizonsResultCode::MultipleObserverStations: {
             std::string msg = fmt::format(
-                "Multiple matching observer stations were found for observer '{}'. ",
+                "Multiple matching observer stations were found for observer '{}'",
                 _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
@@ -1076,9 +1076,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
-                    msg = fmt::format(
-                        "Latest Horizons error: {}", _latestHorizonsError
-                    );
+                    msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
                 break;

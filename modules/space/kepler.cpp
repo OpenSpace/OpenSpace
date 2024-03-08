@@ -734,7 +734,7 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
     std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
     if (std::filesystem::is_regular_file(cachedFile)) {
         LINFO(fmt::format(
-            "Cached file {} used for Kepler file {}", cachedFile, file
+            "Cached file '{}' used for Kepler file '{}'", cachedFile, file
         ));
 
         std::optional<std::vector<Parameters>> res = loadCache(cachedFile);
@@ -758,7 +758,7 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
             break;
     }
 
-    LINFO(fmt::format("Saving cache {} for Kepler file {}", cachedFile, file));
+    LINFO(fmt::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
     saveCache(res, cachedFile);
     return res;
 }

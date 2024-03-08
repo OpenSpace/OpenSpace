@@ -234,9 +234,7 @@ bool UrlSynchronization::isEachFileValid() {
                 "{}: File is valid to {} but asset specifies SecondsUntilResync = {} "
                 "Did you mean to re-download the file? If so, remove file from sync "
                 "folder to resync",
-                _identifier,
-                fileIsValidToDate,
-                _secondsUntilResync
+                _identifier, fileIsValidToDate, _secondsUntilResync
             ));
         }
 
@@ -313,7 +311,7 @@ bool UrlSynchronization::trySyncUrls() {
         std::filesystem::path destination = directory() / (_filename + ".tmp");
 
         if (sizeData.find(url) != sizeData.end()) {
-            LWARNING(fmt::format("{}: Duplicate entry for {}", _identifier, url));
+            LWARNING(fmt::format("{}: Duplicate entry for '{}'", _identifier, url));
             continue;
         }
 
@@ -362,7 +360,7 @@ bool UrlSynchronization::trySyncUrls() {
         d->wait();
         if (!d->hasSucceeded()) {
             failed = true;
-            LERROR(fmt::format("Error downloading file from URL {}", d->url()));
+            LERROR(fmt::format("Error downloading file from URL: {}", d->url()));
             continue;
         }
 
@@ -383,7 +381,7 @@ bool UrlSynchronization::trySyncUrls() {
         if (ec) {
             LERRORC(
                 "URLSynchronization",
-                fmt::format("Error renaming file {} to {}", tempName, originalName)
+                fmt::format("Error renaming file '{}' to '{}'", tempName, originalName)
             );
 
             failed = true;

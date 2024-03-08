@@ -242,7 +242,7 @@ bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
     ZoneScoped;
 
     if (!std::filesystem::is_regular_file(filename)) {
-        LERROR(fmt::format("Script with name {} did not exist", filename));
+        LERROR(fmt::format("Script with name '{}' did not exist", filename));
         return false;
     }
 
@@ -361,7 +361,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         lua_gettable(state, -2);
         if (lua_isnil(state, -1)) {
             LERROR(fmt::format(
-                "Module '{}' did not provide a documentation in script file {}",
+                "Module '{}' did not provide a documentation in script file '{}'",
                 library.name, script
             ));
             lua_pop(state, 1);
@@ -492,17 +492,14 @@ void ScriptEngine::writeLog(const std::string& script) {
             _logFilename = absPath(global::configuration->scriptLog).string();
             _logFileExists = true;
 
-            LDEBUG(fmt::format(
-                "Using script log file {}", std::filesystem::path(_logFilename)
-            ));
+            LDEBUG(fmt::format("Using script log file '{}'", _logFilename));
 
             // Test file and clear previous input
             std::ofstream file(_logFilename, std::ofstream::out | std::ofstream::trunc);
 
             if (!file.good()) {
                 LERROR(fmt::format(
-                    "Could not open file {} for logging scripts",
-                    std::filesystem::path(_logFilename)
+                    "Could not open file '{}' for logging scripts", _logFilename
                 ));
 
                 return;

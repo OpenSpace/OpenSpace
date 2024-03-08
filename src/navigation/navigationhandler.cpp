@@ -567,7 +567,7 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
 
     if (!ofs.good()) {
         throw ghoul::RuntimeError(fmt::format(
-            "Error saving navigation state to {}", filepath
+            "Error saving navigation state to '{}'", filepath
         ));
     }
 

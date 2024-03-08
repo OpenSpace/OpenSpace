@@ -106,10 +106,10 @@ ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
 
 std::string ReadFitsTask::description() {
     return fmt::format(
-        "Read the specified fits file (or all fits files in specified folder): {}\n and "
-        "write raw star data into: {}\nAll columns required for default rendering and "
-        "filtering parameters will always be read but user can define additional filter "
-        "columns to read", _inFileOrFolderPath, _outFileOrFolderPath
+        "Read the specified fits file (or all fits files in specified folder): '{}'\n "
+        "and write raw star data into: '{}'\nAll columns required for default rendering "
+        "and filtering parameters will always be read but user can define additional "
+        "filter columns to read", _inFileOrFolderPath, _outFileOrFolderPath
     );
 }
 
@@ -143,7 +143,9 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
     std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
     if (outFileStream.good()) {
         int32_t nValues = static_cast<int32_t>(fullData.size());
-        LINFO(fmt::format("Writing {} values to file {}", nValues, _outFileOrFolderPath));
+        LINFO(fmt::format(
+            "Writing {} values to file '{}'", nValues, _outFileOrFolderPath
+        ));
         LINFO("Number of values per star: " + std::to_string(nValuesPerStar));
 
         if (nValues == 0) {
@@ -165,7 +167,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
     }
     else {
         LERROR(fmt::format(
-            "Error opening file: {} as output data file", _outFileOrFolderPath
+            "Error opening file '{}' as output data file", _outFileOrFolderPath
         ));
     }
 }
@@ -301,20 +303,18 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index,
                                     std::vector<bool>& isFirstWrite, int nValuesPerStar)
 {
-    std::string outPath = fmt::format(
-        "{}octant_{}.bin", _outFileOrFolderPath.string(), index
-    );
+    std::string outPath = fmt::format("{}octant_{}.bin", _outFileOrFolderPath, index);
     std::ofstream fileStream(outPath, std::ofstream::binary | std::ofstream::app);
     if (fileStream.good()) {
         int32_t nValues = static_cast<int32_t>(octantData.size());
-        LINFO("Write " + std::to_string(nValues) + " values to " + outPath);
+        LINFO(fmt::format("Write {} values to {}", nValues, outPath));
 
         if (nValues == 0) {
             LERROR("Error writing file - No values were read from file");
         }
         // If this is the first write then write number of values per star!
         if (isFirstWrite[index]) {
-            LINFO("First write for Octant_" + std::to_string(index));
+            LINFO(fmt::format("First write for Octant_{}", index));
             fileStream.write(
                 reinterpret_cast<const char*>(&nValuesPerStar),
                 sizeof(int32_t)
@@ -331,7 +331,7 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
         return nValues / nValuesPerStar;
     }
     else {
-        LERROR(fmt::format("Error opening file: {} as output data file", outPath));
+        LERROR(fmt::format("Error opening file '{}' as output data file", outPath));
         return 0;
     }
 }

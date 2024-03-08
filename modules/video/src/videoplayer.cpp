@@ -166,7 +166,7 @@ void VideoPlayer::observePropertyMpv(MpvKey key) {
 void VideoPlayer::setPropertyStringMpv(const char* name, const char* value) {
     int result = mpv_set_property_string(_mpvHandle, name, value);
     if (!checkMpvError(result)) {
-        LWARNING(fmt::format("Error setting property {}", name));
+        LWARNING(fmt::format("Error setting property '{}'", name));
     }
 }
 
@@ -226,7 +226,7 @@ void VideoPlayer::getPropertyAsyncMpv(MpvKey key) {
         formats[key]
     );
     if (!checkMpvError(result)) {
-        LWARNING(fmt::format("Could not find property {}", keys[key]));
+        LWARNING(fmt::format("Could not find property '{}'", keys[key]));
         return;
     }
 }
@@ -238,7 +238,7 @@ void VideoPlayer::commandAsyncMpv(const char* cmd[], MpvKey key) {
         cmd
     );
     if (!checkMpvError(result)) {
-        LERROR(fmt::format("Could not execute command {}", keys[key]));
+        LERROR(fmt::format("Could not execute command '{}'", keys[key]));
         return;
     }
 }
@@ -608,7 +608,7 @@ void VideoPlayer::handleMpvEvents() {
                 // Validate reply with what we have stored
                 MpvKey key = static_cast<MpvKey>(event->reply_userdata);
                 if (formats[key] != prop->format) {
-                    LINFO(fmt::format("Wrong format for property {}", keys[key]));
+                    LINFO(fmt::format("Wrong format for property '{}'", keys[key]));
                     break;
                 }
                 getPropertyAsyncMpv(key);
@@ -647,7 +647,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         int result = mpv_event_to_node(&node, event);
         if (!checkMpvError(result)) {
             LWARNING(
-                fmt::format("Error getting data from libmpv property {}", keys[key])
+                fmt::format("Error getting data from libmpv property: {}", keys[key])
             );
         }
     }

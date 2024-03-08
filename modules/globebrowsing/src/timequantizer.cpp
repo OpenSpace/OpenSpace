@@ -388,9 +388,7 @@ void TimeQuantizer::verifyStartTimeRestrictions() {
     if (_start.day() < 1 || _start.day() > dayUpperLimit) {
         throw ghoul::RuntimeError(fmt::format(
             "Invalid start day value of {} for {}, valid days are 1 - {}",
-            _start.day(),
-            helpfulDescription,
-            dayUpperLimit
+            _start.day(), helpfulDescription, dayUpperLimit
         ));
     }
     if (_start.hour() != 0 || _start.minute() != 0 || _start.second() != 0) {

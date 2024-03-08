@@ -482,28 +482,28 @@ bool RenderableMultiresVolume::initializeSelector() {
                 );
                 std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
-                    // Read histograms from cache.
+                    // Read histograms from cache
                     cacheFile.close();
                     LINFO(
-                        fmt::format("Loading histograms from cache: {}", cached)
+                        fmt::format("Loading histograms from cache '{}'", cached)
                     );
                     success &= _errorHistogramManager->loadFromFile(cached);
                 }
                 else if (!_errorHistogramsPath.empty()) {
-                    // Read histograms from scene data.
+                    // Read histograms from scene data
                     LINFO(fmt::format(
-                        "Loading histograms from scene data: {}", _errorHistogramsPath
+                        "Loading histograms from scene data '{}'", _errorHistogramsPath
                     ));
                     success &= _errorHistogramManager->loadFromFile(
                         _errorHistogramsPath.string()
                     );
                 }
                 else {
-                    // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cached));
+                    // Build histograms from tsp file
+                    LWARNING(fmt::format("Failed to open '{}'", cached));
                     success &= _errorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cached));
+                        LINFO(fmt::format("Writing cache to '{}'", cached));
                         _errorHistogramManager->saveToFile(cached);
                     }
                 }
@@ -523,18 +523,18 @@ bool RenderableMultiresVolume::initializeSelector() {
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from {}", cached));
+                    LINFO(fmt::format("Loading histograms from '{}'", cached));
                     success &= _histogramManager->loadFromFile(cached);
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cached));
+                    LWARNING(fmt::format("Failed to open '{}'", cached));
                     success &= _histogramManager->buildHistograms(
                         _tsp.get(),
                         nHistograms
                     );
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cached));
+                        LINFO(fmt::format("Writing cache to '{}'", cached));
                         _histogramManager->saveToFile(cached);
                     }
                 }
@@ -555,15 +555,15 @@ bool RenderableMultiresVolume::initializeSelector() {
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from {}", cached));
+                    LINFO(fmt::format("Loading histograms from '{}'", cached));
                     success &= _localErrorHistogramManager->loadFromFile(cached);
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cached));
+                    LWARNING(fmt::format("Failed to open '{}'", cached));
                     success &= _localErrorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cached));
+                        LINFO(fmt::format("Writing cache to '{}'", cached));
                         _localErrorHistogramManager->saveToFile(cached);
                     }
                 }

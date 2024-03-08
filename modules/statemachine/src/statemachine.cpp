@@ -203,7 +203,7 @@ void StateMachine::saveToDotFile(const std::string& filename) const {
     std::ofstream file(outputFile);
     if (!file.good()) {
         LERROR(fmt::format(
-            "Error opening file {} for saving state machine dot file", outputFile
+            "Error opening file '{}' for saving state machine dot file", outputFile
         ));
         return;
     }

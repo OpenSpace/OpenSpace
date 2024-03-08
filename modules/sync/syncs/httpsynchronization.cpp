@@ -372,7 +372,7 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
         d->wait();
         if (!d->hasSucceeded()) {
-            LERROR(fmt::format("Error downloading file from URL {}", d->url()));
+            LERROR(fmt::format("Error downloading file from URL '{}'", d->url()));
             failed = true;
             continue;
         }
@@ -391,7 +391,7 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         std::error_code ec;
         std::filesystem::rename(tempName, originalName, ec);
         if (ec) {
-            LERROR(fmt::format("Error renaming {} to {}", tempName, originalName));
+            LERROR(fmt::format("Error renaming '{}' to '{}'", tempName, originalName));
             failed = true;
         }
 
@@ -408,14 +408,14 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
             if (is64) {
                 LERROR(fmt::format(
-                    "Error while unzipping {}: Zip64 archives are not supported", source
+                    "Error while unzipping '{}': Zip64 archives are not supported", source
                 ));
                 continue;
             }
 
             int ret = zip_extract(source.c_str(), dest.c_str(), nullptr, nullptr);
             if (ret != 0) {
-                LERROR(fmt::format("Error {} while unzipping {}", ret, source));
+                LERROR(fmt::format("Error '{}' while unzipping '{}'", ret, source));
                 continue;
             }
 

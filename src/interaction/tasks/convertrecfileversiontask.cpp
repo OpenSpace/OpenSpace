@@ -69,7 +69,7 @@ ConvertRecFileVersionTask::~ConvertRecFileVersionTask() {
 
 std::string ConvertRecFileVersionTask::description() {
     std::string description = fmt::format(
-        "Convert file format of session recording file {} to current version",
+        "Convert file format of session recording file '{}' to current version",
         _inFilePath
     );
     return description;
@@ -90,7 +90,7 @@ void ConvertRecFileVersionTask::convert() {
     );
     if (!hasBinaryFileExtension && !hasAsciiFileExtension) {
         LERROR(fmt::format(
-            "Input filename does not have expected {} or {} extension",
+            "Input filename does not have expected '{}' or '{}' extension",
             SessionRecording::FileExtensionBinary, SessionRecording::FileExtensionAscii
         ));
         return;

@@ -369,7 +369,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         }
         else {
             LERROR(fmt::format(
-                "Provided texture file does not exist: '{}'",
+                "Provided texture file does not exist: {}",
                 _defaultProperties.pointTexture.value()
             ));
         }
@@ -629,7 +629,7 @@ void GeoJsonComponent::readFile() {
     catch (const geos::util::GEOSException& e) {
         LERROR(fmt::format(
             "Error creating GeoJson layer with identifier '{}'. Problem reading "
-            "GeoJson file '{}'. Error: '{}'", identifier(), _geoJsonFile.value(), e.what()
+            "GeoJson file '{}'. Error: {}", identifier(), _geoJsonFile.value(), e.what()
         ));
     }
 

@@ -242,7 +242,7 @@ ColorMappingComponent::ColorMappingComponent()
     colorMapFile.onChange([this]() {
         bool fileExists = std::filesystem::exists(colorMapFile.value());
         if (!fileExists) {
-            LERROR(fmt::format("Could not find cmap file: '{}'", colorMapFile.value()));
+            LERROR(fmt::format("Could not find cmap file: {}", colorMapFile.value()));
         }
         _colorMapFileIsDirty = true;
     });

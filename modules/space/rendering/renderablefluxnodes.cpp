@@ -359,12 +359,12 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 
         // Ensure that there are available and valid source files left
         if (_binarySourceFiles.empty()) {
-            LERROR(fmt::format("{} contains no files", _binarySourceFolderPath));
+            LERROR(fmt::format("'{}' contains no files", _binarySourceFolderPath));
         }
     }
     else {
         LERROR(fmt::format(
-            "Source folder {} is not a valid directory", _binarySourceFolderPath
+            "Source folder '{}' is not a valid directory", _binarySourceFolderPath
         ));
     }
 
@@ -646,8 +646,9 @@ void RenderableFluxNodes::populateStartTimes() {
                 _startTimes.push_back(triggerTime);
             }
             else {
-                LERROR(fmt::format("Error in file formating. Last column in ",
-                    "file '{}' is not on UTC ISO8601 format", timeFile
+                LERROR(fmt::format(
+                    "Error in file formating. Last column in file '{}' is not on UTC "
+                    "ISO8601 format", timeFile
                 ));
             }
         }

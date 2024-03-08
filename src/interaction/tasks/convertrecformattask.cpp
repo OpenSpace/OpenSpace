@@ -73,7 +73,7 @@ ConvertRecFormatTask::~ConvertRecFormatTask() {
 
 std::string ConvertRecFormatTask::description() {
     std::string description =
-        fmt::format("Convert session recording file {}", _inFilePath);
+        fmt::format("Convert session recording file '{}'", _inFilePath);
     if (_fileFormatType == SessionRecording::DataMode::Ascii) {
         description += "(ascii format) ";
     }
@@ -83,7 +83,7 @@ std::string ConvertRecFormatTask::description() {
     else {
         description += "(UNKNOWN format) ";
     }
-    description += fmt::format("conversion to file {}", _outFilePath);
+    description += fmt::format("conversion to file '{}'", _outFilePath);
     return description;
 }
 
@@ -107,12 +107,13 @@ void ConvertRecFormatTask::convert() {
 
     if (_inFilePath.extension() != expectedFileExtension_in) {
         LWARNING(fmt::format(
-            "Input filename doesn't have expected {} format file extension", currentFormat
+            "Input filename doesn't have expected '{}' format file extension",
+            currentFormat
         ));
     }
     if (_outFilePath.extension() == expectedFileExtension_in) {
         LERROR(fmt::format(
-            "Output filename has {} file extension, but is conversion from {}",
+            "Output filename has '{}' file extension, but is conversion from '{}'",
             currentFormat, currentFormat
         ));
         return;
@@ -162,7 +163,7 @@ void ConvertRecFormatTask::determineFormatType() {
         != SessionRecording::FileHeaderTitle)
     {
         LERROR(fmt::format(
-            "Session recording file {} does not have expected header", _inFilePath
+            "Session recording file '{}' does not have expected header", _inFilePath
         ));
     }
     else {
@@ -198,7 +199,7 @@ void ConvertRecFormatTask::convertToAscii() {
         // Check if have reached EOF
         if (!_iFile) {
             LINFO(fmt::format(
-                "Finished converting {} entries from file {}", lineNum - 1, _inFilePath
+                "Finished converting {} entries from file '{}'", lineNum - 1, _inFilePath
             ));
             fileReadOk = false;
             break;
@@ -227,7 +228,7 @@ void ConvertRecFormatTask::convertToAscii() {
         }
         else {
             LERROR(fmt::format(
-                "Unknown frame type @ index {} of playback file {}",
+                "Unknown frame type @ index {} of playback file '{}'",
                 lineNum - 1, _inFilePath
             ));
             break;
@@ -259,7 +260,7 @@ void ConvertRecFormatTask::convertToBinary() {
         std::string entryType;
         if (!(iss >> entryType)) {
             LERROR(fmt::format(
-                "Error reading entry type @ line {} of file {}", lineNum, _inFilePath
+                "Error reading entry type @ line {} of file '{}'", lineNum, _inFilePath
             ));
             break;
         }
@@ -284,7 +285,7 @@ void ConvertRecFormatTask::convertToBinary() {
         }
         else {
             LERROR(fmt::format(
-                "Unknown frame type {} @ line {} of file {}",
+                "Unknown frame type {} @ line {} of file '{}'",
                 entryType, lineContents, _inFilePath
             ));
             break;
@@ -292,7 +293,7 @@ void ConvertRecFormatTask::convertToBinary() {
     }
     _oFile.close();
     LINFO(fmt::format(
-        "Finished converting {} entries from file {}", lineNum, _inFilePath
+        "Finished converting {} entries from file '{}'", lineNum, _inFilePath
     ));
 }
 

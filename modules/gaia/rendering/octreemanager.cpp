@@ -723,7 +723,7 @@ void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix,
             outFileStream.close();
         }
         else {
-            LERROR(fmt::format("Error opening file: {} as output data file", outPath));
+            LERROR(fmt::format("Error opening file '{}' as output data file", outPath));
         }
     }
 

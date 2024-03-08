@@ -118,7 +118,7 @@ namespace {
                 parent,
                 "Exception",
                 QString::fromStdString(fmt::format(
-                    "ParsingError exception in {}: {}, {}",
+                    "ParsingError exception in '{}': {}, {}",
                     filename, e.component, e.message
                 ))
             );
@@ -129,7 +129,7 @@ namespace {
                 parent,
                 "Exception",
                 QString::fromStdString(fmt::format(
-                    "RuntimeError exception in {}, component {}: {}",
+                    "RuntimeError exception in '{}', component {}: {}",
                     filename, e.component, e.message
                 ))
             );
@@ -154,7 +154,7 @@ namespace {
                         parent,
                         "Exception",
                         QString::fromStdString(fmt::format(
-                            "Error writing data to file: '{}' as file is marked hidden",
+                            "Error writing data to file '{}' as file is marked hidden",
                             path
                         ))
                     );
@@ -166,7 +166,7 @@ namespace {
                 parent,
                 "Exception",
                 QString::fromStdString(fmt::format(
-                    "Error writing data to file: {} ({})", path, e.what()
+                    "Error writing data to file '{}': {}", path, e.what()
                 ))
             );
         }
@@ -189,7 +189,7 @@ namespace {
                 parent,
                 "Exception",
                 QString::fromStdString(fmt::format(
-                    "Error writing data to file: {} ({})", path, e.what()
+                    "Error writing data to file '{}': {}", path, e.what()
                 ))
             );
         }
@@ -507,7 +507,7 @@ void LauncherWindow::populateProfilesList(std::string preset) {
         std::optional<Profile> p = loadProfileFromFile(this, path.string());
         int idx = _profileBox->count() - 1;
         if (p.has_value() && (*p).meta.has_value()) {
-            const std::optional<std::string>& d = (*p).meta.value().description;
+            const std::optional<std::string>& d = p->meta.value().description;
             if (d.has_value()) {
                 // Tooltip has to be 'rich text' to linebreak properly
                 QString tooltip = QString::fromStdString(fmt::format("<p>{}</p>", *d));
@@ -543,7 +543,7 @@ void LauncherWindow::populateProfilesList(std::string preset) {
         std::optional<Profile> p = loadProfileFromFile(this, path.string());
         int idx = _profileBox->count() - 1;
         if (p.has_value() && (*p).meta.has_value()) {
-            const std::optional<std::string>& d = (*p).meta.value().description;
+            const std::optional<std::string>& d = p->meta.value().description;
             if (d.has_value()) {
                 // Tooltip has to be 'rich text' to linebreak properly
                 QString tooltip = QString::fromStdString(fmt::format("<p>{}</p>", *d));
@@ -741,7 +741,8 @@ void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
         _editWindowButton->setToolTip(
             QString::fromStdString(fmt::format(
                 "Cannot edit '{}'\nsince it is one of the configuration "
-                "files provided in the OpenSpace installation", fileSelected))
+                "files provided in the OpenSpace installation", fileSelected
+            ))
         );
     }
     else {
@@ -752,7 +753,8 @@ void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
                 _editWindowButton->setEnabled(false);
                 _editWindowButton->setToolTip(QString::fromStdString(fmt::format(
                     "This file does not meet the minimum required version of {}.",
-                    versionMin.versionString())));
+                    versionMin.versionString()
+                )));
                 return;
             } 
         }
@@ -862,12 +864,10 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                 }
                 catch (const std::runtime_error& e) {
                     //Re-throw an SGCT error exception with the runtime exception message
-                    throw std::runtime_error(
-                        fmt::format(
-                            "Importing of this configuration file failed because of a "
-                            "problem detected in the readConfig function:\n\n{}", e.what()
-                        )
-                    );
+                    throw std::runtime_error(fmt::format(
+                        "Importing of this configuration file failed because of a "
+                        "problem detected in the readConfig function:\n\n{}", e.what()
+                    ));
                 }
                 SgctEdit editor(
                     preview,
@@ -888,7 +888,7 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                 editRefusalDialog(
                     "File Format Version Error",
                     fmt::format(
-                        "File '{}' does not meet the minimum required version of {}.",
+                        "File '{}' does not meet the minimum required version of {}",
                         winCfg, versionMin.versionString()
                     ),
                     ""

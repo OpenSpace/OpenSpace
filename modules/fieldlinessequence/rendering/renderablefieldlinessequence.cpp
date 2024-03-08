@@ -389,8 +389,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     std::filesystem::path sourcePath = p.sourceFolder;
     if (!std::filesystem::is_directory(sourcePath)) {
         LERROR(fmt::format(
-            "FieldlinesSequence {} is not a valid directory",
-            sourcePath.string()
+            "FieldlinesSequence '{}' is not a valid directory", sourcePath
         ));
     }
 
@@ -422,7 +421,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     // Ensure that there are available and valid source files left
     if (_sourceFiles.empty()) {
         LERROR(fmt::format(
-            "{} contains no {} files", sourcePath.string(), fileTypeString
+            "'{}' contains no {} files", sourcePath.string(), fileTypeString
         ));
     }
     _extraVars = p.extraVariables.value_or(_extraVars);
@@ -492,7 +491,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     if (!_outputFolderPath.empty() && !std::filesystem::is_directory(_outputFolderPath)) {
         _outputFolderPath.clear();
         LERROR(fmt::format(
-            "The specified output path: '{}', does not exist", _outputFolderPath
+            "The specified output path '{}' does not exist", _outputFolderPath
         ));
     }
 
@@ -618,7 +617,7 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM() {
             }
         }
         else {
-            LWARNING(fmt::format("Failed to load state from: {}", filePath));
+            LWARNING(fmt::format("Failed to load state from '{}'", filePath));
         }
     }
 }
@@ -853,7 +852,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
 
     if (!std::filesystem::is_directory(filePath)) {
         LERROR(fmt::format(
-            "The specified seed point directory: '{}' does not exist", filePath
+            "The specified seed point directory '{}' does not exist", filePath
         ));
         return outMap;
     }
@@ -887,7 +886,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
         }
 
         if (outVec.empty()) {
-            LERROR(fmt::format("Found no seed points in: {}", seedFilePath));
+            LERROR(fmt::format("Found no seed points in '{}'", seedFilePath));
             outMap.clear();
             return {};
         }

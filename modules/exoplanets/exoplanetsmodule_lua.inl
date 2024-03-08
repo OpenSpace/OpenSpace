@@ -53,14 +53,14 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
     const std::string binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
-        LERROR(fmt::format("Failed to open exoplanets data file: '{}'", binPath));
+        LERROR(fmt::format("Failed to open exoplanets data file '{}'", binPath));
         return ExoplanetSystem();
     }
 
     const std::string lutPath = module->lookUpTablePath();
     std::ifstream lut(absPath(lutPath));
     if (!lut.good()) {
-        LERROR(fmt::format("Failed to open exoplanets look-up table: '{}'", lutPath));
+        LERROR(fmt::format("Failed to open exoplanets look-up table '{}'", lutPath));
         return ExoplanetSystem();
     }
 
@@ -90,7 +90,7 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
         sanitizeNameString(name);
 
         if (!hasSufficientData(p)) {
-            LWARNING(fmt::format("Insufficient data for exoplanet: '{}'", name));
+            LWARNING(fmt::format("Insufficient data for exoplanet '{}'", name));
             continue;
         }
 
@@ -129,7 +129,7 @@ void createExoplanetSystem(const std::string& starName,
     const glm::vec3 starPosInParsec = system.starData.position;
     if (!isValidPosition(starPosInParsec)) {
         LERROR(fmt::format(
-            "Insufficient data available for exoplanet system: '{}'. Could not determine "
+            "Insufficient data available for exoplanet system '{}'. Could not determine "
             "star position", starName
         ));
         return;
@@ -723,7 +723,7 @@ listOfExoplanetsDeprecated()
 
     std::ifstream inputDataFile(csvFile);
     if (!inputDataFile.good()) {
-        LERROR(fmt::format("Failed to open input file {}", csvFile));
+        LERROR(fmt::format("Failed to open input file '{}'", csvFile));
         return;
     }
 
@@ -745,11 +745,11 @@ listOfExoplanetsDeprecated()
             module->teffToBvConversionFilePath()
         );
 
-        LINFO(fmt::format("Reading data for planet: '{}' ", planetData.name));
+        LINFO(fmt::format("Reading data for planet '{}'", planetData.name));
 
         if (!hasSufficientData(planetData.dataEntry)) {
             LWARNING(fmt::format(
-                "Insufficient data for exoplanet: '{}'", planetData.name
+                "Insufficient data for exoplanet '{}'", planetData.name
             ));
             continue;
         }
@@ -785,7 +785,7 @@ listOfExoplanetsDeprecated()
     }
 
     LINFO(fmt::format(
-        "Read data for {} exoplanet systems from CSV file: '{}'. Please wait until "
+        "Read data for {} exoplanet systems from CSV file: {}. Please wait until "
         "they are all finished initializing. You may have to reload the user interface.",
         hostNameToSystemDataMap.size(), csvFile
     ));

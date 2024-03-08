@@ -90,7 +90,7 @@ void BrowserInstance::loadUrl(std::string url) {
     ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
 
     if (!url.empty()) {
-        LDEBUG(fmt::format("Loading URL: {}", url));
+        LDEBUG(fmt::format("Loading URL '{}'", url));
         CefString cefUrl = std::move(url);
         _browser->GetMainFrame()->LoadURL(cefUrl);
     }

@@ -152,7 +152,7 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
     }
     else {
         LERROR(fmt::format(
-            "Trying to use texture file that does not exist: {} ", texturePath
+            "Trying to use texture file that does not exist: {}", texturePath
         ));
     }
 }
@@ -234,7 +234,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
             catch (geos::util::IllegalStateException& e) {
                 throw ghoul::RuntimeError(fmt::format(
                     "Non-simple (e.g. self-intersecting) polygons not supported yet. "
-                    "GEOS error: '{}'", e.what()
+                    "GEOS error: {}", e.what()
                 ));
 
                 // TODO: handle self-intersections points

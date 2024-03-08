@@ -866,7 +866,7 @@ void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
         _globeLabelsComponent.draw(data);
     }
     catch (const ghoul::opengl::TextureUnit::TextureUnitError& e) {
-        LERROR(fmt::format("Error on drawing globe labels: '{}'", e.message));
+        LERROR(fmt::format("Error on drawing globe labels '{}'", e.message));
     }
 
     if (_geoJsonManager.isReady()) {

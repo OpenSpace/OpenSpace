@@ -283,7 +283,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
     for (std::string_view fmt : Unsupported) {
         if (_datasetFilePath.ends_with(fmt)) {
             LWARNING(fmt::format(
-                "Unsupported file format for MRF caching: {}, Dataset: {}",
+                "Unsupported file format for MRF caching: '{}', Dataset: '{}'",
                 fmt, _datasetFilePath
             ));
             return std::nullopt;
@@ -305,8 +305,8 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
             // Already existing directories causes a 'failure' but no error
             if (ec) {
                 LWARNING(fmt::format(
-                    "Failed to create directories for cache at: {}. "
-                    "Error Code: {}, message: {}",
+                    "Failed to create directories for cache at: '{}'. "
+                    "Error Code: '{}', message: {}",
                     root, std::to_string(ec.value()), ec.message()
                 ));
                 return std::nullopt;
@@ -320,7 +320,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
             );
             if (!src) {
                 LWARNING(fmt::format(
-                    "Failed to load dataset: {}. GDAL Error: {}",
+                    "Failed to load dataset '{}'. GDAL error: {}",
                     _datasetFilePath, CPLGetLastErrorMsg()
                 ));
                 return std::nullopt;
@@ -357,7 +357,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
             );
             if (!dst) {
                 LWARNING(fmt::format(
-                    "Failed to create MRF Caching dataset dataset: {}. GDAL Error: {}",
+                    "Failed to create MRF Caching dataset dataset '{}'. GDAL error: {}",
                     mrf, CPLGetLastErrorMsg()
                 ));
                 return std::nullopt;
@@ -398,7 +398,7 @@ void RawTileDataReader::initialize() {
         _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
         if (!_dataset) {
             throw ghoul::RuntimeError(fmt::format(
-                "Failed to load dataset: {}. GDAL Error: {}",
+                "Failed to load dataset '{}'. GDAL error: {}",
                 _datasetFilePath, CPLGetLastErrorMsg()
             ));
         }

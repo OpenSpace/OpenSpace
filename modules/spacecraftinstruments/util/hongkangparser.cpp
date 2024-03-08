@@ -132,7 +132,7 @@ bool HongKangParser::create() {
     const bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
     if (!hasObserver) {
         throw ghoul::RuntimeError(
-            fmt::format("SPICE has no observer: '{}' in kernel pool", _spacecraft),
+            fmt::format("SPICE has no observer '{}' in kernel pool", _spacecraft),
             "HongKangParser"
         );
     }

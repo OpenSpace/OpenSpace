@@ -139,7 +139,7 @@ void Browser::deinitializeGL() {
 
     _texture = nullptr;
 
-    LDEBUG(fmt::format("Deinitializing browser: {}", _url.value()));
+    LDEBUG(fmt::format("Deinitializing browser '{}'", _url.value()));
 
     _browserInstance->close(true);
 

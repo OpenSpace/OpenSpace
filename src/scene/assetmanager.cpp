@@ -238,7 +238,7 @@ void AssetManager::update() {
             [&path](const std::unique_ptr<Asset>& a) { return a->path() == path; }
         );
         if (it == _assets.cend()) {
-            LWARNING(fmt::format("Tried to remove unknown asset {}. Skipping", asset));
+            LWARNING(fmt::format("Tried to remove unknown asset '{}'. Skipping", asset));
             continue;
         }
 
@@ -363,7 +363,7 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
 
     if (!std::filesystem::is_regular_file(asset->path())) {
         LERROR(fmt::format(
-            "Could not load asset {}: File does not exist", asset->path())
+            "Could not load asset '{}': File does not exist", asset->path())
         );
         return false;
     }
@@ -372,7 +372,7 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
         ghoul::lua::runScriptFile(*_luaState, asset->path());
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR(fmt::format("Could not load asset {}: {}", asset->path(), e.message));
+        LERROR(fmt::format("Could not load asset '{}': {}", asset->path(), e.message));
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
@@ -915,7 +915,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
 
     if (!std::filesystem::is_regular_file(path)) {
         throw ghoul::RuntimeError(fmt::format(
-            "Could not find asset file {} requested by {}",
+            "Could not find asset file '{}' requested by '{}'",
             path, retriever
         ));
     }
@@ -939,7 +939,7 @@ void AssetManager::callOnInitialize(Asset* asset) const {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(fmt::format(
-                "When initializing {}: {}",
+                "When initializing '{}': {}",
                 asset->path(),
                 ghoul::lua::value<std::string>(*_luaState, -1)
             ));
@@ -962,7 +962,7 @@ void AssetManager::callOnDeinitialize(Asset* asset) const {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, deinit);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(fmt::format(
-                "When deinitializing {}: {}",
+                "When deinitializing '{}': {}",
                 asset->path(),
                 ghoul::lua::value<std::string>(*_luaState, -1)
             ));

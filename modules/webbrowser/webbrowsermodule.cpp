@@ -123,7 +123,7 @@ std::filesystem::path WebBrowserModule::findHelperExecutable() {
     std::filesystem::path execLocation = absPath("${BIN}/" + std::string(SubprocessPath));
     if (!std::filesystem::is_regular_file(execLocation)) {
         LERROR(fmt::format(
-            "Could not find web helper executable at location: {}" , execLocation
+            "Could not find web helper executable at location: {}", execLocation
         ));
     }
     return execLocation;

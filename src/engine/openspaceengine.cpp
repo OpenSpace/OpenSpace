@@ -230,7 +230,7 @@ void OpenSpaceEngine::registerPathTokens() {
     using T = std::string;
     for (const std::pair<const T, T>& path : global::configuration->pathTokens) {
         std::string fullKey = "${" + path.first + "}";
-        LDEBUG(fmt::format("Registering path '{}': '{}'", fullKey, path.second));
+        LDEBUG(fmt::format("Registering path '{}': {}", fullKey, path.second));
 
         const bool overrideBase = (fullKey == "${BASE}");
         if (overrideBase) {
@@ -502,9 +502,9 @@ void OpenSpaceEngine::initializeGL() {
             for (const std::string& ext : m->requiredOpenGLExtensions()) {
                 if (!SysCap.component<OCC>().isExtensionSupported(ext)) {
                     LFATAL(fmt::format(
-                        "Module {} required OpenGL extension {} which is not available "
-                        "on this system. Some functionality related to this module will "
-                        "probably not work",
+                        "Module '{}' required OpenGL extension '{}' which is not "
+                        "available on this system. Some functionality related to this "
+                        "module will probably not work",
                         m->guiName(), ext
                     ));
                 }
@@ -639,27 +639,27 @@ void OpenSpaceEngine::initializeGL() {
                 case GL_INVALID_ENUM:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_INVALID_ENUM", f.function->name())
+                        fmt::format("Function '{}': GL_INVALID_ENUM", f.function->name())
                     );
                     break;
                 case GL_INVALID_VALUE:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_INVALID_VALUE", f.function->name())
+                        fmt::format("Function '{}': GL_INVALID_VALUE", f.function->name())
                     );
                     break;
                 case GL_INVALID_OPERATION:
                     LERRORC(
                         "OpenGL Invalid State",
                         fmt::format(
-                            "Function {}: GL_INVALID_OPERATION", f.function->name()
+                            "Function '{}': GL_INVALID_OPERATION", f.function->name()
                         ));
                     break;
                 case GL_INVALID_FRAMEBUFFER_OPERATION:
                     LERRORC(
                         "OpenGL Invalid State",
                         fmt::format(
-                            "Function {}: GL_INVALID_FRAMEBUFFER_OPERATION",
+                            "Function '{}': GL_INVALID_FRAMEBUFFER_OPERATION",
                             f.function->name()
                         )
                     );
@@ -667,7 +667,7 @@ void OpenSpaceEngine::initializeGL() {
                 case GL_OUT_OF_MEMORY:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_OUT_OF_MEMORY", f.function->name())
+                        fmt::format("Function '{}': GL_OUT_OF_MEMORY", f.function->name())
                     );
                     break;
                 default:
@@ -924,15 +924,17 @@ void OpenSpaceEngine::loadFonts() {
         std::filesystem::path fontName = absPath(font.second);
 
         if (!std::filesystem::is_regular_file(fontName)) {
-            LERROR(fmt::format("Could not find font {} for key '{}'", fontName, key));
+            LERROR(fmt::format("Could not find font '{}' for key '{}'", fontName, key));
             continue;
         }
 
-        LDEBUG(fmt::format("Registering font {} with key '{}'", fontName, key));
+        LDEBUG(fmt::format("Registering font '{}' with key '{}'", fontName, key));
         bool success = global::fontManager->registerFontPath(key, fontName);
 
         if (!success) {
-            LERROR(fmt::format("Error registering font {} with key '{}'", fontName, key));
+            LERROR(fmt::format(
+                "Error registering font '{}' with key '{}'", fontName, key
+            ));
         }
     }
 
@@ -1518,7 +1520,7 @@ bool OpenSpaceEngine::setMode(Mode newMode) {
 
 void OpenSpaceEngine::resetMode() {
     _currentMode = Mode::UserControl;
-    LDEBUG(fmt::format("Reset engine mode to {}", stringify(_currentMode)));
+    LDEBUG(fmt::format("Reset engine mode to '{}'", stringify(_currentMode)));
 }
 
 OpenSpaceEngine::CallbackHandle OpenSpaceEngine::addModeChangeCallback(
@@ -1702,7 +1704,7 @@ void setActionsFromProfile(const Profile& p) {
         }
         if (a.script.empty()) {
             LERROR(fmt::format(
-                "Identifier '{}' doesn't provide a Lua command to execute", a.identifier
+                "Identifier '{}' does not provide a Lua command to execute", a.identifier
             ));
         }
         interaction::Action action;

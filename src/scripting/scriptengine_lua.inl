@@ -225,14 +225,14 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
 
     if (is64) {
         throw ghoul::lua::LuaError(fmt::format(
-            "Error while unzipping {}: Zip64 archives are not supported", source
+            "Error while unzipping '{}': Zip64 archives are not supported", source
         ));
     }
 
     int ret = zip_extract(source.c_str(), destination.c_str(), nullptr, nullptr);
     if (ret != 0) {
         throw ghoul::lua::LuaError(fmt::format(
-            "Error {} while unzipping {}", ret, source
+            "Error while unzipping '{}': {}", source, ret
         ));
     }
 

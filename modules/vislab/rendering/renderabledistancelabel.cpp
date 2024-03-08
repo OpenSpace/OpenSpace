@@ -149,7 +149,7 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         }
         else {
             LERROR(fmt::format(
-                "Could not find scene graph node {} or {}",
+                "Could not find scene graph node '{}' or '{}'",
                 nodeline->start(), nodeline->end()
             ));
         }

@@ -191,7 +191,7 @@ namespace {
 
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError(fmt::format("Unknown globe: {}", globeIdentifier));
+        throw ghoul::lua::LuaError(fmt::format("Unknown globe '{}'", globeIdentifier));
     }
 
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
@@ -201,7 +201,7 @@ namespace {
 
     layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layerGroup);
     if (group == layers::Group::ID::Unknown) {
-        throw ghoul::lua::LuaError(fmt::format("Unknown layer group: {}", layerGroup));
+        throw ghoul::lua::LuaError(fmt::format("Unknown layer group '{}'", layerGroup));
     }
 
     LayerGroup& lg = globe->layerManager().layerGroup(group);
@@ -669,7 +669,7 @@ geoPositionForCameraDeprecated(bool useEyePosition = false)
     std::filesystem::path path = absPath(filename);
     if (!std::filesystem::is_regular_file(path)) {
         throw ghoul::lua::LuaError(fmt::format(
-            "Could not find the provided file: '{}'", filename
+            "Could not find the provided file '{}'", filename
         ));
     }
 
@@ -678,7 +678,7 @@ geoPositionForCameraDeprecated(bool useEyePosition = false)
 
     if (extension != ".geojson" && extension != ".json") {
         throw ghoul::lua::LuaError(fmt::format(
-            "Unexpected file type: '{}'. Expected '.geojson' or '.json' file", filename
+            "Unexpected file type '{}'. Expected '.geojson' or '.json' file", filename
         ));
     }
 

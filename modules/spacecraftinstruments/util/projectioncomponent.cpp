@@ -425,7 +425,7 @@ void ProjectionComponent::imageProjectBegin() {
 
     if (_textureSizeDirty) {
         glm::ivec2 size = _textureSize;
-        LDEBUG(fmt::format("Changing texture size to {}, {}", size.x, size.y));
+        LDEBUG(fmt::format("Changing texture size to ({}, {})", size.x, size.y));
 
         // If the texture size has changed, we have to allocate new memory and copy
         // the image texture to the new target
@@ -900,7 +900,7 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
 }
 
 bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size) {
-    LINFO(fmt::format("Creating projection texture of size '{}, {}'", size.x, size.y));
+    LINFO(fmt::format("Creating projection texture of size ({}, {})", size.x, size.y));
 
     using namespace ghoul::opengl;
     _projectionTexture = std::make_unique<Texture>(
@@ -939,7 +939,7 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
 }
 
 bool ProjectionComponent::generateDepthTexture(const glm::ivec2& size) {
-    LINFO(fmt::format("Creating depth texture of size '{}, {}'", size.x, size.y));
+    LINFO(fmt::format("Creating depth texture of size ({}, {})", size.x, size.y));
 
     _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(size, 1),

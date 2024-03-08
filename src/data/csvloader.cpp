@@ -79,7 +79,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 
     if (rows.size() < 2) {
         LWARNING(fmt::format(
-            "Error loading data file {}. No data items read", filePath
+            "Error loading data file '{}'. No data items read", filePath
         ));
         return Dataset();
     }
@@ -135,13 +135,11 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
         // One or more position columns weren't read
         LERROR(fmt::format(
-            "Error loading data file {}. Missing X, Y or Z position column", filePath
+            "Error loading data file '{}'. Missing X, Y or Z position column", filePath
         ));
     }
 
-    LINFO(fmt::format(
-        "Loading {} rows with {} columns", rows.size(), columns.size()
-    ));
+    LINFO(fmt::format("Loading {} rows with {} columns", rows.size(), columns.size()));
     ProgressBar progress = ProgressBar(static_cast<int>(rows.size()));
 
     // Skip first row (column names)

@@ -69,7 +69,7 @@ namespace version1 {
             }
             else {
                 throw ghoul::RuntimeError(fmt::format(
-                    "Unknown visibility value {}", *visibility
+                    "Unknown visibility value '{}'", *visibility
                 ));
             }
         }

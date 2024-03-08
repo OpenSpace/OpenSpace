@@ -679,7 +679,7 @@ void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::stri
     switch (enclosedType) {
         case PropertyValueType::Boolean:
             LERROR(fmt::format(
-                "A lua table of bool values is not supported. (processing property {})",
+                "A Lua table of bool values is not supported. (processing property '{}')",
                 _profilePropertyName
             ));
             break;
@@ -701,7 +701,7 @@ void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::stri
         default:
             LERROR(fmt::format(
                 "Table-within-a-table values are not supported for profile a "
-                "property (processing property {})", _profilePropertyName
+                "property (processing property '{}')", _profilePropertyName
             ));
             break;
     }
@@ -730,8 +730,8 @@ void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L,
         }
         catch (std::bad_variant_access&) {
             LERROR(fmt::format(
-                "Error attempting to parse profile property setting for "
-                "{} using value = {}", _profilePropertyName, value
+                "Error attempting to parse profile property setting for '{}' using "
+                "value = {}", _profilePropertyName, value
             ));
         }
     }

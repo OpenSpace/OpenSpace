@@ -436,8 +436,10 @@ JoystickCameraStates::findOrAddJoystickCameraState(const std::string& joystickNa
             joystick->joystickName = joystickName;
         }
         else {
-            LWARNING(fmt::format("Cannot add more joysticks, only {} joysticks are "
-                "supported", JoystickInputStates::MaxNumJoysticks));
+            LWARNING(fmt::format(
+                "Cannot add more joysticks, only {} joysticks are supported",
+                JoystickInputStates::MaxNumJoysticks
+            ));
             return nullptr;
         }
     }

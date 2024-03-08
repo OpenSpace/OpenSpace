@@ -56,7 +56,7 @@ unsigned int UIntProperty::fromLuaConversion(lua_State* state) const {
         return ghoul::lua::value<unsigned int>(state);
     }
     else {
-        throw ghoul::RuntimeError(fmt::format("Error extracting value in UIntProperty"));
+        throw ghoul::RuntimeError("Error extracting value in UIntProperty");
     }
 }
 

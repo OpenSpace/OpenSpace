@@ -2102,7 +2102,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
             if (_pointSpreadFunctionTexture) {
                 LDEBUG(fmt::format(
-                    "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
+                    "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
                ));
                 _pointSpreadFunctionTexture->uploadTexture();
             }
@@ -2129,7 +2129,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 1
             );
             if (_colorTexture) {
-                LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));
+                LDEBUG(fmt::format(
+                    "Loaded texture from '{}'", absPath(_colorTexturePath)
+                ));
                 _colorTexture->uploadTexture();
             }
 
@@ -2186,7 +2188,7 @@ bool RenderableGaiaStars::readDataFile() {
     _octreeManager.initOctree(_cpuRamBudgetInBytes);
 
     std::filesystem::path file = absPath(_filePath.value());
-    LINFO(fmt::format("Loading data file: {}", file));
+    LINFO(fmt::format("Loading data file '{}'", file));
 
     switch (fileReaderOption) {
         case gaia::FileReaderOption::Fits:

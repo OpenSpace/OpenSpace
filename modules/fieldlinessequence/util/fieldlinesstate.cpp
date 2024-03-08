@@ -140,7 +140,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     std::ifstream ifs(pathToJsonFile);
 
     if (!ifs.is_open()) {
-        LERROR(fmt::format("FAILED TO OPEN FILE: {}", pathToJsonFile));
+        LERROR(fmt::format("Failed to open file '{}'", pathToJsonFile));
         return false;
     }
 

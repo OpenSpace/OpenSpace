@@ -72,7 +72,7 @@ void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
             _layerGroups[static_cast<int>(id)]->setLayersFromDict(d);
         }
         else {
-            LWARNINGC("LayerManager", fmt::format("Unknown layer group: {}", groupName));
+            LWARNINGC("LayerManager", fmt::format("Unknown layer group '{}'", groupName));
         }
     }
 

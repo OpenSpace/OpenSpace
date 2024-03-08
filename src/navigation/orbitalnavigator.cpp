@@ -534,7 +534,7 @@ OrbitalNavigator::OrbitalNavigator()
         }
         else {
             LERROR(fmt::format(
-                "No scenegraph node with identifier {} exists", _anchor.value()
+                "No scenegraph node with identifier '{}' exists", _anchor.value()
             ));
         }
     });
@@ -550,7 +550,7 @@ OrbitalNavigator::OrbitalNavigator()
         }
         else {
             LERROR(fmt::format(
-                "No scenegraph node with identifier {} exists", _aim.value()
+                "No scenegraph node with identifier '{}' exists", _aim.value()
             ));
         }
     });

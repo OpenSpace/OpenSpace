@@ -270,7 +270,7 @@ void GuiGlobeBrowsingComponent::render() {
     Capabilities cap = module->capabilities(_currentServer);
 
     if (cap.empty()) {
-        LWARNINGC("GlobeBrowsing", fmt::format("Unknown server: '{}'", _currentServer));
+        LWARNINGC("GlobeBrowsing", fmt::format("Unknown server '{}'", _currentServer));
     }
 
     ImGui::Columns(6, nullptr, false);

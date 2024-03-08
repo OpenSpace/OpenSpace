@@ -121,7 +121,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         if (responseCode >= 400) {
             LERRORC(
                 "HttpRequest",
-                fmt::format("Failed download {} with code {}", _url, responseCode)
+                fmt::format("Failed download '{}' with code {}", _url, responseCode)
             );
             success = false;
         }
@@ -133,7 +133,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         LERRORC(
             "HttpRequest",
             fmt::format(
-                "Failed download {} with error {}", _url, curl_easy_strerror(res)
+                "Failed download '{}' with error {}", _url, curl_easy_strerror(res)
             )
         );
     }
@@ -256,7 +256,7 @@ HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destin
     , _destination(std::move(destination))
 {
     if (!overwrite && std::filesystem::is_regular_file(_destination)) {
-        throw ghoul::RuntimeError(fmt::format("File {} already exists", _destination));
+        throw ghoul::RuntimeError(fmt::format("File '{}' already exists", _destination));
     }
 }
 
@@ -286,7 +286,7 @@ bool HttpFileDownload::setup() {
     // GetLastError() gives more details than errno.
     DWORD errorId = GetLastError();
     if (errorId == 0) {
-        LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
+        LERRORC("HttpFileDownload", fmt::format("Cannot open file '{}'", _destination));
         return false;
     }
     std::array<char, 256> Buffer;
@@ -304,7 +304,7 @@ bool HttpFileDownload::setup() {
     std::string message(Buffer.data(), size);
     LERRORC(
         "HttpFileDownload",
-        fmt::format("Cannot open file {}: {}", _destination, message)
+        fmt::format("Cannot open file '{}': {}", _destination, message)
     );
     return false;
 #else // ^^^ WIN32 / !WIN32 vvv
@@ -330,7 +330,7 @@ bool HttpFileDownload::setup() {
 #endif // __unix__
     }
 
-    LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
+    LERRORC("HttpFileDownload", fmt::format("Cannot open file '{}'", _destination));
     return false;
 #endif // WIN32
 }

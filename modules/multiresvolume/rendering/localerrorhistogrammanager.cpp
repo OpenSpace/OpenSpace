@@ -135,9 +135,7 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset,
             else {
                 LERROR(fmt::format(
                     "Child {} visited without cache, {}, {}",
-                    childIndex,
-                    bstOffset,
-                    octreeOffset
+                    childIndex, bstOffset, octreeOffset
                 ));
                 return false;
             }

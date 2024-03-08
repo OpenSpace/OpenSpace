@@ -185,7 +185,7 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
 
     if (std::filesystem::is_regular_file(absFilename)) {
         LERROR(fmt::format(
-            "Unable to start recording; file {} already exists", absFilename
+            "Unable to start recording; file '{}' already exists", absFilename
         ));
         return false;
     }
@@ -197,7 +197,9 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
     }
 
     if (!_recordFile.is_open() || !_recordFile.good()) {
-        LERROR(fmt::format("Unable to open file {} for keyframe recording", absFilename));
+        LERROR(fmt::format(
+            "Unable to open file '{}' for keyframe recording", absFilename
+        ));
         return false;
     }
     return true;
@@ -426,7 +428,7 @@ bool SessionRecording::startPlayback(std::string& filename,
 
     if (!_playbackFile.is_open() || !_playbackFile.good()) {
         LERROR(fmt::format(
-            "Unable to open file {} for keyframe playback", absFilename.c_str()
+            "Unable to open file '{}' for keyframe playback", absFilename.c_str()
         ));
         stopPlayback();
         cleanUpPlayback();
@@ -1084,7 +1086,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             // Check if have reached EOF
             if (!_playbackFile) {
                 LINFO(fmt::format(
-                    "Finished parsing {} entries from playback file {}",
+                    "Finished parsing {} entries from playback file '{}'",
                     _playbackLineNum - 1, _playbackFilename
                 ));
                 break;
@@ -1100,7 +1102,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             }
             else {
                 LERROR(fmt::format(
-                    "Unknown frame type {} @ index {} of playback file {}",
+                    "Unknown frame type {} @ index {} of playback file '{}'",
                     frameType, _playbackLineNum - 1, _playbackFilename
                 ));
                 parsingStatusOk = false;
@@ -1118,7 +1120,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             std::string entryType;
             if (!(iss >> entryType)) {
                 LERROR(fmt::format(
-                    "Error reading entry type @ line {} of playback file {}",
+                    "Error reading entry type @ line {} of playback file '{}'",
                     _playbackLineNum, _playbackFilename
                 ));
                 break;
@@ -1138,7 +1140,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             }
             else {
                 LERROR(fmt::format(
-                    "Unknown frame type {} @ line {} of playback file {}",
+                    "Unknown frame type {} @ line {} of playback file '{}'",
                     entryType, _playbackLineNum, _playbackFilename
                 ));
                 parsingStatusOk = false;
@@ -1146,7 +1148,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             }
         }
         LINFO(fmt::format(
-            "Finished parsing {} entries from playback file {}",
+            "Finished parsing {} entries from playback file '{}'",
             _playbackLineNum, _playbackFilename
         ));
     }
@@ -1567,8 +1569,8 @@ void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
                     std::find(_loadedNodes.begin(), _loadedNodes.end(), navNode);
                 if (it == _loadedNodes.end()) {
                     LWARNING(fmt::format(
-                        "Playback file contains a property setting of navigation using"
-                        " scenegraph node '{}', which is not currently loaded", navNode
+                        "Playback file contains a property setting of navigation using "
+                        "scenegraph node '{}', which is not currently loaded", navNode
                     ));
                 }
             }
@@ -1582,8 +1584,8 @@ void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
                     );
                 if (matchHits.empty()) {
                     LWARNING(fmt::format(
-                        "Playback file contains a property setting of scenegraph"
-                        " node '{}', which is not currently loaded", found
+                        "Playback file contains a property setting of scenegraph "
+                        "node '{}', which is not currently loaded", found
                     ));
                 }
             }
@@ -1780,14 +1782,11 @@ bool SessionRecording::readScriptKeyframeAscii(Timestamps& times,
     iss >> times.timeOs >> times.timeRec >> times.timeSim;
     kf.read(iss);
     if (iss.fail()) {
-        LERROR(fmt::format(
-            "Error parsing script line {} of playback file", lineN
-        ));
+        LERROR(fmt::format("Error parsing script line {} of playback file", lineN));
         return false;
-    } else if (!iss.eof()) {
-        LERROR(fmt::format(
-            "Did not find an EOL at line {} of playback file", lineN
-        ));
+    }
+    else if (!iss.eof()) {
+        LERROR(fmt::format("Did not find an EOL at line {} of playback file", lineN));
         return false;
     }
     return true;
@@ -2296,7 +2295,8 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     std::filesystem::path conversionInFilename = absPath(filename);
     if (!std::filesystem::is_regular_file(conversionInFilename)) {
         throw ConversionError(fmt::format(
-            "Cannot find the specified playback file {} to convert", conversionInFilename
+            "Cannot find the specified playback file '{}' to convert",
+            conversionInFilename
         ));
     }
 
@@ -2314,7 +2314,7 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     stream << inputFstream.rdbuf();
     if (!inputFstream.is_open() || !inputFstream.good()) {
         throw ConversionError(fmt::format(
-            "Unable to open file {} for conversion", filename.c_str()
+            "Unable to open file '{}' for conversion", filename
         ));
     }
     inputFstream.close();
@@ -2365,8 +2365,8 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
         if (depth != 0) {
             conversionOutFilename = determineConversionOutFilename(filename, mode);
             LINFO(fmt::format(
-                "Starting conversion on rec file {}, version {} in {} mode. "
-                "Writing result to {}",
+                "Starting conversion on rec file '{}', version {} in {} mode. "
+                "Writing result to '{}'",
                 newFilename, fileVersion, (mode == DataMode::Ascii) ? "ascii" : "binary",
                 conversionOutFilename
             ));
@@ -2379,8 +2379,8 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
             }
             if (!conversionOutFile.is_open() || !conversionOutFile.good()) {
                 LERROR(fmt::format(
-                    "Unable to open file {} for conversion result",
-                    conversionOutFilename.c_str()
+                    "Unable to open file '{}' for conversion result",
+                    conversionOutFilename
                 ));
                 return "";
             }
@@ -2432,7 +2432,7 @@ bool SessionRecording::convertEntries(std::string& inFilename,
             // Check if have reached EOF
             if (!inStream) {
                 LINFO(fmt::format(
-                    "Finished converting {} entries from playback file {}",
+                    "Finished converting {} entries from playback file '{}'",
                     lineNum - 1, inFilename
                 ));
                 break;
@@ -2475,7 +2475,7 @@ bool SessionRecording::convertEntries(std::string& inFilename,
             }
             else {
                 LERROR(fmt::format(
-                    "Unknown frame type {} @ index {} of conversion file {}",
+                    "Unknown frame type {} @ index {} of conversion file '{}'",
                     frameType, lineNum - 1, inFilename
                 ));
                 conversionStatusOk = false;
@@ -2491,7 +2491,7 @@ bool SessionRecording::convertEntries(std::string& inFilename,
             std::string entryType;
             if (!(iss >> entryType)) {
                 LERROR(fmt::format(
-                    "Error reading entry type @ line {} of conversion file {}",
+                    "Error reading entry type @ line {} of conversion file '{}'",
                     lineNum, inFilename
                 ));
                 break;
@@ -2538,14 +2538,14 @@ bool SessionRecording::convertEntries(std::string& inFilename,
             }
             else {
                 LERROR(fmt::format(
-                    "Unknown frame type {} @ line {} of conversion file {}",
+                    "Unknown frame type {} @ line {} of conversion file '{}'",
                     entryType, lineNum, inFilename
                 ));
                 conversionStatusOk = false;
             }
         }
         LINFO(fmt::format(
-            "Finished parsing {} entries from conversion file {}",
+            "Finished parsing {} entries from conversion file '{}'",
             lineNum, inFilename
         ));
     }
@@ -2564,7 +2564,7 @@ std::string SessionRecording_legacy_0085::getLegacyConversionResult(std::string 
     // as the oldest supported legacy version.
     LERROR(fmt::format(
         "Version 00.85 is the oldest supported legacy file format; no conversion "
-        "can be made. It is possible that file {} has a corrupted header or an invalid "
+        "can be made. It is possible that file '{}' has a corrupted header or an invalid "
         "file format version number",
         filename
     ));

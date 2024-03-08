@@ -232,7 +232,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     std::filesystem::path sequenceDir = absPath(_sourceDirectory);
 
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(fmt::format("Could not load sequence directory {}", sequenceDir));
+        LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir));
         return;
     }
 
