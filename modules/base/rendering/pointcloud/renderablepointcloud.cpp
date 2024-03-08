@@ -1561,8 +1561,8 @@ bool operator==(const TextureFormat& l, const TextureFormat& r) {
 
 size_t TextureFormatHash::operator()(const TextureFormat& k) const {
     size_t res = 0;
-    res += static_cast<uint16_t>(k.resolution.x) << 32;
-    res += static_cast<uint16_t>(k.resolution.y) << 16;
+    res += static_cast<uint64_t>(k.resolution.x) << 32;
+    res += static_cast<uint64_t>(k.resolution.y) << 16;
     res += k.useAlpha ? 0 : 1;
     return res;
 }
