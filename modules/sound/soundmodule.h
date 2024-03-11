@@ -57,8 +57,6 @@ public:
     void stopAll() const;
     std::vector<int> currentlyPlaying() const;
 
-
-
     BooleanType(IsRamped);
     void setVolumeChangeRamped(int handle, IsRamped isRamped) const;
 
@@ -68,6 +66,9 @@ public:
     BooleanType(IsMute);
     void setMute(int handle, IsMute mute) const;
     bool isMute(int handle) const;
+
+    std::vector<std::string> drivers() const;
+    void setDriver(int index) const;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;

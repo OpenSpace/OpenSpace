@@ -34,6 +34,14 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "SoundModule";
+
+    struct [[codegen::Dictionary(SoundModule)]] Parameters {
+        // Sets the maximum number of simultaneous channels that can be played back by the
+        // audio subsystem. If this value is not specified, it defaults to 128.
+        std::optional<int> maxNumberOfChannels [[codegen::greater(0)]];
+    };
+
+#include "soundmodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -43,6 +51,8 @@ SoundModule::SoundModule()
 {}
 
 void SoundModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     FMOD_RESULT result = FMOD::System_Create(&_system);
     if (result != FMOD_OK) {
         LERROR(fmt::format(
@@ -52,7 +62,8 @@ void SoundModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         return;
     }
 
-    result = _system->init(128, FMOD_INIT_NORMAL, nullptr);
+    const int nChannels = p.maxNumberOfChannels.value_or(128);
+    result = _system->init(nChannels, FMOD_INIT_NORMAL, nullptr);
     if (result != FMOD_OK) {
         LERROR(fmt::format(
             "Error initializing FMOD with code {}: {}",
@@ -218,6 +229,23 @@ bool SoundModule::isMute(int handle) const {
     return isMute;
 }
 
+std::vector<std::string> SoundModule::drivers() const {
+    int nDrivers = 0;
+    _system->getNumDrivers(&nDrivers);
+
+    std::vector<std::string> result;
+    for (int i = 0; i < nDrivers; i++) {
+        std::array<char, 512> buffer = {};
+        _system->getDriverInfo(i, buffer.data(), 512, nullptr, nullptr, nullptr, nullptr);
+        result.push_back(buffer.data());
+    }
+    return result;
+}
+
+void SoundModule::setDriver(int index) const {
+    _system->setDriver(index);
+}
+
 std::vector<documentation::Documentation> SoundModule::documentations() const {
     return {
     };
@@ -235,7 +263,9 @@ scripting::LuaLibrary SoundModule::luaLibrary() const {
             codegen::lua::SetVolume,
             codegen::lua::Volume,
             codegen::lua::SetMute,
-            codegen::lua::IsMute
+            codegen::lua::IsMute,
+            codegen::lua::Drivers,
+            codegen::lua::SetDriver
         }
     };
 }
