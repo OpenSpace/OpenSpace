@@ -106,7 +106,7 @@ std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
     return si;
 }
 
-ServerInterface::ServerInterface(const ghoul::Dictionary& config)
+ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "", "", "" })
     , _socketType(TypeInfo)
     , _port(PortInfo, 0)
@@ -140,8 +140,10 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
         std::string(AllowAccess)
     );
 
-    if (config.hasKey(DefaultAccessInfo.identifier)) {
-        std::string access = config.value<std::string>(DefaultAccessInfo.identifier);
+    if (dictionary.hasKey(DefaultAccessInfo.identifier)) {
+        const std::string access = config.value<std::string>(
+            DefaultAccessInfo.identifier
+        );
         if (access == DenyAccess) {
             _defaultAccess.setValue(static_cast<int>(Access::Deny));
         }
@@ -153,14 +155,14 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
         }
     }
 
-    const std::string identifier = config.value<std::string>(KeyIdentifier);
+    const std::string identifier = dictionary.value<std::string>(KeyIdentifier);
 
     auto readList =
-        [config](const std::string& key, properties::StringListProperty& list) {
-            if (config.hasValue<ghoul::Dictionary>(key)) {
-                const ghoul::Dictionary& dict = config.value<ghoul::Dictionary>(key);
+        [dictionary](const std::string& key, properties::StringListProperty& list) {
+            if (dictionary.hasValue<ghoul::Dictionary>(key)) {
+                const ghoul::Dictionary& dict = dictionary.value<ghoul::Dictionary>(key);
                 std::vector<std::string> v;
-                for (std::string_view k : dict.keys()) {
+                for (const std::string_view k : dict.keys()) {
                     v.push_back(dict.value<std::string>(k));
                 }
                 list = v;
@@ -175,7 +177,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     setGuiName(identifier);
     setDescription("Settings for server interface " + identifier);
 
-    const std::string type = config.value<std::string>(TypeInfo.identifier);
+    const std::string type = dictionary.value<std::string>(TypeInfo.identifier);
     if (type == TcpSocketType) {
         _socketType = static_cast<int>(InterfaceType::TcpSocket);
     }
@@ -183,12 +185,12 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
         _socketType = static_cast<int>(InterfaceType::WebSocket);
     }
 
-    if (config.hasValue<std::string>(PasswordInfo.identifier)) {
-        _password = config.value<std::string>(PasswordInfo.identifier);
+    if (dictionary.hasValue<std::string>(PasswordInfo.identifier)) {
+        _password = dictionary.value<std::string>(PasswordInfo.identifier);
     }
 
-    _port = static_cast<int>(config.value<double>(PortInfo.identifier));
-    _enabled = config.value<bool>(EnabledInfo.identifier);
+    _port = static_cast<int>(dictionary.value<double>(PortInfo.identifier));
+    _enabled = dictionary.value<bool>(EnabledInfo.identifier);
 
     auto reinitialize = [this]() {
         deinitialize();
@@ -258,7 +260,7 @@ bool ServerInterface::clientHasAccessWithoutPassword(
             return true;
         }
     }
-    Access access = static_cast<Access>(_defaultAccess.value());
+    const Access access = static_cast<Access>(_defaultAccess.value());
     if (access == Access::Allow) {
         for (const std::string& address : _denyAddresses.value()) {
             if (clientAddress == address) {
@@ -276,7 +278,7 @@ bool ServerInterface::clientIsBlocked(const std::string& clientAddress) const {
             return true;
         }
     }
-    Access access = static_cast<Access>(_defaultAccess.value());
+    const Access access = static_cast<Access>(_defaultAccess.value());
     if (access == Access::Deny) {
         for (const std::string& address : _allowAddresses.value()) {
             if (clientAddress == address) {

@@ -122,7 +122,8 @@ void Connection::handleMessage(const std::string& message) {
     }
     catch (const std::exception& e) {
         LERROR(e.what());
-    } catch (...) {
+    }
+    catch (...) {
         if (!isAuthorized()) {
             _socket->disconnect();
             LERROR(fmt::format(
@@ -131,18 +132,17 @@ void Connection::handleMessage(const std::string& message) {
             ));
             return;
         }
-        else {
-            std::string sanitizedString = message;
-            std::transform(
-                message.begin(),
-                message.end(),
-                sanitizedString.begin(),
-                [](wchar_t c) {
-                    return std::isprint(c, std::locale("")) ? char(c) : ' ';
-                }
-            );
-            LERROR(fmt::format("Could not parse JSON '{}'", sanitizedString));
-        }
+
+        std::string sanitizedString = message;
+        std::transform(
+            message.begin(),
+            message.end(),
+            sanitizedString.begin(),
+            [](wchar_t c) {
+                return std::isprint(c, std::locale("")) ? char(c) : ' ';
+            }
+        );
+        LERROR(fmt::format("Could not parse JSON '{}'", sanitizedString));
     }
 }
 

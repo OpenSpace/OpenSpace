@@ -26,9 +26,9 @@
 
 namespace openspace::volume {
 
-InvalidGridTypeError::InvalidGridTypeError(std::string gt)
-    : RuntimeError("Invalid grid type: '" + gt + "'")
-    , gridType(std::move(gt))
+InvalidGridTypeError::InvalidGridTypeError(std::string gridType)
+    : RuntimeError("Invalid grid type: '" + gridType + "'")
+    , gridType(std::move(gridType))
 {}
 
 VolumeGridType parseGridType(const std::string& gridType) {

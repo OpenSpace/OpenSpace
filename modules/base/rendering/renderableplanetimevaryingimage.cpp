@@ -162,7 +162,7 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
     namespace fs = std::filesystem;
-    fs::path sourceFolder = absPath(_sourceFolder);
+    const fs::path sourceFolder = absPath(_sourceFolder);
     // Extract all file paths from the provided folder
     _sourceFiles.clear();
     namespace fs = std::filesystem;
@@ -206,8 +206,8 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     }
     bool needsUpdate = false;
     const double currentTime = data.time.j2000Seconds();
-    bool isInInterval = (currentTime >= _startTimes[0]) &&
-        (currentTime < _sequenceEndTime);
+    const bool isInInterval = (currentTime >= _startTimes[0]) &&
+                              (currentTime < _sequenceEndTime);
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
@@ -268,7 +268,7 @@ int RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex(
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
         if (iter != _startTimes.begin()) {
-            std::ptrdiff_t idx = std::distance(_startTimes.begin(), iter);
+            const std::ptrdiff_t idx = std::distance(_startTimes.begin(), iter);
             activeIndex = static_cast<int>(idx) - 1;
         }
         else {

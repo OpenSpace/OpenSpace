@@ -437,7 +437,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
             }
 
             std::string matches;
-            for (std::string observer : matchingObservers) {
+            for (const std::string& observer : matchingObservers) {
                 matches += '\n' + observer;
             }
             LINFO(fmt::format("Matching Observers: {}", matches));
@@ -632,16 +632,14 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
         // Convert date and time to seconds after 2000
         // and pos to Galactic positions in meter from Observer.
         std::string timeString = fmt::format("{} {}", date, time);
-        double timeInJ2000 = Time::convertTime(timeString);
-        glm::dvec3 gPos = glm::dvec3(
+
+        // Add position to stored data
+        dataPoint.time = Time::convertTime(timeString);
+        dataPoint.position = glm::dvec3(
             1000 * range * cos(glm::radians(gLat)) * cos(glm::radians(gLon)),
             1000 * range * cos(glm::radians(gLat)) * sin(glm::radians(gLon)),
             1000 * range * sin(glm::radians(gLat))
         );
-
-        // Add position to stored data
-        dataPoint.time = timeInJ2000;
-        dataPoint.position = gPos;
         data.push_back(dataPoint);
 
         std::getline(fileStream, line);
@@ -762,9 +760,8 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
         if (line.find(startPhrase) != std::string::npos) {
             break;
         }
-        else if (!altStartPhrase.empty() &&
-                 line.find(altStartPhrase) != std::string::npos)
-        {
+
+        if (!altStartPhrase.empty() && line.find(altStartPhrase) != std::string::npos) {
             break;
         }
 
@@ -780,7 +777,8 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
 
     // In the first file parse both start and end time
     // From the first line get the start time
-    std::string startTime, endTime;
+    std::string startTime;
+    std::string endTime;
     std::getline(fileStream, line);
     if (fileStream.good()) {
         std::stringstream str(line);
