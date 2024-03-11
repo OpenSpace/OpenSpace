@@ -111,7 +111,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     addProperty(_dimensions);
     addProperty(_reload);
 
-    auto* webBrowser = global::moduleEngine->module<WebBrowserModule>();
+    WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
         webBrowser->addBrowser(_browserInstance.get());
     }
@@ -140,7 +140,7 @@ bool ScreenSpaceBrowser::deinitializeGL() {
 
     _browserInstance->close(true);
 
-    auto* webBrowser = global::moduleEngine->module<WebBrowserModule>();
+    WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
         webBrowser->removeBrowser(_browserInstance.get());
         _browserInstance.reset();

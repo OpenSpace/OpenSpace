@@ -150,7 +150,7 @@ void SelectionProperty::sortOptions() {
 
 bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) {
     bool changed = false;
-    std::set<std::string>::iterator it = keys.begin();
+    auto it = keys.begin();
     while (it != keys.end()) {
         if (!hasOption(*it)) {
             LWARNING(fmt::format(

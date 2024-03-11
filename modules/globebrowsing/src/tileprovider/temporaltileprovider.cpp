@@ -472,8 +472,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
     // Find the most current image that matches the current time. We can't pass the `time`
     // variable into the retrieveTileProvider function as it would generate a new
     // non-existing TileProvider for every new frame
-    using It = std::vector<std::pair<double, std::string>>::const_iterator;
-    It it = std::lower_bound(
+    auto it = std::lower_bound(
         _folder.files.begin(),
         _folder.files.end(),
         time.j2000Seconds(),
@@ -495,8 +494,7 @@ TileProvider*
 TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
                                                                          const Time& time)
 {
-    using It = std::vector<std::pair<double, std::string>>::const_iterator;
-    It next = std::lower_bound(
+    auto next = std::lower_bound(
         _folder.files.begin(),
         _folder.files.end(),
         time.j2000Seconds(),
@@ -505,8 +503,8 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
         }
     );
 
-    It curr = next != _folder.files.begin() ? next - 1 : next;
-    It nextNext = next != _folder.files.end() ? next + 1 : curr;
+    auto curr = next != _folder.files.begin() ? next - 1 : next;
+    auto nextNext = next != _folder.files.end() ? next + 1 : curr;
 
     if (next == _folder.files.end()) {
         curr = _folder.files.end() - 1;
@@ -514,7 +512,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
         nextNext = curr;
     }
 
-    It prev = curr != _folder.files.begin() ? curr - 1 : curr;
+    auto prev = curr != _folder.files.begin() ? curr - 1 : curr;
 
     _interpolateTileProvider->t1 = retrieveTileProvider(Time(curr->first));
     _interpolateTileProvider->t2 = retrieveTileProvider(Time(next->first));

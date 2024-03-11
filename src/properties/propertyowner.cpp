@@ -157,10 +157,7 @@ bool PropertyOwner::hasProperty(const std::string& uri) const {
 bool PropertyOwner::hasProperty(const Property* prop) const {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
 
-    std::vector<Property*>::const_iterator it = std::find(
-        _properties.begin(), _properties.end(), prop
-    );
-
+    auto it = std::find(_properties.begin(), _properties.end(), prop);
     return it != _properties.end();
 }
 
@@ -169,7 +166,7 @@ const std::vector<PropertyOwner*>& PropertyOwner::propertySubOwners() const {
 }
 
 PropertyOwner* PropertyOwner::propertySubOwner(const std::string& identifier) const {
-    std::vector<PropertyOwner*>::const_iterator it = std::find_if(
+    auto it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
         [&identifier](PropertyOwner* owner) { return owner->identifier() == identifier; }
@@ -209,7 +206,7 @@ void PropertyOwner::addProperty(Property* prop) {
         return;
     }
     // See if we can find the identifier of the property to add in the properties list
-    std::vector<Property*>::const_iterator it = std::find_if(
+    auto it = std::find_if(
         _properties.begin(),
         _properties.end(),
         [id = prop->identifier()](Property* p) { return p->identifier() == id; }
@@ -253,7 +250,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
     );
 
     // See if we can find the name of the propertyowner to add using the lower bound
-    std::vector<PropertyOwner*>::const_iterator it = std::find_if(
+    auto it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
         [identifier = owner->identifier()](PropertyOwner* o) {
@@ -294,7 +291,7 @@ void PropertyOwner::removeProperty(Property* prop) {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
 
     // See if we can find the identifier of the property to add in the properties list
-    std::vector<Property*>::const_iterator it = std::find_if(
+    auto it = std::find_if(
         _properties.begin(),
         _properties.end(),
         [id = prop->identifier()](Property* p) { return p->identifier() == id; }
@@ -320,7 +317,7 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
     ghoul_precondition(owner != nullptr, "owner must not be nullptr");
 
     // See if we can find the name of the propertyowner to add
-    std::vector<PropertyOwner*>::const_iterator it = std::find_if(
+    auto it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
         [identifier = owner->identifier()](PropertyOwner* o) {

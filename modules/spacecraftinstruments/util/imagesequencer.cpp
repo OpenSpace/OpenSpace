@@ -254,7 +254,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     }
 
     std::vector<int> toDelete;
-    for (std::vector<Image>::iterator it = captures.begin(); it != captures.end(); it++) {
+    for (auto it = captures.begin(); it != captures.end(); it++) {
         if (!it->isPlaceholder) {
             continue;
         }
