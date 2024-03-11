@@ -160,9 +160,11 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
 void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geometry* geo,
                                                         int index, bool ignoreHeights)
 {
-    ghoul_assert(geo, "No geometry provided");
+    if (!geo) {
+        throw std::logic_error("No geometry provided");
+    }
     ghoul_assert(
-        geo->isPuntal() || !geo->isCollection(),
+        (geo && geo->isPuntal()) || (geo && !geo->isCollection()),
         "Non-point geometry can not be a collection"
     );
 

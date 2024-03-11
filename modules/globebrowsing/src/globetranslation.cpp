@@ -222,6 +222,14 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         return _position;
     }
 
+    if (!_attachedNode) {
+        LERRORC(
+            "GlobeRotation",
+            fmt::format("Could not find attached node '{}'", _globe.value())
+        );
+        return _position;
+    }
+
     GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
 
     double lat = _latitude;
