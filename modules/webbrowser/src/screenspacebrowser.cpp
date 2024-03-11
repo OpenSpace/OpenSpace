@@ -82,6 +82,8 @@ void ScreenSpaceBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
+    , _renderHandler(new ScreenSpaceRenderHandler)
+    , _keyboardHandler(new WebKeyboardHandler)
     , _url(UrlInfo)
     , _reload(ReloadInfo)
 {
@@ -93,11 +95,9 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 
     _url = p.url.value_or(_url);
 
-    glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
+    const glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
     _dimensions = p.dimensions.value_or(windowDimensions);
 
-    _renderHandler = new ScreenSpaceRenderHandler;
-    _keyboardHandler = new WebKeyboardHandler();
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),
         _keyboardHandler.get()
@@ -111,7 +111,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     addProperty(_dimensions);
     addProperty(_reload);
 
-    WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
+    auto* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
         webBrowser->addBrowser(_browserInstance.get());
     }
@@ -140,7 +140,7 @@ bool ScreenSpaceBrowser::deinitializeGL() {
 
     _browserInstance->close(true);
 
-    WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
+    auto* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
         webBrowser->removeBrowser(_browserInstance.get());
         _browserInstance.reset();
@@ -163,7 +163,7 @@ void ScreenSpaceBrowser::render(float blackoutFactor) {
         translationMatrix() *
         localRotationMatrix() *
         scaleMatrix();
-    draw(mat, blackoutFactor);
+    draw(std::move(mat), blackoutFactor);
 }
 
 void ScreenSpaceBrowser::update() {

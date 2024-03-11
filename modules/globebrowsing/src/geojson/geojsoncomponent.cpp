@@ -610,7 +610,7 @@ void GeoJsonComponent::readFile() {
     GeoJSONReader reader;
 
     try {
-        GeoJSONFeatureCollection fc = reader.readFeatures(content);
+        const GeoJSONFeatureCollection fc = reader.readFeatures(content);
 
         int count = 1;
         for (const GeoJSONFeature& feature : fc.getFeatures()) {
@@ -688,9 +688,9 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
                 identifier = fmt::format("Feature{}-", index, identifier);
             }
 
-            properties::PropertyOwner::PropertyOwnerInfo info = {
-                identifier,
-                name
+            const properties::PropertyOwner::PropertyOwnerInfo info = {
+                std::move(identifier),
+                std::move(name)
                 // @TODO: Use description from file, if any
             };
             _features.push_back(std::make_unique<SubFeatureProps>(info));
@@ -720,7 +720,7 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
     // but on Windows it returns
     // geos::geom::CoordinateXY
     auto centroidCoord = *centroid->getCoordinate();
-    glm::vec2 centroidLatLong = glm::vec2(centroidCoord.y, centroidCoord.x);
+    const glm::vec2 centroidLatLong = glm::vec2(centroidCoord.y, centroidCoord.x);
     feature.centroidLatLong = centroidLatLong;
 
     std::unique_ptr<geos::geom::Geometry> boundingbox = geometry->getEnvelope();
@@ -800,12 +800,12 @@ void GeoJsonComponent::computeMainFeatureMetaPropeties() {
     _centerLatLong = 0.5f * (bboxLowerCorner + bboxUpperCorner);
 
     // Compute the diagonal distance (size) of the bounding box
-    Geodetic2 pos0 = {
+    const Geodetic2 pos0 = {
         glm::radians(bboxLowerCorner.x),
         glm::radians(bboxLowerCorner.y)
     };
 
-    Geodetic2 pos1 = {
+    const Geodetic2 pos1 = {
         glm::radians(bboxUpperCorner.x),
         glm::radians(bboxUpperCorner.y)
     };
@@ -838,7 +838,7 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
 
     global::scriptEngine->queueScript(
         fmt::format(
-            "openspace.globebrowsing.flyToGeo(\"{}\", {}, {}, {})",
+            "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
             _globeNode.owner()->identifier(), lat, lon, d
         ),
         scripting::ScriptEngine::ShouldBeSynchronized::Yes,
@@ -849,7 +849,7 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
 void GeoJsonComponent::triggerDeletion() const {
     global::scriptEngine->queueScript(
         fmt::format(
-            "openspace.globebrowsing.deleteGeoJson(\"{}\", \"{}\")",
+            "openspace.globebrowsing.deleteGeoJson([[{}]], [[{}]])",
             _globeNode.owner()->identifier(), _identifier
         ),
         scripting::ScriptEngine::ShouldBeSynchronized::Yes,

@@ -89,7 +89,7 @@ DeltaTimesDialog::DeltaTimesDialog(QWidget* parent, std::vector<double>* deltaTi
     createWidgets();
 
     for (size_t d = 0; d < _deltaTimesData.size(); ++d) {
-        std::string summary = createSummaryForDeltaTime(d, true);
+        const std::string summary = createSummaryForDeltaTime(d, true);
         _listWidget->addItem(new QListWidgetItem(QString::fromStdString(summary)));
     }
 
@@ -185,7 +185,7 @@ void DeltaTimesDialog::createWidgets() {
 std::string DeltaTimesDialog::createSummaryForDeltaTime(size_t idx, bool forListView) {
     int k = (idx % 10 == 9) ? 0 : idx % 10 + 1;
     k = (idx == 0) ? 1 : k;
-    std::string key = std::to_string(k);
+    const std::string key = std::to_string(k);
 
     std::string s;
     if (idx >= 20) {
@@ -247,9 +247,9 @@ void DeltaTimesDialog::valueChanged(const QString& text) {
         _errorMsg->setText("");
     }
     else {
-        int value = text.toDouble();
-        if (value != 0) {
-            _value->setText(QString::fromStdString(timeDescription(text.toDouble())));
+        const double value = text.toDouble();
+        if (value != 0.0) {
+            _value->setText(QString::fromStdString(timeDescription(value)));
             _errorMsg->setText("");
         }
     }
@@ -267,7 +267,7 @@ bool DeltaTimesDialog::isLineEmpty(int index) {
 }
 
 void DeltaTimesDialog::addDeltaTimeValue() {
-    int currentListSize = _listWidget->count();
+    const int currentListSize = _listWidget->count();
     const QString messageAddValue = "  (Enter integer value below & click 'Save')";
 
     if ((currentListSize == 1) && (isLineEmpty(0))) {
@@ -292,9 +292,9 @@ void DeltaTimesDialog::addDeltaTimeValue() {
 void DeltaTimesDialog::saveDeltaTimeValue() {
     QListWidgetItem* item = _listWidget->currentItem();
     if (item && !_deltaTimesData.empty()) {
-        int index = _listWidget->row(item);
+        const int index = _listWidget->row(item);
         _deltaTimesData.at(index) = _seconds->text().toDouble();
-        std::string summary = createSummaryForDeltaTime(index, true);
+        const std::string summary = createSummaryForDeltaTime(index, true);
         _listWidget->item(index)->setText(QString::fromStdString(summary));
         transitionEditMode(index, false);
         _editModeNewItem = false;
@@ -362,6 +362,7 @@ void DeltaTimesDialog::parseSelections() {
         }
     }
     std::vector<double> tempDt;
+    tempDt.reserve(finalNonzeroIndex);
     for (int i = 0; i < (finalNonzeroIndex + 1); i++) {
         tempDt.push_back(_deltaTimesData[i]);
     }
@@ -379,11 +380,13 @@ void DeltaTimesDialog::keyPressEvent(QKeyEvent* evt) {
         }
         return;
     }
-    else if (evt->key() == Qt::Key_Escape) {
+
+    if (evt->key() == Qt::Key_Escape) {
         if (_editModeNewItem) {
             discardDeltaTimeValue();
             return;
         }
     }
+
     QDialog::keyPressEvent(evt);
 }

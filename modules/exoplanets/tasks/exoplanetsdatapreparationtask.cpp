@@ -532,8 +532,8 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
                 bv = 2.f;
             }
             else {
-                float bvDiff = (bvUpper - bvLower);
-                float teffDiff = (teffUpper - teffLower);
+                const float bvDiff = (bvUpper - bvLower);
+                const float teffDiff = (teffUpper - teffLower);
                 bv = ((bvDiff * (teff - teffLower)) / teffDiff) + bvLower;
             }
             break;
