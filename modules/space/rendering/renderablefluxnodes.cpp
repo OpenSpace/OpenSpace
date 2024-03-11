@@ -824,7 +824,6 @@ void RenderableFluxNodes::update(const UpdateData& data) {
         _vertexPositions = _statesPos[_activeTriggerTimeIndex];
         _vertexColor = _statesColor[_activeTriggerTimeIndex];
         _vertexRadius = _statesRadius[_activeTriggerTimeIndex];
-        needsUpdate = false;
         updatePositionBuffer();
         updateVertexColorBuffer();
         updateVertexFilteringBuffer();

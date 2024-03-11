@@ -435,7 +435,6 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     if (hostNameSize > 0) {
         hostName = std::string(&message[pointer], hostNameSize);
     }
-    pointer += hostNameSize;
 
     if (status > ParallelConnection::Status::Host) {
         LERROR("Invalid status");

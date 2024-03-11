@@ -185,8 +185,8 @@ void ConvertRecFormatTask::determineFormatType() {
 void ConvertRecFormatTask::convertToAscii() {
     SessionRecording::Timestamps times;
     datamessagestructures::CameraKeyframe ckf;
-    datamessagestructures::TimeKeyframe   tkf;
-    datamessagestructures::ScriptMessage  skf;
+    datamessagestructures::TimeKeyframe tkf;
+    datamessagestructures::ScriptMessage skf;
     int lineNum = 1;
     _oFile.open(_outFilePath, std::ifstream::app);
     char tmpType = SessionRecording::DataFormatAsciiTag;
@@ -201,7 +201,6 @@ void ConvertRecFormatTask::convertToAscii() {
             LINFO(fmt::format(
                 "Finished converting {} entries from file '{}'", lineNum - 1, _inFilePath
             ));
-            fileReadOk = false;
             break;
         }
 
@@ -237,14 +236,13 @@ void ConvertRecFormatTask::convertToAscii() {
         SessionRecording::saveKeyframeToFile(keyframeLine.str(), _oFile);
         lineNum++;
     }
-    _oFile.close();
 }
 
 void ConvertRecFormatTask::convertToBinary() {
     SessionRecording::Timestamps times;
     datamessagestructures::CameraKeyframe ckf;
-    datamessagestructures::TimeKeyframe   tkf;
-    datamessagestructures::ScriptMessage  skf;
+    datamessagestructures::TimeKeyframe tkf;
+    datamessagestructures::ScriptMessage skf;
     int lineNum = 1;
     std::string lineContents;
     unsigned char keyframeBuffer[SessionRecording::_saveBufferMaxSize_bytes];

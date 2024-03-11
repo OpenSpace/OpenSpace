@@ -492,6 +492,7 @@ void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& gl
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
         LERROR("Error when going to Geodetic2");
+        return;
     }
 
     const glm::dmat4 inverseModelTransform = glm::inverse(

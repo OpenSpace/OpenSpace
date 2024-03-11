@@ -228,6 +228,14 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         return _matrix;
     }
 
+    if (!_globeNode) {
+        LERRORC(
+            "GlobeRotation",
+            fmt::format("Could not find globe '{}'", _globe.value())
+        );
+        return _matrix;
+    }
+
     double lat = _latitude;
     double lon = _longitude;
 

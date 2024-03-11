@@ -238,7 +238,6 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     }
 
     if (_useHeightmap) {
-
         glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
             lat,

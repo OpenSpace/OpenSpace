@@ -96,7 +96,6 @@ namespace {
                 importInsertItem(iss, parent->child(nChildInsert), elem, level + 1);
             }
             else if (levelChange < 0) {
-                continueToNextLine = false;
                 break;
             }
         }

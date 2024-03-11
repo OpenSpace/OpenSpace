@@ -658,6 +658,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
     // Handle new values
     switch (key) {
         case MpvKey::Duration: {
+            if (!prop) {
+                break;
+            }
             double* duration = reinterpret_cast<double*>(prop->data);
 
             if (!duration) {
@@ -674,6 +677,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::Height: {
+            if (!prop) {
+                break;
+            }
             int* height = reinterpret_cast<int*>(prop->data);
 
             if (!height) {
@@ -691,6 +697,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::Width: {
+            if (!prop) {
+                break;
+            }
             int* width = reinterpret_cast<int*>(prop->data);
 
             if (!width) {
@@ -708,6 +717,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::Time: {
+            if (!prop) {
+                break;
+            }
             double* time = reinterpret_cast<double*>(prop->data);
 
             if (!time) {
@@ -718,11 +730,17 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::IsSeeking: {
+            if (!prop) {
+                break;
+            }
             bool* isSeekingBool = reinterpret_cast<bool*>(prop->data);
             _isSeeking = *isSeekingBool;
             break;
         }
         case MpvKey::Fps: {
+            if (!prop) {
+                break;
+            }
             double* fps = reinterpret_cast<double*>(prop->data);
             if (*fps < glm::epsilon<double>()) {
                 _fps = 24.0;
@@ -743,6 +761,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::Pause: {
+            if (!prop) {
+                break;
+            }
             int* videoIsPaused = reinterpret_cast<int*>(prop->data);
             _isPaused = (* videoIsPaused == 1);
             break;
