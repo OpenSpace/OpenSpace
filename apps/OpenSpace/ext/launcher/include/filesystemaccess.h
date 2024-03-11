@@ -33,7 +33,7 @@ public:
      * Constructor for filesystemAccess class.
      *
      * \param fileExtension The file extensiopn filter used to find files. Only files with
-     *        this extension will be recognized (e.g. '.xml')
+     *        this extension will be recognized (e.g. '.json')
      * \param hideFileExtensions If `true` then file extensions will be removed from the
      *        listed files in the output
      * \param useCheckboxes If `true` then the text output format will contain a '0' as
