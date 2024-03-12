@@ -578,7 +578,9 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
     ofs << state.toJson().dump(2);
 }
 
-void NavigationHandler::loadNavigationState(const std::string& filepath) {
+void NavigationHandler::loadNavigationState(const std::string& filepath,
+                                            bool useTimeStamp)
+{
     const std::filesystem::path absolutePath = absPath(filepath);
     LINFO(fmt::format("Reading camera state from file: {}", absolutePath));
 
@@ -602,6 +604,10 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
 
     NavigationState state = NavigationState(json);
     setNavigationStateNextFrame(state);
+
+    if (useTimeStamp && state.timestamp.has_value()) {
+        global::timeManager->setTimeNextFrame(Time(*state.timestamp));
+    }
 }
 
 std::vector<std::string> NavigationHandler::listAllJoysticks() const {
