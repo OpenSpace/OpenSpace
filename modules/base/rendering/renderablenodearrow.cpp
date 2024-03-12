@@ -424,7 +424,7 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     const glm::dvec3 startNodePos = startNode->worldPosition();
     const glm::dvec3 endNodePos = endNode->worldPosition();
 
-    const glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
+    glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
     glm::dvec3 startPos = glm::dvec3(startNodePos + offset * arrowDirection);
     glm::dvec3 endPos = glm::dvec3(startPos + length * arrowDirection);
 
