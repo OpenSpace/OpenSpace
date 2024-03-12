@@ -549,8 +549,8 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     }
 }
 
-void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, double value,
-                                         char unit)
+void TimeQuantizer::doFirstApproximation(DateTime& quantized, const DateTime& unQ,
+                                         double value, char unit)
 {
     ZoneScoped;
 

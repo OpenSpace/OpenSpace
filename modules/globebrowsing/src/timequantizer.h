@@ -362,7 +362,7 @@ public:
 private:
     void verifyStartTimeRestrictions();
     void verifyResolutionRestrictions(const int value, const char unit);
-    void doFirstApproximation(DateTime& q, DateTime& unQ, double value, char unit);
+    void doFirstApproximation(DateTime& q, const DateTime& unQ, double value, char unit);
     double computeSecondsFromResolution(const int valueIn, const char unit);
     double _resolution = 0.0;
     double _resolutionValue = 0.0;
