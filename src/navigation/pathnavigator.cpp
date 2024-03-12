@@ -599,6 +599,7 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             codegen::lua::ZoomToFocus,
             codegen::lua::ZoomToDistance,
             codegen::lua::ZoomToDistanceRelative,
+            codegen::lua::JumpTo,
             codegen::lua::CreatePath
         }
     };

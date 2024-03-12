@@ -307,6 +307,42 @@ namespace {
     }
 }
 
+/**
+ * Fade rendering to black, jump to the specified node, and then fade in. This is done by
+ * triggering another script that handles the logic.
+ *
+ * If no fade duration is specified, use the property from Navigation Handler ->
+ * Path Navigator
+ */
+[[codegen::luawrap]] void jumpTo(std::string nodeIdentifier,
+                                 std::optional<double> fadeDuration)
+{
+    using namespace openspace;
+    if (!sceneGraphNode(nodeIdentifier)) {
+        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
+    }
+
+    double duration = fadeDuration.value_or(1.0);
+
+    std::string onArrivalScript = fmt::format(
+        "openspace.pathnavigation.flyTo('{}', 0) "
+        "openspace.setPropertyValueSingle("
+            "'RenderEngine.BlackoutFactor', 1, {}, 'QuadraticEaseIn'"
+        ")", nodeIdentifier, duration
+    );
+    std::string script = fmt::format(
+        "openspace.setPropertyValueSingle("
+            "'RenderEngine.BlackoutFactor', 0, {}, 'QuadraticEaseOut', [[{}]]"
+        ")", duration, onArrivalScript
+    );
+    // No syncing, as this was called from a script that should have been synced already
+    global::scriptEngine->queueScript(
+        script,
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
+    );
+}
+
 // Create a camera path as described by the lua table input argument.
 [[codegen::luawrap]] void createPath(ghoul::Dictionary path) {
     using namespace openspace;
