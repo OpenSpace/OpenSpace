@@ -106,6 +106,15 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo JumpToFadeDurationInfo = {
+        "JumpToFadeDuration",
+        "JumpTo Fade Duration",
+        "The number of seconds the fading of the rendering should take per default when "
+        "jumping to a scene graph node using the 'openspace.pathnavigation.jumpTo' "
+        "script.",
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
         "MinimalValidBoundingSphere",
         "Minimal Valid Bounding Sphere",
@@ -138,6 +147,7 @@ PathNavigator::PathNavigator()
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
     , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
     , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 2.f, 0.1f, 3.f)
+    , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.0f, 10.f)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
@@ -157,6 +167,7 @@ PathNavigator::PathNavigator()
     addProperty(_applyIdleBehaviorOnFinish);
     addProperty(_arrivalDistanceFactor);
     addProperty(_linearRotationSpeedFactor);
+    addProperty(_jumpToFadeDuration);
     addProperty(_minValidBoundingSphere);
 
     _relevantNodeTags = std::vector<std::string>{
@@ -191,6 +202,10 @@ double PathNavigator::arrivalDistanceFactor() const {
 
 float PathNavigator::linearRotationSpeedFactor() const {
     return _linearRotationSpeedFactor;
+}
+
+float PathNavigator::jumpToFadeDuration() const {
+    return _jumpToFadeDuration;
 }
 
 bool PathNavigator::hasCurrentPath() const {

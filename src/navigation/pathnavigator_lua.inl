@@ -322,7 +322,9 @@ namespace {
         throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
 
-    double duration = fadeDuration.value_or(1.0);
+    double duration = fadeDuration.value_or(
+        global::navigationHandler->pathNavigator().jumpToFadeDuration()
+    );
 
     std::string onArrivalScript = fmt::format(
         "openspace.pathnavigation.flyTo('{}', 0) "
