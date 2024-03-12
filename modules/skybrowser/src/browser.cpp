@@ -95,7 +95,7 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
     , _renderHandler(new RenderHandler)
     , _keyboardHandler(new WebKeyboardHandler)
     , _browserInstance(
-        std::make_unique<BrowserInstance>(_renderHandler, _keyboardHandler)
+        std::make_unique<BrowserInstance>(_renderHandler.get(), _keyboardHandler.get())
     )
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
