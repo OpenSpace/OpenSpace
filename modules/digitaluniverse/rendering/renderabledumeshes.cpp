@@ -372,7 +372,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
     const ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
         .enableDepth = true,
         .enableFalseDepth = false,
-        .scale = pow(10.f, _textSize),
+        .scale = std::pow(10.f, _textSize),
         .renderType = _renderOption,
         .minSize = _textMinMaxSize.value().x,
         .maxSize = _textMinMaxSize.value().y,
