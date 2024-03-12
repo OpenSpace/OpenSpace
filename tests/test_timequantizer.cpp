@@ -51,7 +51,7 @@ namespace {
     }
 
     void singleResolutionTest(globebrowsing::TimeQuantizer& tq, std::string resolution,
-                              std::string expectedType, bool expectFailure)
+                              const std::string& expectedType, bool expectFailure)
     {
         std::string res;
         try {
@@ -70,7 +70,7 @@ namespace {
     }
 
     void singleStartTimeTest(globebrowsing::TimeQuantizer& tq, std::string startTime,
-                             std::string expectedErrSubstring, bool expectFailure)
+                             const std::string& expectedErrSubstring, bool expectFailure)
     {
         std::string res;
         try {
@@ -88,12 +88,12 @@ namespace {
         }
     }
 
-    void singleStartTimeTest(std::string startTime, std::string expectedErrSubstring,
-                             bool expectFailure)
+    void singleStartTimeTest(std::string startTime,
+                             const std::string& expectedErrSubstring, bool expectFailure)
     {
         std::string res;
         try {
-            globebrowsing::TimeQuantizer tq(startTime, startTime, "1d");
+            const globebrowsing::TimeQuantizer tq(startTime, startTime, "1d");
         }
         catch (const ghoul::RuntimeError & e) {
             res = e.message;

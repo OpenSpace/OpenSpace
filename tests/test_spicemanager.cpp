@@ -471,15 +471,15 @@ TEST_CASE("SpiceManager: Get Field Of View", "[spicemanager]") {
     double et;
     double bounds_ref[5][3];
     char shape_ref[TYPLEN];
-    char name_ref[FILLEN];
-    double boresightVec[3];
+    std::array<char, FILLEN> nameRef;
+    std::array<double, 3> boresightVec;
 
     str2et_c("2004 jun 11 19:32:00", &et);
-    SpiceBoolean found;
+    SpiceBoolean found = SPICETRUE;
     bodn2c_c("CASSINI_ISS_NAC", &cassini_ID, &found);
     CHECK(found == SPICETRUE);
 
-    getfov_c(cassini_ID, 5, TYPLEN, TYPLEN, shape_ref, name_ref, boresightVec, &n, bounds_ref);
+    getfov_c(cassini_ID, 5, TYPLEN, TYPLEN, shape_ref, nameRef.data(), boresightVec.data(), &n, bounds_ref);
 
     SpiceManager::FieldOfViewResult res;
 

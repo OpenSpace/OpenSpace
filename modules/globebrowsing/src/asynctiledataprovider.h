@@ -65,7 +65,7 @@ public:
     void reset();
     void prepareToBeDeleted();
 
-    bool shouldBeDeleted();
+    bool shouldBeDeleted() const;
 
     const RawTileDataReader& rawTileDataReader() const;
     float noDataValueAsFloat() const;

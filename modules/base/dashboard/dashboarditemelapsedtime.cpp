@@ -131,7 +131,7 @@ DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dict
         _lowestTimeUnit.addOption(static_cast<int>(u), std::string(nameForTimeUnit(u)));
     }
     _lowestTimeUnit = static_cast<int>(TimeUnit::Second);
-    TimeUnit u = codegen::map<TimeUnit>(
+    const TimeUnit u = codegen::map<TimeUnit>(
         p.lowestTimeUnit.value_or(Parameters::TimeUnit::Second)
     );
     _lowestTimeUnit = static_cast<int>(u);
@@ -146,11 +146,11 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
     if (_simplifyTime) {
         using namespace std::chrono;
 
-        TimeUnit lowestTime = TimeUnit(_lowestTimeUnit.value());
-        std::string_view lowestUnitS = nameForTimeUnit(lowestTime, false);
-        std::string_view lowestUnitP = nameForTimeUnit(lowestTime, true);
+        const TimeUnit lowestTime = TimeUnit(_lowestTimeUnit.value());
+        const std::string_view lowestUnitS = nameForTimeUnit(lowestTime, false);
+        const std::string_view lowestUnitP = nameForTimeUnit(lowestTime, true);
 
-        std::vector<std::pair<double, std::string_view>> ts = splitTime(delta);
+        const std::vector<std::pair<double, std::string_view>> ts = splitTime(delta);
         std::string time;
         for (const std::pair<double, std::string_view>& t : ts) {
             time += fmt::format("{} {} ", t.first, t.second);
