@@ -108,7 +108,7 @@ std::filesystem::path OpenSpaceModule::modulePath() const {
     std::string moduleIdentifier = ghoul::toLowerCase(identifier());
 
     // First try the internal module directory
-    std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);
+    const std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);
     return std::filesystem::is_directory(path) ? path : "";
 }
 

@@ -313,7 +313,7 @@ float AtmosphereDeferredcaster::eclipseShadow(glm::dvec3 position) {
 }
 
 void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const DeferredcastData&,
-                                          ghoul::opengl::ProgramObject& prg)
+                                          ghoul::opengl::ProgramObject& program)
 {
     ZoneScoped;
     TracyGpuZone("Atmosphere preRaycast");
@@ -329,7 +329,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
     );
 
     // Number of planet radii to use as distance threshold for culling
-    prg.setUniform(_uniformCache.cullAtmosphere, 1);
+    program.setUniform(_uniformCache.cullAtmosphere, 1);
 
     constexpr double DistanceCullingRadii = 5000;
     glm::dmat4 MV = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
@@ -337,47 +337,47 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
     if (distance <= scaledRadius * DistanceCullingRadii &&
         isAtmosphereInFrustum(MV, tPlanetPos, scaledRadius + ATM_EPS))
     {
-        prg.setUniform(_uniformCache.cullAtmosphere, 0);
-        prg.setUniform(_uniformCache.opacity, _opacity);
-        prg.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
-        prg.setUniform(_uniformCache.Rt, _atmosphereRadius);
-        prg.setUniform(_uniformCache.groundRadianceEmission, _groundRadianceEmission);
-        prg.setUniform(_uniformCache.HR, _rayleighHeightScale);
-        prg.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
-        prg.setUniform(_uniformCache.HM, _mieHeightScale);
-        prg.setUniform(_uniformCache.betaMieExtinction, _mieExtinctionCoeff);
-        prg.setUniform(_uniformCache.mieG, _miePhaseConstant);
-        prg.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
-        prg.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
-        prg.setUniform(_uniformCache.HO, _ozoneHeightScale);
-        prg.setUniform(_uniformCache.betaOzoneExtinction, _ozoneExtinctionCoeff);
-        prg.setUniform(_uniformCache.SAMPLES_R, _rSamples);
-        prg.setUniform(_uniformCache.SAMPLES_MU, _muSamples);
-        prg.setUniform(_uniformCache.SAMPLES_MU_S, _muSSamples);
-        prg.setUniform(_uniformCache.SAMPLES_NU, _nuSamples);
+        program.setUniform(_uniformCache.cullAtmosphere, 0);
+        program.setUniform(_uniformCache.opacity, _opacity);
+        program.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
+        program.setUniform(_uniformCache.Rt, _atmosphereRadius);
+        program.setUniform(_uniformCache.groundRadianceEmission, _groundRadianceEmission);
+        program.setUniform(_uniformCache.HR, _rayleighHeightScale);
+        program.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
+        program.setUniform(_uniformCache.HM, _mieHeightScale);
+        program.setUniform(_uniformCache.betaMieExtinction, _mieExtinctionCoeff);
+        program.setUniform(_uniformCache.mieG, _miePhaseConstant);
+        program.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
+        program.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
+        program.setUniform(_uniformCache.HO, _ozoneHeightScale);
+        program.setUniform(_uniformCache.betaOzoneExtinction, _ozoneExtinctionCoeff);
+        program.setUniform(_uniformCache.SAMPLES_R, _rSamples);
+        program.setUniform(_uniformCache.SAMPLES_MU, _muSamples);
+        program.setUniform(_uniformCache.SAMPLES_MU_S, _muSSamples);
+        program.setUniform(_uniformCache.SAMPLES_NU, _nuSamples);
         // We expose the value as degrees, but the shader wants radians
-        prg.setUniform(_uniformCache.sunAngularSize, glm::radians(_sunAngularSize));
+        program.setUniform(_uniformCache.sunAngularSize, glm::radians(_sunAngularSize));
 
         // Object Space
         glm::dmat4 invModelMatrix = glm::inverse(_modelTransform);
-        prg.setUniform(_uniformCache.inverseModelTransformMatrix, invModelMatrix);
-        prg.setUniform(_uniformCache.modelTransformMatrix, _modelTransform);
+        program.setUniform(_uniformCache.inverseModelTransformMatrix, invModelMatrix);
+        program.setUniform(_uniformCache.modelTransformMatrix, _modelTransform);
 
         glm::dmat4 viewToWorldMatrix = glm::inverse(data.camera.combinedViewMatrix());
 
         // Eye Space to World Space
-        prg.setUniform(_uniformCache.viewToWorldMatrix, viewToWorldMatrix);
+        program.setUniform(_uniformCache.viewToWorldMatrix, viewToWorldMatrix);
 
         // Projection to Eye Space
         glm::dmat4 dInvProj = glm::inverse(glm::dmat4(data.camera.projectionMatrix()));
 
         glm::dmat4 invWholePipeline = invModelMatrix * viewToWorldMatrix * dInvProj;
 
-        prg.setUniform(_uniformCache.projectionToModelTransform, invWholePipeline);
+        program.setUniform(_uniformCache.projectionToModelTransform, invWholePipeline);
 
         glm::dvec4 camPosObjCoords =
             invModelMatrix * glm::dvec4(data.camera.eyePositionVec3(), 1.0);
-        prg.setUniform(_uniformCache.camPosObj, glm::dvec3(camPosObjCoords));
+        program.setUniform(_uniformCache.camPosObj, glm::dvec3(camPosObjCoords));
 
         SceneGraphNode* node = sceneGraph()->sceneGraphNode("Sun");
         glm::dvec3 sunPosWorld = node ? node->worldPosition() : glm::dvec3(0.0);
@@ -393,7 +393,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         }
 
         // Sun Position in Object Space
-        prg.setUniform(_uniformCache.sunDirectionObj, glm::normalize(sunPosObj));
+        program.setUniform(_uniformCache.sunDirectionObj, glm::normalize(sunPosObj));
 
         // Shadow calculations..
         _shadowDataArrayCache.clear();
@@ -487,35 +487,38 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
             char* bf = fmt::format_to(_uniformNameBuffer + 16, "{}", counter);
 
             std::strcpy(bf, "].isShadowing\0");
-            prg.setUniform(_uniformNameBuffer, sd.isShadowing);
+            program.setUniform(_uniformNameBuffer, sd.isShadowing);
 
             if (sd.isShadowing) {
                 std::strcpy(bf, "].xp\0");
-                prg.setUniform(_uniformNameBuffer, sd.penumbra);
+                program.setUniform(_uniformNameBuffer, sd.penumbra);
                 std::strcpy(bf, "].xu\0");
-                prg.setUniform(_uniformNameBuffer, sd.umbra);
+                program.setUniform(_uniformNameBuffer, sd.umbra);
                 std::strcpy(bf, "].rc\0");
-                prg.setUniform(_uniformNameBuffer, sd.radiusCaster);
+                program.setUniform(_uniformNameBuffer, sd.radiusCaster);
                 std::strcpy(bf, "].sourceCasterVec\0");
-                prg.setUniform(_uniformNameBuffer, sd.sourceCasterVec);
+                program.setUniform(_uniformNameBuffer, sd.sourceCasterVec);
                 std::strcpy(bf, "].casterPositionVec\0");
-                prg.setUniform(_uniformNameBuffer, sd.casterPositionVec);
+                program.setUniform(_uniformNameBuffer, sd.casterPositionVec);
             }
             counter++;
         }
-        prg.setUniform(_uniformCache.hardShadows, _hardShadowsEnabled);
+        program.setUniform(_uniformCache.hardShadows, _hardShadowsEnabled);
     }
     _transmittanceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-    prg.setUniform(_uniformCache.transmittanceTexture, _transmittanceTableTextureUnit);
+    program.setUniform(
+        _uniformCache.transmittanceTexture,
+        _transmittanceTableTextureUnit
+    );
 
     _irradianceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
-    prg.setUniform(_uniformCache.irradianceTexture, _irradianceTableTextureUnit);
+    program.setUniform(_uniformCache.irradianceTexture, _irradianceTableTextureUnit);
 
     _inScatteringTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
-    prg.setUniform(_uniformCache.inscatterTexture, _inScatteringTableTextureUnit);
+    program.setUniform(_uniformCache.inscatterTexture, _inScatteringTableTextureUnit);
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData&, const DeferredcastData&,
@@ -954,8 +957,8 @@ void AtmosphereDeferredcaster::calculateIrradiance(int scatteringOrder,
 }
 
 void AtmosphereDeferredcaster::calculateInscattering(int scatteringOrder,
-                                                     ghoul::opengl::ProgramObject& prg,
-                                                     GLuint deltaSRayleigh)
+                                                    ghoul::opengl::ProgramObject& program,
+                                                                    GLuint deltaSRayleigh)
 
 {
     ZoneScoped;
@@ -967,18 +970,18 @@ void AtmosphereDeferredcaster::calculateInscattering(int scatteringOrder,
         0
     );
     glViewport(0, 0, _textureSize.x, _textureSize.y);
-    prg.activate();
+    program.activate();
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     glBindTexture(GL_TEXTURE_3D, deltaSRayleigh);
-    prg.setUniform("deltaSTexture", unit);
-    prg.setUniform("SAMPLES_MU_S", _muSSamples);
-    prg.setUniform("SAMPLES_NU", _nuSamples);
-    prg.setUniform("SAMPLES_MU", _muSamples);
-    prg.setUniform("SAMPLES_R", _rSamples);
+    program.setUniform("deltaSTexture", unit);
+    program.setUniform("SAMPLES_MU_S", _muSSamples);
+    program.setUniform("SAMPLES_NU", _nuSamples);
+    program.setUniform("SAMPLES_MU", _muSamples);
+    program.setUniform("SAMPLES_R", _rSamples);
     for (int layer = 0; layer < _rSamples; ++layer) {
-        prg.setUniform("layer", layer);
+        program.setUniform("layer", layer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
     if (_saveCalculationTextures) {
@@ -987,7 +990,7 @@ void AtmosphereDeferredcaster::calculateInscattering(int scatteringOrder,
             glm::ivec2(_textureSize)
         );
     }
-    prg.deactivate();
+    program.deactivate();
 }
 
 void AtmosphereDeferredcaster::calculateAtmosphereParameters() {

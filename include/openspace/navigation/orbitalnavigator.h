@@ -410,12 +410,6 @@ private:
     glm::dvec3 cameraToSurfaceVector(const glm::dvec3& cameraPos,
         const glm::dvec3& centerPos, const SurfacePositionHandle& posHandle);
 
-    /**
-     * Calculates a SurfacePositionHandle given a camera position in world space.
-     */
-    SurfacePositionHandle calculateSurfacePositionHandle(const SceneGraphNode& node,
-        const glm::dvec3& cameraPositionWorldSpace) const;
-
     void resetIdleBehavior();
 
     /**
@@ -451,7 +445,7 @@ private:
      * \param position The position of the camera. Will be changed by the function
      * \param globalRotation The camera's global rotation. Will be changed by the function
      */
-    void orbitAroundAxis(const glm::dvec3 axis, double angle, glm::dvec3& position,
+    void orbitAroundAxis(const glm::dvec3& axis, double angle, glm::dvec3& position,
         glm::dquat& globalRotation);
 
     double rotationSpeedScaleFromCameraHeight(const glm::dvec3& cameraPosition,

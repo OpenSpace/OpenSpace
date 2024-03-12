@@ -38,6 +38,17 @@ namespace {
 
     constexpr std::string_view KeyInFilePath = "InputFilePath";
     constexpr std::string_view KeyOutFilePath = "OutputFilePath";
+
+    std::string addFileSuffix(const std::string& filePath, const std::string& suffix) {
+        const size_t lastdot = filePath.find_last_of(".");
+        const std::string extension = filePath.substr(0, lastdot);
+        if (lastdot == std::string::npos) {
+            return filePath + suffix;
+        }
+        else {
+            return filePath.substr(0, lastdot) + suffix + extension;
+        }
+    }
 } // namespace
 
 namespace openspace::interaction {
@@ -66,9 +77,7 @@ ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) 
 ConvertRecFormatTask::~ConvertRecFormatTask() {
     _iFile.close();
     _oFile.close();
-    if (sessRec != nullptr) {
-        delete sessRec;
-    }
+    delete sessRec;
 }
 
 std::string ConvertRecFormatTask::description() {
@@ -209,20 +218,29 @@ void ConvertRecFormatTask::convertToAscii() {
 
         if (frameType == SessionRecording::HeaderCameraBinary) {
             sessRec->readCameraKeyframeBinary(times, ckf, _iFile, lineNum);
-            sessRec->saveHeaderAscii(times, SessionRecording::HeaderCameraAscii,
-                keyframeLine);
+            SessionRecording::saveHeaderAscii(
+                times,
+                SessionRecording::HeaderCameraAscii,
+                keyframeLine
+            );
             ckf.write(keyframeLine);
         }
         else if (frameType == SessionRecording::HeaderTimeBinary) {
             sessRec->readTimeKeyframeBinary(times, tkf, _iFile, lineNum);
-            sessRec->saveHeaderAscii(times, SessionRecording::HeaderTimeAscii,
-                keyframeLine);
+            SessionRecording::saveHeaderAscii(
+                times,
+                SessionRecording::HeaderTimeAscii,
+                keyframeLine
+            );
             tkf.write(keyframeLine);
         }
         else if (frameType == SessionRecording::HeaderScriptBinary) {
             sessRec->readScriptKeyframeBinary(times, skf, _iFile, lineNum);
-            sessRec->saveHeaderAscii(times, SessionRecording::HeaderScriptAscii,
-                keyframeLine);
+            SessionRecording::saveHeaderAscii(
+                times,
+                SessionRecording::HeaderScriptAscii,
+                keyframeLine
+            );
             skf.write(keyframeLine);
         }
         else {
@@ -293,19 +311,6 @@ void ConvertRecFormatTask::convertToBinary() {
     LINFO(fmt::format(
         "Finished converting {} entries from file '{}'", lineNum, _inFilePath
     ));
-}
-
-std::string ConvertRecFormatTask::addFileSuffix(const std::string& filePath,
-                                                const std::string& suffix)
-{
-    size_t lastdot = filePath.find_last_of(".");
-    std::string extension = filePath.substr(0, lastdot);
-    if (lastdot == std::string::npos) {
-        return filePath + suffix;
-    }
-    else {
-        return filePath.substr(0, lastdot) + suffix + extension;
-    }
 }
 
 documentation::Documentation ConvertRecFormatTask::documentation() {

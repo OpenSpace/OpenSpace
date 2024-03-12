@@ -32,7 +32,6 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
-#include <openspace/navigation/pathnavigator.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -267,7 +266,7 @@ void PathNavigator::updateCamera(double deltaTime) {
 
     // Set anchor node in orbitalNavigator, to render visible nodes and add activate
     // navigation when we reach the end.
-    std::string currentAnchor = anchor()->identifier();
+    const std::string currentAnchor = anchor()->identifier();
     if (currentAnchor != newAnchor) {
         global::navigationHandler->orbitalNavigator().setFocusNode(newAnchor, false);
     }
@@ -294,7 +293,7 @@ void PathNavigator::updateCamera(double deltaTime) {
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
-    OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
+    const OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
         // Silently ignore any paths that are being created during a session recording
         // playback. The camera path should already have been recorded
@@ -334,7 +333,9 @@ void PathNavigator::startPath() {
         return;
     }
 
-    bool success = global::openSpaceEngine->setMode(OpenSpaceEngine::Mode::CameraPath);
+    const bool success = global::openSpaceEngine->setMode(
+        OpenSpaceEngine::Mode::CameraPath
+    );
     if (!success) {
         LERROR("Could not start camera path");
         return; // couldn't switch to camera path mode
@@ -427,8 +428,8 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
         // Use the biggest of the bounding sphere and interaction sphere,
         // so we don't accidentally choose a bounding sphere that is much smaller
         // than the interaction sphere of the node
-        double bs = n->boundingSphere();
-        double is = n->interactionSphere();
+        const double bs = n->boundingSphere();
+        const double is = n->interactionSphere();
         return std::max(is, bs);
     };
 
@@ -497,7 +498,7 @@ void PathNavigator::findRelevantNodes() {
     }
 
     auto isRelevant = [&relevantTags](const SceneGraphNode* node) {
-        const std::vector<std::string> tags = node->tags();
+        const std::vector<std::string>& tags = node->tags();
         auto result = std::find_first_of(
             relevantTags.begin(),
             relevantTags.end(),
@@ -547,7 +548,7 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
         const glm::dvec3 posInModelCoords =
             glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
 
-        bool isClose = collision::isPointInsideSphere(
+        const bool isClose = collision::isPointInsideSphere(
             posInModelCoords,
             glm::dvec3(0.0, 0.0, 0.0),
             proximityRadius
@@ -561,7 +562,7 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
     return nullptr;
 }
 
-void PathNavigator::removeRollRotation(CameraPose& pose) {
+void PathNavigator::removeRollRotation(CameraPose& pose) const {
     // The actual position for the camera does not really matter. Use the origin,
     // to avoid precision problems when we have large values for the position
     const glm::dvec3 cameraPos = glm::dvec3(0.0);
@@ -573,9 +574,9 @@ void PathNavigator::removeRollRotation(CameraPose& pose) {
     // enough away from the camera
     constexpr double NotTooCloseDistance = 10000.0;
 
-    glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;
+    const glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;
 
-    glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
+    const glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
         cameraPos,
         lookAtPos,
         camera()->lookUpVectorWorldSpace()

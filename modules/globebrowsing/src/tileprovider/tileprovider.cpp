@@ -152,7 +152,7 @@ void TileProvider::deinitialize() {
 }
 
 ChunkTile TileProvider::traverseTree(TileIndex tileIndex, int parents, int maxParents,
-                        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
+                  const std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
                                                              TileUvTransform& uvTransform)
 {
     // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller

@@ -143,7 +143,7 @@ struct TileProvider : public properties::PropertyOwner {
     bool isInitialized = false;
 protected:
     ChunkTile traverseTree(TileIndex tileIndex, int parents, int maxParents,
-        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
+        const std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
         TileUvTransform& uvTransform);
 
 private:

@@ -411,6 +411,28 @@ namespace {
         "choice for globes, and the Y-axis is a good choice for models",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    /**
+     * Calculates a SurfacePositionHandle given a camera position in world space.
+     */
+    openspace::SurfacePositionHandle calculateSurfacePositionHandle(
+                                                    const openspace::SceneGraphNode& node,
+                                               const glm::dvec3& cameraPositionWorldSpace)
+    {
+        ghoul_assert(
+            glm::length(cameraPositionWorldSpace) > 0.0,
+            "Cannot have degenerate vector"
+        );
+
+        const glm::dmat4 inverseModelTransform = glm::inverse(node.modelTransform());
+        const glm::dvec3 cameraPositionModelSpace =
+            glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1.0));
+        const openspace::SurfacePositionHandle posHandle =
+            node.calculateSurfacePositionHandle(cameraPositionModelSpace);
+
+        return posHandle;
+    }
+
 } // namespace
 
 namespace openspace::interaction {
@@ -1854,24 +1876,6 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
     );
 }
 
-SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
-                                                const SceneGraphNode& node,
-                                        const glm::dvec3& cameraPositionWorldSpace) const
-{
-    ghoul_assert(
-        glm::length(cameraPositionWorldSpace) > 0.0,
-        "Cannot have degenerate vector"
-    );
-
-    const glm::dmat4 inverseModelTransform = glm::inverse(node.modelTransform());
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1.0));
-    const SurfacePositionHandle posHandle =
-        node.calculateSurfacePositionHandle(cameraPositionModelSpace);
-
-    return posHandle;
-}
-
 JoystickCameraStates& OrbitalNavigator::joystickStates() {
     return _joystickStates;
 }
@@ -1897,7 +1901,7 @@ const ScriptCameraStates& OrbitalNavigator::scriptStates() const {
 }
 
 void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     if (mode != OpenSpaceEngine::Mode::UserControl) {
         LERROR(
             "Could not start idle behavior. The camera is being controlled "
@@ -1910,7 +1914,7 @@ void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
         _idleBehavior.chosenBehavior = std::nullopt;
     }
     else {
-        IdleBehavior::Behavior behavior;
+        IdleBehavior::Behavior behavior = IdleBehavior::Behavior::Orbit;
         if (choice == IdleKeyOrbit) {
             behavior = IdleBehavior::Behavior::Orbit;
         }
@@ -1921,9 +1925,9 @@ void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
             behavior = IdleBehavior::Behavior::OrbitAroundUp;
         }
         else {
-            throw ghoul::RuntimeError(
-                fmt::format("No existing IdleBehavior with identifier '{}'", choice)
-            );
+            throw ghoul::RuntimeError(fmt::format(
+                "No existing IdleBehavior with identifier '{}'", choice
+            ));
         }
         _idleBehavior.chosenBehavior = behavior;
     }
@@ -1950,8 +1954,10 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
         return;
     }
 
-    SurfacePositionHandle posHandle =
-        calculateSurfacePositionHandle(*_anchorNode, position);
+    const SurfacePositionHandle posHandle = calculateSurfacePositionHandle(
+        *_anchorNode,
+        position
+    );
 
     // Same speed scale as horizontal translation
     double speedScale = rotationSpeedScaleFromCameraHeight(position, posHandle);
@@ -1964,10 +1970,10 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
     }
 
     // Interpolate so that the start and end are smooth
-    double s = _idleBehaviorDampenInterpolator.value();
+    const double s = _idleBehaviorDampenInterpolator.value();
     speedScale *= _invertIdleBehaviorInterpolation ? (1.0 - s) : s;
 
-    double angle = deltaTime * speedScale;
+    const double angle = deltaTime * speedScale;
 
     // Apply the chosen behavior
     const IdleBehavior::Behavior choice = _idleBehavior.chosenBehavior.value_or(
@@ -2021,7 +2027,7 @@ void OrbitalNavigator::orbitAnchor(double angle, glm::dvec3& position,
     position += rotationDiffVec3;
 }
 
-void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double angle,
+void OrbitalNavigator::orbitAroundAxis(const glm::dvec3& axis, double angle,
                                        glm::dvec3& position, glm::dquat& globalRotation)
 {
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");

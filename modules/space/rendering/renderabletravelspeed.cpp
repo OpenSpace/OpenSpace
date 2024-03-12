@@ -86,6 +86,10 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    double calculateTravelTime(glm::dvec3 start, glm::dvec3 target, double speed) {
+        return glm::distance(target, start) / speed;
+    }
+
     struct [[codegen::Dictionary(RenderableLightTravel)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
         std::string target;
@@ -153,9 +157,10 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
         if (SceneGraphNode* n = sceneGraphNode(_targetName);  n) {
             _targetNode = n;
             _targetPosition = _targetNode->worldPosition();
-            _lightTravelTime = calculateLightTravelTime(
+            _lightTravelTime = calculateTravelTime(
                 _sourcePosition,
-                _targetPosition
+                _targetPosition,
+                _travelSpeed
             );
             calculateDirectionVector();
             reinitiateTravel();
@@ -164,9 +169,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
 
     _travelSpeed = p.travelSpeed.value_or(_travelSpeed);
     addProperty(_travelSpeed);
-    _travelSpeed.onChange([this]() {
-        reinitiateTravel();
-    });
+    _travelSpeed.onChange([this]() { reinitiateTravel(); });
 }
 
 void RenderableTravelSpeed::initialize() {
@@ -203,11 +206,6 @@ void RenderableTravelSpeed::deinitializeGL() {
     );
     glDeleteVertexArrays(1, &_vaoId);
     glDeleteBuffers(1, &_vBufferId);
-}
-
-double RenderableTravelSpeed::calculateLightTravelTime(glm::dvec3 startPosition,
-    glm::dvec3 targetPosition) {
-    return glm::distance(targetPosition, startPosition) / _travelSpeed;
 }
 
 void RenderableTravelSpeed::calculateDirectionVector() {
@@ -273,9 +271,10 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     ghoul_assert(mySGNPointer, "Renderable have to be owned by scene graph node");
     _sourcePosition = mySGNPointer->worldPosition();
 
-    _lightTravelTime = calculateLightTravelTime(
+    _lightTravelTime = calculateTravelTime(
         _sourcePosition,
-        _targetPosition
+        _targetPosition,
+        _travelSpeed
     );
 
     const double currentTime = data.time.j2000Seconds();

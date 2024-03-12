@@ -94,9 +94,9 @@ public:
     /**
      * Set the end date/time of the time range.
      *
-     * \param start The ISO8601 date/time string that defines the end of the range
+     * \param end The ISO8601 date/time string that defines the end of the range
      */
-    void setEnd(const std::string start);
+    void setEnd(const std::string end);
 
 private:
     std::string _start;
