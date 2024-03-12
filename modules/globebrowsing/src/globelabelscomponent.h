@@ -69,7 +69,6 @@ private:
     bool saveCachedFile(const std::filesystem::path& file) const;
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         float distToCamera, float fadeInVariable);
-    bool isLabelInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position) const;
 
     // Labels Structures
     struct LabelEntry {

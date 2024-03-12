@@ -59,7 +59,7 @@ bool CameraTopic::isDone() const {
 }
 
 void CameraTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at("event").get<std::string>();
+    const std::string event = json.at("event").get<std::string>();
 
     if (event != SubscribeEvent) {
         _isDone = true;
@@ -83,7 +83,7 @@ void CameraTopic::sendCameraData() {
     glm::dvec3 position = module->geoPosition();
     std::pair<double, std::string_view> altSimplified = simplifyDistance(position.z);
 
-    nlohmann::json jsonData = {
+    const nlohmann::json jsonData = {
         { "latitude", position.x },
         { "longitude", position.y },
         { "altitude", altSimplified.first },

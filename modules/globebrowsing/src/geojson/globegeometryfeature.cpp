@@ -75,8 +75,8 @@ std::string GlobeGeometryFeature::key() const {
     return _key;
 }
 
-void GlobeGeometryFeature::setOffsets(const glm::vec3& value) {
-    _offsets = value;
+void GlobeGeometryFeature::setOffsets(glm::vec3 offsets) {
+    _offsets = std::move(offsets);
 }
 
 void GlobeGeometryFeature::initializeGL(ghoul::opengl::ProgramObject* pointsProgram,
@@ -100,8 +100,8 @@ void GlobeGeometryFeature::deinitializeGL() {
 }
 
 bool GlobeGeometryFeature::isReady() const {
-    bool shadersAreReady = _linesAndPolygonsProgram && _pointsProgram;
-    bool textureIsReady = (!_hasTexture) || _pointTexture;
+    const bool shadersAreReady = _linesAndPolygonsProgram && _pointsProgram;
+    const bool textureIsReady = (!_hasTexture) || _pointTexture;
     return shadersAreReady && textureIsReady;
 }
 
@@ -291,8 +291,8 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
 {
     ghoul_assert(pass >= 0 && pass < 2, "Render pass variable out of accepted range");
 
-    float opacity = mainOpacity * _properties.opacity();
-    float fillOpacity = mainOpacity * _properties.fillOpacity();
+    const float opacity = mainOpacity * _properties.opacity();
+    const float fillOpacity = mainOpacity * _properties.fillOpacity();
 
     const glm::dmat4 globeModelTransform = _globe.modelTransform();
     const glm::dmat4 modelViewTransform =
@@ -315,7 +315,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
             continue;
         }
 
-        bool shouldRenderTwice = r.type == RenderType::Polygon &&
+        const bool shouldRenderTwice = r.type == RenderType::Polygon &&
             fillOpacity < 1.f && _properties.extrude();
 
         if (pass > 0 && !shouldRenderTwice) {
@@ -384,8 +384,8 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
     ghoul_assert(feature.type == RenderType::Points, "Trying to render faulty geometry");
     _pointsProgram->setUniform("color", _properties.color());
 
-    float bs = static_cast<float>(_globe.boundingSphere());
-    float size = 0.001f * sizeScale * _properties.pointSize() * bs;
+    const float bs = static_cast<float>(_globe.boundingSphere());
+    const float size = 0.001f * sizeScale * _properties.pointSize() * bs;
     _pointsProgram->setUniform("pointSize", size);
 
     _pointsProgram->setUniform("renderMode", static_cast<int>(renderMode));
@@ -531,7 +531,7 @@ void GlobeGeometryFeature::updateGeometry() {
         createPointGeometry();
     }
     else {
-        std::vector<std::vector<glm::vec3>> edgeVertices = createLineGeometry();
+        const std::vector<std::vector<glm::vec3>> edgeVertices = createLineGeometry();
         createExtrudedGeometry(edgeVertices);
         createPolygonGeometry();
     }
@@ -556,20 +556,19 @@ void GlobeGeometryFeature::updateHeightsFromHeightMap() {
 std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
     std::vector<std::vector<glm::vec3>> resultPositions;
     resultPositions.reserve(_geoCoordinates.size());
-
-    for (size_t i = 0; i < _geoCoordinates.size(); i++) {
+    for (const std::vector<Geodetic3>& coordinates : _geoCoordinates) {
         std::vector<Vertex> vertices;
         std::vector<glm::vec3> positions;
         // TODO: this is not correct anymore
-        vertices.reserve(_geoCoordinates[i].size() * 3);
+        vertices.reserve(coordinates.size() * 3);
         // TODO: this is not correct anymore
-        positions.reserve(_geoCoordinates[i].size() * 3);
+        positions.reserve(coordinates.size() * 3);
 
         glm::dvec3 lastPos = glm::dvec3(0.0);
         double lastHeightValue = 0.0;
 
         bool isFirst = true;
-        for (const Geodetic3& geodetic : _geoCoordinates[i]) {
+        for (const Geodetic3& geodetic : coordinates) {
             glm::dvec3 v = geometryhelper::computeOffsetedModelCoordinate(
                 geodetic,
                 _globe,

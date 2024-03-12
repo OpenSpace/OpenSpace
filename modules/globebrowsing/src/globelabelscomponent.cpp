@@ -154,6 +154,73 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    bool isLabelInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position) {
+        // Frustum Planes
+        glm::dvec3 col1(MVMatrix[0][0], MVMatrix[1][0], MVMatrix[2][0]);
+        glm::dvec3 col2(MVMatrix[0][1], MVMatrix[1][1], MVMatrix[2][1]);
+        glm::dvec3 col3(MVMatrix[0][2], MVMatrix[1][2], MVMatrix[2][2]);
+        glm::dvec3 col4(MVMatrix[0][3], MVMatrix[1][3], MVMatrix[2][3]);
+
+        glm::dvec3 leftNormal = col4 + col1;
+        glm::dvec3 rightNormal = col4 - col1;
+        glm::dvec3 bottomNormal = col4 + col2;
+        glm::dvec3 topNormal = col4 - col2;
+        glm::dvec3 nearNormal = col3 + col4;
+        glm::dvec3 farNormal = col4 - col3;
+
+        // Plane Distances
+        double leftDistance = MVMatrix[3][3] + MVMatrix[3][0];
+        double rightDistance = MVMatrix[3][3] - MVMatrix[3][0];
+        double bottomDistance = MVMatrix[3][3] + MVMatrix[3][1];
+        double topDistance = MVMatrix[3][3] - MVMatrix[3][1];
+        double nearDistance = MVMatrix[3][3] + MVMatrix[3][2];
+        // double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
+
+        // Normalize Planes
+        const double invMagLeft = 1.0 / glm::length(leftNormal);
+        leftNormal *= invMagLeft;
+        leftDistance *= invMagLeft;
+
+        const double invMagRight = 1.0 / glm::length(rightNormal);
+        rightNormal *= invMagRight;
+        rightDistance *= invMagRight;
+
+        const double invMagBottom = 1.0 / glm::length(bottomNormal);
+        bottomNormal *= invMagBottom;
+        bottomDistance *= invMagBottom;
+
+        const double invMagTop = 1.0 / glm::length(topNormal);
+        topNormal *= invMagTop;
+        topDistance *= invMagTop;
+
+        const double invMagNear = 1.0 / glm::length(nearNormal);
+        nearNormal *= invMagNear;
+        nearDistance *= invMagNear;
+
+        const double invMagFar = 1.0 / glm::length(farNormal);
+        farNormal *= invMagFar;
+        // farDistance *= invMagFar;
+
+        constexpr float Radius = 1.0;
+        if ((glm::dot(leftNormal, position) + leftDistance) < -Radius) {
+            return false;
+        }
+        else if ((glm::dot(rightNormal, position) + rightDistance) < -Radius) {
+            return false;
+        }
+        else if ((glm::dot(bottomNormal, position) + bottomDistance) < -Radius) {
+            return false;
+        }
+        else if ((glm::dot(topNormal, position) + topDistance) < -Radius) {
+            return false;
+        }
+        else if ((glm::dot(nearNormal, position) + nearDistance) < -Radius) {
+            return false;
+        }
+
+        return true;
+    }
+
     struct [[codegen::Dictionary(GlobeLabelsComponent)]] Parameters {
         // The path to the labels file
         std::optional<std::filesystem::path> fileName;
@@ -643,75 +710,6 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
             );
         }
     }
-}
-
-bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
-                                            const glm::dvec3& position) const
-{
-    // Frustum Planes
-    glm::dvec3 col1(MVMatrix[0][0], MVMatrix[1][0], MVMatrix[2][0]);
-    glm::dvec3 col2(MVMatrix[0][1], MVMatrix[1][1], MVMatrix[2][1]);
-    glm::dvec3 col3(MVMatrix[0][2], MVMatrix[1][2], MVMatrix[2][2]);
-    glm::dvec3 col4(MVMatrix[0][3], MVMatrix[1][3], MVMatrix[2][3]);
-
-    glm::dvec3 leftNormal = col4 + col1;
-    glm::dvec3 rightNormal = col4 - col1;
-    glm::dvec3 bottomNormal = col4 + col2;
-    glm::dvec3 topNormal = col4 - col2;
-    glm::dvec3 nearNormal = col3 + col4;
-    glm::dvec3 farNormal = col4 - col3;
-
-    // Plane Distances
-    double leftDistance = MVMatrix[3][3] + MVMatrix[3][0];
-    double rightDistance = MVMatrix[3][3] - MVMatrix[3][0];
-    double bottomDistance = MVMatrix[3][3] + MVMatrix[3][1];
-    double topDistance = MVMatrix[3][3] - MVMatrix[3][1];
-    double nearDistance = MVMatrix[3][3] + MVMatrix[3][2];
-    // double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
-
-    // Normalize Planes
-    const double invMagLeft = 1.0 / glm::length(leftNormal);
-    leftNormal *= invMagLeft;
-    leftDistance *= invMagLeft;
-
-    const double invMagRight = 1.0 / glm::length(rightNormal);
-    rightNormal *= invMagRight;
-    rightDistance *= invMagRight;
-
-    const double invMagBottom = 1.0 / glm::length(bottomNormal);
-    bottomNormal *= invMagBottom;
-    bottomDistance *= invMagBottom;
-
-    const double invMagTop = 1.0 / glm::length(topNormal);
-    topNormal *= invMagTop;
-    topDistance *= invMagTop;
-
-    const double invMagNear = 1.0 / glm::length(nearNormal);
-    nearNormal *= invMagNear;
-    nearDistance *= invMagNear;
-
-    const double invMagFar = 1.0 / glm::length(farNormal);
-    farNormal *= invMagFar;
-    // farDistance *= invMagFar;
-
-    constexpr float Radius = 1.0;
-    if ((glm::dot(leftNormal, position) + leftDistance) < -Radius) {
-        return false;
-    }
-    else if ((glm::dot(rightNormal, position) + rightDistance) < -Radius) {
-        return false;
-    }
-    else if ((glm::dot(bottomNormal, position) + bottomDistance) < -Radius) {
-        return false;
-    }
-    else if ((glm::dot(topNormal, position) + topDistance) < -Radius) {
-        return false;
-    }
-    else if ((glm::dot(nearNormal, position) + nearDistance) < -Radius) {
-        return false;
-    }
-
-    return true;
 }
 
 } // namespace openspace

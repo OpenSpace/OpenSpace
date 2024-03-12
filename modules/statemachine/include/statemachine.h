@@ -38,7 +38,7 @@ public:
     explicit StateMachine(const ghoul::Dictionary& dictionary);
     ~StateMachine() = default;
 
-    void setInitialState(const std::string initialState);
+    void setInitialState(const std::string& initialState);
     const State* currentState() const;
     void transitionTo(const std::string& newState);
     bool canTransitionTo(const std::string& state) const;

@@ -211,7 +211,7 @@ std::string DeltaTimesDialog::createSummaryForDeltaTime(size_t idx, bool forList
 
 void DeltaTimesDialog::listItemSelected() {
     QListWidgetItem *item = _listWidget->currentItem();
-    int index = _listWidget->row(item);
+    const int index = _listWidget->row(item);
 
     if (index < (static_cast<int>(_deltaTimesData.size()) - 1)) {
         _listWidget->setCurrentRow(index);
@@ -229,7 +229,7 @@ void DeltaTimesDialog::listItemSelected() {
     transitionEditMode(index, true);
 }
 
-void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string color) {
+void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string_view color) {
     std::string labelS = "Set Simulation Time Increment for key";
     if (index >= static_cast<int>(_deltaTimesData.size())) {
         index = static_cast<int>(_deltaTimesData.size()) - 1;
@@ -237,9 +237,9 @@ void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string colo
     if (editMode) {
         labelS += " '" + createSummaryForDeltaTime(index, false) + "':";
     }
-    _adjustLabel->setText(QString::fromStdString(
-        "<font color='" + color + "'>" + labelS + "</font>"
-    ));
+    _adjustLabel->setText(QString::fromStdString(fmt::format(
+        "<font color='{}'>{}</font>", color, labelS
+    )));
 }
 
 void DeltaTimesDialog::valueChanged(const QString& text) {

@@ -80,7 +80,7 @@ private:
      */
     void transitionEditMode(int index, bool state);
 
-    void setLabelForKey(int index, bool editMode, std::string color);
+    void setLabelForKey(int index, bool editMode, std::string_view color);
     bool isLineEmpty(int index);
 
     std::vector<double>* _deltaTimes = nullptr;

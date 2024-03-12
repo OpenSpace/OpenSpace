@@ -141,7 +141,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
     );
 
     if (dictionary.hasKey(DefaultAccessInfo.identifier)) {
-        const std::string access = config.value<std::string>(
+        const std::string access = dictionary.value<std::string>(
             DefaultAccessInfo.identifier
         );
         if (access == DenyAccess) {
