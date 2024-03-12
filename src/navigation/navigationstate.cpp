@@ -25,8 +25,9 @@
 #include <openspace/camera/camerapose.h>
 #include <ghoul/logging/logmanager.h>
 #include <openspace/navigation/navigationstate.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/spicemanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "NavigationState";
@@ -74,6 +75,11 @@ namespace {
 
         // The pitch angle in radians. Positive angle means pitching camera upwards
         std::optional<double> pitch;
+
+        // The timestamp for when the navigation state was captured or is valid. Specified
+        // either as seconds past the J2000 epoch, or as a date string in ISO 8601 format:
+        // 'YYYY MM DD HH:mm:ss.xxx'
+        std::optional<std::variant<double, std::string>> timestamp;
     };
 #include "navigationstate_codegen.cpp"
 } // namespace
@@ -92,6 +98,17 @@ NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
     up = p.up;
     yaw = p.yaw.value_or(yaw);
     pitch = p.pitch.value_or(pitch);
+
+    if (p.timestamp.has_value()) {
+        if (std::holds_alternative<double>(*p.timestamp)) {
+            timestamp = std::get<double>(*p.timestamp);
+        }
+        else {
+            timestamp = SpiceManager::ref().ephemerisTimeFromDate(
+                std::get<std::string>(*p.timestamp)
+            );
+        }
+    }
 }
 
 NavigationState::NavigationState(const nlohmann::json& json) {
@@ -126,12 +143,24 @@ NavigationState::NavigationState(const nlohmann::json& json) {
     if (auto it = json.find("pitch");  it != json.end()) {
         pitch = it->get<double>();
     }
+
+    if (auto it = json.find("timestamp");  it != json.end()) {
+        if (it->is_string()) {
+            timestamp = SpiceManager::ref().ephemerisTimeFromDate(
+                it->get<std::string>()
+            );
+        }
+        else {
+            timestamp = it->get<double>();
+        }
+    }
 }
 
 NavigationState::NavigationState(std::string anchor_, std::string aim_,
                                  std::string referenceFrame_, glm::dvec3 position_,
                                  std::optional<glm::dvec3> up_,
-                                 double yaw_, double pitch_)
+                                 double yaw_, double pitch_,
+                                 std::optional<double> timestamp_)
     : anchor(std::move(anchor_))
     , aim(std::move(aim_))
     , referenceFrame(std::move(referenceFrame_))
@@ -139,6 +168,7 @@ NavigationState::NavigationState(std::string anchor_, std::string aim_,
     , up(std::move(up_))
     , yaw(yaw_)
     , pitch(pitch_)
+    , timestamp(timestamp_)
 {}
 
 CameraPose NavigationState::cameraPose() const {
@@ -212,6 +242,15 @@ ghoul::Dictionary NavigationState::dictionary() const {
     if (std::abs(pitch) > Epsilon) {
         cameraDict.setValue("Pitch", pitch);
     }
+    if (timestamp.has_value()) {
+        cameraDict.setValue(
+            "Timestamp",
+            SpiceManager::ref().dateFromEphemerisTime(
+                *timestamp,
+                "YYYY MON DD HR:MN:SC"
+            )
+        );
+    }
     return cameraDict;
 }
 
@@ -252,6 +291,13 @@ nlohmann::json NavigationState::toJson() const {
     }
     if (std::abs(pitch) > Epsilon) {
         result["pitch"] = pitch;
+    }
+
+    if (timestamp.has_value()) {
+        result["timestamp"] = SpiceManager::ref().dateFromEphemerisTime(
+            *timestamp,
+            "YYYY MON DD HR:MN:SC"
+        );
     }
 
     return result;

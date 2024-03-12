@@ -35,12 +35,13 @@
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/query/query.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/query/query.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -531,7 +532,10 @@ NavigationState NavigationHandler::navigationState(
         _orbitalNavigator.aimNode() ? _orbitalNavigator.aimNode()->identifier() : "",
         referenceFrame.identifier(),
         position,
-        invReferenceFrameTransform * neutralUp, yaw, pitch
+        invReferenceFrameTransform * neutralUp,
+        yaw,
+        pitch,
+        global::timeManager->time().j2000Seconds()
     );
 }
 
@@ -582,11 +586,18 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
         throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
     }
 
-    std::ifstream f(filepath);
+    std::ifstream f(absolutePath);
     std::string contents = std::string(
         std::istreambuf_iterator<char>(f),
         std::istreambuf_iterator<char>()
     );
+
+    if (contents.empty()) {
+        throw::ghoul::RuntimeError(fmt::format(
+            "Failed reading camera state from file: {}. File is empty", absolutePath
+        ));
+    }
+
     nlohmann::json json = nlohmann::json::parse(contents);
 
     NavigationState state = NavigationState(json);
