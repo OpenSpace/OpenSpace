@@ -581,8 +581,13 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
 void NavigationHandler::loadNavigationState(const std::string& filepath,
                                             bool useTimeStamp)
 {
-    const std::filesystem::path absolutePath = absPath(filepath);
+    std::filesystem::path absolutePath = absPath(filepath);
     LINFO(fmt::format("Reading camera state from file: {}", absolutePath));
+
+    if (!absolutePath.has_extension()) {
+        // Adding the .navstate extension to the filepath if it came without one
+        absolutePath.replace_extension(".navstate");
+    }
 
     if (!std::filesystem::is_regular_file(absolutePath)) {
         throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
