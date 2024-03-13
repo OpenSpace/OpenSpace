@@ -83,7 +83,7 @@ namespace {
             }
         }
         else {
-            const nlohmann::json value = j[key];
+            const nlohmann::json& value = j[key];
             if (!(value.*checkFunc)()) {
                 std::string type = [](auto c) {
                     if (c == &nlohmann::json::is_string) { return "a string"; }
@@ -229,7 +229,7 @@ void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
 }
 
 void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
-    std::string value = j.get<std::string>();
+    const std::string value = j.get<std::string>();
     if (value == "setPropertyValue") {
         v = Profile::Property::SetType::SetPropertyValue;
     }
@@ -315,7 +315,7 @@ void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
 }
 
 void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
-    std::string value = j.get<std::string>();
+    const std::string value = j.get<std::string>();
     if (value == "absolute") {
         v = Profile::Time::Type::Absolute;
     }
@@ -381,14 +381,14 @@ void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
         j["aim"] = *v.aim;
     }
     j["frame"] = v.referenceFrame;
-    nlohmann::json p {
+    const nlohmann::json p {
         { "x", v.position.x },
         { "y", v.position.y },
         { "z", v.position.z }
     };
     j["position"] = p;
     if (v.up.has_value()) {
-        nlohmann::json u {
+        const nlohmann::json u {
             { "x", v.up->x },
             { "y", v.up->y },
             { "z", v.up->z }
@@ -577,7 +577,7 @@ void convertVersion10to11(nlohmann::json& profile) {
         profile.at("keybindings").get<std::vector<version10::Keybinding>>();
     for (size_t i = 0; i < kbs.size(); i++) {
         version10::Keybinding& kb = kbs[i];
-        std::string identifier = fmt::format("profile.keybind.{}", i);
+        const std::string identifier = fmt::format("profile.keybind.{}", i);
 
         Profile::Action action;
         action.identifier = identifier;
@@ -635,7 +635,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     version = Profile::CurrentVersion;
 
     // Update properties
-    std::vector<properties::Property*> ps = changedProperties(rootOwner);
+    const std::vector<properties::Property*> ps = changedProperties(rootOwner);
 
     for (properties::Property* prop : ps) {
         Property p;
@@ -754,8 +754,8 @@ Profile::Profile(const std::filesystem::path& path) {
         ));
     }
 
-    std::string content(
-        (std::istreambuf_iterator<char>(inFile)),
+    const std::string content = std::string(
+        std::istreambuf_iterator<char>(inFile),
         std::istreambuf_iterator<char>()
     );
 
@@ -830,7 +830,7 @@ Profile::Profile(const std::filesystem::path& path) {
     }
     catch (const nlohmann::json::exception& e) {
         std::string err = e.what();
-        throw ParsingError(ParsingError::Severity::Error, err);
+        throw ParsingError(ParsingError::Severity::Error, std::move(err));
     }
 }
 

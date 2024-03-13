@@ -259,20 +259,20 @@ namespace {
             e += ".0";
         }
         // 1, 2
-        size_t nDashes = std::count_if(
+        const size_t nDashes = std::count_if(
             epoch.begin(),
             epoch.end(),
             [](char c) { return c == '-'; }
         );
-        std::string formatString = (nDashes == 2) ? "{:4}-{:2}-{:2}{}" : "{:4}{:2}{:2}{}";
+        const std::string format = (nDashes == 2) ? "{:4}-{:2}-{:2}{}" : "{:4}{:2}{:2}{}";
         auto [res, year, monthNum, dayOfMonthNum, fractionOfDay] =
-            scn::scan_tuple<int, int, int, double>(e, formatString);
+            scn::scan_tuple<int, int, int, double>(e, format);
         if (!res) {
             throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
         }
         const int daysSince2000 = countDays(year);
-        int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
-        double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
+        const int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
+        const double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
 
         // 3
         using namespace std::chrono;
@@ -328,8 +328,8 @@ namespace {
         const size_t pos = epoch.find('T');
         if (pos == 10) {
             // We have the first form
-            int month;
-            int days;
+            int month = 0;
+            int days = 0;
             auto res = scn::scan(
                 epoch, "{:4}-{:2}-{:2}T{:2}:{:2}:{}",
                 date.year, month, days, date.hours, date.minutes, date.seconds
@@ -428,9 +428,9 @@ std::vector<Parameters> readTleFile(std::filesystem::path file) {
         // The id only contains the last two digits of the launch year, so we have to
         // patch it to the full year
         {
-            std::string id = firstLine.substr(9, 6);
-            std::string prefix = [y = id.substr(0, 2)](){
-                int year = std::atoi(y.c_str());
+            const std::string id = firstLine.substr(9, 6);
+            const std::string prefix = [y = id.substr(0, 2)](){
+                const int year = std::atoi(y.c_str());
                 return year >= 57 ? "19" : "20";
             }();
             p.id = fmt::format("{}{}-{}", prefix, id.substr(0, 2), id.substr(3));
@@ -488,7 +488,7 @@ std::vector<Parameters> readTleFile(std::filesystem::path file) {
 
         // Get mean motion
         stream.str(secondLine.substr(52, 11));
-        float meanMotion;
+        float meanMotion = 0.f;
         stream >> meanMotion;
 
         p.semiMajorAxis = calculateSemiMajorAxis(meanMotion);
@@ -502,7 +502,7 @@ std::vector<Parameters> readTleFile(std::filesystem::path file) {
     return result;
 }
 
-std::vector<Parameters> readOmmFile(std::filesystem::path file) {
+std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
 
     std::vector<Parameters> result;
@@ -563,7 +563,7 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file) {
             current->epoch = epochFromOmmString(parts[1]);
         }
         else if (parts[0] == "MEAN_MOTION") {
-            float mm = std::stof(parts[1]);
+            const float mm = std::stof(parts[1]);
             current->semiMajorAxis = calculateSemiMajorAxis(mm);
             current->period = std::chrono::seconds(std::chrono::hours(24)).count() / mm;
         }
@@ -594,7 +594,7 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file) {
     return result;
 }
 
-std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
+std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
     constexpr int NDataFields = 9;
     constexpr std::string_view ExpectedHeader = "full_name,epoch_cal,e,a,i,om,w,ma,per";
 
@@ -658,7 +658,7 @@ std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
     return result;
 }
 
-void saveCache(const std::vector<Parameters>& params, std::filesystem::path file) {
+void saveCache(const std::vector<Parameters>& params, const std::filesystem::path& file) {
     std::ofstream stream(file, std::ofstream::binary);
 
     stream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
@@ -688,7 +688,7 @@ void saveCache(const std::vector<Parameters>& params, std::filesystem::path file
     }
 }
 
-std::optional<std::vector<Parameters>> loadCache(std::filesystem::path file) {
+std::optional<std::vector<Parameters>> loadCache(const std::filesystem::path& file) {
     std::ifstream stream(file, std::ifstream::binary);
 
     int8_t version = 0;

@@ -84,7 +84,7 @@ Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
     }
     double tileLongitudalLength = l;
 
-    const char* unit;
+    const char* unit = nullptr;
     if (tileLongitudalLength > 9999) {
         tileLongitudalLength *= 0.001;
         unit = "km";
@@ -93,8 +93,8 @@ Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
         unit = "m";
     }
 
-    std::string text = fmt::format("{:.0f} {:s}", tileLongitudalLength, unit);
-    glm::vec2 textPosition = glm::vec2(
+    const std::string text = fmt::format("{:.0f} {:s}", tileLongitudalLength, unit);
+    const glm::vec2 textPosition = glm::vec2(
         0.f,
         aboveEquator ?
             fontSize / 2.f :

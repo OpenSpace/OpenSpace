@@ -148,32 +148,36 @@ void AvoidCollisionCurve::removeCollisions(int step) {
         }
 
         for (SceneGraphNode* node : _relevantNodes) {
+            using namespace collision;
+
             // Do collision check in relative coordinates, to avoid huge numbers
             const glm::dmat4 modelTransform = node->modelTransform();
-            glm::dvec3 p1 = glm::inverse(modelTransform) * glm::dvec4(lineStart, 1.0);
-            glm::dvec3 p2 = glm::inverse(modelTransform) * glm::dvec4(lineEnd, 1.0);
+            const glm::dvec3 p1 =
+                glm::inverse(modelTransform) * glm::dvec4(lineStart, 1.0);
+            const glm::dvec3 p2 =
+                glm::inverse(modelTransform) * glm::dvec4(lineEnd, 1.0);
 
             // Sphere to check for collision. Make sure it does not have radius zero.
             const double minValidBoundingSphere =
                 global::navigationHandler->pathNavigator().minValidBoundingSphere();
 
             double radius = std::max(node->boundingSphere(), minValidBoundingSphere);
-            glm::dvec3 center = glm::dvec3(0.0, 0.0, 0.0);
+            constexpr glm::dvec3 Center = glm::dvec3(0.0, 0.0, 0.0);
 
             // Add a buffer to avoid passing too close to the node.
             // Dont't add it if any point is inside the buffer
-            double buffer = CollisionBufferSizeRadiusMultiplier * radius;
-            bool p1IsInside = collision::isPointInsideSphere(p1, center, radius + buffer);
-            bool p2IsInside = collision::isPointInsideSphere(p2, center, radius + buffer);
+            const double buffer = CollisionBufferSizeRadiusMultiplier * radius;
+            const bool p1IsInside = isPointInsideSphere(p1, Center, radius + buffer);
+            const bool p2IsInside = isPointInsideSphere(p2, Center, radius + buffer);
             if (!p1IsInside && !p2IsInside) {
                 radius += buffer;
             }
 
             glm::dvec3 intersectionPointModelCoords;
-            bool collision = collision::lineSphereIntersection(
+            const bool collision = lineSphereIntersection(
                 p1,
                 p2,
-                center,
+                Center,
                 radius,
                 intersectionPointModelCoords
             );
@@ -186,8 +190,8 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                 glm::dvec4(intersectionPointModelCoords, 1.0);
 
             // before collision response, make sure none of the points are inside the node
-            bool isStartInsideNode = collision::isPointInsideSphere(p1, center, radius);
-            bool isEndInsideNode = collision::isPointInsideSphere(p2, center, radius);
+            const bool isStartInsideNode = isPointInsideSphere(p1, Center, radius);
+            const bool isEndInsideNode = isPointInsideSphere(p2, Center, radius);
             if (isStartInsideNode || isEndInsideNode) {
                 LWARNING(fmt::format(
                     "Something went wrong! "
@@ -209,7 +213,7 @@ void AvoidCollisionCurve::removeCollisions(int step) {
             const double avoidCollisionDistance =
                 AvoidCollisionDistanceRadiusMultiplier * radius;
 
-            glm::dvec3 extraKnot = collisionPoint -
+            const glm::dvec3 extraKnot = collisionPoint -
                 avoidCollisionDistance * glm::normalize(orthogonal);
 
             // Don't add invalid positions (indicating precision issues)

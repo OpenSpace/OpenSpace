@@ -82,7 +82,7 @@ openspace::globebrowsing::TileTextureInitData::HashKey calculateHashKey(
     ghoul_assert(dimensions.x <= 1024, "Incorrect dimension");
     ghoul_assert(dimensions.y <= 1024, "Incorrect dimension");
     ghoul_assert(dimensions.z == 1, "Incorrect dimension");
-    unsigned int formatId = uniqueIdForTextureFormat(format);
+    const unsigned int formatId = uniqueIdForTextureFormat(format);
     ghoul_assert(formatId < 256, "Incorrect format");
 
     openspace::globebrowsing::TileTextureInitData::HashKey res = 0ULL;
@@ -169,7 +169,7 @@ TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum typ
     , hashKey(calculateHashKey(dimensions, ghoulTextureFormat, glType))
 {}
 
-TileTextureInitData TileTextureInitData::operator=(const TileTextureInitData& rhs) {
+TileTextureInitData& TileTextureInitData::operator=(const TileTextureInitData& rhs) {
     if (this == &rhs) {
         return *this;
     }
@@ -177,7 +177,7 @@ TileTextureInitData TileTextureInitData::operator=(const TileTextureInitData& rh
     return rhs;
 }
 
-TileTextureInitData TileTextureInitData::operator=(TileTextureInitData&& rhs) noexcept {
+TileTextureInitData& TileTextureInitData::operator=(TileTextureInitData&& rhs) noexcept {
     if (this == &rhs) {
         return *this;
     }

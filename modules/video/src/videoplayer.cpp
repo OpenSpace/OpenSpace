@@ -430,7 +430,7 @@ void VideoPlayer::initializeMpv() {
 
     // This makes mpv use the currently set GL context. It will use the callback
     // (passed via params) to resolve GL builtin functions, as well as extensions.
-    const int result = mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params);
+    int result = mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params);
     if (result < 0) {
         LINFO("Failed to initialize libmpv OpenGL context");
     }
