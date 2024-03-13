@@ -247,7 +247,7 @@ void ParallelPeer::sendAuthentication() {
 }
 
 void ParallelPeer::queueInMessage(const ParallelConnection::Message& message) {
-    std::lock_guard unqlock(_receiveBufferMutex);
+    const std::lock_guard unqlock(_receiveBufferMutex);
     _receiveBuffer.push_back(message);
 }
 
@@ -269,7 +269,7 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
 }
 
 void ParallelPeer::analyzeTimeDifference(double messageTimestamp) {
-    std::lock_guard latencyLock(_latencyMutex);
+    const std::lock_guard latencyLock(_latencyMutex);
 
     const double timeDiff = global::windowDelegate->applicationTime() - messageTimestamp;
     if (_latencyDiffs.empty()) {
@@ -283,7 +283,7 @@ void ParallelPeer::analyzeTimeDifference(double messageTimestamp) {
 }
 
 double ParallelPeer::convertTimestamp(double messageTimestamp) {
-    std::lock_guard latencyLock(_latencyMutex);
+    const std::lock_guard latencyLock(_latencyMutex);
     return messageTimestamp + _initialTimeDiff + _bufferTime;
 }
 
@@ -291,7 +291,7 @@ double ParallelPeer::convertTimestamp(double messageTimestamp) {
 double ParallelPeer::latencyStandardDeviation() const {
     double accumulatedLatencyDiffSquared = 0;
     double accumulatedLatencyDiff = 0;
-    for (double diff : _latencyDiffs) {
+    for (const double diff : _latencyDiffs) {
         accumulatedLatencyDiff += diff;
         accumulatedLatencyDiffSquared += diff*diff;
     }
@@ -319,11 +319,10 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
 
     analyzeTimeDifference(timestamp);
 
-    std::vector<char> buffer(message.begin() + offset, message.end());
-
+    const std::vector<char> buffer(message.begin() + offset, message.end());
     switch (static_cast<datamessagestructures::Type>(type)) {
         case datamessagestructures::Type::CameraData: {
-            datamessagestructures::CameraKeyframe kf(buffer);
+            const datamessagestructures::CameraKeyframe kf(buffer);
             const double convertedTimestamp = convertTimestamp(kf._timestamp);
 
             global::navigationHandler->keyframeNavigator().removeKeyframesAfter(
@@ -345,7 +344,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
         }
         case datamessagestructures::Type::TimelineData: {
             const double now = global::windowDelegate->applicationTime();
-            datamessagestructures::TimeTimeline timelineMessage(buffer);
+            const datamessagestructures::TimeTimeline timelineMessage(buffer);
 
             if (timelineMessage._clear) {
                 global::timeManager->removeKeyframesAfter(
@@ -462,16 +461,17 @@ void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
         LERROR("Malformed host info message");
         return;
     }
-    const uint32_t nConnections = *(reinterpret_cast<const uint32_t*>(&message[0]));
+    const uint32_t nConnections = *(reinterpret_cast<const uint32_t*>(message.data()));
     setNConnections(nConnections);
 }
 
 void ParallelPeer::handleCommunication() {
     while (!_shouldDisconnect && _connection.isConnectedOrConnecting()) {
         try {
-            ParallelConnection::Message m = _connection.receiveMessage();
+            const ParallelConnection::Message m = _connection.receiveMessage();
             queueInMessage(m);
-        } catch (const ParallelConnection::ConnectionLostError& e) {
+        }
+        catch (const ParallelConnection::ConnectionLostError& e) {
             if (e.shouldLogError) {
                 LERROR("Parallel connection lost");
             }
@@ -503,18 +503,21 @@ void ParallelPeer::requestHostship() {
     );
     buffer.insert(buffer.end(), hostPw.begin(), hostPw.end());
 
-    _connection.sendMessage(ParallelConnection::Message(
-        ParallelConnection::MessageType::HostshipRequest,
-        buffer
-    ));
+    _connection.sendMessage(
+        ParallelConnection::Message(
+            ParallelConnection::MessageType::HostshipRequest,
+            buffer
+        )
+    );
 }
 
 void ParallelPeer::resignHostship() {
-    std::vector<char> buffer;
-    _connection.sendMessage(ParallelConnection::Message(
-        ParallelConnection::MessageType::HostshipResignation,
-        buffer
-    ));
+    _connection.sendMessage(
+        ParallelConnection::Message(
+            ParallelConnection::MessageType::HostshipResignation,
+            std::vector<char>()
+        )
+    );
 }
 
 void ParallelPeer::setPassword(std::string password) {
@@ -536,8 +539,8 @@ void ParallelPeer::sendScript(std::string script) {
     std::vector<char> buffer;
     sm.serialize(buffer);
 
-    double timestamp = global::windowDelegate->applicationTime();
-    ParallelConnection::DataMessage message(
+    const double timestamp = global::windowDelegate->applicationTime();
+    const ParallelConnection::DataMessage message = ParallelConnection::DataMessage(
         datamessagestructures::Type::ScriptData,
         timestamp,
         buffer
@@ -548,22 +551,22 @@ void ParallelPeer::sendScript(std::string script) {
 void ParallelPeer::resetTimeOffset() {
     global::navigationHandler->keyframeNavigator().clearKeyframes();
     global::timeManager->clearKeyframes();
-    std::lock_guard latencyLock(_latencyMutex);
+    const std::lock_guard latencyLock(_latencyMutex);
     _latencyDiffs.clear();
 }
 
 void ParallelPeer::preSynchronization() {
     ZoneScoped;
 
-    std::unique_lock<std::mutex> unlock(_receiveBufferMutex);
+    const std::unique_lock unlock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {
-        ParallelConnection::Message& message = _receiveBuffer.front();
+        const ParallelConnection::Message& message = _receiveBuffer.front();
         handleMessage(message);
         _receiveBuffer.pop_front();
     }
 
     if (isHost()) {
-        double now = global::windowDelegate->applicationTime();
+        const double now = global::windowDelegate->applicationTime();
 
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
             sendCameraKeyframe();
@@ -585,7 +588,7 @@ void ParallelPeer::preSynchronization() {
 
 void ParallelPeer::setStatus(ParallelConnection::Status status) {
     if (_status != status) {
-        ParallelConnection::Status prevStatus = _status;
+        const ParallelConnection::Status prevStatus = _status;
         _status = status;
         _timeJumped = true;
         _connectionEvent->publish("statusChanged");
@@ -767,7 +770,7 @@ void ParallelPeer::sendTimeTimeline() {
     // Fill the timeline buffer
     timelineMessage.serialize(buffer);
 
-    double timestamp = global::windowDelegate->applicationTime();
+    const double timestamp = global::windowDelegate->applicationTime();
     // Send message
     _connection.sendDataMessage(ParallelConnection::DataMessage(
         datamessagestructures::Type::TimelineData,

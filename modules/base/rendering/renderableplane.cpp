@@ -156,7 +156,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         { static_cast<int>(BlendMode::Additive), "Additive"}
     });
     _blendMode.onChange([this]() {
-        BlendMode m = static_cast<BlendMode>(_blendMode.value());
+        const BlendMode m = static_cast<BlendMode>(_blendMode.value());
         switch (m) {
             case BlendMode::Normal:
                 setRenderBinFromOpacity();
@@ -244,17 +244,17 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform(_uniformCache.mirrorBackside, _mirrorBackside);
 
-    glm::dvec3 objectPositionWorld = glm::dvec3(
+    glm::dvec3 objPosWorld = glm::dvec3(
         glm::translate(
             glm::dmat4(1.0),
             data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
-    glm::dvec3 newRight = glm::normalize(
+    const glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objPosWorld);
+    const glm::dvec3 newRight = glm::normalize(
         glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
     );
-    glm::dvec3 newUp = glm::cross(normal, newRight);
+    const glm::dvec3 newUp = glm::cross(normal, newRight);
 
     glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
     cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
@@ -283,7 +283,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform(_uniformCache.multiplyColor, _multiplyColor);
 
-    bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
+    const bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);

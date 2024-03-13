@@ -257,42 +257,6 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     _buffer.resize(128);
 }
 
-std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
-                                                                    Component& comp) const
-{
-    if (comp.type == Type::Node) {
-        if (!comp.node) {
-            comp.node = global::renderEngine->scene()->sceneGraphNode(comp.nodeName);
-
-            if (!comp.node) {
-                LERRORC(
-                    "DashboardItemAngle",
-                    "Could not find node '" + comp.nodeName.value() + "'"
-                );
-                return { glm::dvec3(0.0), "Node" };
-            }
-        }
-    }
-
-    switch (comp.type) {
-        case Type::Node:
-            return { comp.node->worldPosition(), comp.node->guiName() };
-        case Type::Focus:
-        {
-            const SceneGraphNode* node =
-                global::navigationHandler->orbitalNavigator().anchorNode();
-            return {
-                node->worldPosition(),
-                "focus"
-            };
-        }
-        case Type::Camera:
-            return { global::renderEngine->scene()->camera()->positionVec3(), "camera" };
-        default:
-            return { glm::dvec3(0.0), "Unknown" };
-    }
-}
-
 void DashboardItemAngle::render(glm::vec2& penPosition) {
     ZoneScoped;
 
@@ -324,7 +288,9 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
             "Angle at {} between {} and {}: {} degrees",
             sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
         );
-        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+        const std::string_view text = std::string_view(
+            _buffer.data(), end - _buffer.data()
+        );
         RenderFont(*_font, penPosition, text);
         penPosition.y -= _font->height();
     }
@@ -335,6 +301,40 @@ glm::vec2 DashboardItemAngle::size() const {
 
     constexpr double Angle = 120;
     return _font->boundingBox("Angle: " + std::to_string(Angle));
+}
+
+std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(Component& comp) {
+    if (comp.type == Type::Node) {
+        if (!comp.node) {
+            comp.node = global::renderEngine->scene()->sceneGraphNode(comp.nodeName);
+
+            if (!comp.node) {
+                LERRORC(
+                    "DashboardItemAngle",
+                    "Could not find node '" + comp.nodeName.value() + "'"
+                );
+                return { glm::dvec3(0.0), "Node" };
+            }
+        }
+    }
+
+    switch (comp.type) {
+        case Type::Node:
+            return { comp.node->worldPosition(), comp.node->guiName() };
+        case Type::Focus:
+        {
+            const SceneGraphNode* node =
+                global::navigationHandler->orbitalNavigator().anchorNode();
+            return {
+                node->worldPosition(),
+                "focus"
+            };
+        }
+        case Type::Camera:
+            return { global::renderEngine->scene()->camera()->positionVec3(), "camera" };
+        default:
+            return { glm::dvec3(0.0), "Unknown" };
+    }
 }
 
 } // namespace openspace

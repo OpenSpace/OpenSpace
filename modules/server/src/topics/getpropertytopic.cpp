@@ -80,7 +80,7 @@ bool GetPropertyTopic::isDone() const {
 }
 
 json GetPropertyTopic::allProperties() {
-    json payload {
+    const json payload {
         {
             "value",
             {
