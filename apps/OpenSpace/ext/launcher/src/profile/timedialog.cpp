@@ -45,7 +45,7 @@ TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>*
     setWindowTitle("Time");
     createWidgets();
 
-    constexpr QStringList types = { "Absolute", "Relative" };
+    const QStringList types = { "Absolute", "Relative" };
     _typeCombo->addItems(types);
     if (_time->has_value()) {
         _timeData = **_time;
