@@ -138,12 +138,12 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     });
     addProperty(_doSimplification);
 
-    for (TimeUnit u : TimeUnits) {
+    for (const TimeUnit u : TimeUnits) {
         _requestedUnit.addOption(static_cast<int>(u), std::string(nameForTimeUnit(u)));
     }
     _requestedUnit = static_cast<int>(TimeUnit::Second);
     if (p.requestedUnit.has_value()) {
-        TimeUnit unit = timeUnitFromString(p.requestedUnit->c_str());
+        const TimeUnit unit = timeUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
@@ -223,14 +223,14 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 glm::vec2 DashboardItemSimulationIncrement::size() const {
     ZoneScoped;
 
-    double t = global::timeManager->targetDeltaTime();
+    const double t = global::timeManager->targetDeltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);
     }
     else {
-        TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        double convertedT = convertTime(t, TimeUnit::Second, unit);
+        const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
+        const double convertedT = convertTime(t, TimeUnit::Second, unit);
         deltaTime = std::pair(
             convertedT,
             std::string(nameForTimeUnit(unit, convertedT != 1.0))

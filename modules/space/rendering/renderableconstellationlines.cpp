@@ -301,7 +301,7 @@ void RenderableConstellationLines::update(const UpdateData&) {
 }
 
 bool RenderableConstellationLines::loadData() {
-    bool success = readSpeckFile();
+    const bool success = readSpeckFile();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
     }

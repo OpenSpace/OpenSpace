@@ -189,9 +189,9 @@ std::vector<std::string> StateMachine::possibleTransitions() const {
     }
 
     res.reserve(_transitions.size());
-    for (size_t i = 0; i < _transitions.size(); i++) {
-        if (_transitions[i].from() == currentState()->name()) {
-            res.push_back(_transitions[i].to());
+    for (const Transition& transition : _transitions) {
+        if (transition.from() == currentState()->name()) {
+            res.push_back(transition.to());
         }
     }
     return res;

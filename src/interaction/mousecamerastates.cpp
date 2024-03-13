@@ -99,10 +99,10 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
             _truckMovementState.previousPosition - mousePosition;
 
         double sensitivity = _sensitivity;
-        if (keyboardinputState.isKeyPressed(Key::Z)) {
+        if (keyboardState.isKeyPressed(Key::Z)) {
             sensitivity *= SENSITIVITY_ADJUSTMENT_INCREASE;
         }
-        else if (keyboardinputState.isKeyPressed(Key::X)) {
+        else if (keyboardState.isKeyPressed(Key::X)) {
             sensitivity *= SENSITIVITY_ADJUSTMENT_DECREASE;
         }
 

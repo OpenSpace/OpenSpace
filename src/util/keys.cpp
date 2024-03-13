@@ -34,7 +34,7 @@
 
 namespace openspace {
 
-KeyWithModifier stringToKey(std::string str) {
+KeyWithModifier stringToKey(const std::string& str) {
     std::vector<std::string> tokens = ghoul::tokenizeString(str, '+');
     // "Keypad +" will tokenize into "Keypad " + ""
     if (tokens.size() == 2 && tokens[0] == "Keypad " && tokens[1].empty()) {
@@ -49,7 +49,7 @@ KeyWithModifier stringToKey(std::string str) {
     // default is unknown
     Key key = Key::Unknown;
     std::string keyName = tokens.back();
-    std::string keyNameOriginal = originalTokens.back();
+    const std::string keyNameOriginal = originalTokens.back();
     for (const KeyInfo& ki : KeyInfos) {
         if (ki.identifier == keyName || ki.name == keyName ||
             ki.identifier == keyNameOriginal || ki.name == keyNameOriginal)
@@ -139,7 +139,7 @@ std::string to_string(const openspace::KeyModifier& mod) {
     }
 
     std::string result;
-    for (const openspace::KeyModifierInfo& kmi : openspace::KeyModifierInfos) {
+    for (const KeyModifierInfo& kmi : KeyModifierInfos) {
         // No need for an extra check for the empty modifier since that is mapped to 0,
         // meaning that the `hasKeyModifier` will always fail for it since it checks
         // internally against != 0
@@ -156,12 +156,12 @@ std::string to_string(const openspace::KeyModifier& mod) {
 }
 
 template <>
-std::string to_string(const openspace::KeyWithModifier& key) {
-    if (key.modifier == openspace::KeyModifier::None) {
-        return to_string(key.key);
+std::string to_string(const openspace::KeyWithModifier& keyMod) {
+    if (keyMod.modifier == openspace::KeyModifier::None) {
+        return to_string(keyMod.key);
     }
     else {
-        return fmt::format("{}+{}", to_string(key.modifier), to_string(key.key));
+        return fmt::format("{}+{}", to_string(keyMod.modifier), to_string(keyMod.key));
     }
 }
 

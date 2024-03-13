@@ -53,7 +53,7 @@ void PlaneGeometry::deinitialize() {
     _vBufferId = 0;
 }
 
-void PlaneGeometry::render() {
+void PlaneGeometry::render() const {
     glBindVertexArray(_vaoId);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);

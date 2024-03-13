@@ -113,11 +113,10 @@ namespace {
         std::uniform_real_distribution<float> hue(0.f, 360.f);
 
         // Value in saturation are in the unit percent [0,1]
-        float value = 0.9f; // Brightness
-        float saturation = 0.5f;
-        glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
-        glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
-
+        constexpr float Value = 0.9f; // Brightness
+        constexpr float Saturation = 0.5f;
+        const glm::vec3 hsvColor = glm::vec3(hue(rd), Saturation, Value);
+        const glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
         return rgbColor;
     }
 } // namespace
@@ -303,6 +302,7 @@ std::vector<std::pair<std::string, bool>>
 ScreenSpaceSkyBrowser::showDisplayCopies() const
 {
     std::vector<std::pair<std::string, bool>> vec;
+    vec.reserve(_showDisplayCopies.size());
     for (const std::unique_ptr<properties::BoolProperty>& copy : _showDisplayCopies) {
         vec.emplace_back(copy->identifier(), copy->value());
     }

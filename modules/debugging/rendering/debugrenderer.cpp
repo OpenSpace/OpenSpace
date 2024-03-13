@@ -73,7 +73,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
     }
 
     // Generate a vao, vertex array object (keeping track of pointers to vbo)
-    GLuint _vaoID;
+    GLuint _vaoID = 0;
     glGenVertexArrays(1, &_vaoID);
     ghoul_assert(_vaoID != 0, "Could not generate vertex arrays");
 
@@ -91,7 +91,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
     glBufferData(
         GL_ARRAY_BUFFER,
         clippingSpacePoints.size() * sizeof(clippingSpacePoints[0]),
-        &clippingSpacePoints[0],
+        clippingSpacePoints.data(),
         GL_STATIC_DRAW);
 
 

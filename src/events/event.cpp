@@ -74,7 +74,7 @@ void log(int i, [[ maybe_unused ]] const EventProfileLoadingFinished& e) {
 
 void log(int i, const EventApplicationShutdown& e) {
     ghoul_assert(e.type == EventApplicationShutdown::Type, "Wrong type");
-    std::string t = [](EventApplicationShutdown::State state) {
+    const std::string t = [](EventApplicationShutdown::State state) {
         switch (state) {
             case EventApplicationShutdown::State::Started:  return "started";
             case EventApplicationShutdown::State::Aborted:  return "aborted";

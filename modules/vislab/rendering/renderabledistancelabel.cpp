@@ -130,8 +130,8 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         std::string distanceText = std::to_string(
             std::round(nodeline->distance() / scale)
         );
-        int pos = static_cast<int>(distanceText.find("."));
-        std::string subStr = distanceText.substr(pos);
+        const int pos = static_cast<int>(distanceText.find("."));
+        const std::string subStr = distanceText.substr(pos);
         distanceText.erase(pos, subStr.size());
 
         // Create final label text and set it
@@ -142,9 +142,9 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         SceneGraphNode* startNode = RE.scene()->sceneGraphNode(nodeline->start());
         SceneGraphNode* endNode = RE.scene()->sceneGraphNode(nodeline->end());
         if (startNode && endNode) {
-            glm::dvec3 start = startNode->worldPosition();
-            glm::dvec3 end = endNode->worldPosition();
-            glm::dvec3 goalPos = start + (end - start) / 2.0;
+            const glm::dvec3 start = startNode->worldPosition();
+            const glm::dvec3 end = endNode->worldPosition();
+            const glm::dvec3 goalPos = start + (end - start) / 2.0;
             _transformationMatrix = glm::translate(glm::dmat4(1.0), goalPos);
         }
         else {

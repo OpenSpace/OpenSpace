@@ -101,7 +101,7 @@ void HttpSynchronization::start() {
     }
     _state = State::Syncing;
 
-    bool isSynced = isEachFileDownloaded();
+    const bool isSynced = isEachFileDownloaded();
     if (isSynced) {
         _state = State::Resolved;
         return;
@@ -111,7 +111,7 @@ void HttpSynchronization::start() {
         return;
     }
 
-    std::string query = fmt::format(
+    const std::string query = fmt::format(
         "?identifier={}&file_version={}&application_version={}",
         _identifier, _version, ApplicationVersion
     );
@@ -282,8 +282,8 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             continue;
         }
 
-        std::string filename = std::filesystem::path(line).filename().string();
-        std::filesystem::path destination = directory() / (filename + ".tmp");
+        const std::string filename = std::filesystem::path(line).filename().string();
+        const std::filesystem::path destination = directory() / (filename + ".tmp");
 
         if (sizeData.find(line) != sizeData.end()) {
             LWARNING(fmt::format("{}: Duplicate entry for {}", _identifier, line));
@@ -320,7 +320,7 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                 return !_shouldCancel;
             }
 
-            std::lock_guard guard(mutex);
+            const std::lock_guard guard(mutex);
 
             sizeData[line] = { downloadedBytes, totalBytes };
 
@@ -397,7 +397,7 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
         if (_unzipFiles && originalName.extension() == ".zip") {
             std::string source = originalName.string();
-            std::string dest =
+            const std::string dest =
                 _unzipFilesDestination.has_value() ?
                 (originalName.parent_path() / *_unzipFilesDestination).string() :
                 originalName.replace_extension().string();;

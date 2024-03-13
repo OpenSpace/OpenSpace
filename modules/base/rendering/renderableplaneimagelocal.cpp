@@ -102,15 +102,15 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
         }
 
         // Shape the plane based on the aspect ration of the image
-        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
         if (_textureDimensions != textureDim) {
-            float aspectRatio = textureDim.x / textureDim.y;
-            float planeAspectRatio = _size.value().x / _size.value().y;
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
 
             if (std::abs(planeAspectRatio - aspectRatio) >
                 std::numeric_limits<float>::epsilon())
             {
-                glm::vec2 newSize =
+                const glm::vec2 newSize =
                     aspectRatio > 0.f ?
                     glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
                     glm::vec2(_size.value().x, _size.value().y * aspectRatio);
@@ -162,12 +162,12 @@ void RenderablePlaneImageLocal::loadTexture() {
     if (!_texturePath.value().empty()) {
         ghoul::opengl::Texture* t = _texture;
 
-        unsigned int hash = ghoul::hashCRC32File(_texturePath);
+        const unsigned int hash = ghoul::hashCRC32File(_texturePath);
 
         _texture = BaseModule::TextureManager.request(
             std::to_string(hash),
             [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
-                std::unique_ptr<ghoul::opengl::Texture> texture =
+                const std::unique_ptr<ghoul::opengl::Texture> texture =
                     ghoul::io::TextureReader::ref().loadTexture(
                         absPath(path).string(),
                         2
@@ -195,15 +195,15 @@ void RenderablePlaneImageLocal::loadTexture() {
         }
 
         // Shape the plane based on the aspect ration of the image
-        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
         if (_textureDimensions != textureDim) {
-            float aspectRatio = textureDim.x / textureDim.y;
-            float planeAspectRatio = _size.value().x / _size.value().y;
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
 
             if (std::abs(planeAspectRatio - aspectRatio) >
                 std::numeric_limits<float>::epsilon())
             {
-                glm::vec2 newSize =
+                const glm::vec2 newSize =
                     aspectRatio > 0.f ?
                     glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
                     glm::vec2(_size.value().x, _size.value().y * aspectRatio);

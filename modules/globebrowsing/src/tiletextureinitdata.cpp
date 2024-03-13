@@ -174,7 +174,7 @@ TileTextureInitData& TileTextureInitData::operator=(const TileTextureInitData& r
         return *this;
     }
 
-    return rhs;
+    return *this;
 }
 
 TileTextureInitData& TileTextureInitData::operator=(TileTextureInitData&& rhs) noexcept {
@@ -182,7 +182,7 @@ TileTextureInitData& TileTextureInitData::operator=(TileTextureInitData&& rhs) n
         return *this;
     }
 
-    return std::move(rhs);
+    return *this;
 }
 
 } // namespace openspace::globebrowsing

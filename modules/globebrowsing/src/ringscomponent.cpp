@@ -452,7 +452,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
 
             const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
 
-            glm::vec3 sunPositionObjectSpace = glm::normalize(
+            const glm::vec3 sunPositionObjectSpace = glm::normalize(
                 glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.f))
             );
 

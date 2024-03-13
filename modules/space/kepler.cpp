@@ -385,7 +385,7 @@ namespace {
 
 namespace openspace::kepler {
 
-std::vector<Parameters> readTleFile(std::filesystem::path file) {
+std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
 
     std::vector<Parameters> result;

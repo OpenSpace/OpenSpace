@@ -37,7 +37,7 @@
 TEST_CASE("CreateSingleColorImage: Create image and check return value",
           "[createsinglecolorimage]")
 {
-    std::filesystem::path path = createSingleColorImage(
+    const std::filesystem::path path = createSingleColorImage(
         "colorFile",
         glm::dvec3(1.0, 0.0, 0.0)
     );
