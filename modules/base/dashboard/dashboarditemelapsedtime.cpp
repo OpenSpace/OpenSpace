@@ -141,7 +141,7 @@ DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dict
 void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
     ZoneScoped;
 
-    double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
+    const double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
 
     if (_simplifyTime) {
         using namespace std::chrono;

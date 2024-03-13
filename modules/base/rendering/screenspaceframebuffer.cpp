@@ -113,18 +113,18 @@ void ScreenSpaceFramebuffer::render(float blackoutFactor) {
     const float yratio = resolution.y / (size.w - size.y);
 
     if (!_renderFunctions.empty()) {
-        GLint viewport[4];
+        std::array<GLint, 4> viewport;
         //glGetIntegerv(GL_VIEWPORT, viewport);
-        global::renderEngine->openglStateCache().viewport(viewport);
+        global::renderEngine->openglStateCache().viewport(viewport.data());
         glViewport(
             static_cast<GLint>(-size.x * xratio),
             static_cast<GLint>(-size.y * yratio),
             static_cast<GLsizei>(resolution.x * xratio),
             static_cast<GLsizei>(resolution.y * yratio)
         );
-        global::renderEngine->openglStateCache().setViewportState(viewport);
+        global::renderEngine->openglStateCache().setViewportState(viewport.data());
 
-        GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+        const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         _framebuffer->activate();
 
         glClearColor(0.f, 0.f, 0.f, 0.f);

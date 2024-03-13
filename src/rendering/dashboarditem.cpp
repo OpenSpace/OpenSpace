@@ -61,7 +61,7 @@ documentation::Documentation DashboardItem::Documentation() {
 }
 
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
-                                                             ghoul::Dictionary dictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
     ghoul::TemplateFactory<DashboardItem>* factory =
         FactoryManager::ref().factory<DashboardItem>();
