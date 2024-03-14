@@ -107,8 +107,8 @@ protected:
     virtual void bindTexture() = 0;
     virtual void unbindTexture();
 
-    glm::vec3 sphericalToRae(glm::vec3 spherical) const;
-    glm::vec3 raeToSpherical(glm::vec3 rae) const;
+    glm::vec3 sphericalToRae(const glm::vec3& spherical) const;
+    glm::vec3 raeToSpherical(const glm::vec3& rae) const;
     glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;

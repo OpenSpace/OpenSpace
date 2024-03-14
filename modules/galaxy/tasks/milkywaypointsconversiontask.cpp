@@ -50,20 +50,20 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
     std::ofstream out(_outFilename, std::ios::out | std::ios::binary);
 
     std::string format;
-    int64_t nPoints;
+    int64_t nPoints = 0;
     in >> format >> nPoints;
 
-    size_t nFloats = nPoints * 7;
+    const size_t nFloats = nPoints * 7;
 
     std::vector<float> pointData(nFloats);
 
-    float x;
-    float y;
-    float z;
-    float r;
-    float g;
-    float b;
-    float a;
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+    float r = 0.f;
+    float g = 0.f;
+    float b = 0.f;
+    float a = 0.f;
 
     for (int64_t i = 0; i < nPoints; i++) {
         in >> x >> y >> z >> r >> g >> b >> a;

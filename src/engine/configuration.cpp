@@ -413,8 +413,8 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("LayerServer", layerServerToString(layerServer));
 
     ghoul::Dictionary moduleConfigurationsDict;
-    for (auto it = moduleConfigurations.begin(); it != moduleConfigurations.end(); it++) {
-        moduleConfigurationsDict.setValue(it->first, it->second);
+    for (const auto& [key, value] : moduleConfigurations) {
+        moduleConfigurationsDict.setValue(key, value);
     }
     res.setValue("ModuleConfigurations", moduleConfigurationsDict);
 

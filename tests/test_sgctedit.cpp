@@ -38,17 +38,16 @@
 using namespace openspace;
 
 namespace {
-    std::string stringify(const std::string filename) {
-        std::ifstream myfile;
-        myfile.open(filename);
+    std::string stringify(const std::string& filename) {
+        std::ifstream myfile = std::ifstream(filename);
         std::stringstream buffer;
         buffer << myfile.rdbuf();
         return buffer.str();
     }
 
     void attemptValidation(const std::string cfgString) {
-        std::filesystem::path schemaDir = absPath("${TESTDIR}/../config/schema");
-        std::string schemaString = stringify(
+        const std::filesystem::path schemaDir = absPath("${TESTDIR}/../config/schema");
+        const std::string schemaString = stringify(
             schemaDir.string() + "/sgcteditor.schema.json"
         );
         sgct::validateConfigAgainstSchema(cfgString, schemaString, schemaDir);
@@ -452,9 +451,9 @@ R"({
 
 TEST_CASE("SgctEdit: minimumVersion", "[sgctedit]") {
     const sgct::config::GeneratorVersion minVersion { "SgctWindowConfig", 1, 1 };
-    std::string inputCfg =
+    const std::string inputCfg =
         absPath("${TESTDIR}/sgctedit/fails_minimum_version.json").string();
-    sgct::config::GeneratorVersion ver = sgct::readConfigGenerator(inputCfg);
+    const sgct::config::GeneratorVersion ver = sgct::readConfigGenerator(inputCfg);
     CHECK_FALSE(ver.versionCheck(minVersion));
 }
 

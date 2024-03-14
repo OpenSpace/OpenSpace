@@ -370,9 +370,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     if (p.modelScale.has_value()) {
         if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
-            Parameters::ScaleUnit scaleUnit =
+            const Parameters::ScaleUnit scaleUnit =
                 std::get<Parameters::ScaleUnit>(*p.modelScale);
-            DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
+            const DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
             _modelScale = toMeter(distanceUnit);
         }
         else if (std::holds_alternative<double>(*p.modelScale)) {
@@ -400,9 +400,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 *p.animationTimeScale
             ))
         {
-            Parameters::AnimationTimeUnit animationTimeUnit =
+            const Parameters::AnimationTimeUnit animationTimeUnit =
                 std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
-            TimeUnit timeUnit = codegen::map<TimeUnit>(animationTimeUnit);
+            const TimeUnit timeUnit = codegen::map<TimeUnit>(animationTimeUnit);
 
             _animationTimeScale = static_cast<double>(
                 convertTime(1.0, timeUnit, TimeUnit::Second)
@@ -448,7 +448,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     }
 
     if (p.lightSources.has_value()) {
-        std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
+        const std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
 
         for (const ghoul::Dictionary& lsDictionary : lightsources) {
             std::unique_ptr<LightSource> lightSource =
@@ -609,11 +609,11 @@ void RenderableModel::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         program,
         [this, program]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            std::filesystem::path vs =
+            const std::filesystem::path vs =
                 _vertexShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
                 std::filesystem::path(_vertexShaderPath);
-            std::filesystem::path fs =
+            const std::filesystem::path fs =
                 _fragmentShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
                 std::filesystem::path(_fragmentShaderPath);
@@ -632,9 +632,9 @@ void RenderableModel::initializeGL() {
     _quadProgram = BaseModule::ProgramObjectManager.request(
         "ModelOpacityProgram",
         [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            std::filesystem::path vs =
+            const std::filesystem::path vs =
                 absPath("${MODULE_BASE}/shaders/modelOpacity_vs.glsl");
-            std::filesystem::path fs =
+            const std::filesystem::path fs =
                 absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
 
             return global::renderEngine->buildRenderProgram(
@@ -651,7 +651,7 @@ void RenderableModel::initializeGL() {
     );
 
     // Screen quad VAO
-    const GLfloat quadVertices[] = {
+    constexpr std::array<GLfloat, 24> QuadVtx = {
         // x     y     s     t
         -1.f, -1.f,  0.f,  0.f,
          1.f,  1.f,  1.f,  1.f,
@@ -667,7 +667,7 @@ void RenderableModel::initializeGL() {
     glGenBuffers(1, &_quadVbo);
     glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVtx), QuadVtx.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(1);
@@ -715,7 +715,7 @@ void RenderableModel::initializeGL() {
     }
 
     // Check status
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Framebuffer is not complete");
     }
@@ -837,7 +837,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glm::mat4(modelViewTransform)
     );
 
-    glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
+    const glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 
     _program->setUniform(
         _uniformCache.normalTransform,
@@ -895,7 +895,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     }
     else {
         // Prepare framebuffer
-        GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+        const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
 
         // Re-bind first texture to use the currently not used Ping-Pong texture in the
@@ -907,7 +907,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             0
         );
         // Check status
-        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Framebuffer is not complete");
         }
@@ -987,8 +987,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             glm::vec2(global::windowDelegate->currentDrawBufferResolution())
         );
 
-        GLint vp[4] = { 0 };
-        global::renderEngine->openglStateCache().viewport(vp);
+        std::array<GLint, 4> vp = {};
+        global::renderEngine->openglStateCache().viewport(vp.data());
         glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
         _quadProgram->setUniform(
             _uniformOpacityCache.viewport,
@@ -1049,9 +1049,9 @@ void RenderableModel::update(const UpdateData& data) {
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime = 0.0;
-        double now = data.time.j2000Seconds();
-        double startTime = data.time.convertTime(_animationStart);
-        double duration = _geometry->animationDuration();
+        const double now = data.time.j2000Seconds();
+        const double startTime = Time::convertTime(_animationStart);
+        const double duration = _geometry->animationDuration();
 
         // The animation works in a time range 0 to duration where 0 in the animation is
         // the given _animationStart time in OpenSpace. The time in OpenSpace then has to

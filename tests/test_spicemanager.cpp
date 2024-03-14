@@ -108,7 +108,7 @@ TEST_CASE("SpiceManager: Load Single Kernel", "[spicemanager]") {
 
     loadLSKKernel();
 
-    SpiceInt handle;
+    SpiceInt handle = 0;
     std::array<char, FileLength> file;
     std::array<char, TypeLength> filtyp;
     std::array<char, SourceLength> source;
@@ -139,11 +139,11 @@ TEST_CASE("SpiceManager: Unload Kernel String", "[spicemanager]") {
 
     loadLSKKernel();
 
-    SpiceInt handle;
+    SpiceInt handle = 0;
     std::array<char, FileLength> file;
     std::array<char, TypeLength> filtyp;
     std::array<char, SourceLength> source;
-    SpiceBoolean found;
+    SpiceBoolean found = SPICEFALSE;
     kdata_c(
         0,
         "text",
@@ -188,13 +188,13 @@ TEST_CASE("SpiceManager: Unload Kernel Integer", "[spicemanager]") {
 
     SpiceManager::initialize();
 
-    int kernelID = loadLSKKernel();
+    const int kernelID = loadLSKKernel();
 
-    SpiceInt handle;
+    SpiceInt handle = 0;
     std::array<char, FileLength> file;
     std::array<char, TypeLength> filtyp;
     std::array<char, SourceLength> source;
-    SpiceBoolean found;
+    SpiceBoolean found = SPICEFALSE;
     kdata_c(
         0,
         "text",

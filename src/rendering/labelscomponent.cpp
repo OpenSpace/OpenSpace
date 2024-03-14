@@ -289,9 +289,10 @@ void LabelsComponent::render(const RenderData& data,
     if (!_enabled) {
         return;
     }
-    float scale = static_cast<float>(toMeter(_unit));
+    const float scale = static_cast<float>(toMeter(_unit));
 
-    int renderOption = _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
+    const int renderOption =
+        _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
@@ -306,7 +307,7 @@ void LabelsComponent::render(const RenderData& data,
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_color), opacity() * fadeInVariable);
+    const glm::vec4 textColor = glm::vec4(glm::vec3(_color), opacity() * fadeInVariable);
 
     for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         if (!e.isEnabled) {
@@ -314,9 +315,10 @@ void LabelsComponent::render(const RenderData& data,
         }
 
         // Transform and scale the labels
-        glm::vec3 transformedPos(_transformationMatrix * glm::dvec4(e.position, 1.0));
-        glm::vec3 scaledPos(transformedPos);
-        scaledPos *= scale;
+        const glm::vec3 transformedPos = glm::vec3(
+            _transformationMatrix * glm::dvec4(e.position, 1.0)
+        );
+        const glm::vec3 scaledPos = glm::vec3(transformedPos * scale);
 
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,

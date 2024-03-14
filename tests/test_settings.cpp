@@ -216,8 +216,8 @@ TEST_CASE("Settings Load: Configuration Remember", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Configuration Remember", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_config_remember.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_config_remember.json";
 
     const Settings srcSettings = {
         .rememberLastConfiguration = true
@@ -259,8 +259,8 @@ TEST_CASE("Settings Load: Profile", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Profile", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_profile.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_profile.json";
 
     const Settings srcSettings = {
         .profile = "def"
@@ -345,8 +345,8 @@ TEST_CASE("Settings Load: Visibility/NoviceUser", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Visibility/NoviceUser", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_noviceuser.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_noviceuser.json";
 
     const Settings srcSettings = {
         .visibility = openspace::properties::Property::Visibility::NoviceUser
@@ -560,8 +560,8 @@ TEST_CASE("Settings Load: LayerServer/All", "[settings]") {
 }
 
 TEST_CASE("Settings Save: LayerServer/All", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_layerserver_all.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_layerserver_all.json";
 
     const Settings srcSettings = {
         .layerServer = openspace::Configuration::LayerServer::All
@@ -603,8 +603,8 @@ TEST_CASE("Settings Load: LayerServer/NewYork", "[settings]") {
 }
 
 TEST_CASE("Settings Save: LayerServer/NewYork", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_layerserver_nyc.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_layerserver_nyc.json";
 
     const Settings srcSettings = {
         .layerServer = openspace::Configuration::LayerServer::NewYork
@@ -647,8 +647,8 @@ TEST_CASE("Settings Load: LayerServer/Sweden", "[settings]") {
 }
 
 TEST_CASE("Settings Save: LayerServer/Sweden", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_layerserver_sweden.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_layers_sweden.json";
 
     const Settings srcSettings = {
         .layerServer = openspace::Configuration::LayerServer::Sweden
@@ -733,8 +733,8 @@ TEST_CASE("Settings Load: LayerServer/None", "[settings]") {
 }
 
 TEST_CASE("Settings Save: LayerServer/None", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_layerserver_none.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_layerserver_none.json";
 
     const Settings srcSettings = {
         .layerServer = openspace::Configuration::LayerServer::None
@@ -778,8 +778,8 @@ TEST_CASE("Settings Load: MRF IsEnabled", "[settings]") {
 }
 
 TEST_CASE("Settings Save: MRF IsEnabled", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_mrf_isenabled.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_mrf_isenabled.json";
 
     const Settings srcSettings = {
         .mrf = Settings::MRF {
@@ -890,8 +890,8 @@ TEST_CASE("Settings Load: Full", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Full", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_full.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_full.json";
 
     const Settings srcSettings = {
         .hasStartedBefore = false,

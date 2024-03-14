@@ -286,8 +286,8 @@ bool Scene::isInitializing() const {
 void Scene::update(const UpdateData& data) {
     ZoneScoped;
 
-    std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
-    for (SceneGraphNode* node : initializedNodes) {
+    const std::vector<SceneGraphNode*> initialized = _initializer->takeInitializedNodes();
+    for (SceneGraphNode* node : initialized) {
         try {
             node->initializeGL();
         }
@@ -404,12 +404,12 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
             // TODO: Throw exception
             LERROR("Dependencies did not have the corrent type");
         }
-        ghoul::Dictionary nodeDependencies =
+        const ghoul::Dictionary nodeDependencies =
             nodeDictionary.value<ghoul::Dictionary>(SceneGraphNode::KeyDependencies);
 
-        for (std::string_view key : nodeDependencies.keys()) {
+        for (const std::string_view key : nodeDependencies.keys()) {
             std::string value = nodeDependencies.value<std::string>(key);
-            dependencyNames.push_back(value);
+            dependencyNames.push_back(std::move(value));
         }
     }
 
@@ -637,7 +637,7 @@ ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
                                                                  const std::string& value)
 {
     ProfilePropertyLua result;
-    PropertyValueType pType = propertyValueType(value);
+    const PropertyValueType pType = propertyValueType(value);
 
     switch (pType) {
         case PropertyValueType::Boolean:

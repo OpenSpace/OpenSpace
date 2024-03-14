@@ -274,7 +274,10 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
             "Could not compute angle at {} between {} and {}",
             sourceInfo.second, destinationInfo.second, referenceInfo.second
         );
-        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+        const std::string_view text = std::string_view(
+            _buffer.data(),
+            end - _buffer.data()
+        );
         RenderFont(*_font, penPosition, text);
         penPosition.y -= _font->height();
     }

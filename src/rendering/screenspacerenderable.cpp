@@ -717,16 +717,16 @@ glm::vec3 ScreenSpaceRenderable::cartesianToSpherical(const glm::vec3& cartesian
     // Rotate cartesian coordinates.
     glm::vec3 rotated = glm::vec3(cartesian.x, cartesian.z, -cartesian.y);
 
-    const float r = sqrt(
-        pow(rotated.x, 2.f) + pow(rotated.y, 2.f) + pow(rotated.z, 2.f)
+    const float r = std::sqrt(
+        std::pow(rotated.x, 2.f) + std::pow(rotated.y, 2.f) + std::pow(rotated.z, 2.f)
     );
-    const float theta = acos(rotated.z / r);
-    const float phi = atan2(rotated.y, rotated.x);
+    const float theta = std::acos(rotated.z / r);
+    const float phi = std::atan2(rotated.y, rotated.x);
     return sanitizeSphericalCoordinates(glm::vec3(r, theta, phi));
 }
 
 // Radius, azimiuth, elevation to spherical coordinates.
-glm::vec3 ScreenSpaceRenderable::raeToSpherical(glm::vec3 rae) const {
+glm::vec3 ScreenSpaceRenderable::raeToSpherical(const glm::vec3& rae) const {
     //return rae;
     const float r = rae.x;
 
@@ -741,15 +741,15 @@ glm::vec3 ScreenSpaceRenderable::raeToSpherical(glm::vec3 rae) const {
 }
 
 // Spherical coordinates to radius, azimuth and elevation.
-glm::vec3 ScreenSpaceRenderable::sphericalToRae(glm::vec3 spherical) const {
+glm::vec3 ScreenSpaceRenderable::sphericalToRae(const glm::vec3& spherical) const {
     //return spherical;
     const float r = spherical.x;
 
     // Azimuth on screen is angle from negative y, as opposed to from x.
-    float azimuth = spherical.z + glm::half_pi<float>();
+    const float azimuth = spherical.z + glm::half_pi<float>();
 
     // Elevation is polar angle - pi/2
-    float elevation = wrap(
+    const float elevation = wrap(
         spherical.y - glm::half_pi<float>(),
         -glm::pi<float>(),
         glm::pi<float>()

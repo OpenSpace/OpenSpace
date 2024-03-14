@@ -154,7 +154,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
             return;
         }
 
-        float value = static_cast<float>(luaL_checknumber(state, 1));
+        const float value = static_cast<float>(luaL_checknumber(state, 1));
         lua_pop(state, 1);
         rawVolume.set(cell, value);
 
