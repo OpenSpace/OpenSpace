@@ -400,7 +400,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
     // Points are rendered as billboards
     const glm::dvec3 cameraViewDirWorld = -renderData.camera.viewDirectionWorldSpace();
     const glm::dvec3 cameraUpDirWorld = renderData.camera.lookUpVectorWorldSpace();
-    const glm::dvec3 orthoRight = glm::normalize(
+    glm::dvec3 orthoRight = glm::normalize(
         glm::cross(cameraUpDirWorld, cameraViewDirWorld)
     );
     if (orthoRight == glm::dvec3(0.0)) {

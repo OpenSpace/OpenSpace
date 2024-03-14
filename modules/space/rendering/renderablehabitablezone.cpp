@@ -238,13 +238,13 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
     // https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
     constexpr std::array<Coefficients, 4> coefficients = {
         // Optimistic Inner boundary - Recent Venus
-        { 1.77600E+00, 2.13600E-04, 2.53300E-08, -1.33200E-11, -3.09700E-15 },
+        Coefficients{ 1.77600E+00, 2.13600E-04, 2.53300E-08, -1.33200E-11, -3.09700E-15 },
         // Conservative Inner boundary - Runaway greenhouse
-        { 1.10700E+00, 1.33200E-04, 1.58000E-08, -8.30800E-12, -1.93100E-15 },
+        Coefficients{ 1.10700E+00, 1.33200E-04, 1.58000E-08, -8.30800E-12, -1.93100E-15 },
         // Conservative Outer boundary - Maximum greenhouse
-        { 3.56000E-01, 6.17100E-05, 1.69800E-09, -3.19800E-12, -5.57500E-16 },
+        Coefficients{ 3.56000E-01, 6.17100E-05, 1.69800E-09, -3.19800E-12, -5.57500E-16 },
         // Optimistic Outer boundary - Early Mars
-        { 3.20000E-01, 5.54700E-05, 1.52600E-09, -2.87400E-12, -5.01100E-16 }
+        Coefficients{ 3.20000E-01, 5.54700E-05, 1.52600E-09, -2.87400E-12, -5.01100E-16 }
     };
 
     const double tstar = static_cast<double>(teff - 5780.f);

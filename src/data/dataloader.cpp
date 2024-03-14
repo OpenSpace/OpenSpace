@@ -115,7 +115,7 @@ namespace openspace::dataloader {
 
 namespace data {
 
-Dataset loadFile(const std::filesystem::path& path, std::optional<DataMapping> specs) {
+Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file = std::ifstream(path);
@@ -142,7 +142,7 @@ Dataset loadFile(const std::filesystem::path& path, std::optional<DataMapping> s
     return res;
 }
 
-std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
+std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
     std::ifstream file(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;
@@ -244,7 +244,7 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
     return result;
 }
 
-void saveCachedFile(const Dataset& dataset, const std::filesystem::path& path) {
+void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
     std::ofstream file = std::ofstream(path, std::ofstream::binary);
 
     file.write(reinterpret_cast<const char*>(&DataCacheFileVersion), sizeof(int8_t));
@@ -344,7 +344,7 @@ Dataset loadFileWithCache(std::filesystem::path path, std::optional<DataMapping>
 
 namespace label {
 
-Labelset loadFile(const std::filesystem::path& path, std::optional<DataMapping>) {
+Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file = std::ifstream(path);
@@ -368,7 +368,7 @@ Labelset loadFile(const std::filesystem::path& path, std::optional<DataMapping>)
     return res;
 }
 
-std::optional<Labelset> loadCachedFile(const std::filesystem::path& path) {
+std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
     std::ifstream file(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;
@@ -414,7 +414,7 @@ std::optional<Labelset> loadCachedFile(const std::filesystem::path& path) {
     return result;
 }
 
-void saveCachedFile(const Labelset& labelset, const std::filesystem::path& path) {
+void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
     std::ofstream file = std::ofstream(path, std::ofstream::binary);
 
     file.write(reinterpret_cast<const char*>(&LabelCacheFileVersion), sizeof(int8_t));
@@ -480,7 +480,7 @@ Labelset loadFromDataset(const Dataset& dataset) {
 
 namespace color {
 
-ColorMap loadFile(const std::filesystem::path& path, std::optional<DataMapping>) {
+ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file = std::ifstream(path);
@@ -504,7 +504,7 @@ ColorMap loadFile(const std::filesystem::path& path, std::optional<DataMapping>)
     return res;
 }
 
-std::optional<ColorMap> loadCachedFile(const std::filesystem::path& path) {
+std::optional<ColorMap> loadCachedFile(std::filesystem::path path) {
     std::ifstream file(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;

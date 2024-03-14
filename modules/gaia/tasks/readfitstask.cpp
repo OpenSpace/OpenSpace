@@ -291,7 +291,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
                         octants[i],
                         i,
                         isFirstWrite,
-                        nValuesPerStar
+                        NValuesPerStar
                     );
 
                     octants[i].clear();
