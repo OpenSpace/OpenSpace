@@ -44,7 +44,7 @@ namespace {
 namespace openspace {
 
 GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture,
-                                 std::optional<std::filesystem::path> raycastingShader)
+                             const std::optional<std::filesystem::path>& raycastingShader)
     : _boundingBox(glm::vec3(1.f))
     , _texture(texture)
     , _textureUnit(nullptr)
@@ -90,7 +90,7 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data,
 }
 
 glm::dmat4 GalaxyRaycaster::modelViewTransform(const RenderData& data) {
-    glm::dmat4 modelTransform =
+    const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
@@ -163,7 +163,7 @@ void GalaxyRaycaster::setAspect(const glm::vec3& aspect) {
 }
 
 void GalaxyRaycaster::setModelTransform(glm::mat4 transform) {
-    _modelTransform = transform;
+    _modelTransform = std::move(transform);
 }
 
 void GalaxyRaycaster::setOpacityCoefficient(float opacityCoefficient) {

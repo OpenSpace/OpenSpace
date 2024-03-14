@@ -32,9 +32,9 @@
 // Entry point function for all processes.
 int main(int argc, char* argv[]) {
   // Provide CEF with command-line arguments.
-  CefMainArgs main_args(argc, argv);
+  const CefMainArgs main_args = CefMainArgs(argc, argv);
 
-  CefRefPtr<openspace::WebBrowserApp> app(new openspace::WebBrowserApp);
+  const CefRefPtr<openspace::WebBrowserApp> app(new openspace::WebBrowserApp);
 
   // CEF applications have multiple sub-processes (render, GPU, etc) that share
   // the same executable. This function checks the command-line and, if this is

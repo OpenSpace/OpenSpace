@@ -151,7 +151,7 @@ void GuiGlobeBrowsingComponent::render() {
     bool isNodeChanged = ImGui::Combo("Globe", &iNode, nodeNames.c_str());
 
     ImGui::SameLine();
-    bool selectFocusNode = ImGui::Button("From Focus");
+    const bool selectFocusNode = ImGui::Button("From Focus");
     if (selectFocusNode) {
         const SceneGraphNode* const focus =
             global::navigationHandler->orbitalNavigator().anchorNode();
@@ -186,7 +186,7 @@ void GuiGlobeBrowsingComponent::render() {
     // Render the list of servers for the planet
     std::vector<UrlInfo> urlInfo = module->urlInfo(_currentNode);
 
-    std::string serverList = std::accumulate(
+    const std::string serverList = std::accumulate(
         urlInfo.cbegin(),
         urlInfo.cend(),
         std::string(),
@@ -267,7 +267,7 @@ void GuiGlobeBrowsingComponent::render() {
 
     ImGui::Separator();
 
-    Capabilities cap = module->capabilities(_currentServer);
+    const Capabilities cap = module->capabilities(_currentServer);
 
     if (cap.empty()) {
         LWARNINGC("GlobeBrowsing", fmt::format("Unknown server '{}'", _currentServer));

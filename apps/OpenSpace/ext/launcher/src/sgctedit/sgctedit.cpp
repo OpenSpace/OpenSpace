@@ -116,12 +116,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, std::string configName,
                     posY -= monitorSizes[monitorNum].y();
                 }
             }
-            QRectF newDims(
-                posX,
-                posY,
-                w.size.x,
-                w.size.y
-            );
+            const QRectF newDims = QRectF(posX, posY, w.size.x, w.size.y);
             wCtrl->setDimensions(newDims);
             if (w.name.has_value()) {
                 wCtrl->setWindowName(w.name.value());
@@ -465,7 +460,7 @@ void SgctEdit::generateConfiguration() {
     _cluster.scene = sgct::config::Scene();
     _cluster.scene->orientation = _settingsWidget->orientation();
     if (_cluster.nodes.empty()) {
-        _cluster.nodes.emplace_back(sgct::config::Node());
+        _cluster.nodes.emplace_back();
     }
     sgct::config::Node& node = _cluster.nodes.back();
 
@@ -514,7 +509,7 @@ void SgctEdit::generateConfigResizeWindowsAccordingToSelected(sgct::config::Node
     std::vector<WindowControl*> windowControls = _displayWidget->activeWindowControls();
     for (size_t wIdx = 0; wIdx < windowControls.size(); ++wIdx) {
         if (node.windows.size() <= wIdx) {
-            node.windows.emplace_back(sgct::config::Window());
+            node.windows.emplace_back();
         }
         if (windowControls[wIdx]) {
             windowControls[wIdx]->generateWindowInformation(node.windows[wIdx]);
@@ -538,7 +533,7 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
         if (_settingsWidget->showUiOnFirstWindow()) {
             if (i == 0) {
                 node.windows[i].tags.emplace_back("GUI");
-                int selectedGraphics =
+                const int selectedGraphics =
                     _settingsWidget->graphicsSelectionForShowUiOnFirstWindow();
 
                 if (selectedGraphics == 0) {

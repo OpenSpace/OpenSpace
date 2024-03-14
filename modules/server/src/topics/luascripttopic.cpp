@@ -137,17 +137,17 @@ namespace openspace {
 
 void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     try {
-        nlohmann::json::const_iterator script = json.find(KeyScript);
-        nlohmann::json::const_iterator function = json.find(KeyFunction);
+        const auto script = json.find(KeyScript);
+        const auto function = json.find(KeyFunction);
 
         if (script != json.end() && script->is_string()) {
             std::string luaScript = script->get<std::string>();
-            nlohmann::json::const_iterator ret = json.find(KeyReturn);
+            const auto ret = json.find(KeyReturn);
             bool shouldReturn = (ret != json.end()) &&
                                  ret->is_boolean() &&
                                  ret->get<bool>();
 
-            nlohmann::json::const_iterator sync = json.find(KeyShouldBeSynchronized);
+            const auto sync = json.find(KeyShouldBeSynchronized);
             bool shouldBeSynchronized = true;
             if (sync != json.end() && sync->is_boolean()) {
                 shouldBeSynchronized = sync->get<bool>();
@@ -157,18 +157,18 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
         }
         else if (function != json.end() && function->is_string()) {
             std::string luaFunction = function->get<std::string>();
-            nlohmann::json::const_iterator ret = json.find(KeyReturn);
+            const auto ret = json.find(KeyReturn);
             bool shouldReturn = (ret != json.end()) &&
                                  ret->is_boolean() &&
                                  ret->get<bool>();
 
-            nlohmann::json::const_iterator sync = json.find(KeyShouldBeSynchronized);
+            const auto sync = json.find(KeyShouldBeSynchronized);
             bool shouldBeSynchronized = true;
             if (sync != json.end() && sync->is_boolean()) {
                 shouldBeSynchronized = sync->get<bool>();
             }
 
-            nlohmann::json::const_iterator args = json.find(KeyArguments);
+            const nlohmann::json::const_iterator args = json.find(KeyArguments);
             if (!args->is_array()) {
                 return;
             }
@@ -179,7 +179,7 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
                 formattedArgs.push_back(formatLua(it));
             }
 
-            std::string luaScript = generateScript(luaFunction, formattedArgs);
+            const std::string luaScript = generateScript(luaFunction, formattedArgs);
             runScript(luaScript, shouldReturn, shouldBeSynchronized);
         }
     }
@@ -194,10 +194,9 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
 {
     scripting::ScriptEngine::ScriptCallback callback;
     if (shouldReturn) {
-        callback = [this](ghoul::Dictionary data) {
+        callback = [this](const ghoul::Dictionary& data) {
             if (_connection) {
-                nlohmann::json j = data;
-                nlohmann::json payload = wrappedPayload(j);
+                const nlohmann::json payload = wrappedPayload(data);
                 _connection->sendJson(payload);
                 _waitingForReturnValue = false;
             }

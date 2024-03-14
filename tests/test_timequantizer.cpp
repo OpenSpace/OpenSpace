@@ -35,7 +35,7 @@ using namespace openspace;
 
 namespace {
     int loadLSKKernel() {
-        int kernelID = openspace::SpiceManager::ref().loadKernel(
+        const int kernelID = openspace::SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
         );
         CHECK(kernelID == 1);
@@ -50,7 +50,8 @@ namespace {
         CHECK(t.ISO8601() == expected);
     }
 
-    void singleResolutionTest(globebrowsing::TimeQuantizer& tq, std::string resolution,
+    void singleResolutionTest(globebrowsing::TimeQuantizer& tq,
+                              const std::string& resolution,
                               const std::string& expectedType, bool expectFailure)
     {
         std::string res;
@@ -69,7 +70,8 @@ namespace {
         }
     }
 
-    void singleStartTimeTest(globebrowsing::TimeQuantizer& tq, std::string startTime,
+    void singleStartTimeTest(globebrowsing::TimeQuantizer& tq,
+                             const std::string& startTime,
                              const std::string& expectedErrSubstring, bool expectFailure)
     {
         std::string res;
@@ -88,7 +90,7 @@ namespace {
         }
     }
 
-    void singleStartTimeTest(std::string startTime,
+    void singleStartTimeTest(const std::string& startTime,
                              const std::string& expectedErrSubstring, bool expectFailure)
     {
         std::string res;

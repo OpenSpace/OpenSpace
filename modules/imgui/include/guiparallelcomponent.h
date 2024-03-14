@@ -40,7 +40,6 @@ private:
     void renderClientWithHost();
     void renderClientWithoutHost();
     void renderClientCommon();
-    void renderHost();
 };
 
 } // namespace openspace::gui

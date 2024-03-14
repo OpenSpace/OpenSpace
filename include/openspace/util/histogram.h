@@ -69,7 +69,7 @@ public:
     std::vector<char> getBinaryData() const;
 
     float highestBinValue(bool equalized, int overBins=0);
-    float binWidth();
+    float binWidth() const;
 
     void changeRange(float minValue, float maxValue);
 

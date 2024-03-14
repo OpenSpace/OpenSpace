@@ -26,7 +26,6 @@
 
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
@@ -56,7 +55,7 @@ void TransferFunction::setPath(const std::string& filepath) {
     if (_file) {
         _file = nullptr;
     }
-    std::filesystem::path f = absPath(filepath);
+    const std::filesystem::path f = absPath(filepath);
     if (!std::filesystem::is_regular_file(f)) {
         LERROR("Could not find transfer function file");
         _file = nullptr;
@@ -127,8 +126,8 @@ void TransferFunction::setTextureFromTxt() {
             upper = glm::clamp(upper, lower, 1.f);
         }
         else if (key == "mappingkey") {
-            float intensity;
-            glm::vec4 rgba = glm::vec4(0.f);
+            float intensity = 0.f;
+            glm::vec4 rgba;
             iss >> intensity;
             for(int i = 0; i < 4; i++) {
                 iss >> rgba[i];
@@ -156,8 +155,12 @@ void TransferFunction::setTextureFromTxt() {
         transferFunction[i] = 0.f;
     }
 
-    size_t lowerIndex = static_cast<size_t>(floorf(lower * static_cast<float>(width-1)));
-    size_t upperIndex = static_cast<size_t>(floorf(upper * static_cast<float>(width-1)));
+    size_t lowerIndex = static_cast<size_t>(
+        std::floor(lower * static_cast<float>(width - 1))
+    );
+    const size_t upperIndex = static_cast<size_t>(
+        std::floor(upper * static_cast<float>(width - 1))
+    );
 
     auto prevKey = mappingKeys.begin();
     auto currentKey = prevKey + 1;

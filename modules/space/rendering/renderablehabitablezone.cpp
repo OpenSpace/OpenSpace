@@ -221,8 +221,8 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
         // For the other stars, use a method by Tom E. Morris:
         // https://www.planetarybiology.com/calculating_habitable_zone.html
         const double L = static_cast<double>(luminosity);
-        double inner = std::sqrt(L / 1.1);
-        double outer = std::sqrt(L / 0.53);
+        const double inner = std::sqrt(L / 1.1);
+        const double outer = std::sqrt(L / 0.53);
         return glm::dvec4(inner, inner, outer, outer);
     }
 
@@ -236,7 +236,7 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
 
     // Coefficients for planets of 1 Earth mass. Received from:
     // https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
-    constexpr Coefficients coefficients[] = {
+    constexpr std::array<Coefficients, 4> coefficients = {
         // Optimistic Inner boundary - Recent Venus
         { 1.77600E+00, 2.13600E-04, 2.53300E-08, -1.33200E-11, -3.09700E-15 },
         // Conservative Inner boundary - Runaway greenhouse
@@ -254,7 +254,7 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
     glm::dvec4 distances;
     for (int i = 0; i < 4; i++) {
         const Coefficients& coeffs = coefficients[i];
-        double seff = coeffs.seffSun + (coeffs.a * tstar) + (coeffs.b * tstar2) +
+        const double seff = coeffs.seffSun + (coeffs.a * tstar) + (coeffs.b * tstar2) +
             (coeffs.c * tstar * tstar2) + (coeffs.d * tstar2 * tstar2);
 
         distances[i] = std::pow(L / seff, 0.5);

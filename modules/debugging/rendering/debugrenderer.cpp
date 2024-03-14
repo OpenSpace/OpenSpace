@@ -78,7 +78,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
     ghoul_assert(_vaoID != 0, "Could not generate vertex arrays");
 
     // Generate a vbo, vertex buffer object (storeing actual data)
-    GLuint _vertexBufferID;
+    GLuint _vertexBufferID = 0;
     glGenBuffers(1, &_vertexBufferID);
     ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
 

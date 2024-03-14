@@ -254,7 +254,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     int nStars = table->readRows - firstRow + 1;
 
     int nNullArr = 0;
-    int nColumnsRead = static_cast<int>(allColumnNames.size());
+    const int nColumnsRead = static_cast<int>(allColumnNames.size());
     const int defaultCols = 17; // Number of columns that are copied by predefined code
     if (nColumnsRead != defaultCols) {
         LINFO("Additional columns will be read! Consider add column in code for "

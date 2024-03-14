@@ -31,11 +31,31 @@
 #include <openspace/network/parallelpeer.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/util/timemanager.h>
-
 #include <ghoul/fmt.h>
-
 #include <algorithm>
 #include <numeric>
+
+namespace {
+    void renderHost() {
+        const size_t nConnections = openspace::global::parallelPeer->nConnections();
+
+        std::string connectionInfo;
+        const size_t nClients = nConnections - 1;
+        if (nClients == 1) {
+            connectionInfo = "Hosting session with 1 client";
+        }
+        else {
+            connectionInfo = fmt::format("Hosting session with {} clients", nClients);
+        }
+
+        ImGui::Text("%s", connectionInfo.c_str());
+
+        const bool resignHostship = ImGui::Button("Resign hostship");
+        if (resignHostship) {
+            openspace::global::parallelPeer->resignHostship();
+        }
+    }
+} // namespace
 
 namespace openspace::gui {
 
@@ -138,26 +158,6 @@ void GuiParallelComponent::renderClientCommon() {
     }
 }
 
-void GuiParallelComponent::renderHost() {
-    const size_t nConnections = global::parallelPeer->nConnections();
-
-    std::string connectionInfo;
-    const size_t nClients = nConnections - 1;
-    if (nClients == 1) {
-        connectionInfo = "Hosting session with 1 client";
-    }
-    else {
-        connectionInfo = "Hosting session with " + std::to_string(nClients) + " clients";
-    }
-
-    ImGui::Text("%s", connectionInfo.c_str());
-
-    const bool resignHostship = ImGui::Button("Resign hostship");
-    if (resignHostship) {
-        global::parallelPeer->resignHostship();
-    }
-}
-
 void GuiParallelComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
@@ -165,7 +165,7 @@ void GuiParallelComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    ParallelConnection::Status status = global::parallelPeer->status();
+    const ParallelConnection::Status status = global::parallelPeer->status();
 
     switch (status) {
         case ParallelConnection::Status::Disconnected:

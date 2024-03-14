@@ -338,7 +338,7 @@ public:
      * \return `true` if data read has no errors
      */
     bool readCameraKeyframeAscii(Timestamps& times,
-        datamessagestructures::CameraKeyframe& kf, std::string currentParsingLine,
+        datamessagestructures::CameraKeyframe& kf, const std::string& currentParsingLine,
         int lineN);
 
     /**
@@ -365,7 +365,7 @@ public:
      * \return `true` if data read has no errors
      */
     bool readTimeKeyframeAscii(Timestamps& times,
-        datamessagestructures::TimeKeyframe& kf, std::string currentParsingLine,
+        datamessagestructures::TimeKeyframe& kf, const std::string& currentParsingLine,
         int lineN);
 
     /**
@@ -394,7 +394,7 @@ public:
      * \return `true` if data read has no errors
      */
     bool readScriptKeyframeAscii(Timestamps& times,
-        datamessagestructures::ScriptMessage& kf, std::string currentParsingLine,
+        datamessagestructures::ScriptMessage& kf, const std::string& currentParsingLine,
         int lineN);
 
     /**
@@ -482,7 +482,7 @@ public:
      * \param readLen_chars Number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
      */
-    static std::string readHeaderElement(std::ifstream& stream, size_t readLen_chars);
+    static std::string readHeaderElement(std::ifstream& stream, size_t readLenChars);
 
     /**
      * Reads header information from a session recording file.
@@ -491,7 +491,7 @@ public:
      * \param readLen_chars Number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
      */
-    static std::string readHeaderElement(std::stringstream& stream, size_t readLen_chars);
+    static std::string readHeaderElement(std::stringstream& stream, size_t readLenChars);
 
     /**
      * Writes a header to a binary recording file buffer.
@@ -520,7 +520,7 @@ public:
      * \param entry The ASCII string version of the keyframe (any type)
      * \param file `std::ofstream` object to write to
      */
-    static void saveKeyframeToFile(std::string entry, std::ofstream& file);
+    static void saveKeyframeToFile(const std::string& entry, std::ofstream& file);
 
     /**
      * Checks if a specified recording file ends with a particular file extension.
@@ -589,7 +589,7 @@ public:
      *
      * \return pathname of the converted version of the file
      */
-    std::string determineConversionOutFilename(const std::string filename, DataMode mode);
+    std::string determineConversionOutFilename(const std::string& filename, DataMode mode);
 
 protected:
     properties::BoolProperty _renderPlaybackInformation;
@@ -675,7 +675,6 @@ protected:
     bool isPropertyAllowedForBaseline(const std::string& propString);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
-    bool doesStartWithSubstring(const std::string& s, const std::string& matchSubstr);
     void trimCommandsFromScriptIfFound(std::string& script);
     void replaceCommandsFromScriptIfFound(std::string& script);
 
@@ -694,7 +693,7 @@ protected:
         int lineNum, std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
     virtual bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    DataMode readModeFromHeader(std::string filename);
+    DataMode readModeFromHeader(const std::string& filename);
     void readPlaybackHeader_stream(std::stringstream& conversionInStream,
         std::string& version, DataMode& mode);
     void populateListofLoadedSceneGraphNodes();

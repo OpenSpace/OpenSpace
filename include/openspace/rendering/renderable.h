@@ -71,7 +71,7 @@ public:
     };
 
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
-        ghoul::Dictionary dictionary);
+        const ghoul::Dictionary& dictionary);
 
     Renderable(const ghoul::Dictionary& dictionary,
         RenderableSettings settings = RenderableSettings());

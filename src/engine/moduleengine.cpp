@@ -63,7 +63,7 @@ void ModuleEngine::initialize(
 {
     ZoneScoped;
 
-    std::vector<OpenSpaceModule*> modules = AllModules();
+    const std::vector<OpenSpaceModule*> modules = AllModules();
 
     std::vector<std::string> moduleNames;
     moduleNames.reserve(modules.size());

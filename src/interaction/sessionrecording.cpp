@@ -869,11 +869,11 @@ void SessionRecording::saveTimeKeyframeAscii(Timestamps& times,
 }
 
 void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
-    if (doesStartWithSubstring(script, scriptReturnPrefix)) {
+    if (script.starts_with(scriptReturnPrefix)) {
         script = script.substr(scriptReturnPrefix.length());
     }
     for (std::string reject : _scriptRejects) {
-        if (doesStartWithSubstring(script, reject)) {
+        if (script.starts_with(reject)) {
             return;
         }
     }
@@ -886,16 +886,11 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
     addKeyframe(times, sm._script, _playbackLineNum);
 }
 
-bool SessionRecording::doesStartWithSubstring(const std::string& s,
-                                              const std::string& matchSubstr)
-{
-    return s.substr(0, matchSubstr.length()) == matchSubstr;
-}
-
 void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script) {
-    Timestamps times =
-        generateCurrentTimestamp3(global::windowDelegate->applicationTime());
-    size_t indexIntoScriptKeyframesFromMainTimeline =
+    const Timestamps times = generateCurrentTimestamp3(
+        global::windowDelegate->applicationTime()
+    );
+    const size_t indexIntoScriptKeyframesFromMainTimeline =
         _keyframesSavePropertiesBaseline_scripts.size();
     _keyframesSavePropertiesBaseline_scripts.push_back(std::move(script));
     addKeyframeToTimeline(
@@ -908,7 +903,7 @@ void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script
 }
 
 void SessionRecording::trimCommandsFromScriptIfFound(std::string& script) {
-    for (std::string trimSnippet : _scriptsToBeTrimmed) {
+    for (const std::string& trimSnippet : _scriptsToBeTrimmed) {
         auto findIdx = script.find(trimSnippet);
         if (findIdx != std::string::npos) {
             auto findClosingParens = script.find_first_of(')', findIdx);
@@ -918,7 +913,7 @@ void SessionRecording::trimCommandsFromScriptIfFound(std::string& script) {
 }
 
 void SessionRecording::replaceCommandsFromScriptIfFound(std::string& script) {
-    for (ScriptSubstringReplace replacementSnippet : _scriptsToBeReplaced) {
+    for (const ScriptSubstringReplace& replacementSnippet : _scriptsToBeReplaced) {
         auto findIdx = script.find(replacementSnippet.substringFound);
         if (findIdx != std::string::npos) {
             script.erase(findIdx, replacementSnippet.substringFound.length());
@@ -950,24 +945,24 @@ void SessionRecording::saveScriptKeyframeAscii(Timestamps& times,
     // Erase all \r (from windows newline), and all \n from line endings and replace with
     // ';' so that lua will treat them as separate lines. This is done in order to treat
     // a multi-line script as a single line in the file.
-    size_t startPos = sm._script.find("\r", 0);
+    size_t startPos = sm._script.find('\r', 0);
     while (startPos != std::string::npos) {
         sm._script.erase(startPos, 1);
-        startPos = sm._script.find("\r", startPos);
+        startPos = sm._script.find('\r', startPos);
     }
-    startPos = sm._script.find("\n", 0);
+    startPos = sm._script.find('\n', 0);
     while (startPos != std::string::npos) {
         sm._script.replace(startPos, 1, ";");
-        startPos = sm._script.find("\n", startPos);
+        startPos = sm._script.find('\n', startPos);
     }
     sm.write(keyframeLine);
     saveKeyframeToFile(keyframeLine.str(), file);
 }
 
 void SessionRecording::savePropertyBaseline(properties::Property& prop) {
-    std::string propIdentifier = prop.fullyQualifiedIdentifier();
+    const std::string propIdentifier = prop.fullyQualifiedIdentifier();
     if (isPropertyAllowedForBaseline(propIdentifier)) {
-        bool isPropAlreadySaved = (
+        const bool isPropAlreadySaved = (
             std::find(
                 _propertyBaselinesSaved.begin(),
                 _propertyBaselinesSaved.end(),
@@ -976,7 +971,7 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
             != _propertyBaselinesSaved.end()
             );
         if (!isPropAlreadySaved) {
-            std::string initialScriptCommand = fmt::format(
+            const std::string initialScriptCommand = fmt::format(
                 "openspace.setPropertyValueSingle(\"{}\", {})",
                 propIdentifier, prop.stringValue()
             );
@@ -987,8 +982,8 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
 }
 
 bool SessionRecording::isPropertyAllowedForBaseline(const std::string& propString) {
-    for (std::string reject : _propertyBaselineRejects) {
-        if (doesStartWithSubstring(propString, reject)) {
+    for (const std::string& reject : _propertyBaselineRejects) {
+        if (propString.starts_with(reject)) {
             return false;
         }
     }
@@ -1038,12 +1033,12 @@ void SessionRecording::render() {
     std::shared_ptr<ghoul::fontrendering::Font> font =
         global::fontManager->font(FontName, FontSizeFrameinfo);
 
-    glm::vec2 res = global::renderEngine->fontResolution();
+    const glm::vec2 res = global::renderEngine->fontResolution();
     glm::vec2 penPosition = glm::vec2(
         res.x / 2 - 150.f,
         res.y / 4
     );
-    std::string text1 = std::to_string(currentTime());
+    const std::string text1 = std::to_string(currentTime());
     ghoul::fontrendering::RenderFont(
         *font,
         penPosition,
@@ -1051,7 +1046,7 @@ void SessionRecording::render() {
         glm::vec4(1.f),
         ghoul::fontrendering::CrDirection::Down
     );
-    std::string text2 = fmt::format(
+    const std::string text2 = fmt::format(
         "Scale: {}", global::navigationHandler->camera()->scaling()
     );
     ghoul::fontrendering::RenderFont(*font, penPosition, text2, glm::vec4(1.f));
@@ -1251,7 +1246,7 @@ bool SessionRecording::playbackCamera() {
         _playbackLineNum
     );
 
-    interaction::KeyframeNavigator::CameraPose pbFrame(std::move(kf));
+    const interaction::KeyframeNavigator::CameraPose pbFrame(std::move(kf));
     if (success) {
         success = addKeyframe(
             {times.timeOs, times.timeRec, times.timeSim},
@@ -1269,7 +1264,7 @@ bool SessionRecording::convertCamera(std::stringstream& inStream, DataMode mode,
     Timestamps times;
     datamessagestructures::CameraKeyframe kf;
 
-    bool success = readSingleKeyframeCamera(
+    const bool success = readSingleKeyframeCamera(
         kf,
         times,
         mode,
@@ -1353,13 +1348,11 @@ bool SessionRecording::readCameraKeyframeBinary(Timestamps& times,
 
 bool SessionRecording::readCameraKeyframeAscii(Timestamps& times,
                                                datamessagestructures::CameraKeyframe& kf,
-                                               std::string currentParsingLine,
+                                               const std::string& currentParsingLine,
                                                int lineN)
 {
-    std::string rotationFollowing;
+    std::istringstream iss = std::istringstream(currentParsingLine);
     std::string entryType;
-
-    std::istringstream iss(currentParsingLine);
     iss >> entryType;
     iss >> times.timeOs >> times.timeRec >> times.timeSim;
     kf.read(iss);
@@ -1404,7 +1397,7 @@ bool SessionRecording::convertTimeChange(std::stringstream& inStream, DataMode m
     Timestamps times;
     datamessagestructures::TimeKeyframe kf;
 
-    bool success = readSingleKeyframeTime(
+    const bool success = readSingleKeyframeTime(
         kf,
         times,
         mode,
@@ -1484,7 +1477,7 @@ bool SessionRecording::readTimeKeyframeBinary(Timestamps& times,
 
 bool SessionRecording::readTimeKeyframeAscii(Timestamps& times,
                                              datamessagestructures::TimeKeyframe& kf,
-                                             std::string currentParsingLine,
+                                             const std::string& currentParsingLine,
                                              int lineN)
 {
     std::string entryType;
@@ -1504,18 +1497,18 @@ bool SessionRecording::readTimeKeyframeAscii(Timestamps& times,
 }
 
 std::string SessionRecording::readHeaderElement(std::ifstream& stream,
-                                                size_t readLen_chars)
+                                                size_t readLenChars)
 {
-    std::vector<char> readTemp(readLen_chars);
-    stream.read(&readTemp[0], readLen_chars);
+    std::vector<char> readTemp(readLenChars);
+    stream.read(readTemp.data(), readLenChars);
     return std::string(readTemp.begin(), readTemp.end());
 }
 
 std::string SessionRecording::readHeaderElement(std::stringstream& stream,
-                                                size_t readLen_chars)
+                                                size_t readLenChars)
 {
-    std::vector<char> readTemp(readLen_chars);
-    stream.read(&readTemp[0], readLen_chars);
+    std::vector<char> readTemp = std::vector<char>(readLenChars);
+    stream.read(readTemp.data(), readLenChars);
     return std::string(readTemp.begin(), readTemp.end());
 }
 
@@ -1545,7 +1538,7 @@ bool SessionRecording::playbackScript() {
 }
 
 void SessionRecording::populateListofLoadedSceneGraphNodes() {
-    std::vector<SceneGraphNode*> nodes =
+    const std::vector<SceneGraphNode*> nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
     for (SceneGraphNode* n : nodes) {
         _loadedNodes.push_back(n->identifier());
@@ -1557,16 +1550,15 @@ void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
         s.erase(0, scriptReturnPrefix.length());
     }
     // This works for both setPropertyValue and setPropertyValueSingle
-    bool containsSetPropertyVal = (s.rfind("openspace.setPropertyValue", 0) == 0);
-    bool containsParensStart = (s.find("(") != std::string::npos);
+    const bool containsSetPropertyVal = (s.rfind("openspace.setPropertyValue", 0) == 0);
+    const bool containsParensStart = (s.find('(') != std::string::npos);
     if (containsSetPropertyVal && containsParensStart) {
-        std::string subjectOfSetProp = isolateTermFromQuotes(s.substr(s.find("(") + 1));
+        std::string subjectOfSetProp = isolateTermFromQuotes(s.substr(s.find('(') + 1));
         if (checkForScenegraphNodeAccessNav(subjectOfSetProp)) {
-            size_t commaPos = s.find(",");
+            const size_t commaPos = s.find(",");
             std::string navNode = isolateTermFromQuotes(s.substr(commaPos + 1));
             if (navNode != "nil") {
-                std::vector<std::string>::iterator it =
-                    std::find(_loadedNodes.begin(), _loadedNodes.end(), navNode);
+                auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), navNode);
                 if (it == _loadedNodes.end()) {
                     LWARNING(fmt::format(
                         "Playback file contains a property setting of navigation using "
@@ -1578,7 +1570,7 @@ void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
         else if (checkForScenegraphNodeAccessScene(subjectOfSetProp)) {
             std::string found = extractScenegraphNodeFromScene(subjectOfSetProp);
             if (!found.empty()) {
-                std::vector<properties::Property*> matchHits =
+                const std::vector<properties::Property*> matchHits =
                     global::renderEngine->scene()->propertiesMatchingRegex(
                         subjectOfSetProp
                     );
@@ -1603,7 +1595,7 @@ std::string SessionRecording::extractScenegraphNodeFromScene(std::string& s) {
     std::string extracted;
     size_t posScene = s.find(scene);
     if (posScene != std::string::npos) {
-        size_t posDot = s.find(".", posScene + scene.length() + 1);
+        const size_t posDot = s.find('.', posScene + scene.length() + 1);
         if (posDot > posScene && posDot != std::string::npos) {
             extracted = s.substr(posScene + scene.length(), posDot -
                 (posScene + scene.length()));
@@ -1614,9 +1606,9 @@ std::string SessionRecording::extractScenegraphNodeFromScene(std::string& s) {
 
 bool SessionRecording::checkForScenegraphNodeAccessNav(std::string& navTerm) {
     const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
-    size_t posNav = navTerm.find(nextTerm);
+    const size_t posNav = navTerm.find(nextTerm);
     if (posNav != std::string::npos) {
-        for (std::string accessName : _navScriptsUsingNodes) {
+        for (const std::string accessName : _navScriptsUsingNodes) {
               if (navTerm.find(accessName) != std::string::npos) {
                   return true;
               }
@@ -1634,14 +1626,14 @@ std::string SessionRecording::isolateTermFromQuotes(std::string s) {
     while (possibleQuotes.find(s.front()) != std::string::npos) {
         s.erase(0, 1);
     }
-    for (char q : possibleQuotes) {
+    for (const char q : possibleQuotes) {
         if (s.find(q) != std::string::npos) {
             s = s.substr(0, s.find(q));
             return s;
         }
     }
     //If no quotes found, remove other possible characters from end
-    std::string unwantedChars = " );";
+    const std::string unwantedChars = " );";
     while (!s.empty() && (unwantedChars.find(s.back()) != std::string::npos)) {
         s.pop_back();
     }
@@ -1654,7 +1646,7 @@ void SessionRecording::eraseSpacesFromString(std::string& s) {
 
 std::string SessionRecording::getNameFromSurroundingQuotes(std::string& s) {
     std::string result;
-    char quote = s.at(0);
+    const char quote = s.at(0);
     // Handle either ' or " marks
     if (quote == '\'' || quote == '\"') {
         size_t quoteCount = std::count(s.begin(), s.end(), quote);
@@ -1667,17 +1659,19 @@ std::string SessionRecording::getNameFromSurroundingQuotes(std::string& s) {
 }
 
 bool SessionRecording::checkIfInitialFocusNodeIsLoaded(unsigned int camIdx1) {
-    if (_keyframesCamera.size() > 0) {
-        std::string startFocusNode
-            = _keyframesCamera[_timeline[camIdx1].idxIntoKeyframeTypeArray].focusNode;
-        auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
-        if (it == _loadedNodes.end()) {
-            LERROR(fmt::format(
-                "Playback file requires scenegraph node '{}', which is "
-                "not currently loaded", startFocusNode
-            ));
-            return false;
-        }
+    if (_keyframesCamera.empty() > 0) {
+        return true;
+    }
+
+    std::string startFocusNode =
+        _keyframesCamera[_timeline[camIdx1].idxIntoKeyframeTypeArray].focusNode;
+    auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
+    if (it == _loadedNodes.end()) {
+        LERROR(fmt::format(
+            "Playback file requires scenegraph node '{}', which is "
+            "not currently loaded", startFocusNode
+        ));
+        return false;
     }
     return true;
 }
@@ -1690,7 +1684,7 @@ bool SessionRecording::convertScript(std::stringstream& inStream, DataMode mode,
     Timestamps times;
     datamessagestructures::ScriptMessage kf;
 
-    bool success = readSingleKeyframeScript(
+    const bool success = readSingleKeyframeScript(
         kf,
         times,
         mode,
@@ -1774,7 +1768,8 @@ bool SessionRecording::readScriptKeyframeBinary(Timestamps& times,
 
 bool SessionRecording::readScriptKeyframeAscii(Timestamps& times,
                                                datamessagestructures::ScriptMessage& kf,
-                                               std::string currentParsingLine, int lineN)
+                                               const std::string& currentParsingLine,
+                                               int lineN)
 {
     std::string entryType;
     std::istringstream iss(currentParsingLine);
@@ -1819,7 +1814,7 @@ bool SessionRecording::addKeyframe(Timestamps t3stamps,
                                    interaction::KeyframeNavigator::CameraPose keyframe,
                                    int lineNum)
 {
-    size_t indexIntoCameraKeyframesFromMainTimeline = _keyframesCamera.size();
+    const size_t indexIntoCameraKeyframesFromMainTimeline = _keyframesCamera.size();
     _keyframesCamera.push_back(std::move(keyframe));
     return addKeyframeToTimeline(
         _timeline,
@@ -1834,7 +1829,7 @@ bool SessionRecording::addKeyframe(Timestamps t3stamps,
                                    datamessagestructures::TimeKeyframe keyframe,
                                    int lineNum)
 {
-    size_t indexIntoTimeKeyframesFromMainTimeline = _keyframesTime.size();
+    const size_t indexIntoTimeKeyframesFromMainTimeline = _keyframesTime.size();
     _keyframesTime.push_back(std::move(keyframe));
     return addKeyframeToTimeline(
         _timeline,
@@ -1849,7 +1844,7 @@ bool SessionRecording::addKeyframe(Timestamps t3stamps,
                                    std::string scriptToQueue,
                                    int lineNum)
 {
-    size_t indexIntoScriptKeyframesFromMainTimeline = _keyframesScript.size();
+    const size_t indexIntoScriptKeyframesFromMainTimeline = _keyframesScript.size();
     _keyframesScript.push_back(std::move(scriptToQueue));
     return addKeyframeToTimeline(
         _timeline,
@@ -1863,14 +1858,14 @@ bool SessionRecording::addKeyframe(Timestamps t3stamps,
 void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
-    bool playbackPaused = (_state == SessionState::PlaybackPaused);
+    const bool playbackPaused = (_state == SessionState::PlaybackPaused);
     if (playbackPaused) {
         _playbackPauseOffset
             += global::windowDelegate->applicationTime() - _previousTime;
     }
     _previousTime = global::windowDelegate->applicationTime();
 
-    double currTime = currentTime();
+    const double currTime = currentTime();
     lookForNonCameraKeyframesThatHaveComeDue(currTime);
     updateCameraWithOrWithoutNewKeyframes(currTime);
     // Unfortunately the first frame is sometimes rendered because globebrowsing reports
@@ -1922,12 +1917,11 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
         return;
     }
 
-    bool didFindFutureCameraKeyframes = findNextFutureCameraIndex(currTime);
-
-    bool isPrevAtFirstKeyframe = (_idxTimeline_cameraPtrPrev ==
-                                  _idxTimeline_cameraFirstInTimeline);
-    bool isFirstTimelineCameraKeyframeInFuture = (currTime <
-                                                  _cameraFirstInTimeline_timestamp);
+    const bool didFindFutureCameraKeyframes = findNextFutureCameraIndex(currTime);
+    const bool isPrevAtFirstKeyframe =
+        (_idxTimeline_cameraPtrPrev == _idxTimeline_cameraFirstInTimeline);
+    const bool isFirstTimelineCameraKeyframeInFuture =
+        (currTime < _cameraFirstInTimeline_timestamp);
 
     if (! (isPrevAtFirstKeyframe && isFirstTimelineCameraKeyframeInFuture)) {
         processCameraKeyframe(currTime);
@@ -1938,8 +1932,8 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
 }
 
 bool SessionRecording::isTimeToHandleNextNonCameraKeyframe(double currTime) {
-    bool isNonCameraPlaybackActive = (_playbackActive_time || _playbackActive_script);
-    return (currTime > getNextTimestamp()) && isNonCameraPlaybackActive;
+    const bool nonCameraPlaybackActive = (_playbackActive_time || _playbackActive_script);
+    return (currTime > getNextTimestamp()) && nonCameraPlaybackActive;
 }
 
 bool SessionRecording::findNextFutureCameraIndex(double currTime) {
@@ -1951,9 +1945,9 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
         }
 
         if (doesTimelineEntryContainCamera(seekAheadIndex)) {
-            unsigned int indexIntoCameraKeyframes =
+            const unsigned int indexIntoCameraKeyframes =
                 _timeline[seekAheadIndex].idxIntoKeyframeTypeArray;
-            double seekAheadKeyframeTimestamp
+            const double seekAheadKeyframeTimestamp
                 = appropriateTimestamp(_timeline[seekAheadIndex].t3stamps);
 
             if (indexIntoCameraKeyframes >= (_keyframesCamera.size() - 1)) {
@@ -1973,7 +1967,7 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
             }
         }
 
-        double interpolationUpperBoundTimestamp =
+        const double interpolationUpperBoundTimestamp =
             appropriateTimestamp(_timeline[_idxTimeline_cameraPtrNext].t3stamps);
         if ((currTime > interpolationUpperBoundTimestamp) && _hasHitEndOfCameraKeyframes)
         {
@@ -2033,8 +2027,8 @@ bool SessionRecording::processCameraKeyframe(double now) {
     interaction::KeyframeNavigator::CameraPose nextPose;
     interaction::KeyframeNavigator::CameraPose prevPose;
 
-    unsigned int prevIdx;
-    unsigned int nextIdx;
+    unsigned int prevIdx = 0;
+    unsigned int nextIdx = 0;
     if (!_playbackActive_camera) {
         return false;
     }
@@ -2049,19 +2043,16 @@ bool SessionRecording::processCameraKeyframe(double now) {
     }
 
     // getPrevTimestamp();
-    double prevTime = appropriateTimestamp(
+    const double prevTime = appropriateTimestamp(
         _timeline[_idxTimeline_cameraPtrPrev].t3stamps
     );
     // getNextTimestamp();
-    double nextTime = appropriateTimestamp(
+    const double nextTime = appropriateTimestamp(
         _timeline[_idxTimeline_cameraPtrNext].t3stamps
     );
 
-    double t;
-    if ((nextTime - prevTime) < 1e-7) {
-        t = 0;
-    }
-    else {
+    double t = 0.0;
+    if ((nextTime - prevTime) >= 1e-7) {
         t = (now - prevTime) / (nextTime - prevTime);
     }
 
@@ -2098,7 +2089,7 @@ bool SessionRecording::processScriptKeyframe() {
         return false;
     }
     else {
-        std::string nextScript = nextKeyframeObj(
+        const std::string nextScript = nextKeyframeObj(
             _idxScript,
             _keyframesScript,
             ([this]() { signalPlaybackFinishedForComponent(RecordedType::Script); })
@@ -2176,14 +2167,14 @@ void SessionRecording::saveKeyframeToFileBinary(unsigned char* buffer,
     file.write(reinterpret_cast<char*>(buffer), size);
 }
 
-void SessionRecording::saveKeyframeToFile(std::string entry, std::ofstream& file) {
-    file << std::move(entry) << std::endl;
+void SessionRecording::saveKeyframeToFile(const std::string& entry, std::ofstream& file) {
+    file << entry << '\n';
 }
 
 SessionRecording::CallbackHandle SessionRecording::addStateChangeCallback(
                                                                    StateChangeCallback cb)
 {
-    CallbackHandle handle = _nextCallbackHandle++;
+    const CallbackHandle handle = _nextCallbackHandle++;
     _stateChangeCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
@@ -2222,7 +2213,7 @@ std::vector<std::string> SessionRecording::playbackList() const {
             DWORD attributes = GetFileAttributes(e.path().string().c_str());
             bool isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
 #else
-            bool isHidden = filename.find(".") == 0;
+            bool isHidden = filename.find('.') == 0;
 #endif // WIN32
             if (!isHidden) {
                 // Don't add hidden files
@@ -2238,7 +2229,7 @@ void SessionRecording::readPlaybackHeader_stream(std::stringstream& conversionIn
                                                  std::string& version, DataMode& mode)
 {
     // Read header
-    std::string readBackHeaderString = readHeaderElement(
+    const std::string readBackHeaderString = readHeaderElement(
         conversionInStream,
         FileHeaderTitle.length()
     );
@@ -2261,13 +2252,15 @@ void SessionRecording::readPlaybackHeader_stream(std::stringstream& conversionIn
     readHeaderElement(conversionInStream, 1);
 }
 
-SessionRecording::DataMode SessionRecording::readModeFromHeader(std::string filename) {
+SessionRecording::DataMode SessionRecording::readModeFromHeader(
+                                                              const std::string& filename)
+{
     DataMode mode;
     std::ifstream inputFile;
     // Open in ASCII first
     inputFile.open(filename, std::ifstream::in);
     // Read header
-    std::string readBackHeaderString = readHeaderElement(
+    const std::string readBackHeaderString = readHeaderElement(
         inputFile,
         FileHeaderTitle.length()
     );
@@ -2321,7 +2314,8 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
 }
 
 void SessionRecording::convertFileRelativePath(std::string filenameRelative) {
-    convertFile(absPath(filenameRelative).string());
+    const std::filesystem::path path = absPath(std::move(filenameRelative));
+    convertFile(path.string());
 }
 
 std::string SessionRecording::convertFile(std::string filename, int depth) {
@@ -2342,7 +2336,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
             fileVersion,
             mode
         );
-        int conversionLineNum = 1;
+        const int conversionLineNum = 1;
 
         // If this instance of the SessionRecording class isn't the instance with the
         // correct version of the file to be converted, then call getLegacy() to recurse
@@ -2554,7 +2548,7 @@ bool SessionRecording::convertEntries(std::string& inFilename,
 
 std::string SessionRecording::getLegacyConversionResult(std::string filename, int depth) {
     SessionRecording_legacy_0085 legacy;
-    return legacy.convertFile(filename, depth);
+    return legacy.convertFile(std::move(filename), depth);
 }
 
 std::string SessionRecording_legacy_0085::getLegacyConversionResult(std::string filename,
@@ -2579,15 +2573,15 @@ std::string SessionRecording::targetFileFormatVersion() {
     return std::string(FileHeaderVersion);
 }
 
-std::string SessionRecording::determineConversionOutFilename(const std::string filename,
+std::string SessionRecording::determineConversionOutFilename(const std::string& filename,
                                                              DataMode mode)
 {
     std::string filenameSansExtension = filename;
-    std::string fileExtension = (mode == DataMode::Binary) ?
+    const std::string fileExtension = (mode == DataMode::Binary) ?
         FileExtensionBinary : FileExtensionAscii;
 
-    if (filename.find_last_of(".") != std::string::npos) {
-        filenameSansExtension = filename.substr(0, filename.find_last_of("."));
+    if (filename.find_last_of('.') != std::string::npos) {
+        filenameSansExtension = filename.substr(0, filename.find_last_of('.'));
     }
     filenameSansExtension += "_" + fileFormatVersion() + "-" + targetFileFormatVersion();
     return filenameSansExtension + fileExtension;
@@ -2602,7 +2596,7 @@ bool SessionRecording_legacy_0085::convertScript(std::stringstream& inStream,
     Timestamps times;
     ScriptMessage_legacy_0085 kf;
 
-    bool success = readSingleKeyframeScript(
+    const bool success = readSingleKeyframeScript(
         kf,
         times,
         mode,

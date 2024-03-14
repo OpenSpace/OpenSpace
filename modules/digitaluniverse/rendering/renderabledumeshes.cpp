@@ -383,7 +383,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
         .cameraLookUp = data.camera.lookUpVectorWorldSpace()
     };
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
+    const glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
 
     for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         glm::vec3 scaledPos(e.position);
@@ -419,7 +419,7 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
     );
 
     if (orthoRight == glm::vec3(0.0)) {
-        glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+        const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
             glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))

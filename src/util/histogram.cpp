@@ -76,7 +76,7 @@ bool Histogram::add(float value, float repeat) {
 
     const float normalizedValue = (value - _minValue) / (_maxValue - _minValue);
     const int binIndex = static_cast<int>(std::min(
-        static_cast<float>(floor(normalizedValue * _numBins)),
+        static_cast<float>(std::floor(normalizedValue * _numBins)),
         _numBins - 1.f
     )); // [0, _numBins - 1]
 
@@ -97,11 +97,11 @@ void Histogram::changeRange(float minValue, float maxValue){
 
     float* newData = new float[_numBins]{0.0};
     for(int i=0; i<_numBins; i++){
-        float unNormalizedValue = i*(oldMax-oldMin)+oldMin;
-        float normalizedValue = (unNormalizedValue - _minValue) /
-                                (_maxValue - _minValue);      // [0.0, 1.0]
-        int binIndex = static_cast<int>(std::min(
-            static_cast<float>(floor(normalizedValue * _numBins)),
+        const float unNormalizedValue = i * (oldMax - oldMin) + oldMin;
+        const float normalizedValue = (unNormalizedValue - _minValue) /
+                                      (_maxValue - _minValue);      // [0.0, 1.0]
+        const int binIndex = static_cast<int>(std::min(
+            static_cast<float>(std::floor(normalizedValue * _numBins)),
             _numBins - 1.f
         )); // [0, _numBins - 1]
 
@@ -153,8 +153,8 @@ bool Histogram::addRectangle(float lowBin, float highBin, float value) {
     const float lowBinIndex = normalizedLowBin * _numBins;
     const float highBinIndex = normalizedHighBin * _numBins;
 
-    const int fillLow = static_cast<int>(floor(lowBinIndex));
-    const int fillHigh = static_cast<int>(ceil(highBinIndex));
+    const int fillLow = static_cast<int>(std::floor(lowBinIndex));
+    const int fillHigh = static_cast<int>(std::ceil(highBinIndex));
 
     for (int i = fillLow; i < fillHigh; i++) {
         _data[i] += value;
@@ -176,9 +176,9 @@ float Histogram::interpolate(float bin) const {
     const float normalizedBin = (bin - _minValue) / (_maxValue - _minValue);
     const float binIndex = normalizedBin * _numBins - 0.5f; // Center
 
-    const float interpolator = binIndex - floor(binIndex);
-    int binLow = static_cast<int>(floor(binIndex));
-    int binHigh = static_cast<int>(ceil(binIndex));
+    const float interpolator = binIndex - std::floor(binIndex);
+    int binLow = static_cast<int>(std::floor(binIndex));
+    int binHigh = static_cast<int>(std::ceil(binIndex));
 
     // Clamp bins
     if (binLow < 0) {
@@ -257,8 +257,8 @@ float Histogram::equalize(float value) const {
     //         " val: " + std::to_string(value)
     //     );
     // }
-    float normalizedValue = (value-_minValue)/(_maxValue-_minValue);
-    int bin = static_cast<int>(floor(normalizedValue * _numBins));
+    float normalizedValue = (value - _minValue) / (_maxValue - _minValue);
+    int bin = static_cast<int>(std::floor(normalizedValue * _numBins));
     // If value == _maxValues then bin == _numBins, which is a invalid index.
     bin = std::min(_numBins-1, bin);
     bin = std::max(0, bin);
@@ -271,7 +271,7 @@ float Histogram::entropy() {
     for (int i = 0; i < _numBins; i++) {
         if (_data[i] != 0) {
             entropy -= (_data[i] / static_cast<float>(_numValues)) *
-                        (log2(_data[i]) / static_cast<float>(_numValues));
+                        (std::log2(_data[i]) / static_cast<float>(_numValues));
         }
     }
     return entropy;
@@ -326,9 +326,9 @@ float Histogram::highestBinValue(bool equalized, int overBins){
 
 
     if (!equalized) {
-        float low = _minValue + static_cast<float>(highestBin) /
-                    _numBins * (_maxValue - _minValue);
-        float high = low + (_maxValue - _minValue) / static_cast<float>(_numBins);
+        const float low = _minValue + static_cast<float>(highestBin) /
+                          _numBins * (_maxValue - _minValue);
+        const float high = low + (_maxValue - _minValue) / static_cast<float>(_numBins);
         return (high+low) / 2.f;
     }
     else {
@@ -337,7 +337,7 @@ float Histogram::highestBinValue(bool equalized, int overBins){
     }
 }
 
-float Histogram::binWidth() {
+float Histogram::binWidth() const {
     return (_maxValue - _minValue) / _numBins;
 }
 

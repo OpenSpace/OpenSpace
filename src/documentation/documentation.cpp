@@ -221,7 +221,7 @@ TestResult testSpecification(const Documentation& documentation,
 
     for (const auto& p : documentation.entries) {
         if (p.key == DocumentationEntry::Wildcard) {
-            for (std::string_view key : dictionary.keys()) {
+            for (const std::string_view key : dictionary.keys()) {
                 applyVerifier(*(p.verifier), std::string(key));
             }
         }
@@ -237,14 +237,14 @@ TestResult testSpecification(const Documentation& documentation,
 
     // Remove duplicate offenders that might occur if multiple rules apply to a single
     // key and more than one of these rules are broken
-    std::set<TestResult::Offense, OffenseCompare> uniqueOffenders(
+    const std::set<TestResult::Offense, OffenseCompare> uniqueOffenders(
         result.offenses.begin(), result.offenses.end()
     );
     result.offenses = std::vector<TestResult::Offense>(
         uniqueOffenders.begin(), uniqueOffenders.end()
     );
     // Remove duplicate warnings. This should normally not happen, but we want to be sure
-    std::set<TestResult::Warning, WarningCompare> uniqueWarnings(
+    const std::set<TestResult::Warning, WarningCompare> uniqueWarnings(
         result.warnings.begin(), result.warnings.end()
     );
     result.warnings = std::vector<TestResult::Warning>(
@@ -258,9 +258,9 @@ void testSpecificationAndThrow(const Documentation& documentation,
                                const ghoul::Dictionary& dictionary, std::string component)
 {
     // Perform testing against the documentation/specification
-    TestResult testResult = testSpecification(documentation, dictionary);
+    const TestResult testResult = testSpecification(documentation, dictionary);
     if (!testResult.success) {
-        throw SpecificationError(testResult, component);
+        throw SpecificationError(testResult, std::move(component));
     }
 }
 
