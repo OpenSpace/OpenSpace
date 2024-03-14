@@ -826,8 +826,8 @@ void RenderableTube::readDataFile() {
             auto pv = pt->find("v");
             if (pu != pt->end() && pv != pt->end()) {
                 float u, v;
-                pt->at("u").get_to(v);
-                pt->at("v").get_to(u);
+                pt->at("u").get_to(u);
+                pt->at("v").get_to(v);
                 timePolygonPoint.tex = glm::vec2(u, v);
             }
             else if (_hasInterpolationTextures) {
