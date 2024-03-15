@@ -93,7 +93,7 @@ public:
     void removeWMSServer(const std::string& name);
 
     bool isMRFCachingEnabled() const;
-    const std::string mrfCacheLocation() const;
+    const std::string& mrfCacheLocation() const;
 
     bool hasDefaultGeoPointTexture() const;
     std::string_view defaultGeoPointTexture() const;

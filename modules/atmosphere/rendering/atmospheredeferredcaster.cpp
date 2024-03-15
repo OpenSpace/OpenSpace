@@ -360,7 +360,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         program.setUniform(_uniformCache.sunAngularSize, glm::radians(_sunAngularSize));
 
         // Object Space
-        glm::dmat4 invModelMatrix = glm::inverse(_modelTransform);
+        const glm::dmat4 invModelMatrix = glm::inverse(_modelTransform);
         program.setUniform(_uniformCache.inverseModelTransformMatrix, invModelMatrix);
         program.setUniform(_uniformCache.modelTransformMatrix, _modelTransform);
 
@@ -667,9 +667,9 @@ GLuint AtmosphereDeferredcaster::calculateDeltaE() {
 std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
     ZoneScoped;
 
-    GLuint deltaSRayleigh = createTexture(_textureSize, "DeltaS Rayleigh", 3);
+    const GLuint deltaSRayleigh = createTexture(_textureSize, "DeltaS Rayleigh", 3);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, deltaSRayleigh, 0);
-    GLuint deltaSMie = createTexture(_textureSize, "DeltaS Mie", 3);
+    const GLuint deltaSMie = createTexture(_textureSize, "DeltaS Mie", 3);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, deltaSMie, 0);
     std::array<GLenum, 2> colorBuffers = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, colorBuffers.data());

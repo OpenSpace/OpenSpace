@@ -47,8 +47,9 @@ namespace openspace::globebrowsing {
 
 namespace {
     // returns the number of days in a given month and year (takes leap year into account)
-    constexpr int monthSize(int month, int year) {
-        date::year_month_day_last d = date::year(year) / date::month(month) / date::last;
+    constexpr int monthSize(int month_, int year_) {
+        using namespace date;
+        const year_month_day_last d = year(year_) / month(month_) / last;
         return static_cast<int>(static_cast<unsigned>(d.day()));
     }
 
@@ -568,10 +569,8 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, const DateTime& un
         }
         case 'M':
         {
-            bool isSimMonthPastQuantizedMonth = unQ.month() > static_cast<int>(value);
-            quantized.setYear(
-                isSimMonthPastQuantizedMonth ? unQ.year() : unQ.year() - 1
-            );
+            const bool isMonthPastQuantizedMonth = unQ.month() > static_cast<int>(value);
+            quantized.setYear(isMonthPastQuantizedMonth ? unQ.year() : unQ.year() - 1);
             break;
         }
         case 'd':

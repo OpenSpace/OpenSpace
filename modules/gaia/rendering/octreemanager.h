@@ -202,12 +202,6 @@ private:
     const std::string BINARY_SUFFIX = ".bin";
 
     /**
-     * \return the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
-     */
-    size_t getChildIndex(float posX, float posY, float posZ, float origX = 0.f,
-        float origY = 0.f, float origZ = 0.f);
-
-    /**
      * Private help function for `insert()`. Inserts star into node if leaf and
      * numStars < MAX_STARS_PER_NODE. If a leaf goes above the threshold it is subdivided
      * into 8 new nodes.
@@ -228,7 +222,7 @@ private:
      * Private help function for `insertInNode()`. Stores star data in node and
      * keeps track of the brightest stars all children.
      */
-    void storeStarData(OctreeNode& node, const std::vector<float>& starValues);
+    void storeStarData(OctreeNode& node, const std::vector<float>& starValues) const;
 
     /**
      * Private help function for `printStarsPerNode()`.
@@ -301,7 +295,7 @@ private:
      * \return the data to be inserted
      */
     std::vector<float> constructInsertData(const OctreeNode& node,
-        gaia::RenderMode mode, int& deltaStars);
+        gaia::RenderMode mode, int& deltaStars) const;
 
     /**
      * Write a node to outFileStream.

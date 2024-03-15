@@ -80,7 +80,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
         setGuiName("ScreenSpaceFramebuffer " + std::to_string(iIdentifier));
     }
 
-    glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
+    const glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
     addProperty(_size);
     _size = glm::vec4(0.f, 0.f, resolution.x, resolution.y);
 }
@@ -173,7 +173,7 @@ void ScreenSpaceFramebuffer::removeAllRenderFunctions() {
 }
 
 void ScreenSpaceFramebuffer::createFramebuffer() {
-    glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
+    const glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
 
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();

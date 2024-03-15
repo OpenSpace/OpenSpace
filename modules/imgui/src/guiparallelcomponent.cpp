@@ -90,12 +90,14 @@ void GuiParallelComponent::renderClientWithHost() {
     const size_t nClients = nConnections - 1;
 
     if (nClients > 2) {
-        std::string c = std::to_string(nClients - 1);
-        connectionInfo += "You and " + c + " more clients are connected";
+        connectionInfo += fmt::format(
+            "You and {} more clients are connected", nClients - 1
+        );
     }
     else if (nClients == 2) {
-        std::string c = std::to_string(nClients - 1);
-        connectionInfo += "You and " + c + " more client are connected";
+        connectionInfo += fmt::format(
+            "You and {} more client are connected", nClients - 1
+        );
     }
     else if (nClients == 1) {
         connectionInfo += "You are the only client";
@@ -108,11 +110,15 @@ void GuiParallelComponent::renderClientWithHost() {
     const size_t nCameraKeyframes =
         global::navigationHandler->keyframeNavigator().nKeyframes();
 
-    std::string timeKeyframeInfo = "TimeKeyframes : " + std::to_string(nTimeKeyframes);
-    std::string cameraKeyframeInfo = "CameraKeyframes : " +
-                                     std::to_string(nCameraKeyframes);
-    std::string latencyStandardDeviation = "Latency standard deviation: " +
-                               std::to_string(parallel.latencyStandardDeviation()) + " s";
+    const std::string timeKeyframeInfo = fmt::format(
+        "TimeKeyframes: {}", nTimeKeyframes
+    );
+    const std::string cameraKeyframeInfo = fmt::format(
+        "CameraKeyframes: {}", nCameraKeyframes
+    );
+    const std::string latencyStandardDeviation = fmt::format(
+        "Latency standard deviation: {} s", parallel.latencyStandardDeviation()
+    );
 
     const bool resetTimeOffset = ImGui::Button("Reset time offset");
 
@@ -130,12 +136,14 @@ void GuiParallelComponent::renderClientWithoutHost() {
     const size_t nConnections = global::parallelPeer->nConnections();
 
     if (nConnections > 2) {
-        std::string c = std::to_string(nConnections - 1);
-        connectionInfo += "You and " + c + " more users are connected";
+        connectionInfo += fmt::format(
+            "You and {} more users are connected", nConnections - 1
+        );
     }
     else if (nConnections == 2) {
-        std::string c = std::to_string(nConnections - 1);
-        connectionInfo += "You and " + c + " more users are connected";
+        connectionInfo += fmt::format(
+            "You and {} more users are connected", nConnections - 1
+        );
     }
     else if (nConnections == 1) {
         connectionInfo += "You are the only one here";

@@ -170,22 +170,20 @@ CameraPose NavigationState::cameraPose() const {
     resultingPose.position = anchorNode->worldPosition() +
         referenceFrameTransform * glm::dvec3(position);
 
-    glm::dvec3 upVector = up.has_value() ?
+    const glm::dvec3 upVector = up.has_value() ?
         glm::normalize(referenceFrameTransform * *up) :
         glm::dvec3(0.0, 1.0, 0.0);
 
     // Construct vectors of a "neutral" view, i.e. when the anchor is centered in view
-    glm::dvec3 neutralView =
+    const glm::dvec3 neutralView =
         glm::normalize(anchorNode->worldPosition() - resultingPose.position);
 
-    glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
-        glm::dvec3(0.0),
-        neutralView,
-        upVector
-    )));
+    const glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(
+        glm::lookAt(glm::dvec3(0.0), neutralView, upVector)
+    ));
 
-    glm::dquat pitchRotation = glm::angleAxis(pitch, glm::dvec3(1.0, 0.0, 0.0));
-    glm::dquat yawRotation = glm::angleAxis(yaw, glm::dvec3(0.0, -1.0, 0.0));
+    const glm::dquat pitchRotation = glm::angleAxis(pitch, glm::dvec3(1.0, 0.0, 0.0));
+    const glm::dquat yawRotation = glm::angleAxis(yaw, glm::dvec3(0.0, -1.0, 0.0));
 
     resultingPose.rotation = neutralCameraRotation * yawRotation * pitchRotation;
 

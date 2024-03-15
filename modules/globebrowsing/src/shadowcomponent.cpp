@@ -315,7 +315,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
 
     //============= Light Matrix by Camera Matrices Composition =============
     //=======================================================================
-    glm::dmat4 lightProjectionMatrix = glm::dmat4(_lightCamera->projectionMatrix());
+    const glm::dmat4 lightProjectionMatrix = glm::dmat4(_lightCamera->projectionMatrix());
 
     // The model transformation missing in the final shadow matrix is add when rendering
     // each object (using its transformations provided by the RenderData structure)
@@ -432,7 +432,7 @@ void ShadowComponent::createShadowFBO() {
     glBindFramebuffer(GL_FRAMEBUFFER, _currentFBO);
 }
 
-void ShadowComponent::updateDepthTexture() {
+void ShadowComponent::updateDepthTexture() const {
     glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
 
     //glTexStorage2D(
@@ -509,8 +509,8 @@ void ShadowComponent::buildDDepthTexture() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void ShadowComponent::saveDepthBuffer() {
-    int size = _shadowDepthTextureWidth * _shadowDepthTextureHeight;
+void ShadowComponent::saveDepthBuffer() const {
+    const int size = _shadowDepthTextureWidth * _shadowDepthTextureHeight;
     std::vector<GLubyte> buffer(size);
 
     glReadPixels(
@@ -528,19 +528,18 @@ void ShadowComponent::saveDepthBuffer() {
     ppmFile.open("depthBufferShadowMapping.ppm", std::fstream::out);
     if (ppmFile.is_open()) {
 
-        ppmFile << "P3" << std::endl;
-        ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight
-                << std::endl;
-        ppmFile << "255" << std::endl;
+        ppmFile << "P3\n";
+        ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight << '\n';
+        ppmFile << "255\n";
 
         LDEBUG("Saving depth texture to file depthBufferShadowMapping.ppm");
         int k = 0;
         for (int i = 0; i < _shadowDepthTextureWidth; i++) {
             for (int j = 0; j < _shadowDepthTextureHeight; j++, k++) {
-                unsigned int val = static_cast<unsigned int>(buffer[k]);
-                ppmFile << val << " " << val << " " << val << " ";
+                const unsigned int val = static_cast<unsigned int>(buffer[k]);
+                ppmFile << fmt::format("{0} {0} {0} ", val);
             }
-            ppmFile << std::endl;
+            ppmFile << '\n';
         }
 
         ppmFile.close();
@@ -567,10 +566,9 @@ void ShadowComponent::saveDepthBuffer() {
     ppmFile.open("positionBufferShadowMapping.ppm", std::fstream::out);
     if (ppmFile.is_open()) {
 
-        ppmFile << "P3" << std::endl;
-        ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight
-                << std::endl;
-        ppmFile << "255" << std::endl;
+        ppmFile << "P3\n";
+        ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight << '\n';
+        ppmFile << "255\n";
 
         LDEBUG("Saving texture position to positionBufferShadowMapping.ppm");
 
@@ -595,7 +593,7 @@ void ShadowComponent::saveDepthBuffer() {
                     << static_cast<unsigned int>(bBuffer[k + 2] / biggestValue) << " ";
                 k += 4;
             }
-            ppmFile << std::endl;
+            ppmFile << '\n';
         }
 
         ppmFile.close();

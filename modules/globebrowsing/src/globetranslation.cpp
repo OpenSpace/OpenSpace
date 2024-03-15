@@ -237,7 +237,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     double alt = _altitude;
 
     if (_useCamera) {
-        glm::dvec3 position = mod->geoPosition();
+        const glm::dvec3 position = mod->geoPosition();
         lat = position.x;
         lon = position.y;
         if (_useCameraAltitude) {
@@ -246,15 +246,16 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     }
 
     if (_useHeightmap) {
-        glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
+        const glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
             lat,
             lon,
             0.0
         );
 
-        SurfacePositionHandle h =
-            _attachedNode->calculateSurfacePositionHandle(groundPos);
+        const SurfacePositionHandle h = _attachedNode->calculateSurfacePositionHandle(
+            groundPos
+        );
 
         _position = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,

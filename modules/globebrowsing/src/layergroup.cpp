@@ -58,10 +58,10 @@ LayerGroup::LayerGroup(layers::Group group)
 
 void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
     for (size_t i = 1; i <= dict.size(); i++) {
-        ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(std::to_string(i));
+        const ghoul::Dictionary layer = dict.value<ghoul::Dictionary>(std::to_string(i));
 
         try {
-            addLayer(layerDict);
+            addLayer(layer);
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
@@ -210,10 +210,10 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     _layers.insert(newPosLayers, std::move(v));
 
     auto oldPosOwner = _subOwners.begin() + oldPosition;
-    PropertyOwner* owner = std::move(*oldPosOwner);
+    PropertyOwner* owner = *oldPosOwner;
     _subOwners.erase(oldPosOwner);
     auto newPosOwner = _subOwners.begin() + newPosition;
-    _subOwners.insert(newPosOwner, std::move(owner));
+    _subOwners.insert(newPosOwner, owner);
 }
 
 std::vector<Layer*> LayerGroup::layers() const {

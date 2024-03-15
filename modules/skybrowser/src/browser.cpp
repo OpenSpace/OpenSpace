@@ -192,10 +192,10 @@ void Browser::reload() {
 }
 
 void Browser::setRatio(float ratio) {
-    float relativeRatio = ratio / browserRatio();
-    float newX = static_cast<float>(_browserDimensions.value().x) * relativeRatio;
+    const float relativeRatio = ratio / browserRatio();
+    const float newX = static_cast<float>(_browserDimensions.value().x) * relativeRatio;
     _browserDimensions = {
-        static_cast<int>(floor(newX)),
+        static_cast<int>(std::floor(newX)),
         _browserDimensions.value().y
     };
     _isDimensionsDirty = true;

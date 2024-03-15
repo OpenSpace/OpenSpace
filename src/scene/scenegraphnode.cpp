@@ -689,8 +689,7 @@ void SceneGraphNode::update(const UpdateData& data) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    State s = _state;
-    if (s != State::Initialized && _state != State::GLInitialized) {
+    if (_state != State::Initialized && _state != State::GLInitialized) {
         return;
     }
     if (!isTimeFrameActive(data.time)) {
@@ -719,12 +718,13 @@ void SceneGraphNode::update(const UpdateData& data) {
     newUpdateData.modelTransform.rotation = _worldRotationCached;
     newUpdateData.modelTransform.scale = _worldScaleCached;
 
-    glm::dmat4 translation = glm::translate(
+    const glm::dmat4 translation = glm::translate(
         glm::dmat4(1.0),
         newUpdateData.modelTransform.translation
     );
-    glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
-    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), newUpdateData.modelTransform.scale);
+    const glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
+    const glm::dmat4 scaling =
+        glm::scale(glm::dmat4(1.0), newUpdateData.modelTransform.scale);
 
     _modelTransformCached = translation * rotation * scaling;
 
@@ -780,7 +780,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         }
     }
 
-    bool isInStickerBin =
+    const bool isInStickerBin =
         data.renderBinMask & static_cast<int>(Renderable::RenderBin::Sticker);
 
     if (_showDebugSphere && isInStickerBin) {
@@ -794,7 +794,8 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     }
 }
 
-void SceneGraphNode::renderDebugSphere(const Camera& camera, double size, glm::vec4 color)
+void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
+                                       const glm::vec4& color)
 {
     const glm::dvec3 scaleVec = _worldScaleCached * size;
     const glm::dmat4 modelTransform =

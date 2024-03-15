@@ -27,7 +27,6 @@
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumesampler.h>
-#include <modules/volume/textureslicevolumereader.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 

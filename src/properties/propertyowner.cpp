@@ -58,7 +58,7 @@ namespace {
         for (properties::Property* p : properties) {
             nlohmann::json propertyJson;
             std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
-            propertyJson["name"] = name;
+            propertyJson["name"] = std::move(name);
             propertyJson["type"] = p->className();
             propertyJson["uri"] = p->fullyQualifiedIdentifier();
             propertyJson["identifier"] = p->identifier();
@@ -70,7 +70,6 @@ namespace {
 
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {
-            nlohmann::json propertyOwner;
             json["propertyOwners"].push_back(createJson(o));
         }
         sortJson(json["propertyOwners"], "name");
@@ -387,12 +386,11 @@ nlohmann::json PropertyOwner::generateJson() const {
     ZoneScoped;
 
     nlohmann::json json;
-    std::vector<PropertyOwner*> subOwners = propertySubOwners();
+    const std::vector<PropertyOwner*>& subOwners = propertySubOwners();
     for (PropertyOwner* owner : subOwners) {
         if (owner->identifier() != "Scene") {
             nlohmann::json jsonOwner = createJson(owner);
-
-            json.push_back(jsonOwner);
+            json.push_back(std::move(jsonOwner));
         }
     }
     sortJson(json, "name");

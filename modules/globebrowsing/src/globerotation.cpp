@@ -186,15 +186,14 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
     ghoul_assert(_globeNode, "Globe cannot be nullptr");
 
     GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
-    glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
+    const glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
         *_globeNode,
         latitude,
         longitude,
         0.0
     );
 
-    SurfacePositionHandle h =
-        _globeNode->calculateSurfacePositionHandle(groundPos);
+    const SurfacePositionHandle h = _globeNode->calculateSurfacePositionHandle(groundPos);
 
     // Compute position including heightmap
     return mod->cartesianCoordinatesFromGeo(
@@ -241,7 +240,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
 
     if (_useCamera) {
         GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
-        glm::dvec3 position = mod->geoPosition();
+        const glm::dvec3 position = mod->geoPosition();
         lat = position.x;
         lon = position.y;
     }
@@ -259,8 +258,8 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         yAxis = glm::dvec3(glm::cross(v1, v2));
     }
     else {
-        float latitudeRad = glm::radians(static_cast<float>(lat));
-        float longitudeRad = glm::radians(static_cast<float>(lon));
+        const float latitudeRad = glm::radians(static_cast<float>(lat));
+        const float longitudeRad = glm::radians(static_cast<float>(lon));
         yAxis = _globeNode->ellipsoid().geodeticSurfaceNormal(
             { latitudeRad, longitudeRad }
         );

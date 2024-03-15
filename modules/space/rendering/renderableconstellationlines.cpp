@@ -152,7 +152,7 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
     else {
         // Enable all constellations that are selected
         for (ConstellationKeyValuePair& pair : _renderingConstellationsMap) {
-            bool isSelected = _selection.isSelected(pair.second.name);
+            const bool isSelected = _selection.isSelected(pair.second.name);
             pair.second.isEnabled = isSelected;
 
             if (_hasLabels) {

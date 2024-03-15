@@ -106,8 +106,8 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
     for (size_t nBound = 0; nBound < edgeVertices.size(); ++nBound) {
         const std::vector<glm::vec3>& boundary = edgeVertices[nBound];
         for (size_t i = 1; i < boundary.size(); i++) {
-            const glm::vec3 v0 = boundary[i - 1];
-            const glm::vec3 v1 = boundary[i ];
+            const glm::vec3& v0 = boundary[i - 1];
+            const glm::vec3& v1 = boundary[i];
 
             // Vertices close to globe (Based on origin which is the zero point here)
             // For now, use center of globe (TODO: allow setting the height)

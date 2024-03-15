@@ -132,7 +132,7 @@ void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObje
 }
 
 bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPosition) {
-    glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
+    const glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
         glm::vec4(0.f, 0.f, 0.f, 1.f);
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));

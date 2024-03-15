@@ -143,7 +143,7 @@ void TransferFunctionHandler::setFilepath(std::string path) {
 }
 
 ghoul::opengl::Texture& TransferFunctionHandler::texture() {
-    return *_texture.get();
+    return *_texture;
 }
 
 void TransferFunctionHandler::uploadTexture() {

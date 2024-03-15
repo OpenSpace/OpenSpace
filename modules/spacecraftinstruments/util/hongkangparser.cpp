@@ -82,7 +82,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
                 continue;
             }
 
-            ghoul::Dictionary typeDictionary =
+            const ghoul::Dictionary typeDictionary =
                 translationDictionary.value<ghoul::Dictionary>(decoderType);
             // for each playbook call -> create a Decoder object
             for (std::string_view key : typeDictionary.keys()) {
@@ -142,7 +142,7 @@ bool HongKangParser::create() {
             "HongKangParser"
         );
     }
-    size_t position = _fileName.find_last_of('.') + 1;
+    const size_t position = _fileName.find_last_of('.') + 1;
     if (position == 0 || position == std::string::npos) {
         return true;
     }
@@ -168,7 +168,7 @@ bool HongKangParser::create() {
     while (!file.eof()) {
         std::getline(file, line);
 
-        std::string event = line.substr(0, line.find_first_of(' '));
+        const std::string event = line.substr(0, line.find_first_of(' '));
 
         const auto it = _fileTranslation.find(event);
         const bool foundEvent = (it != _fileTranslation.end());
@@ -208,13 +208,13 @@ bool HongKangParser::create() {
                     _targetTimes.emplace_back(time, image.target);
                 }
 
-                // store actual image in map. All targets get _only_ their corresp. subset
-                _subsetMap[image.target]._subset.push_back(image);
                 // compute and store the range for each subset
                 _subsetMap[image.target]._range.include(time);
+                // store actual image in map. All targets get _only_ their corresp. subset
+                _subsetMap[image.target]._subset.push_back(std::move(image));
             }
             if (it->second->decoderType() == "SCANNER") { // SCANNER START
-                double scanStart = time;
+                const double scanStart = time;
 
                 InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(
                     it->second.get()
@@ -222,18 +222,20 @@ bool HongKangParser::create() {
                 const std::string& endNominal = scanner->stopCommand();
 
                 // store current position in file
-                std::streampos len = file.tellg();
+                const std::streampos len = file.tellg();
                 std::string linePeek;
                 while (!file.eof()) {
                     // continue grabbing next line until we find what we need
                     getline(file, linePeek);
                     if (linePeek.find(endNominal) != std::string::npos) {
                         met = linePeek.substr(25, 9);
-                        double scanStop = ephemerisTimeFromMissionElapsedTime(
+                        const double scanStop = ephemerisTimeFromMissionElapsedTime(
                             met,
                             _metRef
                         );
-                        std::string scannerTarget = findPlaybookSpecifiedTarget(line);
+                        const std::string scannerTarget = findPlaybookSpecifiedTarget(
+                            line
+                        );
 
                         TimeRange scanRange = TimeRange(scanStart, scanStop);
                         ghoul_assert(scanRange.isDefined(), "Invalid time range");
@@ -241,7 +243,7 @@ bool HongKangParser::create() {
 
                         // store individual image
                         Image image = {
-                            .timeRange = scanRange,
+                            .timeRange = std::move(scanRange),
                             .path = _defaultCaptureImage.string(),
                             .activeInstruments = it->second->translations(),
                             .target = cameraTarget,
@@ -263,7 +265,7 @@ bool HongKangParser::create() {
                 // end of capture sequence for camera, store end time of this sequence
                 TimeRange cameraRange = TimeRange(captureStart, time);
                 ghoul_assert(cameraRange.isDefined(), "Invalid time range");
-                _instrumentTimes.emplace_back(previousCamera, cameraRange);
+                _instrumentTimes.emplace_back(previousCamera, std::move(cameraRange));
                 captureStart = -1;
             }
         }

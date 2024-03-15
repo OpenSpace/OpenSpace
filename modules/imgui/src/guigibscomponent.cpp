@@ -146,7 +146,7 @@ void GuiGIBSComponent::render() {
             layerScript
         );
         global::scriptEngine->queueScript(
-            script,
+            std::move(script),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );

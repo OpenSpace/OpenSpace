@@ -34,6 +34,25 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "OctreeManager";
+
+    /**
+     * \return the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
+     */
+    size_t childIndex(float posX, float posY, float posZ, float origX, float origY,
+                      float origZ)
+    {
+        size_t index = 0;
+        if (posX < origX) {
+            index += 1;
+        }
+        if (posY < origY) {
+            index += 2;
+        }
+        if (posZ < origZ) {
+            index += 4;
+        }
+        return index;
+    }
 } // namespace
 
 namespace openspace {
@@ -940,22 +959,6 @@ bool OctreeManager::isRebuildOngoing() const {
     return _rebuildBuffer;
 }
 
-size_t OctreeManager::getChildIndex(float posX, float posY, float posZ, float origX,
-                                    float origY, float origZ)
-{
-    size_t index = 0;
-    if (posX < origX) {
-        index += 1;
-    }
-    if (posY < origY) {
-        index += 2;
-    }
-    if (posZ < origZ) {
-        index += 4;
-    }
-    return index;
-}
-
 bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& starValues,
                                  int depth)
 {
@@ -989,7 +992,7 @@ bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& sta
             tmpValues.insert(tmpValues.end(), velBegin, velEnd);
 
             // Find out which child that will inherit the data and store it.
-            size_t index = getChildIndex(
+            const size_t index = childIndex(
                 tmpValues[0],
                 tmpValues[1],
                 tmpValues[2],
@@ -1007,7 +1010,7 @@ bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& sta
 
     // Node is an inner node, keep recursion going.
     // This will also take care of the new star when a subdivision has taken place.
-    size_t index = getChildIndex(
+    const size_t index = childIndex(
         starValues[0],
         starValues[1],
         starValues[2],
@@ -1050,17 +1053,18 @@ void OctreeManager::sliceNodeLodCache(OctreeNode& node) {
         node.velData = std::move(tmpVel);
         node.numStars = node.magOrder.size(); // = MAX_STARS_PER_NODE
 
-        for (int i = 0; i < 8; i++) {
-            sliceNodeLodCache(*node.Children[i]);
+        for (const std::shared_ptr<OctreeNode>& child : node.Children) {
+            sliceNodeLodCache(*child);
         }
     }
 }
 
-void OctreeManager::storeStarData(OctreeNode& node, const std::vector<float>& starValues)
+void OctreeManager::storeStarData(OctreeNode& node,
+                                  const std::vector<float>& starValues) const
 {
     // Insert star data at the back of vectors and store a vector with pairs consisting of
     // star magnitude and insert index for later sorting and slicing of LOD cache.
-    float mag = starValues[POS_SIZE];
+    const float mag = starValues[POS_SIZE];
     node.magOrder.insert(node.magOrder.end(), std::make_pair(mag, node.numStars));
     node.numStars++;
 
@@ -1118,7 +1122,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
         const float z = (i < 4) ?
             node.originZ + node.halfDimension :
             node.originZ - node.halfDimension;
-        glm::dvec3 pos = glm::dvec3(x, y, z) * 1000.0 * distanceconstants::Parsec;
+        const glm::dvec3 pos = glm::dvec3(x, y, z) * 1000.0 * distanceconstants::Parsec;
         corners[i] = glm::dvec4(pos, 1.0);
     }
 
@@ -1141,8 +1145,8 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
 
     // Take care of inner nodes.
     if (!(node.isLeaf)) {
-        glm::vec2 nodeSize = _culler->getNodeSizeInPixels(corners, mvp, screenSize);
-        float totalPixels = nodeSize.x * nodeSize.y;
+        const glm::vec2 nodeSize = _culler->getNodeSizeInPixels(corners, mvp, screenSize);
+        const float totalPixels = nodeSize.x * nodeSize.y;
 
         // Check if we should return any LOD cache data. If we're streaming a big dataset
         // from files and inner node is visible and loaded, then it should be rendered
@@ -1160,9 +1164,9 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
                 }
 
                 // We're in an inner node, remove indices from potential children in cache
-                for (int i = 0; i < 8; i++) {
+                for (const std::shared_ptr<OctreeNode>& child : node.Children) {
                     std::map<int, std::vector<float>> tmpData = removeNodeFromCache(
-                        *node.Children[i],
+                        *child,
                         deltaStars
                     );
                     fetchedData.insert(tmpData.begin(), tmpData.end());
@@ -1202,11 +1206,11 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
     fetchedData = removeNodeFromCache(node, deltaStars, false);
 
     // Recursively check if children should be rendered.
-    for (size_t i = 0; i < 8; i++) {
+    for (const std::shared_ptr<OctreeNode>& child : node.Children) {
         // Observe that if there exists identical keys in fetchedData then those values in
         // tmpData will be ignored! Thus we store the removed keys until next render call!
         std::map<int, std::vector<float>> tmpData = checkNodeIntersection(
-            *node.Children[i],
+            *child,
             mvp,
             screenSize,
             deltaStars,
@@ -1242,9 +1246,9 @@ std::map<int, std::vector<float>> OctreeManager::removeNodeFromCache(OctreeNode&
 
     // Check children recursively if we're in an inner node.
     if (!(node.isLeaf) && recursive) {
-        for (int i = 0; i < 8; i++) {
+        for (const std::shared_ptr<OctreeNode>& child : node.Children) {
             std::map<int, std::vector<float>> tmpData = removeNodeFromCache(
-                *node.Children[i],
+                *child,
                 deltaStars
             );
             keysToRemove.insert(tmpData.begin(), tmpData.end());
@@ -1264,8 +1268,8 @@ std::vector<float> OctreeManager::getNodeData(const OctreeNode& node,
 
     // If we're not in a leaf, get data from all children recursively.
     std::vector<float> nodeData;
-    for (size_t i = 0; i < 8; i++) {
-        std::vector<float> tmpData = getNodeData(*node.Children[i], mode);
+    for (const std::shared_ptr<OctreeNode>& child : node.Children) {
+        std::vector<float> tmpData = getNodeData(*child, mode);
         nodeData.insert(nodeData.end(), tmpData.begin(), tmpData.end());
     }
     return nodeData;
@@ -1274,20 +1278,17 @@ std::vector<float> OctreeManager::getNodeData(const OctreeNode& node,
 void OctreeManager::clearNodeData(OctreeNode& node) {
     // Clear data and its allocated memory.
     node.posData.clear();
-    node.posData.shrink_to_fit();
     node.colData.clear();
-    node.colData.shrink_to_fit();
     node.velData.clear();
-    node.velData.shrink_to_fit();
 
     // Clear magnitudes as well!
     //std::vector<std::pair<float, size_t>>().swap(node->magOrder);
     node.magOrder.clear();
 
     if (!node.isLeaf) {
-        // Remove data from all children recursively.
-        for (size_t i = 0; i < 8; i++) {
-            clearNodeData(*node.Children[i]);
+        // Remove data from all children recursively
+        for (const std::shared_ptr<OctreeNode>& child : node.Children) {
+            clearNodeData(*child);
         }
     }
 }
@@ -1336,7 +1337,7 @@ bool OctreeManager::updateBufferIndex(OctreeNode& node) {
     }
 
     // Make sure node isn't loading/unloading as we're checking isLoaded flag.
-    std::lock_guard lock(node.loadingLock);
+    const std::lock_guard lock(node.loadingLock);
 
     // Return false if there are no more spots in our buffer, or if we're streaming and
     // node isn't loaded yet, or if node doesn't have any stars.
@@ -1362,7 +1363,7 @@ bool OctreeManager::updateBufferIndex(OctreeNode& node) {
 
 std::vector<float> OctreeManager::constructInsertData(const OctreeNode& node,
                                                       gaia::RenderMode mode,
-                                                      int& deltaStars)
+                                                      int& deltaStars) const
 {
     // Return early if node doesn't contain any stars!
     if (node.numStars == 0) {

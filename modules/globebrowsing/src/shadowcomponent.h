@@ -81,11 +81,11 @@ public:
 private:
     void createDepthTexture();
     void createShadowFBO();
-    void updateDepthTexture();
+    void updateDepthTexture() const;
     void buildDDepthTexture();
 
     // Debug
-    void saveDepthBuffer();
+    void saveDepthBuffer() const;
 
     ShadowMapData _shadowData;
 
