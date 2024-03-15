@@ -32,13 +32,15 @@
 SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     : QWidget(parent)
     , _orientationValue(std::move(orientation))
+    , _firstWindowGraphicsSelection(new QComboBox)
+    , _firstWindowSelectionLayout(new QHBoxLayout)
+    ,_showUiOnFirstWindow(new QCheckBox(
+        "Show user interface only on first window using graphics:"
+    ))
 {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     
-    _showUiOnFirstWindow = new QCheckBox(
-        "Show user interface only on first window using graphics:"
-    );
     _showUiOnFirstWindow->setChecked(false);
     _showUiOnFirstWindow->setEnabled(false);
     _showUiOnFirstWindow->setToolTip(
@@ -48,9 +50,6 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
         "not show the user interface"
     );
 
-    _firstWindowSelectionLayout = new QHBoxLayout;
-
-    _firstWindowGraphicsSelection = new QComboBox();
     _firstWindowGraphicsSelection->setToolTip(
         "Select the contents of the first window to match one of the other windows"
     );

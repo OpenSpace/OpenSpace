@@ -204,7 +204,7 @@ void EventEngine::triggerActions() const {
     while (e) {
         const auto it = _eventActions.find(e->type);
         if (it != _eventActions.end()) {
-            ghoul::Dictionary params = toParameter(*e);
+            const ghoul::Dictionary params = toParameter(*e);
             for (const ActionInfo& ai : it->second) {
                 if (ai.isEnabled &&
                     (!ai.filter.has_value() || params.isSubset(*ai.filter)))
@@ -235,7 +235,7 @@ void EventEngine::triggerTopics() const {
         const auto it = _eventTopics.find(e->type);
 
         if (it != _eventTopics.end()) {
-            ghoul::Dictionary params = toParameter(*e);
+            const ghoul::Dictionary params = toParameter(*e);
             for (const TopicInfo& ti : it->second) {
                 ti.callback(params);
             }

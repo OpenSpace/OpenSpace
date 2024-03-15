@@ -46,7 +46,7 @@ namespace openspace {
 class LuaConsole : public properties::PropertyOwner {
 public:
     LuaConsole();
-    ~LuaConsole() override;
+    ~LuaConsole() override = default;
 
     void initialize();
     void deinitialize();

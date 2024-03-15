@@ -58,7 +58,7 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid"
@@ -210,7 +210,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
         );
 
         if (orthoRight == glm::vec3(0.0)) {
-            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+            const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
             right = glm::cross(viewDirection, otherVector);
             orthoRight = glm::normalize(
                 glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))

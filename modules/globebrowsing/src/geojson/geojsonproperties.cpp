@@ -71,7 +71,7 @@ namespace geojson::propertykeys {
 namespace {
     using PropertyInfo = openspace::properties::Property::PropertyInfo;
 
-    template <std::size_t SIZE>
+    template <size_t SIZE>
     bool keyMatches(const std::string_view key,
                     const std::array<std::string_view, SIZE>& keyAlternativesArray,
                     std::optional<const PropertyInfo> propInfo = std::nullopt)

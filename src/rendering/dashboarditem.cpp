@@ -69,7 +69,7 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
 
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);
 
-    DashboardItem* item = factory->create(dashboardType, std::move(dictionary));
+    DashboardItem* item = factory->create(dashboardType, dictionary);
     item->_type = dashboardType;
 
     return std::unique_ptr<DashboardItem>(item);

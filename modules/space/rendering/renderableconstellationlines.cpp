@@ -347,7 +347,7 @@ bool RenderableConstellationLines::readSpeckFile() {
             continue;
         }
 
-        if (const std::size_t found = line.find("mesh");  found == std::string::npos) {
+        if (const size_t found = line.find("mesh");  found == std::string::npos) {
             continue;
         }
 

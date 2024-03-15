@@ -347,7 +347,7 @@ void MemoryAwareTileCache::assureTextureContainerExists(
         _textureContainerMap.emplace(initDataKey,
             TextureContainerTileCache(
                 std::make_unique<TextureContainer>(initData, 500),
-                std::make_unique<TileCache>(std::numeric_limits<std::size_t>::max())
+                std::make_unique<TileCache>(std::numeric_limits<size_t>::max())
             )
         );
     }

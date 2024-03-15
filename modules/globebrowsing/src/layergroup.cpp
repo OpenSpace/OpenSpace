@@ -113,7 +113,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
         LERROR("'Identifier' must be specified for layer");
         return nullptr;
     }
-    std::string identifier = layerDict.value<std::string>("Identifier");
+    const std::string identifier = layerDict.value<std::string>("Identifier");
     if (hasPropertySubOwner(identifier)) {
         LINFO("Layer with identifier '" + identifier + "' already exists");
         _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
@@ -167,7 +167,6 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
         if (it->get()->identifier() == layerName) {
             // we need to make a copy as the layername is only a reference
             // which will no longer be valid once it is deleted
-            std::string name = layerName;
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             properties::PropertyOwner* layerGroup = it->get()->owner();
@@ -184,7 +183,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             if (_onChangeCallback) {
                 _onChangeCallback(nullptr);
             }
-            LINFO("Deleted layer " + name);
+            LINFO("Deleted layer " + layerName);
 
             if (_layers.empty()) {
                 _levelBlendingEnabled.setVisibility(

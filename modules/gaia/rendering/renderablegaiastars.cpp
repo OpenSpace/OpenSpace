@@ -1398,7 +1398,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
     if (_dataIsDirty) {
         LDEBUG("Regenerating data");
         // Reload data file. This may reconstruct the Octree as well.
-        bool success = readDataFile();
+        const bool success = readDataFile();
         if (!success) {
             throw ghoul::RuntimeError("Error loading Gaia Star data");
         }
@@ -1698,10 +1698,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
             }
             case gaia::ShaderOption::BillboardSSBO:
             case gaia::ShaderOption::BillboardVBO: {
-                std::filesystem::path vs = absPath(
+                const std::filesystem::path vs = absPath(
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"
                 );
-                std::filesystem::path fs = absPath(
+                const std::filesystem::path fs = absPath(
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl"
                 );
                 std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
@@ -1735,8 +1735,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         // Calculate memory budgets.
         _chunkSize = _octreeManager.maxStarsPerNode() * _nRenderValuesPerStar;
-        long long totalChunkSizeInBytes = _octreeManager.totalNodes() *
-                                          _chunkSize * sizeof(GLfloat);
+        const long long totalChunkSizeInBytes =
+            _octreeManager.totalNodes() * _chunkSize * sizeof(GLfloat);
         _maxStreamingBudgetInBytes = std::min(
             totalChunkSizeInBytes,
             _gpuMemoryBudgetInBytes
@@ -1745,7 +1745,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                                      (_chunkSize * sizeof(GLfloat));
 
         _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxNodesInStream));
-        bool datasetFitInMemory =
+        const bool datasetFitInMemory =
             static_cast<float>(_totalDatasetSizeInBytes) < (_cpuRamBudgetInBytes * 0.9f);
 
         if (!datasetFitInMemory && !hasProperty(&_additionalNodes)) {
@@ -2040,7 +2040,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             GL_STATIC_DRAW
         );
 
-        GLint tmPositionAttrib = _programTM->attributeLocation("in_position");
+        const GLint tmPositionAttrib = _programTM->attributeLocation("in_position");
         glEnableVertexAttribArray(tmPositionAttrib);
         glVertexAttribPointer(
             tmPositionAttrib,
@@ -2062,7 +2062,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
         }
         if (!_fboTexture) {
             // Generate a new texture and attach it to our FBO.
-            glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
+            const glm::vec2 screenSize = glm::vec2(
+                global::renderEngine->renderingResolution()
+            );
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
                 glm::uvec3(screenSize, 1),
                 GL_TEXTURE_2D,
@@ -2147,8 +2149,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
     }
 
     if (global::windowDelegate->windowHasResized()) {
-        // Update FBO texture resolution if we haven't already.
-        glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
+        // Update FBO texture resolution if we haven't already
+        const glm::vec2 screenSize = glm::vec2(
+            global::renderEngine->renderingResolution()
+        );
         const bool hasChanged = glm::any(
             glm::notEqual(_fboTexture->dimensions(), glm::uvec3(screenSize, 1))
         );
@@ -2243,8 +2247,7 @@ int RenderableGaiaStars::readFitsFile(const std::filesystem::path& filePath) {
     for (size_t i = 0; i < fullData.size(); i += nReadValuesPerStar) {
         const auto first = fullData.begin() + i;
         const auto last = fullData.begin() + i + nReadValuesPerStar;
-        std::vector<float> starValues(first, last);
-
+        const std::vector<float> starValues(first, last);
         _octreeManager.insert(starValues);
     }
     _octreeManager.sliceLodData();
@@ -2261,8 +2264,8 @@ int RenderableGaiaStars::readSpeckFile(const std::filesystem::path& filePath) {
     for (size_t i = 0; i < fullData.size(); i += nReadValuesPerStar) {
         auto first = fullData.begin() + i;
         auto last = fullData.begin() + i + nReadValuesPerStar;
-        std::vector<float> starValues = std::vector<float>(first, last);
-        _octreeManager.insert(std::move(starValues));
+        const std::vector<float> starValues = std::vector<float>(first, last);
+        _octreeManager.insert(starValues);
     }
     _octreeManager.sliceLodData();
     return static_cast<int>(fullData.size() / nReadValuesPerStar);

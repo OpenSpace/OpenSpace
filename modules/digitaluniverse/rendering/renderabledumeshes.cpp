@@ -496,7 +496,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             continue;
         }
 
-        const std::size_t found = line.find("mesh");
+        const size_t found = line.find("mesh");
         if (found == std::string::npos) {
             continue;
         }

@@ -111,10 +111,12 @@ LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictiona
 }
 
 std::string LabelParser::decode(const std::string& line) {
-    for (std::pair<const std::string, std::unique_ptr<Decoder>>& key : _fileTranslation) {
-        std::size_t value = line.find(key.first);
+    using K = std::string;
+    using V = std::unique_ptr<Decoder>;
+    for (const std::pair<const K, V>& key : _fileTranslation) {
+        const size_t value = line.find(key.first);
         if (value != std::string::npos) {
-            std::string toTranslate = line.substr(value);
+            const std::string toTranslate = line.substr(value);
             return _fileTranslation[toTranslate]->translations()[0];
         }
     }
@@ -125,7 +127,7 @@ std::string LabelParser::encode(const std::string& line) const {
     using K = std::string;
     using V = std::unique_ptr<Decoder>;
     for (const std::pair<const K, V>& key : _fileTranslation) {
-        std::size_t value = line.find(key.first);
+        const size_t value = line.find(key.first);
         if (value != std::string::npos) {
             return line.substr(value);
         }
@@ -149,12 +151,12 @@ bool LabelParser::create() {
 
         std::string path = e.path().string();
 
-        size_t position = path.find_last_of('.') + 1;
+        const size_t position = path.find_last_of('.') + 1;
         if (position == 0 || position == std::string::npos) {
             continue;
         }
 
-        std::filesystem::path extension = std::filesystem::path(path).extension();
+        const std::filesystem::path extension = std::filesystem::path(path).extension();
         if (extension != ".lbl" && extension != ".LBL") {
             continue;
         }
@@ -261,14 +263,14 @@ bool LabelParser::create() {
                 count = 0;
 
                 using namespace std::literals;
-                std::string p = path.substr(0, path.size() - ("lbl"s).size());
+                const std::string p = path.substr(0, path.size() - ("lbl"s).size());
                 for (const std::string& ext : extensions) {
-                    std::string imagePath = p + ext;
+                    const std::string imagePath = p + ext;
                     if (std::filesystem::is_regular_file(imagePath)) {
                         std::vector<std::string> spiceInstrument;
                         spiceInstrument.push_back(_instrumentID);
 
-                        Image image = {
+                        const Image image = {
                             .timeRange = TimeRange(startTime, stopTime),
                             .path = imagePath,
                             .activeInstruments = spiceInstrument,

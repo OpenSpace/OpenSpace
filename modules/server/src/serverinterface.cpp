@@ -99,10 +99,10 @@ namespace {
 namespace openspace {
 
 std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
-                                                          const ghoul::Dictionary& config)
+                                                      const ghoul::Dictionary& dictionary)
 {
     // TODO: Use documentation to verify dictionary
-    auto si = std::make_unique<ServerInterface>(config);
+    auto si = std::make_unique<ServerInterface>(dictionary);
     return si;
 }
 

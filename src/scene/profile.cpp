@@ -584,7 +584,7 @@ void convertVersion10to11(nlohmann::json& profile) {
         action.documentation = std::move(kb.documentation);
         action.name = std::move(kb.name);
         action.guiPath = std::move(kb.guiPath);
-        action.isLocal = std::move(kb.isLocal);
+        action.isLocal = kb.isLocal;
         action.script = std::move(kb.script);
         actions.push_back(std::move(action));
 
