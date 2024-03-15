@@ -32,7 +32,7 @@ void Worker::operator()() {
     std::function<void()> task;
     while (true) {
         {
-            const std::unique_lock lock(pool.queue_mutex);
+            std::unique_lock lock(pool.queue_mutex);
 
             // look for a work item
             while (!pool.stop && pool.tasks.empty()) {

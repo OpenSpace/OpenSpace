@@ -103,7 +103,8 @@ protected:
 
 private:
     void goToChunk(const globebrowsing::RenderableGlobe& globe,
-        const globebrowsing::TileIndex& ti, glm::vec2 uv, bool doResetCameraDirection);
+        const globebrowsing::TileIndex& ti, const glm::vec2& uv,
+        bool doResetCameraDirection);
 
     void goToGeodetic2(const globebrowsing::RenderableGlobe& globe,
         globebrowsing::Geodetic2 geo2, bool doResetCameraDirection);

@@ -38,8 +38,8 @@ namespace {
     /**
      * \return the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
      */
-    size_t childIndex(float posX, float posY, float posZ, float origX, float origY,
-                      float origZ)
+    size_t childIndex(float posX, float posY, float posZ, float origX = 0.f,
+                      float origY = 0.f, float origZ = 0.f)
     {
         size_t index = 0;
         if (posX < origX) {
@@ -136,7 +136,7 @@ void OctreeManager::initBufferIndexStack(long long maxNodes, bool useVBO,
 }
 
 void OctreeManager::insert(const std::vector<float>& starValues) {
-    size_t index = getChildIndex(starValues[0], starValues[1], starValues[2]);
+    size_t index = childIndex(starValues[0], starValues[1], starValues[2]);
 
     insertInNode(*_root->Children[index], starValues);
 }
@@ -200,11 +200,11 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
     glm::vec3 fCameraPos = static_cast<glm::vec3>(
         cameraPos / (1000.0 * distanceconstants::Parsec)
     );
-    size_t idx = getChildIndex(fCameraPos.x, fCameraPos.y, fCameraPos.z);
+    size_t idx = childIndex(fCameraPos.x, fCameraPos.y, fCameraPos.z);
     std::shared_ptr<OctreeNode> node = _root->Children[idx];
 
     while (!node->isLeaf) {
-        idx = getChildIndex(
+        idx = childIndex(
             fCameraPos.x,
             fCameraPos.y,
             fCameraPos.z,
