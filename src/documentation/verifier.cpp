@@ -139,7 +139,7 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
             if (dict.hasValue<double>(key)) {
                 // If we have a double value, we need to check if it is integer
                 const double value = dict.value<double>(key);
-                double intPart;
+                double intPart = 0.0;
                 const bool isInt = modf(value, &intPart) == 0.0;
                 if (isInt) {
                     TestResult res;

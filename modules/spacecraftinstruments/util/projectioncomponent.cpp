@@ -506,8 +506,8 @@ void ProjectionComponent::imageProjectBegin() {
             );
         };
 
-        GLuint fbos[2];
-        glGenFramebuffers(2, fbos);
+        std::array<GLuint, 3> fbos;
+        glGenFramebuffers(2, fbos.data());
         glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[0]);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbos[1]);
 
@@ -537,7 +537,7 @@ void ProjectionComponent::imageProjectBegin() {
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        glDeleteFramebuffers(2, fbos);
+        glDeleteFramebuffers(2, fbos.data());
 
         glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
         glFramebufferTexture2D(
@@ -592,8 +592,8 @@ void ProjectionComponent::imageProjectBegin() {
     );
 
     if (_dilation.isEnabled) {
-        GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-        glDrawBuffers(2, buffers);
+        std::array<GLenum, 2> buffers = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, buffers.data());
     }
 }
 

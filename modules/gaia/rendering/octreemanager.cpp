@@ -810,9 +810,9 @@ void OctreeManager::fetchNodeDataFromFile(OctreeNode& node) {
         inFileStream.read(reinterpret_cast<char*>(&nDataSize), sizeof(int32_t));
 
         std::vector<float> readData(nDataSize, 0.f);
-        const int nBytes = nDataSize * sizeof(readData[0]);
+        const int nBytes = nDataSize * sizeof(float);
         if (nDataSize > 0) {
-            inFileStream.read(reinterpret_cast<char*>(&readData[0]), nBytes);
+            inFileStream.read(reinterpret_cast<char*>(readData.data()), nBytes);
         }
 
         const int starsInNode = static_cast<int>(nDataSize / _valuesPerStar);

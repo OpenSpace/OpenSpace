@@ -54,12 +54,12 @@ LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictiona
             continue;
         }
 
-        Dictionary typeDict = dictionary.value<Dictionary>(decoderStr);
+        const Dictionary typeDict = dictionary.value<Dictionary>(decoderStr);
 
         // create dictionary containing all {playbookKeys , spice IDs}
         if (decoderStr == "Instrument") {
             // for each playbook call -> create a Decoder object
-            for (std::string_view key : typeDict.keys()) {
+            for (const std::string_view key : typeDict.keys()) {
                 if (!typeDict.hasValue<Dictionary>(key)) {
                     continue;
                 }

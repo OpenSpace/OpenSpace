@@ -69,12 +69,6 @@ namespace {
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
-    const GLenum ColorAttachmentArray[3] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT1,
-       GL_COLOR_ATTACHMENT2,
-    };
-
     constexpr std::array<const char*, 26> UniformNames = {
         "modelViewTransform", "projectionTransform", "normalTransform", "meshTransform",
         "meshNormalTransform", "ambientIntensity", "diffuseIntensity",
@@ -912,7 +906,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             LERROR("Framebuffer is not complete");
         }
 
-        glDrawBuffers(3, ColorAttachmentArray);
+        constexpr std::array<GLenum, 3> ColorAttachmentArray = {
+           GL_COLOR_ATTACHMENT0,
+           GL_COLOR_ATTACHMENT1,
+           GL_COLOR_ATTACHMENT2,
+        };
+        glDrawBuffers(3, ColorAttachmentArray.data());
         glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));

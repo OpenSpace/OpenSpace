@@ -199,7 +199,7 @@ void ConvertRecFormatTask::convertToAscii() {
     datamessagestructures::ScriptMessage skf;
     int lineNum = 1;
     _oFile.open(_outFilePath, std::ifstream::app);
-    char tmpType = SessionRecording::DataFormatAsciiTag;
+    const char tmpType = SessionRecording::DataFormatAsciiTag;
     _oFile.write(&tmpType, 1);
     _oFile.write("\n", 1);
 
@@ -263,7 +263,7 @@ void ConvertRecFormatTask::convertToBinary() {
     datamessagestructures::ScriptMessage skf;
     int lineNum = 1;
     std::string lineContents;
-    unsigned char keyframeBuffer[SessionRecording::_saveBufferMaxSize_bytes];
+    std::array<unsigned char, SessionRecording::_saveBufferMaxSize_bytes> keyframeBuffer;
     _oFile.open(_outFilePath, std::ifstream::app | std::ios::binary);
     const char tmpType = SessionRecording::DataFormatBinaryTag;
     _oFile.write(&tmpType, 1);
@@ -283,17 +283,17 @@ void ConvertRecFormatTask::convertToBinary() {
 
         if (entryType == SessionRecording::HeaderCameraAscii) {
             sessRec->readCameraKeyframeAscii(times, ckf, lineContents, lineNum);
-            sessRec->saveCameraKeyframeBinary(times, ckf, keyframeBuffer,
+            sessRec->saveCameraKeyframeBinary(times, ckf, keyframeBuffer.data(),
             _oFile);
         }
         else if (entryType == SessionRecording::HeaderTimeAscii) {
             sessRec->readTimeKeyframeAscii(times, tkf, lineContents, lineNum);
-            sessRec->saveTimeKeyframeBinary(times, tkf, keyframeBuffer,
+            sessRec->saveTimeKeyframeBinary(times, tkf, keyframeBuffer.data(),
             _oFile);
         }
         else if (entryType == SessionRecording::HeaderScriptAscii) {
             sessRec->readScriptKeyframeAscii(times, skf, lineContents, lineNum);
-            sessRec->saveScriptKeyframeBinary(times, skf, keyframeBuffer,
+            sessRec->saveScriptKeyframeBinary(times, skf, keyframeBuffer.data(),
             _oFile);
         }
         else if (entryType.substr(0, 1) == SessionRecording::HeaderCommentAscii) {

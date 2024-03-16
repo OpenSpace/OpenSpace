@@ -77,7 +77,7 @@ namespace {
     constexpr std::string_view RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 
-    const GLenum ColorAttachmentArray[4] = {
+    constexpr std::array<GLenum, 4> ColorAttachmentArray = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,
        GL_COLOR_ATTACHMENT2,
@@ -140,7 +140,7 @@ void FramebufferRenderer::initialize() {
 
     LDEBUG("Initializing FramebufferRenderer");
 
-    const GLfloat vertexData[] = {
+    constexpr std::array<GLfloat, 12> VertexData = {
         // x     y
         -1.f, -1.f,
          1.f,  1.f,
@@ -156,7 +156,7 @@ void FramebufferRenderer::initialize() {
     glGenBuffers(1, &_vertexPositionBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
 
@@ -853,8 +853,8 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    float volumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
+    constexpr std::array<float, 4> VolumeBorderColor = { 0.f, 0.f, 0.f, 1.f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor.data());
     if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(
             GL_TEXTURE,
@@ -1110,7 +1110,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Deferred G-Buffer");
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
-        glDrawBuffers(3, ColorAttachmentArray);
+        glDrawBuffers(3, ColorAttachmentArray.data());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
     }
@@ -1200,7 +1200,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     if (_enableFXAA) {
         glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
-        glDrawBuffers(1, ColorAttachmentArray);
+        glDrawBuffers(1, ColorAttachmentArray.data());
         glDisable(GL_BLEND);
 
     }
