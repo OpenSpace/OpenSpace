@@ -646,10 +646,11 @@ bool ConstructOctreeTask::filterStar(const glm::vec2& range, float filterValue,
 {
     // Return true if star should be filtered away, i.e. if min = max = filterValue or
     // if filterValue < min (when min != 0.0) or filterValue > max (when max != 0.0).
-    return (fabs(range.x - range.y) < FLT_EPSILON &&
-        fabs(range.x - filterValue) < FLT_EPSILON) ||
-        (fabs(range.x - normValue) > FLT_EPSILON && filterValue < range.x) ||
-        (fabs(range.y - normValue) > FLT_EPSILON && filterValue > range.y);
+    constexpr float eps = std::numeric_limits<float>::epsilon();
+    return (std::abs(range.x - range.y) < eps &&
+        std::abs(range.x - filterValue) < eps) ||
+        (std::abs(range.x - normValue) > eps && filterValue < range.x) ||
+        (std::abs(range.y - normValue) > eps && filterValue > range.y);
 }
 
 documentation::Documentation ConstructOctreeTask::Documentation() {

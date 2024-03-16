@@ -42,10 +42,10 @@ namespace {
                      double& seconds)
     {
         // Find hms or dms indicies
-        size_t hOrDIndex =
+        const size_t hOrDIndex =
             (str.find('h') != std::string::npos) ? str.find('h') : str.find('d');
-        size_t mIndex = str.find('m');
-        size_t sIndex = str.find('s');
+        const size_t mIndex = str.find('m');
+        const size_t sIndex = str.find('s');
         if (hOrDIndex == std::string::npos || mIndex == std::string::npos ||
             sIndex == std::string::npos)
         {
@@ -56,9 +56,9 @@ namespace {
         }
 
         // Construct the number strings
-        std::string sHoursOrDegrees = str.substr(0, hOrDIndex);
-        std::string sMinutes = str.substr(hOrDIndex + 1, mIndex - hOrDIndex - 1);
-        std::string sSeconds = str.substr(mIndex + 1, sIndex - mIndex - 1);
+        const std::string sHoursOrDegrees = str.substr(0, hOrDIndex);
+        const std::string sMinutes = str.substr(hOrDIndex + 1, mIndex - hOrDIndex - 1);
+        const std::string sSeconds = str.substr(mIndex + 1, sIndex - mIndex - 1);
 
         // Convert the strings to numbers
         try {
@@ -176,21 +176,23 @@ namespace openspace {
 // https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php
 glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
     // (Ra, Dec) -> (a, d)
-    double a = glm::radians(ra);
-    double d = glm::radians(dec);
+    const double a = glm::radians(ra);
+    const double d = glm::radians(dec);
 
     // Convert to galactic reference frame
-    double l = L0 - atan2(
-        cos(d) * sin(a - A0),
-        sin(d) * cos(D0) - cos(d) * sin(D0) * cos(a - A0)
+    const double l = L0 - std::atan2(
+        std::cos(d) * std::sin(a - A0),
+        std::sin(d) * std::cos(D0) - std::cos(d) * std::sin(D0) * std::cos(a - A0)
     );
-    double b = asin(sin(d) * sin(D0) + cos(d) * cos(D0) * cos(a - A0));
+    const double b = std::asin(
+        std::sin(d) * std::sin(D0) + std::cos(d) * std::cos(D0) * std::cos(a - A0)
+    );
 
     // Convert to cartesian
-    glm::dvec3 rGalactic = glm::dvec3(
-        cos(b) * cos(l),
-        cos(b) * sin(l),
-        sin(b)
+    const glm::dvec3 rGalactic = glm::dvec3(
+        std::cos(b) * std::cos(l),
+        std::cos(b) * std::sin(l),
+        std::sin(b)
     );
 
     return distance * rGalactic;
@@ -211,13 +213,15 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     }
 
     // Parse right ascension
-    int raHours, raMinutes;
-    double raSeconds;
+    int raHours = 0;
+    int raMinutes = 0;
+    double raSeconds = 0.0;
     parseRa(ra, raHours, raMinutes, raSeconds);
 
     // Parse declination
-    int decDegrees, decMinutes;
-    double decSeconds;
+    int decDegrees = 0;
+    int decMinutes = 0;
+    double decSeconds = 0.0;
     parseDec(dec, decDegrees, decMinutes, decSeconds);
 
     const bool isValid = isRaDecValid(raHours,
@@ -236,12 +240,12 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     }
 
     // Convert from hours/degrees, minutes, seconds to decimal degrees
-    double sign = std::signbit(static_cast<float>(decDegrees)) ? -1.0 : 1.0;
-    double raDeg = (raHours * 15.0) +
+    const double sign = std::signbit(static_cast<float>(decDegrees)) ? -1.0 : 1.0;
+    const double raDeg = (raHours * 15.0) +
         (raMinutes * 15.0 / 60.0) +
         (raSeconds * 15.0 / 3600.0);
 
-    double decDeg = (abs(decDegrees) +
+    const double decDeg = (std::abs(decDegrees) +
         (decMinutes / 60.0) +
         (decSeconds / 3600.0)) * sign;
 
@@ -255,22 +259,24 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
 // https://en.wikipedia.org/wiki/Celestial_coordinate_system
 glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
     // Normalize
-    double distance = sqrt(x*x + y*y + z*z);
-    double nX = x / distance;
-    double nY = y / distance;
-    double nZ = z / distance;
+    const double distance = std::sqrt(x*x + y*y + z*z);
+    double const nX = x / distance;
+    const double nY = y / distance;
+    const double nZ = z / distance;
 
     // Convert from cartesian
     // (x, y, z) -> (l, b)
-    double l = atan2(nY, nX);
-    double b = asin(nZ);
+    const double l = std::atan2(nY, nX);
+    const double b = std::asin(nZ);
 
     // Convert to equatorial reference frame
-    double a = atan2(
-        cos(b) * sin(L0 - l),
-        sin(b) * cos(D0) - cos(b) * sin(D0) * cos(L0 - l)
+    const double a = std::atan2(
+        std::cos(b) * std::sin(L0 - l),
+        std::sin(b) * std::cos(D0) - std::cos(b) * std::sin(D0) * std::cos(L0 - l)
     ) + A0;
-    double d = asin(sin(b) * sin(D0) + cos(b) * cos(D0) * cos(L0 - l));
+    const double d = std::asin(
+        std::sin(b) * std::sin(D0) + std::cos(b) * std::cos(D0) * std::cos(L0 - l)
+    );
 
     return glm::dvec3(glm::degrees(a), glm::degrees(d), distance);
 }
@@ -294,16 +300,16 @@ std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) 
     }
 
     // Calculate Ra
-    int raHours = static_cast<int>(std::trunc(raDeg) / 15.0);
-    double raMinutesFull = (raDeg - raHours * 15.0) * 60.0 / 15.0;
-    int raMinutes = static_cast<int>(std::trunc(raMinutesFull));
-    double raSeconds = (raMinutesFull - raMinutes) * 60.0;
+    const int raHours = static_cast<int>(std::trunc(raDeg) / 15.0);
+    const double raMinutesFull = (raDeg - raHours * 15.0) * 60.0 / 15.0;
+    const int raMinutes = static_cast<int>(std::trunc(raMinutesFull));
+    const double raSeconds = (raMinutesFull - raMinutes) * 60.0;
 
     // Calculate Dec
-    int decDegrees = static_cast<int>(std::trunc(decDeg));
-    double decMinutesFull = (std::abs(decDeg) - std::abs(decDegrees)) * 60.0;
-    int decMinutes = static_cast<int>(std::trunc(decMinutesFull));
-    double decSeconds = (decMinutesFull - decMinutes) * 60.0;
+    const int decDegrees = static_cast<int>(std::trunc(decDeg));
+    const double decMinutesFull = (std::abs(decDeg) - std::abs(decDegrees)) * 60.0;
+    const int decMinutes = static_cast<int>(std::trunc(decMinutesFull));
+    const double decSeconds = (decMinutesFull - decMinutes) * 60.0;
 
     // Construct strings
     std::pair<std::string, std::string> result;

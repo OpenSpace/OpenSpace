@@ -641,7 +641,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_shadowMappingPropertyOwner);
 
     _generalProperties.targetLodScaleFactor.onChange([this]() {
-        float sf = _generalProperties.targetLodScaleFactor;
+        const float sf = _generalProperties.targetLodScaleFactor;
         _generalProperties.currentLodScaleFactor = sf;
         _lodScaleFactorDirty = true;
     });
@@ -785,7 +785,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
         try {
             if (_shadowComponent && _shadowComponent->isEnabled()) {
                 // Set matrices and other GL states
-                RenderData lightRenderData(_shadowComponent->begin(data));
+                const RenderData lightRenderData(_shadowComponent->begin(data));
 
                 glDisable(GL_BLEND);
 
@@ -829,7 +829,8 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             }
         }
         catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
-            std::string layer = _lastChangedLayer ? _lastChangedLayer->guiName() : "";
+            const std::string& layer =
+                _lastChangedLayer ? _lastChangedLayer->guiName() : "";
 
             LWARNINGC(
                 guiName(),
@@ -917,10 +918,10 @@ void RenderableGlobe::update(const UpdateData& data) {
     setBoundingSphere(bs);
     setInteractionSphere(bs);
 
-    glm::dmat4 translation =
+    const glm::dmat4 translation =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
-    glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
-    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
+    const glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
+    const glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     _cachedModelTransform = translation * rotation * scaling;
     _cachedInverseModelTransform = glm::inverse(_cachedModelTransform);
@@ -1744,7 +1745,7 @@ void RenderableGlobe::recompileShaders() {
             0
         );
 
-        std::string groupName = std::string(layers::Groups[i].identifier);
+        const std::string groupName = std::string(layers::Groups[i].identifier);
 
         for (int j = 0;
              j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1;
@@ -1770,8 +1771,8 @@ void RenderableGlobe::recompileShaders() {
         }
 
         // This is to avoid errors from shader preprocessor
-        std::string keyLayerAdjustmentType = groupName + "0" + "LayerAdjustmentType";
-        shaderDictionary.setValue(keyLayerAdjustmentType, 0);
+        std::string layerAdjustmentType = groupName + "0" + "LayerAdjustmentType";
+        shaderDictionary.setValue(std::move(layerAdjustmentType), 0);
 
         for (int j = 0;
              j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1;
@@ -1804,7 +1805,9 @@ void RenderableGlobe::recompileShaders() {
     shaderDictionary.setValue("nShadowSamples", _generalProperties.nShadowSamples - 1);
 
     // Exclise Shadow Samples
-    int nEclipseShadows = static_cast<int>(_ellipsoid.shadowConfigurationArray().size());
+    const int nEclipseShadows = static_cast<int>(
+        _ellipsoid.shadowConfigurationArray().size()
+    );
     shaderDictionary.setValue("nEclipseShadows", nEclipseShadows - 1);
     //
     // Create local shader
@@ -1865,11 +1868,11 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
 
     glm::dvec3 centerToEllipsoidSurface =
         _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
-    glm::dvec3 ellipsoidSurfaceToTarget = targetModelSpace - centerToEllipsoidSurface;
+    const glm::dvec3 ellipsoidSrfToTarget = targetModelSpace - centerToEllipsoidSurface;
     // ellipsoidSurfaceOutDirection will point towards the target, we want the outward
     // direction. Therefore it must be flipped in case the target is under the reference
     // ellipsoid so that it always points outwards
-    glm::dvec3 ellipsoidSurfaceOutDirection = glm::normalize(ellipsoidSurfaceToTarget);
+    glm::dvec3 ellipsoidSurfaceOutDirection = glm::normalize(ellipsoidSrfToTarget);
     if (glm::dot(ellipsoidSurfaceOutDirection, centerToEllipsoidSurface) < 0) {
         ellipsoidSurfaceOutDirection *= -1.0;
     }
@@ -1986,7 +1989,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
             return 0;
         }
 
-        glm::vec2 transformedUv = layer->tileUvToTextureSamplePosition(
+        const glm::vec2& transformedUv = layer->tileUvToTextureSamplePosition(
             uvTransform,
             patchUV
         );
@@ -2085,10 +2088,10 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
     );
     // Shadow calculations..
     std::vector<ShadowRenderingStruct> shadowDataArray;
-    std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray =
+    const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray =
         _ellipsoid.shadowConfigurationArray();
     shadowDataArray.reserve(shadowConfArray.size());
-    double lt;
+    double lt = 0.0;
     for (const auto& shadowConf : shadowConfArray) {
         // TO REMEMBER: all distances and lengths in world coordinates are in
         // meters!!! We need to move this to view space...
@@ -2363,7 +2366,7 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
     for (const layers::Group& gi : layers::Groups) {
         const std::vector<Layer*>& lyrs = _layerManager.layerGroup(gi.id).activeLayers();
         for (Layer* layer : lyrs) {
-            Tile::Status status = layer->tileStatus(chunk.tileIndex);
+            const Tile::Status status = layer->tileStatus(chunk.tileIndex);
             // Ensure that the current tile is OK and that the tileprovider for the
             // current layer has enough data to support an additional level.
             if (status == Tile::Status::OK &&
@@ -2419,7 +2422,7 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
         _cachedInverseModelTransform * glm::dvec4(renderData.camera.positionVec3(), 1.0)
     );
 
-    const glm::dvec3 globeToCamera = cameraPos;
+    const glm::dvec3& globeToCamera = cameraPos;
 
     const Geodetic2 camPosOnGlobe = _ellipsoid.cartesianToGeodetic2(globeToCamera);
     const Geodetic2 closestPatchPoint = patch.closestPoint(camPosOnGlobe);

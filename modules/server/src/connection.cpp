@@ -109,7 +109,7 @@ void Connection::handleMessage(const std::string& message) {
     ZoneScoped;
 
     try {
-        nlohmann::json j = nlohmann::json::parse(message.c_str());
+        const nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
             handleJson(j);
         }
@@ -163,7 +163,7 @@ void Connection::handleJson(const nlohmann::json& json) {
     }
 
     // The topic id may be an already discussed topic, or a new one.
-    TopicId topicId = *topicJson;
+    const TopicId topicId = *topicJson;
     auto topicIt = _topics.find(topicId);
 
     if (topicIt == _topics.end()) {
@@ -173,9 +173,9 @@ void Connection::handleJson(const nlohmann::json& json) {
             LERROR("Type must be specified as a string when a new topic is initialized");
             return;
         }
-        std::string type = *typeJson;
+        const std::string type = *typeJson;
 
-        if (!isAuthorized() && type != "authorize") {
+        if (!isAuthorized() && (type != "authorize")) {
             LERROR("Connection is not authorized");
             return;
         }

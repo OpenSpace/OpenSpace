@@ -52,8 +52,8 @@ public:
         bool usersAssets = false);
 
 private:
-    void parseChildDirElements(QFileInfo item, const std::string& space, int level,
-        std::vector<std::string>& dirNames, std::vector<std::string>& output,
+    void parseChildDirElements(const QFileInfo& fileInfo, const std::string& space,
+        int level, std::vector<std::string>& dirNames, std::vector<std::string>& output,
         bool userAssets);
     void parseChildFile(std::string filename, bool& hasDirHeaderBeenAdded,
         std::vector<std::string>& dirNames, std::vector<std::string>& output);

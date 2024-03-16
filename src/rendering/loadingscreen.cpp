@@ -373,8 +373,8 @@ void LoadingScreen::render() {
         renderer.render(*_messageFont, messageLl, _message);
     }
 
-    glm::vec2 logLl = glm::vec2(0.f, 0.f);
-    glm::vec2 logUr = glm::vec2(res.x, res.y * (LogBackgroundPosition + 0.015));
+    const glm::vec2 logLl = glm::vec2(0.f, 0.f);
+    const glm::vec2 logUr = glm::vec2(res.x, res.y * (LogBackgroundPosition + 0.015));
 
     // Font rendering enables depth testing so we disable again to render the log box
     glDisable(GL_DEPTH_TEST);
@@ -389,9 +389,9 @@ void LoadingScreen::render() {
     }
 
     if (_showNodeNames) {
-        std::lock_guard guard(_itemsMutex);
+        const std::lock_guard guard(_itemsMutex);
 
-        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        const auto now = std::chrono::system_clock::now();
 
         const glm::vec2 logoLl = glm::vec2(LogoCenter.x - size.x,  LogoCenter.y - size.y);
         const glm::vec2 logoUr = glm::vec2(LogoCenter.x + size.x,  LogoCenter.y + size.y);
@@ -585,7 +585,7 @@ void LoadingScreen::renderLogMessages() const {
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
 
     size_t nRows = 0;
-    size_t j = std::min(MaxNumberMessages, entries.size());
+    const size_t j = std::min(MaxNumberMessages, entries.size());
     for (size_t i = 1; i <= j; i++) {
         ZoneScopedN("Entry");
 
@@ -636,7 +636,7 @@ void LoadingScreen::renderLogMessages() const {
     size_t row = 0;
     for (auto& [level, amount] : numberOfErrorsPerLevel) {
         const std::string text = fmt::format("{}: {}", ghoul::to_string(level), amount);
-        glm::vec2 bbox = _logFont->boundingBox(text);
+        const glm::vec2 bbox = _logFont->boundingBox(text);
         renderer.render(
             *_logFont,
             glm::vec2(
@@ -651,7 +651,7 @@ void LoadingScreen::renderLogMessages() const {
 }
 
 void LoadingScreen::postMessage(std::string message) {
-    std::lock_guard guard(_messageMutex);
+    const std::lock_guard guard(_messageMutex);
     _message = std::move(message);
 }
 
@@ -688,7 +688,7 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         // also would create any of the text information
         return;
     }
-    std::lock_guard guard(_itemsMutex);
+    const std::lock_guard guard(_itemsMutex);
 
     auto it = std::find_if(
         _items.begin(),

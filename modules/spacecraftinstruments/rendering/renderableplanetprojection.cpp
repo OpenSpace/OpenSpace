@@ -439,8 +439,8 @@ glm::mat4 RenderablePlanetProjection::attitudeParameters(double time, const glm:
         _projectionComponent.instrumentId()
     );
 
-    double lightTime;
-    glm::dvec3 p = SpiceManager::ref().targetPosition(
+    double lightTime = 0.0;
+    const glm::dvec3 p = SpiceManager::ref().targetPosition(
         _projectionComponent.projectorId(),
         _projectionComponent.projecteeId(),
         "GALACTIC",
@@ -479,7 +479,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         _projectionComponent.generateMipMap();
     }
 
-    glm::vec3 up = data.camera.lookUpVectorCameraSpace();
+    const glm::vec3 up = data.camera.lookUpVectorCameraSpace();
     if (_projectionComponent.doesPerformProjection()) {
         int nProjections = 0;
         for (const Image& img : _imageTimes) {
@@ -487,10 +487,10 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
                 break;
             }
             try {
-                glm::mat4 projectorMatrix = attitudeParameters(img.timeRange.start, up);
-                std::shared_ptr<ghoul::opengl::Texture> t =
+                const glm::mat4 projMatrix = attitudeParameters(img.timeRange.start, up);
+                const std::shared_ptr<ghoul::opengl::Texture> t =
                     _projectionComponent.loadProjectionTexture(img.path);
-                imageProjectGPU(*t, projectorMatrix);
+                imageProjectGPU(*t, projMatrix);
                 ++nProjections;
             }
             catch (const SpiceManager::SpiceException& e) {
@@ -507,8 +507,8 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         LERRORC(e.component, e.what());
     }
 
-    double lt;
-    glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
+    double lt = 0.0;
+    const glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
         "SUN",
         _projectionComponent.projecteeId(),
         "GALACTIC",
@@ -546,21 +546,23 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         _projectionComponent.projectionFading()
     );
 
-    ghoul::opengl::TextureUnit unit[3];
+    ghoul::opengl::TextureUnit baseUnit;
     if (_baseTexture) {
-        unit[0].activate();
+        baseUnit.activate();
         _baseTexture->bind();
-        _programObject->setUniform(_mainUniformCache.baseTexture, unit[0]);
+        _programObject->setUniform(_mainUniformCache.baseTexture, baseUnit);
     }
 
-    unit[1].activate();
+    ghoul::opengl::TextureUnit projectionUnit;
+    projectionUnit.activate();
     _projectionComponent.projectionTexture().bind();
-    _programObject->setUniform(_mainUniformCache.projectionTexture, unit[1]);
+    _programObject->setUniform(_mainUniformCache.projectionTexture, projectionUnit);
 
+    ghoul::opengl::TextureUnit heightUnit;
     if (_heightMapTexture) {
-        unit[2].activate();
+        heightUnit.activate();
         _heightMapTexture->bind();
-        _programObject->setUniform(_mainUniformCache.heightTexture, unit[2]);
+        _programObject->setUniform(_mainUniformCache.heightTexture, heightUnit);
     }
 
     _sphere->render();
@@ -615,7 +617,7 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         );
 
         if (!newImageTimes.empty()) {
-            double firstNewImage = newImageTimes[0].timeRange.end;
+            const double firstNewImage = newImageTimes[0].timeRange.end;
             // Make sure images are always projected in the correct order
             // (Remove buffered images with a later timestamp)
             const auto& it = std::find_if(
@@ -644,7 +646,7 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
 
 void RenderablePlanetProjection::loadColorTexture() {
     using ghoul::opengl::Texture;
-    std::string selectedPath = _colorTexturePaths.option().description;
+    const std::string selectedPath = _colorTexturePaths.option().description;
 
     // We delete the texture first in order to free up the memory, which could otherwise
     // run out in the case of two large textures
@@ -667,7 +669,7 @@ void RenderablePlanetProjection::loadColorTexture() {
 
 void RenderablePlanetProjection::loadHeightTexture() {
     using ghoul::opengl::Texture;
-    std::string selectedPath = _heightMapTexturePaths.option().description;
+    const std::string selectedPath = _heightMapTexturePaths.option().description;
 
     // We delete the texture first in order to free up the memory, which could otherwise
     // run out in the case of two large textures

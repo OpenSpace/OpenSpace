@@ -78,11 +78,11 @@ void ConvertRecFileVersionTask::perform(const Task::ProgressCallback&) {
 }
 
 void ConvertRecFileVersionTask::convert() {
-    const bool hasBinaryFileExtension = sessRec->hasFileExtension(
+    const bool hasBinaryFileExtension = SessionRecording::hasFileExtension(
         _inFilename,
         SessionRecording::FileExtensionBinary
     );
-    const bool hasAsciiFileExtension = sessRec->hasFileExtension(
+    const bool hasAsciiFileExtension = SessionRecording::hasFileExtension(
         _inFilename,
         SessionRecording::FileExtensionAscii
     );
