@@ -156,10 +156,10 @@ namespace {
 
     bool isLabelInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position) {
         // Frustum Planes
-        glm::dvec3 col1(MVMatrix[0][0], MVMatrix[1][0], MVMatrix[2][0]);
-        glm::dvec3 col2(MVMatrix[0][1], MVMatrix[1][1], MVMatrix[2][1]);
-        glm::dvec3 col3(MVMatrix[0][2], MVMatrix[1][2], MVMatrix[2][2]);
-        glm::dvec3 col4(MVMatrix[0][3], MVMatrix[1][3], MVMatrix[2][3]);
+        const glm::dvec3 col1(MVMatrix[0][0], MVMatrix[1][0], MVMatrix[2][0]);
+        const glm::dvec3 col2(MVMatrix[0][1], MVMatrix[1][1], MVMatrix[2][1]);
+        const glm::dvec3 col3(MVMatrix[0][2], MVMatrix[1][2], MVMatrix[2][2]);
+        const glm::dvec3 col4(MVMatrix[0][3], MVMatrix[1][3], MVMatrix[2][3]);
 
         glm::dvec3 leftNormal = col4 + col1;
         glm::dvec3 rightNormal = col4 - col1;
@@ -385,7 +385,7 @@ bool GlobeLabelsComponent::loadLabelsData(const std::filesystem::path& file) {
         "GlobeLabelsComponent|" + identifier()
     );
 
-    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
+    const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
             "Cached file '{}' used for labels file '{}'", cachedFile, file
@@ -406,7 +406,7 @@ bool GlobeLabelsComponent::loadLabelsData(const std::filesystem::path& file) {
     }
     LINFO(fmt::format("Loading labels file '{}'", file));
 
-    bool success = readLabelsFile(file);
+    const bool success = readLabelsFile(file);
     if (success) {
         saveCachedFile(cachedFile);
     }
@@ -473,8 +473,8 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             lEntry.longitude = std::stof(token);
 
             std::getline(iss, token, ','); // Coord System
-            std::string coordinateSystem(token);
-            size_t found = coordinateSystem.find("West");
+            const std::string_view coordinateSystem = token;
+            const size_t found = coordinateSystem.find("West");
             if (found != std::string::npos) {
                 lEntry.longitude = 360.0f - lEntry.longitude;
             }
@@ -485,7 +485,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             if (token.empty()) {
                 std::getline(issFeature, token, '=');
             }
-            strncpy(lEntry.feature, token.c_str(), 255);
+            std::strncpy(lEntry.feature, token.c_str(), 255);
 
             GlobeBrowsingModule* _globeBrowsingModule =
                 global::moduleEngine->module<openspace::GlobeBrowsingModule>();
@@ -539,21 +539,21 @@ bool GlobeLabelsComponent::loadCachedFile(const std::filesystem::path& file) {
 }
 
 bool GlobeLabelsComponent::saveCachedFile(const std::filesystem::path& file) const {
-    std::ofstream fileStream(file, std::ofstream::binary);
+    std::ofstream fileStream = std::ofstream(file, std::ofstream::binary);
     if (!fileStream.good()) {
         LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return false;
     }
     fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
 
-    int32_t nValues = static_cast<int32_t>(_labels.labelsArray.size());
+    const int32_t nValues = static_cast<int32_t>(_labels.labelsArray.size());
     if (nValues == 0) {
         LERROR("Error writing cache: No values were loaded");
         return false;
     }
     fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-    size_t nBytes = nValues * sizeof(LabelEntry);
+    const size_t nBytes = nValues * sizeof(LabelEntry);
     fileStream.write(reinterpret_cast<const char*>(_labels.labelsArray.data()), nBytes);
 
     return fileStream.good();
@@ -565,27 +565,27 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
     }
 
     // Calculate the MVP matrix
-    glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+    const glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
+    const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
                     viewTransform;
-    glm::dmat4 mvp = vp * _globe->modelTransform();
+    const glm::dmat4 mvp = vp * _globe->modelTransform();
 
-    glm::dvec3 globePosWorld =
+    const glm::dvec3 globePosWorld =
         glm::dvec3(_globe->modelTransform() * glm::vec4(0.f, 0.f, 0.f, 1.f));
-    glm::dvec3 cameraToGlobeWorld = globePosWorld - data.camera.positionVec3();
-    double distanceCameraGlobeWorld = glm::length(cameraToGlobeWorld);
+    const glm::dvec3 cameraToGlobeWorld = globePosWorld - data.camera.positionVec3();
+    const double distanceCameraGlobeWorld = glm::length(cameraToGlobeWorld);
 
     float varyingOpacity = 1.f;
 
     const glm::dvec3 globeRadii = _globe->ellipsoid().radii();
-    double averageRadius = (globeRadii.x + globeRadii.y + globeRadii.z) / 3.0;
+    const double averageRadius = (globeRadii.x + globeRadii.y + globeRadii.z) / 3.0;
 
     if (_fadeInEnabled) {
         glm::dvec2 fadeRange = glm::dvec2(averageRadius + _heightOffset);
         fadeRange.x += _fadeDistances.value().y;
-        double a = 1.0 / (fadeRange.y - fadeRange.x);
-        double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        double funcValue = a * distanceCameraGlobeWorld + b;
+        const double a = 1.0 / (fadeRange.y - fadeRange.x);
+        const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        const double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
 
         if (varyingOpacity < MinOpacityValueConst) {
@@ -598,9 +598,9 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
             averageRadius + _heightOffset + LabelFadeOutLimitAltitudeMeters
         );
         fadeRange.x += _fadeDistances.value().x;
-        double a = 1.0 / (fadeRange.x - fadeRange.y);
-        double b = -(fadeRange.y / (fadeRange.x - fadeRange.y));
-        double funcValue = a * distanceCameraGlobeWorld + b;
+        const double a = 1.0 / (fadeRange.x - fadeRange.y);
+        const double b = -(fadeRange.y / (fadeRange.x - fadeRange.y));
+        const double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
 
         if (varyingOpacity < MinOpacityValueConst) {
@@ -615,27 +615,24 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                                         const glm::dmat4& modelViewProjectionMatrix,
                                         float distToCamera, float fadeInVariable
 ) {
-    glm::vec4 textColor = glm::vec4(
-        glm::vec3(_color),
-        opacity() * fadeInVariable
-    );
+    const glm::vec4 textColor = glm::vec4(glm::vec3(_color), opacity() * fadeInVariable);
 
-    glm::dmat4 VP = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+    const glm::dmat4 VP = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
                     data.camera.combinedViewMatrix();
 
-    glm::dmat4 invModelMatrix = glm::inverse(_globe->modelTransform());
+    const glm::dmat4 invModelMatrix = glm::inverse(_globe->modelTransform());
 
-    glm::dvec3 cameraViewDirectionObj = glm::dvec3(
+    const glm::dvec3 cameraViewDirectionObj = glm::dvec3(
         invModelMatrix * glm::dvec4(data.camera.viewDirectionWorldSpace(), 0.0)
     );
-    glm::dvec3 cameraUpDirectionObj = glm::dvec3(
+    const glm::dvec3 cameraUpDirectionObj = glm::dvec3(
         invModelMatrix * glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0)
     );
     glm::dvec3 orthoRight = glm::normalize(
         glm::cross(cameraViewDirectionObj, cameraUpDirectionObj)
     );
     if (orthoRight == glm::dvec3(0.0)) {
-        glm::dvec3 otherVector(
+        const glm::dvec3 otherVector = glm::dvec3(
             cameraUpDirectionObj.y,
             cameraUpDirectionObj.x,
             cameraUpDirectionObj.z
@@ -646,9 +643,9 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
 
     for (const LabelEntry& lEntry : _labels.labelsArray) {
         glm::vec3 position = lEntry.geoPosition;
-        glm::dvec3 locationPositionWorld =
+        const glm::dvec3 locationPositionWorld =
             glm::dvec3(_globe->modelTransform() * glm::dvec4(position, 1.0));
-        double distanceCameraToLabelWorld =
+        const double distanceCameraToLabelWorld =
             glm::length(locationPositionWorld - data.camera.positionVec3());
 
         if (_disableCulling ||
@@ -656,11 +653,11 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
             isLabelInFrustum(VP, locationPositionWorld)))
         {
             if (_alignmentOption == Circularly) {
-                glm::dvec3 labelNormalObj = glm::dvec3(
+                const glm::dvec3 labelNormalObj = glm::dvec3(
                     invModelMatrix * glm::dvec4(data.camera.positionVec3(), 1.0)
                 ) - glm::dvec3(position);
 
-                glm::dvec3 labelUpDirectionObj = glm::dvec3(position);
+                const glm::dvec3 labelUpDirectionObj = glm::dvec3(position);
 
                 orthoRight = glm::normalize(
                     glm::cross(labelUpDirectionObj, labelNormalObj)
@@ -694,8 +691,8 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
             labelInfo.disableTransmittance = true;
 
             // Testing
-            glm::dmat4 modelviewTransform = glm::dmat4(data.camera.combinedViewMatrix()) *
-                                            _globe->modelTransform();
+            const glm::dmat4 modelviewTransform = glm::dmat4(
+                data.camera.combinedViewMatrix()) * _globe->modelTransform();
             labelInfo.modelViewMatrix = modelviewTransform;
             labelInfo.projectionMatrix = glm::dmat4(
                 data.camera.sgctInternal.projectionMatrix()

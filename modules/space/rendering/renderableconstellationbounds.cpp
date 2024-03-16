@@ -145,11 +145,11 @@ void RenderableConstellationBounds::initializeGL() {
     glBufferData(
         GL_ARRAY_BUFFER,
         _vertexValues.size() * 3 * sizeof(float),
-        &_vertexValues[0],
+        _vertexValues.data(),
         GL_STATIC_DRAW
     );
 
-    GLint positionAttrib = _program->attributeLocation("in_position");
+    const GLint positionAttrib = _program->attributeLocation("in_position");
     glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
@@ -245,10 +245,10 @@ bool RenderableConstellationBounds::loadVertexFile() {
 
         // @CHECK: Is this the best way of doing this? ---abock
         std::stringstream s(currentLine);
-        float ra;
+        float ra = 0.f;
         s >> ra;
 
-        float dec;
+        float dec = 0.f;
         s >> dec;
 
         std::string abbreviation;
@@ -274,8 +274,9 @@ bool RenderableConstellationBounds::loadVertexFile() {
             currentBound = ConstellationBound();
             currentBound.isEnabled = true;
             currentBound.constellationAbbreviation = abbreviation;
-            std::string name = constellationFullName(abbreviation);
-            currentBound.constellationFullName = name.empty() ? abbreviation : name;
+            const std::string name = constellationFullName(abbreviation);
+            currentBound.constellationFullName =
+                name.empty() ? abbreviation : std::move(name);
             currentBound.startIndex = static_cast<GLsizei>(_vertexValues.size());
         }
 

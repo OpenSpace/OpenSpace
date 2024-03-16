@@ -154,14 +154,13 @@ std::string OptionProperty::getDescriptionByValue(int value) {
 
 std::string OptionProperty::generateAdditionalJsonDescription() const {
     // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
-    std::string result =
-        "{ \"" + OptionsKey + "\": [";
+    std::string result = "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); i++) {
         const Option& o = _options[i];
-        std::string v = std::to_string(o.value);
-        std::string vSan = escapedJson(v);
-        std::string d = o.description;
-        std::string dSan = escapedJson(d);
+        const std::string v = std::to_string(o.value);
+        const std::string vSan = escapedJson(v);
+        const std::string d = o.description;
+        const std::string dSan = escapedJson(d);
 
         result += '{';
         result += fmt::format(R"("{}": "{}")", vSan, dSan);

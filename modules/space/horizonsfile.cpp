@@ -66,7 +66,7 @@ HorizonsFile::HorizonsFile(std::filesystem::path filePath, std::string result)
 {
     // Write the response into a new file and save it
     std::ofstream file(_file);
-    file << ghoul::replaceAll(std::move(result), "\\n", "\n") << std::endl;
+    file << ghoul::replaceAll(std::move(result), "\\n", "\n") << '\n';
 }
 
 void HorizonsFile::setFile(std::filesystem::path file) {
@@ -118,7 +118,7 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
 
 json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath) {
     // Set up HTTP request and download result
-    std::unique_ptr<HttpFileDownload> download = std::make_unique<HttpFileDownload>(
+    const auto download = std::make_unique<HttpFileDownload>(
         url,
         filePath,
         HttpFileDownload::Overwrite::Yes
@@ -141,7 +141,7 @@ json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath)
     return convertHorizonsDownloadToJson(filePath);
 }
 
-nlohmann::json convertHorizonsDownloadToJson(std::filesystem::path filePath) {
+nlohmann::json convertHorizonsDownloadToJson(const std::filesystem::path& filePath) {
     // Read the entire file into a string
     constexpr size_t ReadSize = 4096;
     std::ifstream stream = std::ifstream(filePath);
@@ -197,7 +197,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
     // Errors
     if (auto it = answer.find("error");  it != answer.end()) {
         // There was an error
-        std::string errorMsg = *it;
+        const std::string errorMsg = *it;
 
         // @CPP23 (malej, 2022-04-08) In all cases below, the string function contains
         // should be used instead of find
@@ -247,7 +247,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
 
 // Check whether the given Horizons file is valid or not
 // Return an error code with what is the problem if there was one
-HorizonsResultCode isValidHorizonsFile(std::filesystem::path file) {
+HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
     std::ifstream fileStream(file);
     if (!fileStream.good()) {
         return HorizonsResultCode::Empty;
@@ -412,7 +412,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
                 "selected observer"
             );
 
-            std::vector<std::string> matchingstations =
+            const std::vector<std::string> matchingstations =
                 parseMatches("Observatory Name", "Multiple matching stations found");
             if (matchingstations.empty()) {
                 LERROR("Could not parse the matching stations");
@@ -420,7 +420,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
             }
 
             std::string matches;
-            for (std::string station : matchingstations) {
+            for (const std::string& station : matchingstations) {
                 matches += '\n' + station;
             }
             LINFO(fmt::format("Matching Observer Stations: {}", matches));
@@ -429,7 +429,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
         case HorizonsResultCode::MultipleObserver: {
             LWARNING("Multiple matches were found for the selected observer");
 
-            std::vector<std::string> matchingObservers =
+            const std::vector<std::string> matchingObservers =
                 parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingObservers.empty()) {
                 LERROR("Could not parse the matching observers");
@@ -460,7 +460,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
 
             LWARNING("Multiple matches were found for the target");
 
-            std::vector<std::string> matchingTargets =
+            const std::vector<std::string> matchingTargets =
                 parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingTargets.empty()) {
                 LERROR("Could not parse the matching targets");
@@ -468,7 +468,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
             }
 
             std::string matches;
-            for (std::string target : matchingTargets) {
+            for (const std::string& target : matchingTargets) {
                 matches += '\n' + target;
             }
             LINFO(fmt::format("Matching targets: {}", matches));
@@ -485,7 +485,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
 
 HorizonsResult readHorizonsFile(std::filesystem::path file) {
     // Check if valid
-    HorizonsResultCode code = isValidHorizonsFile(file);
+    const HorizonsResultCode code = isValidHorizonsFile(file);
     if (code != HorizonsResultCode::Valid) {
         HorizonsResult result;
         result.errorCode = code;
@@ -563,16 +563,16 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
         std::stringstream str2(line);
 
         //   X Y Z
-        double xPos;
-        double yPos;
-        double zPos;
+        double xPos = 0.0;
+        double yPos = 0.0;
+        double zPos = 0.0;
         str2 >> xPos >> yPos >> zPos;
 
         // Convert date and time to seconds after 2000
         std::string timeString = fmt::format("{} {}", date, time);
         double timeInJ2000 = Time::convertTime(timeString);
         glm::dvec3 pos = glm::dvec3(1000 * xPos, 1000 * yPos, 1000 * zPos);
-        glm::dmat3 transform =
+        const glm::dmat3 transform =
             SpiceManager::ref().positionTransformMatrix("ECLIPJ2000", "GALACTIC", 0.0);
         pos = transform * pos;
 
@@ -631,7 +631,7 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
 
         // Convert date and time to seconds after 2000
         // and pos to Galactic positions in meter from Observer.
-        std::string timeString = fmt::format("{} {}", date, time);
+        const std::string timeString = fmt::format("{} {}", date, time);
 
         // Add position to stored data
         dataPoint.time = Time::convertTime(timeString);

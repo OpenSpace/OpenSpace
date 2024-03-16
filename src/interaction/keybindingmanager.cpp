@@ -78,7 +78,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string actio
 #endif // WIN32
     ghoul_assert(!action.empty(), "Action must not be empty");
 
-    KeyWithModifier km = { key, modifier };
+    const KeyWithModifier km = { key, modifier };
     _keyLua.insert({ km, std::move(action) });
 }
 

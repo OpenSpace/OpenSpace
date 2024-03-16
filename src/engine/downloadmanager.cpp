@@ -51,7 +51,7 @@ namespace {
     }
 
     size_t writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp) {
-        size_t realsize = size * nmemb;
+        const size_t realsize = size * nmemb;
         auto* mem = static_cast<openspace::DownloadManager::MemoryFile*>(userp);
 
         // @TODO(abock): Remove this and replace mem->buffer with std::vector<char>
@@ -256,7 +256,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
         CURLcode res = curl_easy_perform(curl);
         if (res == CURLE_OK) {
             // ask for the content-type
-            char* ct;
+            char* ct = nullptr;
             res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
             if (res == CURLE_OK) {
                 std::string extension = std::string(ct);

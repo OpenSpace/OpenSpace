@@ -131,7 +131,7 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
 
 void RenderablePlaneTimeVaryingImage::initialize() {
     RenderablePlane::initialize();
-    bool success = extractMandatoryInfoFromDictionary();
+    const bool success = extractMandatoryInfoFromDictionary();
     if (!success) {
         return;
     }

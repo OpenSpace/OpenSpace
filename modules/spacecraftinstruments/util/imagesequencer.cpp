@@ -225,7 +225,8 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     // create temporary storage
     std::vector<Image> captures;
     // what to look for
-    Image findPrevious, findCurrent;
+    Image findPrevious;
+    Image findCurrent;
     findPrevious.timeRange.start = sinceTime;
     findCurrent.timeRange.start = time;
 
@@ -277,7 +278,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     for (size_t i = 0; i < toDelete.size(); i++) {
         // We have to subtract i here as we already have deleted i value before this and
         // we need to adjust the location
-        int v = toDelete[i] - static_cast<int>(i);
+        const int v = toDelete[i] - static_cast<int>(i);
         captures.erase(captures.begin() + v);
     }
 
@@ -351,21 +352,22 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
         double min = 10;
         auto findMin = [&min](const std::vector<Image>& vec) -> double {
             for (size_t i = 1; i < vec.size(); i++) {
-                double e = std::abs(vec[i].timeRange.start - vec[i - 1].timeRange.start);
+                const double e = std::abs(
+                    vec[i].timeRange.start - vec[i - 1].timeRange.start
+                );
                 min = std::min(e, min);
             }
             return min;
         };
 
         // find the smallest separation of images in time
-        double epsilon;
-        epsilon = findMin(destination);
+        double epsilon = findMin(destination);
         // set epsilon as 1% smaller than min
         epsilon -= min * 0.01;
 
         // IFF images have same time as mission planned capture, erase that event
         // from 'predicted event file' (mission-playbook)
-        for (Image& i : source) {
+        for (const Image& i : source) {
             for (const Image& j : destination) {
                 const double diff = std::abs(i.timeRange.start - j.timeRange.start);
                 if (diff < epsilon) {

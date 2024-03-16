@@ -141,7 +141,7 @@ void ExoplanetsDataPreparationTask::perform(
 
     // Read until the first line contaning the column names, and save them for
     // later access
-    std::vector<std::string> columnNames = readFirstDataRow(inputDataFile);
+    const std::vector<std::string> columnNames = readFirstDataRow(inputDataFile);
 
     // Read total number of items
     int total = 0;
@@ -171,9 +171,9 @@ void ExoplanetsDataPreparationTask::perform(
         );
 
         // Create look-up table
-        long pos = static_cast<long>(binFile.tellp());
-        std::string planetName = planetData.host + " " + planetData.component;
-        lutFile << planetName << "," << pos << std::endl;
+        const long pos = static_cast<long>(binFile.tellp());
+        const std::string planetName = planetData.host + " " + planetData.component;
+        lutFile << planetName << "," << pos << '\n';
 
         binFile.write(
             reinterpret_cast<char*>(&planetData.dataEntry),
@@ -191,7 +191,7 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
 
     // Read past any comments and empty lines
     while (std::getline(file, line)) {
-        bool shouldSkip = line.empty() || line[0] == '#';
+        const bool shouldSkip = line.empty() || line[0] == '#';
         if (!shouldSkip) {
             break;
         }
@@ -209,10 +209,10 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
 }
 
 ExoplanetsDataPreparationTask::PlanetData
-ExoplanetsDataPreparationTask::parseDataRow(std::string row,
+ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
                                             const std::vector<std::string>& columnNames,
-                                            std::filesystem::path positionSourceFile,
-                                          std::filesystem::path bvFromTeffConversionFile)
+                                          const std::filesystem::path& positionSourceFile,
+                                    const std::filesystem::path& bvFromTeffConversionFile)
 {
     auto readFloatData = [](const std::string& str) -> float {
 #ifdef WIN32
@@ -224,7 +224,7 @@ ExoplanetsDataPreparationTask::parseDataRow(std::string row,
         return std::numeric_limits<float>::quiet_NaN();
 #else
         // clang is missing float support for std::from_chars
-        return !str.empty() ? std::stof(str.c_str(), nullptr) : NAN;
+        return !str.empty() ? std::stof(str, nullptr) : NAN;
 #endif
 };
 
@@ -238,12 +238,12 @@ ExoplanetsDataPreparationTask::parseDataRow(std::string row,
         return std::numeric_limits<double>::quiet_NaN();
 #else
         // clang is missing double support for std::from_chars
-        return !str.empty() ? std::stod(str.c_str(), nullptr) : NAN;
+        return !str.empty() ? std::stod(str, nullptr) : NAN;
 #endif
     };
 
     auto readIntegerData = [](const std::string& str) -> int {
-        int result;
+        int result = 0;
         auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
         if (ec == std::errc()) {
             return result;
@@ -391,15 +391,15 @@ ExoplanetsDataPreparationTask::parseDataRow(std::string row,
         }
         // Star luminosity
         else if (column == "st_lum") {
-            float dataInLogSolar = readFloatData(data);
+            const float dataInLogSolar = readFloatData(data);
             p.luminosity = static_cast<float>(std::pow(10, dataInLogSolar));
         }
         else if (column == "st_lumerr1") {
-            float dataInLogSolar = readFloatData(data);
+            const float dataInLogSolar = readFloatData(data);
             p.luminosityUpper = static_cast<float>(std::pow(10, dataInLogSolar));
         }
         else if (column == "st_lumerr2") {
-            float dataInLogSolar = readFloatData(data);
+            const float dataInLogSolar = readFloatData(data);
             p.luminosityLower = static_cast<float>(-std::pow(10, dataInLogSolar));
         }
         // Is the planet orbiting a binary system?
@@ -422,12 +422,12 @@ ExoplanetsDataPreparationTask::parseDataRow(std::string row,
     p.bigOmegaUpper = std::numeric_limits<float>::quiet_NaN();
     p.bigOmegaLower = std::numeric_limits<float>::quiet_NaN();
 
-    bool foundPositionFromSpeck = !std::isnan(p.positionX);
-    bool hasDistance = !std::isnan(distanceInParsec);
-    bool hasIcrsCoords = !std::isnan(ra) && !std::isnan(dec) && hasDistance;
+    const bool foundPositionFromSpeck = !std::isnan(p.positionX);
+    const bool hasDistance = !std::isnan(distanceInParsec);
+    const bool hasIcrsCoords = !std::isnan(ra) && !std::isnan(dec) && hasDistance;
 
     if (!foundPositionFromSpeck && hasIcrsCoords) {
-        glm::dvec3 pos = icrsToGalacticCartesian(ra, dec, distanceInParsec);
+        const glm::dvec3 pos = icrsToGalacticCartesian(ra, dec, distanceInParsec);
         p.positionX = static_cast<float>(pos.x);
         p.positionY = static_cast<float>(pos.y);
         p.positionZ = static_cast<float>(pos.z);
@@ -458,7 +458,7 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
 
     std::string line;
     while (std::getline(exoplanetsFile, line)) {
-        bool shouldSkipLine = (
+        const bool shouldSkipLine = (
             line.empty() || line[0] == '#' || line.substr(0, 7) == "datavar" ||
             line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture"
         );
@@ -478,11 +478,11 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
         if (name == starName) {
             std::stringstream dataStream(data);
             std::getline(dataStream, coord, ' ');
-            position[0] = std::stof(coord.c_str(), nullptr);
+            position[0] = std::stof(coord, nullptr);
             std::getline(dataStream, coord, ' ');
-            position[1] = std::stof(coord.c_str(), nullptr);
+            position[1] = std::stof(coord, nullptr);
             std::getline(dataStream, coord, ' ');
-            position[2] = std::stof(coord.c_str(), nullptr);
+            position[2] = std::stof(coord, nullptr);
             break;
         }
     }
@@ -509,7 +509,7 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
     float bvUpper = 0.f;
     float bvLower = 0.f;
     float teffLower = 0.f;
-    float teffUpper;
+    float teffUpper = 0.f;
     std::string row;
     while (std::getline(teffToBvFile, row)) {
         std::istringstream lineStream(row);
@@ -518,8 +518,8 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
         std::string bvString;
         std::getline(lineStream, bvString);
 
-        float teffCurrent = std::stof(teffString.c_str(), nullptr);
-        float bvCurrent = std::stof(bvString.c_str(), nullptr);
+        const float teffCurrent = std::stof(teffString, nullptr);
+        const float bvCurrent = std::stof(bvString, nullptr);
 
         if (teff > teffCurrent) {
             teffLower = teffCurrent;

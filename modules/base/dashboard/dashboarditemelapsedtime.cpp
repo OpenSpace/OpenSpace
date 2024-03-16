@@ -127,7 +127,7 @@ DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dict
     _simplifyTime = p.simplifyTime.value_or(_simplifyTime);
     addProperty(_simplifyTime);
 
-    for (TimeUnit u : TimeUnits) {
+    for (const TimeUnit u : TimeUnits) {
         _lowestTimeUnit.addOption(static_cast<int>(u), std::string(nameForTimeUnit(u)));
     }
     _lowestTimeUnit = static_cast<int>(TimeUnit::Second);

@@ -203,7 +203,7 @@ void checkJoystickStatus() {
 
         JoystickInputState& state = global::joystickInputStates->at(i);
 
-        int present = glfwJoystickPresent(i);
+        const int present = glfwJoystickPresent(i);
         if (present == GLFW_FALSE) {
             state.isConnected = false;
             continue;
@@ -282,8 +282,8 @@ void mainInitFunc(GLFWwindow*) {
     // We save the startup value of the screenshots just in case we want to add a date
     // to them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
-    FileSys.registerPathToken("${STARTUP_SCREENSHOT}", screenshotPath);
     sgct::Settings::instance().setCapturePath(screenshotPath.string());
+    FileSys.registerPathToken("${STARTUP_SCREENSHOT}", std::move(screenshotPath));
 
     LDEBUG("Initializing OpenSpace Engine started");
     global::openSpaceEngine->initialize();
@@ -292,10 +292,10 @@ void mainInitFunc(GLFWwindow*) {
 #ifndef __APPLE__
     // Apparently: "Cocoa: Regular windows do not have icons on macOS"
     {
-        std::filesystem::path path = absPath("${DATA}/openspace-icon.png");
-        int x;
-        int y;
-        int n;
+        const std::filesystem::path path = absPath("${DATA}/openspace-icon.png");
+        int x = 0;
+        int y = 0;
+        int n = 0;
         unsigned char* data = stbi_load(path.string().c_str(), &x, &y, &n, 0);
 
         GLFWimage icons[1];
@@ -341,7 +341,7 @@ void mainInitFunc(GLFWwindow*) {
     }
 
     for (size_t i = 0; i < Engine::instance().windows().size(); i++) {
-        Window& window = *Engine::instance().windows()[i];
+        const Window& window = *Engine::instance().windows()[i];
         if (!window.hasTag(SpoutTag)) {
             continue;
         }
@@ -438,11 +438,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
     currentDrawResolution = glm::ivec2(data.bufferSize.x, data.bufferSize.y);
 
     glm::vec3 pos;
-    std::memcpy(
-        glm::value_ptr(pos),
-        &Engine::instance().defaultUser().posMono().x,
-        sizeof(vec3)
-    );
+    std::memcpy(glm::value_ptr(pos), &Engine::defaultUser().posMono().x, sizeof(vec3));
 
     glm::mat4 viewMatrix;
     std::memcpy(
@@ -620,7 +616,7 @@ void mainCharCallback(unsigned int codepoint, int modifiers, sgct::Window* windo
 
 
 
-void mainDropCallback(std::vector<std::string_view> paths) {
+void mainDropCallback(const std::vector<std::string_view>& paths) {
     ZoneScoped;
 
     for (std::string_view path : paths) {
@@ -750,11 +746,11 @@ void setSgctDelegateFunctions() {
         const Viewport* viewport = dynamic_cast<const Viewport*>(currentViewport);
         if (viewport) {
             if (viewport->hasSubViewports() && viewport->nonLinearProjection()) {
-                ivec2 dim = viewport->nonLinearProjection()->cubemapResolution();
+                const ivec2 dim = viewport->nonLinearProjection()->cubemapResolution();
                 return glm::ivec2(dim.x, dim.y);
             }
             else {
-                ivec2 dim = currentWindow->finalFBODimensions();
+                const ivec2 dim = currentWindow->finalFBODimensions();
                 return glm::ivec2(dim.x, dim.y);
             }
         }
@@ -765,8 +761,8 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentViewportSize = []() {
         ZoneScoped;
 
-        if (currentViewport != nullptr) {
-            vec2 size = currentViewport->size();
+        if (currentViewport) {
+            const vec2 size = currentViewport->size();
             return glm::ivec2(size.x, size.y);
         }
         return glm::ivec2(-1, -1);
@@ -774,9 +770,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentViewportResolution = []() {
         ZoneScoped;
 
-        if (currentViewport != nullptr) {
-            ivec2 res = currentWindow->resolution();
-            vec2 size = currentViewport->size();
+        if (currentViewport) {
+            const ivec2 res = currentWindow->resolution();
+            const vec2 size = currentViewport->size();
             return glm::ivec2(size.x * res.x, size.y * res.y);
         }
         return glm::ivec2(-1, -1);
@@ -784,7 +780,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.dpiScaling = []() {
         ZoneScoped;
 
-        vec2 scale = currentWindow->scale();
+        const vec2 scale = currentWindow->scale();
         return glm::vec2(scale.x, scale.y);
     };
     sgctDelegate.firstWindowResolution = []() {
@@ -951,8 +947,7 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.swapGroupFrameNumber = []() -> uint64_t {
         ZoneScoped;
-
-        return currentWindow->swapGroupFrameNumber();
+        return sgct::Window::swapGroupFrameNumber();
     };
     sgctDelegate.setScreenshotFolder = [](std::filesystem::path path) {
         sgct::Settings::instance().setCapturePath(std::move(path));
@@ -966,29 +961,30 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentNode = []() {
         return ClusterManager::instance().thisNodeId();
     };
-    sgctDelegate.mousePositionViewportRelative = [](glm::vec2 mousePosition) {
+    sgctDelegate.mousePositionViewportRelative = [](const glm::vec2& mousePosition) {
         for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
-            if (isGuiWindow(window.get())) {
-                sgct::ivec2 res = window->resolution();
-                for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
-                    sgct::vec2 pos = viewport->position();
-                    sgct::vec2 size = viewport->size();
-                    glm::vec4 bounds = glm::vec4(
-                        pos.x * res.x,
-                        (1.0 - pos.y - size.y) * res.y,
-                        (pos.x + size.x) * res.x,
-                        (1.0 - pos.y) * res.y
-                    );
+            if (!isGuiWindow(window.get())) {
+                continue;
+            }
 
-                    if (
-                        (mousePosition.x >= bounds.x && mousePosition.x <= bounds.z) &&
-                        (mousePosition.y >= bounds.y && mousePosition.y <= bounds.w)
-                        ) {
-                        return glm::vec2(
-                            res.x * (mousePosition.x - bounds.x) / (bounds.z - bounds.x),
-                            res.y * (mousePosition.y - bounds.y) / (bounds.w - bounds.y)
-                        );
-                    }
+            const sgct::ivec2 res = window->resolution();
+            for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
+                const sgct::vec2 pos = viewport->position();
+                const sgct::vec2 size = viewport->size();
+                const glm::vec4 bounds = glm::vec4(
+                    pos.x * res.x,
+                    (1.0 - pos.y - size.y) * res.y,
+                    (pos.x + size.x) * res.x,
+                    (1.0 - pos.y) * res.y
+                );
+
+                if ((mousePosition.x >= bounds.x && mousePosition.x <= bounds.z) &&
+                    (mousePosition.y >= bounds.y && mousePosition.y <= bounds.w))
+                {
+                    return glm::vec2(
+                        res.x * (mousePosition.x - bounds.x) / (bounds.z - bounds.x),
+                        res.y * (mousePosition.y - bounds.y) / (bounds.w - bounds.y)
+                    );
                 }
             }
         }
@@ -1008,7 +1004,7 @@ void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& ha
 
             const std::string sgctAssignment = "SGCTConfig=";
             const size_t findSgct = p.find(sgctAssignment);
-            const size_t findBracket = p.find("}");
+            const size_t findBracket = p.find('}');
             if (findSgct != std::string::npos) {
                 if (findBracket != std::string::npos) {
                     sgctFunctionName = arg.substr(
@@ -1025,17 +1021,17 @@ void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& ha
     }
 }
 
-std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
+std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,
                                         bool haveCliSGCTConfig)
 {
     openspace::Configuration& config = *global::configuration;
 
     std::string preset;
-    bool sgctConfigFileSpecifiedByLuaFunction = !config.sgctConfigNameInitialized.empty();
+    const bool sgctCfgFileSpecifiedByLua = !config.sgctConfigNameInitialized.empty();
     if (haveCliSGCTConfig) {
         preset = fmt::format("{} (from CLI)", config.windowConfiguration);
     }
-    else if (sgctConfigFileSpecifiedByLuaFunction) {
+    else if (sgctCfgFileSpecifiedByLua) {
         preset = config.sgctConfigNameInitialized + labelFromCfgFile;
     }
     else {
@@ -1045,7 +1041,7 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
 }
 
 std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
-                                            std::string windowConfiguration,
+                                            const std::string& windowConfiguration,
                                             const std::string& labelFromCfgFile)
 {
     std::string config = windowConfiguration;
@@ -1060,7 +1056,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            std::filesystem::path c = absPath(config);
+            const std::filesystem::path c = absPath(config);
 
             std::filesystem::path cj = c;
             cj.replace_extension(".json");
@@ -1179,7 +1175,7 @@ int main(int argc, char* argv[]) {
     );
 
     try {
-        bool showHelp = parser.execute();
+        const bool showHelp = parser.execute();
         if (showHelp) {
             std::cout << parser.helpText();
             exit(EXIT_SUCCESS);
@@ -1333,7 +1329,7 @@ int main(int argc, char* argv[]) {
 #endif // __APPLE__
 
         std::string pwd = std::filesystem::current_path().string();
-        if (size_t it = pwd.find_first_of("'\"[]");  it != std::string::npos) {
+        if (const size_t it = pwd.find_first_of("'\"[]");  it != std::string::npos) {
             QMessageBox::warning(
                 nullptr,
                 "OpenSpace",
@@ -1345,15 +1341,15 @@ int main(int argc, char* argv[]) {
             );
         }
 
-        LauncherWindow win(
+        LauncherWindow win = LauncherWindow(
             !commandlineArguments.profile.has_value(),
             *global::configuration,
             !commandlineArguments.windowConfig.has_value(),
-            windowCfgPreset,
+            std::move(windowCfgPreset),
             nullptr
         );
         win.show();
-        app.exec();
+        QApplication::exec();
 
         if (!win.wasLaunchSelected()) {
             exit(EXIT_SUCCESS);
@@ -1459,7 +1455,7 @@ int main(int argc, char* argv[]) {
     Log::instance().setNotifyLevel(Log::Level::Debug);
 
     try {
-        Engine::create(cluster, callbacks, config);
+        Engine::create(std::move(cluster), std::move(callbacks), config);
     }
     catch (const std::runtime_error& e) {
         LFATALC("main", e.what());
@@ -1509,8 +1505,8 @@ int main(int argc, char* argv[]) {
         settings.hasStartedBefore = true;
 
         if (settings.rememberLastProfile) {
-            std::filesystem::path p = global::configuration->profile;
-            std::filesystem::path reducedName = p.filename().replace_extension();
+            const std::filesystem::path p = global::configuration->profile;
+            const std::filesystem::path reducedName = p.filename().replace_extension();
             settings.profile = reducedName.string();
         }
 
