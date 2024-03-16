@@ -165,6 +165,7 @@ SpiceManager::SpiceManager() {
     errprt_c("SET", 0, buffer.data());
 
     loadLeapSecondsSpiceKernel();
+    loadGeophysicalConstantsKernel();
 }
 
 SpiceManager::~SpiceManager() {
@@ -1540,6 +1541,140 @@ const std::filesystem::path path = std::filesystem::temp_directory_path();
     std::filesystem::remove(file);
 }
 
+void SpiceManager::loadGeophysicalConstantsKernel() {
+    constexpr std::string_view GeoPhysicalConstantsKernelSource = R"(
+KPL/PCK
+
+      The SPK creations applications (mkspk, mkspk_c) require the data in
+      this kernel to produce Type 10 SPK segments based upon the Two-Line
+      element sets available from NORAD/SPACETRACK. The data applies ONLY
+      to the Two-Line Element sets and only to the SGP4 implementations
+      included in the SPICE library [1][2]. The SPK application copies 
+      this data to the constants partition of the Type 10 segment, so the
+      user has no need for the kernel after creation of the corresponding
+      SPK.
+
+      Bill Taber (JPL)
+      Edward Wright (JPL)
+
+      The assigned values are taken from the Spacetrack #3 report, referred
+      to as WGS721 in Vallado [2]. It is possible to edit this file
+      to use the high accuracy WGS-72 values (WGS72) or the WGS-84
+      values (WGS84). The KE parameter value for WGS72 and WGS84
+      is calculated from the MU and ER values. The lists include MU only
+      for the calculation of KE.
+
+      MU, the standard gravitational parameter, in cubic kilometer per
+      second squared.
+
+      WGS721 (STR#3 values) [1]
+
+         ER =    6378.135
+
+         J2   =    0.001082616
+         J3   =   -0.00000253881
+         J4   =   -0.00000165597
+
+         KE   =    0.0743669161
+
+
+      WGS72 [2]
+
+         MU   =  398600.8
+         ER   =  6378.135
+
+         J2   =   0.001082616
+         J3   =  -0.00000253881
+         J4   =  -0.00000165597
+
+         KE   =  60.0D0/DSQRT(ER**3/MU)
+              =  0.074366916133173
+
+
+      WGS84 [2]
+
+         MU   =  398600.5
+         ER   =  6378.137
+
+         J2   =   0.00108262998905
+         J3   =  -0.00000253215306
+         J4   =  -0.00000161098761
+
+         KE   =  60.0D0/DSQRT(ER**3/MU)
+              =  0.074366853168714
+
+
+      The BODY399_Jn values are un-normalized zonal harmonic values
+      for the earth. These numbers are dimensionless.
+
+\begindata
+
+      BODY399_J2 =    1.082616D-3
+      BODY399_J3 =   -2.53881D-6
+      BODY399_J4 =   -1.65597D-6
+
+\begintext
+
+      The next item is the square root of GM for the earth given
+      in units of earth-radii**1.5/Minute
+
+\begindata
+
+      BODY399_KE =    7.43669161D-2
+
+\begintext
+
+      The next two items define the top and bottom of the atmospheric
+      drag model, distance above the surface in kilometers, used by
+      the type 10 ephemeris type.
+
+\begindata
+
+      BODY399_QO =  120.0D0
+      BODY399_SO =   78.0D0
+
+\begintext
+
+      The equatorial radius of the earth in kilometers as used by
+      the TLE propagator.
+
+\begindata
+
+      BODY399_ER = 6378.135D0
+
+\begintext
+
+      The value of AE is the number of distance units per earth
+      radii used by the NORAD state propagation software. Don't
+      change this value.
+
+\begindata
+
+      BODY399_AE = 1.0D0
+
+\begintext
+
+References:
+
+   [1] Hoots, F. R., and Roehrich, R., l. 1980. "Spacetrack Report #3, Models
+       for Propagation of the NORAD Element Sets." U.S. Air Force, CO.
+
+   [2] Vallado, David, Crawford, Paul, Hujsak, Richard,
+       and Kelso, T.S. 2006. Revisiting Spacetrack Report #3. Paper
+       AIAA 2006-6753 presented at the AIAA/AAS Astrodynamics
+       Specialist Conference, August 21-24, 2006. Keystone, CO.
+)";
+
+      std::filesystem::path path = std::filesystem::temp_directory_path();
+      std::filesystem::path file = path / "geophysical.ker";
+      {
+          std::ofstream f(file);
+          f << GeoPhysicalConstantsKernelSource;
+      }
+      loadKernel(file.string());
+      std::filesystem::remove(file);
+}
+
 void SpiceManager::setExceptionHandling(UseException useException) {
     _useExceptions = useException;
 }
@@ -1558,6 +1693,7 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             codegen::lua::SpiceBodies,
             codegen::lua::RotationMatrix,
             codegen::lua::Position,
+            codegen::lua::ConvertTLEtoSPK
         }
     };
 }

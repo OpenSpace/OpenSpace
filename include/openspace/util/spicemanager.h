@@ -1122,6 +1122,12 @@ private:
      */
     void loadLeapSecondsSpiceKernel();
 
+    /**
+     * Loads pre defined geophysical constants kernel (geophysical.ker)
+     */
+    void loadGeophysicalConstantsKernel();
+
+
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;
 

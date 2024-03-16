@@ -45,6 +45,7 @@
 #include <openspace/util/coordinateconversion.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 
@@ -138,11 +139,14 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
 
 scripting::LuaLibrary SpaceModule::luaLibrary() const {
     return {
-        "space",
-        {
+        .name = "space",
+        .functions = {
             codegen::lua::ConvertFromRaDec,
             codegen::lua::ConvertToRaDec,
             codegen::lua::ReadKeplerFile
+        },
+        .scripts = {
+            absPath("${MODULE_SPACE}/scripts/spice.lua")
         }
     };
 }
