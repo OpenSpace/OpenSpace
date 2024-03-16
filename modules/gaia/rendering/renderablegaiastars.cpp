@@ -2084,8 +2084,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             *_fboTexture,
             0
         );
-        GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, textureBuffers);
+        GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
+        glDrawBuffers(1, &textureBuffer);
 
         // Check that our framebuffer is ok.
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -2176,8 +2176,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 *_fboTexture,
                 0
             );
-            GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-            glDrawBuffers(1, textureBuffers);
+            GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
+            glDrawBuffers(1, &textureBuffer);
 
             // Check that our framebuffer is ok.
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {

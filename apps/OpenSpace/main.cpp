@@ -298,16 +298,16 @@ void mainInitFunc(GLFWwindow*) {
         int n = 0;
         unsigned char* data = stbi_load(path.string().c_str(), &x, &y, &n, 0);
 
-        GLFWimage icons[1];
-        icons[0].pixels = data;
-        icons[0].width = x;
-        icons[0].height = y;
+        GLFWimage icon;
+        icon.pixels = data;
+        icon.width = x;
+        icon.height = y;
 
         for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
-            glfwSetWindowIcon(window->windowHandle(), 1, icons);
+            glfwSetWindowIcon(window->windowHandle(), 1, &icon);
         }
 
-        stbi_image_free(icons[0].pixels);
+        stbi_image_free(icon.pixels);
     }
 #endif // __APPLE__
 

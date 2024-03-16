@@ -60,7 +60,7 @@ void GeoJsonManager::deinitializeGL() {
 }
 
 bool GeoJsonManager::isReady() const {
-    bool isReady = std::all_of(
+    const bool isReady = std::all_of(
         std::begin(_geoJsonObjects),
         std::end(_geoJsonObjects),
         [](const std::unique_ptr<GeoJsonComponent>& g) {
@@ -81,7 +81,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
             "GeoJsonComponent"
         );
 
-        std::string identifier = layerDict.value<std::string>("Identifier");
+        const std::string identifier = layerDict.value<std::string>("Identifier");
         if (hasPropertySubOwner(identifier)) {
             LERROR("GeoJson layer with identifier '" + identifier + "' already exists");
             return;

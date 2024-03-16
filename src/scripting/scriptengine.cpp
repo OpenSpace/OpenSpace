@@ -569,7 +569,7 @@ void ScriptEngine::preSync(bool isMaster) {
 void ScriptEngine::encode(SyncBuffer* syncBuffer) {
     ZoneScoped;
 
-    size_t nScripts = _scriptsToSync.size();
+    const size_t nScripts = _scriptsToSync.size();
     syncBuffer->encode(nScripts);
     for (const std::string& s : _scriptsToSync) {
         syncBuffer->encode(s);
@@ -597,10 +597,10 @@ void ScriptEngine::postSync(bool isMaster) {
     if (isMaster) {
         while (!_masterScriptQueue.empty()) {
             const std::string script = std::move(_masterScriptQueue.front().script);
-            ScriptCallback callback = std::move(_masterScriptQueue.front().callback);
+            const ScriptCallback cb = std::move(_masterScriptQueue.front().callback);
             _masterScriptQueue.pop();
             try {
-                runScript(script, std::move(callback));
+                runScript(script, cb);
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);

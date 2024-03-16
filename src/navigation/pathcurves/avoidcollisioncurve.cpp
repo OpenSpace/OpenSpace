@@ -83,7 +83,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
     if (distanceToStartNode < closeToNodeThresholdFactor * startNodeRadius) {
         const double distance = startNodeRadius;
-        const glm::dvec3 newP = start.position() + distance * glm::normalize(nodeToStart);
+        glm::dvec3 newP = start.position() + distance * glm::normalize(nodeToStart);
         _points.push_back(std::move(newP));
     }
 

@@ -81,7 +81,7 @@ namespace {
         bool continueToNextLine = true;
 
         while (continueToNextLine && !elem.line.empty()) {
-            int levelChange = elem.level - level;
+            const int levelChange = elem.level - level;
 
             if (levelChange == 0) {
                 parent->insertChildren(++nChildInsert, 1, 3);

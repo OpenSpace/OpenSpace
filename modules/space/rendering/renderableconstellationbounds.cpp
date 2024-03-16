@@ -274,7 +274,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
             currentBound = ConstellationBound();
             currentBound.isEnabled = true;
             currentBound.constellationAbbreviation = abbreviation;
-            const std::string name = constellationFullName(abbreviation);
+            std::string name = constellationFullName(abbreviation);
             currentBound.constellationFullName =
                 name.empty() ? abbreviation : std::move(name);
             currentBound.startIndex = static_cast<GLsizei>(_vertexValues.size());
@@ -290,8 +290,8 @@ bool RenderableConstellationBounds::loadVertexFile() {
         // Convert the (right ascension, declination) to rectangular coordinates)
         // The 1.0 is the distance of the celestial sphere, we will scale that in the
         // render function
-        double rectangularValues[3];
-        radrec_c(1.0, ra, dec, rectangularValues);
+        std::array<double, 3> rectangularValues;
+        radrec_c(1.0, ra, dec, rectangularValues.data());
 
         // Add the new vertex to our list of vertices
         _vertexValues.push_back({

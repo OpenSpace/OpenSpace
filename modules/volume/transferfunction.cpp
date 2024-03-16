@@ -42,7 +42,7 @@ bool TransferFunction::setEnvelopesFromString(const std::string& s) {
     for (const nlohmann::json& it : j) {
         Envelope env;
         std::vector<EnvelopePoint> tmpVec;
-        const nlohmann::json points = it["points"];
+        const nlohmann::json& points = it["points"];
         for (size_t i = 0; i < 4; i++) {
             const nlohmann::json& jt = points[i];
             const std::string color = jt["color"].get<std::string>();

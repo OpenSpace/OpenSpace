@@ -158,12 +158,12 @@ void ScreenSpaceBrowser::render(float blackoutFactor) {
     }
 
     _renderHandler->updateTexture();
-    glm::mat4 mat =
+    const glm::mat4 mat =
         globalRotationMatrix() *
         translationMatrix() *
         localRotationMatrix() *
         scaleMatrix();
-    draw(std::move(mat), blackoutFactor);
+    draw(mat, blackoutFactor);
 }
 
 void ScreenSpaceBrowser::update() {

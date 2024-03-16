@@ -329,11 +329,11 @@ RenderData ShadowComponent::begin(const RenderData& data) {
 
     // Saves current state
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_currentFBO);
-    global::renderEngine->openglStateCache().viewport(_mViewport);
+    global::renderEngine->openglStateCache().viewport(_viewport.data());
 
     glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
-    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
-    glDrawBuffers(3, drawBuffers);
+    std::array<GLenum, 3> drawBuffers = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
+    glDrawBuffers(3, drawBuffers.data());
     glViewport(0, 0, _shadowDepthTextureWidth, _shadowDepthTextureHeight);
     glClearDepth(1.f);
     glDepthFunc(GL_LEQUAL);
@@ -368,11 +368,13 @@ void ShadowComponent::end() {
 
     // Restores system state
     glBindFramebuffer(GL_FRAMEBUFFER, _currentFBO);
-    GLenum drawBuffers[] = {
-        GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2
+    std::array<GLenum, 3> drawBuffers = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2
     };
-    glDrawBuffers(3, drawBuffers);
-    glViewport(_mViewport[0], _mViewport[1], _mViewport[2], _mViewport[3]);
+    glDrawBuffers(3, drawBuffers.data());
+    glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
 
     // Restores OpenGL Rendering State
     global::renderEngine->openglStateCache().resetColorState();
@@ -418,16 +420,8 @@ void ShadowComponent::createShadowFBO() {
         0
     );
 
-    //glFramebufferTexture(
-    //    GL_FRAMEBUFFER,
-    //    GL_COLOR_ATTACHMENT0,
-    //    _positionInLightSpaceTexture,
-    //    0
-    //);
-
-    //GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
-    GLenum drawBuffers[] = { GL_NONE, GL_NONE, GL_NONE };
-    glDrawBuffers(3, drawBuffers);
+    std::array<GLenum, 3> drawBuffers = { GL_NONE, GL_NONE, GL_NONE };
+    glDrawBuffers(3, drawBuffers.data());
 
     checkFrameBufferState("createShadowFBO()");
 

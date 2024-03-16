@@ -28,6 +28,7 @@
 #include <modules/gaia/rendering/gaiaoptions.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <array>
 #include <map>
 #include <mutex>
 #include <queue>
@@ -41,7 +42,7 @@ class OctreeCuller;
 class OctreeManager {
 public:
     struct OctreeNode {
-        std::shared_ptr<OctreeNode> Children[8];
+        std::array<std::shared_ptr<OctreeNode>, 8> children;
         std::vector<float> posData;
         std::vector<float> colData;
         std::vector<float> velData;

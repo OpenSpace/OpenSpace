@@ -226,21 +226,21 @@ void GuiGlobeBrowsingComponent::render() {
 
     if (ImGui::BeginPopup("globebrowsing_add_server")) {
         constexpr int InputBufferSize = 512;
-        static char NameInputBuffer[InputBufferSize];
-        ImGui::InputText("Server Name", NameInputBuffer, InputBufferSize);
+        static std::array<char, InputBufferSize> NameInputBuffer;
+        ImGui::InputText("Server Name", NameInputBuffer.data(), InputBufferSize);
 
-        static char UrlInputBuffer[InputBufferSize];
-        ImGui::InputText("Server URL", UrlInputBuffer, InputBufferSize);
+        static std::array<char, InputBufferSize> UrlInputBuffer;
+        ImGui::InputText("Server URL", UrlInputBuffer.data(), InputBufferSize);
 
         const bool addServer = ImGui::Button("Add Server");
         if (addServer && (!_currentNode.empty())) {
             module->loadWMSCapabilities(
-                std::string(NameInputBuffer),
+                std::string(NameInputBuffer.data()),
                 _currentNode,
-                std::string(UrlInputBuffer)
+                std::string(UrlInputBuffer.data())
             );
-            std::memset(NameInputBuffer, 0, InputBufferSize * sizeof(char));
-            std::memset(UrlInputBuffer, 0, InputBufferSize * sizeof(char));
+            std::memset(NameInputBuffer.data(), 0, InputBufferSize * sizeof(char));
+            std::memset(UrlInputBuffer.data(), 0, InputBufferSize * sizeof(char));
 
             urlInfo = module->urlInfo(_currentNode);
             _currentServer = urlInfo.back().name;

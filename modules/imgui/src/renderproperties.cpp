@@ -217,14 +217,14 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 
     const std::string value = p->value();
 
-    static constexpr int bufferSize = 256;
-    static char buffer[bufferSize];
+    static constexpr int BufferSize = 256;
+    static std::array<char, BufferSize> buffer;
 #ifdef _MSC_VER
-    strcpy_s(buffer, value.length() + 1, value.c_str());
+    strcpy_s(buffer.data(), value.length() + 1, value.c_str());
 #else
-    strcpy(buffer, value.c_str());
+    strcpy(buffer.data(), value.c_str());
 #endif
-    const bool hasNewValue = ImGui::InputText(name.c_str(), buffer, bufferSize);
+    const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
@@ -232,7 +232,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     if (hasNewValue) {
         executeSetPropertyScript(
             p->fullyQualifiedIdentifier(),
-            "[[" + std::string(buffer) + "]]"
+            "[[" + std::string(buffer.data()) + "]]"
         );
     }
 
@@ -250,17 +250,17 @@ void renderListProperty(const std::string& name, const std::string& fullIdentifi
     // Remove brackets from the string value
     const std::string value = stringValue.substr(1, stringValue.size() - 2);
 
-    static const int bufferSize = 512;
-    static char buffer[bufferSize];
+    static constexpr int BufferSize = 512;
+    static std::array<char, BufferSize> buffer;
 #ifdef _MSC_VER
-    strcpy_s(buffer, value.length() + 1, value.c_str());
+    strcpy_s(buffer.data(), value.length() + 1, value.c_str());
 #else
-    strcpy(buffer, value.c_str());
+    strcpy(buffer.data(), value.c_str());
 #endif
 
-    bool hasNewValue = ImGui::InputText(name.c_str(), buffer, bufferSize);
+    const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (hasNewValue) {
-        std::vector<std::string> tokens = ghoul::tokenizeString(std::string(buffer), ',');
+        std::vector<std::string> tokens = ghoul::tokenizeString(buffer.data(), ',');
         std::string script = "{";
         for (std::string& token : tokens) {
             if (!token.empty()) {
@@ -270,7 +270,7 @@ void renderListProperty(const std::string& name, const std::string& fullIdentifi
         }
         script += '}';
 
-        executeSetPropertyScript(fullIdentifier, std::move(script));
+        executeSetPropertyScript(fullIdentifier, script);
     }
 }
 
@@ -598,7 +598,7 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
     glm::vec2 value = glm::dvec2(*p);
     const float min = static_cast<float>(glm::compMin(p->minValue()));
     const float max = static_cast<float>(glm::compMax(p->maxValue()));
-    bool changed = ImGui::SliderFloat2(
+    const bool changed = ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
         min,
@@ -810,7 +810,7 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
     );
     const float min = static_cast<float>(glm::compMin(minValues));
 
-    glm::dvec4 maxValues = glm::dvec4(
+    const glm::dvec4 maxValues = glm::dvec4(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1]),
         glm::compMax(p->maxValue()[2]),

@@ -409,11 +409,11 @@ RenderEngine::RenderEngine()
 
             const std::time_t now = std::time(nullptr);
             std::tm* nowTime = std::localtime(&now);
-            char date[128];
-            strftime(date, sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
+            std::array<char, 128> date;
+            strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
 
             const std::filesystem::path newFolder = absPath(
-                "${STARTUP_SCREENSHOT}/" + std::string(date)
+                "${STARTUP_SCREENSHOT}/" + std::string(date.data())
             );
 
             FileSys.registerPathToken(
@@ -782,12 +782,12 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 
 
     if (intersects(mousePosition, _cameraButtonLocations.rotation)) {
-        constexpr const char ToggleRotationFrictionScript[] = R"(
+        constexpr std::string_view ToggleRotationFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
-            ToggleRotationFrictionScript,
+            std::string(ToggleRotationFrictionScript),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
@@ -795,12 +795,12 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     }
 
     if (intersects(mousePosition, _cameraButtonLocations.zoom)) {
-        constexpr const char ToggleZoomFrictionScript[] = R"(
+        constexpr std::string_view ToggleZoomFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
-            ToggleZoomFrictionScript,
+            std::string(ToggleZoomFrictionScript),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );

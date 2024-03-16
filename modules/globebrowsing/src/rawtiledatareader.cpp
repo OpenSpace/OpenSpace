@@ -290,14 +290,14 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
         }
     }
 
-    GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
+    const GlobeBrowsingModule& mod = *global::moduleEngine->module<GlobeBrowsingModule>();
 
     const std::string datasetIdentifier =
         std::to_string(std::hash<std::string>{}(_datasetFilePath));
     const std::string path = fmt::format("{}/{}/{}/",
-        module.mrfCacheLocation(), _cacheProperties.path, datasetIdentifier);
+        mod.mrfCacheLocation(), _cacheProperties.path, datasetIdentifier);
     const std::string root = absPath(path).string();
-    const std::string mrf = root + datasetIdentifier + ".mrf";
+    std::string mrf = root + datasetIdentifier + ".mrf";
 
     if (!std::filesystem::exists(mrf)) {
         std::error_code ec;

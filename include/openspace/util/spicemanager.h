@@ -524,7 +524,7 @@ public:
      *        specific spacecraft
      * \pre \p craft must not be empty
      */
-    double spacecraftClockToET(const std::string& craft, double craftTicks);
+    double spacecraftClockToET(const std::string& craft, double craftTicks) const;
 
     /**
      * Converts the \p timeString representing a date to a double precision value

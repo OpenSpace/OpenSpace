@@ -217,7 +217,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_LINE_SMOOTH);
     glDepthMask(false);
 
-    for (GeometryData& c : _circles) {
+    for (const GeometryData& c : _circles) {
         c.render();
     }
 
@@ -339,7 +339,10 @@ RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode)
 }
 
 RenderableRadialGrid::GeometryData::GeometryData(GeometryData&& other) noexcept {
-    if (this == &other) return;
+    if (this == &other) {
+        return;
+    }
+
     vao = other.vao;
     vbo = other.vbo;
     varray = std::move(other.varray);

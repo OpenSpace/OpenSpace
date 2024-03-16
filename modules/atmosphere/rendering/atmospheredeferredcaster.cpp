@@ -1053,7 +1053,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     glGenBuffers(1, &quadVbo);
     glBindBuffer(GL_ARRAY_BUFFER, quadVbo);
 
-    constexpr GLfloat VertexData[] = {
+    constexpr std::array<GLfloat, 12> VertexData = {
         // x     y
         -1.f, -1.f,
          1.f,  1.f,
@@ -1063,7 +1063,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
          1.f,  1.f,
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
 

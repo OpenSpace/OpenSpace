@@ -231,7 +231,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
         if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate->windowHasResized() || _instance->_shouldReshape) {
-                glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
+                const glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
                 _instance->reshape(static_cast<glm::ivec2>(
                     static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
                 ));

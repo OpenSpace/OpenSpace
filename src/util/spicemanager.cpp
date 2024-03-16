@@ -150,10 +150,19 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString(
 }
 
 SpiceManager::SpiceManager() {
+    // The third parameter for the erract_c function is a SpiceChar*, not ConstSpiceChar*
+    // so we have to do this weird memory copying trick
+    std::array<char, 7> buffer;
+
     // Set the SPICE library to not exit the program if an error occurs
-    erract_c("SET", 0, const_cast<char*>("REPORT"));
+    std::memset(buffer.data(), 0, buffer.size());
+    std::strcpy(buffer.data(), "REPORT");
+    erract_c("SET", 0, buffer.data());
+
     // But we do not want SPICE to print the errors, we will fetch them ourselves
-    errprt_c("SET", 0, const_cast<char*>("NONE"));
+    std::memset(buffer.data(), 0, buffer.size());
+    std::strcpy(buffer.data(), "NONE");
+    errprt_c("SET", 0, buffer.data());
 
     loadLeapSecondsSpiceKernel();
 }
@@ -416,8 +425,7 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
 {
     std::vector<std::pair<int, std::string>> bodies;
 
-    constexpr int Frnmln = 33;
-    static SpiceInt idsetBuffer[SPICE_CELL_CTRLSZ + 8192];
+    static std::array<SpiceInt, SPICE_CELL_CTRLSZ + 8192> idsetBuffer;
     static SpiceCell idset = {
         SPICE_INT,
         0,
@@ -426,11 +434,12 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
         SPICETRUE,
         SPICEFALSE,
         SPICEFALSE,
-        &idsetBuffer,
-        &(idsetBuffer[SPICE_CELL_CTRLSZ])
+        idsetBuffer.data(),
+        idsetBuffer.data() + SPICE_CELL_CTRLSZ
     };
 
-    SpiceChar frname[Frnmln];
+    constexpr int Frnmln = 33;
+    std::array<SpiceChar, Frnmln> frname;
 
     for (SpiceInt i = 1; i <= 6; i++) {
         if (i < 6) {
@@ -454,11 +463,11 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
             frmnam_c(
                 (reinterpret_cast<SpiceInt*>(idset.data))[j],
                 Frnmln,
-                frname
+                frname.data()
             );
             bodies.emplace_back(
                 static_cast<long>(reinterpret_cast<SpiceInt*>(idset.data)[j]),
-                frname
+                frname.data()
             );
         }
     }
@@ -567,7 +576,9 @@ void SpiceManager::getValue(const std::string& body, const std::string& value,
     getValueInternal(body, value, static_cast<int>(v.size()), v.data());
 }
 
-double SpiceManager::spacecraftClockToET(const std::string& craft, double craftTicks) {
+double SpiceManager::spacecraftClockToET(const std::string& craft,
+                                         double craftTicks) const
+{
     ghoul_assert(!craft.empty(), "Empty craft");
 
     const int craftId = naifId(craft);
@@ -599,10 +610,10 @@ double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
 std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime, const char* format)
 {
     constexpr int BufferSize = 128;
-    char Buffer[BufferSize];
-    std::memset(Buffer, char(0), BufferSize);
+    std::array<char, BufferSize> Buffer;
+    std::memset(Buffer.data(), char(0), BufferSize);
 
-    timout_c(ephemerisTime, format, BufferSize, Buffer);
+    timout_c(ephemerisTime, format, BufferSize, Buffer.data());
     if (failed_c()) {
         throwSpiceError(fmt::format(
             "Error converting ephemeris time '{}' to date with format '{}'",
@@ -612,11 +623,11 @@ std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime, const char
     if (Buffer[0] == '*') {
         // The conversion failed and we need to use et2utc
         constexpr int SecondsPrecision = 3;
-        et2utc_c(ephemerisTime, "C", SecondsPrecision, BufferSize, Buffer);
+        et2utc_c(ephemerisTime, "C", SecondsPrecision, BufferSize, Buffer.data());
     }
 
 
-    return std::string(Buffer);
+    return std::string(Buffer.data());
 }
 
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,

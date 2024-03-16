@@ -355,7 +355,7 @@ void RenderablePlanetProjection::initializeGL() {
     setBoundingSphere(std::max(std::max(radius[0], radius[1]), radius[2]));
 
     // SCREEN-QUAD
-    const GLfloat vertexData[] = {
+    constexpr std::array<GLfloat, 12> VertexData = {
         -1.f, -1.f,
          1.f,  1.f,
         -1.f,  1.f,
@@ -368,7 +368,7 @@ void RenderablePlanetProjection::initializeGL() {
     glBindVertexArray(_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glBindVertexArray(0);

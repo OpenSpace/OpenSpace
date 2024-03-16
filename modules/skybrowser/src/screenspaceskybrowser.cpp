@@ -268,8 +268,8 @@ void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCo
         openspace::properties::Property::PropertyInfo showInfo = DisplayCopyShowInfo;
         // @TODO(abock) I think the lifetime for this string is a bit tricky. I don't
         // think it will live long enough to be actually usable
-        std::string idDisplayCopyVisible = "ShowDisplayCopy" + std::to_string(start + i);
-        showInfo.identifier = idDisplayCopyVisible.c_str();
+        const std::string idDispCpyVis = "ShowDisplayCopy" + std::to_string(start + i);
+        showInfo.identifier = idDispCpyVis.c_str();
         _showDisplayCopies.push_back(
             std::make_unique<properties::BoolProperty>(showInfo, true)
         );

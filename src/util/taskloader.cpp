@@ -42,19 +42,19 @@ namespace {
 namespace openspace {
 
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
-                                                            const ghoul::Dictionary& dict)
+                                                      const ghoul::Dictionary& dictionary)
 {
     std::vector<std::unique_ptr<Task>> tasks;
 
-    for (const std::string_view key : dict.keys()) {
-        if (dict.hasValue<std::string>(key)) {
-            const std::string taskName = dict.value<std::string>(key);
+    for (const std::string_view key : dictionary.keys()) {
+        if (dictionary.hasValue<std::string>(key)) {
+            const std::string taskName = dictionary.value<std::string>(key);
             const std::string path = taskName + ".task";
             std::vector<std::unique_ptr<Task>> subTasks = tasksFromFile(path);
             std::move(subTasks.begin(), subTasks.end(), std::back_inserter(tasks));
         }
-        else if (dict.hasValue<ghoul::Dictionary>(key)) {
-            const ghoul::Dictionary subTask = dict.value<ghoul::Dictionary>(key);
+        else if (dictionary.hasValue<ghoul::Dictionary>(key)) {
+            const ghoul::Dictionary subTask = dictionary.value<ghoul::Dictionary>(key);
             const std::string& taskType = subTask.value<std::string>("Type");
             std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
             if (!task) {

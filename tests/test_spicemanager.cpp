@@ -297,20 +297,16 @@ TEST_CASE("SpiceManager: Get Value From ID ND", "[spicemanager]") {
 }
 
 TEST_CASE("SpiceManager: String To Ephemeris Time", "[spicemanager]") {
-    constexpr int DateLength = 128;
-
     SpiceManager::initialize();
 
     loadLSKKernel();
 
     double control_ephemerisTime = 0.0;
-    const char date[DateLength] = "Thu Mar 20 12:53:29 PST 1997";
-    str2et_c(date, &control_ephemerisTime);
+    const std::string date = "Thu Mar 20 12:53:29 PST 1997";
+    str2et_c(date.c_str(), &control_ephemerisTime);
 
     double ephemerisTime = -1.0;
-    CHECK_NOTHROW(
-        ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date)
-    );
+    CHECK_NOTHROW(ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date));
 
     CHECK(ephemerisTime == control_ephemerisTime);
 
@@ -318,20 +314,17 @@ TEST_CASE("SpiceManager: String To Ephemeris Time", "[spicemanager]") {
 }
 
 TEST_CASE("SpiceManager: Get Target Position", "[spicemanager]") {
-    constexpr int DateLength = 128;
-
     SpiceManager::initialize();
 
     loadMetaKernel();
 
-
-    const char utctime[DateLength] = "2004 jun 11 19:32:00";
+    const std::string utctime = "2004 JUN 11 19:32:00";
     double et = 0.0;
-    str2et_c(utctime, &et);
+    str2et_c(utctime.c_str(), &et);
 
-    double pos[3] = { 0.0, 0.0, 0.0 };
+    std::array<double, 3> pos = { 0.0, 0.0, 0.0 };
     double lt = 0.0;
-    spkpos_c("EARTH", et, "J2000", "LT+S", "CASSINI", pos, &lt);
+    spkpos_c("EARTH", et, "J2000", "LT+S", "CASSINI", pos.data(), &lt);
 
     glm::dvec3 targetPosition = glm::dvec3(0.0);
     double lightTime = 0.0;
@@ -360,15 +353,13 @@ TEST_CASE("SpiceManager: Get Target Position", "[spicemanager]") {
 }
 
 TEST_CASE("SpiceManager: Get Target State", "[spicemanager]") {
-    constexpr int DateLength = 128;
-
     SpiceManager::initialize();
 
     loadMetaKernel();
 
     double et = 0.0;
-    const char utctime[DateLength] = "2004 jun 11 19:32:00";
-    str2et_c(utctime, &et);
+    const std::string utctime = "2004 JUN 11 19:32:00";
+    str2et_c(utctime.c_str(), &et);
 
     std::array<double, 6> state;
     double lt = 0.0;

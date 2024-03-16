@@ -937,7 +937,7 @@ void OpenSpaceEngine::loadFonts() {
         }
 
         LDEBUG(fmt::format("Registering font '{}' with key '{}'", fontName, key));
-        bool success = global::fontManager->registerFontPath(key, fontName);
+        const bool success = global::fontManager->registerFontPath(key, fontName);
 
         if (!success) {
             LERROR(fmt::format(
@@ -1436,7 +1436,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     lua_setglobal(s, "filename");
 
     std::string basename = file.filename().string();
-    ghoul::lua::push(s, basename);
+    ghoul::lua::push(s, std::move(basename));
     lua_setglobal(s, "basename");
 
     std::string extension = file.extension().string();
