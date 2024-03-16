@@ -56,8 +56,8 @@ namespace {
     constexpr uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
     constexpr std::string_view FontName = "Console";
-    constexpr float EntryFontSize = 14.0f;
-    constexpr float HistoryFontSize = 11.0f;
+    constexpr float EntryFontSize = 14.f;
+    constexpr float HistoryFontSize = 11.f;
 
     // Additional space between the entry text and the history (in pixels)
     constexpr float SeparatorSpace = 30.f;

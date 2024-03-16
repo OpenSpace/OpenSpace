@@ -81,7 +81,7 @@ LayerRenderSettings::LayerRenderSettings()
     });
 }
 
-void LayerRenderSettings::onChange(std::function<void()> callback) {
+void LayerRenderSettings::onChange(const std::function<void()>& callback) {
     gamma.onChange(callback);
     multiplier.onChange(callback);
     multiplier.onChange(callback);

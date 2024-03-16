@@ -2024,19 +2024,19 @@ void RenderableGaiaStars::update(const UpdateData&) {
         glBindBuffer(GL_ARRAY_BUFFER, _vboQuad);
 
         // Quad for fullscreen.
-        static constexpr GLfloat vbo_quad_data[] = {
-            -1.0f, -1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-            -1.0f,  1.0f, 0.0f,
-            -1.0f,  1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-            1.0f,  1.0f, 0.0f,
+        constexpr std::array<GLfloat, 24> VboQuadData = {
+            -1.f, -1.f, 0.f,
+             1.f, -1.f, 0.f,
+            -1.f,  1.f, 0.f,
+            -1.f,  1.f, 0.f,
+             1.f, -1.f, 0.f,
+             1.f,  1.f, 0.f,
         };
 
         glBufferData(
             GL_ARRAY_BUFFER,
-            sizeof(vbo_quad_data),
-            vbo_quad_data,
+            sizeof(VboQuadData),
+            VboQuadData.data(),
             GL_STATIC_DRAW
         );
 

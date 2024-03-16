@@ -619,7 +619,7 @@ void mainCharCallback(unsigned int codepoint, int modifiers, sgct::Window* windo
 void mainDropCallback(const std::vector<std::string_view>& paths) {
     ZoneScoped;
 
-    for (std::string_view path : paths) {
+    for (const std::string_view path : paths) {
         global::openSpaceEngine->handleDragDrop(path);
     }
 }
@@ -1217,15 +1217,15 @@ int main(int argc, char* argv[]) {
 
         // Register the base path as the directory where the configuration file lives
         std::filesystem::path base = configurationFilePath.parent_path();
-        FileSys.registerPathToken("${BASE}", base);
+        FileSys.registerPathToken("${BASE}", std::move(base));
 
         // The previous incarnation of this was initializing GLFW to get the primary
         // monitor's resolution, but that had some massive performance implications as
         // there was some issue with the swap buffer handling inside of GLFW. My
         // assumption is that GLFW doesn't like being initialized, destroyed, and then
         // initialized again. Therefore we are using the platform specific functions now
-        glm::ivec2 size = glm::ivec2(1920, 1080);
 #ifdef WIN32
+        glm::ivec2 size = glm::ivec2(1920, 1080);
         DEVMODEW dm = { 0 };
         dm.dmSize = sizeof(DEVMODEW);
         BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
@@ -1233,6 +1233,8 @@ int main(int argc, char* argv[]) {
             size.x = dm.dmPelsWidth;
             size.y = dm.dmPelsHeight;
         }
+#else // ^^^^ WIN32 // !WIN32 vvvv
+        const glm::ivec2 size = glm::ivec2(1920, 1080);
 #endif // WIN32
 
         // Loading configuration from disk
@@ -1377,8 +1379,8 @@ int main(int argc, char* argv[]) {
         // there was some issue with the swap buffer handling inside of GLFW. My
         // assumption is that GLFW doesn't like being initialized, destroyed, and then
         // initialized again. Therefore we are using the platform specific functions now
-        glm::ivec2 size = glm::ivec2(1920, 1080);
 #ifdef WIN32
+        glm::ivec2 size = glm::ivec2(1920, 1080);
         DEVMODEW dm = { 0 };
         dm.dmSize = sizeof(DEVMODEW);
         BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
@@ -1386,6 +1388,8 @@ int main(int argc, char* argv[]) {
             size.x = dm.dmPelsWidth;
             size.y = dm.dmPelsHeight;
         }
+#else // ^^^^ WIN32 // !WIN32 vvvv
+        const glm::ivec2 size = glm::ivec2(1920, 1080);
 #endif // WIN32
 
         *global::configuration = loadConfigurationFromFile(
@@ -1431,7 +1435,7 @@ int main(int argc, char* argv[]) {
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     LDEBUG("Parsing commandline arguments");
-    sgct::Configuration config = parseArguments(arg);
+    const sgct::Configuration config = parseArguments(arg);
     LDEBUG("Loading cluster information");
     config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
 

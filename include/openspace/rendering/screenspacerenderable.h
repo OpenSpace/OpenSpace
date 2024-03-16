@@ -82,7 +82,7 @@ public:
     glm::vec2 screenSpaceDimensions();
     glm::vec2 upperRightCornerScreenSpace();
     glm::vec2 lowerLeftCornerScreenSpace();
-    bool isIntersecting(glm::vec2 coord);
+    bool isIntersecting(const glm::vec2& coord);
     void translate(glm::vec2 translation, glm::vec2 position);
     void setCartesianPosition(const glm::vec3& position);
     void setRaeFromCartesianPosition(const glm::vec3& position);
@@ -102,7 +102,7 @@ protected:
     glm::vec3 raeToCartesian(const glm::vec3& rae) const;
     glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
-    void draw(glm::mat4 modelTransform, float blackoutFactor);
+    void draw(const glm::mat4& modelTransform, float blackoutFactor);
 
     virtual void bindTexture() = 0;
     virtual void unbindTexture();

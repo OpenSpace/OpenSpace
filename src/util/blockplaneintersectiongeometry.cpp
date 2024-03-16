@@ -117,7 +117,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     std::vector<std::pair<int, float>> angles(nIntersections - 1);
 
     const glm::vec3 vec1 = glm::normalize(intersections[1] - intersections[0]);
-    angles[0] = std::pair<int, float>(1, 0.0f);
+    angles[0] = std::pair<int, float>(1, 0.f);
 
     for (int i = 2; i < nIntersections; i++) {
         const glm::vec3 vectorI = glm::normalize(intersections[i] - intersections[0]);

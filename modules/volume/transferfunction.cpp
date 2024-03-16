@@ -38,13 +38,13 @@ TransferFunction::TransferFunction(const std::string& s) {
 }
 
 bool TransferFunction::setEnvelopesFromString(const std::string& s) {
-    json j = json::parse(s);
+    const json j = json::parse(s);
     for (const nlohmann::json& it : j) {
         Envelope env;
         std::vector<EnvelopePoint> tmpVec;
         const nlohmann::json points = it["points"];
         for (size_t i = 0; i < 4; i++) {
-            const nlohmann::json jt = points[i];
+            const nlohmann::json& jt = points[i];
             const std::string color = jt["color"].get<std::string>();
             const float xValue = jt["position"]["x"].get<float>();
             const float yValue = jt["position"]["y"].get<float>();

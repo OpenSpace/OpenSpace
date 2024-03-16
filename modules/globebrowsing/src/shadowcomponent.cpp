@@ -335,10 +335,10 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
     glDrawBuffers(3, drawBuffers);
     glViewport(0, 0, _shadowDepthTextureWidth, _shadowDepthTextureHeight);
-    glClearDepth(1.0f);
+    glClearDepth(1.f);
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //glEnable(GL_CULL_FACE);
@@ -347,7 +347,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     //checkGLError("begin() -- set cullface to front");
     //glEnable(GL_POLYGON_OFFSET_FILL);
     //checkGLError("begin() -- enabled polygon offset fill");
-    //glPolygonOffset(2.5f, 10.0f);
+    //glPolygonOffset(2.5f, 10.f);
     //checkGLError("begin() -- set values for polygon offset");
 
     RenderData lightRenderData{

@@ -86,10 +86,6 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    double calculateTravelTime(glm::dvec3 start, glm::dvec3 target, double speed) {
-        return glm::distance(target, start) / speed;
-    }
-
     struct [[codegen::Dictionary(RenderableLightTravel)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
         std::string target;
@@ -157,11 +153,8 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
         if (SceneGraphNode* n = sceneGraphNode(_targetName);  n) {
             _targetNode = n;
             _targetPosition = _targetNode->worldPosition();
-            _lightTravelTime = calculateTravelTime(
-                _sourcePosition,
-                _targetPosition,
-                _travelSpeed
-            );
+            _lightTravelTime =
+                glm::distance(_targetPosition, _sourcePosition) / _travelSpeed;
             calculateDirectionVector();
             reinitiateTravel();
         }
@@ -271,11 +264,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     ghoul_assert(mySGNPointer, "Renderable have to be owned by scene graph node");
     _sourcePosition = mySGNPointer->worldPosition();
 
-    _lightTravelTime = calculateTravelTime(
-        _sourcePosition,
-        _targetPosition,
-        _travelSpeed
-    );
+    _lightTravelTime = glm::distance(_targetPosition, _sourcePosition) / _travelSpeed;
 
     const double currentTime = data.time.j2000Seconds();
     // Unless we've reached the target

@@ -476,7 +476,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             const std::string_view coordinateSystem = token;
             const size_t found = coordinateSystem.find("West");
             if (found != std::string::npos) {
-                lEntry.longitude = 360.0f - lEntry.longitude;
+                lEntry.longitude = 360.f - lEntry.longitude;
             }
 
             // Clean white spaces

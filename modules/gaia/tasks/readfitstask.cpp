@@ -181,14 +181,14 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
     _firstRow = std::max(_firstRow, 1);
 
-    // Create Threadpool and JobManager.
+    // Create Threadpool and JobManager
     LINFO("Threads in pool: " + std::to_string(_threadsToUse));
     ThreadPool threadPool(_threadsToUse);
     ConcurrentJobManager<std::vector<std::vector<float>>> jobManager(
         std::move(threadPool)
     );
 
-    // Get all files in specified folder.
+    // Get all files in specified folder
     std::vector<std::filesystem::path> allInputFiles;
     if (std::filesystem::is_directory(_inFileOrFolderPath)) {
         namespace fs = std::filesystem;
@@ -202,9 +202,9 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     const size_t nInputFiles = allInputFiles.size();
     LINFO("Files to read: " + std::to_string(nInputFiles));
 
-    // Define what columns to read.
+    // Define what columns to read
     _allColumnNames.clear();
-    // Read in the order of table in file.
+    // Read in the order of table in file
     std::vector<std::string> defaultColumnNames = {
         "ra",
         "ra_error",

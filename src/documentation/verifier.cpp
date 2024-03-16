@@ -138,9 +138,9 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
         if (dict.hasKey(key)) {
             if (dict.hasValue<double>(key)) {
                 // If we have a double value, we need to check if it is integer
-                double value = dict.value<double>(key);
+                const double value = dict.value<double>(key);
                 double intPart;
-                bool isInt = modf(value, &intPart) == 0.0;
+                const bool isInt = modf(value, &intPart) == 0.0;
                 if (isInt) {
                     TestResult res;
                     res.success = true;
@@ -198,7 +198,7 @@ TestResult StringVerifier::operator()(const ghoul::Dictionary& dictionary,
         return res;
     }
 
-    std::string value = dictionary.value<std::string>(key);
+    const std::string value = dictionary.value<std::string>(key);
     if (value.empty() && _mustBeNotEmpty) {
         res.success = false;
         TestResult::Offense o = {
@@ -229,8 +229,8 @@ TestResult IdentifierVerifier::operator()(const ghoul::Dictionary& dict,
         return res;
     }
 
-    std::string identifier = dict.value<std::string>(key);
-    size_t pos = identifier.find_first_of(" \t\n\r.");
+    const std::string identifier = dict.value<std::string>(key);
+    const size_t pos = identifier.find_first_of(" \t\n\r.");
     if (pos != std::string::npos) {
         res.success = false;
         TestResult::Offense o = {
@@ -261,7 +261,7 @@ TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
         return res;
     }
 
-    std::string file = dict.value<std::string>(key);
+    const std::string file = dict.value<std::string>(key);
     if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
         res.success = false;
         TestResult::Offense o = {
@@ -288,7 +288,7 @@ TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
         return res;
     }
 
-    std::string dir = dict.value<std::string>(key);
+    const std::string dir = dict.value<std::string>(key);
     if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir)) {
         res.success = false;
         TestResult::Offense o = {
@@ -315,8 +315,8 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
         return res;
     }
 
-    std::string dateTime = dict.value<std::string>(key);
-    std::string format = "%Y %m %d %H:%M:%S"; // YYYY MM DD hh:mm:ss
+    const std::string dateTime = dict.value<std::string>(key);
+    const std::string format = "%Y %m %d %H:%M:%S"; // YYYY MM DD hh:mm:ss
 
     std::tm t = {};
     std::istringstream ss(dateTime);
@@ -347,7 +347,7 @@ TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,
         return res;
     }
 
-    glm::dvec3 values = dictionary.value<glm::dvec3>(key);
+    const glm::dvec3 values = dictionary.value<glm::dvec3>(key);
     if (values.x < 0.0 || values.x > 1.0) {
         res.success = false;
         TestResult::Offense o = {
@@ -397,7 +397,7 @@ TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
             .offender = key + ".x",
             .reason = TestResult::Offense::Reason::Verification
         };
-        res.offenses.push_back(o);
+        res.offenses.push_back(std::move(o));
     }
 
     if (values.y < 0.0 || values.y > 1.0) {
@@ -406,7 +406,7 @@ TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
             .offender = key + ".y",
             .reason = TestResult::Offense::Reason::Verification
         };
-        res.offenses.push_back(o);
+        res.offenses.push_back(std::move(o));
     }
 
     if (values.z < 0.0 || values.z > 1.0) {
@@ -415,7 +415,7 @@ TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
             .offender = key + ".z",
             .reason = TestResult::Offense::Reason::Verification
         };
-        res.offenses.push_back(o);
+        res.offenses.push_back(std::move(o));
     }
 
     if (values.w < 0.0 || values.w > 1.0) {
@@ -424,7 +424,7 @@ TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
             .offender = key + ".a",
             .reason = TestResult::Offense::Reason::Verification
         };
-        res.offenses.push_back(o);
+        res.offenses.push_back(std::move(o));
     }
 
     return res;

@@ -222,11 +222,11 @@ void Histogram::normalize() {
  * value will be the value at the index.
  */
 void Histogram::generateEqualizer() {
-    float previousCdf = 0.0f;
-    _equalizer = std::vector<float>(_numBins, 0.0f);
+    float previousCdf = 0.f;
+    _equalizer = std::vector<float>(_numBins, 0.f);
     for (int i = 0; i < _numBins; i++) {
         const float probability = _data[i] / static_cast<float>(_numValues);
-        const float cdf = std::min(1.0f, previousCdf + probability);
+        const float cdf = std::min(1.f, previousCdf + probability);
         _equalizer[i] = cdf * (_numBins-1);
         previousCdf = cdf;
     }

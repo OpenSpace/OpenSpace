@@ -490,7 +490,7 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 OrbitalNavigator::LimitZoom::LimitZoom()
     : properties::PropertyOwner(LimitZoomInfo)
     , enableZoomInLimit(EnabledMinimumAllowedDistanceInfo, true)
-    , minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
+    , minimumAllowedDistance(MinimumDistanceInfo, 10.f, 0.f, 10000.f)
     , enableZoomOutLimit(EnabledMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
@@ -520,8 +520,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
-    , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
-    , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
+    , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.f, 50.f)
+    , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.f, 50.f)
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(
         StereoscopicDepthOfFocusSurfaceInfo,
@@ -917,7 +917,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     camRot.localRotation = interpolateLocalRotation(deltaTime, camRot.localRotation);
     camRot.localRotation = rotateLocally(deltaTime, camRot.localRotation);
 
-    double horizontalTranslationSpeedScale =
+    const double horizontalTranslationSpeedScale =
         rotationSpeedScaleFromCameraHeight(pose.position, posHandle);
 
     // Rotation around target object's up vector based on user input
@@ -1640,12 +1640,12 @@ double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,
         return targetDistance;
     }
 
-    double t = _cameraToSurfaceDistanceInterpolator.value();
+    const double t = _cameraToSurfaceDistanceInterpolator.value();
     _cameraToSurfaceDistanceInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _cameraToSurfaceDistanceInterpolator.step();
 
     // Interpolate distance logarithmically
-    double result = glm::exp(glm::mix(
+    const double result = glm::exp(glm::mix(
         glm::log(currentDistance),
         glm::log(targetDistance),
         glm::min(t * _cameraToSurfaceDistanceInterpolator.deltaTimeScaled(), 1.0))

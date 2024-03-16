@@ -29,7 +29,6 @@
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -385,7 +384,7 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
     const size_t HeightChannel = 0;
     const LayerGroup& heightmaps = lm.layerGroup(layers::Group::ID::HeightLayers);
 
-    ChunkTileVector chunkTileSettingPairs = tilesAndSettingsUnsorted(
+    const ChunkTileVector chunkTileSettingPairs = tilesAndSettingsUnsorted(
         heightmaps,
         chunk.tileIndex
     );
@@ -443,7 +442,7 @@ bool colorAvailableForChunk(const Chunk& chunk, const LayerManager& lm) {
     const LayerGroup& colorLayers = lm.layerGroup(layers::Group::ID::ColorLayers);
     for (Layer* lyr : colorLayers.activeLayers()) {
         if (lyr->tileProvider()) {
-            ChunkTile t = lyr->tileProvider()->chunkTile(chunk.tileIndex);
+            const ChunkTile t = lyr->tileProvider()->chunkTile(chunk.tileIndex);
             if (t.tile.status == Tile::Status::Unavailable) {
                 return false;
             }
@@ -463,7 +462,7 @@ std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
     const double patchCenterRadius = ellipsoid.maximumRadius();
 
     const double maxCenterRadius = patchCenterRadius + heights.max;
-    Geodetic2 halfSize = chunk.surfacePatch.halfSize();
+    const Geodetic2 halfSize = chunk.surfacePatch.halfSize();
 
     // As the patch is curved, the maximum height offsets at the corners must be long
     // enough to cover large enough to cover a heights.max at the center of the
@@ -608,8 +607,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     // @TODO (abock, 2021-03-25) The layermanager should be changed to take a
     // std::map<std::string, ghoul::Dictionary> instead and then we don't need to get it
     // as a bare dictionary anymore and can use the value from the struct directly
-    ghoul::Dictionary layersDictionary = dictionary.value<ghoul::Dictionary>("Layers");
-    _layerManager.initialize(layersDictionary);
+    const ghoul::Dictionary layersDict = dictionary.value<ghoul::Dictionary>("Layers");
+    _layerManager.initialize(layersDict);
 
     addProperty(Fadeable::_opacity);
     addProperty(_generalProperties.performShading);

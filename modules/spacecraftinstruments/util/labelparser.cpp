@@ -45,23 +45,25 @@ namespace openspace {
 LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictionary)
     : _fileName(std::move(fileName))
 {
+    using ghoul::Dictionary;
+
     // get the different instrument types
     // for each decoder (assuming might have more if hong makes changes)
-    for (std::string_view decoderStr : dictionary.keys()) {
-        if (!dictionary.hasValue<ghoul::Dictionary>(decoderStr)) {
+    for (const std::string_view decoderStr : dictionary.keys()) {
+        if (!dictionary.hasValue<Dictionary>(decoderStr)) {
             continue;
         }
 
-        ghoul::Dictionary typeDict = dictionary.value<ghoul::Dictionary>(decoderStr);
+        Dictionary typeDict = dictionary.value<Dictionary>(decoderStr);
 
         // create dictionary containing all {playbookKeys , spice IDs}
         if (decoderStr == "Instrument") {
             // for each playbook call -> create a Decoder object
             for (std::string_view key : typeDict.keys()) {
-                if (!typeDict.hasValue<ghoul::Dictionary>(key)) {
+                if (!typeDict.hasValue<Dictionary>(key)) {
                     continue;
                 }
-                ghoul::Dictionary decoderDict = typeDict.value<ghoul::Dictionary>(key);
+                const Dictionary decoderDict = typeDict.value<Dictionary>(key);
 
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
                     decoderDict,
@@ -73,33 +75,32 @@ LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictiona
             }
         }
         if (decoderStr == "Target") {
-            if (!typeDict.hasValue<ghoul::Dictionary>(keySpecs) ||
-                !typeDict.hasValue<ghoul::Dictionary>(keySpecs))
+            if (!typeDict.hasValue<Dictionary>(keySpecs) ||
+                !typeDict.hasValue<Dictionary>(keySpecs))
             {
                 continue;
             }
 
-            ghoul::Dictionary specsOfInterestDict =
-                typeDict.value<ghoul::Dictionary>(keySpecs);
+            const Dictionary specsOfInterestDict = typeDict.value<Dictionary>(keySpecs);
 
             _specsOfInterest.resize(specsOfInterestDict.size());
             for (size_t n = 0; n < _specsOfInterest.size(); ++n) {
-                std::string key = std::to_string(n + 1);
+                const std::string key = std::to_string(n + 1);
                 if (specsOfInterestDict.hasValue<std::string>(key)) {
                     std::string readMe = specsOfInterestDict.value<std::string>(key);
-                    _specsOfInterest[n] = readMe;
+                    _specsOfInterest[n] = std::move(readMe);
                 }
             }
-            ghoul::Dictionary convertDict = typeDict.value<ghoul::Dictionary>(keyConvert);
+            const Dictionary convertDict = typeDict.value<Dictionary>(keyConvert);
 
-            for (std::string_view key : convertDict.keys()) {
-                if (!convertDict.hasValue<ghoul::Dictionary>(key)) {
+            for (const std::string_view key : convertDict.keys()) {
+                if (!convertDict.hasValue<Dictionary>(key)) {
                     continue;
                 }
 
-                ghoul::Dictionary itemDict = convertDict.value<ghoul::Dictionary>(key);
+                const Dictionary item = convertDict.value<Dictionary>(key);
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
-                    itemDict,
+                    item,
                     std::string(decoderStr)
                 );
                 // insert decoder to map - this will be used in the parser to determine

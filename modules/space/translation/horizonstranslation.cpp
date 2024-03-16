@@ -244,7 +244,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     for (int i = 0; i < nKeyframes; i++) {
         // Add keyframe in timeline
         _timeline.addKeyframe(
-            std::move(cacheKeyframes[i].timestamp),
+            cacheKeyframes[i].timestamp,
             {
                 cacheKeyframes[i].position[0],
                 cacheKeyframes[i].position[1],

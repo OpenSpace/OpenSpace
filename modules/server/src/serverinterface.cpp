@@ -215,8 +215,6 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
     addProperty(_password);
 }
 
-ServerInterface::~ServerInterface() {}
-
 void ServerInterface::initialize() {
     if (!_enabled) {
         return;

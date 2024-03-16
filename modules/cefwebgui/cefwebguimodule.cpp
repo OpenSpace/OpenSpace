@@ -140,8 +140,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     WebBrowserModule* webBrowserModule =
         global::moduleEngine->module<WebBrowserModule>();
 
-    bool available = webBrowserModule && webBrowserModule->isEnabled();
-
+    const bool available = webBrowserModule && webBrowserModule->isEnabled();
     if (!available) {
         return;
     }

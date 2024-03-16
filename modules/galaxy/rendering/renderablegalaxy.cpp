@@ -265,13 +265,13 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
     , _starRenderingEnabled(StarRenderingEnabledInfo, true)
     , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.05f, 0.001f)
-    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.f, 200.0f)
-    , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.f, 1000.0f)
+    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.f, 200.f)
+    , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.f, 1000.f)
     , _starRenderingMethod(
         StarRenderingMethodInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.0f)
+    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.f)
     , _rotation(
         RotationInfo,
         glm::vec3(0.f),

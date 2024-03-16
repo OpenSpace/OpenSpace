@@ -84,15 +84,11 @@ namespace {
         rhsLl -= glm::vec2(ItemStandoffDistance / 2.f);
         rhsUr += glm::vec2(ItemStandoffDistance / 2.f);
 
-        return !(
-            lhsUr.x < rhsLl.x ||
-            lhsLl.x > rhsUr.x ||
-            lhsUr.y < rhsLl.y ||
-            lhsLl.y > rhsUr.y
-        );
+        return lhsUr.x >= rhsLl.x && lhsLl.x <= rhsUr.x &&
+               lhsUr.y >= rhsLl.y && lhsLl.y <= rhsUr.y;
     }
 
-    glm::vec2 ndcToScreen(glm::vec2 ndc, glm::ivec2 res) {
+    glm::vec2 ndcToScreen(glm::vec2 ndc, const glm::ivec2& res) {
         ndc.x = (ndc.x + 1.f) / 2.f * res.x;
         ndc.y = (ndc.y + 1.f) / 2.f * res.y;
         return ndc;
@@ -261,7 +257,7 @@ void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
             return;
         }
 
-        bool finishedLoading = std::all_of(
+        const bool finishedLoading = std::all_of(
             allAssets.begin(),
             allAssets.end(),
             [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
@@ -298,9 +294,9 @@ void LoadingScreen::render() {
     const glm::ivec2 res =
         glm::vec2(global::windowDelegate->firstWindowResolution()) * dpiScaling;
 
-    float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
+    const float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
-    float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
+    const float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
         static_cast<float>(_logoTexture->dimensions().y);
 
     ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(res);
@@ -359,7 +355,7 @@ void LoadingScreen::render() {
     glm::vec2 messageLl = glm::vec2(0.f);
     glm::vec2 messageUr = glm::vec2(0.f);
     if (_showMessage) {
-        std::lock_guard guard(_messageMutex);
+        const std::lock_guard guard(_messageMutex);
 
         const glm::vec2 bboxMessage = _messageFont->boundingBox(_message);
 
@@ -630,7 +626,7 @@ void LoadingScreen::renderLogMessages() const {
 
     // Render # of warnings and error messages
     std::map<ghoul::logging::LogLevel, size_t> numberOfErrorsPerLevel;
-    for (auto& entry : _log->entries()) {
+    for (const auto& entry : _log->entries()) {
         numberOfErrorsPerLevel[entry.level]++;
     }
     size_t row = 0;
