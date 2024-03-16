@@ -68,9 +68,9 @@ namespace {
 
 namespace openspace::volume {
 
-TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
+TransferFunctionHandler::TransferFunctionHandler(properties::StringProperty prop)
     : properties::PropertyOwner({ "TransferFunctionHandler", "Tranfer Function Handler" })
-    , _transferFunctionPath(prop)
+    , _transferFunctionPath(std::move(prop))
     , _dataUnit(DataUnitInfo)
     , _minValue(MinValueInfo)
     , _maxValue(MaxValueInfo)

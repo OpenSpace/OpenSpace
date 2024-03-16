@@ -130,7 +130,7 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         std::string distanceText = std::to_string(
             std::round(nodeline->distance() / scale)
         );
-        const int pos = static_cast<int>(distanceText.find("."));
+        const int pos = static_cast<int>(distanceText.find('.'));
         const std::string subStr = distanceText.substr(pos);
         distanceText.erase(pos, subStr.size());
 

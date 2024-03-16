@@ -305,7 +305,7 @@ public:
      *
      * \param callback Function handle for the callback
      */
-    void removeStateChangeCallback(CallbackHandle callback);
+    void removeStateChangeCallback(CallbackHandle handle);
 
     /**
      * Provides list of available playback files.
@@ -528,7 +528,8 @@ public:
      * \param filename The name of the file to record to
      * \param extension The file extension to check for
      */
-    static bool hasFileExtension(std::string filename, std::string extension);
+    static bool hasFileExtension(const std::string& filename,
+        const std::string& extension);
 
     /**
      * Converts file format of a session recording file to the current format version
@@ -612,7 +613,7 @@ protected:
     double _timestampPlaybackStarted_application = 0.0;
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
-    bool hasCameraChangedFromPrev(datamessagestructures::CameraKeyframe kfNew);
+    bool hasCameraChangedFromPrev(const datamessagestructures::CameraKeyframe& kfNew);
     double appropriateTimestamp(Timestamps t3stamps);
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
@@ -620,7 +621,7 @@ protected:
     void recordCurrentTimeRate();
     bool handleRecordingFile(std::string filenameIn);
     static bool isPath(std::string& filename);
-    void removeTrailingPathSlashes(std::string& filename);
+    void removeTrailingPathSlashes(std::string& filename) const;
     bool playbackCamera();
     bool playbackTimeChange();
     bool playbackScript();
@@ -629,7 +630,7 @@ protected:
     void handlePlaybackEnd();
 
     bool findFirstCameraKeyframeInTimeline();
-    Timestamps generateCurrentTimestamp3(double keyframeTime);
+    Timestamps generateCurrentTimestamp3(double keyframeTime) const;
     static void saveStringToFile(const std::string& s, unsigned char* kfBuffer,
         size_t& idx, std::ofstream& file);
     static void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size,
@@ -699,9 +700,9 @@ protected:
     void populateListofLoadedSceneGraphNodes();
 
     void checkIfScriptUsesScenegraphNode(std::string s);
-    bool checkForScenegraphNodeAccessScene(std::string& s);
+    bool checkForScenegraphNodeAccessScene(const std::string& s);
     bool checkForScenegraphNodeAccessNav(std::string& navTerm);
-    std::string extractScenegraphNodeFromScene(std::string& s);
+    std::string extractScenegraphNodeFromScene(const std::string& s);
     bool checkIfInitialFocusNodeIsLoaded(unsigned int firstCamIndex);
     std::string isolateTermFromQuotes(std::string s);
     void eraseSpacesFromString(std::string& s);

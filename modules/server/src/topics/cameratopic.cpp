@@ -69,7 +69,7 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
     ServerModule* module = global::moduleEngine->module<ServerModule>();
     _dataCallbackHandle = module->addPreSyncCallback(
         [this]() {
-            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+            const auto now = std::chrono::system_clock::now();
             if (now - _lastUpdateTime > _cameraPositionUpdateTime) {
                 sendCameraData();
                 _lastUpdateTime = std::chrono::system_clock::now();

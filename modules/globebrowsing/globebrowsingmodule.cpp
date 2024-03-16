@@ -652,7 +652,7 @@ bool GlobeBrowsingModule::isMRFCachingEnabled() const {
     return _mrfCacheEnabled;
 }
 
-const std::string& GlobeBrowsingModule::mrfCacheLocation() const {
+std::string GlobeBrowsingModule::mrfCacheLocation() const {
     return _mrfCacheLocation;
 }
 

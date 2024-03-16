@@ -94,67 +94,69 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
+    constexpr std::array<GLfloat, 4> ShadowBorder = { 1.f, 1.f, 1.f, 1.f };
 
     void checkFrameBufferState(const std::string& codePosition) {
         if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Framework not built. " + codePosition);
-            GLenum fbErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            const GLenum fbErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             switch (fbErr) {
-            case GL_FRAMEBUFFER_UNDEFINED:
-                LERROR("Indefined framebuffer");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                LERROR("Incomplete, missing attachement");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                LERROR("Framebuffer doesn't have at least one image attached to it");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                LERROR(
-                    "Returned if the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is "
-                    "GL_NONE for any color attachment point(s) named by GL_DRAW_BUFFERi"
-                );
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-                LERROR(
-                    "Returned if GL_READ_BUFFER is not GL_NONE and the value of "
-                    "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color "
-                    "attachment point named by GL_READ_BUFFER");
-                break;
-            case GL_FRAMEBUFFER_UNSUPPORTED:
-                LERROR(
-                    "Returned if the combination of internal formats of the attached "
-                    "images violates an implementation - dependent set of restrictions"
-                );
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-                LERROR(
-                    "Returned if the value of GL_RENDERBUFFE_r_samples is not the same "
-                    "for all attached renderbuffers; if the value of GL_TEXTURE_SAMPLES "
-                    "is the not same for all attached textures; or , if the attached "
-                    "images are a mix of renderbuffers and textures, the value of "
-                    "GL_RENDERBUFFE_r_samples does not match the value of "
-                    "GL_TEXTURE_SAMPLES"
-                );
-                LERROR(
-                    "Returned if the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not "
-                    "the same for all attached textures; or , if the attached images are "
-                    "a mix of renderbuffers and textures, the value of "
-                    "GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached "
-                    "textures"
-                );
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-                LERROR(
-                    "Returned if any framebuffer attachment is layered, and any "
-                    "populated attachment is not layered, or if all populated color "
-                    "attachments are not from textures of the same target"
-                );
-                break;
-            default:
-                LDEBUG("No error found checking framebuffer: " + codePosition);
-                break;
+                case GL_FRAMEBUFFER_UNDEFINED:
+                    LERROR("Indefined framebuffer");
+                    break;
+                case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                    LERROR("Incomplete, missing attachement");
+                    break;
+                case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                    LERROR("Framebuffer doesn't have at least one image attached to it");
+                    break;
+                case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                    LERROR(
+                        "Returned if the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE "
+                        "is GL_NONE for any color attachment point(s) named by "
+                        "GL_DRAW_BUFFERi"
+                    );
+                    break;
+                case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                    LERROR(
+                        "Returned if GL_READ_BUFFER is not GL_NONE and the value of "
+                        "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color "
+                        "attachment point named by GL_READ_BUFFER");
+                    break;
+                case GL_FRAMEBUFFER_UNSUPPORTED:
+                    LERROR(
+                        "Returned if the combination of internal formats of the attached "
+                        "images violates an implementation - dependent set of "
+                        "restrictions"
+                    );
+                    break;
+                case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                    LERROR(
+                        "Returned if the value of GL_RENDERBUFFE_r_samples is not the "
+                        "same for all attached renderbuffers; if the value of "
+                        "GL_TEXTURE_SAMPLES is the not same for all attached textures; "
+                        "or , if the attached images are a mix of renderbuffers and "
+                        "textures, the value of GL_RENDERBUFFE_r_samples does not match "
+                        "the value of GL_TEXTURE_SAMPLES"
+                    );
+                    LERROR(
+                        "Returned if the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is "
+                        "not the same for all attached textures; or , if the attached "
+                        "images are a mix of renderbuffers and textures, the value of "
+                        "GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all "
+                        "attached textures"
+                    );
+                    break;
+                case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                    LERROR(
+                        "Returned if any framebuffer attachment is layered, and any "
+                        "populated attachment is not layered, or if all populated color "
+                        "attachments are not from textures of the same target"
+                    );
+                    break;
+                default:
+                    LDEBUG("No error found checking framebuffer: " + codePosition);
+                    break;
             }
         }
     }
@@ -190,7 +192,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     if (!dictionary.hasValue<ghoul::Dictionary>("Shadows")) {
         return;
     }
-    ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>("Shadows");
+    const ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>("Shadows");
 
     const Parameters p = codegen::bake<Parameters>(d);
 
@@ -207,9 +209,9 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
         _dynamicDepthTextureRes = false;
     }
     else {
-        glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
-        _shadowDepthTextureWidth = renderingResolution.x * 2;
-        _shadowDepthTextureHeight = renderingResolution.y * 2;
+        const glm::ivec2 renderingRes= global::renderEngine->renderingResolution();
+        _shadowDepthTextureWidth = renderingRes.x * 2;
+        _shadowDepthTextureHeight = renderingRes.y * 2;
         _dynamicDepthTextureRes = true;
     }
 
@@ -239,7 +241,7 @@ void ShadowComponent::deinitializeGL() {
 }
 
 RenderData ShadowComponent::begin(const RenderData& data) {
-    glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
+    const glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
     if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
         (_shadowDepthTextureHeight != renderingResolution.y)))
     {
@@ -252,21 +254,22 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     // Builds light's ModelViewProjectionMatrix:
     // ===========================================
 
-    glm::dvec3 diffVector = glm::dvec3(_sunPosition) - data.modelTransform.translation;
-    double originalLightDistance = glm::length(diffVector);
-    glm::dvec3 lightDirection = glm::normalize(diffVector);
+    const glm::dvec3 diffVector =
+        glm::dvec3(_sunPosition) - data.modelTransform.translation;
+    const double originalLightDistance = glm::length(diffVector);
+    const glm::dvec3 lightDirection = glm::normalize(diffVector);
 
     // Percentage of the original light source distance (to avoid artifacts)
     //double multiplier = originalLightDistance *
     //    (static_cast<double>(_distanceFraction)/1.0E5);
 
-    double multiplier = originalLightDistance *
+    const double multiplier = originalLightDistance *
         (static_cast<double>(_distanceFraction) / 1E17);
 
     // New light source position
     //glm::dvec3 lightPosition = data.modelTransform.translation +
     //    (lightDirection * multiplier);
-    glm::dvec3 lightPosition = data.modelTransform.translation +
+    const glm::dvec3 lightPosition = data.modelTransform.translation +
         (diffVector * multiplier);
 
     //// Light Position
@@ -275,27 +278,27 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     //=============== Manually Created Camera Matrix ===================
     //==================================================================
     // camera Z
-    glm::dvec3 cameraZ = lightDirection;
+    const glm::dvec3 cameraZ = lightDirection;
 
     // camera X
-    glm::dvec3 upVector = glm::dvec3(0.0, 1.0, 0.0);
-    glm::dvec3 cameraX = glm::normalize(glm::cross(upVector, cameraZ));
+    const glm::dvec3 upVector = glm::dvec3(0.0, 1.0, 0.0);
+    const glm::dvec3 cameraX = glm::normalize(glm::cross(upVector, cameraZ));
 
     // camera Y
-    glm::dvec3 cameraY = glm::cross(cameraZ, cameraX);
+    const glm::dvec3 cameraY = glm::cross(cameraZ, cameraX);
 
     // init 4x4 matrix
     glm::dmat4 cameraRotationMatrix(1.0);
 
     double* matrix = glm::value_ptr(cameraRotationMatrix);
-    matrix[0]  = cameraX.x;
-    matrix[4]  = cameraX.y;
-    matrix[8]  = cameraX.z;
-    matrix[1]  = cameraY.x;
-    matrix[5]  = cameraY.y;
-    matrix[9]  = cameraY.z;
-    matrix[2]  = cameraZ.x;
-    matrix[6]  = cameraZ.y;
+    matrix[0] = cameraX.x;
+    matrix[4] = cameraX.y;
+    matrix[8] = cameraX.z;
+    matrix[1] = cameraY.x;
+    matrix[5] = cameraY.y;
+    matrix[9] = cameraY.z;
+    matrix[2] = cameraZ.x;
+    matrix[6] = cameraZ.y;
     matrix[10] = cameraZ.z;
 
     // set translation part
@@ -459,7 +462,7 @@ void ShadowComponent::updateDepthTexture() const {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ShadowBorder);
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ShadowBorder.data());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 

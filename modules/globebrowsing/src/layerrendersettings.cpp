@@ -94,14 +94,12 @@ float LayerRenderSettings::performLayerSettings(float v) const {
 }
 
 glm::vec4 LayerRenderSettings::performLayerSettings(const glm::vec4& currentValue) const {
-    glm::vec4 newValue = glm::vec4(
+    return glm::vec4(
         performLayerSettings(currentValue.r),
         performLayerSettings(currentValue.g),
         performLayerSettings(currentValue.b),
         performLayerSettings(currentValue.a)
     );
-
-    return newValue;
 }
 
 } // namespace openspace::globebrowsing

@@ -78,7 +78,7 @@ void Camera::setParent(SceneGraphNode* parent) {
     _parent = parent;
 }
 
-void Camera::rotate(glm::dquat rotation) {
+void Camera::rotate(const glm::dquat& rotation) {
     const std::lock_guard _lock(_mutex);
     _rotation = rotation * static_cast<glm::dquat>(_rotation);
 

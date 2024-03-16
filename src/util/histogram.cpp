@@ -92,8 +92,8 @@ void Histogram::changeRange(float minValue, float maxValue){
     }
 
     float* oldData = _data;
-    float oldMin = _minValue;
-    float oldMax = _maxValue;
+    const float oldMin = _minValue;
+    const float oldMax = _maxValue;
 
     float* newData = new float[_numBins]{0.0};
     for(int i=0; i<_numBins; i++){
@@ -257,7 +257,7 @@ float Histogram::equalize(float value) const {
     //         " val: " + std::to_string(value)
     //     );
     // }
-    float normalizedValue = (value - _minValue) / (_maxValue - _minValue);
+    const float normalizedValue = (value - _minValue) / (_maxValue - _minValue);
     int bin = static_cast<int>(std::floor(normalizedValue * _numBins));
     // If value == _maxValues then bin == _numBins, which is a invalid index.
     bin = std::min(_numBins-1, bin);

@@ -78,7 +78,7 @@ Time::Time(const std::string& time) :
 {}
 
 Time Time::now() {
-    time_t secondsSince1970 = time(nullptr);
+    const time_t secondsSince1970 = time(nullptr);
 
     const time_t secondsInAYear = static_cast<time_t>(365.25 * 24 * 60 * 60);
     const double secondsSince2000 = static_cast<double>(

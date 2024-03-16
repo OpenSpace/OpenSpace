@@ -147,7 +147,7 @@ double targetRoll(const glm::dvec3& up, const glm::dvec3& forward) {
 
 glm::dvec3 cameraDirectionEquatorial() {
     // Get the view direction of the screen in cartesian J2000 coordinates
-    glm::dvec3 camDirGalactic = cameraDirectionGalactic();
+    const glm::dvec3 camDirGalactic = cameraDirectionGalactic();
     return galacticToEquatorial(camDirGalactic);
 }
 
@@ -220,7 +220,7 @@ glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3&
     return glm::rotate(rotationAngle, rotationAxis);
 }
 
-double sizeFromFov(double fov, glm::dvec3 worldPosition) {
+double sizeFromFov(double fov, const glm::dvec3& worldPosition) {
     // Calculate the size with trigonometry
     //  /|
     // /_|    Adjacent is the horizontal line, opposite the vertical

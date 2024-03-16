@@ -198,7 +198,7 @@ void RenderableConstellationsBase::initialize() {
         if (!entry.identifier.empty()) {
             std::string fullName = constellationFullName(entry.identifier);
             if (!fullName.empty()) {
-                entry.text = fullName;
+                entry.text = std::move(fullName);
             }
         }
     }
@@ -228,7 +228,7 @@ void RenderableConstellationsBase::render(const RenderData& data, RendererTasks&
     );
 
     if (orthoRight == glm::vec3(0.f)) {
-        glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
+        const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
             glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))

@@ -143,9 +143,8 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
         if (script != json.end() && script->is_string()) {
             std::string luaScript = script->get<std::string>();
             const auto ret = json.find(KeyReturn);
-            bool shouldReturn = (ret != json.end()) &&
-                                 ret->is_boolean() &&
-                                 ret->get<bool>();
+            const bool shouldReturn =
+                (ret != json.end()) && ret->is_boolean() && ret->get<bool>();
 
             const auto sync = json.find(KeyShouldBeSynchronized);
             bool shouldBeSynchronized = true;
@@ -153,14 +152,13 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
                 shouldBeSynchronized = sync->get<bool>();
             }
 
-            runScript(luaScript, shouldReturn, shouldBeSynchronized);
+            runScript(std::move(luaScript), shouldReturn, shouldBeSynchronized);
         }
         else if (function != json.end() && function->is_string()) {
-            std::string luaFunction = function->get<std::string>();
+            const std::string luaFunction = function->get<std::string>();
             const auto ret = json.find(KeyReturn);
-            bool shouldReturn = (ret != json.end()) &&
-                                 ret->is_boolean() &&
-                                 ret->get<bool>();
+            const bool shouldReturn =
+                (ret != json.end()) && ret->is_boolean() && ret->get<bool>();
 
             const auto sync = json.find(KeyShouldBeSynchronized);
             bool shouldBeSynchronized = true;
@@ -179,8 +177,8 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
                 formattedArgs.push_back(formatLua(it));
             }
 
-            const std::string luaScript = generateScript(luaFunction, formattedArgs);
-            runScript(luaScript, shouldReturn, shouldBeSynchronized);
+            std::string luaScript = generateScript(luaFunction, formattedArgs);
+            runScript(std::move(luaScript), shouldReturn, shouldBeSynchronized);
         }
     }
     catch (const std::out_of_range& e) {
