@@ -47,7 +47,7 @@ struct Configuration {
 
     ghoul::Dictionary createDictionary();
 
-    std::string windowConfiguration = "${CONFIG}/single.xml";
+    std::string windowConfiguration = "${CONFIG}/single.json";
     std::string asset;
     std::string profile;
 

@@ -1061,15 +1061,9 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             std::filesystem::path cj = c;
             cj.replace_extension(".json");
 
-            std::filesystem::path cx = c;
-            cx.replace_extension(".xml");
-
             if (c.extension().empty()) {
                 if (std::filesystem::exists(cj)) {
                     config += ".json";
-                }
-                else if (std::filesystem::exists(cx)) {
-                    config += ".xml";
                 }
                 else {
                     throw ghoul::RuntimeError(fmt::format(
@@ -1079,7 +1073,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
                 }
             }
             else {
-                // user customzied sgct config
+                // user customized SGCT config
             }
         }
         global::configuration->windowConfiguration = config;

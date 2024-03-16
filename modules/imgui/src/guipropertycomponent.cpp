@@ -397,18 +397,6 @@ void GuiPropertyComponent::render() {
     };
 
     if (!_useTreeLayout || noGuiGroups) {
-        // Remove all of the nodes that we want hidden first
-        owners.erase(
-            std::remove_if(
-                owners.begin(),
-                owners.end(),
-                [](properties::PropertyOwner* p) {
-                    SceneGraphNode* s = dynamic_cast<SceneGraphNode*>(p);
-                    return s && s->hasGuiHintHidden();
-                }
-            ),
-            owners.end()
-        );
         std::for_each(owners.begin(), owners.end(), renderProp);
     }
     else { // _useTreeLayout && gui groups exist
@@ -417,9 +405,6 @@ void GuiPropertyComponent::render() {
         for (properties::PropertyOwner* pOwner : owners) {
             // We checked above that pOwner is a SceneGraphNode
             SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
-            if (nOwner->hasGuiHintHidden()) {
-                continue;
-            }
             const std::string gui = nOwner->guiPath();
             if (gui.empty()) {
                 // We know that we are done now since we stable_sort:ed them above
