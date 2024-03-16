@@ -43,6 +43,28 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    std::future<openspace::DownloadManager::MemoryFile> downloadImageToMemory(
+                                                                   const std::string& url)
+    {
+        using namespace openspace;
+
+        return global::downloadManager->fetchFile(
+            url,
+            [url](const DownloadManager::MemoryFile&) {
+                LDEBUGC(
+                    "RenderableSphereImageOnline",
+                    fmt::format("Download to memory finished for image '{}'", url)
+                );
+            },
+            [url](const std::string& err) {
+                LDEBUGC(
+                    "RenderableSphereImageOnline",
+                    fmt::format("Download to memory failed for image '{}': {}", url, err)
+                );
+            }
+        );
+    }
+
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
@@ -93,7 +115,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
             LERRORC(
@@ -139,26 +161,6 @@ void RenderableSphereImageOnline::bindTexture() {
     else {
         unbindTexture();
     }
-}
-
-std::future<DownloadManager::MemoryFile>
-RenderableSphereImageOnline::downloadImageToMemory(const std::string& url)
-{
-    return global::downloadManager->fetchFile(
-        url,
-        [url](const DownloadManager::MemoryFile&) {
-            LDEBUGC(
-                "RenderableSphereImageOnline",
-                fmt::format("Download to memory finished for image '{}'", url)
-            );
-        },
-        [url](const std::string& err) {
-            LDEBUGC(
-                "RenderableSphereImageOnline",
-                fmt::format("Download to memory failed for image '{}': {}", url, err)
-            );
-        }
-    );
 }
 
 } // namespace openspace

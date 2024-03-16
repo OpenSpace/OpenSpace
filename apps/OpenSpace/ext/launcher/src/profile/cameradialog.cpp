@@ -47,9 +47,9 @@ namespace {
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     bool inNumericalRange(QLineEdit* le, float min, float max) {
-        QString s = le->text();
+        const QString s = le->text();
         bool validConversion = false;
-        float value = s.toFloat(&validConversion);
+        const float value = s.toFloat(&validConversion);
         if (!validConversion) {
             return false;
         }
@@ -60,9 +60,9 @@ namespace {
     }
 
     bool isNumericalLargerThan(QLineEdit* le, float limit) {
-        QString s = le->text();
+        const QString s = le->text();
         bool validConversion = false;
-        float value = s.toFloat(&validConversion);
+        const float value = s.toFloat(&validConversion);
         if (!validConversion) {
             return false;
         }
@@ -353,17 +353,17 @@ QWidget* CameraDialog::createNavStateWidget() {
     connect(
         loadFile, &QPushButton::clicked,
         [this]() {
-            QString file = QFileDialog::getOpenFileName(
+            const QString file = QFileDialog::getOpenFileName(
                 this,
                 "Select navigate state file"
             );
 
-            std::ifstream f(file.toStdString());
-            std::string contents = std::string(
-                (std::istreambuf_iterator<char>(f)),
+            std::ifstream f = std::ifstream(file.toStdString());
+            const std::string contents = std::string(
+                std::istreambuf_iterator<char>(f),
                 std::istreambuf_iterator<char>()
             );
-            nlohmann::json json = nlohmann::json::parse(contents);
+            const nlohmann::json json = nlohmann::json::parse(contents);
 
             using namespace openspace::interaction;
             NavigationState state = NavigationState(json);
@@ -529,7 +529,7 @@ bool CameraDialog::areRequiredFormsFilledAndValid() {
     return allFormsOk;
 }
 
-void CameraDialog::addErrorMsg(QString errorDescription) {
+void CameraDialog::addErrorMsg(const QString& errorDescription) {
     QString contents = _errorMsg->text();
     if (!contents.isEmpty()) {
         contents += ", ";
@@ -563,7 +563,7 @@ void CameraDialog::approved() {
             !_navState.upY->text().isEmpty() &&
             !_navState.upZ->text().isEmpty())
         {
-            glm::dvec3 u = glm::dvec3(
+            const glm::dvec3 u = glm::dvec3(
                 _navState.upX->text().toDouble(),
                 _navState.upY->text().toDouble(),
                 _navState.upZ->text().toDouble()

@@ -71,7 +71,7 @@ private:
         bool isMarkedForRemoval = false;
     };
 
-    void handleConnection(std::shared_ptr<Connection> connection);
+    void handleConnection(const std::shared_ptr<Connection>& connection);
     void cleanUpFinishedThreads();
     void consumeMessages();
     void disconnectAll();

@@ -330,7 +330,7 @@ RenderEngine::RenderEngine()
     , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.f)
     , _gamma(GammaInfo, 0.95f, 0.01f, 5.f)
     , _hue(HueInfo, 0.f, 0.f, 360.f)
-    , _saturation(SaturationInfo, 1.f, 0.0f, 2.f)
+    , _saturation(SaturationInfo, 1.f, 0.f, 2.f)
     , _value(ValueInfo, 1.f, 0.f, 2.f)
     , _framerateLimit(FramerateLimitInfo, 0, 0, 500)
     , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
@@ -407,13 +407,13 @@ RenderEngine::RenderEngine()
             // Going from 'false' -> 'true'
             // We might need to create the folder first
 
-            std::time_t now = std::time(nullptr);
+            const std::time_t now = std::time(nullptr);
             std::tm* nowTime = std::localtime(&now);
-            char date[128];
-            strftime(date, sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
+            std::array<char, 128> date;
+            strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
 
-            std::filesystem::path newFolder = absPath(
-                "${STARTUP_SCREENSHOT}/" + std::string(date)
+            const std::filesystem::path newFolder = absPath(
+                "${STARTUP_SCREENSHOT}/" + std::string(date.data())
             );
 
             FileSys.registerPathToken(
@@ -494,7 +494,7 @@ void RenderEngine::initialize() {
     if (global::versionChecker->hasLatestVersionInfo()) {
         VersionChecker::SemanticVersion latest = global::versionChecker->latestVersion();
 
-        VersionChecker::SemanticVersion current {
+        const VersionChecker::SemanticVersion current {
             OPENSPACE_VERSION_MAJOR,
             OPENSPACE_VERSION_MINOR,
             OPENSPACE_VERSION_PATCH
@@ -525,7 +525,7 @@ void RenderEngine::initializeGL() {
     // initialized window
     _horizFieldOfView = static_cast<float>(global::windowDelegate->getHorizFieldOfView());
 
-    Configuration::FontSizes fontSize = global::configuration->fontSize;
+    const Configuration::FontSizes fontSize = global::configuration->fontSize;
     {
         ZoneScopedN("Fonts");
         TracyGpuZone("Fonts");
@@ -632,21 +632,21 @@ glm::ivec2 RenderEngine::fontResolution() const {
 }
 
 glm::mat4 RenderEngine::globalRotation() const {
-    glm::vec3 rot = _globalRotation;
+    const glm::vec3 rot = _globalRotation;
 
-    glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1.f, 0.f, 0.f));
-    glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0.f, 1.f, 0.f));
-    glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0.f, 0.f, 1.f));
+    const glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1.f, 0.f, 0.f));
+    const glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0.f, 1.f, 0.f));
+    const glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0.f, 0.f, 1.f));
 
     return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
 }
 
 glm::mat4 RenderEngine::screenSpaceRotation() const {
-    glm::vec3 rot = _screenSpaceRotation;
+    const glm::vec3 rot = _screenSpaceRotation;
 
-    glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1.f, 0.f, 0.f));
-    glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0.f, 1.f, 0.f));
-    glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0.f, 0.f, 1.f));
+    const glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1.f, 0.f, 0.f));
+    const glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0.f, 1.f, 0.f));
+    const glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0.f, 0.f, 1.f));
 
     return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
 }
@@ -655,11 +655,11 @@ glm::mat4 RenderEngine::nodeRotation() const {
     if (!global::windowDelegate->isMaster()) {
         return glm::mat4(1.f);
     }
-    glm::vec3 rot = _masterRotation;
+    const glm::vec3 rot = _masterRotation;
 
-    glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1.f, 0.f, 0.f));
-    glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0.f, 1.f, 0.f));
-    glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0.f, 0.f, 1.f));
+    const glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1.f, 0.f, 0.f));
+    const glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0.f, 1.f, 0.f));
+    const glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0.f, 0.f, 1.f));
 
     return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
 }
@@ -679,7 +679,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     const glm::mat4 globalRot = globalRotation();
     const glm::mat4 nodeRot = nodeRotation();
-    glm::mat4 combinedGlobalRot = nodeRot * globalRot;
+    const glm::mat4 combinedGlobalRot = nodeRot * globalRot;
 
     if (_camera) {
         _camera->sgctInternal.setViewMatrix(viewMatrix * combinedGlobalRot * sceneMatrix);
@@ -719,7 +719,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         );
 
         std::string fn = std::to_string(_frameNumber);
-        WindowDelegate::Frustum frustum = global::windowDelegate->frustumMode();
+        const WindowDelegate::Frustum frustum = global::windowDelegate->frustumMode();
         std::string fr = [](WindowDelegate::Frustum f) -> std::string {
             switch (f) {
                 case WindowDelegate::Frustum::Mono:     return "";
@@ -733,7 +733,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         std::string dt = std::to_string(global::windowDelegate->deltaTime());
         std::string avgDt = std::to_string(global::windowDelegate->averageDeltaTime());
 
-        std::string res = fmt::format(
+        const std::string res = fmt::format(
             "Frame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
             fn, fr, sgFn, dt, avgDt
         );
@@ -782,12 +782,12 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 
 
     if (intersects(mousePosition, _cameraButtonLocations.rotation)) {
-        constexpr const char ToggleRotationFrictionScript[] = R"(
+        constexpr std::string_view ToggleRotationFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
-            ToggleRotationFrictionScript,
+            std::string(ToggleRotationFrictionScript),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
@@ -795,12 +795,12 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     }
 
     if (intersects(mousePosition, _cameraButtonLocations.zoom)) {
-        constexpr const char ToggleZoomFrictionScript[] = R"(
+        constexpr std::string_view ToggleZoomFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
-            ToggleZoomFrictionScript,
+            std::string(ToggleZoomFrictionScript),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
@@ -808,12 +808,12 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     }
 
     if (intersects(mousePosition, _cameraButtonLocations.roll)) {
-        constexpr const char ToggleRollFrictionScript[] = R"(
+        constexpr std::string_view ToggleRollFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
         global::scriptEngine->queueScript(
-            ToggleRollFrictionScript,
+            std::string(ToggleRollFrictionScript),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
@@ -871,7 +871,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     glEnable(GL_BLEND);
 
     // t = 1.f -> start of shutdown counter    t = 0.f -> timer has reached shutdown
-    float t = 1.f - (timer / fullTime);
+    const float t = 1.f - (timer / fullTime);
 
     rendering::helper::renderBox(
         glm::vec2(0.f),
@@ -905,10 +905,10 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     RenderFont(*_fontShutdown, penPosition, "Press ESC again to abort");
 }
 
-void RenderEngine::renderDashboard() {
+void RenderEngine::renderDashboard() const {
     ZoneScoped;
 
-    glm::vec2 dashboardStart = global::dashboard->getStartPositionOffset();
+    const glm::vec2 dashboardStart = global::dashboard->getStartPositionOffset();
     glm::vec2 penPosition = glm::vec2(
         dashboardStart.x,
         dashboardStart.y + fontResolution().y - global::luaConsole->currentHeight()
@@ -965,7 +965,7 @@ bool RenderEngine::isHdrDisabled() const {
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
                                                       const std::filesystem::path& vsPath,
-                                                             std::filesystem::path fsPath,
+                                                      const std::filesystem::path& fsPath,
                                                                    ghoul::Dictionary data)
 {
     ghoul::Dictionary dict = std::move(data);
@@ -997,7 +997,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
                                                       const std::filesystem::path& vsPath,
-                                                             std::filesystem::path fsPath,
+                                                      const std::filesystem::path& fsPath,
                                                       const std::filesystem::path& csPath,
                                                                    ghoul::Dictionary data)
 {
@@ -1275,8 +1275,8 @@ void RenderEngine::renderVersionInformation() {
         );
     }
 
-    [[maybe_unused]] float debugOffset = 0.f;
 #ifdef _DEBUG
+    [[maybe_unused]] float debugOffset = 0.f;
     {
         const glm::vec2 debugBox = _fontVersionInfo->boundingBox("Debug build");
         debugOffset = debugBox.y;
@@ -1291,6 +1291,8 @@ void RenderEngine::renderVersionInformation() {
             glm::vec4(0.2f, 0.75f, 0.15f, 1.f)
         );
     }
+#else // !_DEBUG
+    [[maybe_unused]] const float debugOffset = 0.f;
 #endif // _DEBUG
 
 #ifdef TRACY_ENABLE
@@ -1348,14 +1350,15 @@ void RenderEngine::renderScreenLog() {
             const double d = (diff - ttf).count();
             const float t = static_cast<float>(d) / static_cast<float>(FadeTime.count());
             const float p = 0.8f - t;
-            alpha = (p <= 0.f) ? 0.f : pow(p, 0.4f);
+            alpha = (p <= 0.f) ? 0.f : std::pow(p, 0.4f);
         }
 
         // Since all log entries are ordered, once one exceeds alpha, all have
         if (alpha <= 0.f) {
             break;
         }
-        std::string_view message = std::string_view(it.message).substr(0, MessageLength);
+        const std::string_view message =
+            std::string_view(it.message).substr(0, MessageLength);
         nRows += std::count(message.begin(), message.end(), '\n');
 
         const glm::vec4 white = glm::vec4(0.9f, 0.9f, 0.9f, alpha);
@@ -1370,7 +1373,6 @@ void RenderEngine::renderScreenLog() {
                 std::string_view(it.category).substr(0, CategoryLength),
                 it.category.length() > CategoryLength ? "..." : ""
             );
-            std::string_view text = std::string_view(buf.data(), end - buf.data());
 
             RenderFont(
                 *_fontLog,
@@ -1378,7 +1380,7 @@ void RenderEngine::renderScreenLog() {
                     10.f,
                     _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
                 ),
-                text,
+                std::string_view(buf.data(), end - buf.data()),
                 white
             );
         }
@@ -1390,14 +1392,13 @@ void RenderEngine::renderScreenLog() {
             const std::string_view lvl = ghoul::to_string(it.level);
             std::fill(buf.begin(), buf.end(), char(0));
             char* end = fmt::format_to(buf.data(), "({})", lvl);
-            std::string_view levelText = std::string_view(buf.data(), end - buf.data());
             RenderFont(
                 *_fontLog,
                 glm::vec2(
                     10 + (30 + 3) * _fontLog->pointSize(),
                     _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
                 ),
-                levelText,
+                std::string_view(buf.data(), end - buf.data()),
                 color
             );
         }

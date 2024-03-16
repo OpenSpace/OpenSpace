@@ -145,10 +145,10 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
 
-    glm::dvec3 position = module->geoPosition();
+    const glm::dvec3 position = module->geoPosition();
     double lat = position.x;
     double lon = position.y;
-    double altitude = position.z;
+    const double altitude = position.z;
 
     std::pair<double, std::string_view> dist = simplifyDistance(altitude);
 
@@ -196,8 +196,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
         }
     }
 
-    std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-
+    const std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
     RenderFont(*_font, penPosition, text);
     penPosition.y -= _font->height();
 }

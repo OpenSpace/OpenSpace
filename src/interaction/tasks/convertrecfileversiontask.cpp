@@ -62,9 +62,7 @@ ConvertRecFileVersionTask::ConvertRecFileVersionTask(const ghoul::Dictionary& di
 }
 
 ConvertRecFileVersionTask::~ConvertRecFileVersionTask() {
-    if (sessRec != nullptr) {
-        delete sessRec;
-    }
+    delete sessRec;
 }
 
 std::string ConvertRecFileVersionTask::description() {
@@ -80,11 +78,11 @@ void ConvertRecFileVersionTask::perform(const Task::ProgressCallback&) {
 }
 
 void ConvertRecFileVersionTask::convert() {
-    bool hasBinaryFileExtension = sessRec->hasFileExtension(
+    const bool hasBinaryFileExtension = SessionRecording::hasFileExtension(
         _inFilename,
         SessionRecording::FileExtensionBinary
     );
-    bool hasAsciiFileExtension = sessRec->hasFileExtension(
+    const bool hasAsciiFileExtension = SessionRecording::hasFileExtension(
         _inFilename,
         SessionRecording::FileExtensionAscii
     );

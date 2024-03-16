@@ -158,11 +158,10 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
 
     std::string metadataString = ghoul::formatLua(outputMetadata);
 
-    std::fstream f(_dictionaryOutputPath, std::ios::out);
+    std::fstream f = std::fstream(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;
-    f.close();
 
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace::kameleonvolume

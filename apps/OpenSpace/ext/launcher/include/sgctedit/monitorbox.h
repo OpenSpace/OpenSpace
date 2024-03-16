@@ -66,9 +66,9 @@ public:
     /**
      * Called when the number of windows that should be displayed changes.
      *
-     * \param newCount The new number of windows included
+     * \param nWindows The new number of windows included
      */
-    void nWindowsDisplayedChanged(int newCount);
+    void nWindowsDisplayedChanged(int nWindows);
 
 protected:
     void paintEvent(QPaintEvent* event) override;

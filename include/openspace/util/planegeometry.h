@@ -39,7 +39,7 @@ public:
 
     void initialize();
     void deinitialize();
-    void render();
+    void render() const;
 
     void updateSize(const glm::vec2& size);
     void updateSize(const float size);

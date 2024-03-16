@@ -273,8 +273,8 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         str >> entry.position.x >> entry.position.y >> entry.position.z;
         allZero &= (entry.position == glm::vec3(0.0));
 
-        glm::vec3 positive = glm::abs(entry.position);
-        float max = glm::compMax(positive);
+        const glm::vec3 positive = glm::abs(entry.position);
+        const float max = glm::compMax(positive);
         if (max > res.maxPositionComponent) {
             res.maxPositionComponent = max;
         }
@@ -304,8 +304,8 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 
                 // Check if value corresponds to a missing value
                 if (specs.has_value() && specs->missingDataValue.has_value()) {
-                    float missingDataValue = specs->missingDataValue.value();
-                    float diff = std::abs(entry.data[i] - missingDataValue);
+                    const float missingDataValue = specs->missingDataValue.value();
+                    const float diff = std::abs(entry.data[i] - missingDataValue);
                     if (diff < std::numeric_limits<float>::epsilon()) {
                         entry.data[i] = std::numeric_limits<float>::quiet_NaN();
                     }
@@ -455,7 +455,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
             // optional arument with identifier
             // Remove the 'id' text
             rest = rest.substr(std::string_view("id ").size());
-            size_t index = rest.find("text");
+            const size_t index = rest.find("text");
             entry.identifier = rest.substr(0, index - 1);
 
             // update the rest, remove the identifier
@@ -493,7 +493,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
 ColorMap loadCmapFile(std::filesystem::path path) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(fmt::format(
             "Failed to open color map file '{}'", path

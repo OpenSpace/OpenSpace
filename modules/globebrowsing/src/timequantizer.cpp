@@ -47,8 +47,9 @@ namespace openspace::globebrowsing {
 
 namespace {
     // returns the number of days in a given month and year (takes leap year into account)
-    constexpr int monthSize(int month, int year) {
-        date::year_month_day_last d = date::year(year) / date::month(month) / date::last;
+    constexpr int monthSize(int month_, int year_) {
+        using namespace date;
+        const year_month_day_last d = year(year_) / month(month_) / last;
         return static_cast<int>(static_cast<unsigned>(d.day()));
     }
 
@@ -334,17 +335,17 @@ TimeQuantizer::TimeQuantizer(std::string start, std::string end,
                              const std::string& resolution)
     : _start(start)
     , _timerange(std::move(start), std::move(end))
+    , _resolution(parseTimeResolutionStr(resolution))
 {
-    _resolution = parseTimeResolutionStr(resolution);
     verifyStartTimeRestrictions();
 }
 
 double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
     const char unit = resolutionStr.back();
-    std::string numberString = resolutionStr.substr(0, resolutionStr.length() - 1);
+    const std::string numberString = resolutionStr.substr(0, resolutionStr.length() - 1);
 
-    char* p;
-    double value = strtol(numberString.c_str(), &p, 10);
+    char* p = nullptr;
+    const double value = strtol(numberString.c_str(), &p, 10);
     _resolutionValue = value;
     _resolutionUnit = unit;
     if (*p) { // not a number
@@ -371,7 +372,7 @@ void TimeQuantizer::setResolution(const std::string& resolutionString) {
 
 void TimeQuantizer::verifyStartTimeRestrictions() {
     // If monthly time resolution then restrict to 28 days so every month is consistent
-    int dayUpperLimit;
+    int dayUpperLimit = 0;
     std::string helpfulDescription = "the selected month";
     if (_resolutionUnit == 'M') {
         dayUpperLimit = 28;
@@ -420,7 +421,7 @@ void TimeQuantizer::verifyResolutionRestrictions(const int value, const char uni
             }
             break;
         case 'h':
-            if (!((value >= 1 && value <= 4) || value == 6 || value == 12)) {
+            if ((value < 1 || value > 4) && value != 6 && value != 12) {
                 throw ghoul::RuntimeError(fmt::format(
                     "Invalid resolution count of {} for (h)our option. Valid counts are "
                     "1, 2, 3, 4, 6, or 12", value
@@ -485,11 +486,14 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     std::memset(unquantizedString, 0, BufferSize);
     SpiceManager::ref().dateFromEphemerisTime(
         t.j2000Seconds(),
-        unquantizedString, BufferSize,
+        unquantizedString,
+        BufferSize,
         Format
     );
 
-    DateTime unquantized(std::string_view(unquantizedString, BufferSize));
+    const DateTime unquantized = DateTime(
+        std::string_view(unquantizedString, BufferSize)
+    );
     // resolutionFraction helps to improve iteration performance
     constexpr double ResolutionFraction = 0.7;
     constexpr int IterationLimit = 50;
@@ -519,7 +523,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
                 );
             }
             error = unquantized.J2000() - quantized.J2000();
-            bool hasSettled = (lastIncr == 1 && lastDecr == 1 && error >= 0.0);
+            const bool hasSettled = (lastIncr == 1 && lastDecr == 1 && error >= 0.0);
             iterations++;
             if (hasSettled || iterations > IterationLimit) {
                 break;
@@ -546,8 +550,8 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     }
 }
 
-void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, double value,
-                                         char unit)
+void TimeQuantizer::doFirstApproximation(DateTime& quantized, const DateTime& unQ,
+                                         double value, char unit)
 {
     ZoneScoped;
 
@@ -565,10 +569,8 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, dou
         }
         case 'M':
         {
-            bool isSimMonthPastQuantizedMonth = unQ.month() > static_cast<int>(value);
-            quantized.setYear(
-                (isSimMonthPastQuantizedMonth) ? unQ.year() : unQ.year() - 1
-            );
+            const bool isMonthPastQuantizedMonth = unQ.month() > static_cast<int>(value);
+            quantized.setYear(isMonthPastQuantizedMonth ? unQ.year() : unQ.year() - 1);
             break;
         }
         case 'd':
@@ -578,7 +580,7 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, dou
             const int originalMinute = quantized.minute();
             const int originalSecond = quantized.second();
             const double addToTime = std::round(error) * 86400;
-            Time testDay(quantized.J2000() + addToTime);
+            const Time testDay = Time(quantized.J2000() + addToTime);
 
             char Buffer[25];
             testDay.ISO8601(Buffer);
@@ -620,10 +622,10 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, dou
 }
 
 std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
-    DateTime s(start.ISO8601());
+    const DateTime s = DateTime(start.ISO8601());
     quantize(start, true);
 
-    DateTime e(end.ISO8601());
+    const DateTime e = DateTime(end.ISO8601());
     quantize(end, true);
 
     const double startSeconds = s.J2000();
@@ -635,7 +637,10 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
 
     std::vector<std::string> result;
     DateTime itr = s;
-    RangedTime range(std::string(start.ISO8601()), std::string(end.ISO8601()));
+    const RangedTime range = RangedTime(
+        std::string(start.ISO8601()),
+        std::string(end.ISO8601())
+    );
     while (range.includes(Time(itr.ISO8601()))) {
         itr.incrementOnce(static_cast<int>(_resolutionValue), _resolutionUnit);
         result.push_back(itr.ISO8601());

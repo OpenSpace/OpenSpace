@@ -133,8 +133,8 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::min();
 
-    rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
-        glm::vec3 coord = _lowerDomainBound +
+    rawVolume.forEachVoxel([&](const glm::uvec3& cell, float) {
+        const glm::vec3 coord = _lowerDomainBound +
             glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
 
 #if (defined(NDEBUG) || defined(DEBUG))
@@ -154,7 +154,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
             return;
         }
 
-        float value = static_cast<float>(luaL_checknumber(state, 1));
+        const float value = static_cast<float>(luaL_checknumber(state, 1));
         lua_pop(state, 1);
         rawVolume.set(cell, value);
 
@@ -189,14 +189,13 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     metadata.minValue = minVal;
     metadata.maxValue = maxVal;
 
-    ghoul::Dictionary outputDictionary = metadata.dictionary();
-    std::string metadataString = ghoul::formatLua(outputDictionary);
+    const ghoul::Dictionary outputDictionary = metadata.dictionary();
+    const std::string metadataString = ghoul::formatLua(outputDictionary);
 
-    std::fstream f(_dictionaryOutputPath, std::ios::out);
+    std::fstream f = std::fstream(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;
-    f.close();
 
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace::volume

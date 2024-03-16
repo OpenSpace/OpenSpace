@@ -164,7 +164,7 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom = 180.f,
  * Rotate the original coordinate system (where x is pointing to First Point of Aries) so
  * that x is pointing from star to the Sun.
  */
-glm::dmat3 computeSystemRotation(glm::dvec3 starPosition);
+glm::dmat3 computeSystemRotation(const glm::dvec3& starPosition);
 
 void sanitizeNameString(std::string& s);
 

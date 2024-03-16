@@ -578,7 +578,6 @@ namespace {
         else if (!nodeName.empty()) {
             size_t nodePos = id.find(nodeName);
             if (nodePos != std::string::npos) {
-
                 // Check tag
                 if (!groupName.empty()) {
                     properties::PropertyOwner* matchingTaggedOwner =

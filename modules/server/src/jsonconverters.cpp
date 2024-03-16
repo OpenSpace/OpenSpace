@@ -34,10 +34,10 @@ using json = nlohmann::json;
 namespace openspace::properties {
 
 void to_json(json& j, const Property& p) {
-    std::string description = p.generateJsonDescription();
+    const std::string description = p.generateJsonDescription();
     json desc = json::parse(description);
 
-    std::string value = p.jsonValue();
+    const std::string value = p.jsonValue();
     json val = json::parse(value);
 
     j = {
@@ -72,8 +72,8 @@ namespace ghoul {
 
 void to_json(json& j, const Dictionary& dictionary) {
     json object;
-    for (std::string_view k : dictionary.keys()) {
-        std::string key = std::string(k);
+    for (const std::string_view k : dictionary.keys()) {
+        const std::string key = std::string(k);
         if (dictionary.hasValue<glm::dvec4>(key)) {
             const glm::dvec4 v = dictionary.value<glm::dvec4>(key);
             object[key] = json::array({ v[0], v[1], v[2], v[3] });

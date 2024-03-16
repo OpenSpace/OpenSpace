@@ -294,6 +294,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         nullptr
     }
     , _attachedObject(AttachedInfo, "")
+    , _constructorDictionary(dictionary)
 {
     // We check the Dictionary here in order to detect the errors early
     codegen::bake<Parameters>(dictionary);
@@ -303,8 +304,6 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         dictionary,
         "FixedRotation"
     );
-
-    _constructorDictionary = dictionary;
 
     setPropertyGroupName("global", "Global");
     setPropertyGroupName("xAxis", "X Axis");
@@ -501,7 +500,7 @@ bool FixedRotation::initialize() {
 }
 
 void FixedRotation::update(const UpdateData& data) {
-    bool anyAxisIsObjectType = (
+    const bool anyAxisIsObjectType = (
         _xAxis.type == Axis::Type::Object ||
         _yAxis.type == Axis::Type::Object ||
         _zAxis.type == Axis::Type::Object
@@ -561,7 +560,7 @@ glm::vec3 FixedRotation::xAxis() const {
                 if (dir == glm::dvec3(0.0)) {
                     dir = glm::dvec3(1.0, 0.0, 0.0);
                 }
-                glm::vec3 dirNorm = glm::vec3(glm::normalize(dir));
+                const glm::vec3 dirNorm = glm::vec3(glm::normalize(dir));
                 return _xAxis.invertObject ? -dirNorm : dirNorm;
             }
             else {
@@ -613,7 +612,7 @@ glm::vec3 FixedRotation::yAxis() const {
             return glm::vec3(0.f, 1.f, 0.f);
         case Axis::Type::Object:
             if (_yAxis.node && _attachedNode) {
-                glm::vec3 dir = glm::vec3(glm::normalize(
+                const glm::vec3 dir = glm::vec3(glm::normalize(
                     // @TODO(abock): This should be changed to be in the coordinate system
                     // of the attached node // same with xAxis and zAxis ofc
                     _yAxis.node->worldPosition() - _attachedNode->worldPosition()
@@ -669,7 +668,7 @@ glm::vec3 FixedRotation::zAxis() const {
             return glm::vec3(0.f, 0.f, 1.f);
         case Axis::Type::Object:
             if (_zAxis.node && _attachedNode) {
-                glm::vec3 dir = glm::vec3(glm::normalize(
+                const glm::vec3 dir = glm::vec3(glm::normalize(
                     _zAxis.node->worldPosition() - _attachedNode->worldPosition()
                 ));
                 return _zAxis.invertObject ? -dir : dir;

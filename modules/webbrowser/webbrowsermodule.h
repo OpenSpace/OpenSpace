@@ -63,14 +63,6 @@ protected:
     void internalDeinitialize() override;
 
 private:
-    /**
-     * Try to find the CEF Helper executable. It looks in the bin/openspace folder.
-     * Therefore, if you change that this might cause a crash here.
-     *
-     * \return the absolute path to the file
-     */
-    std::filesystem::path findHelperExecutable();
-
     properties::BoolProperty _updateBrowserBetweenRenderables;
     properties::FloatProperty _browserUpdateInterval;
 

@@ -434,7 +434,7 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
         }
         else {
             spatialScale = glm::vec4(1.f);
-            spatialScale.w = 1; //-log10(1.0f/max.x);
+            spatialScale.w = 1; //-log10(1.f/max.x);
             coordinateType = "Polar";
         }
 

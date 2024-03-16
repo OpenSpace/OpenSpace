@@ -36,11 +36,11 @@ class Waypoint;
 class PathCurve {
 public:
     struct InsufficientPrecisionError : public ghoul::RuntimeError {
-        explicit InsufficientPrecisionError(std::string msg);
+        explicit InsufficientPrecisionError(std::string error);
     };
 
     struct TooShortPathError : public ghoul::RuntimeError {
-        explicit TooShortPathError(std::string msg);
+        explicit TooShortPathError(std::string error);
     };
 
     virtual ~PathCurve() = 0;

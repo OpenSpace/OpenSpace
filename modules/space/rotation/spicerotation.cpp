@@ -112,7 +112,7 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     addProperty(_fixedDate);
 
     if (dictionary.hasKey(TimeFrameInfo.identifier)) {
-        ghoul::Dictionary timeFrameDictionary =
+        const ghoul::Dictionary timeFrameDictionary =
             dictionary.value<ghoul::Dictionary>(TimeFrameInfo.identifier);
         _timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
         if (_timeFrame == nullptr) {

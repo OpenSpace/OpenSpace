@@ -72,8 +72,8 @@ private:
 
     Timestep* currentTimestep();
     int timestepIndex(const Timestep* t) const;
-    Timestep* timestepFromIndex(int index);
-    void jumpToTimestep(int i);
+    Timestep* timestepFromIndex(int target);
+    void jumpToTimestep(int target);
 
     void loadTimestepMetadata(const std::string& path);
 

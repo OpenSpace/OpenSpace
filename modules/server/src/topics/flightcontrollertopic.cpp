@@ -118,7 +118,7 @@ namespace {
     constexpr const char* Friction = "friction";
     constexpr const char* Lua = "lua";
 
-    const static std::unordered_map<std::string, AxisType> AxisIndexMap ({
+    const std::unordered_map<std::string, AxisType> AxisIndexMap ({
         { OrbitX, AxisType::OrbitX },
         { OrbitY, AxisType::OrbitY },
         { ZoomIn, AxisType::ZoomIn },
@@ -131,7 +131,7 @@ namespace {
         { PanY, AxisType::PanY }
     });
 
-    const static std::unordered_map<std::string, Command> CommandMap ({
+    const std::unordered_map<std::string, Command> CommandMap ({
         { Connect, Command::Connect },
         { Disconnect, Command::Disconnect },
         { InputState, Command::InputState },

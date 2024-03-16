@@ -37,7 +37,7 @@ struct RawVolumeMetadata {
     static RawVolumeMetadata createFromDictionary(const ghoul::Dictionary& dictionary);
     static documentation::Documentation Documentation();
 
-    ghoul::Dictionary dictionary();
+    ghoul::Dictionary dictionary() const;
 
     glm::uvec3 dimensions = glm::uvec3(0);
     VolumeGridType gridType;

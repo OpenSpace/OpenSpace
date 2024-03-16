@@ -118,7 +118,7 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
     }
 
     if (_property) {
-        std::string_view type = _property->className();
+        const std::string_view type = _property->className();
         if (type == "DoubleProperty") {
             double value = static_cast<properties::DoubleProperty*>(_property)->value();
             RenderFont(

@@ -144,7 +144,7 @@ bool DataMapping::isExcludeColumn(std::string_view column) const {
 
 std::string generateHashString(const DataMapping& dm) {
     std::string a;
-    for (std::string_view c : dm.excludeColumns) {
+    for (const std::string_view c : dm.excludeColumns) {
         a += c;
     }
     unsigned int excludeColumnsHash = ghoul::hashCRC32(a);

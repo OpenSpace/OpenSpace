@@ -41,10 +41,10 @@ public:
     void envelopesToLua(lua_State* state) const;
 
     bool setEnvelopesFromString(const std::string& s);
-    bool setEnvelopesFromLua(lua_State* lua);
+    bool setEnvelopesFromLua(lua_State* state);
 
     void loadEnvelopesFromFile(const std::string& path);
-    void saveEnvelopesToFile(const std::string& path);
+    void saveEnvelopesToFile(const std::string& path) const;
 
     bool operator!=(const TransferFunction& tf);
     bool hasEnvelopes() const;

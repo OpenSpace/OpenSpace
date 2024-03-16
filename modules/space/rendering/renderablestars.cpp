@@ -770,16 +770,13 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_moffatMethodOwner);
 
     if (p.fadeInDistances.has_value()) {
-        glm::vec2 v = *p.fadeInDistances;
-        _fadeInDistances = v;
+        _fadeInDistances = *p.fadeInDistances;
         _disableFadeInDistance = false;
         _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
         addProperty(_fadeInDistances);
         addProperty(_disableFadeInDistance);
     }
 }
-
-RenderableStars::~RenderableStars() {}
 
 bool RenderableStars::isReady() const {
     return _program && _pointSpreadFunctionTexture;
@@ -801,7 +798,7 @@ void RenderableStars::initializeGL() {
     // data value actually exists or not.  Once we determine the index, we no longer
     // need the value and can clear it
     if (!_queuedOtherData.empty()) {
-        int idx = _dataset.index(_queuedOtherData);
+        const int idx = _dataset.index(_queuedOtherData);
         if (idx == -1) {
             LERROR(fmt::format("Could not find other data column {}", _queuedOtherData));
         }
@@ -929,7 +926,7 @@ void RenderableStars::loadPSFTexture() {
 
 void RenderableStars::renderPSFToTexture() {
     // Creates the FBO for the calculations
-    GLuint psfFBO;
+    GLuint psfFBO = 0;
     glGenFramebuffers(1, &psfFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, psfFBO);
     GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
@@ -1039,20 +1036,20 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     _program->activate();
 
-    glm::dvec3 eyePosition = glm::dvec3(
+    const glm::dvec3 eyePosition = glm::dvec3(
         glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
     _program->setUniform(_uniformCache.eyePosition, eyePosition);
 
-    glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+    const glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
     _program->setUniform(_uniformCache.cameraUp, cameraUp);
 
-    glm::dmat4 modelMatrix = calcModelTransform(data);
+    const glm::dmat4 modelMatrix = calcModelTransform(data);
 
-    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+    const glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
-    glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
-                                            data.camera.combinedViewMatrix();
+    const glm::dmat4 cameraViewProjectionMatrix =
+        projectionMatrix * data.camera.combinedViewMatrix();
 
     _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
     _program->setUniform(
@@ -1076,7 +1073,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
-        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        const float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
         const glm::vec2 fadeRange = _fadeInDistances;
         const double a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
         const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
@@ -1170,16 +1167,16 @@ void RenderableStars::update(const UpdateData&) {
             GL_STATIC_DRAW
         );
 
-        GLint positionAttrib = _program->attributeLocation("in_position");
+        const GLint positionAttrib = _program->attributeLocation("in_position");
         // bvLumAbsMagAppMag = bv color, luminosity, abs magnitude and app magnitude
-        GLint bvLumAbsMagAppMagAttrib = _program->attributeLocation(
+        const GLint bvLumAbsMagAppMagAttrib = _program->attributeLocation(
             "in_bvLumAbsMagAppMag"
         );
 
         const size_t nStars = _dataset.entries.size();
         const size_t nValues = slice.size() / nStars;
 
-        GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
+        const GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
 
         glEnableVertexAttribArray(positionAttrib);
         glEnableVertexAttribArray(bvLumAbsMagAppMagAttrib);
@@ -1224,7 +1221,7 @@ void RenderableStars::update(const UpdateData&) {
                     reinterpret_cast<void*>(offsetof(VelocityVBOLayout, value))
                 );
 
-                GLint velocityAttrib = _program->attributeLocation("in_velocity");
+                const GLint velocityAttrib = _program->attributeLocation("in_velocity");
                 glEnableVertexAttribArray(velocityAttrib);
                 glVertexAttribPointer(
                     velocityAttrib,
@@ -1256,7 +1253,7 @@ void RenderableStars::update(const UpdateData&) {
                     reinterpret_cast<void*>(offsetof(SpeedVBOLayout, value))
                 );
 
-                GLint speedAttrib = _program->attributeLocation("in_speed");
+                const GLint speedAttrib = _program->attributeLocation("in_speed");
                 glEnableVertexAttribArray(speedAttrib);
                 glVertexAttribPointer(
                     speedAttrib,
@@ -1303,7 +1300,7 @@ void RenderableStars::update(const UpdateData&) {
     if (_colorTextureIsDirty) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
-        if (_colorTexturePath.value() != "") {
+        if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_colorTexturePath).string(),
                 1
@@ -1351,7 +1348,7 @@ void RenderableStars::update(const UpdateData&) {
 }
 
 void RenderableStars::loadData() {
-    std::filesystem::path file = absPath(_speckFile);
+    const std::filesystem::path file = absPath(_speckFile);
     if (!std::filesystem::is_regular_file(file)) {
         return;
     }
@@ -1368,7 +1365,7 @@ void RenderableStars::loadData() {
     }
     _otherDataOption.addOptions(variableNames);
 
-    bool success = _dataset.normalizeVariable("lum");
+    const bool success = _dataset.normalizeVariable("lum");
     if (!success) {
         throw ghoul::RuntimeError("Could not find required variable 'luminosity'");
     }
@@ -1487,7 +1484,7 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
                     static_cast<float>(position[2])
                 }};
 
-                int index = _otherDataOption.value();
+                const int index = _otherDataOption.value();
                 // plus 3 because of the position
                 layout.value.value = e.data[index];
 
