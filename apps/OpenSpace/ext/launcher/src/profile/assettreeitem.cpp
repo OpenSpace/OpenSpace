@@ -121,8 +121,8 @@ bool AssetTreeItem::insertChildren(int position, int count, int columns) {
     }
 
     for (int row = 0; row < count; ++row) {
-        std::vector<QVariant> data(columns);
-        AssetTreeItem* item = new AssetTreeItem(data, this);
+        std::vector<QVariant> data = std::vector<QVariant>(columns);
+        AssetTreeItem* item = new AssetTreeItem(std::move(data), this);
         _childItems.insert(_childItems.begin() + position, item);
     }
 

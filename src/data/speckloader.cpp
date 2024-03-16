@@ -493,7 +493,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
 ColorMap loadCmapFile(std::filesystem::path path) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(fmt::format(
             "Failed to open color map file '{}'", path

@@ -664,10 +664,12 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         return position;
     }
     else if (targetHasCoverage) {
-        // observer has no coverage
+        // observer has no coverage, so we try getting position from the reverse
+        const std::string& invObserver = target;
+        const std::string& invTarget = observer;
         return getEstimatedPosition(
-            observer,
-            target,
+            invTarget,
+            invObserver,
             referenceFrame,
             aberrationCorrection,
             ephemerisTime,

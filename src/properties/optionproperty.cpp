@@ -59,7 +59,7 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
 }
 
 void OptionProperty::addOption(int value, std::string desc) {
-    Option option = { .value = std::move(value), .description = std::move(desc) };
+    Option option = { .value = value, .description = std::move(desc) };
 
     for (const Option& o : _options) {
         if (o.value == option.value) {
@@ -79,7 +79,7 @@ void OptionProperty::addOption(int value, std::string desc) {
 
 void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {
     for (std::pair<int, std::string>& p : options) {
-        addOption(std::move(p.first), std::move(p.second));
+        addOption(p.first, std::move(p.second));
     }
 }
 
@@ -96,9 +96,8 @@ void OptionProperty::clearOptions() {
 
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
-    for (size_t i = 0; i < _options.size(); i++) {
-        const Option& o = _options[i];
-        if (o.value == value) {
+    for (const Option& option : _options) {
+        if (option.value == value) {
             // If it does, set it by calling the superclasses setValue method
             // @TODO(abock): This should be setValue(value) instead or otherwise the
             //               stored indices and option values start to drift if the

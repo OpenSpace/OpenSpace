@@ -178,11 +178,17 @@ namespace {
     }
 
     void resetPropertyChangeFlags() {
+        using namespace openspace;
+
         ZoneScoped;
 
-        const std::vector<openspace::SceneGraphNode*> nodes =
-            openspace::global::renderEngine->scene()->allSceneGraphNodes();
-        for (openspace::SceneGraphNode* n : nodes) {
+        Scene* scene = global::renderEngine->scene();
+        if (!scene) {
+            return;
+        }
+
+        const std::vector<SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+        for (SceneGraphNode* n : nodes) {
             resetPropertyChangeFlagsOfSubowners(n);
         }
     }

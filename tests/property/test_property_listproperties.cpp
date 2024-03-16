@@ -324,7 +324,7 @@ TEST_CASE("DoubleListProperty: Get Lua Value", "[doublelistproperty]") {
 }
 
 TEST_CASE("DoubleListProperty: Get Empty Lua Value", "[doublelistproperty]") {
-    openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
+    const openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
 
     const ghoul::lua::LuaState L;
     p.getLuaValue(L);

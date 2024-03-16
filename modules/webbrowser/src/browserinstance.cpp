@@ -84,12 +84,12 @@ void BrowserInstance::initialize() {
     _shouldReshape = true;
 }
 
-void BrowserInstance::loadUrl(std::string url) {
+void BrowserInstance::loadUrl(const std::string& url) {
     ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
 
     if (!url.empty()) {
         LDEBUG(fmt::format("Loading URL '{}'", url));
-        _browser->GetMainFrame()->LoadURL(std::move(url));
+        _browser->GetMainFrame()->LoadURL(url);
     }
     else {
         LWARNING("Provided browser URL is empty");

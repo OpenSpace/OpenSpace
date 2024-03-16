@@ -53,7 +53,7 @@ public:
         std::shared_ptr<ghoul::opengl::Texture> texture,
         std::shared_ptr<openspace::TransferFunction> transferFunction,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
-    ~BasicVolumeRaycaster() override;
+    ~BasicVolumeRaycaster() override = default;
 
     void initialize();
     void deinitialize();

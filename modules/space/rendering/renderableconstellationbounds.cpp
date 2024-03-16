@@ -208,7 +208,7 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
 }
 
 bool RenderableConstellationBounds::loadData() {
-    bool success = loadVertexFile();
+    const bool success = loadVertexFile();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
     }

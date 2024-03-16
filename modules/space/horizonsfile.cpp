@@ -569,8 +569,8 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
         str2 >> xPos >> yPos >> zPos;
 
         // Convert date and time to seconds after 2000
-        std::string timeString = fmt::format("{} {}", date, time);
-        double timeInJ2000 = Time::convertTime(timeString);
+        const std::string timeString = fmt::format("{} {}", date, time);
+        const double timeInJ2000 = Time::convertTime(timeString);
         glm::dvec3 pos = glm::dvec3(1000 * xPos, 1000 * yPos, 1000 * zPos);
         const glm::dmat3 transform =
             SpiceManager::ref().positionTransformMatrix("ECLIPJ2000", "GALACTIC", 0.0);

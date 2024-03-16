@@ -122,7 +122,7 @@ protected:
 
 private:
     void sortOptions();
-    bool removeInvalidKeys(std::set<std::string>& keys);
+    bool removeInvalidKeys(std::set<std::string>& keys) const;
 
     std::string generateAdditionalJsonDescription() const override;
 

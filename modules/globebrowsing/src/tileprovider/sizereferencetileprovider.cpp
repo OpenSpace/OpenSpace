@@ -28,6 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 #include <optional>
 #include <variant>
 

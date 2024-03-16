@@ -232,15 +232,16 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
         _minDeltaTimeCache,
         _maxDeltaTimeCache
     );
-    std::string_view output = std::string_view(_buffer.data(), end - _buffer.data());
+    const std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
 
-    int nLines = output.empty() ? 0 :
-        static_cast<int>((std::count(output.begin(), output.end(), '\n') + 1));
+    const int nLines = text.empty() ?
+        0 :
+        static_cast<int>((std::count(text.begin(), text.end(), '\n') + 1));
 
     ghoul::fontrendering::FontRenderer::defaultRenderer().render(
         *_font,
         penPosition,
-        output
+        text
     );
     penPosition.y -= _font->height() * static_cast<float>(nLines);
 }
@@ -250,13 +251,13 @@ glm::vec2 DashboardItemFramerate::size() const {
 
     const FrametimeType t = FrametimeType(_frametimeType.value());
     char* end = format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
-    std::string_view output = std::string_view(_buffer.data(), end - _buffer.data());
+    const std::string_view res = std::string_view(_buffer.data(), end - _buffer.data());
 
-    if (output.empty()) {
+    if (res.empty()) {
         return { 0.f, 0.f };
     }
 
-    return _font->boundingBox(output);
+    return _font->boundingBox(res);
 }
 
 } // namespace openspace

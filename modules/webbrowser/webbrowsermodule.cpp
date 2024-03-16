@@ -132,7 +132,7 @@ void WebBrowserModule::internalDeinitialize() {
 
     _eventHandler->resetBrowserInstance();
 
-    bool forceBrowserShutdown = true;
+    const bool forceBrowserShutdown = true;
     for (BrowserInstance* browser : _browsers) {
         browser->close(forceBrowserShutdown);
     }

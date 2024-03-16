@@ -38,8 +38,6 @@
 
 namespace openspace::interaction {
 
-KeybindingManager::KeybindingManager() {}
-
 void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
     if (action == KeyAction::Press || action == KeyAction::Repeat) {

@@ -155,7 +155,7 @@ void TransferFunction::setTextureFromTxt() {
         transferFunction[i] = 0.f;
     }
 
-    size_t lowerIndex = static_cast<size_t>(
+    const size_t lowerIndex = static_cast<size_t>(
         std::floor(lower * static_cast<float>(width - 1))
     );
     const size_t upperIndex = static_cast<size_t>(

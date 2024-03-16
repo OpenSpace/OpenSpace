@@ -118,7 +118,7 @@ namespace data {
 Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file = std::ifstream(path);
+    const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(fmt::format("Failed to open data file '{}'", path));
     }
@@ -142,8 +142,8 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     return res;
 }
 
-std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
-    std::ifstream file(path, std::ios::binary);
+std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
+    std::ifstream file = std::ifstream(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;
     }
@@ -244,7 +244,7 @@ std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
     return result;
 }
 
-void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
+void saveCachedFile(const Dataset& dataset, const std::filesystem::path& path) {
     std::ofstream file = std::ofstream(path, std::ofstream::binary);
 
     file.write(reinterpret_cast<const char*>(&DataCacheFileVersion), sizeof(int8_t));
@@ -347,7 +347,7 @@ namespace label {
 Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file = std::ifstream(path);
+    const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(fmt::format("Failed to open dataset file '{}'", path));
     }
@@ -368,7 +368,7 @@ Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     return res;
 }
 
-std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
+std::optional<Labelset> loadCachedFile(const std::filesystem::path& path) {
     std::ifstream file(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;
@@ -414,7 +414,7 @@ std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
     return result;
 }
 
-void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
+void saveCachedFile(const Labelset& labelset, const std::filesystem::path& path) {
     std::ofstream file = std::ofstream(path, std::ofstream::binary);
 
     file.write(reinterpret_cast<const char*>(&LabelCacheFileVersion), sizeof(int8_t));
@@ -483,12 +483,12 @@ namespace color {
 ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file = std::ifstream(path);
+    const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(fmt::format("Failed to open colormap file '{}'", path));
     }
 
-    std::string extension = ghoul::toLowerCase(path.extension().string());
+    const std::string extension = ghoul::toLowerCase(path.extension().string());
 
     ColorMap res;
     if (extension == ".cmap") {
@@ -504,7 +504,7 @@ ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     return res;
 }
 
-std::optional<ColorMap> loadCachedFile(std::filesystem::path path) {
+std::optional<ColorMap> loadCachedFile(const std::filesystem::path& path) {
     std::ifstream file(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;
@@ -569,8 +569,8 @@ std::optional<ColorMap> loadCachedFile(std::filesystem::path path) {
     return result;
 }
 
-void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path) {
-    std::ofstream file(path, std::ofstream::binary);
+void saveCachedFile(const ColorMap& colorMap, const std::filesystem::path& path) {
+    std::ofstream file = std::ofstream(path, std::ofstream::binary);
 
     file.write(reinterpret_cast<const char*>(&ColorCacheFileVersion), sizeof(int8_t));
 

@@ -287,12 +287,8 @@ glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
 // https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-
 // coordinates-of-stars
 std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) {
-    // Radians to degrees
-    double raDeg = ra;
-    double decDeg = dec;
-
     // Check input
-    if (raDeg < 0 || raDeg > 360 || decDeg < -90 || decDeg > 90) {
+    if (ra < 0.0 || ra > 360.0 || dec < -90.0 || dec > 90.0) {
         LWARNING(fmt::format(
             "Ra '{}' or Dec '{}' is outside the allowed range, result may be incorrect",
             ra, dec
@@ -300,14 +296,14 @@ std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) 
     }
 
     // Calculate Ra
-    const int raHours = static_cast<int>(std::trunc(raDeg) / 15.0);
-    const double raMinutesFull = (raDeg - raHours * 15.0) * 60.0 / 15.0;
+    const int raHours = static_cast<int>(std::trunc(ra) / 15.0);
+    const double raMinutesFull = (ra - raHours * 15.0) * 60.0 / 15.0;
     const int raMinutes = static_cast<int>(std::trunc(raMinutesFull));
     const double raSeconds = (raMinutesFull - raMinutes) * 60.0;
 
     // Calculate Dec
-    const int decDegrees = static_cast<int>(std::trunc(decDeg));
-    const double decMinutesFull = (std::abs(decDeg) - std::abs(decDegrees)) * 60.0;
+    const int decDegrees = static_cast<int>(std::trunc(dec));
+    const double decMinutesFull = (std::abs(dec) - std::abs(decDegrees)) * 60.0;
     const int decMinutes = static_cast<int>(std::trunc(decMinutesFull));
     const double decSeconds = (decMinutesFull - decMinutes) * 60.0;
 

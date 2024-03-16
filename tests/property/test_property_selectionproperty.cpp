@@ -33,7 +33,7 @@
 #include <vector>
 
 TEST_CASE("SelectionProperty: Class Name and Default Value", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    const openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
 
     CHECK(p.className() == "SelectionProperty");
     CHECK(p.value().empty());

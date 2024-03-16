@@ -51,9 +51,9 @@ namespace {
 
 namespace openspace::interaction {
 
-AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end) {
-    _relevantNodes = global::navigationHandler->pathNavigator().relevantNodes();
-
+AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end)
+    : _relevantNodes(global::navigationHandler->pathNavigator().relevantNodes())
+{
     if (!start.node() || !end.node()) { // guard, but should never happen
         LERROR("Something went wrong. The start or end node does not exist");
         return;
@@ -70,7 +70,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     _points.push_back(start.position());
 
     // Add an extra point to first go backwards if starting close to planet
-    glm::dvec3 nodeToStart = start.position() - startNodeCenter;
+    const glm::dvec3 nodeToStart = start.position() - startNodeCenter;
     const double distanceToStartNode = glm::length(nodeToStart);
 
     // Note that the factor 2.0 is arbitrarily chosen to look ok.
@@ -83,8 +83,8 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
     if (distanceToStartNode < closeToNodeThresholdFactor * startNodeRadius) {
         const double distance = startNodeRadius;
-        glm::dvec3 newPos = start.position() + distance * glm::normalize(nodeToStart);
-        _points.push_back(newPos);
+        const glm::dvec3 newP = start.position() + distance * glm::normalize(nodeToStart);
+        _points.push_back(std::move(newP));
     }
 
     const glm::dvec3 startToEnd = end.position() - start.position();
@@ -92,12 +92,12 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     // Add point for moving out if the end state is far away and in opposite direction.
     // This helps with avoiding fast rotation in the center of the path
     const double maxRadius = std::max(startNodeRadius, endNodeRadius);
-    bool nodesAreDifferent = start.nodeIdentifier() != end.nodeIdentifier();
+    const bool nodesAreDifferent = (start.nodeIdentifier() != end.nodeIdentifier());
     if (glm::length(startToEnd) >  0.5 * maxRadius && nodesAreDifferent) {
-        double cosAngleToTarget = glm::dot(
+        const double cosAngleToTarget = glm::dot(
             normalize(-startViewDir), normalize(startToEnd)
         );
-        bool targetInOppositeDirection = cosAngleToTarget > 0.7;
+        const bool targetInOppositeDirection = (cosAngleToTarget > 0.7);
 
         if (targetInOppositeDirection) {
             const glm::dquat midleRot = glm::slerp(start.rotation(), end.rotation(), 0.5);
@@ -106,8 +106,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
             glm::dvec3 newPos = start.position() + 0.2 * startToEnd -
                 stepOutDistance * glm::normalize(middleViewDir);
-
-            _points.push_back(newPos);
+            _points.push_back(std::move(newPos));
         }
     }
 
@@ -118,7 +117,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     if (distanceToEndNode < closeToNodeThresholdFactor * endNodeRadius) {
         const double distance = endNodeRadius;
         glm::dvec3 newPos = end.position() + distance * glm::normalize(nodeToEnd);
-        _points.push_back(newPos);
+        _points.push_back(std::move(newPos));
     }
 
     _points.push_back(end.position());
@@ -186,7 +185,7 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                 continue;
             }
 
-            glm::dvec3 collisionPoint = modelTransform *
+            const glm::dvec3 collisionPoint = modelTransform *
                 glm::dvec4(intersectionPointModelCoords, 1.0);
 
             // before collision response, make sure none of the points are inside the node

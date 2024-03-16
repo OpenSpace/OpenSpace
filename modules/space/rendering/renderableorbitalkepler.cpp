@@ -274,7 +274,10 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.modelView, calcModelViewTransform(data));
 
     // Because we want the property to work similar to the planet trails
-    const float fade = pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.f);
+    const float fade = std::pow(
+        _appearance.lineFade.maxValue() - _appearance.lineFade,
+        2.f
+    );
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);

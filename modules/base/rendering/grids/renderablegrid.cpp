@@ -92,7 +92,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid"
@@ -262,7 +262,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     );
 
     if (orthoRight == glm::vec3(0.0)) {
-        glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+        const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
             glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
@@ -347,8 +347,8 @@ void RenderableGrid::update(const UpdateData&) {
             // Line in y direction
             bool shouldHighlight = false;
             if (_highlightRate.value().x != 0) {
-                int dist = abs(static_cast<int>(i) - static_cast<int>(center.x));
-                int rest = dist % _highlightRate.value().x;
+                const int dist = abs(static_cast<int>(i) - static_cast<int>(center.x));
+                const int rest = dist % _highlightRate.value().x;
                 shouldHighlight = rest == 0;
             }
 
@@ -364,8 +364,8 @@ void RenderableGrid::update(const UpdateData&) {
             // Line in x direction
             shouldHighlight = false;
             if (_highlightRate.value().y != 0) {
-                int dist = abs(static_cast<int>(j) - static_cast<int>(center.y));
-                int rest = dist % _highlightRate.value().y;
+                const int dist = abs(static_cast<int>(j) - static_cast<int>(center.y));
+                const int rest = dist % _highlightRate.value().y;
                 shouldHighlight = abs(rest) == 0;
             }
 
@@ -387,9 +387,11 @@ void RenderableGrid::update(const UpdateData&) {
 
         bool shouldHighlight = false;
         if (_highlightRate.value().y != 0) {
-            int dist = abs(static_cast<int>(nSegments.y) - static_cast<int>(center.y));
-            int rest = dist % _highlightRate.value().y;
-            shouldHighlight = abs(rest) == 0;
+            const int dist = std::abs(
+                static_cast<int>(nSegments.y) - static_cast<int>(center.y)
+            );
+            const int rest = dist % _highlightRate.value().y;
+            shouldHighlight = std::abs(rest) == 0;
         }
 
         if (shouldHighlight) {
@@ -409,9 +411,11 @@ void RenderableGrid::update(const UpdateData&) {
 
         bool shouldHighlight = false;
         if (_highlightRate.value().x != 0) {
-            int dist = abs(static_cast<int>(nSegments.x) - static_cast<int>(center.x));
-            int rest = dist % _highlightRate.value().x;
-            shouldHighlight = abs(rest) == 0;
+            const int dist = std::abs(
+                static_cast<int>(nSegments.x) - static_cast<int>(center.x)
+            );
+            const int rest = dist % _highlightRate.value().x;
+            shouldHighlight = std::abs(rest) == 0;
         }
         if (shouldHighlight) {
             _highlightArray.push_back({ halfSize.x, y0, 0.0 });

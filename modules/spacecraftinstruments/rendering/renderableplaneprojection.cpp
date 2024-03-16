@@ -82,8 +82,6 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     }
 }
 
-RenderablePlaneProjection::~RenderablePlaneProjection() {}
-
 bool RenderablePlaneProjection::isReady() const {
     return _shader && _texture;
 }

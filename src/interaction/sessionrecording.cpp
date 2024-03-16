@@ -120,9 +120,6 @@ SessionRecording::SessionRecording(bool isGlobal)
     }
 }
 
-SessionRecording::~SessionRecording() {
-}
-
 void SessionRecording::deinitialize() {
     stopRecording();
     stopPlayback();
@@ -302,8 +299,8 @@ void SessionRecording::stopRecording() {
                         std::move(kf.position),
                         std::move(kf.rotation),
                         std::move(kf.focusNode),
-                        std::move(kf.followFocusNodeRotation),
-                        std::move(kf.scale)
+                        kf.followFocusNodeRotation,
+                        kf.scale
                     );
                     saveSingleKeyframeCamera(
                         kfMsg,

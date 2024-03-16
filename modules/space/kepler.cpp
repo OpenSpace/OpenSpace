@@ -127,7 +127,7 @@ namespace {
             LeapSecond { .year = 2017, .dayOfYear =   1 }
         };
         // Get the position of the last leap second before the desired date
-        LeapSecond date{ year, dayOfYear };
+        const LeapSecond date = { year, dayOfYear };
         const auto it = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), date);
 
         // Get the position of the Epoch

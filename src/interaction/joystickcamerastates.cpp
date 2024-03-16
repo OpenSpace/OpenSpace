@@ -267,7 +267,7 @@ void JoystickCameraStates::setAxisMapping(const std::string& joystickName,
         global::joystickInputStates->axis(joystickName, axis);
 }
 
-void JoystickCameraStates::setAxisMappingProperty(std::string joystickName,
+void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickName,
                                                   int axis,
                                                   std::string propertyUri,
                                                   float min, float max,
@@ -431,7 +431,7 @@ JoystickCameraStates::findOrAddJoystickCameraState(const std::string& joystickNa
     JoystickCameraState* joystick = joystickCameraState(joystickName);
     if (!joystick) {
         if (_joystickCameraStates.size() < JoystickInputStates::MaxNumJoysticks) {
-            _joystickCameraStates.emplace_back(JoystickCameraState());
+            _joystickCameraStates.emplace_back();
             joystick = &_joystickCameraStates.back();
             joystick->joystickName = joystickName;
         }

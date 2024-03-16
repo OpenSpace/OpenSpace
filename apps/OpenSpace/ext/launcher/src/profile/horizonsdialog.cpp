@@ -64,7 +64,7 @@ namespace {
 
     BooleanType(IsDirty);
     void styleLabel(QLabel* label, IsDirty isDirty) {
-        std::string newStyle = isDirty ? "error" : "normal";
+        const std::string newStyle = isDirty ? "error" : "normal";
         label->setObjectName(QString::fromStdString(newStyle));
         label->style()->unpolish(label);
         label->style()->polish(label);
@@ -73,7 +73,7 @@ namespace {
     int findId(const std::string& match) {
         // Format: id, other information...
         std::stringstream str(match);
-        int id;
+        int id = 0;
         str >> id;
         return id;
     }

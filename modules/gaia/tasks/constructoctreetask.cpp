@@ -390,8 +390,8 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         for (size_t i = 0; i < fullData.size(); i += nValuesPerStar) {
             auto first = fullData.begin() + i;
             auto last = fullData.begin() + i + nValuesPerStar;
-            std::vector<float> filterValues(first, last);
-            std::vector<float> renderValues(first, first + RENDER_VALUES);
+            const std::vector<float> filterValues(first, last);
+            const std::vector<float> renderValues(first, first + RENDER_VALUES);
 
             // Filter data by parameters.
             if (checkAllFilters(filterValues)) {
@@ -468,7 +468,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
 
     _indexOctreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
-    float processOneFile = 1.f / allInputFiles.size();
+    const float processOneFile = 1.f / allInputFiles.size();
 
     LINFO(fmt::format(
         "MAX DIST: {} - MAX STARS PER NODE: {}",
@@ -506,7 +506,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
                 //}
 
                 // If all filters passed then insert render values into Octree.
-                std::vector<float> renderValues(
+                const std::vector<float> renderValues(
                     filterValues.begin(),
                     filterValues.begin() + RENDER_VALUES
                 );

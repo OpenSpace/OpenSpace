@@ -236,7 +236,7 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
         auto sign = [](double val) -> double {
             return val > 0.0 ? 1.0 : ((val < 0.0) ? -1.0 : 0.0);
         };
-        double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
+        const double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
 
         auto solver = [this, &meanAnomaly, &sign](double x) -> double {
             const double s = _eccentricity * sin(x);

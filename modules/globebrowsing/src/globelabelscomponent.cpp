@@ -452,7 +452,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             strncpy(lEntry.feature, token.c_str(), 255);
             int tokenChar = 0;
             while (tokenChar < 256) {
-                if (lEntry.feature[tokenChar] < 0 && lEntry.feature[tokenChar] != '\0') {
+                if (lEntry.feature[tokenChar] < 0 && lEntry.feature[tokenChar]) {
                     lEntry.feature[tokenChar] = '*';
                 }
                 else if (lEntry.feature[tokenChar] == '\"') {
@@ -663,7 +663,7 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                     glm::cross(labelUpDirectionObj, labelNormalObj)
                 );
                 if (orthoRight == glm::dvec3(0.0)) {
-                    glm::dvec3 otherVector(
+                    const glm::dvec3 otherVector = glm::dvec3(
                         labelUpDirectionObj.y,
                         labelUpDirectionObj.x,
                         labelUpDirectionObj.z

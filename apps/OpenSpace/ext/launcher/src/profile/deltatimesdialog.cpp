@@ -70,9 +70,9 @@ namespace {
             return "";
         }
 
-        size_t i;
+        size_t i = 0;
         for (i = 0; i < (TimeIntervals.size() - 1); i++) {
-            if (abs(value) >= TimeIntervals[i].secondsPerInterval) {
+            if (std::abs(value) >= TimeIntervals[i].secondsPerInterval) {
                 break;
             }
         }

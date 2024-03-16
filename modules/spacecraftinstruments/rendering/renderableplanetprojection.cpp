@@ -429,13 +429,13 @@ void RenderablePlanetProjection::imageProjectGPU(
 glm::mat4 RenderablePlanetProjection::attitudeParameters(double time, const glm::vec3& up)
 {
     // precomputations for shader
-    glm::dmat3 instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
+    const glm::dmat3 instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
         _projectionComponent.instrumentId(),
         "GALACTIC",
         time
     );
 
-    SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
+    const SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
         _projectionComponent.instrumentId()
     );
 

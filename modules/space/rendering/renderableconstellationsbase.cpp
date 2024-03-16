@@ -64,7 +64,7 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    const static openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the constellations"

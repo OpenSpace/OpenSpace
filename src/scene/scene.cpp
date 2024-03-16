@@ -156,7 +156,7 @@ Camera* Scene::camera() const {
 }
 
 void Scene::registerNode(SceneGraphNode* node) {
-    if (_nodesByIdentifier.count(node->identifier())) {
+    if (_nodesByIdentifier.contains(node->identifier())) {
         throw Scene::InvalidSceneError(fmt::format(
             "Node with identifier '{}' already exists", node->identifier()
         ));
@@ -672,7 +672,7 @@ ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
 
 void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value)
 {
-    PropertyValueType enclosedType;
+    PropertyValueType enclosedType = PropertyValueType::Nil;
     const size_t commaPos = value.find(',', 0);
     if (commaPos != std::string::npos) {
         enclosedType = propertyValueType(value.substr(0, commaPos));

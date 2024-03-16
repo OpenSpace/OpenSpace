@@ -642,7 +642,7 @@ glm::mat4 RenderEngine::globalRotation() const {
 }
 
 glm::mat4 RenderEngine::screenSpaceRotation() const {
-    glm::vec3 rot = _screenSpaceRotation;
+    const glm::vec3 rot = _screenSpaceRotation;
 
     const glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1.f, 0.f, 0.f));
     const glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0.f, 1.f, 0.f));

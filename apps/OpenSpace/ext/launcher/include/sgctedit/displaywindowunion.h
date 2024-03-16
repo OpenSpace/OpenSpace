@@ -109,7 +109,7 @@ signals:
     void nWindowsChanged(int newCount);
 
 private:
-    void createWidgets(int nMaxWindows, std::vector<QRect> monitorResolutions,
+    void createWidgets(int nMaxWindows, const std::vector<QRect>& monitorResolutions,
         std::array<QColor, 4> windowColors, bool resetToDefault);
     void showWindows();
 

@@ -40,7 +40,7 @@ namespace {
     constexpr std::string_view KeyOutFilePath = "OutputFilePath";
 
     std::string addFileSuffix(const std::string& filePath, const std::string& suffix) {
-        const size_t lastdot = filePath.find_last_of(".");
+        const size_t lastdot = filePath.find_last_of('.');
         const std::string extension = filePath.substr(0, lastdot);
         if (lastdot == std::string::npos) {
             return filePath + suffix;
@@ -101,7 +101,8 @@ void ConvertRecFormatTask::perform(const Task::ProgressCallback&) {
 }
 
 void ConvertRecFormatTask::convert() {
-    std::string expectedFileExtension_in, expectedFileExtension_out;
+    std::string expectedFileExtension_in;
+    std::string expectedFileExtension_out;
     std::string currentFormat;
     if (_fileFormatType == SessionRecording::DataMode::Binary) {
         currentFormat = "binary";
@@ -202,9 +203,8 @@ void ConvertRecFormatTask::convertToAscii() {
     _oFile.write(&tmpType, 1);
     _oFile.write("\n", 1);
 
-    bool fileReadOk = true;
-    while (fileReadOk) {
-        unsigned char frameType = readFromPlayback<unsigned char>(_iFile);
+    while (true) {
+        const unsigned char frameType = readFromPlayback<unsigned char>(_iFile);
         // Check if have reached EOF
         if (!_iFile) {
             LINFO(fmt::format(
@@ -265,7 +265,7 @@ void ConvertRecFormatTask::convertToBinary() {
     std::string lineContents;
     unsigned char keyframeBuffer[SessionRecording::_saveBufferMaxSize_bytes];
     _oFile.open(_outFilePath, std::ifstream::app | std::ios::binary);
-    char tmpType = SessionRecording::DataFormatBinaryTag;
+    const char tmpType = SessionRecording::DataFormatBinaryTag;
     _oFile.write(&tmpType, 1);
     _oFile.write("\n", 1);
 

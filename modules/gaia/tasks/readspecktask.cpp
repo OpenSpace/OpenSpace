@@ -89,7 +89,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
         fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
         fileStream.write(reinterpret_cast<const char*>(&nRenderValues), sizeof(int32_t));
 
-        size_t nBytes = nValues * sizeof(fullData[0]);
+        const size_t nBytes = nValues * sizeof(fullData[0]);
         fileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
 
         fileStream.close();

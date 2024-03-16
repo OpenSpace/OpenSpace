@@ -29,7 +29,7 @@
 namespace openspace {
 
 ScreenLog::ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel)
-    : _timeToLive(std::move(timeToLive))
+    : _timeToLive(timeToLive)
     , _logLevel(logLevel)
 {
     _entries.reserve(64);

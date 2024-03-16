@@ -52,7 +52,7 @@ namespace documentation { struct Documentation; }
 class RenderableStars : public Renderable {
 public:
     explicit RenderableStars(const ghoul::Dictionary& dictionary);
-    ~RenderableStars() override;
+    ~RenderableStars() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;

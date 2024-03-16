@@ -101,7 +101,7 @@ public:
     SessionRecording();
     SessionRecording(bool isGlobal);
 
-    ~SessionRecording() override;
+    ~SessionRecording() override = default;
 
     /**
      * Used to de-initialize the session recording feature. Any recording or playback

@@ -56,8 +56,6 @@ BasicVolumeRaycaster::BasicVolumeRaycaster(
     , _boundingBox(glm::vec3(1.f))
 {}
 
-BasicVolumeRaycaster::~BasicVolumeRaycaster() {}
-
 void BasicVolumeRaycaster::initialize() {
     _boundingBox.initialize();
 }
