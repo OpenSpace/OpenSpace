@@ -410,8 +410,13 @@ bool SessionRecording::startPlayback(std::string& filename,
         LERROR("Unknown data type in header (should be Ascii or Binary)");
         cleanUpPlayback();
     }
-    // throwaway newline character
-    readHeaderElement(_playbackFile, 1);
+    // throwaway newline character(s)
+    std::string lineEnd = readHeaderElement(_playbackFile, 1);
+    bool isDosLineEnding = (lineEnd == "\r");
+    if (isDosLineEnding) {
+        // throwaway the second newline character (\n) also
+        readHeaderElement(_playbackFile, 1);
+    }
 
     if (_recordingDataMode == DataMode::Binary) {
         // Close & re-open the file, starting from the beginning, and do dummy read
@@ -419,7 +424,8 @@ bool SessionRecording::startPlayback(std::string& filename,
         _playbackFile.close();
         _playbackFile.open(_playbackFilename, std::ifstream::in | std::ios::binary);
         size_t headerSize = FileHeaderTitle.length() + FileHeaderVersionLength
-            + sizeof(DataFormatBinaryTag) + sizeof('\n');
+            + sizeof(DataFormatBinaryTag) + sizeof('\n')
+            + ((isDosLineEnding) ? sizeof('\r') : 0);
         std::vector<char> hBuffer;
         hBuffer.resize(headerSize);
         _playbackFile.read(hBuffer.data(), headerSize);
