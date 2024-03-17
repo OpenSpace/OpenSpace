@@ -33,7 +33,7 @@
 
 namespace SoLoud {
     class Soloud;
-    class WavStream;
+    class Wav;
 } // namespace SoLoud
 
 namespace openspace {
@@ -54,11 +54,9 @@ public:
      * Starts playing the audio file located and the provided \p path. The \p loop
      * parameter determines whether the file is only played once, or on a loop. The return
      * value is an opaque handle that has to be passed in to most of the other audio
-     * related functions. The audio file will be played in streaming mode, which means
-     * that the loading time should be negligable and independent of the length of the
-     * track. The audio file will be played in "background" mode, which means that each
-     * channel will be played at full volume. To play a video using spatial audio, use the
-     * #playAudio3d function instead.
+     * related functions. The audio file will be played in "background" mode, which means
+     * that each channel will be played at full volume. To play a video using spatial
+     * audio, use the #playAudio3d function instead.
      *
      * \param path The audio file that should be played
      * \param loop If `Yes` then the song will be played in a loop until the program is
@@ -210,14 +208,12 @@ public:
      * Starts playing the audio file located and the provided \p path. The \p loop
      * parameter determines whether the file is only played once, or on a loop. The return
      * value is an opaque handle that has to be passed in to most of the other audio
-     * related functions. The audio file will be played in streaming mode, which means
-     * that the loading time should be negligable and independent of the length of the
-     * track. The \p position parameter determines the spatial location of the sound in
-     * a meter-based coordinate system. The position of the listener is (0,0,0) with the
-     * forward direction along the +y axis. This means that the "left" channel in a stereo
-     * setting is towards -x and the "right" channel towards x. This default value can be
-     * customized through the #set3dListenerParameters function. If you want to play a
-     * video without spatial audio, use the #playAudio funciton instead.
+     * related functions. The \p position parameter determines the spatial location of the
+     * sound in a meter-based coordinate system. The position of the listener is (0,0,0)
+     * with the forward direction along the +y axis. This means that the "left" channel in
+     * a stereo setting is towards -x and the "right" channel towards x. This default
+     * value can be customized through the #set3dListenerParameters function. If you want
+     * to play a video without spatial audio, use the #playAudio funciton instead.
      *
      * \param path The audio file that should be played
      * \param position The position of the audio file in the 3D environment
@@ -272,7 +268,7 @@ public:
 
 private:
     struct Info {
-        std::unique_ptr<SoLoud::WavStream> sound;
+        std::unique_ptr<SoLoud::Wav> sound;
         std::string name;
     };
 
@@ -280,14 +276,14 @@ private:
     void internalDeinitializeGL() override;
 
     /**
-     * Loads the sound at the provided \p path as a streaming source and returns the
-     * pointer to it. The sound has only been loaded and no other attributes have changed.
+     * Loads the sound at the provided \p path as an audio source and returns the pointer
+     * to it. The sound has only been loaded and no other attributes have changed.
      *
      * \param path The path to the audio file on disk that should be loaded
-     * \return The SoLoud::WavStream object of the loaded file
+     * \return The SoLoud::Wav object of the loaded file
      * \throw ghoul::RuntimeError If the \p path is not a loadable audio file
      */
-    std::unique_ptr<SoLoud::WavStream> loadSound(const std::filesystem::path& path);
+    std::unique_ptr<SoLoud::Wav> loadSound(const std::filesystem::path& path);
 
     std::unique_ptr<SoLoud::Soloud> _engine = nullptr;
 

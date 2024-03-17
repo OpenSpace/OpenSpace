@@ -31,7 +31,7 @@
 #include "soundmodule_lua.inl"
 
 #include <soloud.h>
-#include <soloud_wavstream.h>
+#include <soloud_wav.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "SoundModule";
@@ -82,12 +82,12 @@ void SoundModule::internalDeinitializeGL() {
     _engine = nullptr;
 }
 
-std::unique_ptr<SoLoud::WavStream> SoundModule::loadSound(
+std::unique_ptr<SoLoud::Wav> SoundModule::loadSound(
                                                         const std::filesystem::path& path)
 {
     ghoul_assert(_engine, "No sound engine loaded");
 
-    std::unique_ptr<SoLoud::WavStream> sound = std::make_unique<SoLoud::WavStream>();
+    std::unique_ptr<SoLoud::Wav> sound = std::make_unique<SoLoud::Wav>();
     const std::string p = path.string();
     SoLoud::result res = sound->load(p.c_str());
     if (res != 0) {
@@ -106,6 +106,10 @@ std::unique_ptr<SoLoud::WavStream> SoundModule::loadSound(
             // We have found one of the candidates
             LDEBUG(fmt::format("Removing song {} as it has ended", it->first));
             _sounds.erase(it);
+            // It is easier to just reset the iterator to the beginning than deal with the
+            // off-by-one error when deleting the last element in the list and the
+            // subsequent crash
+            it = _sounds.begin();
         }
         else {
             it++;
@@ -120,8 +124,8 @@ int SoundModule::playAudio(const std::filesystem::path& path, ShouldLoop loop,
 {
     ghoul_assert(_engine, "No sound engine loaded");
 
-    std::unique_ptr<SoLoud::WavStream> sound = loadSound(path);
-    sound->setAutoStop(false);
+    std::unique_ptr<SoLoud::Wav> sound = loadSound(path);
+    //sound->setAutoStop(false);
     sound->setLooping(loop);
     SoLoud::handle handle = _engine->playBackground(*sound);
 
@@ -259,8 +263,8 @@ int SoundModule::playAudio3d(const std::filesystem::path& path, const glm::vec3&
 {
     ghoul_assert(_engine, "No sound engine loaded");
 
-    std::unique_ptr<SoLoud::WavStream> sound = loadSound(path);
-    sound->setAutoStop(false);
+    std::unique_ptr<SoLoud::Wav> sound = loadSound(path);
+    //sound->setAutoStop(false);
     sound->setLooping(loop);
     SoLoud::handle handle = _engine->play3d(*sound, position.x, position.y, position.z);
 
