@@ -56,14 +56,19 @@ public:
      * value is an opaque handle that has to be passed in to most of the other audio
      * related functions. The audio file will be played in streaming mode, which means
      * that the loading time should be negligable and independent of the length of the
-     * track.
+     * track. The audio file will be played in "background" mode, which means that each
+     * channel will be played at full volume. To play a video using spatial audio, use the
+     * #playAudio3d function instead.
      *
      * \param path The audio file that should be played
      * \param loop If `Yes` then the song will be played in a loop until the program is
      *        closed or the playing is stopped through the #stopAudio function
+     * \param name An optional name for the sound that can be used to later look up the
+     *        handle
      * \return A handle that can be used to refer to this audio playback in later stages
      */
-    int playAudio(const std::filesystem::path& path, ShouldLoop loop);
+    int playAudio(const std::filesystem::path& path, ShouldLoop loop,
+        std::string name = "");
 
     /**
      * Stops the audio referenced by the \p handle. The \p handle must be a handle to a
@@ -147,46 +152,146 @@ public:
     std::vector<int> currentlyPlaying() const;
 
     /**
+     * Sets the global volume for all track referred to the new \p volume. The total
+     * for each track is the global volume set by this function multiplied with the volume
+     * for the specific track set through the #setVolume function. The default value for
+     * the global volume is 0.5. The volume should be a number bigger than 0, where 1 is
+     * the maximum volume level. The \p fade controls whether the volume change should be
+     * immediately (if it is 0) or over how many seconds it should change. The default is
+     * for it to change over 500 ms.
+     *
+     * \param volume The new volume level. Must be greater or equal to 0
+     * \param fade How much time the fade from the current volume to the new volume should
+     *        take
+     */
+    void setGlobalVolume(float volume, float fade = 0.5f) const;
+
+    /**
+     * Returns the global volume for all track. The number returned will be greater or
+     * equal to 0.
+     *
+     * \return The global volume
+     */
+    float globalVolume() const;
+
+    /**
      * Sets the volume of the track referred to by \p handle to the new \p volume. The
-     * volume should be a number bigger than 0, where 1 would be a "normal" volume level.
-     * The \p interpolation controls whether the volume change should be immediately (if
+     * volume should be a number bigger than 0, where 1 is the maximum volume level.
+     * The \p fade controls whether the volume change should be immediately (if
      * it is 0) or over how many seconds it should change. The default is for it to change
      * over 500 ms.
      *
      * \param handle The handle to the track whose volume should be changed
      * \param volume The new volume level. Must be greater or equal to 0
-     * \param interpolation How much time the interpolation from the current volume to the
-     *        new volume should take
+     * \param fade How much time the fade from the current volume to the new volume should
+     *        take
      */
-    void setVolume(int handle, float volume, float interpolation = 0.5f) const;
+    void setVolume(int handle, float volume, float fade = 0.5f) const;
 
     /**
      * Returns the volume for the track referred to by the \p handle. The number returned
      * will be greater or equal to 0.
      *
      * \return The volume for the track referred to by the \p handle, which will be
-     *         greater or equal to 0.
+     *         greater or equal to 0
      */
     float volume(int handle) const;
 
+    /**
+     * Returns the handle for the audio track with the provided name. If no audio track
+     * could be found, `-1` is returned instead.
+     *
+     * \param name The name of the audio file that should be looked up
+     * \return The handle for the track or `-1` if the track could not be found
+     */
+    int findAudio(const std::string& name) const;
+
+    /**
+     * Starts playing the audio file located and the provided \p path. The \p loop
+     * parameter determines whether the file is only played once, or on a loop. The return
+     * value is an opaque handle that has to be passed in to most of the other audio
+     * related functions. The audio file will be played in streaming mode, which means
+     * that the loading time should be negligable and independent of the length of the
+     * track. The \p position parameter determines the spatial location of the sound in
+     * a meter-based coordinate system. The position of the listener is (0,0,0) with the
+     * forward direction along the +y axis. This means that the "left" channel in a stereo
+     * setting is towards -x and the "right" channel towards x. This default value can be
+     * customized through the #set3dListenerParameters function. If you want to play a
+     * video without spatial audio, use the #playAudio funciton instead.
+     *
+     * \param path The audio file that should be played
+     * \param position The position of the audio file in the 3D environment
+     * \param loop If `Yes` then the song will be played in a loop until the program is
+     *        closed or the playing is stopped through the #stopAudio function
+     * \param name An optional name for the sound that can be used to later look up the
+     *        handle
+     * \return A handle that can be used to refer to this audio playback in later stages
+     */
     int playAudio3d(const std::filesystem::path& path, const glm::vec3& position,
-        ShouldLoop loop);
-    void set3dListenerParameters(const std::optional<glm::vec3>& position,
-        const std::optional<glm::vec3>& lookAt, const std::optional<glm::vec3>& up) const;
+        ShouldLoop loop, std::string name = "");
+
+    /**
+     * Updates the 3D position of a track started through the #playAudio3d function. See
+     * that function and the #set3dListenerParameters function for a complete description.
+     *
+     * \param handle A valid handle for a track started through the #playAudio3d function
+     * \param position The new position from which the track originates
+     */
     void set3dSourcePosition(int handle, const glm::vec3& position) const;
 
+    /**
+     * Sets the position and orientation of the listener. This new position is
+     * automatically used to adjust the relative position of all 3D tracks. Each parameter
+     * to this function call is optional and if a value is omitted, the currently set
+     * value continues to be used instead. The coordinate system for the tracks and the
+     * listener is a meter-based coordinate system.
+     *
+     * \param position The position of the listener.
+     * \param lookAt The direction vector of the forward direction
+     * \param up The up-vector of the coordinate system
+     */
+    void set3dListenerParameters(const std::optional<glm::vec3>& position,
+        const std::optional<glm::vec3>& lookAt = std::nullopt,
+        const std::optional<glm::vec3>& up = std::nullopt) const;
+
+    /**
+     * Sets the position of the speaker for the provided \p channel to the provided
+     * \position. In general, this is considered an advanced feature to accommodate
+     * non-standard audio environments.
+     *
+     * \param channel The channel whose speaker's position should be changed
+     * \param position The new position for the speaker
+     */
     void setSpeakerPosition(int channel, const glm::vec3& position) const;
+
+    /**
+     * Returns the position for the speaker of the provided \p channel.
+     * \return The position for the speaker of the provided \p channel
+     */
     glm::vec3 speakerPosition(int channel) const;
 
 private:
+    struct Info {
+        std::unique_ptr<SoLoud::WavStream> sound;
+        std::string name;
+    };
+
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitializeGL() override;
+
+    /**
+     * Loads the sound at the provided \p path as a streaming source and returns the
+     * pointer to it. The sound has only been loaded and no other attributes have changed.
+     *
+     * \param path The path to the audio file on disk that should be loaded
+     * \return The SoLoud::WavStream object of the loaded file
+     * \throw ghoul::RuntimeError If the \p path is not a loadable audio file
+     */
     std::unique_ptr<SoLoud::WavStream> loadSound(const std::filesystem::path& path);
-    std::map<int, std::unique_ptr<SoLoud::WavStream>>::const_iterator findSound(
-        int h) const;
 
     std::unique_ptr<SoLoud::Soloud> _engine = nullptr;
-    std::map<int, std::unique_ptr<SoLoud::WavStream>> _sounds;
+
+    std::map<uint64_t, Info> _sounds;
 };
 
 } // namespace openspace

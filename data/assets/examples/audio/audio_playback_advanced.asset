@@ -1,0 +1,43 @@
+-- Lets first download a file that we can use for our examples. If you have files
+-- locally, you can skip this part.
+-- The song in the example comes from https://incompetech.com/ which is a fantastic
+-- webpage for very high quality royalty-free music
+openspace.downloadFile(
+  "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Sneaky%20Adventure.mp3",
+  openspace.absPath("${TEMPORARY}/SneakyAdventure.mp3"),
+  true
+)
+local handle = 0
+
+asset.onInitialize(function()
+  -- Start playing the song immediately in 3D. Place the audio straight in front of us
+  handle = openspace.sound.playAudio3d(openspace.absPath("${TEMPORARY}/SneakyAdventure.mp3"), { 0.0, 0.0, 0.0 })
+  openspace.printInfo("Playing audio handle: " .. handle)
+
+  -- Add two new custom properties. Once to control the position of the song:
+  openspace.addCustomProperty(
+    "Example_AudioPanning",
+    "FloatProperty",
+    "Example - Audio Panning",
+    "Change the panning of the example audio",
+    "openspace.sound.set3dSourcePosition(" .. handle .. ", { openspace.propertyValue('UserProperties.Example_AudioPanning'),0,0})"
+  )
+
+  -- And one to control the volume:
+  openspace.addCustomProperty(
+    "Example_AudioVolume",
+    "FloatProperty",
+    "Example - Volume",
+    "Change the volume of the example audio",
+    "openspace.sound.setVolume(" .. handle .. ", openspace.propertyValue('UserProperties.Example_AudioVolume'))"
+  )
+end)
+
+asset.onDeinitialize(function()
+  -- Remove the two custom properties that we added
+  openspace.removeCustomProperty("Example_AudioVolume")
+  openspace.removeCustomProperty("Example_AudioPanning")
+
+  -- When we remove this asset, we want to audio to stop playing no matter what
+  openspace.sound.stopAudio(handle)
+end)
