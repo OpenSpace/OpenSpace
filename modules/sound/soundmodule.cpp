@@ -31,7 +31,7 @@
 #include "soundmodule_lua.inl"
 
 #include <soloud.h>
-#include <soloud_wav.h>
+#include <soloud_wavstream.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "SoundModule";
@@ -57,20 +57,35 @@ SoundModule::~SoundModule() {}
 void SoundModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    LDEBUG(fmt::format("Initializing SoLoud version: {}", SOLOUD_VERSION));
+
     _engine->init();
     _engine->setGlobalVolume(1.f);
-    const int nChannels = p.maxNumberOfChannels.value_or(128);
+    const int nChannels = p.maxNumberOfChannels.value_or(16);
     _engine->setMaxActiveVoiceCount(static_cast<unsigned int>(nChannels));
+
+    global::callback::postDraw->emplace_back([this]() {
+        if (!_sounds.empty()) {
+            _engine->update3dAudio();
+        }
+    });
+
+    LDEBUG(fmt::format("Audio backend: {}", _engine->getBackendString()));
+    LDEBUG(fmt::format("Number of channels: {}", _engine->getBackendChannels()));
 }
 
 void SoundModule::internalDeinitializeGL() {
+    _sounds.clear();
     _engine->deinit();
     _engine = nullptr;
 }
 
-int SoundModule::playAudio(std::string path, ShouldLoop loop) {
-    std::unique_ptr<SoLoud::Wav> sound = std::make_unique<SoLoud::Wav>();
-    SoLoud::result res = sound->load(path.c_str());
+std::unique_ptr<SoLoud::WavStream> SoundModule::loadSound(
+                                                        const std::filesystem::path& path)
+{
+    std::unique_ptr<SoLoud::WavStream> sound = std::make_unique<SoLoud::WavStream>();
+    const std::string p = path.string();
+    SoLoud::result res = sound->load(p.c_str());
     if (res != 0) {
         throw ghoul::RuntimeError(fmt::format(
             "Error loading sound from {}. {}: {}",
@@ -78,37 +93,66 @@ int SoundModule::playAudio(std::string path, ShouldLoop loop) {
         ));
     }
 
+    return sound;
+}
+
+std::map<int, std::unique_ptr<SoLoud::WavStream>>::const_iterator SoundModule::findSound(
+                                                                              int h) const
+{
+    auto it = _sounds.find(h);
+    if (it == _sounds.end()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Handle {} is not a valid sound handle", h
+        ));
+    }
+    return it;
+}
+
+int SoundModule::playAudio(const std::filesystem::path& path, ShouldLoop loop) {
+    std::unique_ptr<SoLoud::WavStream> sound = loadSound(path);
     sound->setLooping(loop);
     SoLoud::handle handle = _engine->playBackground(*sound);
 
-    ghoul_assert(
-        std::find(_sounds.begin(), _sounds.end(), handle) == _sounds.end(),
-        "Handle already used"
-    );
+    ghoul_assert(_sounds.find(handle) == _sounds.end(), "Handle already used");
     _sounds[handle] = std::move(sound);
     return handle;
 }
 
 void SoundModule::stopAudio(int handle) {
-    auto it = std::find(_sounds.begin(), _sounds.end(), handle);
-    if (it == _sounds.end()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Handle {} is not a valid sound handle", handle
-        ));
-    }
+    auto it = findSound(handle);
     _sounds.erase(it);
     _engine->stop(handle);
 }
 
 bool SoundModule::isPlaying(int handle) const {
-    auto it = std::find(_sounds.begin(), _sounds.end(), handle);
-    if (it == _sounds.end()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Handle {} is not a valid sound handle", handle
-        ));
-    }
-
+    findSound(handle);
     return _engine->isValidVoiceHandle(handle);
+}
+
+void SoundModule::pauseAudio(int handle) const {
+    findSound(handle);
+    _engine->setPause(handle, true);
+}
+
+void SoundModule::resumeAudio(int handle) const {
+    findSound(handle);
+    _engine->setPause(handle, false);
+}
+
+bool SoundModule::isPaused(int handle) const {
+    findSound(handle);
+    const bool isPaused = _engine->getPause(handle);
+    return isPaused;
+}
+
+void SoundModule::setLooping(int handle, ShouldLoop loop) const {
+    findSound(handle);
+    _engine->setLooping(handle, loop);
+}
+
+SoundModule::ShouldLoop SoundModule::isLooping(int handle) const {
+    findSound(handle);
+    return _engine->getLooping(handle) ? ShouldLoop::Yes : ShouldLoop::No;
 }
 
 void SoundModule::stopAll() {
@@ -125,44 +169,67 @@ std::vector<int> SoundModule::currentlyPlaying() const {
     return res;
 }
 
-void SoundModule::setVolume(int handle, float volume) const {
-    auto it = std::find(_sounds.begin(), _sounds.end(), handle);
-    if (it == _sounds.end()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Handle {} is not a valid sound handle", handle
-        ));
+void SoundModule::setVolume(int handle, float volume, float interpolation) const {
+    findSound(handle);
+    if (interpolation == 0.f) {
+        _engine->setVolume(handle, volume);
     }
-
-    _engine->setVolume(handle, volume);
+    else {
+        _engine->fadeVolume(handle, volume, 0.5f);
+    }
 }
 
 float SoundModule::volume(int handle) const {
-    auto it = std::find(_sounds.begin(), _sounds.end(), handle);
-    if (it == _sounds.end()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Handle {} is not a valid sound handle", handle
-        ));
-    }
-
+    findSound(handle);
     const float volume = _engine->getVolume(handle);
     return volume;
 }
 
-std::vector<std::string> SoundModule::drivers() const {
-    //int nDrivers = 0;
-    //_system->getNumDrivers(&nDrivers);
+int SoundModule::playAudio3d(const std::filesystem::path& path, const glm::vec3& position,
+                             ShouldLoop loop)
+{
+    std::unique_ptr<SoLoud::WavStream> sound = loadSound(path);
+    sound->setLooping(loop);
+    SoLoud::handle handle = _engine->play3d(*sound, position.x, position.y, position.z);
 
-    //std::vector<std::string> result;
-    //for (int i = 0; i < nDrivers; i++) {
-    //    std::array<char, 512> buffer = {};
-    //    _system->getDriverInfo(i, buffer.data(), 512, nullptr, nullptr, nullptr, nullptr);
-    //    result.push_back(buffer.data());
-    //}
-    return {};
+    ghoul_assert(_sounds.find(handle) == _sounds.end(), "Handle already used");
+    _sounds[handle] = std::move(sound);
+    return handle;
 }
 
-void SoundModule::setDriver(int index) const {
-    //_system->setDriver(index);
+void SoundModule::set3dListenerParameters(const std::optional<glm::vec3>& position,
+                                          const std::optional<glm::vec3>& lookAt,
+                                          const std::optional<glm::vec3>& up) const
+{
+    if (position.has_value()) {
+        _engine->set3dListenerPosition(position->x, position->y, position->z);
+    }
+    if (lookAt.has_value()) {
+        _engine->set3dListenerAt(lookAt->x, lookAt->y, lookAt->z);
+    }
+    if (up.has_value()) {
+        _engine->set3dListenerUp(up->x, up->y, up->z);
+    }
+}
+
+void SoundModule::set3dSourcePosition(int handle, const glm::vec3& position) const {
+    findSound(handle);
+    _engine->set3dSourcePosition(
+        handle,
+        position.x, position.y, position.z
+    );
+}
+
+void SoundModule::setSpeakerPosition(int channel, const glm::vec3& position) const {
+    _engine->setSpeakerPosition(channel, position.x, position.y, position.z);
+}
+
+glm::vec3 SoundModule::speakerPosition(int channel) const {
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+    _engine->getSpeakerPosition(channel, x, y, z);
+    return glm::vec3(x, y, z);
 }
 
 std::vector<documentation::Documentation> SoundModule::documentations() const {
@@ -180,8 +247,16 @@ scripting::LuaLibrary SoundModule::luaLibrary() const {
             codegen::lua::CurrentlyPlaying,
             codegen::lua::SetVolume,
             codegen::lua::Volume,
-            codegen::lua::Drivers,
-            codegen::lua::SetDriver
+            codegen::lua::PauseAudio,
+            codegen::lua::ResumeAudio,
+            codegen::lua::IsPaused,
+            codegen::lua::SetLooping,
+            codegen::lua::IsLooping,
+            codegen::lua::PlayAudio3d,
+            codegen::lua::Set3dListenerPosition,
+            codegen::lua::Set3dSourcePosition,
+            codegen::lua::SetSpeakerPosition,
+            codegen::lua::SpeakerPosition
         }
     };
 }

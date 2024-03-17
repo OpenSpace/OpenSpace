@@ -46,6 +46,8 @@ begin_dependency("SoLoud")
 set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "")
 if (WIN32)
   set(SOLOUD_BACKEND_WINMM ON CACHE BOOL "")
+elseif (UNIX)
+  set(SOLOUD_BACKEND_ALSA ON CACHE BOOL "")
 endif ()
 add_subdirectory(ext/soloud/contrib)
 

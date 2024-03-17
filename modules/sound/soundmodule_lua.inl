@@ -27,27 +27,21 @@
 namespace {
 
 /**
- * Starts playing an audio file. The file must be something that is supported by the FMOD
- * library, which is basically any audio file imaginable. The function returns a number
- * which can be used in other functions to refer to this audio channel. Please note that
- * the provided address can either be a file on disk (in which case the file has to exist)
- * or a URL for an internet resource.
+ * Starts playing an audio file. The file must be something that is supported by the
+ * SoLoud library, which are WAV, FLAC, MP3, or Ogg Vorbis files. The function returns a
+ * number which can be used in other functions to refer to this audio.
  *
- * For a full list of supported audio files, see this list:
- * https://www.fmod.com/docs/2.02/api/core-api-sound.html#fmod_sound_type
- *
- * \param address The address of the file that should be played, which could either be a
- *        local file or a web address
+ * \param path The address of the file that should be played
  * \param shouldLoop If this value is `true`, the audio file will be played in a loop
  *        until explicitly stopped. If it is `false`, the audio file will be played once
  * \return A numerical handle that can be used to refer to the playing audio in later
  *         function calls. Each number is only returned once
  */
-[[codegen::luawrap]] int playAudio(std::string address, bool shouldLoop) {
+[[codegen::luawrap]] int playAudio(std::filesystem::path path, bool shouldLoop) {
     using namespace openspace;
 
     int handle = global::moduleEngine->module<SoundModule>()->playAudio(
-        std::move(address),
+        std::move(path),
         SoundModule::ShouldLoop(shouldLoop)
     );
     return handle;
@@ -91,9 +85,10 @@ namespace {
  * \param volume The new volume value that we want to audio file to have. This value has
  *        to be between 0 and 1
  */
-[[codegen::luawrap]] void setVolume(int handle, float volume) {
+[[codegen::luawrap]] void setVolume(int handle, float volume, float interpolation = 0.5f)
+{
     using namespace openspace;
-    global::moduleEngine->module<SoundModule>()->setVolume(handle, volume);
+    global::moduleEngine->module<SoundModule>()->setVolume(handle, volume, interpolation);
 }
 
 /**
@@ -107,29 +102,72 @@ namespace {
     return global::moduleEngine->module<SoundModule>()->volume(handle);
 }
 
-/**
- * Returns a list of all sound drivers that are detected on this computer
- */
-[[codegen::luawrap]] std::vector<std::string> drivers() {
+[[codegen::luawrap]] void pauseAudio(int handle) {
     using namespace openspace;
-    return global::moduleEngine->module<SoundModule>()->drivers();
+    global::moduleEngine->module<SoundModule>()->pauseAudio(handle);
 }
 
-/**
- * Sets the provided driver as the currently playback sound card. The provided index must
- * be an index into the list returned by the `drivers` function.
- */
-[[codegen::luawrap]] void setDriver(int index) {
+[[codegen::luawrap]] void resumeAudio(int handle) {
     using namespace openspace;
-    std::vector<std::string> ds = global::moduleEngine->module<SoundModule>()->drivers();
-    if (index >= ds.size()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Requested sound driver index {} higher than number of available drivers {}",
-            index, ds.size()
-        ));
-    }
-    LINFOC("setDriver", fmt::format("Setting sound driver to {}", ds[index]));
-    return global::moduleEngine->module<SoundModule>()->setDriver(index);
+    global::moduleEngine->module<SoundModule>()->resumeAudio(handle);
+}
+
+[[codegen::luawrap]] bool isPaused(int handle) {
+    using namespace openspace;
+    return global::moduleEngine->module<SoundModule>()->isPaused(handle);
+}
+
+[[codegen::luawrap]] void setLooping(int handle, bool shouldLoop) {
+    using namespace openspace;
+    global::moduleEngine->module<SoundModule>()->setLooping(
+        handle,
+        SoundModule::ShouldLoop(shouldLoop)
+    );
+}
+
+[[codegen::luawrap]] bool isLooping(int handle) {
+    using namespace openspace;
+    return global::moduleEngine->module<SoundModule>()->isLooping(handle);
+}
+
+[[codegen::luawrap]] int playAudio3d(std::string path, glm::vec3 position,
+                                     bool shouldLoop = true)
+{
+    using namespace openspace;
+
+    int handle = global::moduleEngine->module<SoundModule>()->playAudio3d(
+        std::move(path),
+        position,
+        SoundModule::ShouldLoop(shouldLoop)
+    );
+    return handle;
+}
+
+[[codegen::luawrap]] void set3dListenerPosition(glm::vec3 position,
+                                                  std::optional<glm::vec3> lookAt,
+                                                  std::optional<glm::vec3> up)
+{
+    using namespace openspace;
+    global::moduleEngine->module<SoundModule>()->set3dListenerParameters(
+        position,
+        lookAt,
+        up
+    );
+}
+
+[[codegen::luawrap]] void set3dSourcePosition(int handle, glm::vec3 position) {
+    using namespace openspace;
+    global::moduleEngine->module<SoundModule>()->set3dSourcePosition(handle, position);
+}
+
+[[codegen::luawrap]] void setSpeakerPosition(int handle, glm::vec3 position) {
+    using namespace openspace;
+    global::moduleEngine->module<SoundModule>()->setSpeakerPosition(handle, position);
+}
+
+[[codegen::luawrap]] glm::vec3 speakerPosition(int handle) {
+    using namespace openspace;
+    return global::moduleEngine->module<SoundModule>()->speakerPosition(handle);
 }
 
 #include "soundmodule_lua_codegen.cpp"
