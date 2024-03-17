@@ -140,7 +140,7 @@ namespace {
             int iDataset = -1;
             std::array<char, 256> IdentifierBuffer;
             std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
-            int ret = sscanf(
+            const int ret = sscanf(
                 subDatasets[i],
                 "SUBDATASET_%i_%255[^=]",
                 &iDataset,
@@ -427,8 +427,8 @@ glm::dvec3 GlobeBrowsingModule::geoPosition() const {
         posHandle.centerToReferenceSurface
     );
 
-    double lat = glm::degrees(geo2.lat);
-    double lon = glm::degrees(geo2.lon);
+    const double lat = glm::degrees(geo2.lat);
+    const double lon = glm::degrees(geo2.lon);
 
     double altitude = glm::length(
         cameraPositionModelSpace - posHandle.centerToReferenceSurface
@@ -445,7 +445,7 @@ glm::dvec3 GlobeBrowsingModule::geoPosition() const {
 
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     const globebrowsing::TileIndex& ti,
-                                    glm::vec2 uv, bool doResetCameraDirection)
+                                    const glm::vec2& uv, bool doResetCameraDirection)
 {
     using namespace globebrowsing;
 
@@ -492,6 +492,7 @@ void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& gl
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
         LERROR("Error when going to Geodetic2");
+        return;
     }
 
     const glm::dmat4 inverseModelTransform = glm::inverse(
@@ -651,7 +652,7 @@ bool GlobeBrowsingModule::isMRFCachingEnabled() const {
     return _mrfCacheEnabled;
 }
 
-const std::string GlobeBrowsingModule::mrfCacheLocation() const {
+std::string GlobeBrowsingModule::mrfCacheLocation() const {
     return _mrfCacheLocation;
 }
 

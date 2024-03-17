@@ -50,13 +50,13 @@ void WebsocketCameraStates::updateStateFromInput(
 
     if (!websocketInputStates.empty()) {
         for (int i = 0; i < WebsocketInputState::MaxAxes; i++) {
-            AxisInformation t = _axisMapping[i];
+            const AxisInformation t = _axisMapping[i];
             if (t.type == AxisType::None) {
                 continue;
             }
 
             float value = websocketInputStates.axis(i);
-            bool hasValue = std::fabs(value) > t.deadzone;
+            const bool hasValue = std::fabs(value) > t.deadzone;
 
             if (!hasValue) {
                 value = 0.f;

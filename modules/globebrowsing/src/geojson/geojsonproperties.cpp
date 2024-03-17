@@ -71,7 +71,7 @@ namespace geojson::propertykeys {
 namespace {
     using PropertyInfo = openspace::properties::Property::PropertyInfo;
 
-    template <std::size_t SIZE>
+    template <size_t SIZE>
     bool keyMatches(const std::string_view key,
                     const std::array<std::string_view, SIZE>& keyAlternativesArray,
                     std::optional<const PropertyInfo> propInfo = std::nullopt)
@@ -135,7 +135,7 @@ namespace {
             );
         }
         else if (value.isString()) {
-            const std::string hex = value.getString();
+            const std::string& hex = value.getString();
             std::optional<glm::vec3> c = hexToRgb(hex);
             if (!c) {
                 LERRORC(
@@ -460,10 +460,10 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     // Distances are computed based on a certain lat/long angle size
     constexpr float DefaultAngle = glm::radians(1.f);
     constexpr float MaxAngle = glm::radians(45.f);
-    float defaultDistance = static_cast<float>(
+    const float defaultDistance = static_cast<float>(
         globe.ellipsoid().longitudalDistance(0.f, 0.f, DefaultAngle)
     );
-    float maxDistance = static_cast<float>(
+    const float maxDistance = static_cast<float>(
         globe.ellipsoid().longitudalDistance(0.f, 0.f, MaxAngle)
     );
     tessellation.distance = defaultDistance;

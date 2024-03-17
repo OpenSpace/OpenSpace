@@ -59,9 +59,13 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
 
     _target = p.target;
     for (const std::pair<const std::string, ghoul::Dictionary>& ps : p.instruments) {
-        ghoul::Dictionary files = ps.second.value<ghoul::Dictionary>(KeyInstrumentFiles);
-        _fileTranslation[ps.first] =
-            Decoder::createFromDictionary(ps.second, KeyInstrument);
+        const ghoul::Dictionary files = ps.second.value<ghoul::Dictionary>(
+            KeyInstrumentFiles
+        );
+        _fileTranslation[ps.first] = Decoder::createFromDictionary(
+            ps.second,
+            KeyInstrument
+        );
         for (size_t i = 0; i < files.size(); i++) {
             std::string filename = files.value<std::string>(std::to_string(i + 1));
             _instrumentFiles[ps.first].push_back(std::move(filename));
@@ -80,7 +84,7 @@ bool InstrumentTimesParser::create() {
     using V = std::vector<std::string>;
     for (const std::pair<const K, V>& p : _instrumentFiles) {
         const std::string& instrumentID = p.first;
-        for (std::string filename : p.second) {
+        for (const std::string& filename : p.second) {
             std::filesystem::path filepath = sequenceDir / filename;
 
             if (!std::filesystem::is_regular_file(filepath)) {
@@ -110,8 +114,8 @@ bool InstrumentTimesParser::create() {
 
                 TimeRange tr;
                 try { // parse date strings
-                    std::string start = matches[1].str();
-                    std::string stop = matches[2].str();
+                    const std::string start = matches[1].str();
+                    const std::string stop = matches[2].str();
                     tr.start = SpiceManager::ref().ephemerisTimeFromDate(start);
                     tr.end = SpiceManager::ref().ephemerisTimeFromDate(stop);
                 }

@@ -291,7 +291,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     // We pass in the model view transformation matrix as double in order to maintain
     // high precision for vertices; especially for the trails, a high vertex precision
     // is necessary as they are usually far away from their reference
-    glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
     _programObject->setUniform(
         _uniformCache.modelView,
         modelViewTransform * info._localTransform
@@ -317,8 +317,8 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     _programObject->setUniform(_uniformCache.nVertices, nVertices);
 
 #if !defined(__APPLE__)
-    GLint viewport[4];
-    global::renderEngine->openglStateCache().viewport(viewport);
+    std::array<GLint, 4> viewport;
+    global::renderEngine->openglStateCache().viewport(viewport.data());
     _programObject->setUniform(
         _uniformCache.viewport,
         static_cast<float>(viewport[0]),
@@ -392,7 +392,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, opacity());
 
-    glm::dmat4 modelTransform = calcModelTransform(data);
+    const glm::dmat4 modelTransform = calcModelTransform(data);
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
@@ -418,7 +418,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 #ifdef __APPLE__
         glLineWidth(1);
 #else
-        glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
+        glLineWidth(std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
 #endif
     }
     if (renderPoints) {

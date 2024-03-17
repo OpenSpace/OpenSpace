@@ -223,10 +223,10 @@ bool UrlSynchronization::isEachFileValid() {
     if (ossyncVersion == "1.0") {
         std::getline(file >> std::ws, line);
         std::string& fileIsValidToDate = line;
-        double fileValidAsJ2000 = Time::convertTime(fileIsValidToDate);
+        const double fileValidAsJ2000 = Time::convertTime(fileIsValidToDate);
 
-        std::string todaysDate = Time::currentWallTime();
-        double todaysDateAsJ2000 = Time::convertTime(todaysDate);
+        const std::string todaysDate = Time::currentWallTime();
+        const double todaysDateAsJ2000 = Time::convertTime(todaysDate);
 
         // Issue warning if file is kept but user changed setting to download on startup.
         if ((fileValidAsJ2000 > todaysDateAsJ2000) && _secondsUntilResync == 0) {
@@ -264,12 +264,12 @@ void UrlSynchronization::createSyncFile(bool) const {
     dir.replace_extension("ossync");
     std::ofstream syncFile(dir, std::ofstream::out);
 
-    std::string currentTimeAsISO8601 = Time::currentWallTime();
-    double currentTimeAsJ2000 = Time::convertTime(currentTimeAsISO8601);
+    const std::string currentTimeAsISO8601 = Time::currentWallTime();
+    const double currentTimeAsJ2000 = Time::convertTime(currentTimeAsISO8601);
 
     // With the format YYYY-MM... any year thats larger than 4 digits throws an error
     // Limit the future date to year 9999
-    double futureTimeAsJ2000 = std::min(
+    const double futureTimeAsJ2000 = std::min(
         currentTimeAsJ2000 + _secondsUntilResync,
         MaxDateAsJ2000
     );
@@ -317,7 +317,7 @@ bool UrlSynchronization::trySyncUrls() {
 
         auto download = std::make_unique<HttpFileDownload>(
             url,
-            destination,
+            std::move(destination),
             HttpFileDownload::Overwrite::Yes
         );
         HttpFileDownload* dl = download.get();
@@ -334,7 +334,7 @@ bool UrlSynchronization::trySyncUrls() {
                     return !_shouldCancel;
                 }
 
-                std::lock_guard guard(fileSizeMutex);
+                const std::lock_guard guard(fileSizeMutex);
                 sizeData[url] = { downloadedBytes, totalBytes };
 
                 _nTotalBytesKnown = true;

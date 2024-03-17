@@ -390,8 +390,8 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         for (size_t i = 0; i < fullData.size(); i += nValuesPerStar) {
             auto first = fullData.begin() + i;
             auto last = fullData.begin() + i + nValuesPerStar;
-            std::vector<float> filterValues(first, last);
-            std::vector<float> renderValues(first, first + RENDER_VALUES);
+            const std::vector<float> filterValues(first, last);
+            const std::vector<float> renderValues(first, first + RENDER_VALUES);
 
             // Filter data by parameters.
             if (checkAllFilters(filterValues)) {
@@ -468,7 +468,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
 
     _indexOctreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
-    float processOneFile = 1.f / allInputFiles.size();
+    const float processOneFile = 1.f / allInputFiles.size();
 
     LINFO(fmt::format(
         "MAX DIST: {} - MAX STARS PER NODE: {}",
@@ -506,7 +506,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
                 //}
 
                 // If all filters passed then insert render values into Octree.
-                std::vector<float> renderValues(
+                const std::vector<float> renderValues(
                     filterValues.begin(),
                     filterValues.begin() + RENDER_VALUES
                 );
@@ -646,10 +646,11 @@ bool ConstructOctreeTask::filterStar(const glm::vec2& range, float filterValue,
 {
     // Return true if star should be filtered away, i.e. if min = max = filterValue or
     // if filterValue < min (when min != 0.0) or filterValue > max (when max != 0.0).
-    return (fabs(range.x - range.y) < FLT_EPSILON &&
-        fabs(range.x - filterValue) < FLT_EPSILON) ||
-        (fabs(range.x - normValue) > FLT_EPSILON && filterValue < range.x) ||
-        (fabs(range.y - normValue) > FLT_EPSILON && filterValue > range.y);
+    constexpr float eps = std::numeric_limits<float>::epsilon();
+    return (std::abs(range.x - range.y) < eps &&
+        std::abs(range.x - filterValue) < eps) ||
+        (std::abs(range.x - normValue) > eps && filterValue < range.x) ||
+        (std::abs(range.y - normValue) > eps && filterValue > range.y);
 }
 
 documentation::Documentation ConstructOctreeTask::Documentation() {

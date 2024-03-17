@@ -68,9 +68,9 @@ namespace {
 
 namespace openspace::volume {
 
-TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
+TransferFunctionHandler::TransferFunctionHandler(properties::StringProperty prop)
     : properties::PropertyOwner({ "TransferFunctionHandler", "Tranfer Function Handler" })
-    , _transferFunctionPath(prop)
+    , _transferFunctionPath(std::move(prop))
     , _dataUnit(DataUnitInfo)
     , _minValue(MinValueInfo)
     , _maxValue(MaxValueInfo)
@@ -143,7 +143,7 @@ void TransferFunctionHandler::setFilepath(std::string path) {
 }
 
 ghoul::opengl::Texture& TransferFunctionHandler::texture() {
-    return *_texture.get();
+    return *_texture;
 }
 
 void TransferFunctionHandler::uploadTexture() {

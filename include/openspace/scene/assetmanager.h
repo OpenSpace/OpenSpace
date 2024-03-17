@@ -83,7 +83,7 @@ public:
      */
     void update();
 
-    scripting::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
     /**
      * Returns all assets that have been loaded by the AssetManager. The order of the

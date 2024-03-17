@@ -448,8 +448,8 @@ glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double 
                                                const std::string& target) const
 {
     if (target.empty()) {
-        glm::dvec3 vec = glm::dvec3(1.0, 0.0, 0.0);
-        return glm::normalize(glm::cross(vec, vecFov));
+        constexpr glm::dvec3 Up = glm::dvec3(1.0, 0.0, 0.0);
+        return glm::normalize(glm::cross(Up, vecFov));
     }
     else {
         const glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
@@ -473,7 +473,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                                       bool isInFov)
 {
     auto makeBodyFixedReferenceFrame =
-        [&target](std::string ref) -> std::pair<std::string, bool>
+        [&target](const std::string& ref) -> std::pair<std::string, bool>
     {
         const bool convert = (ref.find("IAU_") == std::string::npos);
         if (convert) {
@@ -515,7 +515,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
         else {
             // The target is in the field of view, but not the entire field of view has to
             // be filled by the target
-            std::pair<std::string, bool> ref = makeBodyFixedReferenceFrame(
+            const std::pair<std::string, bool> ref = makeBodyFixedReferenceFrame(
                 _instrument.referenceFrame
             );
 
@@ -764,7 +764,7 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
     // Model transform and view transform needs to be in double precision
-    glm::mat4 modelViewProjectionTransform =
+    const glm::mat4 modelViewProjectionTransform =
         calcModelViewProjectionTransform(data);
 
     _program->setUniform(_uniformCache.modelViewProjection, modelViewProjectionTransform);
@@ -835,7 +835,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
 
     // First, for all potential targets, check whether they are in the field of view
     for (const std::string& pt : _instrument.potentialTargets) {
-        bool inFOV = SpiceManager::ref().isTargetInFieldOfView(
+        const bool inFOV = SpiceManager::ref().isTargetInFieldOfView(
             pt,
             _instrument.spacecraft,
             global::moduleEngine->module<SpacecraftInstrumentsModule>()->frameFromBody(
@@ -865,7 +865,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
             _instrument.potentialTargets.end(),
             distances.begin(),
             [&i = _instrument, &t = time] (const std::string& pt) {
-                double lt;
+                double lt = 0.0;
                 const glm::dvec3 p = SpiceManager::ref().targetPosition(
                     pt,
                     i.spacecraft,

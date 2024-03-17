@@ -188,8 +188,8 @@ void NavigationHandler::updateCamera(double deltaTime) {
         return;
     }
 
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-    bool playbackMode = (mode == OpenSpaceEngine::Mode::SessionRecordingPlayback);
+    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    const bool playbackMode = (mode == OpenSpaceEngine::Mode::SessionRecordingPlayback);
 
     // If we're in session recording payback mode, the session recording is responsible
     // for navigation. So don't do anything more here
@@ -226,14 +226,14 @@ void NavigationHandler::applyPendingState() {
 
     std::variant<NodeCameraStateSpec, NavigationState> pending = *_pendingState;
     if (std::holds_alternative<NavigationState>(pending)) {
-        NavigationState ns = std::get<NavigationState>(pending);
+        const NavigationState ns = std::get<NavigationState>(pending);
         _orbitalNavigator.setAnchorNode(ns.anchor);
         _orbitalNavigator.setAimNode(ns.aim);
         _camera->setPose(ns.cameraPose());
     }
     else if (std::holds_alternative<NodeCameraStateSpec>(pending)) {
-        NodeCameraStateSpec spec = std::get<NodeCameraStateSpec>(pending);
-        Waypoint wp = computeWaypointFromNodeInfo(spec);
+        const NodeCameraStateSpec spec = std::get<NodeCameraStateSpec>(pending);
+        const Waypoint wp = computeWaypointFromNodeInfo(spec);
 
         _orbitalNavigator.setAnchorNode(wp.nodeIdentifier());
         _orbitalNavigator.setAimNode("");
@@ -272,13 +272,13 @@ void NavigationHandler::updateCameraTransitions() {
 
     // Updated checks compared to last time, so we can check if we are still in the
     // approach or anchor sphere
-    bool isInApproachSphere = currDistance < d * af;
-    bool isInReachSphere = currDistance < d * rf;
+    const bool isInApproachSphere = currDistance < d * af;
+    const bool isInReachSphere = currDistance < d * rf;
 
     // Compare these to the values from last frame, to trigger the correct transition
     // events
-    bool wasInApproachSphere = _inAnchorApproachSphere;
-    bool wasInReachSphere = _inAnchorReachSphere;
+    const bool wasInApproachSphere = _inAnchorApproachSphere;
+    const bool wasInReachSphere = _inAnchorReachSphere;
     _inAnchorApproachSphere = isInApproachSphere;
     _inAnchorReachSphere = isInReachSphere;
 
@@ -378,7 +378,7 @@ void NavigationHandler::updateCameraTransitions() {
         );
     };
 
-    bool anchorWasChanged = anchorNode() != _lastAnchor;
+    const bool anchorWasChanged = anchorNode() != _lastAnchor;
     if (anchorWasChanged) {
         // The anchor was changed between frames, so the transitions we have to check
         // are a bit different. Just directly trigger the relevant events for the
@@ -510,8 +510,8 @@ NavigationState NavigationHandler::navigationState(
         glm::normalize(_camera->lookUpVectorWorldSpace())
     ));
 
-    glm::dquat localRotation = invNeutralRotation * _camera->rotationQuaternion();
-    glm::dvec3 eulerAngles = glm::eulerAngles(localRotation);
+    const glm::dquat localRotation = invNeutralRotation * _camera->rotationQuaternion();
+    const glm::dvec3 eulerAngles = glm::eulerAngles(localRotation);
 
     const double pitch = eulerAngles.x;
     const double yaw = -eulerAngles.y;
@@ -540,7 +540,7 @@ NavigationState NavigationHandler::navigationState(
 }
 
 void NavigationHandler::saveNavigationState(const std::filesystem::path& filepath,
-                                            const std::string& referenceFrameIdentifier)
+                                        const std::string& referenceFrameIdentifier) const
 {
     ghoul_precondition(!filepath.empty(), "File path must not be empty");
 
@@ -593,7 +593,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
         throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
     }
 
-    std::ifstream f(absolutePath);
+    std::ifstream f = std::ifstream(absolutePath);
     std::string contents = std::string(
         std::istreambuf_iterator<char>(f),
         std::istreambuf_iterator<char>()
@@ -605,9 +605,9 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
         ));
     }
 
-    nlohmann::json json = nlohmann::json::parse(contents);
+    const nlohmann::json json = nlohmann::json::parse(contents);
 
-    NavigationState state = NavigationState(json);
+    const NavigationState state = NavigationState(json);
     setNavigationStateNextFrame(state);
 
     if (useTimeStamp && state.timestamp.has_value()) {

@@ -119,7 +119,7 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
             global::timeManager->setTimeNextFrame(newTime);
         }
         else {
-            nlohmann::json value = json.at("value");
+            const nlohmann::json value = json.at("value");
             std::string literal = luaLiteralFromJson(value);
 
             global::scriptEngine->queueScript(

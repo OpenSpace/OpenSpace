@@ -106,7 +106,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     });
     addProperty(_doSimplification);
 
-    for (DistanceUnit u : DistanceUnits) {
+    for (const DistanceUnit u : DistanceUnits) {
         _requestedUnit.addOption(
             static_cast<int>(u),
             std::string(nameForDistanceUnit(u))
@@ -114,7 +114,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
     if (p.requestedUnit.has_value()) {
-        DistanceUnit unit = distanceUnitFromString(p.requestedUnit->c_str());
+        const DistanceUnit unit = distanceUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
@@ -163,8 +163,8 @@ glm::vec2 DashboardItemVelocity::size() const {
         dist = simplifyDistance(d);
     }
     else {
-        DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        double convertedD = convertMeters(d, unit);
+        const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
+        const double convertedD = convertMeters(d, unit);
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 

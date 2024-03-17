@@ -77,7 +77,7 @@ GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
         ));
     }
 
-    kepler::Parameters param = parameters[element - 1];
+    const kepler::Parameters& param = parameters[element - 1];
     setKeplerElements(
         param.eccentricity,
         param.semiMajorAxis,

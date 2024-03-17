@@ -71,7 +71,7 @@ private:
 
     void openSaveAs();
     void typeOnChange(int index);
-    void downloadProgress(int value, int max);
+    void downloadProgress(int value, int total);
     void importTimeRange();
 
     void approved();

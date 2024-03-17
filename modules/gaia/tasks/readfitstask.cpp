@@ -90,15 +90,16 @@ ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
     _lastRow = p.lastRow.value_or(_lastRow);
 
     if (p.filterColumnNames.has_value()) {
-        ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(KeyFilterColumnNames);
+        const ghoul::Dictionary d =
+            dictionary.value<ghoul::Dictionary>(KeyFilterColumnNames);
 
         // Ugly fix for ASCII sorting when there are more columns read than 10.
         std::set<int> intKeys;
-        for (std::string_view key : d.keys()) {
+        for (const std::string_view key : d.keys()) {
             intKeys.insert(std::stoi(std::string(key)));
         }
 
-        for (int key : intKeys) {
+        for (const int key : intKeys) {
             _filterColumnNames.push_back(d.value<std::string>(std::to_string(key)));
         }
     }
@@ -160,7 +161,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
             sizeof(int32_t)
         );
 
-        size_t nBytes = nValues * sizeof(fullData[0]);
+        const size_t nBytes = nValues * sizeof(fullData[0]);
         outFileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
 
         outFileStream.close();
@@ -180,12 +181,14 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
     _firstRow = std::max(_firstRow, 1);
 
-    // Create Threadpool and JobManager.
+    // Create Threadpool and JobManager
     LINFO("Threads in pool: " + std::to_string(_threadsToUse));
     ThreadPool threadPool(_threadsToUse);
-    ConcurrentJobManager<std::vector<std::vector<float>>> jobManager(threadPool);
+    ConcurrentJobManager<std::vector<std::vector<float>>> jobManager(
+        std::move(threadPool)
+    );
 
-    // Get all files in specified folder.
+    // Get all files in specified folder
     std::vector<std::filesystem::path> allInputFiles;
     if (std::filesystem::is_directory(_inFileOrFolderPath)) {
         namespace fs = std::filesystem;
@@ -196,12 +199,12 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
         }
     }
 
-    size_t nInputFiles = allInputFiles.size();
+    const size_t nInputFiles = allInputFiles.size();
     LINFO("Files to read: " + std::to_string(nInputFiles));
 
-    // Define what columns to read.
+    // Define what columns to read
     _allColumnNames.clear();
-    // Read in the order of table in file.
+    // Read in the order of table in file
     std::vector<std::string> defaultColumnNames = {
         "ra",
         "ra_error",
@@ -241,13 +244,13 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     LINFO(allNames);
 
     // Declare how many values to save for each star.
-    int32_t nValuesPerStar = 24;
-    size_t nDefaultColumns = defaultColumnNames.size();
+    constexpr int32_t NValuesPerStar = 24;
+    const size_t nDefaultColumns = defaultColumnNames.size();
     auto fitsFileReader = std::make_shared<FitsFileReader>(false);
 
     // Divide all files into ReadFilejobs and then delegate them onto several threads!
     while (!allInputFiles.empty()) {
-        std::filesystem::path fileToRead = allInputFiles.back();
+        const std::filesystem::path fileToRead = allInputFiles.back();
         allInputFiles.erase(allInputFiles.end() - 1);
 
         // Add reading of file to jobmanager, which will distribute it to our threadpool.
@@ -257,7 +260,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
             _firstRow,
             _lastRow,
             nDefaultColumns,
-            nValuesPerStar,
+            NValuesPerStar,
             fitsFileReader
         );
         jobManager.enqueueJob(readFileJob);
@@ -288,7 +291,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
                         octants[i],
                         i,
                         isFirstWrite,
-                        nValuesPerStar
+                        NValuesPerStar
                     );
 
                     octants[i].clear();
@@ -322,7 +325,7 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
             isFirstWrite[index] = false;
         }
 
-        size_t nBytes = nValues * sizeof(octantData[0]);
+        const size_t nBytes = nValues * sizeof(octantData[0]);
         fileStream.write(reinterpret_cast<const char*>(octantData.data()), nBytes);
 
         fileStream.close();

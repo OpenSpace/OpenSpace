@@ -80,14 +80,14 @@ void EventEngine::registerEventTopic(size_t topicId, events::Event::Type type,
 {
     TopicInfo ti;
     ti.id = topicId;
-    ti.callback = callback;
+    ti.callback = std::move(callback);
 
     _eventTopics[type].push_back(ti);
 }
 
 void EventEngine::unregisterEventAction(events::Event::Type type,
                                         const std::string& identifier,
-                                        std::optional<ghoul::Dictionary> filter)
+                                        const std::optional<ghoul::Dictionary>& filter)
 {
     const auto it = _eventActions.find(type);
     if (it != _eventActions.end()) {
@@ -204,7 +204,7 @@ void EventEngine::triggerActions() const {
     while (e) {
         const auto it = _eventActions.find(e->type);
         if (it != _eventActions.end()) {
-            ghoul::Dictionary params = toParameter(*e);
+            const ghoul::Dictionary params = toParameter(*e);
             for (const ActionInfo& ai : it->second) {
                 if (ai.isEnabled &&
                     (!ai.filter.has_value() || params.isSubset(*ai.filter)))
@@ -235,7 +235,7 @@ void EventEngine::triggerTopics() const {
         const auto it = _eventTopics.find(e->type);
 
         if (it != _eventTopics.end()) {
-            ghoul::Dictionary params = toParameter(*e);
+            const ghoul::Dictionary params = toParameter(*e);
             for (const TopicInfo& ti : it->second) {
                 ti.callback(params);
             }

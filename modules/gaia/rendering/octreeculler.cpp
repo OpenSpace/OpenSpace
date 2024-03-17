@@ -73,8 +73,9 @@ void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners,
     _nodeBounds = globebrowsing::AABB3();
 
     for (size_t i = 0; i < 8; i++) {
-        glm::dvec4 cornerClippingSpace = mvp * corners[i];
-        glm::dvec4 ndc = (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
+        const glm::dvec4 cornerClippingSpace = mvp * corners[i];
+        const glm::dvec4 ndc =
+            (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
         expand(_nodeBounds, glm::dvec3(ndc));
     }
 }

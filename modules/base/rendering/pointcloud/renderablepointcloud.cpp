@@ -1030,7 +1030,6 @@ void RenderablePointCloud::updateBufferData() {
             attibutesPerPoint * sizeof(float),
             reinterpret_cast<void*>(attributeOffset * sizeof(float))
         );
-        attributeOffset += 1;
     }
 
     glBindVertexArray(0);

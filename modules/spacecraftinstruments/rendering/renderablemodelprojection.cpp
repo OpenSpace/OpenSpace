@@ -118,7 +118,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::filesystem::path file = absPath(p.geometryFile.string());
+    const std::filesystem::path file = absPath(p.geometryFile.string());
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         file.string(),
         ghoul::io::ModelReader::ForceRenderInvisible::No,
@@ -129,9 +129,9 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 
     if (p.modelScale.has_value()) {
         if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
-            Parameters::ScaleUnit scaleUnit =
+            const Parameters::ScaleUnit scaleUnit =
                 std::get<Parameters::ScaleUnit>(*p.modelScale);
-            DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
+            const DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
             _modelScale = toMeter(distanceUnit);
         }
         else if (std::holds_alternative<double>(*p.modelScale)) {
@@ -231,15 +231,15 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
         _projectionComponent.clearAllProjections();
     }
 
-    glm::vec3 up = data.camera.lookUpVectorCameraSpace();
+    const glm::vec3 up = data.camera.lookUpVectorCameraSpace();
 
     if (_shouldCapture && _projectionComponent.doesPerformProjection()) {
         for (const Image& i : _imageTimes) {
             try {
-                glm::mat4 projectorMatrix = attitudeParameters(i.timeRange.start, up);
-                std::shared_ptr<ghoul::opengl::Texture> t =
+                const glm::mat4 projectorMat = attitudeParameters(i.timeRange.start, up);
+                const std::shared_ptr<ghoul::opengl::Texture> t =
                     _projectionComponent.loadProjectionTexture(i.path, i.isPlaceholder);
-                imageProjectGPU(*t, projectorMatrix);
+                imageProjectGPU(*t, projectorMat);
             }
             catch (const SpiceManager::SpiceException& e) {
                 LERRORC(e.component, e.what());
@@ -431,12 +431,12 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
         time
     );
 
-    SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
+    const SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
         _projectionComponent.instrumentId()
     );
     _boresight = std::move(res.boresightVector);
 
-    double lightTime;
+    double lightTime = 0.0;
     const glm::dvec3 p = SpiceManager::ref().targetPosition(
         _projectionComponent.projectorId(),
         _projectionComponent.projecteeId(),

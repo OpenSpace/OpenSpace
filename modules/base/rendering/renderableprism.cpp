@@ -231,8 +231,8 @@ void RenderablePrism::updateVertexData() {
 
     // Put base vertices into array
     for (int j = 0; j < _nShapeSegments; j++) {
-        float ux = unitVertices[j].xyz[0];
-        float uy = unitVertices[j].xyz[1];
+        const float ux = unitVertices[j].xyz[0];
+        const float uy = unitVertices[j].xyz[1];
 
         _vertexArray.push_back(ux * _baseRadius); // x
         _vertexArray.push_back(uy * _baseRadius); // y
@@ -241,8 +241,8 @@ void RenderablePrism::updateVertexData() {
 
     // Put top shape vertices into array
     for (int j = 0; j < _nShapeSegments; j++) {
-        float ux = unitVertices[j].xyz[0];
-        float uy = unitVertices[j].xyz[1];
+        const float ux = unitVertices[j].xyz[0];
+        const float uy = unitVertices[j].xyz[1];
 
         _vertexArray.push_back(ux * _radius); // x
         _vertexArray.push_back(uy * _radius); // y
@@ -264,8 +264,8 @@ void RenderablePrism::updateVertexData() {
     }
     else {
         for (int j = 0; j < _nLines; j++) {
-            float ux = unitVerticesLines[j].xyz[0];
-            float uy = unitVerticesLines[j].xyz[1];
+            const float ux = unitVerticesLines[j].xyz[0];
+            const float uy = unitVerticesLines[j].xyz[1];
 
             // Base
             _vertexArray.push_back(ux * _baseRadius); // x

@@ -150,12 +150,22 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString(
 }
 
 SpiceManager::SpiceManager() {
+    // The third parameter for the erract_c function is a SpiceChar*, not ConstSpiceChar*
+    // so we have to do this weird memory copying trick
+    std::array<char, 7> buffer;
+
     // Set the SPICE library to not exit the program if an error occurs
-    erract_c("SET", 0, const_cast<char*>("REPORT"));
+    std::memset(buffer.data(), 0, buffer.size());
+    std::strcpy(buffer.data(), "REPORT");
+    erract_c("SET", 0, buffer.data());
+
     // But we do not want SPICE to print the errors, we will fetch them ourselves
-    errprt_c("SET", 0, const_cast<char*>("NONE"));
+    std::memset(buffer.data(), 0, buffer.size());
+    std::strcpy(buffer.data(), "NONE");
+    errprt_c("SET", 0, buffer.data());
 
     loadLeapSecondsSpiceKernel();
+    loadGeophysicalConstantsKernel();
 }
 
 SpiceManager::~SpiceManager() {
@@ -193,8 +203,9 @@ SpiceManager& SpiceManager::ref() {
 // If an error occurred, true is returned, otherwise, false
 void throwSpiceError(const std::string& errorMessage) {
     if (openspace::SpiceManager::ref().exceptionHandling()) {
-        char buffer[SpiceErrorBufferSize];
-        getmsg_c("LONG", SpiceErrorBufferSize, buffer);
+        std::string buffer;
+        buffer.resize(SpiceErrorBufferSize);
+        getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
         reset_c();
         throw openspace::SpiceManager::SpiceException(errorMessage + ": " + buffer);
     }
@@ -217,7 +228,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         )
     );
 
-    std::filesystem::path path = absPath(std::move(filePath));
+    const std::filesystem::path path = absPath(std::move(filePath));
     const auto it = std::find_if(
         _loadedKernels.begin(),
         _loadedKernels.end(),
@@ -232,9 +243,9 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     // We need to set the current directory as meta-kernels are usually defined relative
     // to the directory they reside in. The directory change is not necessary for regular
     // kernels
-    std::filesystem::path currentDirectory = std::filesystem::current_path();
+    const std::filesystem::path currentDirectory = std::filesystem::current_path();
 
-    std::filesystem::path p = path.parent_path();
+    const std::filesystem::path p = path.parent_path();
     std::filesystem::current_path(p);
 
     LINFO(fmt::format("Loading SPICE kernel '{}'", path));
@@ -248,7 +259,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         throwSpiceError("Kernel loading");
     }
 
-    std::filesystem::path fileExtension = path.extension();
+    const std::filesystem::path fileExtension = path.extension();
     if (fileExtension == ".bc" || fileExtension == ".BC") {
         findCkCoverage(path.string()); // binary ck kernel
     }
@@ -256,7 +267,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         findSpkCoverage(path.string()); // binary spk kernel
     }
 
-    KernelHandle kernelId = ++_lastAssignedKernel;
+    const KernelHandle kernelId = ++_lastAssignedKernel;
     ghoul_assert(kernelId != 0, "Kernel Handle wrapped around to 0");
     _loadedKernels.push_back({ path.string(), kernelId, 1 });
     return kernelId;
@@ -291,7 +302,7 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
 void SpiceManager::unloadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty filename");
 
-    std::filesystem::path path = absPath(std::move(filePath));
+    const std::filesystem::path path = absPath(std::move(filePath));
 
     const auto it = std::find_if(
         _loadedKernels.begin(),
@@ -415,8 +426,7 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
 {
     std::vector<std::pair<int, std::string>> bodies;
 
-    constexpr int Frnmln = 33;
-    static SpiceInt idsetBuffer[SPICE_CELL_CTRLSZ + 8192];
+    static std::array<SpiceInt, SPICE_CELL_CTRLSZ + 8192> idsetBuffer;
     static SpiceCell idset = {
         SPICE_INT,
         0,
@@ -425,11 +435,12 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
         SPICETRUE,
         SPICEFALSE,
         SPICEFALSE,
-        &idsetBuffer,
-        &(idsetBuffer[SPICE_CELL_CTRLSZ])
+        idsetBuffer.data(),
+        idsetBuffer.data() + SPICE_CELL_CTRLSZ
     };
 
-    SpiceChar frname[Frnmln];
+    constexpr int Frnmln = 33;
+    std::array<SpiceChar, Frnmln> frname;
 
     for (SpiceInt i = 1; i <= 6; i++) {
         if (i < 6) {
@@ -453,13 +464,11 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
             frmnam_c(
                 (reinterpret_cast<SpiceInt*>(idset.data))[j],
                 Frnmln,
-                frname
+                frname.data()
             );
-            bodies.push_back(
-                std::make_pair(
-                    static_cast<long>(reinterpret_cast<SpiceInt*>(idset.data)[j]),
-                    frname
-                )
+            bodies.emplace_back(
+                static_cast<long>(reinterpret_cast<SpiceInt*>(idset.data)[j]),
+                frname.data()
             );
         }
     }
@@ -474,15 +483,15 @@ bool SpiceManager::hasValue(const std::string& body, const std::string& item) co
     ghoul_assert(!body.empty(), "Empty body");
     ghoul_assert(!item.empty(), "Empty item");
 
-    int id = naifId(body);
+    const int id = naifId(body);
     return hasValue(id, item);
 }
 
 int SpiceManager::naifId(const std::string& body) const {
     ghoul_assert(!body.empty(), "Empty body");
 
-    SpiceBoolean success;
-    SpiceInt id;
+    SpiceBoolean success = SPICEFALSE;
+    SpiceInt id = 0;
     bods2c_c(body.c_str(), &id, &success);
     if (!success && _useExceptions) {
         throw SpiceException(fmt::format("Could not find NAIF ID of body '{}'", body));
@@ -493,8 +502,8 @@ int SpiceManager::naifId(const std::string& body) const {
 bool SpiceManager::hasNaifId(const std::string& body) const {
     ghoul_assert(!body.empty(), "Empty body");
 
-    SpiceBoolean success;
-    SpiceInt id;
+    SpiceBoolean success = SPICEFALSE;
+    SpiceInt id = 0;
     bods2c_c(body.c_str(), &id, &success);
     reset_c();
     return success;
@@ -503,7 +512,7 @@ bool SpiceManager::hasNaifId(const std::string& body) const {
 int SpiceManager::frameId(const std::string& frame) const {
     ghoul_assert(!frame.empty(), "Empty frame");
 
-    SpiceInt id;
+    SpiceInt id = 0;
     namfrm_c(frame.c_str(), &id);
     if (id == 0 && _useExceptions) {
         throw SpiceException(fmt::format("Could not find NAIF ID of frame '{}'", frame));
@@ -514,7 +523,7 @@ int SpiceManager::frameId(const std::string& frame) const {
 bool SpiceManager::hasFrameId(const std::string& frame) const {
     ghoul_assert(!frame.empty(), "Empty frame");
 
-    SpiceInt id;
+    SpiceInt id = 0;
     namfrm_c(frame.c_str(), &id);
     return id != 0;
 }
@@ -526,7 +535,7 @@ void getValueInternal(const std::string& body, const std::string& value, int siz
     ghoul_assert(!value.empty(), "Empty value");
     ghoul_assert(v != nullptr, "Empty value pointer");
 
-    SpiceInt n;
+    SpiceInt n = 0;
     bodvrd_c(body.c_str(), value.c_str(), size, &n, v);
 
     if (failed_c()) {
@@ -568,11 +577,13 @@ void SpiceManager::getValue(const std::string& body, const std::string& value,
     getValueInternal(body, value, static_cast<int>(v.size()), v.data());
 }
 
-double SpiceManager::spacecraftClockToET(const std::string& craft, double craftTicks) {
+double SpiceManager::spacecraftClockToET(const std::string& craft,
+                                         double craftTicks) const
+{
     ghoul_assert(!craft.empty(), "Empty craft");
 
-    int craftId = naifId(craft);
-    double et;
+    const int craftId = naifId(craft);
+    double et = 0.0;
     sct2e_c(craftId, craftTicks, &et);
     if (failed_c()) {
         throwSpiceError(fmt::format(
@@ -589,7 +600,7 @@ double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const 
 }
 
 double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
-    double et;
+    double et = 0.0;
     str2et_c(timeString, &et);
     if (failed_c()) {
         throwSpiceError(fmt::format("Error converting date '{}'", timeString));
@@ -600,10 +611,10 @@ double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
 std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime, const char* format)
 {
     constexpr int BufferSize = 128;
-    char Buffer[BufferSize];
-    std::memset(Buffer, char(0), BufferSize);
+    std::array<char, BufferSize> Buffer;
+    std::memset(Buffer.data(), char(0), BufferSize);
 
-    timout_c(ephemerisTime, format, BufferSize, Buffer);
+    timout_c(ephemerisTime, format, BufferSize, Buffer.data());
     if (failed_c()) {
         throwSpiceError(fmt::format(
             "Error converting ephemeris time '{}' to date with format '{}'",
@@ -613,11 +624,11 @@ std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime, const char
     if (Buffer[0] == '*') {
         // The conversion failed and we need to use et2utc
         constexpr int SecondsPrecision = 3;
-        et2utc_c(ephemerisTime, "C", SecondsPrecision, BufferSize, Buffer);
+        et2utc_c(ephemerisTime, "C", SecondsPrecision, BufferSize, Buffer.data());
     }
 
 
-    return std::string(Buffer);
+    return std::string(Buffer.data());
 }
 
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,
@@ -630,8 +641,8 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
     ghoul_assert(!observer.empty(), "Observer is not empty");
     ghoul_assert(!referenceFrame.empty(), "Reference frame is not empty");
 
-    bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
-    bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
+    const bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
+    const bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
     if (!targetHasCoverage && !observerHasCoverage) {
         if (_useExceptions) {
             throw SpiceException(
@@ -665,10 +676,12 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         return position;
     }
     else if (targetHasCoverage) {
-        // observer has no coverage
+        // observer has no coverage, so we try getting position from the reverse
+        const std::string& invObserver = target;
+        const std::string& invTarget = observer;
         return getEstimatedPosition(
-            observer,
-            target,
+            invTarget,
+            invObserver,
             referenceFrame,
             aberrationCorrection,
             ephemerisTime,
@@ -754,7 +767,7 @@ SpiceManager::SurfaceInterceptResult SpiceManager::surfaceIntercept(
 
     SurfaceInterceptResult result;
 
-    SpiceBoolean found;
+    SpiceBoolean found = SPICEFALSE;
     sincpt_c(ComputationMethod.c_str(),
         target.c_str(),
         ephemerisTime,
@@ -795,8 +808,9 @@ bool SpiceManager::isTargetInFieldOfView(const std::string& target,
     ghoul_assert(!referenceFrame.empty(), "Reference frame must not be empty");
     ghoul_assert(!instrument.empty(), "Instrument must not be empty");
 
-    int visible;
-    fovtrg_c(instrument.c_str(),
+    int visible = 0;
+    fovtrg_c(
+        instrument.c_str(),
         target.c_str(),
         toString(method),
         referenceFrame.c_str(),
@@ -897,7 +911,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     if (failed_c()) {
         throwSpiceError("");
     }
-    SpiceBoolean success = !(failed_c());
+    const SpiceBoolean success = !(failed_c());
     reset_c();
     if (!success) {
         result = getEstimatedTransformMatrix(
@@ -950,7 +964,7 @@ SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const 
 
     FieldOfViewResult res;
 
-    SpiceInt nrReturned;
+    SpiceInt nrReturned = 0;
     double boundsArr[MaxBoundsSize][3];
     char fovShapeBuffer[BufferSize];
     char frameNameBuffer[BufferSize];
@@ -977,7 +991,7 @@ SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const 
         res.bounds.emplace_back(boundsArr[i][0], boundsArr[i][1], boundsArr[i][2]);
     }
 
-    std::string shape = std::string(fovShapeBuffer);
+    const std::string shape = std::string(fovShapeBuffer);
     static const std::map<std::string, FieldOfViewResult::Shape> Map = {
         { "POLYGON", FieldOfViewResult::Shape::Polygon },
         { "RECTANGLE" , FieldOfViewResult::Shape::Rectangle },
@@ -1080,7 +1094,8 @@ void SpiceManager::findCkCoverage(const std::string& path) {
 
         for (SpiceInt j = 0; j < numberOfIntervals; j++) {
             // Get the endpoints of the jth interval.
-            SpiceDouble b, e;
+            SpiceDouble b = 0.0;
+            SpiceDouble e = 0.0;
             wnfetd_c(&cover, j, &b, &e);
             if (failed_c()) {
                 throwSpiceError("Error finding Ck Coverage");
@@ -1139,7 +1154,8 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
 
         for (SpiceInt j = 0; j < numberOfIntervals; j++) {
             //Get the endpoints of the jth interval.
-            SpiceDouble b, e;
+            SpiceDouble b = 0.0;
+            SpiceDouble e = 0.0;
             wnfetd_c(&cover, j, &b, &e);
             if (failed_c()) {
                 throwSpiceError("Error finding Spk coverage");
@@ -1167,7 +1183,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
     ghoul_assert(!referenceFrame.empty(), "Reference frame must not be empty");
     ghoul_assert(target != observer, "Target and observer must be different");
 
-    int targetId = naifId(target);
+    const int targetId = naifId(target);
 
     if (targetId == 0) {
         // SOLAR SYSTEM BARYCENTER special case, no definition in kernels
@@ -1227,8 +1243,8 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
     else {
         // coverage both earlier and later, interpolate these positions
         glm::dvec3 posEarlier = glm::dvec3(0.0);
-        double ltEarlier;
-        double timeEarlier = *std::prev((coveredTimes.lower_bound(ephemerisTime)));
+        double ltEarlier = 0.0;
+        const double timeEarlier = *std::prev((coveredTimes.lower_bound(ephemerisTime)));
         spkpos_c(
             target.c_str(),
             timeEarlier,
@@ -1240,8 +1256,8 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
         );
 
         glm::dvec3 posLater = glm::dvec3(0.0);
-        double ltLater;
-        double timeLater = *(coveredTimes.upper_bound(ephemerisTime));
+        double ltLater = 0.0;
+        const double timeLater = *(coveredTimes.upper_bound(ephemerisTime));
         spkpos_c(
             target.c_str(),
             timeLater,
@@ -1322,8 +1338,8 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
     }
     else {
         // coverage both earlier and later, interpolate these transformations
-        double earlier = *std::prev((coveredTimes.lower_bound(time)));
-        double later = *(coveredTimes.upper_bound(time));
+        const double earlier = *std::prev((coveredTimes.lower_bound(time)));
+        const double later = *(coveredTimes.upper_bound(time));
 
         glm::dmat3 earlierTransform = glm::dmat3(1.0);
         pxform_c(
@@ -1515,14 +1531,148 @@ DELTET/DELTA_AT        = ( 10,   @1972-JAN-1
 
 
 )";
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "naif0012.tls";
+const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "naif0012.tls";
     {
         std::ofstream f(file);
         f << Naif00012tlsSource;
     }
     loadKernel(file.string());
     std::filesystem::remove(file);
+}
+
+void SpiceManager::loadGeophysicalConstantsKernel() {
+    constexpr std::string_view GeoPhysicalConstantsKernelSource = R"(
+KPL/PCK
+
+      The SPK creations applications (mkspk, mkspk_c) require the data in
+      this kernel to produce Type 10 SPK segments based upon the Two-Line
+      element sets available from NORAD/SPACETRACK. The data applies ONLY
+      to the Two-Line Element sets and only to the SGP4 implementations
+      included in the SPICE library [1][2]. The SPK application copies 
+      this data to the constants partition of the Type 10 segment, so the
+      user has no need for the kernel after creation of the corresponding
+      SPK.
+
+      Bill Taber (JPL)
+      Edward Wright (JPL)
+
+      The assigned values are taken from the Spacetrack #3 report, referred
+      to as WGS721 in Vallado [2]. It is possible to edit this file
+      to use the high accuracy WGS-72 values (WGS72) or the WGS-84
+      values (WGS84). The KE parameter value for WGS72 and WGS84
+      is calculated from the MU and ER values. The lists include MU only
+      for the calculation of KE.
+
+      MU, the standard gravitational parameter, in cubic kilometer per
+      second squared.
+
+      WGS721 (STR#3 values) [1]
+
+         ER =    6378.135
+
+         J2   =    0.001082616
+         J3   =   -0.00000253881
+         J4   =   -0.00000165597
+
+         KE   =    0.0743669161
+
+
+      WGS72 [2]
+
+         MU   =  398600.8
+         ER   =  6378.135
+
+         J2   =   0.001082616
+         J3   =  -0.00000253881
+         J4   =  -0.00000165597
+
+         KE   =  60.0D0/DSQRT(ER**3/MU)
+              =  0.074366916133173
+
+
+      WGS84 [2]
+
+         MU   =  398600.5
+         ER   =  6378.137
+
+         J2   =   0.00108262998905
+         J3   =  -0.00000253215306
+         J4   =  -0.00000161098761
+
+         KE   =  60.0D0/DSQRT(ER**3/MU)
+              =  0.074366853168714
+
+
+      The BODY399_Jn values are un-normalized zonal harmonic values
+      for the earth. These numbers are dimensionless.
+
+\begindata
+
+      BODY399_J2 =    1.082616D-3
+      BODY399_J3 =   -2.53881D-6
+      BODY399_J4 =   -1.65597D-6
+
+\begintext
+
+      The next item is the square root of GM for the earth given
+      in units of earth-radii**1.5/Minute
+
+\begindata
+
+      BODY399_KE =    7.43669161D-2
+
+\begintext
+
+      The next two items define the top and bottom of the atmospheric
+      drag model, distance above the surface in kilometers, used by
+      the type 10 ephemeris type.
+
+\begindata
+
+      BODY399_QO =  120.0D0
+      BODY399_SO =   78.0D0
+
+\begintext
+
+      The equatorial radius of the earth in kilometers as used by
+      the TLE propagator.
+
+\begindata
+
+      BODY399_ER = 6378.135D0
+
+\begintext
+
+      The value of AE is the number of distance units per earth
+      radii used by the NORAD state propagation software. Don't
+      change this value.
+
+\begindata
+
+      BODY399_AE = 1.0D0
+
+\begintext
+
+References:
+
+   [1] Hoots, F. R., and Roehrich, R., l. 1980. "Spacetrack Report #3, Models
+       for Propagation of the NORAD Element Sets." U.S. Air Force, CO.
+
+   [2] Vallado, David, Crawford, Paul, Hujsak, Richard,
+       and Kelso, T.S. 2006. Revisiting Spacetrack Report #3. Paper
+       AIAA 2006-6753 presented at the AIAA/AAS Astrodynamics
+       Specialist Conference, August 21-24, 2006. Keystone, CO.
+)";
+
+      std::filesystem::path path = std::filesystem::temp_directory_path();
+      std::filesystem::path file = path / "geophysical.ker";
+      {
+          std::ofstream f(file);
+          f << GeoPhysicalConstantsKernelSource;
+      }
+      loadKernel(file.string());
+      std::filesystem::remove(file);
 }
 
 void SpiceManager::setExceptionHandling(UseException useException) {
@@ -1543,6 +1693,7 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             codegen::lua::SpiceBodies,
             codegen::lua::RotationMatrix,
             codegen::lua::Position,
+            codegen::lua::ConvertTLEtoSPK
         }
     };
 }

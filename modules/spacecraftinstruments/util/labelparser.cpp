@@ -45,23 +45,25 @@ namespace openspace {
 LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictionary)
     : _fileName(std::move(fileName))
 {
+    using ghoul::Dictionary;
+
     // get the different instrument types
     // for each decoder (assuming might have more if hong makes changes)
-    for (std::string_view decoderStr : dictionary.keys()) {
-        if (!dictionary.hasValue<ghoul::Dictionary>(decoderStr)) {
+    for (const std::string_view decoderStr : dictionary.keys()) {
+        if (!dictionary.hasValue<Dictionary>(decoderStr)) {
             continue;
         }
 
-        ghoul::Dictionary typeDict = dictionary.value<ghoul::Dictionary>(decoderStr);
+        const Dictionary typeDict = dictionary.value<Dictionary>(decoderStr);
 
         // create dictionary containing all {playbookKeys , spice IDs}
         if (decoderStr == "Instrument") {
             // for each playbook call -> create a Decoder object
-            for (std::string_view key : typeDict.keys()) {
-                if (!typeDict.hasValue<ghoul::Dictionary>(key)) {
+            for (const std::string_view key : typeDict.keys()) {
+                if (!typeDict.hasValue<Dictionary>(key)) {
                     continue;
                 }
-                ghoul::Dictionary decoderDict = typeDict.value<ghoul::Dictionary>(key);
+                const Dictionary decoderDict = typeDict.value<Dictionary>(key);
 
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
                     decoderDict,
@@ -73,33 +75,32 @@ LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictiona
             }
         }
         if (decoderStr == "Target") {
-            if (!typeDict.hasValue<ghoul::Dictionary>(keySpecs) ||
-                !typeDict.hasValue<ghoul::Dictionary>(keySpecs))
+            if (!typeDict.hasValue<Dictionary>(keySpecs) ||
+                !typeDict.hasValue<Dictionary>(keySpecs))
             {
                 continue;
             }
 
-            ghoul::Dictionary specsOfInterestDict =
-                typeDict.value<ghoul::Dictionary>(keySpecs);
+            const Dictionary specsOfInterestDict = typeDict.value<Dictionary>(keySpecs);
 
             _specsOfInterest.resize(specsOfInterestDict.size());
             for (size_t n = 0; n < _specsOfInterest.size(); ++n) {
-                std::string key = std::to_string(n + 1);
+                const std::string key = std::to_string(n + 1);
                 if (specsOfInterestDict.hasValue<std::string>(key)) {
                     std::string readMe = specsOfInterestDict.value<std::string>(key);
-                    _specsOfInterest[n] = readMe;
+                    _specsOfInterest[n] = std::move(readMe);
                 }
             }
-            ghoul::Dictionary convertDict = typeDict.value<ghoul::Dictionary>(keyConvert);
+            const Dictionary convertDict = typeDict.value<Dictionary>(keyConvert);
 
-            for (std::string_view key : convertDict.keys()) {
-                if (!convertDict.hasValue<ghoul::Dictionary>(key)) {
+            for (const std::string_view key : convertDict.keys()) {
+                if (!convertDict.hasValue<Dictionary>(key)) {
                     continue;
                 }
 
-                ghoul::Dictionary itemDict = convertDict.value<ghoul::Dictionary>(key);
+                const Dictionary item = convertDict.value<Dictionary>(key);
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
-                    itemDict,
+                    item,
                     std::string(decoderStr)
                 );
                 // insert decoder to map - this will be used in the parser to determine
@@ -111,10 +112,12 @@ LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictiona
 }
 
 std::string LabelParser::decode(const std::string& line) {
-    for (std::pair<const std::string, std::unique_ptr<Decoder>>& key : _fileTranslation) {
-        std::size_t value = line.find(key.first);
+    using K = std::string;
+    using V = std::unique_ptr<Decoder>;
+    for (const std::pair<const K, V>& key : _fileTranslation) {
+        const size_t value = line.find(key.first);
         if (value != std::string::npos) {
-            std::string toTranslate = line.substr(value);
+            const std::string toTranslate = line.substr(value);
             return _fileTranslation[toTranslate]->translations()[0];
         }
     }
@@ -125,7 +128,7 @@ std::string LabelParser::encode(const std::string& line) const {
     using K = std::string;
     using V = std::unique_ptr<Decoder>;
     for (const std::pair<const K, V>& key : _fileTranslation) {
-        std::size_t value = line.find(key.first);
+        const size_t value = line.find(key.first);
         if (value != std::string::npos) {
             return line.substr(value);
         }
@@ -149,12 +152,12 @@ bool LabelParser::create() {
 
         std::string path = e.path().string();
 
-        size_t position = path.find_last_of('.') + 1;
+        const size_t position = path.find_last_of('.') + 1;
         if (position == 0 || position == std::string::npos) {
             continue;
         }
 
-        std::filesystem::path extension = std::filesystem::path(path).extension();
+        const std::filesystem::path extension = std::filesystem::path(path).extension();
         if (extension != ".lbl" && extension != ".LBL") {
             continue;
         }
@@ -261,14 +264,14 @@ bool LabelParser::create() {
                 count = 0;
 
                 using namespace std::literals;
-                std::string p = path.substr(0, path.size() - ("lbl"s).size());
+                const std::string p = path.substr(0, path.size() - ("lbl"s).size());
                 for (const std::string& ext : extensions) {
-                    std::string imagePath = p + ext;
+                    const std::string imagePath = p + ext;
                     if (std::filesystem::is_regular_file(imagePath)) {
                         std::vector<std::string> spiceInstrument;
                         spiceInstrument.push_back(_instrumentID);
 
-                        Image image = {
+                        const Image image = {
                             .timeRange = TimeRange(startTime, stopTime),
                             .path = imagePath,
                             .activeInstruments = spiceInstrument,

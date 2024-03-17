@@ -209,7 +209,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
 {
     const Parameters p = codegen::bake<Parameters>(layerDict);
 
-    layers::Layer::ID typeID =
+    const layers::Layer::ID typeID =
         p.type.has_value() ?
         ghoul::from_string<layers::Layer::ID>(*p.type) :
         layers::Layer::ID::DefaultTileProvider;
@@ -457,7 +457,7 @@ void Layer::update() {
 glm::vec2 Layer::tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
                                                const glm::vec2& tileUV)
 {
-    glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
+    const glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
     return uv;
 }
 
@@ -481,10 +481,10 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
                 static_cast<int>(_layerGroupId)
             );
             if (initDict.hasKey(KeyName) && initDict.hasValue<std::string>(KeyName)) {
-                std::string name = initDict.value<std::string>(KeyName);
+                const std::string name = initDict.value<std::string>(KeyName);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
-            _tileProvider = TileProvider::createFromDictionary(id, std::move(initDict));
+            _tileProvider = TileProvider::createFromDictionary(id, initDict);
             break;
         case layers::Layer::ID::SolidColor:
             if (initDict.hasValue<glm::dvec3>(ColorInfo.identifier)) {

@@ -60,7 +60,9 @@ public:
 
     // Rotation, animation, placement
     void lookAtTarget(const std::string& id);
-    void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
+
+    // Pass in galactic coordinate
+    void startRotatingCamera(const glm::dvec3& endAnimation);
     double targetAnimationSpeed() const;
     double browserAnimationSpeed() const;
     double spaceCraftAnimationTime() const;

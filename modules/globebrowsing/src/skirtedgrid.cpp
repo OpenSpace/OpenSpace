@@ -117,7 +117,7 @@ void SkirtedGrid::initializeGL() {
     std::vector<GLushort> elementData = createElements(xSegments, ySegments);
 
     struct Vertex {
-        GLfloat texture[2];
+        std::array<GLfloat, 2> texture;
     };
 
 

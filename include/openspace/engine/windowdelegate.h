@@ -122,8 +122,8 @@ struct WindowDelegate {
 
     int (*currentNode)() = []() { return 0; };
 
-    glm::vec2 (*mousePositionViewportRelative)(glm::vec2 mousePosition) =
-        [](glm::vec2) { return glm::vec2(0); };
+    glm::vec2 (*mousePositionViewportRelative)(const glm::vec2& mousePosition) =
+        [](const glm::vec2&) { return glm::vec2(0); };
 };
 
 } // namespace openspace

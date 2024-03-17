@@ -99,7 +99,6 @@ void MarkNodesDialog::listItemAdded() {
         return;
     }
 
-    std::string itemToAdd = _newNode->text().toStdString();
     QListWidgetItem* item = new QListWidgetItem(_newNode->text());
     _list->addItem(item);
 
@@ -112,14 +111,14 @@ void MarkNodesDialog::listItemAdded() {
 
 void MarkNodesDialog::listItemRemove() {
     QListWidgetItem* item = _list->currentItem();
-    int index = _list->row(item);
+    const int index = _list->row(item);
     _list->takeItem(index);
 }
 
 void MarkNodesDialog::parseSelections() {
     std::vector<std::string> nodes;
     for (int i = 0; i < _list->count(); i++) {
-        QString node = _list->item(i)->text();
+        const QString node = _list->item(i)->text();
         nodes.push_back(node.toStdString());
     }
     *_markedNodes = std::move(nodes);

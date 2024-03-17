@@ -211,10 +211,10 @@ SkyBrowserModule::SkyBrowserModule()
         constexpr double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
 
         // Disable browser and targets when camera is outside of solar system
-        bool camWasInSolarSystem = _isCameraInSolarSystem;
-        glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+        const bool camWasInSolarSystem = _isCameraInSolarSystem;
+        const glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
         _isCameraInSolarSystem = glm::length(cameraPos) < SolarSystemRadius;
-        bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
+        const bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
 
         // Visualization mode changed. Start fading in/out
         if (vizModeChanged) {
@@ -444,18 +444,18 @@ TargetBrowserPair* SkyBrowserModule::pair(std::string_view id) const {
     return found;
 }
 
-void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
+void SkyBrowserModule::startRotatingCamera(const glm::dvec3& endAnimation) {
     // Save coordinates to rotate to in galactic world coordinates
-    glm::dvec3 start = skybrowser::cameraDirectionGalactic();
-    double angle = skybrowser::angleBetweenVectors(start, endAnimation);
-    double time = angle / _cameraRotationSpeed;
+    const glm::dvec3 start = skybrowser::cameraDirectionGalactic();
+    const double angle = skybrowser::angleBetweenVectors(start, endAnimation);
+    const double time = angle / _cameraRotationSpeed;
     _cameraRotation = skybrowser::Animation(start, endAnimation, time);
     _cameraRotation.start();
 }
 
 void SkyBrowserModule::incrementallyRotateCamera() {
     if (_cameraRotation.isAnimating()) {
-        glm::dmat4 rotMat = _cameraRotation.rotationMatrix();
+        const glm::dmat4 rotMat = _cameraRotation.rotationMatrix();
         global::navigationHandler->camera()->rotate(glm::quat_cast(rotMat));
     }
 }

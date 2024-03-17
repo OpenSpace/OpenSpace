@@ -581,7 +581,7 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
 
     std::stringstream ss;
     ss << "opacity_" << getId();
-    program->setUniform(ss.str(), visible ? 1.0f : 0.0f);
+    program->setUniform(ss.str(), visible ? 1.f : 0.f);
 
     ss.str(std::string());
     ss << "stepSizeCoefficient_" << getId();
