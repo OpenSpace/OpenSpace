@@ -42,19 +42,15 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-begin_dependency("FMOD")
-add_library(fmod SHARED IMPORTED)
-target_include_directories(fmod SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmod/core/inc)
-set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmod/core/lib/fmod_vc.lib)
-set_target_properties(fmod PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmod/core/lib/fmod.dll)
-set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmod/core/lib/fmodL_vc.lib)
-set_target_properties(fmod PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmod/core/lib/fmodL.dll)
+begin_dependency("SoLoud")
+set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "")
+if (WIN32)
+  set(SOLOUD_BACKEND_WINMM ON CACHE BOOL "")
+endif ()
+add_subdirectory(ext/soloud/contrib)
 
-# target_include_directories(fmod SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmod/studio/inc)
-# set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmod/studio/lib/fmodstudio_vc.lib)
-# set_target_properties(fmod PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmod/studio/lib/fmodstudio.dll)
-# set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmod/studio/lib/fmodstudioL_vc.lib)
-# set_target_properties(fmod PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmod/studio/lib/fmodstudioL.dll)
-
-target_link_libraries(openspace-module-sound PRIVATE fmod)
-end_dependency("FMOD")
+# Unfortunately, the soloud cmake tarket doesn't set the include directories correctly
+target_include_directories(openspace-module-sound SYSTEM PRIVATE ext/soloud/include)
+target_link_libraries(openspace-module-sound PRIVATE soloud)
+set_property(TARGET soloud PROPERTY FOLDER "External")
+end_dependency("SoLoud")

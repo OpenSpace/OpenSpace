@@ -84,22 +84,6 @@ namespace {
 }
 
 /**
- * Sets a state for the specific audio file on whether volume changes should be abruptly
- * `=false` or if they should be ramped over a short time `=true`. The actual volume
- * changes are applied through the `setVolume` function instead.
- *
- * \param handle The handle for which we want to change the volume change behavior
- * \param isRamped If this is `true` later volume changes are ramped over time
- */
-[[codegen::luawrap]] void setVolumeChangeRamped(int handle, bool isRamped) {
-    using namespace openspace;
-    global::moduleEngine->module<SoundModule>()->setVolumeChangeRamped(
-        handle,
-        SoundModule::IsRamped(isRamped)
-    );
-}
-
-/**
  * Sets the volume for the audio file referred to by the provided to the new value. The
  * volume is provided as a number between 0 and 1.
  *
@@ -121,29 +105,6 @@ namespace {
 [[codegen::luawrap]] float volume(int handle) {
     using namespace openspace;
     return global::moduleEngine->module<SoundModule>()->volume(handle);
-}
-
-/**
- * Sets the audio file referred to by the handle to be mute or unmute.
- *
- * \param handle The handle for which we want to change the state of muteness
- * \param isMute If `true` the audio file is muted after this call, if it is `false`, the
- *        audio is playing at the volume set by the last `setVolume` call
- */
-[[codegen::luawrap]] void setMute(int handle, bool isMute) {
-    using namespace openspace;
-    global::moduleEngine->module<SoundModule>()->setMute(
-        handle,
-        SoundModule::IsMute(isMute)
-    );
-}
-
-/**
- * Returns whether the audio referred to by the `handle` is currently muted.
- */
-[[codegen::luawrap]] bool isMute(int handle) {
-    using namespace openspace;
-    return global::moduleEngine->module<SoundModule>()->isMute(handle);
 }
 
 /**

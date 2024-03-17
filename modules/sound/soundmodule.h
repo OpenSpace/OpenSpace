@@ -31,11 +31,10 @@
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/misc/boolean.h>
 
-namespace FMOD {
-    class Channel;
-    class Sound;
-    class System;
-} // namespace FMOD
+namespace SoLoud {
+    class Soloud;
+    class Wav;
+} // namespace SoLoud
 
 namespace openspace {
 
@@ -44,7 +43,7 @@ public:
     constexpr static const char* Name = "Sound";
 
     SoundModule();
-    ~SoundModule() override = default;
+    ~SoundModule() override;
     std::vector<documentation::Documentation> documentations() const override;
 
     scripting::LuaLibrary luaLibrary() const override;
@@ -54,18 +53,11 @@ public:
     void stopAudio(int handle);
     bool isPlaying(int handle) const;
 
-    void stopAll() const;
+    void stopAll();
     std::vector<int> currentlyPlaying() const;
-
-    BooleanType(IsRamped);
-    void setVolumeChangeRamped(int handle, IsRamped isRamped) const;
 
     void setVolume(int handle, float volume) const;
     float volume(int handle) const;
-
-    BooleanType(IsMute);
-    void setMute(int handle, IsMute mute) const;
-    bool isMute(int handle) const;
 
     std::vector<std::string> drivers() const;
     void setDriver(int index) const;
@@ -74,13 +66,8 @@ private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitializeGL() override;
 
-    FMOD::System* _system = nullptr;
-    struct Info {
-        FMOD::Channel* channel = nullptr;
-        FMOD::Sound* sound = nullptr;
-    };
-    std::map<int, Info> _channels;
-    int _nextHandle = 0;
+    std::unique_ptr<SoLoud::Soloud> _engine = nullptr;
+    std::map<int, std::unique_ptr<SoLoud::Wav>> _sounds;
 };
 
 } // namespace openspace

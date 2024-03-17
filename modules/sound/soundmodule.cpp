@@ -27,10 +27,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <ghoul/logging/logmanager.h>
-#include <fmod.hpp>
-#include <fmod_errors.h>
 
 #include "soundmodule_lua.inl"
+
+#include <soloud.h>
+#include <soloud_wav.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "SoundModule";
@@ -48,202 +49,120 @@ namespace openspace {
 
 SoundModule::SoundModule()
     : OpenSpaceModule(Name)
+    , _engine(std::make_unique<SoLoud::Soloud>())
 {}
+
+SoundModule::~SoundModule() {}
 
 void SoundModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    FMOD_RESULT result = FMOD::System_Create(&_system);
-    if (result != FMOD_OK) {
-        LERROR(fmt::format(
-            "Error creating FMOD with code {}: {}",
-            static_cast<int>(result), FMOD_ErrorString(result)
-        ));
-        return;
-    }
-
+    _engine->init();
+    _engine->setGlobalVolume(1.f);
     const int nChannels = p.maxNumberOfChannels.value_or(128);
-    result = _system->init(nChannels, FMOD_INIT_NORMAL, nullptr);
-    if (result != FMOD_OK) {
-        LERROR(fmt::format(
-            "Error initializing FMOD with code {}: {}",
-            static_cast<int>(result), FMOD_ErrorString(result)
-        ));
-        return;
-    }
-
-    global::callback::postDraw->emplace_back([this]() {
-        _system->update();
-    });
+    _engine->setMaxActiveVoiceCount(static_cast<unsigned int>(nChannels));
 }
 
 void SoundModule::internalDeinitializeGL() {
-    FMOD_RESULT result = _system->release();
-    if (result != FMOD_OK) {
-        LERROR(fmt::format(
-            "Error creating FMOD with code {}: {}",
-            static_cast<int>(result), FMOD_ErrorString(result)
-        ));
-    }
-
-    for (const std::pair<const int, Info>& p : _channels) {
-        stopAudio(p.first);
-    }
-
-    _system = nullptr;
+    _engine->deinit();
+    _engine = nullptr;
 }
 
 int SoundModule::playAudio(std::string path, ShouldLoop loop) {
-    FMOD::Sound* sound = nullptr;
-    // See:
-    // https://www.fmod.com/docs/2.02/api/core-api-common.html#fmod_createsample
-    FMOD_MODE mode = FMOD_DEFAULT | FMOD_CREATESTREAM;
-    if (loop) {
-        mode |= FMOD_LOOP_NORMAL;
-    }
-    
-    FMOD_RESULT result = _system->createSound(path.c_str(), mode, nullptr, &sound);
-    if (result != FMOD_OK) {
+    std::unique_ptr<SoLoud::Wav> sound = std::make_unique<SoLoud::Wav>();
+    SoLoud::result res = sound->load(path.c_str());
+    if (res != 0) {
         throw ghoul::RuntimeError(fmt::format(
             "Error loading sound from {}. {}: {}",
-            path, static_cast<int>(result), FMOD_ErrorString(result)
+            path, static_cast<int>(res), _engine->getErrorString(res)
         ));
     }
 
-    FMOD::Channel* channel = nullptr;
-    result = _system->playSound(sound, nullptr, false, &channel);
-    if (result != FMOD_OK) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Error playing sound from {}. {}: {}",
-            path, static_cast<int>(result), FMOD_ErrorString(result)
-        ));
-    }
+    sound->setLooping(loop);
+    SoLoud::handle handle = _engine->playBackground(*sound);
 
-    const int handle = _nextHandle;
-    _channels[handle] = { .channel = channel, .sound = sound };
-    _nextHandle++;
+    ghoul_assert(
+        std::find(_sounds.begin(), _sounds.end(), handle) == _sounds.end(),
+        "Handle already used"
+    );
+    _sounds[handle] = std::move(sound);
     return handle;
 }
 
 void SoundModule::stopAudio(int handle) {
-    auto it = _channels.find(handle);
-    if (it == _channels.end()) {
+    auto it = std::find(_sounds.begin(), _sounds.end(), handle);
+    if (it == _sounds.end()) {
         throw ghoul::RuntimeError(fmt::format(
             "Handle {} is not a valid sound handle", handle
         ));
     }
-
-    it->second.channel->stop();
-    it->second.sound->release();
+    _sounds.erase(it);
+    _engine->stop(handle);
 }
 
 bool SoundModule::isPlaying(int handle) const {
-    auto it = _channels.find(handle);
-    if (it == _channels.end()) {
+    auto it = std::find(_sounds.begin(), _sounds.end(), handle);
+    if (it == _sounds.end()) {
         throw ghoul::RuntimeError(fmt::format(
             "Handle {} is not a valid sound handle", handle
         ));
     }
 
-    bool result = false;
-    it->second.channel->isPlaying(&result);
-    return result;
+    return _engine->isValidVoiceHandle(handle);
 }
 
-void SoundModule::stopAll() const {
-    std::vector<int> list;
-    for (const std::pair<const int, Info>& p : _channels) {
-        p.second.channel->stop();
-    }
+void SoundModule::stopAll() {
+    _engine->stopAll();
+    _sounds.clear();
 }
 
 std::vector<int> SoundModule::currentlyPlaying() const {
-    std::vector<int> list;
-    for (const std::pair<const int, Info>& p : _channels) {
-        bool result = false;
-        p.second.channel->isPlaying(&result);
-        if (result) {
-            list.push_back(p.first);
-        }
+    std::vector<int> res;
+    res.reserve(_sounds.size());
+    for (const auto& [key, value] : _sounds) {
+        res.push_back(key);
     }
-
-    return list;
-}
-
-void SoundModule::setVolumeChangeRamped(int handle, IsRamped isRamped) const {
-    auto it = _channels.find(handle);
-    if (it == _channels.end()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Handle {} is not a valid sound handle", handle
-        ));
-    }
-
-    it->second.channel->setVolumeRamp(isRamped);
+    return res;
 }
 
 void SoundModule::setVolume(int handle, float volume) const {
-    auto it = _channels.find(handle);
-    if (it == _channels.end()) {
+    auto it = std::find(_sounds.begin(), _sounds.end(), handle);
+    if (it == _sounds.end()) {
         throw ghoul::RuntimeError(fmt::format(
             "Handle {} is not a valid sound handle", handle
         ));
     }
 
-    it->second.channel->setVolume(volume);
+    _engine->setVolume(handle, volume);
 }
 
 float SoundModule::volume(int handle) const {
-    auto it = _channels.find(handle);
-    if (it == _channels.end()) {
+    auto it = std::find(_sounds.begin(), _sounds.end(), handle);
+    if (it == _sounds.end()) {
         throw ghoul::RuntimeError(fmt::format(
             "Handle {} is not a valid sound handle", handle
         ));
     }
 
-    float volume = 0.f;
-    it->second.channel->getVolume(&volume);
+    const float volume = _engine->getVolume(handle);
     return volume;
 }
 
-void SoundModule::setMute(int handle, IsMute mute) const {
-    auto it = _channels.find(handle);
-    if (it == _channels.end()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Handle {} is not a valid sound handle", handle
-        ));
-    }
-
-    it->second.channel->setMute(mute);
-}
-
-bool SoundModule::isMute(int handle) const {
-    auto it = _channels.find(handle);
-    if (it == _channels.end()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Handle {} is not a valid sound handle", handle
-        ));
-    }
-
-    bool isMute = true;
-    it->second.channel->getMute(&isMute);
-    return isMute;
-}
-
 std::vector<std::string> SoundModule::drivers() const {
-    int nDrivers = 0;
-    _system->getNumDrivers(&nDrivers);
+    //int nDrivers = 0;
+    //_system->getNumDrivers(&nDrivers);
 
-    std::vector<std::string> result;
-    for (int i = 0; i < nDrivers; i++) {
-        std::array<char, 512> buffer = {};
-        _system->getDriverInfo(i, buffer.data(), 512, nullptr, nullptr, nullptr, nullptr);
-        result.push_back(buffer.data());
-    }
-    return result;
+    //std::vector<std::string> result;
+    //for (int i = 0; i < nDrivers; i++) {
+    //    std::array<char, 512> buffer = {};
+    //    _system->getDriverInfo(i, buffer.data(), 512, nullptr, nullptr, nullptr, nullptr);
+    //    result.push_back(buffer.data());
+    //}
+    return {};
 }
 
 void SoundModule::setDriver(int index) const {
-    _system->setDriver(index);
+    //_system->setDriver(index);
 }
 
 std::vector<documentation::Documentation> SoundModule::documentations() const {
@@ -259,11 +178,8 @@ scripting::LuaLibrary SoundModule::luaLibrary() const {
             codegen::lua::StopAudio,
             codegen::lua::IsPlaying,
             codegen::lua::CurrentlyPlaying,
-            codegen::lua::SetVolumeChangeRamped,
             codegen::lua::SetVolume,
             codegen::lua::Volume,
-            codegen::lua::SetMute,
-            codegen::lua::IsMute,
             codegen::lua::Drivers,
             codegen::lua::SetDriver
         }

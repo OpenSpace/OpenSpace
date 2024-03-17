@@ -41,3 +41,6 @@
 [submodule "support/doxygen/css"]
 	path = support/doxygen/css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
+[submodule "modules/sound/ext/soloud"]
+	path = modules/sound/ext/soloud
+	url = https://github.com/jarikomppa/soloud.git
