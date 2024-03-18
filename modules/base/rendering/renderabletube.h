@@ -95,6 +95,7 @@ private:
     int currentColorCutplaneParameterIndex() const;
 
     void readDataFile();
+    void loadSelectedSample();
     void initializeTextures();
 
     void createTube();
@@ -153,6 +154,7 @@ private:
     properties::BoolProperty _enableFaceCulling;
     properties::TriggerProperty _jumpToPrevPolygon;
     properties::TriggerProperty _jumpToNextPolygon;
+    properties::StringProperty _selectedSample;
 
     std::vector<float> _lightIntensitiesBuffer;
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
@@ -202,6 +204,7 @@ private:
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
     glm::uvec2 _textureResolution = glm::uvec2(0);
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderCutplane;
+    std::filesystem::path _kernelsDirectory;
 };
 
 } // namespace openspace

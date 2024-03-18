@@ -30,6 +30,7 @@
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/lightsource.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -180,6 +181,20 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SelectedSampleInfo = {
+        "SelectedSample",
+        "Selected Sample",
+        "Select a sample to add as a trail",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo KernelDirectoryInfo = {
+        "KernelDirectory",
+        "Kernel Directory",
+        "The directory where the kernels for the samples in the cut-plane are located",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableTube)]] Parameters {
         // The input file with data for the tube
         std::string file;
@@ -247,6 +262,9 @@ namespace {
 
         // [[codegen::verbatim(ShowAllTubeInfo.description)]]
         std::optional<bool> showAllTube;
+
+        // [[codegen::verbatim(KernelDirectoryInfo.description)]]
+        std::optional<std::string> kernelsDirectory;
     };
 #include "renderabletube_codegen.cpp"
 } // namespace
@@ -329,6 +347,7 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _jumpToPrevPolygon(JumpToPrevPolygonInfo)
     , _jumpToNextPolygon(JumpToNextPolygonInfo)
     , _colorSettingsCutplane(dictionary)
+    , _selectedSample(SelectedSampleInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _dataFile = p.file;
@@ -433,6 +452,14 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
         }
     }
     addPropertySubOwner(_colorSettingsCutplane);
+
+    _selectedSample.onChange([this]() { loadSelectedSample(); });
+    addProperty(_selectedSample);
+
+    if (p.kernelsDirectory.has_value()) {
+        std::filesystem::path folder = absPath(*p.kernelsDirectory);
+        _kernelsDirectory = absPath(folder).string();
+    }
 }
 
 bool RenderableTube::isReady() const {
@@ -828,7 +855,7 @@ void RenderableTube::readDataFile() {
                 float u, v;
                 pt->at("u").get_to(u);
                 pt->at("v").get_to(v);
-                timePolygonPoint.tex = glm::vec2(u, v);
+                timePolygonPoint.tex = glm::vec2(u, 1.0 - v);
             }
             else if (_hasInterpolationTextures) {
                 // Texture exist but no texture coordinates
@@ -841,6 +868,68 @@ void RenderableTube::readDataFile() {
         }
         _data.push_back(timePolygon);
     }
+}
+
+void RenderableTube::loadSelectedSample() {
+    if (_kernelsDirectory.empty()) {
+        LERROR("Cannot add trail without kernel directory");
+        return;
+    }
+
+    // Find information for the scen graph nodes, filenames start from 000001
+    std::string kernelPath = absPath(_kernelsDirectory / fmt::format("{:06}.bsp", std::stoi(_selectedSample.value()) + 1)).string();
+    std::replace(kernelPath.begin(), kernelPath.end(), '\\', '/');
+
+    // Identifier starts at 000001
+    std::string identifier = fmt::format("{:06}_trail", std::stoi(_selectedSample.value()) + 1);
+    // Target starts at 1000000
+    std::string target = fmt::format("1{:06}", std::stoi(_selectedSample.value()));
+
+    std::string start = std::string(Time(_data.front().timestamp).ISO8601());
+    std::string end = std::string(Time(_data.back().timestamp).ISO8601());
+
+    std::string addTrailNodeScript = fmt::format(
+        "openspace.spice.loadKernel('{0}'); "
+        "openspace.addSceneGraphNode({{"
+            "Identifier = '{1}',"
+            "Parent = 'SunCenter',"
+            "Renderable = {{"
+                "Type = 'RenderableTrailTrajectory',"
+                "Translation = {{"
+                    "Type = 'SpiceTranslation',"
+                    "Target = '{2}',"
+                    "Observer = 'SUN'"
+                "}},"
+                "Color = {{ 0.0, 0.5019607843137255, 0.0 }},"
+                "Opacity = 1,"
+                "StartTime = '{3}',"
+                "EndTime = '{4}',"
+                "SampleInterval = 86400,"
+                "LineWidth = 3.5"
+            "}},"
+            "Tag = {{ 'B612' }},"
+            "GUI = {{"
+                "Name = '{1} Trail',"
+                "Path = '/B612/{5}/Trails'"
+            "}}"
+        "}})",
+        kernelPath, identifier, target, start, end, parent()->identifier()
+    );
+
+    // Add trail
+    global::scriptEngine->queueScript(
+        addTrailNodeScript,
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    );
+
+    // Reload GUI
+    std::string reload = "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)";
+    global::scriptEngine->queueScript(
+        reload,
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    );
 }
 
 void RenderableTube::initializeTextures() {
