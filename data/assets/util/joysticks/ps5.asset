@@ -24,7 +24,7 @@ local joystickHelper = asset.require("./joystick_helper")
 -- Seventh parameter can be used to reverse the camera movement for the axis
 -- Eighth parameter is the sensitivity for the axis
 
-local PS4Controller = {
+local PS5Controller = {
   -- Axes
   LeftThumbStick = {
     LeftRight = 0,
@@ -44,24 +44,27 @@ local PS4Controller = {
   Triangle = 3,
   L1 = 4,
   R1 = 5,
+  L2Press = 6,
+  R2Press = 7,
   Share = 8,
   Options = 9,
   PS = 12,
   LeftStickButton = 10,
   RightStickButton = 11,
   TouchPad = 13,
+  Mute = 14,
   DPad = {
-    Up = 14,
-    Right = 15,
-    Down = 16,
-    Left = 17
+    Up = 15,
+    Right = 16,
+    Down = 17,
+    Left = 18
   }
 }
 
 
 asset.onInitialize(function()
-  local controller = PS4Controller
-  local name = "Wireless Controller"
+  local controller = PS5Controller
+  local name = "DualSense Wireless Controller"
 
   local deadzoneJoysticks = 0.2
   local deadzoneTriggers = 0.05
@@ -227,12 +230,22 @@ asset.onInitialize(function()
     ]],
     ""  -- <-- Description of your custom script here (optional)
   )
+
+  -- Microphone mute button
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Mute,
+    [[
+      -- <-- Copy paste your custom script here
+    ]],
+    ""  -- <-- Description of your custom script here (optional)
+  )
 end)
 
 asset.meta = {
-  Name = "Joystick controller: PS4",
+  Name = "Joystick controller: PS5",
   Version = "1.0",
-  Description = "Joystick controller configuration for PS4",
+  Description = "Joystick controller configuration for PS5",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

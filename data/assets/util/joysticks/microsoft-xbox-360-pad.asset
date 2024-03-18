@@ -24,44 +24,42 @@ local joystickHelper = asset.require("./joystick_helper")
 -- Seventh parameter can be used to reverse the camera movement for the axis
 -- Eighth parameter is the sensitivity for the axis
 
-local PS4Controller = {
+local XBoxController = {
   -- Axes
   LeftThumbStick = {
     LeftRight = 0,
     UpDown = 1
   },
   RightThumbStick = {
-    LeftRight = 2,
-    UpDown = 5
+    LeftRight = 3,
+    UpDown = 4
   },
-  L2 = 3,
-  R2 = 4,
+  LeftTrigger = 2,
+  RightTrigger = 5,
 
   -- Buttons
-  Cross = 1,
-  Circle = 2,
-  Square = 0,
-  Triangle = 3,
-  L1 = 4,
-  R1 = 5,
-  Share = 8,
-  Options = 9,
-  PS = 12,
-  LeftStickButton = 10,
-  RightStickButton = 11,
-  TouchPad = 13,
+  A = 0,
+  B = 1,
+  X = 2,
+  Y = 3,
+  LB = 4,
+  RB = 5,
+  Back = 6,
+  Start = 7,
+  LeftStickButton = 9,
+  RightStickButton = 10,
   DPad = {
-    Up = 14,
-    Right = 15,
-    Down = 16,
-    Left = 17
+    Up = 11,
+    Right = 12,
+    Down = 13,
+    Left = 14
   }
 }
 
 
 asset.onInitialize(function()
-  local controller = PS4Controller
-  local name = "Wireless Controller"
+  local controller = XBoxController
+  local name = "Microsoft X-Box 360 pad"
 
   local deadzoneJoysticks = 0.2
   local deadzoneTriggers = 0.05
@@ -69,15 +67,15 @@ asset.onInitialize(function()
   openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick.UpDown, deadzoneJoysticks)
   openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick.LeftRight, deadzoneJoysticks)
   openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick.UpDown, deadzoneJoysticks)
-  openspace.navigation.setAxisDeadZone(name, controller.L2, deadzoneTriggers)
-  openspace.navigation.setAxisDeadZone(name, controller.R2, deadzoneTriggers)
+  openspace.navigation.setAxisDeadZone(name, controller.LeftTrigger, deadzoneTriggers)
+  openspace.navigation.setAxisDeadZone(name, controller.RightTrigger, deadzoneTriggers)
 
   openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick.LeftRight, "Orbit X")
   openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick.UpDown, "Orbit Y")
   openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick.LeftRight, "Pan X", true)
   openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick.UpDown, "Pan Y", true)
-  openspace.navigation.bindJoystickAxis(name, controller.L2, "Zoom Out", false, "TriggerLike")
-  openspace.navigation.bindJoystickAxis(name, controller.R2, "Zoom In", false, "TriggerLike")
+  openspace.navigation.bindJoystickAxis(name, controller.LeftTrigger, "Zoom Out", false, "TriggerLike")
+  openspace.navigation.bindJoystickAxis(name, controller.RightTrigger, "Zoom In", false, "TriggerLike")
 
   -- Roll
   openspace.navigation.bindJoystickButton(
@@ -99,7 +97,7 @@ asset.onInitialize(function()
   -- Switch focus in the interesting nodes menu
   openspace.navigation.bindJoystickButton(
     name,
-    controller.L1,
+    controller.LB,
     [[
       openspace.navigation.targetPreviousInterestingAnchor()
       openspace.navigation.retargetAnchor()
@@ -109,7 +107,7 @@ asset.onInitialize(function()
 
   openspace.navigation.bindJoystickButton(
     name,
-    controller.R1,
+    controller.RB,
     [[
       openspace.navigation.targetNextInterestingAnchor()
       openspace.navigation.retargetAnchor()
@@ -120,19 +118,19 @@ asset.onInitialize(function()
   -- Toggle Frictions
   openspace.navigation.bindJoystickButton(
     name,
-    controller.Cross,
+    controller.A,
     propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
     "Toggle rotational friction"
   )
   openspace.navigation.bindJoystickButton(
     name,
-    controller.Circle,
+    controller.B,
     propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
     "Toggle zoom friction"
   )
   openspace.navigation.bindJoystickButton(
     name,
-    controller.Triangle,
+    controller.Y,
     propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
     "Toggle roll friction"
   )
@@ -170,7 +168,7 @@ asset.onInitialize(function()
   -- Reset Time to yesterday
   openspace.navigation.bindJoystickButton(
     name,
-    controller.Options,
+    controller.Back,
     [[
       openspace.time.setDeltaTime(1)
       local yesterday = openspace.time.advancedTime(openspace.time.currentWallTime(), "-1d")
@@ -182,26 +180,16 @@ asset.onInitialize(function()
   -- Pause
   openspace.navigation.bindJoystickButton(
     name,
-    controller.TouchPad,
+    controller.Start,
     "openspace.time.togglePause()",
     "Pause time simulation"
   )
 
   -- Open buttons that can be customized
-  -- Square
+  -- X
   openspace.navigation.bindJoystickButton(
     name,
-    controller.Square,
-    [[
-      -- <-- Copy paste your custom script here
-    ]],
-    ""  -- <-- Description of your custom script here (optional)
-  )
-
-  -- Share button
-  openspace.navigation.bindJoystickButton(
-    name,
-    controller.Share,
+    controller.X,
     [[
       -- <-- Copy paste your custom script here
     ]],
@@ -217,23 +205,16 @@ asset.onInitialize(function()
     ]],
     ""  -- <-- Description of your custom script here (optional)
   )
-
-  -- Playstation button
-  openspace.navigation.bindJoystickButton(
-    name,
-    controller.PS,
-    [[
-      -- <-- Copy paste your custom script here
-    ]],
-    ""  -- <-- Description of your custom script here (optional)
-  )
 end)
 
 asset.meta = {
-  Name = "Joystick controller: PS4",
+  Name = "Joystick controller: Microsoft X-Box 360 pad",
   Version = "1.0",
-  Description = "Joystick controller configuration for PS4",
-  Author = "OpenSpace Team",
+  Description = "Joystick controller configuration for Microsoft X-Box 360 pad",
+  Author = [[
+    OpenSpace Team & Winston
+    https://openspacesupport.slack.com/archives/CLMQXJJDQ/p1710388096683769
+  ]],
   URL = "http://openspaceproject.com",
   License = "MIT license"
 }
