@@ -343,9 +343,8 @@ namespace {
             std::optional<std::filesystem::path> file;
 
             // The folder where the textures are located when using multiple different
-            // textures to render the points, based on a mapping to a column in the
-            // dataset. Setting this value means that multiple textures shall be used
-            // and any single sprite texture file is ignored.
+            // textures to render the points. Setting this value means that multiple
+            // textures shall be used and any single sprite texture file is ignored.
             //
             // Note that the textures can be any format, but rendering efficiency will
             // be best if using textures with the exact same resolution.
