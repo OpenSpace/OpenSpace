@@ -52,7 +52,8 @@ local Test_Interpolated = {
 }
 
 -- Speck file (allows storing all data in one single file, including the texture mapping)
--- Note that we disable this scene graph node per default
+-- Note that we disable this scene graph node per default here, as it shows the same
+-- information as the CSV version
 local Test_Speck = {
   Identifier = "TexturedPointCloudExample_Speck",
   Renderable = {
