@@ -87,7 +87,7 @@ namespace {
         "If true, the textures will be compressed to preserve graphics card memory. This "
         "is enabled per default, but may lead to visible artefacts for certain images, "
         "especially up close. Set this to false to disable any hardware compression of "
-        "the textures, and represent each color channel wit 8 bits.",
+        "the textures, and represent each color channel with 8 bits.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -107,7 +107,7 @@ namespace {
         "File",
         "Point Sprite Texture File",
         "The path to the texture that should be used as the point sprite. Note that if "
-        "multiple textures option is set in the asset, by provising a texture folder, "
+        "multiple textures option is set in the asset, by providing a texture folder, "
         "this value will be ignored.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
