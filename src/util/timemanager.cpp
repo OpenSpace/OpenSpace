@@ -388,7 +388,7 @@ TimeKeyframeData TimeManager::interpolate(const Keyframe<TimeKeyframeData>& past
 }
 
 void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframe, double dt) {
-    const Time& currentTime = keyframeData.time;
+    const Time& currentTime = keyframe.time;
     _deltaTime = _timePaused ? 0.0 : _targetDeltaTime;
     if (isPlayingBackSessionRecording()) {
         _currentTime.data().advanceTime(dt * _deltaTime);
@@ -396,8 +396,8 @@ void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframe, double dt)
     else {
         _currentTime.data().setTime(currentTime.j2000Seconds());
     }
-    _timePaused = keyframeData.pause;
-    _targetDeltaTime = keyframeData.delta;
+    _timePaused = keyframe.pause;
+    _targetDeltaTime = keyframe.delta;
     _deltaTime = _timePaused ? 0.0 : _targetDeltaTime;
 }
 
