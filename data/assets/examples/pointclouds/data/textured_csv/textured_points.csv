@@ -1,3 +1,6 @@
+# A dummy dataset with an xyz position, some random values and an integer value to
+# use for texturing the points
+#
 # The texture mapping from index to file is handled in another file
 x,y,z,a,b,texture
 13428000,26239000,45870000,-3.226548224,33.95773276,1
