@@ -253,7 +253,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 global::renderEngine->scene()->addPropertyInterpolation(
                     prop,
                     static_cast<float>(interpolationDuration),
-                    std::move(postScript),
+                    postScript,
                     easingFunction
                 );
             }

@@ -347,7 +347,7 @@ void TimeManager::progressTime(double dt) {
 
 TimeKeyframeData TimeManager::interpolate(const Keyframe<TimeKeyframeData>& past,
                                           const Keyframe<TimeKeyframeData>& future,
-                                          double appTime)
+                                          double time)
 {
     // https://en.wikipedia.org/wiki/Spline_interpolation
     // interpolatedTime = (1 - t)y1 + t*y2 + t(1 - t)(a(1 - t) + bt), where
@@ -363,7 +363,7 @@ TimeKeyframeData TimeManager::interpolate(const Keyframe<TimeKeyframeData>& past
     const double deltaAppTime = future.timestamp - past.timestamp;
     const double deltaSimTime = futureSimTime - pastSimTime;
 
-    const double t = (appTime - past.timestamp) / deltaAppTime;
+    const double t = (time - past.timestamp) / deltaAppTime;
     const double a = pastDerivative * deltaAppTime - deltaSimTime;
     const double b = -futureDerivative * deltaAppTime + deltaSimTime;
 
@@ -387,8 +387,8 @@ TimeKeyframeData TimeManager::interpolate(const Keyframe<TimeKeyframeData>& past
     return data;
 }
 
-void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframeData, double dt) {
-    const Time& currentTime = keyframeData.time;
+void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframe, double dt) {
+    const Time& currentTime = keyframe.time;
     _deltaTime = _timePaused ? 0.0 : _targetDeltaTime;
     if (isPlayingBackSessionRecording()) {
         _currentTime.data().advanceTime(dt * _deltaTime);
@@ -396,8 +396,8 @@ void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframeData, double
     else {
         _currentTime.data().setTime(currentTime.j2000Seconds());
     }
-    _timePaused = keyframeData.pause;
-    _targetDeltaTime = keyframeData.delta;
+    _timePaused = keyframe.pause;
+    _targetDeltaTime = keyframe.delta;
     _deltaTime = _timePaused ? 0.0 : _targetDeltaTime;
 }
 

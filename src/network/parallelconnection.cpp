@@ -112,13 +112,12 @@ bool ParallelConnection::sendMessage(const Message& message) {
         reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
     );
 
-    if (!_socket->put<char>(header.data(), header.size())) {
+    const bool res = _socket->put<char>(header.data(), header.size());
+    if (!res) {
         return false;
     }
-    if (!_socket->put<char>(message.content.data(), message.content.size())) {
-        return false;
-    }
-    return true;
+    const bool res2 = _socket->put<char>(message.content.data(), message.content.size());
+    return res2;
 }
 
 void ParallelConnection::disconnect() {

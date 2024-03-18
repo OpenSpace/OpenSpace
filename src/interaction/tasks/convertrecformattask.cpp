@@ -336,4 +336,4 @@ documentation::Documentation ConvertRecFormatTask::documentation() {
     };
 }
 
-}
+} // namespace openspace::interaction

@@ -123,6 +123,8 @@ WebBrowserModule::WebBrowserModule()
     addProperty(_browserUpdateInterval);
 }
 
+WebBrowserModule::~WebBrowserModule() {}
+
 void WebBrowserModule::internalDeinitialize() {
     ZoneScoped;
 

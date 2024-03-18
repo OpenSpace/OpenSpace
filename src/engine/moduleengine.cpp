@@ -135,27 +135,27 @@ void ModuleEngine::deinitializeGL() {
     LDEBUG("Finished deinitializing OpenGL of modules");
 }
 
-void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod) {
+void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
     ZoneScoped;
 
-    ghoul_assert(mod, "Module must not be nullptr");
+    ghoul_assert(module, "Module must not be nullptr");
 
     auto it = std::find_if(
         _modules.begin(),
         _modules.end(),
-        [&mod](std::unique_ptr<OpenSpaceModule>& rhs) {
-            return rhs->identifier() == mod->identifier();
+        [&module](std::unique_ptr<OpenSpaceModule>& rhs) {
+            return rhs->identifier() == module->identifier();
         }
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            fmt::format("Module name '{}' was registered before", mod->identifier()),
+            fmt::format("Module name '{}' was registered before", module->identifier()),
             "ModuleEngine"
         );
     }
 
-    LDEBUG(fmt::format("Registered module '{}'", mod->identifier()));
-    _modules.push_back(std::move(mod));
+    LDEBUG(fmt::format("Registered module '{}'", module->identifier()));
+    _modules.push_back(std::move(module));
 }
 
 std::vector<OpenSpaceModule*> ModuleEngine::modules() const {

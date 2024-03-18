@@ -583,7 +583,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
     }
 
     std::ifstream f = std::ifstream(filepath);
-    std::string contents = std::string(
+    const std::string contents = std::string(
         std::istreambuf_iterator<char>(f),
         std::istreambuf_iterator<char>()
     );

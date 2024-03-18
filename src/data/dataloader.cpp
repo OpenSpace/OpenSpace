@@ -449,9 +449,9 @@ void saveCachedFile(const Labelset& labelset, const std::filesystem::path& path)
     }
 }
 
-Labelset loadFileWithCache(std::filesystem::path filePath) {
+Labelset loadFileWithCache(std::filesystem::path path) {
     return internalLoadFileWithCache<Labelset>(
-        std::move(filePath),
+        std::move(path),
         std::nullopt,
         &loadFile,
         &loadCachedFile,

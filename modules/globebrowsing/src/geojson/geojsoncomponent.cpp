@@ -250,7 +250,7 @@ documentation::Documentation GeoJsonComponent::Documentation() {
 
 GeoJsonComponent::SubFeatureProps::SubFeatureProps(
                                        properties::PropertyOwner::PropertyOwnerInfo info)
-    : properties::PropertyOwner(info)
+    : properties::PropertyOwner(std::move(info))
     , enabled(EnabledInfo, true)
     , centroidLatLong(
         CentroidCoordinateInfo,

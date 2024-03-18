@@ -101,7 +101,7 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the points. If no label file is provided, the labels will be "

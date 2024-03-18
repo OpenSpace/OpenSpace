@@ -297,5 +297,4 @@ ghoul::io::SocketServer* ServerInterface::server() {
     return _socketServer.get();
 }
 
-
-}
+} // namespace openspace

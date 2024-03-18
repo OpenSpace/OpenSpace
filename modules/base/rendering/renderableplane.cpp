@@ -322,7 +322,7 @@ void RenderablePlane::update(const UpdateData&) {
 void RenderablePlane::createPlane() {
     const GLfloat sizeX = _size.value().x;
     const GLfloat sizeY = _size.value().y;
-    const GLfloat vertexData[] = {
+    const std::array<GLfloat, 36> vertexData = {
         //   x       y    z    w    s    t
         -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
          sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
@@ -334,7 +334,7 @@ void RenderablePlane::createPlane() {
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
 

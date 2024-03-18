@@ -398,7 +398,7 @@ DefaultTileProvider TemporalTileProvider::createTileProvider(
         case Mode::Prototype: {
             static const std::vector<std::string> IgnoredTokens = {
                 // From: http://www.gdal.org/frmt_wms.html
-                "${x}", "${y}", "${z}", "${version}" "${format}", "${layer}"
+                "${x}", "${y}", "${z}", "${version}", "${format}", "${layer}"
             };
 
             value = _prototyped.prototype;
@@ -768,8 +768,8 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
     glDisable(GL_BLEND);
-    GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, textureBuffers);
+    const GLenum textureBuffers = GL_COLOR_ATTACHMENT0;
+    glDrawBuffers(1, &textureBuffers);
 
     // Setup our own viewport settings
     const GLsizei w = static_cast<GLsizei>(writeTexture->width());

@@ -33,8 +33,8 @@ using json = nlohmann::json;
 
 namespace openspace::volume {
 
-TransferFunction::TransferFunction(const std::string& s) {
-    setEnvelopesFromString(s);
+TransferFunction::TransferFunction(const std::string& string) {
+    setEnvelopesFromString(string);
 }
 
 bool TransferFunction::setEnvelopesFromString(const std::string& s) {

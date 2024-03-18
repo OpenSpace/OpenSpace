@@ -909,4 +909,4 @@ void VideoPlayer::resizeTexture(glm::ivec2 size) {
     }
 }
 
-} // namespace openspace::video
+} // namespace openspace

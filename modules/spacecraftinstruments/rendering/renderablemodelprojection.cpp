@@ -431,7 +431,7 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
         time
     );
 
-    const SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
+    SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
         _projectionComponent.instrumentId()
     );
     _boresight = std::move(res.boresightVector);

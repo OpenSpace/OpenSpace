@@ -331,7 +331,7 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
         "LimitZoom",
         "Limit Zoom",
         "Settings to limit the camera from going to close to or too far away from the "
@@ -1565,7 +1565,7 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
 }
 
 OrbitalNavigator::Displacement
-OrbitalNavigator::interpolateRetargetAim(double deltaTime, CameraPose pose,
+OrbitalNavigator::interpolateRetargetAim(double deltaTime, const CameraPose& pose,
                                          const glm::dvec3& prevCameraToAnchor,
                                          Displacement anchorToAim)
 {
@@ -1603,7 +1603,7 @@ OrbitalNavigator::interpolateRetargetAim(double deltaTime, CameraPose pose,
     if (requestedAngle <= maxAngle) {
         const glm::dvec3 aimPos = pose.position + prevCameraToAnchor + anchorToAim.second;
         const CameraRotationDecomposition aimDecomp = decomposeCameraRotation(
-            std::move(pose),
+            pose,
             aimPos
         );
 

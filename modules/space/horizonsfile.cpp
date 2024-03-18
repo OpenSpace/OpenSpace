@@ -116,7 +116,7 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     return url;
 }
 
-json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath) {
+json sendHorizonsRequest(const std::string& url, const std::filesystem::path& filePath) {
     // Set up HTTP request and download result
     const auto download = std::make_unique<HttpFileDownload>(
         url,

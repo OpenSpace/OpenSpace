@@ -446,4 +446,4 @@ void RenderableOrbitalKepler::updateBuffers() {
     setBoundingSphere(maxSemiMajorAxis * 1000);
 }
 
-} // namespace opensapce
+} // namespace openspace

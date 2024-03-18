@@ -94,7 +94,7 @@ namespace {
             SettingsIconSize,
             SettingsIconSize
         );
-    } // geometry
+    } // namespace geometry
 
     std::optional<Profile> loadProfileFromFile(QWidget* parent, std::string filename) {
         // Verify that the file actually exists
@@ -787,7 +787,8 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         if (editor.specifiedFilename() != profile) {
             saveProfilePath = _userProfilePath;
         }
-        std::string path = saveProfilePath + editor.specifiedFilename() + ".profile";
+        const std::string path =
+            saveProfilePath + editor.specifiedFilename() + ".profile";
         saveProfile(this, path, *p);
         populateProfilesList(editor.specifiedFilename());
     }
@@ -898,7 +899,10 @@ void LauncherWindow::handleReturnFromWindowEditor(const sgct::config::Cluster& c
     savePath.replace_extension(".json");
     saveWindowConfig(this, savePath, cluster);
     // Truncate path to convert this back to path relative to _userConfigPath
-    std::filesystem::path p = std::filesystem::proximate(savePath, saveWindowCfgPath);
+    const std::filesystem::path p = std::filesystem::proximate(
+        savePath,
+        saveWindowCfgPath
+    );
     populateWindowConfigsList(p.string());
 }
 
@@ -912,7 +916,7 @@ std::string LauncherWindow::selectedProfile() const {
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {
-    int idx = _windowConfigBox->currentIndex();
+    const int idx = _windowConfigBox->currentIndex();
     if (idx == 0) {
         return _sgctConfigName;
     }

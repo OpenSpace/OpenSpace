@@ -68,10 +68,10 @@ documentation::Documentation RenderablePlaneProjection::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_renderableplaneprojection");
 }
 
-RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dict)
-    : Renderable(dict)
+RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
 {
-    const Parameters p = codegen::bake<Parameters>(dict);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
     _spacecraft = p.spacecraft;
     _instrument = p.instrument;
     _defaultTarget = p.defaultTarget.value_or(_defaultTarget);

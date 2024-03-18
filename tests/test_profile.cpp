@@ -36,6 +36,11 @@
 #include <fstream>
 #include <json/json.hpp>
 
+// clang-tidy is convinced that it is possible to use emplace_back instead of push_back
+// for the profiole types, but I haven't been able to convince the Visual Studio
+// compiler to agree
+// NOLINTBEGIN(modernize-use-emplace)
+
 namespace openspace {
     bool operator==(const openspace::Profile::Version& lhs,
                     const openspace::Profile::Version& rhs) noexcept
@@ -1587,3 +1592,5 @@ TEST_CASE("(Error) Camera (GoToNode): Missing value 'anchor'", "[profile]") {
 //        Catch::Matchers::Equals("(profile) 'camera.height' must be a larger than zero")
 //    );
 //}
+
+// NOLINTEND(modernize-use-emplace)

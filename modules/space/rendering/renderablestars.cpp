@@ -929,8 +929,8 @@ void RenderableStars::renderPSFToTexture() {
     GLuint psfFBO = 0;
     glGenFramebuffers(1, &psfFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, psfFBO);
-    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, drawBuffers);
+    GLenum drawBuffers = GL_COLOR_ATTACHMENT0;
+    glDrawBuffers(1, &drawBuffers);
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _psfTexture, 0);
     glViewport(0, 0, PsfTextureSize, PsfTextureSize);

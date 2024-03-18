@@ -74,7 +74,7 @@ public:
 
     static documentation::Documentation Documentation();
 
-    glm::vec4 colorFromColorMap(float value) const;
+    glm::vec4 colorFromColorMap(float valueToColorFrom) const;
 
     properties::BoolProperty enabled;
     properties::BoolProperty invert;
