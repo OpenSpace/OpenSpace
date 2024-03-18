@@ -102,10 +102,12 @@ local FixedColor_ScaleBasedOnData = {
     SizeSettings = {
       SizeMapping = {
         -- The options for the columns that the points can be scaled by. The first
-        -- alternative is chosen per default
-        ParameterOptions = { "number_withNan", "a" },
-        -- Use the last of the provided options here. Default is the first one
-        Parameter = "a"
+        -- alternative in the list is chosen per default
+        ParameterOptions = { "a", "b" },
+        -- Specify which option we want to use for size mapping at start up. Here we
+        -- use the last of the provided options rather than the first one, which is
+        -- otherwise used by default
+        Parameter = "b"
       },
       -- Use a slightly smaller scale than above for the base size of the points
       -- (will decide the size of the smallest point). That way, the points don't
