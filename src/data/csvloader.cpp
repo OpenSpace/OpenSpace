@@ -127,7 +127,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             continue;
         }
         else {
-            // note that the texture column is also a regular column. Just save the index
+            // Note that the texture column is also a regular column. Just save the index
             if (isTextureColumn(col, specs)) {
                 res.textureDataIndex = nDataColumns;
                 textureColumn = static_cast<int>(i);
@@ -141,7 +141,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         }
     }
 
-    // Some eerrors/warnings
+    // Some errors / warnings
     if (specs.has_value()) {
         bool hasAllProvided = specs->checkIfAllProvidedColumnsExist(columns);
         if (!hasAllProvided) {
@@ -292,7 +292,7 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
 
         std::stringstream str(line);
 
-        // each line is following the form:
+        // Each line is following the template:
         // <idx> <file name>
         Dataset::Texture texture;
         str >> texture.index >> texture.file;

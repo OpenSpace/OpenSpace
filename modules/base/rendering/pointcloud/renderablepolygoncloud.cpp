@@ -71,7 +71,7 @@ RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictiona
     _nPolygonSides = p.polygonSides.value_or(_nPolygonSides);
 
     // The texture to use for the rendering will be generated in initializeGl. Make sure
-    // we use it in the rnedering
+    // we use it in the rendering
     _hasSpriteTexture = true;
 
     _textureMode = TextureInputMode::Other;

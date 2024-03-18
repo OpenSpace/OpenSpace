@@ -43,7 +43,7 @@ namespace {
         "Parameter",
         "Parameter Option",
         "This value determines which parameter is used for scaling of the point. The "
-        "parameter value will be used as a miltiplicative factor to scale the size of "
+        "parameter value will be used as a multiplicative factor to scale the size of "
         "the points. Note that they may however still be scaled by max size adjustment "
         "effects.",
         openspace::properties::Property::Visibility::AdvancedUser

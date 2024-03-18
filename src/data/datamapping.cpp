@@ -123,7 +123,7 @@ namespace {
         // A file where each line contains an integer index and an image file name.
         // Not valid for SPECK files, which includes this information as part of its
         // data format. This map will be used to map the data in the TextureColumn to
-        // an image file to use for rendering the points. Not that only the files with
+        // an image file to use for rendering the points. Note that only the files with
         // indices that are used in the dataset will actually be loaded
         std::optional<std::filesystem::path> textureMapFile;
 
