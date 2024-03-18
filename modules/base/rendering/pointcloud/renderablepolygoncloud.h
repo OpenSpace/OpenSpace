@@ -60,6 +60,8 @@ private:
 
     GLuint _polygonVao = 0;
     GLuint _polygonVbo = 0;
+
+    bool _textureIsInitialized = false;
 };
 
 } // namespace openspace
