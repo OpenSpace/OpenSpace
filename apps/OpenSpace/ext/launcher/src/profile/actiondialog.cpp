@@ -679,7 +679,8 @@ void ActionDialog::chooseScripts() {
     d.exec();
 }
 
-void ActionDialog::appendScriptsToTextfield(std::vector<std::string> scripts) const {
+void ActionDialog::appendScriptsToTextfield(const std::vector<std::string>& scripts) const
+{
     for (const std::string& script : scripts) {
         _actionWidgets.script->append(QString::fromStdString(script));
     }

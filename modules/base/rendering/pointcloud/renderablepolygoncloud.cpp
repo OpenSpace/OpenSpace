@@ -139,7 +139,7 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
     GLuint textureFBO;
     glGenFramebuffers(1, &textureFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
-    GLenum drawBuffers = GL_COLOR_ATTACHMENT0;
+    const GLenum drawBuffers = GL_COLOR_ATTACHMENT0;
     glDrawBuffers(1, &drawBuffers);
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);

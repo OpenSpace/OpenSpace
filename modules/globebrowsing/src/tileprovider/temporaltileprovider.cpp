@@ -768,7 +768,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
     glDisable(GL_BLEND);
-    GLenum textureBuffers = GL_COLOR_ATTACHMENT0;
+    const GLenum textureBuffers = GL_COLOR_ATTACHMENT0;
     glDrawBuffers(1, &textureBuffers);
 
     // Setup our own viewport settings

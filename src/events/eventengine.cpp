@@ -31,7 +31,7 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "EventEngine";
-}
+} // namespace
 
 namespace openspace {
 

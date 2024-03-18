@@ -33,8 +33,8 @@ using json = nlohmann::json;
 namespace openspace::volume {
 
 EnvelopePoint::EnvelopePoint(glm::vec3 c, float x, float y)
-    : color(c)
-    , colorHex(hexadecimalFromVec3(std::move(c)))
+    : color(std::move(c))
+    , colorHex(hexadecimalFromVec3(color))
     , position({ x, y })
 {}
 
@@ -44,9 +44,9 @@ EnvelopePoint::EnvelopePoint(std::string c, float x, float y)
     , position(std::make_pair(x, y))
 {}
 
-Envelope::Envelope(std::vector<EnvelopePoint> vec) {
-    _points = std::move(vec);
-}
+Envelope::Envelope(std::vector<EnvelopePoint> vec)
+    : _points(std::move(vec))
+{}
 
 bool Envelope::operator!=(const Envelope& env) const {
     constexpr double MinDist = 0.0001;
@@ -87,13 +87,14 @@ bool Envelope::isEnvelopeValid() const {
          nextIter != _points.end();
          ++currentIter, ++nextIter)
     {
-        if (currentIter->position.first > nextIter->position.first)
+        if (currentIter->position.first > nextIter->position.first) {
             return false;
+        }
     }
     return true;
 }
 
-glm::vec3 Envelope::normalizeColor(glm::vec3 vec) const {
+glm::vec3 Envelope::normalizeColor(const glm::vec3& vec) const {
     return { vec.r / 255.f, vec.g / 255.f , vec.b / 255.f };
 }
 
@@ -110,7 +111,7 @@ glm::vec4 Envelope::valueAtPosition(float pos) const {
     }
     auto beforeIter = afterIter - 1;
 
-    float dist = afterIter->position.first - beforeIter->position.first;
+    const float dist = afterIter->position.first - beforeIter->position.first;
     if (dist < 0.0001) {
         return {
             normalizeColor((beforeIter->color + afterIter->color) / 2.f),
@@ -158,7 +159,7 @@ std::string EnvelopePoint::decimalToHexadecimal(int dec) const {
 
     std::string hexStr;
     while (dec > 0) {
-        int hex = dec % 16;
+        const int hex = dec % 16;
 
         if (hex < 10) {
             hexStr = hexStr.insert(0, std::string(1, static_cast<char>(hex + 48)));
@@ -180,9 +181,9 @@ glm::vec3 EnvelopePoint::hexadecimalToRGBConversion(const std::string& hex) cons
 }
 
 std::string EnvelopePoint::hexadecimalFromVec3(const glm::vec3& vec) const {
-    std::string r = decimalToHexadecimal(static_cast<int>(vec.r));
-    std::string g = decimalToHexadecimal(static_cast<int>(vec.g));
-    std::string b = decimalToHexadecimal(static_cast<int>(vec.b));
+    const std::string r = decimalToHexadecimal(static_cast<int>(vec.r));
+    const std::string g = decimalToHexadecimal(static_cast<int>(vec.g));
+    const std::string b = decimalToHexadecimal(static_cast<int>(vec.b));
 
     return ("#" + r + g + b);
 }

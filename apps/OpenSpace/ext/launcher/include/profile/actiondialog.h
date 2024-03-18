@@ -59,7 +59,7 @@ private:
     void clearActionFields() const;
     void actionRejected();
     void chooseScripts();
-    void appendScriptsToTextfield(std::vector<std::string> scripts) const;
+    void appendScriptsToTextfield(const std::vector<std::string>& scripts) const;
 
     openspace::Profile::Keybinding* selectedKeybinding();
     void keybindingAdd();

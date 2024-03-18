@@ -83,7 +83,7 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
     for (const DocumentationEntry& p : d.entries) {
         nlohmann::json entry;
         entry["key"] = p.key;
-        entry["optional"] = p.optional ? true : false;
+        entry["optional"] = static_cast<bool>(p.optional);
         entry["type"] = p.verifier->type();
         entry["documentation"] = p.documentation;
 

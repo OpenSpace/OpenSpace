@@ -35,15 +35,15 @@
 TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
     using namespace openspace::volume;
 
-    glm::uvec3 dims(1);
-    float value = 0.5f;
+    const glm::uvec3 dims = glm::uvec3(1, 1, 1);
+    const float value = 0.5f;
 
     RawVolume<float> vol(dims);
 
     vol.set({ 0, 0, 0 }, value);
     CHECK(vol.get({ 0, 0, 0 }) == value);
 
-    std::filesystem::path volumePath = absPath("${TESTDIR}/tinyvolume.rawvolume");
+    const std::filesystem::path volumePath = absPath("${TESTDIR}/tinyvolume.rawvolume");
 
     // Write the 1x1x1 volume to disk
     RawVolumeWriter<float> writer(volumePath.string());
@@ -59,12 +59,14 @@ TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
     using namespace openspace::volume;
 
     const glm::uvec3 dims = glm::uvec3(2, 4, 8);
-    auto value = [dims](glm::uvec3 v) {
+    auto value = [dims](const glm::uvec3& v) {
         return static_cast<float>(v.z * dims.z * dims.y + v.y * dims.y + v.x);
     };
 
     RawVolume<float> vol(dims);
-    vol.forEachVoxel([&vol, &value](glm::uvec3 x, float) { vol.set(x, value(x)); });
+    vol.forEachVoxel(
+        [&vol, &value](const glm::uvec3& x, float) { vol.set(x, value(x)); }
+    );
     vol.forEachVoxel([&value](const glm::uvec3& x, float v) { CHECK(v == value(x)); });
 
     const std::filesystem::path volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");

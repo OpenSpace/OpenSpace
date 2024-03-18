@@ -163,10 +163,9 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         _milestones.reserve(p.milestones->size());
         for (const Parameters::Milestone& milestone : *p.milestones) {
             std::string name = milestone.name;
-            Time newTime = Time(milestone.date);
             Milestone newDate = {
                 .name = std::move(name),
-                .date = std::move(newTime)
+                .date = Time(milestone.date)
             };
             if (milestone.description.has_value()) {
                 newDate.description = milestone.description.value();

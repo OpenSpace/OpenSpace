@@ -202,23 +202,12 @@ namespace {
         // farDistance *= invMagFar;
 
         constexpr float Radius = 1.0;
-        if ((glm::dot(leftNormal, position) + leftDistance) < -Radius) {
-            return false;
-        }
-        else if ((glm::dot(rightNormal, position) + rightDistance) < -Radius) {
-            return false;
-        }
-        else if ((glm::dot(bottomNormal, position) + bottomDistance) < -Radius) {
-            return false;
-        }
-        else if ((glm::dot(topNormal, position) + topDistance) < -Radius) {
-            return false;
-        }
-        else if ((glm::dot(nearNormal, position) + nearDistance) < -Radius) {
-            return false;
-        }
-
-        return true;
+        const bool res = ((glm::dot(leftNormal, position) + leftDistance) < -Radius) ||
+            ((glm::dot(rightNormal, position) + rightDistance) < -Radius) ||
+            ((glm::dot(bottomNormal, position) + bottomDistance) < -Radius) ||
+            ((glm::dot(topNormal, position) + topDistance) < -Radius) ||
+            ((glm::dot(nearNormal, position) + nearDistance) < -Radius);
+        return !res;
     }
 
     struct [[codegen::Dictionary(GlobeLabelsComponent)]] Parameters {
