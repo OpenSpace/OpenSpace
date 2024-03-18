@@ -19,8 +19,8 @@ local Test = {
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "Textured Points Example",
-    Path = "/Point Cloud/Multi-Textured"
+    Name = "Multi-Textured Points",
+    Path = "/Example/Point Clouds/Multi-Textured"
   }
 }
 
@@ -46,8 +46,8 @@ local Test_Interpolated = {
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "Textured Points Example (Interpolation)",
-    Path = "/Point Cloud/Multi-Textured"
+    Name = "Multi-Textured Points (Interpolation)",
+    Path = "/Example/Point Clouds/Multi-Textured"
   }
 }
 
@@ -68,8 +68,8 @@ local Test_Speck = {
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "Textured Points Example (Speck file)",
-    Path = "/Point Cloud/Multi-Textured"
+    Name = "Multi-Textured Points (Speck file)",
+    Path = "/Example/Point Clouds/Multi-Textured"
   }
 }
 
