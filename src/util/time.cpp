@@ -97,8 +97,8 @@ double Time::j2000Seconds() const {
     return _time;
 }
 
-double Time::advanceTime(double delta) {
-    _time += delta;
+double Time::advanceTime(double deltaTime) {
+    _time += deltaTime;
     return _time;
 }
 

@@ -1665,8 +1665,8 @@ References:
        Specialist Conference, August 21-24, 2006. Keystone, CO.
 )";
 
-      std::filesystem::path path = std::filesystem::temp_directory_path();
-      std::filesystem::path file = path / "geophysical.ker";
+      const std::filesystem::path path = std::filesystem::temp_directory_path();
+      const std::filesystem::path file = path / "geophysical.ker";
       {
           std::ofstream f(file);
           f << GeoPhysicalConstantsKernelSource;

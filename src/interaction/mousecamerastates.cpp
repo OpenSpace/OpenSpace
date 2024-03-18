@@ -28,9 +28,9 @@
 #include <openspace/interaction/keyboardinputstate.h>
 
 namespace {
-    const double SENSITIVITY_ADJUSTMENT_INCREASE = 8.0;
-    const double SENSITIVITY_ADJUSTMENT_DECREASE = 0.5;
-}
+    constexpr double SensitivityAdjustmentIncrease = 8.0;
+    constexpr double SensitivityAdjustmentDecrease = 0.5;
+} // namespace
 
 namespace openspace::interaction {
 
@@ -100,10 +100,10 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
 
         double sensitivity = _sensitivity;
         if (keyboardState.isKeyPressed(Key::Z)) {
-            sensitivity *= SENSITIVITY_ADJUSTMENT_INCREASE;
+            sensitivity *= SensitivityAdjustmentIncrease;
         }
         else if (keyboardState.isKeyPressed(Key::X)) {
-            sensitivity *= SENSITIVITY_ADJUSTMENT_DECREASE;
+            sensitivity *= SensitivityAdjustmentDecrease;
         }
 
         _truckMovementState.velocity.set(

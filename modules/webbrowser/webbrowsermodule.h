@@ -49,7 +49,7 @@ public:
     static constexpr const char* Name = "WebBrowser";
 
     WebBrowserModule();
-    ~WebBrowserModule() override = default;
+    ~WebBrowserModule() override;
 
     void addBrowser(BrowserInstance*);
     void removeBrowser(BrowserInstance*);

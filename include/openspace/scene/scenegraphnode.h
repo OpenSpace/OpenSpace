@@ -140,7 +140,7 @@ public:
 
     bool supportsDirectInteraction() const;
 
-    SceneGraphNode* childNode(const std::string& identifier);
+    SceneGraphNode* childNode(const std::string& id);
 
     const Renderable* renderable() const;
     Renderable* renderable();

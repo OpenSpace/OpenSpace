@@ -415,8 +415,8 @@ void RawTileDataReader::initialize() {
             case GL_SHORT:          return 1ULL << 15ULL;
             case GL_UNSIGNED_INT:   return 1ULL << 32ULL;
             case GL_INT:            return 1ULL << 31ULL;
-            case GL_HALF_FLOAT:     return 1ULL;
-            case GL_FLOAT:          return 1ULL;
+            case GL_HALF_FLOAT:
+            case GL_FLOAT:
             case GL_DOUBLE:         return 1ULL;
             default:                throw ghoul::MissingCaseException();
         }

@@ -131,16 +131,16 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
     LDEBUG("Rendering to Texture");
 
     // Saves initial Application's OpenGL State
-    GLint defaultFBO;
-    GLint viewport[4];
+    GLint defaultFBO = 0;
+    std::array<GLint, 4> viewport;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    glGetIntegerv(GL_VIEWPORT, viewport.data());
 
     GLuint textureFBO;
     glGenFramebuffers(1, &textureFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
-    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, drawBuffers);
+    GLenum drawBuffers = GL_COLOR_ATTACHMENT0;
+    glDrawBuffers(1, &drawBuffers);
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
 

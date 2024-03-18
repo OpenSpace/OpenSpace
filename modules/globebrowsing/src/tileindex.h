@@ -34,7 +34,7 @@ namespace openspace::globebrowsing {
 struct TileIndex {
     using TileHashKey = uint64_t;
 
-    TileIndex(uint32_t x, uint32_t y, uint8_t level);
+    TileIndex(uint32_t x_, uint32_t y_, uint8_t level_);
 
     uint32_t x = 0;
     uint32_t y = 0;

@@ -2083,24 +2083,20 @@ bool SessionRecording::processCameraKeyframe(double now) {
 }
 
 bool SessionRecording::processScriptKeyframe() {
-    if (!_playbackActive_script) {
+    if (!_playbackActive_script || _keyframesScript.empty()) {
         return false;
     }
-    else if (_keyframesScript.empty()) {
-        return false;
-    }
-    else {
-        const std::string nextScript = nextKeyframeObj(
-            _idxScript,
-            _keyframesScript,
-            ([this]() { signalPlaybackFinishedForComponent(RecordedType::Script); })
-        );
-        global::scriptEngine->queueScript(
-            nextScript,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
-    }
+
+    const std::string nextScript = nextKeyframeObj(
+        _idxScript,
+        _keyframesScript,
+        ([this]() { signalPlaybackFinishedForComponent(RecordedType::Script); })
+    );
+    global::scriptEngine->queueScript(
+        nextScript,
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    );
 
     return true;
 }

@@ -240,8 +240,8 @@ bool HttpSynchronization::isEachFileDownloaded() {
 }
 
 HttpSynchronization::SynchronizationState
-HttpSynchronization::trySyncFromUrl(std::string listUrl) {
-    HttpMemoryDownload fileListDownload(std::move(listUrl));
+HttpSynchronization::trySyncFromUrl(std::string url) {
+    HttpMemoryDownload fileListDownload = HttpMemoryDownload(std::move(url));
     fileListDownload.onProgress([&c = _shouldCancel](int64_t, std::optional<int64_t>) {
         return !c;
     });

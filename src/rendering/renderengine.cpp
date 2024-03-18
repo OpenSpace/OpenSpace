@@ -982,7 +982,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
         name,
         vsPath,
         absPath(RenderFsPath),
-        std::move(dict)
+        dict
     );
 
     if (program) {
@@ -1015,7 +1015,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
         vsPath,
         absPath(RenderFsPath),
         csPath,
-        std::move(dict)
+        dict
     );
 
     if (program) {

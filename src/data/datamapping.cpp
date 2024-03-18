@@ -107,7 +107,7 @@ namespace {
         std::optional<std::vector<std::string>> excludeColumns;
     };
 #include "datamapping_codegen.cpp"
-}
+} // namespace
 
 namespace openspace::dataloader {
 

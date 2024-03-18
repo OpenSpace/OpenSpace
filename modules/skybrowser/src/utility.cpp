@@ -61,12 +61,12 @@ glm::dvec3 sphericalToCartesian(const glm::dvec2& coords) {
 }
 
 // Converts from cartesian coordianates to spherical in the unit of degrees
-glm::dvec2 cartesianToSpherical(const glm::dvec3& coord) {
+glm::dvec2 cartesianToSpherical(const glm::dvec3& coords) {
     // Equatorial coordinates RA = right ascension, Dec = declination
-    double ra = atan2(coord.y, coord.x);
+    double ra = atan2(coords.y, coords.x);
     const double dec = atan2(
-        coord.z,
-        glm::sqrt((coord.x * coord.x) + (coord.y * coord.y))
+        coords.z,
+        glm::sqrt((coords.x * coords.x) + (coords.y * coords.y))
     );
 
     ra = ra > 0.0 ? ra : ra + glm::two_pi<double>();
@@ -275,4 +275,4 @@ glm::dvec3 Animation<glm::dvec3>::newValue() const {
     return glm::dvec3(rotMat * glm::dvec4(_start, 1.0));;
 }
 
-} // namespace openspace
+} // namespace openspace::skybrowser

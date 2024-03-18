@@ -70,37 +70,37 @@ void to_json(json& j, const PropertyOwner* p) {
 
 namespace ghoul {
 
-void to_json(json& j, const Dictionary& dictionary) {
+void to_json(json& j, const Dictionary& d) {
     json object;
-    for (const std::string_view k : dictionary.keys()) {
+    for (const std::string_view k : d.keys()) {
         const std::string key = std::string(k);
-        if (dictionary.hasValue<glm::dvec4>(key)) {
-            const glm::dvec4 v = dictionary.value<glm::dvec4>(key);
+        if (d.hasValue<glm::dvec4>(key)) {
+            const glm::dvec4 v = d.value<glm::dvec4>(key);
             object[key] = json::array({ v[0], v[1], v[2], v[3] });
         }
-        else if (dictionary.hasValue<glm::dvec3>(key)) {
-            const glm::dvec3 v = dictionary.value<glm::dvec3>(key);
+        else if (d.hasValue<glm::dvec3>(key)) {
+            const glm::dvec3 v = d.value<glm::dvec3>(key);
             object[key] = json::array({ v[0], v[1], v[2] });
         }
-        else if (dictionary.hasValue<glm::dvec2>(key)) {
-            const glm::dvec2 v = dictionary.value<glm::dvec2>(key);
+        else if (d.hasValue<glm::dvec2>(key)) {
+            const glm::dvec2 v = d.value<glm::dvec2>(key);
             object[key] = json::array({ v[0], v[1] });
         }
-        else if (dictionary.hasValue<double>(key)) {
-            object[key] = dictionary.value<double>(key);
+        else if (d.hasValue<double>(key)) {
+            object[key] = d.value<double>(key);
         }
-        else if (dictionary.hasValue<int>(key)) {
-            object[key] = dictionary.value<int>(key);
+        else if (d.hasValue<int>(key)) {
+            object[key] = d.value<int>(key);
         }
-        else if (dictionary.hasValue<std::string>(key)) {
-            object[key] = dictionary.value<std::string>(key);
+        else if (d.hasValue<std::string>(key)) {
+            object[key] = d.value<std::string>(key);
         }
-        else if (dictionary.hasValue<bool>(key)) {
-            object[key] = dictionary.value<bool>(key);
+        else if (d.hasValue<bool>(key)) {
+            object[key] = d.value<bool>(key);
         }
-        else if (dictionary.hasValue<Dictionary>(key)) {
+        else if (d.hasValue<Dictionary>(key)) {
             json child;
-            to_json(child, dictionary.value<Dictionary>(key));
+            to_json(child, d.value<Dictionary>(key));
             object[key] = child;
         }
         else {
@@ -167,4 +167,4 @@ void to_json(json& j, const dvec3& v) {
     };
 }
 
-} // namepsace glm
+} // namespace glm
