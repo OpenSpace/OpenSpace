@@ -4,7 +4,7 @@
 #
 # static_value has values that are the same for the correpsonding point in each
 #              time step
-# dynamic_value has values that change for every timestep. the change will be
+# dynamic_value has values that change for every timestep. The change will be
 #               reflected in the interpolation
 #
 time,x,y,z,dynamic_value,static_value
