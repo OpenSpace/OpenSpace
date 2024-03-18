@@ -47,7 +47,7 @@ void JoystickCameraStates::updateStateFromInput(
                                            const JoystickInputStates& joystickInputStates,
                                                 double deltaTime)
 {
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     if (mode == OpenSpaceEngine::Mode::CameraPath ||
         mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
     {
@@ -71,7 +71,7 @@ void JoystickCameraStates::updateStateFromInput(
             continue;
         }
 
-        int nAxes = joystickInputStates.numAxes(joystickInputState.name);
+        const int nAxes = joystickInputStates.numAxes(joystickInputState.name);
         for (int i = 0;
              i < std::min(nAxes, static_cast<int>(joystick->axisMapping.size()));
              i++)
@@ -81,7 +81,7 @@ void JoystickCameraStates::updateStateFromInput(
                 continue;
             }
 
-            float rawValue = joystickInputStates.axis(joystickInputState.name, i);
+            const float rawValue = joystickInputStates.axis(joystickInputState.name, i);
             float value = rawValue;
 
             if (t.isSticky) {
@@ -162,7 +162,7 @@ void JoystickCameraStates::updateStateFromInput(
                     localRotation.second.y += value;
                     break;
                 case AxisType::Property:
-                    std::string script = fmt::format(
+                    const std::string script = fmt::format(
                         "openspace.setPropertyValue('{}', {});",
                         t.propertyUri, value
                     );
@@ -176,11 +176,11 @@ void JoystickCameraStates::updateStateFromInput(
             }
         }
 
-        int nButtons = joystickInputStates.numButtons(joystickInputState.name);
+        const int nButtons = joystickInputStates.numButtons(joystickInputState.name);
         for (int i = 0; i < nButtons; i++) {
             auto itRange = joystick->buttonMapping.equal_range(i);
             for (auto it = itRange.first; it != itRange.second; it++) {
-                bool active = global::joystickInputStates->button(
+                const bool active = global::joystickInputStates->button(
                     joystickInputState.name,
                     i,
                     it->second.action
@@ -237,7 +237,7 @@ void JoystickCameraStates::updateStateFromInput(
     }
 }
 
-void JoystickCameraStates::setAxisMapping(std::string joystickName,
+void JoystickCameraStates::setAxisMapping(const std::string& joystickName,
                                           int axis, AxisType mapping,
                                           AxisInvert shouldInvert,
                                           JoystickType joystickType,
@@ -267,7 +267,7 @@ void JoystickCameraStates::setAxisMapping(std::string joystickName,
         global::joystickInputStates->axis(joystickName, axis);
 }
 
-void JoystickCameraStates::setAxisMappingProperty(std::string joystickName,
+void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickName,
                                                   int axis,
                                                   std::string propertyUri,
                                                   float min, float max,
@@ -287,7 +287,7 @@ void JoystickCameraStates::setAxisMappingProperty(std::string joystickName,
 
     joystickCameraState->axisMapping[axis].type = AxisType::Property;
     joystickCameraState->axisMapping[axis].invert = shouldInvert;
-    joystickCameraState->axisMapping[axis].propertyUri = propertyUri;
+    joystickCameraState->axisMapping[axis].propertyUri = std::move(propertyUri);
     joystickCameraState->axisMapping[axis].minValue = min;
     joystickCameraState->axisMapping[axis].maxValue = max;
     joystickCameraState->axisMapping[axis].isRemote = isRemote;
@@ -431,13 +431,15 @@ JoystickCameraStates::findOrAddJoystickCameraState(const std::string& joystickNa
     JoystickCameraState* joystick = joystickCameraState(joystickName);
     if (!joystick) {
         if (_joystickCameraStates.size() < JoystickInputStates::MaxNumJoysticks) {
-            _joystickCameraStates.push_back(JoystickCameraState());
+            _joystickCameraStates.emplace_back();
             joystick = &_joystickCameraStates.back();
             joystick->joystickName = joystickName;
         }
         else {
-            LWARNING(fmt::format("Cannot add more joysticks, only {} joysticks are "
-                "supported", JoystickInputStates::MaxNumJoysticks));
+            LWARNING(fmt::format(
+                "Cannot add more joysticks, only {} joysticks are supported",
+                JoystickInputStates::MaxNumJoysticks
+            ));
             return nullptr;
         }
     }

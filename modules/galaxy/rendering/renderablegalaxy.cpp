@@ -222,7 +222,7 @@ namespace {
         std::ofstream fileStream(file, std::ofstream::binary);
 
         if (!fileStream.good()) {
-            LERROR(fmt::format("Error opening file {} for save cache file", file));
+            LERROR(fmt::format("Error opening file '{}' for save cache file", file));
             return;
         }
 
@@ -265,13 +265,13 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
     , _starRenderingEnabled(StarRenderingEnabledInfo, true)
     , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.05f, 0.001f)
-    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.f, 200.0f)
-    , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.f, 1000.0f)
+    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.f, 200.f)
+    , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.f, 1000.f)
     , _starRenderingMethod(
         StarRenderingMethodInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.0f)
+    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.f)
     , _rotation(
         RotationInfo,
         glm::vec3(0.f),
@@ -345,8 +345,8 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 void RenderableGalaxy::initialize() {
     ZoneScoped;
 
-    // Aspect is currently hardcoded to cubic voxels.
-    glm::vec3 d = _volumeDimensions;
+    // Aspect is currently hardcoded to cubic voxels
+    const glm::vec3 d = _volumeDimensions;
     _aspect = d / glm::compMax(d);
 
     // The volume
@@ -361,8 +361,8 @@ void RenderableGalaxy::initialize() {
     );
     const bool hasCachedFile = std::filesystem::is_regular_file(cachedPointsFile);
     if (hasCachedFile) {
-        LINFO(fmt::format("Cached file {} used for galaxy point file {}",
-            cachedPointsFile, std::filesystem::path(_pointsFilename)
+        LINFO(fmt::format("Cached file '{}' used for galaxy point file '{}'",
+            cachedPointsFile, _pointsFilename
         ));
 
         Result res = loadCachedFile(cachedPointsFile);
@@ -460,7 +460,7 @@ void RenderableGalaxy::initializeGL() {
 
         if (_pointSpreadFunctionTexture) {
             LDEBUG(fmt::format(
-                "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
+                "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
             ));
             _pointSpreadFunctionTexture->uploadTexture();
         }
@@ -548,7 +548,7 @@ void RenderableGalaxy::update(const UpdateData& data) {
     transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0.f, 1.f, 0.f));
     transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0.f, 0.f, 1.f));
 
-    glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
+    const glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
     _pointTransform = transform;
 
     _raycaster->setDownscaleRender(_downScaleVolumeRendering);
@@ -564,7 +564,7 @@ void RenderableGalaxy::update(const UpdateData& data) {
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     // Render the volume
     if (_raycaster && _volumeRenderingEnabled) {
-        RaycasterTask task { _raycaster.get(), data };
+        const RaycasterTask task { _raycaster.get(), data };
 
         const glm::vec3 position = data.camera.positionVec3();
         const float length = safeLength(position);
@@ -608,7 +608,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         }
     }
 
-    if (!(_starRenderingEnabled && _opacityCoefficient > 0.f)) {
+    if (!_starRenderingEnabled || _opacityCoefficient <= 0.f) {
         return;
     }
 
@@ -631,7 +631,7 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
 
     _pointsProgram->activate();
 
-    glm::dmat4 rotMatrix = glm::rotate(
+    const glm::dmat4 rotMatrix = glm::rotate(
         glm::dmat4(1.0),
         glm::pi<double>(),
         glm::dvec3(1.0, 0.0, 0.0)) *
@@ -639,11 +639,12 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
             glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
     );
 
-    AlternativeTransform altTransform;
-    altTransform.rotation = glm::dmat4(data.modelTransform.rotation) * rotMatrix;
-    glm::dmat4 modelTransform = calcModelTransform(data, altTransform);
+    const AlternativeTransform altTransform = {
+        .rotation = glm::dmat4(data.modelTransform.rotation) * rotMatrix
+    };
+    const glm::dmat4 modelTransform = calcModelTransform(data, altTransform);
 
-    glm::dmat4 cameraViewProjectionMatrix =
+    const glm::dmat4 cameraViewProjectionMatrix =
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
 
     _pointsProgram->setUniform(_uniformCachePoints.modelMatrix, modelTransform);
@@ -652,7 +653,7 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
         cameraViewProjectionMatrix
     );
 
-    glm::dvec3 eyePosition = glm::dvec3(
+    const glm::dvec3 eyePosition = glm::dvec3(
         glm::inverse(data.camera.combinedViewMatrix()) *
         glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
@@ -681,7 +682,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
 
     _billboardsProgram->activate();
 
-    glm::dmat4 rotMatrix = glm::rotate(
+    const glm::dmat4 rotMatrix = glm::rotate(
         glm::dmat4(1.0),
         glm::pi<double>(),
         glm::dvec3(1.0, 0.0, 0.0)) *
@@ -689,11 +690,12 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
             glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
     );
 
-    AlternativeTransform altTransform;
-    altTransform.rotation = glm::dmat4(data.modelTransform.rotation) * rotMatrix;
-    glm::dmat4 modelTransform = calcModelTransform(data, altTransform);
+    const AlternativeTransform altTransform = {
+        .rotation = glm::dmat4(data.modelTransform.rotation) * rotMatrix
+    };
+    const glm::dmat4 modelTransform = calcModelTransform(data, altTransform);
 
-    glm::dmat4 cameraViewProjectionMatrix =
+    const glm::dmat4 cameraViewProjectionMatrix =
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
 
     _billboardsProgram->setUniform(_uniformCacheBillboards.modelMatrix, modelTransform);
@@ -702,13 +704,13 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
         cameraViewProjectionMatrix
     );
 
-    glm::dvec3 eyePosition = glm::dvec3(
+    const glm::dvec3 eyePosition = glm::dvec3(
         glm::inverse(data.camera.combinedViewMatrix()) *
         glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
     _billboardsProgram->setUniform(_uniformCacheBillboards.eyePosition, eyePosition);
 
-    glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+    const glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
     _billboardsProgram->setUniform(_uniformCacheBillboards.cameraUp, cameraUp);
 
     ghoul::opengl::TextureUnit psfUnit;
@@ -728,11 +730,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
 }
 
 RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
-    std::vector<glm::vec3> pointPositions;
-    std::vector<glm::vec3> pointColors;
-    int64_t nPoints;
-
-    std::ifstream pointFile(_pointsFilename, std::ios::in);
+    std::ifstream pointFile = std::ifstream(_pointsFilename, std::ios::in);
 
     // Read header for OFF (Object File Format)
     std::string line;
@@ -741,17 +739,26 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
     // Read point count
     std::getline(pointFile, line);
     std::istringstream iss(line);
+    int64_t nPoints = 0;
     iss >> nPoints;
 
     // Prepare point reading
     _nPoints = static_cast<size_t>(nPoints);
 
+    std::vector<glm::vec3> pointPositions;
+    std::vector<glm::vec3> pointColors;
     // Read points
     for (size_t i = 0;
         i < static_cast<size_t>(_nPoints * _enabledPointsRatio.maxValue()) + 1;
         i++)
     {
-        float x, y, z, r, g, b, a;
+        float x = 0.f;
+        float y = 0.f;
+        float z = 0.f;
+        float r = 0.f;
+        float g = 0.f;
+        float b = 0.f;
+        float a = 0.f;
         std::getline(pointFile, line);
         std::istringstream issp(line);
         issp >> x >> y >> z >> r >> g >> b >> a;
@@ -774,28 +781,28 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
 RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
                                                         const std::filesystem::path& file)
 {
-    std::ifstream fileStream(file, std::ifstream::binary);
+    std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file {} for loading cache file", file));
+        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return { false, {}, {} };
     }
 
-    int8_t cacheVersion;
+    int8_t cacheVersion = 0;
     fileStream.read(reinterpret_cast<char*>(&cacheVersion), sizeof(int8_t));
     if (cacheVersion != CurrentCacheVersion) {
-        LINFO(fmt::format("Removing cache file {} as the version changed", file));
+        LINFO(fmt::format("Removing cache file '{}' as the version changed", file));
         return { false, {}, {} };
     }
 
-    int64_t nPoints;
+    int64_t nPoints = 0;
     fileStream.read(reinterpret_cast<char*>(&nPoints), sizeof(int64_t));
     _nPoints = static_cast<size_t>(nPoints);
 
-    float enabledPointsRatio;
+    float enabledPointsRatio = false;
     fileStream.read(reinterpret_cast<char*>(&enabledPointsRatio), sizeof(float));
     _enabledPointsRatio = enabledPointsRatio;
 
-    uint64_t nPositions;
+    uint64_t nPositions = 0;
     fileStream.read(reinterpret_cast<char*>(&nPositions), sizeof(uint64_t));
     std::vector<glm::vec3> positions;
     positions.resize(nPositions);
@@ -804,7 +811,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
         nPositions * sizeof(glm::vec3)
     );
 
-    uint64_t nColors;
+    uint64_t nColors = 0;
     fileStream.read(reinterpret_cast<char*>(&nColors), sizeof(uint64_t));
     std::vector<glm::vec3> colors;
     colors.resize(nColors);

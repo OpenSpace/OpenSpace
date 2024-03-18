@@ -114,10 +114,10 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
         // user may specify an overall time range. In that case expand this timerange
         if (p.timeRange.has_value()) {
-            std::string start = p.timeRange->start;
-            std::string end = p.timeRange->end.value_or(start);
+            const std::string start = p.timeRange->start;
+            const std::string end = p.timeRange->end.value_or(start);
 
-            TimeRange overallTimeRange = TimeRange(
+            const TimeRange overallTimeRange = TimeRange(
                 SpiceManager::ref().ephemerisTimeFromDate(start),
                 SpiceManager::ref().ephemerisTimeFromDate(end)
             );
@@ -139,8 +139,8 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     }
     else {
         if (p.timeRange.has_value()) {
-            std::string start = p.timeRange->start;
-            std::string end = p.timeRange->end.value_or(start);
+            const std::string start = p.timeRange->start;
+            const std::string end = p.timeRange->end.value_or(start);
 
             _timeRange = TimeRange(
                 SpiceManager::ref().ephemerisTimeFromDate(start),
@@ -165,8 +165,8 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
             std::string name = milestone.name;
             Time newTime = Time(milestone.date);
             Milestone newDate = {
-                .name = name,
-                .date = newTime
+                .name = std::move(name),
+                .date = std::move(newTime)
             };
             if (milestone.description.has_value()) {
                 newDate.description = milestone.description.value();
@@ -235,7 +235,7 @@ void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
 
     for (const MissionPhase& phase : _subphases) {
         if (phase.timeRange().includes(time)) {
-            trace.push_back(phase);
+            trace.emplace_back(phase);
             phase.phaseTrace(time, trace, maxDepth - 1);
             return;
         }

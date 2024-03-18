@@ -140,10 +140,10 @@ void GdalWrapper::setGdalProxyConfiguration() {
 
         const std::string proxy = address + ":" + std::to_string(port);
         CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());
-        LDEBUG(fmt::format("Using proxy server {}", proxy));
+        LDEBUG(fmt::format("Using proxy server '{}'", proxy));
 
         if (!user.empty() && !password.empty()) {
-            std::string userPwd = user + ":" + password;
+            const std::string userPwd = user + ":" + password;
             CPLSetConfigOption("GDAL_HTTP_PROXYUSERPWD", userPwd.c_str());
             CPLSetConfigOption("GDAL_HTTP_PROXYAUTH", auth.c_str());
             LDEBUG(fmt::format("Using authentication method: {}", auth));

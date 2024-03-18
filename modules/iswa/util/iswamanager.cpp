@@ -434,7 +434,7 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
         }
         else {
             spatialScale = glm::vec4(1.f);
-            spatialScale.w = 1; //-log10(1.0f/max.x);
+            spatialScale.w = 1; //-log10(1.f/max.x);
             coordinateType = "Polar";
         }
 
@@ -622,7 +622,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
     }
     else {
         LWARNING(
-            fmt::format("{} is not a cdf file or can't be found", absPath(info.path))
+            fmt::format("'{}' is not a CDF file or cannot be found", absPath(info.path))
         );
     }
 }
@@ -630,7 +630,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
 void IswaManager::createFieldline(std::string name, std::string cdfPath,
                                   std::string seedPath)
 {
-    std::filesystem::path ext = std::filesystem::path(absPath(cdfPath)).extension();
+    std::filesystem::path ext = absPath(cdfPath).extension();
     if (std::filesystem::is_regular_file(absPath(cdfPath)) && ext == ".cdf") {
         std::string luaTable = "{"
             "Name = '" + name + "',"
@@ -744,7 +744,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdfFile));
+        LWARNING(fmt::format("'{}' is not a CDF file or cannot be found", cdfFile));
     }
 }
 

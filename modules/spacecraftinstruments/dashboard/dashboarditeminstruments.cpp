@@ -72,8 +72,8 @@ namespace {
         return progress;
     }
 
-    glm::vec2 addToBoundingbox(glm::vec2 lhs, glm::vec2 rhs) {
-        return { std::max(lhs.x, rhs.x), lhs.y + rhs.y };
+    glm::vec2 addToBoundingbox(const glm::vec2& lhs, const glm::vec2& rhs) {
+        return glm::vec2(std::max(lhs.x, rhs.x), lhs.y + rhs.y);
     }
 
     struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
@@ -122,7 +122,7 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
     ZoneScoped;
 
-    double currentTime = global::timeManager->time().j2000Seconds();
+    const double currentTime = global::timeManager->time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
         return;
@@ -133,9 +133,9 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
     constexpr glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
 
-    double previous = sequencer.prevCaptureTime(currentTime);
-    double next = sequencer.nextCaptureTime(currentTime);
-    double remaining = next - currentTime;
+    const double previous = sequencer.prevCaptureTime(currentTime);
+    const double next = sequencer.nextCaptureTime(currentTime);
+    const double remaining = next - currentTime;
     float t = static_cast<float>(1.0 - remaining / (next - previous));
     t = std::clamp(t, 0.f, 1.f);
 
@@ -156,7 +156,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         }
 
         const int Size = 25;
-        int p = std::max(static_cast<int>((t * (Size - 1)) + 1), 0);
+        const int p = std::max(static_cast<int>((t * (Size - 1)) + 1), 0);
         RenderFont(
             *_font,
             penPosition,
@@ -215,7 +215,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     const std::vector<std::pair<std::string, bool>>& activeMap =
         sequencer.activeInstruments(currentTime);
 
-    glm::vec4 firing = glm::vec4(0.58f - t, 1.f - t, 1.f - t, 1.f);
+    const glm::vec4 firing = glm::vec4(0.58f - t, 1.f - t, 1.f - t, 1.f);
 
     RenderFont(
         *_font,
@@ -253,24 +253,24 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemInstruments::size() const {
-    glm::vec2 size = glm::vec2(0.f);
-    double currentTime = global::timeManager->time().j2000Seconds();
+    const double time = global::timeManager->time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
         return glm::vec2(0.f);
     }
-    ImageSequencer& sequencer = ImageSequencer::ref();
+    const ImageSequencer& sequencer = ImageSequencer::ref();
 
-    double previous = sequencer.prevCaptureTime(currentTime);
-    double next = sequencer.nextCaptureTime(currentTime);
-    double remaining = sequencer.nextCaptureTime(currentTime) - currentTime;
+    const double previous = sequencer.prevCaptureTime(time);
+    const double next = sequencer.nextCaptureTime(time);
+    const double remaining = sequencer.nextCaptureTime(time) - time;
     const float t = static_cast<float>(1.0 - remaining / (next - previous));
 
     const std::string& str = SpiceManager::ref().dateFromEphemerisTime(
-        sequencer.nextCaptureTime(currentTime),
+        sequencer.nextCaptureTime(time),
         "YYYY MON DD HR:MN:SC"
     );
 
+    glm::vec2 size = glm::vec2(0.f);
     if (remaining > 0.0) {
         std::string progress = progressToStr(25, t);
 
@@ -288,14 +288,14 @@ glm::vec2 DashboardItemInstruments::size() const {
             _font->boundingBox(fmt::format("Data acquisition time: {}", str))
         );
     }
-    std::pair<double, std::string> nextTarget = sequencer.nextTarget(currentTime);
-    std::pair<double, std::string> currentTarget = sequencer.currentTarget(currentTime);
+    const std::pair<double, std::string> nextTarget = sequencer.nextTarget(time);
+    const std::pair<double, std::string> currentTarget = sequencer.currentTarget(time);
 
     if (currentTarget.first <= 0.0) {
         return size;
     }
 
-    const int timeleft = static_cast<int>(nextTarget.first - currentTime);
+    const int timeleft = static_cast<int>(nextTarget.first - time);
 
     const int hour = timeleft / 3600;
     int second = timeleft % 3600;

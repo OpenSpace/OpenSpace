@@ -384,7 +384,7 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
                 }
             );
             o.explanation = fmt::format(
-                "{} not in list of accepted values '{}'",
+                "'{}' not in list of accepted values '{}'",
                 key, list
             );
             r.offenses.push_back(o);

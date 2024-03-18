@@ -69,6 +69,25 @@ namespace {
         "Only used if UpdateBrowserBetweenRenderables is true",
         openspace::properties::Property::Visibility::Developer
     };
+
+    /**
+     * Try to find the CEF Helper executable. It looks in the bin/openspace folder.
+     * Therefore, if you change that this might cause a crash here.
+     *
+     * \return the absolute path to the file
+     */
+    std::filesystem::path findHelperExecutable() {
+        const std::filesystem::path execLocation = absPath(fmt::format(
+            "${{BIN}}/{}", SubprocessPath
+        ));
+        if (!std::filesystem::is_regular_file(execLocation)) {
+            LERROR(fmt::format(
+                "Could not find web helper executable at location: {}", execLocation
+            ));
+        }
+        return execLocation;
+    }
+
 } // namespace
 
 namespace openspace {
@@ -76,7 +95,7 @@ namespace openspace {
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
     , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
-    , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.0f, 1000.f)
+    , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.f, 1000.f)
     , _eventHandler(new EventHandler)
 {
     global::callback::deinitialize->emplace_back([this]() {
@@ -113,20 +132,10 @@ void WebBrowserModule::internalDeinitialize() {
 
     _eventHandler->resetBrowserInstance();
 
-    bool forceBrowserShutdown = true;
+    const bool forceBrowserShutdown = true;
     for (BrowserInstance* browser : _browsers) {
         browser->close(forceBrowserShutdown);
     }
-}
-
-std::filesystem::path WebBrowserModule::findHelperExecutable() {
-    std::filesystem::path execLocation = absPath("${BIN}/" + std::string(SubprocessPath));
-    if (!std::filesystem::is_regular_file(execLocation)) {
-        LERROR(fmt::format(
-            "Could not find web helper executable at location: {}" , execLocation
-        ));
-    }
-    return execLocation;
 }
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
@@ -229,7 +238,7 @@ void update() {
     const std::chrono::time_point<std::chrono::high_resolution_clock> timeBefore =
         std::chrono::high_resolution_clock::now();
 
-    std::chrono::microseconds duration =
+    const std::chrono::microseconds duration =
         std::chrono::duration_cast<std::chrono::microseconds>(timeBefore - latestCall);
 
     if (duration > interval) {

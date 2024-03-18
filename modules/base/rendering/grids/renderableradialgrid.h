@@ -66,8 +66,8 @@ protected:
         GeometryData& operator=(GeometryData&& other) noexcept;
         ~GeometryData();
 
-        void update();
-        void render();
+        void update() const;
+        void render() const;
 
         std::vector<rendering::helper::VertexXYZ> varray;
         GLuint vao = 0;

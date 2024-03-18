@@ -49,7 +49,7 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList
 }
 
 void DisplayWindowUnion::createWidgets(int nMaxWindows,
-                                       std::vector<QRect> monitorResolutions,
+                                       const std::vector<QRect>& monitorResolutions,
                                        std::array<QColor, 4> windowColors,
                                        bool resetToDefault)
 {

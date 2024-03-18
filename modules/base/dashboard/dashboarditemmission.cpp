@@ -72,7 +72,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
     if (!global::missionManager->hasCurrentMission()) {
         return;
     }
-    double currentTime = global::timeManager->time().j2000Seconds();
+    const double currentTime = global::timeManager->time().j2000Seconds();
     const Mission& mission = global::missionManager->currentMission();
 
     if (mission.phases().empty()) {
@@ -99,7 +99,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         penPosition.y -= _font->height();
         RenderFont(*_font, penPosition, title, missionProgressColor);
         double remaining = phase.timeRange().end - currentTime;
-        float t = static_cast<float>(
+        const float t = static_cast<float>(
             1.0 - remaining / phase.timeRange().duration()
         );
         std::string progress = progressToStr(25, t);
@@ -124,13 +124,13 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         );
     }
 
-    bool showAllPhases = false;
+    constexpr bool ShowAllPhases = false;
 
     using PhaseWithDepth = std::pair<const MissionPhase*, int>;
     std::stack<PhaseWithDepth> S;
 
     constexpr int PixelIndentation = 20;
-    S.push({ &mission, 0 });
+    S.emplace(&mission, 0);
     while (!S.empty()) {
         const MissionPhase* phase = S.top().first;
         const int depth = S.top().second;
@@ -169,15 +169,13 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         }
         penPosition.x -= depth * PixelIndentation;
 
-        if (isCurrentPhase || showAllPhases) {
+        if (isCurrentPhase || ShowAllPhases) {
             // phases are sorted increasingly by start time, and will be
             // popped last-in-first-out from the stack, so add them in
             // reversed order.
-            int indexLastPhase = static_cast<int>(
-                phase->phases().size()
-            ) - 1;
+            const int indexLastPhase = static_cast<int>(phase->phases().size()) - 1;
             for (int i = indexLastPhase; 0 <= i; --i) {
-                S.push({ &phase->phases()[i], depth + 1 });
+                S.emplace(&phase->phases()[i], depth + 1);
             }
         }
     }

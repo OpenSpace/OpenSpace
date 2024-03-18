@@ -39,8 +39,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 #include <chrono>
+#include <cmath>
 #include <fstream>
-#include <math.h>
 #include <random>
 #include <vector>
 
@@ -274,7 +274,10 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.modelView, calcModelViewTransform(data));
 
     // Because we want the property to work similar to the planet trails
-    const float fade = pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.f);
+    const float fade = std::pow(
+        _appearance.lineFade.maxValue() - _appearance.lineFade,
+        2.f
+    );
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
@@ -366,7 +369,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     size_t nVerticesTotal = 0;
 
-    int numOrbits = static_cast<int>(parameters.size());
+    const int numOrbits = static_cast<int>(parameters.size());
     for (int i = 0; i < numOrbits; i++) {
         nVerticesTotal += _segmentSize[i];
     }
@@ -389,10 +392,10 @@ void RenderableOrbitalKepler::updateBuffers() {
         );
 
         for (GLint j = 0 ; j < (_segmentSize[orbitIdx]); j++) {
-            double timeOffset = orbit.period *
+            const double timeOffset = orbit.period *
                 static_cast<double>(j) / static_cast<double>(_segmentSize[orbitIdx] - 1);
 
-            glm::dvec3 position = keplerTranslator.position({
+            const glm::dvec3 position = keplerTranslator.position({
                 {},
                 Time(timeOffset + orbit.epoch),
                 Time(0.0)

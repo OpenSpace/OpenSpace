@@ -354,7 +354,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     }
 
     using namespace std::chrono;
-    double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
+    const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // How much time has passed since the last permanent point
     const double delta = data.time.j2000Seconds() - _lastPointTime;

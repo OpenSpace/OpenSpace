@@ -69,7 +69,10 @@ namespace {
                 absPath("${USER_PROFILES}").string(), global::configuration->profile
             );
         }
-        LINFOC("Profile", fmt::format("Saving a copy of the old profile as {}", newFile));
+        LINFOC(
+            "Profile",
+            fmt::format("Saving a copy of the old profile as '{}'", newFile)
+        );
         std::filesystem::copy(sourcePath, destPath);
         saveFilePath = global::configuration->profile;
     }
@@ -119,7 +122,7 @@ namespace {
     catch (const std::ofstream::failure& e) {
         throw ghoul::lua::LuaError(
             fmt::format(
-                "Exception opening profile file for write: {} ({})", absFilename, e.what()
+                "Exception opening profile file for write '{}': {}", absFilename, e.what()
             )
         );
     }
@@ -129,7 +132,7 @@ namespace {
     }
     catch (const std::ofstream::failure& e) {
         throw ghoul::lua::LuaError(
-            fmt::format("Data write error to file: {} ({})", absFilename, e.what())
+            fmt::format("Data write error to file '{}': {}", absFilename, e.what())
         );
     }
 }

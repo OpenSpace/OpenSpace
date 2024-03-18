@@ -86,7 +86,7 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
             LWARNINGC(
                 "ScreenSpaceImageLocal",
                 fmt::format(
-                    "Image {} did not exist for {}", _texturePath.value(), _identifier
+                    "Image '{}' did not exist for '{}'", _texturePath.value(), _identifier
                 )
             );
         }
@@ -103,7 +103,9 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
         else {
             LWARNINGC(
                 "ScreenSpaceImageLocal",
-                fmt::format("Image {} did not exist for {}", *p.texturePath, _identifier)
+                fmt::format(
+                    "Image '{}' did not exist for '{}'", *p.texturePath, _identifier
+                )
             );
         }
     }

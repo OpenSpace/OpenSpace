@@ -62,14 +62,12 @@ ConvertRecFileVersionTask::ConvertRecFileVersionTask(const ghoul::Dictionary& di
 }
 
 ConvertRecFileVersionTask::~ConvertRecFileVersionTask() {
-    if (sessRec != nullptr) {
-        delete sessRec;
-    }
+    delete sessRec;
 }
 
 std::string ConvertRecFileVersionTask::description() {
     std::string description = fmt::format(
-        "Convert file format of session recording file {} to current version",
+        "Convert file format of session recording file '{}' to current version",
         _inFilePath
     );
     return description;
@@ -80,17 +78,17 @@ void ConvertRecFileVersionTask::perform(const Task::ProgressCallback&) {
 }
 
 void ConvertRecFileVersionTask::convert() {
-    bool hasBinaryFileExtension = sessRec->hasFileExtension(
+    const bool hasBinaryFileExtension = SessionRecording::hasFileExtension(
         _inFilename,
         SessionRecording::FileExtensionBinary
     );
-    bool hasAsciiFileExtension = sessRec->hasFileExtension(
+    const bool hasAsciiFileExtension = SessionRecording::hasFileExtension(
         _inFilename,
         SessionRecording::FileExtensionAscii
     );
     if (!hasBinaryFileExtension && !hasAsciiFileExtension) {
         LERROR(fmt::format(
-            "Input filename does not have expected {} or {} extension",
+            "Input filename does not have expected '{}' or '{}' extension",
             SessionRecording::FileExtensionBinary, SessionRecording::FileExtensionAscii
         ));
         return;

@@ -203,7 +203,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 
     _speckFile = absPath(p.file).string();
-    _hasSpeckFile = true;
     _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
@@ -267,7 +266,7 @@ bool RenderableDUMeshes::isReady() const {
 }
 
 void RenderableDUMeshes::initialize() {
-    bool success = loadData();
+    const bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
     }
@@ -368,22 +367,23 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
                                       const glm::vec3& orthoRight,
                                       const glm::vec3& orthoUp)
 {
-    float scale = static_cast<float>(toMeter(_unit));
+    const float scale = static_cast<float>(toMeter(_unit));
 
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-    labelInfo.orthoRight = orthoRight;
-    labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = _textMinMaxSize.value().x;
-    labelInfo.maxSize = _textMinMaxSize.value().y;
-    labelInfo.cameraPos = data.camera.positionVec3();
-    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = _renderOption;
-    labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, _textSize);
-    labelInfo.enableDepth = true;
-    labelInfo.enableFalseDepth = false;
+    const ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
+        .enableDepth = true,
+        .enableFalseDepth = false,
+        .scale = std::pow(10.f, _textSize),
+        .renderType = _renderOption,
+        .minSize = _textMinMaxSize.value().x,
+        .maxSize = _textMinMaxSize.value().y,
+        .mvpMatrix = modelViewProjectionMatrix,
+        .orthoRight = orthoRight,
+        .orthoUp = orthoUp,
+        .cameraPos = data.camera.positionVec3(),
+        .cameraLookUp = data.camera.lookUpVectorWorldSpace()
+    };
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
+    const glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
 
     for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         glm::vec3 scaledPos(e.position);
@@ -415,14 +415,14 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
 
     const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
     glm::vec3 orthoRight = glm::normalize(
-        glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+        glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
     );
 
     if (orthoRight == glm::vec3(0.0)) {
-        glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
+        const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
         );
     }
 
@@ -448,14 +448,14 @@ void RenderableDUMeshes::update(const UpdateData&) {
 bool RenderableDUMeshes::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
-        LINFO(fmt::format("Loading Speck file {}", std::filesystem::path(_speckFile)));
+        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
         success = readSpeckFile();
         if (!success) {
             return false;
         }
     }
 
-    std::string labelFile = _labelFile;
+    const std::string labelFile = _labelFile;
     if (!labelFile.empty()) {
         _labelset = dataloader::label::loadFileWithCache(_labelFile);
     }
@@ -466,9 +466,7 @@ bool RenderableDUMeshes::loadData() {
 bool RenderableDUMeshes::readSpeckFile() {
     std::ifstream file(_speckFile);
     if (!file.good()) {
-        LERROR(fmt::format(
-            "Failed to open Speck file {}", std::filesystem::path(_speckFile)
-        ));
+        LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
         return false;
     }
 
@@ -498,7 +496,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             continue;
         }
 
-        std::size_t found = line.find("mesh");
+        const size_t found = line.find("mesh");
         if (found == std::string::npos) {
             continue;
         }
@@ -564,22 +562,22 @@ bool RenderableDUMeshes::readSpeckFile() {
                 glm::vec3 pos;
                 bool success = true;
                 for (int i = 0; i < 3; i++) {
-                    GLfloat value;
+                    GLfloat value = 0.f;
                     lineData >> value;
-                    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
+                    const bool errorReading = lineData.rdstate() & std::ifstream::failbit;
                     if (errorReading) {
                         success = false;
                         break;
                     }
 
-                    GLfloat scaledValue = value * scale;
+                    const GLfloat scaledValue = value * scale;
                     pos[i] = scaledValue;
                     mesh.vertices.push_back(scaledValue);
                 }
 
                 if (!success) {
                     LERROR(fmt::format(
-                        "Failed reading position on line {} of mesh {} in file: '{}'. "
+                        "Failed reading position on line {} of mesh {} in file '{}'. "
                         "Stopped reading mesh data", l, meshIndex, _speckFile
                     ));
                     break;
@@ -627,11 +625,11 @@ void RenderableDUMeshes::createMeshes() {
 
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
         for (int i = 0; i < p.second.numU; i++) {
-            GLuint vao;
+            GLuint vao = 0;
             glGenVertexArrays(1, &vao);
             p.second.vaoArray.push_back(vao);
 
-            GLuint vbo;
+            GLuint vbo = 0;
             glGenBuffers(1, &vbo);
             p.second.vboArray.push_back(vbo);
 
@@ -641,7 +639,7 @@ void RenderableDUMeshes::createMeshes() {
             glBufferData(
                 GL_ARRAY_BUFFER,
                 p.second.vertices.size() * sizeof(GLfloat),
-                &p.second.vertices[0],
+                p.second.vertices.data(),
                 GL_STATIC_DRAW
             );
             // in_position
@@ -686,11 +684,11 @@ void RenderableDUMeshes::createMeshes() {
         // Grid: we need columns
         if (p.second.numU > 1) {
             for (int i = 0; i < p.second.numV; i++) {
-                GLuint cvao;
+                GLuint cvao = 0;
                 glGenVertexArrays(1, &cvao);
                 p.second.vaoArray.push_back(cvao);
 
-                GLuint cvbo;
+                GLuint cvbo = 0;
                 glGenBuffers(1, &cvbo);
                 p.second.vboArray.push_back(cvbo);
 
@@ -699,7 +697,7 @@ void RenderableDUMeshes::createMeshes() {
                 glBufferData(
                     GL_ARRAY_BUFFER,
                     p.second.vertices.size() * sizeof(GLfloat),
-                    &p.second.vertices[0],
+                    p.second.vertices.data(),
                     GL_STATIC_DRAW
                 );
                 // in_position

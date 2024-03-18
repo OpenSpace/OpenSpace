@@ -43,8 +43,8 @@ namespace {
 
 namespace openspace::interaction {
 
-Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
-    : _nodeIdentifier(ref)
+Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, std::string ref)
+    : _nodeIdentifier(std::move(ref))
 {
     _pose = { .position = pos, .rotation = rot };
 
@@ -172,7 +172,7 @@ glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
 }
 
 Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
-                                     std::optional<Waypoint> startPoint,
+                                     const std::optional<Waypoint>& startPoint,
                                      bool useLinear)
 {
     const SceneGraphNode* targetNode = sceneGraphNode(spec.identifier);
@@ -182,14 +182,14 @@ Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
     }
 
     // Use current camera position if no previous point was specified
-    Waypoint prevPoint = startPoint.value_or(waypointFromCamera());
+    const Waypoint prevPoint = startPoint.value_or(waypointFromCamera());
 
     glm::dvec3 stepDir;
-    glm::dvec3 targetPos;
+    glm::dvec3 cameraPos;
     if (spec.position.has_value()) {
         // The position in instruction is given in the targetNode's local coordinates.
         // Convert to world coordinates
-        targetPos = glm::dvec3(
+        cameraPos = glm::dvec3(
             targetNode->modelTransform() * glm::dvec4(*spec.position, 1.0)
         );
     }
@@ -203,14 +203,14 @@ Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
 
         if (useLinear) {
             // If linear path, compute position along line form start to end point
-            glm::dvec3 endNodePos = targetNode->worldPosition();
+            const glm::dvec3 endNodePos = targetNode->worldPosition();
             stepDir = glm::normalize(prevPoint.position() - endNodePos);
         }
         else {
             stepDir = computeGoodStepDirection(targetNode, prevPoint);
         }
 
-        targetPos = targetNode->worldPosition() + stepDir * distanceFromNodeCenter;
+        cameraPos = targetNode->worldPosition() + stepDir * distanceFromNodeCenter;
     }
 
     glm::dvec3 up = global::navigationHandler->camera()->lookUpVectorWorldSpace();
@@ -224,20 +224,20 @@ Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
     // Compute rotation so the camera is looking at the targetted node
     glm::dvec3 lookAtPos = targetNode->worldPosition();
 
-    // Check if we can distinguish between targetpos and lookAt pos. Otherwise, move it
+    // Check if we can distinguish between cameraPos and lookAt pos. Otherwise, move it
     // further away
-    const glm::dvec3 diff = targetPos - lookAtPos;
-    double distSquared = glm::dot(diff, diff);
+    const glm::dvec3 diff = cameraPos - lookAtPos;
+    const double distSquared = glm::dot(diff, diff);
     if (std::isnan(distSquared) || distSquared < LengthEpsilon) {
-        double startToEndDist = glm::length(
+        const double startToEndDist = glm::length(
             prevPoint.position() - targetNode->worldPosition()
         );
-        lookAtPos = targetPos - stepDir * 0.1 * startToEndDist;
+        lookAtPos = cameraPos - stepDir * 0.1 * startToEndDist;
     }
 
-    const glm::dquat targetRot = ghoul::lookAtQuaternion(targetPos, lookAtPos, up);
+    const glm::dquat targetRot = ghoul::lookAtQuaternion(cameraPos, lookAtPos, up);
 
-    return Waypoint(targetPos, targetRot, spec.identifier);
+    return Waypoint(cameraPos, targetRot, spec.identifier);
 }
 
 } // namespace openspace::interaction

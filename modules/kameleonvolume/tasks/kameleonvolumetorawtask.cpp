@@ -98,8 +98,8 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
 
 std::string KameleonVolumeToRawTask::description() {
     return fmt::format(
-        "Extract volumetric data from cdf file {}. Write raw volume data into {} "
-        "and dictionary with metadata to {}",
+        "Extract volumetric data from CDF file '{}'. Write raw volume data into '{}' "
+        "and dictionary with metadata to '{}'",
         _inputPath, _rawVolumeOutputPath, _dictionaryOutputPath
     );
 }
@@ -158,11 +158,10 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
 
     std::string metadataString = ghoul::formatLua(outputMetadata);
 
-    std::fstream f(_dictionaryOutputPath, std::ios::out);
+    std::fstream f = std::fstream(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;
-    f.close();
 
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace::kameleonvolume

@@ -38,8 +38,6 @@
 
 namespace openspace::interaction {
 
-KeybindingManager::KeybindingManager() {}
-
 void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
@@ -78,7 +76,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string actio
 #endif // WIN32
     ghoul_assert(!action.empty(), "Action must not be empty");
 
-    KeyWithModifier km = { key, modifier };
+    const KeyWithModifier km = { key, modifier };
     _keyLua.insert({ km, std::move(action) });
 }
 

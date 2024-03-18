@@ -39,7 +39,7 @@ public:
 
     bool initialize();
 
-    void render();
+    void render() const;
 
 //private:
     struct Vertex {

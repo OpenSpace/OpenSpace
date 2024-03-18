@@ -41,7 +41,7 @@ public:
     static documentation::Documentation Documentation();
 
     static std::unique_ptr<DashboardItem> createFromDictionary(
-        ghoul::Dictionary dictionary
+        const ghoul::Dictionary& dictionary
     );
 
     DashboardItem(const ghoul::Dictionary& dictionary);

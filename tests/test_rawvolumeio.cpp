@@ -58,17 +58,16 @@ TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
 TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
     using namespace openspace::volume;
 
-    glm::uvec3 dims(2, 4, 8);
+    const glm::uvec3 dims = glm::uvec3(2, 4, 8);
     auto value = [dims](glm::uvec3 v) {
         return static_cast<float>(v.z * dims.z * dims.y + v.y * dims.y + v.x);
     };
 
     RawVolume<float> vol(dims);
     vol.forEachVoxel([&vol, &value](glm::uvec3 x, float) { vol.set(x, value(x)); });
+    vol.forEachVoxel([&value](const glm::uvec3& x, float v) { CHECK(v == value(x)); });
 
-    vol.forEachVoxel([&value](glm::uvec3 x, float v) { CHECK(v == value(x)); });
-
-    std::filesystem::path volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
+    const std::filesystem::path volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
 
     // Write the 2x4x8 volume to disk
     RawVolumeWriter<float> writer(volumePath.string());
@@ -76,8 +75,8 @@ TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
 
     // Read the 2x4x8 volume and make sure the value is the same.
     RawVolumeReader<float> reader(volumePath.string(), dims);
-    std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
-    vol.forEachVoxel([&value](glm::uvec3 x, float v) {
+    const std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
+    vol.forEachVoxel([&value](const glm::uvec3& x, float v) {
         CHECK(v == value(x));
     });
 }

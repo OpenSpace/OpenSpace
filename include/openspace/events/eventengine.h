@@ -113,7 +113,7 @@ public:
      */
     void unregisterEventAction(events::Event::Type type,
         const std::string& identifier,
-        std::optional<ghoul::Dictionary> filter = std::nullopt);
+        const std::optional<ghoul::Dictionary>& filter = std::nullopt);
 
     /**
      * Removing registration for a specific event identified by the \p identifier.

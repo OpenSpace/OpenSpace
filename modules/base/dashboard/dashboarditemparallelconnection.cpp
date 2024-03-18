@@ -108,8 +108,8 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
 glm::vec2 DashboardItemParallelConnection::size() const {
     ZoneScoped;
 
-    ParallelConnection::Status status = global::parallelPeer->status();
-    size_t nConnections = global::parallelPeer->nConnections();
+    const ParallelConnection::Status status = global::parallelPeer->status();
+    const size_t nConnections = global::parallelPeer->nConnections();
     const std::string& hostName = global::parallelPeer->hostName();
 
     std::string connectionInfo;

@@ -39,7 +39,7 @@ using nlohmann::json;
 namespace openspace {
 
 void DocumentationTopic::handleJson(const nlohmann::json& json) {
-    std::string requestedType = json.at("type").get<std::string>();
+    const std::string requestedType = json.at("type").get<std::string>();
 
     nlohmann::json response;
 

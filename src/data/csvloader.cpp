@@ -52,7 +52,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     ghoul_assert(std::filesystem::exists(filePath), "File must exist");
 
     auto readFloatData = [](const std::string& str) -> float {
-        float result;
+        float result = 0.f;
 #ifdef WIN32
         auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
         if (ec == std::errc() && std::isfinite(result)) {
@@ -62,7 +62,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 #else // ^^^^ WIN32 // !WIN32 vvvv
         // clang is missing float support for std::from_chars
         try {
-            result = std::stof(str.c_str(), nullptr);
+            result = std::stof(str, nullptr);
             if (std::isfinite(result)) {
                 return result;
             }
@@ -81,7 +81,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 
     if (rows.size() < 2) {
         LWARNING(fmt::format(
-            "Error loading data file {}. No data items read", filePath
+            "Error loading data file '{}'. No data items read", filePath
         ));
         return Dataset();
     }
@@ -99,7 +99,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     int textureColumn = -1;
 
     int nDataColumns = 0;
-    bool hasExcludeColumns = specs.has_value() && specs->hasExcludeColumns();
+    const bool hasExcludeColumns = specs.has_value() && specs->hasExcludeColumns();
     std::vector<size_t> skipColumns;
     if (hasExcludeColumns) {
         skipColumns.reserve((*specs).excludeColumns.size());
@@ -171,13 +171,11 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
         // One or more position columns weren't read
         LERROR(fmt::format(
-            "Error loading data file {}. Missing X, Y or Z position column", filePath
+            "Error loading data file '{}'. Missing X, Y or Z position column", filePath
         ));
     }
 
-    LINFO(fmt::format(
-        "Loading {} rows with {} columns", rows.size(), columns.size()
-    ));
+    LINFO(fmt::format("Loading {} rows with {} columns", rows.size(), columns.size()));
     ProgressBar progress = ProgressBar(static_cast<int>(rows.size()));
 
     std::set<int> uniqueTextureIndicesInData;
@@ -201,7 +199,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             const std::string& strValue = row[i];
 
             // For now, all values are converted to float
-            float value = readFloatData(strValue);
+            const float value = readFloatData(strValue);
 
             if (i == xColumn) {
                 entry.position.x = value;
@@ -226,8 +224,8 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             }
         }
 
-        glm::vec3 positive = glm::abs(entry.position);
-        float max = glm::compMax(positive);
+        const glm::vec3 positive = glm::abs(entry.position);
+        const float max = glm::compMax(positive);
         if (max > res.maxPositionComponent) {
             res.maxPositionComponent = max;
         }

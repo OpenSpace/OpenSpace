@@ -68,7 +68,7 @@ public:
     void update();
     void reset(bool includeDisabled = false);
 
-    void onChange(std::function<void(Layer* l)> callback);
+    void onChange(const std::function<void(Layer* l)>& callback);
 
     static documentation::Documentation Documentation();
 

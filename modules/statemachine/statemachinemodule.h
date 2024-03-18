@@ -42,13 +42,13 @@ public:
 
     void initializeStateMachine(const ghoul::Dictionary& states,
         const ghoul::Dictionary& transitions,
-        const std::optional<std::string> startState = std::nullopt);
+        std::optional<std::string> startState = std::nullopt);
     void deinitializeStateMachine();
 
     bool hasStateMachine() const;
 
     // initializeStateMachine must have been called before
-    void setInitialState(const std::string initialState);
+    void setInitialState(const std::string& initialState);
     std::string currentState() const;
     std::vector<std::string> possibleTransitions() const;
     void transitionTo(const std::string& newState);

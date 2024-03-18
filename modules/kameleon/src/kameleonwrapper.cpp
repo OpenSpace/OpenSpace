@@ -172,7 +172,9 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format("Loading variable {} from CDF data with a uniform sampling", var));
+    LINFO(fmt::format(
+        "Loading variable '{}' from CDF data with a uniform sampling", var
+    ));
 
     const size_t size = outDimensions.x * outDimensions.y * outDimensions.z;
     float* data = new float[size];
@@ -323,7 +325,7 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
     LINFO(fmt::format(
-        "Loading variable {} from CDF data with a uniform sampling",
+        "Loading variable '{}' from CDF data with a uniform sampling",
         var
     ));
 
@@ -454,7 +456,7 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
     LINFO(fmt::format(
-        "loading variables {} {} {} from CDF data with a uniform sampling",
+        "Loading variables {} {} {} from CDF data with a uniform sampling",
         xVar,
         yVar,
         zVar

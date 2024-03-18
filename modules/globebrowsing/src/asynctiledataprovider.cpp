@@ -113,7 +113,7 @@ bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex)
 }
 
 void AsyncTileDataProvider::endUnfinishedJobs() {
-    std::vector<TileIndex::TileHashKey> unfinishedJobs =
+    const std::vector<TileIndex::TileHashKey> unfinishedJobs =
         _concurrentJobManager.keysToUnfinishedJobs();
     for (const TileIndex::TileHashKey& unfinishedJob : unfinishedJobs) {
         // When erasing the job before
@@ -122,7 +122,7 @@ void AsyncTileDataProvider::endUnfinishedJobs() {
 }
 
 void AsyncTileDataProvider::endEnqueuedJobs() {
-    std::vector<TileIndex::TileHashKey> enqueuedJobs =
+    const std::vector<TileIndex::TileHashKey> enqueuedJobs =
         _concurrentJobManager.keysToEnqueuedJobs();
     for (const TileIndex::TileHashKey& enqueuedJob : enqueuedJobs) {
         // When erasing the job before
@@ -180,7 +180,7 @@ void AsyncTileDataProvider::prepareToBeDeleted() {
     endEnqueuedJobs();
 }
 
-bool AsyncTileDataProvider::shouldBeDeleted() {
+bool AsyncTileDataProvider::shouldBeDeleted() const {
     return _shouldBeDeleted;
 }
 

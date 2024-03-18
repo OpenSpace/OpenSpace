@@ -101,14 +101,14 @@ void ActionManager::triggerAction(const std::string& identifier,
 
     if (!shouldBeSynchronized || a.isLocal) {
         global::scriptEngine->queueScript(
-            script,
+            std::move(script),
             scripting::ScriptEngine::ShouldBeSynchronized::No,
             scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
     else {
         global::scriptEngine->queueScript(
-            script,
+            std::move(script),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );

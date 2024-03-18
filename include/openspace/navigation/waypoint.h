@@ -39,7 +39,7 @@ struct NavigationState;
 class Waypoint {
 public:
     Waypoint() = default;
-    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
+    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, std::string ref);
     explicit Waypoint(const NavigationState& ns);
 
     CameraPose pose() const;
@@ -92,7 +92,7 @@ struct NodeCameraStateSpec {
  * \return The computed WayPoint
  */
 Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
-    std::optional<Waypoint> startPoint = std::nullopt, bool useLinear = false);
+    const std::optional<Waypoint>& startPoint = std::nullopt, bool useLinear = false);
 
 } // namespace openspace::interaction
 

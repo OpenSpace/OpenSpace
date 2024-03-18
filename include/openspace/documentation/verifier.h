@@ -954,7 +954,7 @@ public:
      *       necessary to make the codegen work in all cases without complications there
      */
     OrVerifier(const std::vector<std::variant<Verifier*,
-        std::shared_ptr<Verifier>>> values);
+        std::shared_ptr<Verifier>>>& values);
 
     /**
      * Checks whether the \p dictionary contains the \p key and whether this key passes

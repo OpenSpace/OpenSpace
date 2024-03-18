@@ -211,7 +211,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             // Convert the start and end time from string representations to J2000 seconds
             _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
             _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
-            double timespan = _end - _start;
+            const double timespan = _end - _start;
 
             _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
 
@@ -234,9 +234,9 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
 
         // Calculate sweeping range for this iteration
-        unsigned int startIndex = _sweepIteration * _sweepChunkSize;
-        unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
-        unsigned int stopIndex = std::min(nextIndex, _numberOfVertices);
+        const unsigned int startIndex = _sweepIteration * _sweepChunkSize;
+        const unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
+        const unsigned int stopIndex = std::min(nextIndex, _numberOfVertices);
 
         // Calculate all vertex positions
         for (unsigned int i = startIndex; i < stopIndex; i++) {
@@ -331,7 +331,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         ghoul_assert(_primaryRenderInformation.count > 0, "No vertices available");
 
         // Copy the last valid location
-        glm::dvec3 v0(
+        const glm::dvec3 v0 = glm::dvec3(
             _vertexArray[_primaryRenderInformation.count - 1].x,
             _vertexArray[_primaryRenderInformation.count - 1].y,
             _vertexArray[_primaryRenderInformation.count - 1].z
@@ -339,7 +339,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
         // And get the current location of the object
         const glm::dvec3 p = _translation->position(data);
-        const glm::dvec3 v1 = { p.x, p.y, p.z };
+        const glm::dvec3 v1 = glm::dvec3(p.x, p.y, p.z);
 
         // Comptue the difference between the points in double precision
         const glm::dvec3 p0 = v0 - v1;

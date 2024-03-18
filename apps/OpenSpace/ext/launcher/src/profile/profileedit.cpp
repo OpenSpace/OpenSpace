@@ -51,7 +51,7 @@
 using namespace openspace;
 
 namespace {
-    QString labelText(size_t size, QString title) {
+    QString labelText(size_t size, const QString& title) {
         QString label;
         if (size > 0) {
             label = title + " (" + QString::number(size) + ")";
@@ -74,7 +74,7 @@ namespace {
                                      const std::vector<Profile::Action>& actions)
     {
         std::string results;
-        for (Profile::Keybinding k : keybindings) {
+        for (const Profile::Keybinding& k : keybindings) {
             const auto it = std::find_if(
                 actions.cbegin(), actions.cend(),
                 [id = k.action](const Profile::Action& a) { return a.identifier == id; }
@@ -368,10 +368,10 @@ void ProfileEdit::duplicateProfile() {
 
     constexpr char Separator = '_';
     int version = 0;
-    if (size_t it = profile.rfind(Separator); it != std::string::npos) {
+    if (const size_t it = profile.rfind(Separator);  it != std::string::npos) {
         // If the value exists, we have a profile that potentially already has a version
         // number attached to it
-        std::string versionStr = profile.substr(it + 1);
+        const std::string versionStr = profile.substr(it + 1);
         try {
             version = std::stoi(versionStr);
 
@@ -392,11 +392,11 @@ void ProfileEdit::duplicateProfile() {
     while (true) {
         version++;
 
-        std::string candidate = profile + Separator + std::to_string(version);
-        std::string candidatePath = _profileBasePath + candidate + ".profile";
+        const std::string candidate = profile + Separator + std::to_string(version);
+        const std::string candidatePath = _profileBasePath + candidate + ".profile";
 
         if (!std::filesystem::exists(candidatePath)) {
-            _profileEdit->setText(QString::fromStdString(std::move(candidate)));
+            _profileEdit->setText(QString::fromStdString(candidate));
             return;
         }
     }
@@ -489,7 +489,7 @@ void ProfileEdit::approved() {
         return;
     }
 
-    std::filesystem::path p = fmt::format(
+    const std::filesystem::path p = fmt::format(
         "{}/{}.profile", _builtInProfilesPath, profileName
     );
     if (std::filesystem::exists(p)) {

@@ -38,11 +38,8 @@ namespace openspace::globebrowsing {
 TextTileProvider::TextTileProvider(TileTextureInitData initData_, size_t fontSize_)
     : initData(std::move(initData_))
     , fontSize(fontSize_)
-{
-    ZoneScoped;
-
-    tileCache = global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
-}
+    , tileCache(global::moduleEngine->module<GlobeBrowsingModule>()->tileCache())
+{}
 
 TextTileProvider::~TextTileProvider() {}
 
@@ -66,12 +63,13 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
     ZoneScoped;
     TracyGpuZone("tile");
 
-    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
     Tile tile = tileCache->get(key);
     if (!tile.texture) {
         ghoul::opengl::Texture* texture = tileCache->texture(initData);
 
-        GLint prevProgram, prevFBO;
+        GLint prevProgram = 0;
+        GLint prevFBO = 0;
         glGetIntegerv(GL_CURRENT_PROGRAM, &prevProgram);
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFBO);
 
@@ -85,8 +83,8 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
             0
         );
 
-        GLsizei w = static_cast<GLsizei>(texture->width());
-        GLsizei h = static_cast<GLsizei>(texture->height());
+        const GLsizei w = static_cast<GLsizei>(texture->width());
+        const GLsizei h = static_cast<GLsizei>(texture->height());
         global::renderEngine->openglStateCache().loadCurrentGLState();
         glViewport(0, 0, w, h);
         glClearColor(

@@ -29,7 +29,7 @@ namespace openspace::properties {
 
 TransferFunctionProperty::TransferFunctionProperty(Property::PropertyInfo info,
                                                    volume::TransferFunction value)
-    : TemplateProperty<volume::TransferFunction>(std::move(info), value)
+    : TemplateProperty<volume::TransferFunction>(std::move(info), std::move(value))
 {}
 
 std::string_view TransferFunctionProperty::className() const {

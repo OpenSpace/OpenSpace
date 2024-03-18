@@ -90,6 +90,16 @@ namespace {
     }
 #endif // TRACY_ENABLE
 
+    std::chrono::steady_clock::time_point currentTimeForInterpolation() {
+        using namespace openspace::global;
+        if (sessionRecording->isSavingFramesDuringPlayback()) {
+            return sessionRecording->currentPlaybackInterpolationTime();
+        }
+        else {
+            return std::chrono::steady_clock::now();
+        }
+    }
+
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 } // namespace
@@ -146,7 +156,7 @@ Camera* Scene::camera() const {
 }
 
 void Scene::registerNode(SceneGraphNode* node) {
-    if (_nodesByIdentifier.count(node->identifier())) {
+    if (_nodesByIdentifier.contains(node->identifier())) {
         throw Scene::InvalidSceneError(fmt::format(
             "Node with identifier '{}' already exists", node->identifier()
         ));
@@ -276,8 +286,8 @@ bool Scene::isInitializing() const {
 void Scene::update(const UpdateData& data) {
     ZoneScoped;
 
-    std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
-    for (SceneGraphNode* node : initializedNodes) {
+    const std::vector<SceneGraphNode*> initialized = _initializer->takeInitializedNodes();
+    for (SceneGraphNode* node : initialized) {
         try {
             node->initializeGL();
         }
@@ -394,12 +404,12 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
             // TODO: Throw exception
             LERROR("Dependencies did not have the corrent type");
         }
-        ghoul::Dictionary nodeDependencies =
+        const ghoul::Dictionary nodeDependencies =
             nodeDictionary.value<ghoul::Dictionary>(SceneGraphNode::KeyDependencies);
 
-        for (std::string_view key : nodeDependencies.keys()) {
+        for (const std::string_view key : nodeDependencies.keys()) {
             std::string value = nodeDependencies.value<std::string>(key);
-            dependencyNames.push_back(value);
+            dependencyNames.push_back(std::move(value));
         }
     }
 
@@ -437,15 +447,6 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     return rawNodePointer;
 }
 
-std::chrono::steady_clock::time_point Scene::currentTimeForInterpolation() {
-    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
-        return global::sessionRecording->currentPlaybackInterpolationTime();
-    }
-    else {
-        return std::chrono::steady_clock::now();
-    }
-}
-
 void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
                                      std::string postScript,
                                      ghoul::EasingFunction easingFunction)
@@ -469,7 +470,7 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
         ghoul::easingFunction<float>(easingFunction);
 
     // First check if the current property already has an interpolation information
-    std::chrono::steady_clock::time_point now = currentTimeForInterpolation();
+    const std::chrono::steady_clock::time_point now = currentTimeForInterpolation();
     for (PropertyInterpolationInfo& info : _propertyInterpolationInfos) {
         if (info.prop == prop) {
             info.beginTime = now;
@@ -520,10 +521,10 @@ void Scene::updateInterpolations() {
 
     using namespace std::chrono;
 
-    steady_clock::time_point now = currentTimeForInterpolation();
+    const steady_clock::time_point now = currentTimeForInterpolation();
     // First, let's update the properties
     for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
-        long long us =
+        const long long us =
             duration_cast<std::chrono::microseconds>(now - i.beginTime).count();
 
         const float t = glm::clamp(
@@ -636,7 +637,7 @@ ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
                                                                  const std::string& value)
 {
     ProfilePropertyLua result;
-    PropertyValueType pType = propertyValueType(value);
+    const PropertyValueType pType = propertyValueType(value);
 
     switch (pType) {
         case PropertyValueType::Boolean:
@@ -648,27 +649,31 @@ ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
         case PropertyValueType::Nil:
             result = ghoul::lua::nil_t();
             break;
-        case PropertyValueType::Table:
-            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '{');
-            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '}');
-            handlePropertyLuaTableEntry(L, value);
+        case PropertyValueType::Table: {
+            std::string val = value;
+            ghoul::trimSurroundingCharacters(val, '{');
+            ghoul::trimSurroundingCharacters(val, '}');
+            handlePropertyLuaTableEntry(L, val);
             _valueIsTable = true;
             break;
+        }
         case PropertyValueType::String:
-        default:
-            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '\"');
-            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '[');
-            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), ']');
-            result = value;
+        default: {
+            std::string val = value;
+            ghoul::trimSurroundingCharacters(val, '\"');
+            ghoul::trimSurroundingCharacters(val, '[');
+            ghoul::trimSurroundingCharacters(val, ']');
+            result = val;
             break;
+        }
     }
     return result;
 }
 
 void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value)
 {
-    PropertyValueType enclosedType;
-    size_t commaPos = value.find(',', 0);
+    PropertyValueType enclosedType = PropertyValueType::Nil;
+    const size_t commaPos = value.find(',', 0);
     if (commaPos != std::string::npos) {
         enclosedType = propertyValueType(value.substr(0, commaPos));
     }
@@ -679,7 +684,7 @@ void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::stri
     switch (enclosedType) {
         case PropertyValueType::Boolean:
             LERROR(fmt::format(
-                "A lua table of bool values is not supported. (processing property {})",
+                "A Lua table of bool values is not supported. (processing property '{}')",
                 _profilePropertyName
             ));
             break;
@@ -701,7 +706,7 @@ void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::stri
         default:
             LERROR(fmt::format(
                 "Table-within-a-table values are not supported for profile a "
-                "property (processing property {})", _profilePropertyName
+                "property (processing property '{}')", _profilePropertyName
             ));
             break;
     }
@@ -730,8 +735,8 @@ void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L,
         }
         catch (std::bad_variant_access&) {
             LERROR(fmt::format(
-                "Error attempting to parse profile property setting for "
-                "{} using value = {}", _profilePropertyName, value
+                "Error attempting to parse profile property setting for '{}' using "
+                "value = {}", _profilePropertyName, value
             ));
         }
     }
@@ -767,7 +772,7 @@ PropertyValueType Scene::propertyValueType(const std::string& value) {
 }
 
 std::vector<properties::Property*> Scene::propertiesMatchingRegex(
-                                                               std::string propertyString)
+                                                        const std::string& propertyString)
 {
     return findMatchesInAllProperties(propertyString, allProperties(), "");
 }

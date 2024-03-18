@@ -226,7 +226,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 "property_setValue",
                 fmt::format(
                     "{}: Property '{}' does not accept input of type '{}'. Requested "
-                    "type: '{}'",
+                    "type: {}",
                     errorLocation(L), prop->fullyQualifiedIdentifier(),
                     luaTypeToString(type), luaTypeToString(prop->typeLua())
                 )
@@ -305,7 +305,7 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
             "property_setValue",
             fmt::format(
                 "{}: Property '{}' does not accept input of type '{}'. "
-                "Requested type: '{}'",
+                "Requested type: {}",
                 errorLocation(L), uri, luaTypeToString(type),
                 luaTypeToString(prop.typeLua())
             )
@@ -364,7 +364,7 @@ int propertySetValue(lua_State* L) {
         }
         else {
             std::string msg = fmt::format(
-                "Unexpected type {} in argument 3",
+                "Unexpected type '{}' in argument 3",
                 ghoul::lua::luaTypeToString(lua_type(L, 3))
             );
             return ghoul::lua::luaError(L, msg);
@@ -377,7 +377,7 @@ int propertySetValue(lua_State* L) {
         }
         else {
             std::string msg = fmt::format(
-                "Unexpected type {} in argument 4",
+                "Unexpected type '{}' in argument 4",
                 ghoul::lua::luaTypeToString(lua_type(L, 4))
             );
             return ghoul::lua::luaError(L, msg);
@@ -390,7 +390,7 @@ int propertySetValue(lua_State* L) {
         }
         else {
             std::string msg = fmt::format(
-                "Unexpected type {} in argument 5",
+                "Unexpected type '{}' in argument 5",
                 ghoul::lua::luaTypeToString(lua_type(L, 5))
             );
             return ghoul::lua::luaError(L, msg);
@@ -402,7 +402,7 @@ int propertySetValue(lua_State* L) {
         if (!correctName) {
             LWARNINGC(
                 "propertySetValue",
-                fmt::format("{} is not a valid easing method", easingMethodName)
+                fmt::format("'{}' is not a valid easing method", easingMethodName)
             );
         }
         else {
@@ -578,7 +578,6 @@ namespace {
         else if (!nodeName.empty()) {
             size_t nodePos = id.find(nodeName);
             if (nodePos != std::string::npos) {
-
                 // Check tag
                 if (!groupName.empty()) {
                     properties::PropertyOwner* matchingTaggedOwner =
@@ -677,7 +676,7 @@ namespace {
     SceneGraphNode* foundNode = sceneGraphNode(identifier);
     if (!foundNode) {
         throw ghoul::lua::LuaError(
-            fmt::format("Did not find a match for identifier: {} ", identifier)
+            fmt::format("Did not find a match for identifier: {}", identifier)
         );
     }
 
@@ -966,13 +965,13 @@ namespace {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
         throw ghoul::lua::LuaError(fmt::format(
-            "Did not find a match for identifier: {} ", identifier
+            "Did not find a match for identifier: {}", identifier
         ));
     }
     SceneGraphNode* newParentNode = sceneGraphNode(newParent);
     if (!newParentNode) {
         throw ghoul::lua::LuaError(fmt::format(
-            "Did not find a match for new parent identifier: {} ", newParent
+            "Did not find a match for new parent identifier: {}", newParent
         ));
     }
 
@@ -989,7 +988,7 @@ namespace {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
         throw ghoul::lua::LuaError(fmt::format(
-            "Did not find a match for identifier: {} ", identifier
+            "Did not find a match for identifier: {}", identifier
         ));
     }
 
@@ -1006,7 +1005,7 @@ namespace {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
         throw ghoul::lua::LuaError(fmt::format(
-            "Did not find a match for identifier: {} ", identifier
+            "Did not find a match for identifier: {}", identifier
         ));
     }
 

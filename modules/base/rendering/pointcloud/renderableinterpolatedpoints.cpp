@@ -277,8 +277,8 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     if (_nDataPoints % nObjects != 0) {
         LERROR(fmt::format(
             "Mismatch between provided number of data entries and the specified number "
-            "of points. Expected the number of entries in the data file {} to be evenly "
-            "divisible by the number of points", _dataFile
+            "of points. Expected the number of entries in the data file '{}' to be "
+            "evenly divisible by the number of points", _dataFile
         ));
     }
 

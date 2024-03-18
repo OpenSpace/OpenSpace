@@ -296,8 +296,8 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
 
 std::string ConstructOctreeTask::description() {
     return fmt::format(
-        "Read bin file (or files in folder): {} and write octree data file (or files) "
-        "into: {}", _inFileOrFolderPath, _outFileOrFolderPath
+        "Read bin file (or files in folder) '{}' and write octree data file (or files) "
+        "into '{}'", _inFileOrFolderPath, _outFileOrFolderPath
     );
 }
 
@@ -325,7 +325,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
 
     _octreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
-    LINFO(fmt::format("Reading data file: {}", _inFileOrFolderPath));
+    LINFO(fmt::format("Reading data file '{}'", _inFileOrFolderPath));
 
     LINFO(fmt::format(
         "MAX DIST: {} - MAX STARS PER NODE: {}",
@@ -390,8 +390,8 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         for (size_t i = 0; i < fullData.size(); i += nValuesPerStar) {
             auto first = fullData.begin() + i;
             auto last = fullData.begin() + i + nValuesPerStar;
-            std::vector<float> filterValues(first, last);
-            std::vector<float> renderValues(first, first + RENDER_VALUES);
+            const std::vector<float> filterValues(first, last);
+            const std::vector<float> renderValues(first, first + RENDER_VALUES);
 
             // Filter data by parameters.
             if (checkAllFilters(filterValues)) {
@@ -406,7 +406,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     }
     else {
         LERROR(fmt::format(
-            "Error opening file {} for loading preprocessed file", _inFileOrFolderPath
+            "Error opening file '{}' for loading preprocessed file", _inFileOrFolderPath
         ));
     }
     LINFO(fmt::format("{} of {} read stars were filtered", nFilteredStars, nTotalStars));
@@ -414,7 +414,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     // Slice LOD data before writing to files.
     _octreeManager->sliceLodData();
 
-    LINFO(fmt::format("Writing octree to: {}", _outFileOrFolderPath));
+    LINFO(fmt::format("Writing octree to '{}'", _outFileOrFolderPath));
     std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
     if (outFileStream.good()) {
         if (nValues == 0) {
@@ -426,7 +426,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     }
     else {
         LERROR(fmt::format(
-            "Error opening file: {} as output data file", _outFileOrFolderPath
+            "Error opening file '{}' as output data file", _outFileOrFolderPath
         ));
     }
 }
@@ -468,7 +468,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
 
     _indexOctreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
-    float processOneFile = 1.f / allInputFiles.size();
+    const float processOneFile = 1.f / allInputFiles.size();
 
     LINFO(fmt::format(
         "MAX DIST: {} - MAX STARS PER NODE: {}",
@@ -479,7 +479,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         std::filesystem::path inFilePath = allInputFiles[idx];
         int nStarsInfile = 0;
 
-        LINFO(fmt::format("Reading data file: {}", inFilePath));
+        LINFO(fmt::format("Reading data file '{}'", inFilePath));
 
         std::ifstream inFileStream(inFilePath, std::ifstream::binary);
         if (inFileStream.good()) {
@@ -506,7 +506,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
                 //}
 
                 // If all filters passed then insert render values into Octree.
-                std::vector<float> renderValues(
+                const std::vector<float> renderValues(
                     filterValues.begin(),
                     filterValues.begin() + RENDER_VALUES
                 );
@@ -537,7 +537,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         }
         else {
             LERROR(fmt::format(
-                "Error opening file {} for loading preprocessed file", inFilePath
+                "Error opening file '{}' for loading preprocessed file", inFilePath
             ));
         }
 
@@ -603,7 +603,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     }
     else {
         LERROR(fmt::format(
-            "Error opening file: {} as index output file", indexFileOutPath
+            "Error opening file '{}' as index output file", indexFileOutPath
         ));
     }
 
@@ -646,10 +646,11 @@ bool ConstructOctreeTask::filterStar(const glm::vec2& range, float filterValue,
 {
     // Return true if star should be filtered away, i.e. if min = max = filterValue or
     // if filterValue < min (when min != 0.0) or filterValue > max (when max != 0.0).
-    return (fabs(range.x - range.y) < FLT_EPSILON &&
-        fabs(range.x - filterValue) < FLT_EPSILON) ||
-        (fabs(range.x - normValue) > FLT_EPSILON && filterValue < range.x) ||
-        (fabs(range.y - normValue) > FLT_EPSILON && filterValue > range.y);
+    constexpr float eps = std::numeric_limits<float>::epsilon();
+    return (std::abs(range.x - range.y) < eps &&
+        std::abs(range.x - filterValue) < eps) ||
+        (std::abs(range.x - normValue) > eps && filterValue < range.x) ||
+        (std::abs(range.y - normValue) > eps && filterValue > range.y);
 }
 
 documentation::Documentation ConstructOctreeTask::Documentation() {

@@ -524,7 +524,7 @@ public:
      *        specific spacecraft
      * \pre \p craft must not be empty
      */
-    double spacecraftClockToET(const std::string& craft, double craftTicks);
+    double spacecraftClockToET(const std::string& craft, double craftTicks) const;
 
     /**
      * Converts the \p timeString representing a date to a double precision value
@@ -1121,6 +1121,12 @@ private:
      * Loads pre defined leap seconds time kernel (naif00012.tls).
      */
     void loadLeapSecondsSpiceKernel();
+
+    /**
+     * Loads pre defined geophysical constants kernel (geophysical.ker)
+     */
+    void loadGeophysicalConstantsKernel();
+
 
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;

@@ -153,8 +153,8 @@ std::string  WebGuiModule::address() const {
 
 WebGuiModule::CallbackHandle WebGuiModule::addEndpointChangeCallback(EndpointCallback cb)
 {
-    CallbackHandle handle = _nextCallbackHandle++;
-    _endpointChangeCallbacks.push_back({ handle, std::move(cb) });
+    const CallbackHandle handle = _nextCallbackHandle++;
+    _endpointChangeCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 

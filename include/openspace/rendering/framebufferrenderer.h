@@ -191,7 +191,7 @@ private:
     void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
-    void updateDownscaleTextures();
+    void updateDownscaleTextures() const;
     void updateExitVolumeTextures();
     void writeDownscaledVolume(const glm::ivec4& viewport);
 

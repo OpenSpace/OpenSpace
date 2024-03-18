@@ -38,8 +38,6 @@ namespace openspace::interaction {
 
 class KeybindingManager {
 public:
-    KeybindingManager();
-
     void resetKeyBindings();
 
     void bindKey(Key key, KeyModifier modifier, std::string action);

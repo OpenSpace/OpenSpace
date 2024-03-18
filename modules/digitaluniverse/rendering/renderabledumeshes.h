@@ -103,7 +103,7 @@ private:
     bool loadData();
     bool readSpeckFile();
 
-    bool _hasSpeckFile = false;
+    bool _hasSpeckFile = true;
     bool _dataIsDirty = true;
     bool _textColorIsDirty = true;
     bool _hasLabel = false;

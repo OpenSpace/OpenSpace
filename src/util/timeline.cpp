@@ -26,6 +26,11 @@
 
 namespace openspace {
 
+KeyframeBase::KeyframeBase(size_t id_, double timestamp_)
+    : id(id_)
+    , timestamp(timestamp_)
+{}
+
 bool compareKeyframeTimes(const KeyframeBase& a, const KeyframeBase& b) {
     return a.timestamp < b.timestamp;
 }

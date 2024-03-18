@@ -199,7 +199,7 @@ private:
     void onSizeYChanged(int newValue);
     void onOffsetXChanged(int newValue);
     void onOffsetYChanged(int newValue);
-    void onProjectionChanged(int newSelection);
+    void onProjectionChanged(int newSelection) const;
     void onFullscreenClicked();
     void onAspectRatioLockClicked();
     void onFovLockClicked();

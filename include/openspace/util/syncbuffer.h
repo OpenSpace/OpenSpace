@@ -36,7 +36,7 @@ class SyncBuffer {
 public:
     SyncBuffer(size_t n);
 
-    ~SyncBuffer();
+    ~SyncBuffer() = default;
 
     void encode(const std::string& s);
 
