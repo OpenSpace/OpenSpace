@@ -139,7 +139,7 @@ Fragment getFragment() {
 
     vec3 viewDirection = normalize(vs_positionCameraSpace.xyz);
 
-    for (int i = 0; i < nLightSources; ++i) {
+    for (int i = 0; i < nLightSources; i++) {
       // Diffuse light
       vec3 lightDirection = lightDirectionsViewSpace[i];
       float diffuseFactor =  max(dot(normal, lightDirection), 0.0);

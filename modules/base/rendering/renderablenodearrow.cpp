@@ -393,7 +393,8 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     }
 
     const double boundingSphere = startNode->boundingSphere();
-    bool hasNoBoundingSphere = boundingSphere < std::numeric_limits<double>::epsilon();
+    const bool hasNoBoundingSphere =
+        boundingSphere < std::numeric_limits<double>::epsilon();
 
     if (hasNoBoundingSphere && (_useRelativeLength || _useRelativeOffset)) {
         LERROR(fmt::format(
@@ -420,8 +421,8 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     );
 
     // Update the position based on the arrowDirection of the nodes
-    glm::dvec3 startNodePos = startNode->worldPosition();
-    glm::dvec3 endNodePos = endNode->worldPosition();
+    const glm::dvec3 startNodePos = startNode->worldPosition();
+    const glm::dvec3 endNodePos = endNode->worldPosition();
 
     glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
     glm::dvec3 startPos = glm::dvec3(startNodePos + offset * arrowDirection);
@@ -432,26 +433,26 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
         arrowDirection *= -1.0;
     }
 
-    double coneLength = _arrowHeadSize * length;
-    double cylinderLength = length - coneLength;
-    double arrowHeadWidth = _width * _arrowHeadWidthFactor;
+    const double coneLength = _arrowHeadSize * length;
+    const double cylinderLength = length - coneLength;
+    const double arrowHeadWidth = _width * _arrowHeadWidthFactor;
 
     // Create transformation matrices to reshape to size and position
     _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
-    glm::dvec3 cylinderScale = glm::dvec3(
+    const glm::dvec3 cylinderScale = glm::dvec3(
         s * glm::dvec4(_width, _width, cylinderLength, 0.0)
     );
     _cylinderScale = glm::scale(glm::dmat4(1.0), cylinderScale);
 
     // Adapt arrow head start to scaled size
-    glm::dvec3 arrowHeadStartPos = startPos + cylinderScale.z * arrowDirection;
+    const glm::dvec3 arrowHeadStartPos = startPos + cylinderScale.z * arrowDirection;
 
     _coneTranslation = glm::translate(glm::dmat4(1.0), arrowHeadStartPos);
-    glm::dvec3 coneScale = glm::dvec3(arrowHeadWidth, arrowHeadWidth, coneLength);
+    const glm::dvec3 coneScale = glm::dvec3(arrowHeadWidth, arrowHeadWidth, coneLength);
     _coneScale = s * glm::scale(glm::dmat4(1.0), coneScale);
 
     // Rotation to point at the end node
-    glm::quat rotQuat = glm::rotation(glm::dvec3(0.0, 0.0, 1.0), arrowDirection);
+    const glm::quat rotQuat = glm::rotation(glm::dvec3(0.0, 0.0, 1.0), arrowDirection);
     _pointDirectionRotation = glm::dmat4(glm::toMat4(rotQuat));
 }
 

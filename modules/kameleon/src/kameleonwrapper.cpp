@@ -172,7 +172,9 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format("Loading variable {} from CDF data with a uniform sampling", var));
+    LINFO(fmt::format(
+        "Loading variable '{}' from CDF data with a uniform sampling", var
+    ));
 
     const size_t size = outDimensions.x * outDimensions.y * outDimensions.z;
     float* data = new float[size];
@@ -290,7 +292,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     int stop = 0;
     constexpr float TruncationLimit = 0.9f;
     const int upperLimit = static_cast<int>(size * TruncationLimit);
-    for (int i = 0; i < NBins; ++i) {
+    for (int i = 0; i < NBins; i++) {
         sum += histogram[i];
         if (sum > upperLimit) {
             stop = i;
@@ -301,7 +303,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     const double dist = ((varMax - varMin) / NBins) * stop;
 
     const double varMaxNew = varMin + dist;
-    for(size_t i = 0; i < size; ++i) {
+    for(size_t i = 0; i < size; i++) {
         const double normalizedVal = (doubleData[i] - varMin) / (varMaxNew - varMin);
 
         data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
@@ -323,7 +325,7 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
     LINFO(fmt::format(
-        "Loading variable {} from CDF data with a uniform sampling",
+        "Loading variable '{}' from CDF data with a uniform sampling",
         var
     ));
 
@@ -454,7 +456,7 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
     LINFO(fmt::format(
-        "loading variables {} {} {} from CDF data with a uniform sampling",
+        "Loading variables {} {} {} from CDF data with a uniform sampling",
         xVar,
         yVar,
         zVar
@@ -1072,7 +1074,7 @@ std::vector<std::string> KameleonWrapper::variables() const {
 
     int numVariables = _model->getNumberOfVariables();
 
-    for (int i = 0; i < numVariables; ++i) {
+    for (int i = 0; i < numVariables; i++) {
         variableNames.push_back(_model->getVariableName(i));;
     }
     return variableNames;

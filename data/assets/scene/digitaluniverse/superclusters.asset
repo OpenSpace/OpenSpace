@@ -18,6 +18,7 @@ local Object = {
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "superclust.speck",
     Labels = {
       Enabled = true,
       File = speck .. "superclust.label",
@@ -28,8 +29,9 @@ local Object = {
     },
     DrawElements = false,
     Opacity = 0.65,
-    File = speck .. "superclust.speck",
-    Texture = textures .. "point3A.png",
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Unit = "Mpc",
     SizeSettings = {
       ScaleExponent = 23.1,

@@ -89,7 +89,7 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
         else {
             setIdentifier("RenderablePlaneSpout" + std::to_string(iIdentifier));
         }
-        ++id;
+        id++;
     }
 
     if (_guiName.empty()) {

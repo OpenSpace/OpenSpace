@@ -135,7 +135,7 @@ const std::vector<std::string> &SpoutReceiver::spoutReceiverList() {
     const int nSenders = _spoutHandle->GetSenderCount();
     _receiverList.clear();
 
-    for (int i = 0; i < nSenders; ++i) {
+    for (int i = 0; i < nSenders; i++) {
         char Name[256];
         _spoutHandle->GetSenderName(i, Name, 256);
         _receiverList.push_back(Name);
@@ -373,7 +373,7 @@ SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner
         _spoutSelection.addOption(0, "");
 
         int idx = 0;
-        for (int i = 0; i < static_cast<int>(receiverList.size()); ++i) {
+        for (int i = 0; i < static_cast<int>(receiverList.size()); i++) {
             _spoutSelection.addOption(i + 1, receiverList[i]);
 
             LWARNING(fmt::format("List {}", receiverList[i]));

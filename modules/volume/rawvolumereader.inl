@@ -104,7 +104,7 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool inve
         std::unique_ptr<RawVolume<VoxelType>> newVolume =
             std::make_unique<RawVolume<VoxelType>>(dims);
 
-        for (size_t i = 0; i < volume->nCells(); ++i) {
+        for (size_t i = 0; i < volume->nCells(); i++) {
             const glm::uvec3& coords = volume->indexToCoords(i);
             glm::uvec3 newcoords = glm::uvec3(coords.x, coords.y, dims.z - coords.z - 1);
 

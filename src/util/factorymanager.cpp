@@ -81,8 +81,8 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
             }
         }
         else if (tv) {
-            Documentation doc = { .entries = tv->documentations };
-            nlohmann::json restrictions = generateJsonDocumentation(doc);
+            const Documentation doc = { .entries = tv->documentations };
+            const nlohmann::json restrictions = generateJsonDocumentation(doc);
             // We have a TableVerifier, so we need to recurse
             entry["restrictions"] = restrictions;
         }
@@ -95,7 +95,8 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
 
     return json;
 }
-}
+
+} // namespace
 
 namespace openspace {
 
@@ -160,7 +161,7 @@ nlohmann::json FactoryManager::generateJson() const {
                 return d.name == factoryInfo.name;
             });
         if (factoryDoc != docs.end()) {
-            nlohmann::json documentation = generateJsonDocumentation(*factoryDoc);
+            const nlohmann::json documentation = generateJsonDocumentation(*factoryDoc);
             factory["classes"].push_back(documentation);
             // Remove documentation from list check at the end if all docs got put in
             docs.erase(factoryDoc);
@@ -182,7 +183,7 @@ nlohmann::json FactoryManager::generateJson() const {
                     return d.name == c;
                 });
             if (found != docs.end()) {
-                nlohmann::json documentation = generateJsonDocumentation(*found);
+                const nlohmann::json documentation = generateJsonDocumentation(*found);
                 factory["classes"].push_back(documentation);
                 docs.erase(found);
             }

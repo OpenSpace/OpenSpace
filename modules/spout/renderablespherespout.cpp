@@ -77,7 +77,7 @@ RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary
         else {
             setIdentifier("RenderableSphereSpout" + std::to_string(iIdentifier));
         }
-        ++id;
+        id++;
     }
 
     if (_guiName.empty()) {

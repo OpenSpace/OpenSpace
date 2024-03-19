@@ -118,7 +118,7 @@ namespace {
     constexpr const char* Friction = "friction";
     constexpr const char* Lua = "lua";
 
-    const static std::unordered_map<std::string, AxisType> AxisIndexMap ({
+    const std::unordered_map<std::string, AxisType> AxisIndexMap ({
         { OrbitX, AxisType::OrbitX },
         { OrbitY, AxisType::OrbitY },
         { ZoomIn, AxisType::ZoomIn },
@@ -131,7 +131,7 @@ namespace {
         { PanY, AxisType::PanY }
     });
 
-    const static std::unordered_map<std::string, Command> CommandMap ({
+    const std::unordered_map<std::string, Command> CommandMap ({
         { Connect, Command::Connect },
         { Disconnect, Command::Disconnect },
         { InputState, Command::InputState },
@@ -147,7 +147,7 @@ using nlohmann::json;
 namespace openspace {
 
 FlightControllerTopic::FlightControllerTopic() {
-    for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); ++it) {
+    for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); it++) {
         global::navigationHandler->setWebsocketAxisMapping(
             int(std::distance(AxisIndexMap.begin(), it)),
             it->second
@@ -175,7 +175,7 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
     auto it = CommandMap.find(json[TypeKey]);
     if (it == CommandMap.end()) {
         LWARNING(
-            fmt::format("Poorly formatted JSON command: no '{}' in payload", TypeKey)
+            fmt::format("Malformed JSON command: no '{}' in payload", TypeKey)
         );
         return;
     }
@@ -270,15 +270,15 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
     if (json.find(FocusKey) == json.end()) {
         const std::string j = json;
         LWARNING(
-            fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j)
+            fmt::format("Could not find '{}' key in JSON. JSON was:\n{}", FocusKey, j)
         );
         if (json.find(AimKey) == json.end()) {
             LWARNING(
-                fmt::format("Could not find {} key in JSON. JSON was:\n{}", AimKey, j)
+                fmt::format("Could not find '{}' key in JSON. JSON was:\n{}", AimKey, j)
             );
             if (json.find(AnchorKey) == json.end()) {
                 LWARNING(fmt::format(
-                    "Could not find {} key in JSON. JSON was:\n{}", AnchorKey, j
+                    "Could not find '{}' key in JSON. JSON was:\n{}", AnchorKey, j
                 ));
                 return;
             }
@@ -324,7 +324,7 @@ void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) con
     if (json[RenderableKey].find(SceneNodeName) == json[RenderableKey].end()) {
         const std::string j = json;
         LWARNING(
-            fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j)
+            fmt::format("Could not find '{}' key in JSON. JSON was:\n{}", FocusKey, j)
         );
         return;
     }
@@ -389,12 +389,12 @@ void FlightControllerTopic::engageAutopilot(const nlohmann::json &json) {
     std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _inputState.isConnected = true;
 
-    for (auto it = input.begin(); it != input.end(); ++it) {
+    for (auto it = input.begin(); it != input.end(); it++) {
         const auto mapIt = AxisIndexMap.find(it.key());
         if (mapIt == AxisIndexMap.end()) {
             if (it.key() != TypeKey || CommandMap.find(it.value()) == CommandMap.end()) {
                 LWARNING(fmt::format(
-                    "No axis, button, or command named {} (value: {})",
+                    "No axis, button, or command named '{}' (value: {})",
                     it.key(), static_cast<int>(it.value())
                 ));
             }
@@ -429,12 +429,12 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
     // Get "inputState" object from "payload"
     auto input = json[InputState][ValuesKey];
 
-    for (auto it = input.begin(); it != input.end(); ++it) {
+    for (auto it = input.begin(); it != input.end(); it++) {
         const auto mapIt = AxisIndexMap.find(it.key());
         if (mapIt == AxisIndexMap.end()) {
             if (it.key() != TypeKey || CommandMap.find(it.value()) == CommandMap.end()) {
                 LWARNING(fmt::format(
-                    "No axis, button, or command named {} (value: {})",
+                    "No axis, button, or command named '{}' (value: {})",
                     it.key() , static_cast<int>(it.value())
                 ));
             }

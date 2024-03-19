@@ -196,7 +196,7 @@ bool ErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) 
 
     _histograms = std::vector<Histogram>(_numInnerNodes);
 
-    for (int i = 0; i < static_cast<int>(_numInnerNodes); ++i) {
+    for (int i = 0; i < static_cast<int>(_numInnerNodes); i++) {
         int offset = i * _numBins;
         float* data = new float[_numBins];
         memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
@@ -224,7 +224,7 @@ bool ErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
     int nFloats = _numInnerNodes * _numBins;
     float* histogramData = new float[nFloats];
 
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
         memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
     }

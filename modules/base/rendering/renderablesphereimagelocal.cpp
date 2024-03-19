@@ -117,14 +117,14 @@ void RenderableSphereImageLocal::loadTexture() {
     if (!texture) {
         LWARNINGC(
             "RenderableSphereImageLocal",
-            fmt::format("Could not load texture from {}", absPath(_texturePath))
+            fmt::format("Could not load texture from '{}'", absPath(_texturePath))
         );
         return;
     }
 
     LDEBUGC(
         "RenderableSphereImageLocal",
-        fmt::format("Loaded texture from {}", absPath(_texturePath))
+        fmt::format("Loaded texture from '{}'", absPath(_texturePath))
     );
     texture->uploadTexture();
     texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);

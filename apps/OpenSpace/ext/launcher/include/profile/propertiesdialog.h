@@ -69,7 +69,6 @@ private:
 
     void selectLineFromScriptLog();
 
-    QString createOneLineSummary(openspace::Profile::Property p);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
     bool areRequiredFormsFilled();

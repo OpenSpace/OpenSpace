@@ -51,7 +51,7 @@ public:
     void OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
         CefRefPtr<CefV8Context> context) override;
     void OnBeforeCommandLineProcessing(const CefString &process_type,
-        CefRefPtr<CefCommandLine> command_line) override;
+        CefRefPtr<CefCommandLine> commandline) override;
 
 private:
     IMPLEMENT_REFCOUNTING(WebBrowserApp);

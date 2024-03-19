@@ -118,8 +118,8 @@ documentation::Documentation Path::Documentation() {
 }
 
 Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duration)
-    : _start(start)
-    , _end(end)
+    : _start(std::move(start))
+    , _end(std::move(end))
     , _type(type)
 {
     switch (_type) {
@@ -196,7 +196,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
 
     double speed = speedAlongPath(_traveledDistance);
     speed *= static_cast<double>(speedScale);
-    double displacement = dt * speed;
+    const double displacement = dt * speed;
 
     const double prevDistance = _traveledDistance;
 
@@ -231,7 +231,7 @@ void Path::quitPath() {
 }
 
 std::string Path::currentAnchor() const {
-    bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
+    const bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
     return (pastHalfway) ? _end.nodeIdentifier() : _start.nodeIdentifier();
 }
 
@@ -243,10 +243,10 @@ bool Path::hasReachedEnd() const {
     // @TODO (emmbr, 2022-11-07) Handle linear paths separately, as they might
     // abort prematurely due to the "isPositionFinished" condition
 
-    bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
+    const bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
 
     constexpr double RotationEpsilon = 0.0001;
-    bool isRotationFinished = ghoul::isSameOrientation(
+    const bool isRotationFinished = ghoul::isSameOrientation(
         _prevPose.rotation,
         _end.rotation(),
         RotationEpsilon
@@ -280,8 +280,8 @@ CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
         const glm::dvec3 lineDir = glm::normalize(prevPosToEnd);
         pose.position = _prevPose.position - displacement * lineDir;
 
-        double newRemainingDistance = glm::length(pose.position - _end.position());
-        double diff = remainingDistance - newRemainingDistance;
+        const double newRemainingDistance = glm::length(pose.position - _end.position());
+        const double diff = remainingDistance - newRemainingDistance;
         // Avoid remaining distances close to zero, or even negative
         if (relativeDistance > 0.5 && diff < LengthEpsilon) {
             // The positions are too large, so we are not making progress because of
@@ -342,7 +342,7 @@ glm::dquat Path::linearPathRotation(double) const {
     double factor = 5.0 / glm::half_pi<double>();
     factor *= global::navigationHandler->pathNavigator().linearRotationSpeedFactor();
 
-    double turnDuration = std::max(angle * factor, 1.0); // Always at least 1 second
+    const double turnDuration = std::max(angle * factor, 1.0); // Always at least 1 second
     const double time = glm::clamp(_progressedTime / turnDuration, 0.0, 1.0);
     return easedSlerpRotation(time);
 
@@ -433,10 +433,10 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
     // camera, but just the "hint" up vector for the lookAt. This leads to fast rolling
     // when the up vector gets close to the camera's forward vector. Should be improved
     // so any rolling is spread out over the entire motion instead
-    double tUp = ghoul::sineEaseInOut(t);
-    glm::dvec3 startUp = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
-    glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
-    glm::dvec3 up = ghoul::interpolateLinear(tUp, startUp, endUp);
+    const double tUp = ghoul::sineEaseInOut(t);
+    const glm::dvec3 startUp = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
+    const glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
+    const glm::dvec3 up = ghoul::interpolateLinear(tUp, startUp, endUp);
 
     return ghoul::lookAtQuaternion(_curve->positionAt(t), lookAtPos, up);
 }
@@ -448,7 +448,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     // Set speed based on distance to closest node
     const double distanceToEndNode = glm::distance(_prevPose.position, endNodePos);
     const double distanceToStartNode = glm::distance(_prevPose.position, startNodePos);
-    bool isCloserToEnd = distanceToEndNode < distanceToStartNode;
+    const bool isCloserToEnd = (distanceToEndNode < distanceToStartNode);
 
     const glm::dvec3 closestPos = isCloserToEnd ? endNodePos : startNodePos;
     const double distanceToClosestNode = glm::distance(closestPos, _prevPose.position);
@@ -541,7 +541,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
     const std::optional<float> duration = p.duration;
 
-    Path::Type type;
+    Path::Type type = Path::Type::Linear;
     if (forceType.has_value()) {
         type = *forceType;
     }
@@ -552,7 +552,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
         type = global::navigationHandler->pathNavigator().defaultPathType();
     }
 
-    bool hasStart = p.startState.has_value();
+    const bool hasStart = p.startState.has_value();
     const Waypoint startPoint = hasStart ?
         Waypoint(NavigationState(p.startState.value())) :
         interaction::waypointFromCamera();
@@ -592,14 +592,14 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 ));
             }
 
-            interaction::NodeCameraStateSpec info {
+            const interaction::NodeCameraStateSpec info {
                 nodeIdentifier,
                 p.position,
                 p.height,
                 p.useTargetUpDirection.value_or(false)
             };
 
-            double startToTargetCenterDistance = glm::distance(
+            const double startToTargetCenterDistance = glm::distance(
                 startPoint.position(),
                 targetNode->worldPosition()
             );
@@ -607,7 +607,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             // Use a linear path if camera start is within the bounding sphere
             const PathNavigator& navigator = global::navigationHandler->pathNavigator();
             const double bs = navigator.findValidBoundingSphere(targetNode);
-            bool withinTargetBoundingSphere = startToTargetCenterDistance < bs;
+            const bool withinTargetBoundingSphere = (startToTargetCenterDistance < bs);
             if (withinTargetBoundingSphere) {
                 LINFO(
                     "Camera is within the bounding sphere of the target node. "
@@ -616,7 +616,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 type = Path::Type::Linear;
             }
 
-            bool isLinear = type == Path::Type::Linear;
+            const bool isLinear = type == Path::Type::Linear;
             waypoints = { computeWaypointFromNodeInfo(info, startPoint, isLinear) };
             break;
         }

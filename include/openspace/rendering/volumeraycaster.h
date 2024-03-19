@@ -136,15 +136,11 @@ public:
     float downscaleRender() const;
 
 private:
-    /**
-     * Maximum number of integration steps to be executed by the volume integrator.
-     */
+    /// Maximum number of integration steps to be executed by the volume integrator
     int _rayCastMaxSteps = 1000;
 
-    /**
-     * Enable and set the downscale rendering of the volume. Used to improve performance.
-     */
-    float _downscaleRenderConst = 1.0f;
+    /// Enable and set the downscale rendering of the volume. Used to improve performance
+    float _downscaleRenderConst = 1.f;
 };
 
 } // namespace openspace

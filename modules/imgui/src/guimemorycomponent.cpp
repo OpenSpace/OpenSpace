@@ -36,7 +36,7 @@ namespace {
         //ImGui::Text("Bucket Size: %i", p.BucketSize);
         ImGui::Text("Number of Buckets: %i", p.nBuckets());
         const std::vector<int>& occupancies = p.occupancies();
-        for (size_t i = 0; i < occupancies.size(); ++i) {
+        for (size_t i = 0; i < occupancies.size(); i++) {
             ImGui::Text(
                 "  %i: %i/%i (%.2f/%.2f kiB)",
                 static_cast<int>(i),

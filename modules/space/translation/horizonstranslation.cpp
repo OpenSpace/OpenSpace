@@ -94,7 +94,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
         _horizonsTextFiles = files;
     }
     else if (std::holds_alternative<std::vector<std::string>>(p.horizonsTextFile)) {
-        std::vector<std::string> files =
+        const std::vector<std::string> files =
             std::get<std::vector<std::string>>(p.horizonsTextFile);
 
         for (const std::string& file : files) {
@@ -122,11 +122,11 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
 
     if (lastBefore && firstAfter) {
         // We're inbetween first and last value.
-        double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;
-        double timeDiff = data.time.j2000Seconds() - lastBefore->timestamp;
-        double diff = (timelineDiff > DBL_EPSILON) ? timeDiff / timelineDiff : 0.0;
+        const double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;
+        const double timeDiff = data.time.j2000Seconds() - lastBefore->timestamp;
+        const double diff = (timelineDiff > DBL_EPSILON) ? timeDiff / timelineDiff : 0.0;
 
-        glm::dvec3 dir = firstAfter->data - lastBefore->data;
+        const glm::dvec3 dir = firstAfter->data - lastBefore->data;
         interpolatedPos = lastBefore->data + dir * diff;
     }
     else if (lastBefore) {
@@ -150,7 +150,7 @@ void HorizonsTranslation::loadData() {
         }
 
         std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
-        bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
+        const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
         if (hasCachedFile) {
             LINFO(fmt::format(
                 "Cached file '{}' used for Horizon file '{}'", cachedFile, file
@@ -210,7 +210,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file {} for loading cache file", file));
+        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 
@@ -241,10 +241,10 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     );
 
     // Extract the data from the cache Keyframe vector
-    for (int i = 0; i < nKeyframes; ++i) {
+    for (int i = 0; i < nKeyframes; i++) {
         // Add keyframe in timeline
         _timeline.addKeyframe(
-            std::move(cacheKeyframes[i].timestamp),
+            cacheKeyframes[i].timestamp,
             {
                 cacheKeyframes[i].position[0],
                 cacheKeyframes[i].position[1],
@@ -259,7 +259,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
 void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) const {
     std::ofstream fileStream(file, std::ofstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file {} for save cache file", file));
+        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return;
     }
 

@@ -52,14 +52,14 @@ StateMachineModule::StateMachineModule()
 
 void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
                                                 const ghoul::Dictionary& transitions,
-                                             const std::optional<std::string> startState)
+                                                std::optional<std::string> startState)
 {
     ghoul::Dictionary dictionary;
     dictionary.setValue("States", states);
     dictionary.setValue("Transitions", transitions);
 
     if (startState.has_value()) {
-        dictionary.setValue("StartState", *startState);
+        dictionary.setValue("StartState", std::move(*startState));
     }
 
     try {
@@ -83,7 +83,7 @@ bool StateMachineModule::hasStateMachine() const {
     return _machine != nullptr;
 }
 
-void StateMachineModule::setInitialState(const std::string initialState) {
+void StateMachineModule::setInitialState(const std::string& initialState) {
     if (!_machine) {
         LERROR("Attempting to use uninitialized state machine");
         return;

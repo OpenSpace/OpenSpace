@@ -69,8 +69,8 @@ public:
      * \return true only if a new future keyframe is available to set camera pose
      */
     bool updateCamera(Camera& camera, bool ignoreFutureKeyframes);
-    static bool updateCamera(Camera* camera, const CameraPose prevPose,
-        const CameraPose nextPose, double t, bool ignoreFutureKeyframes);
+    static bool updateCamera(Camera* camera, const CameraPose& prevPose,
+        const CameraPose& nextPose, double t, bool ignoreFutureKeyframes);
 
     Timeline<CameraPose>& timeline();
     void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);

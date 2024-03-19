@@ -26,7 +26,7 @@ namespace openspace {
 
 template <typename T>
 Keyframe<T>::Keyframe(size_t i, double t, T d)
-    : KeyframeBase{ i, t }
+    : KeyframeBase(i, t)
     , data(std::move(d))
 {}
 

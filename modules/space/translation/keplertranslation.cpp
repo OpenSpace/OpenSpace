@@ -35,7 +35,7 @@ namespace {
     T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
         T x2 = x0;
 
-        for (int i = 0; i < maxIter; ++i) {
+        for (int i = 0; i < maxIter; i++) {
             T x = x2;
             x2 = function(x);
             if (std::abs(x2 - x) < err) {
@@ -236,7 +236,7 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
         auto sign = [](double val) -> double {
             return val > 0.0 ? 1.0 : ((val < 0.0) ? -1.0 : 0.0);
         };
-        double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
+        const double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
 
         auto solver = [this, &meanAnomaly, &sign](double x) -> double {
             const double s = _eccentricity * sin(x);

@@ -112,7 +112,7 @@ std::string prunedIdentifier(std::string identifier) {
             );
             if (!found.has_value()) {
                 LINFO(fmt::format(
-                    "No image with identifier {} was found in the collection.", imageUrl
+                    "No image with identifier '{}' was found in the collection.", imageUrl
                 ));
                 return;
             }
@@ -161,7 +161,7 @@ std::string prunedIdentifier(std::string identifier) {
     SceneGraphNode* circle = global::renderEngine->scene()->sceneGraphNode(identifier);
     if (!circle) {
         throw ghoul::lua::LuaError(fmt::format(
-            "Could not find node to set as hover circle: '{}'", identifier
+            "Could not find node to set as hover circle: {}", identifier
         ));
     }
 

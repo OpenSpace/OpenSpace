@@ -51,7 +51,7 @@ namespace {
 
     if (global::renderEngine->screenSpaceRenderable(name)) {
         throw ghoul::lua::LuaError(fmt::format(
-            "A cygnet with the name \"{}\" already exist", name
+            "A cygnet with the name '{}' already exist", name
         ));
     }
     else {

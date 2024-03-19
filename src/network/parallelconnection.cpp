@@ -112,13 +112,12 @@ bool ParallelConnection::sendMessage(const Message& message) {
         reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
     );
 
-    if (!_socket->put<char>(header.data(), header.size())) {
+    const bool res = _socket->put<char>(header.data(), header.size());
+    if (!res) {
         return false;
     }
-    if (!_socket->put<char>(message.content.data(), message.content.size())) {
-        return false;
-    }
-    return true;
+    const bool res2 = _socket->put<char>(message.content.data(), message.content.size());
+    return res2;
 }
 
 void ParallelConnection::disconnect() {
@@ -158,7 +157,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     }
 
     // Make sure that header matches this version of OpenSpace
-    if (!(headerBuffer[0] == 'O' && headerBuffer[1] == 'S')) {
+    if (headerBuffer[0] != 'O' || headerBuffer[1] != 'S') {
         LERROR("Expected to read message header 'OS' from socket");
         throw ConnectionLostError();
     }

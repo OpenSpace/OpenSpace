@@ -516,7 +516,7 @@ void RenderablePlanesCloud::loadTextures() {
             ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
         if (t) {
-            LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
+            LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture '{}'", path));
             t->uploadTexture();
             t->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             t->purgeFromRAM();
@@ -587,7 +587,7 @@ void RenderablePlanesCloud::createPlanes() {
             glm::vec4 vertex2 = transformedPos - u + v;
             glm::vec4 vertex4 = transformedPos + u - v;
 
-            for (int i = 0; i < 3; ++i) {
+            for (int i = 0; i < 3; i++) {
                 maxSize = std::max(maxSize, vertex0[i]);
                 maxSize = std::max(maxSize, vertex1[i]);
                 maxSize = std::max(maxSize, vertex2[i]);
@@ -613,7 +613,7 @@ void RenderablePlanesCloud::createPlanes() {
             std::unordered_map<int, PlaneAggregate>::iterator found =
                 _planesMap.find(textureIndex);
             if (found != _planesMap.end()) {
-                for (int i = 0; i < PlanesVertexDataSize; ++i) {
+                for (int i = 0; i < PlanesVertexDataSize; i++) {
                     found->second.planesCoordinates.push_back(VertexData[i]);
                 }
                 found->second.numberOfPlanes++;
@@ -624,7 +624,7 @@ void RenderablePlanesCloud::createPlanes() {
                 glGenVertexArrays(1, &pA.vao);
                 glGenBuffers(1, &pA.vbo);
                 pA.numberOfPlanes = 1;
-                for (int i = 0; i < PlanesVertexDataSize; ++i) {
+                for (int i = 0; i < PlanesVertexDataSize; i++) {
                     pA.planesCoordinates.push_back(VertexData[i]);
                 }
                 _planesMap.insert(std::pair(textureIndex, pA));

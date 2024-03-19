@@ -223,10 +223,10 @@ bool UrlSynchronization::isEachFileValid() {
     if (ossyncVersion == "1.0") {
         std::getline(file >> std::ws, line);
         std::string& fileIsValidToDate = line;
-        double fileValidAsJ2000 = Time::convertTime(fileIsValidToDate);
+        const double fileValidAsJ2000 = Time::convertTime(fileIsValidToDate);
 
-        std::string todaysDate = Time::currentWallTime();
-        double todaysDateAsJ2000 = Time::convertTime(todaysDate);
+        const std::string todaysDate = Time::currentWallTime();
+        const double todaysDateAsJ2000 = Time::convertTime(todaysDate);
 
         // Issue warning if file is kept but user changed setting to download on startup.
         if ((fileValidAsJ2000 > todaysDateAsJ2000) && _secondsUntilResync == 0) {
@@ -234,9 +234,7 @@ bool UrlSynchronization::isEachFileValid() {
                 "{}: File is valid to {} but asset specifies SecondsUntilResync = {} "
                 "Did you mean to re-download the file? If so, remove file from sync "
                 "folder to resync",
-                _identifier,
-                fileIsValidToDate,
-                _secondsUntilResync
+                _identifier, fileIsValidToDate, _secondsUntilResync
             ));
         }
 
@@ -266,12 +264,12 @@ void UrlSynchronization::createSyncFile(bool) const {
     dir.replace_extension("ossync");
     std::ofstream syncFile(dir, std::ofstream::out);
 
-    std::string currentTimeAsISO8601 = Time::currentWallTime();
-    double currentTimeAsJ2000 = Time::convertTime(currentTimeAsISO8601);
+    const std::string currentTimeAsISO8601 = Time::currentWallTime();
+    const double currentTimeAsJ2000 = Time::convertTime(currentTimeAsISO8601);
 
     // With the format YYYY-MM... any year thats larger than 4 digits throws an error
     // Limit the future date to year 9999
-    double futureTimeAsJ2000 = std::min(
+    const double futureTimeAsJ2000 = std::min(
         currentTimeAsJ2000 + _secondsUntilResync,
         MaxDateAsJ2000
     );
@@ -313,13 +311,13 @@ bool UrlSynchronization::trySyncUrls() {
         std::filesystem::path destination = directory() / (_filename + ".tmp");
 
         if (sizeData.find(url) != sizeData.end()) {
-            LWARNING(fmt::format("{}: Duplicate entry for {}", _identifier, url));
+            LWARNING(fmt::format("{}: Duplicate entry for '{}'", _identifier, url));
             continue;
         }
 
         auto download = std::make_unique<HttpFileDownload>(
             url,
-            destination,
+            std::move(destination),
             HttpFileDownload::Overwrite::Yes
         );
         HttpFileDownload* dl = download.get();
@@ -336,7 +334,7 @@ bool UrlSynchronization::trySyncUrls() {
                     return !_shouldCancel;
                 }
 
-                std::lock_guard guard(fileSizeMutex);
+                const std::lock_guard guard(fileSizeMutex);
                 sizeData[url] = { downloadedBytes, totalBytes };
 
                 _nTotalBytesKnown = true;
@@ -362,7 +360,7 @@ bool UrlSynchronization::trySyncUrls() {
         d->wait();
         if (!d->hasSucceeded()) {
             failed = true;
-            LERROR(fmt::format("Error downloading file from URL {}", d->url()));
+            LERROR(fmt::format("Error downloading file from URL: {}", d->url()));
             continue;
         }
 
@@ -383,7 +381,7 @@ bool UrlSynchronization::trySyncUrls() {
         if (ec) {
             LERRORC(
                 "URLSynchronization",
-                fmt::format("Error renaming file {} to {}", tempName, originalName)
+                fmt::format("Error renaming file '{}' to '{}'", tempName, originalName)
             );
 
             failed = true;

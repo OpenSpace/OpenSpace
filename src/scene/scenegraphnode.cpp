@@ -380,15 +380,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 *p.transform->translation
             );
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.translation == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create ephemeris for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
             LDEBUG(fmt::format(
                 "Successfully created ephemeris for '{}'", result->identifier()
             ));
@@ -399,15 +390,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 *p.transform->rotation
             );
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.rotation == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create rotation for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
             LDEBUG(fmt::format(
                 "Successfully created rotation for '{}'", result->identifier()
             ));
@@ -416,15 +398,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.transform->scale.has_value()) {
             result->_transform.scale = Scale::createFromDictionary(*p.transform->scale);
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.scale == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create scale for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
             LDEBUG(fmt::format(
                 "Successfully created scale for '{}'", result->identifier()
             ));
@@ -438,15 +411,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     if (p.timeFrame.has_value()) {
         result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
 
-        // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-        // transitioned to throwing exceptions when the construction fails
-        if (result->_timeFrame == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create time frame for SceneGraphNode '{}'",
-                result->identifier()
-            ));
-            return nullptr;
-        }
         LDEBUG(fmt::format(
             "Successfully created time frame for '{}'", result->identifier()
         ));
@@ -725,8 +689,7 @@ void SceneGraphNode::update(const UpdateData& data) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    State s = _state;
-    if (s != State::Initialized && _state != State::GLInitialized) {
+    if (_state != State::Initialized && _state != State::GLInitialized) {
         return;
     }
     if (!isTimeFrameActive(data.time)) {
@@ -755,12 +718,13 @@ void SceneGraphNode::update(const UpdateData& data) {
     newUpdateData.modelTransform.rotation = _worldRotationCached;
     newUpdateData.modelTransform.scale = _worldScaleCached;
 
-    glm::dmat4 translation = glm::translate(
+    const glm::dmat4 translation = glm::translate(
         glm::dmat4(1.0),
         newUpdateData.modelTransform.translation
     );
-    glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
-    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), newUpdateData.modelTransform.scale);
+    const glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
+    const glm::dmat4 scaling =
+        glm::scale(glm::dmat4(1.0), newUpdateData.modelTransform.scale);
 
     _modelTransformCached = translation * rotation * scaling;
 
@@ -816,7 +780,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         }
     }
 
-    bool isInStickerBin =
+    const bool isInStickerBin =
         data.renderBinMask & static_cast<int>(Renderable::RenderBin::Sticker);
 
     if (_showDebugSphere && isInStickerBin) {
@@ -830,15 +794,17 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     }
 }
 
-void SceneGraphNode::renderDebugSphere(const Camera& camera, double size, glm::vec4 color)
+void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
+                                       const glm::vec4& color)
 {
-    glm::dvec3 scaleVec = _worldScaleCached * size;
-    glm::dmat4 modelTransform =
+    const glm::dvec3 scaleVec = _worldScaleCached * size;
+    const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), _worldPositionCached) *
         glm::dmat4(_worldRotationCached) *
         glm::scale(glm::dmat4(1.0), scaleVec);
 
-    glm::mat4 modelViewProjection = camera.projectionMatrix() *
+
+    const glm::mat4 modelViewProjection = camera.projectionMatrix() *
         glm::mat4(camera.combinedViewMatrix() * modelTransform);
 
     _debugSphereProgram->activate();
@@ -1018,13 +984,14 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
         return;
     }
 
-    glm::ivec2 res = global::windowDelegate->currentSubwindowSize();
+    const glm::ivec2 res = global::windowDelegate->currentSubwindowSize();
 
     // Get the radius of node
-    double nodeRadius = boundingSphere();
+    const double nodeRadius = boundingSphere();
 
     // Distance from the camera to the node
-    double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
+    const double distFromCamToNode =
+        glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
 
     // Fix to limit the update of properties
     if (distFromCamToNode >= _visibilityDistance) {
@@ -1218,6 +1185,7 @@ void SceneGraphNode::setScene(Scene* scene) {
 
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     std::vector<SceneGraphNode*> nodes;
+    nodes.reserve(_children.size());
     for (const ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         nodes.push_back(child.get());
     }

@@ -100,7 +100,7 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
                                          ghoul::opengl::ProgramObject& program)
 {
     std::string id = std::to_string(data.id);
-    //program.setUniform("opacity_" + std::to_string(id), visible ? 1.0f : 0.0f);
+    //program.setUniform("opacity_" + std::to_string(id), visible ? 1.f : 0.f);
     program.setUniform("stepSizeCoefficient_" + id, _stepSizeCoefficient);
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();

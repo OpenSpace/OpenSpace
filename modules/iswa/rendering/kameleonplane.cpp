@@ -339,7 +339,7 @@ void KameleonPlane::readFieldlinePaths(const std::string& indexFile) {
             int i = 0;
             const std::string& fullName = identifier();
             std::string partName = fullName.substr(0,fullName.find_last_of("-"));
-            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
+            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); it++) {
                 _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     partName + "/" + it.key(),

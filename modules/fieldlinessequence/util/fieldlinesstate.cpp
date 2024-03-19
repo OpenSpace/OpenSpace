@@ -134,7 +134,7 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     allNamesInOne.assign(buffer.data(), byteSizeAllNames);
 
     size_t offset = 0;
-    for (size_t i = 0; i < nExtras; ++i) {
+    for (size_t i = 0; i < nExtras; i++) {
         auto endOfVarName = allNamesInOne.find('\0', offset);
         endOfVarName -= offset;
         const std::string varName = allNamesInOne.substr(offset, endOfVarName);
@@ -152,7 +152,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     std::ifstream ifs(pathToJsonFile);
 
     if (!ifs.is_open()) {
-        LERROR(fmt::format("FAILED TO OPEN FILE: {}", pathToJsonFile));
+        LERROR(fmt::format("Failed to open file '{}'", pathToJsonFile));
         return false;
     }
 
@@ -184,7 +184,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
             return false;
         }
 
-        for (size_t i = nPosComponents ; i < nVariables ; ++i) {
+        for (size_t i = nPosComponents; i < nVariables; i++) {
             _extraQuantityNames.push_back(variableNameVec[i]);
         }
     }
@@ -200,7 +200,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
         const std::vector<std::vector<float>>& jData = (*lineIter)[sTrace][sData];
         const size_t nPoints = jData.size();
 
-        for (size_t j = 0; j < nPoints; ++j) {
+        for (size_t j = 0; j < nPoints; j++) {
             const std::vector<float>& variables = jData[j];
 
             // Expects the x, y and z variables to be stored first!
@@ -217,7 +217,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 
             // Add the extra quantites. Stored in the same array as the x,y,z variables.
             // Hence index of the first extra quantity = 3
-            for (size_t xtraIdx = 3, k = 0 ; k < nExtras; ++k, ++xtraIdx) {
+            for (size_t xtraIdx = 3, k = 0; k < nExtras; k++, xtraIdx++) {
                 _extraQuantities[k].push_back(variables[xtraIdx]);
             }
         }

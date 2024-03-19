@@ -33,11 +33,13 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cmath>
 #include <cctype>
 #include <fstream>
 #include <functional>
+#include <sstream>
 #include <string_view>
 
 namespace {
@@ -50,7 +52,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     ghoul_assert(std::filesystem::exists(filePath), "File must exist");
 
     auto readFloatData = [](const std::string& str) -> float {
-        float result;
+        float result = 0.f;
 #ifdef WIN32
         auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
         if (ec == std::errc() && std::isfinite(result)) {
@@ -60,7 +62,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 #else // ^^^^ WIN32 // !WIN32 vvvv
         // clang is missing float support for std::from_chars
         try {
-            result = std::stof(str.c_str(), nullptr);
+            result = std::stof(str, nullptr);
             if (std::isfinite(result)) {
                 return result;
             }
@@ -79,7 +81,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 
     if (rows.size() < 2) {
         LWARNING(fmt::format(
-            "Error loading data file {}. No data items read", filePath
+            "Error loading data file '{}'. No data items read", filePath
         ));
         return Dataset();
     }
@@ -94,15 +96,16 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     int yColumn = -1;
     int zColumn = -1;
     int nameColumn = -1;
+    int textureColumn = -1;
 
     int nDataColumns = 0;
-    bool hasExcludeColumns = specs.has_value() && (*specs).hasExcludeColumns();
+    const bool hasExcludeColumns = specs.has_value() && specs->hasExcludeColumns();
     std::vector<size_t> skipColumns;
     if (hasExcludeColumns) {
         skipColumns.reserve((*specs).excludeColumns.size());
     }
 
-    for (size_t i = 0; i < columns.size(); ++i) {
+    for (size_t i = 0; i < columns.size(); i++) {
         const std::string& col = columns[i];
 
         if (isPositionColumn(col, specs)) {
@@ -119,11 +122,17 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         else if (isNameColumn(col, specs)) {
             nameColumn = static_cast<int>(i);
         }
-        else if (hasExcludeColumns && (*specs).isExcludeColumn(col)) {
+        else if (hasExcludeColumns && specs->isExcludeColumn(col)) {
             skipColumns.push_back(i);
             continue;
         }
         else {
+            // Note that the texture column is also a regular column. Just save the index
+            if (isTextureColumn(col, specs)) {
+                res.textureDataIndex = nDataColumns;
+                textureColumn = static_cast<int>(i);
+            }
+
             res.variables.push_back({
                 .index = nDataColumns,
                 .name = col
@@ -132,17 +141,44 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         }
     }
 
-    if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
-        // One or more position columns weren't read
-        LERROR(fmt::format(
-            "Error loading data file {}. Missing X, Y or Z position column", filePath
+    // Some errors / warnings
+    if (specs.has_value()) {
+        bool hasAllProvided = specs->checkIfAllProvidedColumnsExist(columns);
+        if (!hasAllProvided) {
+            LERROR(fmt::format(
+                "Error loading data file {}. Not all columns provided in data mapping "
+                "exists in dataset", filePath
+            ));
+        }
+    }
+
+    bool hasProvidedTextureFile = specs.has_value() && specs->textureMap.has_value();
+    bool hasTextureIndex = (res.textureDataIndex >= 0);
+
+    if (hasProvidedTextureFile && !hasTextureIndex && !specs->textureColumn.has_value()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error loading data file {}. No texture column was specified in the data "
+            "mapping", filePath
+        ));
+    }
+    if (!hasProvidedTextureFile && hasTextureIndex) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error loading data file {}. Missing texture map file location in data "
+            "mapping", filePath
         ));
     }
 
-    LINFO(fmt::format(
-        "Loading {} rows with {} columns", rows.size(), columns.size()
-    ));
+    if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
+        // One or more position columns weren't read
+        LERROR(fmt::format(
+            "Error loading data file '{}'. Missing X, Y or Z position column", filePath
+        ));
+    }
+
+    LINFO(fmt::format("Loading {} rows with {} columns", rows.size(), columns.size()));
     ProgressBar progress = ProgressBar(static_cast<int>(rows.size()));
+
+    std::set<int> uniqueTextureIndicesInData;
 
     // Skip first row (column names)
     for (size_t rowIdx = 1; rowIdx < rows.size(); ++rowIdx) {
@@ -151,7 +187,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         Dataset::Entry entry;
         entry.data.reserve(nDataColumns);
 
-        for (size_t i = 0; i < row.size(); ++i) {
+        for (size_t i = 0; i < row.size(); i++) {
             // Check if column should be exluded. Note that list of indices is sorted
             // so we can do a binary search
             if (hasExcludeColumns &&
@@ -163,7 +199,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             const std::string& strValue = row[i];
 
             // For now, all values are converted to float
-            float value = readFloatData(strValue);
+            const float value = readFloatData(strValue);
 
             if (i == xColumn) {
                 entry.position.x = value;
@@ -182,10 +218,14 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             else {
                 entry.data.push_back(value);
             }
+
+            if (i == textureColumn) {
+                uniqueTextureIndicesInData.emplace(static_cast<int>(value));
+            }
         }
 
-        glm::vec3 positive = glm::abs(entry.position);
-        float max = glm::compMax(positive);
+        const glm::vec3 positive = glm::abs(entry.position);
+        const float max = glm::compMax(positive);
         if (max > res.maxPositionComponent) {
             res.maxPositionComponent = max;
         }
@@ -193,6 +233,82 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         res.entries.push_back(entry);
 
         progress.print(static_cast<int>(rowIdx + 1));
+    }
+
+    // Load the textures. Skip textures that are not included in the dataset
+    if (hasProvidedTextureFile) {
+        const std::filesystem::path path = *specs->textureMap;
+        if (!std::filesystem::is_regular_file(path)) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Failed to open texture map file {}", path
+            ));
+        }
+        res.textures = loadTextureMapFile(path, uniqueTextureIndicesInData);
+    }
+
+    return res;
+}
+
+std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
+                                          const std::set<int>& texturesInData)
+{
+    ghoul_assert(std::filesystem::exists(path), "File must exist");
+
+    std::ifstream file(path);
+    if (!file.good()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Failed to open texture map file {}", path
+        ));
+    }
+
+    int currentLineNumber = 0;
+
+    std::vector<Dataset::Texture> res;
+
+    std::string line;
+    while (std::getline(file, line)) {
+        ghoul::trimWhitespace(line);
+        currentLineNumber++;
+
+        if (line.empty() || line.starts_with("#")) {
+            continue;
+        }
+
+        std::vector<std::string> tokens = ghoul::tokenizeString(line, ' ');
+        int nNonEmptyTokens = static_cast<int>(std::count_if(
+            tokens.begin(),
+            tokens.end(),
+            [](const std::string& t) { return !t.empty(); }
+        ));
+
+        if (nNonEmptyTokens > 2) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading texture map file {}: Line {} has too many parameters. "
+                "Expected 2: an integer index followed by a filename, where the file "
+                "name may not include whitespaces",
+                path, currentLineNumber
+            ));
+        }
+
+        std::stringstream str(line);
+
+        // Each line is following the template:
+        // <idx> <file name>
+        Dataset::Texture texture;
+        str >> texture.index >> texture.file;
+
+        for (const Dataset::Texture& t : res) {
+            if (t.index == texture.index) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Error loading texture map file {}: Texture index '{}' defined twice",
+                    path, texture.index
+                ));
+            }
+        }
+
+        if (texturesInData.contains(texture.index)) {
+            res.push_back(texture);
+        }
     }
 
     return res;

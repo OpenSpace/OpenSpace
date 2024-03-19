@@ -39,9 +39,9 @@ namespace {
         bool existsInFilesystem = true;
     };
 
-    int getLevelFromLine(std::string line) {
+    int getLevelFromLine(const std::string& line) {
         int level = 0;
-        for (unsigned int i = 0; i < line.length(); ++i) {
+        for (unsigned int i = 0; i < line.length(); i++) {
             if (line.substr(i, 1) == " ") {
                 level++;
             }
@@ -80,14 +80,19 @@ namespace {
         int nChildInsert = -1;
         bool continueToNextLine = true;
 
-        while (continueToNextLine && elem.line.length() != 0) {
-            int levelChange = elem.level - level;
+        while (continueToNextLine && !elem.line.empty()) {
+            const int levelChange = elem.level - level;
 
             if (levelChange == 0) {
                 parent->insertChildren(++nChildInsert, 1, 3);
-                parent->child(nChildInsert)->setData(0, QString::fromStdString(elem.line));
-                bool shouldMakeElemChecked = (elem.checked || !elem.existsInFilesystem);
-                Qt::CheckState check = (shouldMakeElemChecked) ? Qt::Checked : Qt::Unchecked;
+                parent->child(nChildInsert)->setData(
+                    0,
+                    QString::fromStdString(elem.line)
+                );
+                const bool shouldMakeElemChecked =
+                    (elem.checked || !elem.existsInFilesystem);
+                const Qt::CheckState check =
+                    shouldMakeElemChecked ? Qt::Checked : Qt::Unchecked;
                 parent->child(nChildInsert)->setData(1, check);
                 parent->child(nChildInsert)->setExistsInFilesystem(elem.existsInFilesystem);
                 continueToNextLine = importGetNextLine(elem, iss);
@@ -96,7 +101,6 @@ namespace {
                 importInsertItem(iss, parent->child(nChildInsert), elem, level + 1);
             }
             else if (levelChange < 0) {
-                continueToNextLine = false;
                 break;
             }
         }
@@ -108,14 +112,14 @@ namespace {
                                   std::vector<AssetTreeItem*>& outputItems,
                                   std::string pathPrefix)
     {
-        std::string itemName = item->data(0).toString().toStdString();
-        bool isPathPrefix = ((pathPrefix.length()) == 0 && (itemName == Header1));
+        const std::string itemName = item->data(0).toString().toStdString();
+        const bool isPathPrefix = ((pathPrefix.length()) == 0 && (itemName == Header1));
 
         if (item->isAsset()) {
             if (item->isChecked()) {
                 std::string path = pathPrefix + itemName;
                 outputItems.push_back(item);
-                outputPaths.push_back(path);
+                outputPaths.push_back(std::move(path));
             }
         }
         else {
@@ -123,7 +127,7 @@ namespace {
                 pathPrefix += itemName;
                 pathPrefix += "/";
             }
-            for (int i = 0; i < item->childCount(); ++i) {
+            for (int i = 0; i < item->childCount(); i++) {
                 parseChildrenForSelected(
                     item->child(i),
                     outputPaths,
@@ -200,7 +204,7 @@ QString AssetTreeModel::name(QModelIndex& index) const {
     return item(index)->name();
 }
 
-void AssetTreeModel::setName(QModelIndex& index, QString name) {
+void AssetTreeModel::setName(QModelIndex& index, const QString& name) {
     item(index)->setData(0, name);
 }
 
@@ -245,7 +249,7 @@ QModelIndex AssetTreeModel::index(int row, int column, const QModelIndex& parent
 }
 
 QModelIndex AssetTreeModel::parent(int row, int column, const QModelIndex& parent) const {
-    QModelIndex idx = index(row, column, parent);
+    const QModelIndex idx = index(row, column, parent);
     return AssetTreeModel::parent(idx);
 }
 

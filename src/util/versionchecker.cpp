@@ -79,16 +79,16 @@ void VersionChecker::cancel() {
         if (_request->hasSucceeded()) {
             _request->wait();
             std::vector<char> data = _request->downloadedData();
-            std::string versionString(data.begin(), data.end());
+            const std::string versionString(data.begin(), data.end());
             std::istringstream versionData(versionString);
 
             std::string token;
             std::getline(versionData, token, '.');
-            int major = std::atoi(token.c_str());
+            const int major = std::atoi(token.c_str());
             std::getline(versionData, token, '.');
-            int minor = std::atoi(token.c_str());
+            const int minor = std::atoi(token.c_str());
             std::getline(versionData, token, '.');
-            int patch = std::atoi(token.c_str());
+            const int patch = std::atoi(token.c_str());
 
             _latestVersion = { major, minor, patch };
             _request = nullptr;
@@ -125,10 +125,11 @@ void VersionChecker::cancel() {
             _request->cancel();
             _request->wait();
             std::vector<char> data = _request->downloadedData();
-            std::string response(data.begin(), data.end());
+            const std::string response = std::string(data.begin(), data.end());
             LWARNING(fmt::format(
-                "Failed to get latest OpenSpace version information from {}",
-                _request->url()
+                "Failed to get OpenSpace version information from {}. Response: {}",
+                _request->url(),
+                response
             ));
             _request = nullptr;
             return false;

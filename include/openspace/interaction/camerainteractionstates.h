@@ -58,7 +58,7 @@ public:
      * Returns true if any of the velocities are larger than zero, i.e. wether an
      * interaction happened.
      */
-    bool hasNonZeroVelocities(bool checkOnlyMovement = false);
+    bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
 
 protected:
     struct InteractionState {

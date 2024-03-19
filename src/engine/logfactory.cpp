@@ -98,25 +98,25 @@ documentation::Documentation LogFactoryDocumentation() {
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::filesystem::path filename = absPath(p.file);
-    bool append = p.append.value_or(true);
-    int nLogRotation = p.logRotation.value_or(0);
-    bool timeStamp = p.timeStamping.value_or(true);
-    bool dateStamp = p.dateStamping.value_or(true);
-    bool categoryStamp = p.categoryStamping.value_or(true);
-    bool logLevelStamp = p.logLevelStamping.value_or(true);
-    ghoul::logging::LogLevel level = codegen::map<ghoul::logging::LogLevel>(
+    const std::filesystem::path filename = absPath(p.file);
+    const bool append = p.append.value_or(true);
+    const int nLogRotation = p.logRotation.value_or(0);
+    const bool timeStamp = p.timeStamping.value_or(true);
+    const bool dateStamp = p.dateStamping.value_or(true);
+    const bool categoryStamp = p.categoryStamping.value_or(true);
+    const bool logLevelStamp = p.logLevelStamping.value_or(true);
+    const ghoul::logging::LogLevel level = codegen::map<ghoul::logging::LogLevel>(
         p.logLevel.value_or(Parameters::LogLevel::AllLogging)
     );
 
     switch (p.type) {
         case Parameters::Type::Html:
         {
-            std::vector<std::string> cssFiles{
+            const std::vector<std::string> cssFiles = {
                 absPath(BootstrapPath).string(),
                 absPath(CssPath).string()
             };
-            std::vector<std::string> jsFiles{ absPath(JsPath).string() };
+            const std::vector<std::string> jsFiles = { absPath(JsPath).string() };
 
             return std::make_unique<ghoul::logging::HTMLLog>(
                 filename.string(),
@@ -142,7 +142,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
                 level
             );
         default:
-            throw new ghoul::MissingCaseException();
+            throw ghoul::MissingCaseException();
     }
 }
 

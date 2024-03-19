@@ -153,8 +153,8 @@ std::string  WebGuiModule::address() const {
 
 WebGuiModule::CallbackHandle WebGuiModule::addEndpointChangeCallback(EndpointCallback cb)
 {
-    CallbackHandle handle = _nextCallbackHandle++;
-    _endpointChangeCallbacks.push_back({ handle, std::move(cb) });
+    const CallbackHandle handle = _nextCallbackHandle++;
+    _endpointChangeCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 
@@ -259,7 +259,7 @@ void WebGuiModule::startProcess() {
     std::string formattedDirectories = "[";
 
     std::vector<std::string> directories = _directories;
-    for (size_t i = 0; i < directories.size(); ++i) {
+    for (size_t i = 0; i < directories.size(); i++) {
         std::string arg = directories[i];
         if (i % 2 == 1) {
             arg = absPath(arg).string();

@@ -88,14 +88,14 @@ public:
     void updateStateFromInput(
         const JoystickInputStates& joystickInputStates, double deltaTime);
 
-    void setAxisMapping(std::string joystickName, int axis, AxisType mapping,
+    void setAxisMapping(const std::string& joystickName, int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
         JoystickType joystickType = JoystickType::JoystickLike,
         bool isSticky = false, AxisFlip shouldFlip = AxisFlip::No,
         double sensitivity = 0.0
     );
 
-    void setAxisMappingProperty(std::string joystickName, int axis,
+    void setAxisMappingProperty(const std::string& joystickName, int axis,
         std::string propertyUri, float min = 0.f, float max = 1.f,
         AxisInvert shouldInvert = AxisInvert::No, bool isRemote = true
     );

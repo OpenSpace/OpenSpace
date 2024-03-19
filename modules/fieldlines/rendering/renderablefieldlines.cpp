@@ -292,7 +292,7 @@ void RenderableFieldlines::update(const UpdateData&) {
         int prevEnd = 0;
         std::vector<LinePoint> vertexData;
         // Arrange data for glMultiDrawArrays
-        for (size_t j = 0; j < fieldlines.size(); ++j) {
+        for (size_t j = 0; j < fieldlines.size(); j++) {
             _lineStart.push_back(prevEnd);
             _lineCount.push_back(static_cast<int>(fieldlines[j].size()));
             prevEnd = prevEnd + static_cast<int>(fieldlines[j].size());
@@ -405,7 +405,7 @@ void RenderableFieldlines::loadSeedPointsFromTable() {
 std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines() {
     if (!_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldType)) {
         LERROR(fmt::format(
-            "{} does not contain a '{}' key", KeyVectorField, KeyVectorFieldType
+            "'{}' does not contain a '{}' key", KeyVectorField, KeyVectorFieldType
         ));
         return {};
     }
@@ -426,14 +426,14 @@ std::vector<RenderableFieldlines::Line>
 RenderableFieldlines::generateFieldlinesVolumeKameleon()
 {
     if (!_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldVolumeModel)) {
-        LERROR(fmt::format("{} does not name a model", KeyVectorField));
+        LERROR(fmt::format("'{}' does not name a model", KeyVectorField));
         return {};
     }
 
     std::string model = _vectorFieldInfo.value<std::string>(KeyVectorFieldVolumeModel);
 
     if (!_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldFile)) {
-        LERROR(fmt::format("{} does not name a file", KeyVectorField));
+        LERROR(fmt::format("'{}' does not name a file", KeyVectorField));
         return {};
     }
     std::string fileName = _vectorFieldInfo.value<std::string>(KeyVectorFieldFile);

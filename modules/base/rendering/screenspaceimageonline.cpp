@@ -105,7 +105,7 @@ void ScreenSpaceImageOnline::update() {
         }
 
         if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-            DownloadManager::MemoryFile imageFile = _imageFuture.get();
+            const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
             if (imageFile.corrupted) {
                 LERRORC(

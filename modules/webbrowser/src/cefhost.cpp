@@ -67,9 +67,9 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     }
 #endif // __APPLE__
 
-    CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
+    const CefRefPtr<WebBrowserApp> app = CefRefPtr<WebBrowserApp>(new WebBrowserApp);
 
-    CefMainArgs args;
+    const CefMainArgs args;
     CefInitialize(args, settings, app.get(), nullptr);
     LDEBUG("Initializing CEF... done");
 }

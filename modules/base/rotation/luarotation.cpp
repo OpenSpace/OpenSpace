@@ -108,7 +108,7 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
     // Execute the scaling function
-    int success = lua_pcall(_state, 2, 9, 0);
+    const int success = lua_pcall(_state, 2, 9, 0);
     if (success != 0) {
         LERRORC(
             "LuaScale",
@@ -116,12 +116,12 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
         );
     }
 
-    double values[9];
-    for (int i = 0; i < 9; ++i) {
+    std::array<double, 9> values;
+    for (int i = 0; i < 9; i++) {
         values[i] = luaL_checknumber(_state, -1 - i);
     }
 
-    return glm::make_mat3(values);
+    return glm::make_mat3(values.data());
 }
 
 } // namespace openspace

@@ -430,7 +430,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
     float min = _lowerValueBound;
     float diff = _upperValueBound - _lowerValueBound;
 
-    for (size_t i = 0; i < _normalizedVolume->nCells(); ++i) {
+    for (size_t i = 0; i < _normalizedVolume->nCells(); i++) {
         out[i] = glm::clamp((in[i] - min) / diff, 0.f, 1.f);
     }
 
