@@ -321,6 +321,8 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
     if (p.file.has_value()) {
         colorMapFile = absPath(*p.file).string();
     }
+
+    invert = p.invert.value_or(invert);
 }
 
 ghoul::opengl::Texture* ColorMappingComponent::texture() const {
