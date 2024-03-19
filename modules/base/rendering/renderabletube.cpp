@@ -188,6 +188,20 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SampleLineWidthInfo = {
+        "SampleLineWidth",
+        "Sample Line Width",
+        "The line width to use when selected samples are added as trails",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SampleColorInfo = {
+        "SampleColor",
+        "Sample Color",
+        "The color to use when selected samples are added as trails",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo KernelDirectoryInfo = {
         "KernelDirectory",
         "Kernel Directory",
@@ -348,6 +362,8 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _jumpToNextPolygon(JumpToNextPolygonInfo)
     , _colorSettingsCutplane(dictionary)
     , _selectedSample(SelectedSampleInfo)
+    , _sampleLineWidth(SampleLineWidthInfo, 3.f, 1.f, 10.f)
+    , _sampleColor(SampleColorInfo, glm::vec3(0.f, 0.8f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _dataFile = p.file;
@@ -455,6 +471,11 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
 
     _selectedSample.onChange([this]() { loadSelectedSample(); });
     addProperty(_selectedSample);
+
+    addProperty(_sampleLineWidth);
+
+    _sampleColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_sampleColor);
 
     if (p.kernelsDirectory.has_value()) {
         std::filesystem::path folder = absPath(*p.kernelsDirectory);
@@ -900,12 +921,12 @@ void RenderableTube::loadSelectedSample() {
                     "Target = '{2}',"
                     "Observer = 'SUN'"
                 "}},"
-                "Color = {{ 0.0, 0.5019607843137255, 0.0 }},"
+                "Color = {{ {7}, {8}, {9} }},"
                 "Opacity = 1,"
                 "StartTime = '{3}',"
                 "EndTime = '{4}',"
                 "SampleInterval = 86400,"
-                "LineWidth = 3.5"
+                "LineWidth = {6}"
             "}},"
             "Tag = {{ 'B612' }},"
             "GUI = {{"
@@ -913,7 +934,9 @@ void RenderableTube::loadSelectedSample() {
                 "Path = '/B612/{5}/Trails'"
             "}}"
         "}})",
-        kernelPath, identifier, target, start, end, parent()->identifier()
+        kernelPath, identifier, target, start, end, parent()->identifier(),
+        _sampleLineWidth.value(), _sampleColor.value().r, _sampleColor.value().g,
+        _sampleColor.value().b
     );
 
     // Add trail

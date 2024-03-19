@@ -155,6 +155,8 @@ private:
     properties::TriggerProperty _jumpToPrevPolygon;
     properties::TriggerProperty _jumpToNextPolygon;
     properties::StringProperty _selectedSample;
+    properties::FloatProperty _sampleLineWidth;
+    properties::Vec3Property _sampleColor;
 
     std::vector<float> _lightIntensitiesBuffer;
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
