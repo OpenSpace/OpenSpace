@@ -1,3 +1,6 @@
+# A dummy dataset with an xyz position and some random data columns.
+# The last two columns has data values with either missing values or
+# Nan values (which can be handled seprately when color mapping)
 x,y,z,a,b,normaldist_withMissing,number_withNan
 13428000,26239000,45870000,-3.226548224,33.95773276,-0.357778948,29
 14727000,45282000,10832000,45.05941924,-106.0395917,,29

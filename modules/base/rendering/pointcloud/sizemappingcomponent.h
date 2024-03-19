@@ -22,22 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_BASE___SIZEMAPPINGCOMPONENT___H__
+#define __OPENSPACE_MODULE_BASE___SIZEMAPPINGCOMPONENT___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <openspace/properties/propertyowner.h>
 
-in vec3 in_position;
-in float in_textureLayer;
-in float in_colorParameter;
-in float in_scalingParameter;
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
-flat out float textureLayer;
-flat out float colorParameter;
-flat out float scalingParameter;
+namespace openspace {
 
-void main() {
-  textureLayer = in_textureLayer;
-  colorParameter = in_colorParameter;
-  scalingParameter = in_scalingParameter;
-  gl_Position = vec4(in_position, 1.0);
-}
+namespace documentation { struct Documentation; }
+
+/**
+ * This is a component that can be used to hold parameters and properties for scaling
+ * point cloud points (or other data-based entities) based a parameter in a dataset.
+ */
+struct SizeMappingComponent : public properties::PropertyOwner {
+    SizeMappingComponent();
+    explicit SizeMappingComponent(const ghoul::Dictionary& dictionary);
+    ~SizeMappingComponent() override = default;
+
+    static documentation::Documentation Documentation();
+
+    properties::BoolProperty enabled;
+    properties::OptionProperty parameterOption;
+    properties::FloatProperty scaleFactor;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___SIZEMAPPINGCOMPONENT___H__
