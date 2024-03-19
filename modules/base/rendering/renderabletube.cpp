@@ -902,17 +902,18 @@ void RenderableTube::loadSelectedSample() {
     std::replace(kernelPath.begin(), kernelPath.end(), '\\', '/');
 
     // Identifier starts at 000001
-    std::string identifier = fmt::format("{:06}_trail", std::stoi(_selectedSample.value()) + 1);
+    std::string identifier = fmt::format("{:06}", std::stoi(_selectedSample.value()) + 1);
+
     // Target starts at 1000000
     std::string target = fmt::format("1{:06}", std::stoi(_selectedSample.value()));
-
     std::string start = std::string(Time(_data.front().timestamp).ISO8601());
     std::string end = std::string(Time(_data.back().timestamp).ISO8601());
 
+    // Trail
     std::string addTrailNodeScript = fmt::format(
         "openspace.spice.loadKernel('{0}'); "
         "openspace.addSceneGraphNode({{"
-            "Identifier = '{1}',"
+            "Identifier = '{1}_trail',"
             "Parent = 'SunCenter',"
             "Renderable = {{"
                 "Type = 'RenderableTrailTrajectory',"
@@ -942,6 +943,34 @@ void RenderableTube::loadSelectedSample() {
     // Add trail
     global::scriptEngine->queueScript(
         addTrailNodeScript,
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    );
+
+    // Head
+    std::string addHeadNodeScript = fmt::format(
+        "openspace.addSceneGraphNode({{"
+            "Identifier = '{0}_head',"
+            "Parent = 'SunCenter',"
+            "Transform = {{"
+                "Translation = {{"
+                    "Type = 'SpiceTranslation',"
+                    "Target = '{1}',"
+                    "Observer = 'SUN'"
+                "}}"
+            "}},"
+            "Tag = {{ 'B612' }},"
+            "GUI = {{"
+                "Name = '{0} Head',"
+                "Path = '/B612/{2}/Heads'"
+            "}}"
+        "}})",
+        identifier, target, parent()->identifier()
+    );
+
+    // Add head
+    global::scriptEngine->queueScript(
+        addHeadNodeScript,
         scripting::ScriptEngine::ShouldBeSynchronized::Yes,
         scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
