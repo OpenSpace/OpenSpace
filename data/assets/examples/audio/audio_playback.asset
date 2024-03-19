@@ -7,15 +7,15 @@ openspace.downloadFile(
   openspace.absPath("${TEMPORARY}/Arcadia.mp3"),
   true
 )
-local handle = 0
+
+local soundName = "Example_Sound_1"
 
 asset.onInitialize(function()
   -- Start playing the song immediately
-  handle = openspace.sound.playAudio(openspace.absPath("${TEMPORARY}/Arcadia.mp3"))
-  openspace.printInfo("Playing audio handle: " .. handle)
+  openspace.audio.playAudio(openspace.absPath("${TEMPORARY}/Arcadia.mp3"), soundName)
 end)
 
 asset.onDeinitialize(function()
   -- When we remove this asset, we want to audio to stop playing no matter what
-  openspace.sound.stopAudio(handle)
+  openspace.audio.stopAudio(soundName)
 end)

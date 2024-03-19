@@ -85,7 +85,7 @@ void AudioModule::internalDeinitializeGL() {
 std::unique_ptr<SoLoud::Wav> AudioModule::loadSound(const std::filesystem::path& path) {
     ghoul_assert(_engine, "No audio engine loaded");
 
-    std::unique_ptr<SoLoud::Wav> audio = std::make_unique<SoLoud::Wav>();
+    std::unique_ptr<SoLoud::Wav> sound = std::make_unique<SoLoud::Wav>();
     const std::string p = path.string();
     SoLoud::result res = sound->load(p.c_str());
     if (res != 0) {
@@ -117,64 +117,53 @@ std::unique_ptr<SoLoud::Wav> AudioModule::loadSound(const std::filesystem::path&
     return sound;
 }
 
-int AudioModule::playAudio(const std::filesystem::path& path, ShouldLoop loop,
-                           std::string name)
+void AudioModule::playAudio(const std::filesystem::path& path, std::string identifier,
+                            ShouldLoop loop)
 {
     ghoul_assert(_engine, "No audio engine loaded");
+    if (_sounds.find(identifier) != _sounds.end()) {
+        LERROR(fmt::format("Sound with name '{}' already played", identifier));
+        return;
+    }
 
     std::unique_ptr<SoLoud::Wav> sound = loadSound(path);
-    //sound->setAutoStop(false);
     sound->setLooping(loop);
     SoLoud::handle handle = _engine->playBackground(*sound);
 
-    ghoul_assert(_sounds.find(handle) == _sounds.end(), "Handle already used");
-    _sounds[handle] = {
+    ghoul_assert(_sounds.find(identifier) == _sounds.end(), "Handle already used");
+    _sounds[identifier] = {
         .sound = std::move(sound),
-        .name = std::move(name)
+        .handle = handle
     };
-    return handle;
 }
 
-void AudioModule::stopAudio(int handle) {
+void AudioModule::playAudio3d(const std::filesystem::path& path, std::string identifier,
+                              const glm::vec3& position, ShouldLoop loop)
+{
     ghoul_assert(_engine, "No audio engine loaded");
-
-    auto it = _sounds.find(handle);
-    if (it != _sounds.end()) {
-        _sounds.erase(it);
-        _engine->stop(handle);
+    if (_sounds.find(identifier) != _sounds.end()) {
+        LERROR(fmt::format("Sound with name '{}' already played", identifier));
+        return;
     }
+
+    std::unique_ptr<SoLoud::Wav> sound = loadSound(path);
+    sound->setLooping(loop);
+    SoLoud::handle handle = _engine->play3d(*sound, position.x, position.y, position.z);
+
+    _sounds[identifier] = {
+        .sound = std::move(sound),
+        .handle = handle
+    };
 }
 
-bool AudioModule::isPlaying(int handle) const {
-    ghoul_assert(_engine, "No audio engine loaded");
-    return _engine->isValidVoiceHandle(handle);
-}
-
-void AudioModule::pauseAudio(int handle) const {
-    ghoul_assert(_engine, "No audio engine loaded");
-    _engine->setPause(handle, true);
-}
-
-void AudioModule::resumeAudio(int handle) const {
-    ghoul_assert(_engine, "No audio engine loaded");
-    _engine->setPause(handle, false);
-}
-
-bool AudioModule::isPaused(int handle) const {
+void AudioModule::stopAudio(const std::string& identifier) {
     ghoul_assert(_engine, "No audio engine loaded");
 
-    const bool isPaused = _engine->getPause(handle);
-    return isPaused;
-}
-
-void AudioModule::setLooping(int handle, ShouldLoop loop) const {
-    ghoul_assert(_engine, "No audio engine loaded");
-    _engine->setLooping(handle, loop);
-}
-
-AudioModule::ShouldLoop AudioModule::isLooping(int handle) const {
-    ghoul_assert(_engine, "No audio engine loaded");
-    return _engine->getLooping(handle) ? ShouldLoop::Yes : ShouldLoop::No;
+    auto it = _sounds.find(identifier);
+    if (it != _sounds.end()) {
+        _engine->stop(it->second.handle);
+        _sounds.erase(it);
+    }
 }
 
 void AudioModule::stopAll() {
@@ -184,7 +173,136 @@ void AudioModule::stopAll() {
     _sounds.clear();
 }
 
-std::vector<int> AudioModule::currentlyPlaying() const {
+void AudioModule::pauseAll() const {
+    for (const std::pair<const std::string, Info>& sound : _sounds) {
+        pauseAudio(sound.first);
+    }
+}
+
+void AudioModule::resumeAll() const {
+    for (const std::pair<const std::string, Info>& sound : _sounds) {
+        resumeAudio(sound.first);
+    }
+}
+
+void AudioModule::playAllFromStart() const {
+    for (const std::pair<const std::string, Info>& sound : _sounds) {
+        _engine->seek(sound.second.handle, 0.f);
+    }
+    resumeAll();
+}
+
+bool AudioModule::isPlaying(const std::string& identifier) const {
+    ghoul_assert(_engine, "No audio engine loaded");
+
+    auto it = _sounds.find(identifier);
+    if (it != _sounds.end()) {
+        return _engine->isValidVoiceHandle(it->second.handle);
+    }
+    else {
+        return false;
+    }
+}
+
+void AudioModule::pauseAudio(const std::string& identifier) const {
+    ghoul_assert(_engine, "No audio engine loaded");
+
+    auto it = _sounds.find(identifier);
+    if (it != _sounds.end()) {
+        _engine->setPause(it->second.handle, true);
+    }
+}
+
+void AudioModule::resumeAudio(const std::string& identifier) const {
+    ghoul_assert(_engine, "No audio engine loaded");
+
+    auto it = _sounds.find(identifier);
+    if (it != _sounds.end()) {
+        _engine->setPause(it->second.handle, false);
+    }
+}
+
+bool AudioModule::isPaused(const std::string& identifier) const {
+    ghoul_assert(_engine, "No audio engine loaded");
+
+    auto it = _sounds.find(identifier);
+    if (it != _sounds.end()) {
+        const bool isPaused = _engine->getPause(it->second.handle);
+        return isPaused;
+    }
+    else {
+        return true;
+    }
+}
+
+void AudioModule::setLooping(const std::string& identifier, ShouldLoop loop) const {
+    ghoul_assert(_engine, "No audio engine loaded");
+
+    auto it = _sounds.find(identifier);
+    if (it != _sounds.end()) {
+        _engine->setLooping(it->second.handle, loop);
+    }
+}
+
+AudioModule::ShouldLoop AudioModule::isLooping(const std::string& identifier) const {
+    ghoul_assert(_engine, "No audio engine loaded");
+
+    auto it = _sounds.find(identifier);
+    if (it != _sounds.end()) {
+        return _engine->getLooping(it->second.handle) ? ShouldLoop::Yes : ShouldLoop::No;
+    }
+    else {
+        return ShouldLoop::No;
+    }
+}
+
+void AudioModule::setVolume(const std::string& identifier, float volume, float fade) const
+{
+    ghoul_assert(_engine, "No audio engine loaded");
+
+    auto it = _sounds.find(identifier);
+    if (it == _sounds.end()) {
+        return;
+    }
+
+    // We clamp the volume level between [0, 1] to not accidentally blow any speakers
+    volume = glm::clamp(volume, 0.f, 1.f);
+    if (fade == 0.f) {
+        _engine->setVolume(it->second.handle, volume);
+    }
+    else {
+        _engine->fadeVolume(it->second.handle, volume, fade);
+    }
+}
+
+float AudioModule::volume(const std::string& identifier) const {
+    ghoul_assert(_engine, "No audio engine loaded");
+
+    auto it = _sounds.find(identifier);
+    if (it != _sounds.end()) {
+        const float volume = _engine->getVolume(it->second.handle);
+        return volume;
+    }
+    else {
+        return 0.f;
+    }
+}
+
+void AudioModule::set3dSourcePosition(const std::string& identifier,
+                                      const glm::vec3& position) const
+{
+    ghoul_assert(_engine, "No audio engine loaded");
+
+    auto it = _sounds.find(identifier);
+    if (it != _sounds.end()) {
+        _engine->set3dSourcePosition(
+            it->second.handle,
+            position.x, position.y, position.z
+        );
+    }
+}
+
+std::vector<std::string> AudioModule::currentlyPlaying() const {
     // This function is *technically* not the ones that are playing, but that ones that we
     // are keeping track of. So we still have songs in our internal data structure that
     // were started as not-looping and that have ended playing. We need to filter them out
@@ -193,11 +311,11 @@ std::vector<int> AudioModule::currentlyPlaying() const {
     // feels worse. We are doing the garbage collection in the two playAudio functions
     // instead, since we have to do some work their either way
 
-    std::vector<int> res;
+    std::vector<std::string> res;
     res.reserve(_sounds.size());
-    for (const auto& [key, value] : _sounds) {
-        if (isPlaying(key)) {
-            res.push_back(key);
+    for (const std::pair<const std::string, Info>& sound : _sounds) {
+        if (isPlaying(sound.first)) {
+            res.push_back(sound.first);
         }
     }
     return res;
@@ -221,59 +339,6 @@ float AudioModule::globalVolume() const {
     return _engine->getGlobalVolume();
 }
 
-void AudioModule::setVolume(int handle, float volume, float fade) const {
-    ghoul_assert(_engine, "No audio engine loaded");
-
-    // We clamp the volume level between [0, 1] to not accidentally blow any speakers
-    volume = glm::clamp(volume, 0.f, 1.f);
-    if (fade == 0.f) {
-        _engine->setVolume(handle, volume);
-    }
-    else {
-        _engine->fadeVolume(handle, volume, fade);
-    }
-}
-
-float AudioModule::volume(int handle) const {
-    ghoul_assert(_engine, "No audio engine loaded");
-
-    const float volume = _engine->getVolume(handle);
-    return volume;
-}
-
-int AudioModule::findAudio(const std::string& name) const {
-    if (name.empty()) {
-        // The empty name can never be a valid name
-        return -1;
-    }
-    for (const auto& [key, value] : _sounds) {
-        if (value.name == name) {
-            return key;
-        }
-    }
-
-    // If we get this far, we didn't find an entry for the name
-    return -1;
-}
-
-int AudioModule::playAudio3d(const std::filesystem::path& path, const glm::vec3& position,
-                             ShouldLoop loop, std::string name)
-{
-    ghoul_assert(_engine, "No audio engine loaded");
-
-    std::unique_ptr<SoLoud::Wav> sound = loadSound(path);
-    //sound->setAutoStop(false);
-    sound->setLooping(loop);
-    SoLoud::handle handle = _engine->play3d(*sound, position.x, position.y, position.z);
-
-    ghoul_assert(_sounds.find(handle) == _sounds.end(), "Handle already used");
-    _sounds[handle] = {
-        .sound = std::move(sound),
-        .name = std::move(name)
-    };
-    return handle;
-}
-
 void AudioModule::set3dListenerParameters(const std::optional<glm::vec3>& position,
                                           const std::optional<glm::vec3>& lookAt,
                                           const std::optional<glm::vec3>& up) const
@@ -289,15 +354,6 @@ void AudioModule::set3dListenerParameters(const std::optional<glm::vec3>& positi
     if (up.has_value()) {
         _engine->set3dListenerUp(up->x, up->y, up->z);
     }
-}
-
-void AudioModule::set3dSourcePosition(int handle, const glm::vec3& position) const {
-    ghoul_assert(_engine, "No audio engine loaded");
-
-    _engine->set3dSourcePosition(
-        handle,
-        position.x, position.y, position.z
-    );
 }
 
 void AudioModule::setSpeakerPosition(int channel, const glm::vec3& position) const {
@@ -325,22 +381,25 @@ scripting::LuaLibrary AudioModule::luaLibrary() const {
         "audio",
         {
             codegen::lua::PlayAudio,
+            codegen::lua::PlayAudio3d,
             codegen::lua::StopAudio,
+            codegen::lua::StopAll,
+            codegen::lua::PauseAll,
+            codegen::lua::ResumeAll,
+            codegen::lua::PlayAllFromStart,
             codegen::lua::IsPlaying,
-            codegen::lua::CurrentlyPlaying,
-            codegen::lua::SetGlobalVolume,
-            codegen::lua::GlobalVolume,
-            codegen::lua::SetVolume,
-            codegen::lua::Volume,
-            codegen::lua::FindAudio,
             codegen::lua::PauseAudio,
             codegen::lua::ResumeAudio,
             codegen::lua::IsPaused,
             codegen::lua::SetLooping,
             codegen::lua::IsLooping,
-            codegen::lua::PlayAudio3d,
-            codegen::lua::Set3dListenerPosition,
+            codegen::lua::SetVolume,
+            codegen::lua::Volume,
             codegen::lua::Set3dSourcePosition,
+            codegen::lua::CurrentlyPlaying,
+            codegen::lua::SetGlobalVolume,
+            codegen::lua::GlobalVolume,
+            codegen::lua::Set3dListenerPosition,
             codegen::lua::SetSpeakerPosition,
             codegen::lua::SpeakerPosition
         }
