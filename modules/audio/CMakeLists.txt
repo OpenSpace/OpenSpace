@@ -25,19 +25,19 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-  soundmodule.h
+  audiomodule.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  soundmodule.cpp
-  soundmodule_lua.inl
+  audiomodule.cpp
+  audiomodule_lua.inl
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
-  "Sound"
-  sound_module
+  "Audio"
+  audio_module
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
@@ -52,7 +52,7 @@ endif ()
 add_subdirectory(ext/soloud/contrib)
 
 # Unfortunately, the soloud cmake tarket doesn't set the include directories correctly
-target_include_directories(openspace-module-sound SYSTEM PRIVATE ext/soloud/include)
-target_link_libraries(openspace-module-sound PRIVATE soloud)
+target_include_directories(openspace-module-audio SYSTEM PRIVATE ext/soloud/include)
+target_link_libraries(openspace-module-audio PRIVATE soloud)
 set_property(TARGET soloud PROPERTY FOLDER "External")
 end_dependency("SoLoud")

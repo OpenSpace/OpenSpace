@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SOUNDMODULE___H__
-#define __OPENSPACE_MODULE_SPACE___SOUNDMODULE___H__
+#ifndef __OPENSPACE_MODULE_SPACE___AUDIOMODULE___H__
+#define __OPENSPACE_MODULE_SPACE___AUDIOMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -38,12 +38,12 @@ namespace SoLoud {
 
 namespace openspace {
 
-class SoundModule : public OpenSpaceModule {
+class AudioModule : public OpenSpaceModule {
 public:
-    constexpr static const char* Name = "Sound";
+    constexpr static const char* Name = "Audio";
 
-    SoundModule();
-    ~SoundModule() override;
+    AudioModule();
+    ~AudioModule() override;
     std::vector<documentation::Documentation> documentations() const override;
 
     scripting::LuaLibrary luaLibrary() const override;
@@ -292,4 +292,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___SOUNDMODULE___H__
+#endif // __OPENSPACE_MODULE_SPACE___AUDIOMODULE___H__
