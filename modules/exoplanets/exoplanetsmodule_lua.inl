@@ -707,7 +707,8 @@ listOfExoplanetsDeprecated()
  *
  * We recommend downloading the file from the Exoplanet Archive's Composite data table,
  * where multiple sources are combined into one row per planet.
- * https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
+ * https://exoplanetarchive.ipac.caltech.edu
+ * /cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
  *
  * Please remember to include all columns in the file download, as missing data columns
  * may lead to an incomplete visualization.

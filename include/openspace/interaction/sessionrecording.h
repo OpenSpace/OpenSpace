@@ -590,7 +590,8 @@ public:
      *
      * \return pathname of the converted version of the file
      */
-    std::string determineConversionOutFilename(const std::string& filename, DataMode mode);
+    std::string determineConversionOutFilename(const std::string& filename,
+        DataMode mode);
 
 protected:
     properties::BoolProperty _renderPlaybackInformation;

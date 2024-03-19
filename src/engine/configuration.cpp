@@ -387,7 +387,10 @@ ghoul::Dictionary Configuration::createDictionary() {
     {
         ghoul::Dictionary loadingScreenDict;
         loadingScreenDict.setValue("IsShowingMessages", loadingScreen.isShowingMessages);
-        loadingScreenDict.setValue("IsShowingNodeNames", loadingScreen.isShowingNodeNames);
+        loadingScreenDict.setValue(
+            "IsShowingNodeNames",
+            loadingScreen.isShowingNodeNames
+        );
         loadingScreenDict.setValue(
             "IsShowingLogMessages",
             loadingScreen.isShowingLogMessages

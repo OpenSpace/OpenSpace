@@ -310,11 +310,12 @@ void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {
     _program = BaseModule::ProgramObjectManager.request(
         "RenderablePointCloud_Interpolated",
         []() {
+            std::filesystem::path path = absPath("${MODULE_BASE}/shaders/pointcloud/");
             return global::renderEngine->buildRenderProgram(
                 "RenderablePointCloud_Interpolated",
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_interpolated_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_fs.glsl"),
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_gs.glsl")
+                path / "billboardpoint_interpolated_vs.glsl",
+                path / "billboardpoint_fs.glsl",
+                path / "billboardpoint_gs.glsl"
             );
         }
     );

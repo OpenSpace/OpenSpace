@@ -1073,7 +1073,9 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
-        const float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        const float distCamera = static_cast<float>(
+            glm::length(data.camera.positionVec3())
+        );
         const glm::vec2 fadeRange = _fadeInDistances;
         const double a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
         const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
