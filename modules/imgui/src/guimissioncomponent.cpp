@@ -118,4 +118,4 @@ void GuiMissionComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace gui
+} // namespace openspace::gui

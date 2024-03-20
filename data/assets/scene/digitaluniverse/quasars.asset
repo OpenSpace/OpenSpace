@@ -27,7 +27,9 @@ local Object = {
     Enabled = true,
     Opacity = 0.95,
     File = speck .. "quasars.speck",
-    Texture = textures .. "point3A.png",
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Unit = "Mpc",
     Fading = {
       FadeInDistances = { 1000.0, 10000.0 } -- Fade in value in the same unit as "Unit"

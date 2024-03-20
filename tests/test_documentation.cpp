@@ -824,7 +824,7 @@ TEST_CASE("Documentation: MixedVerifiers", "[documentation]") {
     positive.setValue("Int", 0);
     positive.setValue("String", ""s);
     positive.setValue("Table", ghoul::Dictionary());
-    TestResult positiveRes = testSpecification(doc, positive);
+    const TestResult positiveRes = testSpecification(doc, positive);
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
 
@@ -897,7 +897,7 @@ TEST_CASE("Documentation: NestedTables", "[documentation]") {
         }
         positive.setValue("Outer_Table2", inner);
     }
-    TestResult positiveRes = testSpecification(doc, positive);
+    const TestResult positiveRes = testSpecification(doc, positive);
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
 
@@ -1058,7 +1058,7 @@ TEST_CASE("Documentation: Optional", "[documentation]") {
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
 
-    ghoul::Dictionary negative;
+    const ghoul::Dictionary negative;
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -1128,7 +1128,7 @@ TEST_CASE("Documentation: Required In Optional", "[documentation]") {
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
 
-    ghoul::Dictionary positive3;
+    const ghoul::Dictionary positive3;
     positiveRes = testSpecification(doc, positive3);
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
@@ -1219,7 +1219,7 @@ TEST_CASE("Documentation: Empty Entries Non Exhaustive", "[documentation]") {
 
     const Documentation doc;
 
-    ghoul::Dictionary positive {};
+    const ghoul::Dictionary positive {};
     TestResult positiveRes = testSpecification(doc, positive);
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
@@ -2310,7 +2310,7 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
     CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
 
-    Documentation wrongDoc = {
+    const Documentation wrongDoc = {
         .entries = {
             { "Table", new ReferencingVerifier("WRONG"), Optional::No }
         }

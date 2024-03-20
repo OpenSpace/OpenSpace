@@ -639,7 +639,7 @@ void ActionDialog::actionSaved() {
     clearActionFields();
 }
 
-void ActionDialog::clearActionFields() {
+void ActionDialog::clearActionFields() const {
     _actionWidgets.list->setCurrentRow(-1);
     _actionWidgets.identifier->clear();
     _actionWidgets.identifier->setEnabled(false);
@@ -679,8 +679,9 @@ void ActionDialog::chooseScripts() {
     d.exec();
 }
 
-void ActionDialog::appendScriptsToTextfield(std::vector<std::string> scripts) {
-    for (const std::string script : scripts) {
+void ActionDialog::appendScriptsToTextfield(const std::vector<std::string>& scripts) const
+{
+    for (const std::string& script : scripts) {
         _actionWidgets.script->append(QString::fromStdString(script));
     }
 }
@@ -693,7 +694,7 @@ Profile::Keybinding* ActionDialog::selectedKeybinding() {
 
 void ActionDialog::keybindingAdd() {
     _keybindingWidgets.list->addItem("");
-    _keybindingsData.push_back(Profile::Keybinding());
+    _keybindingsData.emplace_back();
     _keybindingWidgets.list->setCurrentRow(_keybindingWidgets.list->count() - 1);
 }
 
@@ -733,7 +734,7 @@ void ActionDialog::keybindingSelected() {
             hasKeyModifier(keybinding->key.modifier, KeyModifier::Alt)
         );
 
-        std::string key = ghoul::to_string(keybinding->key.key);
+        const std::string key = ghoul::to_string(keybinding->key.key);
         _keybindingWidgets.key->setCurrentText(QString::fromStdString(key));
         _keybindingWidgets.key->setEnabled(true);
         _keybindingWidgets.action->setCurrentText(
@@ -771,7 +772,7 @@ void ActionDialog::keybindingSelected() {
     }
 }
 
-void ActionDialog::keybindingActionSelected(int) {
+void ActionDialog::keybindingActionSelected(int) const {
     _keybindingWidgets.actionText->setText(_keybindingWidgets.action->currentText());
 }
 
@@ -812,7 +813,7 @@ void ActionDialog::keybindingSaved() {
     clearKeybindingFields();
 }
 
-void ActionDialog::clearKeybindingFields() {
+void ActionDialog::clearKeybindingFields() const {
     _keybindingWidgets.list->setCurrentRow(-1);
     _keybindingWidgets.shiftModifier->setChecked(false);
     _keybindingWidgets.shiftModifier->setEnabled(false);

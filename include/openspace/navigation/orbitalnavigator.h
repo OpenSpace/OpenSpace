@@ -274,8 +274,8 @@ private:
      * from the global to the current total rotation so that
      * `cameraRotation = globalRotation * localRotation`.
      */
-    CameraRotationDecomposition decomposeCameraRotationSurface(const CameraPose& pose,
-        const SceneGraphNode& reference);
+    CameraRotationDecomposition decomposeCameraRotationSurface(
+        const CameraPose& cameraPose, const SceneGraphNode& reference);
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by
@@ -285,7 +285,7 @@ private:
      * The local rotation defines the differential from the global to the current total
      * rotation so that `cameraRotation = globalRotation * localRotation`.
      */
-    CameraRotationDecomposition decomposeCameraRotation(const CameraPose& pose,
+    CameraRotationDecomposition decomposeCameraRotation(const CameraPose& cameraPose,
         const glm::dvec3& reference);
 
     /**
@@ -293,7 +293,7 @@ private:
      * the world rotation for a camera.
      */
     glm::dquat composeCameraRotation(
-        const CameraRotationDecomposition& composition) const;
+        const CameraRotationDecomposition& decomposition) const;
 
     /**
      * Moves and rotates the camera around the anchor node in order to maintain the screen
@@ -326,8 +326,8 @@ private:
     glm::dquat interpolateLocalRotation(double deltaTime,
         const glm::dquat& localCameraRotation);
 
-    Displacement interpolateRetargetAim(double deltaTime, CameraPose pose,
-        const glm::dvec3& cameraToAnchor, Displacement anchorToAim);
+    Displacement interpolateRetargetAim(double deltaTime, const CameraPose& pose,
+        const glm::dvec3& prevCameraToAnchor, Displacement anchorToAim);
 
     double interpolateCameraToSurfaceDistance(double deltaTime, double currentDistance,
         double targetDistance);

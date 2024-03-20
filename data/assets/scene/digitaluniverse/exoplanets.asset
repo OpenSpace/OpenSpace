@@ -18,6 +18,7 @@ local Object = {
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "expl.speck",
     Labels = {
       File = speck .. "expl.label",
       Color = { 0.3, 0.3, 0.8 },
@@ -26,8 +27,9 @@ local Object = {
       Unit = "pc"
     },
     Opacity = 1.0,
-    Texture = textures .. "target-blue.png",
-    File = speck .. "expl.speck",
+    Texture = {
+      File = textures .. "target-blue.png",
+    },
     Unit = "pc",
     SizeSettings = {
       ScaleExponent = 16.9,

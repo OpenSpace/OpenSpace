@@ -74,7 +74,7 @@ public:
     bool isSelectedPairUsingRae() const;
 
     // Managing the target browser pairs
-    void removeTargetBrowserPair(const std::string& browserId);
+    void removeTargetBrowserPair(const std::string& id);
     void addTargetBrowserPair(const std::string& targetId, const std::string& browserId);
 
     // Hover circle

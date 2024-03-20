@@ -282,9 +282,9 @@ public:
      * Used to trigger a save of a script to the recording file, but only if a recording
      * is currently in progress.
      *
-     * \param scriptToSave String of the Lua command to be saved
+     * \param script String of the Lua command to be saved
      */
-    void saveScriptKeyframeToTimeline(std::string scriptToSave);
+    void saveScriptKeyframeToTimeline(std::string script);
 
     /**
      * \return The Lua library that contains all Lua functions available to affect the
@@ -590,7 +590,8 @@ public:
      *
      * \return pathname of the converted version of the file
      */
-    std::string determineConversionOutFilename(const std::string& filename, DataMode mode);
+    std::string determineConversionOutFilename(const std::string& filename,
+        DataMode mode);
 
 protected:
     properties::BoolProperty _renderPlaybackInformation;
@@ -633,7 +634,7 @@ protected:
     Timestamps generateCurrentTimestamp3(double keyframeTime) const;
     static void saveStringToFile(const std::string& s, unsigned char* kfBuffer,
         size_t& idx, std::ofstream& file);
-    static void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size,
+    static void saveKeyframeToFileBinary(unsigned char* buffer, size_t size,
         std::ofstream& file);
 
     bool addKeyframe(Timestamps t3stamps,
@@ -689,11 +690,12 @@ protected:
     bool convertEntries(std::string& inFilename, std::stringstream& inStream,
         DataMode mode, int lineNum, std::ofstream& outFile);
     virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
+        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
     virtual bool convertTimeChange(std::stringstream& inStream, DataMode mode,
-        int lineNum, std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
+        int lineNum, std::string& inputLine, std::ofstream& outFile,
+        unsigned char* buffer);
     virtual bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
+        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
     DataMode readModeFromHeader(const std::string& filename);
     void readPlaybackHeader_stream(std::stringstream& conversionInStream,
         std::string& version, DataMode& mode);

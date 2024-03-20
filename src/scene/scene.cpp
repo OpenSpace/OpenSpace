@@ -880,19 +880,19 @@ scripting::LuaLibrary Scene::luaLibrary() {
     };
 }
 
-std::string makeIdentifier(std::string s) {
+std::string makeIdentifier(std::string str) {
     // Note that we want to preserve '-' and '_', but replace any other punctuation
     // marks. Hence, we first convert '_' to whitespaces to avoid them being replaced
     // in the puncutation check
-    std::replace(s.begin(), s.end(), '_', ' ');
+    std::replace(str.begin(), str.end(), '_', ' ');
     std::replace_if(
-        s.begin(),
-        s.end(),
+        str.begin(),
+        str.end(),
         [](unsigned char c) { return std::ispunct(c) != 0; },
         '-'
     );
-    std::replace(s.begin(), s.end(), ' ', '_');
-    return s;
+    std::replace(str.begin(), str.end(), ' ', '_');
+    return str;
 }
 
 }  // namespace openspace

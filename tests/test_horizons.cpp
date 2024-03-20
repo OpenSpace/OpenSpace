@@ -271,7 +271,7 @@ TEST_CASE("HorizonsFile: Observer and target same", "[horizonsfile]") {
     const HorizonsResultCode answer = HorizonsResultCode::ErrorObserverTargetSame;
 
     // This test is only for Observer type format
-    HorizonsType type = HorizonsType::Observer;
+    const HorizonsType type = HorizonsType::Observer;
     testHorizonsAnswer(data, type, filePath, answer);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }

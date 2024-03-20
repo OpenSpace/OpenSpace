@@ -264,4 +264,4 @@ std::vector<std::vector<float>> ReadFileJob::product() {
     return _octants;
 }
 
-} // namespace openspace::gaiamission
+} // namespace openspace::gaia

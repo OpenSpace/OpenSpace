@@ -55,8 +55,8 @@ public:
     void initialize(const ghoul::Dictionary& layerGroupsDict);
     void deinitialize();
 
-    Layer* addLayer(layers::Group::ID groupId, const ghoul::Dictionary& layerDict);
-    void deleteLayer(layers::Group::ID groupId, const std::string& layerName);
+    Layer* addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict);
+    void deleteLayer(layers::Group::ID id, const std::string& layerName);
 
     LayerGroup& layerGroup(layers::Group::ID groupId);
     const LayerGroup& layerGroup(layers::Group::ID groupId) const;

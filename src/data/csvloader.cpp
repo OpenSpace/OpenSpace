@@ -33,11 +33,13 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cmath>
 #include <cctype>
 #include <fstream>
 #include <functional>
+#include <sstream>
 #include <string_view>
 
 namespace {
@@ -94,6 +96,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     int yColumn = -1;
     int zColumn = -1;
     int nameColumn = -1;
+    int textureColumn = -1;
 
     int nDataColumns = 0;
     const bool hasExcludeColumns = specs.has_value() && specs->hasExcludeColumns();
@@ -119,17 +122,50 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         else if (isNameColumn(col, specs)) {
             nameColumn = static_cast<int>(i);
         }
-        else if (hasExcludeColumns && (*specs).isExcludeColumn(col)) {
+        else if (hasExcludeColumns && specs->isExcludeColumn(col)) {
             skipColumns.push_back(i);
             continue;
         }
         else {
+            // Note that the texture column is also a regular column. Just save the index
+            if (isTextureColumn(col, specs)) {
+                res.textureDataIndex = nDataColumns;
+                textureColumn = static_cast<int>(i);
+            }
+
             res.variables.push_back({
                 .index = nDataColumns,
                 .name = col
             });
             nDataColumns++;
         }
+    }
+
+    // Some errors / warnings
+    if (specs.has_value()) {
+        bool hasAllProvided = specs->checkIfAllProvidedColumnsExist(columns);
+        if (!hasAllProvided) {
+            LERROR(fmt::format(
+                "Error loading data file {}. Not all columns provided in data mapping "
+                "exists in dataset", filePath
+            ));
+        }
+    }
+
+    bool hasProvidedTextureFile = specs.has_value() && specs->textureMap.has_value();
+    bool hasTextureIndex = (res.textureDataIndex >= 0);
+
+    if (hasProvidedTextureFile && !hasTextureIndex && !specs->textureColumn.has_value()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error loading data file {}. No texture column was specified in the data "
+            "mapping", filePath
+        ));
+    }
+    if (!hasProvidedTextureFile && hasTextureIndex) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error loading data file {}. Missing texture map file location in data "
+            "mapping", filePath
+        ));
     }
 
     if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
@@ -141,6 +177,8 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 
     LINFO(fmt::format("Loading {} rows with {} columns", rows.size(), columns.size()));
     ProgressBar progress = ProgressBar(static_cast<int>(rows.size()));
+
+    std::set<int> uniqueTextureIndicesInData;
 
     // Skip first row (column names)
     for (size_t rowIdx = 1; rowIdx < rows.size(); ++rowIdx) {
@@ -180,6 +218,10 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             else {
                 entry.data.push_back(value);
             }
+
+            if (i == textureColumn) {
+                uniqueTextureIndicesInData.emplace(static_cast<int>(value));
+            }
         }
 
         const glm::vec3 positive = glm::abs(entry.position);
@@ -191,6 +233,82 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         res.entries.push_back(entry);
 
         progress.print(static_cast<int>(rowIdx + 1));
+    }
+
+    // Load the textures. Skip textures that are not included in the dataset
+    if (hasProvidedTextureFile) {
+        const std::filesystem::path path = *specs->textureMap;
+        if (!std::filesystem::is_regular_file(path)) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Failed to open texture map file {}", path
+            ));
+        }
+        res.textures = loadTextureMapFile(path, uniqueTextureIndicesInData);
+    }
+
+    return res;
+}
+
+std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
+                                          const std::set<int>& texturesInData)
+{
+    ghoul_assert(std::filesystem::exists(path), "File must exist");
+
+    std::ifstream file(path);
+    if (!file.good()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Failed to open texture map file {}", path
+        ));
+    }
+
+    int currentLineNumber = 0;
+
+    std::vector<Dataset::Texture> res;
+
+    std::string line;
+    while (std::getline(file, line)) {
+        ghoul::trimWhitespace(line);
+        currentLineNumber++;
+
+        if (line.empty() || line.starts_with("#")) {
+            continue;
+        }
+
+        std::vector<std::string> tokens = ghoul::tokenizeString(line, ' ');
+        int nNonEmptyTokens = static_cast<int>(std::count_if(
+            tokens.begin(),
+            tokens.end(),
+            [](const std::string& t) { return !t.empty(); }
+        ));
+
+        if (nNonEmptyTokens > 2) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading texture map file {}: Line {} has too many parameters. "
+                "Expected 2: an integer index followed by a filename, where the file "
+                "name may not include whitespaces",
+                path, currentLineNumber
+            ));
+        }
+
+        std::stringstream str(line);
+
+        // Each line is following the template:
+        // <idx> <file name>
+        Dataset::Texture texture;
+        str >> texture.index >> texture.file;
+
+        for (const Dataset::Texture& t : res) {
+            if (t.index == texture.index) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Error loading texture map file {}: Texture index '{}' defined twice",
+                    path, texture.index
+                ));
+            }
+        }
+
+        if (texturesInData.contains(texture.index)) {
+            res.push_back(texture);
+        }
     }
 
     return res;

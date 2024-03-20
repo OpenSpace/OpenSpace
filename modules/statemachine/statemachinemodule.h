@@ -58,7 +58,7 @@ public:
      * Save the state machine to a file given by the name and optional directory.
      * If no directory is given, the TEMP folder is used.
      */
-    void saveToFile(const std::string& fileName,
+    void saveToFile(const std::string& filename,
         std::string directory = "${TEMPORARY}/") const;
 
     scripting::LuaLibrary luaLibrary() const override;

@@ -18,6 +18,7 @@ local DeepSkyObjects = {
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "dso.speck",
     Labels = {
       File = speck .. "dso.label",
       Color = { 0.1, 0.4, 0.6 },
@@ -29,8 +30,9 @@ local DeepSkyObjects = {
     Coloring = {
       FixedColor = { 1.0, 1.0, 0.0 }
     },
-    File = speck .. "dso.speck",
-    Texture = textures .. "point3.png",
+    Texture = {
+      File = textures .. "point3.png",
+    },
     Unit = "pc",
     --FadeInDistances = { 0.05, 1.0 }, -- Fade in value in the same unit as "Unit"
     SizeSettings = {

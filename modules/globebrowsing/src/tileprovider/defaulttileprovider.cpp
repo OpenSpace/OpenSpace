@@ -142,7 +142,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     const int pixelSize = p.tilePixelSize.value_or(0);
 
     // Only preprocess height layers by default
-    _performPreProcessing = _layerGroupID == layers::Group::ID::HeightLayers;
+    _performPreProcessing = (_layerGroupID == layers::Group::ID::HeightLayers);
     _performPreProcessing = p.performPreProcessing.value_or(_performPreProcessing);
 
     // Get the name of the layergroup to which this layer belongs

@@ -53,10 +53,7 @@ namespace {
         if (!validConversion) {
             return false;
         }
-        if (value < min || value > max) {
-            return false;
-        }
-        return true;
+        return (value >= min) && (value <= max);
     }
 
     bool isNumericalLargerThan(QLineEdit* le, float limit) {
@@ -66,10 +63,7 @@ namespace {
         if (!validConversion) {
             return false;
         }
-        if (value > limit) {
-            return true;
-        }
-        return false;
+        return value > limit;
     }
 } // namespace
 

@@ -1549,7 +1549,7 @@ KPL/PCK
       this kernel to produce Type 10 SPK segments based upon the Two-Line
       element sets available from NORAD/SPACETRACK. The data applies ONLY
       to the Two-Line Element sets and only to the SGP4 implementations
-      included in the SPICE library [1][2]. The SPK application copies 
+      included in the SPICE library [1][2]. The SPK application copies
       this data to the constants partition of the Type 10 segment, so the
       user has no need for the kernel after creation of the corresponding
       SPK.
@@ -1665,8 +1665,8 @@ References:
        Specialist Conference, August 21-24, 2006. Keystone, CO.
 )";
 
-      std::filesystem::path path = std::filesystem::temp_directory_path();
-      std::filesystem::path file = path / "geophysical.ker";
+      const std::filesystem::path path = std::filesystem::temp_directory_path();
+      const std::filesystem::path file = path / "geophysical.ker";
       {
           std::ofstream f(file);
           f << GeoPhysicalConstantsKernelSource;

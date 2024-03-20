@@ -223,7 +223,7 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
         global::windowDelegate->maxDeltaTime() * 1000.0
     );
 
-    FrametimeType frametimeType = FrametimeType(_frametimeType.value());
+    const FrametimeType frametimeType = FrametimeType(_frametimeType.value());
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
     char* end = format(

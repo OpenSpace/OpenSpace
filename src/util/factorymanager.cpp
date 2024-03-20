@@ -95,7 +95,8 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
 
     return json;
 }
-}
+
+} // namespace
 
 namespace openspace {
 

@@ -113,4 +113,4 @@ documentation::Documentation ConvertRecFileVersionTask::documentation() {
     };
 }
 
-}
+} // namespace openspace::interaction

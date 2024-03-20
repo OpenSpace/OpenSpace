@@ -47,4 +47,4 @@ bool compareKeyframeTimeWithTime_playbackWithFrames(const KeyframeBase& a, doubl
     return a.timestamp <= b;
 }
 
-} // namespace
+} // namespace openspace

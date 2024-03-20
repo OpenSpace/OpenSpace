@@ -52,20 +52,34 @@ public:
 protected:
     void initializeShadersAndGlExtras() override;
     void deinitializeShaders() override;
-    void bindDataForPointRendering() override;
+    void setExtraUniforms() override;
     void preUpdate() override;
 
     int nAttributesPerPoint() const override;
 
+    bool useSplineInterpolation() const;
+
     /**
-     * Create the data slice to use for rendering the points. Compared to the regular
-     * point cloud, the data slice for an interpolated set of points will have to be
-     * recreated when the interpolation value changes, and will only include a subset of
-     * the points in the entire dataset
+     * Create the rendering data for the positions for the point with the given index
+     * and append that to the result. Compared to the base class, this class may require
+     * 2-4 positions, depending on if * spline interpolation is used or not.
      *
-     * \return The dataslice to use for rendering the points
+     * The values are computed based on the current interpolation value.
+     *
+     * Also, compute the maxRadius to use for setting the bounding sphere.
      */
-    std::vector<float> createDataSlice() override;
+    void addPositionDataForPoint(unsigned int index, std::vector<float>& result,
+        double& maxRadius) const override;
+
+    /**
+     * Create the rendering data for the color and size data for the point with the given
+     * index and append that to the result. Compared to the base class, this class require
+     * 2 values per data value, to use for interpolation.
+     *
+     * The values are computed based on the current interpolation value.
+     */
+    void addColorAndSizeDataForPoint(unsigned int index,
+        std::vector<float>& result) const override;
 
     void initializeBufferData();
     void updateBufferData() override;
@@ -73,6 +87,8 @@ protected:
 private:
     bool isAtKnot() const;
     float computeCurrentLowerValue() const;
+    float computeCurrentUpperValue() const;
+    std::pair<size_t, size_t> interpolationIndices(unsigned int index) const;
 
     struct Interpolation : public properties::PropertyOwner {
         Interpolation();
