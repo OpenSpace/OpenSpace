@@ -42,7 +42,7 @@ struct NavigationState {
     NavigationState(std::string anchor, std::string aim, std::string referenceFrame,
         glm::dvec3 position, std::optional<glm::dvec3> up = std::nullopt,
         double yaw = 0.0, double pitch = 0.0,
-        std::optional<double> timestamp_ = std::nullopt);
+        std::optional<double> timestamp = std::nullopt);
 
     CameraPose cameraPose() const;
     ghoul::Dictionary dictionary() const;

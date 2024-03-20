@@ -73,7 +73,7 @@ namespace {
 }
 
 // Set the navigation state. The first argument must be a valid Navigation State. If
-// usetimeStamp is set to true and the provided navigation state has a timestamp, time
+// useTimeStamp is set to true and the provided navigation state has a timestamp, time
 // will be set as well.
 [[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState,
                                              bool useTimeStamp = false)
