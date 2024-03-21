@@ -26,8 +26,8 @@
 
 #include "profile/line.h"
 #include "profile/scriptlogdialog.h"
-#include <ghoul/misc/stringhelper.h>
 #include <openspace/scene/profile.h>
+#include <ghoul/misc/stringhelper.h>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QLabel>

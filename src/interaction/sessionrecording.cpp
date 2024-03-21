@@ -412,8 +412,8 @@ bool SessionRecording::startPlayback(std::string& filename,
     }
     // throwaway newline character(s)
     std::string lineEnd = readHeaderElement(_playbackFile, 1);
-    bool isDosLineEnding = (lineEnd == "\r");
-    if (isDosLineEnding) {
+    bool hasDosLineEnding = (lineEnd == "\r");
+    if (hasDosLineEnding) {
         // throwaway the second newline character (\n) also
         readHeaderElement(_playbackFile, 1);
     }
@@ -424,8 +424,7 @@ bool SessionRecording::startPlayback(std::string& filename,
         _playbackFile.close();
         _playbackFile.open(_playbackFilename, std::ifstream::in | std::ios::binary);
         size_t headerSize = FileHeaderTitle.length() + FileHeaderVersionLength
-            + sizeof(DataFormatBinaryTag) + sizeof('\n')
-            + ((isDosLineEnding) ? sizeof('\r') : 0);
+            + sizeof(DataFormatBinaryTag) + sizeof('\n');
         std::vector<char> hBuffer;
         hBuffer.resize(headerSize);
         _playbackFile.read(hBuffer.data(), headerSize);

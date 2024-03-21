@@ -348,7 +348,7 @@ def check_for_std_getline(lines):
   index = [i for i,s in enumerate(lines)
           if 'std::getline' in s]
   if len(index) > 0:
-    return 'File used wrong glm include. Use "#include <ghoul/glm.h>" instead'
+    return 'File used wrong std::getline function. Use ghoul::getline from "ghoul/misc/stringhelper.h" instead'
   else:
     return ''
 
