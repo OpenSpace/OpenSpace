@@ -27,14 +27,20 @@ namespace {
 /**
  * Load a navigation state from file. The file should be a lua file returning the
  * navigation state as a table formatted as a Navigation State, such as the output files
- * of saveNavigationState.
+ * of saveNavigationState. If usetimeStamp is set to true and the provided navigation
+ * state has a timestamp, time will be set as well.
  */
-[[codegen::luawrap]] void loadNavigationState(std::string cameraStateFilePath) {
+[[codegen::luawrap]] void loadNavigationState(std::string cameraStateFilePath,
+                                              bool useTimeStamp = false)
+{
     if (cameraStateFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
-    openspace::global::navigationHandler->loadNavigationState(cameraStateFilePath);
+    openspace::global::navigationHandler->loadNavigationState(
+        cameraStateFilePath,
+        useTimeStamp
+    );
 }
 
 /**
@@ -66,13 +72,21 @@ namespace {
     return state.dictionary();
 }
 
-// Set the navigation state. The argument must be a valid Navigation State.
-[[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState) {
+// Set the navigation state. The first argument must be a valid Navigation State. If
+// useTimeStamp is set to true and the provided navigation state has a timestamp, time
+// will be set as well.
+[[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState,
+                                             bool useTimeStamp = false)
+{
     using namespace openspace;
 
-    global::navigationHandler->setNavigationStateNextFrame(
-        interaction::NavigationState(navigationState)
-    );
+    interaction::NavigationState ns = interaction::NavigationState(navigationState);
+
+    global::navigationHandler->setNavigationStateNextFrame(ns);
+
+    if (useTimeStamp && ns.timestamp.has_value()) {
+        global::timeManager->setTimeNextFrame(Time(*ns.timestamp));
+    }
 }
 
 /**

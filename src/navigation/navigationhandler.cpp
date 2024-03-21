@@ -35,12 +35,13 @@
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/query/query.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/query/query.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -531,7 +532,10 @@ NavigationState NavigationHandler::navigationState(
         _orbitalNavigator.aimNode() ? _orbitalNavigator.aimNode()->identifier() : "",
         referenceFrame.identifier(),
         position,
-        invReferenceFrameTransform * neutralUp, yaw, pitch
+        invReferenceFrameTransform * neutralUp,
+        yaw,
+        pitch,
+        global::timeManager->time().j2000Seconds()
     );
 }
 
@@ -574,23 +578,41 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
     ofs << state.toJson().dump(2);
 }
 
-void NavigationHandler::loadNavigationState(const std::string& filepath) {
-    const std::filesystem::path absolutePath = absPath(filepath);
+void NavigationHandler::loadNavigationState(const std::string& filepath,
+                                            bool useTimeStamp)
+{
+    std::filesystem::path absolutePath = absPath(filepath);
     LINFO(fmt::format("Reading camera state from file: {}", absolutePath));
+
+    if (!absolutePath.has_extension()) {
+        // Adding the .navstate extension to the filepath if it came without one
+        absolutePath.replace_extension(".navstate");
+    }
 
     if (!std::filesystem::is_regular_file(absolutePath)) {
         throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
     }
 
-    std::ifstream f = std::ifstream(filepath);
+    std::ifstream f = std::ifstream(absolutePath);
     const std::string contents = std::string(
         std::istreambuf_iterator<char>(f),
         std::istreambuf_iterator<char>()
     );
+
+    if (contents.empty()) {
+        throw::ghoul::RuntimeError(fmt::format(
+            "Failed reading camera state from file: {}. File is empty", absolutePath
+        ));
+    }
+
     const nlohmann::json json = nlohmann::json::parse(contents);
 
     const NavigationState state = NavigationState(json);
     setNavigationStateNextFrame(state);
+
+    if (useTimeStamp && state.timestamp.has_value()) {
+        global::timeManager->setTimeNextFrame(Time(*state.timestamp));
+    }
 }
 
 std::vector<std::string> NavigationHandler::listAllJoysticks() const {
