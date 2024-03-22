@@ -429,10 +429,22 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     // Color group
     if (p.colorTablePaths.has_value()) {
         for (auto path : *p.colorTablePaths) {
-            _colorTablePaths.push_back(path);
+            if (std::filesystem::exists(path)) {
+                _colorTablePaths.emplace_back(path);
+            }
+            else {
+                _colorTablePaths.emplace_back(
+                    FieldlinesSequenceModule::DefaultTransferFunctionFile
+                );
+                LERROR(fmt::format(
+                    "Color table path {} is not a valid file.",
+                    "Used a default transferfunction instead.",
+                    path
+                ));
+            }
         }
     }
-    else {
+    if (!p.colorTablePaths.has_value() || _colorTablePaths.empty()) {
         _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile;
     }
     _colorUniform = p.color.value_or(_colorUniform);
@@ -663,6 +675,11 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         else {
             _colorTablePath = _colorTablePaths[0].string();
         }
+    });
+
+    // This is to save the changes done in the gui for when you switch between options
+    _selectedColorRange.onChange([this]() {
+        _colorTableRanges[_colorQuantity] = _selectedColorRange;
     });
 
     _maskingQuantity.onChange([this]() {
