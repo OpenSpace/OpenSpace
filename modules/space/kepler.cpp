@@ -28,8 +28,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
-#include <scn/scn.h>
-#include <scn/tuple_return.h>
+#include <scn/scan.h>
 #include <fstream>
 #include <optional>
 #include <sstream>
@@ -209,10 +208,13 @@ namespace {
         if (e.find('.') == std::string::npos) {
             e += ".0";
         }
-        auto [res, year, daysInYear] = scn::scan_tuple<int, double>(e, "{:2}{}");
+        // @TODO(abock) The 'd' suffix can be removed when
+        // https://github.com/eliaskosunen/scnlib/issues/104 is fixed
+        auto res = scn::scan<int, double>(e, "{:2d}{}");
         if (!res) {
             throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
         }
+        auto [year, daysInYear] = res->values();
         year += year > 57 ? 1900 : 2000;
         const int daysSince2000 = countDays(year);
 
@@ -265,11 +267,11 @@ namespace {
             [](char c) { return c == '-'; }
         );
         const std::string format = (nDashes == 2) ? "{:4}-{:2}-{:2}{}" : "{:4}{:2}{:2}{}";
-        auto [res, year, monthNum, dayOfMonthNum, fractionOfDay] =
-            scn::scan_tuple<int, int, int, double>(e, format);
+        auto res = scn::scan<int, int, int, double>(e, scn::runtime_format(format));
         if (!res) {
             throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
         }
+        auto [year, monthNum, dayOfMonthNum, fractionOfDay] = res->values();
         const int daysSince2000 = countDays(year);
         const int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
         const double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
@@ -330,25 +332,32 @@ namespace {
             // We have the first form
             int month = 0;
             int days = 0;
-            auto res = scn::scan(
-                epoch, "{:4}-{:2}-{:2}T{:2}:{:2}:{}",
-                date.year, month, days, date.hours, date.minutes, date.seconds
+            // @TODO(abock) The 'd' suffix can be removed when
+            // https://github.com/eliaskosunen/scnlib/issues/104 is fixed
+            auto res = scn::scan<int, int, int, int, int, double>(
+                epoch, "{:4d}-{:2d}-{:2d}T{:2d}:{:2d}:{}"
             );
             if (!res) {
                 throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
             }
+            std::tie(date.year, month, days, date.hours, date.minutes, date.seconds) =
+                res->values();
             date.nDays = daysIntoGivenYear(date.year, month, days);
         }
         else if (pos == 8) {
             // We have the second form
 
-            auto res = scn::scan(
-                epoch, "{:4}-{:3}T{:2}:{:2}:{}",
-                date.year, date.nDays, date.hours, date.minutes, date.seconds
+            // @TODO(abock) The 'd' suffix can be removed when
+            // https://github.com/eliaskosunen/scnlib/issues/104 is fixed
+            auto res = scn::scan<int, int, int, int, double>(
+                epoch, "{:4d}-{:3d}T{:2d}:{:2d}:{}"
+                //date.year, date.nDays, date.hours, date.minutes, date.seconds
             );
             if (!res) {
                 throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
             }
+            std::tie(date.year, date.nDays, date.hours, date.minutes, date.seconds) =
+                res->values();
         }
         else {
             throw ghoul::RuntimeError(fmt::format("Malformed epoch string '{}'", epoch));

@@ -51,16 +51,15 @@ parallel tools: {
     stage('tools/scm') {
       deleteDir();
       gitHelper.checkoutGit(url, branch, false);
-      helper.createDirectory('build');
     }
     stage('tools/cppcheck') {
       sh(
-        script: 'cppcheck --enable=all --xml --xml-version=2 -i ext --suppressions-list=support/cppcheck/suppressions.txt include modules src tests 2> build/cppcheck.xml',
+        script: 'cppcheck --enable=all --xml --xml-version=2 -i ext --suppressions-list=support/cppcheck/suppressions.txt include modules src tests 2> cppcheck.xml',
         label: 'CPPCheck'
       )
       recordIssues(
         id: 'tools-cppcheck',
-        tool: cppCheck(pattern: 'build/cppcheck.xml')
+        tool: cppCheck(pattern: 'cppcheck.xml')
       )
     }
     cleanWs()
