@@ -34,7 +34,7 @@
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <scn/scn.h>
+#include <scn/scan.h>
 #include <array>
 #include <filesystem>
 #include <fstream>
@@ -404,8 +404,9 @@ bool RenderableConstellationLines::readSpeckFile() {
 
             // Try to read three values for the position
             glm::vec3 pos;
-            auto reading = scn::scan(line, "{} {} {}", pos.x, pos.y, pos.z);
+            auto reading = scn::scan<float, float, float>(line, "{} {} {}");
             if (reading) {
+                std::tie(pos.x, pos.y, pos.z) = reading->values();
                 pos *= scale;
                 constellationLine.vertices.push_back(pos.x);
                 constellationLine.vertices.push_back(pos.y);

@@ -28,7 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
 #include <geos/io/GeoJSON.h>
-#include <scn/scn.h>
+#include <scn/scan.h>
 #include <algorithm>
 #include <cstdio>
 
@@ -100,10 +100,10 @@ namespace {
     }
 
     std::optional<glm::vec3> hexToRgb(std::string_view hexColor) {
-        glm::ivec3 rgb;
-        auto ret = scn::scan(hexColor, "#{:2x}{:2x}{:2x}", rgb.r, rgb.g, rgb.b);
+        auto ret = scn::scan<int, int, int>(hexColor, "#{:2x}{:2x}{:2x}");
         if (ret) {
-            return (1.f / 255.f) * glm::vec3(rgb);
+            auto [x, y, z] = ret->values();
+            return (1.f / 255.f) * glm::vec3(x, y, z);
         }
         else {
             return std::nullopt;
