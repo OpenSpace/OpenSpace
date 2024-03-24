@@ -94,7 +94,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
         layoutMonButton->addStretch(1);
 
         _addWindowButton = new QPushButton("Add Window");
-        _addWindowButton->setToolTip(QString::fromStdString(fmt::format(
+        _addWindowButton->setToolTip(QString::fromStdString(std::format(
             "Add a window to the configuration (up to {} windows allowed)", nMaxWindows
         )));
         _addWindowButton->setFocusPolicy(Qt::NoFocus);

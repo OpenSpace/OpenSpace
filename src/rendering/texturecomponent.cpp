@@ -99,7 +99,7 @@ void TextureComponent::loadFromFile(const std::filesystem::path& path) {
         );
 
         if (texture) {
-            LDEBUG(fmt::format("Loaded texture from '{}'", absolutePath));
+            LDEBUG(std::format("Loaded texture from '{}'", absolutePath));
             _texture = std::move(texture);
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(absolutePath);

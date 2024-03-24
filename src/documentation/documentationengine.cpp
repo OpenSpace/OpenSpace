@@ -41,7 +41,7 @@ DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
 DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
                                                                         Documentation doc)
-    : ghoul::RuntimeError(fmt::format(
+    : ghoul::RuntimeError(std::format(
         "Duplicate Documentation with name '{}' and id '{}'", doc.name, doc.id
     ))
     , documentation(std::move(doc))

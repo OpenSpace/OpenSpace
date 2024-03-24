@@ -49,7 +49,7 @@ namespace {
         if (hOrDIndex == std::string::npos || mIndex == std::string::npos ||
             sIndex == std::string::npos)
         {
-            throw ghoul::lua::LuaRuntimeException(fmt::format(
+            throw ghoul::lua::LuaRuntimeException(std::format(
                 "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
                 "and Dec 'XdYmZs'", str
             ));
@@ -65,7 +65,7 @@ namespace {
             // Hours or degrees must be an integer
             double temp = std::stod(sHoursOrDegrees);
             if (std::floor(temp) != temp) {
-                throw ghoul::lua::LuaRuntimeException(fmt::format(
+                throw ghoul::lua::LuaRuntimeException(std::format(
                     "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
                     "and Dec 'XdYmZs', where X must be an integer", str
                 ));
@@ -75,7 +75,7 @@ namespace {
             // Minutes must be an integer
             temp = std::stod(sMinutes);
             if (std::floor(temp) != temp) {
-                throw ghoul::lua::LuaRuntimeException(fmt::format(
+                throw ghoul::lua::LuaRuntimeException(std::format(
                     "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
                     "and Dec 'XdYmZs', where Y must be an integer", str
                 ));
@@ -86,7 +86,7 @@ namespace {
             seconds = std::stod(sSeconds);
         }
         catch (const std::invalid_argument&) {
-            throw ghoul::lua::LuaRuntimeException(fmt::format(
+            throw ghoul::lua::LuaRuntimeException(std::format(
                 "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
                 "and Dec 'XdYmZs'", str
             ));
@@ -95,7 +95,7 @@ namespace {
 
     void parseRa(const std::string& ra, int& hours, int& minutes, double& seconds) {
         if (ra.find('d') != std::string::npos) {
-            throw ghoul::lua::LuaRuntimeException(fmt::format(
+            throw ghoul::lua::LuaRuntimeException(std::format(
                 "Ra '{}' format is incorrect. Correct format is: 'XhYmZs'", ra
             ));
         }
@@ -104,7 +104,7 @@ namespace {
 
     void parseDec(const std::string& dec, int& degrees, int& minutes, double& seconds) {
         if (dec.find('h') != std::string::npos) {
-            throw ghoul::lua::LuaRuntimeException(fmt::format(
+            throw ghoul::lua::LuaRuntimeException(std::format(
                 "Dec '{}' format is incorrect. Correct format is: 'XdYmZs'", dec
             ));
         }
@@ -114,21 +114,21 @@ namespace {
     bool isRaDecValid(int raH, int raM, double raS, int decD, int decM, double decS) {
         // Ra
         if (raH < 0.0 || raH >= 24.0) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Right ascension hours '{}' is outside the allowed range of 0 to 24 "
                 "hours (exclusive)", raH
             ));
             return false;
         }
         if (raM < 0.0 || raM >= 60.0) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Right ascension minutes '{}' is outside the allowed range of 0 to 60 "
                 "minutes (exclusive)", raM
             ));
             return false;
         }
         if (raS < 0.0 || raS >= 60.0) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Right ascension seconds '{}' is outside the allowed "
                 "range of 0 to 60 seconds (exclusive)", raS
             ));
@@ -137,7 +137,7 @@ namespace {
 
         // Dec
         if (decD < -90.0 || decD > 90.0) {
-            LWARNING(fmt::format("Declination degrees '{}' is outside the allowed range "
+            LWARNING(std::format("Declination degrees '{}' is outside the allowed range "
                 "of -90 to 90 degrees (inclusive)", decD
             ));
             return false;
@@ -150,14 +150,14 @@ namespace {
             return false;
         }
         if (decM < 0.0 || decM >= 60.0) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Declination minutes '{}' is outside the allowed range of 0 to 60 "
                 "minutes (exclusive)", decM
             ));
             return false;
         }
         if (decS < 0.0 || decS >= 60.0) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Declination seconds '{}' is outside the allowed range of 0 to 60 "
                 "seconds (exclusive)", decS
             ));
@@ -206,7 +206,7 @@ glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
 // coordinates-of-stars
 glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     if (ra.size() < 6 || dec.size() < 6) {
-        throw ghoul::lua::LuaRuntimeException(fmt::format(
+        throw ghoul::lua::LuaRuntimeException(std::format(
             "Ra '{}' or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
             "and Dec 'XdYmZs'", ra, dec
         ));
@@ -233,7 +233,7 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     );
 
     if (!isValid) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Ra '{}' or Dec '{}' is outside the allowed range, result may be incorrect",
             ra, dec
         ));
@@ -289,7 +289,7 @@ glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
 std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) {
     // Check input
     if (ra < 0.0 || ra > 360.0 || dec < -90.0 || dec > 90.0) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Ra '{}' or Dec '{}' is outside the allowed range, result may be incorrect",
             ra, dec
         ));
@@ -327,7 +327,7 @@ std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) 
     );
 
     if (!isValid) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Resulting Ra '{}' or Dec '{}' is outside the allowed range, result may be "
             "incorrect", result.first, result.second
         ));

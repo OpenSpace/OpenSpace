@@ -82,7 +82,7 @@ std::string Property::fullyQualifiedIdentifier() const {
     while (currentOwner) {
         const std::string& ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
-            identifier = fmt::format("{}.{}", ownerId, identifier);
+            identifier = std::format("{}.{}", ownerId, identifier);
         }
         currentOwner = currentOwner->owner();
     }
@@ -275,7 +275,7 @@ std::string Property::generateJsonDescription() const {
     const std::string metaData = generateMetaDataJsonDescription();
     const std::string description = generateAdditionalJsonDescription();
 
-    return fmt::format(
+    return std::format(
         R"({{"{}":"{}","{}":"{}","{}":"{}","{}":{},"{}":{}}})",
         TypeKey, cName, IdentifierKey, identifierSan, NameKey, gNameSan, MetaDataKey,
         metaData, AdditionalDataKey, description
@@ -318,7 +318,7 @@ std::string Property::generateMetaDataJsonDescription() const {
         );
     }
 
-    std::string result = fmt::format(
+    std::string result = std::format(
         R"({{"{}":"{}","{}":"{}","{}":{},"{}":{},"{}":{}}})",
         MetaDataKeyGroup, sanitizedGroupId,
         MetaDataKeyVisibility, vis,

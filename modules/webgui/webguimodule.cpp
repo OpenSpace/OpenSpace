@@ -273,10 +273,10 @@ void WebGuiModule::startProcess() {
 
     std::string defaultEndpoint;
     if (!_defaultEndpoint.value().empty()) {
-        defaultEndpoint = fmt::format("--redirect \"{}\"", _defaultEndpoint.value());
+        defaultEndpoint = std::format("--redirect \"{}\"", _defaultEndpoint.value());
     }
 
-    const std::string command = fmt::format(
+    const std::string command = std::format(
         "\"{}\" \"{}\" --directories \"{}\" {} --http-port \"{}\" --ws-address \"{}\" "
         "--ws-port {} --auto-close --local",
         node.string(), absPath(_entryPoint.value()).string(), formattedDirectories,
@@ -288,11 +288,11 @@ void WebGuiModule::startProcess() {
         absPath("${BIN}").string(),
         [](const char* data, size_t n) {
             const std::string str(data, n);
-            LDEBUG(fmt::format("Web GUI server output: {}", str));
+            LDEBUG(std::format("Web GUI server output: {}", str));
         },
         [](const char* data, size_t n) {
             const std::string str(data, n);
-            LERROR(fmt::format("Web GUI server error: {}", str));
+            LERROR(std::format("Web GUI server error: {}", str));
         }
     );
 }

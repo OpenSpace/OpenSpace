@@ -159,10 +159,10 @@ void OctreeManager::printStarsPerNode() const {
         const std::string prefix = "{" + std::to_string(i);
         accumulatedString += printStarsPerNode(*_root->children[i], prefix);
     }
-    LINFO(fmt::format("Number of stars per node: \n{}", accumulatedString));
-    LINFO(fmt::format("Number of leaf nodes: {}", std::to_string(_numLeafNodes)));
-    LINFO(fmt::format("Number of inner nodes: {}", std::to_string(_numInnerNodes)));
-    LINFO(fmt::format("Depth of tree: {}", std::to_string(_totalDepth)));
+    LINFO(std::format("Number of stars per node: \n{}", accumulatedString));
+    LINFO(std::format("Number of leaf nodes: {}", std::to_string(_numLeafNodes)));
+    LINFO(std::format("Number of inner nodes: {}", std::to_string(_numInnerNodes)));
+    LINFO(std::format("Depth of tree: {}", std::to_string(_totalDepth)));
 }
 
 void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
@@ -426,7 +426,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
         // Uses a reverse loop to try to decrease the biggest chunk
         if (*removedKey == static_cast<int>(_biggestChunkIndexInUse) - 1) {
             _biggestChunkIndexInUse = *removedKey;
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Decreased size to: {} Free Spots in VBO: {}",
                 _biggestChunkIndexInUse, _freeSpotsInBuffer.size()
             ));
@@ -442,7 +442,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
     if ((_biggestChunkIndexInUse > _maxStackSize * 4 / 5) &&
         (_freeSpotsInBuffer.size() > _maxStackSize * 5 / 6))
     {
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "Rebuilding VBO. Biggest Chunk: {}  4/5: {} FreeSpotsInVBO: {} 5/6: {}",
             _biggestChunkIndexInUse, _maxStackSize * 4 / 5, _freeSpotsInBuffer.size(),
             _maxStackSize * 5 / 6
@@ -521,7 +521,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
         // Clear potential removed keys for both VBO and SSBO
         _removedKeysInPrevCall.clear();
 
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "After rebuilding branch {} - Biggest chunk: {} Free spots in buffer: {}",
             _traversedBranchesInRenderCall, _biggestChunkIndexInUse,
             _freeSpotsInBuffer.size()
@@ -620,7 +620,7 @@ int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData,
     inFileStream.read(reinterpret_cast<char*>(&MAX_STARS_PER_NODE), sizeof(int32_t));
     inFileStream.read(reinterpret_cast<char*>(&MAX_DIST), sizeof(int32_t));
 
-    LDEBUG(fmt::format(
+    LDEBUG(std::format(
         "Max stars per node in read Octree: {} - Radius of root layer: {}",
         MAX_STARS_PER_NODE, MAX_DIST
     ));
@@ -708,7 +708,7 @@ void OctreeManager::writeToMultipleFiles(const std::string& outFolderPath,
     writeNodeToMultipleFiles(outFilePrefix, *_root->children[branchIndex], false);
 
     // Clear all data in branch.
-    LINFO(fmt::format("Clear all data from branch {} in octree", branchIndex));
+    LINFO(std::format("Clear all data from branch {} in octree", branchIndex));
     clearNodeData(*_root->children[branchIndex]);
 }
 
@@ -738,7 +738,7 @@ void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix,
             outFileStream.close();
         }
         else {
-            LERROR(fmt::format("Error opening file '{}' as output data file", outPath));
+            LERROR(std::format("Error opening file '{}' as output data file", outPath));
         }
     }
 
@@ -1088,7 +1088,7 @@ std::string OctreeManager::printStarsPerNode(const OctreeNode& node,
         return str + " - [Leaf] \n";
     }
     else {
-        str += fmt::format("LOD: {} - [Parent]\n", node.posData.size() / POS_SIZE);
+        str += std::format("LOD: {} - [Parent]\n", node.posData.size() / POS_SIZE);
         for (int i = 0; i < 8; i++) {
             auto pref = prefix + "->" + std::to_string(i);
             str += printStarsPerNode(*node.children[i], pref);

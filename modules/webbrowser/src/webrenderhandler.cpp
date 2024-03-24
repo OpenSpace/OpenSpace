@@ -25,7 +25,6 @@
 #include <modules/webbrowser/include/webrenderhandler.h>
 
 #include <ghoul/glm.h>
-#include <fmt/format.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace {

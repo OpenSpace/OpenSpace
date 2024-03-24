@@ -140,7 +140,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     FILE* fp;
     errno_t error = fopen_s(&fp, file.string().c_str(), "wb");
     if (error != 0) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not open/create file: {}. Errno: {}", file, errno
         ));
     }
@@ -148,7 +148,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     FILE* fp = fopen(file.string().c_str(), "wb"); // write binary
 #endif // WIN32
     if (!fp) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not open/create file: {}. Errno: {}", file, errno
         ));
     }
@@ -194,7 +194,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             else {
                 long rescode = 0;
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &rescode);
-                future->errorMessage = fmt::format(
+                future->errorMessage = std::format(
                     "{}. HTTP code: {}", curl_easy_strerror(res), rescode
                 );
             }
@@ -227,7 +227,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                                                           SuccessCallback successCallback,
                                                               ErrorCallback errorCallback)
 {
-    LDEBUG(fmt::format("Start downloading file '{}' into memory", url));
+    LDEBUG(std::format("Start downloading file '{}' into memory", url));
 
     auto downloadFunction = [url, successCb = std::move(successCallback),
                              errorCb = std::move(errorCallback)]()
@@ -278,7 +278,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                 errorCb(err);
             }
             else {
-                LWARNING(fmt::format("Error downloading '{}': {}", url, err));
+                LWARNING(std::format("Error downloading '{}': {}", url, err));
             }
             curl_easy_cleanup(curl);
             // Set a boolean variable in MemoryFile to determine if it is

@@ -113,7 +113,7 @@ namespace {
         std::vector<std::string> transitions = module->possibleTransitions();
         LINFOC(
             "StateMachine",
-            fmt::format(
+            std::format(
                 "Currently in state: '{}'. Can transition to states: [ {} ]",
                 currentState,
                 ghoul::join(transitions, ",")

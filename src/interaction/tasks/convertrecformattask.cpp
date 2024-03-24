@@ -65,7 +65,7 @@ ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) 
 
     ghoul_assert(std::filesystem::is_regular_file(_inFilePath), "The file must exist");
     if (!std::filesystem::is_regular_file(_inFilePath)) {
-        LERROR(fmt::format("Failed to load session recording file: {}", _inFilePath));
+        LERROR(std::format("Failed to load session recording file: {}", _inFilePath));
     }
     else {
         _iFile.open(_inFilePath, std::ifstream::in | std::ifstream::binary);
@@ -82,7 +82,7 @@ ConvertRecFormatTask::~ConvertRecFormatTask() {
 
 std::string ConvertRecFormatTask::description() {
     std::string description =
-        fmt::format("Convert session recording file '{}'", _inFilePath);
+        std::format("Convert session recording file '{}'", _inFilePath);
     if (_fileFormatType == SessionRecording::DataMode::Ascii) {
         description += "(ascii format) ";
     }
@@ -92,7 +92,7 @@ std::string ConvertRecFormatTask::description() {
     else {
         description += "(UNKNOWN format) ";
     }
-    description += fmt::format("conversion to file '{}'", _outFilePath);
+    description += std::format("conversion to file '{}'", _outFilePath);
     return description;
 }
 
@@ -116,13 +116,13 @@ void ConvertRecFormatTask::convert() {
     }
 
     if (_inFilePath.extension() != expectedFileExtension_in) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Input filename doesn't have expected '{}' format file extension",
             currentFormat
         ));
     }
     if (_outFilePath.extension() == expectedFileExtension_in) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Output filename has '{}' file extension, but is conversion from '{}'",
             currentFormat, currentFormat
         ));
@@ -172,7 +172,7 @@ void ConvertRecFormatTask::determineFormatType() {
     if (line.substr(0, SessionRecording::FileHeaderTitle.length())
         != SessionRecording::FileHeaderTitle)
     {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Session recording file '{}' does not have expected header", _inFilePath
         ));
     }
@@ -207,7 +207,7 @@ void ConvertRecFormatTask::convertToAscii() {
         const unsigned char frameType = readFromPlayback<unsigned char>(_iFile);
         // Check if have reached EOF
         if (!_iFile) {
-            LINFO(fmt::format(
+            LINFO(std::format(
                 "Finished converting {} entries from file '{}'", lineNum - 1, _inFilePath
             ));
             break;
@@ -244,7 +244,7 @@ void ConvertRecFormatTask::convertToAscii() {
             skf.write(keyframeLine);
         }
         else {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Unknown frame type @ index {} of playback file '{}'",
                 lineNum - 1, _inFilePath
             ));
@@ -275,7 +275,7 @@ void ConvertRecFormatTask::convertToBinary() {
         std::istringstream iss(lineContents);
         std::string entryType;
         if (!(iss >> entryType)) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error reading entry type @ line {} of file '{}'", lineNum, _inFilePath
             ));
             break;
@@ -300,7 +300,7 @@ void ConvertRecFormatTask::convertToBinary() {
             continue;
         }
         else {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Unknown frame type {} @ line {} of file '{}'",
                 entryType, lineContents, _inFilePath
             ));
@@ -308,7 +308,7 @@ void ConvertRecFormatTask::convertToBinary() {
         }
     }
     _oFile.close();
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Finished converting {} entries from file '{}'", lineNum, _inFilePath
     ));
 }

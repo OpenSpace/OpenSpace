@@ -106,21 +106,6 @@ namespace {
 #include "assetmanager_codegen.cpp"
 } // namespace
 
-namespace fmt {
-    template <typename T>
-    struct formatter<std::optional<T>> :fmt::formatter<T> {
-
-        template <typename FormatContext>
-        auto format(const std::optional<T>& opt, FormatContext& ctx) {
-            if (opt) {
-                fmt::formatter<T>::format(*opt, ctx);
-                return ctx.out();
-            }
-            return fmt::format_to(ctx.out(), "<none>");
-        }
-    };
-} // namespace fmt
-
 namespace openspace {
 
 AssetManager::AssetManager(ghoul::lua::LuaState* state,
@@ -238,7 +223,7 @@ void AssetManager::update() {
             [&path](const std::unique_ptr<Asset>& a) { return a->path() == path; }
         );
         if (it == _assets.cend()) {
-            LWARNING(fmt::format("Tried to remove unknown asset '{}'. Skipping", asset));
+            LWARNING(std::format("Tried to remove unknown asset '{}'. Skipping", asset));
             continue;
         }
 
@@ -288,7 +273,7 @@ void AssetManager::update() {
             it = _unfinishedSynchronizations.erase(it);
         }
         else if (si->synchronization->isRejected()) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Failed to synchronize resource '{}'", si->synchronization->name()
             ));
             for (Asset* a : si->assets) {
@@ -362,7 +347,7 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
     };
 
     if (!std::filesystem::is_regular_file(asset->path())) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not load asset '{}': File does not exist", asset->path())
         );
         return false;
@@ -372,7 +357,7 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
         ghoul::lua::runScriptFile(*_luaState, asset->path());
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR(fmt::format("Could not load asset '{}': {}", asset->path(), e.message));
+        LERROR(std::format("Could not load asset '{}': {}", asset->path(), e.message));
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
@@ -658,7 +643,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             if (!dependency) {
                 return ghoul::lua::luaError(
                     L,
-                    fmt::format("Asset '{}' not found", assetName)
+                    std::format("Asset '{}' not found", assetName)
                 );
             }
             // this = parent ;  child = dependency
@@ -892,7 +877,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
             if (a->firstParent()) {
                 // The first request came from another asset, so we can mention it in the
                 // error message
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Loading asset {0} from {1} with enable state {3} different from "
                     "initial loading from {2} with state {4}. Only {4} will have an "
                     "effect",
@@ -919,7 +904,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     }
 
     if (!std::filesystem::is_regular_file(path)) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Could not find asset file '{}' requested by '{}'",
             path, retriever
         ));
@@ -943,7 +928,7 @@ void AssetManager::callOnInitialize(Asset* asset) const {
     for (const int init : it->second) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            throw ghoul::lua::LuaRuntimeException(fmt::format(
+            throw ghoul::lua::LuaRuntimeException(std::format(
                 "When initializing '{}': {}",
                 asset->path(),
                 ghoul::lua::value<std::string>(*_luaState, -1)
@@ -966,7 +951,7 @@ void AssetManager::callOnDeinitialize(Asset* asset) const {
     for (const int deinit : it->second) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, deinit);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            throw ghoul::lua::LuaRuntimeException(fmt::format(
+            throw ghoul::lua::LuaRuntimeException(std::format(
                 "When deinitializing '{}': {}",
                 asset->path(),
                 ghoul::lua::value<std::string>(*_luaState, -1)

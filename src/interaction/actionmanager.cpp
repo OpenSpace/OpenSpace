@@ -88,7 +88,7 @@ void ActionManager::triggerAction(const std::string& identifier,
     if (!hasAction(identifier)) {
         LWARNINGC(
             "ActionManager",
-            fmt::format("Action '{}' not found in the list", identifier)
+            std::format("Action '{}' not found in the list", identifier)
         );
         return;
     }
@@ -97,7 +97,7 @@ void ActionManager::triggerAction(const std::string& identifier,
     std::string script =
         arguments.isEmpty() ?
         a.command :
-        fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
+        std::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
 
     if (!shouldBeSynchronized || a.isLocal) {
         global::scriptEngine->queueScript(

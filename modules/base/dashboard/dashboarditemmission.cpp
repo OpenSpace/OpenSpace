@@ -107,7 +107,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100),
+            std::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100),
             missionProgressColor
         );
     }
@@ -119,7 +119,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format("{:.0f} s", remaining),
+            std::format("{:.0f} s", remaining),
             nextMissionColor
         );
     }
@@ -148,7 +148,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(
+                std::format(
                     "{:s}  {:s} {:.1f} %",
                     phase->name(),progress,t * 100
                 ),

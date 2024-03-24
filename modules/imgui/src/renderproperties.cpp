@@ -73,7 +73,7 @@ void renderTooltip(Property* prop, double delay) {
 
 void executeSetPropertyScript(const std::string& id, const std::string& value) {
     global::scriptEngine->queueScript(
-        fmt::format("openspace.setPropertyValueSingle('{}', {});", id, value),
+        std::format("openspace.setPropertyValueSingle('{}', {});", id, value),
         scripting::ScriptEngine::ShouldBeSynchronized::Yes,
         scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
@@ -194,7 +194,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
         if (selectionChanged) {
             std::string parameters = "{";
             for (const std::string& s : newSelected) {
-                parameters += fmt::format("'{}',", s);
+                parameters += std::format("'{}',", s);
             }
             if (!newSelected.empty()) {
                 parameters.pop_back();

@@ -114,7 +114,7 @@ void RenderableConstellationBounds::initialize() {
 
                 if (it == options.end()) {
                     // The user has specified a constellation name that doesn't exist
-                    LWARNING(fmt::format(
+                    LWARNING(std::format(
                         "Option '{}' not found in list of constellations", s
                     ));
                 }
@@ -257,7 +257,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
         if (!s.good()) {
             // If this evaluates to true, the stream was not completely filled, which
             // means that the line was incomplete, so there was an error
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error reading file '{}' at line #{}", fileName, currentLineNumber
             ));
             break;

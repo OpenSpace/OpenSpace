@@ -269,7 +269,7 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
-        char* end = fmt::format_to(
+        char* end = std::format_to(
             _buffer.data(),
             "Could not compute angle at {} between {} and {}",
             sourceInfo.second, destinationInfo.second, referenceInfo.second
@@ -286,7 +286,7 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
             glm::acos(glm::dot(a, b) / (glm::length(a) * glm::length(b)))
         );
 
-        char* end = fmt::format_to(
+        char* end = std::format_to(
             _buffer.data(),
             "Angle at {} between {} and {}: {} degrees",
             sourceInfo.second, destinationInfo.second, referenceInfo.second, angle

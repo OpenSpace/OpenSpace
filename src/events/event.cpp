@@ -45,12 +45,12 @@ namespace openspace::events {
 
 void log(int i, const EventSceneGraphNodeAdded& e) {
     ghoul_assert(e.type == EventSceneGraphNodeAdded::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SceneGraphNodeAdded: {}", i, e.node));
+    LINFO(std::format("[{}] SceneGraphNodeAdded: {}", i, e.node));
 }
 
 void log(int i, const EventSceneGraphNodeRemoved& e) {
     ghoul_assert(e.type == EventSceneGraphNodeRemoved::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SceneGraphNodeRemoved: {}", i, e.node));
+    LINFO(std::format("[{}] SceneGraphNodeRemoved: {}", i, e.node));
 }
 
 void log(int i, const EventParallelConnection& e) {
@@ -64,12 +64,12 @@ void log(int i, const EventParallelConnection& e) {
             default:                                  throw ghoul::MissingCaseException();
         }
     }(e.state);
-    LINFO(fmt::format("[{}] ParallelConnection ({})", i, state));
+    LINFO(std::format("[{}] ParallelConnection ({})", i, state));
 }
 
 void log(int i, [[ maybe_unused ]] const EventProfileLoadingFinished& e) {
     ghoul_assert(e.type == EventProfileLoadingFinished::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ProfileLoadingFinished", i));
+    LINFO(std::format("[{}] ProfileLoadingFinished", i));
 }
 
 void log(int i, const EventApplicationShutdown& e) {
@@ -82,17 +82,17 @@ void log(int i, const EventApplicationShutdown& e) {
             default:                                  throw ghoul::MissingCaseException();
         }
     }(e.state);
-    LINFO(fmt::format("[{}] ApplicationShutdown", i));
+    LINFO(std::format("[{}] ApplicationShutdown", i));
 }
 
 void log(int i, const EventScreenSpaceRenderableAdded& e) {
     ghoul_assert(e.type == EventScreenSpaceRenderableAdded::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ScreenSpaceRenderableAdded: {}", i, e.renderable));
+    LINFO(std::format("[{}] ScreenSpaceRenderableAdded: {}", i, e.renderable));
 }
 
 void log(int i, const EventScreenSpaceRenderableRemoved& e) {
     ghoul_assert(e.type == EventScreenSpaceRenderableRemoved::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ScreenSpaceRenderableRemoved: {}", i, e.renderable));
+    LINFO(std::format("[{}] ScreenSpaceRenderableRemoved: {}", i, e.renderable));
 }
 
 void log(int i, const EventCameraFocusTransition& e) {
@@ -112,7 +112,7 @@ void log(int i, const EventCameraFocusTransition& e) {
         }
     }(e.transition);
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] CameraTransition: {}, {} ({})",
         i, reinterpret_cast<const void*>(e.camera), e.node, t
     ));
@@ -120,7 +120,7 @@ void log(int i, const EventCameraFocusTransition& e) {
 
 void log(int i, const EventTimeOfInterestReached& e) {
     ghoul_assert(e.type == EventTimeOfInterestReached::Type, "Wrong type");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] TimeOfInterestReached: {},  {}",
         i, e.time->UTC(), reinterpret_cast<const void*>(e.camera)
     ));
@@ -128,32 +128,32 @@ void log(int i, const EventTimeOfInterestReached& e) {
 
 void log(int i, [[ maybe_unused ]] const EventMissionEventReached& e) {
     ghoul_assert(e.type == EventMissionEventReached::Type, "Wrong type");
-    LINFO(fmt::format("[{}] MissionEventReached", i));
+    LINFO(std::format("[{}] MissionEventReached", i));
 }
 
 void log(int i, const EventPlanetEclipsed& e) {
     ghoul_assert(e.type == EventPlanetEclipsed::Type, "Wrong type");
-    LINFO(fmt::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
+    LINFO(std::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
 }
 
 void log(int i, [[ maybe_unused ]] const EventInterpolationFinished& e) {
     ghoul_assert(e.type == EventInterpolationFinished::Type, "Wrong type");
-    LINFO(fmt::format("[{}] InterpolationFinished", i));
+    LINFO(std::format("[{}] InterpolationFinished", i));
 }
 
 void log(int i, const EventFocusNodeChanged& e) {
     ghoul_assert(e.type == EventFocusNodeChanged::Type, "Wrong type");
-    LINFO(fmt::format("[{}] FocusNodeChanged: {} -> {}", i, e.oldNode, e.newNode));
+    LINFO(std::format("[{}] FocusNodeChanged: {} -> {}", i, e.oldNode, e.newNode));
 }
 
 void log(int i, const EventLayerAdded& e) {
     ghoul_assert(e.type == EventLayerAdded::Type, "Wrong type");
-    LINFO(fmt::format("[{}] LayerAdded: {}", i, e.layer));
+    LINFO(std::format("[{}] LayerAdded: {}", i, e.layer));
 }
 
 void log(int i, const EventLayerRemoved& e) {
     ghoul_assert(e.type == EventLayerRemoved::Type, "Wrong type");
-    LINFO(fmt::format("[{}] LayerRemoved: {}", i, e.layer));
+    LINFO(std::format("[{}] LayerRemoved: {}", i, e.layer));
 }
 
 void log(int i, const EventSessionRecordingPlayback& e) {
@@ -169,12 +169,12 @@ void log(int i, const EventSessionRecordingPlayback& e) {
         }
     }(e.state);
 
-    LINFO(fmt::format("[{}] SessionRecordingPlayback: {}", i, state));
+    LINFO(std::format("[{}] SessionRecordingPlayback: {}", i, state));
 }
 
 void log(int i, const EventPointSpacecraft& e) {
     ghoul_assert(e.type == EventPointSpacecraft::Type, "Wrong type");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] PointSpacecraft: Ra: {}, Dec: {}, Duration: {}", i, e.ra, e.dec,
         e.duration
     ));
@@ -182,17 +182,17 @@ void log(int i, const EventPointSpacecraft& e) {
 
 void log(int i, const EventRenderableEnabled& e) {
     ghoul_assert(e.type == EventRenderableEnabled::Type, "Wrong type");
-    LINFO(fmt::format("[{}] EventRenderableEnabled: {}", i, e.node));
+    LINFO(std::format("[{}] EventRenderableEnabled: {}", i, e.node));
 }
 
 void log(int i, const EventRenderableDisabled& e) {
     ghoul_assert(e.type == EventRenderableDisabled::Type, "Wrong type");
-    LINFO(fmt::format("[{}] EventRenderableDisabled: {}", i, e.node));
+    LINFO(std::format("[{}] EventRenderableDisabled: {}", i, e.node));
 }
 
 void log(int i, const EventCameraPathStarted& e) {
     ghoul_assert(e.type == EventCameraPathStarted::Type, "Wrong type");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] EventCameraPathStarted:  Origin: '{}'  Destination: '{}'",
         i, e.origin, e.destination
     ));
@@ -200,7 +200,7 @@ void log(int i, const EventCameraPathStarted& e) {
 
 void log(int i, const EventCameraPathFinished& e) {
     ghoul_assert(e.type == EventCameraPathFinished::Type, "Wrong type");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] EventCameraPathFinished:  Origin: '{}'  Destination: '{}'",
         i, e.origin, e.destination
     ));
@@ -208,12 +208,12 @@ void log(int i, const EventCameraPathFinished& e) {
 
 void log(int i, const EventCameraMovedPosition& e) {
     ghoul_assert(e.type == EventCameraMovedPosition::Type, "Wrong type");
-    LINFO(fmt::format("[{}] EventCameraMovedPosition", i));
+    LINFO(std::format("[{}] EventCameraMovedPosition", i));
 }
 
 void log(int i, const CustomEvent& e) {
     ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
-    LINFO(fmt::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
+    LINFO(std::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
 }
 
 std::string_view toString(Event::Type type) {
@@ -318,7 +318,7 @@ Event::Type fromString(std::string_view str) {
         return Event::Type::Custom;
     }
 
-    throw ghoul::RuntimeError(fmt::format("Unknown event type '{}'", str));
+    throw ghoul::RuntimeError(std::format("Unknown event type '{}'", str));
 }
 
 ghoul::Dictionary toParameter(const Event& e) {

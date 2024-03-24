@@ -530,7 +530,7 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     {
         LWARNINGC(
             "FixedRotation",
-            fmt::format(
+            std::format(
                 "Near-collinear vectors detected: "
                 "x ({}, {}, {}) y ({}, {}, {}) z ({}, {}, {})",
                 x.x, x.y, x.z, y.x, y.y, y.z, z.x, z.y, z.z

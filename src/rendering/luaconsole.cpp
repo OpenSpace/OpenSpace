@@ -201,7 +201,7 @@ void LuaConsole::initialize() {
             if (version != CurrentVersion) {
                 LWARNINGC(
                     "LuaConsole",
-                    fmt::format("Outdated console history version: {}", version)
+                    std::format("Outdated console history version: {}", version)
                 );
             }
             else {

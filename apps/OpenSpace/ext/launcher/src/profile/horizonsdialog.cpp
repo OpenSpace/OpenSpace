@@ -164,7 +164,7 @@ void HorizonsDialog::importTimeRange() {
             }
 
             _errorMsg->setText("Could not import time range");
-            const std::string msg = fmt::format(
+            const std::string msg = std::format(
                 "Could not import time range '{}' to '{}'",
                 _validTimeRange.first, _validTimeRange.second
             );
@@ -438,7 +438,7 @@ bool HorizonsDialog::isValidInput() {
     bool couldConvert = false;
     const int32_t step = _stepEdit->text().toInt(&couldConvert);
     if (!couldConvert) {
-        _errorMsg->setText(QString::fromStdString(fmt::format(
+        _errorMsg->setText(QString::fromStdString(std::format(
             "Step size needs to be a number in range 1 to {}",
             std::numeric_limits<int32_t>::max()
         )));
@@ -458,7 +458,7 @@ bool HorizonsDialog::isValidInput() {
     // website as a uint32_t. If step size over 32 bit int is sent, this error message is
     // received: Cannot read numeric value -- re-enter
     if (step < 1) {
-        _errorMsg->setText(QString::fromStdString(fmt::format(
+        _errorMsg->setText(QString::fromStdString(std::format(
             "Step size is outside valid range 1 to '{}'",
             std::numeric_limits<int32_t>::max()
         )));
@@ -503,7 +503,7 @@ nlohmann::json HorizonsDialog::handleReply(QNetworkReply* reply) {
         const QVariant statusCode =
             reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
         if (!checkHttpStatus(statusCode)) {
-            const std::string msg = fmt::format(
+            const std::string msg = std::format(
                 "Connection Error '{}'", reply->errorString().toStdString()
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
@@ -519,7 +519,7 @@ nlohmann::json HorizonsDialog::handleReply(QNetworkReply* reply) {
             redirect = reply->url().resolved(redirect);
         }
 
-        const std::string msg = fmt::format(
+        const std::string msg = std::format(
             "Redirecting request to '{}'", redirect.toString().toStdString()
         );
         appendLog(msg, HorizonsDialog::LogLevel::Info);
@@ -530,7 +530,7 @@ nlohmann::json HorizonsDialog::handleReply(QNetworkReply* reply) {
     reply->deleteLater();
 
     if (answer.isEmpty()) {
-        const std::string msg = fmt::format(
+        const std::string msg = std::format(
             "Connection Error '{}'", reply->errorString().toStdString()
         );
         appendLog(msg, HorizonsDialog::LogLevel::Error);
@@ -568,7 +568,7 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
                     "later time";
                 break;
             default:
-                message = fmt::format(
+                message = std::format(
                     "HTTP status code '{}' was returned",
                     statusCode.toString().toStdString()
                 );
@@ -666,7 +666,7 @@ std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
                 }
                 else {
                     _errorMsg->setText("Could not parse time range");
-                    const std::string msg = fmt::format(
+                    const std::string msg = std::format(
                         "Could not read time range '{}' to '{}'",
                         timeRange.first, timeRange.second
                     );
@@ -675,7 +675,7 @@ std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
                 return std::pair<std::string, std::string>();
             }
             else {
-                const std::string msg = fmt::format(
+                const std::string msg = std::format(
                     "Could not find all time range information. Latest Horizons "
                     "mesage: {}", _latestHorizonsError
                 );
@@ -741,7 +741,7 @@ bool HorizonsDialog::handleRequest() {
 
         std::filesystem::rename(oldFile, newFile);
 
-        const std::string msg = fmt::format(
+        const std::string msg = std::format(
             "For more information, see the saved error file '{}'", newFile
         );
         appendLog(msg, LogLevel::Info);
@@ -794,13 +794,13 @@ std::string HorizonsDialog::constructUrl() {
         _observerName = center;
     }
 
-    _startTime = fmt::format(
+    _startTime = std::format(
         "{} {}",
         _startEdit->date().toString("yyyy-MM-dd").toStdString(),
         _startEdit->time().toString("hh:mm:ss").toStdString()
     );
 
-    _endTime = fmt::format(
+    _endTime = std::format(
         "{} {}",
         _endEdit->date().toString("yyyy-MM-dd").toStdString(),
         _endEdit->time().toString("hh:mm:ss").toStdString()
@@ -872,7 +872,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
 
     auto result = answer.find("result");
     if (result == answer.end()) {
-        const std::string msg = fmt::format(
+        const std::string msg = std::format(
             "Malformed answer received '{}'", answer.dump()
         );
         appendLog(msg, HorizonsDialog::LogLevel::Error);
@@ -929,7 +929,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
         case HorizonsResultCode::Empty: {
             _errorMsg->setText("The horizons file is empty");
             if (!_latestHorizonsError.empty()) {
-                const std::string msg = fmt::format(
+                const std::string msg = std::format(
                     "Latest Horizons error: {}", _latestHorizonsError
                 );
                 appendLog(msg, LogLevel::Error);
@@ -939,7 +939,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::ErrorSize: {
-            const std::string msg = fmt::format(
+            const std::string msg = std::format(
                 "Time range '{}' to '{}' with step size '{} {}' is too big, try to "
                 "increase the step size and/or decrease the time range",
                 _startTime, _endTime, _stepEdit->text().toStdString(),
@@ -963,7 +963,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             std::filesystem::remove(_horizonsFile.file());
             break;
         case HorizonsResultCode::ErrorTimeRange: {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "Time range is outside the valid range for target '{}'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
@@ -973,13 +973,13 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             _validTimeRange = readTimeRange();
             if (_validTimeRange.first.empty() || _validTimeRange.second.empty()) {
                 if (!_latestHorizonsError.empty()) {
-                    msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
+                    msg = std::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
                 break;
             }
 
-            msg = fmt::format(
+            msg = std::format(
                 "Valid time range is '{}' to '{}'",
                 _validTimeRange.first, _validTimeRange.second
             );
@@ -990,12 +990,12 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::ErrorNoObserver: {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "No match was found for observer '{}'", _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
 
-            msg = fmt::format(
+            msg = std::format(
                 "Try to use '@{}' as observer to search for possible matches",
                 _observerName
             );
@@ -1006,7 +1006,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::ErrorObserverTargetSame: {
-            const std::string msg = fmt::format(
+            const std::string msg = std::format(
                 "The observer '{}' and target '{}' are the same. Please use another "
                 "observer for the current target", _observerName, _targetName
             );
@@ -1018,7 +1018,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::ErrorNoData: {
-            const std::string msg = fmt::format(
+            const std::string msg = std::format(
                 "There is not enough data to compute the state of target '{}' in "
                 "relation to the observer '{}' for the time range '{}' to '{}'. Try to "
                 "use another observer for the current target or another time range",
@@ -1030,13 +1030,13 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::MultipleObserverStations: {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "Multiple matching observer stations were found for observer '{}'",
                 _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
 
-            msg = fmt::format(
+            msg = std::format(
                 "Did not find what you were looking for? Use '@{}' as observer to search "
                 "for alternatives", _observerName
             );
@@ -1054,7 +1054,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
-                    msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
+                    msg = std::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
                 break;
@@ -1073,7 +1073,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::MultipleObserver: {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "Multiple matches were found for observer '{}'", _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
@@ -1087,7 +1087,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
-                    msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
+                    msg = std::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
                 break;
@@ -1106,12 +1106,12 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::ErrorNoTarget: {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "No match was found for target '{}'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
 
-            msg = fmt::format(
+            msg = std::format(
                 "Try to use '{}*' as target to search for possible matches", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
@@ -1132,7 +1132,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             // Format: ID#, Name, Designation, IAU/aliases/other
             // Line after data: Number of matches =  X. Use ID# to make unique selection.
 
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "Multiple matches were found for target '{}'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
@@ -1146,7 +1146,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
-                    msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
+                    msg = std::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
                 break;
@@ -1167,7 +1167,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
         case HorizonsResultCode::UnknownError: {
             appendLog("Unknown error", LogLevel::Error);
             if (!_latestHorizonsError.empty()) {
-                const std::string msg = fmt::format(
+                const std::string msg = std::format(
                     "Latest Horizons error: {}", _latestHorizonsError
                 );
                 appendLog(msg, LogLevel::Error);
@@ -1177,7 +1177,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
         }
         default: {
             if (!_latestHorizonsError.empty()) {
-                const std::string msg = fmt::format(
+                const std::string msg = std::format(
                     "Latest Horizons error: {}", _latestHorizonsError
                 );
                 appendLog(msg, LogLevel::Error);

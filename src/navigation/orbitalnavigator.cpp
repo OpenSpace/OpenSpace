@@ -555,7 +555,7 @@ OrbitalNavigator::OrbitalNavigator()
             );
         }
         else {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "No scenegraph node with identifier '{}' exists", _anchor.value()
             ));
         }
@@ -571,7 +571,7 @@ OrbitalNavigator::OrbitalNavigator()
             setAimNode(node);
         }
         else {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "No scenegraph node with identifier '{}' exists", _aim.value()
             ));
         }
@@ -1934,7 +1934,7 @@ void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
             behavior = IdleBehavior::Behavior::OrbitAroundUp;
         }
         else {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "No existing IdleBehavior with identifier '{}'", choice
             ));
         }

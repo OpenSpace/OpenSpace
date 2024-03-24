@@ -569,7 +569,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
             const SceneGraphNode* targetNode = sceneGraphNode(navigationState.anchor);
             if (!targetNode) {
-                throw ghoul::RuntimeError(fmt::format(
+                throw ghoul::RuntimeError(std::format(
                     "Could not find anchor node '{}' in provided navigation state",
                     navigationState.anchor
                 ));
@@ -587,7 +587,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
 
             if (!targetNode) {
-                throw ghoul::RuntimeError(fmt::format(
+                throw ghoul::RuntimeError(std::format(
                     "Could not find target node '{}'", nodeIdentifier
                 ));
             }

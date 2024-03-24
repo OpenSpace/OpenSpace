@@ -181,7 +181,7 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     addProperty(value);
 
     auto triggerInterpolation = [](std::string_view identifier, float v, float d) {
-        std::string script = fmt::format(
+        std::string script = std::format(
             "openspace.setPropertyValueSingle(\"{}\", {}, {})",
             identifier, v, d
         );
@@ -275,7 +275,7 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     // corresponded to
 
     if (_nDataPoints % nObjects != 0) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Mismatch between provided number of data entries and the specified number "
             "of points. Expected the number of entries in the data file '{}' to be "
             "evenly divisible by the number of points", _dataFile
@@ -445,11 +445,11 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
 void RenderableInterpolatedPoints::initializeBufferData() {
     if (_vao == 0) {
         glGenVertexArrays(1, &_vao);
-        LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
+        LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
     }
     if (_vbo == 0) {
         glGenBuffers(1, &_vbo);
-        LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
+        LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
     const int attibutesPerPoint = nAttributesPerPoint();

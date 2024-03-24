@@ -76,7 +76,7 @@ namespace {
     QList<QString> monitorNames(const std::vector<QRect>& resolutions) {
         QList<QString> monitorNames;
         for (size_t i = 0; i < resolutions.size(); i++) {
-            const std::string fullName = fmt::format(
+            const std::string fullName = std::format(
                 "{} ({}x{})",
                 MonitorNames[i], resolutions[i].width(), resolutions[i].height()
             );
@@ -122,7 +122,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
     layout->setRowStretch(8, 1);
     
     _windowNumber = new QLabel("Window " + QString::number(_windowIndex + 1));
-    _windowNumber->setStyleSheet(QString::fromStdString(fmt::format(
+    _windowNumber->setStyleSheet(QString::fromStdString(std::format(
         "QLabel {{ color : #{:02x}{:02x}{:02x}; }}",
         windowColor.red(), windowColor.green(), windowColor.blue()
     )));

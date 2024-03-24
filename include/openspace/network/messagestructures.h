@@ -407,7 +407,7 @@ struct ScriptMessage {
         if (buffer.size() != (sizeof(uint32_t) + len)) {
             LERRORC(
                 "ParallelPeer",
-                fmt::format(
+                std::format(
                     "Received buffer with wrong size. Expected {} got {}",
                     len, buffer.size()
                 )

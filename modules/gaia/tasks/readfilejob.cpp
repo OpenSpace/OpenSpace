@@ -59,7 +59,7 @@ void ReadFileJob::execute() {
 
     if (!table) {
         throw ghoul::RuntimeError(
-            fmt::format("Failed to open Fits file '{}'", _inFilePath
+            std::format("Failed to open Fits file '{}'", _inFilePath
         ));
     }
 

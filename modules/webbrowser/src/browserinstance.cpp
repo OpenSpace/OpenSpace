@@ -88,7 +88,7 @@ void BrowserInstance::loadUrl(const std::string& url) {
     ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
 
     if (!url.empty()) {
-        LDEBUG(fmt::format("Loading URL '{}'", url));
+        LDEBUG(std::format("Loading URL '{}'", url));
         _browser->GetMainFrame()->LoadURL(url);
     }
     else {
@@ -98,7 +98,7 @@ void BrowserInstance::loadUrl(const std::string& url) {
 
 bool BrowserInstance::loadLocalPath(std::string path) {
     if (!std::filesystem::is_regular_file(path)) {
-        LDEBUG(fmt::format("Could not find path '{}', verify that it is correct", path));
+        LDEBUG(std::format("Could not find path '{}', verify that it is correct", path));
         return false;
     }
 

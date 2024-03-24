@@ -499,16 +499,16 @@ void TimeManager::addDeltaTimesKeybindings() {
     );
 
     auto addDeltaTimeKeybind = [this](Key key, KeyModifier mod, double step) {
-        const std::string s = fmt::format("{:.0f}", step);
+        const std::string s = std::format("{:.0f}", step);
 
-        std::string identifier = fmt::format("{}.{}", DeltaTimeActionPrefix, s);
+        std::string identifier = std::format("{}.{}", DeltaTimeActionPrefix, s);
         interaction::Action action;
         action.identifier = identifier;
-        action.command = fmt::format("openspace.time.interpolateDeltaTime({})", s);
-        action.documentation = fmt::format(
+        action.command = std::format("openspace.time.interpolateDeltaTime({})", s);
+        action.documentation = std::format(
             "Setting the simulation speed to {} seconds per realtime second", s
         );
-        action.name = fmt::format("Set: {}", s);
+        action.name = std::format("Set: {}", s);
         action.guiPath = DeltaTimeStepsGuiPath;
         action.isLocal = interaction::Action::IsLocal::Yes;
         global::actionManager->registerAction(std::move(action));
@@ -542,7 +542,7 @@ void TimeManager::addDeltaTimesKeybindings() {
     LINFO("Added keybindings for specified delta time steps");
     const int maxKeyBinds = 3 * nKeys;
     if (nSteps > maxKeyBinds) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Error settings delta time keys: Too many delta times, so not all could be "
             "mapped to a key. Total: {} steps, which is {} more than the number of "
             "available keybindings",
@@ -567,9 +567,9 @@ void TimeManager::clearDeltaTimesKeybindings() {
         if (bindings.size() > 1) {
             std::string names;
             for (auto& b : bindings) {
-                names += fmt::format("'{}' ", b.second);
+                names += std::format("'{}' ", b.second);
             }
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Updating keybindings for new delta time steps: More than one action "
                 "was bound to key '{}'. The following actions are removed: {}",
                 ghoul::to_string(kb), names

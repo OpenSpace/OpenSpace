@@ -92,7 +92,7 @@ void SelectionProperty::setOptions(const std::vector<std::string>& keys) {
             _options.push_back(key);
         }
         else {
-            LWARNING(fmt::format("Ignoring duplicated key '{}'", key));
+            LWARNING(std::format("Ignoring duplicated key '{}'", key));
         }
     }
     _options.shrink_to_fit();
@@ -109,7 +109,7 @@ void SelectionProperty::setOptions(const std::vector<std::string>& keys) {
 
 void SelectionProperty::addOption(const std::string& key) {
     if (hasOption(key)) {
-        LWARNING(fmt::format("Cannot add option. Key '{}' already exists", key));
+        LWARNING(std::format("Cannot add option. Key '{}' already exists", key));
         return;
     }
 
@@ -153,7 +153,7 @@ bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) const {
     auto it = keys.begin();
     while (it != keys.end()) {
         if (!hasOption(*it)) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Key '{}' is not a valid option and is removed from selection", *it
             ));
             it = keys.erase(it);
@@ -168,7 +168,7 @@ bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) const {
 
 std::string SelectionProperty::generateAdditionalJsonDescription() const {
     const nlohmann::json optionsJson(_options);
-    std::string result = fmt::format(
+    std::string result = std::format(
         R"({{ "{}": {} }})", OptionsKey, optionsJson.dump()
     );
     return result;

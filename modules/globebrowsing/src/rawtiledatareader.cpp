@@ -111,7 +111,7 @@ GDALDataType toGDALDataType(GLenum glType) {
         default:
             LERRORC(
                 "GDALRawTileDataReader",
-                fmt::format(
+                std::format(
                     "OpenGL data type unknown to GDAL: {}", static_cast<int>(glType)
                 )
             );
@@ -282,7 +282,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
 
     for (std::string_view fmt : Unsupported) {
         if (_datasetFilePath.ends_with(fmt)) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Unsupported file format for MRF caching: '{}', Dataset: '{}'",
                 fmt, _datasetFilePath
             ));
@@ -294,7 +294,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
 
     const std::string datasetIdentifier =
         std::to_string(std::hash<std::string>{}(_datasetFilePath));
-    const std::string path = fmt::format("{}/{}/{}/",
+    const std::string path = std::format("{}/{}/{}/",
         mod.mrfCacheLocation(), _cacheProperties.path, datasetIdentifier);
     const std::string root = absPath(path).string();
     std::string mrf = root + datasetIdentifier + ".mrf";
@@ -304,7 +304,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
         if (!std::filesystem::create_directories(root, ec)) {
             // Already existing directories causes a 'failure' but no error
             if (ec) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Failed to create directories for cache at: '{}'. "
                     "Error Code: '{}', message: {}",
                     root, std::to_string(ec.value()), ec.message()
@@ -319,7 +319,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
                 GDALOpen(_datasetFilePath.c_str(), GA_ReadOnly)
             );
             if (!src) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Failed to load dataset '{}'. GDAL error: {}",
                     _datasetFilePath, CPLGetLastErrorMsg()
                 ));
@@ -356,7 +356,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
                 driver->CreateCopy(mrf.c_str(), src, false, createOpts, nullptr, nullptr)
             );
             if (!dst) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Failed to create MRF Caching dataset dataset '{}'. GDAL error: {}",
                     mrf, CPLGetLastErrorMsg()
                 ));
@@ -397,7 +397,7 @@ void RawTileDataReader::initialize() {
         ZoneScopedN("GDALOpen");
         _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
         if (!_dataset) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Failed to load dataset '{}'. GDAL error: {}",
                 _datasetFilePath, CPLGetLastErrorMsg()
             ));

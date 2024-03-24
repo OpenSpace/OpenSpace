@@ -109,7 +109,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         if (propertyName.empty() && nodeName.empty()) {
             LERRORC(
                 "findMatchesInAllProperties",
-                fmt::format(
+                std::format(
                     "Malformed regular expression: '{}': Empty both before and after '*'",
                     regex
                 )
@@ -121,7 +121,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
             LERRORC(
                 "findMatchesInAllProperties",
-                fmt::format(
+                std::format(
                     "Malformed regular expression: '{}': Currently only one '*' is "
                     "supported", regex
                 )
@@ -224,7 +224,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
         if (type != prop->typeLua()) {
             LERRORC(
                 "property_setValue",
-                fmt::format(
+                std::format(
                     "{}: Property '{}' does not accept input of type '{}'. Requested "
                     "type: {}",
                     errorLocation(L), prop->fullyQualifiedIdentifier(),
@@ -263,7 +263,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     if (!foundMatching) {
         LERRORC(
             "property_setValue",
-            fmt::format(
+            std::format(
                 "{}: No property matched the requested URI '{}'", errorLocation(L), regex
             )
         );
@@ -303,7 +303,7 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
     if (type != prop.typeLua()) {
         LERRORC(
             "property_setValue",
-            fmt::format(
+            std::format(
                 "{}: Property '{}' does not accept input of type '{}'. "
                 "Requested type: {}",
                 errorLocation(L), uri, luaTypeToString(type),
@@ -363,7 +363,7 @@ int propertySetValue(lua_State* L) {
                 ghoul::lua::value<double>(L, 3, ghoul::lua::PopValue::No);
         }
         else {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "Unexpected type '{}' in argument 3",
                 ghoul::lua::luaTypeToString(lua_type(L, 3))
             );
@@ -376,7 +376,7 @@ int propertySetValue(lua_State* L) {
                 ghoul::lua::value<std::string>(L, 4, ghoul::lua::PopValue::No);
         }
         else {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "Unexpected type '{}' in argument 4",
                 ghoul::lua::luaTypeToString(lua_type(L, 4))
             );
@@ -389,7 +389,7 @@ int propertySetValue(lua_State* L) {
                 ghoul::lua::value<std::string>(L, 5, ghoul::lua::PopValue::No);
         }
         else {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "Unexpected type '{}' in argument 5",
                 ghoul::lua::luaTypeToString(lua_type(L, 5))
             );
@@ -402,7 +402,7 @@ int propertySetValue(lua_State* L) {
         if (!correctName) {
             LWARNINGC(
                 "propertySetValue",
-                fmt::format("'{}' is not a valid easing method", easingMethodName)
+                std::format("'{}' is not a valid easing method", easingMethodName)
             );
         }
         else {
@@ -415,7 +415,7 @@ int propertySetValue(lua_State* L) {
         if (!prop) {
             LERRORC(
                 "property_setValue",
-                fmt::format(
+                std::format(
                     "{}: Property with URI '{}' was not found",
                     ghoul::lua::errorLocation(L), uriOrRegex
                 )
@@ -459,7 +459,7 @@ int propertyGetValue(lua_State* L) {
     if (!prop) {
         LERRORC(
             "propertyGetValue",
-            fmt::format(
+            std::format(
                 "{}: Property with URI '{}' was not found",
                 ghoul::lua::errorLocation(L), uri
             )
@@ -517,7 +517,7 @@ namespace {
 
         // If none then malformed regular expression
         if (propertyName.empty() && nodeName.empty()) {
-            throw ghoul::lua::LuaError(fmt::format(
+            throw ghoul::lua::LuaError(std::format(
                 "Malformed regular expression: '{}': Empty both before and after '*'",
                 regex
             ));
@@ -525,7 +525,7 @@ namespace {
 
         // Currently do not support several wildcards
         if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
-            throw ghoul::lua::LuaError(fmt::format(
+            throw ghoul::lua::LuaError(std::format(
                 "Malformed regular expression: '{}': Currently only one '*' is supported",
                 regex
             ));
@@ -637,12 +637,12 @@ namespace {
         logError(e, cat);
 
         throw ghoul::lua::LuaError(
-            fmt::format("Error loading scene graph node: {}", e.what())
+            std::format("Error loading scene graph node: {}", e.what())
         );
     }
     catch (const ghoul::RuntimeError& e) {
         throw ghoul::lua::LuaError(
-            fmt::format("Error loading scene graph node: {}", e.what())
+            std::format("Error loading scene graph node: {}", e.what())
         );
     }
 }
@@ -676,7 +676,7 @@ namespace {
     SceneGraphNode* foundNode = sceneGraphNode(identifier);
     if (!foundNode) {
         throw ghoul::lua::LuaError(
-            fmt::format("Did not find a match for identifier: {}", identifier)
+            std::format("Did not find a match for identifier: {}", identifier)
         );
     }
 
@@ -738,7 +738,7 @@ namespace {
         // If none then malformed regular expression
         if (propertyName.empty() && nodeName.empty()) {
             throw ghoul::lua::LuaError(
-                fmt::format(
+                std::format(
                     "Malformed regular expression: '{}': Empty both before and after '*'",
                     name
                 )
@@ -748,7 +748,7 @@ namespace {
         // Currently do not support several wildcards
         if (name.find_first_of("*", wildPos + 1) != std::string::npos) {
             throw ghoul::lua::LuaError(
-                fmt::format(
+                std::format(
                     "Malformed regular expression: '{}': "
                     "Currently only one '*' is supported",
                     name
@@ -812,7 +812,7 @@ namespace {
 
     if (!foundMatch) {
         throw ghoul::lua::LuaError(
-            fmt::format("Did not find a match for identifier: {}", name)
+            std::format("Did not find a match for identifier: {}", name)
         );
     }
 
@@ -931,7 +931,7 @@ namespace {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
         throw ghoul::lua::LuaError(
-            fmt::format("Did not find a match for identifier: {} ", identifier)
+            std::format("Did not find a match for identifier: {} ", identifier)
         );
     }
 
@@ -948,7 +948,7 @@ namespace {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
         throw ghoul::lua::LuaError(
-            fmt::format("Did not find a match for identifier: {} ", identifier)
+            std::format("Did not find a match for identifier: {} ", identifier)
         );
     }
 
@@ -964,13 +964,13 @@ namespace {
     using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Did not find a match for identifier: {}", identifier
         ));
     }
     SceneGraphNode* newParentNode = sceneGraphNode(newParent);
     if (!newParentNode) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Did not find a match for new parent identifier: {}", newParent
         ));
     }
@@ -987,7 +987,7 @@ namespace {
     using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Did not find a match for identifier: {}", identifier
         ));
     }
@@ -1004,7 +1004,7 @@ namespace {
     using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Did not find a match for identifier: {}", identifier
         ));
     }
@@ -1096,7 +1096,7 @@ enum class [[codegen::enum]] CustomPropertyType {
     }
 
     if (global::userPropertyOwner->hasProperty(identifier)) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Failed to register property '{}' since a user-defined property with that "
             "name already exists",
             identifier
@@ -1218,7 +1218,7 @@ enum class [[codegen::enum]] CustomPropertyType {
         delete p;
     }
     else {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Could not find user-defined property '{}'", identifier
         ));
     }

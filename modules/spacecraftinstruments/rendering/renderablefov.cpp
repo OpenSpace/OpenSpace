@@ -301,7 +301,7 @@ void RenderableFov::initializeGL() {
         res.shape == SpiceManager::FieldOfViewResult::Shape::Rectangle;
     if (!supportedShape) {
         throw ghoul::RuntimeError(
-            fmt::format("'{}' has unsupported shape", _instrument.name),
+            std::format("'{}' has unsupported shape", _instrument.name),
             "RenderableFov"
         );
     }
@@ -329,7 +329,7 @@ void RenderableFov::initializeGL() {
 
         LINFOC(
             _instrument.name,
-            fmt::format("Simplified from {} to {}", sizeBefore, sizeAfter)
+            std::format("Simplified from {} to {}", sizeBefore, sizeAfter)
         );
     }
 

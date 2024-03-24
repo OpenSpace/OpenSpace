@@ -311,7 +311,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
             str = TAsPOverRho;
         }
         if (!success) {
-            LWARNING(fmt::format("Failed to load extra variable '{}'. Ignoring", str));
+            LWARNING(std::format("Failed to load extra variable '{}'. Ignoring", str));
             extraScalarVars.erase(extraScalarVars.begin() + i);
             --i;
         }
@@ -349,7 +349,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
                 name = JParallelB;
             }
             if (!success) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Failed to load at least one of the magnitude variables: '{}', '{}', "
                     "'{}'. Removing ability to store corresponding magnitude",
                     s1, s2, s3
@@ -368,7 +368,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
     else {
         // WRONG NUMBER OF MAGNITUDE VARIABLES.. REMOVE ALL!
         extraMagVars.clear();
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Wrong number of variables provided for storing magnitudes. Expects multiple "
             "of 3 but {} are provided",
             extraMagVars.size()

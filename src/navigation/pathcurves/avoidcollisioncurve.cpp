@@ -192,7 +192,7 @@ void AvoidCollisionCurve::removeCollisions(int step) {
             const bool isStartInsideNode = isPointInsideSphere(p1, Center, radius);
             const bool isEndInsideNode = isPointInsideSphere(p2, Center, radius);
             if (isStartInsideNode || isEndInsideNode) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Something went wrong! "
                     "At least one point in the path is inside node: {}",
                     node->identifier()

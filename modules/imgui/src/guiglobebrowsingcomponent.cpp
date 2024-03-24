@@ -270,7 +270,7 @@ void GuiGlobeBrowsingComponent::render() {
     const Capabilities cap = module->capabilities(_currentServer);
 
     if (cap.empty()) {
-        LWARNINGC("GlobeBrowsing", fmt::format("Unknown server '{}'", _currentServer));
+        LWARNINGC("GlobeBrowsing", std::format("Unknown server '{}'", _currentServer));
     }
 
     ImGui::Columns(6, nullptr, false);
@@ -327,7 +327,7 @@ void GuiGlobeBrowsingComponent::render() {
                 layerName.end()
             );
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.globebrowsing.addLayer(\
                         '{}', \
                         '{}', \

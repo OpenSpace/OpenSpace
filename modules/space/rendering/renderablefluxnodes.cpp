@@ -359,11 +359,11 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 
         // Ensure that there are available and valid source files left
         if (_binarySourceFiles.empty()) {
-            LERROR(fmt::format("'{}' contains no files", _binarySourceFolderPath));
+            LERROR(std::format("'{}' contains no files", _binarySourceFolderPath));
         }
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Source folder '{}' is not a valid directory", _binarySourceFolderPath
         ));
     }
@@ -456,7 +456,7 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
     std::ifstream fileStream3(file3, std::ifstream::binary);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Could not read file '{}'", file));
+        LERROR(std::format("Could not read file '{}'", file));
         return;
     }
 
@@ -646,7 +646,7 @@ void RenderableFluxNodes::populateStartTimes() {
                 _startTimes.push_back(triggerTime);
             }
             else {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Error in file formating. Last column in file '{}' is not on UTC "
                     "ISO8601 format", timeFile
                 ));

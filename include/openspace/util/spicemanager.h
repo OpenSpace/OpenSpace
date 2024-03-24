@@ -578,7 +578,7 @@ public:
 
         timout_c(ephemerisTime, format, bufferSize, outBuf);
         if (failed_c()) {
-            throwSpiceError(fmt::format(
+            throwSpiceError(std::format(
                 "Error converting ephemeris time '{}' to date with format '{}'",
                     ephemerisTime, format
             ));

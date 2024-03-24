@@ -130,7 +130,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     name = p.name.value_or("Name unspecified");
-    const std::string _loggerCat = fmt::format("DefaultTileProvider ({})", name);
+    const std::string _loggerCat = std::format("DefaultTileProvider ({})", name);
 
     // 1. Get required Keys
     _filePath = p.filePath;
@@ -162,7 +162,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     std::string identifier = p.identifier.value_or("unspecified");
     std::string enclosing = p.globeName.value_or("unspecified");
 
-    std::string path = fmt::format("{}/{}/{}/", enclosing, layerGroup, identifier);
+    std::string path = std::format("{}/{}/{}/", enclosing, layerGroup, identifier);
 
     const GlobeBrowsingModule& mod = *global::moduleEngine->module<GlobeBrowsingModule>();
     bool enabled = mod.isMRFCachingEnabled();

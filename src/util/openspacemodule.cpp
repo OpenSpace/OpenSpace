@@ -56,7 +56,7 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
 
     std::filesystem::path path = modulePath();
     if (!path.empty()) {
-        LDEBUG(fmt::format("Registering module path '{}' -> {}", moduleToken, path));
+        LDEBUG(std::format("Registering module path '{}' -> {}", moduleToken, path));
         FileSys.registerPathToken(std::move(moduleToken), std::move(path));
     }
 

@@ -192,7 +192,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         _filename = absPath(dictionary.value<std::string>(KeyDataSource)).string();
     }
     else {
-        LERROR(fmt::format("Node did not contain a valid '{}'", KeyDataSource));
+        LERROR(std::format("Node did not contain a valid '{}'", KeyDataSource));
         return;
     }
 
@@ -245,7 +245,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
     }
     else {
-        LERROR(fmt::format("Node did not contain a valid '{}'", KeyTransferFunction));
+        LERROR(std::format("Node did not contain a valid '{}'", KeyTransferFunction));
         return;
     }
 
@@ -474,7 +474,7 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::TF:
             if (_errorHistogramManager) {
                  std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                     fmt::format(
+                     std::format(
                          "{}_{}_errorHistograms",
                          std::filesystem::path(_filename).stem().string(), nHistograms
                      ),
@@ -485,13 +485,13 @@ bool RenderableMultiresVolume::initializeSelector() {
                     // Read histograms from cache
                     cacheFile.close();
                     LINFO(
-                        fmt::format("Loading histograms from cache '{}'", cached)
+                        std::format("Loading histograms from cache '{}'", cached)
                     );
                     success &= _errorHistogramManager->loadFromFile(cached);
                 }
                 else if (!_errorHistogramsPath.empty()) {
                     // Read histograms from scene data
-                    LINFO(fmt::format(
+                    LINFO(std::format(
                         "Loading histograms from scene data '{}'", _errorHistogramsPath
                     ));
                     success &= _errorHistogramManager->loadFromFile(
@@ -500,10 +500,10 @@ bool RenderableMultiresVolume::initializeSelector() {
                 }
                 else {
                     // Build histograms from tsp file
-                    LWARNING(fmt::format("Failed to open '{}'", cached));
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _errorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to '{}'", cached));
+                        LINFO(std::format("Writing cache to '{}'", cached));
                         _errorHistogramManager->saveToFile(cached);
                     }
                 }
@@ -514,7 +514,7 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::SIMPLE:
             if (_histogramManager) {
                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                    fmt::format("{}_{}_histogram",
+                    std::format("{}_{}_histogram",
                         std::filesystem::path(_filename).stem().string(), nHistograms
                     ),
                     ""
@@ -523,18 +523,18 @@ bool RenderableMultiresVolume::initializeSelector() {
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from '{}'", cached));
+                    LINFO(std::format("Loading histograms from '{}'", cached));
                     success &= _histogramManager->loadFromFile(cached);
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open '{}'", cached));
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _histogramManager->buildHistograms(
                         _tsp.get(),
                         nHistograms
                     );
                     if (success) {
-                        LINFO(fmt::format("Writing cache to '{}'", cached));
+                        LINFO(std::format("Writing cache to '{}'", cached));
                         _histogramManager->saveToFile(cached);
                     }
                 }
@@ -545,7 +545,7 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::LOCAL:
             if (_localErrorHistogramManager) {
                  std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                    fmt::format(
+                    std::format(
                         "{}_{}_localErrorHistograms",
                         std::filesystem::path(_filename).stem().string(), nHistograms
                     ),
@@ -555,15 +555,15 @@ bool RenderableMultiresVolume::initializeSelector() {
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from '{}'", cached));
+                    LINFO(std::format("Loading histograms from '{}'", cached));
                     success &= _localErrorHistogramManager->loadFromFile(cached);
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open '{}'", cached));
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _localErrorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to '{}'", cached));
+                        LINFO(std::format("Writing cache to '{}'", cached));
                         _localErrorHistogramManager->saveToFile(cached);
                     }
                 }

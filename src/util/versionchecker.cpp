@@ -47,7 +47,7 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     std::string operatingSystem = SysCap.component<GCC>().operatingSystemString();
     operatingSystem = ghoul::encodeUrl(operatingSystem);
 
-    std::string fullUrl = fmt::format(
+    std::string fullUrl = std::format(
         "{}?client_version={}&commit_hash={}&operating_system={}",
         url, OPENSPACE_VERSION_NUMBER, OPENSPACE_GIT_COMMIT, operatingSystem
     );
@@ -100,7 +100,7 @@ void VersionChecker::cancel() {
             };
 
             if (currentVersion < _latestVersion) {
-                LINFO(fmt::format(
+                LINFO(std::format(
                     "Newer OpenSpace version {}.{}.{} is available. "
                     "Currently running {}.{}.{}",
                     _latestVersion->major,
@@ -112,7 +112,7 @@ void VersionChecker::cancel() {
                 ));
             }
             else {
-                LINFO(fmt::format(
+                LINFO(std::format(
                     "OpenSpace version {}.{}.{} is up to date",
                     currentVersion.major,
                     currentVersion.minor,
@@ -126,7 +126,7 @@ void VersionChecker::cancel() {
             _request->wait();
             std::vector<char> data = _request->downloadedData();
             const std::string response = std::string(data.begin(), data.end());
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Failed to get OpenSpace version information from {}. Response: {}",
                 _request->url(),
                 response

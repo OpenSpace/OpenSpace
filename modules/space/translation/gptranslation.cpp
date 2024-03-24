@@ -72,7 +72,7 @@ GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
     );
 
     if (element > static_cast<int>(parameters.size())) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Requested element {} but only {} are available", element, parameters.size()
         ));
     }

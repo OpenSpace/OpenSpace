@@ -168,7 +168,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     offset += sizeof(uint8_t);
 
     if (protocolVersionIn != ProtocolVersion) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Protocol versions do not match. Remote version: {}, Local version: {}",
             protocolVersionIn,
             ProtocolVersion

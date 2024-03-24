@@ -102,7 +102,7 @@ namespace {
             QMessageBox::critical(
                 parent,
                 "Exception",
-                QString::fromStdString(fmt::format(
+                QString::fromStdString(std::format(
                     "Could not open profile file '{}'", filename
                 ))
             );
@@ -117,7 +117,7 @@ namespace {
             QMessageBox::critical(
                 parent,
                 "Exception",
-                QString::fromStdString(fmt::format(
+                QString::fromStdString(std::format(
                     "ParsingError exception in '{}': {}, {}",
                     filename, e.component, e.message
                 ))
@@ -128,7 +128,7 @@ namespace {
             QMessageBox::critical(
                 parent,
                 "Exception",
-                QString::fromStdString(fmt::format(
+                QString::fromStdString(std::format(
                     "RuntimeError exception in '{}', component {}: {}",
                     filename, e.component, e.message
                 ))
@@ -153,7 +153,7 @@ namespace {
                     QMessageBox::critical(
                         parent,
                         "Exception",
-                        QString::fromStdString(fmt::format(
+                        QString::fromStdString(std::format(
                             "Error writing data to file '{}' as file is marked hidden",
                             path
                         ))
@@ -165,7 +165,7 @@ namespace {
             QMessageBox::critical(
                 parent,
                 "Exception",
-                QString::fromStdString(fmt::format(
+                QString::fromStdString(std::format(
                     "Error writing data to file '{}': {}", path, e.what()
                 ))
             );
@@ -188,7 +188,7 @@ namespace {
             QMessageBox::critical(
                 parent,
                 "Exception",
-                QString::fromStdString(fmt::format(
+                QString::fromStdString(std::format(
                     "Error writing data to file '{}': {}", path, e.what()
                 ))
             );
@@ -481,7 +481,7 @@ void LauncherWindow::populateProfilesList(const std::string& preset) {
     if (!std::filesystem::exists(_profilePath)) {
         LINFOC(
             "LauncherWindow",
-            fmt::format("Could not find profile folder '{}'", _profilePath)
+            std::format("Could not find profile folder '{}'", _profilePath)
         );
         return;
     }
@@ -517,7 +517,7 @@ void LauncherWindow::populateProfilesList(const std::string& preset) {
             const std::optional<std::string>& d = p->meta.value().description;
             if (d.has_value()) {
                 // Tooltip has to be 'rich text' to linebreak properly
-                const QString tooltip = QString::fromStdString(fmt::format(
+                const QString tooltip = QString::fromStdString(std::format(
                     "<p>{}</p>", *d
                 ));
                 _profileBox->setItemData(idx, tooltip, Qt::ToolTipRole);
@@ -555,7 +555,7 @@ void LauncherWindow::populateProfilesList(const std::string& preset) {
             const std::optional<std::string>& d = p->meta.value().description;
             if (d.has_value()) {
                 // Tooltip has to be 'rich text' to linebreak properly
-                const QString tooltip = QString::fromStdString(fmt::format(
+                const QString tooltip = QString::fromStdString(std::format(
                     "<p>{}</p>", *d
                 ));
                 _profileBox->setItemData(idx, tooltip, Qt::ToolTipRole);
@@ -602,7 +602,7 @@ bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_en
         }
         if (!tooltipDescription.empty()) {
             const QString toolTip = QString::fromStdString(
-                fmt::format("<p>{}</p>", tooltipDescription)
+                std::format("<p>{}</p>", tooltipDescription)
             );
             box.setItemData(box.count() - 1, toolTip, Qt::ToolTipRole);
         }
@@ -671,7 +671,7 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
     else {
         LINFOC(
             "LauncherWindow",
-            fmt::format("Could not find config folder '{}'", _configPath)
+            std::format("Could not find config folder '{}'", _configPath)
         );
     }
 
@@ -729,7 +729,7 @@ void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
     else if (newIndex >= _preDefinedConfigStartingIdx) {
         _editWindowButton->setEnabled(false);
         _editWindowButton->setToolTip(
-            QString::fromStdString(fmt::format(
+            QString::fromStdString(std::format(
                 "Cannot edit '{}'\nsince it is one of the configuration "
                 "files provided in the OpenSpace installation", fileSelected
             ))
@@ -741,7 +741,7 @@ void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
                 sgct::readConfigGenerator(fileSelected);
             if (!versionCheck(previewGenVersion)) {
                 _editWindowButton->setEnabled(false);
-                _editWindowButton->setToolTip(QString::fromStdString(fmt::format(
+                _editWindowButton->setToolTip(QString::fromStdString(std::format(
                     "This file does not meet the minimum required version of {}.",
                     versionMin.versionString()
                 )));
@@ -851,7 +851,7 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                 }
                 catch (const std::runtime_error& e) {
                     //Re-throw an SGCT error exception with the runtime exception message
-                    throw std::runtime_error(fmt::format(
+                    throw std::runtime_error(std::format(
                         "Importing of this configuration file failed because of a "
                         "problem detected in the readConfig function:\n\n{}", e.what()
                     ));
@@ -874,7 +874,7 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
             else {
                 editRefusalDialog(
                     "File Format Version Error",
-                    fmt::format(
+                    std::format(
                         "File '{}' does not meet the minimum required version of {}",
                         winCfg, versionMin.versionString()
                     ),
@@ -885,7 +885,7 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
         catch (const std::runtime_error& e) {
             editRefusalDialog(
                 "Format Validation Error",
-                fmt::format("Parsing error found in file '{}'", winCfg),
+                std::format("Parsing error found in file '{}'", winCfg),
                 e.what()
             );
         }

@@ -110,7 +110,7 @@ void ScreenSpaceImageOnline::update() {
             if (imageFile.corrupted) {
                 LERRORC(
                     "ScreenSpaceImageOnline",
-                    fmt::format("Error loading image from URL '{}'", _texturePath.value())
+                    std::format("Error loading image from URL '{}'", _texturePath.value())
                 );
                 return;
             }

@@ -66,7 +66,7 @@ namespace {
 
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
-        throw ghoul::lua::LuaError(fmt::format("Unknown scene graph node '{}'", uri));
+        throw ghoul::lua::LuaError(std::format("Unknown scene graph node '{}'", uri));
     }
 
     node->addTag(std::move(tag));
@@ -78,7 +78,7 @@ namespace {
 
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
-        throw ghoul::lua::LuaError(fmt::format("Unknown scene graph node '{}'", uri));
+        throw ghoul::lua::LuaError(std::format("Unknown scene graph node '{}'", uri));
     }
 
     node->removeTag(tag);
@@ -90,7 +90,7 @@ namespace {
 {
     using namespace openspace;
 
-    LINFOC("OpenSpaceEngine", fmt::format("Downloading file from '{}'", url));
+    LINFOC("OpenSpaceEngine", std::format("Downloading file from '{}'", url));
     std::shared_ptr<DownloadManager::FileFuture> future =
         global::downloadManager->downloadFile(
             url,
@@ -103,7 +103,7 @@ namespace {
     if (waitForCompletion) {
         while (!future->isFinished && future->errorMessage.empty()) {
             // just wait
-            LTRACEC("OpenSpaceEngine", fmt::format("waiting '{}'", future->errorMessage));
+            LTRACEC("OpenSpaceEngine", std::format("waiting '{}'", future->errorMessage));
         }
     }
 }
@@ -142,7 +142,7 @@ namespace {
     );
     const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
     if (hasCachedFile) {
-        LDEBUGC("OpenSpaceEngine", fmt::format("Cached file '{}' used", fileName));
+        LDEBUGC("OpenSpaceEngine", std::format("Cached file '{}' used", fileName));
         return fileName;
     }
     else {
@@ -220,7 +220,7 @@ namespace {
                                                             bool includeFirstLine = false)
 {
     if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
-        throw ghoul::lua::LuaError(fmt::format("Could not find file '{}'", file));
+        throw ghoul::lua::LuaError(std::format("Could not find file '{}'", file));
     }
 
     std::vector<std::vector<std::string>> res =
@@ -258,7 +258,7 @@ namespace {
  */
 [[codegen::luawrap]] ghoul::Dictionary loadJson(std::filesystem::path path) {
     if (!std::filesystem::exists(path)) {
-        throw ghoul::RuntimeError(fmt::format("File '{}' did not exist", path));
+        throw ghoul::RuntimeError(std::format("File '{}' did not exist", path));
     }
 
     std::ifstream f(path);

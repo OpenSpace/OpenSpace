@@ -102,7 +102,7 @@ void CefWebGuiModule::startOrStopGui() {
     const bool isMaster = global::windowDelegate->isMaster();
 
     if (_enabled && isMaster) {
-        LDEBUGC("WebBrowser", fmt::format("Loading GUI from '{}'", _url.value()));
+        LDEBUGC("WebBrowser", std::format("Loading GUI from '{}'", _url.value()));
 
         if (!_instance) {
             _instance = std::make_unique<BrowserInstance>(

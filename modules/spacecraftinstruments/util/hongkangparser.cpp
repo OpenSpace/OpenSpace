@@ -86,7 +86,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
                 translationDictionary.value<ghoul::Dictionary>(decoderType);
             // for each playbook call -> create a Decoder object
             for (std::string_view key : typeDictionary.keys()) {
-                const std::string& currentKey = fmt::format("{}.{}", decoderType, key);
+                const std::string& currentKey = std::format("{}.{}", decoderType, key);
 
                 ghoul::Dictionary decoderDictionary;
                 if (translationDictionary.hasValue<ghoul::Dictionary>(currentKey)) {
@@ -132,7 +132,7 @@ bool HongKangParser::create() {
     const bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
     if (!hasObserver) {
         throw ghoul::RuntimeError(
-            fmt::format("SPICE has no observer '{}' in kernel pool", _spacecraft),
+            std::format("SPICE has no observer '{}' in kernel pool", _spacecraft),
             "HongKangParser"
         );
     }

@@ -126,7 +126,7 @@ ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
                 for (int i = 0; i < j.size(); i++) {
                     const nlohmann::json& value = j[i];
                     // We add 1 to the key to make Lua happy :-/
-                    addToDict(subDict, fmt::format("{}", i + 1), value);
+                    addToDict(subDict, std::format("{}", i + 1), value);
                 }
                 dict.setValue(std::move(key), std::move(subDict));
                 break;

@@ -174,14 +174,14 @@ CameraPose NavigationState::cameraPose() const {
     const SceneGraphNode* anchorNode = sceneGraphNode(anchor);
 
     if (!anchorNode) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not find scene graph node '{}' used as anchor", anchor
         ));
         return CameraPose();
     }
 
     if (!referenceFrameNode) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not find scene graph node '{}' used as reference frame",
             referenceFrame
         ));

@@ -106,7 +106,7 @@ ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
 }
 
 std::string ReadFitsTask::description() {
-    return fmt::format(
+    return std::format(
         "Read the specified fits file (or all fits files in specified folder): '{}'\n "
         "and write raw star data into: '{}'\nAll columns required for default rendering "
         "and filtering parameters will always be read but user can define additional "
@@ -144,7 +144,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
     std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
     if (outFileStream.good()) {
         int32_t nValues = static_cast<int32_t>(fullData.size());
-        LINFO(fmt::format(
+        LINFO(std::format(
             "Writing {} values to file '{}'", nValues, _outFileOrFolderPath
         ));
         LINFO("Number of values per star: " + std::to_string(nValuesPerStar));
@@ -167,7 +167,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
         outFileStream.close();
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error opening file '{}' as output data file", _outFileOrFolderPath
         ));
     }
@@ -300,24 +300,24 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
             }
         }
     }
-    LINFO(fmt::format("A total of {} stars were written to binary files", totalStars));
+    LINFO(std::format("A total of {} stars were written to binary files", totalStars));
 }
 
 int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index,
                                     std::vector<bool>& isFirstWrite, int nValuesPerStar)
 {
-    std::string outPath = fmt::format("{}octant_{}.bin", _outFileOrFolderPath, index);
+    std::string outPath = std::format("{}octant_{}.bin", _outFileOrFolderPath, index);
     std::ofstream fileStream(outPath, std::ofstream::binary | std::ofstream::app);
     if (fileStream.good()) {
         int32_t nValues = static_cast<int32_t>(octantData.size());
-        LINFO(fmt::format("Write {} values to {}", nValues, outPath));
+        LINFO(std::format("Write {} values to {}", nValues, outPath));
 
         if (nValues == 0) {
             LERROR("Error writing file - No values were read from file");
         }
         // If this is the first write then write number of values per star!
         if (isFirstWrite[index]) {
-            LINFO(fmt::format("First write for Octant_{}", index));
+            LINFO(std::format("First write for Octant_{}", index));
             fileStream.write(
                 reinterpret_cast<const char*>(&nValuesPerStar),
                 sizeof(int32_t)
@@ -334,7 +334,7 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
         return nValues / nValuesPerStar;
     }
     else {
-        LERROR(fmt::format("Error opening file '{}' as output data file", outPath));
+        LERROR(std::format("Error opening file '{}' as output data file", outPath));
         return 0;
     }
 }

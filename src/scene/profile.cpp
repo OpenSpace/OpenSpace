@@ -78,7 +78,7 @@ namespace {
             if (!isOptional) {
                 throw Profile::ParsingError(
                     Profile::ParsingError::Severity::Error,
-                    fmt::format("'{}.{}' field is missing", keyPrefix, key)
+                    std::format("'{}.{}' field is missing", keyPrefix, key)
                 );
             }
         }
@@ -98,7 +98,7 @@ namespace {
 
                 throw Profile::ParsingError(
                     Profile::ParsingError::Severity::Error,
-                    fmt::format("'{}.{}' must be {}", keyPrefix, key, type)
+                    std::format("'{}.{}' must be {}", keyPrefix, key, type)
                 );
             }
         }
@@ -111,7 +111,7 @@ namespace {
             if (allowedKeys.find(key) == allowedKeys.end()) {
                 LINFOC(
                     "Profile",
-                    fmt::format("Key '{}' not supported in '{}'", key, prefix)
+                    std::format("Key '{}' not supported in '{}'", key, prefix)
                 );
             }
         }
@@ -577,7 +577,7 @@ void convertVersion10to11(nlohmann::json& profile) {
         profile.at("keybindings").get<std::vector<version10::Keybinding>>();
     for (size_t i = 0; i < kbs.size(); i++) {
         version10::Keybinding& kb = kbs[i];
-        const std::string identifier = fmt::format("profile.keybind.{}", i);
+        const std::string identifier = std::format("profile.keybind.{}", i);
 
         Profile::Action action;
         action.identifier = identifier;
@@ -749,7 +749,7 @@ Profile::Profile(const std::filesystem::path& path) {
         inFile.open(path, std::ifstream::in);
     }
     catch (const std::ifstream::failure& e) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Exception opening profile file for read '{}': {}", path, e.what()
         ));
     }

@@ -117,9 +117,9 @@ bool KameleonWrapper::open(const std::string& filename) {
         _zCoordVar = v[2];
         _type = modelType();
 
-        LDEBUG(fmt::format("x: {}", _xCoordVar));
-        LDEBUG(fmt::format("y: {}", _yCoordVar));
-        LDEBUG(fmt::format("z: {}", _zCoordVar));
+        LDEBUG(std::format("x: {}", _xCoordVar));
+        LDEBUG(std::format("y: {}", _yCoordVar));
+        LDEBUG(std::format("z: {}", _zCoordVar));
 
         _min = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat(),
@@ -172,7 +172,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Loading variable '{}' from CDF data with a uniform sampling", var
     ));
 
@@ -183,10 +183,10 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 
     const double varMin =
         _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
-    LDEBUG(fmt::format("{} Min: {}", var, varMin));
+    LDEBUG(std::format("{} Min: {}", var, varMin));
     const double varMax =
         _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
-    LDEBUG(fmt::format("{} Max: {}", var, varMax));
+    LDEBUG(std::format("{} Max: {}", var, varMax));
 
     // HISTOGRAM
     constexpr int NBins = 200;
@@ -308,10 +308,10 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 
         data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
         if (data[i] < 0.f) {
-            LERROR(fmt::format("Datapoint {} less than 0", i));
+            LERROR(std::format("Datapoint {} less than 0", i));
         }
         if (data[i] > 1.f) {
-            LERROR(fmt::format("Datapoint {} more than 1", i));
+            LERROR(std::format("Datapoint {} more than 1", i));
         }
     }
 
@@ -324,7 +324,7 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
                                            float slice) const
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Loading variable '{}' from CDF data with a uniform sampling",
         var
     ));
@@ -352,8 +352,8 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
     const double yDim = hasYSlice ? 1.0 : outDimensions.y - 1;
     const double zDim = hasZSlice ? 1.0 : outDimensions.z - 1;
 
-    LDEBUG(fmt::format("{} min: {}", var, varMin));
-    LDEBUG(fmt::format("{} max: {}", var, varMax));
+    LDEBUG(std::format("{} min: {}", var, varMin));
+    LDEBUG(std::format("{} max: {}", var, varMax));
 
     //double maxValue = 0.0;
     //double minValue = std::numeric_limits<double>::max();
@@ -455,7 +455,7 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Loading variables {} {} {} from CDF data with a uniform sampling",
         xVar,
         yVar,
@@ -530,7 +530,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::classifiedFieldLines(const std::str
                                                                      float stepSize) const
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Creating {} fieldlines from variables {} {} {}",
         seedPoints.size(), xVar, yVar, zVar
     ));
@@ -592,7 +592,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::fieldLines(const std::string& xVar,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Creating {} fieldlines from variables {} {} {}",
         seedPoints.size(), xVar, yVar, zVar
     ));
@@ -647,7 +647,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::lorentzTrajectories(
                                                                const glm::vec4& /*color*/,
                                                                          float step) const
 {
-    LINFO(fmt::format("Creating {} Lorentz force trajectories", seedPoints.size()));
+    LINFO(std::format("Creating {} Lorentz force trajectories", seedPoints.size()));
 
     Fieldlines trajectories;
 
@@ -840,7 +840,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
 
         ++numSteps;
         if (numSteps > MaxSteps) {
-            LDEBUG(fmt::format("Max number of steps taken ({})", MaxSteps));
+            LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;
         }
     }
@@ -954,7 +954,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
 
         ++numSteps;
         if (numSteps > MaxSteps) {
-            LDEBUG(fmt::format("Max number of steps taken ({})", MaxSteps));
+            LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;
         }
     }

@@ -230,7 +230,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     if (!_globeNode) {
         LERRORC(
             "GlobeRotation",
-            fmt::format("Could not find globe '{}'", _globe.value())
+            std::format("Could not find globe '{}'", _globe.value())
         );
         return _matrix;
     }

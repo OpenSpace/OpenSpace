@@ -37,6 +37,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QTabWidget>
+#include <fstream>
 
 namespace {
     constexpr int CameraTypeNode = 0;

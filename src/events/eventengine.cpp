@@ -124,7 +124,7 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
     }
 
     // If we get this far, we haven't found the identifier
-    throw ghoul::RuntimeError(fmt::format(
+    throw ghoul::RuntimeError(std::format(
         "Could not find event with identifier '{}'", identifier
     ));
 }
@@ -148,13 +148,13 @@ void EventEngine::unregisterEventTopic(size_t topicId, events::Event::Type type)
             }
         }
         else {
-            LWARNING(fmt::format("Could not find registered event '{}' with topicId: {}",
+            LWARNING(std::format("Could not find registered event '{}' with topicId: {}",
                 events::toString(type), topicId)
             );
         }
     }
     else {
-        LWARNING(fmt::format("Could not find registered event '{}'",
+        LWARNING(std::format("Could not find registered event '{}'",
             events::toString(type))
         );
     }

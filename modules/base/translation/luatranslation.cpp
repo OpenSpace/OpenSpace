@@ -91,7 +91,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            fmt::format(
+            std::format(
                 "Script '{}' does not have a function 'translation'",
                 _luaScriptFile.value()
             )
@@ -115,7 +115,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            fmt::format("Error executing 'translation': {}", lua_tostring(_state, -1))
+            std::format("Error executing 'translation': {}", lua_tostring(_state, -1))
         );
     }
 

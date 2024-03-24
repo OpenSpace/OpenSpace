@@ -190,7 +190,7 @@ NSArray* focusIdentifiers;
 
         NSString* title = [button title];
 
-        std::string str = fmt::format(
+        std::string str = std::format(
             "openspace.setPropertyValueSingle('{}', '{}');\
              openspace.setPropertyValueSingle('{}', '');\
              openspace.setPropertyValueSingle('{}', '');",

@@ -313,7 +313,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
         // Do nothing
     }
     catch (const ghoul::RuntimeError& e) {
-        LERROR(fmt::format("Could not create path. Reason: {}", e.message));
+        LERROR(std::format("Could not create path. Reason: {}", e.message));
         return;
     }
 
@@ -436,7 +436,7 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
     double result = sphere(node);
 
     if (result < _minValidBoundingSphere) {
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
             "minimal value of {}. This might lead to unexpected results",
             node->identifier(), _minValidBoundingSphere.value()

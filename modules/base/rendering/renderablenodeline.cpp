@@ -181,7 +181,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
             if (!node || node->boundingSphere() > 0.0) {
                 return;
             }
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Setting StartOffset for node line '{}': Trying to use relative offsets "
                 "for start node '{}' that has no bounding sphere. This will result in no "
                 "offset. Use direct values by setting UseRelativeOffsets to false",
@@ -198,7 +198,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
             if (!node || node->boundingSphere() > 0.0) {
                 return;
             }
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Setting EndOffset for node line '{}': Trying to use relative offsets "
                 "for end node '{}' that has no bounding sphere. This will result in no "
                 "offset. Use direct values by setting UseRelativeOffsets to false",
@@ -213,7 +213,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         SceneGraphNode* endNode = global::renderEngine->scene()->sceneGraphNode(_end);
 
         if (!startNode) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error when recomputing node line offsets for scene graph node '{}'. "
                 "Could not find start node '{}'", parent()->identifier(), _start.value()
             ));
@@ -221,7 +221,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         }
 
         if (!endNode) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error when recomputing node line offsets for scene graph node '{}'. "
                 "Could not find end node '{}'", parent()->identifier(), _end.value()
             ));
@@ -310,12 +310,12 @@ void RenderableNodeLine::updateVertexData() {
     SceneGraphNode* endNode = global::renderEngine->scene()->sceneGraphNode(_end);
 
     if (!startNode) {
-        LERROR(fmt::format("Could not find start node '{}'", _start.value()));
+        LERROR(std::format("Could not find start node '{}'", _start.value()));
         return;
     }
 
     if (!endNode) {
-        LERROR(fmt::format("Could not find end node '{}'", _end.value()));
+        LERROR(std::format("Could not find end node '{}'", _end.value()));
         return;
     }
 

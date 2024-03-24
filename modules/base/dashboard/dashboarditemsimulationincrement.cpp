@@ -195,11 +195,14 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(
-                    fmt::runtime(_transitionFormat.value()),
-                    targetDeltaTime.first, targetDeltaTime.second,
-                    pauseText,
-                    currentDeltaTime.first, currentDeltaTime.second
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(
+                    _transitionFormat.value(),
+                    std::make_format_args(
+                        targetDeltaTime.first, targetDeltaTime.second,
+                        pauseText,
+                        currentDeltaTime.first, currentDeltaTime.second
+                    )
                 )
             );
         }
@@ -207,14 +210,19 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(
-                    fmt::runtime(_regularFormat.value()),
-                    targetDeltaTime.first, targetDeltaTime.second, pauseText
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(
+                    _regularFormat.value(),
+                    std::make_format_args(
+                        targetDeltaTime.first,
+                        targetDeltaTime.second,
+                        pauseText
+                    )
                 )
             );
         }
     }
-    catch (const fmt::format_error&) {
+    catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
     penPosition.y -= _font->height();
@@ -238,7 +246,7 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
     }
 
     return _font->boundingBox(
-        fmt::format(
+        std::format(
             "Simulation increment: {:.1f} {:s} / second",
             deltaTime.first, deltaTime.second
         )

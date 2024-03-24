@@ -38,7 +38,7 @@ namespace openspace {
 LocalErrorHistogramManager::LocalErrorHistogramManager(TSP* tsp) : _tsp(tsp) {}
 
 bool LocalErrorHistogramManager::buildHistograms(int numBins) {
-    LINFO(fmt::format("Build histograms with {} bins each", numBins));
+    LINFO(std::format("Build histograms with {} bins each", numBins));
     _numBins = numBins;
 
     _file = &(_tsp->file());
@@ -133,7 +133,7 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset,
                 childValues = it->second;
             }
             else {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Child {} visited without cache, {}, {}",
                     childIndex, bstOffset, octreeOffset
                 ));
@@ -152,7 +152,7 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset,
                 parentValues = it->second;
             }
             else {
-                LERROR(fmt::format("Parent {} visited without cache", parentIndex));
+                LERROR(std::format("Parent {} visited without cache", parentIndex));
                 return false;
             }
         }
@@ -237,7 +237,7 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
                 childValues = it->second;
             }
             else {
-                LERROR(fmt::format("Child {} visited without cache", childIndex));
+                LERROR(std::format("Child {} visited without cache", childIndex));
                 return false;
             }
         }
@@ -253,7 +253,7 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
                 parentValues = it->second;
             }
             else {
-                LERROR(fmt::format("Parent {} visited without cache", parentIndex));
+                LERROR(std::format("Parent {} visited without cache", parentIndex));
                 return false;
             }
         }

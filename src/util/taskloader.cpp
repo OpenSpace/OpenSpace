@@ -58,7 +58,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
             const std::string& taskType = subTask.value<std::string>("Type");
             std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
             if (!task) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Failed to create a Task object of type '{}'", taskType
                 ));
             }
@@ -71,7 +71,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& path) {
     std::filesystem::path absTasksFile = absPath(path);
     if (!std::filesystem::is_regular_file(absTasksFile)) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not load tasks file '{}'. File not found", absTasksFile
         ));
         return std::vector<std::unique_ptr<Task>>();
@@ -82,7 +82,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
         ghoul::lua::loadDictionaryFromFile(absTasksFile.string(), tasksDictionary);
     }
     catch (const ghoul::RuntimeError& e) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not load tasks file '{}'. Lua error: ({}) {}",
             absTasksFile, e.message, e.component
         ));
@@ -93,7 +93,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
         return tasksFromDictionary(tasksDictionary);
     }
     catch (const documentation::SpecificationError& e) {
-        LERROR(fmt::format("Could not load tasks file '{}': {}", absTasksFile, e.what()));
+        LERROR(std::format("Could not load tasks file '{}': {}", absTasksFile, e.what()));
         logError(e);
 
         return std::vector<std::unique_ptr<Task>>();

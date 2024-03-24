@@ -114,7 +114,7 @@ void GuiGIBSComponent::render() {
         std::string imageFormat = std::string(ImageFormatBuffer.data());
 
         // Construct the components of the Lua function
-        std::string xmlFunc = fmt::format(
+        std::string xmlFunc = std::format(
             "openspace.globebrowsing.createTemporalGibsGdalXml('{}', '{}', '{}')",
             layer, imageRes, imageFormat
         );
@@ -122,7 +122,7 @@ void GuiGIBSComponent::render() {
         if (startDate == "Present") {
             startDate.clear();
         }
-        std::string layerScript = fmt::format(
+        std::string layerScript = std::format(
             "{{"
             "    Identifier = '{}',"
             "    Type = 'TemporalTileLayer',"
@@ -141,7 +141,7 @@ void GuiGIBSComponent::render() {
             layer, startDate, endDate, temporalRes, temporalFormat, xmlFunc
         );
 
-        std::string script = fmt::format(
+        std::string script = std::format(
             "openspace.globebrowsing.addLayer('Earth', 'ColorLayers', {})",
             layerScript
         );

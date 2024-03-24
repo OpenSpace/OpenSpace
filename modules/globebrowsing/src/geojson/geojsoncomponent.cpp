@@ -368,7 +368,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
             _textureIsDirty = true;
         }
         else {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Provided texture file does not exist: {}",
                 _defaultProperties.pointTexture.value()
             ));
@@ -594,7 +594,7 @@ void GeoJsonComponent::readFile() {
     std::ifstream file(_geoJsonFile);
 
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open GeoJSON file: {}", _geoJsonFile.value()));
+        LERROR(std::format("Failed to open GeoJSON file: {}", _geoJsonFile.value()));
         return;
     }
 
@@ -617,7 +617,7 @@ void GeoJsonComponent::readFile() {
         }
 
         if (_geometryFeatures.empty()) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "No GeoJson features could be successfully created for GeoJson layer "
                 "with identifier '{}'. Disabling layer.", identifier()
             ));
@@ -625,7 +625,7 @@ void GeoJsonComponent::readFile() {
         }
     }
     catch (const geos::util::GEOSException& e) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error creating GeoJson layer with identifier '{}'. Problem reading "
             "GeoJson file '{}'. Error: {}", identifier(), _geoJsonFile.value(), e.what()
         ));
@@ -646,7 +646,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
     std::vector<const geos::geom::Geometry*> geomsToAdd;
     if (!geom) {
         // Null geometry => no geometries to add
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Feature {} in GeoJson file '{}' is a null geometry and will not be loaded",
             indexInFile, _geoJsonFile.value()
         ));
@@ -683,7 +683,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             // If there is already an owner with that name as an identifier, make a
             // unique one
             if (_featuresPropertyOwner.hasPropertySubOwner(identifier)) {
-                identifier = fmt::format("Feature{}-", index, identifier);
+                identifier = std::format("Feature{}-", index, identifier);
             }
 
             const properties::PropertyOwner::PropertyOwnerInfo info = {
@@ -698,7 +698,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             _featuresPropertyOwner.addPropertySubOwner(_features.back().get());
         }
         catch (const ghoul::RuntimeError& error) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error creating GeoJson layer with identifier '{}'. Problem reading "
                 "feature {} in GeoJson file '{}'.",
                 identifier(), indexInFile, _geoJsonFile.value()
@@ -835,7 +835,7 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
     float lon = centroidLon + _latLongOffset.value().y;
 
     global::scriptEngine->queueScript(
-        fmt::format(
+        std::format(
             "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
             _globeNode.owner()->identifier(), lat, lon, d
         ),
@@ -846,7 +846,7 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
 
 void GeoJsonComponent::triggerDeletion() const {
     global::scriptEngine->queueScript(
-        fmt::format(
+        std::format(
             "openspace.globebrowsing.deleteGeoJson([[{}]], [[{}]])",
             _globeNode.owner()->identifier(), _identifier
         ),

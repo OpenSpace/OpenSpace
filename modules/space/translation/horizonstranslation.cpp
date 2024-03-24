@@ -85,7 +85,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
     if (std::holds_alternative<std::string>(p.horizonsTextFile)) {
         std::string file = std::get<std::string>(p.horizonsTextFile);
         if (!std::filesystem::is_regular_file(absPath(file))) {
-            LWARNING(fmt::format("The Horizons text file '{}' could not be found", file));
+            LWARNING(std::format("The Horizons text file '{}' could not be found", file));
             return;
         }
 
@@ -99,7 +99,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
 
         for (const std::string& file : files) {
             if (!std::filesystem::is_regular_file(absPath(file))) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "The Horizons text file '{}' could not be found", file
                 ));
                 return;
@@ -145,14 +145,14 @@ void HorizonsTranslation::loadData() {
     for (const std::string& filePath : _horizonsTextFiles.value()) {
         std::filesystem::path file = absPath(filePath);
         if (!std::filesystem::is_regular_file(file)) {
-            LWARNING(fmt::format("The Horizons text file '{}' could not be found", file));
+            LWARNING(std::format("The Horizons text file '{}' could not be found", file));
             return;
         }
 
         std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
         const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
         if (hasCachedFile) {
-            LINFO(fmt::format(
+            LINFO(std::format(
                 "Cached file '{}' used for Horizon file '{}'", cachedFile, file
             ));
 
@@ -166,13 +166,13 @@ void HorizonsTranslation::loadData() {
             }
         }
         else {
-            LINFO(fmt::format("Cache for Horizon file '{}' not found", file));
+            LINFO(std::format("Cache for Horizon file '{}' not found", file));
         }
-        LINFO(fmt::format("Loading Horizon file '{}'", file));
+        LINFO(std::format("Loading Horizon file '{}'", file));
 
         HorizonsFile horizonsFile(file);
         if (!readHorizonsTextFile(horizonsFile)) {
-            LERROR(fmt::format("Could not read data from Horizons file '{}'", file));
+            LERROR(std::format("Could not read data from Horizons file '{}'", file));
             return;
         }
 
@@ -210,7 +210,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+        LERROR(std::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 
@@ -259,7 +259,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
 void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) const {
     std::ofstream fileStream(file, std::ofstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
+        LERROR(std::format("Error opening file '{}' for save cache file", file));
         return;
     }
 

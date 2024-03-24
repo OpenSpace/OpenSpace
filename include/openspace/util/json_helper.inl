@@ -76,7 +76,7 @@ std::string formatJson(T value) {
             values += std::to_string(value[i]) + ',';
         }
         values.pop_back();
-        return fmt::format("[{}]", values);
+        return std::format("[{}]", values);
     }
     else if constexpr (internal::isGlmMatrix<T>()) {
         std::string values;
@@ -86,7 +86,7 @@ std::string formatJson(T value) {
             }
         }
         values.pop_back();
-        return fmt::format("[{}]", values);
+        return std::format("[{}]", values);
     }
     else {
         static_assert(sizeof(T) == 0, "JSON formatting of type T not implemented");

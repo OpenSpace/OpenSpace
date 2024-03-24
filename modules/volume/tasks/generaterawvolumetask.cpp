@@ -88,7 +88,7 @@ GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary
 }
 
 std::string GenerateRawVolumeTask::description() {
-    return fmt::format(
+    return std::format(
         "Generate a raw volume with dimenstions: ({}, {}, {}). For each cell, set the "
         "value by evaluating the lua function: `{}`, with three arguments (x, y, z) "
         "ranging from ({}, {}, {}) to ({}, {}, {}). Write raw volume data into '{}' and "

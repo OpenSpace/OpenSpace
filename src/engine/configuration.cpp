@@ -551,7 +551,7 @@ void parseLuaState(Configuration& configuration) {
     if (p.consoleKey.has_value()) {
         const KeyWithModifier km = stringToKey(*p.consoleKey);
         if (km.modifier != KeyModifier::None) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Console key '{}' must be a 'bare' key and cannot contain any modifiers",
                 *p.consoleKey
             ));
@@ -690,7 +690,7 @@ std::filesystem::path findConfiguration(const std::string& filename) {
         if (directory == nextDirectory) {
             // We have reached the root of the file system and did not find the file
             throw ghoul::RuntimeError(
-                fmt::format("Could not find configuration file '{}'", filename),
+                std::format("Could not find configuration file '{}'", filename),
                 "ConfigurationManager"
             );
         }
@@ -707,7 +707,7 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     Configuration result;
 
     // Injecting the resolution of the primary screen into the Lua state
-    const std::string script = fmt::format(
+    const std::string script = std::format(
         "ScreenResolution = {{ x = {}, y = {} }}",
         primaryMonitorResolution.x, primaryMonitorResolution.y
     );

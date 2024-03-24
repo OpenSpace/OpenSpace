@@ -65,7 +65,7 @@ void ScriptlogDialog::createWidgets() {
 
     QGridLayout* layout = new QGridLayout(this);
     {
-        QLabel* heading = new QLabel(QString::fromStdString(fmt::format(
+        QLabel* heading = new QLabel(QString::fromStdString(std::format(
             "Choose commands from \"{}\"", _scriptLogFile
         )));
         heading->setObjectName("heading");
@@ -84,7 +84,7 @@ void ScriptlogDialog::createWidgets() {
                 );
                 _scriptLogFile = file.toStdString();
         
-                heading->setText(QString::fromStdString(fmt::format(
+                heading->setText(QString::fromStdString(std::format(
                     "Choose commands from \"{}\"", _scriptLogFile
                 )));
                 loadScriptFile();

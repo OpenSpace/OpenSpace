@@ -45,7 +45,7 @@ namespace {
             connectionInfo = "Hosting session with 1 client";
         }
         else {
-            connectionInfo = fmt::format("Hosting session with {} clients", nClients);
+            connectionInfo = std::format("Hosting session with {} clients", nClients);
         }
 
         ImGui::Text("%s", connectionInfo.c_str());
@@ -90,12 +90,12 @@ void GuiParallelComponent::renderClientWithHost() {
     const size_t nClients = nConnections - 1;
 
     if (nClients > 2) {
-        connectionInfo += fmt::format(
+        connectionInfo += std::format(
             "You and {} more clients are connected", nClients - 1
         );
     }
     else if (nClients == 2) {
-        connectionInfo += fmt::format(
+        connectionInfo += std::format(
             "You and {} more client are connected", nClients - 1
         );
     }
@@ -110,13 +110,13 @@ void GuiParallelComponent::renderClientWithHost() {
     const size_t nCameraKeyframes =
         global::navigationHandler->keyframeNavigator().nKeyframes();
 
-    const std::string timeKeyframeInfo = fmt::format(
+    const std::string timeKeyframeInfo = std::format(
         "TimeKeyframes: {}", nTimeKeyframes
     );
-    const std::string cameraKeyframeInfo = fmt::format(
+    const std::string cameraKeyframeInfo = std::format(
         "CameraKeyframes: {}", nCameraKeyframes
     );
-    const std::string latencyStandardDeviation = fmt::format(
+    const std::string latencyStandardDeviation = std::format(
         "Latency standard deviation: {} s", parallel.latencyStandardDeviation()
     );
 
@@ -136,12 +136,12 @@ void GuiParallelComponent::renderClientWithoutHost() {
     const size_t nConnections = global::parallelPeer->nConnections();
 
     if (nConnections > 2) {
-        connectionInfo += fmt::format(
+        connectionInfo += std::format(
             "You and {} more users are connected", nConnections - 1
         );
     }
     else if (nConnections == 2) {
-        connectionInfo += fmt::format(
+        connectionInfo += std::format(
             "You and {} more users are connected", nConnections - 1
         );
     }

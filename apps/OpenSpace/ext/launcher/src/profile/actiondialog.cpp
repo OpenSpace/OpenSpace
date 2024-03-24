@@ -56,7 +56,7 @@ namespace {
 
     void updateListItem(QListWidgetItem* item, const Profile::Keybinding& kb) {
         ghoul_assert(item, "Item must exist at this point");
-        const std::string n = fmt::format("{}\t{}", ghoul::to_string(kb.key), kb.action);
+        const std::string n = std::format("{}\t{}", ghoul::to_string(kb.key), kb.action);
         item->setText(QString::fromStdString(n));
     }
 } // namespace
@@ -474,7 +474,7 @@ void ActionDialog::actionRemove() {
         const QMessageBox::StandardButton button = QMessageBox::information(
             this,
             "Remove action",
-            QString::fromStdString(fmt::format(
+            QString::fromStdString(std::format(
                 "Action '{}' is used in the keybind '{}' and cannot be removed unless "
                 "the keybind is removed as well. Do you want to remove the keybind as "
                 "well?",

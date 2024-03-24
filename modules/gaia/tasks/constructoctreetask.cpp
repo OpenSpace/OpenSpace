@@ -295,7 +295,7 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
 }
 
 std::string ConstructOctreeTask::description() {
-    return fmt::format(
+    return std::format(
         "Read bin file (or files in folder) '{}' and write octree data file (or files) "
         "into '{}'", _inFileOrFolderPath, _outFileOrFolderPath
     );
@@ -325,9 +325,9 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
 
     _octreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
-    LINFO(fmt::format("Reading data file '{}'", _inFileOrFolderPath));
+    LINFO(std::format("Reading data file '{}'", _inFileOrFolderPath));
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "MAX DIST: {} - MAX STARS PER NODE: {}",
         _octreeManager->maxDist(), _octreeManager->maxStarsPerNode()
     ));
@@ -405,16 +405,16 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         inFileStream.close();
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error opening file '{}' for loading preprocessed file", _inFileOrFolderPath
         ));
     }
-    LINFO(fmt::format("{} of {} read stars were filtered", nFilteredStars, nTotalStars));
+    LINFO(std::format("{} of {} read stars were filtered", nFilteredStars, nTotalStars));
 
     // Slice LOD data before writing to files.
     _octreeManager->sliceLodData();
 
-    LINFO(fmt::format("Writing octree to '{}'", _outFileOrFolderPath));
+    LINFO(std::format("Writing octree to '{}'", _outFileOrFolderPath));
     std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
     if (outFileStream.good()) {
         if (nValues == 0) {
@@ -425,7 +425,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         outFileStream.close();
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error opening file '{}' as output data file", _outFileOrFolderPath
         ));
     }
@@ -470,7 +470,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
 
     const float processOneFile = 1.f / allInputFiles.size();
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "MAX DIST: {} - MAX STARS PER NODE: {}",
         _indexOctreeManager->maxDist(), _indexOctreeManager->maxStarsPerNode()
     ));
@@ -479,7 +479,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         std::filesystem::path inFilePath = allInputFiles[idx];
         int nStarsInfile = 0;
 
-        LINFO(fmt::format("Reading data file '{}'", inFilePath));
+        LINFO(std::format("Reading data file '{}'", inFilePath));
 
         std::ifstream inFileStream(inFilePath, std::ifstream::binary);
         if (inFileStream.good()) {
@@ -536,7 +536,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
             inFileStream.close();
         }
         else {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error opening file '{}' for loading preprocessed file", inFilePath
             ));
         }
@@ -548,8 +548,8 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         progressCallback((idx + 1) * processOneFile);
         nStars += nStarsInfile;
 
-        LINFO(fmt::format("Writing {} stars to octree files", nStarsInfile));
-        LINFO(fmt::format(
+        LINFO(std::format("Writing {} stars to octree files", nStarsInfile));
+        LINFO(std::format(
             "Number leaf nodes: {}\n Number inner nodes: {}\n Total depth of tree: {}",
             _indexOctreeManager->numLeafNodes(),
             _indexOctreeManager->numInnerNodes(),
@@ -567,7 +567,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         writeThreads[idx] = std::move(t);
     }
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "A total of {} stars were read from files and distributed into {} total nodes",
         nStars, _indexOctreeManager->totalNodes()
     ));
@@ -591,7 +591,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     //    " - 5000kPc is " + std::to_string(starsOutside5000));
 
     // Write index file of Octree structure.
-    std::filesystem::path indexFileOutPath = fmt::format(
+    std::filesystem::path indexFileOutPath = std::format(
         "{}/index.bin", _outFileOrFolderPath.string()
     );
     std::ofstream outFileStream(indexFileOutPath, std::ofstream::binary);
@@ -602,7 +602,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         outFileStream.close();
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error opening file '{}' as index output file", indexFileOutPath
         ));
     }

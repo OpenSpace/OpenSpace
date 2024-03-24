@@ -111,7 +111,7 @@ void HttpSynchronization::start() {
         return;
     }
 
-    const std::string query = fmt::format(
+    const std::string query = std::format(
         "?identifier={}&file_version={}&application_version={}",
         _identifier, _version, ApplicationVersion
     );
@@ -158,7 +158,7 @@ void HttpSynchronization::cancel() {
 }
 
 std::string HttpSynchronization::generateUid() {
-    return fmt::format("{}/{}", _identifier, _version);
+    return std::format("{}/{}", _identifier, _version);
 }
 
 void HttpSynchronization::createSyncFile(bool isFullySynchronized) const {
@@ -168,7 +168,7 @@ void HttpSynchronization::createSyncFile(bool isFullySynchronized) const {
     dir.replace_extension("ossync");
     std::ofstream syncFile(dir, std::ofstream::out);
 
-    syncFile << fmt::format(
+    syncFile << std::format(
         "{}\n{}\n",
         OssyncVersionNumber,
         (isFullySynchronized ? SynchronizationToken : "Partial Synchronized")
@@ -227,7 +227,7 @@ bool HttpSynchronization::isEachFileDownloaded() {
         }
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "{}: Unknown ossync version number read."
             "Got {} while {} and below are valid.",
             _identifier,
@@ -286,7 +286,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
         const std::filesystem::path destination = directory() / (filename + ".tmp");
 
         if (sizeData.find(line) != sizeData.end()) {
-            LWARNING(fmt::format("{}: Duplicate entry for {}", _identifier, line));
+            LWARNING(std::format("{}: Duplicate entry for {}", _identifier, line));
             continue;
         }
 
@@ -372,7 +372,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
     for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
         d->wait();
         if (!d->hasSucceeded()) {
-            LERROR(fmt::format("Error downloading file from URL '{}'", d->url()));
+            LERROR(std::format("Error downloading file from URL '{}'", d->url()));
             failed = true;
             continue;
         }
@@ -391,7 +391,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
         std::error_code ec;
         std::filesystem::rename(tempName, originalName, ec);
         if (ec) {
-            LERROR(fmt::format("Error renaming '{}' to '{}'", tempName, originalName));
+            LERROR(std::format("Error renaming '{}' to '{}'", tempName, originalName));
             failed = true;
         }
 
@@ -407,7 +407,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             zip_close(z);
 
             if (is64) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Error while unzipping '{}': Zip64 archives are not supported", source
                 ));
                 continue;
@@ -415,7 +415,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
 
             int ret = zip_extract(source.c_str(), dest.c_str(), nullptr, nullptr);
             if (ret != 0) {
-                LERROR(fmt::format("Error '{}' while unzipping '{}'", ret, source));
+                LERROR(std::format("Error '{}' while unzipping '{}'", ret, source));
                 continue;
             }
 

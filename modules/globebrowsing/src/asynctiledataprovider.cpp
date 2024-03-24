@@ -141,7 +141,7 @@ void AsyncTileDataProvider::update() {
             // Only allow resetting if there are no jobs currently running
             if (_enqueuedTileRequests.empty()) {
                 performReset(ResetRawTileDataReader::Yes);
-                LINFO(fmt::format("Tile data reader '{}' reset successfully", _name));
+                LINFO(std::format("Tile data reader '{}' reset successfully", _name));
             }
             break;
         case ResetMode::ShouldResetAllButRawTileDataReader:
@@ -150,7 +150,7 @@ void AsyncTileDataProvider::update() {
             // Only allow resetting if there are no jobs currently running
             if (_enqueuedTileRequests.empty()) {
                 performReset(ResetRawTileDataReader::No);
-                LINFO(fmt::format("Tile data reader '{}' reset successfully", _name));
+                LINFO(std::format("Tile data reader '{}' reset successfully", _name));
             }
             break;
         case ResetMode::ShouldBeDeleted:
@@ -172,7 +172,7 @@ void AsyncTileDataProvider::reset() {
     // we need to wait until _enqueuedTileRequests is empty before finishing up.
     _resetMode = ResetMode::ShouldResetAll;
     endEnqueuedJobs();
-    LINFO(fmt::format("Prepairing for resetting of tile reader '{}'", _name));
+    LINFO(std::format("Prepairing for resetting of tile reader '{}'", _name));
 }
 
 void AsyncTileDataProvider::prepareToBeDeleted() {

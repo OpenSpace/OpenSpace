@@ -378,12 +378,12 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             std::string list = std::accumulate(
                 values.begin() + 1,
                 values.end(),
-                fmt::format("{}", values.front()),
+                std::format("{}", values.front()),
                 [](std::string lhs, typename T::Type rhs) {
-                    return fmt::format("{}, {}", lhs, rhs);
+                    return std::format("{}, {}", lhs, rhs);
                 }
             );
-            o.explanation = fmt::format(
+            o.explanation = std::format(
                 "'{}' not in list of accepted values '{}'",
                 key, list
             );

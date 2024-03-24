@@ -380,7 +380,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 *p.transform->translation
             );
 
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Successfully created ephemeris for '{}'", result->identifier()
             ));
         }
@@ -390,7 +390,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 *p.transform->rotation
             );
 
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Successfully created rotation for '{}'", result->identifier()
             ));
         }
@@ -398,7 +398,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.transform->scale.has_value()) {
             result->_transform.scale = Scale::createFromDictionary(*p.transform->scale);
 
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Successfully created scale for '{}'", result->identifier()
             ));
         }
@@ -411,7 +411,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     if (p.timeFrame.has_value()) {
         result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
 
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "Successfully created time frame for '{}'", result->identifier()
         ));
         result->addPropertySubOwner(result->_timeFrame.get());
@@ -423,7 +423,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul_assert(result->_renderable, "Failed to create Renderable");
         result->_renderable->_parent = result.get();
         result->addPropertySubOwner(result->_renderable.get());
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "Successfully created renderable for '{}'", result->identifier()
         ));
     }
@@ -481,7 +481,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
     }
 
-    LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
+    LDEBUG(std::format("Successfully created SceneGraphNode '{}'", result->identifier()));
 
     result->_lastScreenSpaceUpdateTime = std::chrono::high_resolution_clock::now();
     result->_type = "SceneGraphNode";
@@ -584,7 +584,7 @@ void SceneGraphNode::initialize() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    LDEBUG(fmt::format("Initializing: {}", identifier()));
+    LDEBUG(std::format("Initializing: {}", identifier()));
 
     if (_renderable) {
         _renderable->initialize();
@@ -605,14 +605,14 @@ void SceneGraphNode::initialize() {
     _evaluatedBoundingSphere = boundingSphere();
     _evaluatedInteractionSphere = interactionSphere();
 
-    LDEBUG(fmt::format("Finished initializing: {}", identifier()));
+    LDEBUG(std::format("Finished initializing: {}", identifier()));
 }
 
 void SceneGraphNode::initializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    LDEBUG(fmt::format("Initializing GL: {}", identifier()));
+    LDEBUG(std::format("Initializing GL: {}", identifier()));
 
     if (_renderable) {
         _renderable->initializeGL();
@@ -638,14 +638,14 @@ void SceneGraphNode::initializeGL() {
 
     _state = State::GLInitialized;
 
-    LDEBUG(fmt::format("Finished initializating GL: {}", identifier()));
+    LDEBUG(std::format("Finished initializating GL: {}", identifier()));
 }
 
 void SceneGraphNode::deinitialize() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    LDEBUG(fmt::format("Deinitializing: {}", identifier()));
+    LDEBUG(std::format("Deinitializing: {}", identifier()));
 
     setScene(nullptr);
 
@@ -655,20 +655,20 @@ void SceneGraphNode::deinitialize() {
     clearChildren();
     _parent = nullptr;
 
-    LDEBUG(fmt::format("Finished deinitializing: {}", identifier()));
+    LDEBUG(std::format("Finished deinitializing: {}", identifier()));
 }
 
 void SceneGraphNode::deinitializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    LDEBUG(fmt::format("Deinitializing GL: {}", identifier()));
+    LDEBUG(std::format("Deinitializing GL: {}", identifier()));
 
     if (_renderable) {
         _renderable->deinitializeGL();
     }
 
-    LDEBUG(fmt::format("Finished deinitializing GL: {}", identifier()));
+    LDEBUG(std::format("Finished deinitializing GL: {}", identifier()));
 }
 
 void SceneGraphNode::traversePreOrder(const std::function<void(SceneGraphNode*)>& fn) {

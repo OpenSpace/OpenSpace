@@ -60,7 +60,7 @@ namespace {
         const SceneGraphNode* referenceFrame = sceneGraphNode(*frame);
         if (!referenceFrame) {
             throw ghoul::lua::LuaError(
-                fmt::format("Could not find node '{}' as reference frame", *frame)
+                std::format("Could not find node '{}' as reference frame", *frame)
             );
         }
         state = global::navigationHandler->navigationState(*referenceFrame);

@@ -508,7 +508,7 @@ void LoadingScreen::render() {
                 int p = static_cast<int>(std::round(info.progress * 100));
                 if (isTotalSizeKnown) {
                     if (info.totalSize < 1024 * 1024) { // 1MB
-                        text = fmt::format(
+                        text = std::format(
                             "{} ({}%)\n{}/{} {}",
                             text, p, info.currentSize, info.totalSize, "bytes"
                         );
@@ -517,7 +517,7 @@ void LoadingScreen::render() {
                         float curr = info.currentSize / (1024.f * 1024.f);
                         float total = info.totalSize / (1024.f * 1024.f);
 
-                        text = fmt::format(
+                        text = std::format(
                             "{} ({}%)\n{:.3f}/{:.3f} {}",
                             text, p, curr, total, "MB"
                         );
@@ -526,11 +526,11 @@ void LoadingScreen::render() {
                 else {
                     // We don't know the total size but we have started downloading data
                     if (info.currentSize < 1024 * 1024) {
-                        text = fmt::format("{}\n{} {}", text, info.currentSize, "bytes");
+                        text = std::format("{}\n{} {}", text, info.currentSize, "bytes");
                     }
                     else {
                         float curr = info.currentSize / (1024.f * 1024.f);
-                        text = fmt::format("{}\n{:.3f} {}", text, curr, "MB");
+                        text = std::format("{}\n{:.3f} {}", text, curr, "MB");
                     }
                 }
             }
@@ -631,7 +631,7 @@ void LoadingScreen::renderLogMessages() const {
     }
     size_t row = 0;
     for (auto& [level, amount] : numberOfErrorsPerLevel) {
-        const std::string text = fmt::format("{}: {}", ghoul::to_string(level), amount);
+        const std::string text = std::format("{}: {}", ghoul::to_string(level), amount);
         const glm::vec2 bbox = _logFont->boundingBox(text);
         renderer.render(
             *_logFont,

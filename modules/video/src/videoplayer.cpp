@@ -133,7 +133,7 @@ namespace {
 
 bool checkMpvError(int status) {
     if (status < 0) {
-        LERROR(fmt::format("Libmpv API error: {}", mpv_error_string(status)));
+        LERROR(std::format("Libmpv API error: {}", mpv_error_string(status)));
         return false;
     }
     return true;
@@ -166,7 +166,7 @@ void VideoPlayer::observePropertyMpv(MpvKey key) {
 void VideoPlayer::setPropertyStringMpv(const char* name, const char* value) {
     const int result = mpv_set_property_string(_mpvHandle, name, value);
     if (!checkMpvError(result)) {
-        LWARNING(fmt::format("Error setting property '{}'", name));
+        LWARNING(std::format("Error setting property '{}'", name));
     }
 }
 
@@ -226,7 +226,7 @@ void VideoPlayer::getPropertyAsyncMpv(MpvKey key) {
         formats[key]
     );
     if (!checkMpvError(result)) {
-        LWARNING(fmt::format("Could not find property '{}'", keys[key]));
+        LWARNING(std::format("Could not find property '{}'", keys[key]));
         return;
     }
 }
@@ -234,7 +234,7 @@ void VideoPlayer::getPropertyAsyncMpv(MpvKey key) {
 void VideoPlayer::commandAsyncMpv(const char* cmd[], MpvKey key) {
     const int result = mpv_command_async(_mpvHandle, static_cast<uint64_t>(key), cmd);
     if (!checkMpvError(result)) {
-        LERROR(fmt::format("Could not execute command '{}'", keys[key]));
+        LERROR(std::format("Could not execute command '{}'", keys[key]));
         return;
     }
 }
@@ -579,7 +579,7 @@ void VideoPlayer::handleMpvEvents() {
             break;
         }
         if (!checkMpvError(event->error)) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Error at mpv event: {} {}",
                 static_cast<int>(event->event_id), event->reply_userdata
             ));
@@ -603,7 +603,7 @@ void VideoPlayer::handleMpvEvents() {
                 // Validate reply with what we have stored
                 const MpvKey key = static_cast<MpvKey>(event->reply_userdata);
                 if (formats[key] != prop->format) {
-                    LINFO(fmt::format("Wrong format for property '{}'", keys[key]));
+                    LINFO(std::format("Wrong format for property '{}'", keys[key]));
                     break;
                 }
                 getPropertyAsyncMpv(key);
@@ -616,7 +616,7 @@ void VideoPlayer::handleMpvEvents() {
             case MPV_EVENT_LOG_MESSAGE: {
                 mpv_event_log_message* msg =
                     reinterpret_cast<mpv_event_log_message*>(event->data);
-                LINFO(fmt::format("[{}] {}: {}", msg->prefix, msg->level, msg->text));
+                LINFO(std::format("[{}] {}: {}", msg->prefix, msg->level, msg->text));
                 break;
             }
             default: {
@@ -631,7 +631,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
     const MpvKey key = static_cast<MpvKey>(event->reply_userdata);
 
     if (!event->data) {
-        LERROR(fmt::format("Could not find data for property: {}", keys[key]));
+        LERROR(std::format("Could not find data for property: {}", keys[key]));
         return;
     }
     // Cast event to node or property depending on its format
@@ -641,7 +641,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         const int result = mpv_event_to_node(&node, event);
         if (!checkMpvError(result)) {
             LWARNING(
-                fmt::format("Error getting data from libmpv property: {}", keys[key])
+                std::format("Error getting data from libmpv property: {}", keys[key])
             );
         }
     }
@@ -667,7 +667,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
                 updateFrameDuration();
             }
 
-            LINFO(fmt::format("Duration: {}", *duration));
+            LINFO(std::format("Duration: {}", *duration));
             break;
         }
         case MpvKey::Height: {
@@ -682,7 +682,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
 
             resizeTexture(glm::ivec2(_videoResolution.x, *height));
-            LINFO(fmt::format("New height: {}", *height));
+            LINFO(std::format("New height: {}", *height));
 
             // Each time a size property is updated, it means libmpv is updating the video
             // so we have to re-render the first frame to show it
@@ -702,7 +702,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
 
             resizeTexture(glm::ivec2(* width, _videoResolution.y));
-            LINFO(fmt::format("New width: {}", *width));
+            LINFO(std::format("New width: {}", *width));
 
             // Each time a size property is updated, it means libmpv is updating the video
             // so we have to re-render the first frame to show it
@@ -750,7 +750,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
                 updateFrameDuration();
             }
 
-            LINFO(fmt::format("Detected fps: {}", *fps));
+            LINFO(std::format("Detected fps: {}", *fps));
             _seekThreshold = 2.0 * (1.0 / _fps);
             break;
         }
@@ -860,7 +860,7 @@ double VideoPlayer::correctVideoPlaybackTime() const {
 }
 
 void VideoPlayer::createTexture(glm::ivec2 size) {
-    LINFO(fmt::format("Creating new FBO with width: {} and height: {}", size.x, size.y));
+    LINFO(std::format("Creating new FBO with width: {} and height: {}", size.x, size.y));
 
     if (size.x <= 0 || size.y <= 0) {
         LERROR("Cannot create empty fbo");
@@ -900,7 +900,7 @@ void VideoPlayer::resizeTexture(glm::ivec2 size) {
     const bool isNew = size != _videoResolution;
     if (isValid && isNew) {
         _videoResolution = size;
-        LINFO(fmt::format("Resizing texture: width: {} height: {}", size.x, size.y));
+        LINFO(std::format("Resizing texture: width: {} height: {}", size.x, size.y));
 
         // Delete texture
         _frameTexture = nullptr;

@@ -357,7 +357,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _file = absPath(p.geometryFile.string());
     if (!std::filesystem::exists(_file)) {
-        throw ghoul::RuntimeError(fmt::format("Cannot find model file '{}'", _file));
+        throw ghoul::RuntimeError(std::format("Cannot find model file '{}'", _file));
     }
 
     _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
@@ -469,7 +469,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _modelScale.onChange([this]() {
         if (!_geometry) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Cannot set scale for model '{}': not loaded yet", _file
             ));
             return;
@@ -487,12 +487,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _enableAnimation.onChange([this]() {
         if (!_modelHasAnimation) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Cannot enable animation for model '{}': it does not have any", _file
             ));
         }
         else if (_enableAnimation && _animationStart.empty()) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Cannot enable animation for model '{}': it does not have a start time",
                 _file
             ));
@@ -500,7 +500,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
         else {
             if (!_geometry) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Cannot enable animation for model '{}': not loaded yet", _file
                 ));
                 return;
@@ -560,13 +560,13 @@ void RenderableModel::initializeGL() {
 
     if (!_modelHasAnimation) {
         if (!_animationStart.empty()) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Animation start time given to model '{}' without animation", _file
             ));
         }
 
         if (_enableAnimation) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Cannot enable animation for model '{}': it does not have any", _file
             ));
             _enableAnimation = false;
@@ -576,13 +576,13 @@ void RenderableModel::initializeGL() {
     }
     else {
         if (_enableAnimation && _animationStart.empty()) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Cannot enable animation for model '{}': it does not have a start time",
                 _file
             ));
         }
         else if (!_enableAnimation) {
-            LINFO(fmt::format(
+            LINFO(std::format(
                 "Model '{}' with deactivated animation was found. The animation can be "
                 "activated by entering a start time in the asset file", _file
             ));

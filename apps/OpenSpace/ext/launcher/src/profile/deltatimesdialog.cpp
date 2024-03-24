@@ -60,7 +60,7 @@ namespace {
 
     std::string checkForTimeDescription(int intervalIndex, double value) {
         double amount = value / TimeIntervals[intervalIndex].secondsPerInterval;
-        std::string description = fmt::format("{}", amount);
+        std::string description = std::format("{}", amount);
         description += " " + TimeIntervals[intervalIndex].intervalName + "/sec";
         return description;
     }
@@ -202,7 +202,7 @@ std::string DeltaTimesDialog::createSummaryForDeltaTime(size_t idx, bool forList
     }
 
     if (forListView) {
-        s += fmt::format(
+        s += std::format(
             "\t{}\t{}", _deltaTimesData.at(idx), timeDescription(_deltaTimesData.at(idx))
         );
     }
@@ -237,7 +237,7 @@ void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string_view
     if (editMode) {
         labelS += " '" + createSummaryForDeltaTime(index, false) + "':";
     }
-    _adjustLabel->setText(QString::fromStdString(fmt::format(
+    _adjustLabel->setText(QString::fromStdString(std::format(
         "<font color='{}'>{}</font>", color, labelS
     )));
 }

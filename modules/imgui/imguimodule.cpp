@@ -281,7 +281,7 @@ void ImGUIModule::internalDeinitialize() {
 
 void ImGUIModule::internalInitializeGL() {
     std::filesystem::path file = FileSys.cacheManager()->cachedFilename("imgui.ini", "");
-    LDEBUG(fmt::format("Using '{}' as ImGUI cache location", file));
+    LDEBUG(std::format("Using '{}' as ImGUI cache location", file));
 
     _iniFileBuffer.resize(file.string().size() + 1);
 

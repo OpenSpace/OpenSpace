@@ -140,7 +140,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     std::ifstream ifs(pathToJsonFile);
 
     if (!ifs.is_open()) {
-        LERROR(fmt::format("Failed to open file '{}'", pathToJsonFile));
+        LERROR(std::format("Failed to open file '{}'", pathToJsonFile));
         return false;
     }
 
@@ -252,7 +252,7 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
 
     std::ofstream ofs(absPath + fileName, std::ofstream::binary | std::ofstream::trunc);
     if (!ofs.is_open()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Failed to save state to binary file: {}{}", absPath, fileName
         ));
         return;
@@ -326,12 +326,12 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     const char* ext = ".json";
     std::ofstream ofs(absPath + ext, std::ofstream::trunc);
     if (!ofs.is_open()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Failed to save state to json file at location: {}{}", absPath, ext
         ));
         return;
     }
-    LINFO(fmt::format("Saving fieldline state to: {}{}", absPath, ext));
+    LINFO(std::format("Saving fieldline state to: {}{}", absPath, ext));
 
     json jColumns = { "x", "y", "z" };
     for (const std::string& s : _extraQuantityNames) {
@@ -371,7 +371,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     const int indentationSpaces = 2;
     ofs << std::setw(indentationSpaces) << jFile << std::endl;
 
-    LINFO(fmt::format("Saved fieldline state to: {}{}", absPath, ext));
+    LINFO(std::format("Saved fieldline state to: {}{}", absPath, ext));
 }
 
 void FieldlinesState::setModel(fls::Model m) {

@@ -511,7 +511,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             _dataIsDirty = true;
         }
         else {
-            LWARNING(fmt::format("File not found: {}", _filePath.value()));
+            LWARNING(std::format("File not found: {}", _filePath.value()));
         }
     });
     addProperty(_filePath);
@@ -597,7 +597,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         if (_ssboData != 0) {
             glDeleteBuffers(1, &_ssboData);
             glGenBuffers(1, &_ssboData);
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Re-generating Data Shader Storage Buffer Object id '{}'", _ssboData
             ));
         }
@@ -876,7 +876,7 @@ void RenderableGaiaStars::initializeGL() {
         &nCurrentAvailMemoryInKB
     );
 
-    LDEBUG(fmt::format(
+    LDEBUG(std::format(
         "nDedicatedVidMemoryKB: {} - nTotalMemoryKB: {} - nCurrentAvailMemoryKB: {}",
         nDedicatedVidMemoryInKB, nTotalMemoryInKB, nCurrentAvailMemoryInKB
     ));
@@ -899,7 +899,7 @@ void RenderableGaiaStars::initializeGL() {
         4294967296;
     _cpuRamBudgetProperty.setMaxValue(static_cast<float>(_cpuRamBudgetInBytes));
 
-    LDEBUG(fmt::format(
+    LDEBUG(std::format(
         "GPU Memory Budget (bytes): {} - CPU RAM Budget (bytes): {}",
         _gpuMemoryBudgetInBytes, _cpuRamBudgetInBytes
     ));
@@ -1755,7 +1755,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             removeProperty(_additionalNodes);
         }
 
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "Chunk size: {} - Max streaming budget (bytes): {} - Max nodes in stream: {}",
             _chunkSize, _maxStreamingBudgetInBytes, maxNodesInStream
         ));
@@ -1780,17 +1780,17 @@ void RenderableGaiaStars::update(const UpdateData&) {
             // Generate SSBO Buffers and bind them.
             if (_vaoEmpty == 0) {
                 glGenVertexArrays(1, &_vaoEmpty);
-                LDEBUG(fmt::format("Generating Empty Vertex Array id '{}'", _vaoEmpty));
+                LDEBUG(std::format("Generating Empty Vertex Array id '{}'", _vaoEmpty));
             }
             if (_ssboIdx == 0) {
                 glGenBuffers(1, &_ssboIdx);
-                LDEBUG(fmt::format(
+                LDEBUG(std::format(
                     "Generating Index Shader Storage Buffer Object id '{}'", _ssboIdx
                 ));
             }
             if (_ssboData == 0) {
                 glGenBuffers(1, &_ssboData);
-                LDEBUG(fmt::format(
+                LDEBUG(std::format(
                     "Generating Data Shader Storage Buffer Object id '{}'", _ssboData
                 ));
             }
@@ -1870,23 +1870,23 @@ void RenderableGaiaStars::update(const UpdateData&) {
             // Generate VAO and VBOs
             if (_vao == 0) {
                 glGenVertexArrays(1, &_vao);
-                LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
+                LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
             }
             if (_vboPos == 0) {
                 glGenBuffers(1, &_vboPos);
-                LDEBUG(fmt::format(
+                LDEBUG(std::format(
                     "Generating Position Vertex Buffer Object id '{}'", _vboPos
                 ));
             }
             if (_vboCol == 0) {
                 glGenBuffers(1, &_vboCol);
-                LDEBUG(fmt::format(
+                LDEBUG(std::format(
                     "Generating Color Vertex Buffer Object id '{}'", _vboCol
                 ));
             }
             if (_vboVel == 0) {
                 glGenBuffers(1, &_vboVel);
-                LDEBUG(fmt::format(
+                LDEBUG(std::format(
                     "Generating Velocity Vertex Buffer Object id '{}'", _vboVel
                 ));
             }
@@ -2012,11 +2012,11 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Generate VAO and VBO for Quad.
         if (_vaoQuad == 0) {
             glGenVertexArrays(1, &_vaoQuad);
-            LDEBUG(fmt::format("Generating Quad Vertex Array id '{}'", _vaoQuad));
+            LDEBUG(std::format("Generating Quad Vertex Array id '{}'", _vaoQuad));
         }
         if (_vboQuad == 0) {
             glGenBuffers(1, &_vboQuad);
-            LDEBUG(fmt::format("Generating Quad Vertex Buffer Object id '{}'", _vboQuad));
+            LDEBUG(std::format("Generating Quad Vertex Buffer Object id '{}'", _vboQuad));
         }
 
         // Bind VBO and VAO for Quad rendering.
@@ -2058,7 +2058,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Generate Framebuffer Object and Texture.
         if (_fbo == 0) {
             glGenFramebuffers(1, &_fbo);
-            LDEBUG(fmt::format("Generating Framebuffer Object id '{}'", _fbo));
+            LDEBUG(std::format("Generating Framebuffer Object id '{}'", _fbo));
         }
         if (!_fboTexture) {
             // Generate a new texture and attach it to our FBO.
@@ -2106,7 +2106,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             );
 
             if (_pointSpreadFunctionTexture) {
-                LDEBUG(fmt::format(
+                LDEBUG(std::format(
                     "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
                ));
                 _pointSpreadFunctionTexture->uploadTexture();
@@ -2134,7 +2134,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 1
             );
             if (_colorTexture) {
-                LDEBUG(fmt::format(
+                LDEBUG(std::format(
                     "Loaded texture from '{}'", absPath(_colorTexturePath)
                 ));
                 _colorTexture->uploadTexture();
@@ -2195,7 +2195,7 @@ bool RenderableGaiaStars::readDataFile() {
     _octreeManager.initOctree(_cpuRamBudgetInBytes);
 
     std::filesystem::path file = absPath(_filePath.value());
-    LINFO(fmt::format("Loading data file '{}'", file));
+    LINFO(std::format("Loading data file '{}'", file));
 
     switch (fileReaderOption) {
         case gaia::FileReaderOption::Fits:
@@ -2225,7 +2225,7 @@ bool RenderableGaiaStars::readDataFile() {
 
     //_octreeManager->printStarsPerNode();
     _nRenderedStars.setMaxValue(nReadStars);
-    LINFO(fmt::format("Dataset contains a total of {} stars", nReadStars));
+    LINFO(std::format("Dataset contains a total of {} stars", nReadStars));
     _totalDatasetSizeInBytes = nReadStars * (PositionSize + ColorSize + VelocitySize) * 4;
 
     return nReadStars > 0;
@@ -2303,7 +2303,7 @@ int RenderableGaiaStars::readBinaryRawFile(const std::filesystem::path& filePath
         fileStream.close();
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error opening file '{}' for loading raw binary file", filePath
         ));
         return nReadStars;
@@ -2321,7 +2321,7 @@ int RenderableGaiaStars::readBinaryOctreeFile(const std::filesystem::path& fileP
         fileStream.close();
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error opening file '{}' for loading binary Octree file", filePath
         ));
         return nReadStars;
@@ -2342,7 +2342,7 @@ int RenderableGaiaStars::readBinaryOctreeStructureFile(
         fileStream.close();
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error opening file '{}' for loading binary Octree file", indexFile
         ));
         return nReadStars;

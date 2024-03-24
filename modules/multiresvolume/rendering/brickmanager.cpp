@@ -49,13 +49,13 @@ bool BrickManager::readHeader() {
 
     _header = _tsp->header();
 
-    LDEBUG(fmt::format("Grid type: {}", _header.gridType));
-    LDEBUG(fmt::format("Original num timesteps: {}", _header.numOrigTimesteps));
-    LDEBUG(fmt::format("Num timesteps: {}", _header.numTimesteps));
-    LDEBUG(fmt::format(
+    LDEBUG(std::format("Grid type: {}", _header.gridType));
+    LDEBUG(std::format("Original num timesteps: {}", _header.numOrigTimesteps));
+    LDEBUG(std::format("Num timesteps: {}", _header.numTimesteps));
+    LDEBUG(std::format(
         "Brick dims: {} {} {}", _header.xBrickDim, _header.yBrickDim, _header.zBrickDim
     ));
-    LDEBUG(fmt::format(
+    LDEBUG(std::format(
         "Num bricks: {} {} {}",
         _header.xNumBricks,
         _header.yNumBricks,
@@ -67,8 +67,8 @@ bool BrickManager::readHeader() {
     _paddedBrickDim = _brickDim + _paddingWidth * 2;
     _atlasDim = _paddedBrickDim*_numBricks;
 
-    LDEBUG(fmt::format("Padded brick dim: {}", _paddedBrickDim));
-    LDEBUG(fmt::format("Atlas dim: {}", _atlasDim));
+    LDEBUG(std::format("Padded brick dim: {}", _paddedBrickDim));
+    LDEBUG(std::format("Atlas dim: {}", _atlasDim));
 
     _numBrickVals = _paddedBrickDim*_paddedBrickDim*_paddedBrickDim;
     // Number of bricks per frame
@@ -81,11 +81,11 @@ bool BrickManager::readHeader() {
     unsigned int numOTNodes = static_cast<unsigned int>((pow(8, numOTLevels) - 1) / 7);
     unsigned int numBSTNodes = _header.numTimesteps * 2 - 1;
     _numBricksTree = numOTNodes * numBSTNodes;
-    LDEBUG(fmt::format("Num OT levels: {}", numOTLevels));
-    LDEBUG(fmt::format("Num OT nodes: {}", numOTNodes));
-    LDEBUG(fmt::format("Num BST nodes: {}", numBSTNodes));
-    LDEBUG(fmt::format("Num bricks in tree: {}", _numBricksTree));
-    LDEBUG(fmt::format("Num values per brick: {}", _numBrickVals));
+    LDEBUG(std::format("Num OT levels: {}", numOTLevels));
+    LDEBUG(std::format("Num OT nodes: {}", numOTNodes));
+    LDEBUG(std::format("Num BST nodes: {}", numBSTNodes));
+    LDEBUG(std::format("Num bricks in tree: {}", _numBricksTree));
+    LDEBUG(std::format("Num values per brick: {}", _numBrickVals));
 
     _brickSize = sizeof(float) * _numBrickVals;
     _volumeSize = _brickSize * _numBricksFrame;
@@ -99,8 +99,8 @@ bool BrickManager::readHeader() {
 
     if (fileSize != calcFileSize) {
         LERROR("Sizes do not match");
-        LERROR(fmt::format("Calculated file size: {}", calcFileSize));
-        LERROR(fmt::format("File size: {}", fileSize));
+        LERROR(std::format("Calculated file size: {}", calcFileSize));
+        LERROR(std::format("File size: {}", fileSize));
         return false;
     }
 

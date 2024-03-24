@@ -59,7 +59,7 @@ KeyWithModifier stringToKey(const std::string& str) {
         }
     }
     if (key == Key::Unknown) {
-        throw ghoul::RuntimeError(fmt::format("Could not find key for '{}'", keyName));
+        throw ghoul::RuntimeError(std::format("Could not find key for '{}'", keyName));
     }
 
     KeyModifier m = KeyModifier::None;
@@ -77,7 +77,7 @@ KeyWithModifier stringToKey(const std::string& str) {
                 }
             }
             if (!found) {
-                throw ghoul::RuntimeError(fmt::format("Unknown modifier key '{}'", s));
+                throw ghoul::RuntimeError(std::format("Unknown modifier key '{}'", s));
             }
         }
     );
@@ -98,7 +98,7 @@ std::string keyToString(KeyWithModifier keyWithModifier) {
             // checks internally against != 0
 
             if (hasKeyModifier(keyWithModifier.modifier, kmi.modifier)) {
-                modifier += fmt::format("{}+", kmi.identifier);
+                modifier += std::format("{}+", kmi.identifier);
             }
         }
     }
@@ -145,7 +145,7 @@ std::string to_string(const openspace::KeyModifier& value) {
         // internally against != 0
 
         if (hasKeyModifier(value, kmi.modifier)) {
-            result += fmt::format("{}+", kmi.name);
+            result += std::format("{}+", kmi.name);
         }
 
     }
@@ -161,7 +161,7 @@ std::string to_string(const openspace::KeyWithModifier& value) {
         return to_string(value.key);
     }
     else {
-        return fmt::format("{}+{}", to_string(value.modifier), to_string(value.key));
+        return std::format("{}+{}", to_string(value.modifier), to_string(value.key));
     }
 }
 

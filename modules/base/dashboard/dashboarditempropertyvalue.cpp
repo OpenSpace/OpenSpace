@@ -124,7 +124,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), value)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(value))
             );
         }
         else if (type == "FloatProperty") {
@@ -132,7 +133,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), value)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(value))
             );
         }
         else if (type == "IntProperty") {
@@ -140,7 +142,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), value)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(value))
             );
         }
         else if (type == "LongProperty") {
@@ -148,7 +151,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), value)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(value))
             );
         }
         else if (type == "ShortProperty") {
@@ -156,7 +160,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), value)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(value))
             );
         }
         else if (type == "UIntProperty") {
@@ -164,7 +169,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v))
             );
         }
         else if (type == "ULongProperty") {
@@ -172,7 +178,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v))
             );
         }
         else if (type == "UShortProperty") {
@@ -181,7 +188,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v))
             );
         }
         else if (type == "DVec2Property") {
@@ -189,7 +197,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
             );
         }
         else if (type == "DVec3Property") {
@@ -197,7 +206,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y, v.z)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
             );
         }
         else if (type == "DVec4Property") {
@@ -205,7 +215,11 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y, v.z, v.w)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(
+                    _displayString.value(),
+                    std::make_format_args(v.x, v.y, v.z, v.w)
+                )
             );
         }
         else if (type == "IVec2Property") {
@@ -213,7 +227,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
             );
         }
         else if (type == "IVec3Property") {
@@ -221,7 +236,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y, v.z)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
             );
         }
         else if (type == "IVec4Property") {
@@ -229,7 +245,11 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y, v.z, v.w)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(
+                    _displayString.value(),
+                    std::make_format_args(v.x, v.y, v.z, v.w)
+                )
             );
         }
         else if (type == "UVec2Property") {
@@ -237,7 +257,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
             );
         }
         else if (type == "UVec3Property") {
@@ -245,7 +266,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y, v.z)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
             );
         }
         else if (type == "UVec4Property") {
@@ -253,7 +275,11 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y, v.z, v.w)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(
+                    _displayString.value(),
+                    std::make_format_args(v.x, v.y, v.z, v.w)
+                )
             );
         }
         else if (type == "Vec2Property") {
@@ -261,7 +287,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
             );
         }
         else if (type == "Vec3Property") {
@@ -269,7 +296,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y, v.z)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
             );
         }
         else if (type == "Vec4Property") {
@@ -277,7 +305,11 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), v.x, v.y, v.z, v.w)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(
+                    _displayString.value(),
+                    std::make_format_args(v.x, v.y, v.z, v.w)
+                )
             );
         }
         else {
@@ -287,7 +319,8 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(fmt::runtime(_displayString.value()), value)
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(_displayString.value(), std::make_format_args(value))
             );
         }
 

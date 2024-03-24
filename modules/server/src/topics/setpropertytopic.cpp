@@ -123,7 +123,7 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
             std::string literal = luaLiteralFromJson(value);
 
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
                 ),
                 scripting::ScriptEngine::ShouldBeSynchronized::Yes,

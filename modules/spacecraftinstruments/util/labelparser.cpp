@@ -139,7 +139,7 @@ std::string LabelParser::encode(const std::string& line) const {
 bool LabelParser::create() {
     std::filesystem::path sequenceDir = absPath(_fileName);
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(fmt::format("Could not load label directory '{}'", sequenceDir));
+        LERROR(std::format("Could not load label directory '{}'", sequenceDir));
         return false;
     }
 
@@ -165,7 +165,7 @@ bool LabelParser::create() {
         std::ifstream file(path);
 
         if (!file.good()) {
-            LERROR(fmt::format("Failed to open label file '{}'", path));
+            LERROR(std::format("Failed to open label file '{}'", path));
             return false;
         }
 
@@ -195,21 +195,21 @@ bool LabelParser::create() {
             if (read == "TARGET_NAME") {
                 _target = decode(line);
                 if (_target.empty()) {
-                    LWARNING(fmt::format(ErrorMsg, "TARGET_NAME", line, path));
+                    LWARNING(std::format(ErrorMsg, "TARGET_NAME", line, path));
                 }
                 count++;
             }
             if (read == "INSTRUMENT_HOST_NAME") {
                 _instrumentHostID = decode(line);
                 if (_instrumentHostID.empty()) {
-                    LWARNING(fmt::format(ErrorMsg, "INSTRUMENT_HOST_NAME", line, path));
+                    LWARNING(std::format(ErrorMsg, "INSTRUMENT_HOST_NAME", line, path));
                 }
                 count++;
             }
             if (read == "INSTRUMENT_ID") {
                 _instrumentID = decode(line);
                 if (_instrumentID.empty()) {
-                    LWARNING(fmt::format(ErrorMsg, "INSTRUMENT_ID", line, path));
+                    LWARNING(std::format(ErrorMsg, "INSTRUMENT_ID", line, path));
                 }
                 lblName = encode(line);
                 count++;
@@ -217,7 +217,7 @@ bool LabelParser::create() {
             if (read == "DETECTOR_TYPE") {
                 _detectorType = decode(line);
                 if (_detectorType.empty()) {
-                    LWARNING(fmt::format(ErrorMsg, "DETECTOR_TYPE", line, path));
+                    LWARNING(std::format(ErrorMsg, "DETECTOR_TYPE", line, path));
                 }
                 count++;
             }
@@ -248,7 +248,7 @@ bool LabelParser::create() {
                     count++;
                 }
                 else{
-                    LERROR(fmt::format(
+                    LERROR(std::format(
                         "Label file '{}' deviates from generic standard", path
                     ));
                     LINFO(

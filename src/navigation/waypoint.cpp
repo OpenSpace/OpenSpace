@@ -50,7 +50,7 @@ Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, std::string ref
 
     const SceneGraphNode* node = sceneGraphNode(_nodeIdentifier);
     if (!node) {
-        LERROR(fmt::format("Could not find node '{}'", _nodeIdentifier));
+        LERROR(std::format("Could not find node '{}'", _nodeIdentifier));
         return;
     }
 
@@ -62,7 +62,7 @@ Waypoint::Waypoint(const NavigationState& ns) {
     const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor);
 
     if (!anchorNode) {
-        LERROR(fmt::format("Could not find node '{}' to target", ns.anchor));
+        LERROR(std::format("Could not find node '{}' to target", ns.anchor));
         return;
     }
 
@@ -71,7 +71,7 @@ Waypoint::Waypoint(const NavigationState& ns) {
     if (!ns.aim.empty()) {
         const SceneGraphNode* aimNode = sceneGraphNode(ns.aim);
         if (!aimNode) {
-            LERROR(fmt::format("Could not find node '{}' to use as aim", ns.aim));
+            LERROR(std::format("Could not find node '{}' to use as aim", ns.aim));
             return;
         }
         _aimNodeIdentifier = ns.aim;
@@ -177,7 +177,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
 {
     const SceneGraphNode* targetNode = sceneGraphNode(spec.identifier);
     if (!targetNode) {
-        LERROR(fmt::format("Could not find target node '{}'", spec.identifier));
+        LERROR(std::format("Could not find target node '{}'", spec.identifier));
         return Waypoint();
     }
 

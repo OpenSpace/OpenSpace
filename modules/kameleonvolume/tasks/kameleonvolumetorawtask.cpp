@@ -97,7 +97,7 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
 }
 
 std::string KameleonVolumeToRawTask::description() {
-    return fmt::format(
+    return std::format(
         "Extract volumetric data from CDF file '{}'. Write raw volume data into '{}' "
         "and dictionary with metadata to '{}'",
         _inputPath, _rawVolumeOutputPath, _dictionaryOutputPath

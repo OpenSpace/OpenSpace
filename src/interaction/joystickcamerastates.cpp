@@ -162,7 +162,7 @@ void JoystickCameraStates::updateStateFromInput(
                     localRotation.second.y += value;
                     break;
                 case AxisType::Property:
-                    const std::string script = fmt::format(
+                    const std::string script = std::format(
                         "openspace.setPropertyValue('{}', {});",
                         t.propertyUri, value
                     );
@@ -421,7 +421,7 @@ JoystickCameraStates::joystickCameraState(const std::string& joystickName) const
         }
     }
 
-    LWARNING(fmt::format("Cannot find JoystickCameraState with name '{}'", joystickName));
+    LWARNING(std::format("Cannot find JoystickCameraState with name '{}'", joystickName));
     return nullptr;
 }
 
@@ -436,7 +436,7 @@ JoystickCameraStates::findOrAddJoystickCameraState(const std::string& joystickNa
             joystick->joystickName = joystickName;
         }
         else {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Cannot add more joysticks, only {} joysticks are supported",
                 JoystickInputStates::MaxNumJoysticks
             ));

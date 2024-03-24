@@ -100,7 +100,7 @@ ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
 }
 
 std::string ExoplanetsDataPreparationTask::description() {
-    return fmt::format(
+    return std::format(
         "Extract data about exoplanets from file '{}' and write as bin to '{}'. The data "
         "file should be a csv version of the Planetary Systems Composite Data from the "
         "NASA exoplanets archive (https://exoplanetarchive.ipac.caltech.edu/)",
@@ -113,7 +113,7 @@ void ExoplanetsDataPreparationTask::perform(
 {
     std::ifstream inputDataFile(_inputDataPath);
     if (!inputDataFile.good()) {
-        LERROR(fmt::format("Failed to open input file '{}'", _inputDataPath));
+        LERROR(std::format("Failed to open input file '{}'", _inputDataPath));
         return;
     }
 
@@ -121,7 +121,7 @@ void ExoplanetsDataPreparationTask::perform(
     std::ofstream lutFile(_outputLutPath);
 
     if (!binFile.good()) {
-        LERROR(fmt::format("Error when writing to '{}'",_outputBinPath));
+        LERROR(std::format("Error when writing to '{}'",_outputBinPath));
         if (!std::filesystem::is_directory(_outputBinPath.parent_path())) {
             LERROR("Output directory does not exist");
         }
@@ -129,7 +129,7 @@ void ExoplanetsDataPreparationTask::perform(
     }
 
     if (!lutFile.good()) {
-        LERROR(fmt::format("Error when writing to '{}'", _outputLutPath));
+        LERROR(std::format("Error when writing to '{}'", _outputLutPath));
         if (!std::filesystem::is_directory(_outputLutPath.parent_path())) {
             LERROR("Output directory does not exist");
         }
@@ -156,7 +156,7 @@ void ExoplanetsDataPreparationTask::perform(
     // containing the data names, again
     readFirstDataRow(inputDataFile);
 
-    LINFO(fmt::format("Loading {} exoplanets", total));
+    LINFO(std::format("Loading {} exoplanets", total));
 
     int exoplanetCount = 0;
     while (std::getline(inputDataFile, row)) {
@@ -453,7 +453,7 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
 
     std::ifstream exoplanetsFile(sourceFile);
     if (!exoplanetsFile) {
-        LERROR(fmt::format("Error opening file '{}'", sourceFile));
+        LERROR(std::format("Error opening file '{}'", sourceFile));
     }
 
     std::string line;
@@ -499,7 +499,7 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
 
     std::ifstream teffToBvFile(conversionFile);
     if (!teffToBvFile.good()) {
-        LERROR(fmt::format("Failed to open file '{}'", conversionFile));
+        LERROR(std::format("Failed to open file '{}'", conversionFile));
         return std::numeric_limits<float>::quiet_NaN();
     }
 

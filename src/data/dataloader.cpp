@@ -47,7 +47,7 @@ namespace {
     template <typename T, typename U>
     void checkSize(U value, std::string_view message) {
         if (value > std::numeric_limits<U>::max()) {
-            throw ghoul::RuntimeError(fmt::format("Error saving file '{}'", message));
+            throw ghoul::RuntimeError(std::format("Error saving file '{}'", message));
         }
     }
 
@@ -87,7 +87,7 @@ namespace {
         if (std::filesystem::exists(cached)) {
             LINFOC(
                 "DataLoader",
-                fmt::format("Cached file {} used for file {}", cached, filePath)
+                std::format("Cached file {} used for file {}", cached, filePath)
             );
 
             std::optional<T> dataset = loadCacheFunction(cached);
@@ -99,7 +99,7 @@ namespace {
                 FileSys.cacheManager()->removeCacheFile(cached);
             }
         }
-        LINFOC("DataLoader", fmt::format("Loading file '{}'", filePath));
+        LINFOC("DataLoader", std::format("Loading file '{}'", filePath));
         T dataset = loadFunction(filePath, specs);
 
         if (!dataset.entries.empty()) {
@@ -120,7 +120,7 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
 
     const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open data file '{}'", path));
+        throw ghoul::RuntimeError(std::format("Failed to open data file '{}'", path));
     }
 
     const std::string extension = ghoul::toLowerCase(path.extension().string());
@@ -133,7 +133,7 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
         res = speck::loadSpeckFile(path, std::move(specs));
     }
     else {
-        LERRORC("DataLoader", fmt::format(
+        LERRORC("DataLoader", std::format(
             "Could not read data file '{}'. File format '{}' is not supported",
             path, path.extension()
         ));
@@ -349,7 +349,7 @@ Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
 
     const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open dataset file '{}'", path));
+        throw ghoul::RuntimeError(std::format("Failed to open dataset file '{}'", path));
     }
 
     const std::string extension = ghoul::toLowerCase(path.extension().string());
@@ -359,7 +359,7 @@ Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
         res = speck::loadLabelFile(path);
     }
     else {
-        LERRORC("DataLoader", fmt::format(
+        LERRORC("DataLoader", std::format(
             "Could not read label data file '{}'. File format '{}' is not supported",
             path, path.extension()
         ));
@@ -469,7 +469,7 @@ Labelset loadFromDataset(const Dataset& dataset) {
         label.position = entry.position;
         label.text = entry.comment.value_or("MISSING LABEL");
         // @TODO: make is possible to configure this identifier?
-        label.identifier = fmt::format("Point-{}", count);
+        label.identifier = std::format("Point-{}", count);
         res.entries.push_back(std::move(label));
     }
 
@@ -485,7 +485,7 @@ ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
 
     const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open colormap file '{}'", path));
+        throw ghoul::RuntimeError(std::format("Failed to open colormap file '{}'", path));
     }
 
     const std::string extension = ghoul::toLowerCase(path.extension().string());
@@ -495,7 +495,7 @@ ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
         res = speck::loadCmapFile(path);
     }
     else {
-        LERRORC("DataLoader", fmt::format(
+        LERRORC("DataLoader", std::format(
             "Could not read color map file '{}'. File format '{}' is not supported",
             path, path.extension()
         ));

@@ -548,7 +548,7 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
     if (!referenceFrameIdentifier.empty()) {
         const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
         if (!referenceFrame) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Could not find node '{}' to use as reference frame",
                 referenceFrameIdentifier
             ));
@@ -565,12 +565,12 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
         // Adding the .navstate extension to the filepath if it came without one
         absolutePath.replace_extension(".navstate");
     }
-    LINFO(fmt::format("Saving camera position: {}", absolutePath));
+    LINFO(std::format("Saving camera position: {}", absolutePath));
 
     std::ofstream ofs(absolutePath);
 
     if (!ofs.good()) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Error saving navigation state to '{}'", filepath
         ));
     }
@@ -582,7 +582,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
                                             bool useTimeStamp)
 {
     std::filesystem::path absolutePath = absPath(filepath);
-    LINFO(fmt::format("Reading camera state from file: {}", absolutePath));
+    LINFO(std::format("Reading camera state from file: {}", absolutePath));
 
     if (!absolutePath.has_extension()) {
         // Adding the .navstate extension to the filepath if it came without one
@@ -600,7 +600,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
     );
 
     if (contents.empty()) {
-        throw::ghoul::RuntimeError(fmt::format(
+        throw::ghoul::RuntimeError(std::format(
             "Failed reading camera state from file: {}. File is empty", absolutePath
         ));
     }

@@ -63,7 +63,7 @@ double Time::convertTime(const char* time) {
 std::string Time::currentWallTime() {
     const std::time_t t = std::time(nullptr);
     std::tm* utcTime = std::gmtime(&t);
-    const std::string time = fmt::format(
+    const std::string time = std::format(
         "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
         utcTime->tm_year + 1900, utcTime->tm_mon + 1, utcTime->tm_mday,
         utcTime->tm_hour, utcTime->tm_min, utcTime->tm_sec
@@ -177,7 +177,7 @@ std::string Time::advancedTime(const std::string& base, std::string change) {
         else if (uName == "M") { unit = TimeUnit::Month; }
         else if (uName == "y") { unit = TimeUnit::Year; }
         else {
-            throw ghoul::RuntimeError(fmt::format("Unknown unit '{}'", uName));
+            throw ghoul::RuntimeError(std::format("Unknown unit '{}'", uName));
         }
 
         dt = openspace::convertTime(value, unit, TimeUnit::Second);
@@ -186,7 +186,7 @@ std::string Time::advancedTime(const std::string& base, std::string change) {
         }
     }
     catch (...) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Error parsing relative time offset '{}'", change
         ));
     }

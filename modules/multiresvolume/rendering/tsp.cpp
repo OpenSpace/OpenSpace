@@ -96,12 +96,12 @@ bool TSP::readHeader() {
 
     _file.read(reinterpret_cast<char*>(&_header), sizeof(Header));
 
-    LDEBUG(fmt::format("Grid type: {}", _header.gridType));
-    LDEBUG(fmt::format(
+    LDEBUG(std::format("Grid type: {}", _header.gridType));
+    LDEBUG(std::format(
         "Brick dimensions: {} {} {}",
         _header.xBrickDim, _header.yBrickDim, _header.zBrickDim
     ));
-    LDEBUG(fmt::format(
+    LDEBUG(std::format(
         "Num bricks: {} {} {}",
         _header.xNumBricks, _header.yNumBricks, _header.zNumBricks
     ));
@@ -118,15 +118,15 @@ bool TSP::readHeader() {
     _numBSTNodes = _header.numTimesteps * 2 - 1;
     _numTotalNodes = _numOTNodes * _numBSTNodes;
 
-    LDEBUG(fmt::format("Num OT levels: {}", _numOTLevels));
-    LDEBUG(fmt::format("Num OT nodes: {}", _numOTNodes));
-    LDEBUG(fmt::format("Num BST levels: {}", _numBSTLevels));
-    LDEBUG(fmt::format("Num BST nodes: {}", _numBSTNodes));
-    LDEBUG(fmt::format("Num total nodes: {}", _numTotalNodes));
+    LDEBUG(std::format("Num OT levels: {}", _numOTLevels));
+    LDEBUG(std::format("Num OT nodes: {}", _numOTNodes));
+    LDEBUG(std::format("Num BST levels: {}", _numBSTLevels));
+    LDEBUG(std::format("Num BST nodes: {}", _numBSTNodes));
+    LDEBUG(std::format("Num total nodes: {}", _numTotalNodes));
 
     // Allocate space for TSP structure
     _data.resize(_numTotalNodes*NUM_DATA);
-    LDEBUG(fmt::format("Data size: {}",  _data.size()));
+    LDEBUG(std::format("Data size: {}",  _data.size()));
 
     return true;
 }
@@ -385,9 +385,9 @@ bool TSP::calculateSpatialError() {
     _maxSpatialError = maxNorm;
     _medianSpatialError = medNorm;
 
-    LDEBUG(fmt::format("Min normalized spatial std dev: {}", minNorm));
-    LDEBUG(fmt::format("Max normalized spatial std dev: {}", maxNorm));
-    LDEBUG(fmt::format("Median normalized spatial std dev: {}", medNorm));
+    LDEBUG(std::format("Min normalized spatial std dev: {}", minNorm));
+    LDEBUG(std::format("Max normalized spatial std dev: {}", maxNorm));
+    LDEBUG(std::format("Median normalized spatial std dev: {}", medNorm));
 
     return true;
 }
@@ -496,9 +496,9 @@ bool TSP::calculateTemporalError() {
     _maxTemporalError = maxNorm;
     _medianTemporalError = medNorm;
 
-    LDEBUG(fmt::format("Min normalized temporal std dev: {}", minNorm));
-    LDEBUG(fmt::format("Max normalized temporal std dev: {}", maxNorm));
-    LDEBUG(fmt::format("Median normalized temporal std dev: {}", medNorm));
+    LDEBUG(std::format("Min normalized temporal std dev: {}", minNorm));
+    LDEBUG(std::format("Max normalized temporal std dev: {}", maxNorm));
+    LDEBUG(std::format("Median normalized temporal std dev: {}", medNorm));
 
     return true;
 }
@@ -514,7 +514,7 @@ bool TSP::readCache() {
 
     std::ifstream file(cacheFilename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
-        LWARNING(fmt::format("Failed to open {}", cacheFilename));
+        LWARNING(std::format("Failed to open {}", cacheFilename));
         return false;
     }
 
@@ -530,12 +530,12 @@ bool TSP::readCache() {
     file.close();
 
     LDEBUG("Cached errors:");
-    LDEBUG(fmt::format("Min spatial error: {}", _minSpatialError));
-    LDEBUG(fmt::format("Max spatial error: {}", _maxSpatialError));
-    LDEBUG(fmt::format("Median spatial error: {}", _medianSpatialError));
-    LDEBUG(fmt::format("Min temporal error: {}", _minTemporalError));
-    LDEBUG(fmt::format("Max temporal error: {}", _maxTemporalError));
-    LDEBUG(fmt::format("Median temporal error: {}", _medianTemporalError));
+    LDEBUG(std::format("Min spatial error: {}", _minSpatialError));
+    LDEBUG(std::format("Max spatial error: {}", _maxSpatialError));
+    LDEBUG(std::format("Median spatial error: {}", _medianSpatialError));
+    LDEBUG(std::format("Min temporal error: {}", _minTemporalError));
+    LDEBUG(std::format("Max temporal error: {}", _maxTemporalError));
+    LDEBUG(std::format("Median temporal error: {}", _medianTemporalError));
 
     return true;
 }
@@ -552,10 +552,10 @@ bool TSP::writeCache() {
 
     std::ofstream file(cacheFilename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
-        LWARNING(fmt::format("Failed to open {}", cacheFilename));
+        LWARNING(std::format("Failed to open {}", cacheFilename));
         return false;
     }
-    LINFO(fmt::format("Writing cache to {}", cacheFilename));
+    LINFO(std::format("Writing cache to {}", cacheFilename));
 
     file.write(reinterpret_cast<char*>(&_minSpatialError), sizeof(float));
     file.write(reinterpret_cast<char*>(&_maxSpatialError), sizeof(float));

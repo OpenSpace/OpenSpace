@@ -32,7 +32,7 @@
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "WebBrowser:EventHandler";

@@ -213,7 +213,7 @@ void PropertyOwner::addProperty(Property* prop) {
 
     // If we found the property identifier, we need to bail out
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Property identifier '{}' already present in PropertyOwner '{}'",
             prop->identifier(),
             identifier()
@@ -224,7 +224,7 @@ void PropertyOwner::addProperty(Property* prop) {
         // Otherwise we still have to look if there is a PropertyOwner with the same name
         const bool hasOwner = hasPropertySubOwner(prop->identifier());
         if (hasOwner) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Property identifier '{}' already names a registered PropertyOwner",
                 prop->identifier()
             ));
@@ -259,7 +259,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
 
     // If we found the propertyowner's name, we need to bail out
     if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "PropertyOwner '{}' already present in PropertyOwner '{}'",
             owner->identifier(),
             identifier()
@@ -270,7 +270,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
         // We still need to check if the PropertyOwners name is used in a Property
         const bool hasProp = hasProperty(owner->identifier());
         if (hasProp) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "PropertyOwner '{}'s name already names a Property", owner->identifier()
             ));
             return;
@@ -302,7 +302,7 @@ void PropertyOwner::removeProperty(Property* prop) {
         _properties.erase(it);
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Property with identifier '{}' not found for removal", prop->identifier()
         ));
     }
@@ -329,7 +329,7 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
         _subOwners.erase(it);
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "PropertyOwner with name '{}' not found for removal", owner->identifier()
         ));
     }
