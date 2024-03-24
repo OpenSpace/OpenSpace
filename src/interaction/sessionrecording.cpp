@@ -2624,7 +2624,8 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             codegen::lua::FileFormatConversion,
             codegen::lua::SetPlaybackPause,
             codegen::lua::TogglePlaybackPause,
-            codegen::lua::IsPlayingBack
+            codegen::lua::IsPlayingBack,
+            codegen::lua::IsRecording
         }
     };
 }
