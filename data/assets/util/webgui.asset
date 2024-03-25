@@ -33,6 +33,9 @@ asset.onInitialize(function()
   local directories = openspace.propertyValue("Modules.WebGui.Directories")
   directories[#directories + 1] = "frontend"
   directories[#directories + 1] = frontend .. "frontend"
+  --Add user directory for webpanels
+  directories[#directories + 1] = "webpanels"
+  directories[#directories + 1] = openspace.absPath("${USER_PANELS}")
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
