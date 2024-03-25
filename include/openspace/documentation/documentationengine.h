@@ -27,6 +27,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/json.h>
+#include <openspace/properties/propertyowner.h>
 #include <ghoul/misc/exception.h>
 
 namespace openspace::documentation {

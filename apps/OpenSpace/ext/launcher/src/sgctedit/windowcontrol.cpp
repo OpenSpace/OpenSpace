@@ -24,8 +24,8 @@
 
 #include "sgctedit/windowcontrol.h"
 
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/fmt.h>
 #include "sgctedit/displaywindowunion.h"
 #include "sgctedit/monitorbox.h"
 #include <QCheckBox>

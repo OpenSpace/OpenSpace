@@ -30,7 +30,7 @@
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {

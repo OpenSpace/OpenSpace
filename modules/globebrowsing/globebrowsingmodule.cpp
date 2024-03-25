@@ -67,8 +67,8 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/profiling.h>

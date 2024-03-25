@@ -35,8 +35,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/programobject.h>

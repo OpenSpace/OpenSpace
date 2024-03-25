@@ -30,8 +30,8 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/openspace.h>
+#include <ghoul/format.h>
 #include <ghoul/ghoul.h>
-#include <ghoul/fmt.h>
 #include <ghoul/glm.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/multiplecommand.h>

@@ -39,7 +39,7 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>

@@ -460,7 +460,7 @@ target_include_directories(openspace-core
 target_precompile_headers(openspace-core PRIVATE
   <openspace/json.h>
   <openspace/properties/numericalproperty.h>
-  [["ghoul/fmt.h"]]
+  [["ghoul/format.h"]]
   [["ghoul/glm.h"]]
   [["ghoul/misc/assert.h"]]
   [["ghoul/misc/boolean.h"]]

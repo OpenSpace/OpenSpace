@@ -26,7 +26,7 @@
 
 #include "profile/line.h"
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/boolean.h>
 #include <QComboBox>

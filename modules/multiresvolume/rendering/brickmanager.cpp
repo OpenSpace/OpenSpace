@@ -24,7 +24,7 @@
 
 #include <modules/multiresvolume/rendering/brickmanager.h>
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>

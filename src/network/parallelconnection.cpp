@@ -26,8 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/logging/logmanager.h>
 

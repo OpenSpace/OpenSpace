@@ -26,15 +26,13 @@
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <modules/spacecraftinstruments/util/instrumentdecoder.h>
-
 #include <openspace/util/spicemanager.h>
-
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
 #include <filesystem>
 #include <fstream>
 

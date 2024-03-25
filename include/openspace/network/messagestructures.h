@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <algorithm>

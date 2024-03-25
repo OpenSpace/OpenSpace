@@ -29,7 +29,7 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/invariants.h>

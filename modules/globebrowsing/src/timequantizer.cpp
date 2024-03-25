@@ -26,7 +26,7 @@
 
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>

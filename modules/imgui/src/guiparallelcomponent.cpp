@@ -31,7 +31,7 @@
 #include <openspace/network/parallelpeer.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <algorithm>
 #include <numeric>
 

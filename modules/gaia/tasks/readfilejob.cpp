@@ -25,9 +25,9 @@
 #include <modules/gaia/tasks/readfilejob.h>
 
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "ReadFileJob";

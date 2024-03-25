@@ -24,7 +24,7 @@
 
 #include <ghoul/misc/dictionary.h>
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <iterator>
 #include <numeric>

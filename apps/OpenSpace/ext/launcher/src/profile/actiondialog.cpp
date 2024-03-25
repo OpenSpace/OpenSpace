@@ -27,7 +27,7 @@
 #include "profile/line.h"
 #include "profile/scriptlogdialog.h"
 #include <openspace/util/keys.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <QCheckBox>
 #include <QComboBox>

@@ -29,10 +29,10 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-#include <ghoul/fmt.h>
-#include <ghoul/ghoul.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/ghoul.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>

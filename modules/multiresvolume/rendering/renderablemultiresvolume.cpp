@@ -42,11 +42,11 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/fmt.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/framebufferobject.h>

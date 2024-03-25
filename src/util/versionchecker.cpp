@@ -25,7 +25,7 @@
 #include <openspace/util/versionchecker.h>
 
 #include <openspace/openspace.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>

@@ -38,7 +38,7 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>

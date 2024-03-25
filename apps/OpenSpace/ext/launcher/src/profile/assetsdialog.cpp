@@ -27,7 +27,7 @@
 #include "profile/assetedit.h"
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QLabel>

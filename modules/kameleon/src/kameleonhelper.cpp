@@ -25,7 +25,7 @@
 #include <modules/kameleon/include/kameleonhelper.h>
 
 #include <openspace/util/time.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 
 #ifdef _MSC_VER

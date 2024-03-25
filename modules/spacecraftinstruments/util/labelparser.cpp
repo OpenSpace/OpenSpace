@@ -25,9 +25,9 @@
 #include <modules/spacecraftinstruments/util/labelparser.h>
 
 #include <openspace/util/spicemanager.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>

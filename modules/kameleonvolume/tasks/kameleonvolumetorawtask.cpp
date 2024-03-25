@@ -27,8 +27,8 @@
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <array>
 #include <filesystem>

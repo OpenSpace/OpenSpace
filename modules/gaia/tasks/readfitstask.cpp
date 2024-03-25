@@ -28,10 +28,10 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <filesystem>
 #include <fstream>
 #include <set>

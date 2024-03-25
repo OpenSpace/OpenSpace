@@ -26,7 +26,7 @@
 
 #include <openspace/json.h>
 #include <openspace/util/time.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <fstream>
 #include <iomanip>

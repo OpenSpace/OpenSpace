@@ -39,7 +39,7 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
 #include <glm/gtx/quaternion.hpp>

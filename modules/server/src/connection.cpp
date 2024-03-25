@@ -46,11 +46,11 @@
 #include <modules/server/include/topics/versiontopic.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
 #include <ghoul/misc/profiling.h>
 
 namespace {

@@ -24,7 +24,7 @@
 
 #include "modules/spout/spoutwrapper.h"
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>

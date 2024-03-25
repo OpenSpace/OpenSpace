@@ -26,7 +26,7 @@
 
 #include <modules/gaia/rendering/octreeculler.h>
 #include <openspace/util/distanceconstants.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <fstream>

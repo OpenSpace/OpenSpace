@@ -25,7 +25,7 @@
 #include "sgctedit/displaywindowunion.h"
 
 #include "sgctedit/windowcontrol.h"
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QColor>
 #include <QFrame>
 #include <QPushButton>

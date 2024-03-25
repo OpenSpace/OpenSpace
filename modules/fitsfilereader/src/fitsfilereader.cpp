@@ -25,7 +25,7 @@
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <fstream>

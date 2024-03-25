@@ -24,11 +24,11 @@
 
 #include <modules/multiresvolume/rendering/tsp.h>
 
-#include <ghoul/fmt.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/format.h>
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <filesystem>
 #include <numeric>

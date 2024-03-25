@@ -31,11 +31,11 @@
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/resourcesynchronization.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>

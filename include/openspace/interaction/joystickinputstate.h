@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 #define __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
-#include <ghoul/fmt.h>
 #include <array>
 #include <memory>
 #include <string>
