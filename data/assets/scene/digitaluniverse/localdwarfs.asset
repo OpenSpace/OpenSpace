@@ -18,6 +18,8 @@ local Object = {
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,
+    Opacity = 0.3,
+    File = speck .. "localgroup.speck",
     Labels = {
       File = speck .. "localgroup.label",
       Color = { 0.3, 0.3, 1.0 },
@@ -27,11 +29,6 @@ local Object = {
     },
     Coloring = {
       FixedColor = { 0.0, 1.0, 0.0 },
-      -- @TODO: This one wasn't actually properly used before the point cloud update.
-      -- All points were mapped to green. Decide if we want it around.
-      -- @TODO: Also, the cmap is currently not applied correctly, due to speck file
-      -- not being read properly (it inlcudes more information than just datavar-s).
-      -- This should be adressed. (2023-12-13, emmbr)
       ColorMapping = {
         File = speck .. "localgroup.cmap",
         ParameterOptions = {
@@ -39,8 +36,6 @@ local Object = {
         }
       }
     },
-    Opacity = 0.3,
-    File = speck .. "localgroup.speck",
     PolygonSides = 12,
     Unit = "Mpc",
     SizeSettings = {

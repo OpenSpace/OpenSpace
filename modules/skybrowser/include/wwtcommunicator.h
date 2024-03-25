@@ -71,7 +71,7 @@ public:
 
 protected:
     void setIdInBrowser(const std::string& id) const;
-    SelectedImageDeque::iterator findSelectedImage(const std::string& id);
+    SelectedImageDeque::iterator findSelectedImage(const std::string& imageUrl);
 
     properties::DoubleProperty _verticalFov;
 

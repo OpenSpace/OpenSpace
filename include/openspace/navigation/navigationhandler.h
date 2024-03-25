@@ -143,9 +143,9 @@ public:
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
     void saveNavigationState(const std::filesystem::path& filepath,
-        const std::string& referenceFrameIdentifier);
+        const std::string& referenceFrameIdentifier) const;
 
-    void loadNavigationState(const std::string& filepath);
+    void loadNavigationState(const std::string& filepath, bool useTimeStamp);
 
     /**
      * Set camera state from a provided navigation state next frame. The actual position

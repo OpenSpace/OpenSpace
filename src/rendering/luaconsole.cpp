@@ -56,8 +56,8 @@ namespace {
     constexpr uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
     constexpr std::string_view FontName = "Console";
-    constexpr float EntryFontSize = 14.0f;
-    constexpr float HistoryFontSize = 11.0f;
+    constexpr float EntryFontSize = 14.f;
+    constexpr float HistoryFontSize = 11.f;
 
     // Additional space between the entry text and the history (in pixels)
     constexpr float SeparatorSpace = 30.f;
@@ -183,8 +183,6 @@ LuaConsole::LuaConsole()
     addProperty(_historyTextColor);
 }
 
-LuaConsole::~LuaConsole() {}
-
 void LuaConsole::initialize() {
     ZoneScoped;
 
@@ -197,26 +195,26 @@ void LuaConsole::initialize() {
 
         if (file.good()) {
             // Read the number of commands from the history
-            uint64_t version;
+            uint64_t version = 0;
             file.read(reinterpret_cast<char*>(&version), sizeof(uint64_t));
 
             if (version != CurrentVersion) {
                 LWARNINGC(
                     "LuaConsole",
-                    fmt::format("Outdated console history version: {}", version)
+                    std::format("Outdated console history version: {}", version)
                 );
             }
             else {
-                int64_t nCommands;
+                int64_t nCommands = 0;
                 file.read(reinterpret_cast<char*>(&nCommands), sizeof(int64_t));
 
-                for (int64_t i = 0; i < nCommands; ++i) {
-                    int64_t length;
+                for (int64_t i = 0; i < nCommands; i++) {
+                    int64_t length = 0;
                     file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
 
                     std::vector<char> tmp(length);
                     file.read(tmp.data(), length);
-                    _commandsHistory.emplace_back(std::string(tmp.begin(), tmp.end()));
+                    _commandsHistory.emplace_back(tmp.begin(), tmp.end());
                 }
             }
         }
@@ -244,7 +242,7 @@ void LuaConsole::initialize() {
         "luaConsole",
         "statusChanged",
         [this]() {
-            ParallelConnection::Status status = global::parallelPeer->status();
+            const ParallelConnection::Status status = global::parallelPeer->status();
             parallelConnectionChanged(status);
         }
     );
@@ -451,7 +449,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     }
 
     if (key == Key::Enter || key == Key::KeypadEnter) {
-        std::string cmd = _commands.at(_activeCommand);
+        const std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
             global::scriptEngine->queueScript(
                 cmd,
@@ -489,7 +487,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         std::vector<std::string> allCommands = global::scriptEngine->allLuaFunctions();
         std::sort(allCommands.begin(), allCommands.end());
 
-        std::string currentCommand = _commands.at(_activeCommand);
+        const std::string currentCommand = _commands.at(_activeCommand);
 
         // Check if it is the first time the tab has been pressed. If so, we need to
         // store the already entered command so that we can later start the search
@@ -500,7 +498,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             _autoCompleteInfo.hasInitialValue = true;
         }
 
-        for (int i = 0; i < static_cast<int>(allCommands.size()); ++i) {
+        for (int i = 0; i < static_cast<int>(allCommands.size()); i++) {
             const std::string& command = allCommands[i];
 
             // Check if the command has enough length (we don't want crashes here)
@@ -510,10 +508,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             const size_t fullLength = _autoCompleteInfo.initialValue.length();
             const bool correctLength = command.length() >= fullLength;
 
-            std::string commandLowerCase = ghoul::toLowerCase(command);
+            const std::string commandLowerCase = ghoul::toLowerCase(command);
 
-            std::string initialValueLowerCase =
-                ghoul::toLowerCase(_autoCompleteInfo.initialValue);
+            const std::string initialValueLowerCase = ghoul::toLowerCase(
+                _autoCompleteInfo.initialValue
+            );
 
             const bool correctCommand =
                 commandLowerCase.substr(0, fullLength) == initialValueLowerCase;
@@ -661,7 +660,7 @@ void LuaConsole::render() {
 
     using namespace ghoul::fontrendering;
 
-    ghoul::GLDebugGroup group("LuaConsole");
+    const ghoul::GLDebugGroup group("LuaConsole");
 
     // Don't render the console if it's collapsed.
     if (_currentHeight < 1.f) {
@@ -831,7 +830,7 @@ void LuaConsole::render() {
     else if (_shouldSendToRemote) {
         const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
 
-        ParallelConnection::Status status = global::parallelPeer->status();
+        const ParallelConnection::Status status = global::parallelPeer->status();
         const int nClients =
             status != ParallelConnection::Status::Disconnected ?
             global::parallelPeer->nConnections() - 1 :
@@ -863,9 +862,9 @@ void LuaConsole::setCommandInputButton(Key key) {
     _commandInputButton = key;
 }
 
-void LuaConsole::addToCommand(std::string c) {
+void LuaConsole::addToCommand(const std::string& c) {
     const size_t length = c.length();
-    _commands.at(_activeCommand).insert(_inputPosition, std::move(c));
+    _commands.at(_activeCommand).insert(_inputPosition, c);
     _inputPosition += length;
 }
 

@@ -81,7 +81,7 @@ namespace {
             }
 
             std::string literal = "{";
-            for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
+            for (nlohmann::json::iterator it = value.begin(); it != value.end(); it++) {
                 literal += luaLiteralFromJson(it.value()) += ",";
             }
             literal.pop_back(); // remove last comma
@@ -94,7 +94,7 @@ namespace {
             }
 
             std::string literal = "{";
-            for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
+            for (nlohmann::json::iterator it = value.begin(); it != value.end(); it++) {
                 literal += it.key() + "=" + luaLiteralFromJson(it.value()) += ",";
             }
             literal.pop_back(); // remove last comma
@@ -119,11 +119,11 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
             global::timeManager->setTimeNextFrame(newTime);
         }
         else {
-            nlohmann::json value = json.at("value");
+            const nlohmann::json value = json.at("value");
             std::string literal = luaLiteralFromJson(value);
 
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
                 ),
                 scripting::ScriptEngine::ShouldBeSynchronized::Yes,

@@ -51,7 +51,6 @@ private:
     void convertToAscii();
     void convertToBinary();
     void determineFormatType();
-    std::string addFileSuffix(const std::string& filePath, const std::string& suffix);
     std::filesystem::path _inFilePath;
     std::filesystem::path _outFilePath;
     std::ifstream _iFile;

@@ -73,7 +73,7 @@ void ScreenSpaceVideo::update() {
     if (!_videoPlayer.isInitialized()) {
         return;
     }
-    glm::uvec3 texDimensions = _videoPlayer.frameTexture()->dimensions();
+    const glm::uvec3& texDimensions = _videoPlayer.frameTexture()->dimensions();
     if (_objectSize != glm::ivec2(texDimensions.x, texDimensions.y)) {
         _objectSize = texDimensions;
     }

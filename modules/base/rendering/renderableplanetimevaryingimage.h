@@ -57,7 +57,7 @@ private:
     ghoul::opengl::Texture* loadTexture() const;
     void extractTriggerTimesFromFileNames();
     bool extractMandatoryInfoFromDictionary();
-    int updateActiveTriggerTimeIndex(double currenttime) const;
+    int updateActiveTriggerTimeIndex(double currentTime) const;
     void computeSequenceEndTime();
 
     // If there's just one state it should never disappear

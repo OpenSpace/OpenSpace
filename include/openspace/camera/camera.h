@@ -78,7 +78,7 @@ public:
     void setAtmosphereDimmingFactor(float atmosphereDimmingFactor);
 
     // Relative mutators
-    void rotate(glm::dquat rotation);
+    void rotate(const glm::dquat& rotation);
 
     // Accessors
     // Remove Vec3 from the name when psc is gone

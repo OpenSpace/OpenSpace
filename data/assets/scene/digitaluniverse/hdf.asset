@@ -27,7 +27,9 @@ local Object = {
     Enabled = false,
     Opacity = 1.0,
     File = HUDFSpeck .. "hudf.speck",
-    Texture = circle .. "circle.png",
+    Texture = {
+      File = circle .. "circle.png",
+    },
     Coloring = {
       ColorMapping = {
         File = ColorMap .. "hudf.cmap",

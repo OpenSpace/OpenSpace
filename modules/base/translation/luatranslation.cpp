@@ -91,7 +91,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            fmt::format(
+            std::format(
                 "Script '{}' does not have a function 'translation'",
                 _luaScriptFile.value()
             )
@@ -115,16 +115,15 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            fmt::format("Error executing 'translation': {}", lua_tostring(_state, -1))
+            std::format("Error executing 'translation': {}", lua_tostring(_state, -1))
         );
     }
 
-    double values[3];
-    for (int i = 1; i <= 3; ++i) {
+    glm::vec3 values;
+    for (int i = 1; i <= 3; i++) {
         values[i - 1] = ghoul::lua::value<double>(_state, i);
     }
-
-    return glm::make_vec3(values);
+    return values;
 }
 
 } // namespace openspace

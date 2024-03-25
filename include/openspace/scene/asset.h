@@ -215,14 +215,14 @@ public:
     void deinitialize();
 
     /**
-     * Marks the passed \p child as being required by this Asset. If the \p child is
-     * already required by this asset, this function does nothing.
+     * Marks the passed \p dependency as being required by this Asset. If the
+     * \p dependency is already required by this asset, this function does nothing.
      *
-     * \param child The asset that is required by this asset
+     * \param dependency The asset that is required by this asset
      *
-     * \pre \p child must not be nullptr
+     * \pre \p dependency must not be nullptr
      */
-    void require(Asset* child);
+    void require(Asset* dependency);
 
     /**
      * Returns `true` if the loading of the Asset has failed in any way so that

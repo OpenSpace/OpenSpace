@@ -46,7 +46,7 @@ public:
     struct ParsingError : public ghoul::RuntimeError {
         enum class Severity { Info, Warning, Error };
 
-        explicit ParsingError(Severity severity, std::string msg);
+        explicit ParsingError(Severity severity_, std::string msg);
 
         Severity severity;
     };

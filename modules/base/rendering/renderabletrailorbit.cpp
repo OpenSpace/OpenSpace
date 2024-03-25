@@ -354,7 +354,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     }
 
     using namespace std::chrono;
-    double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
+    const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // How much time has passed since the last permanent point
     const double delta = data.time.j2000Seconds() - _lastPointTime;
@@ -387,7 +387,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             return { false, true, UpdateReport::All };
         }
 
-        for (int i = 0; i < nNewPoints; ++i) {
+        for (int i = 0; i < nNewPoints; i++) {
             _lastPointTime += secondsPerPoint;
 
             // Get the new permanent point and write it into the (previously) floating
@@ -427,7 +427,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             return { false, true, UpdateReport::All };
         }
 
-        for (int i = 0; i < nNewPoints; ++i) {
+        for (int i = 0; i < nNewPoints; i++) {
             _firstPointTime -= secondsPerPoint;
 
             // Get the new permanent point and write it into the (previously) floating
@@ -478,7 +478,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
-    for (int i = 1; i < _resolution; ++i) {
+    for (int i = 1; i < _resolution; i++) {
         const glm::vec3 p = _translation->position({ {}, Time(time), Time(0.0) });
         _vertexArray[i] = { p.x, p.y, p.z };
 

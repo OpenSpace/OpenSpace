@@ -56,7 +56,7 @@ private:
     QWidget* createNavStateWidget();
     QWidget* createGeoWidget();
 
-    void addErrorMsg(QString errorDescription);
+    void addErrorMsg(const QString& errorDescription);
     bool areRequiredFormsFilledAndValid();
 
     std::optional<openspace::Profile::CameraType>* _camera = nullptr;

@@ -35,12 +35,13 @@
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/query/query.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/query/query.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -187,8 +188,8 @@ void NavigationHandler::updateCamera(double deltaTime) {
         return;
     }
 
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-    bool playbackMode = (mode == OpenSpaceEngine::Mode::SessionRecordingPlayback);
+    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    const bool playbackMode = (mode == OpenSpaceEngine::Mode::SessionRecordingPlayback);
 
     // If we're in session recording payback mode, the session recording is responsible
     // for navigation. So don't do anything more here
@@ -225,14 +226,14 @@ void NavigationHandler::applyPendingState() {
 
     std::variant<NodeCameraStateSpec, NavigationState> pending = *_pendingState;
     if (std::holds_alternative<NavigationState>(pending)) {
-        NavigationState ns = std::get<NavigationState>(pending);
+        const NavigationState ns = std::get<NavigationState>(pending);
         _orbitalNavigator.setAnchorNode(ns.anchor);
         _orbitalNavigator.setAimNode(ns.aim);
         _camera->setPose(ns.cameraPose());
     }
     else if (std::holds_alternative<NodeCameraStateSpec>(pending)) {
-        NodeCameraStateSpec spec = std::get<NodeCameraStateSpec>(pending);
-        Waypoint wp = computeWaypointFromNodeInfo(spec);
+        const NodeCameraStateSpec spec = std::get<NodeCameraStateSpec>(pending);
+        const Waypoint wp = computeWaypointFromNodeInfo(spec);
 
         _orbitalNavigator.setAnchorNode(wp.nodeIdentifier());
         _orbitalNavigator.setAimNode("");
@@ -271,13 +272,13 @@ void NavigationHandler::updateCameraTransitions() {
 
     // Updated checks compared to last time, so we can check if we are still in the
     // approach or anchor sphere
-    bool isInApproachSphere = currDistance < d * af;
-    bool isInReachSphere = currDistance < d * rf;
+    const bool isInApproachSphere = currDistance < d * af;
+    const bool isInReachSphere = currDistance < d * rf;
 
     // Compare these to the values from last frame, to trigger the correct transition
     // events
-    bool wasInApproachSphere = _inAnchorApproachSphere;
-    bool wasInReachSphere = _inAnchorReachSphere;
+    const bool wasInApproachSphere = _inAnchorApproachSphere;
+    const bool wasInReachSphere = _inAnchorReachSphere;
     _inAnchorApproachSphere = isInApproachSphere;
     _inAnchorReachSphere = isInReachSphere;
 
@@ -377,7 +378,7 @@ void NavigationHandler::updateCameraTransitions() {
         );
     };
 
-    bool anchorWasChanged = anchorNode() != _lastAnchor;
+    const bool anchorWasChanged = anchorNode() != _lastAnchor;
     if (anchorWasChanged) {
         // The anchor was changed between frames, so the transitions we have to check
         // are a bit different. Just directly trigger the relevant events for the
@@ -509,8 +510,8 @@ NavigationState NavigationHandler::navigationState(
         glm::normalize(_camera->lookUpVectorWorldSpace())
     ));
 
-    glm::dquat localRotation = invNeutralRotation * _camera->rotationQuaternion();
-    glm::dvec3 eulerAngles = glm::eulerAngles(localRotation);
+    const glm::dquat localRotation = invNeutralRotation * _camera->rotationQuaternion();
+    const glm::dvec3 eulerAngles = glm::eulerAngles(localRotation);
 
     const double pitch = eulerAngles.x;
     const double yaw = -eulerAngles.y;
@@ -531,12 +532,15 @@ NavigationState NavigationHandler::navigationState(
         _orbitalNavigator.aimNode() ? _orbitalNavigator.aimNode()->identifier() : "",
         referenceFrame.identifier(),
         position,
-        invReferenceFrameTransform * neutralUp, yaw, pitch
+        invReferenceFrameTransform * neutralUp,
+        yaw,
+        pitch,
+        global::timeManager->time().j2000Seconds()
     );
 }
 
 void NavigationHandler::saveNavigationState(const std::filesystem::path& filepath,
-                                            const std::string& referenceFrameIdentifier)
+                                        const std::string& referenceFrameIdentifier) const
 {
     ghoul_precondition(!filepath.empty(), "File path must not be empty");
 
@@ -544,7 +548,7 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
     if (!referenceFrameIdentifier.empty()) {
         const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
         if (!referenceFrame) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Could not find node '{}' to use as reference frame",
                 referenceFrameIdentifier
             ));
@@ -561,36 +565,54 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
         // Adding the .navstate extension to the filepath if it came without one
         absolutePath.replace_extension(".navstate");
     }
-    LINFO(fmt::format("Saving camera position: {}", absolutePath));
+    LINFO(std::format("Saving camera position: {}", absolutePath));
 
     std::ofstream ofs(absolutePath);
 
     if (!ofs.good()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Error saving navigation state to {}", filepath
+        throw ghoul::RuntimeError(std::format(
+            "Error saving navigation state to '{}'", filepath
         ));
     }
 
     ofs << state.toJson().dump(2);
 }
 
-void NavigationHandler::loadNavigationState(const std::string& filepath) {
-    const std::filesystem::path absolutePath = absPath(filepath);
-    LINFO(fmt::format("Reading camera state from file: {}", absolutePath));
+void NavigationHandler::loadNavigationState(const std::string& filepath,
+                                            bool useTimeStamp)
+{
+    std::filesystem::path absolutePath = absPath(filepath);
+    LINFO(std::format("Reading camera state from file: {}", absolutePath));
+
+    if (!absolutePath.has_extension()) {
+        // Adding the .navstate extension to the filepath if it came without one
+        absolutePath.replace_extension(".navstate");
+    }
 
     if (!std::filesystem::is_regular_file(absolutePath)) {
         throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
     }
 
-    std::ifstream f(filepath);
-    std::string contents = std::string(
+    std::ifstream f = std::ifstream(absolutePath);
+    const std::string contents = std::string(
         std::istreambuf_iterator<char>(f),
         std::istreambuf_iterator<char>()
     );
-    nlohmann::json json = nlohmann::json::parse(contents);
 
-    NavigationState state = NavigationState(json);
+    if (contents.empty()) {
+        throw::ghoul::RuntimeError(std::format(
+            "Failed reading camera state from file: {}. File is empty", absolutePath
+        ));
+    }
+
+    const nlohmann::json json = nlohmann::json::parse(contents);
+
+    const NavigationState state = NavigationState(json);
     setNavigationStateNextFrame(state);
+
+    if (useTimeStamp && state.timestamp.has_value()) {
+        global::timeManager->setTimeNextFrame(Time(*state.timestamp));
+    }
 }
 
 std::vector<std::string> NavigationHandler::listAllJoysticks() const {

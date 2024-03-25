@@ -1,3 +1,12 @@
+# A test dataset for interpolation, where the xyz positions expand outward in each
+# time step. There are 10 points per timestep, as illustrated by the time column.
+# There are also two columns that may be used for color mapping:
+#
+# static_value has values that are the same for the correpsonding point in each
+#              time step
+# dynamic_value has values that change for every timestep. The change will be
+#               reflected in the interpolation
+#
 time,x,y,z,dynamic_value,static_value
 0.0,675.0297905065192,1672.6820684730765,-124.14442820502654,1,1
 0.0,9.0852354697237,1080.363474597831,266.4506394528842,3,3

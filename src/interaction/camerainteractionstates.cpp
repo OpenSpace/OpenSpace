@@ -84,7 +84,7 @@ void CameraInteractionStates::resetVelocities() {
     _globalRollState.velocity.setHard({ 0.0, 0.0 });
 }
 
-bool CameraInteractionStates::hasNonZeroVelocities(bool checkOnlyMovement) {
+bool CameraInteractionStates::hasNonZeroVelocities(bool checkOnlyMovement) const {
     glm::dvec2 sum = glm::dvec2(0.0);
     sum += globalRotationVelocity();
     sum += truckMovementVelocity();

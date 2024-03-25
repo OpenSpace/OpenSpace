@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___PROPERTYOWNER___H__
 #define __OPENSPACE_CORE___PROPERTYOWNER___H__
 
-#include <openspace/json.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -294,11 +293,6 @@ public:
      * \param tag The tag is that is to be removed from this PropertyOwner
      */
     void removeTag(const std::string& tag);
-
-    /**
-     * Generate JSON for documentation.
-     */
-    nlohmann::json generateJson() const;
 
 protected:
     /// The unique identifier of this PropertyOwner

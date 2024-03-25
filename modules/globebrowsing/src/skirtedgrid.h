@@ -39,10 +39,10 @@ namespace openspace::globebrowsing {
 class SkirtedGrid {
 public:
     /**
-     * \param xSegments is the number of grid cells in the x direction
-     * \param ySegments is the number of grid cells in the y direction
+     * \param xSeg is the number of grid cells in the x direction
+     * \param ySeg is the number of grid cells in the y direction
      */
-    SkirtedGrid(unsigned int xSegments, unsigned int ySegments);
+    SkirtedGrid(unsigned int xSeg, unsigned int ySeg);
     ~SkirtedGrid() = default;
 
     void initializeGL();

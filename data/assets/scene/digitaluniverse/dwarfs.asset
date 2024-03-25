@@ -18,6 +18,7 @@ local Object = {
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "dwarfs.speck",
     Labels = {
       File = speck .. "dwarfs.label",
       Color = { 0.5, 0.1, 0.2 },
@@ -26,8 +27,9 @@ local Object = {
       Unit = "pc"
     },
     Opacity = 1.0,
-    File = speck .. "dwarfs.speck",
-    Texture = textures .. "point3.png",
+    Texture = {
+      File = textures .. "point3.png",
+    },
     Unit = "pc",
     Coloring = {
       FixedColor = { 0.4, 0.0, 0.1 },

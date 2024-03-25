@@ -102,7 +102,7 @@ void CefWebGuiModule::startOrStopGui() {
     const bool isMaster = global::windowDelegate->isMaster();
 
     if (_enabled && isMaster) {
-        LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _url.value()));
+        LDEBUGC("WebBrowser", std::format("Loading GUI from '{}'", _url.value()));
 
         if (!_instance) {
             _instance = std::make_unique<BrowserInstance>(
@@ -140,8 +140,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     WebBrowserModule* webBrowserModule =
         global::moduleEngine->module<WebBrowserModule>();
 
-    bool available = webBrowserModule && webBrowserModule->isEnabled();
-
+    const bool available = webBrowserModule && webBrowserModule->isEnabled();
     if (!available) {
         return;
     }
@@ -232,7 +231,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
         if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate->windowHasResized() || _instance->_shouldReshape) {
-                glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
+                const glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
                 _instance->reshape(static_cast<glm::ivec2>(
                     static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
                 ));

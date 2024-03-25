@@ -47,9 +47,8 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
                                  WebKeyboardHandler* keyboardHandler)
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
+    , _client(new BrowserClient(_renderHandler.get(), _keyboardHandler.get()))
 {
-    _client = new BrowserClient(_renderHandler.get(), _keyboardHandler.get());
-
     CefWindowInfo windowInfo;
     // On Windows and MacOS this function takes a pointer as a parameter, but Linux
     // requires this to be a long unsigned int, so we can't use nullptr here
@@ -58,11 +57,10 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;
 
-    std::string url;
     _browser = CefBrowserHost::CreateBrowserSync(
         windowInfo,
         _client.get(),
-        url,
+        "",
         browserSettings,
         nullptr,
         nullptr
@@ -86,13 +84,12 @@ void BrowserInstance::initialize() {
     _shouldReshape = true;
 }
 
-void BrowserInstance::loadUrl(std::string url) {
+void BrowserInstance::loadUrl(const std::string& url) {
     ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
 
     if (!url.empty()) {
-        LDEBUG(fmt::format("Loading URL: {}", url));
-        CefString cefUrl = std::move(url);
-        _browser->GetMainFrame()->LoadURL(cefUrl);
+        LDEBUG(std::format("Loading URL '{}'", url));
+        _browser->GetMainFrame()->LoadURL(url);
     }
     else {
         LWARNING("Provided browser URL is empty");
@@ -101,7 +98,7 @@ void BrowserInstance::loadUrl(std::string url) {
 
 bool BrowserInstance::loadLocalPath(std::string path) {
     if (!std::filesystem::is_regular_file(path)) {
-        LDEBUG(fmt::format("Could not find path '{}', verify that it is correct", path));
+        LDEBUG(std::format("Could not find path '{}', verify that it is correct", path));
         return false;
     }
 
