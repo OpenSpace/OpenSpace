@@ -28,7 +28,6 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/glm.h>
@@ -111,25 +110,6 @@ std::vector<std::pair<KeyWithModifier, std::string>> KeybindingManager::keyBindi
 const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBindings() const
 {
     return _keyLua;
-}
-
-nlohmann::json KeybindingManager::generateJson() const {
-    ZoneScoped;
-
-    nlohmann::json json;
-
-    for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
-        nlohmann::json keybind;
-        keybind["name"] = ghoul::to_string(p.first);
-        keybind["action"] = p.second;
-        json.push_back(std::move(keybind));
-    }
-    sortJson(json, "name");
-
-    nlohmann::json result;
-    result["name"] = "Keybindings";
-    result["keybindings"] = json;
-    return result;
 }
 
 scripting::LuaLibrary KeybindingManager::luaLibrary() {

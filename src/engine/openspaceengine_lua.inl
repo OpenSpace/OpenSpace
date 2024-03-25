@@ -39,7 +39,7 @@ namespace {
  * Writes out documentation files
  */
 [[codegen::luawrap]] void writeDocumentation() {
-    openspace::global::openSpaceEngine->writeDocumentation();
+    DocEng.writeDocumentation();
 }
 
 // Sets the folder used for storing screenshots or session recording frames

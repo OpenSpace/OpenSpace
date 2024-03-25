@@ -27,10 +27,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/json.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -40,42 +38,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
-
-    nlohmann::json createJson(openspace::properties::PropertyOwner* owner) {
-        ZoneScoped;
-
-        using namespace openspace;
-        nlohmann::json json;
-        json["name"] = !owner->guiName().empty() ? owner->guiName() : owner->identifier();
-
-        json["description"] = owner->description();
-        json["properties"] = nlohmann::json::array();
-        json["propertyOwners"] = nlohmann::json::array();
-        json["type"] = owner->type();
-        json["tags"] = owner->tags();
-
-        const std::vector<properties::Property*>& properties = owner->properties();
-        for (properties::Property* p : properties) {
-            nlohmann::json propertyJson;
-            std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
-            propertyJson["name"] = std::move(name);
-            propertyJson["type"] = p->className();
-            propertyJson["uri"] = p->fullyQualifiedIdentifier();
-            propertyJson["identifier"] = p->identifier();
-            propertyJson["description"] = p->description();
-
-            json["properties"].push_back(propertyJson);
-        }
-        sortJson(json["properties"], "name");
-
-        auto propertyOwners = owner->propertySubOwners();
-        for (properties::PropertyOwner* o : propertyOwners) {
-            json["propertyOwners"].push_back(createJson(o));
-        }
-        sortJson(json["propertyOwners"], "name");
-
-        return json;
-    }
 } // namespace
 
 namespace openspace::properties {
@@ -156,7 +118,10 @@ bool PropertyOwner::hasProperty(const std::string& uri) const {
 bool PropertyOwner::hasProperty(const Property* prop) const {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
 
-    auto it = std::find(_properties.begin(), _properties.end(), prop);
+    std::vector<Property*>::const_iterator it = std::find(
+        _properties.begin(), _properties.end(), prop
+    );
+
     return it != _properties.end();
 }
 
@@ -165,7 +130,7 @@ const std::vector<PropertyOwner*>& PropertyOwner::propertySubOwners() const {
 }
 
 PropertyOwner* PropertyOwner::propertySubOwner(const std::string& identifier) const {
-    auto it = std::find_if(
+    std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
         [&identifier](PropertyOwner* owner) { return owner->identifier() == identifier; }
@@ -205,7 +170,7 @@ void PropertyOwner::addProperty(Property* prop) {
         return;
     }
     // See if we can find the identifier of the property to add in the properties list
-    auto it = std::find_if(
+    std::vector<Property*>::const_iterator it = std::find_if(
         _properties.begin(),
         _properties.end(),
         [id = prop->identifier()](Property* p) { return p->identifier() == id; }
@@ -249,7 +214,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
     );
 
     // See if we can find the name of the propertyowner to add using the lower bound
-    auto it = std::find_if(
+    std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
         [identifier = owner->identifier()](PropertyOwner* o) {
@@ -290,7 +255,7 @@ void PropertyOwner::removeProperty(Property* prop) {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
 
     // See if we can find the identifier of the property to add in the properties list
-    auto it = std::find_if(
+    std::vector<Property*>::const_iterator it = std::find_if(
         _properties.begin(),
         _properties.end(),
         [id = prop->identifier()](Property* p) { return p->identifier() == id; }
@@ -316,7 +281,7 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
     ghoul_precondition(owner != nullptr, "owner must not be nullptr");
 
     // See if we can find the name of the propertyowner to add
-    auto it = std::find_if(
+    std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
         [identifier = owner->identifier()](PropertyOwner* o) {
@@ -380,26 +345,6 @@ void PropertyOwner::addTag(std::string tag) {
 
 void PropertyOwner::removeTag(const std::string& tag) {
     _tags.erase(std::remove(_tags.begin(), _tags.end(), tag), _tags.end());
-}
-
-nlohmann::json PropertyOwner::generateJson() const {
-    ZoneScoped;
-
-    nlohmann::json json;
-    const std::vector<PropertyOwner*>& subOwners = propertySubOwners();
-    for (PropertyOwner* owner : subOwners) {
-        if (owner->identifier() != "Scene") {
-            nlohmann::json jsonOwner = createJson(owner);
-            json.push_back(std::move(jsonOwner));
-        }
-    }
-    sortJson(json, "name");
-
-    nlohmann::json result;
-    result["name"] = "propertyOwner";
-    result["data"] = json;
-
-    return result;
 }
 
 } // namespace openspace::properties

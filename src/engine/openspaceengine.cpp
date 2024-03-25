@@ -41,7 +41,6 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
@@ -57,7 +56,6 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
-#include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
@@ -808,7 +806,10 @@ void OpenSpaceEngine::loadAssets() {
 
     runGlobalCustomizationScripts();
 
-    _writeDocumentationTask = std::async(&OpenSpaceEngine::writeDocumentation, this);
+    _writeDocumentationTask = std::async(
+        &documentation::DocumentationEngine::writeDocumentation,
+        DocEng
+    );
 
     LTRACE("OpenSpaceEngine::loadAsset(end)");
 }
@@ -952,57 +953,6 @@ void OpenSpaceEngine::loadFonts() {
     catch (const ghoul::RuntimeError& err) {
         LERRORC(err.component, err.message);
     }
-}
-
-void OpenSpaceEngine::writeDocumentation() {
-    ZoneScoped;
-
-    // Write documentation to json files if config file supplies path for doc files
-    std::string path = global::configuration->documentation.path;
-    if (path.empty()) {
-        // if path was empty, that means that no documentation is requested
-        return;
-    }
-    path = absPath(path).string() + '/';
-
-    // Start the async requests as soon as possible so they are finished when we need them
-    std::future<nlohmann::json> settings = std::async(
-        &properties::PropertyOwner::generateJson,
-        global::rootPropertyOwner
-    );
-
-    std::future<nlohmann::json> scene = std::async(
-        &properties::PropertyOwner::generateJson,
-        _scene.get()
-    );
-    SceneLicenseWriter writer;
-
-    nlohmann::json scripting = global::scriptEngine->generateJson();
-    nlohmann::json factory = FactoryManager::ref().generateJson();
-    nlohmann::json keybindings = global::keybindingManager->generateJson();
-    nlohmann::json license = writer.generateJsonGroupedByLicense();
-    nlohmann::json sceneProperties = settings.get();
-    nlohmann::json sceneGraph = scene.get();
-
-    sceneProperties["name"] = "Settings";
-    sceneGraph["name"] = "Scene";
-
-    // Add this here so that the generateJson function is the same as before to ensure
-    // backwards compatibility
-    nlohmann::json scriptingResult;
-    scriptingResult["name"] = "Scripting API";
-    scriptingResult["data"] = scripting;
-
-    nlohmann::json documentation = {
-        sceneGraph, sceneProperties, keybindings, license, scriptingResult, factory
-    };
-
-    nlohmann::json result;
-    result["documentation"] = documentation;
-
-    std::ofstream out(absPath("${DOCUMENTATION}/documentationData.js"));
-    out << "var data = " << result.dump();
-    out.close();
 }
 
 void OpenSpaceEngine::preSynchronization() {

@@ -139,6 +139,14 @@ public:
     std::vector<ActionInfo> registeredActions() const;
 
     /**
+     * Returns the list of all registered actions, grouped by their event type.
+     *
+     * \return The unordered map of all registered actions
+     */
+    const std::unordered_map<events::Event::Type, std::vector<ActionInfo>>&
+        eventActions() const;
+
+    /**
      * Enables the event identified by the \p identifier. If the event is already enabled,
      * this function does nothing.
      *
