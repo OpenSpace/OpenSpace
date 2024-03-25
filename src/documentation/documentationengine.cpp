@@ -263,7 +263,7 @@ DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
 DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
                                                                         Documentation doc)
-    : ghoul::RuntimeError(fmt::format(
+    : ghoul::RuntimeError(std::format(
         "Duplicate Documentation with name '{}' and id '{}'", doc.name, doc.id
     ))
     , documentation(std::move(doc))
@@ -451,7 +451,7 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
             actionJson[NameKey] = eventJson[NameKey];
             actionJson[ActionKey] = action.action;
             // Create a unique ID
-            actionJson[IdKey] = fmt::format("{}{}", action.action, action.id);
+            actionJson[IdKey] = std::format("{}{}", action.action, action.id);
 
             // Output filters as a string
             if (action.filter.has_value()) {
@@ -462,7 +462,7 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
                 std::string filtersString = "";
                 for (std::string_view key : keys) {
                     std::string value = filters.value<std::string>(key);
-                    filtersString += fmt::format("{} = {}, ", key, value);
+                    filtersString += std::format("{} = {}, ", key, value);
                 }
                 filtersString.pop_back(); // Remove last space from last entry
                 filtersString.pop_back(); // Remove last comma from last entry

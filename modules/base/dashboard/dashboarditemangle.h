@@ -55,7 +55,7 @@ private:
         SceneGraphNode* node;
     };
 
-    std::pair<glm::dvec3, std::string> positionAndLabel(Component& comp) const;
+    static std::pair<glm::dvec3, std::string> positionAndLabel(Component& comp);
 
     Component _source;
     Component _reference;

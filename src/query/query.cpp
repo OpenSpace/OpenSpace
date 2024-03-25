@@ -59,4 +59,4 @@ std::vector<properties::Property*> allProperties() {
     return global::rootPropertyOwner->propertiesRecursive();
 }
 
-}  // namespace
+}  // namespace openspace

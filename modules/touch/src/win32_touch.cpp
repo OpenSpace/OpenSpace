@@ -254,7 +254,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
         }
 
         if (!gTouchHook) {
-            LINFO(fmt::format("Failed to setup WindowsHook for touch input redirection"));
+            LINFO(std::format("Failed to setup WindowsHook for touch input redirection"));
 #ifdef ENABLE_TUIOMESSAGES
             delete gTuioServer;
 #endif

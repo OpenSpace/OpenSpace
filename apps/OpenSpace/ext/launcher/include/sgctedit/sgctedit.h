@@ -66,7 +66,7 @@ public:
      * \param configBasePath The path to the folder where default config files reside
      * \param parent Pointer to parent Qt widget
      */
-    SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
+    SgctEdit(sgct::config::Cluster& cluster, std::string configName,
         std::string& configBasePath, QWidget* parent);
 
     /**

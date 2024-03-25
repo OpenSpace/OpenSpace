@@ -92,7 +92,7 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
             onChange();
         }
         else {
-            LWARNING(fmt::format("Could not subscribe. Property '{}' not found", key));
+            LWARNING(std::format("Could not subscribe. Property '{}' not found", key));
         }
     }
     if (event == StopSubscription) {

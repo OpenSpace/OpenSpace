@@ -105,12 +105,12 @@ void ScreenSpaceImageOnline::update() {
         }
 
         if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-            DownloadManager::MemoryFile imageFile = _imageFuture.get();
+            const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
             if (imageFile.corrupted) {
                 LERRORC(
                     "ScreenSpaceImageOnline",
-                    fmt::format("Error loading image from URL '{}'", _texturePath.value())
+                    std::format("Error loading image from URL '{}'", _texturePath.value())
                 );
                 return;
             }

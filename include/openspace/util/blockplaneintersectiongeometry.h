@@ -42,7 +42,7 @@ public:
     void render();
 
     void setBlockSize(glm::vec3 size);
-    void setPlane(glm::vec3 normal, float distance);
+    void setPlane(const glm::vec3& normal, float distance);
 
 private:
     void updateVertices();

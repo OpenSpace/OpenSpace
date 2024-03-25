@@ -61,7 +61,7 @@ public:
 
     struct DataMessage {
         DataMessage() = default;
-        DataMessage(datamessagestructures::Type t, double timestamp, std::vector<char> c);
+        DataMessage(datamessagestructures::Type t, double time, std::vector<char> c);
 
         datamessagestructures::Type type;
         double timestamp;
@@ -70,7 +70,7 @@ public:
 
     class ConnectionLostError : public ghoul::RuntimeError {
     public:
-        explicit ConnectionLostError(bool shouldLogError = true);
+        explicit ConnectionLostError(bool shouldLogError_ = true);
 
         bool shouldLogError;
     };

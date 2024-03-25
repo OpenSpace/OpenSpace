@@ -524,7 +524,7 @@ public:
      *        specific spacecraft
      * \pre \p craft must not be empty
      */
-    double spacecraftClockToET(const std::string& craft, double craftTicks);
+    double spacecraftClockToET(const std::string& craft, double craftTicks) const;
 
     /**
      * Converts the \p timeString representing a date to a double precision value
@@ -578,7 +578,7 @@ public:
 
         timout_c(ephemerisTime, format, bufferSize, outBuf);
         if (failed_c()) {
-            throwSpiceError(fmt::format(
+            throwSpiceError(std::format(
                 "Error converting ephemeris time '{}' to date with format '{}'",
                     ephemerisTime, format
             ));
@@ -1121,6 +1121,12 @@ private:
      * Loads pre defined leap seconds time kernel (naif00012.tls).
      */
     void loadLeapSecondsSpiceKernel();
+
+    /**
+     * Loads pre defined geophysical constants kernel (geophysical.ker)
+     */
+    void loadGeophysicalConstantsKernel();
+
 
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;

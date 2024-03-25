@@ -65,7 +65,6 @@ private:
     void transitionToEditMode();
     void parseSelections();
 
-    QString createOneLineSummary(openspace::Profile::Module m);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
     bool isLineEmpty(int index) const;

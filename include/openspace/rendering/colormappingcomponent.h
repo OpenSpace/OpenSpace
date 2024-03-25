@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___COLORMAPCOMPONENT___H__
-#define __OPENSPACE_CORE___COLORMAPCOMPONENT___H__
+#ifndef __OPENSPACE_CORE___COLORMAPPINGCOMPONENT___H__
+#define __OPENSPACE_CORE___COLORMAPPINGCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -74,7 +74,7 @@ public:
 
     static documentation::Documentation Documentation();
 
-    glm::vec4 colorFromColorMap(float value) const;
+    glm::vec4 colorFromColorMap(float valueToColorFrom) const;
 
     properties::BoolProperty enabled;
     properties::BoolProperty invert;
@@ -120,4 +120,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___COLORMAPCOMPONENT___H__
+#endif // __OPENSPACE_CORE___COLORMAPPINGCOMPONENT___H__

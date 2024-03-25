@@ -117,13 +117,13 @@ void SkirtedGrid::initializeGL() {
     std::vector<GLushort> elementData = createElements(xSegments, ySegments);
 
     struct Vertex {
-        GLfloat texture[2];
+        std::array<GLfloat, 2> texture;
     };
 
 
     std::vector<glm::vec2> textures = createTextureCoordinates(xSegments, ySegments);
     std::vector<Vertex> vertexData(textures.size());
-    for (size_t i = 0; i < textures.size(); ++i) {
+    for (size_t i = 0; i < textures.size(); i++) {
         vertexData[i].texture[0] = textures[i][0];
         vertexData[i].texture[1] = textures[i][1];
     }

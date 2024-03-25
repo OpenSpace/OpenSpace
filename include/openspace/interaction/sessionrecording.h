@@ -101,7 +101,7 @@ public:
     SessionRecording();
     SessionRecording(bool isGlobal);
 
-    ~SessionRecording() override;
+    ~SessionRecording() override = default;
 
     /**
      * Used to de-initialize the session recording feature. Any recording or playback
@@ -282,9 +282,9 @@ public:
      * Used to trigger a save of a script to the recording file, but only if a recording
      * is currently in progress.
      *
-     * \param scriptToSave String of the Lua command to be saved
+     * \param script String of the Lua command to be saved
      */
-    void saveScriptKeyframeToTimeline(std::string scriptToSave);
+    void saveScriptKeyframeToTimeline(std::string script);
 
     /**
      * \return The Lua library that contains all Lua functions available to affect the
@@ -305,7 +305,7 @@ public:
      *
      * \param callback Function handle for the callback
      */
-    void removeStateChangeCallback(CallbackHandle callback);
+    void removeStateChangeCallback(CallbackHandle handle);
 
     /**
      * Provides list of available playback files.
@@ -338,7 +338,7 @@ public:
      * \return `true` if data read has no errors
      */
     bool readCameraKeyframeAscii(Timestamps& times,
-        datamessagestructures::CameraKeyframe& kf, std::string currentParsingLine,
+        datamessagestructures::CameraKeyframe& kf, const std::string& currentParsingLine,
         int lineN);
 
     /**
@@ -365,7 +365,7 @@ public:
      * \return `true` if data read has no errors
      */
     bool readTimeKeyframeAscii(Timestamps& times,
-        datamessagestructures::TimeKeyframe& kf, std::string currentParsingLine,
+        datamessagestructures::TimeKeyframe& kf, const std::string& currentParsingLine,
         int lineN);
 
     /**
@@ -394,7 +394,7 @@ public:
      * \return `true` if data read has no errors
      */
     bool readScriptKeyframeAscii(Timestamps& times,
-        datamessagestructures::ScriptMessage& kf, std::string currentParsingLine,
+        datamessagestructures::ScriptMessage& kf, const std::string& currentParsingLine,
         int lineN);
 
     /**
@@ -482,7 +482,7 @@ public:
      * \param readLen_chars Number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
      */
-    static std::string readHeaderElement(std::ifstream& stream, size_t readLen_chars);
+    static std::string readHeaderElement(std::ifstream& stream, size_t readLenChars);
 
     /**
      * Reads header information from a session recording file.
@@ -491,7 +491,7 @@ public:
      * \param readLen_chars Number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
      */
-    static std::string readHeaderElement(std::stringstream& stream, size_t readLen_chars);
+    static std::string readHeaderElement(std::stringstream& stream, size_t readLenChars);
 
     /**
      * Writes a header to a binary recording file buffer.
@@ -520,7 +520,7 @@ public:
      * \param entry The ASCII string version of the keyframe (any type)
      * \param file `std::ofstream` object to write to
      */
-    static void saveKeyframeToFile(std::string entry, std::ofstream& file);
+    static void saveKeyframeToFile(const std::string& entry, std::ofstream& file);
 
     /**
      * Checks if a specified recording file ends with a particular file extension.
@@ -528,7 +528,8 @@ public:
      * \param filename The name of the file to record to
      * \param extension The file extension to check for
      */
-    static bool hasFileExtension(std::string filename, std::string extension);
+    static bool hasFileExtension(const std::string& filename,
+        const std::string& extension);
 
     /**
      * Converts file format of a session recording file to the current format version
@@ -589,7 +590,8 @@ public:
      *
      * \return pathname of the converted version of the file
      */
-    std::string determineConversionOutFilename(const std::string filename, DataMode mode);
+    std::string determineConversionOutFilename(const std::string& filename,
+        DataMode mode);
 
 protected:
     properties::BoolProperty _renderPlaybackInformation;
@@ -612,7 +614,7 @@ protected:
     double _timestampPlaybackStarted_application = 0.0;
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
-    bool hasCameraChangedFromPrev(datamessagestructures::CameraKeyframe kfNew);
+    bool hasCameraChangedFromPrev(const datamessagestructures::CameraKeyframe& kfNew);
     double appropriateTimestamp(Timestamps t3stamps);
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
@@ -620,7 +622,7 @@ protected:
     void recordCurrentTimeRate();
     bool handleRecordingFile(std::string filenameIn);
     static bool isPath(std::string& filename);
-    void removeTrailingPathSlashes(std::string& filename);
+    void removeTrailingPathSlashes(std::string& filename) const;
     bool playbackCamera();
     bool playbackTimeChange();
     bool playbackScript();
@@ -629,10 +631,10 @@ protected:
     void handlePlaybackEnd();
 
     bool findFirstCameraKeyframeInTimeline();
-    Timestamps generateCurrentTimestamp3(double keyframeTime);
+    Timestamps generateCurrentTimestamp3(double keyframeTime) const;
     static void saveStringToFile(const std::string& s, unsigned char* kfBuffer,
         size_t& idx, std::ofstream& file);
-    static void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size,
+    static void saveKeyframeToFileBinary(unsigned char* buffer, size_t size,
         std::ofstream& file);
 
     bool addKeyframe(Timestamps t3stamps,
@@ -675,7 +677,6 @@ protected:
     bool isPropertyAllowedForBaseline(const std::string& propString);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
-    bool doesStartWithSubstring(const std::string& s, const std::string& matchSubstr);
     void trimCommandsFromScriptIfFound(std::string& script);
     void replaceCommandsFromScriptIfFound(std::string& script);
 
@@ -689,20 +690,21 @@ protected:
     bool convertEntries(std::string& inFilename, std::stringstream& inStream,
         DataMode mode, int lineNum, std::ofstream& outFile);
     virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
+        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
     virtual bool convertTimeChange(std::stringstream& inStream, DataMode mode,
-        int lineNum, std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
+        int lineNum, std::string& inputLine, std::ofstream& outFile,
+        unsigned char* buffer);
     virtual bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    DataMode readModeFromHeader(std::string filename);
+        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
+    DataMode readModeFromHeader(const std::string& filename);
     void readPlaybackHeader_stream(std::stringstream& conversionInStream,
         std::string& version, DataMode& mode);
     void populateListofLoadedSceneGraphNodes();
 
     void checkIfScriptUsesScenegraphNode(std::string s);
-    bool checkForScenegraphNodeAccessScene(std::string& s);
+    bool checkForScenegraphNodeAccessScene(const std::string& s);
     bool checkForScenegraphNodeAccessNav(std::string& navTerm);
-    std::string extractScenegraphNodeFromScene(std::string& s);
+    std::string extractScenegraphNodeFromScene(const std::string& s);
     bool checkIfInitialFocusNodeIsLoaded(unsigned int firstCamIndex);
     std::string isolateTermFromQuotes(std::string s);
     void eraseSpacesFromString(std::string& s);

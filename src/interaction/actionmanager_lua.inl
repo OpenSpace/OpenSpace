@@ -64,7 +64,7 @@ namespace {
     }
     if (!global::actionManager->hasAction(identifier)) {
         throw ghoul::lua::LuaError(
-            fmt::format("Identifier '{}' for action not found", identifier)
+            std::format("Identifier '{}' for action not found", identifier)
         );
     }
 
@@ -105,7 +105,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     using namespace openspace;
 
     if (global::actionManager->hasAction(action.identifier)) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Identifier '{}' for action already registered", action.identifier
         ));
     }
@@ -118,7 +118,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     a.guiPath = action.guiPath.value_or(a.guiPath);
     if (!a.guiPath.starts_with('/')) {
         throw ghoul::RuntimeError(
-            fmt::format(
+            std::format(
                 "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but "
                 "should be '/{}' ", a.name, a.guiPath, a.guiPath)
         );
@@ -141,7 +141,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     }
     if (!global::actionManager->hasAction(identifier)) {
         throw ghoul::lua::LuaError(
-            fmt::format("Identifier '{}' for action not found", identifier)
+            std::format("Identifier '{}' for action not found", identifier)
         );
     }
 
@@ -189,7 +189,7 @@ struct [[codegen::Dictionary(Action)]] Action {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
     if (!global::actionManager->hasAction(id)) {
-        throw ghoul::lua::LuaError(fmt::format("Action '{}' not found", id));
+        throw ghoul::lua::LuaError(std::format("Action '{}' not found", id));
     }
 
     // No sync because this is already inside a Lua script, therefor it has

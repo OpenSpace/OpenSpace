@@ -41,10 +41,15 @@ struct DataMapping {
     bool hasExcludeColumns() const;
     bool isExcludeColumn(std::string_view column) const;
 
+    bool checkIfAllProvidedColumnsExist(const std::vector<std::string>& columns) const;
+
     std::optional<std::string> xColumnName;
     std::optional<std::string> yColumnName;
     std::optional<std::string> zColumnName;
     std::optional<std::string> nameColumn;
+    std::optional<std::string> textureColumn;
+
+    std::optional<std::filesystem::path> textureMap;
 
     std::optional<float> missingDataValue;
 
@@ -71,6 +76,8 @@ bool isColumnY(const std::string& c, const std::optional<DataMapping>& mapping);
 bool isColumnZ(const std::string& c, const std::optional<DataMapping>& mapping);
 
 bool isNameColumn(const std::string& c, const std::optional<DataMapping>& mapping);
+
+bool isTextureColumn(const std::string& c, const std::optional<DataMapping>& mapping);
 
 } // namespace openspace::dataloader
 

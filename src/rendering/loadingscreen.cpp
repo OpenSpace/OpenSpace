@@ -84,15 +84,11 @@ namespace {
         rhsLl -= glm::vec2(ItemStandoffDistance / 2.f);
         rhsUr += glm::vec2(ItemStandoffDistance / 2.f);
 
-        return !(
-            lhsUr.x < rhsLl.x ||
-            lhsLl.x > rhsUr.x ||
-            lhsUr.y < rhsLl.y ||
-            lhsLl.y > rhsUr.y
-        );
+        return lhsUr.x >= rhsLl.x && lhsLl.x <= rhsUr.x &&
+               lhsUr.y >= rhsLl.y && lhsLl.y <= rhsUr.y;
     }
 
-    glm::vec2 ndcToScreen(glm::vec2 ndc, glm::ivec2 res) {
+    glm::vec2 ndcToScreen(glm::vec2 ndc, const glm::ivec2& res) {
         ndc.x = (ndc.x + 1.f) / 2.f * res.x;
         ndc.y = (ndc.y + 1.f) / 2.f * res.y;
         return ndc;
@@ -230,7 +226,7 @@ void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
                         LoadingScreen::ItemStatus::Started,
                         progressInfo
                     );
-                    ++it;
+                    it++;
             }
             else if ((*it)->isRejected()) {
                 updateItem(
@@ -239,7 +235,7 @@ void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
                     LoadingScreen::ItemStatus::Failed,
                     LoadingScreen::ProgressInfo()
                 );
-                ++it;
+                it++;
             }
             else {
                 LoadingScreen::ProgressInfo progressInfo;
@@ -261,7 +257,7 @@ void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
             return;
         }
 
-        bool finishedLoading = std::all_of(
+        const bool finishedLoading = std::all_of(
             allAssets.begin(),
             allAssets.end(),
             [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
@@ -298,9 +294,9 @@ void LoadingScreen::render() {
     const glm::ivec2 res =
         glm::vec2(global::windowDelegate->firstWindowResolution()) * dpiScaling;
 
-    float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
+    const float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
-    float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
+    const float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
         static_cast<float>(_logoTexture->dimensions().y);
 
     ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(res);
@@ -359,7 +355,7 @@ void LoadingScreen::render() {
     glm::vec2 messageLl = glm::vec2(0.f);
     glm::vec2 messageUr = glm::vec2(0.f);
     if (_showMessage) {
-        std::lock_guard guard(_messageMutex);
+        const std::lock_guard guard(_messageMutex);
 
         const glm::vec2 bboxMessage = _messageFont->boundingBox(_message);
 
@@ -373,8 +369,8 @@ void LoadingScreen::render() {
         renderer.render(*_messageFont, messageLl, _message);
     }
 
-    glm::vec2 logLl = glm::vec2(0.f, 0.f);
-    glm::vec2 logUr = glm::vec2(res.x, res.y * (LogBackgroundPosition + 0.015));
+    const glm::vec2 logLl = glm::vec2(0.f, 0.f);
+    const glm::vec2 logUr = glm::vec2(res.x, res.y * (LogBackgroundPosition + 0.015));
 
     // Font rendering enables depth testing so we disable again to render the log box
     glDisable(GL_DEPTH_TEST);
@@ -389,9 +385,9 @@ void LoadingScreen::render() {
     }
 
     if (_showNodeNames) {
-        std::lock_guard guard(_itemsMutex);
+        const std::lock_guard guard(_itemsMutex);
 
-        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        const auto now = std::chrono::system_clock::now();
 
         const glm::vec2 logoLl = glm::vec2(LogoCenter.x - size.x,  LogoCenter.y - size.y);
         const glm::vec2 logoUr = glm::vec2(LogoCenter.x + size.x,  LogoCenter.y + size.y);
@@ -407,7 +403,7 @@ void LoadingScreen::render() {
                 glm::vec2 ll = glm::vec2(0.f);
                 glm::vec2 ur = glm::vec2(0.f);
                 int i = 0;
-                for (; i < MaxNumberLocationSamples; ++i) {
+                for (; i < MaxNumberLocationSamples; i++) {
                     std::uniform_int_distribution<int> distX(
                         15,
                         static_cast<int>(res.x - b.x - 15)
@@ -512,7 +508,7 @@ void LoadingScreen::render() {
                 int p = static_cast<int>(std::round(info.progress * 100));
                 if (isTotalSizeKnown) {
                     if (info.totalSize < 1024 * 1024) { // 1MB
-                        text = fmt::format(
+                        text = std::format(
                             "{} ({}%)\n{}/{} {}",
                             text, p, info.currentSize, info.totalSize, "bytes"
                         );
@@ -521,7 +517,7 @@ void LoadingScreen::render() {
                         float curr = info.currentSize / (1024.f * 1024.f);
                         float total = info.totalSize / (1024.f * 1024.f);
 
-                        text = fmt::format(
+                        text = std::format(
                             "{} ({}%)\n{:.3f}/{:.3f} {}",
                             text, p, curr, total, "MB"
                         );
@@ -530,11 +526,11 @@ void LoadingScreen::render() {
                 else {
                     // We don't know the total size but we have started downloading data
                     if (info.currentSize < 1024 * 1024) {
-                        text = fmt::format("{}\n{} {}", text, info.currentSize, "bytes");
+                        text = std::format("{}\n{} {}", text, info.currentSize, "bytes");
                     }
                     else {
                         float curr = info.currentSize / (1024.f * 1024.f);
-                        text = fmt::format("{}\n{:.3f} {}", text, curr, "MB");
+                        text = std::format("{}\n{:.3f} {}", text, curr, "MB");
                     }
                 }
             }
@@ -585,7 +581,7 @@ void LoadingScreen::renderLogMessages() const {
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
 
     size_t nRows = 0;
-    size_t j = std::min(MaxNumberMessages, entries.size());
+    const size_t j = std::min(MaxNumberMessages, entries.size());
     for (size_t i = 1; i <= j; i++) {
         ZoneScopedN("Entry");
 
@@ -630,13 +626,13 @@ void LoadingScreen::renderLogMessages() const {
 
     // Render # of warnings and error messages
     std::map<ghoul::logging::LogLevel, size_t> numberOfErrorsPerLevel;
-    for (auto& entry : _log->entries()) {
+    for (const auto& entry : _log->entries()) {
         numberOfErrorsPerLevel[entry.level]++;
     }
     size_t row = 0;
     for (auto& [level, amount] : numberOfErrorsPerLevel) {
-        const std::string text = fmt::format("{}: {}", ghoul::to_string(level), amount);
-        glm::vec2 bbox = _logFont->boundingBox(text);
+        const std::string text = std::format("{}: {}", ghoul::to_string(level), amount);
+        const glm::vec2 bbox = _logFont->boundingBox(text);
         renderer.render(
             *_logFont,
             glm::vec2(
@@ -651,7 +647,7 @@ void LoadingScreen::renderLogMessages() const {
 }
 
 void LoadingScreen::postMessage(std::string message) {
-    std::lock_guard guard(_messageMutex);
+    const std::lock_guard guard(_messageMutex);
     _message = std::move(message);
 }
 
@@ -688,7 +684,7 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         // also would create any of the text information
         return;
     }
-    std::lock_guard guard(_itemsMutex);
+    const std::lock_guard guard(_itemsMutex);
 
     auto it = std::find_if(
         _items.begin(),

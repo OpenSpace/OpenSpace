@@ -49,8 +49,8 @@ struct CameraKeyframe {
     CameraKeyframe(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
-    CameraKeyframe(glm::dvec3&& pos, glm::dquat&& rot, std::string&& focusNode,
-        bool&& followNodeRot, float&& scale)
+    CameraKeyframe(glm::dvec3 pos, glm::dquat rot, std::string focusNode,
+                   bool followNodeRot, float scale)
         : _position(pos)
         , _rotation(rot)
         , _followNodeRotation(followNodeRot)
@@ -407,7 +407,7 @@ struct ScriptMessage {
         if (buffer.size() != (sizeof(uint32_t) + len)) {
             LERRORC(
                 "ParallelPeer",
-                fmt::format(
+                std::format(
                     "Received buffer with wrong size. Expected {} got {}",
                     len, buffer.size()
                 )
@@ -467,7 +467,7 @@ struct ScriptMessage {
         }
         std::string tmpReadbackScript;
         _script.erase();
-        for (int i = 0; i < numScriptLines; ++i) {
+        for (int i = 0; i < numScriptLines; i++) {
             std::getline(iss, tmpReadbackScript);
             size_t start = tmpReadbackScript.find_first_not_of(" ");
             tmpReadbackScript = tmpReadbackScript.substr(start);

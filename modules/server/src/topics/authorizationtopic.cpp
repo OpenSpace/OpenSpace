@@ -54,7 +54,7 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
     }
     else {
         try {
-            std::string providedKey = json.at("key").get<std::string>();
+            const std::string providedKey = json.at("key").get<std::string>();
             if (authorize(providedKey)) {
                 _connection->setAuthorized(true);
                 _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));

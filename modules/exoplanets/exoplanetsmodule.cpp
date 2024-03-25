@@ -268,7 +268,7 @@ std::string ExoplanetsModule::exoplanetsDataPath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
     return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
+        std::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
     ).string();
 }
 
@@ -276,14 +276,14 @@ std::string ExoplanetsModule::lookUpTablePath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
     return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
+        std::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
     ).string();
 }
 
 std::string ExoplanetsModule::teffToBvConversionFilePath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
-    return absPath(fmt::format(
+    return absPath(std::format(
         "{}/{}", _exoplanetsDataFolder.value(), TeffToBvConversionFileName
     )).string();
 }

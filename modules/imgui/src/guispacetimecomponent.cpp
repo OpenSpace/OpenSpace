@@ -201,7 +201,7 @@ void GuiSpaceTimeComponent::render() {
 
     constexpr int BufferSize = 256;
     static char Buffer[BufferSize];
-    bool dateChanged = ImGui::InputText(
+    const bool dateChanged = ImGui::InputText(
         "Change Date",
         Buffer,
         BufferSize,
@@ -211,7 +211,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent to the
         // connected nodes and peers
         global::scriptEngine->queueScript(
-            "openspace.time.setTime(\"" + std::string(Buffer) + "\")",
+            std::format("openspace.time.setTime([[{}]])", std::string_view(Buffer)),
             scripting::ScriptEngine::ShouldBeSynchronized::No,
             scripting::ScriptEngine::ShouldSendToRemote::No
         );
@@ -345,7 +345,7 @@ void GuiSpaceTimeComponent::render() {
                 openspace::TimeUnits.end(),
                 std::string(""),
                 [](const std::string& a, const openspace::TimeUnit& unit) {
-                    return fmt::format(
+                    return std::format(
                         "{}{} / second", a, nameForTimeUnit(unit, true)
                     ) + '\0';
                 }
@@ -357,7 +357,7 @@ void GuiSpaceTimeComponent::render() {
             convertTime(dt, TimeUnit::Second, _deltaTimeUnit)
         );
 
-        bool valueChanged = ImGui::InputFloat(
+        const bool valueChanged = ImGui::InputFloat(
             "##inputValueDeltaTime",
             &_deltaTime,
             1.f,
@@ -368,7 +368,7 @@ void GuiSpaceTimeComponent::render() {
         ImGui::SameLine();
 
         int deltaTimeUnit = static_cast<int>(_deltaTimeUnit);
-        bool unitChanged = ImGui::Combo(
+        const bool unitChanged = ImGui::Combo(
             "##inputUnit",
             &deltaTimeUnit,
             _timeUnits.c_str()
@@ -377,8 +377,11 @@ void GuiSpaceTimeComponent::render() {
 
         if (valueChanged) {
             // If the value changed, we want to change the delta time to the new value
-
-            double newDt = convertTime(_deltaTime, _deltaTimeUnit, TimeUnit::Second);
+            const double newDt = convertTime(
+                _deltaTime,
+                _deltaTimeUnit,
+                TimeUnit::Second
+            );
 
             // No sync or send because time settings are always synced and sent
             // to the connected nodes and peers
@@ -454,7 +457,7 @@ void GuiSpaceTimeComponent::render() {
         }
     }
     else {
-        bool accelerationDeltaChanged = ImGui::SliderFloat(
+        const bool accelerationDeltaChanged = ImGui::SliderFloat(
             "Delta Time Slider",
             &_accelerationDelta,
             -100.f,
@@ -624,4 +627,4 @@ void GuiSpaceTimeComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace gui
+} // namespace openspace::gui

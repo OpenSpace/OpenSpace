@@ -104,7 +104,7 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
     else {
         LERRORC(
             "onVREvent()",
-            fmt::format("Received an event named {} of unknown type", eventData.getName())
+            std::format("Received an event named {} of unknown type", eventData.getName())
         );
     }
 
@@ -244,7 +244,7 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
         global::openSpaceEngine.decode(std::move(synchronizationBuffer));
     }
     else {
-        LERRORC("onVREvent()", fmt::format("Received an event of unknown type {}", type));
+        LERRORC("onVREvent()", std::format("Received an event of unknown type {}", type));
     }
 }
 
@@ -372,7 +372,7 @@ int main(int argc, char** argv) {
             LFATALC("main", "Could not find configuration: " + configurationFilePath);
             exit(EXIT_FAILURE);
         }
-        LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
+        LINFO(std::format("Configuration Path: '{}'", configurationFilePath));
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");

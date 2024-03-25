@@ -41,7 +41,8 @@ struct NavigationState {
     explicit NavigationState(const nlohmann::json& json);
     NavigationState(std::string anchor, std::string aim, std::string referenceFrame,
         glm::dvec3 position, std::optional<glm::dvec3> up = std::nullopt,
-        double yaw = 0.0, double pitch = 0.0);
+        double yaw = 0.0, double pitch = 0.0,
+        std::optional<double> timestamp = std::nullopt);
 
     CameraPose cameraPose() const;
     ghoul::Dictionary dictionary() const;
@@ -55,6 +56,8 @@ struct NavigationState {
     std::optional<glm::dvec3> up;
     double yaw = 0.0;
     double pitch = 0.0;
+
+    std::optional<double> timestamp;
 };
 
 } // namespace openspace::interaction

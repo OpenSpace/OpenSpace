@@ -200,7 +200,7 @@ glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3&
  * \param worldPosition The galactic position of the plane
  * \return Field of view
  */
-double sizeFromFov(double fov, glm::dvec3 worldPosition);
+double sizeFromFov(double fov, const glm::dvec3& worldPosition);
 
 template <typename T>
 class Animation {

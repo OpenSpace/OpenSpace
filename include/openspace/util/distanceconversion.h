@@ -218,7 +218,7 @@ constexpr DistanceUnit distanceUnitFromString(std::string_view unitName) {
             found = i;
             break;
         }
-        ++i;
+        i++;
     }
 
     i = 0;
@@ -227,7 +227,7 @@ constexpr DistanceUnit distanceUnitFromString(std::string_view unitName) {
             found = i;
             break;
         }
-        ++i;
+        i++;
     }
 
 

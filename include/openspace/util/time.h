@@ -166,7 +166,7 @@ public:
      * (M)onths, and (y)ears as units and an optional - sign to move backwards in time.
      * The return value is in the form of an ISO 8601 date string.
      */
-    static std::string advancedTime(std::string base, std::string change);
+    static std::string advancedTime(const std::string& base, std::string change);
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the

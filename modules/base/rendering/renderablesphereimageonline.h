@@ -52,9 +52,6 @@ protected:
     void bindTexture() override;
 
 private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
-
     properties::StringProperty _textureUrl;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;

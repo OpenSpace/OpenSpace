@@ -205,7 +205,7 @@ public:
       * \param index Location of the item to set
       * \param name The asset name to set
       */
-    void setName(QModelIndex& index, QString name);
+    void setName(QModelIndex& index, const QString& name);
 
     /**
       * Set state of checked/selected of an item.

@@ -47,7 +47,7 @@ namespace {
     template <typename T, typename U>
     void checkSize(U value, std::string_view message) {
         if (value > std::numeric_limits<U>::max()) {
-            throw ghoul::RuntimeError(fmt::format("Error saving file: {}", message));
+            throw ghoul::RuntimeError(std::format("Error saving file '{}'", message));
         }
     }
 
@@ -87,7 +87,7 @@ namespace {
         if (std::filesystem::exists(cached)) {
             LINFOC(
                 "DataLoader",
-                fmt::format("Cached file {} used for file {}", cached, filePath)
+                std::format("Cached file {} used for file {}", cached, filePath)
             );
 
             std::optional<T> dataset = loadCacheFunction(cached);
@@ -99,7 +99,7 @@ namespace {
                 FileSys.cacheManager()->removeCacheFile(cached);
             }
         }
-        LINFOC("DataLoader", fmt::format("Loading file {}", filePath));
+        LINFOC("DataLoader", std::format("Loading file '{}'", filePath));
         T dataset = loadFunction(filePath, specs);
 
         if (!dataset.entries.empty()) {
@@ -118,23 +118,23 @@ namespace data {
 Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open data file {}", path));
+        throw ghoul::RuntimeError(std::format("Failed to open data file '{}'", path));
     }
 
-    std::string extension = ghoul::toLowerCase(path.extension().string());
+    const std::string extension = ghoul::toLowerCase(path.extension().string());
 
     Dataset res;
     if (extension == ".csv") {
-        res = csv::loadCsvFile(path, specs);
+        res = csv::loadCsvFile(path, std::move(specs));
     }
     else if (extension == ".speck") {
-        res = speck::loadSpeckFile(path, specs);
+        res = speck::loadSpeckFile(path, std::move(specs));
     }
     else {
-        LERRORC("DataLoader", fmt::format(
-            "Could not read data file {}. File format {} is not supported",
+        LERRORC("DataLoader", std::format(
+            "Could not read data file '{}'. File format '{}' is not supported",
             path, path.extension()
         ));
     }
@@ -142,15 +142,15 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     return res;
 }
 
-std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
-    std::ifstream file(path, std::ios::binary);
+std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
+    std::ifstream file = std::ifstream(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;
     }
 
     Dataset result;
 
-    int8_t fileVersion;
+    int8_t fileVersion = 0;
     file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
     if (fileVersion != DataCacheFileVersion) {
         // Incompatible version and we won't be able to read the file
@@ -159,17 +159,17 @@ std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
 
     //
     // Read variables
-    uint16_t nVariables;
+    uint16_t nVariables = 0;
     file.read(reinterpret_cast<char*>(&nVariables), sizeof(uint16_t));
     result.variables.resize(nVariables);
     for (int i = 0; i < nVariables; i += 1) {
         Dataset::Variable var;
 
-        int16_t idx;
+        int16_t idx = 0;
         file.read(reinterpret_cast<char*>(&idx), sizeof(int16_t));
         var.index = idx;
 
-        uint16_t len;
+        uint16_t len = 0;
         file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
         var.name.resize(len);
         file.read(var.name.data(), len);
@@ -179,17 +179,17 @@ std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
 
     //
     // Read textures
-    uint16_t nTextures;
+    uint16_t nTextures = 0;
     file.read(reinterpret_cast<char*>(&nTextures), sizeof(uint16_t));
     result.textures.resize(nTextures);
     for (int i = 0; i < nTextures; i += 1) {
         Dataset::Texture tex;
 
-        int16_t idx;
+        int16_t idx = 0;
         file.read(reinterpret_cast<char*>(&idx), sizeof(int16_t));
         tex.index = idx;
 
-        uint16_t len;
+        uint16_t len = 0;
         file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
         tex.file.resize(len);
         file.read(tex.file.data(), len);
@@ -199,17 +199,17 @@ std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
 
     //
     // Read indices
-    int16_t texDataIdx;
+    int16_t texDataIdx = 0;
     file.read(reinterpret_cast<char*>(&texDataIdx), sizeof(int16_t));
     result.textureDataIndex = texDataIdx;
 
-    int16_t oriDataIdx;
+    int16_t oriDataIdx = 0;
     file.read(reinterpret_cast<char*>(&oriDataIdx), sizeof(int16_t));
     result.orientationDataIndex = oriDataIdx;
 
     //
     // Read entries
-    uint64_t nEntries;
+    uint64_t nEntries = 0;
     file.read(reinterpret_cast<char*>(&nEntries), sizeof(uint64_t));
     result.entries.reserve(nEntries);
     for (uint64_t i = 0; i < nEntries; i += 1) {
@@ -218,12 +218,12 @@ std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
         file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
         file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
 
-        uint16_t nValues;
+        uint16_t nValues = 0;
         file.read(reinterpret_cast<char*>(&nValues), sizeof(uint16_t));
         e.data.resize(nValues);
         file.read(reinterpret_cast<char*>(e.data.data()), nValues * sizeof(float));
 
-        uint16_t len;
+        uint16_t len = 0;
         file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
         if (len > 0) {
             std::string comment;
@@ -237,15 +237,15 @@ std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
 
     //
     // Read max data point variable
-    float max;
+    float max = 0.f;
     file.read(reinterpret_cast<char*>(&max), sizeof(float));
     result.maxPositionComponent = max;
 
     return result;
 }
 
-void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
-    std::ofstream file(path, std::ofstream::binary);
+void saveCachedFile(const Dataset& dataset, const std::filesystem::path& path) {
+    std::ofstream file = std::ofstream(path, std::ofstream::binary);
 
     file.write(reinterpret_cast<const char*>(&DataCacheFileVersion), sizeof(int8_t));
 
@@ -330,12 +330,10 @@ void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
     );
 }
 
-Dataset loadFileWithCache(std::filesystem::path filePath,
-                          std::optional<DataMapping> specs)
-{
+Dataset loadFileWithCache(std::filesystem::path path, std::optional<DataMapping> specs) {
     return internalLoadFileWithCache<Dataset>(
-        filePath,
-        specs,
+        std::move(path),
+        std::move(specs),
         &loadFile,
         &loadCachedFile,
         &saveCachedFile
@@ -349,20 +347,20 @@ namespace label {
 Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open dataset file {}", path));
+        throw ghoul::RuntimeError(std::format("Failed to open dataset file '{}'", path));
     }
 
-    std::string extension = ghoul::toLowerCase(path.extension().string());
+    const std::string extension = ghoul::toLowerCase(path.extension().string());
 
     Labelset res;
     if (extension == ".label") {
         res = speck::loadLabelFile(path);
     }
     else {
-        LERRORC("DataLoader", fmt::format(
-            "Could not read label data file {}. File format {} is not supported",
+        LERRORC("DataLoader", std::format(
+            "Could not read label data file '{}'. File format '{}' is not supported",
             path, path.extension()
         ));
     }
@@ -370,13 +368,13 @@ Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     return res;
 }
 
-std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
+std::optional<Labelset> loadCachedFile(const std::filesystem::path& path) {
     std::ifstream file(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;
     }
 
-    int8_t fileVersion;
+    int8_t fileVersion = 0;
     file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
     if (fileVersion != LabelCacheFileVersion) {
         // Incompatible version and we won't be able to read the file
@@ -385,11 +383,11 @@ std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
 
     Labelset result;
 
-    int16_t textColorIdx;
+    int16_t textColorIdx = 0;
     file.read(reinterpret_cast<char*>(&textColorIdx), sizeof(int16_t));
     result.textColorIndex = textColorIdx;
 
-    uint32_t nEntries;
+    uint32_t nEntries = 0;
     file.read(reinterpret_cast<char*>(&nEntries), sizeof(uint32_t));
     result.entries.reserve(nEntries);
     for (unsigned int i = 0; i < nEntries; i += 1) {
@@ -399,13 +397,13 @@ std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
         file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
 
         // Identifier
-        uint8_t idLen;
+        uint8_t idLen = 0;
         file.read(reinterpret_cast<char*>(&idLen), sizeof(uint8_t));
         e.identifier.resize(idLen);
         file.read(e.identifier.data(), idLen);
 
         // Text
-        uint16_t len;
+        uint16_t len = 0;
         file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
         e.text.resize(len);
         file.read(e.text.data(), len);
@@ -416,8 +414,8 @@ std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
     return result;
 }
 
-void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
-    std::ofstream file(path, std::ofstream::binary);
+void saveCachedFile(const Labelset& labelset, const std::filesystem::path& path) {
+    std::ofstream file = std::ofstream(path, std::ofstream::binary);
 
     file.write(reinterpret_cast<const char*>(&LabelCacheFileVersion), sizeof(int8_t));
 
@@ -451,9 +449,9 @@ void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
     }
 }
 
-Labelset loadFileWithCache(std::filesystem::path filePath) {
+Labelset loadFileWithCache(std::filesystem::path path) {
     return internalLoadFileWithCache<Labelset>(
-        filePath,
+        std::move(path),
         std::nullopt,
         &loadFile,
         &loadCachedFile,
@@ -471,7 +469,7 @@ Labelset loadFromDataset(const Dataset& dataset) {
         label.position = entry.position;
         label.text = entry.comment.value_or("MISSING LABEL");
         // @TODO: make is possible to configure this identifier?
-        label.identifier = fmt::format("Point-{}", count);
+        label.identifier = std::format("Point-{}", count);
         res.entries.push_back(std::move(label));
     }
 
@@ -485,20 +483,20 @@ namespace color {
 ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open colormap file {}", path));
+        throw ghoul::RuntimeError(std::format("Failed to open colormap file '{}'", path));
     }
 
-    std::string extension = ghoul::toLowerCase(path.extension().string());
+    const std::string extension = ghoul::toLowerCase(path.extension().string());
 
     ColorMap res;
     if (extension == ".cmap") {
         res = speck::loadCmapFile(path);
     }
     else {
-        LERRORC("DataLoader", fmt::format(
-            "Could not read color map file {}. File format {} is not supported",
+        LERRORC("DataLoader", std::format(
+            "Could not read color map file '{}'. File format '{}' is not supported",
             path, path.extension()
         ));
     }
@@ -506,13 +504,13 @@ ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     return res;
 }
 
-std::optional<ColorMap> loadCachedFile(std::filesystem::path path) {
+std::optional<ColorMap> loadCachedFile(const std::filesystem::path& path) {
     std::ifstream file(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;
     }
 
-    int8_t fileVersion;
+    int8_t fileVersion = 0;
     file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
     if (fileVersion != ColorCacheFileVersion) {
         // Incompatible version and we won't be able to read the file
@@ -521,7 +519,7 @@ std::optional<ColorMap> loadCachedFile(std::filesystem::path path) {
 
     ColorMap result;
 
-    uint32_t nColors;
+    uint32_t nColors = 0;
     file.read(reinterpret_cast<char*>(&nColors), sizeof(uint32_t));
     result.entries.reserve(nColors);
     for (unsigned int i = 0; i < nColors; i += 1) {
@@ -571,8 +569,8 @@ std::optional<ColorMap> loadCachedFile(std::filesystem::path path) {
     return result;
 }
 
-void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path) {
-    std::ofstream file(path, std::ofstream::binary);
+void saveCachedFile(const ColorMap& colorMap, const std::filesystem::path& path) {
+    std::ofstream file = std::ofstream(path, std::ofstream::binary);
 
     file.write(reinterpret_cast<const char*>(&ColorCacheFileVersion), sizeof(int8_t));
 
@@ -610,10 +608,9 @@ void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path) {
     file.write(reinterpret_cast<const char*>(&nanColor.w), sizeof(float));
 }
 
-ColorMap loadFileWithCache(std::filesystem::path path)
-{
+ColorMap loadFileWithCache(std::filesystem::path path) {
     return internalLoadFileWithCache<ColorMap>(
-        path,
+        std::move(path),
         std::nullopt,
         &loadFile,
         &loadCachedFile,
@@ -637,7 +634,7 @@ int Dataset::index(std::string_view variableName) const {
 }
 
 bool Dataset::normalizeVariable(std::string_view variableName) {
-    int idx = index(variableName);
+    const int idx = index(variableName);
 
     if (idx == -1) {
         // We didn't find the variable that was specified
@@ -647,7 +644,7 @@ bool Dataset::normalizeVariable(std::string_view variableName) {
     float minValue = std::numeric_limits<float>::max();
     float maxValue = -std::numeric_limits<float>::max();
     for (Dataset::Entry& e : entries) {
-        float value = e.data[idx];
+        const float value = e.data[idx];
         if (std::isnan(value)) {
             continue;
         }
@@ -656,7 +653,7 @@ bool Dataset::normalizeVariable(std::string_view variableName) {
     }
 
     for (Dataset::Entry& e : entries) {
-        float value = e.data[idx];
+        const float value = e.data[idx];
         if (std::isnan(value)) {
             continue;
         }
@@ -681,7 +678,7 @@ glm::vec2 Dataset::findValueRange(int variableIndex) const {
     float maxValue = -std::numeric_limits<float>::max();
     for (const Dataset::Entry& e : entries) {
         if (!e.data.empty()) {
-            float value = e.data[variableIndex];
+            const float value = e.data[variableIndex];
             if (std::isnan(value)) {
                 continue;
             }
@@ -698,7 +695,7 @@ glm::vec2 Dataset::findValueRange(int variableIndex) const {
 }
 
 glm::vec2 Dataset::findValueRange(std::string_view variableName) const {
-    int idx = index(variableName);
+    const int idx = index(variableName);
 
     if (idx == -1) {
         // We didn't find the variable that was specified

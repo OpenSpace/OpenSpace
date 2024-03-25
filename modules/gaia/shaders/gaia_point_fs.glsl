@@ -95,5 +95,5 @@ void main() {
     //color *= ratio * ratioMultiplier;
   }
 
-  outColor = vec4(color, 1.0f);
+  outColor = vec4(color, 1.0);
 }

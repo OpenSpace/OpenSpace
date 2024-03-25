@@ -35,7 +35,7 @@ public:
     bool isDone() const override;
 
 private:
-    void runScript(std::string script, bool returnValue, bool shouldBeSynchronized);
+    void runScript(std::string script, bool shouldReturn, bool shouldBeSynchronized);
 
     bool _waitingForReturnValue = true;
 };

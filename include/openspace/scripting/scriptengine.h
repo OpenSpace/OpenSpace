@@ -83,7 +83,8 @@ public:
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
 
-    bool runScript(const std::string& script, ScriptCallback callback = ScriptCallback());
+    bool runScript(const std::string& script,
+        const ScriptCallback& callback = ScriptCallback());
     bool runScriptFile(const std::filesystem::path& filename);
 
     virtual void preSync(bool isMaster) override;
@@ -92,7 +93,8 @@ public:
     virtual void postSync(bool isMaster) override;
 
     void queueScript(std::string script, ShouldBeSynchronized shouldBeSynchronized,
-        ShouldSendToRemote shouldSendToRemote, ScriptCallback cb = ScriptCallback());
+        ShouldSendToRemote shouldSendToRemote,
+        ScriptCallback callback = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
     const std::vector<LuaLibrary>& allLuaLibraries() const;

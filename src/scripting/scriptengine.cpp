@@ -163,7 +163,7 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
     return (it != _registeredLibraries.end());
 }
 
-bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback) {
+bool ScriptEngine::runScript(const std::string& script, const ScriptCallback& callback) {
     ZoneScoped;
 
     ghoul_assert(!script.empty(), "Script must not be empty");
@@ -212,7 +212,7 @@ bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
     ZoneScoped;
 
     if (!std::filesystem::is_regular_file(filename)) {
-        LERROR(fmt::format("Script with name {} did not exist", filename));
+        LERROR(std::format("Script with name {} did not exist", filename));
         return false;
     }
 
@@ -247,35 +247,35 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
             result = true;
             break;
         case LUA_TBOOLEAN:
-            LERROR(fmt::format("Library name '{}' specifies a boolean", name));
+            LERROR(std::format("Library name '{}' specifies a boolean", name));
             break;
         case LUA_TLIGHTUSERDATA:
-            LERROR(fmt::format("Library name '{}' specifies a light user data", name));
+            LERROR(std::format("Library name '{}' specifies a light user data", name));
             break;
         case LUA_TNUMBER:
-            LERROR(fmt::format("Library name '{}' specifies a number", name));
+            LERROR(std::format("Library name '{}' specifies a number", name));
             break;
         case LUA_TSTRING:
-            LERROR(fmt::format("Library name '{}' specifies a string", name));
+            LERROR(std::format("Library name '{}' specifies a string", name));
             break;
         case LUA_TTABLE:
             if (hasLibrary(name)) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Library with name '{}' has been registered before", name
                 ));
             }
             else {
-                LERROR(fmt::format("Library name '{}' specifies a table", name));
+                LERROR(std::format("Library name '{}' specifies a table", name));
             }
             break;
         case LUA_TFUNCTION:
-            LERROR(fmt::format("Library name '{}' specifies a function", name));
+            LERROR(std::format("Library name '{}' specifies a function", name));
             break;
         case LUA_TUSERDATA:
-            LERROR(fmt::format("Library name '{}' specifies a user data", name));
+            LERROR(std::format("Library name '{}' specifies a user data", name));
             break;
         case LUA_TTHREAD:
-            LERROR(fmt::format("Library name '{}' specifies a thread", name));
+            LERROR(std::format("Library name '{}' specifies a thread", name));
             break;
     }
 
@@ -294,7 +294,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
             lua_getfield(state, -1, p.name.c_str());
             const bool isNil = lua_isnil(state, -1);
             if (!isNil) {
-                LERROR(fmt::format("Function name '{}' was already assigned", p.name));
+                LERROR(std::format("Function name '{}' was already assigned", p.name));
                 return;
             }
             lua_pop(state, 1);
@@ -330,7 +330,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         ghoul::lua::push(state, "documentation");
         lua_gettable(state, -2);
         if (lua_isnil(state, -1)) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Module '{}' did not provide a documentation in script file {}",
                 library.name, script
             ));
@@ -432,7 +432,7 @@ void ScriptEngine::writeLog(const std::string& script) {
             _logFilename = absPath(global::configuration->scriptLog).string();
             _logFileExists = true;
 
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Using script log file {}", std::filesystem::path(_logFilename)
             ));
 
@@ -440,7 +440,7 @@ void ScriptEngine::writeLog(const std::string& script) {
             std::ofstream file(_logFilename, std::ofstream::out | std::ofstream::trunc);
 
             if (!file.good()) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Could not open file {} for logging scripts",
                     std::filesystem::path(_logFilename)
                 ));
@@ -457,7 +457,7 @@ void ScriptEngine::writeLog(const std::string& script) {
     // Simple text output to logfile
     std::ofstream file(_logFilename, std::ofstream::app);
     if (!file.good()) {
-        LERROR(fmt::format("Could not open file '{}' for logging scripts", _logFilename));
+        LERROR(std::format("Could not open file '{}' for logging scripts", _logFilename));
         return;
     }
 

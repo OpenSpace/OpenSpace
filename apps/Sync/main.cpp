@@ -64,7 +64,7 @@ int main(int, char**) {
         Task& task = *tasks[i].get();
         LINFOC(
             "Sync",
-            fmt::format(
+            std::format(
                 "Synchronizing scene {} out of {}: {}",
                 i + 1, tasks.size(), task.description()
             )
