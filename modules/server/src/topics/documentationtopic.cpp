@@ -27,7 +27,7 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
-
+#include <openspace/properties/propertyowner.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/interaction/keybindingmanager.h>
@@ -42,9 +42,6 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
 
     nlohmann::json response;
 
-    // @emiax: Proposed future refector.
-    // Do not parse generated json. Instead implement ability to get
-    // ghoul::Dictionary objects from ScriptEngine, FactoryManager, and KeybindingManager.
     if (requestedType == "lua") {
         response = DocEng.generateScriptEngineJson();
     }
@@ -55,7 +52,7 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
         response = DocEng.generateKeybindingsJson();
     }
     else if (requestedType == "asset") {
-        // TODO: Add asset documentation here
+        DocEng.generatePropertyOwnerJson(global::rootPropertyOwner);
     }
     else if (requestedType == "meta") {
         response = DocEng.generateLicenseListJson();

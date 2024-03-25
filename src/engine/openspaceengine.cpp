@@ -806,7 +806,6 @@ void OpenSpaceEngine::loadAssets() {
 
     runGlobalCustomizationScripts();
 
-    
     _writeDocumentationTask = std::async(
         &documentation::DocumentationEngine::writeDocumentation,
         DocEng

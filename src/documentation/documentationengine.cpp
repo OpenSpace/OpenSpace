@@ -131,9 +131,7 @@ namespace {
     constexpr const char* FiltersKey = "filters";
     constexpr const char* ActionsKey = "actions";
 
-    nlohmann::json documentationToJson(
-                                         const openspace::documentation::Documentation& d)
-    {
+    nlohmann::json documentationToJson(const openspace::documentation::Documentation& d) {
         using namespace openspace::documentation;
 
         nlohmann::json json;
@@ -357,7 +355,6 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
         }
 
         nlohmann::json assetJson;
-
         assetJson[NameKey] = meta.has_value() ? meta->name : NoDataName;
         assetJson[VersionKey] = meta.has_value() ? meta->version : NoDataName;
         assetJson[DescriptionKey] = meta.has_value() ? meta->description : NoDataName;

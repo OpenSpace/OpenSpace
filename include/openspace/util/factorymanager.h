@@ -42,6 +42,7 @@ public:
         std::unique_ptr<ghoul::TemplateFactoryBase> factory;
         std::string name;
     };
+
     /**
      * This exception is thrown if the ghoul::TemplateFactory could not be found in the
      * #factory method.
