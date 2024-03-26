@@ -318,7 +318,7 @@ namespace {
                                  std::optional<double> fadeDuration)
 {
     using namespace openspace;
-    if (!sceneGraphNode(nodeIdentifier)) {
+    if (SceneGraphNode* n = sceneGraphNode(nodeIdentifier);  !n) {
         throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
 
