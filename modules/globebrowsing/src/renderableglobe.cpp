@@ -181,9 +181,9 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SunNodeInfo = {
-        "SunNode",
-        "Name of the local Sun",
+    constexpr openspace::properties::Property::PropertyInfo LightSourceNodeInfo = {
+        "LightSourceNode",
+        "Name of the light source",
         "This value is the name of a scene graph node that should be used as the source "
         "of illumination for the globe. If this value is not specified, the solar "
         "system's Sun is used instead",
@@ -321,8 +321,8 @@ namespace {
         std::optional<ghoul::Dictionary> shadows
             [[codegen::reference("globebrowsing_shadows_component")]];
 
-        // [[codegen::verbatim(SunNodeInfo.description)]]
-        std::optional<std::string> sunNode;
+        // [[codegen::verbatim(LightSourceNodeInfo.description)]]
+        std::optional<std::string> lightSourceNode;
     };
 #include "renderableglobe_codegen.cpp"
 } // namespace
@@ -548,9 +548,13 @@ bool intersects(const AABB3& bb, const AABB3& o) {
  * Calculates the direction towards the local light source. If \p illumination is a
  * `nullptr`, it is interpreted to be (0,0,0)
  */
-glm::dvec3 directionToLightSource(const glm::dvec3& pos, SceneGraphNode* illumination) {
-    if (illumination) {
-        return illumination->worldPosition() - pos;
+glm::dvec3 directionToLightSource(const glm::dvec3& pos, SceneGraphNode* lightSource) {
+    // For the lighting we use the provided node, or the Sun
+    SceneGraphNode* node =
+        lightSource ? lightSource : sceneGraph()->sceneGraphNode("Sun");
+
+    if (lightSource) {
+        return lightSource->worldPosition() - pos;
     }
     else {
         const glm::dvec3 dir = length(pos) > 0.0 ? glm::normalize(-pos) : glm::dvec3(0.0);
@@ -600,7 +604,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
-    , _sunNodeName(SunNodeInfo)
+    , _lightSourceNodeName(LightSourceNodeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -643,25 +647,25 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.renderAtDistance);
 
-    _sunNodeName.onChange([this]() {
-        if (_sunNodeName.value().empty()) {
-            _sunNode = nullptr;
+    _lightSourceNodeName.onChange([this]() {
+        if (_lightSourceNodeName.value().empty()) {
+            _lightSourceNode = nullptr;
             return;
         }
 
-        SceneGraphNode* n = sceneGraphNode(_sunNodeName);
+        SceneGraphNode* n = sceneGraphNode(_lightSourceNodeName);
         if (!n) {
             LERROR(std::format(
                 "Could not find node '{}' as illumination for '{}'",
-                _sunNodeName.value(), identifier()
+                _lightSourceNodeName.value(), identifier()
             ));
         }
         else {
-            _sunNode = n;
+            _lightSourceNode = n;
         }
     });
-    _sunNodeName = p.sunNode.value_or("");
-    addProperty(_sunNodeName);
+    _lightSourceNodeName = p.lightSourceNode.value_or("");
+    addProperty(_lightSourceNodeName);
 
     if (p.shadowGroup.has_value()) {
         std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
@@ -1213,7 +1217,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     if (nightLayersActive || waterLayersActive || _generalProperties.performShading) {
         const glm::dvec3 directionToSunWorldSpace =
-            directionToLightSource(data.modelTransform.translation, _sunNode);
+            directionToLightSource(data.modelTransform.translation, _lightSourceNode);
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
@@ -1239,7 +1243,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     if (nightLayersActive || waterLayersActive || _generalProperties.performShading) {
         const glm::dvec3 directionToSunWorldSpace =
-            directionToLightSource(data.modelTransform.translation, _sunNode);
+            directionToLightSource(data.modelTransform.translation, _lightSourceNode);
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));

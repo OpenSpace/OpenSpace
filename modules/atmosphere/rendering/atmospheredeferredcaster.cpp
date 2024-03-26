@@ -382,8 +382,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
             invModelMatrix * glm::dvec4(data.camera.eyePositionVec3(), 1.0);
         program.setUniform(_uniformCache.camPosObj, glm::dvec3(camPosObjCoords));
 
-        const glm::dvec3 sunPosWorld =
-            _sunNode ? _sunNode->worldPosition() : glm::dvec3(0.0);
+        // For the lighting we use the provided node, or the Sun
+        SceneGraphNode* node =
+            _lightSourceNode ? _lightSourceNode : sceneGraph()->sceneGraphNode("Sun");
+        const glm::dvec3 sunPosWorld = node ? node->worldPosition() : glm::dvec3(0.0);
 
         glm::dvec3 sunPosObj;
         // Sun following camera position
@@ -575,7 +577,7 @@ void AtmosphereDeferredcaster::setParameters(float atmosphereRadius, float plane
                                              glm::vec3 mieScatteringCoefficients,
                                              glm::vec3 mieExtinctionCoefficients,
                                              bool sunFollowing, float sunAngularSize,
-                                             SceneGraphNode* sunNode)
+                                             SceneGraphNode* lightSourceNode)
 {
     _atmosphereRadius = atmosphereRadius;
     _atmospherePlanetRadius = planetRadius;
@@ -593,8 +595,8 @@ void AtmosphereDeferredcaster::setParameters(float atmosphereRadius, float plane
     _mieExtinctionCoeff = std::move(mieExtinctionCoefficients);
     _sunFollowingCameraEnabled = sunFollowing;
     _sunAngularSize = sunAngularSize;
-    // sunNode may be nullptr in which the position is to be interpreted to be (0,0,0)
-    _sunNode = sunNode;
+    // The light source may be nullptr which we interpret to mean a position of (0,0,0)
+    _lightSourceNode = lightSourceNode;
 }
 
 void AtmosphereDeferredcaster::setHardShadows(bool enabled) {

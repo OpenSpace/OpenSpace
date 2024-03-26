@@ -289,8 +289,8 @@ private:
         std::array<GPULayerGroup, LayerManager::NumLayerGroups> gpuLayerGroups;
     } _localRenderer;
 
-    SceneGraphNode* _sunNode = nullptr;
-    properties::StringProperty _sunNodeName;
+    SceneGraphNode* _lightSourceNode = nullptr;
+    properties::StringProperty _lightSourceNodeName;
 
     bool _shadersNeedRecompilation = true;
     bool _lodScaleFactorDirty = true;

@@ -97,8 +97,8 @@ private:
     properties::BoolProperty _sunFollowingCameraEnabled;
     properties::BoolProperty _hardShadowsEnabled;
     properties::FloatProperty _sunAngularSize;
-    SceneGraphNode* _sunNode = nullptr;
-    properties::StringProperty _sunNodeName;
+    SceneGraphNode* _lightSourceNode = nullptr;
+    properties::StringProperty _lightSourceNodeName;
 
     // Atmosphere dimming
     properties::FloatProperty _atmosphereDimmingHeight;
