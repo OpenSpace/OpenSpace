@@ -512,6 +512,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
             nlohmann::json documentation;
             documentation[NameKey] = factoryInfo.name;
             documentation[IdentifierKey] = factoryInfo.name;
+            documentation[MembersKey] = nlohmann::json::array();
             factory[ClassesKey].push_back(documentation);
         }
 
@@ -532,6 +533,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
                 nlohmann::json documentation;
                 documentation[NameKey] = c;
                 documentation[IdentifierKey] = c;
+                documentation[MembersKey] = nlohmann::json::array();
                 factory[ClassesKey].push_back(documentation);
             }
         }
