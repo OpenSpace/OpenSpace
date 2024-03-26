@@ -326,13 +326,13 @@ namespace {
         global::navigationHandler->pathNavigator().jumpToFadeDuration()
     );
 
-    std::string onArrivalScript = fmt::format(
+    std::string onArrivalScript = std::format(
         "openspace.pathnavigation.flyTo('{}', 0) "
         "openspace.setPropertyValueSingle("
             "'RenderEngine.BlackoutFactor', 1, {}, 'QuadraticEaseIn'"
         ")", nodeIdentifier, duration
     );
-    std::string script = fmt::format(
+    std::string script = std::format(
         "openspace.setPropertyValueSingle("
             "'RenderEngine.BlackoutFactor', 0, {}, 'QuadraticEaseOut', [[{}]]"
         ")", duration, onArrivalScript
