@@ -181,15 +181,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SunNodeInfo = {
-        "SunNode",
-        "Name of the local Sun",
-        "This value is the name of a scene graph node that should be used as the source "
-        "of illumination for the globe. If this value is not specified, the solar "
-        "system's Sun is used instead",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EclipseInfo = {
         "Eclipse",
         "Eclipse",
@@ -321,8 +312,8 @@ namespace {
         std::optional<ghoul::Dictionary> shadows
             [[codegen::reference("globebrowsing_shadows_component")]];
 
-        // [[codegen::verbatim(SunNodeInfo.description)]]
-        std::optional<std::string> sunNode;
+        std::optional<ghoul::Dictionary> lightSource
+            [[codegen::reference("core_light_source")]];
     };
 #include "renderableglobe_codegen.cpp"
 } // namespace
@@ -544,20 +535,6 @@ bool intersects(const AABB3& bb, const AABB3& o) {
         && (bb.min.z <= o.max.z) && (o.min.z <= bb.max.z);
 }
 
-/**
- * Calculates the direction towards the local light source. If \p illumination is a
- * `nullptr`, it is interpreted to be (0,0,0)
- */
-glm::dvec3 directionToLightSource(const glm::dvec3& pos, SceneGraphNode* illumination) {
-    if (illumination) {
-        return illumination->worldPosition() - pos;
-    }
-    else {
-        const glm::dvec3 dir = length(pos) > 0.0 ? glm::normalize(-pos) : glm::dvec3(0.0);
-        return dir;
-    }
-}
-
 } // namespace
 
 Chunk::Chunk(const TileIndex& ti)
@@ -600,7 +577,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
-    , _sunNodeName(SunNodeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -643,25 +619,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.renderAtDistance);
 
-    _sunNodeName.onChange([this]() {
-        if (_sunNodeName.value().empty()) {
-            _sunNode = nullptr;
-            return;
-        }
-
-        SceneGraphNode* n = sceneGraphNode(_sunNodeName);
-        if (!n) {
-            LERROR(std::format(
-                "Could not find node '{}' as illumination for '{}'",
-                _sunNodeName.value(), identifier()
-            ));
-        }
-        else {
-            _sunNode = n;
-        }
-    });
-    _sunNodeName = p.sunNode.value_or("");
-    addProperty(_sunNodeName);
+    if (p.lightSource.has_value()) {
+        _lightSource = LightSource::createFromDictionary(*p.lightSource);
+        addPropertySubOwner(_lightSource.get());
+    }
 
     if (p.shadowGroup.has_value()) {
         std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
@@ -1212,11 +1173,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         !_layerManager.layerGroup(Group::ID::WaterMasks).activeLayers().empty();
 
     if (nightLayersActive || waterLayersActive || _generalProperties.performShading) {
-        const glm::dvec3 directionToSunWorldSpace =
-            directionToLightSource(data.modelTransform.translation, _sunNode);
+        const glm::vec3 directionToSunCameraSpace =
+            _lightSource ? _lightSource->directionViewSpace(data) : glm::vec3(0.f);
 
-        const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
-            glm::dvec4(directionToSunWorldSpace, 0));
         // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
         // way is to figure out with the uniform is optimized away. I assume that it is
         // because the shader doesn't get recompiled when the last layer of the night
@@ -1238,11 +1197,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     );
 
     if (nightLayersActive || waterLayersActive || _generalProperties.performShading) {
-        const glm::dvec3 directionToSunWorldSpace =
-            directionToLightSource(data.modelTransform.translation, _sunNode);
+        const glm::vec3 directionToSunCameraSpace =
+            _lightSource ? _lightSource->directionViewSpace(data) : glm::vec3(0.f);
 
-        const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
-            glm::dvec4(directionToSunWorldSpace, 0));
         // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
         // way is to figure out with the uniform is optimized away. I assume that it is
         // because the shader doesn't get recompiled when the last layer of the night

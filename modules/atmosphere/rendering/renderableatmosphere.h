@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/scene/lightsource.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/textureunit.h>
 #include <memory>
@@ -97,8 +98,8 @@ private:
     properties::BoolProperty _sunFollowingCameraEnabled;
     properties::BoolProperty _hardShadowsEnabled;
     properties::FloatProperty _sunAngularSize;
-    SceneGraphNode* _sunNode = nullptr;
-    properties::StringProperty _sunNodeName;
+
+    std::unique_ptr<LightSource> _lightSource;
 
     // Atmosphere dimming
     properties::FloatProperty _atmosphereDimmingHeight;

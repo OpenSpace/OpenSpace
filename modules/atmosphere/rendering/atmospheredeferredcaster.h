@@ -41,8 +41,9 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-struct RenderData;
 struct DeferredcastData;
+class LightSource;
+struct RenderData;
 struct ShadowConfiguration;
 
 struct ShadowRenderingStruct {
@@ -88,7 +89,7 @@ public:
         float mieHeightScale, float miePhaseConstant, float sunRadiance,
         glm::vec3 rayScatteringCoefficients, glm::vec3 ozoneExtinctionCoefficients,
         glm::vec3 mieScatteringCoefficients, glm::vec3 mieExtinctionCoefficients,
-        bool sunFollowing, float sunAngularSize, SceneGraphNode* sunNode);
+        bool sunFollowing, float sunAngularSize, LightSource* lightSource);
 
     void setHardShadows(bool enabled);
 
@@ -142,7 +143,7 @@ private:
     float _miePhaseConstant = 0.f;
     float _sunRadianceIntensity = 5.f;
     float _sunAngularSize = 0.3f;
-    SceneGraphNode* _sunNode = nullptr;
+    LightSource* _lightSource = nullptr;
 
     glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.f);
     glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);

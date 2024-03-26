@@ -183,15 +183,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SunNodeInfo = {
-        "SunNode",
-        "Name of the local Sun",
-        "This value is the name of a scene graph node that should be used as the source "
-        "of illumination for the atmosphere. If this value is not specified, the solar "
-        "system's Sun is used instead",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
         struct ShadowGroup {
             // Individual light sources
@@ -281,8 +272,8 @@ namespace {
         // [[codegen::verbatim(SunAngularSize.description)]]
         std::optional<float> sunAngularSize [[codegen::inrange(0.0, 180.0)]];
 
-        // [[codegen::verbatim(SunNodeInfo.description)]]
-        std::optional<std::string> sunNode;
+        std::optional<ghoul::Dictionary> lightSource
+            [[codegen::reference("core_light_source")]];
     };
 #include "renderableatmosphere_codegen.cpp"
 
@@ -324,7 +315,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabled(EclipseHardShadowsInfo, false)
     , _sunAngularSize(SunAngularSize, 0.3f, 0.f, 180.f)
-    , _sunNodeName(SunNodeInfo)
     , _atmosphereDimmingHeight(AtmosphereDimmingHeightInfo, 0.7f, 0.f, 1.f)
     , _atmosphereDimmingSunsetAngle(
         SunsetAngleInfo,
@@ -450,29 +440,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _sunAngularSize.onChange(updateWithoutCalculation);
     addProperty(_sunAngularSize);
 
-    _sunNodeName.onChange([this]() {
-        if (_sunNodeName.value().empty()) {
-            _sunNode = nullptr;
-            return;
-        }
-
-        SceneGraphNode* n = sceneGraphNode(_sunNodeName);
-        if (!n) {
-            LERRORC(
-                "RenderabeAtmosphere",
-                std::format(
-                    "Could not find node '{}' as illumination for '{}'",
-                    _sunNodeName.value(), identifier()
-                )
-            );
-        }
-        else {
-            _sunNode = n;
-            _deferredCasterNeedsUpdate = true;
-        }
-    });
-    _sunNodeName = p.sunNode.value_or("");
-    addProperty(_sunNodeName);
+    if (p.lightSource.has_value()) {
+        _lightSource = LightSource::createFromDictionary(*p.lightSource);
+        addPropertySubOwner(_lightSource.get());
+    }
 }
 
 void RenderableAtmosphere::deinitializeGL() {
@@ -549,7 +520,7 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _mieExtinctionCoeff,
         _sunFollowingCameraEnabled,
         _sunAngularSize,
-        _sunNode
+        _lightSource.get()
     );
     _deferredcaster->setHardShadows(_hardShadowsEnabled);
 }

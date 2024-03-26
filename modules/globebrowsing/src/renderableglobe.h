@@ -41,6 +41,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/scene/lightsource.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
@@ -289,8 +290,7 @@ private:
         std::array<GPULayerGroup, LayerManager::NumLayerGroups> gpuLayerGroups;
     } _localRenderer;
 
-    SceneGraphNode* _sunNode = nullptr;
-    properties::StringProperty _sunNodeName;
+    std::unique_ptr<LightSource> _lightSource;
 
     bool _shadersNeedRecompilation = true;
     bool _lodScaleFactorDirty = true;
