@@ -1102,6 +1102,10 @@ bool SceneGraphNode::hasGuiHintHidden() const {
     return _guiHidden;
 }
 
+void SceneGraphNode::setGuiHintHidden(bool value) {
+    _guiHidden = value;
+}
+
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
