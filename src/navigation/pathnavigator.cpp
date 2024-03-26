@@ -109,8 +109,7 @@ namespace {
         "JumpToFadeDuration",
         "JumpTo Fade Duration",
         "The number of seconds the fading of the rendering should take per default when "
-        "jumping to a scene graph node using the 'openspace.pathnavigation.jumpTo' "
-        "script.",
+        "doing a 'jump' transition to a scene graph node",
         openspace::properties::Property::Visibility::User
     };
 
