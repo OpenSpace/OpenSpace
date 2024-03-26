@@ -175,8 +175,11 @@ namespace {
                 Documentation doc = { .entries = tv->documentations };
 
                 // Since this is a table we need to recurse this function to extract data
-                nlohmann::json restrictions = documentationToJson(doc);
-                entry[RestrictionsKey] = restrictions;
+                nlohmann::json tableDocs = documentationToJson(doc);
+
+                // Set the members entry to the members of the table
+                // to remove unnecessary nestling
+                entry[MembersKey] = tableDocs[MembersKey];
             }
             else {
                 entry[DescriptionKey] = p.verifier->documentation();
