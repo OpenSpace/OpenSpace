@@ -52,7 +52,7 @@ namespace {
 namespace openspace {
 
 void GetPropertyTopic::handleJson(const nlohmann::json& json) {
-    std::string requestedKey = json.at("property").get<std::string>();
+    const std::string requestedKey = json.at("property").get<std::string>();
     LDEBUG("Getting property '" + requestedKey + "'...");
     nlohmann::json response;
     if (requestedKey == AllPropertiesValue) {
@@ -80,7 +80,7 @@ bool GetPropertyTopic::isDone() const {
 }
 
 json GetPropertyTopic::allProperties() {
-    json payload {
+    const json payload {
         {
             "value",
             {
@@ -100,7 +100,7 @@ json GetPropertyTopic::propertyFromKey(const std::string& key) {
         return wrappedPayload(prop);
     }
 
-    return wrappedError(fmt::format("Property '{}' not found", key), 404);
+    return wrappedError(std::format("Property '{}' not found", key), 404);
 }
 
 } // namespace openspace

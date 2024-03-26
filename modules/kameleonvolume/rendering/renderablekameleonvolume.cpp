@@ -339,7 +339,7 @@ bool RenderableKameleonVolume::isCachingEnabled() const {
 
 void RenderableKameleonVolume::load() {
     if (!std::filesystem::is_regular_file(_sourcePath.value())) {
-        LERROR(fmt::format("File '{}' does not exist", _sourcePath.value()));
+        LERROR(std::format("File '{}' does not exist", _sourcePath.value()));
         return;
     }
     if (!isCachingEnabled()) {
@@ -361,7 +361,7 @@ void RenderableKameleonVolume::load() {
 
 std::string RenderableKameleonVolume::cacheSuffix() const {
     glm::uvec3 dims = _dimensions;
-    return fmt::format(".{}.{}x{}x{}", _variable.value(), dims[0], dims[1], dims[2]);
+    return std::format(".{}.{}x{}x{}", _variable.value(), dims[0], dims[1], dims[2]);
 }
 
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {

@@ -33,7 +33,7 @@ namespace {
         );
     }
     catch (const ghoul::RuntimeError& e) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Error adding dashboard item: {}", e.what()
         ));
     }

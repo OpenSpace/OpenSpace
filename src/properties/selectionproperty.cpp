@@ -92,14 +92,14 @@ void SelectionProperty::setOptions(const std::vector<std::string>& keys) {
             _options.push_back(key);
         }
         else {
-            LWARNING(fmt::format("Ignoring duplicated key '{}'", key));
+            LWARNING(std::format("Ignoring duplicated key '{}'", key));
         }
     }
     _options.shrink_to_fit();
     sortOptions();
 
     // In case we have a selection, remove non-existing options
-    bool changed = removeInvalidKeys(_value);
+    const bool changed = removeInvalidKeys(_value);
     if (changed) {
         _isValueDirty = true;
     }
@@ -109,7 +109,7 @@ void SelectionProperty::setOptions(const std::vector<std::string>& keys) {
 
 void SelectionProperty::addOption(const std::string& key) {
     if (hasOption(key)) {
-        LWARNING(fmt::format("Cannot add option. Key '{}' already exists", key));
+        LWARNING(std::format("Cannot add option. Key '{}' already exists", key));
         return;
     }
 
@@ -135,12 +135,12 @@ std::set<std::string> SelectionProperty::fromLuaConversion(lua_State* state) con
 }
 
 void SelectionProperty::toLuaConversion(lua_State* state) const {
-    std::vector<std::string> value(_value.begin(), _value.end());
+    const std::vector<std::string> value(_value.begin(), _value.end());
     ghoul::lua::push(state, value);
 }
 
 std::string SelectionProperty::toStringConversion() const {
-    nlohmann::json json(_value);
+    const nlohmann::json json(_value);
     return json.dump();
 }
 
@@ -148,12 +148,12 @@ void SelectionProperty::sortOptions() {
     std::sort(_options.begin(), _options.end());
 }
 
-bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) {
+bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) const {
     bool changed = false;
-    std::set<std::string>::iterator it = keys.begin();
+    auto it = keys.begin();
     while (it != keys.end()) {
         if (!hasOption(*it)) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Key '{}' is not a valid option and is removed from selection", *it
             ));
             it = keys.erase(it);
@@ -167,10 +167,10 @@ bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) {
 }
 
 std::string SelectionProperty::generateAdditionalJsonDescription() const {
-    nlohmann::json optionsJson(_options);
-    std::string result = "{ ";
-    result += fmt::format("\"{}\": {}", OptionsKey, optionsJson.dump());
-    result += " }";
+    const nlohmann::json optionsJson(_options);
+    std::string result = std::format(
+        R"({{ "{}": {} }})", OptionsKey, optionsJson.dump()
+    );
     return result;
 }
 

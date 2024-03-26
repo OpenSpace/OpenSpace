@@ -96,7 +96,7 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
 
     _sourceFolder = p.sourceFolder;
     if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Time varying image, '{}' is not a valid directory",
             _sourceFolder.value()
         ));
@@ -131,7 +131,7 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
 
 void RenderablePlaneTimeVaryingImage::initialize() {
     RenderablePlane::initialize();
-    bool success = extractMandatoryInfoFromDictionary();
+    const bool success = extractMandatoryInfoFromDictionary();
     if (!success) {
         return;
     }
@@ -162,7 +162,7 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
     namespace fs = std::filesystem;
-    fs::path sourceFolder = absPath(_sourceFolder);
+    const fs::path sourceFolder = absPath(_sourceFolder);
     // Extract all file paths from the provided folder
     _sourceFiles.clear();
     namespace fs = std::filesystem;
@@ -174,7 +174,7 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
     std::sort(_sourceFiles.begin(), _sourceFiles.end());
     // Ensure that there are available and valid source files left
     if (_sourceFiles.empty()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "{}: Plane sequence filepath '{}' was empty",
             _identifier, _sourceFolder.value()
         ));
@@ -206,8 +206,8 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     }
     bool needsUpdate = false;
     const double currentTime = data.time.j2000Seconds();
-    bool isInInterval = (currentTime >= _startTimes[0]) &&
-        (currentTime < _sequenceEndTime);
+    const bool isInInterval = (currentTime >= _startTimes[0]) &&
+                              (currentTime < _sequenceEndTime);
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
@@ -268,7 +268,7 @@ int RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex(
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
         if (iter != _startTimes.begin()) {
-            std::ptrdiff_t idx = std::distance(_startTimes.begin(), iter);
+            const std::ptrdiff_t idx = std::distance(_startTimes.begin(), iter);
             activeIndex = static_cast<int>(idx) - 1;
         }
         else {

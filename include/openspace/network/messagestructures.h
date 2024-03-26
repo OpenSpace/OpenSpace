@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <algorithm>
@@ -49,8 +49,8 @@ struct CameraKeyframe {
     CameraKeyframe(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
-    CameraKeyframe(glm::dvec3&& pos, glm::dquat&& rot, std::string&& focusNode,
-        bool&& followNodeRot, float&& scale)
+    CameraKeyframe(glm::dvec3 pos, glm::dquat rot, std::string focusNode,
+                   bool followNodeRot, float scale)
         : _position(pos)
         , _rotation(rot)
         , _followNodeRotation(followNodeRot)
@@ -407,7 +407,7 @@ struct ScriptMessage {
         if (buffer.size() != (sizeof(uint32_t) + len)) {
             LERRORC(
                 "ParallelPeer",
-                fmt::format(
+                std::format(
                     "Received buffer with wrong size. Expected {} got {}",
                     len, buffer.size()
                 )

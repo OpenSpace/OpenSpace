@@ -68,10 +68,10 @@ documentation::Documentation RenderablePlaneProjection::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_renderableplaneprojection");
 }
 
-RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dict)
-    : Renderable(dict)
+RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
 {
-    const Parameters p = codegen::bake<Parameters>(dict);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
     _spacecraft = p.spacecraft;
     _instrument = p.instrument;
     _defaultTarget = p.defaultTarget.value_or(_defaultTarget);
@@ -81,8 +81,6 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
 }
-
-RenderablePlaneProjection::~RenderablePlaneProjection() {}
 
 bool RenderablePlaneProjection::isReady() const {
     return _shader && _texture;
@@ -223,7 +221,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         LERROR(e.what());
     }
 
-    double lt;
+    double lt = 0.0;
     const glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
         _target.body,
         _spacecraft,
@@ -258,7 +256,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         projection[j] = glm::vec3(cornerPosition * 1000.0);
     }
 
-    const GLfloat vertex_data[] = {
+    const std::array<GLfloat, 36> VertexData = {
         // square of two triangles drawn within fov in target coordinates
         //      x      y     z     w     s     t
         // Lower left 1
@@ -277,7 +275,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);

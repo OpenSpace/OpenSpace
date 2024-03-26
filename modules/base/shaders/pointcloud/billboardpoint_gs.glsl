@@ -27,12 +27,14 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
+flat in float textureLayer[];
 flat in float colorParameter[];
 flat in float scalingParameter[];
 
 layout(triangle_strip, max_vertices = 4) out;
 flat out float gs_colorParameter;
 out vec2 texCoord;
+flat out int layer;
 flat out float vs_screenSpaceDepth;
 flat out vec4 vs_positionViewSpace;
 
@@ -45,6 +47,7 @@ uniform dmat4 projectionMatrix;
 uniform dmat4 modelMatrix;
 uniform bool enableMaxSizeControl;
 uniform bool hasDvarScaling;
+uniform float dvarScaleFactor;
 
 // RenderOption: CameraViewDirection
 uniform vec3 up;
@@ -58,6 +61,8 @@ uniform vec3 cameraLookUp;
 // The max size is an angle, in degrees, for the diameter
 uniform float maxAngularSize;
 
+uniform vec2 aspectRatioScale;
+
 const vec2 corners[4] = vec2[4](
   vec2(0.0, 0.0),
   vec2(1.0, 0.0),
@@ -70,13 +75,14 @@ const int RenderOptionCameraPositionNormal = 1;
 
 void main() {
   vec4 pos = gl_in[0].gl_Position;
+  layer = int(textureLayer[0]);
   gs_colorParameter = colorParameter[0];
 
   dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
 
   float scaleMultiply = pow(10.0, scaleExponent);
   if (hasDvarScaling) {
-    scaleMultiply *= scalingParameter[0];
+    scaleMultiply *= scalingParameter[0] * dvarScaleFactor;
   }
 
   vec3 scaledRight = vec3(0.0);
@@ -116,9 +122,9 @@ void main() {
   dmat4 cameraViewProjectionMatrix = projectionMatrix * cameraViewMatrix;
 
   vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
-  vec4 scaledRightClip = scaleFactor *
+  vec4 scaledRightClip = scaleFactor * aspectRatioScale.x *
     vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
-  vec4 scaledUpClip = scaleFactor *
+  vec4 scaledUpClip = scaleFactor * aspectRatioScale.y *
     vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
 
   vec4 dposViewSpace= vec4(cameraViewMatrix * dpos);

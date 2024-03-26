@@ -359,11 +359,11 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 
         // Ensure that there are available and valid source files left
         if (_binarySourceFiles.empty()) {
-            LERROR(fmt::format("'{}' contains no files", _binarySourceFolderPath));
+            LERROR(std::format("'{}' contains no files", _binarySourceFolderPath));
         }
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Source folder '{}' is not a valid directory", _binarySourceFolderPath
         ));
     }
@@ -447,16 +447,16 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
             break;
     }
 
-    std::string file = _binarySourceFolderPath.string() + "\\positions" + energybin;
-    std::string file2 = _binarySourceFolderPath.string() + "\\fluxes" + energybin;
-    std::string file3 = _binarySourceFolderPath.string() + "\\radiuses" + energybin;
+    const std::string file = _binarySourceFolderPath.string() + "\\positions" + energybin;
+    const std::string file2 = _binarySourceFolderPath.string() + "\\fluxes" + energybin;
+    const std::string file3 = _binarySourceFolderPath.string() + "\\radiuses" + energybin;
 
     std::ifstream fileStream(file, std::ifstream::binary);
     std::ifstream fileStream2(file2, std::ifstream::binary);
     std::ifstream fileStream3(file3, std::ifstream::binary);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Could not read file '{}'", file));
+        LERROR(std::format("Could not read file '{}'", file));
         return;
     }
 
@@ -581,21 +581,21 @@ bool RenderableFluxNodes::isReady() const {
 void RenderableFluxNodes::populateStartTimes() {
     std::string timeFile;
     for (const std::string& filePath : _binarySourceFiles) {
-        if (filePath.substr(filePath.find_last_of(".") + 1) == "csv") {
+        if (filePath.substr(filePath.find_last_of('.') + 1) == "csv") {
             timeFile = filePath;
             break;
         }
-        else if (filePath.substr(filePath.find_last_of(".") + 1) == "dat") {
+        else if (filePath.substr(filePath.find_last_of('.') + 1) == "dat") {
             timeFile = filePath;
             break;
         }
-        else if (filePath.substr(filePath.find_last_of(".") + 1) == "txt") {
+        else if (filePath.substr(filePath.find_last_of('.') + 1) == "txt") {
             timeFile = filePath;
             break;
         }
         //if no file extention but word "time" in file name
         else if (filePath.find("time") != std::string::npos &&
-                    filePath.find(".") == std::string::npos)
+                 filePath.find('.') == std::string::npos)
         {
             timeFile = filePath;
             break;
@@ -646,7 +646,7 @@ void RenderableFluxNodes::populateStartTimes() {
                 _startTimes.push_back(triggerTime);
             }
             else {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Error in file formating. Last column in file '{}' is not on UTC "
                     "ISO8601 format", timeFile
                 ));
@@ -659,7 +659,7 @@ void RenderableFluxNodes::updateActiveTriggerTimeIndex(double currentTime) {
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
         if (iter != _startTimes.begin()) {
-            std::ptrdiff_t idx = std::distance(_startTimes.begin(), iter);
+            const std::ptrdiff_t idx = std::distance(_startTimes.begin(), iter);
             _activeTriggerTimeIndex = static_cast<int>(idx) - 1;
         }
         else {
@@ -692,7 +692,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     if (!earthNode) {
         LWARNING("Could not find scene graph node 'Earth'");
     }
-    glm::vec3 earthPos = glm::vec3(
+    const glm::vec3 earthPos = glm::vec3(
         earthNode->worldPosition() * data.modelTransform.rotation
     );
 
@@ -749,7 +749,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         _gaussianPulseEnabled
     );
 
-    glm::vec3 cameraPos = data.camera.positionVec3() * data.modelTransform.rotation;
+    const glm::vec3 cameraPos = data.camera.positionVec3() * data.modelTransform.rotation;
 
     _shaderProgram->setUniform("cameraPos", cameraPos);
 
@@ -824,7 +824,6 @@ void RenderableFluxNodes::update(const UpdateData& data) {
         _vertexPositions = _statesPos[_activeTriggerTimeIndex];
         _vertexColor = _statesColor[_activeTriggerTimeIndex];
         _vertexRadius = _statesRadius[_activeTriggerTimeIndex];
-        needsUpdate = false;
         updatePositionBuffer();
         updateVertexColorBuffer();
         updateVertexFilteringBuffer();

@@ -32,7 +32,7 @@ double shiftAndScale(double t, double start, double end) {
         "Values must be 0.0 < start < end < 1.0"
     );
 
-    double tScaled = t / (end - start) - start;
+    const double tScaled = t / (end - start) - start;
     return std::max(0.0, std::min(tScaled, 1.0));
 }
 

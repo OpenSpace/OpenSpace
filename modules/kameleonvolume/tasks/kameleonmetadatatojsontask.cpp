@@ -26,8 +26,8 @@
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <filesystem>
 #include <fstream>
@@ -58,7 +58,7 @@ KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
 }
 
 std::string KameleonMetadataToJsonTask::description() {
-    return fmt::format(
+    return std::format(
         "Extract metadata from CDF file '{}' and write as JSON to '{}'",
         _inputPath, _outputPath
     );
@@ -72,7 +72,7 @@ void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressC
     std::string json = ghoul::formatJson(dictionary);
     std::ofstream output(_outputPath);
     output << std::move(json);
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace::kameleonvolume

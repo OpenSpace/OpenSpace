@@ -95,7 +95,7 @@ TouchModule::TouchModule()
                 FactoryManager::ref().factory<Renderable>();
 
             if (!fRenderable->hasClass(s)) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "In property 'DefaultDirectTouchRenderableTypes': '{}' is not a "
                     "registered renderable type. Ignoring", s
                 ));

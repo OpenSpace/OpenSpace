@@ -28,7 +28,6 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/glm.h>
@@ -37,8 +36,6 @@
 #include "keybindingmanager_lua.inl"
 
 namespace openspace::interaction {
-
-KeybindingManager::KeybindingManager() {}
 
 void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
@@ -78,7 +75,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string actio
 #endif // WIN32
     ghoul_assert(!action.empty(), "Action must not be empty");
 
-    KeyWithModifier km = { key, modifier };
+    const KeyWithModifier km = { key, modifier };
     _keyLua.insert({ km, std::move(action) });
 }
 
@@ -113,25 +110,6 @@ std::vector<std::pair<KeyWithModifier, std::string>> KeybindingManager::keyBindi
 const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBindings() const
 {
     return _keyLua;
-}
-
-nlohmann::json KeybindingManager::generateJson() const {
-    ZoneScoped;
-
-    nlohmann::json json;
-
-    for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
-        nlohmann::json keybind;
-        keybind["name"] = ghoul::to_string(p.first);
-        keybind["action"] = p.second;
-        json.push_back(std::move(keybind));
-    }
-    sortJson(json, "name");
-
-    nlohmann::json result;
-    result["name"] = "Keybindings";
-    result["keybindings"] = json;
-    return result;
 }
 
 scripting::LuaLibrary KeybindingManager::luaLibrary() {

@@ -50,7 +50,7 @@ namespace {
     info->selected = true;
 
     if (global::renderEngine->screenSpaceRenderable(name)) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "A cygnet with the name '{}' already exist", name
         ));
     }
@@ -91,7 +91,7 @@ namespace {
     std::shared_ptr<CygnetInfo> info = cygnetInformation[id];
     info->selected = false;
 
-    std::string script = fmt::format(
+    std::string script = std::format(
         "openspace.unregisterScreenSpaceRenderable('{}');", cygnetInformation[id]->name
     );
 

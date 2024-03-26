@@ -81,6 +81,13 @@ local SunEclipJ2000 = {
   }
 }
 
+local LightSource = {
+  Type = "SceneGraphLightSource",
+  Identifier = "Sun",
+  Node = SunIAU.Identifier,
+  Intensity = 1.0
+}
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SolarSystemBarycenter)
@@ -100,6 +107,7 @@ asset.export(SolarSystemBarycenter)
 asset.export(SunCenter)
 asset.export(SunIAU)
 asset.export(SunEclipJ2000)
+asset.export("LightSource", LightSource)
 
 
 

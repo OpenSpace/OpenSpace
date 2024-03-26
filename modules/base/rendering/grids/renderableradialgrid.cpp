@@ -80,7 +80,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid"
@@ -217,7 +217,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_LINE_SMOOTH);
     glDepthMask(false);
 
-    for (GeometryData& c : _circles) {
+    for (const GeometryData& c : _circles) {
         c.render();
     }
 
@@ -243,7 +243,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
         );
 
         if (orthoRight == glm::vec3(0.0)) {
-            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+            const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
             right = glm::cross(viewDirection, otherVector);
             orthoRight = glm::normalize(
                 glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
@@ -279,8 +279,8 @@ void RenderableRadialGrid::update(const UpdateData&) {
         std::vector<rendering::helper::Vertex> vertices =
             rendering::helper::createRing(nSegments, radius);
 
-        _circles.push_back(GeometryData(GL_LINE_STRIP));
-        _circles.back().varray = rendering::helper::convert(vertices);
+        _circles.emplace_back(GL_LINE_STRIP);
+        _circles.back().varray = rendering::helper::convert(std::move(vertices));
         _circles.back().update();
     };
 
@@ -339,7 +339,10 @@ RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode)
 }
 
 RenderableRadialGrid::GeometryData::GeometryData(GeometryData&& other) noexcept {
-    if (this == &other) return;
+    if (this == &other) {
+        return;
+    }
+
     vao = other.vao;
     vbo = other.vbo;
     varray = std::move(other.varray);
@@ -372,7 +375,7 @@ RenderableRadialGrid::GeometryData::~GeometryData() {
     vbo = 0;
 }
 
-void RenderableRadialGrid::GeometryData::update() {
+void RenderableRadialGrid::GeometryData::update() const {
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(
@@ -392,7 +395,7 @@ void RenderableRadialGrid::GeometryData::update() {
     );
 }
 
-void RenderableRadialGrid::GeometryData::render() {
+void RenderableRadialGrid::GeometryData::render() const {
     glBindVertexArray(vao);
     glDrawArrays(mode, 0, static_cast<GLsizei>(varray.size()));
     glBindVertexArray(0);

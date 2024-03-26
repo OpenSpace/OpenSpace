@@ -1,0 +1,85 @@
+Checks: >-
+  -*,
+  bugprone-*,
+  -bugprone-argument-comment,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-implicit-widening-of-multiplication-result,
+  -bugprone-narrowing-conversions,
+  -bugprone-suspicious-include,
+  -bugprone-switch-missing-default-case,
+  -bugprone-unchecked-optional-access,
+  clang-analyzer-*,
+  -clang-analyzer-apiModeling*,
+  -clang-analyzer-osx*,
+  -clang-analyzer-security.FloatLoopCounter,
+  -clang-analyzer-webkit*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-do-while,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-avoid-non-const-global-variables,
+  -cppcoreguidelines-narrowing-conversions,
+  -cppcoreguidelines-no-malloc,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-member-init,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-type-static-cast-downcast,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-pro-type-vararg,
+  google-*,
+  -google-objc-*,
+  -google-build-using-namespace,
+  -google-default-arguments,
+  -google-readability-casting,
+  -google-readability-function-size,
+  -google-readability-namespace-comments,
+  -google-explicit-constructor,
+  -google-runtime-int,
+  llvm-*,
+  -llvm-else-after-return,
+  -llvm-include-order,
+  -llvm-qualified-auto,
+  misc-*,
+  -misc-include-cleaner,
+  -misc-no-recursion,
+  modernize-*,
+  -modernize-raw-string-literal,
+  -modernize-return-braced-init-list,
+  -modernize-use-trailing-return-type,
+  -modernize-use-auto,
+  performance-*,
+  -performance-no-int-to-ptr,
+  readability-*,
+  -readability-avoid-unconditional-preprocessor-if,
+  -readability-else-after-return,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-implicit-bool-conversion,
+  -readability-magic-numbers,
+  -readability-named-parameter,
+  -readability-uppercase-literal-suffix,
+  -readability-use-anyofallof
+
+CheckOptions:
+  - key:    bugprone-assert-side-effect.AssertMacros
+    value:  ghoul_assert,ghoul_precondition
+  - key:    cppcoreguidelines-rvalue-reference-param-not-moved.AllowPartialMove
+    value:  True
+  - key:    misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value:  True
+  - key:    modernize-loop-convert.UseCxx20ReverseRanges
+    value:  False
+  - key:    performance-move-const-arg.CheckTriviallyCopyableMove
+    value:  False
+  - key:    performance-unnecessary-value-param.AllowedTypes
+    value:  glm::vec2;glm::vec3;glm::vec4;glm::ivec2;glm::ivec3;glm::ivec4;glm::dvec2;glm::dvec3;glm::dvec4;glm::uvec2;glm::uvec3;glm::uvec4;glm::mat2;glm::mat3;glm::mat4;glm::mat[2-4]x[2-4];glm::dmat2;glm::dmat3;glm::dmat4;glm::dmat[2-4]x[2-4];glm::quat;glm::dquat
+  - key:    readability-inconsistent-declaration-parameter-name.Strict
+    value:  True
+  - key:    readability-qualified-auto.AddConstToQualified
+    value:  False
+  - key:    readability-simplify-boolean-expr.ChainedConditionalReturn
+    value:  True
+  - key:    readability-simplify-boolean-expr.ChainedConditionalAssignment
+    value:  True

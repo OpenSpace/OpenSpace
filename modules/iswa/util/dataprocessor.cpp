@@ -110,13 +110,13 @@ void DataProcessor::initializeVectors(int numOptions) {
         _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
     }
     if (_sum.empty()) {
-        _sum = std::vector<float>(numOptions, 0.0f);
+        _sum = std::vector<float>(numOptions, 0.f);
     }
     if (_standardDeviation.empty()) {
-        _standardDeviation = std::vector<float>(numOptions, 0.0f);
+        _standardDeviation = std::vector<float>(numOptions, 0.f);
     }
     if (_numValues.empty()) {
-        _numValues = std::vector<float>(numOptions, 0.0f);
+        _numValues = std::vector<float>(numOptions, 0.f);
     }
     if (_histograms.empty()) {
         _histograms.clear();

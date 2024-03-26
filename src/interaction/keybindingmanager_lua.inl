@@ -35,12 +35,12 @@ namespace {
         throw ghoul::lua::LuaError("Action must not be empty");
     }
     if (!global::actionManager->hasAction(action)) {
-        throw ghoul::lua::LuaError(fmt::format("Action '{}' does not exist", action));
+        throw ghoul::lua::LuaError(std::format("Action '{}' does not exist", action));
     }
 
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
     if (iKey.key == openspace::Key::Unknown) {
-        throw ghoul::lua::LuaError(fmt::format("Could not find key '{}'", key));
+        throw ghoul::lua::LuaError(std::format("Could not find key '{}'", key));
     }
 
     global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(action));

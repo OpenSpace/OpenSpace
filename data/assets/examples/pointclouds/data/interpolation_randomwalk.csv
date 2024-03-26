@@ -1,3 +1,5 @@
+# A test dataset for interpolation, where the xyz vary in a random walk patterin
+# time step. There are 10 points per timestep, as illustrated by the time column
 time,x,y,z
 0.0,675.0297905065192,1672.6820684730765,-124.14442820502654
 0.0,9.0852354697237,1080.363474597831,266.4506394528842

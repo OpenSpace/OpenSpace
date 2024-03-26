@@ -70,7 +70,7 @@ struct Chunk {
         WantSplit
     };
 
-    Chunk(const TileIndex& tileIndex);
+    Chunk(const TileIndex& ti);
 
     const TileIndex tileIndex;
     const GeodeticPatch surfacePatch;

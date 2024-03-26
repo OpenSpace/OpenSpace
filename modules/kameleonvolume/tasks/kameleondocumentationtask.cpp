@@ -64,7 +64,7 @@ KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& di
 }
 
 std::string KameleonDocumentationTask::description() {
-    return fmt::format(
+    return std::format(
         "Extract metadata from CDF file '{}' and output HTML documentation to '{}'",
         _inputPath, _outputPath
     );
@@ -151,7 +151,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
 
     file << html.str();
 
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace::kameleonvolume

@@ -100,13 +100,19 @@ local FixedColor_ScaleBasedOnData = {
       FixedColor = { 0.5, 0.5, 0.0 }
     },
     SizeSettings = {
-      -- The options for the columns that the points can be scaled by. The first
-      -- alternative is chosen per default
-      SizeMapping = { "number_withNan", "a" },
+      SizeMapping = {
+        -- The options for the columns that the points can be scaled by. The first
+        -- alternative in the list is chosen per default
+        ParameterOptions = { "a", "b" },
+        -- Specify which option we want to use for size mapping at start up. Here we
+        -- use the last of the provided options rather than the first one, which is
+        -- otherwise used by default
+        Parameter = "b"
+      },
       -- Use a slightly smaller scale than above for the base size of the points
       -- (will decide the size of the smallest point). That way, the points don't
       -- become too big when scaled by the data parameter
-      ScaleExponent = 5
+      ScaleExponent = 5.0
     }
   },
   GUI = {
@@ -131,11 +137,13 @@ local Textured = {
   Renderable = {
     Type = "RenderablePointCloud",
     File = asset.resource("data/dummydata.csv"),
-    -- The path to the texture file. Here we use openspace.absPath so that we can use
-    -- the ${DATA} token to get the path to a texture in the "OpenSpace/data" folder,
-    -- but for a file at a relative location it would also work to use asset.resource,
-    -- like for the data file above
-    Texture = openspace.absPath("${DATA}/test3.jpg"),
+    Texture = {
+      -- The path to the texture file. Here we use openspace.absPath so that we can use
+      -- the ${DATA} token to get the path to a texture in the "OpenSpace/data" folder,
+      -- but for a file at a relative location it would also work to use asset.resource,
+      -- like for the data file above
+      File = openspace.absPath("${DATA}/test3.jpg"),
+    },
     -- Disable additive blending, so that points will be rendered with their actual color
     -- and overlapping points will be sorted by depth. This works best when the points
     -- have an opacity of 1

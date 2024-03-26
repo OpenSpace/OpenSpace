@@ -135,7 +135,7 @@ void ImageSequenceTileProvider::update() {
             _currentTileProvider->deinitialize();
         }
 
-        std::string p = _imagePaths[_index].string();
+        const std::string p = _imagePaths[_index].string();
         _currentImage = p;
         _initDict.setValue("FilePath", p);
         _currentTileProvider = std::make_unique<DefaultTileProvider>(_initDict);
@@ -150,7 +150,7 @@ void ImageSequenceTileProvider::update() {
 
 void ImageSequenceTileProvider::reset() {
     namespace fs = std::filesystem;
-    std::string path = _folderPath;
+    const std::string path = _folderPath;
     _imagePaths.clear();
     for (const fs::directory_entry& p : fs::directory_iterator(path)) {
         if (p.is_regular_file()) {

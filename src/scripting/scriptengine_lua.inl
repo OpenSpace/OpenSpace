@@ -93,7 +93,7 @@ namespace {
 [[codegen::luawrap]] std::string readFile(std::filesystem::path file) {
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
-        throw ghoul::lua::LuaError(fmt::format("Could not open file '{}'", file));
+        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file));
     }
 
     std::ifstream f(p);
@@ -224,14 +224,14 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
     zip_close(z);
 
     if (is64) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Error while unzipping '{}': Zip64 archives are not supported", source
         ));
     }
 
     int ret = zip_extract(source.c_str(), destination.c_str(), nullptr, nullptr);
     if (ret != 0) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Error while unzipping '{}': {}", source, ret
         ));
     }

@@ -1,5 +1,5 @@
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 
 
 

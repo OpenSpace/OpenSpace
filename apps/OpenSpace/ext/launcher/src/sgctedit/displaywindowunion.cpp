@@ -25,7 +25,7 @@
 #include "sgctedit/displaywindowunion.h"
 
 #include "sgctedit/windowcontrol.h"
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QColor>
 #include <QFrame>
 #include <QPushButton>
@@ -49,7 +49,7 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList
 }
 
 void DisplayWindowUnion::createWidgets(int nMaxWindows,
-                                       std::vector<QRect> monitorResolutions,
+                                       const std::vector<QRect>& monitorResolutions,
                                        std::array<QColor, 4> windowColors,
                                        bool resetToDefault)
 {
@@ -94,7 +94,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
         layoutMonButton->addStretch(1);
 
         _addWindowButton = new QPushButton("Add Window");
-        _addWindowButton->setToolTip(QString::fromStdString(fmt::format(
+        _addWindowButton->setToolTip(QString::fromStdString(std::format(
             "Add a window to the configuration (up to {} windows allowed)", nMaxWindows
         )));
         _addWindowButton->setFocusPolicy(Qt::NoFocus);

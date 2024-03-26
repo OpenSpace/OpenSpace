@@ -241,7 +241,7 @@ public:
      * \return Vector of Property objs containing property names that matched the regex
      */
     std::vector<properties::Property*> propertiesMatchingRegex(
-        std::string propertyString);
+        const std::string& propertyString);
 
     /**
      * Returns a list of all unique tags that are used in the currently loaded scene.
@@ -305,7 +305,6 @@ private:
      * Update dependencies.
      */
     void updateNodeRegistry();
-    std::chrono::steady_clock::time_point currentTimeForInterpolation();
     void sortTopologically();
 
     std::unique_ptr<Camera> _camera;

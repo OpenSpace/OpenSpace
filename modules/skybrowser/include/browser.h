@@ -100,9 +100,9 @@ private:
         void setTexture(GLuint t);
     };
 
-    std::unique_ptr<BrowserInstance> _browserInstance;
     CefRefPtr<RenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
+    std::unique_ptr<BrowserInstance> _browserInstance;
 };
 
 } // namespace openspace

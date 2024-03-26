@@ -46,12 +46,12 @@
 #include <modules/server/include/topics/versiontopic.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <fmt/format.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";
@@ -109,40 +109,40 @@ void Connection::handleMessage(const std::string& message) {
     ZoneScoped;
 
     try {
-        nlohmann::json j = nlohmann::json::parse(message.c_str());
+        const nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
             handleJson(j);
         }
         catch (const std::domain_error& e) {
-            LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
+            LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
         }
     }
     catch (const std::out_of_range& e) {
-        LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
+        LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
     }
     catch (const std::exception& e) {
         LERROR(e.what());
-    } catch (...) {
+    }
+    catch (...) {
         if (!isAuthorized()) {
             _socket->disconnect();
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Could not parse JSON '{}'. Connection is unauthorized. Disconnecting",
                 message
             ));
             return;
         }
-        else {
-            std::string sanitizedString = message;
-            std::transform(
-                message.begin(),
-                message.end(),
-                sanitizedString.begin(),
-                [](wchar_t c) {
-                    return std::isprint(c, std::locale("")) ? char(c) : ' ';
-                }
-            );
-            LERROR(fmt::format("Could not parse JSON '{}'", sanitizedString));
-        }
+
+        std::string sanitizedString = message;
+        std::transform(
+            message.begin(),
+            message.end(),
+            sanitizedString.begin(),
+            [](wchar_t c) {
+                return std::isprint(c, std::locale("")) ? char(c) : ' ';
+            }
+        );
+        LERROR(std::format("Could not parse JSON '{}'", sanitizedString));
     }
 }
 
@@ -163,7 +163,7 @@ void Connection::handleJson(const nlohmann::json& json) {
     }
 
     // The topic id may be an already discussed topic, or a new one.
-    TopicId topicId = *topicJson;
+    const TopicId topicId = *topicJson;
     auto topicIt = _topics.find(topicId);
 
     if (topicIt == _topics.end()) {
@@ -173,9 +173,9 @@ void Connection::handleJson(const nlohmann::json& json) {
             LERROR("Type must be specified as a string when a new topic is initialized");
             return;
         }
-        std::string type = *typeJson;
+        const std::string type = *typeJson;
 
-        if (!isAuthorized() && type != "authorize") {
+        if (!isAuthorized() && (type != "authorize")) {
             LERROR("Connection is not authorized");
             return;
         }

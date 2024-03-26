@@ -46,7 +46,7 @@ int StringListProperty::typeLua() const {
 }
 
 std::string StringListProperty::toStringConversion() const {
-    nlohmann::json json(_value);
+    const nlohmann::json json = nlohmann::json(_value);
     return json.dump();
 }
 

@@ -26,15 +26,15 @@
 
 namespace openspace::volume {
 
-size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dims) {
-    const size_t w = dims.x;
-    const size_t h = dims.y;
+size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dimensions) {
+    const size_t w = dimensions.x;
+    const size_t h = dimensions.y;
     return coords.z * (h * w) + coords.y * w + coords.x;
 }
 
-glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dims) {
-    const size_t w = dims.x;
-    const size_t h = dims.y;
+glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dimensions) {
+    const size_t w = dimensions.x;
+    const size_t h = dimensions.y;
 
     const size_t x = index % w;
     const size_t y = (index / w) % h;

@@ -56,7 +56,7 @@ public:
     const std::vector<EnvelopePoint>& points() const;
 
     glm::vec4 valueAtPosition(float pos) const;
-    glm::vec3 normalizeColor(glm::vec3 vec) const;
+    glm::vec3 normalizeColor(const glm::vec3& vec) const;
     nlohmann::json jsonPoints() const;
     nlohmann::json jsonEnvelope() const;
     void setEnvelopeLuaTable(lua_State* state) const;

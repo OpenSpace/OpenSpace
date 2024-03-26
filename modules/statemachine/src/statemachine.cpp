@@ -25,7 +25,7 @@
 #include <modules/statemachine/include/statemachine.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <fstream>
 #include <optional>
@@ -59,7 +59,7 @@ StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
 
     _states.reserve(p.states.size());
     for (const ghoul::Dictionary& s : p.states) {
-        _states.push_back(State(s));
+        _states.emplace_back(s);
     }
 
     _transitions.reserve(p.transitions.size());
@@ -67,14 +67,14 @@ StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
         const Transition trans = Transition(t);
 
         // Check so transition has valid identifiers
-        bool foundFrom = findState(trans.from()) != -1;
-        bool foundTo = findState(trans.to()) != -1;
+        const bool foundFrom = findState(trans.from()) != -1;
+        const bool foundTo = findState(trans.to()) != -1;
 
         if (foundFrom && foundTo) {
             _transitions.push_back(trans);
         }
         else {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Invalid transition from '{}' to '{}'. One or both of the states do not "
                 "exist in the state machine", trans.from(), trans.to()
             ));
@@ -95,11 +95,11 @@ StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
     setInitialState(startState);
 }
 
-void StateMachine::setInitialState(const std::string initialState) {
-    int stateIndex = findState(initialState);
+void StateMachine::setInitialState(const std::string& initialState) {
+    const int stateIndex = findState(initialState);
 
     if (stateIndex == -1) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Attempting to initialize with undefined state '{}'", initialState
         ));
         return;
@@ -125,17 +125,17 @@ void StateMachine::transitionTo(const std::string& newState) {
         return;
     }
 
-    int stateIndex = findState(newState);
+    const int stateIndex = findState(newState);
     if (stateIndex == -1) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Attempting to transition to undefined state '{}'", newState
         ));
         return;
     }
 
-    int transitionIndex = findTransitionTo(newState);
+    const int transitionIndex = findTransitionTo(newState);
     if (transitionIndex == -1) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Transition from '{}' to '{}' is undefined",
             currentState()->name(), newState
         ));
@@ -189,9 +189,9 @@ std::vector<std::string> StateMachine::possibleTransitions() const {
     }
 
     res.reserve(_transitions.size());
-    for (size_t i = 0; i < _transitions.size(); i++) {
-        if (_transitions[i].from() == currentState()->name()) {
-            res.push_back(_transitions[i].to());
+    for (const Transition& transition : _transitions) {
+        if (transition.from() == currentState()->name()) {
+            res.push_back(transition.to());
         }
     }
     return res;
@@ -202,22 +202,22 @@ void StateMachine::saveToDotFile(const std::string& filename) const {
 
     std::ofstream file(outputFile);
     if (!file.good()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error opening file '{}' for saving state machine dot file", outputFile
         ));
         return;
     }
 
-    file << "digraph statemachine {" << std::endl;
+    file << "digraph statemachine {\n";
     for (const State& s : _states) {
-        file << "\t" << s.name() << ";" << std::endl;
+        file << std::format("\t{};\n", s.name());
     }
     for (const Transition& t : _transitions) {
-        file << "\t" << t.from() << " -> " << t.to() << ";" << std::endl;
+        file << std::format("\t{} -> {};\n", t.from(), t.to());
     }
-    file << "}" << std::endl;
+    file << "}\n";
 
-    LINFO(fmt::format("Saved state machine to file: {}", outputFile));
+    LINFO(std::format("Saved state machine to file: {}", outputFile));
 }
 
 } // namespace openspace

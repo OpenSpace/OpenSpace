@@ -173,7 +173,7 @@ namespace {
     }
     catch (const documentation::SpecificationError& e) {
         logError(e, "flyToNavigationState");
-        throw ghoul::lua::LuaError(fmt::format("Unable to create a path: {}", e.what()));
+        throw ghoul::lua::LuaError(std::format("Unable to create a path: {}", e.what()));
     }
 
     ghoul::Dictionary instruction;

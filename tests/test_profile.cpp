@@ -36,6 +36,11 @@
 #include <fstream>
 #include <json/json.hpp>
 
+// clang-tidy is convinced that it is possible to use emplace_back instead of push_back
+// for the profiole types, but I haven't been able to convince the Visual Studio
+// compiler to agree
+// NOLINTBEGIN(modernize-use-emplace)
+
 namespace openspace {
     bool operator==(const openspace::Profile::Version& lhs,
                     const openspace::Profile::Version& rhs) noexcept
@@ -169,15 +174,14 @@ TEST_CASE("Basic Meta (full)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::Meta meta;
-    meta.name = "name";
-    meta.version = "version";
-    meta.description = "description";
-    meta.author = "author";
-    meta.url = "url";
-    meta.license = "license";
-    ref.meta = meta;
+    ref.meta = {
+        .name = "name",
+        .version = "version",
+        .description = "description",
+        .author = "author",
+        .url = "url",
+        .license = "license"
+    };
 
     CHECK(profile == ref);
 }
@@ -188,9 +192,7 @@ TEST_CASE("Basic Meta (empty)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::Meta meta;
-    ref.meta = meta;
+    ref.meta = Profile::Meta();
 
     CHECK(profile == ref);
 }
@@ -201,14 +203,14 @@ TEST_CASE("Basic Meta (no name)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
+    ref.meta = {
+        .version = "version",
+        .description = "description",
+        .author = "author",
+        .url = "url",
+        .license = "license"
+    };
 
-    Profile::Meta meta;
-    meta.version = "version";
-    meta.description = "description";
-    meta.author = "author";
-    meta.url = "url";
-    meta.license = "license";
-    ref.meta = meta;
 
     CHECK(profile == ref);
 }
@@ -219,14 +221,13 @@ TEST_CASE("Basic Meta (no version)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::Meta meta;
-    meta.name = "name";
-    meta.description = "description";
-    meta.author = "author";
-    meta.url = "url";
-    meta.license = "license";
-    ref.meta = meta;
+    ref.meta = {
+        .name = "name",
+        .description = "description",
+        .author = "author",
+        .url = "url",
+        .license = "license"
+    };
 
     CHECK(profile == ref);
 }
@@ -237,14 +238,13 @@ TEST_CASE("Basic Meta (no description)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::Meta meta;
-    meta.name = "name";
-    meta.version = "version";
-    meta.author = "author";
-    meta.url = "url";
-    meta.license = "license";
-    ref.meta = meta;
+    ref.meta = {
+        .name = "name",
+        .version = "version",
+        .author = "author",
+        .url = "url",
+        .license = "license"
+    };
 
     CHECK(profile == ref);
 }
@@ -255,14 +255,13 @@ TEST_CASE("Basic Meta (no author)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::Meta meta;
-    meta.name = "name";
-    meta.version = "version";
-    meta.description = "description";
-    meta.url = "url";
-    meta.license = "license";
-    ref.meta = meta;
+    ref.meta = {
+        .name = "name",
+        .version = "version",
+        .description = "description",
+        .url = "url",
+        .license = "license"
+    };
 
     CHECK(profile == ref);
 }
@@ -273,14 +272,13 @@ TEST_CASE("Basic Meta (no url)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::Meta meta;
-    meta.name = "name";
-    meta.version = "version";
-    meta.description = "description";
-    meta.author = "author";
-    meta.license = "license";
-    ref.meta = meta;
+    ref.meta = {
+        .name = "name",
+        .version = "version",
+        .description = "description",
+        .author = "author",
+        .license = "license"
+    };
 
     CHECK(profile == ref);
 }
@@ -291,14 +289,13 @@ TEST_CASE("Basic Meta (no license)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::Meta meta;
-    meta.name = "name";
-    meta.version = "version";
-    meta.description = "description";
-    meta.author = "author";
-    meta.url = "url";
-    ref.meta = meta;
+    ref.meta = {
+        .name = "name",
+        .version = "version",
+        .description = "description",
+        .author = "author",
+        .url = "url"
+    };
 
     CHECK(profile == ref);
 }
@@ -309,31 +306,22 @@ TEST_CASE("Basic Module", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    {
-        Profile::Module m;
-        m.name = "abs-module";
-        ref.modules.push_back(m);
-    }
-    {
-        Profile::Module m;
-        m.name = "def-module";
-        m.loadedInstruction = "instr";
-        ref.modules.push_back(m);
-    }
-    {
-        Profile::Module m;
-        m.name = "ghi-module";
-        m.notLoadedInstruction = "not_instr";
-        ref.modules.push_back(m);
-    }
-    {
-        Profile::Module m;
-        m.name = "jkl-module";
-        m.loadedInstruction = "instr";
-        m.notLoadedInstruction = "not_instr";
-        ref.modules.push_back(m);
-    }
+    ref.modules.push_back({
+        .name = "abs-module"
+    });
+    ref.modules.push_back({
+        .name = "def-module",
+        .loadedInstruction = "instr"
+    });
+    ref.modules.push_back({
+        .name = "ghi-module",
+        .notLoadedInstruction = "not_instr"
+    });
+    ref.modules.push_back({
+        .name = "jkl-module",
+        .loadedInstruction = "instr",
+        .notLoadedInstruction = "not_instr"
+    });
 
     CHECK(profile == ref);
 }
@@ -344,10 +332,9 @@ TEST_CASE("Basic Assets", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    ref.assets.push_back("folder1/folder2/asset");
-    ref.assets.push_back("folder3/folder4/asset2");
-    ref.assets.push_back("folder5/folder6/asset3");
+    ref.assets.emplace_back("folder1/folder2/asset");
+    ref.assets.emplace_back("folder3/folder4/asset2");
+    ref.assets.emplace_back("folder5/folder6/asset3");
 
     CHECK(profile == ref);
 }
@@ -358,49 +345,36 @@ TEST_CASE("Basic Properties", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValue;
-        p.name = "property_name_1";
-        p.value = "property_value_1";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValue;
-        p.name = "property_name_2";
-        p.value = "property_value_2";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValue;
-        p.name = "property_name_3";
-        p.value = "property_value_3";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
-        p.name = "property_name_4";
-        p.value = "property_value_4";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
-        p.name = "property_name_5";
-        p.value = "property_value_5";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
-        p.name = "property_name_6";
-        p.value = "property_value_6";
-        ref.properties.push_back(p);
-    }
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValue,
+        .name = "property_name_1",
+        .value = "property_value_1"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValue,
+        .name = "property_name_2",
+        .value = "property_value_2"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValue,
+        .name = "property_name_3",
+        .value = "property_value_3"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValueSingle,
+        .name = "property_name_4",
+        .value = "property_value_4"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValueSingle,
+        .name = "property_name_5",
+        .value = "property_value_5"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValueSingle,
+        .name = "property_name_6",
+        .value = "property_value_6"
+    });
 
     CHECK(profile == ref);
 }
@@ -411,52 +385,44 @@ TEST_CASE("Basic Keybindings", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
+    ref.actions.push_back({
+        .identifier = "profile.keybind.0",
+        .documentation = "T documentation",
+        .name = "T name",
+        .guiPath = "T Gui-Path",
+        .isLocal = true,
+        .script = "T script"
+    });
+    ref.keybindings.push_back({
+        .key = { Key::T, KeyModifier::None },
+        .action = "profile.keybind.0"
+    });
 
-    {
-        Profile::Action a;
-        a.identifier = "profile.keybind.0";
-        a.documentation = "T documentation";
-        a.name = "T name";
-        a.guiPath = "T Gui-Path";
-        a.isLocal = true;
-        a.script = "T script";
-        ref.actions.push_back(a);
+    ref.actions.push_back({
+        .identifier = "profile.keybind.1",
+        .documentation = "U documentation",
+        .name = "U name",
+        .guiPath = "U Gui-Path",
+        .isLocal = false,
+        .script = "U script"
+    });
+    ref.keybindings.push_back({
+        .key = { Key::U, KeyModifier::None },
+        .action = "profile.keybind.1"
+    });
 
-        Profile::Keybinding k;
-        k.action = "profile.keybind.0";
-        k.key = { Key::T, KeyModifier::None };
-        ref.keybindings.push_back(k);
-    }
-    {
-        Profile::Action a;
-        a.identifier = "profile.keybind.1";
-        a.documentation = "U documentation";
-        a.name = "U name";
-        a.guiPath = "U Gui-Path";
-        a.isLocal = false;
-        a.script = "U script";
-        ref.actions.push_back(a);
-
-        Profile::Keybinding k;
-        k.action = "profile.keybind.1";
-        k.key = { Key::U, KeyModifier::None };
-        ref.keybindings.push_back(k);
-    }
-    {
-        Profile::Action a;
-        a.identifier = "profile.keybind.2";
-        a.documentation = "CTRL+V documentation";
-        a.name = "CTRL+V name";
-        a.guiPath = "CTRL+V Gui-Path";
-        a.isLocal = false;
-        a.script = "CTRL+V script";
-        ref.actions.push_back(a);
-
-        Profile::Keybinding k;
-        k.action = "profile.keybind.2";
-        k.key = { Key::V, KeyModifier::Control };
-        ref.keybindings.push_back(k);
-    }
+    ref.actions.push_back({
+        .identifier = "profile.keybind.2",
+        .documentation = "CTRL+V documentation",
+        .name = "CTRL+V name",
+        .guiPath = "CTRL+V Gui-Path",
+        .isLocal = false,
+        .script = "CTRL+V script"
+    });
+    ref.keybindings.push_back({
+        .key = { Key::V, KeyModifier::Control },
+        .action = "profile.keybind.2"
+    });
 
     CHECK(profile == ref);
 }
@@ -467,11 +433,10 @@ TEST_CASE("Basic Time Relative", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::Time time;
-    time.type = Profile::Time::Type::Relative;
-    time.value = "-1d";
-    ref.time = time;
+    ref.time = {
+        .type = Profile::Time::Type::Relative,
+        .value = "-1d"
+    };
 
     CHECK(profile == ref);
 }
@@ -482,11 +447,10 @@ TEST_CASE("Basic Time Absolute", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::Time time;
-    time.type = Profile::Time::Type::Absolute;
-    time.value = "2020-06-01T12:00:00";
-    ref.time = time;
+    ref.time = {
+        .type = Profile::Time::Type::Absolute,
+        .value = "2020-06-01T12:00:00"
+    };
 
     CHECK(profile == ref);
 }
@@ -497,7 +461,6 @@ TEST_CASE("Basic Delta Times", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
     ref.deltaTimes.push_back(1.0);
     ref.deltaTimes.push_back(30.0);
     ref.deltaTimes.push_back(60.0);
@@ -513,16 +476,15 @@ TEST_CASE("Basic Camera NavState (full)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::CameraNavState camera;
-    camera.anchor = "none";
-    camera.aim = "aim";
-    camera.referenceFrame = "root";
-    camera.position = glm::dvec3(1.0, 2.0, 3.0);
-    camera.up = glm::dvec3(4.0, 5.0, 6.0);
-    camera.yaw = 10.0;
-    camera.pitch = -10.0;
-    ref.camera = camera;
+    ref.camera = Profile::CameraNavState {
+        .anchor = "none",
+        .aim = "aim",
+        .referenceFrame = "root",
+        .position = glm::dvec3(1.0, 2.0, 3.0),
+        .up = glm::dvec3(4.0, 5.0, 6.0),
+        .yaw = 10.0,
+        .pitch = -10.0
+    };
 
     CHECK(profile == ref);
 }
@@ -534,15 +496,14 @@ TEST_CASE("Basic Camera NavState (no aim)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::CameraNavState camera;
-    camera.anchor = "none";
-    camera.referenceFrame = "root";
-    camera.position = glm::dvec3(1.0, 2.0, 3.0);
-    camera.up = glm::dvec3(4.0, 5.0, 6.0);
-    camera.yaw = 10.0;
-    camera.pitch = -10.0;
-    ref.camera = camera;
+    ref.camera = Profile::CameraNavState {
+        .anchor = "none",
+        .referenceFrame = "root",
+        .position = glm::dvec3(1.0, 2.0, 3.0),
+        .up = glm::dvec3(4.0, 5.0, 6.0),
+        .yaw = 10.0,
+        .pitch = -10.0
+    };
 
     CHECK(profile == ref);
 }
@@ -554,15 +515,14 @@ TEST_CASE("Basic Camera NavState (no pitch)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::CameraNavState camera;
-    camera.anchor = "none";
-    camera.aim = "aim";
-    camera.referenceFrame = "root";
-    camera.position = glm::dvec3(1.0, 2.0, 3.0);
-    camera.up = glm::dvec3(4.0, 5.0, 6.0);
-    camera.yaw = 10.0;
-    ref.camera = camera;
+    ref.camera = Profile::CameraNavState {
+        .anchor = "none",
+        .aim = "aim",
+        .referenceFrame = "root",
+        .position = glm::dvec3(1.0, 2.0, 3.0),
+        .up = glm::dvec3(4.0, 5.0, 6.0),
+        .yaw = 10.0
+    };
 
     CHECK(profile == ref);
 }
@@ -574,15 +534,14 @@ TEST_CASE("Basic Camera NavState (no up)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::CameraNavState camera;
-    camera.anchor = "none";
-    camera.aim = "aim";
-    camera.referenceFrame = "root";
-    camera.position = glm::dvec3(1.0, 2.0, 3.0);
-    camera.yaw = 10.0;
-    camera.pitch = -10.0;
-    ref.camera = camera;
+    ref.camera = Profile::CameraNavState {
+        .anchor = "none",
+        .aim = "aim",
+        .referenceFrame = "root",
+        .position = glm::dvec3(1.0, 2.0, 3.0),
+        .yaw = 10.0,
+        .pitch = -10.0
+    };
 
     CHECK(profile == ref);
 }
@@ -594,15 +553,14 @@ TEST_CASE("Basic Camera NavState (no yaw)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::CameraNavState camera;
-    camera.anchor = "none";
-    camera.aim = "aim";
-    camera.referenceFrame = "root";
-    camera.position = glm::dvec3(1.0, 2.0, 3.0);
-    camera.up = glm::dvec3(4.0, 5.0, 6.0);
-    camera.pitch = -10.0;
-    ref.camera = camera;
+    ref.camera = Profile::CameraNavState {
+        .anchor = "none",
+        .aim = "aim",
+        .referenceFrame = "root",
+        .position = glm::dvec3(1.0, 2.0, 3.0),
+        .up = glm::dvec3(4.0, 5.0, 6.0),
+        .pitch = -10.0,
+    };
 
     CHECK(profile == ref);
 }
@@ -613,12 +571,11 @@ TEST_CASE("Basic Camera GoToGeo (full)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::CameraGoToGeo camera;
-    camera.anchor = "anchor";
-    camera.latitude = 1.0;
-    camera.longitude = 2.0;
-    ref.camera = camera;
+    ref.camera = Profile::CameraGoToGeo {
+        .anchor = "anchor",
+        .latitude = 1.0,
+        .longitude = 2.0
+    };
 
     CHECK(profile == ref);
 }
@@ -630,13 +587,12 @@ TEST_CASE("Basic Camera GoToGeo (with altitude)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::CameraGoToGeo camera;
-    camera.anchor = "anchor";
-    camera.latitude = 1.0;
-    camera.longitude = 2.0;
-    camera.altitude = 4.0;
-    ref.camera = camera;
+    ref.camera = Profile::CameraGoToGeo {
+        .anchor = "anchor",
+        .latitude = 1.0,
+        .longitude = 2.0,
+        .altitude = 4.0
+    };
 
     CHECK(profile == ref);
 }
@@ -648,10 +604,9 @@ TEST_CASE("Basic Camera GoToNode", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::CameraGoToNode camera;
-    camera.anchor = "anchor";
-    ref.camera = camera;
+    ref.camera = Profile::CameraGoToNode {
+        .anchor = "anchor"
+    };
 
     CHECK(profile == ref);
 }
@@ -663,11 +618,10 @@ TEST_CASE("Basic Camera GoToNode (with height)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    Profile::CameraGoToNode camera;
-    camera.anchor = "anchor";
-    camera.height = 100.0;
-    ref.camera = camera;
+    ref.camera = Profile::CameraGoToNode {
+        .anchor = "anchor",
+        .height = 100.0
+    };
 
     CHECK(profile == ref);
 }
@@ -678,10 +632,9 @@ TEST_CASE("Basic Mark Nodes", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    ref.markNodes.push_back("node-1");
-    ref.markNodes.push_back("node-2");
-    ref.markNodes.push_back("node-3");
+    ref.markNodes.emplace_back("node-1");
+    ref.markNodes.emplace_back("node-2");
+    ref.markNodes.emplace_back("node-3");
 
     CHECK(profile == ref);
 }
@@ -693,10 +646,9 @@ TEST_CASE("Basic Additional Scripts", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-
-    ref.additionalScripts.push_back("script-1");
-    ref.additionalScripts.push_back("script-2");
-    ref.additionalScripts.push_back("script-3");
+    ref.additionalScripts.emplace_back("script-1");
+    ref.additionalScripts.emplace_back("script-2");
+    ref.additionalScripts.emplace_back("script-3");
 
     CHECK(profile == ref);
 }
@@ -710,163 +662,130 @@ TEST_CASE("Integration Full Test", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
+    ref.meta = {
+        .name = "name",
+        .version = "version",
+        .description = "description",
+        .author = "author",
+        .url = "url",
+        .license = "license"
+    };
+    ref.modules.push_back({
+        .name = "abs-module"
+    });
+    ref.modules.push_back({
+        .name = "def-module",
+        .loadedInstruction = "instr"
+    });
+    ref.modules.push_back({
+        .name = "ghi-module",
+        .notLoadedInstruction = "not_instr"
+    });
+    ref.modules.push_back({
+        .name = "jkl-module",
+        .loadedInstruction = "instr",
+        .notLoadedInstruction = "not_instr"
+    });
+    ref.assets.emplace_back("scene/solarsystem/planets/earth/earth");
+    ref.assets.emplace_back("scene/solarsystem/planets/earth/satellites/satellites");
+    ref.assets.emplace_back("folder1/folder2/asset");
+    ref.assets.emplace_back("folder3/folder4/asset2");
+    ref.assets.emplace_back("folder5/folder6/asset3");
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValue,
+        .name = "{earth_satellites}.Renderable.Enabled",
+        .value = "false"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValue,
+        .name = "property_name_1",
+        .value = "property_value_1"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValue,
+        .name = "property_name_2",
+        .value = "property_value_2"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValue,
+        .name = "property_name_3",
+        .value = "property_value_3"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValueSingle,
+        .name = "property_name_4",
+        .value = "property_value_4"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValueSingle,
+        .name = "property_name_5",
+        .value = "property_value_5"
+    });
+    ref.properties.push_back({
+        .setType = Profile::Property::SetType::SetPropertyValueSingle,
+        .name = "property_name_6",
+        .value = "property_value_6"
+    });
 
-    Profile::Meta meta;
-    meta.name = "name";
-    meta.version = "version";
-    meta.description = "description";
-    meta.author = "author";
-    meta.url = "url";
-    meta.license = "license";
-    ref.meta = meta;
+    ref.actions.push_back({
+        .identifier = "profile.keybind.0",
+        .documentation = "T documentation",
+        .name = "T name",
+        .guiPath = "T Gui-Path",
+        .isLocal = true,
+        .script = "T script"
+    });
+    ref.keybindings.push_back({
+        .key = { Key::T, KeyModifier::None },
+        .action = "profile.keybind.0"
+    });
 
-    {
-        Profile::Module m;
-        m.name = "abs-module";
-        ref.modules.push_back(m);
-    }
-    {
-        Profile::Module m;
-        m.name = "def-module";
-        m.loadedInstruction = "instr";
-        ref.modules.push_back(m);
-    }
-    {
-        Profile::Module m;
-        m.name = "ghi-module";
-        m.notLoadedInstruction = "not_instr";
-        ref.modules.push_back(m);
-    }
-    {
-        Profile::Module m;
-        m.name = "jkl-module";
-        m.loadedInstruction = "instr";
-        m.notLoadedInstruction = "not_instr";
-        ref.modules.push_back(m);
-    }
+    ref.actions.push_back({
+        .identifier = "profile.keybind.1",
+        .documentation = "U documentation",
+        .name = "U name",
+        .guiPath = "U Gui-Path",
+        .isLocal = false,
+        .script = "U script"
+    });
+    ref.keybindings.push_back({
+        .key = { Key::U, KeyModifier::None },
+        .action = "profile.keybind.1"
+    });
 
-    ref.assets.push_back("scene/solarsystem/planets/earth/earth");
-    ref.assets.push_back("scene/solarsystem/planets/earth/satellites/satellites");
-    ref.assets.push_back("folder1/folder2/asset");
-    ref.assets.push_back("folder3/folder4/asset2");
-    ref.assets.push_back("folder5/folder6/asset3");
+    ref.actions.push_back({
+        .identifier = "profile.keybind.2",
+        .documentation = "CTRL+V documentation",
+        .name = "CTRL+V name",
+        .guiPath = "CTRL+V Gui-Path",
+        .isLocal = false,
+        .script = "CTRL+V script"
+    });
+    ref.keybindings.push_back({
+        .key = { Key::V, KeyModifier::Control },
+        .action = "profile.keybind.2"
+    });
 
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValue;
-        p.name = "{earth_satellites}.Renderable.Enabled";
-        p.value = "false";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValue;
-        p.name = "property_name_1";
-        p.value = "property_value_1";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValue;
-        p.name = "property_name_2";
-        p.value = "property_value_2";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValue;
-        p.name = "property_name_3";
-        p.value = "property_value_3";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
-        p.name = "property_name_4";
-        p.value = "property_value_4";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
-        p.name = "property_name_5";
-        p.value = "property_value_5";
-        ref.properties.push_back(p);
-    }
-    {
-        Profile::Property p;
-        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
-        p.name = "property_name_6";
-        p.value = "property_value_6";
-        ref.properties.push_back(p);
-    }
+    ref.time = {
+        .type = Profile::Time::Type::Relative,
+        .value = "-1d"
+    };
 
-    {
-        Profile::Action a;
-        a.identifier = "profile.keybind.0";
-        a.documentation = "T documentation";
-        a.name = "T name";
-        a.guiPath = "T Gui-Path";
-        a.isLocal = true;
-        a.script = "T script";
-        ref.actions.push_back(a);
+    ref.camera = Profile::CameraGoToGeo {
+        .anchor = "Earth",
+        .latitude = 58.5877,
+        .longitude = 16.1924,
+        .altitude = 2.0e+07
+    };
 
-        Profile::Keybinding k;
-        k.action = "profile.keybind.0";
-        k.key = { Key::T, KeyModifier::None };
-        ref.keybindings.push_back(k);
-    }
-    {
-        Profile::Action a;
-        a.identifier = "profile.keybind.1";
-        a.documentation = "U documentation";
-        a.name = "U name";
-        a.guiPath = "U Gui-Path";
-        a.isLocal = false;
-        a.script = "U script";
-        ref.actions.push_back(a);
+    ref.markNodes.emplace_back("Earth");
+    ref.markNodes.emplace_back("Mars");
+    ref.markNodes.emplace_back("Moon");
+    ref.markNodes.emplace_back("Sun");
 
-        Profile::Keybinding k;
-        k.action = "profile.keybind.1";
-        k.key = { Key::U, KeyModifier::None };
-        ref.keybindings.push_back(k);
-    }
-    {
-        Profile::Action a;
-        a.identifier = "profile.keybind.2";
-        a.documentation = "CTRL+V documentation";
-        a.name = "CTRL+V name";
-        a.guiPath = "CTRL+V Gui-Path";
-        a.isLocal = false;
-        a.script = "CTRL+V script";
-        ref.actions.push_back(a);
-
-        Profile::Keybinding k;
-        k.action = "profile.keybind.2";
-        k.key = { Key::V, KeyModifier::Control };
-        ref.keybindings.push_back(k);
-    }
-
-    Profile::Time time;
-    time.type = Profile::Time::Type::Relative;
-    time.value = "-1d";
-    ref.time = time;
-
-    Profile::CameraGoToGeo camera;
-    camera.anchor = "Earth";
-    camera.latitude = 58.5877;
-    camera.longitude = 16.1924;
-    camera.altitude = 2.0e+07;
-    ref.camera = camera;
-
-    ref.markNodes.push_back("Earth");
-    ref.markNodes.push_back("Mars");
-    ref.markNodes.push_back("Moon");
-    ref.markNodes.push_back("Sun");
-
-    ref.additionalScripts.push_back("script-1");
-    ref.additionalScripts.push_back("script-2");
-    ref.additionalScripts.push_back("script-3");
+    ref.additionalScripts.emplace_back("script-1");
+    ref.additionalScripts.emplace_back("script-2");
+    ref.additionalScripts.emplace_back("script-3");
 
     CHECK(profile == ref);
 }
@@ -891,13 +810,13 @@ TEST_CASE("Add asset to empty Profile (ignored)", "[profile]") {
     profile.ignoreUpdates = true;
     profile.addAsset("new-asset");
 
-    CHECK(profile.assets.size() == 0);
+    CHECK(profile.assets.empty());
 }
 
 TEST_CASE("Add asset to not-empty Profile", "[profile]") {
     Profile profile;
     profile.version = Profile::CurrentVersion;
-    profile.assets.push_back("old-asset");
+    profile.assets.emplace_back("old-asset");
 
     profile.addAsset("new-asset");
 
@@ -909,7 +828,7 @@ TEST_CASE("Add asset to not-empty Profile", "[profile]") {
 TEST_CASE("Add asset to not-empty Profile (ignored)", "[profile]") {
     Profile profile;
     profile.version = Profile::CurrentVersion;
-    profile.assets.push_back("old-asset");
+    profile.assets.emplace_back("old-asset");
 
     profile.ignoreUpdates = true;
     profile.addAsset("new-asset");
@@ -974,8 +893,8 @@ TEST_CASE("Removing non-exisiting asset", "[profile]") {
     Profile profile;
     profile.version = Profile::CurrentVersion;
 
-    profile.assets.push_back("asset1");
-    profile.assets.push_back("asset3");
+    profile.assets.emplace_back("asset1");
+    profile.assets.emplace_back("asset3");
 
     CHECK_NOTHROW(profile.removeAsset("unknown-asset"));
 }
@@ -984,8 +903,8 @@ TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
     Profile profile;
     profile.version = Profile::CurrentVersion;
 
-    profile.assets.push_back("asset1");
-    profile.assets.push_back("asset3");
+    profile.assets.emplace_back("asset1");
+    profile.assets.emplace_back("asset3");
 
     profile.ignoreUpdates = true;
     CHECK_NOTHROW(profile.removeAsset("unknown-asset"));
@@ -1673,3 +1592,5 @@ TEST_CASE("(Error) Camera (GoToNode): Missing value 'anchor'", "[profile]") {
 //        Catch::Matchers::Equals("(profile) 'camera.height' must be a larger than zero")
 //    );
 //}
+
+// NOLINTEND(modernize-use-emplace)

@@ -27,7 +27,7 @@
 #include "profile/line.h"
 #include "profile/scriptlogdialog.h"
 #include <openspace/util/keys.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <QCheckBox>
 #include <QComboBox>
@@ -56,8 +56,8 @@ namespace {
 
     void updateListItem(QListWidgetItem* item, const Profile::Keybinding& kb) {
         ghoul_assert(item, "Item must exist at this point");
-        std::string name = fmt::format("{}\t{}", ghoul::to_string(kb.key), kb.action);
-        item->setText(QString::fromStdString(name));
+        const std::string n = std::format("{}\t{}", ghoul::to_string(kb.key), kb.action);
+        item->setText(QString::fromStdString(n));
     }
 } // namespace
 
@@ -141,7 +141,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
     );
 
     for (const Profile::Action& action : _actionData) {
-        std::string name = action.name.empty() ? action.identifier : action.name;
+        const std::string name = action.name.empty() ? action.identifier : action.name;
         _actionWidgets.list->addItem(new QListWidgetItem(QString::fromStdString(name)));
     }
 
@@ -160,8 +160,8 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         _actionWidgets.identifier, &QLineEdit::textEdited,
         [this]() {
             // Check if the identifier is legal
-            std::string identifier = _actionWidgets.identifier->text().toStdString();
-            bool isLegal = identifier.find_first_of("\t\n. ") == std::string::npos;
+            const std::string id = _actionWidgets.identifier->text().toStdString();
+            const bool isLegal = id.find_first_of("\t\n. ") == std::string::npos;
             if (isLegal) {
                 _actionWidgets.infoText->clear();
                 _actionWidgets.infoText->setHidden(true);
@@ -452,7 +452,7 @@ Profile::Action* ActionDialog::selectedAction() {
 
 void ActionDialog::actionAdd() {
     _actionWidgets.list->addItem("");
-    _actionData.push_back(Profile::Action());
+    _actionData.emplace_back();
     _actionWidgets.list->setCurrentRow(_actionWidgets.list->count() - 1);
 }
 
@@ -471,10 +471,10 @@ void ActionDialog::actionRemove() {
         if (kb.action != action->identifier) {
             continue;
         }
-        QMessageBox::StandardButton button = QMessageBox::information(
+        const QMessageBox::StandardButton button = QMessageBox::information(
             this,
             "Remove action",
-            QString::fromStdString(fmt::format(
+            QString::fromStdString(std::format(
                 "Action '{}' is used in the keybind '{}' and cannot be removed unless "
                 "the keybind is removed as well. Do you want to remove the keybind as "
                 "well?",
@@ -561,14 +561,14 @@ void ActionDialog::actionSelected() {
 }
 
 void ActionDialog::actionSaved() {
-    std::string newIdentifier = _actionWidgets.identifier->text().toStdString();
+    const std::string newIdentifier = _actionWidgets.identifier->text().toStdString();
     if (newIdentifier.empty()) {
         QMessageBox::critical(this, "Empty identifier", "Identifier must not be empty");
         return;
     }
 
     Profile::Action* action = selectedAction();
-    std::string oldIdentifier = action->identifier;
+    const std::string oldIdentifier = action->identifier;
     if (oldIdentifier != newIdentifier) {
         // The identifier is a bit special as we need to make sure that we didn't
         // accidentally create a duplicate while renaming the currently selected action.
@@ -639,7 +639,7 @@ void ActionDialog::actionSaved() {
     clearActionFields();
 }
 
-void ActionDialog::clearActionFields() {
+void ActionDialog::clearActionFields() const {
     _actionWidgets.list->setCurrentRow(-1);
     _actionWidgets.identifier->clear();
     _actionWidgets.identifier->setEnabled(false);
@@ -679,9 +679,10 @@ void ActionDialog::chooseScripts() {
     d.exec();
 }
 
-void ActionDialog::appendScriptsToTextfield(std::vector<std::string> scripts) {
-    for (std::string script : scripts) {
-        _actionWidgets.script->append(QString::fromStdString(std::move(script)));
+void ActionDialog::appendScriptsToTextfield(const std::vector<std::string>& scripts) const
+{
+    for (const std::string& script : scripts) {
+        _actionWidgets.script->append(QString::fromStdString(script));
     }
 }
 
@@ -693,7 +694,7 @@ Profile::Keybinding* ActionDialog::selectedKeybinding() {
 
 void ActionDialog::keybindingAdd() {
     _keybindingWidgets.list->addItem("");
-    _keybindingsData.push_back(Profile::Keybinding());
+    _keybindingsData.emplace_back();
     _keybindingWidgets.list->setCurrentRow(_keybindingWidgets.list->count() - 1);
 }
 
@@ -733,7 +734,7 @@ void ActionDialog::keybindingSelected() {
             hasKeyModifier(keybinding->key.modifier, KeyModifier::Alt)
         );
 
-        std::string key = ghoul::to_string(keybinding->key.key);
+        const std::string key = ghoul::to_string(keybinding->key.key);
         _keybindingWidgets.key->setCurrentText(QString::fromStdString(key));
         _keybindingWidgets.key->setEnabled(true);
         _keybindingWidgets.action->setCurrentText(
@@ -771,7 +772,7 @@ void ActionDialog::keybindingSelected() {
     }
 }
 
-void ActionDialog::keybindingActionSelected(int) {
+void ActionDialog::keybindingActionSelected(int) const {
     _keybindingWidgets.actionText->setText(_keybindingWidgets.action->currentText());
 }
 
@@ -812,7 +813,7 @@ void ActionDialog::keybindingSaved() {
     clearKeybindingFields();
 }
 
-void ActionDialog::clearKeybindingFields() {
+void ActionDialog::clearKeybindingFields() const {
     _keybindingWidgets.list->setCurrentRow(-1);
     _keybindingWidgets.shiftModifier->setChecked(false);
     _keybindingWidgets.shiftModifier->setEnabled(false);
@@ -830,8 +831,8 @@ void ActionDialog::clearKeybindingFields() {
 }
 
 void ActionDialog::keybindingRejected() {
-    bool isKeyEmpty = (_keybindingsData.back().key.key == Key::Unknown);
-    bool isActionEmpty = _keybindingsData.back().action.empty();
+    const bool isKeyEmpty = (_keybindingsData.back().key.key == Key::Unknown);
+    const bool isActionEmpty = _keybindingsData.back().action.empty();
     if (isKeyEmpty || isActionEmpty) {
         delete _keybindingWidgets.list->takeItem(_keybindingWidgets.list->count() - 1);
         _keybindingsData.erase(_keybindingsData.begin() + _keybindingsData.size() - 1);

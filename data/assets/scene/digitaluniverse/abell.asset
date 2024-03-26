@@ -25,6 +25,7 @@ local Object = {
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "abell.speck",
     Labels = {
       File = speck .. "abell.label",
       Opacity = 1.0,
@@ -39,8 +40,9 @@ local Object = {
       FixedColor = { 1.0, 0.4, 0.2 },
       --ColorMap = speck .. "abell.cmap", -- TODO: Decide whether to add
     },
-    File = speck .. "abell.speck",
-    Texture = textures .. "point3A.png",
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
     SizeSettings = {
