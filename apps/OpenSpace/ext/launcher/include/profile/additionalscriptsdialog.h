@@ -52,7 +52,7 @@ private:
      *
      * \param scripts The scripts to be appended
      */
-    void appendScriptsToTextfield(std::vector<std::string> scripts);
+    void appendScriptsToTextfield(const std::vector<std::string>& scripts);
 
     std::vector<std::string>* _scripts = nullptr;
     std::vector<std::string> _scriptsData;

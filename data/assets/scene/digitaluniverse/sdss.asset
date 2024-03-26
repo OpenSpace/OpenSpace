@@ -30,7 +30,9 @@ local Object = {
         }
       }
     },
-    Texture = textures .. "point3A.png",
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Unit = "Mpc",
     Fading = {
       FadeInDistances = { 220.0, 650.0 } -- Fade in value in the same unit as "Unit"

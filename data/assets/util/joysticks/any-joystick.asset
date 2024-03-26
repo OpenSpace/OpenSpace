@@ -13,6 +13,8 @@ local function addJoystickAsset(joystick)
     openspace.asset.add("./util/joysticks/xbox")
   elseif joystick == "Wireless Xbox Controller" then
     openspace.asset.add("./util/joysticks/xbox-wireless")
+  elseif joystick == "Microsoft X-Box 360 pad" then
+    openspace.asset.add("./util/joysticks/microsoft-xbox-360-pad")
   elseif joystick == "SpaceNavigator" then
     openspace.asset.add("./util/joysticks/space-mouse-compact")
   elseif joystick == "SpaceMouse Enterprise" then
@@ -74,3 +76,14 @@ asset.onDeinitialize(function()
     openspace.asset.remove("./util/joysticks/space-mouse-enterprise")
   end
 end)
+
+asset.meta = {
+  Name = "Joystick controller: Any",
+  Version = "1.0",
+  Description = [[
+    Checks the name on the connected controllers and adds the cooresponding joystick asset
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

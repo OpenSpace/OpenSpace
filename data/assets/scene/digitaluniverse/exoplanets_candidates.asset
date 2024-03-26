@@ -21,7 +21,9 @@ local Object = {
     Opacity = 0.99,
     File = speck .. "exoplanet_candidates.speck",
     Unit = "pc",
-    Texture = textures .. "halo.png",
+    Texture = {
+      File = textures .. "halo.png",
+    },
     Coloring = {
       FixedColor = { 1.0, 1.0, 0.0 }
     },

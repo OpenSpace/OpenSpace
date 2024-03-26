@@ -105,7 +105,7 @@ private:
      */
     void findRelevantNodes();
 
-    void removeRollRotation(CameraPose& pose);
+    void removeRollRotation(CameraPose& pose) const;
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;

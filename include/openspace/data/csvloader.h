@@ -34,6 +34,9 @@ namespace openspace::dataloader::csv {
 Dataset loadCsvFile(std::filesystem::path path,
     std::optional<DataMapping> specs = std::nullopt);
 
+std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
+    const std::set<int>& texturesInData);
+
 } // namespace openspace::dataloader
 
 #endif // __OPENSPACE_CORE___CSVLOADER___H__

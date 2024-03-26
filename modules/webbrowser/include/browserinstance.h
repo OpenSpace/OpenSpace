@@ -61,7 +61,7 @@ public:
     BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
     ~BrowserInstance();
 
-    void loadUrl(std::string url);
+    void loadUrl(const std::string& url);
 
     /**
      * Load a local file.

@@ -28,6 +28,7 @@ flat in float gs_colorParameter;
 flat in float vs_screenSpaceDepth;
 flat in vec4 vs_positionViewSpace;
 in vec2 texCoord;
+flat in int layer;
 
 uniform float opacity;
 uniform vec3 color;
@@ -42,7 +43,7 @@ uniform vec4 belowRangeColor;
 uniform bool useBelowRangeColor;
 
 uniform bool hasSpriteTexture;
-uniform sampler2D spriteTexture;
+uniform sampler2DArray spriteTexture;
 
 uniform bool useColorMap;
 uniform sampler1D colorMapTexture;
@@ -85,23 +86,19 @@ Fragment getFragment() {
 
   // Moving the origin to the center and calculating the length
   float lengthFromCenter = length((texCoord - vec2(0.5)) * 2.0);
-  if (!hasSpriteTexture) {
-    if (lengthFromCenter > 1.0) {
-      discard;
-    }
+  if (!hasSpriteTexture && (lengthFromCenter > 1.0)) {
+    discard;
   }
 
-  vec4 fullColor = vec4(1.0);
+  vec4 fullColor = glm::vec4(color, 1.0);
   if (useColorMap) {
     fullColor = sampleColorMap(gs_colorParameter);
   }
-  else {
-    fullColor.rgb = color;
-  }
 
   if (hasSpriteTexture) {
-    fullColor *= texture(spriteTexture, texCoord);
-  } else if (enableOutline && (lengthFromCenter > (1.0 - outlineWeight))) {
+    fullColor *= texture(spriteTexture, vec3(texCoord, layer));
+  }
+  else if (enableOutline && (lengthFromCenter > (1.0 - outlineWeight))) {
     fullColor.rgb = outlineColor;
   }
 

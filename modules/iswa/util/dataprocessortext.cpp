@@ -126,7 +126,7 @@ void DataProcessorText::addDataValues(const std::string& data,
             continue;
         }
 
-        for (int i = 0; i < numOptions; ++i) {
+        for (int i = 0; i < numOptions; i++) {
             const float value = values[i];
 
             optionValues[i].push_back(value);

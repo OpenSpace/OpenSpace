@@ -329,7 +329,7 @@ namespace {
     }
     else {
         double v = std::get<double>(change);
-        c = fmt::format("{}s", v);
+        c = std::format("{}s", v);
     }
 
     std::string res = openspace::Time::advancedTime(std::move(b), std::move(c));

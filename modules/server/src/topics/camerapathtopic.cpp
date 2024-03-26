@@ -60,7 +60,7 @@ bool CameraPathTopic::isDone() const {
 }
 
 void CameraPathTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at("event").get<std::string>();
+    const std::string event = json.at("event").get<std::string>();
 
     if (event != SubscribeEvent) {
         _isDone = true;
@@ -70,10 +70,10 @@ void CameraPathTopic::handleJson(const nlohmann::json& json) {
     ServerModule* module = global::moduleEngine->module<ServerModule>();
     _dataCallbackHandle = module->addPreSyncCallback(
         [this]() {
-            bool isInPath = (global::openSpaceEngine->currentMode()
+            const bool isInPath =(global::openSpaceEngine->currentMode()
                 == OpenSpaceEngine::Mode::CameraPath);
 
-            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+            const auto now = std::chrono::system_clock::now();
             if (isInPath && (now - _lastUpdateTime) > _cameraPathUpdateTime) {
                 sendCameraPathData();
                 _lastUpdateTime = std::chrono::system_clock::now();
@@ -100,7 +100,7 @@ void CameraPathTopic::sendCameraPathData() {
     );
     seconds = std::max(seconds, 0);
 
-    nlohmann::json jsonData = {
+    const nlohmann::json jsonData = {
         { "target", path->endPoint().nodeIdentifier() },
         { "remainingTime", seconds },
         //{ "remainingDistance", path->remainingDistance() },

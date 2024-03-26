@@ -67,8 +67,8 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/profiling.h>
@@ -136,11 +136,11 @@ namespace {
 
         int currentLayerNumber = -1;
         Layer currentLayer;
-        for (int i = 0; i < nSubdatasets; ++i) {
+        for (int i = 0; i < nSubdatasets; i++) {
             int iDataset = -1;
             std::array<char, 256> IdentifierBuffer;
             std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
-            int ret = sscanf(
+            const int ret = sscanf(
                 subDatasets[i],
                 "SUBDATASET_%i_%255[^=]",
                 &iDataset,
@@ -181,7 +181,6 @@ namespace {
     }
 
     struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
-
         // [[codegen::verbatim(TileCacheSizeInfo.description)]]
         std::optional<int> tileCacheSize;
 
@@ -230,10 +229,13 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
             _hasDefaultGeoPointTexture = true;
         }
         else {
-            LWARNINGC("GlobeBrowsingModule", fmt::format(
-                "The provided texture file {} for the default geo point texture "
-                "does not exist", path
-            ));
+            LWARNINGC(
+                "GlobeBrowsingModule",
+                std::format(
+                    "The provided texture file '{}' for the default geo point texture "
+                    "does not exist", path
+                )
+            );
         }
     });
 
@@ -424,8 +426,8 @@ glm::dvec3 GlobeBrowsingModule::geoPosition() const {
         posHandle.centerToReferenceSurface
     );
 
-    double lat = glm::degrees(geo2.lat);
-    double lon = glm::degrees(geo2.lon);
+    const double lat = glm::degrees(geo2.lat);
+    const double lon = glm::degrees(geo2.lon);
 
     double altitude = glm::length(
         cameraPositionModelSpace - posHandle.centerToReferenceSurface
@@ -442,7 +444,7 @@ glm::dvec3 GlobeBrowsingModule::geoPosition() const {
 
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     const globebrowsing::TileIndex& ti,
-                                    glm::vec2 uv, bool doResetCameraDirection)
+                                    const glm::vec2& uv, bool doResetCameraDirection)
 {
     using namespace globebrowsing;
 
@@ -489,6 +491,7 @@ void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& gl
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
         LERROR("Error when going to Geodetic2");
+        return;
     }
 
     const glm::dmat4 inverseModelTransform = glm::inverse(
@@ -634,7 +637,7 @@ GlobeBrowsingModule::urlInfo(const std::string& globe) const
 {
     const auto range = _urlList.equal_range(globe);
     std::vector<UrlInfo> res;
-    for (auto i = range.first; i != range.second; ++i) {
+    for (auto i = range.first; i != range.second; i++) {
         res.emplace_back(i->second);
     }
     return res;
@@ -648,7 +651,7 @@ bool GlobeBrowsingModule::isMRFCachingEnabled() const {
     return _mrfCacheEnabled;
 }
 
-const std::string GlobeBrowsingModule::mrfCacheLocation() const {
+std::string GlobeBrowsingModule::mrfCacheLocation() const {
     return _mrfCacheLocation;
 }
 

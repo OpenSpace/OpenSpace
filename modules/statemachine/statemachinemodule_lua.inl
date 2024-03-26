@@ -111,11 +111,14 @@ namespace {
     if (module->hasStateMachine()) {
         std::string currentState = module->currentState();
         std::vector<std::string> transitions = module->possibleTransitions();
-        LINFOC("StateMachine", fmt::format(
-            "Currently in state: '{}'. Can transition to states: [ {} ]",
-            currentState,
-            ghoul::join(transitions, ",")
-        ));
+        LINFOC(
+            "StateMachine",
+            std::format(
+                "Currently in state: '{}'. Can transition to states: [ {} ]",
+                currentState,
+                ghoul::join(transitions, ",")
+            )
+        );
     }
     else {
         LINFOC("StateMachine", "No state machine has been created");

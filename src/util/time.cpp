@@ -38,7 +38,7 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
@@ -61,10 +61,9 @@ double Time::convertTime(const char* time) {
 }
 
 std::string Time::currentWallTime() {
-    std::time_t t = std::time(nullptr);
+    const std::time_t t = std::time(nullptr);
     std::tm* utcTime = std::gmtime(&t);
-
-    std::string time = fmt::format(
+    const std::string time = std::format(
         "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
         utcTime->tm_year + 1900, utcTime->tm_mon + 1, utcTime->tm_mday,
         utcTime->tm_hour, utcTime->tm_min, utcTime->tm_sec
@@ -79,28 +78,27 @@ Time::Time(const std::string& time) :
 {}
 
 Time Time::now() {
-    Time now;
-    time_t secondsSince1970;
-    secondsSince1970 = time(nullptr);
+    const time_t secondsSince1970 = time(nullptr);
 
     const time_t secondsInAYear = static_cast<time_t>(365.25 * 24 * 60 * 60);
     const double secondsSince2000 = static_cast<double>(
         secondsSince1970 - 30 * secondsInAYear
     );
+    Time now;
     now.setTime(secondsSince2000);
     return now;
 }
 
-void Time::setTime(double value) {
-    _time = value;
+void Time::setTime(double j2000Seconds) {
+    _time = j2000Seconds;
 }
 
 double Time::j2000Seconds() const {
     return _time;
 }
 
-double Time::advanceTime(double delta) {
-    _time += delta;
+double Time::advanceTime(double deltaTime) {
+    _time += deltaTime;
     return _time;
 }
 
@@ -144,8 +142,8 @@ void Time::ISO8601(char* buffer) const {
     SpiceManager::ref().dateFromEphemerisTime(_time, buffer, S, Format);
 }
 
-std::string Time::advancedTime(std::string base, std::string change) {
-    double j2000Seconds = Time::convertTime(base);
+std::string Time::advancedTime(const std::string& base, std::string change) {
+    const double j2000Seconds = Time::convertTime(base);
 
     double dt = 0.0;
     if (change.empty()) {
@@ -168,8 +166,8 @@ std::string Time::advancedTime(std::string base, std::string change) {
     );
 
     try {
-        double value = std::stod(std::string(change.begin(), it));
-        std::string uName = std::string(it, change.end());
+        const double value = std::stod(std::string(change.begin(), it));
+        const std::string_view uName = std::string_view(it, change.end());
 
         TimeUnit unit = TimeUnit::Second;
         if (uName == "s") { unit = TimeUnit::Second; }
@@ -179,7 +177,7 @@ std::string Time::advancedTime(std::string base, std::string change) {
         else if (uName == "M") { unit = TimeUnit::Month; }
         else if (uName == "y") { unit = TimeUnit::Year; }
         else {
-            throw ghoul::RuntimeError(fmt::format("Unknown unit '{}'", uName));
+            throw ghoul::RuntimeError(std::format("Unknown unit '{}'", uName));
         }
 
         dt = openspace::convertTime(value, unit, TimeUnit::Second);
@@ -188,12 +186,12 @@ std::string Time::advancedTime(std::string base, std::string change) {
         }
     }
     catch (...) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Error parsing relative time offset '{}'", change
         ));
     }
 
-    std::string_view ret = Time(j2000Seconds + dt).ISO8601();
+    const std::string_view ret = Time(j2000Seconds + dt).ISO8601();
     return std::string(ret);
 }
 

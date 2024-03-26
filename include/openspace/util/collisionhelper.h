@@ -45,8 +45,8 @@ namespace openspace::collision {
  * \return True if the line between \p p1 and \p p2 intersects the sphere given by
  *         \p r and \p center, and false otherwise
  */
-bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 center,
-    double r, glm::dvec3& intersectionPoint);
+bool lineSphereIntersection(const glm::dvec3& p1, const glm::dvec3& p2,
+    const glm::dvec3& center, double r, glm::dvec3& intersectionPoint);
 
 /**
  * Check if the point \p p is inside of the sphere defined by radius \p r and center

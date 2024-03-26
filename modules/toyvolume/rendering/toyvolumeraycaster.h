@@ -66,7 +66,7 @@ public:
     void setColor(glm::vec4 color);
     void setModelTransform(glm::mat4 transform);
     void setTime(double time);
-    void setStepSize(float time);
+    void setStepSize(float stepSize);
 
 private:
     glm::dmat4 modelViewTransform(const RenderData& data);

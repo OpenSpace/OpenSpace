@@ -292,7 +292,7 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
             keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
         }
         else {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "File {} @ line {} does not have '1' header", filename // linNum + 1
             ));
         }
@@ -345,7 +345,7 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
             stream >> keplerElements.meanMotion;
         }
         else {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "File {} @ line {} does not have '2' header", filename  // , lineNum + 2
             ));
         }
@@ -403,7 +403,7 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
             Time(0.0),
             false
         });
-        // LINFO(fmt::format("cart: {} ", position));
+        // LINFO(std::format("cart: {} ", position));
         glm::dvec3 sphPos;
         if (gridType == "Spherical"){
             sphPos = cartesianToSphericalCoord(position);
@@ -420,7 +420,7 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
             if (sphPos.z > maxPhi){
                 maxPhi = sphPos.z;
             }
-            // LINFO(fmt::format("pos: {} ", sphPos));
+            // LINFO(std::format("pos: {} ", sphPos));
             positionBuffer.push_back(sphPos);
 
         }
@@ -431,10 +431,10 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
 
 
     }
-    LINFO(fmt::format("max theta: {} ", maxTheta));
-    LINFO(fmt::format("max phi: {} ", maxPhi));
-    LINFO(fmt::format("min theta: {} ", minTheta));
-    LINFO(fmt::format("min phi: {} ", minPhi));
+    LINFO(std::format("max theta: {} ", maxTheta));
+    LINFO(std::format("max phi: {} ", maxPhi));
+    LINFO(std::format("min theta: {} ", minTheta));
+    LINFO(std::format("min phi: {} ", minPhi));
 
     return positionBuffer;
 }
@@ -457,7 +457,7 @@ float getDensityAt(glm::uvec3 cell,  double* densityArray, RawVolume<float>& raw
     // return value at position cell from _densityPerVoxel
     size_t index = raw.coordsToIndex(cell);
     value = static_cast<float>(densityArray[index]);
-    //LINFO(fmt::format("indensity: {} ", index));
+    //LINFO(std::format("indensity: {} ", index));
 
     return value;
 }
@@ -538,9 +538,9 @@ double* mapDensityToVoxels(double* densityArray, std::vector<glm::dvec3> positio
 {
 
     for (const glm::dvec3& position : positions) {
-        //LINFO(fmt::format("pos: {} ", position));
+        //LINFO(std::format("pos: {} ", position));
         int index = getIndexFromPosition(position, dim, maxApogee, gridType);
-        //LINFO(fmt::format("index: {} ", index));
+        //LINFO(std::format("index: {} ", index));
         if (gridType == "Cartesian"){
             ++densityArray[index];
         }
@@ -646,7 +646,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     }
 
     // float maxApogee = getMaxApogee(_TLEDataVector);
-    LINFO(fmt::format("Max Apogee: {} ", _maxApogee));
+    LINFO(std::format("Max Apogee: {} ", _maxApogee));
 
     /**  SEQUENCE
     *   1. handle timeStep
@@ -664,7 +664,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
 
     // 1.1
      int numberOfIterations = static_cast<int>(timeSpan/timeStep);
-    LINFO(fmt::format("timestep: {} ", numberOfIterations));
+    LINFO(std::format("timestep: {} ", numberOfIterations));
 
     std::queue<volume::RawVolume<float>> rawVolumeQueue = {};
     const int size = _dimensions.x *_dimensions.y *_dimensions.z;
@@ -677,7 +677,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
             startTimeInSeconds + (i * timeStep),
             _gridType
         );   //+(i*timeStep)
-        //LINFO(fmt::format("pos: {} ", startPositionBuffer[4]));
+        //LINFO(std::format("pos: {} ", startPositionBuffer[4]));
 
         double *densityArrayp = new double[size]();
         //densityArrayp = mapDensityToVoxels(
@@ -727,8 +727,8 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
 
             minVal = std::min(minVal, value);
             maxVal = std::max(maxVal, value);
-            /*LINFO(fmt::format("min: {} ", minVal));
-            LINFO(fmt::format("max: {} ", maxVal));*/
+            /*LINFO(std::format("min: {} ", minVal));
+            LINFO(std::format("max: {} ", maxVal));*/
         });
         rawVolumeQueue.push(rawVolume);
         delete[] densityArrayp;
@@ -736,7 +736,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
 
     // two loops is used to get a global min and max value for voxels.
     for(int i=0 ; i<=numberOfIterations ; ++i){
-        // LINFO(fmt::format("raw file output name: {} ", _rawVolumeOutputPath));
+        // LINFO(std::format("raw file output name: {} ", _rawVolumeOutputPath));
 
         size_t lastIndex = _rawVolumeOutputPath.find_last_of(".");
         std::string rawOutputName = _rawVolumeOutputPath.substr(0, lastIndex);
@@ -773,8 +773,8 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         metadata.minValue = minVal;
         metadata.maxValue = maxVal;
 
-        /*LINFO(fmt::format("min2: {} ", minVal));
-        LINFO(fmt::format("max2: {} ", maxVal));*/
+        /*LINFO(std::format("min2: {} ", minVal));
+        LINFO(std::format("max2: {} ", maxVal));*/
 
         ghoul::Dictionary outputDictionary = metadata.dictionary();
         ghoul::DictionaryLuaFormatter formatter;

@@ -34,7 +34,7 @@
 #include <openspace/properties/property.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
 namespace {
     constexpr float KM_TO_M = 1000.f;
@@ -466,11 +466,11 @@ glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const TransformData
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.scale));
 }
 
-void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderTask) {
+void RenderableAtmosphere::render(const RenderData& data, RendererTasks& rendererTask) {
     ZoneScoped;
 
-    DeferredcasterTask task{ _deferredcaster.get(), data };
-    renderTask.deferredcasterTasks.push_back(task);
+    DeferredcasterTask task = { _deferredcaster.get(), data };
+    rendererTask.deferredcasterTasks.push_back(std::move(task));
 }
 
 void RenderableAtmosphere::update(const UpdateData& data) {
@@ -484,7 +484,7 @@ void RenderableAtmosphere::update(const UpdateData& data) {
     }
 
     glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
-    _deferredcaster->setModelTransform(modelTransform);
+    _deferredcaster->setModelTransform(std::move(modelTransform));
     _deferredcaster->setOpacity(opacity());
     _deferredcaster->update(data);
     setDimmingCoefficient(computeModelTransformMatrix(data.modelTransform));
@@ -525,17 +525,17 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     const glm::dvec3 normalUnderCamera = glm::normalize(cameraPos - planetPos);
     const glm::dvec3 vecToSun = glm::normalize(-planetPos);
 
-    float cameraDistance = static_cast<float>(glm::distance(planetPos, cameraPos));
-    float cameraSunAngle = static_cast<float>(
+    const float cameraDistance = static_cast<float>(glm::distance(planetPos, cameraPos));
+    const float cameraSunAngle = static_cast<float>(
         glm::degrees(glm::acos(glm::dot(vecToSun, normalUnderCamera))
     ));
-    float sunsetEnd = _atmosphereDimmingSunsetAngle.value().y;
+    const float sunsetEnd = _atmosphereDimmingSunsetAngle.value().y;
 
     // If cameraSunAngle is more than 90 degrees, we are in shaded part of globe
-    bool cameraIsInSun = cameraSunAngle <= sunsetEnd;
+    const bool cameraIsInSun = cameraSunAngle <= sunsetEnd;
     // Atmosphere height is in KM
-    float atmosphereEdge = KM_TO_M * (_planetRadius + _atmosphereHeight);
-    bool cameraIsInAtmosphere = cameraDistance < atmosphereEdge;
+    const float atmosphereEdge = KM_TO_M * (_planetRadius + _atmosphereHeight);
+    const bool cameraIsInAtmosphere = cameraDistance < atmosphereEdge;
 
     // Don't fade if camera is not in the sunny part of an atmosphere
     if (!cameraIsInAtmosphere || !cameraIsInSun) {
@@ -543,17 +543,18 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     }
     // Else we need to fade the objects
     // Height of the atmosphere where the objects will be faded
-    float atmosphereFadingHeight = KM_TO_M * _atmosphereDimmingHeight * _atmosphereHeight;
-    float atmosphereInnerEdge = atmosphereEdge - atmosphereFadingHeight;
-    bool cameraIsInFadingRegion = cameraDistance > atmosphereInnerEdge;
+    const float atmosphereFadingHeight =
+        KM_TO_M * _atmosphereDimmingHeight * _atmosphereHeight;
+    const float atmosphereInnerEdge = atmosphereEdge - atmosphereFadingHeight;
+    const bool cameraIsInFadingRegion = cameraDistance > atmosphereInnerEdge;
 
     // Check if camera is in sunset
-    float sunsetStart = _atmosphereDimmingSunsetAngle.value().x;
-    bool cameraIsInSunset = cameraSunAngle > sunsetStart && cameraIsInSun;
+    const float sunsetStart = _atmosphereDimmingSunsetAngle.value().x;
+    const bool cameraIsInSunset = cameraSunAngle > sunsetStart && cameraIsInSun;
 
     // See if we are inside of an eclipse shadow
     float eclipseShadow = _deferredcaster->eclipseShadow(cameraPos);
-    bool cameraIsInEclipse = std::abs(eclipseShadow - 1.f) > glm::epsilon<float>();
+    const bool cameraIsInEclipse = std::abs(eclipseShadow - 1.f) > glm::epsilon<float>();
     // Invert shadow and multiply with itself to make it more narrow
     eclipseShadow = std::pow(1.f - eclipseShadow, 2.f);
     float atmosphereDimming = 0.f;
@@ -566,8 +567,8 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     else if (cameraIsInFadingRegion && cameraIsInEclipse) {
         // Fade with regards to altitude & eclipse shadow
         // Fading - linear interpolation
-        float fading = (cameraDistance - atmosphereInnerEdge) /
-            atmosphereFadingHeight;
+        const float fading =
+            (cameraDistance - atmosphereInnerEdge) / atmosphereFadingHeight;
         atmosphereDimming = std::clamp(eclipseShadow + fading, 0.f, 1.f);
     }
     else if (cameraIsInFadingRegion) {

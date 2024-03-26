@@ -46,7 +46,7 @@ void LuaLibrary::merge(LuaLibrary rhs) {
             // want to overwrite it
             LERRORC(
                 "LuaLibrary",
-                fmt::format(
+                std::format(
                     "Lua function '{}' in library '{}' has been defined twice",
                     fun.name, rhs.name
                 )

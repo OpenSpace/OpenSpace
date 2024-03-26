@@ -38,8 +38,6 @@ namespace openspace::interaction {
 
 class KeybindingManager {
 public:
-    KeybindingManager();
-
     void resetKeyBindings();
 
     void bindKey(Key key, KeyModifier modifier, std::string action);
@@ -52,8 +50,6 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-
-    nlohmann::json generateJson() const;
 
     const std::multimap<KeyWithModifier, std::string>& keyBindings() const;
 

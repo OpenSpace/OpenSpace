@@ -100,7 +100,7 @@ RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
     return metadata;
 }
 
-ghoul::Dictionary RawVolumeMetadata::dictionary() {
+ghoul::Dictionary RawVolumeMetadata::dictionary() const {
     ghoul::Dictionary dict;
     dict.setValue("Dimensions", glm::dvec3(dimensions));
     dict.setValue("GridType", gridTypeToString(gridType));
