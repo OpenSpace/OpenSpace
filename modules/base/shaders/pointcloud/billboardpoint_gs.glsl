@@ -30,6 +30,8 @@ layout(points) in;
 flat in float textureLayer[];
 flat in float colorParameter[];
 flat in float scalingParameter[];
+flat in vec3 orientationU[];
+flat in vec3 orientationV[];
 
 layout(triangle_strip, max_vertices = 4) out;
 flat out float gs_colorParameter;
@@ -48,6 +50,7 @@ uniform dmat4 modelMatrix;
 uniform bool enableMaxSizeControl;
 uniform bool hasDvarScaling;
 uniform float dvarScaleFactor;
+uniform bool hasOrientationData;
 
 // RenderOption: CameraViewDirection
 uniform vec3 up;
@@ -72,6 +75,7 @@ const vec2 corners[4] = vec2[4](
 
 const int RenderOptionCameraViewDirection = 0;
 const int RenderOptionCameraPositionNormal = 1;
+const int RenderOptionFixedRotation = 2;
 
 void main() {
   vec4 pos = gl_in[0].gl_Position;
@@ -85,21 +89,31 @@ void main() {
     scaleMultiply *= scalingParameter[0] * dvarScaleFactor;
   }
 
-  vec3 scaledRight = vec3(0.0);
-  vec3 scaledUp = vec3(0.0);
+  vec3 scaledRight = vec3(1.0, 0.0, 0.0);
+  vec3 scaledUp = vec3(0.0, 1.0, 0.0);
 
   if (renderOption == RenderOptionCameraViewDirection) {
-    scaledRight = scaleMultiply * right * 0.5;
-    scaledUp = scaleMultiply * up * 0.5;
+    scaledRight = right;
+    scaledUp = up;
   }
   else if (renderOption == RenderOptionCameraPositionNormal) {
     vec3 normal = vec3(normalize(cameraPosition - dpos.xyz));
     vec3 newRight = normalize(cross(cameraLookUp, normal));
     vec3 newUp = cross(normal, newRight);
 
-    scaledRight = scaleMultiply * newRight * 0.5;
-    scaledUp = scaleMultiply * newUp * 0.5;
+    scaledRight = newRight;
+    scaledUp = newUp;
   }
+  else if (renderOption == RenderOptionFixedRotation) {
+    if (hasOrientationData) {
+        scaledRight = orientationU[0];
+        scaledUp = orientationV[0];
+    }
+    // Else use default
+  }
+
+  scaledRight *= scaleMultiply * 0.5;
+  scaledUp *= scaleMultiply * 0.5;
 
   if (enableMaxSizeControl) {
     // Limit the max size of the points, as the angle in "FOV" that the point is allowed

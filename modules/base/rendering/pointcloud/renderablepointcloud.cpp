@@ -69,7 +69,8 @@ namespace {
 
     enum RenderOption {
         ViewDirection = 0,
-        PositionNormal
+        PositionNormal,
+        FixedRotation
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureEnabledInfo = {
@@ -196,6 +197,16 @@ namespace {
         "If false, no such blending will take place and the color of the point "
         "will not be modified by blending. Note that this may lead to weird behaviors "
         "when the points are rendered with transparency.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseRotationInfo = {
+        "UseRotation",
+        "Use Rotation",
+        "If true and there is rotation/orientation information for teh points in the "
+        "dataset, use this information when rendering the planes for the points. This "
+        "means that the points will not be billboarded to face the camera, but rotatated "
+        "to match the orientation provided per point in the dataset.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -364,7 +375,8 @@ namespace {
 
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
-            PositionNormal [[codegen::key("Camera Position Normal")]]
+            PositionNormal [[codegen::key("Camera Position Normal")]],
+            FixedRotation [[codegen::key("Fixed Rotation")]]
         };
         // [[codegen::verbatim(RenderOptionInfo.description)]]
         std::optional<RenderOption> renderOption;
@@ -580,6 +592,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _drawElements(DrawElementsInfo, true)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
+    , _useRotation(UseRotationInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _nDataPoints(NumShownDataPointsInfo, 0)
     , _fading(dictionary)
@@ -604,6 +617,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
+    _renderOption.addOption(RenderOption::FixedRotation, "Fixed Rotation");
 
     if (p.renderOption.has_value()) {
         _renderOption = codegen::map<RenderOption>(*p.renderOption);
@@ -1143,7 +1157,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.outlineColor, _colorSettings.outlineColor);
     _program->setUniform(_uniformCache.outlineWeight, _colorSettings.outlineWeight);
 
-    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
+    bool useColorMap = hasColorData() && _colorSettings.colorMapping->enabled &&
         _colorSettings.colorMapping->texture();
 
     _program->setUniform(_uniformCache.useColormap, useColorMap);
@@ -1190,6 +1204,8 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
             _colorSettings.colorMapping->useBelowRangeColor
         );
     }
+
+    _program->setUniform("hasOrientationData", hasOrientationData());
 
     bool useTexture = _hasSpriteTexture && _texture.enabled;
     _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
@@ -1295,8 +1311,9 @@ glm::dvec3 RenderablePointCloud::transformedPosition(
 
 int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 3; // position
-    n += _hasColorMapFile ? 1 : 0;
-    n += _hasDatavarSize ? 1 : 0;
+    n += hasColorData() ? 1 : 0;
+    n += hasSizeData() ? 1 : 0;
+    n += hasOrientationData() ? 6 : 0;
     n += _hasSpriteTexture ? 1 : 0; // texture id
     return n;
 }
@@ -1349,12 +1366,17 @@ void RenderablePointCloud::updateBufferData() {
 
     offset = bufferVertexAttribute("in_position", 3, attibutesPerPoint, offset);
 
-    if (_hasColorMapFile) {
+    if (hasColorData()) {
         offset = bufferVertexAttribute("in_colorParameter", 1, attibutesPerPoint, offset);
     }
 
-    if (_hasDatavarSize) {
+    if (hasSizeData()) {
         offset = bufferVertexAttribute("in_scalingParameter", 1, attibutesPerPoint, offset);
+    }
+
+    if (hasOrientationData()) {
+        offset = bufferVertexAttribute("in_orientationU", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientationV", 3, attibutesPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {
@@ -1411,7 +1433,7 @@ int RenderablePointCloud::currentColorParameterIndex() const {
         _colorSettings.colorMapping->dataColumn;
 
     if (!_hasColorMapFile || property.options().empty()) {
-        return 0;
+        return -1;
     }
 
     return _dataset.index(property.option().description);
@@ -1422,10 +1444,33 @@ int RenderablePointCloud::currentSizeParameterIndex() const {
         _sizeSettings.sizeMapping->parameterOption;
 
     if (!_hasDatavarSize || property.options().empty()) {
-        return 0;
+        return -1;
     }
 
     return _dataset.index(property.option().description);
+}
+
+bool RenderablePointCloud::hasColorData() const {
+    int colorParamIndex = currentColorParameterIndex();
+    return _hasColorMapFile && colorParamIndex >= 0;
+}
+
+bool RenderablePointCloud::hasSizeData() const {
+    int sizeParamIndex = currentSizeParameterIndex();
+    return _hasDatavarSize && sizeParamIndex >= 0;
+}
+
+bool RenderablePointCloud::hasMultiTextureData() const {
+    // What datavar is the texture, if any
+    int textureIdIndex = _dataset.textureDataIndex;
+    return _hasSpriteTexture && textureIdIndex >= 0;
+}
+
+bool RenderablePointCloud::hasOrientationData() const {
+    int orientationDataIndex = _dataset.orientationDataIndex;
+    return orientationDataIndex >= 0;
+
+    // TODO: verify that it has all the orientation values?
 }
 
 void RenderablePointCloud::addPositionDataForPoint(unsigned int index,
@@ -1449,18 +1494,61 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
 {
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
 
-    int colorParamIndex = currentColorParameterIndex();
-    if (_hasColorMapFile && colorParamIndex >= 0) {
+    if (hasColorData()) {
+        int colorParamIndex = currentColorParameterIndex();
         result.push_back(e.data[colorParamIndex]);
     }
 
-    int sizeParamIndex = currentSizeParameterIndex();
-    if (_hasDatavarSize && sizeParamIndex >= 0) {
+    if (hasSizeData()) {
+        int sizeParamIndex = currentSizeParameterIndex();
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
         result.push_back(e.data[sizeParamIndex]);
     }
+}
+
+void RenderablePointCloud::addOrientationDataForPoint(unsigned int index,
+                                                      std::vector<float>& result) const
+{
+    if (!hasOrientationData()) {
+        return;
+    }
+
+    const dataloader::Dataset::Entry& e = _dataset.entries[index];
+    int orientationDataIndex = _dataset.orientationDataIndex;
+
+    glm::vec4 u = glm::vec4(
+        _transformationMatrix *
+        glm::dvec4(
+            e.data[orientationDataIndex + 0],
+            e.data[orientationDataIndex + 1],
+            e.data[orientationDataIndex + 2],
+            1.f
+        )
+    );
+
+    glm::vec4 v = glm::vec4(
+        _transformationMatrix *
+        glm::dvec4(
+            e.data[orientationDataIndex + 3],
+            e.data[orientationDataIndex + 4],
+            e.data[orientationDataIndex + 5],
+            1.f
+        )
+    );
+
+    // The orientation is given as six values in sucession: two vectors (u, v) that
+    // specify the plane orientation
+    result.push_back(u.x);
+    result.push_back(u.y);
+    result.push_back(u.z);
+
+    result.push_back(v.x);
+    result.push_back(v.y);
+    result.push_back(v.z);
+
+    // @TODO: when it works, make this safer (maybe store the rotation per point rather than assume there are six values)
 }
 
 std::vector<float> RenderablePointCloud::createDataSlice() {
@@ -1469,9 +1557,6 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     if (_dataset.entries.empty()) {
         return std::vector<float>();
     }
-
-    // What datavar is the texture, if any
-    int textureIdIndex = _dataset.textureDataIndex;
 
     double maxRadius = 0.0;
 
@@ -1490,13 +1575,14 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         const dataloader::Dataset::Entry& e = _dataset.entries[i];
 
         unsigned int subresultIndex = 0;
+        // Default texture layer for single texture is zero
         float textureLayer = 0.f;
 
         bool useMultiTexture = (_textureMode == TextureInputMode::Multi) &&
-            (textureIdIndex >= 0);
+            hasMultiTextureData();
 
-        if (_hasSpriteTexture && useMultiTexture) {
-            int texId = static_cast<int>(e.data[textureIdIndex]);
+        if (useMultiTexture) {
+            int texId = static_cast<int>(e.data[_dataset.textureDataIndex]);
             size_t texIndex = _indexInDataToTextureIndex[texId];
             textureLayer = static_cast<float>(
                 _textureIndexToArrayMap[texIndex].layer
@@ -1509,6 +1595,8 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         // Add position, color and size data (subclasses may compute these differently)
         addPositionDataForPoint(i, subArrayToUse, maxRadius);
         addColorAndSizeDataForPoint(i, subArrayToUse);
+
+        addOrientationDataForPoint(i, subArrayToUse);
 
         // Texture layer
         if (_hasSpriteTexture) {

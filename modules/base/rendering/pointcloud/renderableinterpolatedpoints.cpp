@@ -358,8 +358,8 @@ int RenderableInterpolatedPoints::nAttributesPerPoint() const {
         n += 2 * 3;
     }
     // And potentially some more color and size data
-    n += _hasColorMapFile ? 1 : 0;
-    n += _hasDatavarSize ? 1 : 0;
+    n += hasColorData() ? 1 : 0;
+    n += hasSizeData() ? 1 : 0;
 
     return n;
 }
@@ -426,14 +426,14 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
     const Dataset::Entry& e0 = _dataset.entries[firstIndex];
     const Dataset::Entry& e1 = _dataset.entries[secondIndex];
 
-    int colorParamIndex = currentColorParameterIndex();
-    if (_hasColorMapFile && colorParamIndex >= 0) {
+    if (hasColorData()) {
+        int colorParamIndex = currentColorParameterIndex();
         result.push_back(e0.data[colorParamIndex]);
         result.push_back(e1.data[colorParamIndex]);
     }
 
-    int sizeParamIndex = currentSizeParameterIndex();
-    if (_hasDatavarSize && sizeParamIndex >= 0) {
+    if (hasSizeData()) {
+        int sizeParamIndex = currentSizeParameterIndex();
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
@@ -470,14 +470,19 @@ void RenderableInterpolatedPoints::initializeBufferData() {
         offset = bufferVertexAttribute("in_position_after", 3, attibutesPerPoint, offset);
     }
 
-    if (_hasColorMapFile) {
+    if (hasColorData()) {
         offset = bufferVertexAttribute("in_colorParameter0", 1, attibutesPerPoint, offset);
         offset = bufferVertexAttribute("in_colorParameter1", 1, attibutesPerPoint, offset);
     }
 
-    if (_hasDatavarSize) {
+    if (hasSizeData()) {
         offset = bufferVertexAttribute("in_scalingParameter0", 1, attibutesPerPoint, offset);
         offset = bufferVertexAttribute("in_scalingParameter1", 1, attibutesPerPoint, offset);
+    }
+
+    if (hasOrientationData()) {
+        offset = bufferVertexAttribute("in_orientationU", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientationV", 3, attibutesPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {

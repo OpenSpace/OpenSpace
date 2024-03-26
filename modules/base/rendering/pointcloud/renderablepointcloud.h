@@ -117,9 +117,16 @@ protected:
     /// Find the index of the currently chosen size parameter in the dataset
     int currentSizeParameterIndex() const;
 
+    bool hasColorData() const;
+    bool hasSizeData() const;
+    bool hasMultiTextureData() const;
+    bool hasOrientationData() const;
+
     virtual void addPositionDataForPoint(unsigned int index, std::vector<float>& result,
         double& maxRadius) const;
     virtual void addColorAndSizeDataForPoint(unsigned int index,
+        std::vector<float>& result) const;
+    virtual void addOrientationDataForPoint(unsigned int index,
         std::vector<float>& result) const;
 
     std::vector<float> createDataSlice();
@@ -193,6 +200,7 @@ protected:
     Fading _fading;
 
     properties::BoolProperty _useAdditiveBlending;
+    properties::BoolProperty _useRotation;
 
     properties::BoolProperty _drawElements;
     properties::OptionProperty _renderOption;
