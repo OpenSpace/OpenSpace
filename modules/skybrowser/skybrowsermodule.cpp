@@ -350,7 +350,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
 
     // Show the circle
     if (useScript) {
-        const std::string script = fmt::format(
+        const std::string script = std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);",
             id
         );
@@ -374,7 +374,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
     pos *= skybrowser::CelestialSphereRadius * 1.1;
 
     // Note that the position can only be set through the script engine
-    const std::string script = fmt::format(
+    const std::string script = std::format(
         "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
         id, ghoul::to_string(pos)
     );
@@ -388,7 +388,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
 void SkyBrowserModule::disableHoverCircle(bool useScript) {
     if (_hoverCircle && _hoverCircle->renderable()) {
         if (useScript) {
-            const std::string script = fmt::format(
+            const std::string script = std::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
                 _hoverCircle->identifier()
             );
@@ -439,7 +439,7 @@ TargetBrowserPair* SkyBrowserModule::pair(std::string_view id) const {
     );
     TargetBrowserPair* found = it != _targetsBrowsers.end() ? it->get() : nullptr;
     if (found == nullptr) {
-        LINFO(fmt::format("Identifier '{}' not found", id));
+        LINFO(std::format("Identifier '{}' not found", id));
     }
     return found;
 }

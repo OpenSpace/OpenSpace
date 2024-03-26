@@ -99,7 +99,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
     }
 
     if (p.filename.has_value() && _urls.size() > 1) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "UrlSynchronization ({}) requested overwrite filename but specified {} URLs "
             "to download, which is not legal",
             p.identifier, _urls.size()
@@ -128,11 +128,11 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
         size_t hash = std::hash<std::string>{}(
             std::accumulate(urls.begin(), urls.end(), std::string())
         );
-        _identifier += fmt::format("({})", hash);
+        _identifier += std::format("({})", hash);
     }
 
     if (p.forceOverride.has_value()) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "{}: The variable ForceOverride has been deprecated. "
             "Optionally, use SecondsUntilResync instead to specify file validity date.",
             p.identifier
@@ -230,7 +230,7 @@ bool UrlSynchronization::isEachFileValid() {
 
         // Issue warning if file is kept but user changed setting to download on startup.
         if ((fileValidAsJ2000 > todaysDateAsJ2000) && _secondsUntilResync == 0) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "{}: File is valid to {} but asset specifies SecondsUntilResync = {} "
                 "Did you mean to re-download the file? If so, remove file from sync "
                 "folder to resync",
@@ -247,7 +247,7 @@ bool UrlSynchronization::isEachFileValid() {
         return false;
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "{}: Unknown ossync version number read. Got {} while {} and below are valid",
             _identifier, ossyncVersion, OssyncVersionNumber
         ));
@@ -279,7 +279,7 @@ void UrlSynchronization::createSyncFile(bool) const {
         "YYYY-MM-DDTHR:MN:SC.###"
     );
 
-    const std::string msg = fmt::format("{}\n{}\n", OssyncVersionNumber, fileIsValidTo);
+    const std::string msg = std::format("{}\n{}\n", OssyncVersionNumber, fileIsValidTo);
     syncFile << msg;
 }
 
@@ -311,7 +311,7 @@ bool UrlSynchronization::trySyncUrls() {
         std::filesystem::path destination = directory() / (_filename + ".tmp");
 
         if (sizeData.find(url) != sizeData.end()) {
-            LWARNING(fmt::format("{}: Duplicate entry for '{}'", _identifier, url));
+            LWARNING(std::format("{}: Duplicate entry for '{}'", _identifier, url));
             continue;
         }
 
@@ -360,7 +360,7 @@ bool UrlSynchronization::trySyncUrls() {
         d->wait();
         if (!d->hasSucceeded()) {
             failed = true;
-            LERROR(fmt::format("Error downloading file from URL: {}", d->url()));
+            LERROR(std::format("Error downloading file from URL: {}", d->url()));
             continue;
         }
 
@@ -381,7 +381,7 @@ bool UrlSynchronization::trySyncUrls() {
         if (ec) {
             LERRORC(
                 "URLSynchronization",
-                fmt::format("Error renaming file '{}' to '{}'", tempName, originalName)
+                std::format("Error renaming file '{}' to '{}'", tempName, originalName)
             );
 
             failed = true;

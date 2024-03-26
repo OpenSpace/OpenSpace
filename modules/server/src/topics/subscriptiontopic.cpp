@@ -29,7 +29,7 @@
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -92,7 +92,7 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
             onChange();
         }
         else {
-            LWARNING(fmt::format("Could not subscribe. Property '{}' not found", key));
+            LWARNING(std::format("Could not subscribe. Property '{}' not found", key));
         }
     }
     if (event == StopSubscription) {

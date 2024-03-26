@@ -160,7 +160,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format(
+            std::format(
                 "{:4.0f} {:s} |{:s}>{:s}| {:.1f} %",
                 remainingConv.first,
                 remainingConv.second,
@@ -180,7 +180,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format("Data acquisition time: {}", str),
+            std::format("Data acquisition time: {}", str),
             glm::vec4(_activeColor.value(), 1.f),
             ghoul::fontrendering::CrDirection::Down
         );
@@ -203,7 +203,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        fmt::format(
+        std::format(
             "Next image: [{:02d}:{:02d}:{:02d}]", tlh.count(), tlm.count(), tls.count()
         ),
         targetColor,
@@ -234,7 +234,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             RenderFont(*_font, penPosition, "  |", glm::vec4(0.3f, 0.3f, 0.3f, 1.f));
             RenderFont(*_font,
                 penPosition,
-                fmt::format("    {:5s}", m.first),
+                std::format("    {:5s}", m.first),
                 glm::vec4(_activeColor.value(), 1.f),
                 ghoul::fontrendering::CrDirection::Down
             );
@@ -244,7 +244,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format("    {:5s}", m.first),
+                std::format("    {:5s}", m.first),
                 glm::vec4(0.3f, 0.3f, 0.3f, 1.f),
                 ghoul::fontrendering::CrDirection::Down
             );
@@ -279,13 +279,13 @@ glm::vec2 DashboardItemInstruments::size() const {
         size = addToBoundingbox(
             size,
             _font->boundingBox(
-                fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100.f)
+                std::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100.f)
             )
         );
 
         size = addToBoundingbox(
             size,
-            _font->boundingBox(fmt::format("Data acquisition time: {}", str))
+            _font->boundingBox(std::format("Data acquisition time: {}", str))
         );
     }
     const std::pair<double, std::string> nextTarget = sequencer.nextTarget(time);
@@ -323,7 +323,7 @@ glm::vec2 DashboardItemInstruments::size() const {
     size = addToBoundingbox(
         size,
         _font->boundingBox(
-            fmt::format("Data acquisition adjacency: [{}:{}:{}]", hh, mm, ss)
+            std::format("Data acquisition adjacency: [{}:{}:{}]", hh, mm, ss)
         )
     );
 

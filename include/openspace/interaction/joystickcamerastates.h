@@ -196,7 +196,7 @@ from_string(std::string_view string)
     if (string == "Pan Y") { return T::PanY; }
     if (string == "Property") { return T::Property; }
 
-    throw RuntimeError(fmt::format("Unknown axis type '{}'", string), "Joystick");
+    throw RuntimeError(std::format("Unknown axis type '{}'", string), "Joystick");
 }
 
 template <>
@@ -220,7 +220,7 @@ from_string(std::string_view string)
     if (string == "JoystickLike") { return T::JoystickLike; }
     if (string == "TriggerLike") { return T::TriggerLike; }
 
-    throw RuntimeError(fmt::format("Unknown joystick type '{}'", string), "Joystick");
+    throw RuntimeError(std::format("Unknown joystick type '{}'", string), "Joystick");
 }
 
 } // namespace ghoul

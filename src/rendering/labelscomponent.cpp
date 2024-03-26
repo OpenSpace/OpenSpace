@@ -258,7 +258,7 @@ void LabelsComponent::initialize() {
 }
 
 void LabelsComponent::loadLabels() {
-    LINFO(fmt::format("Loading label file '{}'", _labelFile));
+    LINFO(std::format("Loading label file '{}'", _labelFile));
 
     if (_createdFromDataset) {
         // The labelset should already have been loaded

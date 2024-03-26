@@ -175,7 +175,7 @@ void RenderablePlaneImageLocal::loadTexture() {
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",
-                    fmt::format("Loaded texture from '{}'", absPath(path))
+                    std::format("Loaded texture from '{}'", absPath(path))
                 );
                 texture->uploadTexture();
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);

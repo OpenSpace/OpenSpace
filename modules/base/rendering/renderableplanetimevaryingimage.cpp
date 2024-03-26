@@ -96,7 +96,7 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
 
     _sourceFolder = p.sourceFolder;
     if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Time varying image, '{}' is not a valid directory",
             _sourceFolder.value()
         ));
@@ -174,7 +174,7 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
     std::sort(_sourceFiles.begin(), _sourceFiles.end());
     // Ensure that there are available and valid source files left
     if (_sourceFiles.empty()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "{}: Plane sequence filepath '{}' was empty",
             _identifier, _sourceFolder.value()
         ));

@@ -136,7 +136,7 @@ bool ScreenSpaceBrowser::deinitializeGL() {
     _renderHandler->setTexture(0);
     _texture = nullptr;
 
-    LDEBUG(fmt::format("Deinitializing ScreenSpaceBrowser: {}", _url.value()));
+    LDEBUG(std::format("Deinitializing ScreenSpaceBrowser: {}", _url.value()));
 
     _browserInstance->close(true);
 

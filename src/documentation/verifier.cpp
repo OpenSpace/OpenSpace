@@ -626,12 +626,12 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
 
         // Add the 'key' as a prefix to make the new offender a fully qualified identifer
         for (TestResult::Offense& s : res.offenses) {
-            s.offender = fmt::format("{}.{}", key, s.offender);
+            s.offender = std::format("{}.{}", key, s.offender);
         }
 
         // Add the 'key' as a prefix to make the new warning a fully qualified identifer
         for (TestResult::Warning& w : res.warnings) {
-            w.offender = fmt::format("{}.{}", key, w.offender);
+            w.offender = std::format("{}.{}", key, w.offender);
         }
 
         return res;
@@ -718,12 +718,12 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
 
         // Add the 'key' as a prefix to make the offender a fully qualified identifer
         for (TestResult::Offense& s : r.offenses) {
-            s.offender = fmt::format("{}.{}", key, s.offender);
+            s.offender = std::format("{}.{}", key, s.offender);
         }
 
         // Add the 'key' as a prefix to make the warning a fully qualified identifer
         for (TestResult::Warning& w : r.warnings) {
-            w.offender = fmt::format("{}.{}", key, w.offender);
+            w.offender = std::format("{}.{}", key, w.offender);
         }
 
         return r;
@@ -797,7 +797,7 @@ std::string OrVerifier::type() const {
         types.begin(),
         std::mem_fn(&Verifier::type)
     );
-    types.push_back(fmt::format("or {}", values.back()->type()));
+    types.push_back(std::format("or {}", values.back()->type()));
 
     return ghoul::join(types, ", ");
 }
@@ -811,7 +811,7 @@ std::string OrVerifier::documentation() const {
         documentations.begin(),
         std::mem_fn(&Verifier::documentation)
     );
-    documentations.push_back(fmt::format("or {}", values.back()->documentation()));
+    documentations.push_back(std::format("or {}", values.back()->documentation()));
 
     return ghoul::join(documentations, ", ");
 }

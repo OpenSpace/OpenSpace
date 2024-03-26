@@ -28,7 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
 #include <geos/io/GeoJSON.h>
-#include <scn/scn.h>
+#include <scn/scan.h>
 #include <algorithm>
 #include <cstdio>
 
@@ -100,10 +100,10 @@ namespace {
     }
 
     std::optional<glm::vec3> hexToRgb(std::string_view hexColor) {
-        glm::ivec3 rgb;
-        auto ret = scn::scan(hexColor, "#{:2x}{:2x}{:2x}", rgb.r, rgb.g, rgb.b);
+        auto ret = scn::scan<int, int, int>(hexColor, "#{:2x}{:2x}{:2x}");
         if (ret) {
-            return (1.f / 255.f) * glm::vec3(rgb);
+            auto [x, y, z] = ret->values();
+            return (1.f / 255.f) * glm::vec3(x, y, z);
         }
         else {
             return std::nullopt;
@@ -120,7 +120,7 @@ namespace {
                 // Should add some more information on which file the reading failed for
                 LERRORC(
                     "GeoJson",
-                    fmt::format(
+                    std::format(
                         "Failed reading color property. Expected 3 values, got {}",
                         val.size()
                     )
@@ -140,7 +140,7 @@ namespace {
             if (!c) {
                 LERRORC(
                     "GeoJson",
-                    fmt::format(
+                    std::format(
                         "Failed reading color property. Did not find a hex color, got {}",
                         hex
                     )
@@ -532,7 +532,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
                 result.pointTextureAnchor = GeoJsonProperties::PointTextureAnchor::Center;
             }
             else {
-                LERRORC("GeoJson", fmt::format(
+                LERRORC("GeoJson", std::format(
                     "Point texture anchor mode '{}' not supported", mode
                 ));
             }
@@ -554,7 +554,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             //    result.altitudeMode = GeoJsonProperties::AltitudeMode::ClampToGround;
             //}
             else {
-                LERRORC("GeoJson", fmt::format(
+                LERRORC("GeoJson", std::format(
                     "Altitude mode '{}' not supported", mode
                 ));
             }
@@ -587,7 +587,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
         }
         catch (const geos::io::GeoJSONValue::GeoJSONTypeError&) {
             // @TODO: Should add some more information on which file the reading failed
-            LERRORC("GeoJson", fmt::format(
+            LERRORC("GeoJson", std::format(
                 "Error reading GeoJson property '{}'. Value has wrong type", key
             ));
         }

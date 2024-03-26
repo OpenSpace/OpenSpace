@@ -210,7 +210,7 @@ constexpr openspace::globebrowsing::layers::Layer::ID from_string(std::string_vi
         return it->id;
     }
     else {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Could not find Layer of type '{}'", string
         ));
     }
@@ -231,7 +231,7 @@ constexpr openspace::globebrowsing::layers::Group::ID from_string(std::string_vi
         return it->id;
     }
     else {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Could not find Group of type '{}'", string
         ));
     }

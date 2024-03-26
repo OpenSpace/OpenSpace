@@ -35,7 +35,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
@@ -151,7 +151,7 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
         _pointTexture->uploadToGpu();
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Trying to use texture file that does not exist: {}", texturePath
         ));
     }
@@ -235,7 +235,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                 _type = GeometryType::Polygon;
             }
             catch (geos::util::IllegalStateException& e) {
-                throw ghoul::RuntimeError(fmt::format(
+                throw ghoul::RuntimeError(std::format(
                     "Non-simple (e.g. self-intersecting) polygons not supported yet. "
                     "GEOS error: {}", e.what()
                 ));
@@ -244,7 +244,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                 // https://www.sciencedirect.com/science/article/pii/S0304397520304199
             }
             catch (geos::util::GEOSException& e) {
-                throw ghoul::RuntimeError(fmt::format(
+                throw ghoul::RuntimeError(std::format(
                     "Unknown geos error: {}", e.what()
                 ));
             }
@@ -282,7 +282,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
         _key = *_properties.overrideValues.name;
     }
     else {
-        _key = fmt::format("Feature {} - {}", index, geo->getGeometryType());
+        _key = std::format("Feature {} - {}", index, geo->getGeometryType());
     }
 }
 

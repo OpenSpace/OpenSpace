@@ -27,7 +27,7 @@
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/util/progressbar.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 
 namespace openspace {
 
@@ -53,7 +53,7 @@ bool ErrorHistogramManager::buildHistograms(int numBins) {
     _histograms = std::vector<Histogram>(_numInnerNodes);
     LINFOC(
         "ErrorHistogramManager",
-        fmt::format("Build {} histograms with {} bins each", _numInnerNodes, numBins)
+        std::format("Build {} histograms with {} bins each", _numInnerNodes, numBins)
     );
 
     // All TSP Leaves

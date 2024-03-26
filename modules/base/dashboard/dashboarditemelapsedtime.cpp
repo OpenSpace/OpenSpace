@@ -153,7 +153,7 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
         const std::vector<std::pair<double, std::string_view>> ts = splitTime(delta);
         std::string time;
         for (const std::pair<double, std::string_view>& t : ts) {
-            time += fmt::format("{} {} ", t.first, t.second);
+            time += std::format("{} {} ", t.first, t.second);
             if (t.second == lowestUnitS || t.second == lowestUnitP) {
                 // We have reached the lowest unit the user was interested in
                 break;
@@ -166,15 +166,17 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format(fmt::runtime(_formatString.value()), time)
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_formatString.value(), std::make_format_args(time))
         );
     }
     else {
-        std::string time = fmt::format("{} s", delta);
+        std::string time = std::format("{} s", delta);
         RenderFont(
             *_font,
             penPosition,
-            fmt::format(fmt::runtime(_formatString.value()), time)
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_formatString.value(), std::make_format_args(time))
         );
     }
 
@@ -185,7 +187,10 @@ glm::vec2 DashboardItemElapsedTime::size() const {
     ZoneScoped;
 
     const double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
-    return _font->boundingBox(fmt::format(fmt::runtime(_formatString.value()), delta));
+    // @CPP26(abock): This can be replaced with std::runtime_format
+    return _font->boundingBox(
+        std::vformat(_formatString.value(), std::make_format_args(delta))
+    );
 }
 
 } // namespace openspace

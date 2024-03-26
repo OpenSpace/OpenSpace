@@ -36,7 +36,7 @@
 #include "profile/propertiesdialog.h"
 #include "profile/timedialog.h"
 #include <openspace/scene/profile.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
 #include <QLabel>
@@ -81,7 +81,7 @@ namespace {
             );
 
             std::string name = it != actions.end() ? it->name : "Unknown action";
-            results += fmt::format("{} ({})\n", name, ghoul::to_string(k.key));
+            results += std::format("{} ({})\n", name, ghoul::to_string(k.key));
         }
         return results;
     }
@@ -89,7 +89,7 @@ namespace {
     std::string summarizeProperties(const std::vector<Profile::Property>& properties) {
         std::string results;
         for (openspace::Profile::Property p : properties) {
-            results += fmt::format("{} = {}\n", p.name, p.value);
+            results += std::format("{} = {}\n", p.name, p.value);
         }
         return results;
     }
@@ -489,7 +489,7 @@ void ProfileEdit::approved() {
         return;
     }
 
-    const std::filesystem::path p = fmt::format(
+    const std::filesystem::path p = std::format(
         "{}/{}.profile", _builtInProfilesPath, profileName
     );
     if (std::filesystem::exists(p)) {

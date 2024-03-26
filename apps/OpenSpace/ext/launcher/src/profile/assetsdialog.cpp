@@ -27,7 +27,7 @@
 #include "profile/assetedit.h"
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QLabel>
@@ -253,8 +253,8 @@ QString AssetsDialog::createTextSummary() {
         const bool existsInFilesystem = summaryItems.at(i)->doesExistInFilesystem();
 
         const std::string s = existsInFilesystem ?
-            fmt::format("{}<br>", summaryPaths.at(i)) :
-            fmt::format("<font color='red'>{}</font><br>", summaryPaths.at(i));
+            std::format("{}<br>", summaryPaths.at(i)) :
+            std::format("<font color='red'>{}</font><br>", summaryPaths.at(i));
         summary += QString::fromStdString(s);
     }
     return summary;

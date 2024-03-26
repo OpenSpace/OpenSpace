@@ -116,7 +116,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
         GPULayer& gal = _gpuActiveLayers[i];
         auto& galuc = gal.uniformCache;
         const Layer& al = *activeLayers[i];
-        const std::string name = fmt::format("{}[{}].", layerGroup.identifier(), i);
+        const std::string name = std::format("{}[{}].", layerGroup.identifier(), i);
 
         if (layerGroup.isHeightLayer()) {
             gal.isHeightLayer = true;
@@ -152,7 +152,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
                 for (size_t j = 0; j < gal.gpuChunkTiles.size(); j++) {
                     GPULayer::GPUChunkTile& t = gal.gpuChunkTiles[j];
                     auto& tuc = t.uniformCache;
-                    const std::string n = fmt::format("{}pile.chunkTile{}.", name, j);
+                    const std::string n = std::format("{}pile.chunkTile{}.", name, j);
 
                     tuc.texture = p.uniformLocation(n + "textureSampler");
                     tuc.uvOffset = p.uniformLocation(n + "uvTransform.uvOffset");

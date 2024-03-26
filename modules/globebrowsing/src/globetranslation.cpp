@@ -225,7 +225,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     if (!_attachedNode) {
         LERRORC(
             "GlobeRotation",
-            fmt::format("Could not find attached node '{}'", _globe.value())
+            std::format("Could not find attached node '{}'", _globe.value())
         );
         return _position;
     }

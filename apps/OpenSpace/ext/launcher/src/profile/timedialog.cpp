@@ -33,7 +33,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QVBoxLayout>
-#include <fmt/format.h>
+#include <format>
 #include <algorithm>
 
 using namespace openspace;
@@ -175,7 +175,7 @@ void TimeDialog::approved() {
     else {
         Profile::Time t;
         t.type = Profile::Time::Type::Absolute;
-        t.value = fmt::format(
+        t.value = std::format(
             "{}T{}",
             _absoluteEdit->date().toString("yyyy-MM-dd").toStdString(),
             _absoluteEdit->time().toString().toStdString()

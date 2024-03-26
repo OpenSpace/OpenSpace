@@ -276,7 +276,7 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
     std::getline(ss, token, ' ');
     url += token + "-";
     std::getline(ss, token, ' ');
-    url = fmt::format("{}{}-", url, monthNumber(token));
+    url = std::format("{}{}-", url, monthNumber(token));
     std::getline(ss, token, 'T');
     url += token + "%20";
     std::getline(ss, token, '.');
@@ -622,7 +622,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
     }
     else {
         LWARNING(
-            fmt::format("'{}' is not a CDF file or cannot be found", absPath(info.path))
+            std::format("'{}' is not a CDF file or cannot be found", absPath(info.path))
         );
     }
 }
@@ -744,7 +744,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(fmt::format("'{}' is not a CDF file or cannot be found", cdfFile));
+        LWARNING(std::format("'{}' is not a CDF file or cannot be found", cdfFile));
     }
 }
 

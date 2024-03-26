@@ -232,7 +232,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     std::filesystem::path sequenceDir = absPath(_sourceDirectory);
 
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir));
+        LERROR(std::format("Could not load sequence directory '{}'", sequenceDir));
         return;
     }
 
@@ -246,7 +246,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     // TODO: defer loading of data to later (separate thread or at least not when loading)
     for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
-        const std::string path = fmt::format(
+        const std::string path = std::format(
             "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
         );
         RawVolumeReader<float> reader(path, t.metadata.dimensions);

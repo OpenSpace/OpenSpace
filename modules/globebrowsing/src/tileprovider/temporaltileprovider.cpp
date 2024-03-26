@@ -217,13 +217,13 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             _prototyped.temporalResolution = p.prototyped->temporalResolution;
         }
         catch (const ghoul::RuntimeError& e) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Could not create time quantizer for Temporal GDAL dataset: {}", e.message
             ));
         }
 
         if (p.prototyped->timeFormat.size() >= 64) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Time format string '{}' too large. Maximum length of 64 is allowed",
                 p.prototyped->timeFormat
             ));
@@ -257,7 +257,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                     // unfortunately.  Luckily, Spice understands DOY date formats, so
                     // we can specify those directly and noone would use a DOY and a DOM
                     // time string in the same format string, right?  Right?!
-                    date = fmt::format(
+                    date = std::format(
                         "{}-{}T{}:{}:{}",
                         tm.tm_year + 1900,
                         tm.tm_yday,
@@ -267,7 +267,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                     );
                 }
                 else {
-                    date = fmt::format(
+                    date = std::format(
                         "{}-{}-{} {}:{}:{}",
                         tm.tm_year + 1900,
                         tm.tm_mon + 1,
@@ -294,7 +294,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         );
 
         if (_folder.files.empty()) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Error loading layer '{}'. Folder '{}' does not contain any files that "
                 "matched the time format",
                 _identifier, _folder.folder

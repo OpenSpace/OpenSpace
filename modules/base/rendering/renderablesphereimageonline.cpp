@@ -53,13 +53,13 @@ namespace {
             [url](const DownloadManager::MemoryFile&) {
                 LDEBUGC(
                     "RenderableSphereImageOnline",
-                    fmt::format("Download to memory finished for image '{}'", url)
+                    std::format("Download to memory finished for image '{}'", url)
                 );
             },
             [url](const std::string& err) {
                 LDEBUGC(
                     "RenderableSphereImageOnline",
-                    fmt::format("Download to memory failed for image '{}': {}", url, err)
+                    std::format("Download to memory failed for image '{}': {}", url, err)
                 );
             }
         );
@@ -120,7 +120,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
         if (imageFile.corrupted) {
             LERRORC(
                 "RenderableSphereImageOnline",
-                fmt::format("Error loading image from URL '{}'", _textureUrl.value())
+                std::format("Error loading image from URL '{}'", _textureUrl.value())
             );
             return;
         }

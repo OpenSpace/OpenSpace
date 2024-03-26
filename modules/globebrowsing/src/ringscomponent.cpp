@@ -665,7 +665,7 @@ void RingsComponent::loadTexture() {
         if (texture) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
+                std::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             _texture = std::move(texture);
 
@@ -688,7 +688,7 @@ void RingsComponent::loadTexture() {
         if (textureForwards) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format(
+                std::format(
                     "Loaded forwards scattering texture from '{}'",
                     absPath(_textureFwrdPath)
                 )
@@ -715,7 +715,7 @@ void RingsComponent::loadTexture() {
         if (textureBackwards) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format(
+                std::format(
                     "Loaded backwards scattering texture from '{}'",
                     absPath(_textureBckwrdPath)
                 )
@@ -742,7 +742,7 @@ void RingsComponent::loadTexture() {
         if (textureUnlit) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
+                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
             );
             _textureUnlit = std::move(textureUnlit);
 
@@ -765,7 +765,7 @@ void RingsComponent::loadTexture() {
         if (textureColor) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format("Loaded color texture from '{}'", absPath(_textureColorPath))
+                std::format("Loaded color texture from '{}'", absPath(_textureColorPath))
             );
             _textureColor = std::move(textureColor);
 
@@ -788,7 +788,7 @@ void RingsComponent::loadTexture() {
         if (textureTransparency) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
+                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
             );
             _textureTransparency = std::move(textureTransparency);
 

@@ -41,7 +41,6 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
@@ -57,7 +56,6 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
-#include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
@@ -236,11 +234,11 @@ void OpenSpaceEngine::registerPathTokens() {
     using T = std::string;
     for (const std::pair<const T, T>& path : global::configuration->pathTokens) {
         std::string fullKey = "${" + path.first + "}";
-        LDEBUG(fmt::format("Registering path '{}': {}", fullKey, path.second));
+        LDEBUG(std::format("Registering path '{}': {}", fullKey, path.second));
 
         const bool overrideBase = (fullKey == "${BASE}");
         if (overrideBase) {
-            LINFO(fmt::format("Overriding base path with '{}'", path.second));
+            LINFO(std::format("Overriding base path with '{}'", path.second));
         }
 
         const bool overrideTemporary = (fullKey == "${TEMPORARY}");
@@ -273,8 +271,8 @@ void OpenSpaceEngine::initialize() {
     if (global::configuration->usePerProfileCache) {
         cacheFolder = cacheFolder + "-" + global::configuration->profile;
 
-        LINFO(fmt::format("Old cache: {}", absPath("${CACHE}")));
-        LINFO(fmt::format("New cache: {}", cacheFolder));
+        LINFO(std::format("Old cache: {}", absPath("${CACHE}")));
+        LINFO(std::format("New cache: {}", cacheFolder));
         FileSys.registerPathToken(
             "${CACHE}",
             cacheFolder,
@@ -352,13 +350,13 @@ void OpenSpaceEngine::initialize() {
             const std::string ext = file.extension().string();
 
             std::filesystem::path newCandidate = file;
-            newCandidate.replace_filename(fmt::format("{}-{}{}", fname, rot, ext));
+            newCandidate.replace_filename(std::format("{}-{}{}", fname, rot, ext));
 
             std::filesystem::path oldCandidate = file;
             if (rot > 1) {
                 // We don't actually have a -0 version, it is just the base name
                 oldCandidate.replace_filename(
-                    fmt::format("{}-{}{}", fname, rot - 1, ext)
+                    std::format("{}-{}{}", fname, rot - 1, ext)
                 );
             }
 
@@ -399,10 +397,10 @@ void OpenSpaceEngine::initialize() {
     // Process profile file
     std::filesystem::path profile;
     if (!std::filesystem::is_regular_file(global::configuration->profile)) {
-        const std::filesystem::path userCandidate = absPath(fmt::format(
+        const std::filesystem::path userCandidate = absPath(std::format(
             "${{USER_PROFILES}}/{}.profile", global::configuration->profile
         ));
-        const std::filesystem::path profileCandidate = absPath(fmt::format(
+        const std::filesystem::path profileCandidate = absPath(std::format(
             "${{PROFILES}}/{}.profile", global::configuration->profile
         ));
 
@@ -414,7 +412,7 @@ void OpenSpaceEngine::initialize() {
             profile = profileCandidate;
         }
         else {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Could not load profile '{}': File does not exist",
                 global::configuration->profile
             ));
@@ -491,7 +489,7 @@ void OpenSpaceEngine::initializeGL() {
     // Check the required OpenGL versions of the registered modules
     const ghoul::systemcapabilities::Version version =
         global::moduleEngine->requiredOpenGLVersion();
-    LINFO(fmt::format("Required OpenGL version: {}", ghoul::to_string(version)));
+    LINFO(std::format("Required OpenGL version: {}", ghoul::to_string(version)));
 
     if (OpenGLCap.openGLVersion() < version) {
         throw ghoul::RuntimeError(
@@ -507,7 +505,7 @@ void OpenSpaceEngine::initializeGL() {
         for (OpenSpaceModule* m : global::moduleEngine->modules()) {
             for (const std::string& ext : m->requiredOpenGLExtensions()) {
                 if (!SysCap.component<OCC>().isExtensionSupported(ext)) {
-                    LFATAL(fmt::format(
+                    LFATAL(std::format(
                         "Module '{}' required OpenGL extension '{}' which is not "
                         "available on this system. Some functionality related to this "
                         "module will probably not work",
@@ -597,7 +595,7 @@ void OpenSpaceEngine::initializeGL() {
                 const std::string s = ghoul::to_string(source);
                 const std::string t = ghoul::to_string(type);
 
-                const std::string cat = fmt::format("OpenGL ({}) [{}] {{{}}}", s, t, id);
+                const std::string cat = std::format("OpenGL ({}) [{}] {{{}}}", s, t, id);
                 switch (severity) {
                     case Severity::High:
                         LERRORC(cat, message);
@@ -619,7 +617,7 @@ void OpenSpaceEngine::initializeGL() {
                     std::string stackString = "Stacktrace\n";
                     std::vector<std::string> stack = ghoul::stackTrace();
                     for (size_t i = 0; i < stack.size(); i++) {
-                        stackString += fmt::format("{}: {}\n", i, stack[i]);
+                        stackString += std::format("{}: {}\n", i, stack[i]);
                     }
                     LDEBUGC(cat, stackString);
                 }
@@ -645,26 +643,26 @@ void OpenSpaceEngine::initializeGL() {
                 case GL_INVALID_ENUM:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Function '{}': GL_INVALID_ENUM", f.function->name())
+                        std::format("Function '{}': GL_INVALID_ENUM", f.function->name())
                     );
                     break;
                 case GL_INVALID_VALUE:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Function '{}': GL_INVALID_VALUE", f.function->name())
+                        std::format("Function '{}': GL_INVALID_VALUE", f.function->name())
                     );
                     break;
                 case GL_INVALID_OPERATION:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format(
+                        std::format(
                             "Function '{}': GL_INVALID_OPERATION", f.function->name()
                         ));
                     break;
                 case GL_INVALID_FRAMEBUFFER_OPERATION:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format(
+                        std::format(
                             "Function '{}': GL_INVALID_FRAMEBUFFER_OPERATION",
                             f.function->name()
                         )
@@ -673,13 +671,13 @@ void OpenSpaceEngine::initializeGL() {
                 case GL_OUT_OF_MEMORY:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Function '{}': GL_OUT_OF_MEMORY", f.function->name())
+                        std::format("Function '{}': GL_OUT_OF_MEMORY", f.function->name())
                     );
                     break;
                 default:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Unknown error code: {0:x}", static_cast<int>(error))
+                        std::format("Unknown error code: {0:x}", static_cast<int>(error))
                     );
             }
         });
@@ -808,7 +806,10 @@ void OpenSpaceEngine::loadAssets() {
 
     runGlobalCustomizationScripts();
 
-    _writeDocumentationTask = std::async(&OpenSpaceEngine::writeDocumentation, this);
+    _writeDocumentationTask = std::async(
+        &documentation::DocumentationEngine::writeDocumentation,
+        DocEng
+    );
 
     LTRACE("OpenSpaceEngine::loadAsset(end)");
 }
@@ -910,7 +911,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
         std::filesystem::path s = absPath(script);
         if (std::filesystem::is_regular_file(s)) {
             try {
-                LINFO(fmt::format("Running global customization script: {}", s));
+                LINFO(std::format("Running global customization script: {}", s));
                 ghoul::lua::runScriptFile(state, s.string());
             }
             catch (const ghoul::RuntimeError& e) {
@@ -918,7 +919,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
             }
         }
         else {
-            LDEBUG(fmt::format("Ignoring non-existing script file: {}", s));
+            LDEBUG(std::format("Ignoring non-existing script file: {}", s));
         }
     }
 }
@@ -932,15 +933,15 @@ void OpenSpaceEngine::loadFonts() {
         std::filesystem::path fontName = absPath(font.second);
 
         if (!std::filesystem::is_regular_file(fontName)) {
-            LERROR(fmt::format("Could not find font '{}' for key '{}'", fontName, key));
+            LERROR(std::format("Could not find font '{}' for key '{}'", fontName, key));
             continue;
         }
 
-        LDEBUG(fmt::format("Registering font '{}' with key '{}'", fontName, key));
+        LDEBUG(std::format("Registering font '{}' with key '{}'", fontName, key));
         const bool success = global::fontManager->registerFontPath(key, fontName);
 
         if (!success) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error registering font '{}' with key '{}'", fontName, key
             ));
         }
@@ -952,57 +953,6 @@ void OpenSpaceEngine::loadFonts() {
     catch (const ghoul::RuntimeError& err) {
         LERRORC(err.component, err.message);
     }
-}
-
-void OpenSpaceEngine::writeDocumentation() {
-    ZoneScoped;
-
-    // Write documentation to json files if config file supplies path for doc files
-    std::string path = global::configuration->documentation.path;
-    if (path.empty()) {
-        // if path was empty, that means that no documentation is requested
-        return;
-    }
-    path = absPath(path).string() + '/';
-
-    // Start the async requests as soon as possible so they are finished when we need them
-    std::future<nlohmann::json> settings = std::async(
-        &properties::PropertyOwner::generateJson,
-        global::rootPropertyOwner
-    );
-
-    std::future<nlohmann::json> scene = std::async(
-        &properties::PropertyOwner::generateJson,
-        _scene.get()
-    );
-    SceneLicenseWriter writer;
-
-    nlohmann::json scripting = global::scriptEngine->generateJson();
-    nlohmann::json factory = FactoryManager::ref().generateJson();
-    nlohmann::json keybindings = global::keybindingManager->generateJson();
-    nlohmann::json license = writer.generateJsonGroupedByLicense();
-    nlohmann::json sceneProperties = settings.get();
-    nlohmann::json sceneGraph = scene.get();
-
-    sceneProperties["name"] = "Settings";
-    sceneGraph["name"] = "Scene";
-
-    // Add this here so that the generateJson function is the same as before to ensure
-    // backwards compatibility
-    nlohmann::json scriptingResult;
-    scriptingResult["name"] = "Scripting API";
-    scriptingResult["data"] = scripting;
-
-    nlohmann::json documentation = {
-        sceneGraph, sceneProperties, keybindings, license, scriptingResult, factory
-    };
-
-    nlohmann::json result;
-    result["documentation"] = documentation;
-
-    std::ofstream out(absPath("${DOCUMENTATION}/documentationData.js"));
-    out << "var data = " << result.dump();
-    out.close();
 }
 
 void OpenSpaceEngine::preSynchronization() {
@@ -1136,13 +1086,13 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     int fatalCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Fatal);
 
     if (warningCounter > 0) {
-        LWARNINGC("Logging", fmt::format("Number of Warnings: {}", warningCounter));
+        LWARNINGC("Logging", std::format("Number of Warnings: {}", warningCounter));
     }
     if (errorCounter > 0) {
-        LWARNINGC("Logging", fmt::format("Number of Errors: {}", errorCounter));
+        LWARNINGC("Logging", std::format("Number of Errors: {}", errorCounter));
     }
     if (fatalCounter > 0) {
-        LWARNINGC("Logging", fmt::format("Number of Fatals: {}", fatalCounter));
+        LWARNINGC("Logging", std::format("Number of Fatals: {}", fatalCounter));
     }
 
     LogMgr.resetMessageCounters();
@@ -1453,7 +1403,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     }
 
     if (lua_isnil(s, -1)) {
-        LWARNING(fmt::format("Unhandled file dropped: {}", file));
+        LWARNING(std::format("Unhandled file dropped: {}", file));
         return;
     }
 
@@ -1514,14 +1464,14 @@ bool OpenSpaceEngine::setMode(Mode newMode) {
         return false;
     }
     else if (_currentMode != Mode::UserControl && newMode != Mode::UserControl) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Cannot switch to mode '{}' when in '{}' mode",
             stringify(newMode), stringify(_currentMode)
         ));
         return false;
     }
 
-    LDEBUG(fmt::format("Mode: {}", stringify(newMode)));
+    LDEBUG(std::format("Mode: {}", stringify(newMode)));
 
     _currentMode = newMode;
     return true;
@@ -1529,7 +1479,7 @@ bool OpenSpaceEngine::setMode(Mode newMode) {
 
 void OpenSpaceEngine::resetMode() {
     _currentMode = Mode::UserControl;
-    LDEBUG(fmt::format("Reset engine mode to '{}'", stringify(_currentMode)));
+    LDEBUG(std::format("Reset engine mode to '{}'", stringify(_currentMode)));
 }
 
 OpenSpaceEngine::CallbackHandle OpenSpaceEngine::addModeChangeCallback(
@@ -1603,7 +1553,7 @@ void setCameraFromProfile(const Profile& p) {
 
     auto checkNodeExists = [](const std::string& node) {
         if (global::renderEngine->scene()->sceneGraphNode(node) == nullptr) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Error when setting camera from profile. Could not find node '{}'", node
             ));
         }
@@ -1644,10 +1594,10 @@ void setCameraFromProfile(const Profile& p) {
                 // dependency in this core code. Eventually, goToGeo will be incorporated
                 // in the OpenSpace core and this code will change.
                 checkNodeExists(geo.anchor);
-                std::string geoScript = fmt::format("openspace.globebrowsing.goToGeo"
+                std::string geoScript = std::format("openspace.globebrowsing.goToGeo"
                     "([[{}]], {}, {}", geo.anchor, geo.latitude, geo.longitude);
                 if (geo.altitude.has_value()) {
-                    geoScript += fmt::format(", {}", geo.altitude.value());
+                    geoScript += std::format(", {}", geo.altitude.value());
                 }
                 geoScript += ")";
                 global::scriptEngine->queueScript(
@@ -1707,12 +1657,12 @@ void setActionsFromProfile(const Profile& p) {
             LERROR("Identifier must to provided to register action");
         }
         if (global::actionManager->hasAction(a.identifier)) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Action for identifier '{}' already existed & registered", a.identifier
             ));
         }
         if (a.script.empty()) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Identifier '{}' does not provide a Lua command to execute", a.identifier
             ));
         }
@@ -1733,10 +1683,10 @@ void setKeybindingsFromProfile(const Profile& p) {
             LERROR("Action must not be empty");
         }
         if (!global::actionManager->hasAction(k.action)) {
-            LERROR(fmt::format("Action '{}' does not exist", k.action));
+            LERROR(std::format("Action '{}' does not exist", k.action));
         }
         if (k.key.key == openspace::Key::Unknown) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Could not find key '{}'",
                 std::to_string(static_cast<uint16_t>(k.key.key))
             ));

@@ -26,7 +26,6 @@
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
 #include <sgct/readconfig.h>

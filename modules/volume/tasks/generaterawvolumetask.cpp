@@ -30,9 +30,9 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
@@ -88,7 +88,7 @@ GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary
 }
 
 std::string GenerateRawVolumeTask::description() {
-    return fmt::format(
+    return std::format(
         "Generate a raw volume with dimenstions: ({}, {}, {}). For each cell, set the "
         "value by evaluating the lua function: `{}`, with three arguments (x, y, z) "
         "ranging from ({}, {}, {}) to ({}, {}, {}). Write raw volume data into '{}' and "

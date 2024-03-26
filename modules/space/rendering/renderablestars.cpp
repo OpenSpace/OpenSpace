@@ -662,7 +662,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
             _colorTextureIsDirty = true;
         }
         else {
-            LWARNING(fmt::format("File not found: {}", _colorTexturePath.value()));
+            LWARNING(std::format("File not found: {}", _colorTexturePath.value()));
         }
     });
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
@@ -682,7 +682,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
             _otherDataColorMapIsDirty = true;
         }
         else {
-            LWARNING(fmt::format("File not found: {}", _otherDataColorMapPath.value()));
+            LWARNING(std::format("File not found: {}", _otherDataColorMapPath.value()));
         }
     });
 
@@ -800,7 +800,7 @@ void RenderableStars::initializeGL() {
     if (!_queuedOtherData.empty()) {
         const int idx = _dataset.index(_queuedOtherData);
         if (idx == -1) {
-            LERROR(fmt::format("Could not find other data column {}", _queuedOtherData));
+            LERROR(std::format("Could not find other data column {}", _queuedOtherData));
         }
         else {
             _otherDataOption = idx;
@@ -905,7 +905,7 @@ void RenderableStars::loadPSFTexture() {
         );
 
         if (_pointSpreadFunctionTexture) {
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
             ));
             _pointSpreadFunctionTexture->uploadTexture();
@@ -1308,7 +1308,7 @@ void RenderableStars::update(const UpdateData&) {
                 1
             );
             if (_colorTexture) {
-                LDEBUG(fmt::format(
+                LDEBUG(std::format(
                     "Loaded texture from '{}'", absPath(_colorTexturePath)
                 ));
                 _colorTexture->uploadTexture();
@@ -1333,7 +1333,7 @@ void RenderableStars::update(const UpdateData&) {
                 1
             );
             if (_otherDataColorMapTexture) {
-                LDEBUG(fmt::format(
+                LDEBUG(std::format(
                     "Loaded texture from '{}'", absPath(_otherDataColorMapPath)
                 ));
                 _otherDataColorMapTexture->uploadTexture();

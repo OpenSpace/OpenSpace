@@ -27,8 +27,8 @@
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <array>
 #include <filesystem>
@@ -97,7 +97,7 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
 }
 
 std::string KameleonVolumeToRawTask::description() {
-    return fmt::format(
+    return std::format(
         "Extract volumetric data from CDF file '{}'. Write raw volume data into '{}' "
         "and dictionary with metadata to '{}'",
         _inputPath, _rawVolumeOutputPath, _dictionaryOutputPath

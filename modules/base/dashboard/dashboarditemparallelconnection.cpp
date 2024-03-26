@@ -68,8 +68,8 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
 
         connectionInfo =
             (nClients == 1) ?
-            fmt::format(Singular, nClients) :
-            fmt::format(Plural, nClients);
+            std::format(Singular, nClients) :
+            std::format(Plural, nClients);
     }
     else if (status == ParallelConnection::Status::ClientWithHost) {
         nClients--;
@@ -86,11 +86,11 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
 
         if (nClients > 2) {
             constexpr std::string_view Plural = "You and {} more clients are tuned in";
-            connectionInfo += fmt::format(Plural, nClients - 1);
+            connectionInfo += std::format(Plural, nClients - 1);
         }
         else if (nClients == 2) {
             constexpr std::string_view Singular = "You and {} more client are tuned in";
-            connectionInfo += fmt::format(Singular, nClients - 1);
+            connectionInfo += std::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {
             connectionInfo += "You are the only client";
@@ -120,7 +120,7 @@ glm::vec2 DashboardItemParallelConnection::size() const {
             connectionInfo = "Hosting session with 1 client";
         }
         else {
-            connectionInfo = fmt::format("Hosting session with {} clients", nClients);
+            connectionInfo = std::format("Hosting session with {} clients", nClients);
         }
     }
     else if (status == ParallelConnection::Status::ClientWithHost) {
@@ -137,11 +137,11 @@ glm::vec2 DashboardItemParallelConnection::size() const {
         connectionInfo += "\n";
         if (nClients > 2) {
             constexpr std::string_view Plural = "You and {} more clients are tuned in";
-            connectionInfo += fmt::format(Plural, nClients);
+            connectionInfo += std::format(Plural, nClients);
         }
         else if (nClients == 2) {
             constexpr std::string_view Singular = "You and {} more client are tuned in";
-            connectionInfo += fmt::format(Singular, nClients - 1);
+            connectionInfo += std::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {
             connectionInfo += "You are the only client";

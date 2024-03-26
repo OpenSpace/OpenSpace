@@ -27,11 +27,10 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
-
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/documentation/documentationengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/scene/scenelicensewriter.h>
 #include <ghoul/logging/logmanager.h>
 
 using nlohmann::json;
@@ -43,23 +42,20 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
 
     nlohmann::json response;
 
-    // @emiax: Proposed future refector.
-    // Do not parse generated json. Instead implement ability to get
-    // ghoul::Dictionary objects from ScriptEngine, FactoryManager, and KeybindingManager.
     if (requestedType == "lua") {
-        response = global::scriptEngine->generateJson();
+        response = DocEng.generateScriptEngineJson();
     }
     else if (requestedType == "factories") {
-        response = FactoryManager::ref().generateJson();
+        response = DocEng.generateFactoryManagerJson();
     }
     else if (requestedType == "keyboard") {
-        response = global::keybindingManager->generateJson();
+        response = DocEng.generateKeybindingsJson();
     }
     else if (requestedType == "asset") {
-        response = global::keybindingManager->generateJson();
+        DocEng.generatePropertyOwnerJson(global::rootPropertyOwner);
     }
     else if (requestedType == "meta") {
-        response = SceneLicenseWriter().generateJsonList();
+        response = DocEng.generateLicenseListJson();
     }
 
     _connection->sendJson(wrappedPayload(response));

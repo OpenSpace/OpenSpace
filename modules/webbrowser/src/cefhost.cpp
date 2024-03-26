@@ -28,7 +28,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <fmt/format.h>
+#include <format>
 
 #ifdef __APPLE__
 #include <include/wrapper/cef_library_loader.h>
@@ -81,7 +81,7 @@ CefHost::~CefHost() {
 void CefHost::attachDebugSettings(CefSettings &settings) {
     settings.remote_debugging_port = 8088;
 
-    LDEBUG(fmt::format(
+    LDEBUG(std::format(
         "Remote WebBrowser debugging available on http://localhost:{}",
         settings.remote_debugging_port
     ));

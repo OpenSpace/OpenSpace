@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 

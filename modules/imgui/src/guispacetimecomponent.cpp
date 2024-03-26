@@ -211,7 +211,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent to the
         // connected nodes and peers
         global::scriptEngine->queueScript(
-            fmt::format("openspace.time.setTime([[{}]])", std::string_view(Buffer)),
+            std::format("openspace.time.setTime([[{}]])", std::string_view(Buffer)),
             scripting::ScriptEngine::ShouldBeSynchronized::No,
             scripting::ScriptEngine::ShouldSendToRemote::No
         );
@@ -345,7 +345,7 @@ void GuiSpaceTimeComponent::render() {
                 openspace::TimeUnits.end(),
                 std::string(""),
                 [](const std::string& a, const openspace::TimeUnit& unit) {
-                    return fmt::format(
+                    return std::format(
                         "{}{} / second", a, nameForTimeUnit(unit, true)
                     ) + '\0';
                 }

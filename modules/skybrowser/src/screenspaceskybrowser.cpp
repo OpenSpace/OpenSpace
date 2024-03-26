@@ -221,7 +221,7 @@ bool ScreenSpaceSkyBrowser::shouldUpdateWhileTargetAnimates() const {
 
 void ScreenSpaceSkyBrowser::setIdInBrowser() const {
     int currentNode = global::windowDelegate->currentNode();
-    WwtCommunicator::setIdInBrowser(fmt::format("{}_{}", identifier(), currentNode));
+    WwtCommunicator::setIdInBrowser(std::format("{}_{}", identifier(), currentNode));
 }
 
 void ScreenSpaceSkyBrowser::setIsInitialized(bool isInitialized) {

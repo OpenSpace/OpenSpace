@@ -202,6 +202,11 @@ namespace {
     return openspace::global::sessionRecording->isPlayingBack();
 }
 
+// Returns true if session recording is currently recording a recording.
+[[codegen::luawrap]] bool isRecording() {
+    return openspace::global::sessionRecording->isRecording();
+}
+
 #include "sessionrecording_lua_codegen.cpp"
 
 } // namespace

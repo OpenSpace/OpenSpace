@@ -113,7 +113,7 @@ std::string SpacecraftInstrumentsModule::frameFromBody(const std::string& body) 
 
     constexpr std::string_view unionPrefix = "IAU_";
     if (body.find(unionPrefix) == std::string::npos) {
-        return fmt::format("{}{}", unionPrefix, body);
+        return std::format("{}{}", unionPrefix, body);
     }
     else {
         return body;

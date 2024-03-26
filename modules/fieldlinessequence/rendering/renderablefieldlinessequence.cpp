@@ -369,7 +369,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             }
             else {
                 _tracingVariable = "b"; //  Magnetic field variable as default
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "No tracing variable, using default '{}'", _tracingVariable
                 ));
             }
@@ -388,7 +388,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     // the files with the same extension as fileTypeString
     std::filesystem::path sourcePath = p.sourceFolder;
     if (!std::filesystem::is_directory(sourcePath)) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "FieldlinesSequence '{}' is not a valid directory", sourcePath
         ));
     }
@@ -420,7 +420,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     // Ensure that there are available and valid source files left
     if (_sourceFiles.empty()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "'{}' contains no {} files", sourcePath.string(), fileTypeString
         ));
     }
@@ -490,7 +490,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _outputFolderPath = p.outputFolder.value_or(_outputFolderPath);
     if (!_outputFolderPath.empty() && !std::filesystem::is_directory(_outputFolderPath)) {
         _outputFolderPath.clear();
-        LERROR(fmt::format(
+        LERROR(std::format(
             "The specified output path '{}' does not exist", _outputFolderPath
         ));
     }
@@ -617,7 +617,7 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM() {
             }
         }
         else {
-            LWARNING(fmt::format("Failed to load state from '{}'", filePath));
+            LWARNING(std::format("Failed to load state from '{}'", filePath));
         }
     }
 }
@@ -851,7 +851,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
 
     if (!std::filesystem::is_directory(filePath)) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "The specified seed point directory '{}' does not exist", filePath
         ));
         return outMap;
@@ -868,12 +868,12 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
 
         std::ifstream seedFile(seedFilePath);
         if (!seedFile.good()) {
-            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
+            LERROR(std::format("Could not open seed points file '{}'", seedFilePath));
             outMap.clear();
             return {};
         }
 
-        LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
+        LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
         std::string line;
         std::vector<glm::vec3> outVec;
         while (std::getline(seedFile, line)) {
@@ -886,7 +886,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
         }
 
         if (outVec.empty()) {
-            LERROR(fmt::format("Found no seed points in '{}'", seedFilePath));
+            LERROR(std::format("Found no seed points in '{}'", seedFilePath));
             outMap.clear();
             return {};
         }

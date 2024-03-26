@@ -1,6 +1,7 @@
 Checks: >-
   -*,
   bugprone-*,
+  -bugprone-argument-comment,
   -bugprone-easily-swappable-parameters,
   -bugprone-implicit-widening-of-multiplication-result,
   -bugprone-narrowing-conversions,
@@ -8,7 +9,10 @@ Checks: >-
   -bugprone-switch-missing-default-case,
   -bugprone-unchecked-optional-access,
   clang-analyzer-*,
+  -clang-analyzer-apiModeling*,
+  -clang-analyzer-osx*,
   -clang-analyzer-security.FloatLoopCounter,
+  -clang-analyzer-webkit*,
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-do-while,
   -cppcoreguidelines-avoid-magic-numbers,
@@ -31,8 +35,8 @@ Checks: >-
   -google-readability-casting,
   -google-readability-function-size,
   -google-readability-namespace-comments,
-  -google-runtime-int,
   -google-explicit-constructor,
+  -google-runtime-int,
   llvm-*,
   -llvm-else-after-return,
   -llvm-include-order,
@@ -40,17 +44,15 @@ Checks: >-
   misc-*,
   -misc-include-cleaner,
   -misc-no-recursion,
-  -misc-non-private-member-variables-in-classes,
   modernize-*,
+  -modernize-raw-string-literal,
   -modernize-return-braced-init-list,
   -modernize-use-trailing-return-type,
   -modernize-use-auto,
   performance-*,
   -performance-no-int-to-ptr,
-  portability-*,
   readability-*,
   -readability-avoid-unconditional-preprocessor-if,
-  -readability-convert-member-functions-to-static,
   -readability-else-after-return,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
@@ -61,5 +63,23 @@ Checks: >-
   -readability-use-anyofallof
 
 CheckOptions:
-  - key:             performance-move-const-arg.CheckTriviallyCopyableMove
-    value:           False
+  - key:    bugprone-assert-side-effect.AssertMacros
+    value:  ghoul_assert,ghoul_precondition
+  - key:    cppcoreguidelines-rvalue-reference-param-not-moved.AllowPartialMove
+    value:  True
+  - key:    misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value:  True
+  - key:    modernize-loop-convert.UseCxx20ReverseRanges
+    value:  False
+  - key:    performance-move-const-arg.CheckTriviallyCopyableMove
+    value:  False
+  - key:    performance-unnecessary-value-param.AllowedTypes
+    value:  glm::vec2;glm::vec3;glm::vec4;glm::ivec2;glm::ivec3;glm::ivec4;glm::dvec2;glm::dvec3;glm::dvec4;glm::uvec2;glm::uvec3;glm::uvec4;glm::mat2;glm::mat3;glm::mat4;glm::mat[2-4]x[2-4];glm::dmat2;glm::dmat3;glm::dmat4;glm::dmat[2-4]x[2-4];glm::quat;glm::dquat
+  - key:    readability-inconsistent-declaration-parameter-name.Strict
+    value:  True
+  - key:    readability-qualified-auto.AddConstToQualified
+    value:  False
+  - key:    readability-simplify-boolean-expr.ChainedConditionalReturn
+    value:  True
+  - key:    readability-simplify-boolean-expr.ChainedConditionalAssignment
+    value:  True

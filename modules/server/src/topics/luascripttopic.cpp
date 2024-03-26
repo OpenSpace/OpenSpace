@@ -102,7 +102,7 @@ namespace {
             return formatArrayAsLuaTable(it->get<nlohmann::json>());
         }
         if (it->is_number()) {
-            return fmt::format("{}", it->get<double>());
+            return std::format("{}", it->get<double>());
         }
         if (it->is_string()) {
             return formatLuaString(it->get<std::string>());

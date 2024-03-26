@@ -500,7 +500,7 @@ void RenderEngine::initialize() {
             OPENSPACE_VERSION_PATCH
         };
         if (current < latest) {
-            _versionString += fmt::format(
+            _versionString += std::format(
                 " [Available: {}.{}.{}]", latest.major, latest.minor, latest.patch
             );
         }
@@ -733,7 +733,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         std::string dt = std::to_string(global::windowDelegate->deltaTime());
         std::string avgDt = std::to_string(global::windowDelegate->averageDeltaTime());
 
-        const std::string res = fmt::format(
+        const std::string res = std::format(
             "Frame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
             fn, fr, sgFn, dt, avgDt
         );
@@ -887,7 +887,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
     constexpr std::string_view FirstLine = "Shutdown in: {:.2f}s/{:.2f}s";
     const glm::vec2 size1 = _fontShutdown->boundingBox(
-        fmt::format(FirstLine, timer, fullTime)
+        std::format(FirstLine, timer, fullTime)
     );
 
     glm::vec2 penPosition = glm::vec2(
@@ -898,7 +898,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     RenderFont(
         *_fontShutdown,
         penPosition,
-        fmt::format(FirstLine, timer, fullTime),
+        std::format(FirstLine, timer, fullTime),
         ghoul::fontrendering::CrDirection::Down
     );
     // Important: Length of this string is the same as the first line to make them align
@@ -1104,7 +1104,7 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
         }
     );
     if (it != global::screenSpaceRenderables->end()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Cannot add scene space renderable. Identifier '{}' already exists",
             identifier
         ));
@@ -1366,7 +1366,7 @@ void RenderEngine::renderScreenLog() {
         std::array<char, 15 + 1 + CategoryLength + 3> buf;
         {
             std::fill(buf.begin(), buf.end(), char(0));
-            char* end = fmt::format_to(
+            char* end = std::format_to(
                 buf.data(),
                 "{:<15} {}{}",
                 it.timeString,
@@ -1391,7 +1391,7 @@ void RenderEngine::renderScreenLog() {
 
             const std::string_view lvl = ghoul::to_string(it.level);
             std::fill(buf.begin(), buf.end(), char(0));
-            char* end = fmt::format_to(buf.data(), "({})", lvl);
+            char* end = std::format_to(buf.data(), "({})", lvl);
             RenderFont(
                 *_fontLog,
                 glm::vec2(

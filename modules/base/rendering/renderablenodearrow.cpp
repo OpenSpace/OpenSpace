@@ -228,7 +228,7 @@ namespace {
 
         SceneGraphNode* startNode = sceneGraphNode(nodeName);
         if (!startNode) {
-            LERROR(fmt::format("Could not find start node '{}'", nodeName));
+            LERROR(std::format("Could not find start node '{}'", nodeName));
             return;
         }
         const double boundingSphere = startNode->boundingSphere();
@@ -242,7 +242,7 @@ namespace {
         else {
             // Recompute distance (previous value was in meters)
             if (boundingSphere < std::numeric_limits<double>::epsilon()) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Start node '{}' has invalid bounding sphere", nodeName
                 ));
                 return;
@@ -383,12 +383,12 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     SceneGraphNode* endNode = sceneGraphNode(_end);
 
     if (!startNode) {
-        LERROR(fmt::format("Could not find start node '{}'", _start.value()));
+        LERROR(std::format("Could not find start node '{}'", _start.value()));
         return;
     }
 
     if (!endNode) {
-        LERROR(fmt::format("Could not find end node '{}'", _end.value()));
+        LERROR(std::format("Could not find end node '{}'", _end.value()));
         return;
     }
 
@@ -397,7 +397,7 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
         boundingSphere < std::numeric_limits<double>::epsilon();
 
     if (hasNoBoundingSphere && (_useRelativeLength || _useRelativeOffset)) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Node '{}' has no valid bounding sphere. Can not use relative values",
             _end.value()
         ));

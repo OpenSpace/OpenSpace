@@ -64,12 +64,12 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
 
     try {
         _machine = std::make_unique<StateMachine>(dictionary);
-        LINFO(fmt::format(
+        LINFO(std::format(
             "State machine was created with start state: {}", currentState()
         ));
     }
     catch (const documentation::SpecificationError& e) {
-        LERROR(fmt::format("Error loading state machine: {}", e.what()));
+        LERROR(std::format("Error loading state machine: {}", e.what()));
         logError(e);
     }
 }

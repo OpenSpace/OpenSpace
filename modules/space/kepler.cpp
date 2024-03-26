@@ -28,8 +28,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
-#include <scn/scn.h>
-#include <scn/tuple_return.h>
+#include <scn/scan.h>
 #include <fstream>
 #include <optional>
 #include <sstream>
@@ -209,10 +208,13 @@ namespace {
         if (e.find('.') == std::string::npos) {
             e += ".0";
         }
-        auto [res, year, daysInYear] = scn::scan_tuple<int, double>(e, "{:2}{}");
+        // @TODO(abock) The 'd' suffix can be removed when
+        // https://github.com/eliaskosunen/scnlib/issues/104 is fixed
+        auto res = scn::scan<int, double>(e, "{:2d}{}");
         if (!res) {
-            throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+            throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
         }
+        auto [year, daysInYear] = res->values();
         year += year > 57 ? 1900 : 2000;
         const int daysSince2000 = countDays(year);
 
@@ -265,11 +267,11 @@ namespace {
             [](char c) { return c == '-'; }
         );
         const std::string format = (nDashes == 2) ? "{:4}-{:2}-{:2}{}" : "{:4}{:2}{:2}{}";
-        auto [res, year, monthNum, dayOfMonthNum, fractionOfDay] =
-            scn::scan_tuple<int, int, int, double>(e, format);
+        auto res = scn::scan<int, int, int, double>(e, scn::runtime_format(format));
         if (!res) {
-            throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+            throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
         }
+        auto [year, monthNum, dayOfMonthNum, fractionOfDay] = res->values();
         const int daysSince2000 = countDays(year);
         const int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
         const double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
@@ -330,28 +332,35 @@ namespace {
             // We have the first form
             int month = 0;
             int days = 0;
-            auto res = scn::scan(
-                epoch, "{:4}-{:2}-{:2}T{:2}:{:2}:{}",
-                date.year, month, days, date.hours, date.minutes, date.seconds
+            // @TODO(abock) The 'd' suffix can be removed when
+            // https://github.com/eliaskosunen/scnlib/issues/104 is fixed
+            auto res = scn::scan<int, int, int, int, int, double>(
+                epoch, "{:4d}-{:2d}-{:2d}T{:2d}:{:2d}:{}"
             );
             if (!res) {
-                throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+                throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
             }
+            std::tie(date.year, month, days, date.hours, date.minutes, date.seconds) =
+                res->values();
             date.nDays = daysIntoGivenYear(date.year, month, days);
         }
         else if (pos == 8) {
             // We have the second form
 
-            auto res = scn::scan(
-                epoch, "{:4}-{:3}T{:2}:{:2}:{}",
-                date.year, date.nDays, date.hours, date.minutes, date.seconds
+            // @TODO(abock) The 'd' suffix can be removed when
+            // https://github.com/eliaskosunen/scnlib/issues/104 is fixed
+            auto res = scn::scan<int, int, int, int, double>(
+                epoch, "{:4d}-{:3d}T{:2d}:{:2d}:{}"
+                //date.year, date.nDays, date.hours, date.minutes, date.seconds
             );
             if (!res) {
-                throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+                throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
             }
+            std::tie(date.year, date.nDays, date.hours, date.minutes, date.seconds) =
+                res->values();
         }
         else {
-            throw ghoul::RuntimeError(fmt::format("Malformed epoch string '{}'", epoch));
+            throw ghoul::RuntimeError(std::format("Malformed epoch string '{}'", epoch));
         }
 
         const int daysSince2000 = countDays(date.year);
@@ -421,7 +430,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         std::string firstLine;
         std::getline(f, firstLine);
         if (f.bad() || firstLine[0] != '1') {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Malformed TLE file '{}' at line {}", file, lineNum + 1
             ));
         }
@@ -433,7 +442,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
                 const int year = std::atoi(y.c_str());
                 return year >= 57 ? "19" : "20";
             }();
-            p.id = fmt::format("{}{}-{}", prefix, id.substr(0, 2), id.substr(3));
+            p.id = std::format("{}{}-{}", prefix, id.substr(0, 2), id.substr(3));
         }
         p.epoch = epochFromSubstring(firstLine.substr(18, 14)); // should be 13?
 
@@ -453,7 +462,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         std::string secondLine;
         std::getline(f, secondLine);
         if (f.bad() || secondLine[0] != '2') {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Malformed TLE file '{}' at line {}", file, lineNum + 1
             ));
         }
@@ -525,7 +534,7 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
         }
 
         if (parts.size() != 2) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Malformed line '{}' at {}", line, lineNum
             ));
         }
@@ -534,7 +543,7 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
             if (parts[1] != "2.0") {
                 LWARNINGC(
                     "OMM",
-                    fmt::format(
+                    std::format(
                         "Only version 2.0 is currently supported but found {}. "
                         "Parsing might fail",
                         parts[1]
@@ -608,7 +617,7 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
     // Newer versions downloaded from the JPL SBDB website have " around variables
     line.erase(remove(line.begin(), line.end(), '\"'), line.end());
     if (line != ExpectedHeader) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Expected JPL SBDB file to start with '{}' but found '{}' instead",
             ExpectedHeader, line.substr(0, 100)
         ));
@@ -620,7 +629,7 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
 
         std::vector<std::string> parts = ghoul::tokenizeString(line, ',');
         if (parts.size() != NDataFields) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Malformed line {}, expected 8 data fields, got {}", line, parts.size()
             ));
         }
@@ -733,7 +742,7 @@ std::optional<std::vector<Parameters>> loadCache(const std::filesystem::path& fi
 std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
     std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
     if (std::filesystem::is_regular_file(cachedFile)) {
-        LINFO(fmt::format(
+        LINFO(std::format(
             "Cached file '{}' used for Kepler file '{}'", cachedFile, file
         ));
 
@@ -758,7 +767,7 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
             break;
     }
 
-    LINFO(fmt::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
+    LINFO(std::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
     saveCache(res, cachedFile);
     return res;
 }

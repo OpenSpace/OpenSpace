@@ -41,7 +41,7 @@ void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
         const std::string& propertyKey = json.at("property").get<std::string>();
         global::scriptEngine->queueScript(
-            fmt::format(
+            std::format(
                 "openspace.setPropertyValueSingle(\"{}\", nil)", propertyKey
             ),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,

@@ -26,10 +26,10 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/fmt.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <filesystem>
 #include <fstream>
@@ -76,7 +76,7 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
 bool InstrumentTimesParser::create() {
     std::filesystem::path sequenceDir = absPath(_fileName);
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(fmt::format("Could not load label directory '{}'", sequenceDir));
+        LERROR(std::format("Could not load label directory '{}'", sequenceDir));
         return false;
     }
 
@@ -88,7 +88,7 @@ bool InstrumentTimesParser::create() {
             std::filesystem::path filepath = sequenceDir / filename;
 
             if (!std::filesystem::is_regular_file(filepath)) {
-                LERROR(fmt::format("Unable to read file '{}'. Skipping file", filepath));
+                LERROR(std::format("Unable to read file '{}'. Skipping file", filepath));
                 continue;
             }
 

@@ -27,7 +27,6 @@
 
 #include <openspace/util/syncable.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/json.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
 #include <filesystem>
@@ -98,8 +97,7 @@ public:
         ScriptCallback callback = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
-
-    nlohmann::json generateJson() const;
+    const std::vector<LuaLibrary>& allLuaLibraries() const;
 
 private:
     BooleanType(Replace);

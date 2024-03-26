@@ -135,7 +135,7 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         distanceText.erase(pos, subStr.size());
 
         // Create final label text and set it
-        const std::string finalText = fmt::format("{} {}", distanceText, unitDescriptor);
+        const std::string finalText = std::format("{} {}", distanceText, unitDescriptor);
         setLabelText(finalText);
 
         // Update placement of label with transformation matrix
@@ -148,14 +148,14 @@ void RenderableDistanceLabel::update(const UpdateData&) {
             _transformationMatrix = glm::translate(glm::dmat4(1.0), goalPos);
         }
         else {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Could not find scene graph node '{}' or '{}'",
                 nodeline->start(), nodeline->end()
             ));
         }
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "There is no scenegraph node with id {}", _nodelineId.value()
         ));
         _errorThrown = true;
