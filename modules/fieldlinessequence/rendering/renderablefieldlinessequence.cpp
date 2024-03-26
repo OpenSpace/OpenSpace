@@ -427,6 +427,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         computeSequenceEndTime();
     }
     // Color group
+    _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile;
     if (p.colorTablePaths.has_value()) {
         for (auto path : *p.colorTablePaths) {
             if (std::filesystem::exists(path)) {
@@ -445,7 +446,9 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         }
     }
     if (!p.colorTablePaths.has_value() || _colorTablePaths.empty()) {
-        _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile;
+        _colorTablePaths.emplace_back(
+            FieldlinesSequenceModule::DefaultTransferFunctionFile
+        );
     }
     _colorUniform = p.color.value_or(_colorUniform);
     _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
@@ -593,7 +596,9 @@ void RenderableFieldlinesSequence::initializeGL() {
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
-
+    if (_firstLoad && _atLeastOneFileLoaded){
+        firstUpdate();
+    }
     setupProperties();
     definePropertyCallbackFunctions();
 
