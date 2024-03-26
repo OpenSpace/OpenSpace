@@ -363,10 +363,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             result->_guiPath = *p.gui->path;
         }
     }
-    result->addProperty(result->_guiDisplayName);
-    result->addProperty(result->_guiDescription);
-    result->addProperty(result->_guiHidden);
-    result->addProperty(result->_guiPath);
 
     result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
     result->_interactionSphere = p.interactionSphere.value_or(result->_interactionSphere);
@@ -576,6 +572,11 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_showDebugSphere);
 
     addProperty(_supportsDirectInteraction);
+
+    addProperty(_guiDisplayName);
+    addProperty(_guiDescription);
+    addProperty(_guiHidden);
+    addProperty(_guiPath);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
