@@ -649,15 +649,28 @@ void DocumentationEngine::writeDocumentation() const {
     scriptingResult[DataKey] = scripting;
 
     nlohmann::json documentation = {
-        sceneGraph, sceneProperties, actions, events, keybindings, license,
-        scriptingResult, factory
+        sceneGraph, sceneProperties, actions, events, keybindings, license
     };
 
     nlohmann::json result;
     result[DocumentationKey] = documentation;
 
+    // Make into a javascript variable so that it is possible to open with static html
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/documentationData.js"));
     out << "var data = " << result.dump();
+    out.close();
+
+    // Write two json files for the static docs page - asset components and scripting api
+    out.open(absPath("${DOCUMENTATION}/assetComponents.json"));
+    if (out) {
+        out << factory.dump();
+    }
+    out.close();
+    out.open(absPath("${DOCUMENTATION}/scriptingApi.json"));
+    if (out) {
+        out << scriptingResult.dump();
+    }
+    out.close();
 }
 
 nlohmann::json DocumentationEngine::generateActionJson() const {
