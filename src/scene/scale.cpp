@@ -53,6 +53,8 @@ documentation::Documentation Scale::Documentation() {
 ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     Scale* result = FactoryManager::ref().factory<Scale>()->create(

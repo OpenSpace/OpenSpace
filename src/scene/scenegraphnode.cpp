@@ -330,6 +330,8 @@ int SceneGraphNode::nextIndex = 0;
 ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     SceneGraphNode* n = global::memoryManager->PersistentMemory.alloc<SceneGraphNode>();
@@ -611,6 +613,7 @@ void SceneGraphNode::initialize() {
 void SceneGraphNode::initializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+    TracyGpuZone("initializeGL")
 
     LDEBUG(std::format("Initializing GL: {}", identifier()));
 
