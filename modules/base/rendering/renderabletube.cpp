@@ -926,7 +926,7 @@ void RenderableTube::loadSelectedSample() {
                 "Opacity = 1,"
                 "StartTime = '{3}',"
                 "EndTime = '{4}',"
-                "SampleInterval = 86400,"
+                "SampleInterval = 600,"
                 "LineWidth = {6}"
             "}},"
             "Tag = {{ 'B612' }},"
