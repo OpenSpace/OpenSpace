@@ -237,8 +237,8 @@ void MemoryAwareTileCache::TextureContainer::reset() {
         );
 
         tex->setDataOwnership(Texture::TakeOwnership::Yes);
-        tex->uploadTexture();
         tex->setFilter(mode);
+        tex->uploadTexture();
 
         _textures.push_back(std::move(tex));
     }
