@@ -918,7 +918,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
 
 void AssetManager::callOnInitialize(Asset* asset) const {
     ZoneScoped;
-    TracyMessage(asset->path().string().c_str(), asset->path().string().length());
+    ZoneText(asset->path().string().c_str(), asset->path().string().length());
     ghoul_precondition(asset, "Asset must not be nullptr");
 
     auto it = _onInitializeFunctionRefs.find(asset);

@@ -312,7 +312,7 @@ void Scene::update(const UpdateData& data) {
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped;
-    ZoneName(
+    ZoneText(
         renderBinToString(data.renderBinMask),
         strlen(renderBinToString(data.renderBinMask))
     );

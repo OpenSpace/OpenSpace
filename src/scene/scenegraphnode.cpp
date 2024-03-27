@@ -613,6 +613,7 @@ void SceneGraphNode::initialize() {
 void SceneGraphNode::initializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+    TracyGpuZone("initializeGL")
 
     LDEBUG(std::format("Initializing GL: {}", identifier()));
 
