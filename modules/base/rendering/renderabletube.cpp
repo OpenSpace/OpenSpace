@@ -1403,7 +1403,7 @@ void RenderableTube::addLowPolySection(int polygonIndex, const TimePolygon const
         // Normal
         glm::dvec3 toNextPoly = glm::normalize(v1.coordinate - v0.coordinate);
         glm::dvec3 toNextPoint = glm::normalize(v3.coordinate - v0.coordinate);
-        glm::dvec3 normal = glm::cross(toNextPoly, toNextPoint);
+        glm::dvec3 normal = glm::cross(toNextPoint, toNextPoly);
 
         sidePointV0.normal[0] = normal.x;
         sidePointV0.normal[1] = normal.y;
