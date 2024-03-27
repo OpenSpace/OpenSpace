@@ -223,21 +223,6 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 }
 
-LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary,
-                                 const dataloader::Dataset& dataset,
-                                 DistanceUnit unit)
-    : LabelsComponent(dictionary)
-{
-    // The unit should match the one in the dataset, not the one that was included in the
-    // asset (if any)
-    _unit = unit;
-
-    // Load the labelset directly based on the dataset, and keep track of that it has
-    // already been loaded this way
-    _labelset = dataloader::label::loadFromDataset(dataset);
-    _createdFromDataset = true;
-}
-
 dataloader::Labelset& LabelsComponent::labelSet() {
     return _labelset;
 }
@@ -257,13 +242,29 @@ void LabelsComponent::initialize() {
     loadLabels();
 }
 
-void LabelsComponent::loadLabels() {
-    LINFO(std::format("Loading label file '{}'", _labelFile));
+void LabelsComponent::loadLabelsFromDataset(const dataloader::Dataset& dataset,
+                                            DistanceUnit unit)
+{
+    LINFO("Loading labels from dataset");
 
+    // The unit should match the one in the dataset, not the one that was included in the
+    // asset (if any)
+    _unit = unit;
+
+    // Load the labelset directly based on the dataset, and keep track of that it has
+    // already been loaded this way
+    _labelset = dataloader::label::loadFromDataset(dataset);
+
+    _createdFromDataset = true;
+}
+
+void LabelsComponent::loadLabels() {
     if (_createdFromDataset) {
         // The labelset should already have been loaded
         return;
     }
+
+    LINFO(std::format("Loading label file '{}'", _labelFile));
 
     if (_useCache) {
         _labelset = dataloader::label::loadFileWithCache(_labelFile);
