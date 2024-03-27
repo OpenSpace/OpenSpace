@@ -75,6 +75,8 @@ namespace {
             std::is_same_v<T, openspace::dataloader::ColorMap>
         );
 
+        ZoneScoped;
+
         std::string info;
         if (specs.has_value()) {
             info = openspace::dataloader::generateHashString(*specs);
@@ -116,6 +118,8 @@ namespace openspace::dataloader {
 namespace data {
 
 Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
+    ZoneScoped;
+
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     const std::ifstream file = std::ifstream(path);
@@ -143,6 +147,8 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
 }
 
 std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
+    ZoneScoped;
+
     std::ifstream file = std::ifstream(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;
@@ -163,6 +169,8 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
     file.read(reinterpret_cast<char*>(&nVariables), sizeof(uint16_t));
     result.variables.resize(nVariables);
     for (int i = 0; i < nVariables; i += 1) {
+        ZoneScopedN("Variable");
+
         Dataset::Variable var;
 
         int16_t idx = 0;
@@ -183,6 +191,8 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
     file.read(reinterpret_cast<char*>(&nTextures), sizeof(uint16_t));
     result.textures.resize(nTextures);
     for (int i = 0; i < nTextures; i += 1) {
+        ZoneScopedN("Texture");
+
         Dataset::Texture tex;
 
         int16_t idx = 0;
@@ -213,6 +223,8 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
     file.read(reinterpret_cast<char*>(&nEntries), sizeof(uint64_t));
     result.entries.reserve(nEntries);
     for (uint64_t i = 0; i < nEntries; i += 1) {
+        ZoneScopedN("Dataset");
+
         Dataset::Entry e;
         file.read(reinterpret_cast<char*>(&e.position.x), sizeof(float));
         file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
@@ -345,6 +357,8 @@ Dataset loadFileWithCache(std::filesystem::path path, std::optional<DataMapping>
 namespace label {
 
 Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
+    ZoneScoped;
+
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     const std::ifstream file = std::ifstream(path);

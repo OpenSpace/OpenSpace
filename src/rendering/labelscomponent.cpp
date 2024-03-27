@@ -232,6 +232,8 @@ const dataloader::Labelset& LabelsComponent::labelSet() const {
 }
 
 void LabelsComponent::initialize() {
+    ZoneScoped;
+
     _font = global::fontManager->font(
         "Mono",
         _fontSize,
@@ -245,6 +247,8 @@ void LabelsComponent::initialize() {
 void LabelsComponent::loadLabelsFromDataset(const dataloader::Dataset& dataset,
                                             DistanceUnit unit)
 {
+    ZoneScoped;
+
     LINFO("Loading labels from dataset");
 
     // The unit should match the one in the dataset, not the one that was included in the
@@ -259,6 +263,8 @@ void LabelsComponent::loadLabelsFromDataset(const dataloader::Dataset& dataset,
 }
 
 void LabelsComponent::loadLabels() {
+    ZoneScoped;
+
     if (_createdFromDataset) {
         // The labelset should already have been loaded
         return;
