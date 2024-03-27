@@ -78,7 +78,7 @@ void EventEngine::registerEventTopic(size_t topicId, events::Event::Type type,
                                      ScriptCallback callback)
 {
     TopicInfo ti;
-    ti.id = topicId;
+    ti.id = static_cast<uint32_t>(topicId);
     ti.callback = std::move(callback);
 
     _eventTopics[type].push_back(ti);
@@ -169,7 +169,7 @@ std::vector<EventEngine::ActionInfo> EventEngine::registeredActions() const {
     return result;
 }
 
-const std::unordered_map<events::Event::Type, std::vector<EventEngine::ActionInfo>>& const
+const std::unordered_map<events::Event::Type, std::vector<EventEngine::ActionInfo>>&
 EventEngine::eventActions() const
 {
     return _eventActions;
