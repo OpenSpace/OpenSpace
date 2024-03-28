@@ -227,6 +227,10 @@ protected:
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 
+    bool _useCaching = true;
+    bool _shouldComputeScaleExponent = false;
+    bool _createLabelsFromDataset = false;
+
     dataloader::Dataset _dataset;
     dataloader::DataMapping _dataMapping;
 

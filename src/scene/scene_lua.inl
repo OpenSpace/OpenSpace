@@ -619,6 +619,8 @@ namespace {
  * Loads the SceneGraphNode described in the table and adds it to the SceneGraph.
  */
 [[codegen::luawrap]] void addSceneGraphNode(ghoul::Dictionary node) {
+    ZoneScoped;
+
     using namespace openspace;
     try {
         SceneGraphNode* n = global::renderEngine->scene()->loadNode(node);

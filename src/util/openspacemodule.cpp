@@ -66,6 +66,7 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
 void OpenSpaceModule::initializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+    TracyGpuZone("initializeGL")
 
     internalInitializeGL();
 }

@@ -51,7 +51,11 @@ MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThrea
 {}
 
 void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
+    ZoneScoped;
+
     auto initFunction = [this, node]() {
+        ZoneScopedN("MultiThreadedInit");
+
         LoadingScreen* loadingScreen = global::openSpaceEngine->loadingScreen();
 
         LoadingScreen::ProgressInfo progressInfo;

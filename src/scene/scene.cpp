@@ -200,6 +200,8 @@ void Scene::updateNodeRegistry() {
 }
 
 void Scene::sortTopologically() {
+    ZoneScoped;
+
     _topologicallySortedNodes.insert(
         _topologicallySortedNodes.end(),
         std::make_move_iterator(_circularNodes.begin()),
@@ -310,7 +312,7 @@ void Scene::update(const UpdateData& data) {
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped;
-    ZoneName(
+    ZoneText(
         renderBinToString(data.renderBinMask),
         strlen(renderBinToString(data.renderBinMask))
     );
@@ -366,6 +368,8 @@ const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
 }
 
 SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
+    ZoneScoped;
+
     // First interpret the dictionary
     std::vector<std::string> dependencyNames;
 

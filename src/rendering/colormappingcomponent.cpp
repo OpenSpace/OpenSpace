@@ -330,6 +330,8 @@ ghoul::opengl::Texture* ColorMappingComponent::texture() const {
 }
 
 void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
+    ZoneScoped;
+
     _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
 
     initializeParameterData(dataset);

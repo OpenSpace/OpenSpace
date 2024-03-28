@@ -330,6 +330,8 @@ int SceneGraphNode::nextIndex = 0;
 ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     SceneGraphNode* n = global::memoryManager->PersistentMemory.alloc<SceneGraphNode>();
@@ -342,6 +344,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     result->setIdentifier(p.identifier);
 
     if (p.gui.has_value()) {
+        ZoneScopedN("GUI");
+
         if (p.gui->name.has_value()) {
             result->setGuiName(*p.gui->name);
             result->_guiDisplayName = result->guiName();
@@ -375,6 +379,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     result->_reachFactor = p.reachFactor.value_or(result->_reachFactor);
 
     if (p.transform.has_value()) {
+        ZoneScopedN("Transform");
+
         if (p.transform->translation.has_value()) {
             result->_transform.translation = Translation::createFromDictionary(
                 *p.transform->translation
@@ -409,6 +415,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
 
     if (p.timeFrame.has_value()) {
+        ZoneScopedN("TimeFrame");
+
         result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
 
         LDEBUG(std::format(
@@ -419,17 +427,21 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     // We initialize the renderable last as it probably has the most dependencies
     if (p.renderable.has_value()) {
+        ZoneScopedN("Renderable");
+
         result->_renderable = Renderable::createFromDictionary(*p.renderable);
         ghoul_assert(result->_renderable, "Failed to create Renderable");
         result->_renderable->_parent = result.get();
         result->addPropertySubOwner(result->_renderable.get());
-        LDEBUG(std::format(
-            "Successfully created renderable for '{}'", result->identifier()
-        ));
+        //LDEBUG(std::format(
+        //    "Successfully created renderable for '{}'", result->identifier()
+        //));
     }
 
     // Extracting the actions from the dictionary
     if (p.onApproach.has_value()) {
+        ZoneScopedN("OnApproach");
+
         if (std::holds_alternative<std::string>(*p.onApproach)) {
             result->_onApproachAction = { std::get<std::string>(*p.onApproach) };
         }
@@ -439,6 +451,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (p.onReach.has_value()) {
+        ZoneScopedN("OnReach");
+
         if (std::holds_alternative<std::string>(*p.onReach)) {
             result->_onReachAction = { std::get<std::string>(*p.onReach) };
         }
@@ -448,6 +462,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (p.onRecede.has_value()) {
+        ZoneScopedN("OnRecede");
+
         if (std::holds_alternative<std::string>(*p.onRecede)) {
             result->_onRecedeAction = { std::get<std::string>(*p.onRecede) };
         }
@@ -457,6 +473,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (p.onExit.has_value()) {
+        ZoneScopedN("OnExit");
+
         if (std::holds_alternative<std::string>(*p.onExit)) {
             result->_onExitAction = { std::get<std::string>(*p.onExit) };
         }
@@ -466,6 +484,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (p.tag.has_value()) {
+        ZoneScopedN("Tag");
+
         if (std::holds_alternative<std::string>(*p.tag)) {
             result->addTag(std::get<std::string>(*p.tag));
         }
@@ -611,6 +631,7 @@ void SceneGraphNode::initialize() {
 void SceneGraphNode::initializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+    TracyGpuZone("initializeGL")
 
     LDEBUG(std::format("Initializing GL: {}", identifier()));
 
