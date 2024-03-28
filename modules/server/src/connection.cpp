@@ -167,6 +167,8 @@ void Connection::handleJson(const nlohmann::json& json) {
     auto topicIt = _topics.find(topicId);
 
     if (topicIt == _topics.end()) {
+        ZoneScopedN("New Topic");
+
         // The topic id is not registered: Initialize a new topic.
         auto typeJson = json.find(MessageKeyType);
         if (typeJson == json.end() || !typeJson->is_string()) {
@@ -174,6 +176,7 @@ void Connection::handleJson(const nlohmann::json& json) {
             return;
         }
         const std::string type = *typeJson;
+        ZoneText(type.c_str(), type.size());
 
         if (!isAuthorized() && (type != "authorize")) {
             LERROR("Connection is not authorized");
@@ -188,6 +191,8 @@ void Connection::handleJson(const nlohmann::json& json) {
         }
     }
     else {
+        ZoneScopedN("Existing Topic");
+
         if (!isAuthorized()) {
             LERROR("Connection is not authorized");
             return;

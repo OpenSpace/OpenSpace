@@ -253,6 +253,8 @@ namespace openspace {
 void WwtDataHandler::loadImages(const std::string& root,
                                 const std::filesystem::path& directory)
 {
+    ZoneScoped;
+
     // Steps to download new images
     // 1. Create the target directory if it doesn't already exist
     // 2. If the 'root' has an associated hash file, download and compare it with the
