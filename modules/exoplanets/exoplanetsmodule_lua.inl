@@ -295,8 +295,9 @@ void createExoplanetSystem(const std::string& starName,
                 "Enabled = " + enabled + ","
                 "Radii = " + std::to_string(planetRadius) + "," // in meters
                 "SegmentsPerPatch = 64,"
-                "PerformShading = false,"
-                "Layers = {}"
+                "PerformShading = true,"
+                "Layers = {},"
+                "LightSourceNode = '" + starIdentifier + "'"
             "},"
             "Transform = { "
                 "Translation = " + planetKeplerTranslation + ""

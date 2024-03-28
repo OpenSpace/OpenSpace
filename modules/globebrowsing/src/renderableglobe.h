@@ -37,9 +37,10 @@
 #include <modules/globebrowsing/src/shadowcomponent.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
@@ -287,6 +288,9 @@ private:
 
         std::array<GPULayerGroup, LayerManager::NumLayerGroups> gpuLayerGroups;
     } _localRenderer;
+
+    SceneGraphNode* _lightSourceNode = nullptr;
+    properties::StringProperty _lightSourceNodeName;
 
     bool _shadersNeedRecompilation = true;
     bool _lodScaleFactorDirty = true;
