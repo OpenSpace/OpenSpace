@@ -272,7 +272,8 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
     int valuesIdx = 0;
     for (Dataset::Entry& e : result.entries) {
         e.data.resize(nValues);
-        std::memcpy(e.data.data(), entriesBuffer.data() + valuesIdx, nValues);
+        auto startOfCopy = entriesBuffer.begin() + valuesIdx;
+        std::move(startOfCopy, startOfCopy + nValues, e.data.begin());
         valuesIdx += nValues;
 
         if (e.comment.has_value()) {
