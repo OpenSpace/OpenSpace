@@ -342,6 +342,18 @@ def check_for_tab(lines):
   else:
     return ''
 
+
+
+def check_for_std_getline(lines):
+  index = [i for i,s in enumerate(lines)
+          if 'std::getline' in s]
+  if len(index) > 0:
+    return 'File used wrong std::getline function. Use ghoul::getline from "ghoul/misc/stringhelper.h" instead'
+  else:
+    return ''
+
+
+
 previousSymbols  = {}
 def check_header_file(file, component):
   with open(file, 'r+', encoding="utf8") as f:
@@ -544,6 +556,10 @@ def check_source_file(file, component):
     if tabs:
       print(file, '\t', 'TABs found: ', tabs)
 
+    std_getlines = check_for_std_getline(lines)
+    if std_getlines:
+      if not 'ghoul/src/misc/stringhelper.cpp' in file:
+        print(file, '\t', 'std::getline found instead of ghoul::getline: ', std_getlines)
 
 
 

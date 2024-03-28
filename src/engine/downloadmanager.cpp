@@ -29,6 +29,7 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/thread.h>
 #include <curl/curl.h>
 #include <chrono>
@@ -261,8 +262,8 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             if (res == CURLE_OK) {
                 std::string extension = std::string(ct);
                 std::stringstream ss(extension);
-                getline(ss, extension ,'/');
-                getline(ss, extension);
+                ghoul::getline(ss, extension ,'/');
+                ghoul::getline(ss, extension);
                 file.format = extension;
             }
             else {

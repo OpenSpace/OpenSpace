@@ -164,7 +164,7 @@ bool HongKangParser::create() {
 
     std::string line;
     while (!file.eof()) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
         const std::string event = line.substr(0, line.find_first_of(' '));
 

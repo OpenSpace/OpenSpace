@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <iomanip>
 #include <ghoul/logging/logmanager.h>
@@ -137,7 +138,7 @@ void ConvertRecFormatTask::convert() {
         _iFile.open(_inFilePath, std::ifstream::in);
         //Throw out first line
         std::string throw_out;
-        std::getline(_iFile, throw_out);
+        ghoul::getline(_iFile, throw_out);
         _oFile.open(_outFilePath);
     }
     else if (_fileFormatType == SessionRecording::DataMode::Binary) {
@@ -269,7 +270,7 @@ void ConvertRecFormatTask::convertToBinary() {
     _oFile.write(&tmpType, 1);
     _oFile.write("\n", 1);
 
-    while (std::getline(_iFile, lineContents)) {
+    while (ghoul::getline(_iFile, lineContents)) {
         lineNum++;
 
         std::istringstream iss(lineContents);

@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
 #include <string_view>
@@ -72,7 +73,7 @@ glm::vec3 computeStarColor(float bv) {
 
     // Interpret the colormap cmap file
     std::string line;
-    while (std::getline(colorMap, line)) {
+    while (ghoul::getline(colorMap, line)) {
         if (line.empty() || (line[0] == '#')) {
             continue;
         }
@@ -88,7 +89,7 @@ glm::vec3 computeStarColor(float bv) {
     const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * (nValues - 1)));
     std::string color;
     for (int i = 0; i < t + 1; i++) {
-        std::getline(colorMap, color);
+        ghoul::getline(colorMap, color);
     }
 
     std::istringstream colorStream(color);

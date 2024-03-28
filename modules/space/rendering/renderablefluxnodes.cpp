@@ -37,6 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
@@ -617,7 +618,7 @@ void RenderableFluxNodes::populateStartTimes() {
 
     std::string line;
     // gets only first line to "remove" header
-    std::getline(tfs, line);
+    ghoul::getline(tfs, line);
     std::stringstream s;
     s << line;
 
@@ -627,7 +628,7 @@ void RenderableFluxNodes::populateStartTimes() {
     while (s >> columnName) {
         ++nColumns;
     }
-    while (std::getline(tfs, line)) {   // for each line of data
+    while (ghoul::getline(tfs, line)) {   // for each line of data
         std::istringstream iss(line);
         for (int i = 0; i < nColumns; i++) {    // for each column in line
             std::string columnValue;
