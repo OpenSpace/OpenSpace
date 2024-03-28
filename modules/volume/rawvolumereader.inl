@@ -79,22 +79,22 @@ glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
 
 template <typename VoxelType>
 std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool invertZ) {
-    glm::uvec3 dims = dimensions();
-    auto volume = std::make_unique<RawVolume<VoxelType>>(dims);
+    ZoneScoped;
 
-    std::ifstream file(_path, std::ios::binary);
-    char* buffer = reinterpret_cast<char*>(volume->data());
-
+    std::ifstream file = std::ifstream(_path, std::ios::binary);
     if (file.fail()) {
         throw ghoul::FileNotFoundError("Volume file not found");
     }
 
-    size_t length = static_cast<size_t>(dims.x) *
-                    static_cast<size_t>(dims.y) *
-                    static_cast<size_t>(dims.z) *
-                    sizeof(VoxelType);
+    glm::uvec3 dims = dimensions();
+    auto volume = std::make_unique<RawVolume<VoxelType>>(dims);
 
-    file.read(buffer, length);
+    char* buffer = reinterpret_cast<char*>(volume->data());
+    size_t length = glm::compMul(dims) * sizeof(VoxelType);
+    {
+        ZoneScopedN("read");
+        file.read(buffer, length);
+    }
 
     if (file.fail()) {
         throw ghoul::RuntimeError("Error reading volume file");

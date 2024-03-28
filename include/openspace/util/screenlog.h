@@ -27,6 +27,7 @@
 
 #include <ghoul/logging/log.h>
 
+#include <ghoul/misc/profiling.h>
 #include <chrono>
 #include <mutex>
 #include <string_view>
@@ -124,7 +125,7 @@ private:
 
     /// A mutex to ensure thread-safety since the logging and the removal of expired
     /// entires can occur on different threads
-    mutable std::mutex _mutex;
+    mutable TracyLockable(std::mutex, _mutex);
 };
 
 } // namespace openspace

@@ -52,6 +52,8 @@ documentation::Documentation Translation::Documentation() {
 ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     Translation* result = FactoryManager::ref().factory<Translation>()->create(

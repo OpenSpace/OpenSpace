@@ -49,6 +49,8 @@ void ScreenLog::removeExpiredEntries() {
 }
 
 void ScreenLog::log(LogLevel level, std::string_view category, std::string_view message) {
+    ZoneScoped;
+
     const std::lock_guard guard(_mutex);
     if (level >= _logLevel) {
         _entries.push_back({

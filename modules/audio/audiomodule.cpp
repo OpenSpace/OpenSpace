@@ -57,7 +57,7 @@ AudioModule::~AudioModule() {}
 void AudioModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    LDEBUG(fmt::format("Initializing SoLoud version: {}", SOLOUD_VERSION));
+    LDEBUG(std::format("Initializing SoLoud version: {}", SOLOUD_VERSION));
 
     _engine->init();
     _engine->setGlobalVolume(0.5f);
@@ -70,8 +70,8 @@ void AudioModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         }
     });
 
-    LDEBUG(fmt::format("Audio backend: {}", _engine->getBackendString()));
-    LDEBUG(fmt::format("Number of channels: {}", _engine->getBackendChannels()));
+    LDEBUG(std::format("Audio backend: {}", _engine->getBackendString()));
+    LDEBUG(std::format("Number of channels: {}", _engine->getBackendChannels()));
 }
 
 void AudioModule::internalDeinitializeGL() {
@@ -89,7 +89,7 @@ std::unique_ptr<SoLoud::Wav> AudioModule::loadSound(const std::filesystem::path&
     const std::string p = path.string();
     SoLoud::result res = sound->load(p.c_str());
     if (res != 0) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Error loading sound from {}. {}: {}",
             path, static_cast<int>(res), _engine->getErrorString(res)
         ));
@@ -102,7 +102,7 @@ std::unique_ptr<SoLoud::Wav> AudioModule::loadSound(const std::filesystem::path&
     for (auto it = _sounds.begin(); it != _sounds.end();) {
         if (!isPlaying(it->first)) {
             // We have found one of the candidates
-            LDEBUG(fmt::format("Removing song {} as it has ended", it->first));
+            LDEBUG(std::format("Removing song {} as it has ended", it->first));
             _sounds.erase(it);
             // It is easier to just reset the iterator to the beginning than deal with the
             // off-by-one error when deleting the last element in the list and the
@@ -122,7 +122,7 @@ void AudioModule::playAudio(const std::filesystem::path& path, std::string ident
 {
     ghoul_assert(_engine, "No audio engine loaded");
     if (_sounds.find(identifier) != _sounds.end()) {
-        LERROR(fmt::format("Sound with name '{}' already played", identifier));
+        LERROR(std::format("Sound with name '{}' already played", identifier));
         return;
     }
 
@@ -142,7 +142,7 @@ void AudioModule::playAudio3d(const std::filesystem::path& path, std::string ide
 {
     ghoul_assert(_engine, "No audio engine loaded");
     if (_sounds.find(identifier) != _sounds.end()) {
-        LERROR(fmt::format("Sound with name '{}' already played", identifier));
+        LERROR(std::format("Sound with name '{}' already played", identifier));
         return;
     }
 
