@@ -163,6 +163,8 @@ std::string PropertyOwner::propertyGroupName(const std::string& groupID) const {
 }
 
 void PropertyOwner::addProperty(Property* prop) {
+    ZoneScoped;
+
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
 
     if (prop->identifier().empty()) {
@@ -207,6 +209,8 @@ void PropertyOwner::addProperty(Property& prop) {
 }
 
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* owner) {
+    ZoneScoped;
+
     ghoul_precondition(owner != nullptr, "owner must not be nullptr");
     ghoul_precondition(
         !owner->identifier().empty(),

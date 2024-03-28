@@ -781,6 +781,8 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
 RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
                                                         const std::filesystem::path& file)
 {
+    ZoneScoped;
+
     std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
     if (!fileStream.good()) {
         LERROR(std::format("Error opening file '{}' for loading cache file", file));
