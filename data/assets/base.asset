@@ -4,6 +4,10 @@
 
 asset.require("./base_blank")
 
+-- We load the SDSS dataset first as that is the one that takes the longest, so the
+-- earlier we start, the sooner the loading is done
+asset.require("scene/digitaluniverse/sdss")
+
 -- Specifying which other assets should be loaded in this scene
 asset.require("scene/solarsystem/sun/sun")
 asset.require("scene/solarsystem/sun/glare")
@@ -61,7 +65,6 @@ asset.require("scene/digitaluniverse/openclusters")
 asset.require("scene/digitaluniverse/planetarynebulae")
 asset.require("scene/digitaluniverse/pulsars")
 asset.require("scene/digitaluniverse/quasars")
-asset.require("scene/digitaluniverse/sdss")
 asset.require("scene/digitaluniverse/starlabels")
 asset.require("scene/digitaluniverse/starorbits")
 asset.require("scene/digitaluniverse/stars")
