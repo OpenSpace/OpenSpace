@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 
 namespace {
@@ -109,7 +110,7 @@ void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
     else {
         std::string line;
         std::string fileContent;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             fileContent += line;
         }
 

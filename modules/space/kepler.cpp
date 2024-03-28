@@ -405,7 +405,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
     int lineNum = 1;
 
     std::string header;
-    while (std::getline(f, header)) {
+    while (ghoul::getline(f, header)) {
         Parameters p;
 
         // Header
@@ -428,7 +428,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         //    13   65-68   Element set  number.Incremented when a new TLE is generated
         //    14   69-69   Checksum (modulo 10)
         std::string firstLine;
-        std::getline(f, firstLine);
+        ghoul::getline(f, firstLine);
         if (f.bad() || firstLine[0] != '1') {
             throw ghoul::RuntimeError(std::format(
                 "Malformed TLE file '{}' at line {}", file, lineNum + 1
@@ -460,7 +460,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         //     9      64-68   Revolution number at epoch (revolutions)
         //    10      69-69   Checksum (modulo 10)
         std::string secondLine;
-        std::getline(f, secondLine);
+        ghoul::getline(f, secondLine);
         if (f.bad() || secondLine[0] != '2') {
             throw ghoul::RuntimeError(std::format(
                 "Malformed TLE file '{}' at line {}", file, lineNum + 1
@@ -522,7 +522,7 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
     int lineNum = 1;
     std::optional<Parameters> current = std::nullopt;
     std::string line;
-    while (std::getline(f, line)) {
+    while (ghoul::getline(f, line)) {
         if (line.empty() || line == "\r") {
             continue;
         }
@@ -613,7 +613,7 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
     f.open(file);
 
     std::string line;
-    std::getline(f, line);
+    ghoul::getline(f, line);
     // Newer versions downloaded from the JPL SBDB website have " around variables
     line.erase(remove(line.begin(), line.end(), '\"'), line.end());
     if (line != ExpectedHeader) {
@@ -624,7 +624,7 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
     }
 
     std::vector<Parameters> result;
-    while (std::getline(f, line)) {
+    while (ghoul::getline(f, line)) {
         constexpr double AuToKm = 1.496e8;
 
         std::vector<std::string> parts = ghoul::tokenizeString(line, ',');

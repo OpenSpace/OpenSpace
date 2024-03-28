@@ -258,8 +258,8 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
     // The line $$SOE indicates start of data.
     std::string line;
     bool foundTarget = false;
-    std::getline(fileStream, line);
-    std::getline(fileStream, line); // First line is just stars (*) no information, skip
+    ghoul::getline(fileStream, line);
+    ghoul::getline(fileStream, line); // First line is just stars (*) no information, skip
 
     // @CPP23 (malej, 2022-04-08) In all cases below, the string function contains
     // should be used instead of find
@@ -338,7 +338,7 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
             return HorizonsResultCode::ErrorNoTarget;
         }
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     if (result != HorizonsResultCode::UnknownError) {
@@ -505,14 +505,14 @@ HorizonsResult readHorizonsFile(std::filesystem::path file) {
     //   X     Y     Z
     // " Before data starts, Observer table doesn't
     std::string line;
-    std::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
     while (line[0] != '$') {
         if (line.starts_with("JDTDB")) {
             fileStream.close();
             return readHorizonsVectorFile(file);
         }
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     fileStream.close();
@@ -536,12 +536,12 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
     // the row marked by $$SOE (i.e. Start Of Ephemerides).
     std::string line;
     do {
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     } while (line[0] != '$');
 
     // Read data line by line until $$EOE (i.e. End Of Ephemerides).
     // Skip the rest of the file.
-    std::getline(fileStream, line); // Skip the line with the $$EOE
+    ghoul::getline(fileStream, line); // Skip the line with the $$EOE
     while (line[0] != '$') {
         HorizonsKeyframe dataPoint;
         std::stringstream str1(line);
@@ -555,7 +555,7 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
         str1 >> temp >> temp >> temp >> date >> time >> temp;
 
         // Get next line of same data point
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
         if (!fileStream.good()) {
             LERROR(std::format("Malformed Horizons file '{}'", file));
             return HorizonsResult();
@@ -581,7 +581,7 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
         dataPoint.position = pos;
         data.push_back(dataPoint);
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     result.data = data;
@@ -605,12 +605,12 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
     // the row marked by $$SOE (i.e. Start Of Ephemerides).
     std::string line;
     do {
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     } while (line[0] != '$');
 
     // Read data line by line until $$EOE (i.e. End Of Ephemerides).
     // Skip the rest of the file.
-    std::getline(fileStream, line); // Skip the line with the $$EOE
+    ghoul::getline(fileStream, line); // Skip the line with the $$EOE
     while (line[0] != '$') {
         HorizonsKeyframe dataPoint;
         std::stringstream str(line);
@@ -642,7 +642,7 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
         );
         data.push_back(dataPoint);
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     LWARNING(
@@ -684,7 +684,7 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
             break;
         }
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     if (!fileStream.good()) {
@@ -693,8 +693,8 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
     }
 
     // There will be one empty line before the list of matches, skip
-    std::getline(fileStream, line);
-    std::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
     while (fileStream.good()) {
         // End of matches or file
         if (line == " " || line.empty() || line.find(endPhrase) != std::string::npos) {
@@ -703,7 +703,7 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
         }
 
         matches.push_back(line);
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     fileStream.close();
@@ -754,7 +754,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
 
     // Ignore everything until head of time range list
     std::string line;
-    std::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
     while (fileStream.good()) {
         // Add the line with the start phrase first, to give context
         if (line.find(startPhrase) != std::string::npos) {
@@ -765,7 +765,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
             break;
         }
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     if (!fileStream.good()) {
@@ -773,13 +773,13 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
     }
 
     // There will be one empty line before the list of time ranges, skip
-    std::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
 
     // In the first file parse both start and end time
     // From the first line get the start time
     std::string startTime;
     std::string endTime;
-    std::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
     if (fileStream.good()) {
         std::stringstream str(line);
 
@@ -843,7 +843,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
             return { "", "" };
         }
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     return { "", "" };

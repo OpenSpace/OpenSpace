@@ -30,6 +30,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -279,7 +280,7 @@ void DataCygnet::readTransferFunctions(std::string tfPath) {
 
     if (tfFile.is_open()) {
         std::string line;
-        while (getline(tfFile, line)) {
+        while (ghoul::getline(tfFile, line)) {
             tfs.emplace_back(absPath(line).string());
         }
 
