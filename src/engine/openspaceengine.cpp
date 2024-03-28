@@ -897,6 +897,9 @@ void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
     if (!std::filesystem::exists(absPath("${USER_CONFIG}"))) {
         std::filesystem::create_directories(absPath("${USER_CONFIG}"));
     }
+    if (!std::filesystem::is_directory(absPath("${USER_PANELS}"))) {
+        std::filesystem::create_directories(absPath("${USER_PANELS}"));
+    }
 }
 
 void OpenSpaceEngine::runGlobalCustomizationScripts() {
