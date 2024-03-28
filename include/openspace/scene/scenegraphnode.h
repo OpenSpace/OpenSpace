@@ -147,6 +147,7 @@ public:
 
     std::string guiPath() const;
     bool hasGuiHintHidden() const;
+    void setGuiHintHidden(bool value);
 
     static documentation::Documentation Documentation();
 

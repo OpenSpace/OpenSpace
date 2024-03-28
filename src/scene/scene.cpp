@@ -116,6 +116,7 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
 {
     _rootNode.setIdentifier(RootNodeIdentifier);
     _rootNode.setScene(this);
+    _rootNode.setGuiHintHidden(true);
 
     _camera->setParent(&_rootNode);
 }

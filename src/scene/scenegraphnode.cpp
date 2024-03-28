@@ -350,18 +350,15 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             result->setGuiName(*p.gui->name);
             result->_guiDisplayName = result->guiName();
         }
-        result->addProperty(result->_guiDisplayName);
 
         if (p.gui->description.has_value()) {
             result->setDescription(*p.gui->description);
             result->_guiDescription = result->description();
         }
-        result->addProperty(result->_guiDescription);
 
         if (p.gui->hidden.has_value()) {
             result->_guiHidden = *p.gui->hidden;
         }
-        result->addProperty(result->_guiHidden);
 
         if (p.gui->path.has_value()) {
             if (!p.gui->path->starts_with('/')) {
@@ -369,7 +366,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             }
             result->_guiPath = *p.gui->path;
         }
-        result->addProperty(result->_guiPath);
     }
 
     result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
@@ -596,6 +592,11 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_showDebugSphere);
 
     addProperty(_supportsDirectInteraction);
+
+    addProperty(_guiDisplayName);
+    addProperty(_guiDescription);
+    addProperty(_guiHidden);
+    addProperty(_guiPath);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -1121,6 +1122,10 @@ std::string SceneGraphNode::guiPath() const {
 
 bool SceneGraphNode::hasGuiHintHidden() const {
     return _guiHidden;
+}
+
+void SceneGraphNode::setGuiHintHidden(bool value) {
+    _guiHidden = value;
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
