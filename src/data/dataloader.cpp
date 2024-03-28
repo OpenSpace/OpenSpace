@@ -281,6 +281,7 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
 
             // If we have a comment, we need to extract its length's worth of characters
             // from the buffer
+            // @TODO replace this with std::move as well?
             std::memcpy(e.comment->data(), &commentBuffer[commentIdx], e.comment->size());
 
             // and then advance the index
