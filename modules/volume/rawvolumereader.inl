@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
 #include <fstream>
 
 namespace openspace::volume {

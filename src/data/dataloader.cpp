@@ -272,7 +272,11 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
     int valuesIdx = 0;
     for (Dataset::Entry& e : result.entries) {
         e.data.resize(nValues);
-        std::memcpy(e.data.data(), entriesBuffer.data() + valuesIdx, nValues);
+        std::memcpy(
+            e.data.data(),
+            entriesBuffer.data() + valuesIdx,
+            nValues * sizeof(float)
+        );
         valuesIdx += nValues;
 
         if (e.comment.has_value()) {
@@ -283,7 +287,7 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
             std::memcpy(e.comment->data(), &commentBuffer[commentIdx], e.comment->size());
 
             // and then advance the index
-            commentIdx += e.comment->size();
+            commentIdx += static_cast<int>(e.comment->size());
         }
     }
 
@@ -354,8 +358,9 @@ void saveCachedFile(const Dataset& dataset, const std::filesystem::path& path) {
 
     // We assume the number of values for each dataset to be the same, so we can store
     // them upfront
-    uint16_t nValues = dataset.entries.empty() ? 0 : dataset.entries[0].data.size();
-    checkSize<uint16_t>(nValues, "Too many data variables");
+    size_t nValuesF = dataset.entries.empty() ? 0 : dataset.entries[0].data.size();
+    checkSize<uint16_t>(nValuesF, "Too many data variables");
+    uint16_t nValues = static_cast<uint16_t>(nValuesF);
     std::vector<float> valuesBuffer;
     valuesBuffer.reserve(dataset.entries.size() * nValues);
 
