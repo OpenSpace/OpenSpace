@@ -90,7 +90,7 @@ Fragment getFragment() {
     discard;
   }
 
-  vec4 fullColor = glm::vec4(color, 1.0);
+  vec4 fullColor = vec4(color, 1.0);
   if (useColorMap) {
     fullColor = sampleColorMap(gs_colorParameter);
   }
