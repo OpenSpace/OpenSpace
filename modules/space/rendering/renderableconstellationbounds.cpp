@@ -30,6 +30,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
 #include <optional>
@@ -114,7 +115,7 @@ void RenderableConstellationBounds::initialize() {
 
                 if (it == options.end()) {
                     // The user has specified a constellation name that doesn't exist
-                    LWARNING(fmt::format(
+                    LWARNING(std::format(
                         "Option '{}' not found in list of constellations", s
                     ));
                 }
@@ -238,7 +239,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
     // a new constellation name, at which point the currentBound is stored away, a new,
     // empty ConstellationBound is created and set at the currentBound
     while (file.good()) {
-        std::getline(file, currentLine);
+        ghoul::getline(file, currentLine);
         if (currentLine.empty()) {
             continue;
         }
@@ -257,7 +258,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
         if (!s.good()) {
             // If this evaluates to true, the stream was not completely filled, which
             // means that the line was incomplete, so there was an error
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error reading file '{}' at line #{}", fileName, currentLineNumber
             ));
             break;

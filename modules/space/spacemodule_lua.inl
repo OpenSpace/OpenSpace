@@ -93,7 +93,7 @@ std::vector<ghoul::Dictionary> readKeplerFile(std::filesystem::path p, std::stri
         f = openspace::kepler::Format::SBDB;
     }
     else {
-        throw ghoul::lua::LuaError(fmt::format("Unsupported format '{}'", type));
+        throw ghoul::lua::LuaError(std::format("Unsupported format '{}'", type));
     }
 
     std::vector<openspace::kepler::Parameters> params = openspace::kepler::readFile(p, f);

@@ -507,7 +507,7 @@ void RenderablePlanesCloud::loadTextures() {
         }
         else {
             // We can't really recover from this as it would crash during rendering anyway
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Could not find image file '{}'", tex.file
             ));
         }
@@ -516,14 +516,14 @@ void RenderablePlanesCloud::loadTextures() {
             ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
         if (t) {
-            LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture '{}'", path));
+            LINFOC("RenderablePlanesCloud", std::format("Loaded texture '{}'", path));
             t->uploadTexture();
             t->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             t->purgeFromRAM();
         }
         else {
             // Same here, we won't be able to recover from this nullptr
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Could not find image file '{}'", tex.file
             ));
         }

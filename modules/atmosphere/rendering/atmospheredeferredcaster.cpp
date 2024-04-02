@@ -488,7 +488,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         unsigned int counter = 0;
         for (const ShadowRenderingStruct& sd : _shadowDataArrayCache) {
             // Add the counter
-            char* bf = fmt::format_to(_uniformNameBuffer + 16, "{}", counter);
+            char* bf = std::format_to(_uniformNameBuffer + 16, "{}", counter);
 
             std::strcpy(bf, "].isShadowing\0");
             program.setUniform(_uniformNameBuffer, sd.isShadowing);
@@ -842,7 +842,7 @@ void AtmosphereDeferredcaster::calculateDeltaJ(int scatteringOrder,
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
-            fmt::format("deltaJ_texture-scattering_order-{}.ppm", scatteringOrder),
+            std::format("deltaJ_texture-scattering_order-{}.ppm", scatteringOrder),
             glm::ivec2(_textureSize)
         );
     }
@@ -882,7 +882,7 @@ void AtmosphereDeferredcaster::calculateDeltaE(int scatteringOrder,
     glDrawArrays(GL_TRIANGLES, 0, 6);
     if (_saveCalculationTextures) {
         saveTextureFile(
-            fmt::format("deltaE_texture-scattering_order-{}.ppm", scatteringOrder),
+            std::format("deltaE_texture-scattering_order-{}.ppm", scatteringOrder),
             _deltaETableSize
         );
     }
@@ -922,7 +922,7 @@ void AtmosphereDeferredcaster::calculateDeltaS(int scatteringOrder,
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
-            fmt::format("deltaS_texture-scattering_order-{}.ppm", scatteringOrder),
+            std::format("deltaS_texture-scattering_order-{}.ppm", scatteringOrder),
             glm::ivec2(_textureSize)
         );
     }
@@ -953,7 +953,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(int scatteringOrder,
     glDrawArrays(GL_TRIANGLES, 0, 6);
     if (_saveCalculationTextures) {
         saveTextureFile(
-            fmt::format("irradianceTable_order-{}.ppm", scatteringOrder),
+            std::format("irradianceTable_order-{}.ppm", scatteringOrder),
             _deltaETableSize
         );
     }
@@ -990,7 +990,7 @@ void AtmosphereDeferredcaster::calculateInscattering(int scatteringOrder,
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
-            fmt::format("inscatteringTable_order-{}.ppm", scatteringOrder),
+            std::format("inscatteringTable_order-{}.ppm", scatteringOrder),
             glm::ivec2(_textureSize)
         );
     }

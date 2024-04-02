@@ -401,7 +401,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
             break;
         }
         default:
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Unidentified message with identifier '{}' received in parallel "
                 "connection",
                 type

@@ -62,7 +62,7 @@ namespace {
     };
 
     [[ nodiscard ]] char* formatDt(std::vector<char>& buffer) {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "Avg. Frametime: {:.2f} ms\0",
             openspace::global::windowDelegate->averageDeltaTime() * 1000.0
@@ -73,7 +73,7 @@ namespace {
                                            double minFrametimeCache,
                                            double maxFrametimeCache)
     {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "Last frametimes between: {:.2f} and {:.2f} ms\n"
             "Overall between: {:.2f} and {:.2f} ms\0",
@@ -85,7 +85,7 @@ namespace {
     }
 
     [[ nodiscard ]] char* formatDtStandardDeviation(std::vector<char>& buffer) {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "Frametime standard deviation : {:.2f} ms\0",
             openspace::global::windowDelegate->deltaTimeStandardDeviation() * 1000.0
@@ -93,7 +93,7 @@ namespace {
     }
 
     [[ nodiscard ]] char* formatDtCoefficientOfVariation(std::vector<char>& buffer) {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "Frametime coefficient of variation : {:.2f} %\0",
             openspace::global::windowDelegate->deltaTimeStandardDeviation() /
@@ -102,7 +102,7 @@ namespace {
     }
 
     [[ nodiscard ]] char* formatFps(std::vector<char>& buffer) {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "FPS: {:3.2f}\0",
             1.0 / openspace::global::windowDelegate->deltaTime()
@@ -110,7 +110,7 @@ namespace {
     }
 
     [[ nodiscard ]] char* formatAverageFps(std::vector<char>& buffer) {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "Avg. FPS: {:3.2f}\0",
             1.0 / openspace::global::windowDelegate->averageDeltaTime()

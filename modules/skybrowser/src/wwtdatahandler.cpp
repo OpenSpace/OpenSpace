@@ -135,7 +135,7 @@ namespace {
         const std::filesystem::path file = directory.string() + fileName + ".aspx";
         const bool success = downloadFile(url, file);
         if (!success) {
-            LINFO(fmt::format(
+            LINFO(std::format(
                 "Could not download file '{}' to directory '{}'", url, directory
             ));
             return false;
@@ -154,7 +154,7 @@ namespace {
         // If the file contains no folders, or there are folders but without urls,
         // stop recursion
         if (!folderExists || folderContainNoUrls) {
-            LINFO(fmt::format("Saving '{}'", url));
+            LINFO(std::format("Saving '{}'", url));
             return true;
         }
 
@@ -253,6 +253,8 @@ namespace openspace {
 void WwtDataHandler::loadImages(const std::string& root,
                                 const std::filesystem::path& directory)
 {
+    ZoneScoped;
+
     // Steps to download new images
     // 1. Create the target directory if it doesn't already exist
     // 2. If the 'root' has an associated hash file, download and compare it with the
@@ -261,7 +263,7 @@ void WwtDataHandler::loadImages(const std::string& root,
 
     // 1.
     if (!directoryExists(directory)) {
-        LINFO(fmt::format("Creating directory '{}'", directory));
+        LINFO(std::format("Creating directory '{}'", directory));
         std::filesystem::create_directory(directory);
     }
 
@@ -291,7 +293,7 @@ void WwtDataHandler::loadImages(const std::string& root,
     // Check if the hash has changed. This will be ignored if either the local of remote
     // hash does not exist
     if (!localHash.empty() && !remoteHash.empty() && localHash != remoteHash) {
-        LINFO(fmt::format(
+        LINFO(std::format(
             "Local hash '{}' differs from remote hash '{}'. Cleaning directory",
             localHash, remoteHash
         ));
@@ -338,7 +340,7 @@ void WwtDataHandler::loadImages(const std::string& root,
         _images[imageVector[i].imageUrl].identifier = std::to_string(i);
     }
 
-    LINFO(fmt::format("Loaded {} WorldWide Telescope images", _images.size()));
+    LINFO(std::format("Loaded {} WorldWide Telescope images", _images.size()));
 }
 
 int WwtDataHandler::nLoadedImages() const {
@@ -380,7 +382,7 @@ void WwtDataHandler::saveImagesFromXml(const tinyxml2::XMLElement* root,
         // If node is another folder, open recursively
         else if (name == Folder) {
             const std::string nodeName = attribute(node, Name);
-            const std::string newCollectionName = fmt::format(
+            const std::string newCollectionName = std::format(
                 "{}/{}", collection, nodeName
             );
             saveImagesFromXml(node, newCollectionName);

@@ -74,15 +74,15 @@ std::string to_string(const openspace::documentation::TestResult& value) {
         stream << "Specification Failure. ";
 
         for (const TestResult::Offense& offense : value.offenses) {
-            stream << fmt::format(" {}", ghoul::to_string(offense));
+            stream << std::format(" {}", ghoul::to_string(offense));
             if (!offense.explanation.empty()) {
-                stream << fmt::format(" ({})", offense.explanation);
+                stream << std::format(" ({})", offense.explanation);
             }
             stream << '\n';
         }
 
         for (const TestResult::Warning& warning : value.warnings) {
-            stream << fmt::format(" {}\n", ghoul::to_string(warning));
+            stream << std::format(" {}\n", ghoul::to_string(warning));
         }
 
         return stream.str();
@@ -95,7 +95,7 @@ std::string to_string(const openspace::documentation::TestResult::Offense& value
     stream << value.offender + ": " + ghoul::to_string(value.reason);
 
     if (!value.explanation.empty()) {
-        stream << fmt::format(" ({})", value.explanation);
+        stream << std::format(" ({})", value.explanation);
     }
 
     return stream.str();
@@ -159,7 +159,7 @@ void logError(const SpecificationError& error, std::string component) {
         LERRORC(error.component, error.message);
     }
     else {
-        LERRORC(fmt::format("{}: {}", component, error.component), error.message);
+        LERRORC(std::format("{}: {}", component, error.component), error.message);
     }
     for (const documentation::TestResult::Offense& o : error.result.offenses) {
         if (o.explanation.empty()) {
@@ -168,7 +168,7 @@ void logError(const SpecificationError& error, std::string component) {
         else {
             LERRORC(
                 ghoul::to_string(o.reason),
-                fmt::format("{}: {}", o.offender, o.explanation)
+                std::format("{}: {}", o.offender, o.explanation)
             );
         }
     }

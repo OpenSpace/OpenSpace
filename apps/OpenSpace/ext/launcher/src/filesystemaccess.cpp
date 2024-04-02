@@ -60,7 +60,7 @@ void FileSystemAccess::parseChildDirElements(const QFileInfo& fileInfo,
     for (const QFileInfo& fi : fileList) {
         std::string res = space + fi.fileName().toStdString();
         if (level == 0 && userAssets) {
-            res = fmt::format("${{USER_ASSETS}}/{}", res);
+            res = std::format("${{USER_ASSETS}}/{}", res);
         }
         if (fi.isDir()) {
             dirNames.push_back(res);

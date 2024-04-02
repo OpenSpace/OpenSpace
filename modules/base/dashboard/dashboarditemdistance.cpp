@@ -369,16 +369,22 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
     try {
-        char* end = fmt::format_to(
+        // @CPP26(abock): This can be replaced with std::runtime_format
+        char* end = std::vformat_to(
             _buffer.data(),
-            fmt::runtime(_formatString.value()),
-            sourceInfo.second, destinationInfo.second, dist.first, dist.second
+            _formatString.value(),
+            std::make_format_args(
+                sourceInfo.second,
+                destinationInfo.second,
+                dist.first,
+                dist.second
+            )
         );
 
         const std::string_view t = std::string_view(_buffer.data(), end - _buffer.data());
         RenderFont(*_font, penPosition, t);
     }
-    catch (const fmt::format_error&) {
+    catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
     penPosition.y -= _font->height();
@@ -399,7 +405,7 @@ glm::vec2 DashboardItemDistance::size() const {
     }
 
     return _font->boundingBox(
-        fmt::format("Distance from focus: {} {}", dist.first, dist.second)
+        std::format("Distance from focus: {} {}", dist.first, dist.second)
     );
 }
 

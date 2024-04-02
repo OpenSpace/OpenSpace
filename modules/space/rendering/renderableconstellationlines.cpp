@@ -34,7 +34,7 @@
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <scn/scn.h>
+#include <scn/scan.h>
 #include <array>
 #include <filesystem>
 #include <fstream>
@@ -198,7 +198,7 @@ void RenderableConstellationLines::initialize() {
 
                 if (it == options.end()) {
                     // The user has specified a constellation name that doesn't exist
-                    LWARNING(fmt::format(
+                    LWARNING(std::format(
                         "Option '{}' not found in list of constellations", s
                     ));
                 }
@@ -314,10 +314,10 @@ bool RenderableConstellationLines::readSpeckFile() {
     }
     std::filesystem::path fileName = absPath(_speckFile);
 
-    LINFO(fmt::format("Loading Speck file '{}'", fileName));
+    LINFO(std::format("Loading Speck file '{}'", fileName));
     std::ifstream file(fileName);
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", fileName));
+        LERROR(std::format("Failed to open Speck file '{}'", fileName));
         return false;
     }
 
@@ -331,7 +331,7 @@ bool RenderableConstellationLines::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
         if (file.eof()) {
             break;
@@ -368,7 +368,7 @@ bool RenderableConstellationLines::readSpeckFile() {
                 str >> constellationLine.colorIndex; // color index
             }
             else {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Unknown command '{}' found in constellation file '{}'",
                     dummy, fileName
                 ));
@@ -378,7 +378,7 @@ bool RenderableConstellationLines::readSpeckFile() {
         }
         while (dummy != "{");
 
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
         // Read the identifier
         std::stringstream id(line);
@@ -386,33 +386,34 @@ bool RenderableConstellationLines::readSpeckFile() {
 
         id >> dummy; // id command
         dummy.clear();
-        std::getline(id, identifier); // identifier
+        ghoul::getline(id, identifier); // identifier
         ghoul::trimWhitespace(identifier);
         constellationLine.name = constellationFullName(identifier);
 
         // Read the number of vertices
-        std::getline(file, line);
+        ghoul::getline(file, line);
         std::stringstream dim(line);
         dim >> constellationLine.numV;
 
         // We can now read the vertices data:
         for (int l = 0; l < constellationLine.numV; ++l) {
-            std::getline(file, line);
+            ghoul::getline(file, line);
             if (line.substr(0, 1) == "}") {
                 break;
             }
 
             // Try to read three values for the position
             glm::vec3 pos;
-            auto reading = scn::scan(line, "{} {} {}", pos.x, pos.y, pos.z);
+            auto reading = scn::scan<float, float, float>(line, "{} {} {}");
             if (reading) {
+                std::tie(pos.x, pos.y, pos.z) = reading->values();
                 pos *= scale;
                 constellationLine.vertices.push_back(pos.x);
                 constellationLine.vertices.push_back(pos.y);
                 constellationLine.vertices.push_back(pos.z);
             }
             else {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Failed reading position on line {} of mesh {} in file '{}'. "
                     "Stopped reading constellation data", l, lineIndex, fileName
                 ));
@@ -423,7 +424,7 @@ bool RenderableConstellationLines::readSpeckFile() {
             maxRadius = std::max(maxRadius, r);
         }
 
-        std::getline(file, line);
+        ghoul::getline(file, line);
         if (line.substr(0, 1) == "}") {
             _renderingConstellationsMap.insert({ lineIndex++, constellationLine });
         }

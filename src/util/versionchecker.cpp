@@ -25,7 +25,7 @@
 #include <openspace/util/versionchecker.h>
 
 #include <openspace/openspace.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
@@ -47,7 +47,7 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     std::string operatingSystem = SysCap.component<GCC>().operatingSystemString();
     operatingSystem = ghoul::encodeUrl(operatingSystem);
 
-    std::string fullUrl = fmt::format(
+    std::string fullUrl = std::format(
         "{}?client_version={}&commit_hash={}&operating_system={}",
         url, OPENSPACE_VERSION_NUMBER, OPENSPACE_GIT_COMMIT, operatingSystem
     );
@@ -83,11 +83,11 @@ void VersionChecker::cancel() {
             std::istringstream versionData(versionString);
 
             std::string token;
-            std::getline(versionData, token, '.');
+            ghoul::getline(versionData, token, '.');
             const int major = std::atoi(token.c_str());
-            std::getline(versionData, token, '.');
+            ghoul::getline(versionData, token, '.');
             const int minor = std::atoi(token.c_str());
-            std::getline(versionData, token, '.');
+            ghoul::getline(versionData, token, '.');
             const int patch = std::atoi(token.c_str());
 
             _latestVersion = { major, minor, patch };
@@ -100,7 +100,7 @@ void VersionChecker::cancel() {
             };
 
             if (currentVersion < _latestVersion) {
-                LINFO(fmt::format(
+                LINFO(std::format(
                     "Newer OpenSpace version {}.{}.{} is available. "
                     "Currently running {}.{}.{}",
                     _latestVersion->major,
@@ -112,7 +112,7 @@ void VersionChecker::cancel() {
                 ));
             }
             else {
-                LINFO(fmt::format(
+                LINFO(std::format(
                     "OpenSpace version {}.{}.{} is up to date",
                     currentVersion.major,
                     currentVersion.minor,
@@ -126,7 +126,7 @@ void VersionChecker::cancel() {
             _request->wait();
             std::vector<char> data = _request->downloadedData();
             const std::string response = std::string(data.begin(), data.end());
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Failed to get OpenSpace version information from {}. Response: {}",
                 _request->url(),
                 response

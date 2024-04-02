@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 
 namespace {
@@ -99,17 +100,17 @@ void IswaKameleonGroup::registerProperties() {
 }
 
 void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
-    LINFO(fmt::format("Reading seed points paths from file '{}'", indexFile));
+    LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
 
     // Read the index file from disk
     std::ifstream seedFile(indexFile);
     if (!seedFile.good()) {
-        LERROR(fmt::format("Could not open seed points file '{}'", indexFile));
+        LERROR(std::format("Could not open seed points file '{}'", indexFile));
     }
     else {
         std::string line;
         std::string fileContent;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             fileContent += line;
         }
 

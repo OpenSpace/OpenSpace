@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/util/json_helper.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -60,16 +59,11 @@ namespace {
 
         std::vector<std::string> result;
 
-        std::string total = std::move(prefix);
+        std::string total = prefix;
         if (!library.name.empty()) {
             total += library.name + ".";
         }
 
-        result.reserve(
-            library.functions.size() +
-            library.subLibraries.size() +
-            library.documentations.size()
-        );
         for (const LuaLibrary::Function& function : library.functions) {
             result.push_back(total + function.name);
         }
@@ -86,36 +80,7 @@ namespace {
         return result;
     }
 
-    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f,
-                          bool includeSourceLocation)
-    {
-        using namespace openspace;
-        using namespace openspace::scripting;
-        nlohmann::json function;
-        function["name"] = f.name;
-        nlohmann::json arguments = nlohmann::json::array();
 
-        for (const LuaLibrary::Function::Argument& arg : f.arguments) {
-            nlohmann::json argument;
-            argument["name"] = arg.name;
-            argument["type"] = arg.type;
-            argument["defaultValue"] = arg.defaultValue.value_or("");
-            arguments.push_back(argument);
-        }
-
-        function["arguments"] = arguments;
-        function["returnType"] = f.returnType;
-        function["help"] = f.helpText;
-
-        if (includeSourceLocation) {
-            nlohmann::json sourceLocation;
-            sourceLocation["file"] = f.sourceLocation.file;
-            sourceLocation["line"] = f.sourceLocation.line;
-            function["sourceLocation"] = sourceLocation;
-        }
-
-        return function;
-    }
 
 #include "scriptengine_codegen.cpp"
 } // namespace
@@ -200,6 +165,7 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
 
 bool ScriptEngine::runScript(const std::string& script, const ScriptCallback& callback) {
     ZoneScoped;
+    ZoneText(script.c_str(), script.size());
 
     ghoul_assert(!script.empty(), "Script must not be empty");
 
@@ -247,7 +213,7 @@ bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
     ZoneScoped;
 
     if (!std::filesystem::is_regular_file(filename)) {
-        LERROR(fmt::format("Script with name '{}' did not exist", filename));
+        LERROR(std::format("Script with name {} did not exist", filename));
         return false;
     }
 
@@ -282,35 +248,35 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
             result = true;
             break;
         case LUA_TBOOLEAN:
-            LERROR(fmt::format("Library name '{}' specifies a boolean", name));
+            LERROR(std::format("Library name '{}' specifies a boolean", name));
             break;
         case LUA_TLIGHTUSERDATA:
-            LERROR(fmt::format("Library name '{}' specifies a light user data", name));
+            LERROR(std::format("Library name '{}' specifies a light user data", name));
             break;
         case LUA_TNUMBER:
-            LERROR(fmt::format("Library name '{}' specifies a number", name));
+            LERROR(std::format("Library name '{}' specifies a number", name));
             break;
         case LUA_TSTRING:
-            LERROR(fmt::format("Library name '{}' specifies a string", name));
+            LERROR(std::format("Library name '{}' specifies a string", name));
             break;
         case LUA_TTABLE:
             if (hasLibrary(name)) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Library with name '{}' has been registered before", name
                 ));
             }
             else {
-                LERROR(fmt::format("Library name '{}' specifies a table", name));
+                LERROR(std::format("Library name '{}' specifies a table", name));
             }
             break;
         case LUA_TFUNCTION:
-            LERROR(fmt::format("Library name '{}' specifies a function", name));
+            LERROR(std::format("Library name '{}' specifies a function", name));
             break;
         case LUA_TUSERDATA:
-            LERROR(fmt::format("Library name '{}' specifies a user data", name));
+            LERROR(std::format("Library name '{}' specifies a user data", name));
             break;
         case LUA_TTHREAD:
-            LERROR(fmt::format("Library name '{}' specifies a thread", name));
+            LERROR(std::format("Library name '{}' specifies a thread", name));
             break;
     }
 
@@ -329,7 +295,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
             lua_getfield(state, -1, p.name.c_str());
             const bool isNil = lua_isnil(state, -1);
             if (!isNil) {
-                LERROR(fmt::format("Function name '{}' was already assigned", p.name));
+                LERROR(std::format("Function name '{}' was already assigned", p.name));
                 return;
             }
             lua_pop(state, 1);
@@ -365,8 +331,8 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         ghoul::lua::push(state, "documentation");
         lua_gettable(state, -2);
         if (lua_isnil(state, -1)) {
-            LERROR(fmt::format(
-                "Module '{}' did not provide a documentation in script file '{}'",
+            LERROR(std::format(
+                "Module '{}' did not provide a documentation in script file {}",
                 library.name, script
             ));
             lua_pop(state, 1);
@@ -375,7 +341,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 
         lua_pushnil(state);
         while (lua_next(state, -2)) {
-            const ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(state);
+            ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(state);
             try {
                 const Parameters p = codegen::bake<Parameters>(d);
 
@@ -453,37 +419,8 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     return result;
 }
 
-nlohmann::json ScriptEngine::generateJson() const {
-    ZoneScoped;
-
-    nlohmann::json json;
-
-    for (const LuaLibrary& l : _registeredLibraries) {
-        nlohmann::json library;
-        const std::string libraryName = l.name;
-        // Keep the library key for backwards compatability
-        library["library"] = libraryName;
-        library["name"] = libraryName;
-        library["fullName"] =
-            libraryName.empty() ?
-            "openspace" :
-            "openspace." + libraryName;
-
-        for (const LuaLibrary::Function& f : l.functions) {
-            constexpr bool HasSourceLocation = true;
-            library["functions"].push_back(toJson(f, HasSourceLocation));
-        }
-
-        for (const LuaLibrary::Function& f : l.documentations) {
-            constexpr bool HasSourceLocation = false;
-            library["functions"].push_back(toJson(f, HasSourceLocation));
-        }
-        sortJson(library["functions"], "name");
-        json.push_back(library);
-
-        sortJson(json, "library");
-    }
-    return json;
+const std::vector<LuaLibrary>& ScriptEngine::allLuaLibraries() const {
+    return _registeredLibraries;
 }
 
 void ScriptEngine::writeLog(const std::string& script) {
@@ -496,17 +433,17 @@ void ScriptEngine::writeLog(const std::string& script) {
             _logFilename = absPath(global::configuration->scriptLog).string();
             _logFileExists = true;
 
-            LDEBUG(fmt::format("Using script log file '{}'", _logFilename));
+            LDEBUG(std::format(
+                "Using script log file {}", std::filesystem::path(_logFilename)
+            ));
 
             // Test file and clear previous input
-            const std::ofstream file = std::ofstream(
-                _logFilename,
-                std::ofstream::out | std::ofstream::trunc
-            );
+            std::ofstream file(_logFilename, std::ofstream::out | std::ofstream::trunc);
 
             if (!file.good()) {
-                LERROR(fmt::format(
-                    "Could not open file '{}' for logging scripts", _logFilename
+                LERROR(std::format(
+                    "Could not open file {} for logging scripts",
+                    std::filesystem::path(_logFilename)
                 ));
 
                 return;
@@ -521,7 +458,7 @@ void ScriptEngine::writeLog(const std::string& script) {
     // Simple text output to logfile
     std::ofstream file(_logFilename, std::ofstream::app);
     if (!file.good()) {
-        LERROR(fmt::format("Could not open file '{}' for logging scripts", _logFilename));
+        LERROR(std::format("Could not open file '{}' for logging scripts", _logFilename));
         return;
     }
 
@@ -531,10 +468,10 @@ void ScriptEngine::writeLog(const std::string& script) {
 void ScriptEngine::preSync(bool isMaster) {
     ZoneScoped;
 
-    const std::lock_guard guard(_clientScriptsMutex);
+    std::lock_guard guard(_clientScriptsMutex);
     if (isMaster) {
         while (!_incomingScripts.empty()) {
-            const QueueItem item = std::move(_incomingScripts.front());
+            QueueItem item = std::move(_incomingScripts.front());
             _incomingScripts.pop();
 
             // Not really a received script but the master also needs to run the script...
@@ -559,9 +496,9 @@ void ScriptEngine::preSync(bool isMaster) {
     }
     else {
         while (!_incomingScripts.empty()) {
-            const QueueItem& item = std::move(_incomingScripts.front());
-            _clientScriptQueue.push(item.script);
+            QueueItem item = std::move(_incomingScripts.front());
             _incomingScripts.pop();
+            _clientScriptQueue.push(item.script);
         }
     }
 }
@@ -569,7 +506,7 @@ void ScriptEngine::preSync(bool isMaster) {
 void ScriptEngine::encode(SyncBuffer* syncBuffer) {
     ZoneScoped;
 
-    const size_t nScripts = _scriptsToSync.size();
+    size_t nScripts = _scriptsToSync.size();
     syncBuffer->encode(nScripts);
     for (const std::string& s : _scriptsToSync) {
         syncBuffer->encode(s);
@@ -580,11 +517,11 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     ZoneScoped;
 
-    const std::lock_guard guard(_clientScriptsMutex);
-    size_t nScripts = 0;
+    std::lock_guard guard(_clientScriptsMutex);
+    size_t nScripts;
     syncBuffer->decode(nScripts);
 
-    for (size_t i = 0; i < nScripts; i++) {
+    for (size_t i = 0; i < nScripts; ++i) {
         std::string script;
         syncBuffer->decode(script);
         _clientScriptQueue.push(std::move(script));
@@ -596,11 +533,11 @@ void ScriptEngine::postSync(bool isMaster) {
 
     if (isMaster) {
         while (!_masterScriptQueue.empty()) {
-            const std::string script = std::move(_masterScriptQueue.front().script);
-            const ScriptCallback cb = std::move(_masterScriptQueue.front().callback);
+            std::string script = std::move(_masterScriptQueue.front().script);
+            ScriptCallback callback = std::move(_masterScriptQueue.front().callback);
             _masterScriptQueue.pop();
             try {
-                runScript(script, cb);
+                runScript(script, callback);
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
@@ -609,7 +546,7 @@ void ScriptEngine::postSync(bool isMaster) {
         }
     }
     else {
-        const std::lock_guard guard(_clientScriptsMutex);
+        std::lock_guard guard(_clientScriptsMutex);
         while (!_clientScriptQueue.empty()) {
             try {
                 runScript(_clientScriptQueue.front());
@@ -719,7 +656,7 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::UnzipFile
         }
     };
-    addLibrary(std::move(lib));
+    addLibrary(lib);
 }
 
 } // namespace openspace::scripting

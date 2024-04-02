@@ -1,5 +1,4 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
@@ -68,7 +67,7 @@ local ItokawaModel = {
     Type = "RenderableModel",
     GeometryFile = model .. "itokawa.glb",
     LightSources = {
-      sun.LightSource
+      sunTransforms.LightSource
     },
     PerformShading = true,
     SpecularIntensity = 0.0

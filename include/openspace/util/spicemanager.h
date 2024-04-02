@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___SPICEMANAGER___H__
 #define __OPENSPACE_CORE___SPICEMANAGER___H__
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
@@ -578,7 +578,7 @@ public:
 
         timout_c(ephemerisTime, format, bufferSize, outBuf);
         if (failed_c()) {
-            throwSpiceError(fmt::format(
+            throwSpiceError(std::format(
                 "Error converting ephemeris time '{}' to date with format '{}'",
                     ephemerisTime, format
             ));

@@ -534,7 +534,7 @@ void ShadowComponent::saveDepthBuffer() const {
         for (int i = 0; i < _shadowDepthTextureWidth; i++) {
             for (int j = 0; j < _shadowDepthTextureHeight; j++, k++) {
                 const unsigned int val = static_cast<unsigned int>(buffer[k]);
-                ppmFile << fmt::format("{0} {0} {0} ", val);
+                ppmFile << std::format("{0} {0} {0} ", val);
             }
             ppmFile << '\n';
         }

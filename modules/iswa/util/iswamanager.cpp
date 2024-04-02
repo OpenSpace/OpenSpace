@@ -44,6 +44,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/constexpr.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 
@@ -273,13 +274,13 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
     ss << SpiceManager::ref().dateFromEphemerisTime(timestamp);;
     std::string token;
 
-    std::getline(ss, token, ' ');
+    ghoul::getline(ss, token, ' ');
     url += token + "-";
-    std::getline(ss, token, ' ');
-    url = fmt::format("{}{}-", url, monthNumber(token));
-    std::getline(ss, token, 'T');
+    ghoul::getline(ss, token, ' ');
+    url = std::format("{}{}-", url, monthNumber(token));
+    ghoul::getline(ss, token, 'T');
     url += token + "%20";
-    std::getline(ss, token, '.');
+    ghoul::getline(ss, token, '.');
     url += token;
 
     return url;
@@ -622,7 +623,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
     }
     else {
         LWARNING(
-            fmt::format("'{}' is not a CDF file or cannot be found", absPath(info.path))
+            std::format("'{}' is not a CDF file or cannot be found", absPath(info.path))
         );
     }
 }
@@ -744,7 +745,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(fmt::format("'{}' is not a CDF file or cannot be found", cdfFile));
+        LWARNING(std::format("'{}' is not a CDF file or cannot be found", cdfFile));
     }
 }
 

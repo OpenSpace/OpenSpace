@@ -68,7 +68,7 @@ namespace version1 {
                 settings.visibility = properties::Property::Visibility::Developer;
             }
             else {
-                throw ghoul::RuntimeError(fmt::format(
+                throw ghoul::RuntimeError(std::format(
                     "Unknown visibility value '{}'", *visibility
                 ));
             }
@@ -127,7 +127,7 @@ Settings loadSettings(const std::filesystem::path& filename) {
         return version1::parseSettings(setting);
     }
 
-    throw ghoul::RuntimeError(fmt::format(
+    throw ghoul::RuntimeError(std::format(
         "Unrecognized version for setting: {}", version
     ));
 }

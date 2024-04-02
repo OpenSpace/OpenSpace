@@ -52,7 +52,7 @@ bool TextureCygnet::updateTexture() {
     );
 
     if (texture) {
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "Loaded texture from image iswa cygnet with id '{}'", _data.id
         ));
         texture->uploadTexture();

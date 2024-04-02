@@ -40,6 +40,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <cstdlib>
 #include <filesystem>
@@ -376,7 +377,7 @@ bool GlobeLabelsComponent::loadLabelsData(const std::filesystem::path& file) {
 
     const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
-        LINFO(fmt::format(
+        LINFO(std::format(
             "Cached file '{}' used for labels file '{}'", cachedFile, file
         ));
 
@@ -391,9 +392,9 @@ bool GlobeLabelsComponent::loadLabelsData(const std::filesystem::path& file) {
         }
     }
     else {
-        LINFO(fmt::format("Cache for labels file '{}' not found", file));
+        LINFO(std::format("Cache for labels file '{}' not found", file));
     }
-    LINFO(fmt::format("Loading labels file '{}'", file));
+    LINFO(std::format("Loading labels file '{}'", file));
 
     const bool success = readLabelsFile(file);
     if (success) {
@@ -406,7 +407,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
     try {
         std::fstream csvLabelFile(file);
         if (!csvLabelFile.good()) {
-            LERROR(fmt::format("Failed to open labels file '{}'", file));
+            LERROR(std::format("Failed to open labels file '{}'", file));
             return false;
         }
         if (!csvLabelFile.is_open()) {
@@ -417,14 +418,14 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
 
         std::string sline;
         while (!csvLabelFile.eof()) {
-            std::getline(csvLabelFile, sline);
+            ghoul::getline(csvLabelFile, sline);
             if (sline.size() <= 10) {
                 continue;
             }
 
             std::istringstream iss(sline);
             std::string token;
-            std::getline(iss, token, ',');
+            ghoul::getline(iss, token, ',');
 
             // First line is just the Header
             if (token == "Feature_Name") {
@@ -450,18 +451,18 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
                 tokenChar++;
             }
 
-            std::getline(iss, token, ','); // Target is not used
+            ghoul::getline(iss, token, ','); // Target is not used
 
-            std::getline(iss, token, ','); // Diameter
+            ghoul::getline(iss, token, ','); // Diameter
             lEntry.diameter = std::stof(token);
 
-            std::getline(iss, token, ','); // Latitude
+            ghoul::getline(iss, token, ','); // Latitude
             lEntry.latitude = std::stof(token);
 
-            std::getline(iss, token, ','); // Longitude
+            ghoul::getline(iss, token, ','); // Longitude
             lEntry.longitude = std::stof(token);
 
-            std::getline(iss, token, ','); // Coord System
+            ghoul::getline(iss, token, ','); // Coord System
             const std::string_view coordinateSystem = token;
             const size_t found = coordinateSystem.find("West");
             if (found != std::string::npos) {
@@ -470,9 +471,9 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
 
             // Clean white spaces
             std::istringstream issFeature(lEntry.feature);
-            std::getline(issFeature, token, '=');
+            ghoul::getline(issFeature, token, '=');
             if (token.empty()) {
-                std::getline(issFeature, token, '=');
+                ghoul::getline(issFeature, token, '=');
             }
             std::strncpy(lEntry.feature, token.c_str(), 255);
 
@@ -491,7 +492,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
         return true;
     }
     catch (const std::fstream::failure& e) {
-        LERROR(fmt::format("Failed reading labels file '{}'", file));
+        LERROR(std::format("Failed reading labels file '{}'", file));
         LERROR(e.what());
         return false;
     }
@@ -500,7 +501,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
 bool GlobeLabelsComponent::loadCachedFile(const std::filesystem::path& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+        LERROR(std::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 
@@ -530,7 +531,7 @@ bool GlobeLabelsComponent::loadCachedFile(const std::filesystem::path& file) {
 bool GlobeLabelsComponent::saveCachedFile(const std::filesystem::path& file) const {
     std::ofstream fileStream = std::ofstream(file, std::ofstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
+        LERROR(std::format("Error opening file '{}' for save cache file", file));
         return false;
     }
     fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));

@@ -38,7 +38,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
@@ -128,7 +127,7 @@ Scene::~Scene() {
             continue;
         }
 
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "SceneGraphNode '{}' was not removed before shutdown",
             node->identifier()
         ));
@@ -157,7 +156,7 @@ Camera* Scene::camera() const {
 
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByIdentifier.contains(node->identifier())) {
-        throw Scene::InvalidSceneError(fmt::format(
+        throw Scene::InvalidSceneError(std::format(
             "Node with identifier '{}' already exists", node->identifier()
         ));
     }
@@ -201,6 +200,8 @@ void Scene::updateNodeRegistry() {
 }
 
 void Scene::sortTopologically() {
+    ZoneScoped;
+
     _topologicallySortedNodes.insert(
         _topologicallySortedNodes.end(),
         std::make_move_iterator(_circularNodes.begin()),
@@ -260,7 +261,7 @@ void Scene::sortTopologically() {
         }
     }
     if (!inDegrees.empty()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "The scene contains circular dependencies. {} nodes will be disabled",
             inDegrees.size()
         ));
@@ -311,7 +312,7 @@ void Scene::update(const UpdateData& data) {
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped;
-    ZoneName(
+    ZoneText(
         renderBinToString(data.renderBinMask),
         strlen(renderBinToString(data.renderBinMask))
     );
@@ -367,6 +368,8 @@ const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
 }
 
 SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
+    ZoneScoped;
+
     // First interpret the dictionary
     std::vector<std::string> dependencyNames;
 
@@ -374,7 +377,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     const bool hasParent = nodeDictionary.hasKey(KeyParent);
 
     if (_nodesByIdentifier.find(nodeIdentifier) != _nodesByIdentifier.end()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Cannot add scene graph node '{}'. A node with that name already exists",
             nodeIdentifier
         ));
@@ -387,7 +390,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
         parent = sceneGraphNode(parentIdentifier);
         if (!parent) {
             // TODO: Throw exception
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Could not find parent '{}' for '{}'", parentIdentifier, nodeIdentifier
             ));
             return nullptr;
@@ -420,7 +423,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
         SceneGraphNode* dep = sceneGraphNode(depName);
         if (!dep) {
             // TODO: Throw exception
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Could not find dependency '{}' for '{}'", depName, nodeIdentifier
             ));
             foundAllDeps = false;
@@ -683,7 +686,7 @@ void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::stri
 
     switch (enclosedType) {
         case PropertyValueType::Boolean:
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "A Lua table of bool values is not supported. (processing property '{}')",
                 _profilePropertyName
             ));
@@ -704,7 +707,7 @@ void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::stri
             break;
         case PropertyValueType::Table:
         default:
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Table-within-a-table values are not supported for profile a "
                 "property (processing property '{}')", _profilePropertyName
             ));
@@ -734,7 +737,7 @@ void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L,
             table.push_back(std::get<T>(tableElement));
         }
         catch (std::bad_variant_access&) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error attempting to parse profile property setting for '{}' using "
                 "value = {}", _profilePropertyName, value
             ));

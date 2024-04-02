@@ -1,6 +1,6 @@
 asset.require("./actions")
 asset.require("scene/solarsystem/planets/mars/default_layers")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")

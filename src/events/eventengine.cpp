@@ -54,8 +54,7 @@ void EventEngine::postFrameCleanup() {
 #endif // _DEBUG
 }
 
-void EventEngine::registerEventAction(events::Event::Type type,
-                                      std::string identifier,
+void EventEngine::registerEventAction(events::Event::Type type, std::string identifier,
                                       std::optional<ghoul::Dictionary> filter)
 {
     ActionInfo ai;
@@ -79,7 +78,7 @@ void EventEngine::registerEventTopic(size_t topicId, events::Event::Type type,
                                      ScriptCallback callback)
 {
     TopicInfo ti;
-    ti.id = topicId;
+    ti.id = static_cast<uint32_t>(topicId);
     ti.callback = std::move(callback);
 
     _eventTopics[type].push_back(ti);
@@ -124,7 +123,7 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
     }
 
     // If we get this far, we haven't found the identifier
-    throw ghoul::RuntimeError(fmt::format(
+    throw ghoul::RuntimeError(std::format(
         "Could not find event with identifier '{}'", identifier
     ));
 }
@@ -148,13 +147,13 @@ void EventEngine::unregisterEventTopic(size_t topicId, events::Event::Type type)
             }
         }
         else {
-            LWARNING(fmt::format("Could not find registered event '{}' with topicId: {}",
+            LWARNING(std::format("Could not find registered event '{}' with topicId: {}",
                 events::toString(type), topicId)
             );
         }
     }
     else {
-        LWARNING(fmt::format("Could not find registered event '{}'",
+        LWARNING(std::format("Could not find registered event '{}'",
             events::toString(type))
         );
     }
@@ -168,6 +167,12 @@ std::vector<EventEngine::ActionInfo> EventEngine::registeredActions() const {
         result.insert(result.end(), p.second.begin(), p.second.end());
     }
     return result;
+}
+
+const std::unordered_map<events::Event::Type, std::vector<EventEngine::ActionInfo>>&
+EventEngine::eventActions() const
+{
+    return _eventActions;
 }
 
 void EventEngine::enableEvent(uint32_t identifier) {
@@ -257,5 +262,4 @@ scripting::LuaLibrary EventEngine::luaLibrary() {
         }
     };
 }
-
 } // namespace openspace

@@ -28,7 +28,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
 #include <filesystem>
@@ -96,7 +96,7 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
             break;
     }
 
-    url += fmt::format(
+    url += std::format(
         "{}'{}'{}'{}'{}'{}'{}'{}'",
         Command, ghoul::encodeUrl(target),
         Center, ghoul::encodeUrl(observer),
@@ -105,10 +105,10 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     );
 
     if (unit.empty()) {
-        url += fmt::format("{}'{}'", StepSize, ghoul::encodeUrl(stepSize));
+        url += std::format("{}'{}'", StepSize, ghoul::encodeUrl(stepSize));
     }
     else {
-        url += fmt::format(
+        url += std::format(
             "{}'{}%20{}'", StepSize, ghoul::encodeUrl(stepSize), unit
         );
     }
@@ -130,7 +130,7 @@ json sendHorizonsRequest(const std::string& url, const std::filesystem::path& fi
     bool failed = false;
     dl->wait();
     if (!dl->hasSucceeded()) {
-        LERROR(fmt::format("Error downloading horizons file with URL '{}'", dl->url()));
+        LERROR(std::format("Error downloading horizons file with URL '{}'", dl->url()));
         failed = true;
     }
 
@@ -163,7 +163,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
     if (auto signature = answer.find("signature");  signature != answer.end()) {
         if (auto source = signature->find("source");  source != signature->end()) {
             if (*source != static_cast<std::string>(ApiSource)) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Horizons answer from unknown source '{}'", source->dump()
                 ));
             }
@@ -178,7 +178,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
             v = v.substr(0, v.find('.'));
 
             if (v != CurrentMajorVersion) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Unknown Horizons major version '{}' found. The currently supported "
                     "major version is {}", version->dump(), CurrentMajorVersion
                 ));
@@ -258,8 +258,8 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
     // The line $$SOE indicates start of data.
     std::string line;
     bool foundTarget = false;
-    std::getline(fileStream, line);
-    std::getline(fileStream, line); // First line is just stars (*) no information, skip
+    ghoul::getline(fileStream, line);
+    ghoul::getline(fileStream, line); // First line is just stars (*) no information, skip
 
     // @CPP23 (malej, 2022-04-08) In all cases below, the string function contains
     // should be used instead of find
@@ -338,7 +338,7 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
             return HorizonsResultCode::ErrorNoTarget;
         }
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     if (result != HorizonsResultCode::UnknownError) {
@@ -388,7 +388,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
                 break;
             }
 
-            LINFO(fmt::format(
+            LINFO(std::format(
                 "Valid time range is '{}' to '{}'",
                 validTimeRange.first, validTimeRange.second
             ));
@@ -423,7 +423,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
             for (const std::string& station : matchingstations) {
                 matches += '\n' + station;
             }
-            LINFO(fmt::format("Matching Observer Stations: {}", matches));
+            LINFO(std::format("Matching Observer Stations: {}", matches));
             break;
         }
         case HorizonsResultCode::MultipleObserver: {
@@ -440,7 +440,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
             for (const std::string& observer : matchingObservers) {
                 matches += '\n' + observer;
             }
-            LINFO(fmt::format("Matching Observers: {}", matches));
+            LINFO(std::format("Matching Observers: {}", matches));
             break;
         }
         case HorizonsResultCode::ErrorNoTarget:
@@ -471,7 +471,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
             for (const std::string& target : matchingTargets) {
                 matches += '\n' + target;
             }
-            LINFO(fmt::format("Matching targets: {}", matches));
+            LINFO(std::format("Matching targets: {}", matches));
             break;
         }
         case HorizonsResultCode::UnknownError:
@@ -495,7 +495,7 @@ HorizonsResult readHorizonsFile(std::filesystem::path file) {
     std::ifstream fileStream(file);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Failed to open Horizons file '{}'", file));
+        LERROR(std::format("Failed to open Horizons file '{}'", file));
         return HorizonsResult();
     }
 
@@ -505,14 +505,14 @@ HorizonsResult readHorizonsFile(std::filesystem::path file) {
     //   X     Y     Z
     // " Before data starts, Observer table doesn't
     std::string line;
-    std::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
     while (line[0] != '$') {
         if (line.starts_with("JDTDB")) {
             fileStream.close();
             return readHorizonsVectorFile(file);
         }
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     fileStream.close();
@@ -527,7 +527,7 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
 
     std::ifstream fileStream(file);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Failed to open Horizons text file {}", file));
+        LERROR(std::format("Failed to open Horizons text file {}", file));
         return HorizonsResult();
     }
 
@@ -536,12 +536,12 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
     // the row marked by $$SOE (i.e. Start Of Ephemerides).
     std::string line;
     do {
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     } while (line[0] != '$');
 
     // Read data line by line until $$EOE (i.e. End Of Ephemerides).
     // Skip the rest of the file.
-    std::getline(fileStream, line); // Skip the line with the $$EOE
+    ghoul::getline(fileStream, line); // Skip the line with the $$EOE
     while (line[0] != '$') {
         HorizonsKeyframe dataPoint;
         std::stringstream str1(line);
@@ -555,9 +555,9 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
         str1 >> temp >> temp >> temp >> date >> time >> temp;
 
         // Get next line of same data point
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
         if (!fileStream.good()) {
-            LERROR(fmt::format("Malformed Horizons file '{}'", file));
+            LERROR(std::format("Malformed Horizons file '{}'", file));
             return HorizonsResult();
         }
         std::stringstream str2(line);
@@ -569,7 +569,7 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
         str2 >> xPos >> yPos >> zPos;
 
         // Convert date and time to seconds after 2000
-        const std::string timeString = fmt::format("{} {}", date, time);
+        const std::string timeString = std::format("{} {}", date, time);
         const double timeInJ2000 = Time::convertTime(timeString);
         glm::dvec3 pos = glm::dvec3(1000 * xPos, 1000 * yPos, 1000 * zPos);
         const glm::dmat3 transform =
@@ -581,7 +581,7 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
         dataPoint.position = pos;
         data.push_back(dataPoint);
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     result.data = data;
@@ -596,7 +596,7 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
 
     std::ifstream fileStream(file);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Failed to open Horizons text file '{}'", file));
+        LERROR(std::format("Failed to open Horizons text file '{}'", file));
         return HorizonsResult();
     }
 
@@ -605,12 +605,12 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
     // the row marked by $$SOE (i.e. Start Of Ephemerides).
     std::string line;
     do {
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     } while (line[0] != '$');
 
     // Read data line by line until $$EOE (i.e. End Of Ephemerides).
     // Skip the rest of the file.
-    std::getline(fileStream, line); // Skip the line with the $$EOE
+    ghoul::getline(fileStream, line); // Skip the line with the $$EOE
     while (line[0] != '$') {
         HorizonsKeyframe dataPoint;
         std::stringstream str(line);
@@ -631,7 +631,7 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
 
         // Convert date and time to seconds after 2000
         // and pos to Galactic positions in meter from Observer.
-        const std::string timeString = fmt::format("{} {}", date, time);
+        const std::string timeString = std::format("{} {}", date, time);
 
         // Add position to stored data
         dataPoint.time = Time::convertTime(timeString);
@@ -642,7 +642,7 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
         );
         data.push_back(dataPoint);
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     LWARNING(
@@ -684,7 +684,7 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
             break;
         }
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     if (!fileStream.good()) {
@@ -693,8 +693,8 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
     }
 
     // There will be one empty line before the list of matches, skip
-    std::getline(fileStream, line);
-    std::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
     while (fileStream.good()) {
         // End of matches or file
         if (line == " " || line.empty() || line.find(endPhrase) != std::string::npos) {
@@ -703,7 +703,7 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
         }
 
         matches.push_back(line);
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     fileStream.close();
@@ -754,7 +754,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
 
     // Ignore everything until head of time range list
     std::string line;
-    std::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
     while (fileStream.good()) {
         // Add the line with the start phrase first, to give context
         if (line.find(startPhrase) != std::string::npos) {
@@ -765,7 +765,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
             break;
         }
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     if (!fileStream.good()) {
@@ -773,13 +773,13 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
     }
 
     // There will be one empty line before the list of time ranges, skip
-    std::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
 
     // In the first file parse both start and end time
     // From the first line get the start time
     std::string startTime;
     std::string endTime;
-    std::getline(fileStream, line);
+    ghoul::getline(fileStream, line);
     if (fileStream.good()) {
         std::stringstream str(line);
 
@@ -793,10 +793,10 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
         // Parse time stamps backwards
         // Format: Trajectory file Name, Start, End (yyyy-mon-dd hh:mm)
         if (hasTime && words.size() > 4) {
-            startTime = fmt::format(
+            startTime = std::format(
                 "{} T {}", words[words.size() - 4], words[words.size() - 3]
             );
-            endTime = fmt::format(
+            endTime = std::format(
                 "{} T {}", words[words.size() - 2], words[words.size() - 1]
             );
         }
@@ -831,7 +831,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
         // Parse time stamps backwards
         // Format: Trajectory file Name, Start, End (yyyy-mon-dd hh:mm)
         if (hasTime && words.size() > 4) {
-            endTime = fmt::format(
+            endTime = std::format(
                 "{} T {}", words[words.size() - 2], words[words.size() - 1]
             );
         }
@@ -843,7 +843,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
             return { "", "" };
         }
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
     }
 
     return { "", "" };

@@ -87,7 +87,7 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            fmt::format(
+            std::format(
                 "Script '{}' does not have a function 'scale'", _luaScriptFile.value()
             )
         );
@@ -110,7 +110,7 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            fmt::format("Error executing 'scale': {}", lua_tostring(_state, -1))
+            std::format("Error executing 'scale': {}", lua_tostring(_state, -1))
         );
     }
 

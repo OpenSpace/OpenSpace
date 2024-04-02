@@ -307,7 +307,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     _numObjects = parameters.size();
 
     if (_startRenderIdx >= _numObjects) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Start index {} out of range [0, {}]", _startRenderIdx.value(), _numObjects
         ));
     }
@@ -315,7 +315,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     long long endElement = _startRenderIdx + _sizeRender - 1;
     endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
     if (endElement < 0 || endElement >= _numObjects) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "End index {} out of range [0, {}]", endElement, _numObjects
         ));
     }
@@ -330,7 +330,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         if (_startRenderIdx >= parameters.size() ||
             (_startRenderIdx + _sizeRender) >= parameters.size())
         {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Tried to load {} objects but only {} are available",
                 _startRenderIdx + _sizeRender, parameters.size()
             ));

@@ -187,7 +187,7 @@ void WwtCommunicator::removeSelectedImage(const std::string& imageUrl) {
 
 void WwtCommunicator::sendMessageToWwt(const ghoul::Dictionary& msg) const {
     std::string m = ghoul::formatJson(msg);
-    executeJavascript(fmt::format("sendMessageToWWT({});", m));
+    executeJavascript(std::format("sendMessageToWWT({});", m));
 }
 
 std::vector<std::string> WwtCommunicator::selectedImages() const {
@@ -239,12 +239,12 @@ void WwtCommunicator::setBorderColor(glm::ivec3 color) {
 
 void WwtCommunicator::setBorderRadius(double radius) {
     _borderRadius = radius;
-    const std::string scr = fmt::format("setBorderRadius({});", radius);
+    const std::string scr = std::format("setBorderRadius({});", radius);
     executeJavascript(scr);
 }
 
 void WwtCommunicator::updateBorderColor() const {
-    const std::string script = fmt::format(
+    const std::string script = std::format(
         "setBackgroundColor('rgb({},{},{})');",
         _wwtBorderColor.x, _wwtBorderColor.y, _wwtBorderColor.z
     );
@@ -348,7 +348,7 @@ void WwtCommunicator::setImageCollectionIsLoaded(bool isLoaded) {
 
 void WwtCommunicator::setIdInBrowser(const std::string& id) const {
     // Send ID to its browser
-    executeJavascript(fmt::format("setId('{}')", id));
+    executeJavascript(std::format("setId('{}')", id));
 }
 
 glm::ivec3 WwtCommunicator::borderColor() const {

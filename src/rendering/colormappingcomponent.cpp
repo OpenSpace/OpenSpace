@@ -242,7 +242,7 @@ ColorMappingComponent::ColorMappingComponent()
     colorMapFile.onChange([this]() {
         const bool fileExists = std::filesystem::exists(colorMapFile.value());
         if (!fileExists) {
-            LERROR(fmt::format("Could not find cmap file: {}", colorMapFile.value()));
+            LERROR(std::format("Could not find cmap file: {}", colorMapFile.value()));
         }
         _colorMapFileIsDirty = true;
     });
@@ -330,6 +330,8 @@ ghoul::opengl::Texture* ColorMappingComponent::texture() const {
 }
 
 void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
+    ZoneScoped;
+
     _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
 
     initializeParameterData(dataset);
@@ -478,7 +480,7 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
             }
 
             if (!found) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Dataset does not contain specified parameter '{}'", o
                 ));
             }
@@ -491,7 +493,7 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
 
     if (_providedParameter.has_value()) {
         if (indexOfProvidedOption == -1) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error when reading Parameter. Could not find provided parameter '{}' in "
                 "list of parameter options", *_providedParameter
             ));

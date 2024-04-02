@@ -437,7 +437,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                 _colorTablePaths.emplace_back(
                     FieldlinesSequenceModule::DefaultTransferFunctionFile
                 );
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Color table path {} is not a valid file.",
                     "Used a default transferfunction instead.",
                     path
@@ -952,10 +952,10 @@ void RenderableFieldlinesSequence::firstUpdate() {
             std::string min = std::to_string(minNr);
             float maxNr = *std::max_element(q.begin(), q.end());
             std::string max = std::to_string(maxNr);
-            LWARNING(fmt::format("min :{}", min));
-            LWARNING(fmt::format("max :{}", max));
+            LWARNING(std::format("min :{}", min));
+            LWARNING(std::format("max :{}", max));
             std::string name = extraNamesVec[i];
-            LWARNING(fmt::format("name:{}", name));
+            LWARNING(std::format("name:{}", name));
         }
         _havePrintedQuantityRange = true;
     }

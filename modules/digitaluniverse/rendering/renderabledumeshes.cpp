@@ -35,6 +35,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -448,7 +449,7 @@ void RenderableDUMeshes::update(const UpdateData&) {
 bool RenderableDUMeshes::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
-        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
+        LINFO(std::format("Loading Speck file '{}'", _speckFile));
         success = readSpeckFile();
         if (!success) {
             return false;
@@ -466,7 +467,7 @@ bool RenderableDUMeshes::loadData() {
 bool RenderableDUMeshes::readSpeckFile() {
     std::ifstream file(_speckFile);
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
+        LERROR(std::format("Failed to open Speck file '{}'", _speckFile));
         return false;
     }
 
@@ -480,7 +481,7 @@ bool RenderableDUMeshes::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
         if (file.eof()) {
             break;
@@ -545,13 +546,13 @@ bool RenderableDUMeshes::readSpeckFile() {
                 str >> dummy;
             } while (dummy != "{");
 
-            std::getline(file, line);
+            ghoul::getline(file, line);
             std::stringstream dim(line);
             dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data:
             for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
-                std::getline(file, line);
+                ghoul::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;
                 }
@@ -576,7 +577,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 }
 
                 if (!success) {
-                    LERROR(fmt::format(
+                    LERROR(std::format(
                         "Failed reading position on line {} of mesh {} in file '{}'. "
                         "Stopped reading mesh data", l, meshIndex, _speckFile
                     ));
@@ -603,7 +604,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 //}
             }
 
-            std::getline(file, line);
+            ghoul::getline(file, line);
             if (line.substr(0, 1) == "}") {
                 _renderingMeshesMap.insert({ meshIndex++, mesh });
             }

@@ -586,6 +586,8 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _colorSettings(dictionary)
     , _sizeSettings(dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(Fadeable::_opacity);
@@ -635,7 +637,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             _texturesDirectory = absPath(*t.folder).string();
 
             if (t.file.has_value()) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Both a single texture File and multi-texture Folder was provided. "
                     "The folder '{}' has priority and the single texture with the "
                     "following path will be ignored: '{}'", *t.folder, *t.file
@@ -697,38 +699,19 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         });
     }
 
-    if (_hasDataFile) {
-        bool useCaching = p.useCaching.value_or(true);
-        if (useCaching) {
-            _dataset = dataloader::data::loadFileWithCache(_dataFile, _dataMapping);
-        }
-        else {
-            _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
-        }
-        _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
+    _useCaching = p.useCaching.value_or(true);
 
-        // If no scale exponent was specified, compute one that will at least show the
-        // points based on the scale of the positions in the dataset
-        if (!p.sizeSettings.has_value() || !p.sizeSettings->scaleExponent.has_value()) {
-            double dist = _dataset.maxPositionComponent * toMeter(_unit);
-            if (dist > 0.0) {
-                float exponent = static_cast<float>(std::log10(dist));
-                // Reduce the actually used exponent a little bit, as just using the
-                // logarithm as is leads to very large points
-                _sizeSettings.scaleExponent = 0.9f * exponent;
-            }
-        }
+    // If no scale exponent was specified, compute one that will at least show the
+    // points based on the scale of the positions in the dataset
+    if (!p.sizeSettings.has_value() || !p.sizeSettings->scaleExponent.has_value()) {
+        _shouldComputeScaleExponent = true;
     }
 
     if (p.labels.has_value()) {
         if (!p.labels->hasKey("File") && _hasDataFile) {
-            // Load the labelset from the dataset if no label file was included
-            _labels = std::make_unique<LabelsComponent>(*p.labels, _dataset, _unit);
+            _createLabelsFromDataset = true;
         }
-        else {
-            _labels = std::make_unique<LabelsComponent>(*p.labels);
-        }
-
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
         // Fading of the labels should depend on the fading of the renderable
@@ -764,11 +747,36 @@ void RenderablePointCloud::initialize() {
             break;
     }
 
+    if (_hasDataFile) {
+        if (_useCaching) {
+            _dataset = dataloader::data::loadFileWithCache(_dataFile, _dataMapping);
+        }
+        else {
+            _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
+        }
+        _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
+
+        // If no scale exponent was specified, compute one that will at least show the
+        // points based on the scale of the positions in the dataset
+        if (_shouldComputeScaleExponent) {
+            double dist = _dataset.maxPositionComponent * toMeter(_unit);
+            if (dist > 0.0) {
+                float exponent = static_cast<float>(std::log10(dist));
+                // Reduce the actually used exponent a little bit, as just using the
+                // logarithm as is leads to very large points
+                _sizeSettings.scaleExponent = 0.9f * exponent;
+            }
+        }
+    }
+
     if (_hasDataFile && _hasColorMapFile) {
         _colorSettings.colorMapping->initialize(_dataset);
     }
 
     if (_hasLabels) {
+        if (_createLabelsFromDataset) {
+            _labels->loadLabelsFromDataset(_dataset, _unit);
+        }
         _labels->initialize();
     }
 }
@@ -842,7 +850,7 @@ void RenderablePointCloud::initializeSingleTexture() {
     std::filesystem::path p = absPath(_texture.spriteTexturePath);
 
     if (!std::filesystem::is_regular_file(p)) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Could not find image file '{}'", p
         ));
     }
@@ -856,7 +864,7 @@ void RenderablePointCloud::initializeMultiTextures() {
         std::filesystem::path path = _texturesDirectory / tex.file;
 
         if (!std::filesystem::is_regular_file(path)) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Could not find image file '{}'", path
             ));
         }
@@ -899,14 +907,14 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 
     if (t) {
-        LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
+        LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
         // Do not upload the loaded texture to the GPU, we just want it to hold the data.
         // However, convert textures make sure they all use the same format
         ghoul::opengl::Texture::Format targetFormat = glFormat(useAlpha);
         convertTextureFormat(*t, targetFormat);
     }
     else {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Could not find image file {}", path
         ));
     }
@@ -1024,7 +1032,7 @@ void RenderablePointCloud::generateArrayTextures() {
         int nMaxTextureLayers = 0;
         glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &nMaxTextureLayers);
         if (static_cast<int>(layer) > nMaxTextureLayers) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Too many layers bound in the same texture array. Found {} textures with "
                 "resolution {}x{} pixels. Max supported is {}.",
                 layer, res.x, res.y, nMaxTextureLayers
@@ -1333,11 +1341,11 @@ void RenderablePointCloud::updateBufferData() {
 
     if (_vao == 0) {
         glGenVertexArrays(1, &_vao);
-        LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
+        LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
     }
     if (_vbo == 0) {
         glGenBuffers(1, &_vbo);
-        LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
+        LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
     glBindVertexArray(_vao);

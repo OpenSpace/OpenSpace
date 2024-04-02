@@ -970,7 +970,7 @@ void FramebufferRenderer::updateRaycastData() {
 
         try {
             _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
-                fmt::format("Volume {} exit", data.id),
+                std::format("Volume {} exit", data.id),
                 absPath(vsPath),
                 absPath(ExitFragmentShaderPath),
                 dict
@@ -983,7 +983,7 @@ void FramebufferRenderer::updateRaycastData() {
             ghoul::Dictionary outsideDict = dict;
             outsideDict.setValue("getEntryPath", std::string(GetEntryOutsidePath));
             _raycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
-                fmt::format("Volume {} raycast", data.id),
+                std::format("Volume {} raycast", data.id),
                 absPath(vsPath),
                 absPath(RaycastFragmentShaderPath),
                 outsideDict
@@ -996,7 +996,7 @@ void FramebufferRenderer::updateRaycastData() {
             ghoul::Dictionary insideDict = dict;
             insideDict.setValue("getEntryPath", std::string(GetEntryInsidePath));
             _insideRaycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
-                fmt::format("Volume {} inside raycast", data.id),
+                std::format("Volume {} inside raycast", data.id),
                 absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
                 absPath(RaycastFragmentShaderPath),
                 insideDict
@@ -1037,7 +1037,7 @@ void FramebufferRenderer::updateDeferredcastData() {
 
         try {
             _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
-                fmt::format("Deferred {} raycast", data.id),
+                std::format("Deferred {} raycast", data.id),
                 vsPath,
                 fsPath,
                 dict

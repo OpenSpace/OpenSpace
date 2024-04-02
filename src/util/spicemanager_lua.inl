@@ -36,7 +36,7 @@ namespace {
     if (std::holds_alternative<std::string>(kernel)) {
         std::string k = std::get<std::string>(kernel);
         if (!std::filesystem::is_regular_file(k)) {
-            throw ghoul::lua::LuaError(fmt::format("Kernel file '{}' did not exist", k));
+            throw ghoul::lua::LuaError(std::format("Kernel file '{}' did not exist", k));
         }
         openspace::SpiceManager::ref().loadKernel(k);
     }
@@ -44,7 +44,7 @@ namespace {
         std::vector<std::string> ks = std::get<std::vector<std::string>>(kernel);
         for (const std::string& k : ks) {
             if (!std::filesystem::is_regular_file(k)) {
-                throw ghoul::lua::LuaError(fmt::format(
+                throw ghoul::lua::LuaError(std::format(
                     "Kernel file '{}' did not exist", k
                 ));
             }
@@ -192,7 +192,7 @@ namespace {
     std::vector<std::string> lines = ghoul::tokenizeString(contents, '\n');
     const size_t nElements = lines.size() / 3;
     if (elementToExtract > nElements) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Error loading {}. Element number {} requested, but only {} found",
             tle, nElements, elementToExtract
         ));
@@ -203,14 +203,14 @@ namespace {
     // It should be 70, but we're removing the \n character at the end in the tokenization
     std::string line1 = lines[3 * elementToExtract + 1];
     if (line1.size() != TLEColumnWidth - 1) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Illformed TLE file {}, expected {} characters per line, got {}",
             tle, TLEColumnWidth, line1.size()
         ));
     }
     std::string line2 = lines[3 * elementToExtract + 2];
     if (line2.size() != TLEColumnWidth - 1) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Illformed TLE file {}, expected {} characters per line, got {}",
             tle, TLEColumnWidth, line2.size()
         ));
@@ -235,7 +235,7 @@ namespace {
     // Extract the body id
     std::vector<std::string> tokens = ghoul::tokenizeString(line2, ' ');
     if (tokens.size() < 2) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Error parsing TLE file {}. Expected 8-9 elements in the second row, got {}",
             tle, tokens.size()
         ));
@@ -248,7 +248,7 @@ namespace {
 
     // Write the elements to a new SPK file
     const SpiceInt nCommentCharacters = 0;
-    std::string internalFileName = fmt::format("Type 10 SPK for {}", tle);
+    std::string internalFileName = std::format("Type 10 SPK for {}", tle);
     std::string segmentId = "Segment";
 
     if (std::filesystem::exists(spk)) {

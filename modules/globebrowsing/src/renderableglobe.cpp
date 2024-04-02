@@ -866,7 +866,7 @@ void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
         _globeLabelsComponent.draw(data);
     }
     catch (const ghoul::opengl::TextureUnit::TextureUnitError& e) {
-        LERROR(fmt::format("Error on drawing globe labels '{}'", e.message));
+        LERROR(std::format("Error on drawing globe labels '{}'", e.message));
     }
 
     if (_geoJsonManager.isReady()) {
@@ -1726,21 +1726,21 @@ void RenderableGlobe::recompileShaders() {
         // lastLayerIndex must be at least 0 for the shader to compile,
         // the layer type is inactivated by setting use to false
         shaderDictionary.setValue(
-            fmt::format("lastLayerIndex{}", layers::Groups[i].identifier),
+            std::format("lastLayerIndex{}", layers::Groups[i].identifier),
             glm::max(preprocessingData.layeredTextureInfo[i].lastLayerIdx, 0)
         );
         shaderDictionary.setValue(
-            fmt::format("use{}", layers::Groups[i].identifier),
+            std::format("use{}", layers::Groups[i].identifier),
             preprocessingData.layeredTextureInfo[i].lastLayerIdx >= 0
         );
         shaderDictionary.setValue(
-            fmt::format("blend{}", layers::Groups[i].identifier),
+            std::format("blend{}", layers::Groups[i].identifier),
             preprocessingData.layeredTextureInfo[i].layerBlendingEnabled
         );
 
         // This is to avoid errors from shader preprocessor
         shaderDictionary.setValue(
-            fmt::format("{}0LayerType", layers::Groups[i].identifier),
+            std::format("{}0LayerType", layers::Groups[i].identifier),
             0
         );
 
@@ -2198,17 +2198,17 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         constexpr std::string_view NameSource = "shadowDataArray[{}].sourceCasterVec";
         constexpr std::string_view NamePos = "shadowDataArray[{}].casterPositionVec";
 
-        programObject.setUniform(fmt::format(NameIsShadowing, counter), sd.isShadowing);
+        programObject.setUniform(std::format(NameIsShadowing, counter), sd.isShadowing);
 
         if (sd.isShadowing) {
-            programObject.setUniform(fmt::format(NameXp, counter), sd.xp);
-            programObject.setUniform(fmt::format(NameXu, counter), sd.xu);
-            programObject.setUniform(fmt::format(NameRc, counter), sd.rc);
+            programObject.setUniform(std::format(NameXp, counter), sd.xp);
+            programObject.setUniform(std::format(NameXu, counter), sd.xu);
+            programObject.setUniform(std::format(NameRc, counter), sd.rc);
             programObject.setUniform(
-                fmt::format(NameSource, counter), sd.sourceCasterVec
+                std::format(NameSource, counter), sd.sourceCasterVec
             );
             programObject.setUniform(
-                fmt::format(NamePos, counter), sd.casterPositionVec
+                std::format(NamePos, counter), sd.casterPositionVec
             );
         }
         counter++;

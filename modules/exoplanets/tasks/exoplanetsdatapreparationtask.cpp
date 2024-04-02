@@ -29,10 +29,11 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/coordinateconversion.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
 #include <charconv>
 #include <filesystem>
 #include <fstream>
@@ -100,7 +101,7 @@ ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
 }
 
 std::string ExoplanetsDataPreparationTask::description() {
-    return fmt::format(
+    return std::format(
         "Extract data about exoplanets from file '{}' and write as bin to '{}'. The data "
         "file should be a csv version of the Planetary Systems Composite Data from the "
         "NASA exoplanets archive (https://exoplanetarchive.ipac.caltech.edu/)",
@@ -113,7 +114,7 @@ void ExoplanetsDataPreparationTask::perform(
 {
     std::ifstream inputDataFile(_inputDataPath);
     if (!inputDataFile.good()) {
-        LERROR(fmt::format("Failed to open input file '{}'", _inputDataPath));
+        LERROR(std::format("Failed to open input file '{}'", _inputDataPath));
         return;
     }
 
@@ -121,7 +122,7 @@ void ExoplanetsDataPreparationTask::perform(
     std::ofstream lutFile(_outputLutPath);
 
     if (!binFile.good()) {
-        LERROR(fmt::format("Error when writing to '{}'",_outputBinPath));
+        LERROR(std::format("Error when writing to '{}'",_outputBinPath));
         if (!std::filesystem::is_directory(_outputBinPath.parent_path())) {
             LERROR("Output directory does not exist");
         }
@@ -129,7 +130,7 @@ void ExoplanetsDataPreparationTask::perform(
     }
 
     if (!lutFile.good()) {
-        LERROR(fmt::format("Error when writing to '{}'", _outputLutPath));
+        LERROR(std::format("Error when writing to '{}'", _outputLutPath));
         if (!std::filesystem::is_directory(_outputLutPath.parent_path())) {
             LERROR("Output directory does not exist");
         }
@@ -146,7 +147,7 @@ void ExoplanetsDataPreparationTask::perform(
     // Read total number of items
     int total = 0;
     std::string row;
-    while (std::getline(inputDataFile, row)) {
+    while (ghoul::getline(inputDataFile, row)) {
         ++total;
     }
     inputDataFile.clear();
@@ -156,10 +157,10 @@ void ExoplanetsDataPreparationTask::perform(
     // containing the data names, again
     readFirstDataRow(inputDataFile);
 
-    LINFO(fmt::format("Loading {} exoplanets", total));
+    LINFO(std::format("Loading {} exoplanets", total));
 
     int exoplanetCount = 0;
-    while (std::getline(inputDataFile, row)) {
+    while (ghoul::getline(inputDataFile, row)) {
         ++exoplanetCount;
         progressCallback(static_cast<float>(exoplanetCount) / static_cast<float>(total));
 
@@ -190,7 +191,7 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
     std::string line;
 
     // Read past any comments and empty lines
-    while (std::getline(file, line)) {
+    while (ghoul::getline(file, line)) {
         const bool shouldSkip = line.empty() || line[0] == '#';
         if (!shouldSkip) {
             break;
@@ -201,7 +202,7 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
     std::vector<std::string> columnNames;
     std::stringstream sStream(line);
     std::string colName;
-    while (std::getline(sStream, colName, ',')) {
+    while (ghoul::getline(sStream, colName, ',')) {
         columnNames.push_back(colName);
     }
 
@@ -270,7 +271,7 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
     std::string name;
 
     std::string data;
-    while (std::getline(lineStream, data, ',')) {
+    while (ghoul::getline(lineStream, data, ',')) {
         const std::string& column = columnNames[columnIndex];
         columnIndex++;
 
@@ -453,11 +454,11 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
 
     std::ifstream exoplanetsFile(sourceFile);
     if (!exoplanetsFile) {
-        LERROR(fmt::format("Error opening file '{}'", sourceFile));
+        LERROR(std::format("Error opening file '{}'", sourceFile));
     }
 
     std::string line;
-    while (std::getline(exoplanetsFile, line)) {
+    while (ghoul::getline(exoplanetsFile, line)) {
         const bool shouldSkipLine = (
             line.empty() || line[0] == '#' || line.substr(0, 7) == "datavar" ||
             line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture"
@@ -470,18 +471,18 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
         std::string data;
         std::string name;
         std::istringstream linestream(line);
-        std::getline(linestream, data, '#');
-        std::getline(linestream, name);
+        ghoul::getline(linestream, data, '#');
+        ghoul::getline(linestream, name);
         name.erase(0, 1);
 
         std::string coord;
         if (name == starName) {
             std::stringstream dataStream(data);
-            std::getline(dataStream, coord, ' ');
+            ghoul::getline(dataStream, coord, ' ');
             position[0] = std::stof(coord, nullptr);
-            std::getline(dataStream, coord, ' ');
+            ghoul::getline(dataStream, coord, ' ');
             position[1] = std::stof(coord, nullptr);
-            std::getline(dataStream, coord, ' ');
+            ghoul::getline(dataStream, coord, ' ');
             position[2] = std::stof(coord, nullptr);
             break;
         }
@@ -499,7 +500,7 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
 
     std::ifstream teffToBvFile(conversionFile);
     if (!teffToBvFile.good()) {
-        LERROR(fmt::format("Failed to open file '{}'", conversionFile));
+        LERROR(std::format("Failed to open file '{}'", conversionFile));
         return std::numeric_limits<float>::quiet_NaN();
     }
 
@@ -511,12 +512,12 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
     float teffLower = 0.f;
     float teffUpper = 0.f;
     std::string row;
-    while (std::getline(teffToBvFile, row)) {
+    while (ghoul::getline(teffToBvFile, row)) {
         std::istringstream lineStream(row);
         std::string teffString;
-        std::getline(lineStream, teffString, ',');
+        ghoul::getline(lineStream, teffString, ',');
         std::string bvString;
-        std::getline(lineStream, bvString);
+        ghoul::getline(lineStream, bvString);
 
         const float teffCurrent = std::stof(teffString, nullptr);
         const float bvCurrent = std::stof(bvString, nullptr);

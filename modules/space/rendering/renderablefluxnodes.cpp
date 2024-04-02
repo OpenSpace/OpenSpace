@@ -37,6 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
@@ -359,11 +360,11 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 
         // Ensure that there are available and valid source files left
         if (_binarySourceFiles.empty()) {
-            LERROR(fmt::format("'{}' contains no files", _binarySourceFolderPath));
+            LERROR(std::format("'{}' contains no files", _binarySourceFolderPath));
         }
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Source folder '{}' is not a valid directory", _binarySourceFolderPath
         ));
     }
@@ -456,7 +457,7 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
     std::ifstream fileStream3(file3, std::ifstream::binary);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Could not read file '{}'", file));
+        LERROR(std::format("Could not read file '{}'", file));
         return;
     }
 
@@ -617,7 +618,7 @@ void RenderableFluxNodes::populateStartTimes() {
 
     std::string line;
     // gets only first line to "remove" header
-    std::getline(tfs, line);
+    ghoul::getline(tfs, line);
     std::stringstream s;
     s << line;
 
@@ -627,7 +628,7 @@ void RenderableFluxNodes::populateStartTimes() {
     while (s >> columnName) {
         ++nColumns;
     }
-    while (std::getline(tfs, line)) {   // for each line of data
+    while (ghoul::getline(tfs, line)) {   // for each line of data
         std::istringstream iss(line);
         for (int i = 0; i < nColumns; i++) {    // for each column in line
             std::string columnValue;
@@ -646,7 +647,7 @@ void RenderableFluxNodes::populateStartTimes() {
                 _startTimes.push_back(triggerTime);
             }
             else {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Error in file formating. Last column in file '{}' is not on UTC "
                     "ISO8601 format", timeFile
                 ));

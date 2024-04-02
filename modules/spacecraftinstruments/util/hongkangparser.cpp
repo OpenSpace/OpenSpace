@@ -26,15 +26,13 @@
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <modules/spacecraftinstruments/util/instrumentdecoder.h>
-
 #include <openspace/util/spicemanager.h>
-
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
 #include <filesystem>
 #include <fstream>
 
@@ -86,7 +84,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
                 translationDictionary.value<ghoul::Dictionary>(decoderType);
             // for each playbook call -> create a Decoder object
             for (std::string_view key : typeDictionary.keys()) {
-                const std::string& currentKey = fmt::format("{}.{}", decoderType, key);
+                const std::string& currentKey = std::format("{}.{}", decoderType, key);
 
                 ghoul::Dictionary decoderDictionary;
                 if (translationDictionary.hasValue<ghoul::Dictionary>(currentKey)) {
@@ -132,7 +130,7 @@ bool HongKangParser::create() {
     const bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
     if (!hasObserver) {
         throw ghoul::RuntimeError(
-            fmt::format("SPICE has no observer '{}' in kernel pool", _spacecraft),
+            std::format("SPICE has no observer '{}' in kernel pool", _spacecraft),
             "HongKangParser"
         );
     }
@@ -166,7 +164,7 @@ bool HongKangParser::create() {
 
     std::string line;
     while (!file.eof()) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
         const std::string event = line.substr(0, line.find_first_of(' '));
 

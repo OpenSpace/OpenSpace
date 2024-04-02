@@ -29,8 +29,9 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
 #include <string_view>
@@ -64,7 +65,7 @@ glm::vec3 computeStarColor(float bv) {
     std::ifstream colorMap(absPath(bvColormapPath), std::ios::in);
 
     if (!colorMap.good()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Failed to open colormap data file '{}'", absPath(bvColormapPath)
         ));
         return glm::vec3(0.f);
@@ -72,7 +73,7 @@ glm::vec3 computeStarColor(float bv) {
 
     // Interpret the colormap cmap file
     std::string line;
-    while (std::getline(colorMap, line)) {
+    while (ghoul::getline(colorMap, line)) {
         if (line.empty() || (line[0] == '#')) {
             continue;
         }
@@ -88,7 +89,7 @@ glm::vec3 computeStarColor(float bv) {
     const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * (nValues - 1)));
     std::string color;
     for (int i = 0; i < t + 1; i++) {
-        std::getline(colorMap, color);
+        ghoul::getline(colorMap, color);
     }
 
     std::istringstream colorStream(color);

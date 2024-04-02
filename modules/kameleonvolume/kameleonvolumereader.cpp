@@ -26,9 +26,9 @@
 
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/volume/rawvolume.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <filesystem>
@@ -83,7 +83,7 @@ KameleonVolumeReader::KameleonVolumeReader(std::string path) : _path(std::move(p
 
     const long status = _kameleon->open(_path);
     if (status != ccmc::FileReader::OK) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Failed to open file '{}' with Kameleon", _path
         ));
     }

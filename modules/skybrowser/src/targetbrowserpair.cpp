@@ -45,7 +45,7 @@ namespace {
         const glm::dvec3 positionCelestial = glm::normalize(direction) *
             openspace::skybrowser::CelestialSphereRadius;
 
-        const std::string script = fmt::format(
+        const std::string script = std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
             id, ghoul::to_string(positionCelestial)
         );
@@ -322,7 +322,7 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate() {
 }
 
 void TargetBrowserPair::startFading(float goal, float fadeTime) {
-    const std::string script = fmt::format(
+    const std::string script = std::format(
         "openspace.setPropertyValueSingle('Scene.{0}.Renderable.Fade', {2}, {3});"
         "openspace.setPropertyValueSingle('ScreenSpace.{1}.Fade', {2}, {3});",
         _targetNode->identifier(), _browser->identifier(), goal, fadeTime

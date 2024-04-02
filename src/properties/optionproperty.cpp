@@ -63,7 +63,7 @@ void OptionProperty::addOption(int value, std::string desc) {
 
     for (const Option& o : _options) {
         if (o.value == option.value) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "The value of option {{ {} -> {} }} was already registered when trying "
                 "to add option {{ {} -> {} }}",
                 o.value, o.description, option.value, option.description
@@ -108,7 +108,7 @@ void OptionProperty::setValue(int value) {
     }
 
     // Otherwise, log an error
-    LERROR(fmt::format("Could not find an option for value '{}'", value));
+    LERROR(std::format("Could not find an option for value '{}'", value));
 }
 
 bool OptionProperty::hasOption() const {
@@ -162,7 +162,7 @@ std::string OptionProperty::generateAdditionalJsonDescription() const {
         const std::string dSan = escapedJson(d);
 
         result += '{';
-        result += fmt::format(R"("{}": "{}")", vSan, dSan);
+        result += std::format(R"("{}": "{}")", vSan, dSan);
         result += '}';
 
         if (i != _options.size() - 1) {

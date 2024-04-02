@@ -54,7 +54,7 @@ ConvertRecFileVersionTask::ConvertRecFileVersionTask(const ghoul::Dictionary& di
 
     ghoul_assert(std::filesystem::is_regular_file(_inFilePath), "The file must exist");
     if (!std::filesystem::is_regular_file(_inFilePath)) {
-        LERROR(fmt::format("Failed to load session recording file: {}", _inFilePath));
+        LERROR(std::format("Failed to load session recording file: {}", _inFilePath));
     }
     else {
         sessRec = new SessionRecording(false);
@@ -66,7 +66,7 @@ ConvertRecFileVersionTask::~ConvertRecFileVersionTask() {
 }
 
 std::string ConvertRecFileVersionTask::description() {
-    std::string description = fmt::format(
+    std::string description = std::format(
         "Convert file format of session recording file '{}' to current version",
         _inFilePath
     );
@@ -87,7 +87,7 @@ void ConvertRecFileVersionTask::convert() {
         SessionRecording::FileExtensionAscii
     );
     if (!hasBinaryFileExtension && !hasAsciiFileExtension) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Input filename does not have expected '{}' or '{}' extension",
             SessionRecording::FileExtensionBinary, SessionRecording::FileExtensionAscii
         ));

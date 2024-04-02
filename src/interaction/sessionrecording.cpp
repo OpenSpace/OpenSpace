@@ -52,6 +52,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <filesystem>
 #include <iomanip>
@@ -183,7 +184,7 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
     std::filesystem::path absFilename = absPath("${RECORDINGS}/" + filenameIn);
 
     if (std::filesystem::is_regular_file(absFilename)) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Unable to start recording; file '{}' already exists", absFilename
         ));
         return false;
@@ -196,7 +197,7 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
     }
 
     if (!_recordFile.is_open() || !_recordFile.good()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Unable to open file '{}' for keyframe recording", absFilename
         ));
         return false;
@@ -266,7 +267,7 @@ void SessionRecording::recordCurrentTimePauseState() {
 }
 
 void SessionRecording::recordCurrentTimeRate() {
-    std::string initialTimeRateCommand = fmt::format(
+    std::string initialTimeRateCommand = std::format(
         "openspace.time.setDeltaTime({})", global::timeManager->targetDeltaTime()
     );
     saveScriptKeyframeToPropertiesBaseline(std::move(initialTimeRateCommand));
@@ -410,8 +411,13 @@ bool SessionRecording::startPlayback(std::string& filename,
         LERROR("Unknown data type in header (should be Ascii or Binary)");
         cleanUpPlayback();
     }
-    // throwaway newline character
-    readHeaderElement(_playbackFile, 1);
+    // throwaway newline character(s)
+    std::string lineEnd = readHeaderElement(_playbackFile, 1);
+    bool hasDosLineEnding = (lineEnd == "\r");
+    if (hasDosLineEnding) {
+        // throwaway the second newline character (\n) also
+        readHeaderElement(_playbackFile, 1);
+    }
 
     if (_recordingDataMode == DataMode::Binary) {
         // Close & re-open the file, starting from the beginning, and do dummy read
@@ -426,7 +432,7 @@ bool SessionRecording::startPlayback(std::string& filename,
     }
 
     if (!_playbackFile.is_open() || !_playbackFile.good()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Unable to open file '{}' for keyframe playback", absFilename.c_str()
         ));
         stopPlayback();
@@ -464,7 +470,7 @@ bool SessionRecording::startPlayback(std::string& filename,
         return false;
     }
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Playback session started: ({:8.3f},0.0,{:13.3f}) with {}/{}/{} entries, "
         "forceTime={}",
         now, _timestampPlaybackStarted_simulation, _keyframesCamera.size(),
@@ -972,7 +978,7 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
             != _propertyBaselinesSaved.end()
             );
         if (!isPropAlreadySaved) {
-            const std::string initialScriptCommand = fmt::format(
+            const std::string initialScriptCommand = std::format(
                 "openspace.setPropertyValueSingle(\"{}\", {})",
                 propIdentifier, prop.stringValue()
             );
@@ -1047,7 +1053,7 @@ void SessionRecording::render() {
         glm::vec4(1.f),
         ghoul::fontrendering::CrDirection::Down
     );
-    const std::string text2 = fmt::format(
+    const std::string text2 = std::format(
         "Scale: {}", global::navigationHandler->camera()->scaling()
     );
     ghoul::fontrendering::RenderFont(*font, penPosition, text2, glm::vec4(1.f));
@@ -1081,7 +1087,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             unsigned char frameType = readFromPlayback<unsigned char>(_playbackFile);
             // Check if have reached EOF
             if (!_playbackFile) {
-                LINFO(fmt::format(
+                LINFO(std::format(
                     "Finished parsing {} entries from playback file '{}'",
                     _playbackLineNum - 1, _playbackFilename
                 ));
@@ -1097,7 +1103,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
                 parsingStatusOk = playbackScript();
             }
             else {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Unknown frame type {} @ index {} of playback file '{}'",
                     frameType, _playbackLineNum - 1, _playbackFilename
                 ));
@@ -1109,13 +1115,13 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
         }
     }
     else {
-        while (parsingStatusOk && std::getline(_playbackFile, _playbackLineParsing)) {
+        while (parsingStatusOk && ghoul::getline(_playbackFile, _playbackLineParsing)) {
             _playbackLineNum++;
 
             std::istringstream iss(_playbackLineParsing);
             std::string entryType;
             if (!(iss >> entryType)) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Error reading entry type @ line {} of playback file '{}'",
                     _playbackLineNum, _playbackFilename
                 ));
@@ -1135,7 +1141,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
                 continue;
             }
             else {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Unknown frame type {} @ line {} of playback file '{}'",
                     entryType, _playbackLineNum, _playbackFilename
                 ));
@@ -1143,7 +1149,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
                 break;
             }
         }
-        LINFO(fmt::format(
+        LINFO(std::format(
             "Finished parsing {} entries from playback file '{}'",
             _playbackLineNum, _playbackFilename
         ));
@@ -1323,14 +1329,14 @@ bool SessionRecording::readCameraKeyframeBinary(Timestamps& times,
         kf.read(&file);
     }
     catch (std::bad_alloc&) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Allocation error with camera playback from keyframe entry {}",
             lineN - 1
         ));
         return false;
     }
     catch (std::length_error&) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "length_error with camera playback from keyframe entry {}",
             lineN - 1
         ));
@@ -1338,7 +1344,7 @@ bool SessionRecording::readCameraKeyframeBinary(Timestamps& times,
     }
 
     if (!file) {
-        LINFO(fmt::format(
+        LINFO(std::format(
             "Error reading camera playback from keyframe entry {}",
             lineN - 1
         ));
@@ -1361,7 +1367,7 @@ bool SessionRecording::readCameraKeyframeAscii(Timestamps& times,
     kf._timestamp = times.timeOs;
 
     if (iss.fail() || !iss.eof()) {
-        LERROR(fmt::format("Error parsing camera line {} of playback file", lineN));
+        LERROR(std::format("Error parsing camera line {} of playback file", lineN));
         return false;
     }
     return true;
@@ -1453,14 +1459,14 @@ bool SessionRecording::readTimeKeyframeBinary(Timestamps& times,
         kf.read(&file);
     }
     catch (std::bad_alloc&) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Allocation error with time playback from keyframe entry {}",
             lineN - 1
         ));
         return false;
     }
     catch (std::length_error&) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "length_error with time playback from keyframe entry {}",
             lineN - 1
         ));
@@ -1468,7 +1474,7 @@ bool SessionRecording::readTimeKeyframeBinary(Timestamps& times,
     }
 
     if (!file) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error reading time playback from keyframe entry {}", lineN - 1
         ));
         return false;
@@ -1489,7 +1495,7 @@ bool SessionRecording::readTimeKeyframeAscii(Timestamps& times,
     kf.read(iss);
 
     if (iss.fail() || !iss.eof()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error parsing time line {} of playback file", lineN
         ));
         return false;
@@ -1561,7 +1567,7 @@ void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
             if (navNode != "nil") {
                 auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), navNode);
                 if (it == _loadedNodes.end()) {
-                    LWARNING(fmt::format(
+                    LWARNING(std::format(
                         "Playback file contains a property setting of navigation using "
                         "scenegraph node '{}', which is not currently loaded", navNode
                     ));
@@ -1576,7 +1582,7 @@ void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
                         subjectOfSetProp
                     );
                 if (matchHits.empty()) {
-                    LWARNING(fmt::format(
+                    LWARNING(std::format(
                         "Playback file contains a property setting of scenegraph "
                         "node '{}', which is not currently loaded", found
                     ));
@@ -1668,7 +1674,7 @@ bool SessionRecording::checkIfInitialFocusNodeIsLoaded(unsigned int firstCamInde
         _keyframesCamera[_timeline[firstCamIndex].idxIntoKeyframeTypeArray].focusNode;
     auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
     if (it == _loadedNodes.end()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Playback file requires scenegraph node '{}', which is "
             "not currently loaded", startFocusNode
         ));
@@ -1743,14 +1749,14 @@ bool SessionRecording::readScriptKeyframeBinary(Timestamps& times,
         kf.read(&file);
     }
     catch (std::bad_alloc&) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Allocation error with script playback from keyframe entry {}",
             lineN - 1
         ));
         return false;
     }
     catch (std::length_error&) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "length_error with script playback from keyframe entry {}",
             lineN - 1
         ));
@@ -1758,7 +1764,7 @@ bool SessionRecording::readScriptKeyframeBinary(Timestamps& times,
     }
 
     if (!file) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error reading script playback from keyframe entry {}",
             lineN - 1
         ));
@@ -1778,11 +1784,11 @@ bool SessionRecording::readScriptKeyframeAscii(Timestamps& times,
     iss >> times.timeOs >> times.timeRec >> times.timeSim;
     kf.read(iss);
     if (iss.fail()) {
-        LERROR(fmt::format("Error parsing script line {} of playback file", lineN));
+        LERROR(std::format("Error parsing script line {} of playback file", lineN));
         return false;
     }
     else if (!iss.eof()) {
-        LERROR(fmt::format("Did not find an EOL at line {} of playback file", lineN));
+        LERROR(std::format("Did not find an EOL at line {} of playback file", lineN));
         return false;
     }
     return true;
@@ -1801,7 +1807,7 @@ bool SessionRecording::addKeyframeToTimeline(std::vector<TimelineEntry>& timelin
         });
     }
     catch(...) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Timeline memory allocation error trying to add keyframe {}. The playback "
             "file may be too large for system memory",
             lineNum - 1
@@ -2004,7 +2010,7 @@ bool SessionRecording::processNextNonCameraKeyframeAheadInTime() {
             _idxScript = _timeline[_idxTimeline_nonCamera].idxIntoKeyframeTypeArray;
             return processScriptKeyframe();
         default:
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Bad keyframe type encountered during playback at index {}",
                 _idxTimeline_nonCamera
             ));
@@ -2284,7 +2290,7 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
 {
     std::filesystem::path conversionInFilename = absPath(filename);
     if (!std::filesystem::is_regular_file(conversionInFilename)) {
-        throw ConversionError(fmt::format(
+        throw ConversionError(std::format(
             "Cannot find the specified playback file '{}' to convert",
             conversionInFilename
         ));
@@ -2303,7 +2309,7 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     }
     stream << inputFstream.rdbuf();
     if (!inputFstream.is_open() || !inputFstream.good()) {
-        throw ConversionError(fmt::format(
+        throw ConversionError(std::format(
             "Unable to open file '{}' for conversion", filename
         ));
     }
@@ -2355,7 +2361,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
         }
         if (depth != 0) {
             conversionOutFilename = determineConversionOutFilename(filename, mode);
-            LINFO(fmt::format(
+            LINFO(std::format(
                 "Starting conversion on rec file '{}', version {} in {} mode. "
                 "Writing result to '{}'",
                 newFilename, fileVersion, (mode == DataMode::Ascii) ? "ascii" : "binary",
@@ -2369,7 +2375,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
                 conversionOutFile.open(conversionOutFilename);
             }
             if (!conversionOutFile.is_open() || !conversionOutFile.good()) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Unable to open file '{}' for conversion result",
                     conversionOutFilename
                 ));
@@ -2422,7 +2428,7 @@ bool SessionRecording::convertEntries(std::string& inFilename,
             unsigned char frameType = readFromPlayback<unsigned char>(inStream);
             // Check if have reached EOF
             if (!inStream) {
-                LINFO(fmt::format(
+                LINFO(std::format(
                     "Finished converting {} entries from playback file '{}'",
                     lineNum - 1, inFilename
                 ));
@@ -2465,7 +2471,7 @@ bool SessionRecording::convertEntries(std::string& inFilename,
                 }
             }
             else {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Unknown frame type {} @ index {} of conversion file '{}'",
                     frameType, lineNum - 1, inFilename
                 ));
@@ -2475,13 +2481,13 @@ bool SessionRecording::convertEntries(std::string& inFilename,
         }
     }
     else {
-        while (conversionStatusOk && std::getline(inStream, lineParsing)) {
+        while (conversionStatusOk && ghoul::getline(inStream, lineParsing)) {
             lineNum++;
 
             std::istringstream iss(lineParsing);
             std::string entryType;
             if (!(iss >> entryType)) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Error reading entry type @ line {} of conversion file '{}'",
                     lineNum, inFilename
                 ));
@@ -2528,14 +2534,14 @@ bool SessionRecording::convertEntries(std::string& inFilename,
                 continue;
             }
             else {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Unknown frame type {} @ line {} of conversion file '{}'",
                     entryType, lineNum, inFilename
                 ));
                 conversionStatusOk = false;
             }
         }
-        LINFO(fmt::format(
+        LINFO(std::format(
             "Finished parsing {} entries from conversion file '{}'",
             lineNum, inFilename
         ));
@@ -2553,7 +2559,7 @@ std::string SessionRecording_legacy_0085::getLegacyConversionResult(std::string 
 {
     // This method is overriden in each legacy subclass, but does nothing in this instance
     // as the oldest supported legacy version.
-    LERROR(fmt::format(
+    LERROR(std::format(
         "Version 00.85 is the oldest supported legacy file format; no conversion "
         "can be made. It is possible that file '{}' has a corrupted header or an invalid "
         "file format version number",
@@ -2624,7 +2630,8 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             codegen::lua::FileFormatConversion,
             codegen::lua::SetPlaybackPause,
             codegen::lua::TogglePlaybackPause,
-            codegen::lua::IsPlayingBack
+            codegen::lua::IsPlayingBack,
+            codegen::lua::IsRecording
         }
     };
 }

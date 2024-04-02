@@ -145,9 +145,7 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        fmt::format(
-            "Camera velocity: {:.4f} {}/s", dist.first, dist.second
-        )
+        std::format("Camera velocity: {:.4f} {}/s", dist.first, dist.second)
     );
     penPosition.y -= _font->height();
 
@@ -169,7 +167,7 @@ glm::vec2 DashboardItemVelocity::size() const {
     }
 
     return _font->boundingBox(
-        fmt::format("Camera velocity: {} {}/s", dist.first, dist.second)
+        std::format("Camera velocity: {} {}/s", dist.first, dist.second)
     );
 }
 

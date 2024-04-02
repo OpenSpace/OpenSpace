@@ -25,9 +25,10 @@
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 
 #ifdef WIN32
@@ -185,7 +186,7 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::p
         }
     }
     catch (FitsException& e) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not read FITS table from file '{}'. Make sure it's not an image file",
             e.message()
         ));
@@ -248,7 +249,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     );
 
     if (!table) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open Fits file '{}'", filePath));
+        throw ghoul::RuntimeError(std::format("Failed to open Fits file '{}'", filePath));
     }
 
     int nStars = table->readRows - firstRow + 1;
@@ -385,7 +386,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     auto table = readTable<float>(filePath, allColumnNames, firstRow, lastRow);
 
     if (!table) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open Fits file '{}'", filePath));
+        throw ghoul::RuntimeError(std::format("Failed to open Fits file '{}'", filePath));
     }
 
     int nStars = table->readRows - firstRow + 1;
@@ -517,8 +518,8 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
         fullData.insert(fullData.end(), values.begin(), values.end());
     }*/
 
-    LINFO(fmt::format("{} out of {} read stars were null arrays", nNullArr, nStars));
-    LINFO(fmt::format("Multiplier: {}", multiplier));
+    LINFO(std::format("{} out of {} read stars were null arrays", nNullArr, nStars));
+    LINFO(std::format("Multiplier: {}", multiplier));
 
     return fullData;
 }
@@ -531,7 +532,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     std::ifstream fileStream(filePath);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", filePath));
+        LERROR(std::format("Failed to open Speck file '{}'", filePath));
         return fullData;
     }
 
@@ -545,7 +546,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     std::string line;
     while (true) {
         const std::streampos position = fileStream.tellg();
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
 
         if (line.empty() || line[0] == '#') {
             continue;
@@ -598,7 +599,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
         std::vector<float> readValues(nValuesPerStar);
         nStars++;
 
-        std::getline(fileStream, line);
+        ghoul::getline(fileStream, line);
         std::stringstream str(line);
 
         // Read values.
@@ -649,7 +650,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
 
     } while (!fileStream.eof());
 
-    LINFO(fmt::format("{} out of {} read stars were null arrays", nNullArr, nStars));
+    LINFO(std::format("{} out of {} read stars were null arrays", nNullArr, nStars));
 
     return fullData;
 }

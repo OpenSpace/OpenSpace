@@ -119,7 +119,7 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
         parameterOption = indexOfProvidedOption;
     }
     else if (p.parameter.has_value()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error when reading Parameter. Could not find provided parameter '{}' in "
             "list of parameter options. Using default.", *p.parameter
         ));

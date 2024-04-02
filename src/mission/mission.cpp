@@ -123,7 +123,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
             );
 
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
-                throw ghoul::RuntimeError(fmt::format(
+                throw ghoul::RuntimeError(std::format(
                     "User specified time range must at least include its subphases'",
                     "Mission ({})", _name
                 ));
@@ -148,7 +148,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
             );
         }
         else {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "If there are no subphases specified, the time range has to be specified",
                 "Mission ({})", _name
             ));

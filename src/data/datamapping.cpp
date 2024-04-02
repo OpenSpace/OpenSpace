@@ -151,6 +151,8 @@ documentation::Documentation DataMapping::Documentation() {
 }
 
 DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionary) {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     DataMapping result;
@@ -186,7 +188,7 @@ bool DataMapping::checkIfAllProvidedColumnsExist(
                                             std::string_view key)
     {
         if (col.has_value() && !containsColumn(*col, columns, isCaseSensitive)) {
-            LWARNING(fmt::format("Could not find provided {} column: '{}'", key, *col));
+            LWARNING(std::format("Could not find provided {} column: '{}'", key, *col));
             return false;
         }
         return true;
@@ -208,7 +210,7 @@ std::string generateHashString(const DataMapping& dm) {
     }
     unsigned int excludeColumnsHash = ghoul::hashCRC32(a);
 
-    return fmt::format(
+    return std::format(
         "DM|{}|{}|{}|{}|{}|{}|{}|{}",
         dm.xColumnName.value_or(""),
         dm.yColumnName.value_or(""),
