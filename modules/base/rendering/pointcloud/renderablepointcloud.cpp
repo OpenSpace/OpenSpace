@@ -869,9 +869,9 @@ void RenderablePointCloud::initializeShadersAndGlExtras() {
         []() {
             return global::renderEngine->buildRenderProgram(
                 "RenderablePointCloud",
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_fs.glsl"),
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_gs.glsl")
+                absPath("${MODULE_BASE}/shaders/pointcloud/pointcloud_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/pointcloud/pointcloud_fs.glsl"),
+                absPath("${MODULE_BASE}/shaders/pointcloud/pointcloud_gs.glsl")
             );
         }
     );
@@ -1124,11 +1124,11 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
 
 void RenderablePointCloud::setExtraUniforms() {}
 
-void RenderablePointCloud::renderBillboards(const RenderData& data,
-                                            const glm::dmat4& modelMatrix,
-                                            const glm::dvec3& orthoRight,
-                                            const glm::dvec3& orthoUp,
-                                            float fadeInVariable)
+void RenderablePointCloud::renderPoints(const RenderData& data,
+                                        const glm::dmat4& modelMatrix,
+                                        const glm::dvec3& orthoRight,
+                                        const glm::dvec3& orthoUp,
+                                        float fadeInVariable)
 {
     if (!_hasDataFile || _dataset.entries.empty()) {
         return;
@@ -1311,7 +1311,7 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
     if (_hasDataFile && _drawElements) {
-        renderBillboards(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
+        renderPoints(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
     }
 
     if (_hasLabels) {

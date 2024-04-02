@@ -313,9 +313,9 @@ void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {
             std::filesystem::path path = absPath("${MODULE_BASE}/shaders/pointcloud/");
             return global::renderEngine->buildRenderProgram(
                 "RenderablePointCloud_Interpolated",
-                path / "billboardpoint_interpolated_vs.glsl",
-                path / "billboardpoint_fs.glsl",
-                path / "billboardpoint_gs.glsl"
+                path / "pointcloud_interpolated_vs.glsl",
+                path / "pointcloud_fs.glsl",
+                path / "pointcloud_gs.glsl"
             );
         }
     );

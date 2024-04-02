@@ -168,10 +168,10 @@ set(SHADER_FILES
   shaders/model_vs.glsl
   shaders/plane_fs.glsl
   shaders/plane_vs.glsl
-  shaders/pointcloud/billboardpoint_fs.glsl
-  shaders/pointcloud/billboardpoint_gs.glsl
-  shaders/pointcloud/billboardpoint_vs.glsl
-  shaders/pointcloud/billboardpoint_interpolated_vs.glsl
+  shaders/pointcloud/pointcloud_fs.glsl
+  shaders/pointcloud/pointcloud_gs.glsl
+  shaders/pointcloud/pointcloud_vs.glsl
+  shaders/pointcloud/pointcloud_interpolated_vs.glsl
   shaders/polygon_fs.glsl
   shaders/polygon_gs.glsl
   shaders/polygon_vs.glsl

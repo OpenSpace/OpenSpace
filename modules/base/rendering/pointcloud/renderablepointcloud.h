@@ -152,7 +152,7 @@ protected:
 
     float computeDistanceFadeValue(const RenderData& data) const;
 
-    void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
+    void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     gl::GLenum internalGlFormat(bool useAlpha) const;
