@@ -114,13 +114,57 @@ local TullyGalaxiesImages = {
   }
 }
 
+local TullyGalaxiesImagesNew = {
+  Identifier = "TullyGalaxiesImages_new",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Opacity = 0.99,
+    File = speck .. "tully.speck",
+    Texture = {
+      Folder = textures
+    },
+    TransformationMatrix = TransformMatrix,
+    -- Use fixed orientation, and rotate planes based on orientation information in
+    -- the dataset
+    OrientationRenderOption = "Fixed Rotation",
+    UseOrientationData = true,
+    Unit = "Mpc",
+    Fading = {
+      FadeInDistances = { 0.0005, 0.003 } -- Fade in value in the same unit as "Unit"
+    },
+    SizeSettings = {
+      SizeMapping = {
+        ParameterOptions = { "diamkpc" },
+        ScaleFactor = 0.001
+      },
+      ScaleExponent = 22.5
+    }
+  },
+  GUI = {
+    Name = "Tully Galaxies Images (new)",
+    Path = "/Universe/Galaxies",
+    Description = [[Each galaxy is represented by an image
+      that represents its morphological type (spiral, elliptical, etc.). Most of these
+      come from The Galaxy Catalog. A handful of nearby galaxies are represented by
+      their actual images, which come mostly from the National Optical Astronomy
+      Observatory (NOAO). Each of these images has been altered from its original state.
+      These images were taken from Earth on some of the world's largest telescopes, so
+      foreground stars from our own Galaxy appear in each image. We are representing
+      galaxies in extragalactic space, so we have removed the stars from each image.
+      (Description from URL) <br><br> Data Reference: Tully Galaxy Catalog: Brent Tully
+      (U Hawaii), Stuart Levy (NCSA/UIUC)]]
+  }
+}
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TullyGalaxies)
   openspace.addSceneGraphNode(TullyGalaxiesImages)
+  openspace.addSceneGraphNode(TullyGalaxiesImagesNew)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TullyGalaxiesImagesNew)
   openspace.removeSceneGraphNode(TullyGalaxiesImages)
   openspace.removeSceneGraphNode(TullyGalaxies)
 end)
@@ -132,7 +176,7 @@ asset.export(TullyGalaxiesImages)
 
 asset.meta = {
   Name = "Tully Galaxies",
-  Version = "4.0",
+  Version = "4.1",
   Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
     images]],
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
