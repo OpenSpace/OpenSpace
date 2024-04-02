@@ -120,7 +120,7 @@ protected:
     bool hasColorData() const;
     bool hasSizeData() const;
     bool hasMultiTextureData() const;
-    bool hasOrientationData() const;
+    bool useOrientationData() const;
 
     virtual void addPositionDataForPoint(unsigned int index, std::vector<float>& result,
         double& maxRadius) const;
@@ -206,6 +206,7 @@ protected:
     properties::OptionProperty _renderOption;
 
     properties::UIntProperty _nDataPoints;
+    properties::BoolProperty _hasOrientationData;
 
     struct Texture : properties::PropertyOwner {
         Texture();
@@ -228,7 +229,7 @@ protected:
         cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
         enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
         useBelowRangeColor, hasDvarScaling, dvarScaleFactor, enableOutline, outlineColor,
-        outlineWeight, aspectRatioScale
+        outlineWeight, aspectRatioScale, useOrientationData
     ) _uniformCache;
 
     std::string _dataFile;

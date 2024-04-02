@@ -480,7 +480,7 @@ void RenderableInterpolatedPoints::initializeBufferData() {
         offset = bufferVertexAttribute("in_scalingParameter1", 1, attibutesPerPoint, offset);
     }
 
-    if (hasOrientationData()) {
+    if (useOrientationData()) {
         offset = bufferVertexAttribute("in_orientationU", 3, attibutesPerPoint, offset);
         offset = bufferVertexAttribute("in_orientationV", 3, attibutesPerPoint, offset);
     }

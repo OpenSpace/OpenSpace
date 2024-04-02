@@ -56,7 +56,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 34> UniformNames = {
+    constexpr std::array<const char*, 35> UniformNames = {
         "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
         "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
         "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
@@ -64,7 +64,7 @@ namespace {
         "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
         "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
         "hasDvarScaling", "dvarScaleFactor", "enableOutline", "outlineColor",
-        "outlineWeight", "aspectRatioScale"
+        "outlineWeight", "aspectRatioScale", "useOrientationData"
     };
 
     enum RenderOption {
@@ -151,9 +151,10 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOption",
-        "Render Option",
-        "Option wether the point billboards should face the camera or not. Used for "
+        "OrientationRenderOption",
+        "Orientation Render Option",
+        "Option that controls how the points are oriented in relation to the camera. "
+        "wether the point  should face the camera or not. Used for "
         "non-linear display environments such as fisheye.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -200,13 +201,26 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseRotationInfo = {
-        "UseRotation",
-        "Use Rotation",
-        "If true and there is rotation/orientation information for teh points in the "
-        "dataset, use this information when rendering the planes for the points. This "
-        "means that the points will not be billboarded to face the camera, but rotatated "
-        "to match the orientation provided per point in the dataset.",
+    constexpr openspace::properties::Property::PropertyInfo UseOrientationDataInfo = {
+        "UseOrientationData",
+        "Use Orientation Data",
+        "Include the orietation data in the datraset when rendering the poitns, if there "
+        "is any. To see the rotation, you also need to set the \"Orientation Render "
+        "Option\" to \"Fixed Rotation\"",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo = {
+        "OrientationRenderOption",
+        "Orientation Render Option",
+        "Controls how the planes for the points will be oriented. \"Camera View "
+        "Direction\" rotates the points so that the plane is orthogonal to the viewing "
+        "direction of the camera (useful for planar displays), and \"Camera Position "
+        "Normal\" rotates the points towards the position of the "
+        "camera (useful for spherical displays, like dome theatres). In both these cases "
+        "the points will bebillboarded towards the camera. In contrast, \"Fixed "
+        "Rotation\" does not rotate the points at all based on the camera and should be "
+        "used when the dataset contains orientation information for the points.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -216,6 +230,13 @@ namespace {
         "This read only property includes information about how many points are being "
         "rendered.",
         openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HasOrientationDataInfo = {
+        "HasOrientationData",
+        "Has Orientation Data",
+        "Set to true if orientation data was read from the dataset",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleExponentInfo = {
@@ -378,8 +399,11 @@ namespace {
             PositionNormal [[codegen::key("Camera Position Normal")]],
             FixedRotation [[codegen::key("Fixed Rotation")]]
         };
-        // [[codegen::verbatim(RenderOptionInfo.description)]]
-        std::optional<RenderOption> renderOption;
+        // [[codegen::verbatim(OrientationRenderOptionInfo.description)]]
+        std::optional<RenderOption> orientationRenderOption;
+
+        // [[codegen::verbatim(UseOrientationDataInfo.description)]]
+        std::optional<bool> useOrientationData;
 
         // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
         std::optional<bool> useAdditiveBlending;
@@ -592,9 +616,10 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _drawElements(DrawElementsInfo, true)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
-    , _useRotation(UseRotationInfo, true)
+    , _useRotation(UseOrientationDataInfo, true) // should be false per default
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _nDataPoints(NumShownDataPointsInfo, 0)
+    , _hasOrientationData(HasOrientationDataInfo, false)
     , _fading(dictionary)
     , _colorSettings(dictionary)
     , _sizeSettings(dictionary)
@@ -621,13 +646,17 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
     _renderOption.addOption(RenderOption::FixedRotation, "Fixed Rotation");
 
-    if (p.renderOption.has_value()) {
-        _renderOption = codegen::map<RenderOption>(*p.renderOption);
+    if (p.orientationRenderOption.has_value()) {
+        _renderOption = codegen::map<RenderOption>(*p.orientationRenderOption);
     }
     else {
         _renderOption = RenderOption::ViewDirection;
     }
     addProperty(_renderOption);
+
+    _useRotation = p.useOrientationData.value_or(_useRotation);
+    _useRotation.onChange([this]() { _dataIsDirty = true; });
+    addProperty(_useRotation);
 
     _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
     addProperty(_useAdditiveBlending);
@@ -734,6 +763,9 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _nDataPoints.setReadOnly(true);
     addProperty(_nDataPoints);
+
+    _hasOrientationData.setReadOnly(true);
+    addProperty(_hasOrientationData);
 }
 
 bool RenderablePointCloud::isReady() const {
@@ -769,6 +801,7 @@ void RenderablePointCloud::initialize() {
             _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
         }
         _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
+        _hasOrientationData = _dataset.orientationDataIndex >= 0;
 
         // If no scale exponent was specified, compute one that will at least show the
         // points based on the scale of the positions in the dataset
@@ -1213,7 +1246,7 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
         );
     }
 
-    _program->setUniform("hasOrientationData", hasOrientationData());
+    _program->setUniform(_uniformCache.useOrientationData, useOrientationData());
 
     bool useTexture = _hasSpriteTexture && _texture.enabled;
     _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
@@ -1321,7 +1354,7 @@ int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 3; // position
     n += hasColorData() ? 1 : 0;
     n += hasSizeData() ? 1 : 0;
-    n += hasOrientationData() ? 6 : 0;
+    n += useOrientationData() ? 6 : 0;
     n += _hasSpriteTexture ? 1 : 0; // texture id
     return n;
 }
@@ -1382,7 +1415,7 @@ void RenderablePointCloud::updateBufferData() {
         offset = bufferVertexAttribute("in_scalingParameter", 1, attibutesPerPoint, offset);
     }
 
-    if (hasOrientationData()) {
+    if (useOrientationData()) {
         offset = bufferVertexAttribute("in_orientationU", 3, attibutesPerPoint, offset);
         offset = bufferVertexAttribute("in_orientationV", 3, attibutesPerPoint, offset);
     }
@@ -1474,11 +1507,8 @@ bool RenderablePointCloud::hasMultiTextureData() const {
     return _hasSpriteTexture && textureIdIndex >= 0;
 }
 
-bool RenderablePointCloud::hasOrientationData() const {
-    int orientationDataIndex = _dataset.orientationDataIndex;
-    return orientationDataIndex >= 0;
-
-    // TODO: verify that it has all the orientation values?
+bool RenderablePointCloud::useOrientationData() const {
+    return _hasOrientationData && _useRotation;
 }
 
 void RenderablePointCloud::addPositionDataForPoint(unsigned int index,
@@ -1519,10 +1549,6 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
 void RenderablePointCloud::addOrientationDataForPoint(unsigned int index,
                                                       std::vector<float>& result) const
 {
-    if (!hasOrientationData()) {
-        return;
-    }
-
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
     int orientationDataIndex = _dataset.orientationDataIndex;
 
@@ -1604,7 +1630,9 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         addPositionDataForPoint(i, subArrayToUse, maxRadius);
         addColorAndSizeDataForPoint(i, subArrayToUse);
 
-        addOrientationDataForPoint(i, subArrayToUse);
+        if (useOrientationData()) {
+            addOrientationDataForPoint(i, subArrayToUse);
+        }
 
         // Texture layer
         if (_hasSpriteTexture) {

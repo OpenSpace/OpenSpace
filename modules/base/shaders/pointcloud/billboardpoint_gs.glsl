@@ -50,7 +50,7 @@ uniform dmat4 modelMatrix;
 uniform bool enableMaxSizeControl;
 uniform bool hasDvarScaling;
 uniform float dvarScaleFactor;
-uniform bool hasOrientationData;
+uniform bool useOrientationData;
 
 // RenderOption: CameraViewDirection
 uniform vec3 up;
@@ -105,7 +105,7 @@ void main() {
     scaledUp = newUp;
   }
   else if (renderOption == RenderOptionFixedRotation) {
-    if (hasOrientationData) {
+    if (useOrientationData) {
         scaledRight = orientationU[0];
         scaledUp = orientationV[0];
     }
