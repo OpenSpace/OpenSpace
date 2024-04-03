@@ -32,6 +32,7 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
@@ -246,6 +247,8 @@ private:
 
     // Line width for the line rendering part
     properties::FloatProperty _lineWidth;
+    // Button which executes a time jump to start of sequence
+    properties::TriggerProperty _jumpToStartBtn;
 
     // At least one file in data set needs to be loaded to read extra variable
     bool _firstLoad = true;
