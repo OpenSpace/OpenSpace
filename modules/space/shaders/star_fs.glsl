@@ -40,6 +40,14 @@ uniform sampler1D otherDataTexture;
 uniform vec2 otherDataRange;
 uniform bool filterOutOfRange;
 
+uniform float glareOpacity;
+uniform float glareScale;
+
+uniform bool hasHighlight;
+uniform sampler2D highlightTexture;
+uniform float highlightOpacity;
+uniform float highlightScale;
+
 // keep in sync with renderablestars.h:ColorOption enum
 const int ColorOptionColor = 0;
 const int ColorOptionVelocity = 1;
@@ -92,8 +100,19 @@ Fragment getFragment() {
       break;
   }
 
-  vec4 textureColor = texture(psfTexture, texCoords);
-  vec4 fullColor = vec4(color.rgb, textureColor.a * alphaValue);
+  vec2 shiftedCoords = (texCoords - 0.5) * 2;
+
+  vec2 scaledCoordsGlare = shiftedCoords / glareScale;
+  vec2 unshiftedCoordsGlare = (scaledCoordsGlare + 1.0) / 2.0;
+  float textureColor = texture(psfTexture, unshiftedCoordsGlare).a * glareOpacity;
+  if (hasHighlight) {
+    vec2 scaledCoordsHighlight = shiftedCoords / highlightScale;
+    vec2 unshiftedCoordsHighlight = (scaledCoordsHighlight + 1.0) / 2.0;
+    float highlight = texture(highlightTexture, unshiftedCoordsHighlight).a * highlightOpacity;
+    textureColor += highlight;
+  }
+
+  vec4 fullColor = vec4(color.rgb, textureColor * alphaValue);
 
   if (fullColor.a < 0.001) {
     discard;

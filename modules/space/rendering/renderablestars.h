@@ -102,15 +102,26 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
     properties::Vec3Property _fixedColor;
     properties::BoolProperty _filterOutOfRange;
-    properties::StringProperty _pointSpreadFunctionTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
-    std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
 
+    struct Texture {
+        properties::PropertyOwner owner;
+
+        properties::StringProperty texturePath;
+        properties::FloatProperty opacity;
+        properties::FloatProperty scale;
+
+        std::unique_ptr<ghoul::opengl::Texture> texture;
+        std::unique_ptr<ghoul::filesystem::File> file;
+    };
+
+    Texture _glare;
+    Texture _highlight;
+
+    properties::FloatProperty _magnitudeExponent;
     properties::OptionProperty _psfMultiplyOption;
     properties::FloatProperty _lumCent;
     properties::FloatProperty _radiusCent;
     properties::FloatProperty _brightnessCent;
-    properties::FloatProperty _magnitudeExponent;
     properties::PropertyOwner _parametersOwner;
     properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _disableFadeInDistance;
@@ -120,13 +131,13 @@ private:
         modelMatrix, cameraUp, cameraViewProjectionMatrix, colorOption, magnitudeExponent,
         eyePosition, psfParamConf, lumCent, radiusCent, brightnessCent, colorTexture,
         alphaValue, psfTexture, otherDataTexture, otherDataRange, filterOutOfRange,
-        fixedColor
+        fixedColor, hasHighlight, highlightTexture, glareOpacity, highlightOpacity,
+        glareScale, highlightScale
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;
     bool _pointSpreadFunctionTextureIsDirty = true;
     bool _colorTextureIsDirty = true;
-    //bool _shapeTextureIsDirty = true;
     bool _dataIsDirty = true;
     bool _otherDataColorMapIsDirty = true;
 

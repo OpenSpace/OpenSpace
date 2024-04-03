@@ -32,13 +32,19 @@ local Stars = {
   Renderable = {
     Type = "RenderableStars",
     File = speck .. "stars.speck",
-    Texture = textures .. "halo.png",
-    --ShapeTexture = textures .. "disc.png",
+    Glare = {
+      Texture = textures .. "halo.png",
+      PartialOpacity = 0.875
+    },
+    Highlight = {
+      Texture = textures .. "glare.png",
+      PartialOpacity = 5.0,
+      Scale = 0.7
+    },
+    MagnitudeExponent = 6.2,
     ColorMap = colormaps .. "colorbv.cmap",
     OtherDataColorMap = colormaps .. "viridis.cmap",
-    MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based", -- or PSF
     DataMapping = {
       Bv = "colorb_v",
       Luminance = "lum",
@@ -70,7 +76,7 @@ local SunStar = {
   Renderable = {
     Type = "RenderableStars",
     File = sunspeck .. "sunstar.speck",
-    Texture = textures .. "halo.png",
+    GlareTexture = textures .. "halo.png",
     --ShapeTexture = textures .. "disc.png",
     ColorMap = colormaps .. "colorbv.cmap",
     MagnitudeExponent = 6.2,
@@ -101,11 +107,11 @@ local SunStar = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Stars)
-  openspace.addSceneGraphNode(SunStar)
+  -- openspace.addSceneGraphNode(SunStar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SunStar)
+  -- openspace.removeSceneGraphNode(SunStar)
   openspace.removeSceneGraphNode(Stars)
 end)
 
