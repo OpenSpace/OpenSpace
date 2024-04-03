@@ -85,7 +85,9 @@ public:
     OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator();
     PathNavigator& pathNavigator();
+
     bool isKeyFrameInteractionEnabled() const;
+    float jumpToFadeDuration() const;
     float interpolationTime() const;
 
     // Callback functions
@@ -195,6 +197,7 @@ private:
     properties::BoolProperty _disableMouseInputs;
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
+    properties::FloatProperty _jumpToFadeDuration;
 };
 
 } // namespace openspace::interaction

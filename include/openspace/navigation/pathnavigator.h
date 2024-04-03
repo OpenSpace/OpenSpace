@@ -60,7 +60,6 @@ public:
     double speedScale() const;
     double arrivalDistanceFactor() const;
     float linearRotationSpeedFactor() const;
-    float jumpToFadeDuration() const;
 
     bool hasCurrentPath() const;
     bool hasFinished() const;
@@ -122,7 +121,6 @@ private:
     properties::FloatProperty _linearRotationSpeedFactor;
     properties::DoubleProperty _minValidBoundingSphere;
     properties::StringListProperty _relevantNodeTags;
-    properties::FloatProperty _jumpToFadeDuration;
 
     std::vector<SceneGraphNode*> _relevantNodes;
     bool _hasInitializedRelevantNodes = false;

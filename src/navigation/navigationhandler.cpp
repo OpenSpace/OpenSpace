@@ -90,6 +90,15 @@ namespace {
         "than using the mouse interaction",
         openspace::properties::Property::Visibility::Developer
     };
+
+    constexpr openspace::properties::Property::PropertyInfo JumpToFadeDurationInfo = {
+        "JumpToFadeDuration",
+        "JumpTo Fade Duration",
+        "The number of seconds the fading of the rendering should take per default when "
+        "navigating through a 'jump' transition. This is when the rendering is first "
+        "faded to black, then the camera is moved, and then the rendering fades in again",
+        openspace::properties::Property::Visibility::User
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -100,6 +109,7 @@ NavigationHandler::NavigationHandler()
     , _disableMouseInputs(DisableMouseInputInfo, false)
     , _disableJoystickInputs(DisableJoystickInputInfo, false)
     , _useKeyFrameInteraction(FrameInfo, false)
+    , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.0f, 10.f)
 {
     addPropertySubOwner(_orbitalNavigator);
     addPropertySubOwner(_pathNavigator);
@@ -108,6 +118,7 @@ NavigationHandler::NavigationHandler()
     addProperty(_disableMouseInputs);
     addProperty(_disableJoystickInputs);
     addProperty(_useKeyFrameInteraction);
+    addProperty(_jumpToFadeDuration);
 }
 
 NavigationHandler::~NavigationHandler() {}
@@ -168,6 +179,10 @@ PathNavigator& NavigationHandler::pathNavigator() {
 
 bool NavigationHandler::isKeyFrameInteractionEnabled() const {
     return _useKeyFrameInteraction;
+}
+
+float NavigationHandler::jumpToFadeDuration() const {
+    return _jumpToFadeDuration;
 }
 
 float NavigationHandler::interpolationTime() const {

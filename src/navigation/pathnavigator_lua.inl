@@ -322,8 +322,8 @@ namespace {
         throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
 
-    double duration = fadeDuration.value_or(
-        global::navigationHandler->pathNavigator().jumpToFadeDuration()
+    const double duration = fadeDuration.value_or(
+        global::navigationHandler->jumpToFadeDuration()
     );
 
     std::string onArrivalScript = std::format(
