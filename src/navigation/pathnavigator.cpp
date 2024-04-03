@@ -44,6 +44,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <vector>
@@ -601,6 +602,7 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             codegen::lua::ZoomToDistance,
             codegen::lua::ZoomToDistanceRelative,
             codegen::lua::JumpTo,
+            codegen::lua::JumpToNavigationState,
             codegen::lua::CreatePath
         }
     };

@@ -193,6 +193,30 @@ void NavigationHandler::setInterpolationTime(float durationInSeconds) {
     _orbitalNavigator.setRetargetInterpolationTime(durationInSeconds);
 }
 
+void NavigationHandler::triggerFadeToTransition(const std::string& transitionScript,
+                                                std::optional<float> fadeDuration)
+{
+    const float duration = fadeDuration.value_or(_jumpToFadeDuration);
+
+    std::string onArrivalScript = std::format(
+        "{} "
+        "openspace.setPropertyValueSingle("
+        "'RenderEngine.BlackoutFactor', 1, {}, 'QuadraticEaseIn'"
+        ")", transitionScript, duration
+    );
+    std::string script = std::format(
+        "openspace.setPropertyValueSingle("
+        "'RenderEngine.BlackoutFactor', 0, {}, 'QuadraticEaseOut', [[{}]]"
+        ")", duration, onArrivalScript
+    );
+    // No syncing, as this was called from a script that should have been synced already
+    global::scriptEngine->queueScript(
+        script,
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
+    );
+}
+
 void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 

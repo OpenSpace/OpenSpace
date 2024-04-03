@@ -311,8 +311,53 @@ namespace {
  * Fade rendering to black, jump to the specified node, and then fade in. This is done by
  * triggering another script that handles the logic.
  *
- * If no fade duration is specified, use the property from Navigation Handler ->
- * Path Navigator
+ * If no fade duration is specified, use the property from Navigation Handler
+ */
+[[codegen::luawrap]] void jumpToNavigationState(ghoul::Dictionary navigationState,
+                                                std::optional<double> fadeDuration)
+{
+    using namespace openspace;
+    try {
+        documentation::testSpecificationAndThrow(
+            interaction::NavigationState::Documentation(),
+            navigationState,
+            "NavigationState"
+        );
+    }
+    catch (const documentation::SpecificationError& e) {
+        logError(e, "jumpToNavigationState");
+        throw ghoul::lua::LuaError(std::format(
+            "Unable to jump to navigation state: {}", e.what()
+        ));
+    }
+
+    // When copy pasting a printed navigation state from the console, The formatting of
+    // the navigation state dictionary won't be completely correct if using the
+    // dictionary directly , due to the number keys for arrays. We solve this by first
+    // creating an object of the correct datatype
+    // (@TODO emmbr 2024-04-03, This formatting problem should probably be fixed)
+    interaction::NavigationState ns = interaction::NavigationState(navigationState);
+
+    const std::string script = std::format(
+        "openspace.navigation.setNavigationState({})", ghoul::formatLua(ns.dictionary())
+    );
+
+    if (fadeDuration.has_value()) {
+        global::navigationHandler->triggerFadeToTransition(
+            script,
+            static_cast<float>(*fadeDuration)
+        );
+    }
+    else {
+        global::navigationHandler->triggerFadeToTransition(script);
+    }
+}
+
+/**
+ * Fade rendering to black, jump to the specified navigation state, and then fade in.
+ * This is done by triggering another script that handles the logic.
+ *
+ * If no fade duration is specified, use the property from Navigation Handler
  */
 [[codegen::luawrap]] void jumpTo(std::string nodeIdentifier,
                                  std::optional<double> fadeDuration)
@@ -322,27 +367,19 @@ namespace {
         throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
 
-    const double duration = fadeDuration.value_or(
-        global::navigationHandler->jumpToFadeDuration()
+    const std::string script = std::format(
+        "openspace.pathnavigation.flyTo('{}', 0)", nodeIdentifier
     );
 
-    std::string onArrivalScript = std::format(
-        "openspace.pathnavigation.flyTo('{}', 0) "
-        "openspace.setPropertyValueSingle("
-            "'RenderEngine.BlackoutFactor', 1, {}, 'QuadraticEaseIn'"
-        ")", nodeIdentifier, duration
-    );
-    std::string script = std::format(
-        "openspace.setPropertyValueSingle("
-            "'RenderEngine.BlackoutFactor', 0, {}, 'QuadraticEaseOut', [[{}]]"
-        ")", duration, onArrivalScript
-    );
-    // No syncing, as this was called from a script that should have been synced already
-    global::scriptEngine->queueScript(
-        script,
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    if (fadeDuration.has_value()) {
+        global::navigationHandler->triggerFadeToTransition(
+            script,
+            static_cast<float>(*fadeDuration)
+        );
+    }
+    else {
+        global::navigationHandler->triggerFadeToTransition(script);
+    }
 }
 
 // Create a camera path as described by the lua table input argument.
