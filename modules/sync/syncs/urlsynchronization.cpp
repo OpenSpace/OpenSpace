@@ -31,6 +31,7 @@
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <numeric>
 #include <mutex>
 #include <optional>
@@ -221,7 +222,7 @@ bool UrlSynchronization::isEachFileValid() {
     // Valid to: yyyy-mm-ddThr:mn:sc.xxx
 
     if (ossyncVersion == "1.0") {
-        std::getline(file >> std::ws, line);
+        ghoul::getline(file >> std::ws, line);
         std::string& fileIsValidToDate = line;
         const double fileValidAsJ2000 = Time::convertTime(fileIsValidToDate);
 

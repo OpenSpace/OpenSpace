@@ -28,6 +28,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/texture.h>
 #include <iterator>
 #include <filesystem>
@@ -109,7 +110,7 @@ void TransferFunction::setTextureFromTxt() {
 
     std::string line;
 
-    while (std::getline(in, line)) {
+    while (ghoul::getline(in, line)) {
         std::istringstream iss(line);
         std::string key;
         iss >> key;

@@ -31,6 +31,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 
@@ -176,7 +177,7 @@ bool LabelParser::create() {
         double stopTime = 0.0;
         std::string line;
         do {
-            std::getline(file, line);
+            ghoul::getline(file, line);
 
             line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
             line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
@@ -228,7 +229,7 @@ bool LabelParser::create() {
                 startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
                 count++;
 
-                std::getline(file, line);
+                ghoul::getline(file, line);
                 line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
                 line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());

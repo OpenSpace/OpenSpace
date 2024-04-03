@@ -586,6 +586,8 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _colorSettings(dictionary)
     , _sizeSettings(dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(Fadeable::_opacity);
@@ -697,38 +699,19 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         });
     }
 
-    if (_hasDataFile) {
-        bool useCaching = p.useCaching.value_or(true);
-        if (useCaching) {
-            _dataset = dataloader::data::loadFileWithCache(_dataFile, _dataMapping);
-        }
-        else {
-            _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
-        }
-        _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
+    _useCaching = p.useCaching.value_or(true);
 
-        // If no scale exponent was specified, compute one that will at least show the
-        // points based on the scale of the positions in the dataset
-        if (!p.sizeSettings.has_value() || !p.sizeSettings->scaleExponent.has_value()) {
-            double dist = _dataset.maxPositionComponent * toMeter(_unit);
-            if (dist > 0.0) {
-                float exponent = static_cast<float>(std::log10(dist));
-                // Reduce the actually used exponent a little bit, as just using the
-                // logarithm as is leads to very large points
-                _sizeSettings.scaleExponent = 0.9f * exponent;
-            }
-        }
+    // If no scale exponent was specified, compute one that will at least show the
+    // points based on the scale of the positions in the dataset
+    if (!p.sizeSettings.has_value() || !p.sizeSettings->scaleExponent.has_value()) {
+        _shouldComputeScaleExponent = true;
     }
 
     if (p.labels.has_value()) {
         if (!p.labels->hasKey("File") && _hasDataFile) {
-            // Load the labelset from the dataset if no label file was included
-            _labels = std::make_unique<LabelsComponent>(*p.labels, _dataset, _unit);
+            _createLabelsFromDataset = true;
         }
-        else {
-            _labels = std::make_unique<LabelsComponent>(*p.labels);
-        }
-
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
         // Fading of the labels should depend on the fading of the renderable
@@ -764,11 +747,36 @@ void RenderablePointCloud::initialize() {
             break;
     }
 
+    if (_hasDataFile) {
+        if (_useCaching) {
+            _dataset = dataloader::data::loadFileWithCache(_dataFile, _dataMapping);
+        }
+        else {
+            _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
+        }
+        _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
+
+        // If no scale exponent was specified, compute one that will at least show the
+        // points based on the scale of the positions in the dataset
+        if (_shouldComputeScaleExponent) {
+            double dist = _dataset.maxPositionComponent * toMeter(_unit);
+            if (dist > 0.0) {
+                float exponent = static_cast<float>(std::log10(dist));
+                // Reduce the actually used exponent a little bit, as just using the
+                // logarithm as is leads to very large points
+                _sizeSettings.scaleExponent = 0.9f * exponent;
+            }
+        }
+    }
+
     if (_hasDataFile && _hasColorMapFile) {
         _colorSettings.colorMapping->initialize(_dataset);
     }
 
     if (_hasLabels) {
+        if (_createLabelsFromDataset) {
+            _labels->loadLabelsFromDataset(_dataset, _unit);
+        }
         _labels->initialize();
     }
 }

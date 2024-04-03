@@ -52,14 +52,18 @@ namespace {
 namespace openspace {
 
 void GetPropertyTopic::handleJson(const nlohmann::json& json) {
+    ZoneScoped;
+
     const std::string requestedKey = json.at("property").get<std::string>();
+    ZoneText(requestedKey.c_str(), requestedKey.size());
     LDEBUG("Getting property '" + requestedKey + "'...");
     nlohmann::json response;
     if (requestedKey == AllPropertiesValue) {
         response = allProperties();
     }
     else if (requestedKey == AllNodesValue) {
-        response = wrappedPayload(sceneGraph()->allSceneGraphNodes());
+        const std::vector<SceneGraphNode*>& nodes = sceneGraph()->allSceneGraphNodes();
+        response = wrappedPayload(nodes);
     }
     else if (requestedKey == AllScreenSpaceRenderablesValue) {
         response = wrappedPayload({

@@ -40,7 +40,7 @@
 #include <string_view>
 
 namespace {
-    constexpr int8_t DataCacheFileVersion = 11;
+    constexpr int8_t DataCacheFileVersion = 13;
     constexpr int8_t LabelCacheFileVersion = 11;
     constexpr int8_t ColorCacheFileVersion = 11;
 
@@ -75,6 +75,8 @@ namespace {
             std::is_same_v<T, openspace::dataloader::ColorMap>
         );
 
+        ZoneScoped;
+
         std::string info;
         if (specs.has_value()) {
             info = openspace::dataloader::generateHashString(*specs);
@@ -93,12 +95,13 @@ namespace {
             std::optional<T> dataset = loadCacheFunction(cached);
             if (dataset.has_value()) {
                 // We could load the cache file and we are now done with this
-                return *dataset;
+                return std::move(*dataset);
             }
             else {
                 FileSys.cacheManager()->removeCacheFile(cached);
             }
         }
+
         LINFOC("DataLoader", std::format("Loading file '{}'", filePath));
         T dataset = loadFunction(filePath, specs);
 
@@ -116,6 +119,8 @@ namespace openspace::dataloader {
 namespace data {
 
 Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
+    ZoneScoped;
+
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     const std::ifstream file = std::ifstream(path);
@@ -143,6 +148,8 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
 }
 
 std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
+    ZoneScoped;
+
     std::ifstream file = std::ifstream(path, std::ios::binary);
     if (!file.good()) {
         return std::nullopt;
@@ -163,6 +170,8 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
     file.read(reinterpret_cast<char*>(&nVariables), sizeof(uint16_t));
     result.variables.resize(nVariables);
     for (int i = 0; i < nVariables; i += 1) {
+        ZoneScopedN("Variable");
+
         Dataset::Variable var;
 
         int16_t idx = 0;
@@ -183,6 +192,8 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
     file.read(reinterpret_cast<char*>(&nTextures), sizeof(uint16_t));
     result.textures.resize(nTextures);
     for (int i = 0; i < nTextures; i += 1) {
+        ZoneScopedN("Texture");
+
         Dataset::Texture tex;
 
         int16_t idx = 0;
@@ -214,25 +225,70 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
     result.entries.reserve(nEntries);
     for (uint64_t i = 0; i < nEntries; i += 1) {
         Dataset::Entry e;
-        file.read(reinterpret_cast<char*>(&e.position.x), sizeof(float));
-        file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
-        file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
+        file.read(reinterpret_cast<char*>(&e.position.x), 3 * sizeof(float));
 
-        uint16_t nValues = 0;
-        file.read(reinterpret_cast<char*>(&nValues), sizeof(uint16_t));
-        e.data.resize(nValues);
-        file.read(reinterpret_cast<char*>(e.data.data()), nValues * sizeof(float));
-
+        // For now we just store the length of the comment. Since the comments are stored
+        // in one block after the data entries, we can use the length later to extract the
+        // contents of this entries comment out of the big block
         uint16_t len = 0;
         file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
         if (len > 0) {
+            // If there is a comment, we already allocate the space for it here. This way
+            // we don't need to separately store the length of it, but can use the size of
+            // the vector instead
             std::string comment;
             comment.resize(len);
-            file.read(comment.data(), len);
             e.comment = std::move(comment);
         }
 
         result.entries.push_back(std::move(e));
+    }
+
+    //
+    // Read the data values next
+    uint16_t nValues = 0;
+    file.read(reinterpret_cast<char*>(&nValues), sizeof(uint16_t));
+    std::vector<float> entriesBuffer;
+    entriesBuffer.resize(nEntries * nValues);
+    file.read(
+        reinterpret_cast<char*>(entriesBuffer.data()),
+        nEntries * nValues * sizeof(float)
+    );
+
+    //
+    // Read comments in one block and then assign them to the data entries
+    uint64_t totalCommentLength = 0;
+    file.read(reinterpret_cast<char*>(&totalCommentLength), sizeof(uint64_t));
+    std::vector<char> commentBuffer;
+    commentBuffer.resize(totalCommentLength);
+    file.read(commentBuffer.data(), totalCommentLength);
+
+    //
+    // Now we have the comments and the data values, we need to implant them into the
+    // data entries
+
+    // commentIdx is the running index into the total comment buffer
+    int commentIdx = 0;
+    int valuesIdx = 0;
+    for (Dataset::Entry& e : result.entries) {
+        e.data.resize(nValues);
+        std::memcpy(
+            e.data.data(),
+            entriesBuffer.data() + valuesIdx,
+            nValues * sizeof(float)
+        );
+        valuesIdx += nValues;
+
+        if (e.comment.has_value()) {
+            ghoul_assert(commentIdx < commentBuffer.size(), "Index too large");
+
+            // If we have a comment, we need to extract its length's worth of characters
+            // from the buffer
+            std::memcpy(e.comment->data(), &commentBuffer[commentIdx], e.comment->size());
+
+            // and then advance the index
+            commentIdx += static_cast<int>(e.comment->size());
+        }
     }
 
     //
@@ -245,6 +301,8 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
 }
 
 void saveCachedFile(const Dataset& dataset, const std::filesystem::path& path) {
+    ZoneScoped;
+
     std::ofstream file = std::ofstream(path, std::ofstream::binary);
 
     file.write(reinterpret_cast<const char*>(&DataCacheFileVersion), sizeof(int8_t));
@@ -297,18 +355,20 @@ void saveCachedFile(const Dataset& dataset, const std::filesystem::path& path) {
     checkSize<uint64_t>(dataset.entries.size(), "Too many entries");
     uint64_t nEntries = static_cast<uint64_t>(dataset.entries.size());
     file.write(reinterpret_cast<const char*>(&nEntries), sizeof(uint64_t));
-    for (const Dataset::Entry& e : dataset.entries) {
-        file.write(reinterpret_cast<const char*>(&e.position.x), sizeof(float));
-        file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(float));
-        file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(float));
 
-        checkSize<uint16_t>(e.data.size(), "Too many data variables");
-        uint16_t nValues = static_cast<uint16_t>(e.data.size());
-        file.write(reinterpret_cast<const char*>(&nValues), sizeof(uint16_t));
-        file.write(
-            reinterpret_cast<const char*>(e.data.data()),
-            e.data.size() * sizeof(float)
-        );
+    // We assume the number of values for each dataset to be the same, so we can store
+    // them upfront
+    size_t nValuesF = dataset.entries.empty() ? 0 : dataset.entries[0].data.size();
+    checkSize<uint16_t>(nValuesF, "Too many data variables");
+    uint16_t nValues = static_cast<uint16_t>(nValuesF);
+    std::vector<float> valuesBuffer;
+    valuesBuffer.reserve(dataset.entries.size() * nValues);
+
+    uint64_t totalCommentLength = 0;
+    for (const Dataset::Entry& e : dataset.entries) {
+        file.write(reinterpret_cast<const char*>(&e.position.x), 3 * sizeof(float));
+
+        valuesBuffer.insert(valuesBuffer.end(), e.data.begin(), e.data.end());
 
         if (e.comment.has_value()) {
             checkSize<uint16_t>(e.comment->size(), "Comment too long");
@@ -317,6 +377,22 @@ void saveCachedFile(const Dataset& dataset, const std::filesystem::path& path) {
             static_cast<uint16_t>(e.comment->size()) :
             0;
         file.write(reinterpret_cast<const char*>(&commentLen), sizeof(uint16_t));
+        totalCommentLength += commentLen;
+    }
+
+    // Write all of the datavalues next
+    file.write(reinterpret_cast<const char*>(&nValues), sizeof(uint16_t));
+    file.write(
+        reinterpret_cast<const char*>(valuesBuffer.data()),
+        valuesBuffer.size() * sizeof(float)
+    );
+
+    //
+    // Write all of the comments next. We don't have to store the individual comment
+    // lengths as the data values written before already have those stored. And since we
+    // are reading the comments in the same order as the dataset entries, we're good
+    file.write(reinterpret_cast<const char*>(&totalCommentLength), sizeof(uint64_t));
+    for (const Dataset::Entry& e : dataset.entries) {
         if (e.comment.has_value()) {
             file.write(e.comment->data(), e.comment->size());
         }
@@ -345,6 +421,8 @@ Dataset loadFileWithCache(std::filesystem::path path, std::optional<DataMapping>
 namespace label {
 
 Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
+    ZoneScoped;
+
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     const std::ifstream file = std::ifstream(path);

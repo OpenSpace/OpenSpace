@@ -118,6 +118,8 @@ documentation::Documentation Renderable::Documentation() {
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     if (!dictionary.hasKey(KeyType)) {
         throw ghoul::RuntimeError("Tried to create Renderable but no 'Type' was found");
     }

@@ -331,7 +331,7 @@ bool RenderableConstellationLines::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
         if (file.eof()) {
             break;
@@ -378,7 +378,7 @@ bool RenderableConstellationLines::readSpeckFile() {
         }
         while (dummy != "{");
 
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
         // Read the identifier
         std::stringstream id(line);
@@ -386,18 +386,18 @@ bool RenderableConstellationLines::readSpeckFile() {
 
         id >> dummy; // id command
         dummy.clear();
-        std::getline(id, identifier); // identifier
+        ghoul::getline(id, identifier); // identifier
         ghoul::trimWhitespace(identifier);
         constellationLine.name = constellationFullName(identifier);
 
         // Read the number of vertices
-        std::getline(file, line);
+        ghoul::getline(file, line);
         std::stringstream dim(line);
         dim >> constellationLine.numV;
 
         // We can now read the vertices data:
         for (int l = 0; l < constellationLine.numV; ++l) {
-            std::getline(file, line);
+            ghoul::getline(file, line);
             if (line.substr(0, 1) == "}") {
                 break;
             }
@@ -424,7 +424,7 @@ bool RenderableConstellationLines::readSpeckFile() {
             maxRadius = std::max(maxRadius, r);
         }
 
-        std::getline(file, line);
+        ghoul::getline(file, line);
         if (line.substr(0, 1) == "}") {
             _renderingConstellationsMap.insert({ lineIndex++, constellationLine });
         }

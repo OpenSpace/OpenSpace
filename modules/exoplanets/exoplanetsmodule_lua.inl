@@ -24,6 +24,7 @@
 
 #include <openspace/scene/scene.h>
 #include <ghoul/misc/csvreader.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <map>
 #include <string>
@@ -71,17 +72,17 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
     // 3. read sizeof(exoplanet) bytes into an exoplanet object.
     ExoplanetDataEntry p;
     std::string line;
-    while (std::getline(lut, line)) {
+    while (ghoul::getline(lut, line)) {
         std::istringstream ss(line);
         std::string name;
-        std::getline(ss, name, ',');
+        ghoul::getline(ss, name, ',');
 
         if (name.substr(0, name.length() - 2) != starName) {
             continue;
         }
 
         std::string location_s;
-        std::getline(ss, location_s);
+        ghoul::getline(ss, location_s);
         long location = std::stol(location_s.c_str());
 
         data.seekg(location);
@@ -576,7 +577,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     // Read number of lines
     int nExoplanets = 0;
-    while (std::getline(lookupTableFile, line)) {
+    while (ghoul::getline(lookupTableFile, line)) {
         ++nExoplanets;
     }
     lookupTableFile.clear();
@@ -584,17 +585,17 @@ std::vector<std::string> hostStarsWithSufficientData() {
     names.reserve(nExoplanets);
 
     ExoplanetDataEntry p;
-    while (std::getline(lookupTableFile, line)) {
+    while (ghoul::getline(lookupTableFile, line)) {
         std::stringstream ss(line);
         std::string name;
-        std::getline(ss, name, ',');
+        ghoul::getline(ss, name, ',');
         // Remove the last two characters, that specify the planet
         name = name.substr(0, name.size() - 2);
 
         // Don't want to list systems where there is not enough data to visualize.
         // So, test if there is before adding the name to the list.
         std::string location_s;
-        std::getline(ss, location_s);
+        ghoul::getline(ss, location_s);
         long location = std::stol(location_s.c_str());
 
         data.seekg(location);
@@ -738,7 +739,7 @@ listOfExoplanetsDeprecated()
 
     // Parse the file line by line to compose system information
     std::string row;
-    while (std::getline(inputDataFile, row)) {
+    while (ghoul::getline(inputDataFile, row)) {
         PlanetData planetData = ExoplanetsDataPreparationTask::parseDataRow(
             row,
             columnNames,

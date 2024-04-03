@@ -28,6 +28,7 @@
 #include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cstring>
 #include <fstream>
@@ -467,8 +468,8 @@ struct ScriptMessage {
         }
         std::string tmpReadbackScript;
         _script.erase();
-        for (int i = 0; i < numScriptLines; i++) {
-            std::getline(iss, tmpReadbackScript);
+        for (int i = 0; i < numScriptLines; ++i) {
+            ghoul::getline(iss, tmpReadbackScript);
             size_t start = tmpReadbackScript.find_first_not_of(" ");
             tmpReadbackScript = tmpReadbackScript.substr(start);
             _script.append(tmpReadbackScript);
