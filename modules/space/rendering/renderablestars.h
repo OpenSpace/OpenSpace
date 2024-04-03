@@ -60,7 +60,6 @@ public:
     bool isReady() const override;
 
     void loadPSFTexture();
-    void renderPSFToTexture();
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
@@ -107,24 +106,12 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
 
-    properties::OptionProperty _psfMethodOption;
     properties::OptionProperty _psfMultiplyOption;
     properties::FloatProperty _lumCent;
     properties::FloatProperty _radiusCent;
     properties::FloatProperty _brightnessCent;
     properties::FloatProperty _magnitudeExponent;
-    properties::PropertyOwner _spencerPSFParamOwner;
-    properties::FloatProperty _p0Param;
-    properties::FloatProperty _p1Param;
-    properties::FloatProperty _p2Param;
-    properties::FloatProperty _spencerAlphaConst;
-    properties::PropertyOwner _moffatPSFParamOwner;
-    properties::FloatProperty _FWHMConst;
-    properties::FloatProperty _moffatBetaConst;
-    properties::OptionProperty _renderingMethodOption;
-    properties::PropertyOwner _userProvidedTextureOwner;
     properties::PropertyOwner _parametersOwner;
-    properties::PropertyOwner _moffatMethodOwner;
     properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _disableFadeInDistance;
 
@@ -152,10 +139,6 @@ private:
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
-    GLuint _psfVao = 0;
-    GLuint _psfVbo = 0;
-    GLuint _psfTexture = 0;
-    GLuint _convolvedTexture = 0;
 };
 
 } // namespace openspace

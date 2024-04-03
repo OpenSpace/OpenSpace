@@ -57,11 +57,6 @@ namespace {
         "otherDataRange", "filterOutOfRange", "fixedColor"
     };
 
-    enum RenderMethod {
-        PointSpreadFunction = 0,
-        TextureBased
-    };
-
     enum SizeComposition {
         AppBrightness = 0,
         LumSize,
@@ -70,12 +65,6 @@ namespace {
         AppMagnitude,
         DistanceModulus
     };
-
-    constexpr int PsfMethodSpencer = 0;
-    constexpr int PsfMethodMoffat = 1;
-
-    constexpr int PsfTextureSize = 64;
-    constexpr int ConvolvedfTextureSize = 257;
 
     constexpr double PARSEC = 0.308567756E17;
 
@@ -240,7 +229,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    // Old Method
     constexpr openspace::properties::Property::PropertyInfo PsfTextureInfo = {
         "Texture",
         "Point Spread Function Texture",
@@ -249,13 +237,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    //constexpr openspace::properties::Property::PropertyInfo ShapeTextureInfo = {
-    //    "ShapeTexture",
-    //    "Shape Texture to be convolved",
-    //    "The path to the texture that should be used as the base shape for the stars"
-    //};
-
-    // PSF
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
         "MagnitudeExponent",
         "Magnitude Exponent",
@@ -266,41 +247,12 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderMethodOptionInfo = {
-        "RenderMethod",
-        "Render Method",
-        "Render method for the stars",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        UserProvidedTextureOptionInfo =
-    {
-        "UserProvidedTexture",
-        "User Provided Texture",
-        ""
-    };
-
     const openspace::properties::PropertyOwner::PropertyOwnerInfo
         ParametersOwnerOptionInfo =
     {
         "ParametersOwner",
         "Parameters Options",
         ""
-    };
-
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo MoffatMethodOptionInfo =
-    {
-        "MoffatMethodOption",
-        "Moffat Method",
-        ""
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PSFMethodOptionInfo = {
-        "PSFMethodOptionInfo",
-        "PSF Method Option",
-        "Debug option for PSF main function: Spencer or Moffat",
-        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeCompositionOptionInfo = {
@@ -328,64 +280,6 @@ namespace {
         "BrightnessPercent",
         "App Brightness Contribution",
         "App Brightness Contribution",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        SpencerPSFParamOwnerInfo =
-    {
-        "SpencerPSFParamOwner",
-        "Spencer PSF Paramameters",
-        "PSF parameters for Spencer"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo P0ParamInfo = {
-        "P0Param",
-        "P0",
-        "P0 parameter contribution",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo P1ParamInfo = {
-        "P1Param",
-        "P1",
-        "P1 parameter contribution",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo P2ParamInfo = {
-        "P2Param",
-        "P2",
-        "P2 parameter contribution",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo AlphaConstInfo = {
-        "AlphaConst",
-        "Alpha",
-        "Empirical Alpha Constant",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        MoffatPSFParamOwnerInfo =
-    {
-        "MoffatPSFParam",
-        "Moffat PSF Parameters",
-        "PSF parameters for Moffat"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FWHMInfo = {
-        "FWHM",
-        "FWHM",
-        "Moffat's FWHM",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo BetaInfo = {
-        "Beta",
-        "Beta",
-        "Moffat's Beta Constant",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -442,14 +336,6 @@ namespace {
 
         // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
         std::optional<float> magnitudeExponent;
-
-        enum class [[codegen::map(RenderMethod)]] RenderMethod {
-            PointSpreadFunction [[codegen::key("PSF")]],
-            TextureBased [[codegen::key("Texture Based")]]
-        };
-
-        // [[codegen::verbatim(RenderMethodOptionInfo.description)]]
-        RenderMethod renderMethod;
 
         // [[codegen::verbatim(PsfTextureInfo.description)]]
         std::filesystem::path texture;
@@ -534,10 +420,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _fixedColor(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
-    , _psfMethodOption(
-        PSFMethodOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
     , _psfMultiplyOption(
         SizeCompositionOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -546,21 +428,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _radiusCent(RadiusPercentInfo, 0.5f, 0.f, 3.f)
     , _brightnessCent(BrightnessPercentInfo, 0.5f, 0.f, 3.f)
     , _magnitudeExponent(MagnitudeExponentInfo, 6.2f, 5.f, 8.f)
-    , _spencerPSFParamOwner(SpencerPSFParamOwnerInfo)
-    , _p0Param(P0ParamInfo, 0.384f, 0.f, 1.f)
-    , _p1Param(P1ParamInfo, 0.478f, 0.f, 1.f)
-    , _p2Param(P2ParamInfo, 0.138f, 0.f, 1.f)
-    , _spencerAlphaConst(AlphaConstInfo, 0.02f, 0.000001f, 5.f)
-    , _moffatPSFParamOwner(MoffatPSFParamOwnerInfo)
-    , _FWHMConst(FWHMInfo, 10.4f, 0.f, 100.f)
-    , _moffatBetaConst(BetaInfo, 4.765f, 0.f, 100.f)
-    , _renderingMethodOption(
-        RenderMethodOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _userProvidedTextureOwner(UserProvidedTextureOptionInfo)
     , _parametersOwner(ParametersOwnerOptionInfo)
-    , _moffatMethodOwner(MoffatMethodOptionInfo)
     , _fadeInDistances(
         FadeInDistancesInfo,
         glm::vec2(0.f),
@@ -692,15 +560,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     addProperty(_filterOutOfRange);
 
-    _renderingMethodOption.addOption(
-        RenderMethod::PointSpreadFunction,
-        "Point Spread Function Based"
-    );
-    _renderingMethodOption.addOption(RenderMethod::TextureBased, "Textured Based");
-    addProperty(_renderingMethodOption);
-
-    _renderingMethodOption = codegen::map<RenderMethod>(p.renderMethod);
-
     _pointSpreadFunctionTexturePath = absPath(p.texture.string()).string();
     _pointSpreadFunctionFile = std::make_unique<File>(
         _pointSpreadFunctionTexturePath.value()
@@ -711,13 +570,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _pointSpreadFunctionFile->setCallback([this]() {
         _pointSpreadFunctionTextureIsDirty = true;
     });
-    _userProvidedTextureOwner.addProperty(_pointSpreadFunctionTexturePath);
-
-    _psfMethodOption.addOption(PsfMethodSpencer, "Spencer's Function");
-    _psfMethodOption.addOption(PsfMethodMoffat, "Moffat's Function");
-    _psfMethodOption = PsfMethodSpencer;
-    _psfMethodOption.onChange([this]() { renderPSFToTexture(); });
-    _parametersOwner.addProperty(_psfMethodOption);
+    addProperty(_pointSpreadFunctionTexturePath);
 
     _psfMultiplyOption.addOption(AppBrightness, "Use Star's Apparent Brightness");
     _psfMultiplyOption.addOption(LumSize, "Use Star's Luminosity and Size");
@@ -746,28 +599,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _magnitudeExponent = p.magnitudeExponent.value_or(_magnitudeExponent);
     _parametersOwner.addProperty(_magnitudeExponent);
 
-    auto renderPsf = [this]() { renderPSFToTexture(); };
-
-    _spencerPSFParamOwner.addProperty(_p0Param);
-    _p0Param.onChange(renderPsf);
-    _spencerPSFParamOwner.addProperty(_p1Param);
-    _p1Param.onChange(renderPsf);
-    _spencerPSFParamOwner.addProperty(_p2Param);
-    _p2Param.onChange(renderPsf);
-    _spencerPSFParamOwner.addProperty(_spencerAlphaConst);
-    _spencerAlphaConst.onChange(renderPsf);
-
-    _moffatPSFParamOwner.addProperty(_FWHMConst);
-    _FWHMConst.onChange(renderPsf);
-    _moffatPSFParamOwner.addProperty(_moffatBetaConst);
-    _moffatBetaConst.onChange(renderPsf);
-
-    _parametersOwner.addPropertySubOwner(_spencerPSFParamOwner);
-    _parametersOwner.addPropertySubOwner(_moffatPSFParamOwner);
-
-    addPropertySubOwner(_userProvidedTextureOwner);
     addPropertySubOwner(_parametersOwner);
-    addPropertySubOwner(_moffatMethodOwner);
 
     if (p.fadeInDistances.has_value()) {
         _fadeInDistances = *p.fadeInDistances;
@@ -809,74 +641,7 @@ void RenderableStars::initializeGL() {
     }
     _speckFileIsDirty = false;
 
-    LDEBUG("Creating Polygon Texture");
-
-    glGenVertexArrays(1, &_psfVao);
-    glGenBuffers(1, &_psfVbo);
-    glBindVertexArray(_psfVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _psfVbo);
-
-    constexpr std::array<GLfloat, 24> VertexData = {
-        //x      y     s     t
-        -1.f, -1.f, 0.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-        -1.f,  1.f, 0.f, 1.f,
-        -1.f, -1.f, 0.f, 0.f,
-         1.f, -1.f, 1.f, 0.f,
-         1.f,  1.f, 1.f, 1.f
-    };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-
-    glGenTextures(1, &_psfTexture);
-    glBindTexture(GL_TEXTURE_2D, _psfTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA8,
-        PsfTextureSize,
-        PsfTextureSize,
-        0,
-        GL_RGBA,
-        GL_BYTE,
-        nullptr
-    );
-
-
-    LDEBUG("Creating Convolution Texture");
-
-    glGenTextures(1, &_convolvedTexture);
-    glBindTexture(GL_TEXTURE_2D, _convolvedTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA8,
-        ConvolvedfTextureSize,
-        ConvolvedfTextureSize,
-        0,
-        GL_RGBA,
-        GL_BYTE,
-        nullptr
-    );
-
-    //loadShapeTexture();
     loadPSFTexture();
-    renderPSFToTexture();
 }
 
 void RenderableStars::deinitializeGL() {
@@ -886,7 +651,6 @@ void RenderableStars::deinitializeGL() {
     _vao = 0;
 
     _colorTexture = nullptr;
-    //_shapeTexture = nullptr;
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());
@@ -922,108 +686,6 @@ void RenderableStars::loadPSFTexture() {
         );
     }
     _pointSpreadFunctionTextureIsDirty = false;
-}
-
-void RenderableStars::renderPSFToTexture() {
-    // Creates the FBO for the calculations
-    GLuint psfFBO = 0;
-    glGenFramebuffers(1, &psfFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, psfFBO);
-    GLenum drawBuffers = GL_COLOR_ATTACHMENT0;
-    glDrawBuffers(1, &drawBuffers);
-
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _psfTexture, 0);
-    glViewport(0, 0, PsfTextureSize, PsfTextureSize);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> program =
-        ghoul::opengl::ProgramObject::Build(
-            "RenderStarPSFToTexture",
-            absPath("${MODULE_SPACE}/shaders/psfToTexture_vs.glsl"),
-            absPath("${MODULE_SPACE}/shaders/psfToTexture_fs.glsl")
-        );
-
-    program->activate();
-    constexpr std::array<float, 4> Black = { 0.f, 0.f, 0.f, 0.f };
-    glClearBufferfv(GL_COLOR, 0, Black.data());
-
-    program->setUniform("psfMethod", _psfMethodOption.value());
-    program->setUniform("p0Param", _p0Param);
-    program->setUniform("p1Param", _p1Param);
-    program->setUniform("p2Param", _p2Param);
-    program->setUniform("alphaConst", _spencerAlphaConst);
-    program->setUniform("FWHM", _FWHMConst);
-    program->setUniform("betaConstant", _moffatBetaConst);
-
-    // Draws psf to texture
-    glBindVertexArray(_psfVao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-
-    program->deactivate();
-
-    // JCC: Convolution is disabled while FFT is not enabled
-    //// Now convolves with a disc shape for final shape
-
-    //GLuint convolveFBO;
-    //glGenFramebuffers(1, &convolveFBO);
-    //glBindFramebuffer(GL_FRAMEBUFFER, convolveFBO);
-    //glDrawBuffers(1, drawBuffers);
-
-    //glFramebufferTexture(
-    //    GL_FRAMEBUFFER,
-    //    GL_COLOR_ATTACHMENT0,
-    //    _convolvedTexture,
-    //    0
-    //);
-
-    //glViewport(0, 0, _convolvedfTextureSize, _convolvedfTextureSize);
-
-    //std::unique_ptr<ghoul::opengl::ProgramObject> programConvolve =
-    //    ghoul::opengl::ProgramObject::Build("ConvolvePSFandStarShape",
-    //        absPath("${MODULE_SPACE}/shaders/convolution_vs.glsl"),
-    //        absPath("${MODULE_SPACE}/shaders/convolution_fs.glsl")
-    //    );
-
-    //programConvolve->activate();
-    //glClearBufferfv(GL_COLOR, 0, black);
-
-    //ghoul::opengl::TextureUnit psfTextureUnit;
-    //psfTextureUnit.activate();
-    //glBindTexture(GL_TEXTURE_2D, _psfTexture);
-    //programConvolve->setUniform("psfTexture", psfTextureUnit);
-    //
-    //ghoul::opengl::TextureUnit shapeTextureUnit;
-    //shapeTextureUnit.activate();
-    //_shapeTexture->bind();
-    //programConvolve->setUniform("shapeTexture", shapeTextureUnit);
-
-    //programConvolve->setUniform("psfTextureSize", _psfTextureSize);
-    //programConvolve->setUniform(
-    //    "convolvedfTextureSize",
-    //    _convolvedfTextureSize
-    //);
-
-    //// Convolves to texture
-    //glBindVertexArray(_psfVao);
-    //glDrawArrays(GL_TRIANGLES, 0, 6);
-    //glBindVertexArray(0);
-
-    //programConvolve->deactivate();
-
-    //// Restores system state
-    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    //glViewport(
-    //    m_viewport[0],
-    //    m_viewport[1],
-    //    m_viewport[2],
-    //    m_viewport[3]
-    //);
-    glDeleteFramebuffers(1, &psfFBO);
-    //glDeleteFramebuffers(1, &convolveFBO);
-
-    // Restores OpenGL blending state
-    global::renderEngine->openglStateCache().resetBlendState();
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {
@@ -1090,15 +752,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
-
-    if (_renderingMethodOption.value() == RenderMethod::PointSpreadFunction) {
-        glBindTexture(GL_TEXTURE_2D, _psfTexture);\
-        // Convolutioned texture
-        //glBindTexture(GL_TEXTURE_2D, _convolvedTexture);
-    }
-    else if (_renderingMethodOption.value() == RenderMethod::TextureBased) {
-        _pointSpreadFunctionTexture->bind();
-    }
+    _pointSpreadFunctionTexture->bind();
 
     _program->setUniform(_uniformCache.psfTexture, psfUnit);
 
