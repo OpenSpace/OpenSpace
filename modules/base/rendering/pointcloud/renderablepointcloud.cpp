@@ -498,7 +498,7 @@ documentation::Documentation RenderablePointCloud::Documentation() {
 RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Sizing", "Sizing", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 25.f)
-    , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
+    , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 100.f)
     , useMaxSizeControl(UseMaxSizeControlInfo, false)
     , maxAngularSize(MaxSizeInfo, 1.f, 0.f, 45.f)
 {
