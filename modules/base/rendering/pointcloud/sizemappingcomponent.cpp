@@ -110,7 +110,7 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
             parameterOption.addOption(static_cast<int>(i), opts[i]);
 
             if (p.parameter.has_value() && *p.parameter == opts[i]) {
-                indexOfProvidedOption = i;
+                indexOfProvidedOption = static_cast<int>(i);
             }
         }
     }
