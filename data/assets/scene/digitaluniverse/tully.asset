@@ -135,9 +135,10 @@ local TullyGalaxiesImagesNew = {
     SizeSettings = {
       SizeMapping = {
         ParameterOptions = { "diamkpc" },
-        ScaleFactor = 0.001
+        ScaleFactor = 3.08567758e19
+        --ScaleFactor = 0.001
       },
-      ScaleExponent = 22.5
+      ScaleExponent = 0.0 -- No exponential scaling
     }
   },
   GUI = {
