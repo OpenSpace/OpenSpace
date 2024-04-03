@@ -83,11 +83,11 @@ void VersionChecker::cancel() {
             std::istringstream versionData(versionString);
 
             std::string token;
-            std::getline(versionData, token, '.');
+            ghoul::getline(versionData, token, '.');
             const int major = std::atoi(token.c_str());
-            std::getline(versionData, token, '.');
+            ghoul::getline(versionData, token, '.');
             const int minor = std::atoi(token.c_str());
-            std::getline(versionData, token, '.');
+            ghoul::getline(versionData, token, '.');
             const int patch = std::atoi(token.c_str());
 
             _latestVersion = { major, minor, patch };

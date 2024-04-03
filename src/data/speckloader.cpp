@@ -86,7 +86,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 
     std::string line;
     // First phase: Loading the header information
-    while (std::getline(file, line)) {
+    while (ghoul::getline(file, line)) {
         currentLineNumber++;
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
@@ -247,9 +247,9 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
     );
 
     // For the first line, we already loaded it and rejected it above, so if we do another
-    // std::getline, we'd miss the first data value line
+    // ghoul::getline, we'd miss the first data value line
     bool isFirst = true;
-    while (isFirst || std::getline(file, line)) {
+    while (isFirst || ghoul::getline(file, line)) {
         currentLineNumber++;
         isFirst = false;
 
@@ -345,7 +345,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         }
 
         std::string rest;
-        std::getline(str, rest);
+        ghoul::getline(str, rest);
         if (!rest.empty()) {
 
             strip(rest);
@@ -383,7 +383,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
 
     std::string line;
     // First phase: Loading the header information
-    while (std::getline(file, line)) {
+    while (ghoul::getline(file, line)) {
         // Ignore empty line or commented-out lines
         if (line.empty() || line[0] == '#') {
             continue;
@@ -423,9 +423,9 @@ Labelset loadLabelFile(std::filesystem::path path) {
     }
 
     // For the first line, we already loaded it and rejected it above, so if we do another
-    // std::getline, we'd miss the first data value line
+    // ghoul::getline, we'd miss the first data value line
     bool isFirst = true;
-    while (isFirst || std::getline(file, line)) {
+    while (isFirst || ghoul::getline(file, line)) {
         isFirst = false;
 
         // Ignore empty line or commented-out lines
@@ -463,7 +463,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
         str >> entry.position.x >> entry.position.y >> entry.position.z;
 
         std::string rest;
-        std::getline(str, rest);
+        ghoul::getline(str, rest);
         strip(rest);
 
         if (startsWith(rest, "id")) {
@@ -519,7 +519,7 @@ ColorMap loadCmapFile(std::filesystem::path path) {
     int nColorLines = -1;
 
     std::string line;
-    while (std::getline(file, line)) {
+    while (ghoul::getline(file, line)) {
         // Ignore empty line or commented-out lines
         if (line.empty() || line[0] == '#') {
             continue;

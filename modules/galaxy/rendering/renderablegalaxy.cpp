@@ -42,6 +42,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
@@ -734,10 +735,10 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
 
     // Read header for OFF (Object File Format)
     std::string line;
-    std::getline(pointFile, line);
+    ghoul::getline(pointFile, line);
 
     // Read point count
-    std::getline(pointFile, line);
+    ghoul::getline(pointFile, line);
     std::istringstream iss(line);
     int64_t nPoints = 0;
     iss >> nPoints;
@@ -759,7 +760,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
         float g = 0.f;
         float b = 0.f;
         float a = 0.f;
-        std::getline(pointFile, line);
+        ghoul::getline(pointFile, line);
         std::istringstream issp(line);
         issp >> x >> y >> z >> r >> g >> b >> a;
 
@@ -781,6 +782,8 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
 RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
                                                         const std::filesystem::path& file)
 {
+    ZoneScoped;
+
     std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
     if (!fileStream.good()) {
         LERROR(std::format("Error opening file '{}' for loading cache file", file));

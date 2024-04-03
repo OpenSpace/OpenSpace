@@ -165,6 +165,7 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
 
 bool ScriptEngine::runScript(const std::string& script, const ScriptCallback& callback) {
     ZoneScoped;
+    ZoneText(script.c_str(), script.size());
 
     ghoul_assert(!script.empty(), "Script must not be empty");
 
@@ -177,7 +178,7 @@ bool ScriptEngine::runScript(const std::string& script, const ScriptCallback& ca
         if (callback) {
             ghoul::Dictionary returnValue =
                 ghoul::lua::loadArrayDictionaryFromString(script, _state);
-            callback(returnValue);
+            callback(std::move(returnValue));
         }
         else {
             ghoul::lua::runScript(_state, script);
