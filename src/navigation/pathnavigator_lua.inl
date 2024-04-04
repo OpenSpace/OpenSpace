@@ -331,9 +331,9 @@ namespace {
         ));
     }
 
-    // When copy pasting a printed navigation state from the console, The formatting of
+    // When copy pasting a printed navigation state from the console, the formatting of
     // the navigation state dictionary won't be completely correct if using the
-    // dictionary directly , due to the number keys for arrays. We solve this by first
+    // dictionary directly, due to the number keys for arrays. We solve this by first
     // creating an object of the correct datatype
     // (@TODO emmbr 2024-04-03, This formatting problem should probably be fixed)
     interaction::NavigationState ns = interaction::NavigationState(navigationState);
@@ -344,7 +344,7 @@ namespace {
 
     if (fadeDuration.has_value()) {
         global::navigationHandler->triggerFadeToTransition(
-            script,
+            std::move(script),
             static_cast<float>(*fadeDuration)
         );
     }
@@ -373,7 +373,7 @@ namespace {
 
     if (fadeDuration.has_value()) {
         global::navigationHandler->triggerFadeToTransition(
-            script,
+            std::move(script),
             static_cast<float>(*fadeDuration)
         );
     }

@@ -109,7 +109,7 @@ NavigationHandler::NavigationHandler()
     , _disableMouseInputs(DisableMouseInputInfo, false)
     , _disableJoystickInputs(DisableJoystickInputInfo, false)
     , _useKeyFrameInteraction(FrameInfo, false)
-    , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.0f, 10.f)
+    , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.f, 10.f)
 {
     addPropertySubOwner(_orbitalNavigator);
     addPropertySubOwner(_pathNavigator);
@@ -198,20 +198,20 @@ void NavigationHandler::triggerFadeToTransition(const std::string& transitionScr
 {
     const float duration = fadeDuration.value_or(_jumpToFadeDuration);
 
-    std::string onArrivalScript = std::format(
+    const std::string onArrivalScript = std::format(
         "{} "
         "openspace.setPropertyValueSingle("
         "'RenderEngine.BlackoutFactor', 1, {}, 'QuadraticEaseIn'"
         ")", transitionScript, duration
     );
-    std::string script = std::format(
+    const std::string script = std::format(
         "openspace.setPropertyValueSingle("
         "'RenderEngine.BlackoutFactor', 0, {}, 'QuadraticEaseOut', [[{}]]"
         ")", duration, onArrivalScript
     );
     // No syncing, as this was called from a script that should have been synced already
     global::scriptEngine->queueScript(
-        script,
+        std::move(script),
         scripting::ScriptEngine::ShouldBeSynchronized::No,
         scripting::ScriptEngine::ShouldSendToRemote::No
     );
