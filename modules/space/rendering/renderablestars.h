@@ -59,7 +59,6 @@ public:
 
     bool isReady() const override;
 
-    void loadPSFTexture();
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
@@ -74,6 +73,7 @@ private:
         FixedColor = 4
     };
 
+    void loadPSFTexture();
     void loadData();
     std::vector<float> createDataSlice(ColorOption option);
 
@@ -83,8 +83,9 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
 
-    properties::PropertyOwner _dataMappingContainer;
     struct {
+        properties::PropertyOwner container;
+
         properties::StringProperty bvColor;
         properties::StringProperty luminance;
         properties::StringProperty absoluteMagnitude;
@@ -103,8 +104,8 @@ private:
     properties::Vec3Property _fixedColor;
     properties::BoolProperty _filterOutOfRange;
 
-    struct Texture {
-        properties::PropertyOwner owner;
+    struct TextureComponent {
+        properties::PropertyOwner container;
 
         properties::StringProperty texturePath;
         properties::FloatProperty opacity;
@@ -114,25 +115,28 @@ private:
         std::unique_ptr<ghoul::filesystem::File> file;
     };
 
-    Texture _halo;
-    Texture _glare;
+    TextureComponent _halo;
+    TextureComponent _glare;
+
+    struct {
+        properties::PropertyOwner container;
+        properties::OptionProperty sizeComposition;
+        properties::FloatProperty lumCent;
+        properties::FloatProperty radiusCent;
+        properties::FloatProperty brightnessCent;
+    } _parameters;
 
     properties::FloatProperty _magnitudeExponent;
-    properties::OptionProperty _psfMultiplyOption;
-    properties::FloatProperty _lumCent;
-    properties::FloatProperty _radiusCent;
-    properties::FloatProperty _brightnessCent;
-    properties::PropertyOwner _parametersOwner;
     properties::Vec2Property _fadeInDistances;
-    properties::BoolProperty _disableFadeInDistance;
+    properties::BoolProperty _enableFadeInDistance;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
-        modelMatrix, cameraUp, cameraViewProjectionMatrix, colorOption, magnitudeExponent,
-        eyePosition, psfParamConf, lumCent, radiusCent, brightnessCent, colorTexture,
-        alphaValue, psfTexture, otherDataTexture, otherDataRange, filterOutOfRange,
-        fixedColor, hasGlare, glareTexture, haloOpacity, glareOpacity,
-        haloScale, glareScale
+        modelMatrix, cameraViewProjectionMatrix, cameraUp, eyePosition, colorOption,
+        magnitudeExponent, sizeComposition, lumCent, radiusCent, brightnessCent,
+        colorTexture, alphaValue, otherDataTexture, otherDataRange, filterOutOfRange,
+        fixedColor, haloTexture, haloOpacity, haloScale, hasGlare, glareTexture,
+        glareOpacity, glareScale
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;
@@ -149,7 +153,6 @@ private:
     float _staticFilterReplacementValue = 0.f;
 
     GLuint _vao = 0;
-    GLuint _vbo = 0;
 };
 
 } // namespace openspace

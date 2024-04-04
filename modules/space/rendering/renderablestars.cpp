@@ -51,12 +51,11 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableStars";
 
     constexpr std::array<const char*, 23> UniformNames = {
-        "modelMatrix", "cameraUp", "cameraViewProjectionMatrix", "colorOption",
-        "magnitudeExponent", "eyePosition", "psfParamConf", "lumCent", "radiusCent",
-        "brightnessCent", "colorTexture", "alphaValue", "psfTexture", "otherDataTexture",
-        "otherDataRange", "filterOutOfRange", "fixedColor", "hasGlare",
-        "glareTexture", "haloOpacity", "glareOpacity", "haloScale",
-        "glareScale"
+        "modelMatrix", "cameraViewProjectionMatrix", "cameraUp", "eyePosition",
+        "colorOption", "magnitudeExponent", "sizeComposition", "lumCent", "radiusCent",
+        "brightnessCent", "colorTexture", "alphaValue", "otherDataTexture",
+        "otherDataRange", "filterOutOfRange", "fixedColor", "haloTexture", "haloOpacity",
+        "haloScale", "hasGlare", "glareTexture", "glareOpacity",  "glareScale"
     };
 
     enum SizeComposition {
@@ -276,9 +275,7 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        ParametersOwnerOptionInfo =
-    {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo ParametersOwnerInfo = {
         "ParametersOwner",
         "Parameters Options",
         ""
@@ -321,9 +318,9 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
-        "DisableFadeIn",
-        "Disable Fade-in effect",
+    constexpr openspace::properties::Property::PropertyInfo EnableFadeInInfo = {
+        "EnableFadeIn",
+        "Enable Fade-in effect",
         "Enables/Disables the Fade-in effect",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -350,7 +347,7 @@ namespace {
         std::optional<std::string> otherData;
 
         // [[codegen::verbatim(OtherDataColorMapInfo.description)]]
-        std::optional<std::string> otherDataColorMap;
+        std::optional<std::filesystem::path> otherDataColorMap;
 
         // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
@@ -420,8 +417,8 @@ namespace {
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
 
-        // [[codegen::verbatim(DisableFadeInInfo.description)]]
-        std::optional<bool> disableFadeIn;
+        // [[codegen::verbatim(EnableFadeInInfo.description)]]
+        std::optional<bool> enableFadeIn;
     };
 #include "renderablestars_codegen.cpp"
 }  // namespace
@@ -436,9 +433,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _speckFile(SpeckFileInfo)
     , _colorTexturePath(ColorTextureInfo)
-    //, _shapeTexturePath(ShapeTextureInfo)
-    , _dataMappingContainer({ "DataMapping", "Data Mapping" })
     , _dataMapping{
+        properties::PropertyOwner({ "DataMapping", "Data Mapping" }),
         properties::StringProperty(MappingBvInfo),
         properties::StringProperty(MappingLuminanceInfo),
         properties::StringProperty(MappingAbsMagnitudeInfo),
@@ -474,76 +470,83 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         properties::FloatProperty(PartialOpacityInfo, 1.f, 0.f, 5.f),
         properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
+    , _parameters{
+        properties::PropertyOwner(ParametersOwnerInfo),
+        properties::OptionProperty(
+            SizeCompositionOptionInfo,
+            properties::OptionProperty::DisplayType::Dropdown
+        ),
+        properties::FloatProperty(LumPercentInfo, 0.5f, 0.f, 3.f),
+        properties::FloatProperty(RadiusPercentInfo, 0.5f, 0.f, 3.f),
+        properties::FloatProperty(BrightnessPercentInfo, 0.5f, 0.f, 3.f)
+    }
     , _magnitudeExponent(MagnitudeExponentInfo, 6.2f, 5.f, 8.f)
-    , _psfMultiplyOption(
-        SizeCompositionOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _lumCent(LumPercentInfo, 0.5f, 0.f, 3.f)
-    , _radiusCent(RadiusPercentInfo, 0.5f, 0.f, 3.f)
-    , _brightnessCent(BrightnessPercentInfo, 0.5f, 0.f, 3.f)
-    , _parametersOwner(ParametersOwnerOptionInfo)
     , _fadeInDistances(
         FadeInDistancesInfo,
         glm::vec2(0.f),
         glm::vec2(0.f),
         glm::vec2(100.f)
     )
-    , _disableFadeInDistance(DisableFadeInInfo, true)
+    , _enableFadeInDistance(EnableFadeInInfo, false)
 {
-    using File = ghoul::filesystem::File;
-
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(Fadeable::_opacity);
-
-    _dataMapping.bvColor = p.dataMapping.bv.value_or("");
-    _dataMapping.bvColor.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.bvColor);
-
-    _dataMapping.luminance = p.dataMapping.luminance.value_or("");
-    _dataMapping.luminance.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.luminance);
-
-    _dataMapping.absoluteMagnitude = p.dataMapping.absoluteMagnitude.value_or("");
-    _dataMapping.absoluteMagnitude.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.absoluteMagnitude);
-
-    _dataMapping.apparentMagnitude = p.dataMapping.apparentMagnitude.value_or("");
-    _dataMapping.apparentMagnitude.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.apparentMagnitude);
-
-    _dataMapping.vx = p.dataMapping.vx.value_or("");
-    _dataMapping.vx.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.vx);
-
-    _dataMapping.vy = p.dataMapping.vy.value_or("");
-    _dataMapping.vy.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.vy);
-
-    _dataMapping.vz = p.dataMapping.vz.value_or("");
-    _dataMapping.vz.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.vz);
-
-    _dataMapping.speed = p.dataMapping.speed.value_or("");
-    _dataMapping.speed.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.speed);
-
-    addPropertySubOwner(_dataMappingContainer);
 
     _speckFile = p.speckFile.string();
     _speckFile.onChange([this]() { _speckFileIsDirty = true; });
     addProperty(_speckFile);
 
+
+    _colorTextureFile = std::make_unique<ghoul::filesystem::File>(p.colorMap);
+    _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
     _colorTexturePath = p.colorMap.string();
-    _colorTextureFile = std::make_unique<File>(_colorTexturePath.value());
+    _colorTexturePath.onChange([&] {
+        if (std::filesystem::exists(_colorTexturePath.value())) {
+            _colorTextureIsDirty = true;
+        }
+        else {
+            LWARNING(std::format("File not found: {}", _colorTexturePath.value()));
+        }
+        });
+    addProperty(_colorTexturePath);
 
-    if (p.otherDataColorMap.has_value()) {
-        _otherDataColorMapPath = absPath(*p.otherDataColorMap).string();
-    }
 
-    _fixedColor.setViewOption(properties::Property::ViewOptions::Color, true);
-    addProperty(_fixedColor);
+    _dataMapping.bvColor = p.dataMapping.bv.value_or(_dataMapping.bvColor);
+    _dataMapping.bvColor.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.bvColor);
+
+    _dataMapping.luminance = p.dataMapping.luminance.value_or(_dataMapping.luminance);
+    _dataMapping.luminance.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.luminance);
+
+    _dataMapping.absoluteMagnitude =
+        p.dataMapping.absoluteMagnitude.value_or(_dataMapping.absoluteMagnitude);
+    _dataMapping.absoluteMagnitude.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.absoluteMagnitude);
+
+    _dataMapping.apparentMagnitude =
+        p.dataMapping.apparentMagnitude.value_or(_dataMapping.apparentMagnitude);
+    _dataMapping.apparentMagnitude.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.apparentMagnitude);
+
+    _dataMapping.vx = p.dataMapping.vx.value_or(_dataMapping.vx);
+    _dataMapping.vx.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.vx);
+
+    _dataMapping.vy = p.dataMapping.vy.value_or(_dataMapping.vy);
+    _dataMapping.vy.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.vy);
+
+    _dataMapping.vz = p.dataMapping.vz.value_or(_dataMapping.vz);
+    _dataMapping.vz.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.vz);
+
+    _dataMapping.speed = p.dataMapping.speed.value_or(_dataMapping.speed);
+    _dataMapping.speed.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.speed);
+    addPropertySubOwner(_dataMapping.container);
+
 
     _colorOption.addOptions({
         { ColorOption::Color, "Color" },
@@ -571,106 +574,95 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
                 break;
         }
     }
-    _colorOption.onChange([&] { _dataIsDirty = true; });
+    _colorOption.onChange([this]() { _dataIsDirty = true; });
     addProperty(_colorOption);
 
-    _colorTexturePath.onChange([&] {
-        if (std::filesystem::exists(_colorTexturePath.value())) {
-            _colorTextureIsDirty = true;
-        }
-        else {
-            LWARNING(std::format("File not found: {}", _colorTexturePath.value()));
-        }
-    });
-    _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
-    addProperty(_colorTexturePath);
 
-    _queuedOtherData = p.otherData.value_or(_queuedOtherData);
 
     _otherDataOption.onChange([this]() { _dataIsDirty = true; });
     addProperty(_otherDataOption);
 
+
+    _otherDataColorMapPath.onChange([this]() { _otherDataColorMapIsDirty = true; });
+    if (p.otherDataColorMap.has_value()) {
+        _otherDataColorMapPath = p.otherDataColorMap->string();
+    }
+    addProperty(_otherDataColorMapPath);
+
+
     _otherDataRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_otherDataRange);
 
-    addProperty(_otherDataColorMapPath);
-    _otherDataColorMapPath.onChange([this]() {
-        if (std::filesystem::exists(_otherDataColorMapPath.value())) {
-            _otherDataColorMapIsDirty = true;
-        }
-        else {
-            LWARNING(std::format("File not found: {}", _otherDataColorMapPath.value()));
-        }
-    });
 
-    _staticFilterValue = p.staticFilter;
-    _staticFilterReplacementValue =
-        p.staticFilterReplacement.value_or(_staticFilterReplacementValue);
+    _fixedColor.setViewOption(properties::Property::ViewOptions::Color, true);
+    addProperty(_fixedColor);
+
 
     addProperty(_filterOutOfRange);
+
+
+    auto markTextureAsDirty = [this]() {_pointSpreadFunctionTextureIsDirty = true; };
+    _halo.texturePath = absPath(p.halo.texture.string()).string();
+    _halo.texturePath.onChange(markTextureAsDirty);
+    _halo.file = std::make_unique<ghoul::filesystem::File>(_halo.texturePath.value());
+    _halo.file->setCallback(markTextureAsDirty);
+    _halo.container.addProperty(_halo.texturePath);
+    _halo.opacity = p.halo.partialOpacity.value_or(_halo.opacity);
+    _halo.container.addProperty(_halo.opacity);
+    _halo.scale = p.halo.scale.value_or(_halo.scale);
+    _halo.container.addProperty(_halo.scale);
+    addPropertySubOwner(_halo.container);
+
+    if (p.glare.has_value()) {
+        _glare.texturePath = absPath(p.glare->texture.string()).string();
+        _glare.file =
+            std::make_unique<ghoul::filesystem::File>(_glare.texturePath.value());
+        _glare.file->setCallback(markTextureAsDirty);
+        _glare.opacity = p.glare->partialOpacity.value_or(_glare.opacity);
+        _glare.scale = p.glare->scale.value_or(_glare.scale);
+    }
+    _glare.texturePath.onChange(markTextureAsDirty);
+    _glare.container.addProperty(_glare.texturePath);
+    _glare.container.addProperty(_glare.opacity);
+    _glare.container.addProperty(_glare.scale);
+    addPropertySubOwner(_glare.container);
+
 
     _magnitudeExponent = p.magnitudeExponent.value_or(_magnitudeExponent);
     addProperty(_magnitudeExponent);
 
-    _psfMultiplyOption.addOption(AppBrightness, "Use Star's Apparent Brightness");
-    _psfMultiplyOption.addOption(LumSize, "Use Star's Luminosity and Size");
-    _psfMultiplyOption.addOption(
-        LumSizeAppBrightness,
-        "Luminosity, Size, App Brightness"
-    );
-    _psfMultiplyOption.addOption(AbsMagnitude, "Absolute Magnitude");
-    _psfMultiplyOption.addOption(AppMagnitude, "Apparent Magnitude");
-    _psfMultiplyOption.addOption(DistanceModulus, "Distance Modulus");
 
+    _parameters.sizeComposition.addOptions({
+        { AppBrightness, "Use Star's Apparent Brightness" },
+        { LumSize, "Use Star's Luminosity and Size" },
+        { LumSizeAppBrightness, "Luminosity, Size, App Brightness" },
+        { AbsMagnitude, "Absolute Magnitude" },
+        { AppMagnitude, "Apparent Magnitude" },
+        { DistanceModulus, "Distance Modulus" }
+    });
+    _parameters.sizeComposition =
+        p.sizeComposition.has_value() ?
+        static_cast<int>(codegen::map<SizeComposition>(*p.sizeComposition)) :
+        SizeComposition::DistanceModulus;
+    _parameters.container.addProperty(_parameters.sizeComposition);
 
-    if (p.sizeComposition.has_value()) {
-        _psfMultiplyOption =
-            static_cast<int>(codegen::map<SizeComposition>(*p.sizeComposition));
-    }
-    else {
-        _psfMultiplyOption = 5;
-    }
-
-    _parametersOwner.addProperty(_psfMultiplyOption);
-    _parametersOwner.addProperty(_lumCent);
-    _parametersOwner.addProperty(_radiusCent);
-    _parametersOwner.addProperty(_brightnessCent);
-
-    _halo.texturePath = absPath(p.halo.texture.string()).string();
-    _halo.texturePath.onChange([this]() { _pointSpreadFunctionTextureIsDirty = true; });
-    _halo.file = std::make_unique<File>(_halo.texturePath.value());
-    _halo.file->setCallback([this]() { _pointSpreadFunctionTextureIsDirty = true; });
-    _halo.owner.addProperty(_halo.texturePath);
-    _halo.opacity = p.halo.partialOpacity.value_or(_halo.opacity);
-    _halo.owner.addProperty(_halo.opacity);
-    _halo.scale = p.halo.scale.value_or(_halo.scale);
-    _halo.owner.addProperty(_halo.scale);
-    addPropertySubOwner(_halo.owner);
-
-    if (p.glare.has_value()) {
-        _glare.texturePath = absPath(p.glare->texture.string()).string();
-        _glare.file = std::make_unique<File>(_glare.texturePath.value());
-        _glare.file->setCallback(
-            [this]() { _pointSpreadFunctionTextureIsDirty = true; }
-        );
-        _glare.opacity = p.glare->partialOpacity.value_or(_glare.opacity);
-        _glare.scale = p.glare->scale.value_or(_glare.scale);
-    }
-    _glare.texturePath.onChange([this]() { _pointSpreadFunctionTextureIsDirty = true; });
-    _glare.owner.addProperty(_glare.texturePath);
-    _glare.owner.addProperty(_glare.opacity);
-    _glare.owner.addProperty(_glare.scale);
-    addPropertySubOwner(_glare.owner);
-
-    addPropertySubOwner(_parametersOwner);
+    _parameters.container.addProperty(_parameters.lumCent);
+    _parameters.container.addProperty(_parameters.radiusCent);
+    _parameters.container.addProperty(_parameters.brightnessCent);
+    addPropertySubOwner(_parameters.container);
 
     if (p.fadeInDistances.has_value()) {
         _fadeInDistances = *p.fadeInDistances;
-        _disableFadeInDistance = false;
+        _enableFadeInDistance = true;
         _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
         addProperty(_fadeInDistances);
-        addProperty(_disableFadeInDistance);
+        addProperty(_enableFadeInDistance);
     }
+
+    _queuedOtherData = p.otherData.value_or(_queuedOtherData);
+    _staticFilterValue = p.staticFilter;
+    _staticFilterReplacementValue =
+        p.staticFilterReplacement.value_or(_staticFilterReplacementValue);
 }
 
 bool RenderableStars::isReady() const {
@@ -684,6 +676,16 @@ void RenderableStars::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
         absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
     );
+
+    glGenVertexArrays(1, &_vao);
+    GLuint vbo = 0;
+    glGenBuffers(1, &vbo);
+
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    glDeleteBuffers(1, &vbo);
+    glBindVertexArray(0);
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
@@ -708,8 +710,6 @@ void RenderableStars::initializeGL() {
 }
 
 void RenderableStars::deinitializeGL() {
-    glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
@@ -722,59 +722,39 @@ void RenderableStars::deinitializeGL() {
 }
 
 void RenderableStars::loadPSFTexture() {
-    _halo.texture = nullptr;
-    if (!_halo.texturePath.value().empty() &&
-        std::filesystem::exists(_halo.texturePath.value()))
-    {
-        _halo.texture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_halo.texturePath).string(),
+    auto markPsfTextureAsDirty = [this]() { _pointSpreadFunctionTextureIsDirty = true; };
+    auto loadTexture = [markPsfTextureAsDirty](TextureComponent& component) {
+        using Texture = ghoul::opengl::Texture;
+
+        component.texture = nullptr;
+        const std::string path = component.texturePath;
+        if (path.empty() || !std::filesystem::exists(path)) {
+            return;
+        }
+
+        component.texture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(path).string(),
             2
         );
 
-        if (_halo.texture) {
-            LDEBUG(std::format(
-                "Loaded texture from '{}'", absPath(_halo.texturePath)
-            ));
-            _halo.texture->uploadTexture();
+        if (!component.texture) {
+            return;
         }
-        _halo.texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
+
+        LDEBUG(std::format("Loaded texture from '{}'", absPath(component.texturePath)));
+        component.texture->uploadTexture();
+        component.texture->setWrapping(Texture::WrappingMode::ClampToBorder);
+
         constexpr std::array<float, 4> border = { 0.f, 0.f, 0.f, 0.f };
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border.data());
-        _halo.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        component.texture->setFilter(Texture::FilterMode::AnisotropicMipMap);
 
-        _halo.file = std::make_unique<ghoul::filesystem::File>(
-            _halo.texturePath.value()
-        );
-        _halo.file->setCallback([this]() { _pointSpreadFunctionTextureIsDirty = true; });
-    }
+        component.file = std::make_unique<ghoul::filesystem::File>(path);
+        component.file->setCallback(markPsfTextureAsDirty);
+    };
 
-    _glare.texture = nullptr;
-    if (!_glare.texturePath.value().empty() &&
-        std::filesystem::exists(_glare.texturePath.value()))
-    {
-        _glare.texture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_glare.texturePath).string(),
-            2
-        );
-
-        if (_glare.texture) {
-            LDEBUG(std::format(
-                "Loaded texture from '{}'", absPath(_glare.texturePath)
-            ));
-            _glare.texture->uploadTexture();
-        }
-        _glare.texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-        constexpr std::array<float, 4> border = { 0.f, 0.f, 0.f, 0.f };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border.data());
-        _glare.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-        _glare.file = std::make_unique<ghoul::filesystem::File>(
-            _glare.texturePath.value()
-        );
-        _glare.file->setCallback(
-            [this]() { _pointSpreadFunctionTextureIsDirty = true; }
-        );
-    }
+    loadTexture(_halo);
+    loadTexture(_glare);
 
     _pointSpreadFunctionTextureIsDirty = false;
 }
@@ -798,24 +778,22 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.cameraUp, cameraUp);
 
     const glm::dmat4 modelMatrix = calcModelTransform(data);
-
-    const glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
-
-    const glm::dmat4 cameraViewProjectionMatrix =
-        projectionMatrix * data.camera.combinedViewMatrix();
-
     _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
-    _program->setUniform(
-        _uniformCache.cameraViewProjectionMatrix,
-        cameraViewProjectionMatrix
-    );
+
+    const glm::dmat4 viewProjectionMatrix =
+        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
+    _program->setUniform(_uniformCache.cameraViewProjectionMatrix, viewProjectionMatrix);
+
     _program->setUniform(_uniformCache.colorOption, _colorOption);
     _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
 
-    _program->setUniform(_uniformCache.psfParamConf, _psfMultiplyOption.value());
-    _program->setUniform(_uniformCache.lumCent, _lumCent);
-    _program->setUniform(_uniformCache.radiusCent, _radiusCent);
-    _program->setUniform(_uniformCache.brightnessCent, _brightnessCent);
+    _program->setUniform(
+        _uniformCache.sizeComposition,
+        _parameters.sizeComposition.value()
+    );
+    _program->setUniform(_uniformCache.lumCent, _parameters.lumCent);
+    _program->setUniform(_uniformCache.radiusCent, _parameters.radiusCent);
+    _program->setUniform(_uniformCache.brightnessCent, _parameters.brightnessCent);
 
     if (_colorOption == ColorOption::FixedColor) {
         if (_uniformCache.fixedColor == -1) {
@@ -824,18 +802,15 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.fixedColor, _fixedColor);
     }
 
-    float fadeInVariable = 1.f;
-    if (!_disableFadeInDistance) {
-        const float distCamera = static_cast<float>(
-            glm::length(data.camera.positionVec3())
-        );
+    if (_enableFadeInDistance) {
+        const float distCam = static_cast<float>(glm::length(data.camera.positionVec3()));
         const glm::vec2 fadeRange = _fadeInDistances;
         const double a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
         const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        const double funcValue = a * distCamera + b;
-        fadeInVariable *= static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
+        const double funcValue = a * distCam + b;
+        const float fadeInValue = static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
 
-        _program->setUniform(_uniformCache.alphaValue, opacity() * fadeInVariable);
+        _program->setUniform(_uniformCache.alphaValue, opacity() * fadeInValue);
     }
     else {
         _program->setUniform(_uniformCache.alphaValue, opacity());
@@ -844,7 +819,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit haloUnit;
     haloUnit.activate();
     _halo.texture->bind();
-    _program->setUniform(_uniformCache.psfTexture, haloUnit);
+    _program->setUniform(_uniformCache.haloTexture, haloUnit);
     _program->setUniform(_uniformCache.haloOpacity, _halo.opacity);
     _program->setUniform(_uniformCache.haloScale, _halo.scale);
 
@@ -884,9 +859,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
 
     glBindVertexArray(_vao);
-    const GLsizei nStars = static_cast<GLsizei>(_dataset.entries.size());
-    glDrawArrays(GL_POINTS, 0, nStars);
-
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -912,14 +885,7 @@ void RenderableStars::update(const UpdateData&) {
 
         std::vector<float> slice = createDataSlice(ColorOption(value));
 
-        if (_vao == 0) {
-            glGenVertexArrays(1, &_vao);
-        }
-        if (_vbo == 0) {
-            glGenBuffers(1, &_vbo);
-        }
         glBindVertexArray(_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
             slice.size() * sizeof(GLfloat),
@@ -1062,13 +1028,11 @@ void RenderableStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath).string(),
+                _colorTexturePath,
                 1
             );
             if (_colorTexture) {
-                LDEBUG(std::format(
-                    "Loaded texture from '{}'", absPath(_colorTexturePath)
-                ));
+                LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
                 _colorTexture->uploadTexture();
             }
 
@@ -1080,19 +1044,17 @@ void RenderableStars::update(const UpdateData&) {
         _colorTextureIsDirty = false;
     }
 
-    //loadShapeTexture();
-
     if (_otherDataColorMapIsDirty) {
         LDEBUG("Reloading Color Texture");
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
             _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_otherDataColorMapPath).string(),
+                _otherDataColorMapPath,
                 1
             );
             if (_otherDataColorMapTexture) {
                 LDEBUG(std::format(
-                    "Loaded texture from '{}'", absPath(_otherDataColorMapPath)
+                    "Loaded texture '{}'", _otherDataColorMapPath.value()
                 ));
                 _otherDataColorMapTexture->uploadTexture();
             }
@@ -1132,20 +1094,14 @@ void RenderableStars::loadData() {
 }
 
 std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
-    const int bvIdx = std::max(_dataset.index(_dataMapping.bvColor.value()), 0);
-    const int lumIdx = std::max(_dataset.index(_dataMapping.luminance.value()), 0);
-    const int absMagIdx = std::max(
-        _dataset.index(_dataMapping.absoluteMagnitude.value()),
-        0
-    );
-    const int appMagIdx = std::max(
-        _dataset.index(_dataMapping.apparentMagnitude.value()),
-        0
-    );
-    const int vxIdx = std::max(_dataset.index(_dataMapping.vx.value()), 0);
-    const int vyIdx = std::max(_dataset.index(_dataMapping.vy.value()), 0);
-    const int vzIdx = std::max(_dataset.index(_dataMapping.vz.value()), 0);
-    const int speedIdx = std::max(_dataset.index(_dataMapping.speed.value()), 0);
+    const int bvIdx = std::max(_dataset.index(_dataMapping.bvColor), 0);
+    const int lumIdx = std::max(_dataset.index(_dataMapping.luminance), 0);
+    const int absMagIdx = std::max(_dataset.index(_dataMapping.absoluteMagnitude), 0);
+    const int appMagIdx = std::max(_dataset.index(_dataMapping.apparentMagnitude), 0);
+    const int vxIdx = std::max(_dataset.index(_dataMapping.vx), 0);
+    const int vyIdx = std::max(_dataset.index(_dataMapping.vy), 0);
+    const int vzIdx = std::max(_dataset.index(_dataMapping.vz), 0);
+    const int speedIdx = std::max(_dataset.index(_dataMapping.speed), 0);
 
     _otherDataRange = glm::vec2(
         std::numeric_limits<float>::max(),

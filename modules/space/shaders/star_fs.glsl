@@ -32,7 +32,7 @@ flat in float ge_speed;
 flat in float gs_screenSpaceDepth;
 
 uniform sampler1D colorTexture;
-uniform sampler2D psfTexture;
+uniform sampler2D haloTexture;
 uniform float alphaValue;
 uniform vec3 fixedColor;
 uniform int colorOption;
@@ -76,6 +76,7 @@ vec4 otherDataValue() {
 
 Fragment getFragment() {
   vec4 color = vec4(0.0);
+
   switch (colorOption) {
     case ColorOptionColor:
       color = bv2rgb(ge_bv);
@@ -104,7 +105,7 @@ Fragment getFragment() {
 
   vec2 scaledCoordsHalo = shiftedCoords / haloScale;
   vec2 unshiftedCoordsHalo = (scaledCoordsHalo + 1.0) / 2.0;
-  float textureColor = texture(psfTexture, unshiftedCoordsHalo).a * haloOpacity;
+  float textureColor = texture(haloTexture, unshiftedCoordsHalo).a * haloOpacity;
   if (hasGlare) {
     vec2 scaledCoordsGlare = shiftedCoords / glareScale;
     vec2 unshiftedCoordsGlare = (scaledCoordsGlare + 1.0) / 2.0;
