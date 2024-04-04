@@ -41,17 +41,17 @@
 
 namespace openspace {
 
-struct TimeKeyframeData {
-    Time time;
-    double delta = 0.0;
-    bool pause = false;
-    bool jump = false;
-};
-
 class TimeManager : public properties::PropertyOwner {
 public:
     using CallbackHandle = int;
     using TimeChangeCallback = std::function<void()>;
+
+    struct TimeKeyframeData {
+        Time time;
+        double delta = 0.0;
+        bool pause = false;
+        bool jump = false;
+    };
 
     TimeManager();
 
@@ -137,10 +137,7 @@ private:
 
     void addDeltaTimesKeybindings();
     void clearDeltaTimesKeybindings();
-    double currentApplicationTimeForInterpolation() const;
     double previousApplicationTimeForInterpolation() const;
-
-    bool isPlayingBackSessionRecording() const;
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;
