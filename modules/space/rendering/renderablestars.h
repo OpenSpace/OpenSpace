@@ -114,8 +114,8 @@ private:
         std::unique_ptr<ghoul::filesystem::File> file;
     };
 
+    Texture _halo;
     Texture _glare;
-    Texture _highlight;
 
     properties::FloatProperty _magnitudeExponent;
     properties::OptionProperty _psfMultiplyOption;
@@ -131,8 +131,8 @@ private:
         modelMatrix, cameraUp, cameraViewProjectionMatrix, colorOption, magnitudeExponent,
         eyePosition, psfParamConf, lumCent, radiusCent, brightnessCent, colorTexture,
         alphaValue, psfTexture, otherDataTexture, otherDataRange, filterOutOfRange,
-        fixedColor, hasHighlight, highlightTexture, glareOpacity, highlightOpacity,
-        glareScale, highlightScale
+        fixedColor, hasGlare, glareTexture, haloOpacity, glareOpacity,
+        haloScale, glareScale
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;

@@ -54,9 +54,9 @@ namespace {
         "modelMatrix", "cameraUp", "cameraViewProjectionMatrix", "colorOption",
         "magnitudeExponent", "eyePosition", "psfParamConf", "lumCent", "radiusCent",
         "brightnessCent", "colorTexture", "alphaValue", "psfTexture", "otherDataTexture",
-        "otherDataRange", "filterOutOfRange", "fixedColor", "hasHighlight",
-        "highlightTexture", "glareOpacity", "highlightOpacity", "glareScale",
-        "highlightScale"
+        "otherDataRange", "filterOutOfRange", "fixedColor", "hasGlare",
+        "glareTexture", "haloOpacity", "glareOpacity", "haloScale",
+        "glareScale"
     };
 
     enum SizeComposition {
@@ -231,16 +231,16 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo HaloOwnerInfo = {
+        "Halo",
+        "Halo",
+        "Settings for the halo portion of the star"
+    };
+
     const openspace::properties::PropertyOwner::PropertyOwnerInfo GlareOwnerInfo = {
         "Glare",
         "Glare",
-        "Settings for the Glare portion of the star"
-    };
-
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo HighlightOwnerInfo = {
-        "Highlight",
-        "Highlight",
-        "Settings for the central highlight portion of the star"
+        "Settings for the central glare portion of the star"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -374,11 +374,11 @@ namespace {
             std::optional<float> scale;
         };
 
-        // [[codegen::verbatim(GlareOwnerInfo.description)]]
-        Texture glare;
+        // [[codegen::verbatim(HaloOwnerInfo.description)]]
+        Texture halo;
 
-        // [[codegen::verbatim(HighlightOwnerInfo.description)]]
-        std::optional<Texture> highlight;
+        // [[codegen::verbatim(GlareOwnerInfo.description)]]
+        std::optional<Texture> glare;
 
         // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
         std::optional<float> magnitudeExponent;
@@ -462,14 +462,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     )
     , _fixedColor(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
-    , _glare{
-        properties::PropertyOwner(GlareOwnerInfo),
+    , _halo{
+        properties::PropertyOwner(HaloOwnerInfo),
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(PartialOpacityInfo, 1.f, 0.f, 5.f),
         properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
-    , _highlight{
-        properties::PropertyOwner(HighlightOwnerInfo),
+    , _glare{
+        properties::PropertyOwner(GlareOwnerInfo),
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(PartialOpacityInfo, 1.f, 0.f, 5.f),
         properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
@@ -636,31 +636,31 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _parametersOwner.addProperty(_radiusCent);
     _parametersOwner.addProperty(_brightnessCent);
 
-    _glare.texturePath = absPath(p.glare.texture.string()).string();
-    _glare.texturePath.onChange([this]() { _pointSpreadFunctionTextureIsDirty = true; });
-    _glare.file = std::make_unique<File>(_glare.texturePath.value());
-    _glare.file->setCallback([this]() { _pointSpreadFunctionTextureIsDirty = true; });
-    _glare.owner.addProperty(_glare.texturePath);
-    _glare.opacity = p.glare.partialOpacity.value_or(_glare.opacity);
-    _glare.owner.addProperty(_glare.opacity);
-    _glare.scale = p.glare.scale.value_or(_glare.scale);
-    _glare.owner.addProperty(_glare.scale);
-    addPropertySubOwner(_glare.owner);
+    _halo.texturePath = absPath(p.halo.texture.string()).string();
+    _halo.texturePath.onChange([this]() { _pointSpreadFunctionTextureIsDirty = true; });
+    _halo.file = std::make_unique<File>(_halo.texturePath.value());
+    _halo.file->setCallback([this]() { _pointSpreadFunctionTextureIsDirty = true; });
+    _halo.owner.addProperty(_halo.texturePath);
+    _halo.opacity = p.halo.partialOpacity.value_or(_halo.opacity);
+    _halo.owner.addProperty(_halo.opacity);
+    _halo.scale = p.halo.scale.value_or(_halo.scale);
+    _halo.owner.addProperty(_halo.scale);
+    addPropertySubOwner(_halo.owner);
 
-    if (p.highlight.has_value()) {
-        _highlight.texturePath = absPath(p.highlight->texture.string()).string();
-        _highlight.file = std::make_unique<File>(_highlight.texturePath.value());
-        _highlight.file->setCallback(
+    if (p.glare.has_value()) {
+        _glare.texturePath = absPath(p.glare->texture.string()).string();
+        _glare.file = std::make_unique<File>(_glare.texturePath.value());
+        _glare.file->setCallback(
             [this]() { _pointSpreadFunctionTextureIsDirty = true; }
         );
-        _highlight.opacity = p.highlight->partialOpacity.value_or(_highlight.opacity);
-        _highlight.scale = p.highlight->scale.value_or(_highlight.scale);
+        _glare.opacity = p.glare->partialOpacity.value_or(_glare.opacity);
+        _glare.scale = p.glare->scale.value_or(_glare.scale);
     }
-    _highlight.texturePath.onChange([this]() { _pointSpreadFunctionTextureIsDirty = true; });
-    _highlight.owner.addProperty(_highlight.texturePath);
-    _highlight.owner.addProperty(_highlight.opacity);
-    _highlight.owner.addProperty(_highlight.scale);
-    addPropertySubOwner(_highlight.owner);
+    _glare.texturePath.onChange([this]() { _pointSpreadFunctionTextureIsDirty = true; });
+    _glare.owner.addProperty(_glare.texturePath);
+    _glare.owner.addProperty(_glare.opacity);
+    _glare.owner.addProperty(_glare.scale);
+    addPropertySubOwner(_glare.owner);
 
     addPropertySubOwner(_parametersOwner);
 
@@ -674,7 +674,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableStars::isReady() const {
-    return _program && _glare.texture;
+    return _program && _halo.texture;
 }
 
 void RenderableStars::initializeGL() {
@@ -722,6 +722,32 @@ void RenderableStars::deinitializeGL() {
 }
 
 void RenderableStars::loadPSFTexture() {
+    _halo.texture = nullptr;
+    if (!_halo.texturePath.value().empty() &&
+        std::filesystem::exists(_halo.texturePath.value()))
+    {
+        _halo.texture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_halo.texturePath).string(),
+            2
+        );
+
+        if (_halo.texture) {
+            LDEBUG(std::format(
+                "Loaded texture from '{}'", absPath(_halo.texturePath)
+            ));
+            _halo.texture->uploadTexture();
+        }
+        _halo.texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
+        constexpr std::array<float, 4> border = { 0.f, 0.f, 0.f, 0.f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border.data());
+        _halo.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+
+        _halo.file = std::make_unique<ghoul::filesystem::File>(
+            _halo.texturePath.value()
+        );
+        _halo.file->setCallback([this]() { _pointSpreadFunctionTextureIsDirty = true; });
+    }
+
     _glare.texture = nullptr;
     if (!_glare.texturePath.value().empty() &&
         std::filesystem::exists(_glare.texturePath.value()))
@@ -745,33 +771,7 @@ void RenderableStars::loadPSFTexture() {
         _glare.file = std::make_unique<ghoul::filesystem::File>(
             _glare.texturePath.value()
         );
-        _glare.file->setCallback([this]() { _pointSpreadFunctionTextureIsDirty = true; });
-    }
-
-    _highlight.texture = nullptr;
-    if (!_highlight.texturePath.value().empty() &&
-        std::filesystem::exists(_highlight.texturePath.value()))
-    {
-        _highlight.texture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_highlight.texturePath).string(),
-            2
-        );
-
-        if (_highlight.texture) {
-            LDEBUG(std::format(
-                "Loaded texture from '{}'", absPath(_highlight.texturePath)
-            ));
-            _highlight.texture->uploadTexture();
-        }
-        _highlight.texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-        constexpr std::array<float, 4> border = { 0.f, 0.f, 0.f, 0.f };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border.data());
-        _highlight.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-        _highlight.file = std::make_unique<ghoul::filesystem::File>(
-            _highlight.texturePath.value()
-        );
-        _highlight.file->setCallback(
+        _glare.file->setCallback(
             [this]() { _pointSpreadFunctionTextureIsDirty = true; }
         );
     }
@@ -841,23 +841,23 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.alphaValue, opacity());
     }
 
-    ghoul::opengl::TextureUnit glareUnit;
-    glareUnit.activate();
-    _glare.texture->bind();
-    _program->setUniform(_uniformCache.psfTexture, glareUnit);
-    _program->setUniform(_uniformCache.glareOpacity, _glare.opacity);
-    _program->setUniform(_uniformCache.glareScale, _glare.scale);
+    ghoul::opengl::TextureUnit haloUnit;
+    haloUnit.activate();
+    _halo.texture->bind();
+    _program->setUniform(_uniformCache.psfTexture, haloUnit);
+    _program->setUniform(_uniformCache.haloOpacity, _halo.opacity);
+    _program->setUniform(_uniformCache.haloScale, _halo.scale);
 
-    ghoul::opengl::TextureUnit highlightUnit;
-    if (_highlight.texture) {
-        highlightUnit.activate();
-        _highlight.texture->bind();
-        _program->setUniform(_uniformCache.highlightTexture, highlightUnit);
-        _program->setUniform(_uniformCache.highlightOpacity, _highlight.opacity);
-        _program->setUniform(_uniformCache.highlightScale, _highlight.scale);
+    ghoul::opengl::TextureUnit glareUnit;
+    if (_glare.texture) {
+        glareUnit.activate();
+        _glare.texture->bind();
+        _program->setUniform(_uniformCache.glareTexture, glareUnit);
+        _program->setUniform(_uniformCache.glareOpacity, _glare.opacity);
+        _program->setUniform(_uniformCache.glareScale, _glare.scale);
     }
 
-    _program->setUniform(_uniformCache.hasHighlight, _highlight.texture != nullptr);
+    _program->setUniform(_uniformCache.hasGlare, _glare.texture != nullptr);
 
 
     ghoul::opengl::TextureUnit colorUnit;
