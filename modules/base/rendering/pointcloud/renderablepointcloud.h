@@ -230,6 +230,7 @@ protected:
     bool _useCaching = true;
     bool _shouldComputeScaleExponent = false;
     bool _createLabelsFromDataset = false;
+    bool _skipFirstDataPoint = false;
 
     dataloader::Dataset _dataset;
     dataloader::DataMapping _dataMapping;

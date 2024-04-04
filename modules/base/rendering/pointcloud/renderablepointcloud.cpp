@@ -372,6 +372,9 @@ namespace {
         // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
         std::optional<bool> useAdditiveBlending;
 
+        // If true, skip the first data point in the loaded dataset
+        std::optional<bool> skipFirstDataPoint;
+
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
             Kilometer [[codegen::key("Km")]],
@@ -701,6 +704,8 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _useCaching = p.useCaching.value_or(true);
 
+    _skipFirstDataPoint = p.skipFirstDataPoint.value_or(false);
+
     // If no scale exponent was specified, compute one that will at least show the
     // points based on the scale of the positions in the dataset
     if (!p.sizeSettings.has_value() || !p.sizeSettings->scaleExponent.has_value()) {
@@ -754,6 +759,11 @@ void RenderablePointCloud::initialize() {
         else {
             _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
         }
+
+        if (_skipFirstDataPoint) {
+            _dataset.entries.erase(_dataset.entries.begin());
+        }
+
         _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
 
         // If no scale exponent was specified, compute one that will at least show the
