@@ -26,11 +26,12 @@ local GaiaAbundanceGalah = {
     Type = "RenderableStars",
     Enabled = false,
     File = speck .. "GaiaAbundGalah.speck",
-    Texture = textures .. "halo.png",
+    Halo = {
+      Texture = textures .. "halo.png"
+    },
     -- ShapeTexture = textures .. "disc.png",
     MagnitudeExponent = 7.25,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based",
     ColorOption = "Other Data",
     OtherData = "FeH",
     ColorMap = colormaps .. "colorbv.cmap",
