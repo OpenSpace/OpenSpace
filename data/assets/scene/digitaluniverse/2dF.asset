@@ -42,7 +42,7 @@ local Object = {
   GUI = {
     Name = "2dF Galaxies",
     Path = "/Universe/Galaxies",
-    Description = [[Census 229,293 galaxies. DU Version 1.7. <br> The Two-degree Field
+    Description = [[Census 229,294 galaxies. DU Version 1.7. <br> The Two-degree Field
     (2dF) Survey was a project designed to map portions of the extragalactic universe. The
     2dF instrument was mounted on the 3.9-meter (12.8-foot) Anglo-Australian Telescope
     (AAT), located 450 km (280 miles) northwest of Sydney. The telescope has a two-degree
