@@ -702,9 +702,9 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         });
     }
 
-    _useCaching = p.useCaching.value_or(true);
+    _useCaching = p.useCaching.value_or(_useCaching);
 
-    _skipFirstDataPoint = p.skipFirstDataPoint.value_or(false);
+    _skipFirstDataPoint = p.skipFirstDataPoint.value_or(_skipFirstDataPoint);
 
     // If no scale exponent was specified, compute one that will at least show the
     // points based on the scale of the positions in the dataset
