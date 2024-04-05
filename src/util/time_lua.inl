@@ -192,6 +192,13 @@ namespace {
 }
 
 /**
+ * Returns whether the simulation time is currently paused or is progressing.
+ */
+[[codegen::luawrap]] bool isPaused() {
+    return openspace::global::timeManager->isPaused();
+}
+
+/**
  * Sets the current simulation time to the specified value. If the parameter is a number,
  * the value is the number of seconds past the J2000 epoch. If it is a string, it has to
  * be a valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. Note: providing

@@ -304,6 +304,14 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     // should be rendered. So make sure it is updated once we know the number of
     // interpolation steps
     _nDataPoints = nObjects;
+
+    if (_skipFirstDataPoint) {
+        LWARNING(
+            "Found setting to skip first data point in asset. This is not supported for "
+            "interpolated point clouds. Ignoring"
+        );
+        _skipFirstDataPoint = false;
+    }
 }
 
 void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {

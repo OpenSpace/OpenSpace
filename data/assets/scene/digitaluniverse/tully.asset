@@ -35,6 +35,7 @@ local TullyGalaxies = {
     },
     Opacity = 0.99,
     File = speck .. "tully.speck",
+    SkipFirstDataPoint = true,
     Texture = {
       File = textures .. "point3A.png"
     },

@@ -1953,8 +1953,7 @@ void OrbitalNavigator::resetIdleBehavior() {
 }
 
 void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
-                                         glm::dquat& localRotation,
-                                         glm::dquat& globalRotation)
+                                         glm::dquat&, glm::dquat& globalRotation)
 {
     _idleBehaviorDampenInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _idleBehaviorDampenInterpolator.step();

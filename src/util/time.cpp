@@ -212,6 +212,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             codegen::lua::PauseToggleViaKeyboard,
             codegen::lua::SetPause,
             codegen::lua::InterpolatePause,
+            codegen::lua::IsPaused,
             codegen::lua::SetTime,
             codegen::lua::InterpolateTime,
             codegen::lua::InterpolateTimeRelative,

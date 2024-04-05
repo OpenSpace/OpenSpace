@@ -222,8 +222,11 @@ bool UrlSynchronization::isEachFileValid() {
     // Valid to: yyyy-mm-ddThr:mn:sc.xxx
 
     if (ossyncVersion == "1.0") {
+        // We need to mutex-protect the access to the time conversion for now
+        std::lock_guard guard(_mutex);
+
         ghoul::getline(file >> std::ws, line);
-        std::string& fileIsValidToDate = line;
+        const std::string& fileIsValidToDate = line;
         const double fileValidAsJ2000 = Time::convertTime(fileIsValidToDate);
 
         const std::string todaysDate = Time::currentWallTime();
