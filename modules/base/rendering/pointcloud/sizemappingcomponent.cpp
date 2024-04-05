@@ -25,6 +25,7 @@
 #include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -69,7 +70,33 @@ namespace {
         std::optional<std::string> parameter;
 
         // [[codegen::verbatim(ScaleFactorInfo.description)]]
-        std::optional<float> scaleFactor;
+        enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
+            Nanometer,
+            Micrometer,
+            Millimeter,
+            Centimeter,
+            Decimeter,
+            Meter,
+            Kilometer,
+            AU,
+            Lighthour,
+            Lightday,
+            Lightmonth,
+            Lightyear,
+            Parsec,
+            Kiloparsec,
+            Megaparsec,
+            Gigaparsec,
+            Gigalightyear
+        };
+
+        // The scale to use for the size values in the dataset, given as either a string
+        // representing a specific unit or a value to multiply all the datapoints with
+        // to convert the value to meter. The resulting value will be applied as a
+        // multiplicative factor. For example, if the size data is given in is in
+        // kilometers then specify either <code>ScaleFactor = 'Kilometer'</code> or
+        // <code>ScaleFactor = 1000.0</code>.
+        std::optional<std::variant<ScaleUnit, double>> scaleFactor;
     };
 #include "sizemappingcomponent_codegen.cpp"
 }  // namespace
@@ -125,7 +152,17 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
         ));
     }
 
-    scaleFactor = p.scaleFactor.value_or(scaleFactor);
+    if (p.scaleFactor.has_value()) {
+        if (std::holds_alternative<Parameters::ScaleUnit>(*p.scaleFactor)) {
+            const Parameters::ScaleUnit scaleUnit =
+                std::get<Parameters::ScaleUnit>(*p.scaleFactor);
+            const DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
+            scaleFactor = toMeter(distanceUnit);
+        }
+        else if (std::holds_alternative<double>(*p.scaleFactor)) {
+            scaleFactor = std::get<double>(*p.scaleFactor);
+        }
+    }
 }
 
 } // namespace openspace
