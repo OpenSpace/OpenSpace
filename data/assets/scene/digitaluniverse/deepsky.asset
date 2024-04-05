@@ -108,16 +108,13 @@ local DeepSkyObjectsImages = {
     OrientationRenderOption = "Fixed Rotation",
     UseOrientationData = true,
     Unit = "pc",
-    -- Fading = {
-    --   FadeInDistances = { 0.001, 1.0 } -- Fade in value in the same unit as "Unit"
-        --FadeInDistances = {0.001, 0.05010},
-    -- },
     SizeSettings = {
       SizeMapping = {
         ParameterOptions = { "radius" },
-        ScaleFactor = 0.001
+        ScaleFactor = 3.08567758e16 -- Parsec TODO
       },
-      ScaleExponent = 22.5
+      -- No exponential scaling, just use size mapping to set the correct size
+      ScaleExponent = 0.0
     }
   },
   Transform = {
