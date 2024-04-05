@@ -247,7 +247,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
     switch (state.model()) {
         case fls::Model::Batsrus:
-            innerBoundaryLimit = 2.5f;  // TODO specify in Lua?
+            innerBoundaryLimit = 0.0f;  // TODO specify in Lua?
             break;
         case fls::Model::Enlil:
             innerBoundaryLimit = 0.11f; // TODO specify in Lua?
@@ -285,15 +285,19 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         );
         const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
 
-        const size_t nLinePoints = positions.size();
+        if ((positions[0].component3 < 0.5 && positions[0].component3 > -0.5) &&
+            (positions[positions.size() - 1].component3 < 0.5 && positions[positions.size() - 1].component3 > -0.5))
+        {
+            const size_t nLinePoints = positions.size();
 
-        std::vector<glm::vec3> vertices;
-        vertices.reserve(nLinePoints);
-        for (const ccmc::Point3f& p : positions) {
-            vertices.emplace_back(p.component1, p.component2, p.component3);
+            std::vector<glm::vec3> vertices;
+            vertices.reserve(nLinePoints);
+            for (const ccmc::Point3f& p : positions) {
+                vertices.emplace_back(p.component1, p.component2, p.component3);
+            }
+            state.addLine(vertices);
+            success |= (nLinePoints > 0);
         }
-        state.addLine(vertices);
-        success |= (nLinePoints > 0);
     }
 
     return success;
